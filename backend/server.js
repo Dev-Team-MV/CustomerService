@@ -1,6 +1,8 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import swaggerUi from 'swagger-ui-express'
+import swaggerSpec from './config/swagger.js'
 import connectDB from './config/db.js'
 import authRoutes from './routes/authRoutes.js'
 import userRoutes from './routes/userRoutes.js'
@@ -8,6 +10,7 @@ import lotRoutes from './routes/lotRoutes.js'
 import modelRoutes from './routes/modelRoutes.js'
 import propertyRoutes from './routes/propertyRoutes.js'
 import payloadRoutes from './routes/payloadRoutes.js'
+import phaseRoutes from './routes/phaseRoutes.js'
 
 dotenv.config()
 
@@ -25,7 +28,32 @@ app.use('/api/lots', lotRoutes)
 app.use('/api/models', modelRoutes)
 app.use('/api/properties', propertyRoutes)
 app.use('/api/payloads', payloadRoutes)
+app.use('/api/phases', phaseRoutes)
 
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     summary: Health check endpoint
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Server is running
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: OK
+ *                 message:
+ *                   type: string
+ *                   example: Server is running
+ */
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' })
 })
