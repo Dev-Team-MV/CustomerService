@@ -47,11 +47,7 @@ const phaseSchema = new mongoose.Schema(
       min: 0,
       max: 100
     },
-    mediaItems: [mediaItemSchema],
-    facades: [{
-      type: String,
-      trim: true
-    }]
+    mediaItems: [mediaItemSchema]
   },
   {
     timestamps: true
