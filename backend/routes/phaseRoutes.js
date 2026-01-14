@@ -145,6 +145,11 @@ router.get('/property/:propertyId/phase/:phaseNumber', protect, getPhaseByNumber
  *                 type: number
  *                 minimum: 0
  *                 maximum: 100
+ *               facades:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of facade image URLs
  *     responses:
  *       200:
  *         description: Phase updated

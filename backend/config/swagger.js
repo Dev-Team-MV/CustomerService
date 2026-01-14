@@ -110,6 +110,11 @@ const options = {
                 }
               }
             },
+            facades: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of facade image URLs'
+            },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
           }
