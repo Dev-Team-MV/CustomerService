@@ -73,12 +73,25 @@ const options = {
             updatedAt: { type: 'string', format: 'date-time' }
           }
         },
+        Facade: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            model: { type: 'string' },
+            title: { type: 'string' },
+            url: { type: 'string' },
+            price: { type: 'number' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
         Property: {
           type: 'object',
           properties: {
             _id: { type: 'string' },
             lot: { type: 'string' },
             model: { type: 'string' },
+            facade: { type: 'string' },
             user: { type: 'string' },
             price: { type: 'number' },
             pending: { type: 'number' },
