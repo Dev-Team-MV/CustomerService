@@ -11,6 +11,7 @@ import Profile from './pages/Profile'
 import Properties from './pages/Properties'
 import Lots from './pages/Lots'
 import Models from './pages/Models'
+import ModelDetail from './pages/ModelDetail'
 import Payloads from './pages/Payloads'
 import Residents from './pages/Residents'
 import Analytics from './pages/Analytics'
@@ -44,6 +45,7 @@ function App() {
                 <Route path="/properties" element={<Properties />} />
                 <Route path="/lots" element={<Lots />} />
                 <Route path="/models" element={<Models />} />
+                <Route path="/models/:id" element={<ModelDetail />} />
                 <Route path="/payloads" element={<Payloads />} />
                 <Route path="/residents" element={<Residents />} />
                 <Route path="/analytics" element={<Analytics />} />
