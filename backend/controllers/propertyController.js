@@ -32,6 +32,10 @@ export const getPropertyById = async (req, res) => {
         path: 'payloads',
         options: { sort: { date: -1 } }
       })
+      .populate({
+        path: 'phases',
+        options: { sort: { phaseNumber: 1 } }
+      })
     
     if (property) {
       res.json(property)
