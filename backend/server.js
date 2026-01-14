@@ -11,6 +11,7 @@ import modelRoutes from './routes/modelRoutes.js'
 import propertyRoutes from './routes/propertyRoutes.js'
 import payloadRoutes from './routes/payloadRoutes.js'
 import phaseRoutes from './routes/phaseRoutes.js'
+import smsRoutes from './routes/smsRoutes.js'
 
 dotenv.config()
 
@@ -29,6 +30,7 @@ app.use('/api/models', modelRoutes)
 app.use('/api/properties', propertyRoutes)
 app.use('/api/payloads', payloadRoutes)
 app.use('/api/phases', phaseRoutes)
+app.use('/api/sms', smsRoutes)
 
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
