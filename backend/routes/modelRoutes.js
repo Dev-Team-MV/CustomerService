@@ -10,13 +10,13 @@ import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
-router.route('/')
-  .get(protect, getAllModels)
-  .post(protect, admin, createModel)
+// Public routes - anyone can view models
+router.get('/', getAllModels)
+router.get('/:id', getModelById)
 
-router.route('/:id')
-  .get(protect, getModelById)
-  .put(protect, admin, updateModel)
-  .delete(protect, admin, deleteModel)
+// Protected routes - only authenticated users can modify
+router.post('/', protect, admin, createModel)
+router.put('/:id', protect, admin, updateModel)
+router.delete('/:id', protect, admin, deleteModel)
 
 export default router

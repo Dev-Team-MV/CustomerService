@@ -11,15 +11,14 @@ import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
-router.route('/')
-  .get(protect, getAllLots)
-  .post(protect, admin, createLot)
+// Public routes - anyone can view lots
+router.get('/', getAllLots)
+router.get('/stats', getLotStats)
+router.get('/:id', getLotById)
 
-router.get('/stats', protect, getLotStats)
-
-router.route('/:id')
-  .get(protect, getLotById)
-  .put(protect, admin, updateLot)
-  .delete(protect, admin, deleteLot)
+// Protected routes - only authenticated users can modify
+router.post('/', protect, admin, createLot)
+router.put('/:id', protect, admin, updateLot)
+router.delete('/:id', protect, admin, deleteLot)
 
 export default router

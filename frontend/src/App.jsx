@@ -14,6 +14,7 @@ import Models from './pages/Models'
 import Payloads from './pages/Payloads'
 import Residents from './pages/Residents'
 import Analytics from './pages/Analytics'
+import PropertySelection from './pages/PropertySelection'
 import NotFound from './pages/NotFound'
 
 const theme = createTheme({
@@ -37,6 +38,10 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             
+            {/* Public route for property selection */}
+            <Route element={<Layout publicView={true} />}>
+            <Route path="/properties/select" element={<PropertySelection />} />
+            </Route>
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />

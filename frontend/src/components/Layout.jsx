@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import {
   AppBar,
@@ -33,9 +33,10 @@ import { useAuth } from '../context/AuthContext'
 
 const drawerWidth = 240
 
-const Layout = () => {
+const Layout = ({ publicView = false }) => {
   const [anchorElUser, setAnchorElUser] = useState(null)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [permanentOpen, setPermanentOpen] = useState(true)
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -50,6 +51,16 @@ const Layout = () => {
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
   }
+
+  // When this layout is used as a public view (e.g. /properties/select)
+  // and the user is NOT authenticated, start with the desktop drawer closed.
+  useEffect(() => {
+    if (publicView && !user) {
+      setPermanentOpen(false)
+    } else {
+      setPermanentOpen(true)
+    }
+  }, [publicView, user])
 
   const handleLogout = () => {
     logout()
@@ -97,8 +108,8 @@ const Layout = () => {
       <AppBar
         position="fixed"
         sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
+          width: { sm: permanentOpen ? `calc(100% - ${drawerWidth}px)` : '100%' },
+          ml: { sm: permanentOpen ? `${drawerWidth}px` : 0 },
         }}
       >
         <Toolbar>
@@ -150,7 +161,7 @@ const Layout = () => {
       </AppBar>
       <Box
         component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        sx={{ width: { sm: permanentOpen ? drawerWidth : 0 }, flexShrink: { sm: 0 } }}
       >
         <Drawer
           variant="temporary"
@@ -166,23 +177,25 @@ const Layout = () => {
         >
           {drawer}
         </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
+        {permanentOpen && (
+          <Drawer
+            variant="permanent"
+            sx={{
+              display: { xs: 'none', sm: 'block' },
+              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            }}
+            open
+          >
+            {drawer}
+          </Drawer>
+        )}
       </Box>
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          width: { sm: permanentOpen ? `calc(100% - ${drawerWidth}px)` : '100%' },
         }}
       >
         <Toolbar />
