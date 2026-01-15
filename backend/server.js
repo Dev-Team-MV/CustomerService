@@ -8,6 +8,7 @@ import authRoutes from './routes/authRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import lotRoutes from './routes/lotRoutes.js'
 import modelRoutes from './routes/modelRoutes.js'
+import facadeRoutes from './routes/facadeRoutes.js'
 import propertyRoutes from './routes/propertyRoutes.js'
 import payloadRoutes from './routes/payloadRoutes.js'
 import phaseRoutes from './routes/phaseRoutes.js'
@@ -27,6 +28,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/lots', lotRoutes)
 app.use('/api/models', modelRoutes)
+app.use('/api/facades', facadeRoutes)
 app.use('/api/properties', propertyRoutes)
 app.use('/api/payloads', payloadRoutes)
 app.use('/api/phases', phaseRoutes)

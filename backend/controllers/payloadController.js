@@ -15,6 +15,7 @@ export const getAllPayloads = async (req, res) => {
         populate: [
           { path: 'lot', select: 'number section' },
           { path: 'model', select: 'model' },
+          { path: 'facade', select: 'title' },
           { path: 'user', select: 'firstName lastName email' }
         ]
       })
@@ -35,6 +36,7 @@ export const getPayloadById = async (req, res) => {
         populate: [
           { path: 'lot' },
           { path: 'model' },
+          { path: 'facade' },
           { path: 'user' }
         ]
       })
@@ -85,6 +87,7 @@ export const createPayload = async (req, res) => {
         populate: [
           { path: 'lot' },
           { path: 'model' },
+          { path: 'facade' },
           { path: 'user' }
         ]
       })

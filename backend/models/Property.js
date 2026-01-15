@@ -13,6 +13,11 @@ const propertySchema = new mongoose.Schema(
       ref: 'Model',
       required: [true, 'Model is required']
     },
+    facade: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Facade',
+      required: [true, 'Facade is required']
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

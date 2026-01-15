@@ -52,22 +52,20 @@ const router = express.Router()
  *             required:
  *               - lot
  *               - model
+ *               - facade
  *               - user
- *               - price
- *               - pending
  *             properties:
  *               lot:
  *                 type: string
  *               model:
  *                 type: string
+ *               facade:
+ *                 type: string
  *               user:
  *                 type: string
- *               price:
- *                 type: number
- *               pending:
- *                 type: number
  *               initialPayment:
  *                 type: number
+ *                 description: Initial payment amount (price and pending will be calculated automatically as lot.price + model.price + facade.price)
  *     responses:
  *       201:
  *         description: Property created (9 phases will be automatically created)
