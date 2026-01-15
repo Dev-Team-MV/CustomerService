@@ -108,7 +108,7 @@ const Layout = ({ publicView = false }) => {
       <AppBar
         position="fixed"
         sx={{
-          width: { sm: permanentOpen ? `calc(100% - ${drawerWidth}px)` : '100%' },
+          width: { sm: permanentOpen ? `calc(80% - ${drawerWidth}px)` : '100%' },
           ml: { sm: permanentOpen ? `${drawerWidth}px` : 0 },
         }}
       >
