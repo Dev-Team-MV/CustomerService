@@ -1,118 +1,258 @@
-import { Box, Typography, Paper, Divider, Grid } from '@mui/material'
-import HomeIcon from '@mui/icons-material/Home'
-import HotelIcon from '@mui/icons-material/Hotel'
-import BathtubIcon from '@mui/icons-material/Bathtub'
-import SquareFootIcon from '@mui/icons-material/SquareFoot'
+// import { Box, Typography, Paper, Divider, Grid } from '@mui/material'
+// import HomeIcon from '@mui/icons-material/Home'
+// import HotelIcon from '@mui/icons-material/Hotel'
+// import BathtubIcon from '@mui/icons-material/Bathtub'
+// import SquareFootIcon from '@mui/icons-material/SquareFoot'
+// import { useProperty } from '../../context/PropertyContext'
+
+// const PropertyStats = () => {
+//   const { selectedModel, getLotCounts, selectedLot, selectedFacade } = useProperty()
+//   const lotCounts = getLotCounts()
+
+//   return (
+//     <Paper 
+//       elevation={2} 
+//       sx={{ 
+//         p: 3, 
+//         bgcolor: '#fff', 
+//         color: '#000',
+//         borderRadius: 2,
+//         border: '1px solid #e0e0e0'
+//       }}
+//     >
+//       {/* Lot Status Section */}
+//       <Typography variant="overline" sx={{ color: '#666', fontWeight: 'bold', mb: 2, display: 'block', letterSpacing: 1 }}>
+//         1/3 LOT STATUS
+//       </Typography>
+      
+//       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, p: 2, bgcolor: '#f9f9f9', borderRadius: 2 }}>
+//         <Box sx={{ textAlign: 'center' }}>
+//           <Typography variant="h5" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
+//             {lotCounts.hold}
+//           </Typography>
+//           <Typography variant="caption" sx={{ color: '#666', fontWeight: '500' }}>
+//             HOLD
+//           </Typography>
+//         </Box>
+//         <Box sx={{ textAlign: 'center' }}>
+//           <Typography variant="h5" sx={{ color: '#4caf50', fontWeight: 'bold' }}>
+//             {lotCounts.available}
+//           </Typography>
+//           <Typography variant="caption" sx={{ color: '#666', fontWeight: '500' }}>
+//             AVAILABLE
+//           </Typography>
+//         </Box>
+//         <Box sx={{ textAlign: 'center' }}>
+//           <Typography variant="h5" sx={{ color: '#f44336', fontWeight: 'bold' }}>
+//             {lotCounts.sold}
+//           </Typography>
+//           <Typography variant="caption" sx={{ color: '#666', fontWeight: '500' }}>
+//             SOLD
+//           </Typography>
+//         </Box>
+//       </Box>
+
+//       <Divider sx={{ mb: 3 }} />
+
+//       {/* House Information Section */}
+//       <Typography variant="overline" sx={{ color: '#666', fontWeight: 'bold', mb: 2, display: 'block', letterSpacing: 1 }}>
+//         HOUSE INFORMATION
+//       </Typography>
+
+//       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+//         {/* Selected Lot Info */}
+//         <Box sx={{ p: 2, bgcolor: '#e8f5e9', borderRadius: 2, border: '1px solid #c8e6c9' }}>
+//           <Typography variant="caption" sx={{ color: '#4a7c59', fontWeight: 'bold' }}>ACTIVE SELECTION</Typography>
+//           <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1b5e20' }}>
+//             {selectedLot ? `Lot ${selectedLot.number}` : 'None selected'}
+//           </Typography>
+//           {selectedLot && (
+//             <Typography variant="caption" sx={{ display: 'block', color: '#666' }}>
+//               {selectedLot.size || '540m²'} • {selectedLot.section || 'Phase II'}
+//             </Typography>
+//           )}
+//         </Box>
+
+//         {selectedModel ? (
+//           <Grid container spacing={2}>
+//             <Grid item xs={6}>
+//               <InfoItem icon={<HomeIcon fontSize="small" />} label="MODEL" value={selectedModel.modelNumber} />
+//             </Grid>
+//             <Grid item xs={6}>
+//               <InfoItem icon={<HomeIcon fontSize="small" />} label="FACADE" value={selectedFacade?.name || '-'} />
+//             </Grid>
+//             <Grid item xs={6}>
+//               <InfoItem icon={<HotelIcon fontSize="small" />} label="BEDS" value={selectedModel.bedrooms} />
+//             </Grid>
+//             <Grid item xs={6}>
+//               <InfoItem icon={<BathtubIcon fontSize="small" />} label="BATHS" value={selectedModel.bathrooms} />
+//             </Grid>
+//             <Grid item xs={12}>
+//               <InfoItem icon={<SquareFootIcon fontSize="small" />} label="SQFT" value={selectedModel.sqft.toLocaleString()} />
+//             </Grid>
+//           </Grid>
+//         ) : (
+//           <Box sx={{ textAlign: 'center', py: 4, bgcolor: '#f9f9f9', borderRadius: 2, border: '1px dashed #ccc' }}>
+//             <Typography variant="body2" sx={{ color: '#999' }}>
+//               Select a model to view house details
+//             </Typography>
+//           </Box>
+//         )}
+//       </Box>
+//     </Paper>
+//   )
+// }
+
+// const InfoItem = ({ icon, label, value }) => (
+//   <Box sx={{ p: 1.5, bgcolor: '#f9f9f9', borderRadius: 2, border: '1px solid #eee' }}>
+//     <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5, gap: 1 }}>
+//       <Box sx={{ color: '#4a7c59', display: 'flex' }}>{icon}</Box>
+//       <Typography variant="caption" sx={{ color: '#666', fontWeight: 'bold' }}>
+//         {label}
+//       </Typography>
+//     </Box>
+//     <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+//       {value}
+//     </Typography>
+//   </Box>
+// )
+
+// export default PropertyStats
+
+import { Box, Paper, Typography, LinearProgress } from '@mui/material'
 import { useProperty } from '../../context/PropertyContext'
+import { Home, ShoppingCart, CheckCircle } from '@mui/icons-material'
 
 const PropertyStats = () => {
-  const { selectedModel, getLotCounts, selectedLot, selectedFacade } = useProperty()
-  const lotCounts = getLotCounts()
+  const { lots } = useProperty()
+
+  // Calculate lot counts from the lots array
+  const getLotCounts = () => {
+    const available = lots.filter(lot => lot.status === 'available').length
+    const pending = lots.filter(lot => lot.status === 'pending').length
+    const sold = lots.filter(lot => lot.status === 'sold').length
+    const total = lots.length
+
+    return { available, pending, sold, total }
+  }
+
+  const stats = getLotCounts()
+
+  const getPercentage = (count) => {
+    return stats.total > 0 ? (count / stats.total) * 100 : 0
+  }
 
   return (
     <Paper 
       elevation={2} 
       sx={{ 
         p: 3, 
-        bgcolor: '#fff', 
-        color: '#000',
+        bgcolor: '#fff',
         borderRadius: 2,
         border: '1px solid #e0e0e0'
       }}
     >
-      {/* Lot Status Section */}
-      <Typography variant="overline" sx={{ color: '#666', fontWeight: 'bold', mb: 2, display: 'block', letterSpacing: 1 }}>
-        1/3 LOT STATUS
+      <Typography 
+        variant="subtitle2" 
+        sx={{ 
+          fontWeight: 'bold', 
+          color: '#333', 
+          mb: 3,
+          letterSpacing: 0.5 
+        }}
+      >
+        LOT AVAILABILITY STATS
       </Typography>
-      
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, p: 2, bgcolor: '#f9f9f9', borderRadius: 2 }}>
-        <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="h5" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
-            {lotCounts.hold}
-          </Typography>
-          <Typography variant="caption" sx={{ color: '#666', fontWeight: '500' }}>
-            HOLD
-          </Typography>
-        </Box>
-        <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="h5" sx={{ color: '#4caf50', fontWeight: 'bold' }}>
-            {lotCounts.available}
-          </Typography>
-          <Typography variant="caption" sx={{ color: '#666', fontWeight: '500' }}>
-            AVAILABLE
-          </Typography>
-        </Box>
-        <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="h5" sx={{ color: '#f44336', fontWeight: 'bold' }}>
-            {lotCounts.sold}
-          </Typography>
-          <Typography variant="caption" sx={{ color: '#666', fontWeight: '500' }}>
-            SOLD
-          </Typography>
-        </Box>
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {/* Available */}
+        <StatItem
+          icon={<Home sx={{ color: '#4caf50' }} />}
+          label="Available"
+          count={stats.available}
+          total={stats.total}
+          color="#4caf50"
+          percentage={getPercentage(stats.available)}
+        />
+
+        {/* Pending/Hold */}
+        <StatItem
+          icon={<ShoppingCart sx={{ color: '#2196f3' }} />}
+          label="Hold"
+          count={stats.pending}
+          total={stats.total}
+          color="#2196f3"
+          percentage={getPercentage(stats.pending)}
+        />
+
+        {/* Sold */}
+        <StatItem
+          icon={<CheckCircle sx={{ color: '#f44336' }} />}
+          label="Sold"
+          count={stats.sold}
+          total={stats.total}
+          color="#f44336"
+          percentage={getPercentage(stats.sold)}
+        />
       </Box>
 
-      <Divider sx={{ mb: 3 }} />
-
-      {/* House Information Section */}
-      <Typography variant="overline" sx={{ color: '#666', fontWeight: 'bold', mb: 2, display: 'block', letterSpacing: 1 }}>
-        HOUSE INFORMATION
-      </Typography>
-
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {/* Selected Lot Info */}
-        <Box sx={{ p: 2, bgcolor: '#e8f5e9', borderRadius: 2, border: '1px solid #c8e6c9' }}>
-          <Typography variant="caption" sx={{ color: '#4a7c59', fontWeight: 'bold' }}>ACTIVE SELECTION</Typography>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1b5e20' }}>
-            {selectedLot ? `Lot ${selectedLot.number}` : 'None selected'}
-          </Typography>
-          {selectedLot && (
-            <Typography variant="caption" sx={{ display: 'block', color: '#666' }}>
-              {selectedLot.size || '540m²'} • {selectedLot.section || 'Phase II'}
-            </Typography>
-          )}
-        </Box>
-
-        {selectedModel ? (
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <InfoItem icon={<HomeIcon fontSize="small" />} label="MODEL" value={selectedModel.modelNumber} />
-            </Grid>
-            <Grid item xs={6}>
-              <InfoItem icon={<HomeIcon fontSize="small" />} label="FACADE" value={selectedFacade?.name || '-'} />
-            </Grid>
-            <Grid item xs={6}>
-              <InfoItem icon={<HotelIcon fontSize="small" />} label="BEDS" value={selectedModel.bedrooms} />
-            </Grid>
-            <Grid item xs={6}>
-              <InfoItem icon={<BathtubIcon fontSize="small" />} label="BATHS" value={selectedModel.bathrooms} />
-            </Grid>
-            <Grid item xs={12}>
-              <InfoItem icon={<SquareFootIcon fontSize="small" />} label="SQFT" value={selectedModel.sqft.toLocaleString()} />
-            </Grid>
-          </Grid>
-        ) : (
-          <Box sx={{ textAlign: 'center', py: 4, bgcolor: '#f9f9f9', borderRadius: 2, border: '1px dashed #ccc' }}>
-            <Typography variant="body2" sx={{ color: '#999' }}>
-              Select a model to view house details
-            </Typography>
-          </Box>
-        )}
+      {/* Summary */}
+      <Box 
+        sx={{ 
+          mt: 3, 
+          pt: 3, 
+          borderTop: '1px solid #e0e0e0',
+          textAlign: 'center' 
+        }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#333' }}>
+          {stats.total}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          Total Lots in Phase II
+        </Typography>
       </Box>
     </Paper>
   )
 }
 
-const InfoItem = ({ icon, label, value }) => (
-  <Box sx={{ p: 1.5, bgcolor: '#f9f9f9', borderRadius: 2, border: '1px solid #eee' }}>
-    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5, gap: 1 }}>
-      <Box sx={{ color: '#4a7c59', display: 'flex' }}>{icon}</Box>
-      <Typography variant="caption" sx={{ color: '#666', fontWeight: 'bold' }}>
-        {label}
-      </Typography>
+const StatItem = ({ icon, label, count, total, color, percentage }) => (
+  <Box>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+      {icon}
+      <Box sx={{ flex: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+          <Typography variant="body2" sx={{ fontWeight: 500, color: '#333' }}>
+            {label}
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 'bold', color }}>
+            {count} / {total}
+          </Typography>
+        </Box>
+        <LinearProgress
+          variant="determinate"
+          value={percentage}
+          sx={{
+            height: 8,
+            borderRadius: 4,
+            bgcolor: '#f0f0f0',
+            '& .MuiLinearProgress-bar': {
+              bgcolor: color,
+              borderRadius: 4
+            }
+          }}
+        />
+      </Box>
     </Box>
-    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-      {value}
+    <Typography 
+      variant="caption" 
+      sx={{ 
+        ml: 5, 
+        color: 'text.secondary',
+        display: 'block' 
+      }}
+    >
+      {percentage.toFixed(1)}% of total inventory
     </Typography>
   </Box>
 )

@@ -1,6 +1,5 @@
-// import { Box, Grid, Container, CircularProgress, Alert } from '@mui/material'
+// import { Box, Grid, Container, CircularProgress, Alert, useMediaQuery, useTheme } from '@mui/material'
 // import { PropertyProvider, useProperty } from '../context/PropertyContext'
-// import { useAuth } from '../context/AuthContext'
 // import InteractiveMap from '../components/property/InteractiveMap'
 // import PropertyStats from '../components/property/PropertyStats'
 // import ModelSelector from '../components/property/ModelSelector'
@@ -9,6 +8,8 @@
 
 // const PropertySelectionContent = () => {
 //   const { loading, error } = useProperty()
+//   const theme = useTheme()
+//   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
 //   if (loading) {
 //     return (
@@ -29,33 +30,47 @@
 //   }
 
 //   return (
-//     <Box sx={{ bgcolor: 'white', minHeight: '100vh', py: 3 }}>
-//       <Container maxWidth="xl">
+//     <Box sx={{ py: 3 }}>
+//       <Container 
+//         maxWidth="lg"
+//         sx={{ 
+//           px: { xs: 2, sm: 3 },
+//           py: 3
+//         }}
+//       >
 //         <Grid container spacing={3}>
-//           {/* Left Column - Main Content (8/12) */}
-//           <Grid item xs={12} lg={8.5}>
+//           {/* Mobile: Show PropertyStats first */}
+//           {isMobile && (
+//             <Grid item xs={12}>
+//               <PropertyStats />
+//             </Grid>
+//           )}
+
+//           {/* Left Column - Main Content */}
+//           <Grid item xs={12} md={8}>
 //             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-//               {/* Map Section */}
 //               <InteractiveMap />
-              
-//               {/* Model Selection */}
 //               <ModelSelector />
-              
-//               {/* Facade Selection */}
 //               <FacadeSelector />
 //             </Box>
 //           </Grid>
           
-//           {/* Right Column - Sidebar (4/12) */}
-//           <Grid item xs={12} lg={3.5}>
-//             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, position: { lg: 'sticky' }, top: 24 }}>
-//               {/* Lot Select & House Information */}
-//               <PropertyStats />
-              
-//               {/* Financial Calculator */}
+//           {/* Right Column - Sidebar (Desktop only) */}
+//           {!isMobile && (
+//             <Grid item xs={12} md={4}>
+//               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+//                 <PropertyStats />
+//                 <PriceCalculator />
+//               </Box>
+//             </Grid>
+//           )}
+
+//           {/* Mobile: Show PriceCalculator at the end */}
+//           {isMobile && (
+//             <Grid item xs={12}>
 //               <PriceCalculator />
-//             </Box>
-//           </Grid>
+//             </Grid>
+//           )}
 //         </Grid>
 //       </Container>
 //     </Box>
@@ -63,36 +78,42 @@
 // }
 
 // const PropertySelection = () => {
-//   const { isAuthenticated } = useAuth()
-
 //   return (
 //     <PropertyProvider>
-//       {isAuthenticated ? (
-//         // User is authenticated - content will be wrapped by Layout component via routing
-//         <PropertySelectionContent />
-//       ) : (
-//         // User is not authenticated - show fullscreen
-//         <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100vh' }}>
-//           <PropertySelectionContent />
-//         </Box>
-//       )}
+//       <PropertySelectionContent />
 //     </PropertyProvider>
 //   )
 // }
 
 // export default PropertySelection
 
-
-import { Box, Grid, Container, CircularProgress, Alert } from '@mui/material'
+import { Typography,Box, Grid, Container, CircularProgress, Alert, useMediaQuery, useTheme } from '@mui/material'
 import { PropertyProvider, useProperty } from '../context/PropertyContext'
+import { useState } from 'react'
 import InteractiveMap from '../components/property/InteractiveMap'
 import PropertyStats from '../components/property/PropertyStats'
 import ModelSelector from '../components/property/ModelSelector'
 import FacadeSelector from '../components/property/FacadeSelector'
+import ResidentAssignment from '../components/property/ResidentAssignment'
 import PriceCalculator from '../components/property/PriceCalculator'
 
 const PropertySelectionContent = () => {
   const { loading, error } = useProperty()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const [residentExpanded, setResidentExpanded] = useState(false)
+
+  const handleCreatePropertyClick = () => {
+    setResidentExpanded(true)
+    
+    // Scroll to ResidentAssignment
+    setTimeout(() => {
+      const element = document.getElementById('resident-assignment-section')
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }, 100)
+  }
 
   if (loading) {
     return (
@@ -113,33 +134,56 @@ const PropertySelectionContent = () => {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'white', py: 3, sm: { p: 0 } }}>
-      <Container maxWidth="lg">
+    <Box sx={{ py: 3 }}>
+            <Typography variant="h4" gutterBottom fontWeight="bold">
+              Get Your Qoute
+            </Typography>
+      <Container 
+maxWidth={false}
+        sx={{ 
+          px: { xs: 2, sm: 3 },
+          py: 3
+        }}
+      >
         <Grid container spacing={3}>
+          {/* Mobile: Show PropertyStats first */}
+          {isMobile && (
+            <Grid item xs={12}>
+              <PropertyStats />
+            </Grid>
+          )}
+
           {/* Left Column - Main Content */}
           <Grid item xs={12} md={8}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              {/* Map Section */}
               <InteractiveMap />
-              
-              {/* Model Selection */}
               <ModelSelector />
-              
-              {/* Facade Selection */}
               <FacadeSelector />
+              <Box id="resident-assignment-section">
+                <ResidentAssignment 
+                  expanded={residentExpanded}
+                  onToggle={() => setResidentExpanded(!residentExpanded)}
+                />
+              </Box>
             </Box>
           </Grid>
           
-          {/* Right Column - Sidebar */}
-          <Grid item xs={12} md={4}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              {/* Lot Select & House Information */}
-              <PropertyStats />
-              
-              {/* Financial Calculator */}
-              <PriceCalculator />
-            </Box>
-          </Grid>
+          {/* Right Column - Sidebar (Desktop only) */}
+          {!isMobile && (
+            <Grid item xs={12} md={4}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <PropertyStats />
+                <PriceCalculator onCreatePropertyClick={handleCreatePropertyClick} />
+              </Box>
+            </Grid>
+          )}
+
+          {/* Mobile: Show PriceCalculator at the end */}
+          {isMobile && (
+            <Grid item xs={12}>
+              <PriceCalculator onCreatePropertyClick={handleCreatePropertyClick} />
+            </Grid>
+          )}
         </Grid>
       </Container>
     </Box>

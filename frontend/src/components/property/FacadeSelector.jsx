@@ -1,12 +1,12 @@
+
 // import React, { useRef, useEffect, useState } from 'react'
-// import { Box, Paper, Typography, Card, CardContent, CardMedia, Chip, IconButton } from '@mui/material'
+// import { Box, Paper, Typography, Card, CardContent, CardMedia, IconButton } from '@mui/material'
 // import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 // import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 // import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 // import { useProperty } from '../../context/PropertyContext'
 
-// // Scroll control hooks & logic
-// const SCROLL_GAP_PX = 16 // matches theme gap: 2 -> 16px
+// const SCROLL_GAP_PX = 16
 
 // function useScrollControls(itemsCount = 0) {
 //   const containerRef = useRef(null)
@@ -18,14 +18,12 @@
 //     if (!el) return
 
 //     const update = () => {
-//       // small epsilon to avoid floating rounding issues
-//       setCanScrollNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 1)
-//       setCanScrollPrev(el.scrollLeft > 1)
+//       const tolerance = 2
+//       setCanScrollNext(el.scrollLeft + el.clientWidth < el.scrollWidth - tolerance)
+//       setCanScrollPrev(el.scrollLeft > tolerance)
 //     }
 
-//     // run a first time (delay slightly to let layout settle)
 //     const t = setTimeout(update, 50)
-
 //     el.addEventListener('scroll', update)
 //     window.addEventListener('resize', update)
 
@@ -34,25 +32,22 @@
 //       el.removeEventListener('scroll', update)
 //       window.removeEventListener('resize', update)
 //     }
-//     // re-run when number of items changes so we recalc overflow
-//   }, [containerRef, itemsCount])
+//   }, [itemsCount])
 
 //   const handleNext = () => {
 //     const el = containerRef.current
 //     if (!el) return
 //     const card = el.querySelector('.facade-card')
-//     const cardWidth = (card && card.offsetWidth) ? card.offsetWidth : 180
-//     const amount = cardWidth + SCROLL_GAP_PX
-//     el.scrollBy({ left: amount, behavior: 'smooth' })
+//     const cardWidth = card?.offsetWidth || 200
+//     el.scrollBy({ left: cardWidth + SCROLL_GAP_PX, behavior: 'smooth' })
 //   }
 
 //   const handlePrev = () => {
 //     const el = containerRef.current
 //     if (!el) return
 //     const card = el.querySelector('.facade-card')
-//     const cardWidth = (card && card.offsetWidth) ? card.offsetWidth : 180
-//     const amount = cardWidth + SCROLL_GAP_PX
-//     el.scrollBy({ left: -amount, behavior: 'smooth' })
+//     const cardWidth = card?.offsetWidth || 200
+//     el.scrollBy({ left: -(cardWidth + SCROLL_GAP_PX), behavior: 'smooth' })
 //   }
 
 //   return { containerRef, canScrollNext, canScrollPrev, handleNext, handlePrev }
@@ -69,15 +64,38 @@
 //         sx={{ 
 //           p: 3, 
 //           bgcolor: '#fff', 
-//           color: '#000',
 //           borderRadius: 2,
-//           border: '1px solid #e0e0e0',
-//           textAlign: 'center',
-//           opacity: 0.7
+//           border: '1px solid #e0e0e0'
 //         }}
 //       >
-//         <Typography variant="subtitle1" sx={{ color: '#999', py: 2 }}>
+//         <Typography variant="subtitle1" color="text.secondary" textAlign="center" sx={{ py: 2 }}>
 //           SELECCIONE UN MODELO PARA VER FACHADAS
+//         </Typography>
+//       </Paper>
+//     )
+//   }
+
+//   if (facades.length === 0) {
+//     return (
+//       <Paper 
+//         elevation={2} 
+//         sx={{ 
+//           p: 3, 
+//           bgcolor: '#fff', 
+//           borderRadius: 2,
+//           border: '1px solid #e0e0e0'
+//         }}
+//       >
+//         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+//           <Typography variant="subtitle1" fontWeight="bold">
+//             03 SELECCIÓN DE FACHADA
+//           </Typography>
+//           <Typography variant="caption" color="success.main" fontWeight="bold">
+//             FOR {selectedModel.model}
+//           </Typography>
+//         </Box>
+//         <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 2 }}>
+//           No hay fachadas disponibles para este modelo
 //         </Typography>
 //       </Paper>
 //     )
@@ -89,127 +107,131 @@
 //       sx={{ 
 //         p: 3, 
 //         bgcolor: '#fff', 
-//         color: '#000',
 //         borderRadius: 2,
 //         border: '1px solid #e0e0e0'
 //       }}
 //     >
-//       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-//         <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#333' }}>
+//       {/* Header */}
+//       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+//         <Typography variant="subtitle1" fontWeight="bold">
 //           03 SELECCIÓN DE FACHADA
 //         </Typography>
-//         <Typography variant="caption" sx={{ color: '#4a7c59', fontWeight: 'bold' }}>
-//           FOR {selectedModel.modelNumber}
+//         <Typography variant="caption" color="success.main" fontWeight="bold">
+//           FOR {selectedModel.model}
 //         </Typography>
 //       </Box>
 
-//       {/* Scroll container wrapper - reserve side padding so arrows don't overlap content */}
-//       <Box sx={{ position: 'relative', px: '56px' }}>
+//       {/* Scroll Container */}
+//       <Box sx={{ position: 'relative', mx: -1 }}>
 //         <Box 
 //           ref={containerRef}
 //           sx={{ 
-//             display: 'flex', 
-//             gap: 2, 
-//             overflowX: 'auto', 
+//             display: 'flex',
+//             gap: 2,
+//             overflowX: 'auto',
+//             px: 1,
 //             pb: 2,
-//             // Hide native scrollbar across browsers but keep scroll functionality
-//             scrollbarWidth: 'none', // Firefox
-//             '-ms-overflow-style': 'none', // IE 10+
-//             '&::-webkit-scrollbar': { display: 'none', height: 0 } // WebKit
+//             pt: 2,
+//             scrollbarWidth: 'none',
+//             '&::-webkit-scrollbar': { display: 'none' }
 //           }}
 //         >
 //           {facades.map((facade) => (
 //             <Card
-//             key={facade.id}
-//             onClick={() => selectFacade(facade)}
-//             sx={{
-//               minWidth: 180,
-//               flexShrink: 0,
-//               cursor: 'pointer',
-//               bgcolor: selectedFacade?.id === facade.id ? '#e8f5e9' : '#fff',
-//               border: selectedFacade?.id === facade.id ? '2px solid #4a7c59' : '1px solid #e0e0e0',
-//               borderRadius: 2,
-//               transition: 'all 0.2s ease',
-//               position: 'relative',
-//               '&:hover': {
-//                 transform: 'scale(1.02)'
-//               }
-//             }}
-//             className="facade-card"
-//           >
-//             {selectedFacade?.id === facade.id && (
-//               <CheckCircleIcon 
-//                 color="success" 
-//                 sx={{ 
-//                   position: 'absolute', 
-//                   top: 8, 
-//                   right: 8, 
-//                   zIndex: 2,
-//                   bgcolor: '#fff',
-//                   borderRadius: '50%'
-//                 }} 
-//               />
-//             )}
+//               key={facade._id}
+//               onClick={() => selectFacade(facade)}
+//               className="facade-card"
+//               sx={{
+//                 minWidth: 200,
+//                 maxWidth: 200,
+//                 flexShrink: 0,
+//                 cursor: 'pointer',
+//                 bgcolor: selectedFacade?._id === facade._id ? '#e8f5e9' : '#fff',
+//                 border: selectedFacade?._id === facade._id ? '2px solid #4a7c59' : '1px solid #e0e0e0',
+//                 borderRadius: 2,
+//                 transition: 'all 0.2s',
+//                 position: 'relative',
+//                 '&:hover': {
+//                   transform: 'translateY(-4px)',
+//                   boxShadow: 2
+//                 }
+//               }}
+//             >
+//               {selectedFacade?._id === facade._id && (
+//                 <CheckCircleIcon 
+//                   color="success" 
+//                   sx={{ 
+//                     position: 'absolute',
+//                     top: 8,
+//                     right: 8,
+//                     bgcolor: '#fff',
+//                     borderRadius: '50%',
+//                     zIndex: 1
+//                   }} 
+//                 />
+//               )}
 
-//             <CardMedia
-//               component="img"
-//               height="100"
-//               image={facade.image || `https://via.placeholder.com/200x120?text=${facade.name}`}
-//               alt={facade.name}
-//               sx={{ filter: selectedFacade?.id === facade.id ? 'none' : 'grayscale(0.5)' }}
-//             />
-            
-//             <CardContent sx={{ p: 1.5, pb: '12px !important' }}>
-//               <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.875rem' }}>
-//                 {facade.name}
-//               </Typography>
-//               <Typography variant="caption" sx={{ color: facade.priceModifier > 0 ? '#4caf50' : '#666' }}>
-//                 {facade.priceModifier > 0 ? `+ $${facade.priceModifier.toLocaleString()}` : 'INCLUDED'}
-//               </Typography>
-//             </CardContent>
-//           </Card>
+//               <CardMedia
+//                 component="img"
+//                 height="120"
+//                 image={facade.url || `https://via.placeholder.com/200x120?text=${facade.title}`}
+//                 alt={facade.title}
+//                 sx={{ 
+//                   objectFit: 'cover',
+//                   filter: selectedFacade?._id === facade._id ? 'none' : 'grayscale(0.3)'
+//                 }}
+//               />
+              
+//               <CardContent sx={{ p: 2 }}>
+//                 <Typography variant="body2" fontWeight="bold" gutterBottom>
+//                   {facade.title}
+//                 </Typography>
+//                 <Typography 
+//                   variant="caption" 
+//                   color={facade.price > 0 ? 'success.main' : 'text.secondary'}
+//                   fontWeight="500"
+//                 >
+//                   {facade.price > 0 ? `+ $${facade.price.toLocaleString()}` : 'INCLUDED'}
+//                 </Typography>
+//               </CardContent>
+//             </Card>
 //           ))}
 //         </Box>
 
-//         {/* Left arrow */}
-//         <IconButton
-//           onClick={handlePrev}
-//           aria-label="previous facade"
-//           sx={{
-//             position: 'absolute',
-//             left: 8,
-//             top: '50%',
-//             transform: 'translateY(-50%)',
-//             zIndex: 3,
-//             bgcolor: '#fff',
-//             boxShadow: 1,
-//             width: 44,
-//             height: 44,
-//             display: canScrollPrev ? 'flex' : 'none'
-//           }}
-//         >
-//           <ChevronLeftIcon />
-//         </IconButton>
+//         {/* Navigation Arrows */}
+//         {canScrollPrev && (
+//           <IconButton
+//             onClick={handlePrev}
+//             sx={{
+//               position: 'absolute',
+//               left: -8,
+//               top: '50%',
+//               transform: 'translateY(-50%)',
+//               bgcolor: '#fff',
+//               boxShadow: 1,
+//               '&:hover': { bgcolor: 'grey.100' }
+//             }}
+//           >
+//             <ChevronLeftIcon />
+//           </IconButton>
+//         )}
 
-//         {/* Right arrow */}
-//         <IconButton
-//           onClick={handleNext}
-//           aria-label="next facade"
-//           sx={{
-//             position: 'absolute',
-//             right: 8,
-//             top: '50%',
-//             transform: 'translateY(-50%)',
-//             zIndex: 3,
-//             bgcolor: '#fff',
-//             boxShadow: 1,
-//             width: 44,
-//             height: 44,
-//             display: canScrollNext ? 'flex' : 'none'
-//           }}
-//         >
-//           <ChevronRightIcon />
-//         </IconButton>
+//         {canScrollNext && (
+//           <IconButton
+//             onClick={handleNext}
+//             sx={{
+//               position: 'absolute',
+//               right: -8,
+//               top: '50%',
+//               transform: 'translateY(-50%)',
+//               bgcolor: '#fff',
+//               boxShadow: 1,
+//               '&:hover': { bgcolor: 'grey.100' }
+//             }}
+//           >
+//             <ChevronRightIcon />
+//           </IconButton>
+//         )}
 //       </Box>
 //     </Paper>
 //   )
@@ -236,8 +258,9 @@ function useScrollControls(itemsCount = 0) {
     if (!el) return
 
     const update = () => {
-      setCanScrollNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 1)
-      setCanScrollPrev(el.scrollLeft > 1)
+      const tolerance = 2
+      setCanScrollNext(el.scrollLeft + el.clientWidth < el.scrollWidth - tolerance)
+      setCanScrollPrev(el.scrollLeft > tolerance)
     }
 
     const t = setTimeout(update, 50)
@@ -255,7 +278,7 @@ function useScrollControls(itemsCount = 0) {
     const el = containerRef.current
     if (!el) return
     const card = el.querySelector('.facade-card')
-    const cardWidth = card?.offsetWidth || 180
+    const cardWidth = card?.offsetWidth || 200
     el.scrollBy({ left: cardWidth + SCROLL_GAP_PX, behavior: 'smooth' })
   }
 
@@ -263,7 +286,7 @@ function useScrollControls(itemsCount = 0) {
     const el = containerRef.current
     if (!el) return
     const card = el.querySelector('.facade-card')
-    const cardWidth = card?.offsetWidth || 180
+    const cardWidth = card?.offsetWidth || 200
     el.scrollBy({ left: -(cardWidth + SCROLL_GAP_PX), behavior: 'smooth' })
   }
 
@@ -280,17 +303,39 @@ const FacadeSelector = () => {
         elevation={2} 
         sx={{ 
           p: 3, 
-          bgcolor: '#fff',
+          bgcolor: '#fff', 
           borderRadius: 2,
-          border: '1px solid #e0e0e0',
-          textAlign: 'center',
-          opacity: 0.7,
-          maxWidth: '100%',
-          overflow: 'hidden'
+          border: '1px solid #e0e0e0'
         }}
       >
-        <Typography variant="subtitle1" sx={{ color: '#999', py: 2 }}>
-          SELECCIONE UN MODELO PARA VER FACHADAS
+        <Typography variant="subtitle1" color="text.secondary" textAlign="center" sx={{ py: 2 }}>
+          SELECT A MODEL TO VIEW FACADES
+        </Typography>
+      </Paper>
+    )
+  }
+
+  if (facades.length === 0) {
+    return (
+      <Paper 
+        elevation={2} 
+        sx={{ 
+          p: 3, 
+          bgcolor: '#fff', 
+          borderRadius: 2,
+          border: '1px solid #e0e0e0'
+        }}
+      >
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="subtitle1" fontWeight="bold">
+            03 FACADE SELECTION
+          </Typography>
+          <Typography variant="caption" color="success.main" fontWeight="bold">
+            FOR {selectedModel.model}
+          </Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 2 }}>
+          No facades available for this model
         </Typography>
       </Paper>
     )
@@ -301,106 +346,110 @@ const FacadeSelector = () => {
       elevation={2} 
       sx={{ 
         p: 3, 
-        bgcolor: '#fff',
+        bgcolor: '#fff', 
         borderRadius: 2,
-        border: '1px solid #e0e0e0',
-        maxWidth: '100%',
-        overflow: 'hidden'
+        border: '1px solid #e0e0e0'
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#333' }}>
-          03 SELECCIÓN DE FACHADA
+      {/* Header */}
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="subtitle1" fontWeight="bold">
+          03 FACADE SELECTION
         </Typography>
-        <Typography variant="caption" sx={{ color: '#4a7c59', fontWeight: 'bold' }}>
-          FOR {selectedModel.modelNumber}
+        <Typography variant="caption" color="success.main" fontWeight="bold">
+          FOR {selectedModel.model}
         </Typography>
       </Box>
 
-      <Box sx={{ position: 'relative', px: '56px' }}>
+      {/* Scroll Container */}
+      <Box sx={{ position: 'relative', mx: -1 }}>
         <Box 
           ref={containerRef}
           sx={{ 
-            display: 'flex', 
-            gap: 2, 
-            overflowX: 'auto', 
+            display: 'flex',
+            gap: 2,
+            overflowX: 'auto',
+            px: 1,
             pb: 2,
+            pt: 2,
             scrollbarWidth: 'none',
-            '-ms-overflow-style': 'none',
             '&::-webkit-scrollbar': { display: 'none' }
           }}
         >
           {facades.map((facade) => (
             <Card
-              key={facade.id}
+              key={facade._id}
               onClick={() => selectFacade(facade)}
               className="facade-card"
               sx={{
-                minWidth: 180,
-                maxWidth: 180,
-                width: 180,
+                minWidth: 200,
+                maxWidth: 200,
                 flexShrink: 0,
                 cursor: 'pointer',
-                bgcolor: selectedFacade?.id === facade.id ? '#e8f5e9' : '#fff',
-                border: selectedFacade?.id === facade.id ? '2px solid #4a7c59' : '1px solid #e0e0e0',
+                bgcolor: selectedFacade?._id === facade._id ? '#e8f5e9' : '#fff',
+                border: selectedFacade?._id === facade._id ? '2px solid #4a7c59' : '1px solid #e0e0e0',
                 borderRadius: 2,
-                transition: 'all 0.2s ease',
+                transition: 'all 0.2s',
                 position: 'relative',
                 '&:hover': {
-                  transform: 'scale(1.02)'
+                  transform: 'translateY(-4px)',
+                  boxShadow: 2
                 }
               }}
             >
-              {selectedFacade?.id === facade.id && (
+              {selectedFacade?._id === facade._id && (
                 <CheckCircleIcon 
                   color="success" 
                   sx={{ 
-                    position: 'absolute', 
-                    top: 8, 
-                    right: 8, 
-                    zIndex: 2,
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
                     bgcolor: '#fff',
-                    borderRadius: '50%'
+                    borderRadius: '50%',
+                    zIndex: 1
                   }} 
                 />
               )}
 
               <CardMedia
                 component="img"
-                height="100"
-                image={facade.image || `https://via.placeholder.com/180x100?text=${facade.name}`}
-                alt={facade.name}
+                height="120"
+                image={facade.url || `https://via.placeholder.com/200x120?text=${facade.title}`}
+                alt={facade.title}
                 sx={{ 
                   objectFit: 'cover',
-                  filter: selectedFacade?.id === facade.id ? 'none' : 'grayscale(0.5)'
+                  filter: selectedFacade?._id === facade._id ? 'none' : 'grayscale(0.3)'
                 }}
               />
               
-              <CardContent sx={{ p: 1.5, pb: '12px !important' }}>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.875rem' }}>
-                  {facade.name}
+              <CardContent sx={{ p: 2 }}>
+                <Typography variant="body2" fontWeight="bold" gutterBottom>
+                  {facade.title}
                 </Typography>
-                <Typography variant="caption" sx={{ color: facade.priceModifier > 0 ? '#4caf50' : '#666' }}>
-                  {facade.priceModifier > 0 ? `+ $${facade.priceModifier.toLocaleString()}` : 'INCLUDED'}
+                <Typography 
+                  variant="caption" 
+                  color={facade.price > 0 ? 'success.main' : 'text.secondary'}
+                  fontWeight="500"
+                >
+                  {facade.price > 0 ? `+ $${facade.price.toLocaleString()}` : 'INCLUDED'}
                 </Typography>
               </CardContent>
             </Card>
           ))}
         </Box>
 
+        {/* Navigation Arrows */}
         {canScrollPrev && (
           <IconButton
             onClick={handlePrev}
             sx={{
               position: 'absolute',
-              left: 8,
+              left: -8,
               top: '50%',
               transform: 'translateY(-50%)',
-              zIndex: 3,
               bgcolor: '#fff',
               boxShadow: 1,
-              width: 44,
-              height: 44
+              '&:hover': { bgcolor: 'grey.100' }
             }}
           >
             <ChevronLeftIcon />
@@ -412,14 +461,12 @@ const FacadeSelector = () => {
             onClick={handleNext}
             sx={{
               position: 'absolute',
-              right: 8,
+              right: -8,
               top: '50%',
               transform: 'translateY(-50%)',
-              zIndex: 3,
               bgcolor: '#fff',
               boxShadow: 1,
-              width: 44,
-              height: 44
+              '&:hover': { bgcolor: 'grey.100' }
             }}
           >
             <ChevronRightIcon />
