@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Box,
   Typography,
@@ -26,6 +27,7 @@ import { Add, Edit, Delete, Home, Image as ImageIcon } from '@mui/icons-material
 import api from '../services/api'
 
 const Models = () => {
+  const navigate = useNavigate()
   const [models, setModels] = useState([])
   const [facades, setFacades] = useState([])
   const [loading, setLoading] = useState(true)
@@ -44,7 +46,16 @@ const Models = () => {
     bathrooms: 0,
     sqft: 0,
     description: '',
-    status: 'active'
+    status: 'active',
+    facades: ['', '', '', ''],
+    images: [
+      { url: '', title: '' },
+      { url: '', title: '' },
+      { url: '', title: '' },
+      { url: '', title: '' },
+      { url: '', title: '' },
+      { url: '', title: '' }
+    ]
   })
 
   const [facadeFormData, setFacadeFormData] = useState({
@@ -93,6 +104,12 @@ const Models = () => {
   const handleOpenDialog = (model = null) => {
     if (model) {
       setSelectedModel(model)
+      const existingFacades = model.facades || []
+      const facadesArray = [...existingFacades, ...Array(4 - existingFacades.length).fill('')].slice(0, 4)
+      
+      const existingImages = model.images || []
+      const imagesArray = [...existingImages, ...Array(6 - existingImages.length).fill({ url: '', title: '' })].slice(0, 6)
+      
       setFormData({
         model: model.model,
         modelNumber: model.modelNumber || '',
@@ -101,7 +118,9 @@ const Models = () => {
         bathrooms: model.bathrooms,
         sqft: model.sqft,
         description: model.description || '',
-        status: model.status
+        status: model.status,
+        facades: facadesArray,
+        images: imagesArray
       })
     } else {
       setSelectedModel(null)
@@ -113,7 +132,16 @@ const Models = () => {
         bathrooms: 0,
         sqft: 0,
         description: '',
-        status: 'active'
+        status: 'active',
+        facades: ['', '', '', ''],
+        images: [
+          { url: '', title: '' },
+          { url: '', title: '' },
+          { url: '', title: '' },
+          { url: '', title: '' },
+          { url: '', title: '' },
+          { url: '', title: '' }
+        ]
       })
     }
     setOpenDialog(true)
@@ -482,6 +510,61 @@ const Models = () => {
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
             </Grid>
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" fontWeight="bold" sx={{ mt: 2, mb: 1 }}>
+                Facades (4 ángulos de la casa)
+              </Typography>
+            </Grid>
+            {formData.facades.map((url, index) => (
+              <Grid item xs={12} sm={6} key={index}>
+                <TextField
+                  fullWidth
+                  label={`Facade ${index + 1}`}
+                  value={url}
+                  onChange={(e) => {
+                    const newFacades = [...formData.facades]
+                    newFacades[index] = e.target.value
+                    setFormData({ ...formData, facades: newFacades })
+                  }}
+                  placeholder="https://example.com/facade.jpg"
+                />
+              </Grid>
+            ))}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" fontWeight="bold" sx={{ mt: 2, mb: 1 }}>
+                Características (6 imágenes con título)
+              </Typography>
+            </Grid>
+            {formData.images.map((img, index) => (
+              <Grid item xs={12} key={index}>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <TextField
+                    fullWidth
+                    label={`Título ${index + 1}`}
+                    value={img.title}
+                    onChange={(e) => {
+                      const newImages = [...formData.images]
+                      newImages[index] = { ...newImages[index], title: e.target.value }
+                      setFormData({ ...formData, images: newImages })
+                    }}
+                    placeholder="Ej: Cocina Moderna"
+                    sx={{ flex: 1 }}
+                  />
+                  <TextField
+                    fullWidth
+                    label={`URL Imagen ${index + 1}`}
+                    value={img.url}
+                    onChange={(e) => {
+                      const newImages = [...formData.images]
+                      newImages[index] = { ...newImages[index], url: e.target.value }
+                      setFormData({ ...formData, images: newImages })
+                    }}
+                    placeholder="https://example.com/image.jpg"
+                    sx={{ flex: 2 }}
+                  />
+                </Box>
+              </Grid>
+            ))}
           </Grid>
         </DialogContent>
         <DialogActions>

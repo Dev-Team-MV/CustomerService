@@ -5,7 +5,8 @@ import {
   createPayload,
   updatePayload,
   deletePayload,
-  getPayloadStats
+  getPayloadStats,
+  getApprovedPayloadsThisMonth
 } from '../controllers/payloadController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
@@ -85,6 +86,35 @@ router.route('/')
  *         description: Payload statistics
  */
 router.get('/stats', protect, getPayloadStats)
+
+/**
+ * @swagger
+ * /api/payloads/approved/this-month:
+ *   get:
+ *     summary: Get approved payloads from this month
+ *     tags: [Payloads]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of approved payloads from this month
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 count:
+ *                   type: number
+ *                   description: Number of approved payloads this month
+ *                 totalAmount:
+ *                   type: number
+ *                   description: Total amount of approved payloads this month
+ *                 payloads:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Payload'
+ */
+router.get('/approved/this-month', protect, getApprovedPayloadsThisMonth)
 
 /**
  * @swagger
