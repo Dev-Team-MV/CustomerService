@@ -202,3 +202,43 @@ export const getPayloadStats = async (req, res) => {
     res.status(500).json({ message: error.message })
   }
 }
+
+export const getApprovedPayloadsThisMonth = async (req, res) => {
+  try {
+    // Obtener el primer y último día del mes actual
+    const now = new Date()
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+    
+    // Filtrar pagos aprobados (cleared) del mes actual
+    const payloads = await Payload.find({
+      status: 'cleared',
+      date: {
+        $gte: firstDayOfMonth,
+        $lte: lastDayOfMonth
+      }
+    })
+      .populate({
+        path: 'property',
+        populate: [
+          { path: 'lot', select: 'number section size' },
+          { path: 'model', select: 'model modelNumber price' },
+          { path: 'facade', select: 'title url price' },
+          { path: 'user', select: 'firstName lastName email phoneNumber' }
+        ]
+      })
+      .populate('processedBy', 'firstName lastName')
+      .sort({ date: -1 })
+    
+    // Calcular el total de pagos aprobados este mes
+    const totalAmount = payloads.reduce((sum, payload) => sum + payload.amount, 0)
+    
+    res.json({
+      count: payloads.length,
+      totalAmount,
+      payloads
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
