@@ -1,5 +1,7 @@
 import Property from '../models/Property.js'
 import Lot from '../models/Lot.js'
+import Model from '../models/Model.js'
+import Facade from '../models/Facade.js'
 import User from '../models/User.js'
 
 export const getAllProperties = async (req, res) => {
@@ -13,6 +15,7 @@ export const getAllProperties = async (req, res) => {
     const properties = await Property.find(filter)
       .populate('lot', 'number section size')
       .populate('model', 'model price bedrooms bathrooms sqft images')
+      .populate('facade', 'title url price')
       .populate('user', 'firstName lastName email phoneNumber')
       .sort({ createdAt: -1 })
     
@@ -27,6 +30,7 @@ export const getPropertyById = async (req, res) => {
     const property = await Property.findById(req.params.id)
       .populate('lot', 'number section size price')
       .populate('model', 'model price bedrooms bathrooms sqft images description')
+      .populate('facade', 'title url price')
       .populate('user', 'firstName lastName email phoneNumber birthday')
       .populate({
         path: 'payloads',
@@ -49,8 +53,9 @@ export const getPropertyById = async (req, res) => {
 
 export const createProperty = async (req, res) => {
   try {
-    const { lot, model, user, price, pending, initialPayment } = req.body
+    const { lot, model, facade, user, initialPayment } = req.body
     
+    // Validate lot
     const lotExists = await Lot.findById(lot)
     if (!lotExists) {
       return res.status(404).json({ message: 'Lot not found' })
@@ -64,13 +69,38 @@ export const createProperty = async (req, res) => {
       return res.status(400).json({ message: 'Lot is already assigned to another user' })
     }
     
+    // Validate model
+    const modelExists = await Model.findById(model)
+    if (!modelExists) {
+      return res.status(404).json({ message: 'Model not found' })
+    }
+    
+    // Validate facade
+    const facadeExists = await Facade.findById(facade)
+    if (!facadeExists) {
+      return res.status(404).json({ message: 'Facade not found' })
+    }
+    
+    // Validate that facade belongs to the selected model
+    if (facadeExists.model.toString() !== model) {
+      return res.status(400).json({ message: 'Facade does not belong to the selected model' })
+    }
+    
+    // Calculate total price: lot + model + facade
+    const totalPrice = lotExists.price + modelExists.price + facadeExists.price
+    
+    // Calculate pending: total price - initial payment
+    const initialPaymentAmount = initialPayment || 0
+    const pendingAmount = totalPrice - initialPaymentAmount
+    
     const property = await Property.create({
       lot,
       model,
+      facade,
       user,
-      price,
-      pending,
-      initialPayment: initialPayment || 0,
+      price: totalPrice,
+      pending: pendingAmount,
+      initialPayment: initialPaymentAmount,
       status: 'pending'
     })
     
@@ -88,6 +118,7 @@ export const createProperty = async (req, res) => {
     const populatedProperty = await Property.findById(property._id)
       .populate('lot')
       .populate('model')
+      .populate('facade')
       .populate('user')
     
     res.status(201).json(populatedProperty)
@@ -112,6 +143,7 @@ export const updateProperty = async (req, res) => {
       const populatedProperty = await Property.findById(updatedProperty._id)
         .populate('lot')
         .populate('model')
+        .populate('facade')
         .populate('user')
       
       res.json(populatedProperty)

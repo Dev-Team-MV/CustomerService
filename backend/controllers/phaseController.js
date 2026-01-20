@@ -58,7 +58,7 @@ export const getPhaseByNumber = async (req, res) => {
   }
 }
 
-// Update a phase (title, constructionPercentage, facades)
+// Update a phase (title, constructionPercentage)
 export const updatePhase = async (req, res) => {
   try {
     const phase = await Phase.findById(req.params.id)
@@ -73,10 +73,6 @@ export const updatePhase = async (req, res) => {
     
     if (req.body.constructionPercentage !== undefined) {
       phase.constructionPercentage = req.body.constructionPercentage
-    }
-    
-    if (req.body.facades !== undefined) {
-      phase.facades = req.body.facades
     }
     
     const updatedPhase = await phase.save()
