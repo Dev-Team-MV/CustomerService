@@ -14,8 +14,27 @@ const modelSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      required: [true, 'Price is required'],
+      required: [true, 'Base price is required'],
       min: 0
+    },
+    // Additional prices for options
+    balconyPrice: {
+      type: Number,
+      default: 0,
+      min: 0,
+      comment: 'Additional price if there is a balcony'
+    },
+    upgradePrice: {
+      type: Number,
+      default: 0,
+      min: 0,
+      comment: 'Additional price for upgrade model vs basic'
+    },
+    storagePrice: {
+      type: Number,
+      default: 0,
+      min: 0,
+      comment: 'Additional price if storage is included'
     },
     bedrooms: {
       type: Number,

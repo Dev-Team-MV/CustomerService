@@ -53,7 +53,7 @@ export const getPropertyById = async (req, res) => {
 
 export const createProperty = async (req, res) => {
   try {
-    const { lot, model, facade, user, initialPayment } = req.body
+    const { lot, model, facade, user, initialPayment, hasBalcony, modelType, hasStorage } = req.body
     
     // Validate lot
     const lotExists = await Lot.findById(lot)
@@ -86,8 +86,26 @@ export const createProperty = async (req, res) => {
       return res.status(400).json({ message: 'Facade does not belong to the selected model' })
     }
     
-    // Calculate total price: lot + model + facade
-    const totalPrice = lotExists.price + modelExists.price + facadeExists.price
+    // Calculate model price with options
+    let modelPrice = modelExists.price // Base price
+    
+    // Add balcony price if hasBalcony is true
+    if (hasBalcony && modelExists.balconyPrice) {
+      modelPrice += modelExists.balconyPrice
+    }
+    
+    // Add upgrade price if modelType is 'upgrade'
+    if (modelType === 'upgrade' && modelExists.upgradePrice) {
+      modelPrice += modelExists.upgradePrice
+    }
+    
+    // Add storage price if hasStorage is true
+    if (hasStorage && modelExists.storagePrice) {
+      modelPrice += modelExists.storagePrice
+    }
+    
+    // Calculate total price: lot + model (with options) + facade
+    const totalPrice = lotExists.price + modelPrice + facadeExists.price
     
     // Calculate pending: total price - initial payment
     const initialPaymentAmount = initialPayment || 0
@@ -101,7 +119,10 @@ export const createProperty = async (req, res) => {
       price: totalPrice,
       pending: pendingAmount,
       initialPayment: initialPaymentAmount,
-      status: 'pending'
+      status: 'pending',
+      hasBalcony: hasBalcony || false,
+      modelType: modelType || 'basic',
+      hasStorage: hasStorage || false
     })
     
     await Lot.findByIdAndUpdate(lot, {
@@ -134,6 +155,46 @@ export const updateProperty = async (req, res) => {
     if (property) {
       property.status = req.body.status || property.status
       property.pending = req.body.pending !== undefined ? req.body.pending : property.pending
+      
+      // Update configuration options if provided
+      if (req.body.hasBalcony !== undefined) {
+        property.hasBalcony = req.body.hasBalcony
+      }
+      if (req.body.modelType !== undefined) {
+        property.modelType = req.body.modelType
+      }
+      if (req.body.hasStorage !== undefined) {
+        property.hasStorage = req.body.hasStorage
+      }
+      
+      // Recalculate price if any configuration changed
+      if (req.body.hasBalcony !== undefined || req.body.modelType !== undefined || req.body.hasStorage !== undefined) {
+        const lotExists = await Lot.findById(property.lot)
+        const modelExists = await Model.findById(property.model)
+        const facadeExists = await Facade.findById(property.facade)
+        
+        if (lotExists && modelExists && facadeExists) {
+          let modelPrice = modelExists.price
+          
+          if (property.hasBalcony && modelExists.balconyPrice) {
+            modelPrice += modelExists.balconyPrice
+          }
+          
+          if (property.modelType === 'upgrade' && modelExists.upgradePrice) {
+            modelPrice += modelExists.upgradePrice
+          }
+          
+          if (property.hasStorage && modelExists.storagePrice) {
+            modelPrice += modelExists.storagePrice
+          }
+          
+          const totalPrice = lotExists.price + modelPrice + facadeExists.price
+          const priceDifference = totalPrice - property.price
+          
+          property.price = totalPrice
+          property.pending = property.pending + priceDifference
+        }
+      }
       
       if (req.body.status === 'sold' && property.lot) {
         await Lot.findByIdAndUpdate(property.lot, { status: 'sold' })

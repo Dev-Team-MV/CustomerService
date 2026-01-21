@@ -4,7 +4,8 @@ import {
   getModelById,
   createModel,
   updateModel,
-  deleteModel
+  deleteModel,
+  getModelPricingOptions
 } from '../controllers/modelController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
@@ -157,5 +158,28 @@ router.route('/:id')
   .get(protect, getModelById)
   .put(protect, admin, updateModel)
   .delete(protect, admin, deleteModel)
+
+/**
+ * @swagger
+ * /api/models/{id}/pricing-options:
+ *   get:
+ *     summary: Get all pricing options for a model
+ *     tags: [Models]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Pricing options for the model
+ *       404:
+ *         description: Model not found
+ */
+router.route('/:id/pricing-options')
+  .get(protect, getModelPricingOptions)
 
 export default router
