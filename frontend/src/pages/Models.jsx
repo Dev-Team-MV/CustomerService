@@ -1381,9 +1381,20 @@ const Models = () => {
     }
   }
 
-  const getModelFacades = (modelId) => {
-    return facades.filter(f => f.model._id === modelId || f.model === modelId)
-  }
+const getModelFacades = (modelId) => {
+  return facades.filter(f => {
+    // Verificar que facade.model exista antes de acceder a _id
+    if (!f.model) return false
+    
+    // Si model es un objeto, comparar por _id
+    if (typeof f.model === 'object') {
+      return f.model._id === modelId
+    }
+    
+    // Si model es un string (solo el ID), comparar directamente
+    return f.model === modelId
+  })
+}
 
   const getFacadeImages = (facade) => {
     if (Array.isArray(facade.url)) {
