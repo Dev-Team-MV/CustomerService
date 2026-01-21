@@ -46,6 +46,20 @@ const propertySchema = new mongoose.Schema(
     saleDate: {
       type: Date,
       default: Date.now
+    },
+    // Opciones de configuración del modelo
+    hasBalcony: {
+      type: Boolean,
+      default: false
+    },
+    modelType: {
+      type: String,
+      enum: ['basic', 'upgrade'],
+      default: 'basic'
+    },
+    hasStorage: {
+      type: Boolean,
+      default: false
     }
   },
   {
