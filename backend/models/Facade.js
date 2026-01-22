@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import deckOptionSchema from './Deck.js'
 
 const facadeSchema = new mongoose.Schema(
   {
@@ -26,7 +27,8 @@ const facadeSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'Price is required'],
       min: 0
-    }
+    },
+    decks: [deckOptionSchema]
   },
   {
     timestamps: true
