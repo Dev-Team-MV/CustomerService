@@ -502,7 +502,9 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Divider
+  Divider,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import DashboardIcon from '@mui/icons-material/Dashboard'
@@ -523,10 +525,12 @@ const drawerWidthExpanded = 260
 const Layout = () => {
   const [anchorElUser, setAnchorElUser] = useState(null)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(true) // ✅ Cambiado a true para mostrar nombres por defecto
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const handleOpenUserMenu = (event) => setAnchorElUser(event.currentTarget)
   const handleCloseUserMenu = () => setAnchorElUser(null)
@@ -871,7 +875,7 @@ const Layout = () => {
           position: 'fixed',
           top: 0,
           right: 0,
-          left: drawerWidth,
+          left: isMobile ? 0 : drawerWidth,
           zIndex: 1200
         }}
       >

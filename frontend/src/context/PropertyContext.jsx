@@ -240,40 +240,37 @@ export const PropertyProvider = ({ children }) => {
     }
   }
 
-  const calculateFinancials = () => {
-    const lotPrice = selectedLot?.price || 0
+const calculateFinancials = () => {
+  const lotPrice = selectedLot?.price || 0
+  
+  let modelPrice = 0
+  
+  if (selectedPricingOption) {
+    modelPrice = selectedPricingOption.price || 0
+    console.log('Using pricing option price:', modelPrice)
+  } else if (selectedModel) {
+    modelPrice = selectedModel.price || 0
     
-    // ✅ Calcular precio del modelo con las opciones seleccionadas
-    let modelPrice = 0
-    
-    if (selectedPricingOption) {
-      // Si hay una opción de pricing seleccionada, usar su precio
-      modelPrice = selectedPricingOption.price || 0
-      console.log('Using pricing option price:', modelPrice)
-    } else if (selectedModel) {
-      // Si no hay opción seleccionada, calcular manualmente
-      modelPrice = selectedModel.price || 0
-      
-      // ✅ Agregar precios de opciones individuales
-      if (options.upgrade && selectedModel.upgradePrice) {
-        modelPrice += selectedModel.upgradePrice
-        console.log('Adding upgrade:', selectedModel.upgradePrice)
-      }
-      if (options.balcony && selectedModel.balconyPrice) {
-        modelPrice += selectedModel.balconyPrice
-        console.log('Adding balcony:', selectedModel.balconyPrice)
-      }
-      if (options.storage && selectedModel.storagePrice) {
-        modelPrice += selectedModel.storagePrice
-        console.log('Adding storage:', selectedModel.storagePrice)
-      }
-      
-      console.log('Calculated model price:', modelPrice)
+    // ✅ Agregar precios de opciones desde los arrays
+    if (options.upgrade && selectedModel.upgrades?.[0]) {
+      modelPrice += selectedModel.upgrades[0].price
+      console.log('Adding upgrade:', selectedModel.upgrades[0].price)
+    }
+    if (options.balcony && selectedModel.balconies?.[0]) {
+      modelPrice += selectedModel.balconies[0].price
+      console.log('Adding balcony:', selectedModel.balconies[0].price)
+    }
+    if (options.storage && selectedModel.storages?.[0]) {
+      modelPrice += selectedModel.storages[0].price
+      console.log('Adding storage:', selectedModel.storages[0].price)
     }
     
-    const facadePrice = selectedFacade?.price || 0
+    console.log('Calculated model price:', modelPrice)
+  }
+  
+  const facadePrice = selectedFacade?.price || 0
 
-    const calculatedListPrice = lotPrice + modelPrice + facadePrice
+  const calculatedListPrice = lotPrice + modelPrice + facadePrice
 
     console.log('Calculating financials:', {
       lotPrice,
@@ -397,18 +394,18 @@ export const PropertyProvider = ({ children }) => {
   }
 
   // Obtener información de pricing del modelo actual
-  const getModelPricingInfo = () => {
-    if (!selectedModel) return null
-    
-    return {
-      hasBalcony: (selectedModel.balconyPrice || 0) > 0,
-      hasUpgrade: (selectedModel.upgradePrice || 0) > 0,
-      hasStorage: (selectedModel.storagePrice || 0) > 0,
-      balconyPrice: selectedModel.balconyPrice || 0,
-      upgradePrice: selectedModel.upgradePrice || 0,
-      storagePrice: selectedModel.storagePrice || 0
-    }
+const getModelPricingInfo = () => {
+  if (!selectedModel) return null
+  
+  return {
+    hasBalcony: Array.isArray(selectedModel.balconies) && selectedModel.balconies.length > 0,
+    hasUpgrade: Array.isArray(selectedModel.upgrades) && selectedModel.upgrades.length > 0,
+    hasStorage: Array.isArray(selectedModel.storages) && selectedModel.storages.length > 0,
+    balconyPrice: selectedModel.balconies?.[0]?.price || 0,
+    upgradePrice: selectedModel.upgrades?.[0]?.price || 0,
+    storagePrice: selectedModel.storages?.[0]?.price || 0
   }
+}
 
   const value = {
     lots,
