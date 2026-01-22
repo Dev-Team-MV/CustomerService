@@ -16,6 +16,8 @@ import Payloads from './pages/Payloads'
 import Residents from './pages/Residents'
 import Analytics from './pages/Analytics'
 import PropertySelection from './pages/PropertySelection'
+import MyProperty from './pages/MyProperty'
+
 import NotFound from './pages/NotFound'
 
 const theme = createTheme({
@@ -46,7 +48,10 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/my-property" element={<MyProperty />} />
+
                 <Route path="/properties" element={<Properties />} />
                 <Route path="/lots" element={<Lots />} />
                 <Route path="/models" element={<Models />} />

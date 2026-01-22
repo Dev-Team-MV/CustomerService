@@ -1,17 +1,148 @@
-// import { Box, Paper, Typography, Card, CardContent, CardMedia, Chip, IconButton } from '@mui/material'
+// import { useState, useEffect, useRef } from 'react'
+// import {
+//   Box,
+//   Paper,
+//   Typography,
+//   Card,
+//   CardContent,
+//   Chip,
+//   CircularProgress,
+//   Alert,
+//   IconButton,
+//   FormControlLabel,
+//   Checkbox,
+//   Button
+// } from '@mui/material'
+// import { 
+//   Home, 
+//   Bed, 
+//   Bathtub, 
+//   SquareFoot, 
+//   ChevronLeft, 
+//   ChevronRight,
+//   Close,
+//   InfoOutlined
+// } from '@mui/icons-material'
 // import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-// import HotelIcon from '@mui/icons-material/Hotel'
-// import BathtubIcon from '@mui/icons-material/Bathtub'
-// import SquareFootIcon from '@mui/icons-material/SquareFoot'
-// import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 // import { useProperty } from '../../context/PropertyContext'
+// import api from '../../services/api'
 
 // const ModelSelector = () => {
-//   const { models, selectedModel, selectModel } = useProperty()
+//   const { 
+//     selectedModel, 
+//     selectModel, 
+//     selectedLot,
+//     options,
+//     toggleOption,
+//     getModelPricingInfo,
+//     selectedPricingOption
+//   } = useProperty()
+  
+//   const [models, setModels] = useState([])
+//   const [loading, setLoading] = useState(true)
+//   const [error, setError] = useState(null)
+//   const [imageIndices, setImageIndices] = useState({})
+//   const scrollContainerRef = useRef(null)
 
-//   const handleModelClick = (model) => {
+//   useEffect(() => {
+//     fetchModels()
+//   }, [])
+
+//   const fetchModels = async () => {
+//     try {
+//       setLoading(true)
+//       const response = await api.get('/models')
+//       const activeModels = response.data.filter(m => m.status === 'active')
+//       setModels(activeModels)
+      
+//       const indices = {}
+//       activeModels.forEach(model => {
+//         indices[model._id] = 0
+//       })
+//       setImageIndices(indices)
+//     } catch (error) {
+//       console.error('Error fetching models:', error)
+//       setError('Failed to load models')
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
+
+//   const handleSelectModel = (model) => {
+//     console.log('Selecting model:', model)
 //     selectModel(model)
 //   }
+
+//   const handleDeselectModel = () => {
+//     selectModel(null)
+//   }
+
+//   const handlePrevImage = (e, modelId, imagesLength) => {
+//     e.stopPropagation()
+//     setImageIndices(prev => ({
+//       ...prev,
+//       [modelId]: prev[modelId] > 0 ? prev[modelId] - 1 : imagesLength - 1
+//     }))
+//   }
+
+//   const handleNextImage = (e, modelId, imagesLength) => {
+//     e.stopPropagation()
+//     setImageIndices(prev => ({
+//       ...prev,
+//       [modelId]: prev[modelId] < imagesLength - 1 ? prev[modelId] + 1 : 0
+//     }))
+//   }
+
+//   const scrollModels = (direction) => {
+//     if (scrollContainerRef.current) {
+//       const scrollAmount = 320
+//       const currentScroll = scrollContainerRef.current.scrollLeft
+//       const newScrollLeft = currentScroll + (direction === 'left' ? -scrollAmount : scrollAmount)
+//       scrollContainerRef.current.scrollTo({
+//         left: newScrollLeft,
+//         behavior: 'smooth'
+//       })
+//     }
+//   }
+
+//   if (!selectedLot) {
+//     return (
+//       <Paper 
+//         elevation={2} 
+//         sx={{ 
+//           p: 3, 
+//           bgcolor: '#fff', 
+//           borderRadius: 2,
+//           border: '1px solid #e0e0e0'
+//         }}
+//       >
+//         <Typography variant="subtitle1" color="text.secondary" textAlign="center" sx={{ py: 2 }}>
+//           SELECT A LOT TO VIEW MODELS
+//         </Typography>
+//       </Paper>
+//     )
+//   }
+
+//   if (loading) {
+//     return (
+//       <Paper elevation={2} sx={{ p: 3, bgcolor: '#fff', borderRadius: 2, border: '1px solid #e0e0e0' }}>
+//         <Box display="flex" justifyContent="center">
+//           <CircularProgress />
+//         </Box>
+//       </Paper>
+//     )
+//   }
+
+//   if (error) {
+//     return (
+//       <Paper elevation={2} sx={{ p: 3, bgcolor: '#fff', borderRadius: 2, border: '1px solid #e0e0e0' }}>
+//         <Alert severity="error">{error}</Alert>
+//       </Paper>
+//     )
+//   }
+
+//   const pricingInfo = selectedModel ? getModelPricingInfo() : null
+//   const hasPricingOptions = pricingInfo?.hasBalcony || pricingInfo?.hasUpgrade || pricingInfo?.hasStorage
 
 //   return (
 //     <Paper 
@@ -19,177 +150,551 @@
 //       sx={{ 
 //         p: 3, 
 //         bgcolor: '#fff', 
-//         color: '#000',
 //         borderRadius: 2,
 //         border: '1px solid #e0e0e0'
 //       }}
 //     >
-//       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-//         <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#333' }}>
+//       {/* Header */}
+//       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+//         <Typography variant="subtitle1" fontWeight="bold">
 //           02 MODEL SELECTION
 //         </Typography>
-//         <Typography variant="caption" sx={{ color: '#4a7c59', fontWeight: 'bold' }}>
-//           {models.length} OPTIONS
-//         </Typography>
+//         <Box display="flex" alignItems="center" gap={2}>
+//           {selectedModel && (
+//             <Button
+//               size="small"
+//               variant="outlined"
+//               onClick={handleDeselectModel}
+//               startIcon={<Close />}
+//               sx={{ 
+//                 borderColor: '#e0e0e0',
+//                 color: '#666',
+//                 '&:hover': { 
+//                   borderColor: '#4a7c59',
+//                   color: '#4a7c59'
+//                 }
+//               }}
+//             >
+//               Clear Selection
+//             </Button>
+//           )}
+//           <Typography variant="caption" color="success.main" fontWeight="bold">
+//             {models.length} OPTIONS
+//           </Typography>
+//         </Box>
 //       </Box>
 
-//       <Box 
-//         sx={{ 
-//           display: 'flex', 
-//           gap: { xs: 2, sm: 3 },
-//           overflowX: 'auto', 
-//           pb: 2,
-//           pt: 2,
-//           scrollbarWidth: 'thin',
-//           '&::-webkit-scrollbar': { height: 6 },
-//           '&::-webkit-scrollbar-thumb': { bgcolor: '#ddd', borderRadius: 3 }
-//         }}
-//       >
-//         {models.map((model) => (
-//           <Card
-//             key={model._id}
-//             onClick={() => handleModelClick(model)}
+//       {/* Main Content Area - Grid Layout con altura fija */}
+//       <Box sx={{ 
+//         position: 'relative',
+//         height: 450,
+//         overflow: 'hidden'
+//       }}>
+//         {/* Pricing Panel - Posición Absoluta */}
+//         <Box
+//           sx={{
+//             position: 'absolute',
+//             left: 0,
+//             top: 0,
+//             bottom: 0,
+//             width: '35%',
+//             maxWidth: 380,
+//             transform: selectedModel ? 'translateX(0)' : 'translateX(-110%)',
+//             opacity: selectedModel ? 1 : 0,
+//             transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+//             zIndex: selectedModel ? 10 : 0
+//           }}
+//         >
+//           {selectedModel && (
+//             <Box sx={{ 
+//               p: 3, 
+//               bgcolor: 'grey.50', 
+//               borderRadius: 2,
+//               border: '2px solid #e0e0e0',
+//               height: '100%',
+//               overflowY: 'auto',
+//               display: 'flex',
+//               flexDirection: 'column',
+//               '&::-webkit-scrollbar': {
+//                 width: 6
+//               },
+//               '&::-webkit-scrollbar-thumb': {
+//                 bgcolor: 'grey.400',
+//                 borderRadius: 3
+//               }
+//             }}>
+//               <Typography variant="subtitle2" fontWeight="bold" mb={1}>
+//                 📦 Pricing Options
+//               </Typography>
+//               <Typography variant="caption" color="text.secondary" display="block" mb={3}>
+//                 Customize {selectedModel.model}
+//               </Typography>
+
+//               {hasPricingOptions ? (
+//                 <>
+//                   <Box display="flex" flexDirection="column" gap={2}>
+//                     {/* Upgrade Option */}
+//                     {pricingInfo.hasUpgrade && (
+//                       <Box
+//                         onClick={() => toggleOption('upgrade')}
+//                         sx={{
+//                           p: 2,
+//                           border: '2px solid',
+//                           borderColor: options.upgrade ? 'secondary.main' : 'divider',
+//                           borderRadius: 2,
+//                           bgcolor: options.upgrade ? 'secondary.50' : 'white',
+//                           cursor: 'pointer',
+//                           transition: 'all 0.2s',
+//                           '&:hover': { 
+//                             boxShadow: 2,
+//                             transform: 'translateY(-2px)'
+//                           }
+//                         }}
+//                       >
+//                         <Box display="flex" justifyContent="space-between" alignItems="center">
+//                           <FormControlLabel
+//                             control={
+//                               <Checkbox 
+//                                 checked={options.upgrade}
+//                                 onChange={(e) => {
+//                                   e.stopPropagation()
+//                                   toggleOption('upgrade')
+//                                 }}
+//                                 sx={{
+//                                   '&.Mui-checked': {
+//                                     color: 'secondary.main'
+//                                   }
+//                                 }}
+//                               />
+//                             }
+//                             label={
+//                               <Box>
+//                                 <Typography fontWeight="bold" fontSize="0.9rem">⭐ Upgrade</Typography>
+//                                 <Typography variant="caption" color="text.secondary">
+//                                   Premium finishes
+//                                 </Typography>
+//                               </Box>
+//                             }
+//                             sx={{ m: 0 }}
+//                           />
+//                           <Typography variant="h6" color="secondary.main" fontWeight="bold">
+//                             +${(pricingInfo.upgradePrice / 1000).toFixed(0)}K
+//                           </Typography>
+//                         </Box>
+//                       </Box>
+//                     )}
+
+//                     {/* Balcony Option */}
+//                     {pricingInfo.hasBalcony && (
+//                       <Box
+//                         onClick={() => toggleOption('balcony')}
+//                         sx={{
+//                           p: 2,
+//                           border: '2px solid',
+//                           borderColor: options.balcony ? 'info.main' : 'divider',
+//                           borderRadius: 2,
+//                           bgcolor: options.balcony ? 'info.50' : 'white',
+//                           cursor: 'pointer',
+//                           transition: 'all 0.2s',
+//                           '&:hover': { 
+//                             boxShadow: 2,
+//                             transform: 'translateY(-2px)'
+//                           }
+//                         }}
+//                       >
+//                         <Box display="flex" justifyContent="space-between" alignItems="center">
+//                           <FormControlLabel
+//                             control={
+//                               <Checkbox 
+//                                 checked={options.balcony}
+//                                 onChange={(e) => {
+//                                   e.stopPropagation()
+//                                   toggleOption('balcony')
+//                                 }}
+//                                 sx={{
+//                                   '&.Mui-checked': {
+//                                     color: 'info.main'
+//                                   }
+//                                 }}
+//                               />
+//                             }
+//                             label={
+//                               <Box>
+//                                 <Typography fontWeight="bold" fontSize="0.9rem">🌳 Balcony</Typography>
+//                                 <Typography variant="caption" color="text.secondary">
+//                                   Outdoor space
+//                                 </Typography>
+//                               </Box>
+//                             }
+//                             sx={{ m: 0 }}
+//                           />
+//                           <Typography variant="h6" color="info.main" fontWeight="bold">
+//                             +${(pricingInfo.balconyPrice / 1000).toFixed(0)}K
+//                           </Typography>
+//                         </Box>
+//                       </Box>
+//                     )}
+
+//                     {/* Storage Option */}
+//                     {pricingInfo.hasStorage && (
+//                       <Box
+//                         onClick={() => toggleOption('storage')}
+//                         sx={{
+//                           p: 2,
+//                           border: '2px solid',
+//                           borderColor: options.storage ? 'success.main' : 'divider',
+//                           borderRadius: 2,
+//                           bgcolor: options.storage ? 'success.50' : 'white',
+//                           cursor: 'pointer',
+//                           transition: 'all 0.2s',
+//                           '&:hover': { 
+//                             boxShadow: 2,
+//                             transform: 'translateY(-2px)'
+//                           }
+//                         }}
+//                       >
+//                         <Box display="flex" justifyContent="space-between" alignItems="center">
+//                           <FormControlLabel
+//                             control={
+//                               <Checkbox 
+//                                 checked={options.storage}
+//                                 onChange={(e) => {
+//                                   e.stopPropagation()
+//                                   toggleOption('storage')
+//                                 }}
+//                                 sx={{
+//                                   '&.Mui-checked': {
+//                                     color: 'success.main'
+//                                   }
+//                                 }}
+//                               />
+//                             }
+//                             label={
+//                               <Box>
+//                                 <Typography fontWeight="bold" fontSize="0.9rem">📦 Storage</Typography>
+//                                 <Typography variant="caption" color="text.secondary">
+//                                   Extra unit
+//                                 </Typography>
+//                               </Box>
+//                             }
+//                             sx={{ m: 0 }}
+//                           />
+//                           <Typography variant="h6" color="success.main" fontWeight="bold">
+//                             +${(pricingInfo.storagePrice / 1000).toFixed(0)}K
+//                           </Typography>
+//                         </Box>
+//                       </Box>
+//                     )}
+//                   </Box>
+
+//                   {/* Selected Configuration Summary */}
+//                   {selectedPricingOption && (
+//                     <Box mt={3} p={2} bgcolor="primary.50" borderRadius={1} border="2px solid" borderColor="primary.main">
+//                       <Typography variant="caption" fontWeight="bold" color="primary.main">
+//                         SELECTED CONFIG
+//                       </Typography>
+//                       <Typography variant="body2" fontWeight="bold" mt={0.5}>
+//                         {selectedPricingOption.label}
+//                       </Typography>
+//                       <Typography variant="h5" color="primary.main" fontWeight="bold" mt={0.5}>
+//                         ${selectedPricingOption.price.toLocaleString()}
+//                       </Typography>
+//                     </Box>
+//                   )}
+//                 </>
+//               ) : (
+//                 // Mensaje cuando NO hay pricing options
+//                 <Box 
+//                   sx={{ 
+//                     flex: 1,
+//                     display: 'flex',
+//                     flexDirection: 'column',
+//                     alignItems: 'center',
+//                     justifyContent: 'center',
+//                     textAlign: 'center',
+//                     py: 4
+//                   }}
+//                 >
+//                   <InfoOutlined 
+//                     sx={{ 
+//                       fontSize: 60, 
+//                       color: 'grey.300',
+//                       mb: 2
+//                     }} 
+//                   />
+//                   <Typography variant="h6" fontWeight="bold" color="text.secondary" mb={1}>
+//                     No Additional Options
+//                   </Typography>
+//                   <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 250 }}>
+//                     This model comes as a complete package with no additional customization options available.
+//                   </Typography>
+//                   <Box 
+//                     mt={3} 
+//                     p={2} 
+//                     bgcolor="grey.100" 
+//                     borderRadius={1} 
+//                     width="100%"
+//                   >
+//                     <Typography variant="caption" fontWeight="bold" color="text.secondary">
+//                       BASE PRICE
+//                     </Typography>
+//                     <Typography variant="h5" color="primary.main" fontWeight="bold" mt={0.5}>
+//                       ${selectedModel.price.toLocaleString()}
+//                     </Typography>
+//                   </Box>
+//                 </Box>
+//               )}
+//             </Box>
+//           )}
+//         </Box>
+
+//         {/* Models Container - Se desplaza a la derecha cuando hay pricing O se centra si no hay opciones */}
+//         <Box
+//           sx={{
+//             position: 'absolute',
+//             right: 0,
+//             top: 0,
+//             bottom: 0,
+//             left: selectedModel ? '38%' : 0,
+//             transition: 'left 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+//             overflow: 'hidden',
+//             display: 'flex',
+//             alignItems: 'center',
+//             justifyContent: selectedModel ? 'center' : 'flex-start'
+//           }}
+//         >
+//           <Box
+//             ref={scrollContainerRef}
 //             sx={{
-//               minWidth: { xs: 220, sm: 260, md: 300 },
-//               maxWidth: { xs: 260, sm: 280, md: 320 },
-//               flexShrink: 0,
-//               cursor: 'pointer',
-//               bgcolor: selectedModel?._id === model._id ? '#e8f5e9' : '#fff',
-//               border: selectedModel?._id === model._id ? '2px solid #4a7c59' : '1px solid #e0e0e0',
-//               borderRadius: { xs: 2, sm: 3 },
-//               transition: 'all 0.3s ease',
-//               position: 'relative',
-//               '&:hover': {
-//                 transform: 'translateY(-4px)',
-//                 boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
+//               display: 'flex',
+//               gap: 2,
+//               overflowX: selectedModel ? 'visible' : 'auto',
+//               overflowY: 'hidden',
+//               height: '100%',
+//               px: 1,
+//               py: 2,
+//               alignItems: 'center',
+//               scrollbarWidth: 'none',
+//               justifyContent: selectedModel ? 'center' : 'flex-start',
+//               width: '100%',
+//               '&::-webkit-scrollbar': {
+//                 display: 'none'
 //               }
 //             }}
 //           >
-//             {selectedModel?._id === model._id && (
-//               <Chip
-//                 label="SELECTED"
-//                 size="small"
-//                 color="success"
-//                 icon={<CheckCircleIcon />}
-//                 sx={{
-//                   position: 'absolute',
-//                   top: { xs: 8, sm: 12 },
-//                   right: { xs: 8, sm: 12 },
-//                   zIndex: 2,
-//                   fontWeight: 'bold',
-//                   fontSize: { xs: '0.7rem', sm: '0.8rem' },
-//                   height: { xs: 22, sm: 26 }
-//                 }}
-//               />
-//             )}
-
-//             <CardMedia
-//               component="img"
-//               height="140"
-//               image={model.image || `https://via.placeholder.com/400x300?text=Model+${model.modelNumber}`}
-//               alt={`Model ${model.modelNumber}`}
-//               sx={{ borderBottom: '1px solid #eee', objectFit: 'cover' }}
-//             />
-            
-//             <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-//               <Box sx={{ 
-//                 display: 'flex', 
-//                 justifyContent: 'space-between', 
-//                 alignItems: 'flex-start', 
-//                 mb: 1,
-//                 gap: 1
-//               }}>
-//                 <Box sx={{ flex: 1, minWidth: 0 }}>
-//                   <Typography 
-//                     variant="h6" 
-//                     sx={{ 
-//                       fontWeight: 'bold', 
-//                       mb: 0.5,
-//                       fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' },
-//                       overflow: 'hidden',
-//                       textOverflow: 'ellipsis',
-//                       whiteSpace: 'nowrap'
-//                     }}
-//                   >
-//                     {model.model || `Model ${model.modelNumber}`}
-//                   </Typography>
-//                   <Typography 
-//                     variant="caption" 
-//                     color="text.secondary"
-//                     sx={{ 
-//                       fontSize: { xs: '0.7rem', sm: '0.75rem' },
-//                       display: 'block'
-//                     }}
-//                   >
-//                     Starting at ${model.price?.toLocaleString()}
-//                   </Typography>
-//                 </Box>
-//                 <Typography 
-//                   variant="subtitle1" 
-//                   sx={{ 
-//                     color: '#4a7c59', 
-//                     fontWeight: 'bold',
-//                     fontSize: { xs: '0.9rem', sm: '1rem' },
-//                     flexShrink: 0
+//             {models.map((model) => {
+//               const isSelected = selectedModel?._id === model._id
+//               const modelImages = model.images && model.images.length > 0 ? model.images : []
+//               const currentImageIndex = imageIndices[model._id] || 0
+//               const currentImage = modelImages[currentImageIndex]
+              
+//               // Si hay modelo seleccionado, solo mostrar ese
+//               if (selectedModel && !isSelected) return null
+              
+//               return (
+//                 <Card
+//                   key={model._id}
+//                   onClick={() => !selectedModel && handleSelectModel(model)}
+//                   sx={{
+//                     minWidth: isSelected ? 380 : 300,
+//                     maxWidth: isSelected ? 380 : 300,
+//                     flexShrink: 0,
+//                     cursor: selectedModel ? 'default' : 'pointer',
+//                     bgcolor: isSelected ? '#e8f5e9' : '#fff',
+//                     border: isSelected ? '3px solid #4a7c59' : '1px solid #e0e0e0',
+//                     borderRadius: 2,
+//                     position: 'relative',
+//                     boxShadow: isSelected ? 4 : 1,
+//                     transition: 'all 0.3s ease',
+//                     '&:hover': !selectedModel ? {
+//                       transform: 'translateY(-4px)',
+//                       boxShadow: 3
+//                     } : {}
 //                   }}
 //                 >
-//                   ${(model.price / 1000).toFixed(0)}K
-//                 </Typography>
-//               </Box>
+//                   {isSelected && (
+//                     <CheckCircleIcon 
+//                       color="success" 
+//                       sx={{ 
+//                         position: 'absolute',
+//                         top: 12,
+//                         right: 12,
+//                         bgcolor: '#fff',
+//                         borderRadius: '50%',
+//                         zIndex: 2,
+//                         fontSize: 32
+//                       }} 
+//                     />
+//                   )}
 
-//               <Box sx={{ 
-//                 display: 'flex', 
-//                 gap: { xs: 1, sm: 1.5, md: 2 },
-//                 mt: { xs: 1.5, sm: 2 },
-//                 flexWrap: 'wrap'
-//               }}>
-//                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-//                   <HotelIcon sx={{ fontSize: { xs: 14, sm: 16 }, color: '#666' }} />
-//                   <Typography variant="caption" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
-//                     {model.bedrooms} Beds
-//                   </Typography>
-//                 </Box>
-//                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-//                   <BathtubIcon sx={{ fontSize: { xs: 14, sm: 16 }, color: '#666' }} />
-//                   <Typography variant="caption" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
-//                     {model.bathrooms} Baths
-//                   </Typography>
-//                 </Box>
-//                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-//                   <SquareFootIcon sx={{ fontSize: { xs: 14, sm: 16 }, color: '#666' }} />
-//                   <Typography variant="caption" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
-//                     {model.sqft.toLocaleString()} ft²
-//                   </Typography>
-//                 </Box>
-//               </Box>
-//             </CardContent>
-//           </Card>
-//         ))}
-        
-//         {/* Placeholder for "More" */}
-//         <Box 
-//           sx={{ 
-//             minWidth: { xs: 80, sm: 100 },
-//             display: 'flex', 
-//             alignItems: 'center', 
-//             justifyContent: 'center',
-//             bgcolor: '#f9f9f9',
-//             borderRadius: { xs: 2, sm: 3 },
-//             border: '1px dashed #ddd'
-//           }}
-//         >
-//           <IconButton 
-//             sx={{ 
-//               bgcolor: '#fff', 
-//               boxShadow: 1,
-//               width: { xs: 36, sm: 40 },
-//               height: { xs: 36, sm: 40 }
-//             }}
-//           >
-//             <ChevronRightIcon fontSize="small" />
-//           </IconButton>
+//                   <Box
+//                     sx={{
+//                       width: '100%',
+//                       height: isSelected ? 240 : 180,
+//                       bgcolor: 'grey.200',
+//                       display: 'flex',
+//                       alignItems: 'center',
+//                       justifyContent: 'center',
+//                       backgroundImage: currentImage ? `url(${currentImage})` : 'none',
+//                       backgroundSize: 'cover',
+//                       backgroundPosition: 'center',
+//                       position: 'relative',
+//                       transition: 'height 0.3s ease'
+//                     }}
+//                   >
+//                     {!currentImage && <Home sx={{ fontSize: 60, color: 'grey.400' }} />}
+                    
+//                     {modelImages.length > 1 && (
+//                       <>
+//                         <IconButton
+//                           size="small"
+//                           onClick={(e) => handlePrevImage(e, model._id, modelImages.length)}
+//                           sx={{
+//                             position: 'absolute',
+//                             left: 8,
+//                             top: '50%',
+//                             transform: 'translateY(-50%)',
+//                             bgcolor: 'rgba(255,255,255,0.9)',
+//                             width: 36,
+//                             height: 36,
+//                             '&:hover': { bgcolor: 'rgba(255,255,255,1)' }
+//                           }}
+//                         >
+//                           <ChevronLeft />
+//                         </IconButton>
+//                         <IconButton
+//                           size="small"
+//                           onClick={(e) => handleNextImage(e, model._id, modelImages.length)}
+//                           sx={{
+//                             position: 'absolute',
+//                             right: 8,
+//                             top: '50%',
+//                             transform: 'translateY(-50%)',
+//                             bgcolor: 'rgba(255,255,255,0.9)',
+//                             width: 36,
+//                             height: 36,
+//                             '&:hover': { bgcolor: 'rgba(255,255,255,1)' }
+//                           }}
+//                         >
+//                           <ChevronRight />
+//                         </IconButton>
+//                       </>
+//                     )}
+                    
+//                     {modelImages.length > 1 && (
+//                       <Chip
+//                         label={`${currentImageIndex + 1}/${modelImages.length}`}
+//                         size="small"
+//                         sx={{
+//                           position: 'absolute',
+//                           bottom: 8,
+//                           left: 8,
+//                           bgcolor: 'rgba(0,0,0,0.7)',
+//                           color: 'white',
+//                           fontSize: '0.75rem',
+//                           height: 24
+//                         }}
+//                       />
+//                     )}
+//                   </Box>
+
+//                   <CardContent sx={{ p: 2.5 }}>
+//                     <Box display="flex" justifyContent="space-between" alignItems="start" mb={1}>
+//                       <Typography variant="h6" fontWeight="bold" sx={{ flex: 1, minWidth: 0 }}>
+//                         {model.model}
+//                       </Typography>
+//                       <Typography variant={isSelected ? "h5" : "h6"} sx={{ color: '#4a7c59', fontWeight: 'bold', ml: 1 }}>
+//                         ${(model.price / 1000).toFixed(0)}K
+//                       </Typography>
+//                     </Box>
+
+//                     <Typography variant="caption" color="text.secondary" display="block" mb={2}>
+//                       Model #{model.modelNumber}
+//                     </Typography>
+
+//                     <Box display="flex" gap={2.5} flexWrap="wrap" mb={2}>
+//                       <Box display="flex" alignItems="center" gap={0.5}>
+//                         <Bed fontSize="small" color="action" />
+//                         <Typography variant="body2" fontWeight="500">{model.bedrooms}</Typography>
+//                       </Box>
+//                       <Box display="flex" alignItems="center" gap={0.5}>
+//                         <Bathtub fontSize="small" color="action" />
+//                         <Typography variant="body2" fontWeight="500">{model.bathrooms}</Typography>
+//                       </Box>
+//                       <Box display="flex" alignItems="center" gap={0.5}>
+//                         <SquareFoot fontSize="small" color="action" />
+//                         <Typography variant="body2" fontWeight="500">{model.sqft?.toLocaleString()}</Typography>
+//                       </Box>
+//                     </Box>
+
+//                     {model.description && (
+//                       <Typography 
+//                         variant="caption" 
+//                         color="text.secondary" 
+//                         sx={{ 
+//                           display: '-webkit-box',
+//                           overflow: 'hidden',
+//                           textOverflow: 'ellipsis',
+//                           WebkitLineClamp: 2,
+//                           WebkitBoxOrient: 'vertical',
+//                           lineHeight: 1.5
+//                         }}
+//                       >
+//                         {model.description}
+//                       </Typography>
+//                     )}
+//                   </CardContent>
+//                 </Card>
+//               )
+//             })}
+//           </Box>
+
+//           {/* Navigation Arrows - Solo cuando NO hay modelo seleccionado */}
+//           {!selectedModel && models.length > 3 && (
+//             <>
+//               <IconButton
+//                 onClick={() => scrollModels('left')}
+//                 sx={{
+//                   position: 'absolute',
+//                   left: -8,
+//                   top: '50%',
+//                   transform: 'translateY(-50%)',
+//                   bgcolor: '#fff',
+//                   boxShadow: 2,
+//                   zIndex: 10,
+//                   '&:hover': { bgcolor: 'grey.100', boxShadow: 3 }
+//                 }}
+//               >
+//                 <ChevronLeft />
+//               </IconButton>
+
+//               <IconButton
+//                 onClick={() => scrollModels('right')}
+//                 sx={{
+//                   position: 'absolute',
+//                   right: -8,
+//                   top: '50%',
+//                   transform: 'translateY(-50%)',
+//                   bgcolor: '#fff',
+//                   boxShadow: 2,
+//                   zIndex: 10,
+//                   '&:hover': { bgcolor: 'grey.100', boxShadow: 3 }
+//                 }}
+//               >
+//                 <ChevronRight />
+//               </IconButton>
+//             </>
+//           )}
 //         </Box>
 //       </Box>
+
+//       {models.length === 0 && (
+//         <Box py={4} textAlign="center">
+//           <Typography variant="body2" color="text.secondary">
+//             No models available
+//           </Typography>
+//         </Box>
+//       )}
 //     </Paper>
 //   )
 // }
@@ -206,15 +711,39 @@ import {
   Chip,
   CircularProgress,
   Alert,
-  IconButton
+  IconButton,
+  FormControlLabel,
+  Checkbox,
+  Button
 } from '@mui/material'
-import { Home, Bed, Bathtub, SquareFoot, ChevronLeft, ChevronRight } from '@mui/icons-material'
+import { 
+  Home, 
+  Bed, 
+  Bathtub, 
+  SquareFoot, 
+  ChevronLeft, 
+  ChevronRight,
+  Close,
+  InfoOutlined,
+  Visibility
+} from '@mui/icons-material'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { useProperty } from '../../context/PropertyContext'
+import { useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 
 const ModelSelector = () => {
-  const { selectedModel, selectModel, selectedLot } = useProperty()
+  const { 
+    selectedModel, 
+    selectModel, 
+    selectedLot,
+    options,
+    toggleOption,
+    getModelPricingInfo,
+    selectedPricingOption
+  } = useProperty()
+  
+  const navigate = useNavigate()
   const [models, setModels] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -232,7 +761,6 @@ const ModelSelector = () => {
       const activeModels = response.data.filter(m => m.status === 'active')
       setModels(activeModels)
       
-      // Inicializar índices de imágenes para cada modelo
       const indices = {}
       activeModels.forEach(model => {
         indices[model._id] = 0
@@ -249,6 +777,15 @@ const ModelSelector = () => {
   const handleSelectModel = (model) => {
     console.log('Selecting model:', model)
     selectModel(model)
+  }
+
+  const handleDeselectModel = () => {
+    selectModel(null)
+  }
+
+  const handleViewDetails = (e, modelId) => {
+    e.stopPropagation()
+    navigate(`/models/${modelId}`)
   }
 
   const handlePrevImage = (e, modelId, imagesLength) => {
@@ -269,8 +806,9 @@ const ModelSelector = () => {
 
   const scrollModels = (direction) => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 320 // Ancho de la card + gap
-      const newScrollLeft = scrollContainerRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount)
+      const scrollAmount = 320
+      const currentScroll = scrollContainerRef.current.scrollLeft
+      const newScrollLeft = currentScroll + (direction === 'left' ? -scrollAmount : scrollAmount)
       scrollContainerRef.current.scrollTo({
         left: newScrollLeft,
         behavior: 'smooth'
@@ -314,6 +852,9 @@ const ModelSelector = () => {
     )
   }
 
+  const pricingInfo = selectedModel ? getModelPricingInfo() : null
+  const hasPricingOptions = pricingInfo?.hasBalcony || pricingInfo?.hasUpgrade || pricingInfo?.hasStorage
+
   return (
     <Paper 
       elevation={2} 
@@ -329,229 +870,550 @@ const ModelSelector = () => {
         <Typography variant="subtitle1" fontWeight="bold">
           02 MODEL SELECTION
         </Typography>
-        <Typography variant="caption" color="success.main" fontWeight="bold">
-          {models.length} OPTIONS
-        </Typography>
+        <Box display="flex" alignItems="center" gap={2}>
+          {selectedModel && (
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={handleDeselectModel}
+              startIcon={<Close />}
+              sx={{ 
+                borderColor: '#e0e0e0',
+                color: '#666',
+                '&:hover': { 
+                  borderColor: '#4a7c59',
+                  color: '#4a7c59'
+                }
+              }}
+            >
+              Clear Selection
+            </Button>
+          )}
+          <Typography variant="caption" color="success.main" fontWeight="bold">
+            {models.length} OPTIONS
+          </Typography>
+        </Box>
       </Box>
 
-      {/* Scroll Container */}
-      <Box sx={{ position: 'relative', mx: -1 }}>
+      {/* Main Content Area - Grid Layout con altura fija */}
+      <Box sx={{ 
+        position: 'relative',
+        height: 450,
+        overflow: 'hidden'
+      }}>
+        {/* Pricing Panel - Posición Absoluta */}
         <Box
-          ref={scrollContainerRef}
           sx={{
-            display: 'flex',
-            gap: 2,
-            overflowX: 'auto',
-            px: 1,
-            pb: 2,
-            pt: 2,
-            scrollbarWidth: 'none',
-            '&::-webkit-scrollbar': {
-              display: 'none'
-            }
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: '35%',
+            maxWidth: 380,
+            transform: selectedModel ? 'translateX(0)' : 'translateX(-110%)',
+            opacity: selectedModel ? 1 : 0,
+            transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+            zIndex: selectedModel ? 10 : 0
           }}
         >
-          {models.map((model) => {
-            const isSelected = selectedModel?._id === model._id
-            const modelImages = model.images && model.images.length > 0 ? model.images : []
-            const currentImageIndex = imageIndices[model._id] || 0
-            const currentImage = modelImages[currentImageIndex]
-            
-            return (
-              <Card
-                key={model._id}
-                onClick={() => handleSelectModel(model)}
+          {selectedModel && (
+            <Box sx={{ 
+              p: 3, 
+              bgcolor: 'grey.50', 
+              borderRadius: 2,
+              border: '2px solid #e0e0e0',
+              height: '100%',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              '&::-webkit-scrollbar': {
+                width: 6
+              },
+              '&::-webkit-scrollbar-thumb': {
+                bgcolor: 'grey.400',
+                borderRadius: 3
+              }
+            }}>
+              <Typography variant="subtitle2" fontWeight="bold" mb={1}>
+                📦 Pricing Options
+              </Typography>
+              <Typography variant="caption" color="text.secondary" display="block" mb={2}>
+                Customize {selectedModel.model}
+              </Typography>
+
+              {/* Botón Ver Detalles */}
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<Visibility />}
+                onClick={(e) => handleViewDetails(e, selectedModel._id)}
                 sx={{
-                  minWidth: 300,
-                  maxWidth: 300,
-                  flexShrink: 0,
-                  cursor: 'pointer',
-                  bgcolor: isSelected ? '#e8f5e9' : '#fff',
-                  border: isSelected ? '2px solid #4a7c59' : '1px solid #e0e0e0',
-                  borderRadius: 2,
-                  transition: 'all 0.2s',
-                  position: 'relative',
+                  mb: 3,
+                  borderColor: '#4a7c59',
+                  color: '#4a7c59',
                   '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 2
+                    borderColor: '#3d6849',
+                    bgcolor: 'rgba(74, 124, 89, 0.05)'
                   }
                 }}
               >
-                {/* Selected Icon Badge */}
-                {isSelected && (
-                  <CheckCircleIcon 
-                    color="success" 
-                    sx={{ 
-                      position: 'absolute',
-                      top: 8,
-                      right: 8,
-                      bgcolor: '#fff',
-                      borderRadius: '50%',
-                      zIndex: 2
-                    }} 
-                  />
-                )}
+                View Full Details
+              </Button>
 
-                {/* Model Image with Gallery Controls */}
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: 180,
-                    bgcolor: 'grey.200',
+              {hasPricingOptions ? (
+                <>
+                  <Box display="flex" flexDirection="column" gap={2}>
+                    {/* Upgrade Option */}
+                    {pricingInfo.hasUpgrade && (
+                      <Box
+                        onClick={() => toggleOption('upgrade')}
+                        sx={{
+                          p: 2,
+                          border: '2px solid',
+                          borderColor: options.upgrade ? 'secondary.main' : 'divider',
+                          borderRadius: 2,
+                          bgcolor: options.upgrade ? 'secondary.50' : 'white',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          '&:hover': { 
+                            boxShadow: 2,
+                            transform: 'translateY(-2px)'
+                          }
+                        }}
+                      >
+                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                          <FormControlLabel
+                            control={
+                              <Checkbox 
+                                checked={options.upgrade}
+                                onChange={(e) => {
+                                  e.stopPropagation()
+                                  toggleOption('upgrade')
+                                }}
+                                sx={{
+                                  '&.Mui-checked': {
+                                    color: 'secondary.main'
+                                  }
+                                }}
+                              />
+                            }
+                            label={
+                              <Box>
+                                <Typography fontWeight="bold" fontSize="0.9rem">⭐ Upgrade</Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  Premium finishes
+                                </Typography>
+                              </Box>
+                            }
+                            sx={{ m: 0 }}
+                          />
+                          <Typography variant="h6" color="secondary.main" fontWeight="bold">
+                            +${(pricingInfo.upgradePrice / 1000).toFixed(0)}K
+                          </Typography>
+                        </Box>
+                      </Box>
+                    )}
+
+                    {/* Balcony Option */}
+                    {pricingInfo.hasBalcony && (
+                      <Box
+                        onClick={() => toggleOption('balcony')}
+                        sx={{
+                          p: 2,
+                          border: '2px solid',
+                          borderColor: options.balcony ? 'info.main' : 'divider',
+                          borderRadius: 2,
+                          bgcolor: options.balcony ? 'info.50' : 'white',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          '&:hover': { 
+                            boxShadow: 2,
+                            transform: 'translateY(-2px)'
+                          }
+                        }}
+                      >
+                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                          <FormControlLabel
+                            control={
+                              <Checkbox 
+                                checked={options.balcony}
+                                onChange={(e) => {
+                                  e.stopPropagation()
+                                  toggleOption('balcony')
+                                }}
+                                sx={{
+                                  '&.Mui-checked': {
+                                    color: 'info.main'
+                                  }
+                                }}
+                              />
+                            }
+                            label={
+                              <Box>
+                                <Typography fontWeight="bold" fontSize="0.9rem">🌳 Balcony</Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  Outdoor space
+                                </Typography>
+                              </Box>
+                            }
+                            sx={{ m: 0 }}
+                          />
+                          <Typography variant="h6" color="info.main" fontWeight="bold">
+                            +${(pricingInfo.balconyPrice / 1000).toFixed(0)}K
+                          </Typography>
+                        </Box>
+                      </Box>
+                    )}
+
+                    {/* Storage Option */}
+                    {pricingInfo.hasStorage && (
+                      <Box
+                        onClick={() => toggleOption('storage')}
+                        sx={{
+                          p: 2,
+                          border: '2px solid',
+                          borderColor: options.storage ? 'success.main' : 'divider',
+                          borderRadius: 2,
+                          bgcolor: options.storage ? 'success.50' : 'white',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          '&:hover': { 
+                            boxShadow: 2,
+                            transform: 'translateY(-2px)'
+                          }
+                        }}
+                      >
+                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                          <FormControlLabel
+                            control={
+                              <Checkbox 
+                                checked={options.storage}
+                                onChange={(e) => {
+                                  e.stopPropagation()
+                                  toggleOption('storage')
+                                }}
+                                sx={{
+                                  '&.Mui-checked': {
+                                    color: 'success.main'
+                                  }
+                                }}
+                              />
+                            }
+                            label={
+                              <Box>
+                                <Typography fontWeight="bold" fontSize="0.9rem">📦 Storage</Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  Extra unit
+                                </Typography>
+                              </Box>
+                            }
+                            sx={{ m: 0 }}
+                          />
+                          <Typography variant="h6" color="success.main" fontWeight="bold">
+                            +${(pricingInfo.storagePrice / 1000).toFixed(0)}K
+                          </Typography>
+                        </Box>
+                      </Box>
+                    )}
+                  </Box>
+
+                  {/* Selected Configuration Summary */}
+                  {selectedPricingOption && (
+                    <Box mt={3} p={2} bgcolor="primary.50" borderRadius={1} border="2px solid" borderColor="primary.main">
+                      <Typography variant="caption" fontWeight="bold" color="primary.main">
+                        SELECTED CONFIG
+                      </Typography>
+                      <Typography variant="body2" fontWeight="bold" mt={0.5}>
+                        {selectedPricingOption.label}
+                      </Typography>
+                      <Typography variant="h5" color="primary.main" fontWeight="bold" mt={0.5}>
+                        ${selectedPricingOption.price.toLocaleString()}
+                      </Typography>
+                    </Box>
+                  )}
+                </>
+              ) : (
+                // Mensaje cuando NO hay pricing options
+                <Box 
+                  sx={{ 
+                    flex: 1,
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundImage: currentImage ? `url(${currentImage})` : 'none',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    position: 'relative',
-                    filter: isSelected ? 'none' : 'grayscale(0.3)'
+                    textAlign: 'center',
+                    py: 4
                   }}
                 >
-                  {!currentImage && <Home sx={{ fontSize: 60, color: 'grey.400' }} />}
-                  
-                  {/* Navigation arrows for multiple images */}
-                  {modelImages.length > 1 && (
-                    <>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => handlePrevImage(e, model._id, modelImages.length)}
-                        sx={{
-                          position: 'absolute',
-                          left: 8,
-                          top: '50%',
-                          transform: 'translateY(-50%)',
-                          bgcolor: 'rgba(255,255,255,0.9)',
-                          width: 32,
-                          height: 32,
-                          '&:hover': { bgcolor: 'rgba(255,255,255,1)' }
-                        }}
-                      >
-                        <ChevronLeft fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => handleNextImage(e, model._id, modelImages.length)}
-                        sx={{
-                          position: 'absolute',
-                          right: 8,
-                          top: '50%',
-                          transform: 'translateY(-50%)',
-                          bgcolor: 'rgba(255,255,255,0.9)',
-                          width: 32,
-                          height: 32,
-                          '&:hover': { bgcolor: 'rgba(255,255,255,1)' }
-                        }}
-                      >
-                        <ChevronRight fontSize="small" />
-                      </IconButton>
-                    </>
-                  )}
-                  
-                  {/* Image counter */}
-                  {modelImages.length > 1 && (
-                    <Chip
-                      label={`${currentImageIndex + 1}/${modelImages.length}`}
-                      size="small"
-                      sx={{
-                        position: 'absolute',
-                        bottom: 8,
-                        left: 8,
-                        bgcolor: 'rgba(0,0,0,0.7)',
-                        color: 'white',
-                        fontSize: '0.75rem',
-                        height: 24
-                      }}
-                    />
-                  )}
-                </Box>
-
-                <CardContent sx={{ p: 2 }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="start" mb={1}>
-                    <Typography variant="h6" fontWeight="bold" sx={{ flex: 1, minWidth: 0 }}>
-                      {model.model}
-                    </Typography>
-                    <Typography variant="h6" sx={{ color: '#4a7c59', fontWeight: 'bold', ml: 1 }}>
-                      ${(model.price / 1000).toFixed(0)}K
-                    </Typography>
-                  </Box>
-
-                  <Typography variant="caption" color="text.secondary" display="block" mb={2}>
-                    Model #{model.modelNumber}
+                  <InfoOutlined 
+                    sx={{ 
+                      fontSize: 60, 
+                      color: 'grey.300',
+                      mb: 2
+                    }} 
+                  />
+                  <Typography variant="h6" fontWeight="bold" color="text.secondary" mb={1}>
+                    No Additional Options
                   </Typography>
-
-                  <Box display="flex" gap={2} flexWrap="wrap">
-                    <Box display="flex" alignItems="center" gap={0.5}>
-                      <Bed fontSize="small" color="action" />
-                      <Typography variant="body2">{model.bedrooms}</Typography>
-                    </Box>
-                    <Box display="flex" alignItems="center" gap={0.5}>
-                      <Bathtub fontSize="small" color="action" />
-                      <Typography variant="body2">{model.bathrooms}</Typography>
-                    </Box>
-                    <Box display="flex" alignItems="center" gap={0.5}>
-                      <SquareFoot fontSize="small" color="action" />
-                      <Typography variant="body2">{model.sqft?.toLocaleString()}</Typography>
-                    </Box>
-                  </Box>
-
-                  {model.description && (
-                    <Typography 
-                      variant="caption" 
-                      color="text.secondary" 
-                      sx={{ 
-                        mt: 1.5,
-                        display: '-webkit-box',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        lineHeight: 1.4
-                      }}
-                    >
-                      {model.description}
+                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 250 }}>
+                    This model comes as a complete package with no additional customization options available.
+                  </Typography>
+                  <Box 
+                    mt={3} 
+                    p={2} 
+                    bgcolor="grey.100" 
+                    borderRadius={1} 
+                    width="100%"
+                  >
+                    <Typography variant="caption" fontWeight="bold" color="text.secondary">
+                      BASE PRICE
                     </Typography>
-                  )}
-                </CardContent>
-              </Card>
-            )
-          })}
+                    <Typography variant="h5" color="primary.main" fontWeight="bold" mt={0.5}>
+                      ${selectedModel.price.toLocaleString()}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          )}
         </Box>
 
-        {/* Navigation Arrows */}
-        {models.length > 3 && (
-          <>
-            <IconButton
-              onClick={() => scrollModels('left')}
-              sx={{
-                position: 'absolute',
-                left: -8,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                bgcolor: '#fff',
-                boxShadow: 1,
-                '&:hover': { bgcolor: 'grey.100' }
-              }}
-            >
-              <ChevronLeft />
-            </IconButton>
+        {/* Models Container */}
+        <Box
+          sx={{
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            bottom: 0,
+            left: selectedModel ? '38%' : 0,
+            transition: 'left 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: selectedModel ? 'center' : 'flex-start'
+          }}
+        >
+          <Box
+            ref={scrollContainerRef}
+            sx={{
+              display: 'flex',
+              gap: 2,
+              overflowX: selectedModel ? 'visible' : 'auto',
+              overflowY: 'hidden',
+              height: '100%',
+              px: 1,
+              py: 2,
+              alignItems: 'center',
+              scrollbarWidth: 'none',
+              justifyContent: selectedModel ? 'center' : 'flex-start',
+              width: '100%',
+              '&::-webkit-scrollbar': {
+                display: 'none'
+              }
+            }}
+          >
+            {models.map((model) => {
+              const isSelected = selectedModel?._id === model._id
+              const modelImages = model.images && model.images.length > 0 ? model.images : []
+              const currentImageIndex = imageIndices[model._id] || 0
+              const currentImage = modelImages[currentImageIndex]
+              
+              if (selectedModel && !isSelected) return null
+              
+              return (
+                <Card
+                  key={model._id}
+                  onClick={() => !selectedModel && handleSelectModel(model)}
+                  sx={{
+                    minWidth: isSelected ? 380 : 300,
+                    maxWidth: isSelected ? 380 : 300,
+                    flexShrink: 0,
+                    cursor: selectedModel ? 'default' : 'pointer',
+                    bgcolor: isSelected ? '#e8f5e9' : '#fff',
+                    border: isSelected ? '3px solid #4a7c59' : '1px solid #e0e0e0',
+                    borderRadius: 2,
+                    position: 'relative',
+                    boxShadow: isSelected ? 4 : 1,
+                    transition: 'all 0.3s ease',
+                    '&:hover': !selectedModel ? {
+                      transform: 'translateY(-4px)',
+                      boxShadow: 3
+                    } : {}
+                  }}
+                >
+                  {isSelected && (
+                    <CheckCircleIcon 
+                      color="success" 
+                      sx={{ 
+                        position: 'absolute',
+                        top: 12,
+                        right: 12,
+                        bgcolor: '#fff',
+                        borderRadius: '50%',
+                        zIndex: 2,
+                        fontSize: 32
+                      }} 
+                    />
+                  )}
 
-            <IconButton
-              onClick={() => scrollModels('right')}
-              sx={{
-                position: 'absolute',
-                right: -8,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                bgcolor: '#fff',
-                boxShadow: 1,
-                '&:hover': { bgcolor: 'grey.100' }
-              }}
-            >
-              <ChevronRight />
-            </IconButton>
-          </>
-        )}
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: isSelected ? 240 : 180,
+                      bgcolor: 'grey.200',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundImage: currentImage ? `url(${currentImage})` : 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      position: 'relative',
+                      transition: 'height 0.3s ease'
+                    }}
+                  >
+                    {!currentImage && <Home sx={{ fontSize: 60, color: 'grey.400' }} />}
+                    
+                    {modelImages.length > 1 && (
+                      <>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handlePrevImage(e, model._id, modelImages.length)}
+                          sx={{
+                            position: 'absolute',
+                            left: 8,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            bgcolor: 'rgba(255,255,255,0.9)',
+                            width: 36,
+                            height: 36,
+                            '&:hover': { bgcolor: 'rgba(255,255,255,1)' }
+                          }}
+                        >
+                          <ChevronLeft />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleNextImage(e, model._id, modelImages.length)}
+                          sx={{
+                            position: 'absolute',
+                            right: 8,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            bgcolor: 'rgba(255,255,255,0.9)',
+                            width: 36,
+                            height: 36,
+                            '&:hover': { bgcolor: 'rgba(255,255,255,1)' }
+                          }}
+                        >
+                          <ChevronRight />
+                        </IconButton>
+                      </>
+                    )}
+                    
+                    {modelImages.length > 1 && (
+                      <Chip
+                        label={`${currentImageIndex + 1}/${modelImages.length}`}
+                        size="small"
+                        sx={{
+                          position: 'absolute',
+                          bottom: 8,
+                          left: 8,
+                          bgcolor: 'rgba(0,0,0,0.7)',
+                          color: 'white',
+                          fontSize: '0.75rem',
+                          height: 24
+                        }}
+                      />
+                    )}
+                  </Box>
+
+                  <CardContent sx={{ p: 2.5 }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="start" mb={1}>
+                      <Typography variant="h6" fontWeight="bold" sx={{ flex: 1, minWidth: 0 }}>
+                        {model.model}
+                      </Typography>
+                      <Typography variant={isSelected ? "h5" : "h6"} sx={{ color: '#4a7c59', fontWeight: 'bold', ml: 1 }}>
+                        ${(model.price / 1000).toFixed(0)}K
+                      </Typography>
+                    </Box>
+
+                    <Typography variant="caption" color="text.secondary" display="block" mb={2}>
+                      Model #{model.modelNumber}
+                    </Typography>
+
+                    <Box display="flex" gap={2.5} flexWrap="wrap" mb={2}>
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <Bed fontSize="small" color="action" />
+                        <Typography variant="body2" fontWeight="500">{model.bedrooms}</Typography>
+                      </Box>
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <Bathtub fontSize="small" color="action" />
+                        <Typography variant="body2" fontWeight="500">{model.bathrooms}</Typography>
+                      </Box>
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <SquareFoot fontSize="small" color="action" />
+                        <Typography variant="body2" fontWeight="500">{model.sqft?.toLocaleString()}</Typography>
+                      </Box>
+                    </Box>
+
+                    {model.description && (
+                      <Typography 
+                        variant="caption" 
+                        color="text.secondary" 
+                        sx={{ 
+                          display: '-webkit-box',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          lineHeight: 1.5
+                        }}
+                      >
+                        {model.description}
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </Box>
+
+          {!selectedModel && models.length > 3 && (
+            <>
+              <IconButton
+                onClick={() => scrollModels('left')}
+                sx={{
+                  position: 'absolute',
+                  left: -8,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  bgcolor: '#fff',
+                  boxShadow: 2,
+                  zIndex: 10,
+                  '&:hover': { bgcolor: 'grey.100', boxShadow: 3 }
+                }}
+              >
+                <ChevronLeft />
+              </IconButton>
+
+              <IconButton
+                onClick={() => scrollModels('right')}
+                sx={{
+                  position: 'absolute',
+                  right: -8,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  bgcolor: '#fff',
+                  boxShadow: 2,
+                  zIndex: 10,
+                  '&:hover': { bgcolor: 'grey.100', boxShadow: 3 }
+                }}
+              >
+                <ChevronRight />
+              </IconButton>
+            </>
+          )}
+        </Box>
       </Box>
 
       {models.length === 0 && (
