@@ -1,6 +1,8 @@
+// Load environment variables FIRST before any other imports
+import './config/env.js'
+
 import express from 'express'
 import cors from 'cors'
-import dotenv from 'dotenv'
 import swaggerUi from 'swagger-ui-express'
 import swaggerSpec from './config/swagger.js'
 import connectDB from './config/db.js'
@@ -13,8 +15,6 @@ import propertyRoutes from './routes/propertyRoutes.js'
 import payloadRoutes from './routes/payloadRoutes.js'
 import phaseRoutes from './routes/phaseRoutes.js'
 import smsRoutes from './routes/smsRoutes.js'
-
-dotenv.config()
 
 const app = express()
 
