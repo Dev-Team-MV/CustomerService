@@ -10,12 +10,22 @@ const api = axios.create({
   baseURL: baseURL,
 })
 
+// Force the baseURL to be set correctly
+api.defaults.baseURL = baseURL
+
 api.interceptors.request.use(
   (config) => {
+    // Ensure baseURL is always correct on every request
+    if (!config.url.startsWith('http')) {
+      config.baseURL = baseURL
+    }
+    
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    
+    console.log('Making request to:', config.baseURL + config.url)
     return config
   },
   (error) => {
