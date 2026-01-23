@@ -1,15 +1,30 @@
-// import { Box, Grid, Container, CircularProgress, Alert, useMediaQuery, useTheme } from '@mui/material'
+// import { Typography,Box, Grid, Container, CircularProgress, Alert, useMediaQuery, useTheme } from '@mui/material'
 // import { PropertyProvider, useProperty } from '../context/PropertyContext'
+// import { useState } from 'react'
 // import InteractiveMap from '../components/property/InteractiveMap'
 // import PropertyStats from '../components/property/PropertyStats'
 // import ModelSelector from '../components/property/ModelSelector'
 // import FacadeSelector from '../components/property/FacadeSelector'
+// import ResidentAssignment from '../components/property/ResidentAssignment'
 // import PriceCalculator from '../components/property/PriceCalculator'
 
 // const PropertySelectionContent = () => {
 //   const { loading, error } = useProperty()
 //   const theme = useTheme()
 //   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+//   const [residentExpanded, setResidentExpanded] = useState(false)
+
+//   const handleCreatePropertyClick = () => {
+//     setResidentExpanded(true)
+    
+//     // Scroll to ResidentAssignment
+//     setTimeout(() => {
+//       const element = document.getElementById('resident-assignment-section')
+//       if (element) {
+//         element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+//       }
+//     }, 100)
+//   }
 
 //   if (loading) {
 //     return (
@@ -31,8 +46,11 @@
 
 //   return (
 //     <Box sx={{ py: 3 }}>
+//             <Typography variant="h4" gutterBottom fontWeight="bold">
+//               Get Your Qoute
+//             </Typography>
 //       <Container 
-//         maxWidth="lg"
+// maxWidth={false}
 //         sx={{ 
 //           px: { xs: 2, sm: 3 },
 //           py: 3
@@ -52,6 +70,12 @@
 //               <InteractiveMap />
 //               <ModelSelector />
 //               <FacadeSelector />
+//               <Box id="resident-assignment-section">
+//                 <ResidentAssignment 
+//                   expanded={residentExpanded}
+//                   onToggle={() => setResidentExpanded(!residentExpanded)}
+//                 />
+//               </Box>
 //             </Box>
 //           </Grid>
           
@@ -60,7 +84,7 @@
 //             <Grid item xs={12} md={4}>
 //               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 //                 <PropertyStats />
-//                 <PriceCalculator />
+//                 <PriceCalculator onCreatePropertyClick={handleCreatePropertyClick} />
 //               </Box>
 //             </Grid>
 //           )}
@@ -68,7 +92,7 @@
 //           {/* Mobile: Show PriceCalculator at the end */}
 //           {isMobile && (
 //             <Grid item xs={12}>
-//               <PriceCalculator />
+//               <PriceCalculator onCreatePropertyClick={handleCreatePropertyClick} />
 //             </Grid>
 //           )}
 //         </Grid>
@@ -87,12 +111,13 @@
 
 // export default PropertySelection
 
-import { Typography,Box, Grid, Container, CircularProgress, Alert, useMediaQuery, useTheme } from '@mui/material'
+import { Typography, Box, Grid, Container, CircularProgress, Alert, useMediaQuery, useTheme } from '@mui/material'
 import { PropertyProvider, useProperty } from '../context/PropertyContext'
 import { useState } from 'react'
 import InteractiveMap from '../components/property/InteractiveMap'
 import PropertyStats from '../components/property/PropertyStats'
 import ModelSelector from '../components/property/ModelSelector'
+import ModelPricingOptions from '../components/property/ModelPricingOptions'
 import FacadeSelector from '../components/property/FacadeSelector'
 import ResidentAssignment from '../components/property/ResidentAssignment'
 import PriceCalculator from '../components/property/PriceCalculator'
@@ -135,11 +160,11 @@ const PropertySelectionContent = () => {
 
   return (
     <Box sx={{ py: 3 }}>
-            <Typography variant="h4" gutterBottom fontWeight="bold">
-              Get Your Qoute
-            </Typography>
+      <Typography variant="h4" gutterBottom fontWeight="bold">
+        Get Your Quote
+      </Typography>
       <Container 
-maxWidth={false}
+        maxWidth={false}
         sx={{ 
           px: { xs: 2, sm: 3 },
           py: 3
@@ -158,6 +183,7 @@ maxWidth={false}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <InteractiveMap />
               <ModelSelector />
+              {/* <ModelPricingOptions /> ✅ Agregado aquí */}
               <FacadeSelector />
               <Box id="resident-assignment-section">
                 <ResidentAssignment 

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import deckOptionSchema from './Deck.js'
 
 const facadeSchema = new mongoose.Schema(
   {
@@ -13,15 +14,21 @@ const facadeSchema = new mongoose.Schema(
       trim: true
     },
     url: {
-      type: String,
-      required: [true, 'URL is required'],
-      trim: true
+      type: [String],
+      required: [true, 'At least one URL is required'],
+      validate: {
+        validator: function(v) {
+          return v && v.length > 0
+        },
+        message: 'At least one URL is required'
+      }
     },
     price: {
       type: Number,
       required: [true, 'Price is required'],
       min: 0
-    }
+    },
+    decks: [deckOptionSchema]
   },
   {
     timestamps: true

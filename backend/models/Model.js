@@ -1,4 +1,7 @@
 import mongoose from 'mongoose'
+import balconyOptionSchema from './Balcony.js'
+import upgradeOptionSchema from './Upgrade.js'
+import storageOptionSchema from './Storage.js'
 
 const modelSchema = new mongoose.Schema(
   {
@@ -14,9 +17,13 @@ const modelSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      required: [true, 'Price is required'],
+      required: [true, 'Base price is required'],
       min: 0
     },
+    // Multiple options arrays
+    balconies: [balconyOptionSchema],
+    upgrades: [upgradeOptionSchema],
+    storages: [storageOptionSchema],
     bedrooms: {
       type: Number,
       required: [true, 'Number of bedrooms is required'],
@@ -32,9 +39,20 @@ const modelSchema = new mongoose.Schema(
       required: [true, 'Square footage is required'],
       min: 0
     },
-    images: [{
-      type: String
-    }],
+    stories: {
+      type: Number,
+      min: 1
+    },
+    images: {
+      exterior: [{
+        type: String,
+        trim: true
+      }],
+      interior: [{
+        type: String,
+        trim: true
+      }]
+    },
     description: {
       type: String,
       trim: true

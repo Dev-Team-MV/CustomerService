@@ -1,7 +1,7 @@
-// import { createContext, useState, useContext, useEffect } from 'react'
+// import { createContext, useContext, useState, useEffect } from 'react'
 // import { propertyService } from '../services/propertyService'
 
-// const PropertyContext = createContext(null)
+// const PropertyContext = createContext()
 
 // export const useProperty = () => {
 //   const context = useContext(PropertyContext)
@@ -12,65 +12,41 @@
 // }
 
 // export const PropertyProvider = ({ children }) => {
-//   // Selection state
-//   const [selectedLot, setSelectedLot] = useState(null)
-//   const [selectedModel, setSelectedModel] = useState(null)
-//   const [selectedFacade, setSelectedFacade] = useState(null)
-  
-//   // Data from backend
 //   const [lots, setLots] = useState([])
 //   const [models, setModels] = useState([])
 //   const [facades, setFacades] = useState([])
-  
-//   // Loading states
-//   const [loading, setLoading] = useState(true)
-//   const [error, setError] = useState(null)
-  
-//   // Options
+//   const [selectedLot, setSelectedLot] = useState(null)
+//   const [selectedModel, setSelectedModel] = useState(null)
+//   const [selectedFacade, setSelectedFacade] = useState(null)
 //   const [options, setOptions] = useState({
 //     storage: false
 //   })
-  
-//   // Financial calculations
+//   const [loading, setLoading] = useState(true)
+//   const [error, setError] = useState(null)
+
 //   const [financials, setFinancials] = useState({
 //     listPrice: 0,
 //     discount: 0,
-//     discountPercent: 0,
+//     discountPercent: 10,
 //     presalePrice: 0,
-//     downPaymentPercent: 10,
 //     totalDownPayment: 0,
-//     initialDownPaymentPercent: 3,
+//     downPaymentPercent: 10,
 //     initialDownPayment: 0,
-//     monthlyPaymentPercent: 2,
+//     initialDownPaymentPercent: 3,
 //     monthlyPayment: 0,
+//     monthlyPaymentPercent: 2,
 //     mortgage: 0
-//   })
-  
-//   // Profits calculations
-//   const [profits, setProfits] = useState({
-//     phaseI: {
-//       price: 0,
-//       discountPercent: 10,
-//       discount: 0,
-//       purchasePrice: 0,
-//       appreciationPercent: 0,
-//       downPaymentPercent: 10,
-//       downPayment: 0,
-//       roi: 0
-//     },
-//     phaseII: {
-//       discountPercent: 0,
-//       discount: 0,
-//       purchasePrice: 0,
-//       appreciationPercent: 0,
-//       downPayment: 0
-//     }
 //   })
 
 //   // Load initial data
 //   useEffect(() => {
 //     loadData()
 //   }, [])
+
+//   // Recalculate financials whenever selections or percentages change
+//   useEffect(() => {
+//     calculateFinancials()
+//   }, [selectedLot, selectedModel, selectedFacade, financials.discountPercent, financials.downPaymentPercent, financials.initialDownPaymentPercent, financials.monthlyPaymentPercent])
 
 //   const loadData = async () => {
 //     try {
@@ -79,53 +55,53 @@
 //         propertyService.getLots(),
 //         propertyService.getModels()
 //       ])
-      
 //       setLots(lotsData)
 //       setModels(modelsData)
-//       setError(null)
 //     } catch (err) {
 //       setError(err.message)
-//       console.error('Error loading property data:', err)
+//       console.error('Error loading data:', err)
 //     } finally {
 //       setLoading(false)
 //     }
 //   }
 
-//   // Select lot
-//   const selectLot = (lot) => {
-//     setSelectedLot(lot)
-//     updateFinancials({ lotPrice: lot?.price || 0 })
+//   const calculateFinancials = () => {
+//     // Calculate listPrice from selections
+//     const lotPrice = selectedLot?.price || 0
+//     const modelPrice = selectedModel?.price || 0
+//     const facadePrice = selectedFacade?.price || 0 // Cambiado de priceModifier a price
+
+//     const calculatedListPrice = lotPrice + modelPrice + facadePrice
+
+//     // Calculate all financial values
+//     const discount = (calculatedListPrice * financials.discountPercent) / 100
+//     const presalePrice = calculatedListPrice - discount
+//     const totalDownPayment = (presalePrice * financials.downPaymentPercent) / 100
+//     const initialDownPayment = (presalePrice * financials.initialDownPaymentPercent) / 100
+//     const remaining = presalePrice - totalDownPayment
+//     const monthlyPayment = (remaining * financials.monthlyPaymentPercent) / 100
+//     const mortgage = presalePrice - totalDownPayment
+
+//     setFinancials(prev => ({
+//       ...prev,
+//       listPrice: calculatedListPrice,
+//       discount,
+//       presalePrice,
+//       totalDownPayment,
+//       initialDownPayment,
+//       monthlyPayment,
+//       mortgage
+//     }))
 //   }
 
-//   // // Select model
-//   // const selectModel = (model) => {
-//   //   setSelectedModel(model)
-//   //   // Load facades for this model (for now, we'll use mock data)
-//   //   const modelFacades = propertyService.getFacades(model?.modelNumber)
-//   //   setFacades(modelFacades)
-//   //   setSelectedFacade(null) // Reset facade selection
-    
-//   //   // Update list price based on lot + model
-//   //   const lotPrice = selectedLot?.price || 0
-//   //   const modelPrice = model?.price || 0
-//   //   updateFinancials({ listPrice: lotPrice + modelPrice })
-//   // }
+//   const selectLot = (lot) => {
+//     setSelectedLot(lot)
+//   }
 
-//   // // Select facade
-//   // const selectFacade = (facade) => {
-//   //   setSelectedFacade(facade)
-//   //   // Apply facade price modifier if any
-//   //   const modifier = facade?.priceModifier || 0
-//   //   const currentListPrice = financials.listPrice
-//   //   updateFinancials({ listPrice: currentListPrice + modifier })
-//   // }
-
-//     // Select model
 //   const selectModel = async (model) => {
 //     setSelectedModel(model)
-//     setSelectedFacade(null) // Reset facade selection
+//     setSelectedFacade(null) // ✅ Reset facade cuando cambia el modelo
     
-//     // Load facades from backend for this model
 //     try {
 //       const modelFacades = await propertyService.getFacadesByModel(model._id)
 //       setFacades(modelFacades)
@@ -133,153 +109,40 @@
 //       console.error('Error loading facades:', err)
 //       setFacades([])
 //     }
-    
-//     updateFinancials({ modelPrice: model?.price || 0, facadePrice: 0 })
 //   }
 
-//   // Select facade
 //   const selectFacade = (facade) => {
-//     setSelectedFacade(facade)
-//     updateFinancials({ facadePrice: facade?.price || 0 })
-//   }
-
-
-//   // Update financial calculations
-//   const updateFinancials = (updates) => {
-//     setFinancials(prev => {
-//       const updated = { ...prev, ...updates }
-      
-//       // Calculate presale price
-//       if (updates.listPrice !== undefined || updates.discount !== undefined || updates.discountPercent !== undefined) {
-//         if (updates.discountPercent !== undefined) {
-//           updated.discount = (updated.listPrice * updated.discountPercent) / 100
-//         } else if (updates.discount !== undefined) {
-//           updated.discountPercent = (updated.discount / updated.listPrice) * 100
-//         }
-//         updated.presalePrice = updated.listPrice - updated.discount
-//       }
-      
-//       // Calculate total down payment
-//       if (updates.presalePrice !== undefined || updates.downPaymentPercent !== undefined) {
-//         updated.totalDownPayment = (updated.presalePrice * updated.downPaymentPercent) / 100
-//       }
-      
-//       // Calculate initial down payment
-//       if (updates.totalDownPayment !== undefined || updates.initialDownPaymentPercent !== undefined) {
-//         updated.initialDownPayment = (updated.totalDownPayment * updated.initialDownPaymentPercent) / 100
-//       }
-      
-//       // Calculate monthly payment
-//       if (updates.presalePrice !== undefined || updates.totalDownPayment !== undefined || updates.monthlyPaymentPercent !== undefined) {
-//         const remaining = updated.presalePrice - updated.totalDownPayment
-//         updated.monthlyPayment = (remaining * updated.monthlyPaymentPercent) / 100
-//       }
-      
-//       // Calculate mortgage
-//       updated.mortgage = updated.presalePrice - updated.totalDownPayment
-      
-//       return updated
-//     })
-//   }
-
-//   // Update profits calculations
-//   const updateProfits = (phase, updates) => {
-//     setProfits(prev => {
-//       const updated = { ...prev }
-//       updated[phase] = { ...updated[phase], ...updates }
-      
-//       if (phase === 'phaseI') {
-//         // Calculate Phase I
-//         if (updates.price !== undefined || updates.discountPercent !== undefined) {
-//           updated.phaseI.discount = (updated.phaseI.price * updated.phaseI.discountPercent) / 100
-//           updated.phaseI.purchasePrice = updated.phaseI.price - updated.phaseI.discount
-//         }
-        
-//         if (updates.purchasePrice !== undefined || updates.downPaymentPercent !== undefined) {
-//           updated.phaseI.downPayment = (updated.phaseI.purchasePrice * updated.phaseI.downPaymentPercent) / 100
-//         }
-        
-//         // Calculate ROI (simplified - would need appreciation and time period for real calculation)
-//         if (updated.phaseI.downPayment > 0) {
-//           const appreciation = (updated.phaseI.purchasePrice * updated.phaseI.appreciationPercent) / 100
-//           updated.phaseI.roi = (appreciation / updated.phaseI.downPayment) * 100
-//         }
-//       }
-      
-//       if (phase === 'phaseII') {
-//         // Calculate Phase II
-//         if (updates.discountPercent !== undefined) {
-//           updated.phaseII.discount = (financials.presalePrice * updated.phaseII.discountPercent) / 100
-//           updated.phaseII.purchasePrice = financials.presalePrice - updated.phaseII.discount
-//         }
-//       }
-      
-//       return updated
-//     })
-//   }
-
-//   // Reset selection
-//   const resetSelection = () => {
-//     setSelectedLot(null)
-//     setSelectedModel(null)
-//     setSelectedFacade(null)
-//     setOptions({ storage: false })
-//     setFinancials({
-//       listPrice: 0,
-//       discount: 0,
-//       discountPercent: 0,
-//       presalePrice: 0,
-//       downPaymentPercent: 10,
-//       totalDownPayment: 0,
-//       initialDownPaymentPercent: 3,
-//       initialDownPayment: 0,
-//       monthlyPaymentPercent: 2,
-//       monthlyPayment: 0,
-//       mortgage: 0
-//     })
-//   }
-
-//   // Get lot counts by status
-//   const getLotCounts = () => {
-//     const counts = {
-//       hold: 0,
-//       available: 0,
-//       sold: 0
+//     // ✅ Toggle selection: si clickea la misma, deselecciona
+//     if (selectedFacade?._id === facade._id) {
+//       setSelectedFacade(null)
+//     } else {
+//       setSelectedFacade(facade)
 //     }
-    
-//     lots.forEach(lot => {
-//       if (lot.status === 'pending') counts.hold++
-//       else if (lot.status === 'available') counts.available++
-//       else if (lot.status === 'sold') counts.sold++
-//     })
-    
-//     return counts
+//   }
+
+//   const updateFinancials = (updates) => {
+//     setFinancials(prev => ({
+//       ...prev,
+//       ...updates
+//     }))
 //   }
 
 //   const value = {
-//     // State
-//     selectedLot,
-//     selectedModel,
-//     selectedFacade,
 //     lots,
 //     models,
 //     facades,
+//     selectedLot,
+//     selectedModel,
+//     selectedFacade,
 //     options,
+//     setOptions,
 //     financials,
-//     profits,
 //     loading,
 //     error,
-    
-//     // Actions
 //     selectLot,
 //     selectModel,
 //     selectFacade,
-//     setOptions,
-//     updateFinancials,
-//     updateProfits,
-//     resetSelection,
-//     getLotCounts,
-//     refreshData: loadData
+//     updateFinancials
 //   }
 
 //   return (
@@ -310,9 +173,17 @@ export const PropertyProvider = ({ children }) => {
   const [selectedLot, setSelectedLot] = useState(null)
   const [selectedModel, setSelectedModel] = useState(null)
   const [selectedFacade, setSelectedFacade] = useState(null)
+  
+  // Opciones de pricing del modelo
+  const [modelPricingOptions, setModelPricingOptions] = useState(null)
+  const [selectedPricingOption, setSelectedPricingOption] = useState(null)
+  
   const [options, setOptions] = useState({
-    storage: false
+    storage: false,
+    balcony: false,
+    upgrade: false
   })
+  
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -335,10 +206,22 @@ export const PropertyProvider = ({ children }) => {
     loadData()
   }, [])
 
-  // Recalculate financials whenever selections or percentages change
+  // ✅ Recalculate financials whenever selections or percentages change
   useEffect(() => {
     calculateFinancials()
-  }, [selectedLot, selectedModel, selectedFacade, financials.discountPercent, financials.downPaymentPercent, financials.initialDownPaymentPercent, financials.monthlyPaymentPercent])
+  }, [
+    selectedLot, 
+    selectedModel, 
+    selectedFacade, 
+    selectedPricingOption,
+    options.balcony,  // ✅ Agregar dependencias individuales
+    options.storage,  // ✅ para que detecte cambios
+    options.upgrade,  // ✅ en cada opción
+    financials.discountPercent, 
+    financials.downPaymentPercent, 
+    financials.initialDownPaymentPercent, 
+    financials.monthlyPaymentPercent
+  ])
 
   const loadData = async () => {
     try {
@@ -357,13 +240,45 @@ export const PropertyProvider = ({ children }) => {
     }
   }
 
-  const calculateFinancials = () => {
-    // Calculate listPrice from selections
-    const lotPrice = selectedLot?.price || 0
-    const modelPrice = selectedModel?.price || 0
-    const facadePrice = selectedFacade?.price || 0 // Cambiado de priceModifier a price
+const calculateFinancials = () => {
+  const lotPrice = selectedLot?.price || 0
+  
+  let modelPrice = 0
+  
+  if (selectedPricingOption) {
+    modelPrice = selectedPricingOption.price || 0
+    console.log('Using pricing option price:', modelPrice)
+  } else if (selectedModel) {
+    modelPrice = selectedModel.price || 0
+    
+    // ✅ Agregar precios de opciones desde los arrays
+    if (options.upgrade && selectedModel.upgrades?.[0]) {
+      modelPrice += selectedModel.upgrades[0].price
+      console.log('Adding upgrade:', selectedModel.upgrades[0].price)
+    }
+    if (options.balcony && selectedModel.balconies?.[0]) {
+      modelPrice += selectedModel.balconies[0].price
+      console.log('Adding balcony:', selectedModel.balconies[0].price)
+    }
+    if (options.storage && selectedModel.storages?.[0]) {
+      modelPrice += selectedModel.storages[0].price
+      console.log('Adding storage:', selectedModel.storages[0].price)
+    }
+    
+    console.log('Calculated model price:', modelPrice)
+  }
+  
+  const facadePrice = selectedFacade?.price || 0
 
-    const calculatedListPrice = lotPrice + modelPrice + facadePrice
+  const calculatedListPrice = lotPrice + modelPrice + facadePrice
+
+    console.log('Calculating financials:', {
+      lotPrice,
+      modelPrice,
+      facadePrice,
+      totalListPrice: calculatedListPrice,
+      options
+    })
 
     // Calculate all financial values
     const discount = (calculatedListPrice * financials.discountPercent) / 100
@@ -391,24 +306,83 @@ export const PropertyProvider = ({ children }) => {
   }
 
   const selectModel = async (model) => {
+    console.log('Selecting model:', model)
     setSelectedModel(model)
-    setSelectedFacade(null) // ✅ Reset facade cuando cambia el modelo
+    setSelectedFacade(null)
+    setSelectedPricingOption(null)
+    setModelPricingOptions(null)
+    
+    // Reset options cuando cambia el modelo
+    setOptions({
+      storage: false,
+      balcony: false,
+      upgrade: false
+    })
     
     try {
+      // Load facades
       const modelFacades = await propertyService.getFacadesByModel(model._id)
       setFacades(modelFacades)
+      
+      // Load pricing options si el modelo tiene opciones
+      if (model.balconyPrice > 0 || model.upgradePrice > 0 || model.storagePrice > 0) {
+        const pricingOptions = await propertyService.getModelPricingOptions(model._id)
+        setModelPricingOptions(pricingOptions)
+        console.log('Pricing options loaded:', pricingOptions)
+      }
     } catch (err) {
-      console.error('Error loading facades:', err)
+      console.error('Error loading model data:', err)
       setFacades([])
+      setModelPricingOptions(null)
     }
   }
 
   const selectFacade = (facade) => {
-    // ✅ Toggle selection: si clickea la misma, deselecciona
     if (selectedFacade?._id === facade._id) {
       setSelectedFacade(null)
     } else {
       setSelectedFacade(facade)
+    }
+  }
+
+  // Seleccionar una opción de pricing específica
+  const selectPricingOption = (option) => {
+    console.log('Selecting pricing option:', option)
+    setSelectedPricingOption(option)
+    
+    // Actualizar los toggles de opciones basado en la opción seleccionada
+    setOptions({
+      storage: option.hasStorage || false,
+      balcony: option.hasBalcony || false,
+      upgrade: option.modelType === 'upgrade'
+    })
+  }
+
+  // ✅ Toggle manual de opciones (para UI interactiva)
+  const toggleOption = (optionName) => {
+    console.log('Toggling option:', optionName, 'Current value:', options[optionName])
+    const newOptions = { ...options, [optionName]: !options[optionName] }
+    setOptions(newOptions)
+    
+    console.log('New options:', newOptions)
+    
+    // Buscar la opción de pricing que coincida con las opciones seleccionadas
+    if (modelPricingOptions && modelPricingOptions.allOptions) {
+      const matchingOption = modelPricingOptions.allOptions.find(opt => {
+        const isUpgradeMatch = newOptions.upgrade ? opt.modelType === 'upgrade' : opt.modelType === 'basic'
+        const isBalconyMatch = opt.hasBalcony === newOptions.balcony
+        const isStorageMatch = opt.hasStorage === newOptions.storage
+        
+        return isUpgradeMatch && isBalconyMatch && isStorageMatch
+      })
+      
+      if (matchingOption) {
+        console.log('Found matching option:', matchingOption)
+        setSelectedPricingOption(matchingOption)
+      } else {
+        console.log('No matching option found, clearing selectedPricingOption')
+        setSelectedPricingOption(null)
+      }
     }
   }
 
@@ -418,6 +392,20 @@ export const PropertyProvider = ({ children }) => {
       ...updates
     }))
   }
+
+  // Obtener información de pricing del modelo actual
+const getModelPricingInfo = () => {
+  if (!selectedModel) return null
+  
+  return {
+    hasBalcony: Array.isArray(selectedModel.balconies) && selectedModel.balconies.length > 0,
+    hasUpgrade: Array.isArray(selectedModel.upgrades) && selectedModel.upgrades.length > 0,
+    hasStorage: Array.isArray(selectedModel.storages) && selectedModel.storages.length > 0,
+    balconyPrice: selectedModel.balconies?.[0]?.price || 0,
+    upgradePrice: selectedModel.upgrades?.[0]?.price || 0,
+    storagePrice: selectedModel.storages?.[0]?.price || 0
+  }
+}
 
   const value = {
     lots,
@@ -434,7 +422,14 @@ export const PropertyProvider = ({ children }) => {
     selectLot,
     selectModel,
     selectFacade,
-    updateFinancials
+    updateFinancials,
+    
+    // Pricing options
+    modelPricingOptions,
+    selectedPricingOption,
+    selectPricingOption,
+    toggleOption,
+    getModelPricingInfo
   }
 
   return (

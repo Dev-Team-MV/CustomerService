@@ -16,6 +16,10 @@ import Payloads from './pages/Payloads'
 import Residents from './pages/Residents'
 import Analytics from './pages/Analytics'
 import PropertySelection from './pages/PropertySelection'
+import MyProperty from './pages/MyProperty'
+import AmenitiesPublic from './pages/AmenitiesPublic'
+import AmenitiesPrivate from './pages/AmenitiesPrivate'
+
 import NotFound from './pages/NotFound'
 
 const theme = createTheme({
@@ -42,11 +46,16 @@ function App() {
             {/* Public route for property selection */}
             <Route element={<Layout publicView={true} />}>
             <Route path="/properties/select" element={<PropertySelection />} />
+            <Route path="/amenities/explore" element={<AmenitiesPublic />} />
             </Route>
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/my-property" element={<MyProperty />} />
+                <Route path="/amenities" element={<AmenitiesPrivate />} />
+
                 <Route path="/properties" element={<Properties />} />
                 <Route path="/lots" element={<Lots />} />
                 <Route path="/models" element={<Models />} />

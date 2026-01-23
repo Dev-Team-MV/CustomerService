@@ -4,8 +4,17 @@ const accountSid = process.env.TWILIO_ACCOUNT_SID
 const authToken = process.env.TWILIO_AUTH_TOKEN
 const phoneFrom = process.env.TWILIO_PHONE_FROM
 
+// Debug: Check if credentials are loaded (without exposing sensitive data)
 if (!accountSid || !authToken || !phoneFrom) {
   console.warn('Twilio credentials not configured. SMS functionality will be disabled.')
+  console.warn('Missing variables:', {
+    accountSid: !accountSid ? 'TWILIO_ACCOUNT_SID' : '✓',
+    authToken: !authToken ? 'TWILIO_AUTH_TOKEN' : '✓',
+    phoneFrom: !phoneFrom ? 'TWILIO_PHONE_FROM' : '✓'
+  })
+} else {
+  console.log('Twilio credentials loaded successfully. SMS functionality enabled.')
+  console.log(`Twilio phone number: ${phoneFrom}`)
 }
 
 const client = accountSid && authToken ? twilio(accountSid, authToken) : null
@@ -49,6 +58,11 @@ export const sendSMS = async (to, message) => {
  * @returns {Promise<Object>} Result object
  */
 export const sendSMSWithValidation = async (to, message) => {
+  // Check if Twilio is configured before validation
+  if (!client) {
+    throw new Error('Twilio client not initialized. Please check your credentials.')
+  }
+
   // Validate phone number format (basic E.164 format check)
   if (!to || !to.startsWith('+')) {
     throw new Error('Phone number must be in E.164 format (e.g., +1234567890)')
