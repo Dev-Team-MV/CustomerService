@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // PRODUCTION URL - hardcoded for Vercel deployment
-const PRODUCTION_API_URL = 'https://customerservice-hy6v.onrender.com/api'
+const PRODUCTION_API_URL = 'https://customerservice-k742.onrender.com/api'
 
 const api = axios.create({
   baseURL: PRODUCTION_API_URL,
