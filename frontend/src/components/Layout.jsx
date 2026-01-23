@@ -997,22 +997,7 @@ const Layout = ({ publicView = false }) => {
                   >
                     Login
                   </Button>
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    startIcon={<PersonAddIcon />}
-                    onClick={() => navigate('/register')}
-                    sx={{
-                      borderColor: '#4a7c59',
-                      color: '#4a7c59',
-                      '&:hover': {
-                        borderColor: '#3a6249',
-                        bgcolor: 'rgba(74, 124, 89, 0.05)'
-                      }
-                    }}
-                  >
-                    Register
-                  </Button>
+                  
                 </Box>
               </motion.div>
             ) : (

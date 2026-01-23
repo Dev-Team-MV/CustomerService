@@ -719,35 +719,19 @@ const Register = () => {
               </motion.div>
               
                 
-                <Typography 
-                  variant="h2" 
-                  fontWeight="300"
-                  sx={{ 
-                    mb: 2,
-                    letterSpacing: '3px'
-                  }}
-                >
-                  JOIN
-                </Typography>
-                <Typography 
-                  variant="h3" 
-                  fontWeight="700"
-                  sx={{ 
-                    mb: 3,
-                    letterSpacing: '5px'
-                  }}
-                >
-                  LAKEWOOD OAKS
-                </Typography>
-                <Box
-                  sx={{
-                    width: '100px',
-                    height: '1px',
-                    bgcolor: 'white',
-                    margin: '0 auto',
-                    mb: 3
-                  }}
-                />
+                             <Box
+                component="img"
+                src="/images/logos/Logo_LakewoodOaks-05.png"
+                alt="Lakewood Oaks on Lake Conroe"
+                sx={{
+                  width: '90%',
+                  maxWidth: '500px',
+                  height: 'auto',
+                  mb: 3,
+                  filter: 'brightness(0) invert(1)',
+                  objectFit: 'contain'
+                }}
+              />
                 <Typography 
                   variant="h6" 
                   fontWeight="300"

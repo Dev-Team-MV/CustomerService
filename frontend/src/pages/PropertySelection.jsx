@@ -1,9 +1,10 @@
-// import { Typography,Box, Grid, Container, CircularProgress, Alert, useMediaQuery, useTheme } from '@mui/material'
+// import { Typography, Box, Grid, Container, CircularProgress, Alert, useMediaQuery, useTheme } from '@mui/material'
 // import { PropertyProvider, useProperty } from '../context/PropertyContext'
 // import { useState } from 'react'
 // import InteractiveMap from '../components/property/InteractiveMap'
 // import PropertyStats from '../components/property/PropertyStats'
 // import ModelSelector from '../components/property/ModelSelector'
+// import ModelPricingOptions from '../components/property/ModelPricingOptions'
 // import FacadeSelector from '../components/property/FacadeSelector'
 // import ResidentAssignment from '../components/property/ResidentAssignment'
 // import PriceCalculator from '../components/property/PriceCalculator'
@@ -46,11 +47,11 @@
 
 //   return (
 //     <Box sx={{ py: 3 }}>
-//             <Typography variant="h4" gutterBottom fontWeight="bold">
-//               Get Your Qoute
-//             </Typography>
+//       <Typography variant="h4" gutterBottom fontWeight="bold">
+//         Get Your Quote
+//       </Typography>
 //       <Container 
-// maxWidth={false}
+//         maxWidth={false}
 //         sx={{ 
 //           px: { xs: 2, sm: 3 },
 //           py: 3
@@ -69,6 +70,7 @@
 //             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 //               <InteractiveMap />
 //               <ModelSelector />
+//               {/* <ModelPricingOptions /> ✅ Agregado aquí */}
 //               <FacadeSelector />
 //               <Box id="resident-assignment-section">
 //                 <ResidentAssignment 
@@ -114,16 +116,17 @@
 import { Typography, Box, Grid, Container, CircularProgress, Alert, useMediaQuery, useTheme } from '@mui/material'
 import { PropertyProvider, useProperty } from '../context/PropertyContext'
 import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 import InteractiveMap from '../components/property/InteractiveMap'
 import PropertyStats from '../components/property/PropertyStats'
 import ModelSelector from '../components/property/ModelSelector'
-import ModelPricingOptions from '../components/property/ModelPricingOptions'
 import FacadeSelector from '../components/property/FacadeSelector'
 import ResidentAssignment from '../components/property/ResidentAssignment'
 import PriceCalculator from '../components/property/PriceCalculator'
 
 const PropertySelectionContent = () => {
   const { loading, error } = useProperty()
+  const { isAuthenticated } = useAuth()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [residentExpanded, setResidentExpanded] = useState(false)
@@ -160,9 +163,17 @@ const PropertySelectionContent = () => {
 
   return (
     <Box sx={{ py: 3 }}>
-      <Typography variant="h4" gutterBottom fontWeight="bold">
-        Get Your Quote
-      </Typography>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h4" gutterBottom fontWeight="bold">
+          Get Your Quote
+        </Typography>
+        {!isAuthenticated && (
+          <Alert severity="info" sx={{ mt: 2 }}>
+            You're browsing as a guest. Sign in to save your selections and create your property.
+          </Alert>
+        )}
+      </Box>
+      
       <Container 
         maxWidth={false}
         sx={{ 
@@ -183,14 +194,17 @@ const PropertySelectionContent = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <InteractiveMap />
               <ModelSelector />
-              {/* <ModelPricingOptions /> ✅ Agregado aquí */}
               <FacadeSelector />
-              <Box id="resident-assignment-section">
-                <ResidentAssignment 
-                  expanded={residentExpanded}
-                  onToggle={() => setResidentExpanded(!residentExpanded)}
-                />
-              </Box>
+              
+              {/* Solo mostrar ResidentAssignment si está autenticado */}
+              {isAuthenticated && (
+                <Box id="resident-assignment-section">
+                  <ResidentAssignment 
+                    expanded={residentExpanded}
+                    onToggle={() => setResidentExpanded(!residentExpanded)}
+                  />
+                </Box>
+              )}
             </Box>
           </Grid>
           
@@ -199,7 +213,10 @@ const PropertySelectionContent = () => {
             <Grid item xs={12} md={4}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 <PropertyStats />
-                <PriceCalculator onCreatePropertyClick={handleCreatePropertyClick} />
+                <PriceCalculator 
+                  onCreatePropertyClick={handleCreatePropertyClick}
+                  isPublic={!isAuthenticated}
+                />
               </Box>
             </Grid>
           )}
@@ -207,7 +224,10 @@ const PropertySelectionContent = () => {
           {/* Mobile: Show PriceCalculator at the end */}
           {isMobile && (
             <Grid item xs={12}>
-              <PriceCalculator onCreatePropertyClick={handleCreatePropertyClick} />
+              <PriceCalculator 
+                onCreatePropertyClick={handleCreatePropertyClick}
+                isPublic={!isAuthenticated}
+              />
             </Grid>
           )}
         </Grid>

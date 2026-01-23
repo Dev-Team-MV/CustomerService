@@ -1,22 +1,25 @@
-import { Box, Paper, Typography, TextField, Button, InputAdornment, Divider, Chip } from '@mui/material'
+import { Box, Paper, Typography, TextField, Button, InputAdornment, Divider, Chip, Alert } from '@mui/material'
 import { useProperty } from '../../context/PropertyContext'
 import { useAuth } from '../../context/AuthContext'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import SendIcon from '@mui/icons-material/Send'
 import HomeIcon from '@mui/icons-material/Home'
+import LoginIcon from '@mui/icons-material/Login'
 
-const PriceCalculator = ({ onCreatePropertyClick }) => {
+const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
   const { 
     financials, 
     updateFinancials, 
     selectedLot, 
     selectedModel, 
     selectedFacade,
-    options, // ✅ Obtener las opciones
-    selectedPricingOption, // ✅ Obtener la opción seleccionada
-    getModelPricingInfo // ✅ Obtener info del modelo
+    options,
+    selectedPricingOption,
+    getModelPricingInfo
   } = useProperty()
   const { isAuthenticated } = useAuth()
+  const navigate = useNavigate()
   const [initialPaymentDate, setInitialPaymentDate] = useState('')
 
   const handleDiscountPercentChange = (e) => {
@@ -45,8 +48,14 @@ const PriceCalculator = ({ onCreatePropertyClick }) => {
       return
     }
 
-    if (!isAuthenticated) {
-      alert('Please log in to create properties')
+    if (isPublic || !isAuthenticated) {
+      // Redirigir a login con la información de retorno
+      navigate('/login', { 
+        state: { 
+          from: window.location.pathname,
+          message: 'Sign in to create and save your property'
+        }
+      })
       return
     }
 
@@ -59,16 +68,22 @@ const PriceCalculator = ({ onCreatePropertyClick }) => {
       return
     }
 
-    if (!isAuthenticated) {
-      alert('Please log in to send quotes')
+    if (isPublic || !isAuthenticated) {
+      // Redirigir a login
+      navigate('/login', { 
+        state: { 
+          from: window.location.pathname,
+          message: 'Sign in to generate and send quotes'
+        }
+      })
       return
     }
 
     alert('Quote functionality coming soon!')
   }
 
-  // ✅ Obtener información de pricing
   const pricingInfo = getModelPricingInfo()
+  const isSelectionComplete = selectedLot && selectedModel
 
   return (
     <Paper 
@@ -79,13 +94,24 @@ const PriceCalculator = ({ onCreatePropertyClick }) => {
         color: '#000',
         borderRadius: 2,
         border: '1px solid #e0e0e0',
-        maxWidth: '100%', // ✅ No exceder
-        boxSizing: 'border-box' // ✅ Importante
+        maxWidth: '100%',
+        boxSizing: 'border-box'
       }}
     >
       <Typography variant="overline" sx={{ color: '#666', fontWeight: 'bold', mb: 2, display: 'block', letterSpacing: 1 }}>
-        CALCULATOR
+        PRICE CALCULATOR
       </Typography>
+
+      {/* Alert para usuarios públicos */}
+      {isPublic && (
+        <Alert 
+          severity="info" 
+          icon={<LoginIcon />}
+          sx={{ mb: 2 }}
+        >
+          Browsing as guest. <strong>Sign in</strong> to save your selections.
+        </Alert>
+      )}
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
         {/* List Price - Calculated automatically */}
@@ -100,13 +126,13 @@ const PriceCalculator = ({ onCreatePropertyClick }) => {
         {/* Selection Summary */}
         <Box sx={{ p: 1.5, bgcolor: '#f5f5f5', borderRadius: 1, fontSize: '0.75rem' }}>
           <Typography variant="caption" display="block" color="text.secondary">
-            Lot: {selectedLot ? `#${selectedLot.number} - $${selectedLot.price?.toLocaleString()}` : 'Not selected'}
+            <strong>Lot:</strong> {selectedLot ? `#${selectedLot.number} - $${selectedLot.price?.toLocaleString()}` : 'Not selected'}
           </Typography>
           <Typography variant="caption" display="block" color="text.secondary">
-            Model: {selectedModel ? `${selectedModel.model} - $${selectedModel.price?.toLocaleString()}` : 'Not selected'}
+            <strong>Model:</strong> {selectedModel ? `${selectedModel.model} - $${selectedModel.price?.toLocaleString()}` : 'Not selected'}
           </Typography>
           
-          {/* ✅ Mostrar opciones seleccionadas */}
+          {/* Mostrar opciones seleccionadas */}
           {selectedModel && pricingInfo && (
             <Box display="flex" gap={0.5} mt={1} flexWrap="wrap">
               {options.upgrade && pricingInfo.hasUpgrade && (
@@ -137,16 +163,16 @@ const PriceCalculator = ({ onCreatePropertyClick }) => {
           )}
           
           <Typography variant="caption" display="block" color="text.secondary" mt={1}>
-            Facade: {selectedFacade 
+            <strong>Facade:</strong> {selectedFacade 
               ? `${selectedFacade.title} - ${selectedFacade.price > 0 ? `+$${selectedFacade.price?.toLocaleString()}` : 'Included'}`
               : 'Not selected'}
           </Typography>
           
-          {/* ✅ Mostrar configuración seleccionada si existe */}
+          {/* Mostrar configuración seleccionada */}
           {selectedPricingOption && (
-            <Box mt={1} p={1} bgcolor="primary.50" borderRadius={1}>
+            <Box mt={1} p={1} bgcolor="rgba(74, 124, 89, 0.1)" borderRadius={1}>
               <Typography variant="caption" fontWeight="bold" color="primary">
-                {selectedPricingOption.label}
+                📋 {selectedPricingOption.label}
               </Typography>
             </Box>
           )}
@@ -162,6 +188,8 @@ const PriceCalculator = ({ onCreatePropertyClick }) => {
               value={financials.discountPercent} 
               onChange={handleDiscountPercentChange}
               suffix="%"
+              min={0}
+              max={100}
             />
           </Box>
           <Box sx={{ flex: 1.5 }}>
@@ -177,23 +205,41 @@ const PriceCalculator = ({ onCreatePropertyClick }) => {
         <Divider />
 
         {/* Presale Price Highlight */}
-        <Box sx={{ p: 2, bgcolor: '#f1f8e9', borderRadius: 2, border: '1px solid #dcedc8', textAlign: 'center' }}>
-          <Typography variant="caption" sx={{ color: '#558b2f', fontWeight: 'bold' }}>PRESALE PRICE TODAY</Typography>
-          <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#2e7d32' }}>
-            ${financials.presalePrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+        <Box sx={{ 
+          p: 2, 
+          bgcolor: 'linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%)', 
+          borderRadius: 2, 
+          border: '2px solid #4a7c59', 
+          textAlign: 'center',
+          boxShadow: '0 4px 12px rgba(74, 124, 89, 0.2)'
+        }}>
+          <Typography variant="caption" sx={{ color: '#558b2f', fontWeight: 'bold', letterSpacing: 1 }}>
+            PRESALE PRICE TODAY
+          </Typography>
+          <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2e7d32', mt: 0.5 }}>
+            ${financials.presalePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#558b2f', fontStyle: 'italic' }}>
+            Limited time offer
           </Typography>
         </Box>
 
         <Divider />
 
         {/* Down Payment Section */}
+        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#4a7c59' }}>
+          Down Payment Details
+        </Typography>
+
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ flex: 1 }}>
             <CalcField 
-              label="Down Payment" 
+              label="Down Payment %" 
               value={financials.downPaymentPercent} 
               onChange={handleDownPaymentPercentChange}
               suffix="%"
+              min={0}
+              max={100}
             />
           </Box>
           <Box sx={{ flex: 1.5 }}>
@@ -210,10 +256,12 @@ const PriceCalculator = ({ onCreatePropertyClick }) => {
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ flex: 1 }}>
             <CalcField 
-              label="Initial DP" 
+              label="Initial DP %" 
               value={financials.initialDownPaymentPercent} 
               onChange={handleInitialDownPaymentPercentChange}
               suffix="%"
+              min={0}
+              max={100}
             />
           </Box>
           <Box sx={{ flex: 1.5 }}>
@@ -237,11 +285,16 @@ const PriceCalculator = ({ onCreatePropertyClick }) => {
           value={financials.initialDownPayment.toFixed(2)} 
           disabled
           prefix="$"
+          highlighted
         />
 
         <Divider />
 
-        {/* Monthly Payment and Mortgage */}
+        {/* Monthly Payment Section */}
+        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#4a7c59' }}>
+          Monthly Payment Plan
+        </Typography>
+
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ flex: 1 }}>
             <CalcField 
@@ -249,6 +302,8 @@ const PriceCalculator = ({ onCreatePropertyClick }) => {
               value={financials.monthlyPaymentPercent} 
               onChange={handleMonthlyPaymentPercentChange}
               suffix="%"
+              min={0}
+              max={100}
             />
           </Box>
           <Box sx={{ flex: 1.5 }}>
@@ -266,74 +321,108 @@ const PriceCalculator = ({ onCreatePropertyClick }) => {
           value={financials.mortgage.toFixed(2)} 
           disabled
           prefix="$"
+          highlighted
         />
 
+        {/* Payment Summary */}
+        <Box sx={{ p: 2, bgcolor: '#f9f9f9', borderRadius: 2, border: '1px solid #e0e0e0' }}>
+          <Typography variant="caption" fontWeight="bold" display="block" mb={1}>
+            Payment Breakdown:
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+            <Typography variant="caption" color="text.secondary">Initial Down Payment:</Typography>
+            <Typography variant="caption" fontWeight="bold">${financials.initialDownPayment.toLocaleString()}</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+            <Typography variant="caption" color="text.secondary">Remaining Down Payment:</Typography>
+            <Typography variant="caption" fontWeight="bold">
+              ${(financials.totalDownPayment - financials.initialDownPayment).toLocaleString()}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+            <Typography variant="caption" color="text.secondary">Monthly Payment:</Typography>
+            <Typography variant="caption" fontWeight="bold">${financials.monthlyPayment.toLocaleString()}</Typography>
+          </Box>
+          <Divider sx={{ my: 1 }} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography variant="caption" fontWeight="bold">Mortgage to Finance:</Typography>
+            <Typography variant="caption" fontWeight="bold" color="primary">
+              ${financials.mortgage.toLocaleString()}
+            </Typography>
+          </Box>
+        </Box>
+
         {/* Note */}
-        <Typography variant="caption" sx={{ color: '#999', fontStyle: 'italic', textAlign: 'center', mt: 1 }}>
-          * Every 10 houses sold, the discount is reduced by 2%
-        </Typography>
+        <Alert severity="warning" icon="⚠️" sx={{ fontSize: '0.75rem' }}>
+          <Typography variant="caption">
+            <strong>Important:</strong> Every 10 houses sold, the discount is reduced by 2%
+          </Typography>
+        </Alert>
 
         {/* Action Buttons */}
-        <Button
-          variant="outlined"
-          fullWidth
-          onClick={handleCreateProperty}
-          startIcon={<HomeIcon />}
-          disabled={!selectedLot || !selectedModel}
-          sx={{
-            borderColor: '#4a7c59',
-            color: '#4a7c59',
-            py: 1.5,
-            borderRadius: 3,
-            fontWeight: 'bold',
-            textTransform: 'none',
-            fontSize: '1rem',
-            '&:hover': {
-              borderColor: '#3d664a',
-              bgcolor: 'rgba(74, 124, 89, 0.04)'
-            },
-            '&:disabled': {
-              borderColor: '#ccc',
-              color: '#999'
-            }
-          }}
-        >
-          Create Property
-        </Button>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 2 }}>
+          <Button
+            variant="outlined"
+            fullWidth
+            onClick={handleCreateProperty}
+            startIcon={isPublic ? <LoginIcon /> : <HomeIcon />}
+            disabled={!isSelectionComplete}
+            sx={{
+              borderColor: '#4a7c59',
+              color: '#4a7c59',
+              py: 1.5,
+              borderRadius: 3,
+              fontWeight: 'bold',
+              textTransform: 'none',
+              fontSize: '1rem',
+              '&:hover': {
+                borderColor: '#3d664a',
+                bgcolor: 'rgba(74, 124, 89, 0.04)'
+              },
+              '&:disabled': {
+                borderColor: '#ccc',
+                color: '#999'
+              }
+            }}
+          >
+            {isPublic ? 'Sign In to Create Property' : 'Create Property'}
+          </Button>
 
-        <Button
-          variant="contained"
-          fullWidth
-          onClick={handleSendQuote}
-          startIcon={<SendIcon />}
-          disabled={!selectedLot || !selectedModel}
-          sx={{
-            bgcolor: '#4a7c59',
-            color: '#fff',
-            py: 1.5,
-            borderRadius: 3,
-            fontWeight: 'bold',
-            textTransform: 'none',
-            fontSize: '1rem',
-            boxShadow: '0 4px 12px rgba(74, 124, 89, 0.3)',
-            '&:hover': {
-              bgcolor: '#3d664a',
-              boxShadow: '0 6px 16px rgba(74, 124, 89, 0.4)'
-            },
-            '&:disabled': {
-              bgcolor: '#ccc',
-              color: '#666'
-            }
-          }}
-        >
-          Generate & Send Quote
-        </Button>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={handleSendQuote}
+            startIcon={isPublic ? <LoginIcon /> : <SendIcon />}
+            disabled={!isSelectionComplete}
+            sx={{
+              bgcolor: '#4a7c59',
+              color: '#fff',
+              py: 1.5,
+              borderRadius: 3,
+              fontWeight: 'bold',
+              textTransform: 'none',
+              fontSize: '1rem',
+              boxShadow: '0 4px 12px rgba(74, 124, 89, 0.3)',
+              '&:hover': {
+                bgcolor: '#3d664a',
+                boxShadow: '0 6px 16px rgba(74, 124, 89, 0.4)'
+              },
+              '&:disabled': {
+                bgcolor: '#ccc',
+                color: '#666',
+                boxShadow: 'none'
+              }
+            }}
+          >
+            {isPublic ? 'Sign In to Send Quote' : 'Generate & Send Quote'}
+          </Button>
+        </Box>
       </Box>
     </Paper>
   )
 }
 
-const CalcField = ({ label, value, onChange, prefix, suffix, disabled = false }) => (
+const CalcField = ({ label, value, onChange, prefix, suffix, disabled = false, highlighted = false, min, max }) => (
   <Box>
     <Typography variant="caption" sx={{ color: '#666', mb: 0.5, display: 'block', fontWeight: 'bold' }}>
       {label}
@@ -345,10 +434,20 @@ const CalcField = ({ label, value, onChange, prefix, suffix, disabled = false })
       value={value}
       onChange={onChange}
       disabled={disabled}
+      inputProps={{
+        min: min,
+        max: max,
+        step: "0.01"
+      }}
       InputProps={{
         startAdornment: prefix ? <InputAdornment position="start">{prefix}</InputAdornment> : null,
         endAdornment: suffix ? <InputAdornment position="end">{suffix}</InputAdornment> : null,
-        sx: { borderRadius: 2, bgcolor: disabled ? '#f9f9f9' : '#fff' }
+        sx: { 
+          borderRadius: 2, 
+          bgcolor: disabled ? (highlighted ? '#fffde7' : '#f9f9f9') : '#fff',
+          fontWeight: highlighted ? 'bold' : 'normal',
+          border: highlighted ? '2px solid #ffd54f' : 'none'
+        }
       }}
     />
   </Box>

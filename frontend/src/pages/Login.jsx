@@ -572,28 +572,19 @@ const Login = () => {
                 />
               </motion.div>
               
-              <Typography 
-                variant="h2" 
-                fontWeight="300"
-                sx={{ 
-                  mb: 2,
-                  letterSpacing: '3px',
-                  fontSize: { xs: '2rem', md: '3rem' }
-                }}
-              >
-                LAKEWOOD
-              </Typography>
-              <Typography 
-                variant="h3" 
-                fontWeight="700"
-                sx={{ 
+              <Box
+                component="img"
+                src="/images/logos/Logo_LakewoodOaks-05.png"
+                alt="Lakewood Oaks on Lake Conroe"
+                sx={{
+                  width: '90%',
+                  maxWidth: '500px',
+                  height: 'auto',
                   mb: 3,
-                  letterSpacing: '5px',
-                  fontSize: { xs: '1.75rem', md: '2.5rem' }
+                  filter: 'brightness(0) invert(1)',
+                  objectFit: 'contain'
                 }}
-              >
-                OAKS
-              </Typography>
+              />
               <Box
                 sx={{
                   width: '120px',
@@ -612,7 +603,7 @@ const Login = () => {
                   fontSize: { xs: '1rem', md: '1.25rem' }
                 }}
               >
-                Modern Living Redefined
+                Resort Lifestyle
               </Typography>
             </motion.div>
             
@@ -697,7 +688,7 @@ const Login = () => {
             </Box>
 
             {/* Mensaje informativo si viene de una ruta protegida */}
-            {location.state?.from && location.state.from !== '/dashboard' && (
+            {/* {location.state?.from && location.state.from !== '/dashboard' && (
               <AnimatePresence>
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
@@ -709,7 +700,7 @@ const Login = () => {
                   </Alert>
                 </motion.div>
               </AnimatePresence>
-            )}
+            )} */}
 
             {error && (
               <AnimatePresence>
