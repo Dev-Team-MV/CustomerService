@@ -1,31 +1,22 @@
 import axios from 'axios'
 
-// Use production URL by default, local only in development
-const isLocalDev = import.meta.env.DEV || window.location.hostname === 'localhost'
-const baseURL = isLocalDev ? '/api' : 'https://customerservice-hy6v.onrender.com/api'
-
-console.log('API Base URL:', baseURL, 'isDev:', import.meta.env.DEV, 'hostname:', window.location.hostname)
+// PRODUCTION URL - hardcoded for Vercel deployment
+const PRODUCTION_API_URL = 'https://customerservice-hy6v.onrender.com/api'
 
 const api = axios.create({
-  baseURL: baseURL,
+  baseURL: PRODUCTION_API_URL,
 })
 
-// Force the baseURL to be set correctly
-api.defaults.baseURL = baseURL
+console.log('🚀 API configured with baseURL:', PRODUCTION_API_URL)
 
 api.interceptors.request.use(
   (config) => {
-    // Ensure baseURL is always correct on every request
-    if (!config.url.startsWith('http')) {
-      config.baseURL = baseURL
-    }
-    
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
     
-    console.log('Making request to:', config.baseURL + config.url)
+    console.log('📡 Making request to:', config.baseURL + config.url)
     return config
   },
   (error) => {
