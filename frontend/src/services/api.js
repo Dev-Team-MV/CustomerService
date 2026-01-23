@@ -1,17 +1,13 @@
 import axios from 'axios'
 
-// Determine API base URL based on environment
-const getBaseURL = () => {
-  // If we're in production (Vercel), use Render backend
-  if (window.location.hostname.includes('vercel.app')) {
-    return 'https://customerservice-hy6v.onrender.com/api'
-  }
-  // Otherwise use environment variable or local proxy
-  return import.meta.env.VITE_API_URL || '/api'
-}
+// Use production URL by default, local only in development
+const isLocalDev = import.meta.env.DEV || window.location.hostname === 'localhost'
+const baseURL = isLocalDev ? '/api' : 'https://customerservice-hy6v.onrender.com/api'
+
+console.log('API Base URL:', baseURL, 'isDev:', import.meta.env.DEV, 'hostname:', window.location.hostname)
 
 const api = axios.create({
-  baseURL: getBaseURL(),
+  baseURL: baseURL,
 })
 
 api.interceptors.request.use(
