@@ -695,18 +695,29 @@ const Register = () => {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.5, duration: 1 }}
               >
-                <motion.div
-                  animate={{ 
-                    y: [0, -10, 0]
+             <motion.div
+                animate={{ 
+                  y: [0, -10, 0]
+                }}
+                transition={{ 
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <Box
+                  component="img"
+                  src="/images/logos/LOGO_MICHELANGELO_PNG-07.png"
+                  alt="Michelangelo Del Valle"
+                  sx={{
+                    width: '35%',
+                    height: 'auto',
+                    filter: 'brightness(0) invert(1)',
+                    objectFit: 'contain'
                   }}
-                  transition={{ 
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                >
-                  <Home sx={{ fontSize: 100, mb: 3 }} />
-                </motion.div>
+                />
+              </motion.div>
+              
                 
                 <Typography 
                   variant="h2" 

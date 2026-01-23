@@ -9,7 +9,7 @@ const AmenitiesPublic = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        bgcolor: '#f5f5f5',
+        bgcolor: 'white',
         py: 4
       }}
     >

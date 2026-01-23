@@ -173,6 +173,7 @@ export const PropertyProvider = ({ children }) => {
   const [selectedLot, setSelectedLot] = useState(null)
   const [selectedModel, setSelectedModel] = useState(null)
   const [selectedFacade, setSelectedFacade] = useState(null)
+  const [selectedDeck, setSelectedDeck] = useState(null)
   
   // Opciones de pricing del modelo
   const [modelPricingOptions, setModelPricingOptions] = useState(null)
@@ -213,6 +214,7 @@ export const PropertyProvider = ({ children }) => {
     selectedLot, 
     selectedModel, 
     selectedFacade, 
+    selectedDeck,
     selectedPricingOption,
     options.balcony,  // ✅ Agregar dependencias individuales
     options.storage,  // ✅ para que detecte cambios
@@ -269,13 +271,15 @@ const calculateFinancials = () => {
   }
   
   const facadePrice = selectedFacade?.price || 0
+  const deckPrice = selectedDeck?.price || 0
 
-  const calculatedListPrice = lotPrice + modelPrice + facadePrice
+  const calculatedListPrice = lotPrice + modelPrice + facadePrice + deckPrice
 
     console.log('Calculating financials:', {
       lotPrice,
       modelPrice,
       facadePrice,
+      deckPrice,
       totalListPrice: calculatedListPrice,
       options
     })
@@ -309,6 +313,7 @@ const calculateFinancials = () => {
     console.log('Selecting model:', model)
     setSelectedModel(model)
     setSelectedFacade(null)
+    setSelectedDeck(null)
     setSelectedPricingOption(null)
     setModelPricingOptions(null)
     
@@ -338,10 +343,25 @@ const calculateFinancials = () => {
   }
 
   const selectFacade = (facade) => {
+    if (!facade) {
+      setSelectedFacade(null)
+      setSelectedDeck(null)
+      return
+    }
+
     if (selectedFacade?._id === facade._id) {
       setSelectedFacade(null)
     } else {
       setSelectedFacade(facade)
+    }
+    setSelectedDeck(null) // Reset deck when facade changes
+  }
+
+  const selectDeck = (deck) => {
+    if (selectedDeck?.name === deck.name) {
+      setSelectedDeck(null)
+    } else {
+      setSelectedDeck(deck)
     }
   }
 
@@ -429,7 +449,9 @@ const getModelPricingInfo = () => {
     selectedPricingOption,
     selectPricingOption,
     toggleOption,
-    getModelPricingInfo
+    getModelPricingInfo,
+    selectedDeck,
+    selectDeck
   }
 
   return (
