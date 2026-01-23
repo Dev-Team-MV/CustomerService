@@ -55,18 +55,38 @@ export const getFacadesByModel = async (req, res) => {
 
 export const createFacade = async (req, res) => {
   try {
-    const { model, title, url, price } = req.body
+    const { model, title, url, price, decks } = req.body
     
     const modelExists = await Model.findById(model)
     if (!modelExists) {
       return res.status(404).json({ message: 'Model not found' })
     }
     
+    // Validar y preparar decks si se proporcionan
+    const validatedDecks = []
+    if (decks && Array.isArray(decks)) {
+      for (const deck of decks) {
+        if (!deck.name || deck.price === undefined) {
+          return res.status(400).json({ 
+            message: 'Each deck must have name and price' 
+          })
+        }
+        validatedDecks.push({
+          name: deck.name,
+          price: deck.price,
+          description: deck.description || '',
+          images: Array.isArray(deck.images) ? deck.images : [],
+          status: deck.status || 'active'
+        })
+      }
+    }
+    
     const facade = await Facade.create({
       model,
       title,
       url,
-      price
+      price,
+      decks: validatedDecks
     })
     
     const populatedFacade = await Facade.findById(facade._id)
@@ -104,6 +124,30 @@ export const updateFacade = async (req, res) => {
     
     if (req.body.price !== undefined) {
       facade.price = req.body.price
+    }
+    
+    // Validar y actualizar decks si se proporcionan
+    if (req.body.decks !== undefined) {
+      if (!Array.isArray(req.body.decks)) {
+        return res.status(400).json({ message: 'Decks must be an array' })
+      }
+      
+      const validatedDecks = []
+      for (const deck of req.body.decks) {
+        if (!deck.name || deck.price === undefined) {
+          return res.status(400).json({ 
+            message: 'Each deck must have name and price' 
+          })
+        }
+        validatedDecks.push({
+          name: deck.name,
+          price: deck.price,
+          description: deck.description || '',
+          images: Array.isArray(deck.images) ? deck.images : [],
+          status: deck.status || 'active'
+        })
+      }
+      facade.decks = validatedDecks
     }
     
     const updatedFacade = await facade.save()

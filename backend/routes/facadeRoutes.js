@@ -7,6 +7,12 @@ import {
   updateFacade,
   deleteFacade
 } from '../controllers/facadeController.js'
+import {
+  getFacadeDecks,
+  addFacadeDeck,
+  updateFacadeDeck,
+  deleteFacadeDeck
+} from '../controllers/deckController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -168,5 +174,118 @@ router.route('/:id')
   .get(protect, getFacadeById)
   .put(protect, admin, updateFacade)
   .delete(protect, admin, deleteFacade)
+
+// ========== DECKS ROUTES ==========
+
+/**
+ * @swagger
+ * /api/facades/{id}/decks:
+ *   get:
+ *     summary: Get all decks for a facade
+ *     tags: [Facades]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of decks
+ *       404:
+ *         description: Facade not found
+ *   post:
+ *     summary: Add a deck to a facade (Admin only)
+ *     tags: [Facades]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - price
+ *             properties:
+ *               name:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               description:
+ *                 type: string
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               status:
+ *                 type: string
+ *                 enum: [active, inactive]
+ *     responses:
+ *       201:
+ *         description: Deck added
+ */
+router.route('/:id/decks')
+  .get(protect, getFacadeDecks)
+  .post(protect, admin, addFacadeDeck)
+
+/**
+ * @swagger
+ * /api/facades/{id}/decks/{deckId}:
+ *   put:
+ *     summary: Update a deck (Admin only)
+ *     tags: [Facades]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: deckId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Deck updated
+ *       404:
+ *         description: Facade or Deck not found
+ *   delete:
+ *     summary: Delete a deck (Admin only)
+ *     tags: [Facades]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: deckId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Deck deleted
+ *       404:
+ *         description: Facade or Deck not found
+ */
+router.route('/:id/decks/:deckId')
+  .put(protect, admin, updateFacadeDeck)
+  .delete(protect, admin, deleteFacadeDeck)
 
 export default router

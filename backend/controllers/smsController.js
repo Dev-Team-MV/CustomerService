@@ -9,6 +9,7 @@ export const sendSMS = async (req, res) => {
 
     if (!to || !message) {
       return res.status(400).json({ 
+        success: false,
         message: 'Phone number (to) and message are required' 
       })
     }
@@ -21,6 +22,20 @@ export const sendSMS = async (req, res) => {
       data: result
     })
   } catch (error) {
+    // Check if it's a Twilio configuration error
+    if (error.message.includes('Twilio client not initialized')) {
+      return res.status(503).json({ 
+        success: false,
+        message: 'SMS service is not configured. Please configure Twilio credentials in environment variables.',
+        error: 'Twilio client not initialized. Please check your credentials.',
+        requiredEnvVars: [
+          'TWILIO_ACCOUNT_SID',
+          'TWILIO_AUTH_TOKEN',
+          'TWILIO_PHONE_FROM'
+        ]
+      })
+    }
+    
     res.status(500).json({ 
       success: false,
       message: error.message 
