@@ -1,8 +1,13 @@
 import axios from 'axios'
 
+// PRODUCTION URL - hardcoded for Vercel deployment
+const PRODUCTION_API_URL = 'https://customerservice-k742.onrender.com/api'
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: PRODUCTION_API_URL,
 })
+
+console.log('🚀 API configured with baseURL:', PRODUCTION_API_URL)
 
 api.interceptors.request.use(
   (config) => {
@@ -10,6 +15,8 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    
+    console.log('📡 Making request to:', config.baseURL + config.url)
     return config
   },
   (error) => {

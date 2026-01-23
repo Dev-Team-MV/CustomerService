@@ -15,7 +15,7 @@ const AmenitiesPublic = () => {
     >
       <Container maxWidth="lg">
         {/* Header Section */}
-        <Paper
+        {/*<Paper
           elevation={2}
           sx={{
             p: 4,
@@ -77,6 +77,7 @@ const AmenitiesPublic = () => {
             </Box>
           </Box>
         </Paper>
+        */}
 
         {/* Map Component */}
         <AmenitiesMap isPublicView={true} />

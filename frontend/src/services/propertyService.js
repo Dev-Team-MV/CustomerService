@@ -3,39 +3,69 @@ import api from './api'
 export const propertyService = {
     // Get all lots
     getLots: async () => {
-        const response = await api.get('/lots')
-        return response.data
+        try {
+            const response = await api.get('/lots')
+            return Array.isArray(response.data) ? response.data : []
+        } catch (error) {
+            console.error('Error fetching lots:', error)
+            return []
+        }
     },
 
     // Get all models
     getModels: async () => {
-        const response = await api.get('/models')
-        return response.data
+        try {
+            const response = await api.get('/models')
+            return Array.isArray(response.data) ? response.data : []
+        } catch (error) {
+            console.error('Error fetching models:', error)
+            return []
+        }
     },
 
     // Get facades for a specific model
     getFacadesByModel: async (modelId) => {
-        const response = await api.get(`/facades/model/${modelId}`)
-        return response.data
+        try {
+            const response = await api.get(`/facades/model/${modelId}`)
+            return Array.isArray(response.data) ? response.data : []
+        } catch (error) {
+            console.error('Error fetching facades:', error)
+            return []
+        }
     },
 
       // ✅ NUEVO: Obtener opciones de pricing de un modelo
     getModelPricingOptions: async (modelId) => {
-        const response = await api.get(`/models/${modelId}/pricing-options`)
-        return response.data
+        try {
+            const response = await api.get(`/models/${modelId}/pricing-options`)
+            return response.data
+        } catch (error) {
+            console.error('Error fetching pricing options:', error)
+            return null
+        }
     },
 
     // Get all facades (with optional model filter)
     getFacades: async (modelId = null) => {
-        const url = modelId ? `/facades?model=${modelId}` : '/facades'
-        const response = await api.get(url)
-        return response.data
+        try {
+            const url = modelId ? `/facades?model=${modelId}` : '/facades'
+            const response = await api.get(url)
+            return Array.isArray(response.data) ? response.data : []
+        } catch (error) {
+            console.error('Error fetching facades:', error)
+            return []
+        }
     },
 
     // Get lot by ID
     getLotById: async (id) => {
-        const response = await api.get(`/lots/${id}`)
-        return response.data
+        try {
+            const response = await api.get(`/lots/${id}`)
+            return response.data
+        } catch (error) {
+            console.error('Error fetching lot by ID:', error)
+            return null
+        }
     },
 
     // Get model by ID
