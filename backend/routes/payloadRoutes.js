@@ -9,6 +9,7 @@ import {
   getApprovedPayloadsThisMonth
 } from '../controllers/payloadController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
+import { upload } from '../controllers/uploadController.js'
 
 const router = express.Router()
 
@@ -70,13 +71,25 @@ const router = express.Router()
  *                 default: pending
  *               notes:
  *                 type: string
+ *               folder:
+ *                 type: string
+ *                 description: Folder name in GCS where images will be stored (e.g., 'payloads', 'payments', 'receipts')
+ *                 default: 'payloads'
+ *     consumes:
+ *       - multipart/form-data
+ *       - application/json
+ *     parameters:
+ *       - in: formData
+ *         name: images
+ *         type: file
+ *         description: Image files to upload (optional, max 10MB each, formats: jpeg, jpg, png, gif, webp)
  *     responses:
  *       201:
  *         description: Payload created
  */
 router.route('/')
   .get(protect, getAllPayloads)
-  .post(protect, admin, createPayload)
+  .post(protect, admin, upload.array('images', 10), createPayload)
 
 /**
  * @swagger
@@ -173,6 +186,17 @@ router.get('/approved/this-month', protect, getApprovedPayloadsThisMonth)
  *                 enum: [pending, cleared, rejected]
  *               notes:
  *                 type: string
+ *               folder:
+ *                 type: string
+ *                 description: Folder name in GCS for new images (e.g., 'payloads', 'payments', 'receipts')
+ *     consumes:
+ *       - multipart/form-data
+ *       - application/json
+ *     parameters:
+ *       - in: formData
+ *         name: images
+ *         type: file
+ *         description: New image files to upload (optional, max 10MB each)
  *     responses:
  *       200:
  *         description: Payload updated
@@ -197,7 +221,7 @@ router.get('/approved/this-month', protect, getApprovedPayloadsThisMonth)
  */
 router.route('/:id')
   .get(protect, getPayloadById)
-  .put(protect, admin, updatePayload)
+  .put(protect, admin, upload.array('images', 10), updatePayload)
   .delete(protect, admin, deletePayload)
 
 export default router
