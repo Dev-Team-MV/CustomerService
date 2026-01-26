@@ -59,6 +59,11 @@ const router = express.Router()
  *                 format: date
  *               support:
  *                 type: string
+ *               urls:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 default: []
  *               status:
  *                 type: string
  *                 enum: [pending, cleared, rejected]
@@ -159,6 +164,10 @@ router.get('/approved/this-month', protect, getApprovedPayloadsThisMonth)
  *                 format: date
  *               support:
  *                 type: string
+ *               urls:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *               status:
  *                 type: string
  *                 enum: [pending, cleared, rejected]

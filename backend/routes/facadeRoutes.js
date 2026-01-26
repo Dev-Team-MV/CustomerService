@@ -23,8 +23,6 @@ const router = express.Router()
  *   get:
  *     summary: Get all facades
  *     tags: [Facades]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: model
@@ -69,7 +67,7 @@ const router = express.Router()
  *         description: Facade created
  */
 router.route('/')
-  .get(protect, getAllFacades)
+  .get(getAllFacades)
   .post(protect, admin, createFacade)
 
 /**
@@ -78,8 +76,6 @@ router.route('/')
  *   get:
  *     summary: Get all facades for a specific model
  *     tags: [Facades]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: modelId
@@ -98,7 +94,7 @@ router.route('/')
  *       404:
  *         description: Model not found
  */
-router.get('/model/:modelId', protect, getFacadesByModel)
+router.get('/model/:modelId', getFacadesByModel)
 
 /**
  * @swagger
