@@ -35,8 +35,6 @@ const router = express.Router()
  *   get:
  *     summary: Get all models
  *     tags: [Models]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of models
@@ -90,7 +88,7 @@ const router = express.Router()
  *         description: Model created
  */
 router.route('/')
-  .get(protect, getAllModels)
+  .get(getAllModels)
   .post(protect, admin, createModel)
 
 /**
@@ -99,8 +97,6 @@ router.route('/')
  *   get:
  *     summary: Get model by ID
  *     tags: [Models]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -173,7 +169,7 @@ router.route('/')
  *         description: Model not found
  */
 router.route('/:id')
-  .get(protect, getModelById)
+  .get(getModelById)
   .put(protect, admin, updateModel)
   .delete(protect, admin, deleteModel)
 

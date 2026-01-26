@@ -17,8 +17,6 @@ const router = express.Router()
  *   get:
  *     summary: Get all lots
  *     tags: [Lots]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of lots
@@ -59,7 +57,7 @@ const router = express.Router()
  *         description: Lot created
  */
 router.route('/')
-  .get(protect, getAllLots)
+  .get(getAllLots)
   .post(protect, admin, createLot)
 
 /**
