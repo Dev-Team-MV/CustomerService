@@ -10,14 +10,28 @@ import {
   InputAdornment,
   IconButton,
   useMediaQuery,
-  useTheme
+  useTheme,
+  ToggleButtonGroup,
+  ToggleButton
 } from '@mui/material'
-import { Visibility, VisibilityOff, KeyboardArrowRight, Home } from '@mui/icons-material'
+import { 
+  Visibility, 
+  VisibilityOff, 
+  KeyboardArrowRight, 
+  Home,
+  Email,
+  Phone
+} from '@mui/icons-material'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
+import TypingFooter from '../components/Footer'
 
 const Login = () => {
+  const [loginMethod, setLoginMethod] = useState('email') // 'email' o 'phone'
   const [email, setEmail] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
@@ -29,25 +43,47 @@ const Login = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
-  // Obtener la ruta de origen o usar '/dashboard' por defecto
   const from = location.state?.from || '/dashboard'
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-
-    const result = await login(email, password)
-    
-    if (result.success) {
-      // Redirigir a la ruta original o al dashboard
-      navigate(from, { replace: true })
-    } else {
-      setError(result.error || 'Error al iniciar sesión')
+  const handleLoginMethodChange = (event, newMethod) => {
+    if (newMethod !== null) {
+      setLoginMethod(newMethod)
+      setError('')
     }
-    
-    setLoading(false)
   }
+
+// Actualizar solo handleSubmit:
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  setError('')
+  setLoading(true)
+
+  // ✅ Preparar las credenciales según el método de login
+  const credentials = loginMethod === 'email' 
+    ? email
+    : `+${phoneNumber}` // Agregar el + al número de teléfono
+
+  console.log('🔐 Login with:', { 
+    method: loginMethod, 
+    credentials: loginMethod === 'phone' ? credentials : email,
+    password: '***'
+  })
+
+  // ✅ Pasar solo el email/phone y password
+  const result = await login(credentials, password)
+  
+  if (result.success) {
+    navigate(from, { replace: true })
+  } else {
+    if (result.requiresPasswordSetup) {
+      setError('Password not set. Please check your phone for the setup link.')
+    } else {
+      setError(result.error || 'Login failed')
+    }
+  }
+  
+  setLoading(false)
+}
 
   return (
     <Box
@@ -119,7 +155,6 @@ const Login = () => {
               zIndex: 1
             }}
           >
-            
             <motion.div
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -182,7 +217,6 @@ const Login = () => {
                 Resort Lifestyle
               </Typography>
             </motion.div>
-            
           </Box>
 
           {/* Animated Lines Decoration */}
@@ -263,21 +297,6 @@ const Login = () => {
               </motion.div>
             </Box>
 
-            {/* Mensaje informativo si viene de una ruta protegida */}
-            {/* {location.state?.from && location.state.from !== '/dashboard' && (
-              <AnimatePresence>
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                >
-                  <Alert severity="info" sx={{ mb: 3, borderRadius: 0 }}>
-                    Please login to access <strong>{location.state.from}</strong>
-                  </Alert>
-                </motion.div>
-              </AnimatePresence>
-            )} */}
-
             {error && (
               <AnimatePresence>
                 <motion.div
@@ -292,43 +311,135 @@ const Login = () => {
               </AnimatePresence>
             )}
 
+            {/* Login Method Toggle */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+              <ToggleButtonGroup
+                value={loginMethod}
+                exclusive
+                onChange={handleLoginMethodChange}
+                aria-label="login method"
+                sx={{
+                  '& .MuiToggleButton-root': {
+                    borderRadius: 0,
+                    border: '2px solid #e0e0e0',
+                    '&.Mui-selected': {
+                      bgcolor: '#4a7c59',
+                      color: 'white',
+                      borderColor: '#4a7c59',
+                      '&:hover': {
+                        bgcolor: '#3d664a'
+                      }
+                    }
+                  }
+                }}
+              >
+                <ToggleButton value="email" aria-label="email login">
+                  <Email sx={{ mr: 1 }} />
+                  Email
+                </ToggleButton>
+                <ToggleButton value="phone" aria-label="phone login">
+                  <Phone sx={{ mr: 1 }} />
+                  Phone
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+
             {/* Form */}
             <Box component="form" onSubmit={handleSubmit}>
-              <motion.div
-                animate={{ 
-                  y: focusedField === 'email' ? -5 : 0
-                }}
-                transition={{ duration: 0.3 }}
-              >
-                <TextField
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  autoFocus
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onFocus={() => setFocusedField('email')}
-                  onBlur={() => setFocusedField(null)}
-                  sx={{
-                    mb: 3,
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 0,
-                      '& fieldset': {
-                        borderWidth: '2px',
-                        borderColor: focusedField === 'email' ? '#4a7c59' : '#e0e0e0',
-                        transition: 'all 0.3s'
-                      }
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: '#4a7c59'
-                    }
-                  }}
-                />
-              </motion.div>
+              {/* Email or Phone Input */}
+              <AnimatePresence mode="wait">
+                {loginMethod === 'email' ? (
+                  <motion.div
+                    key="email"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <motion.div
+                      animate={{ 
+                        y: focusedField === 'email' ? -5 : 0
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <TextField
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        autoComplete="email"
+                        autoFocus
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        onFocus={() => setFocusedField('email')}
+                        onBlur={() => setFocusedField(null)}
+                        sx={{
+                          mb: 3,
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 0,
+                            '& fieldset': {
+                              borderWidth: '2px',
+                              borderColor: focusedField === 'email' ? '#4a7c59' : '#e0e0e0',
+                              transition: 'all 0.3s'
+                            }
+                          },
+                          '& .MuiInputLabel-root.Mui-focused': {
+                            color: '#4a7c59'
+                          }
+                        }}
+                      />
+                    </motion.div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="phone"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Box sx={{ mb: 3 }}>
+                      <PhoneInput
+                        country={'us'}
+                        value={phoneNumber}
+                        onChange={setPhoneNumber}
+                        onFocus={() => setFocusedField('phone')}
+                        onBlur={() => setFocusedField(null)}
+                        inputProps={{
+                          name: 'phone',
+                          required: true,
+                          autoFocus: true
+                        }}
+                        containerStyle={{
+                          width: '100%'
+                        }}
+                        inputStyle={{
+                          width: '100%',
+                          height: '56px',
+                          fontSize: '16px',
+                          borderRadius: 0,
+                          border: `2px solid ${focusedField === 'phone' ? '#4a7c59' : '#e0e0e0'}`,
+                          transition: 'all 0.3s'
+                        }}
+                        buttonStyle={{
+                          borderRadius: 0,
+                          border: `2px solid ${focusedField === 'phone' ? '#4a7c59' : '#e0e0e0'}`,
+                          borderRight: 'none'
+                        }}
+                        dropdownStyle={{
+                          borderRadius: 0
+                        }}
+                        searchStyle={{
+                          borderRadius: 0
+                        }}
+                      />
+                    </Box>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
+              {/* Password Input */}
               <motion.div
                 animate={{ 
                   y: focusedField === 'password' ? -5 : 0
@@ -405,10 +516,11 @@ const Login = () => {
                   {loading ? 'Signing in...' : 'Sign In'}
                 </Button>
               </motion.div>
-
             </Box>
           </motion.div>
+        {/* {!isMobile && <TypingFooter variant="dark" />} */}
         </Box>
+      <TypingFooter variant="dark" />
       </Box>
     </Box>
   )

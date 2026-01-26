@@ -1,10 +1,18 @@
 import api from './api'
 
 export const authService = {
-  login: async (email, password) => {
-    const response = await api.post('/auth/login', { email, password })
+  login: async (emailOrPhone, password, isPhone = false) => {
+    // ✅ Determinar si es email o teléfono
+    const payload = isPhone 
+      ? { phoneNumber: emailOrPhone, password }
+      : { email: emailOrPhone, password }
+    
+    console.log('📤 Login payload:', payload)
+    
+    const response = await api.post('/auth/login', payload)
     return response.data
   },
+
 
   register: async (firstName, lastName, email, password, phoneNumber) => {
     const response = await api.post('/auth/register', { firstName, lastName, email, password, phoneNumber })

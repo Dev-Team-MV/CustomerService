@@ -42,6 +42,7 @@ function App() {
             {/* Auth Routes - Sin Layout */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/setup-password/:token" element={<Register />} />
             
             {/* Public Routes - Layout Público */}
             <Route element={<Layout publicView={true} />}>

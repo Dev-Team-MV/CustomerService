@@ -726,6 +726,9 @@
 
 // export default Dashboard
 
+// Agregar import de PhoneInput al inicio
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
 
 import { useState, useEffect } from 'react'
 import {
@@ -744,7 +747,8 @@ import {
   TextField,
   MenuItem,
   Button,
-  CircularProgress
+  CircularProgress,
+  Alert
 } from '@mui/material'
 import {
   HomeWork,
@@ -921,16 +925,22 @@ const Dashboard = () => {
     setOpenUserDialog(false)
   }
 
-  const handleSubmitUser = async () => {
-    try {
-      await api.post('/auth/register', userFormData)
-      handleCloseUserDialog()
-      alert('User invited successfully!')
-    } catch (error) {
-      console.error('Error inviting user:', error)
-      alert(error.response?.data?.message || 'Error inviting user')
-    }
+// Actualizar handleSubmitUser
+const handleSubmitUser = async () => {
+  try {
+    // Enviar con skipPasswordSetup para activar el flujo de SMS
+    await api.post('/auth/register', {
+      ...userFormData,
+      phoneNumber: `+${userFormData.phoneNumber}`, // Agregar el + al número
+      skipPasswordSetup: true // ✅ Esto activa el envío del SMS
+    })
+    handleCloseUserDialog()
+    alert('✅ User invited successfully! They will receive an SMS with setup instructions.')
+  } catch (error) {
+    console.error('Error inviting user:', error)
+    alert(error.response?.data?.message || 'Error inviting user')
   }
+}
 
   const quickActions = [
     { 
@@ -1291,93 +1301,122 @@ const Dashboard = () => {
       </Grid>
 
       {/* Invite User Dialog */}
-      <Dialog open={openUserDialog} onClose={handleCloseUserDialog} maxWidth="md" fullWidth>
-        <DialogTitle>Invite New User</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="First Name"
-                value={userFormData.firstName}
-                onChange={(e) => setUserFormData({ ...userFormData, firstName: e.target.value })}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Last Name"
-                value={userFormData.lastName}
-                onChange={(e) => setUserFormData({ ...userFormData, lastName: e.target.value })}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                type="email"
-                label="Email"
-                value={userFormData.email}
-                onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                type="password"
-                label="Password"
-                value={userFormData.password}
-                onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Phone Number"
-                value={userFormData.phoneNumber}
-                onChange={(e) => setUserFormData({ ...userFormData, phoneNumber: e.target.value })}
-                placeholder="(555) 123-4567"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                type="date"
-                label="Birthday"
-                value={userFormData.birthday}
-                onChange={(e) => setUserFormData({ ...userFormData, birthday: e.target.value })}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                select
-                label="Role"
-                value={userFormData.role}
-                onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
-              >
-                <MenuItem value="user">User</MenuItem>
-                <MenuItem value="admin">Admin</MenuItem>
-                <MenuItem value="superadmin">Super Admin</MenuItem>
-              </TextField>
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseUserDialog}>Cancel</Button>
-          <Button 
-            onClick={handleSubmitUser} 
-            variant="contained"
-            disabled={!userFormData.firstName || !userFormData.lastName || !userFormData.email || !userFormData.password}
-          >
-            Invite User
-          </Button>
-        </DialogActions>
-      </Dialog>
+<Dialog open={openUserDialog} onClose={handleCloseUserDialog} maxWidth="md" fullWidth>
+  <DialogTitle>
+    <Box display="flex" alignItems="center" gap={1}>
+      <Typography variant="h6" fontWeight="bold">
+        Invite New User
+      </Typography>
+      <Chip label="SMS Setup" size="small" color="primary" />
+    </Box>
+  </DialogTitle>
+  <DialogContent>
+    <Alert severity="info" sx={{ mb: 2 }}>
+      The user will receive an SMS with a link to set their password
+    </Alert>
+    <Grid container spacing={2} sx={{ mt: 1 }}>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          fullWidth
+          label="First Name"
+          value={userFormData.firstName}
+          onChange={(e) => setUserFormData({ ...userFormData, firstName: e.target.value })}
+          required
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          fullWidth
+          label="Last Name"
+          value={userFormData.lastName}
+          onChange={(e) => setUserFormData({ ...userFormData, lastName: e.target.value })}
+          required
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          fullWidth
+          type="email"
+          label="Email"
+          value={userFormData.email}
+          onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
+          required
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <Box>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+            Phone Number *
+          </Typography>
+          <PhoneInput
+            country={'us'}
+            value={userFormData.phoneNumber}
+            onChange={(value) => setUserFormData({ ...userFormData, phoneNumber: value })}
+            inputProps={{
+              name: 'phone',
+              required: true
+            }}
+            containerStyle={{
+              width: '100%'
+            }}
+            inputStyle={{
+              width: '100%',
+              height: '56px',
+              fontSize: '16px',
+              border: '1px solid #c4c4c4'
+            }}
+            buttonStyle={{
+              border: '1px solid #c4c4c4',
+              borderRight: 'none'
+            }}
+          />
+        </Box>
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          fullWidth
+          type="date"
+          label="Birthday"
+          value={userFormData.birthday}
+          onChange={(e) => setUserFormData({ ...userFormData, birthday: e.target.value })}
+          InputLabelProps={{ shrink: true }}
+        />
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <TextField
+          fullWidth
+          select
+          label="Role"
+          value={userFormData.role}
+          onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
+        >
+          <MenuItem value="user">User</MenuItem>
+          <MenuItem value="admin">Admin</MenuItem>
+          <MenuItem value="superadmin">Super Admin</MenuItem>
+        </TextField>
+      </Grid>
+    </Grid>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleCloseUserDialog}>Cancel</Button>
+    <Button 
+      onClick={handleSubmitUser} 
+      variant="contained"
+      disabled={
+        !userFormData.firstName || 
+        !userFormData.lastName || 
+        !userFormData.email || 
+        !userFormData.phoneNumber // Validar phone en vez de password
+      }
+      sx={{
+        bgcolor: '#4a7c59',
+        '&:hover': { bgcolor: '#3d664a' }
+      }}
+    >
+      Send Invitation
+    </Button>
+  </DialogActions>
+</Dialog>
     </Box>
   )
 }
