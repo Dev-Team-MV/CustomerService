@@ -21,6 +21,10 @@ const payloadSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    urls: {
+      type: [String],
+      default: []
+    },
     status: {
       type: String,
       enum: ['pending', 'cleared', 'rejected'],
