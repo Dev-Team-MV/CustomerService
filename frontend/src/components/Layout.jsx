@@ -1016,7 +1016,7 @@ const Layout = ({ publicView = false }) => {
                     <LoginIcon />
                   </IconButton>
                 </Tooltip>
-                <Tooltip title="Register" placement="right">
+                {/* <Tooltip title="Register" placement="right">
                   <IconButton
                     onClick={() => navigate('/register')}
                     sx={{
@@ -1029,7 +1029,7 @@ const Layout = ({ publicView = false }) => {
                   >
                     <PersonAddIcon />
                   </IconButton>
-                </Tooltip>
+                </Tooltip> */}
               </Box>
             )}
           </AnimatePresence>

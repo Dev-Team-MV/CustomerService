@@ -125,26 +125,26 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
       await api.post('/properties', propertyPayload)
   
       // ✅ Enviar SMS de asignación de propiedad (SIEMPRE, para nuevos y existentes)
-      if (userInfo?.phoneNumber) {
-        setSmsStatus('sending-property')
-        const propertySMS = await sendPropertyAssignmentSMS({
-          firstName: userInfo.firstName,
-          phoneNumber: userInfo.phoneNumber,
-          lotNumber: selectedLot.number,
-          section: selectedLot.section,
-          modelName: selectedModel.model,
-          price: financials.presalePrice,
-          status: 'pending'
-        })
+      // if (userInfo?.phoneNumber) {
+      //   setSmsStatus('sending-property')
+      //   const propertySMS = await sendPropertyAssignmentSMS({
+      //     firstName: userInfo.firstName,
+      //     phoneNumber: userInfo.phoneNumber,
+      //     lotNumber: selectedLot.number,
+      //     section: selectedLot.section,
+      //     modelName: selectedModel.model,
+      //     price: financials.presalePrice,
+      //     status: 'pending'
+      //   })
         
-        if (propertySMS.success) {
-          console.log('✅ Property assignment SMS sent')
-          setSmsStatus('sent')
-        } else {
-          console.warn('⚠️ Property SMS failed:', propertySMS.error)
-          setSmsStatus('failed')
-        }
-      }
+      //   if (propertySMS.success) {
+      //     console.log('✅ Property assignment SMS sent')
+      //     setSmsStatus('sent')
+      //   } else {
+      //     console.warn('⚠️ Property SMS failed:', propertySMS.error)
+      //     setSmsStatus('failed')
+      //   }
+      // }
       
       const smsMessage = smsStatus === 'sent' 
         ? '\n\n📱 SMS notifications sent successfully!'

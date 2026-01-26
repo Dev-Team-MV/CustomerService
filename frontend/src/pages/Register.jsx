@@ -732,16 +732,7 @@ const Register = () => {
                   objectFit: 'contain'
                 }}
               />
-                <Typography 
-                  variant="h6" 
-                  fontWeight="300"
-                  sx={{ 
-                    opacity: 0.9,
-                    letterSpacing: '2px'
-                  }}
-                >
-                  Start Your Journey Today
-                </Typography>
+
               </motion.div>
             </Box>
 
