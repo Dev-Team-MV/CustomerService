@@ -1,5 +1,8 @@
 import Payload from '../models/Payload.js'
 import Property from '../models/Property.js'
+import { uploadFile } from '../services/storageService.js'
+import crypto from 'crypto'
+import path from 'path'
 
 export const getAllPayloads = async (req, res) => {
   try {
@@ -54,11 +57,38 @@ export const getPayloadById = async (req, res) => {
 
 export const createPayload = async (req, res) => {
   try {
-    const { property, date, amount, support, urls, status, notes } = req.body
+    const { property, date, amount, support, urls, status, notes, folder } = req.body
     
     const propertyExists = await Property.findById(property)
     if (!propertyExists) {
       return res.status(404).json({ message: 'Property not found' })
+    }
+
+    // Procesar imágenes si se subieron
+    let uploadedUrls = urls || []
+    
+    // Si hay archivos subidos (multipart/form-data)
+    if (req.files && req.files.length > 0) {
+      const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
+      const folderPath = folder || 'payloads' // Carpeta por defecto: 'payloads'
+      
+      const uploadPromises = req.files.map(async (file) => {
+        const fileExtension = path.extname(file.originalname)
+        const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+        
+        const result = await uploadFile(
+          file.buffer,
+          fileName,
+          file.mimetype,
+          makePublic,
+          folderPath
+        )
+
+        return result.publicUrl || result.signedUrl
+      })
+
+      const newUrls = await Promise.all(uploadPromises)
+      uploadedUrls = [...uploadedUrls, ...newUrls]
     }
     
     const payload = await Payload.create({
@@ -66,7 +96,7 @@ export const createPayload = async (req, res) => {
       date: date || Date.now(),
       amount,
       support,
-      urls: urls || [],
+      urls: uploadedUrls,
       status: status || 'pending',
       notes,
       processedBy: req.user._id
@@ -107,11 +137,38 @@ export const updatePayload = async (req, res) => {
     if (payload) {
       const oldStatus = payload.status
       const oldAmount = payload.amount
+      const { folder } = req.body
+      
+      // Procesar nuevas imágenes si se subieron
+      let updatedUrls = req.body.urls !== undefined ? req.body.urls : payload.urls
+      
+      if (req.files && req.files.length > 0) {
+        const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
+        const folderPath = folder || 'payloads'
+        
+        const uploadPromises = req.files.map(async (file) => {
+          const fileExtension = path.extname(file.originalname)
+          const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+          
+          const result = await uploadFile(
+            file.buffer,
+            fileName,
+            file.mimetype,
+            makePublic,
+            folderPath
+          )
+
+          return result.publicUrl || result.signedUrl
+        })
+
+        const newUrls = await Promise.all(uploadPromises)
+        updatedUrls = [...updatedUrls, ...newUrls]
+      }
       
       payload.date = req.body.date || payload.date
       payload.amount = req.body.amount !== undefined ? req.body.amount : payload.amount
       payload.support = req.body.support || payload.support
-      payload.urls = req.body.urls !== undefined ? req.body.urls : payload.urls
+      payload.urls = updatedUrls
       payload.status = req.body.status || payload.status
       payload.notes = req.body.notes || payload.notes
       payload.processedBy = req.user._id

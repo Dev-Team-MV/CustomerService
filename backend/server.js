@@ -15,6 +15,7 @@ import propertyRoutes from './routes/propertyRoutes.js'
 import payloadRoutes from './routes/payloadRoutes.js'
 import phaseRoutes from './routes/phaseRoutes.js'
 import smsRoutes from './routes/smsRoutes.js'
+import uploadRoutes from './routes/uploadRoutes.js'
 
 const app = express()
 
@@ -50,6 +51,7 @@ app.use('/api/properties', propertyRoutes)
 app.use('/api/payloads', payloadRoutes)
 app.use('/api/phases', phaseRoutes)
 app.use('/api/sms', smsRoutes)
+app.use('/api/upload', uploadRoutes)
 
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
