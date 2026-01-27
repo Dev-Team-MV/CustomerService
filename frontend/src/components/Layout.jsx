@@ -751,25 +751,26 @@ const Layout = ({ publicView = false }) => {
   ]
 
   // Menú para vista pública
-  const publicMenuItems = [
-    { text: 'Property Selection', icon: <HomeWorkIcon />, path: '/properties/select' },
-    { text: 'Explore Amenities', icon: <HomeIcon />, path: '/amenities/explore' }
-  ]
+ const publicMenuItems = [
+  { text: 'Get Your Quote', icon: <HomeWorkIcon />, path: '/explore/properties' },
+  { text: 'Explore Amenities', icon: <HomeIcon />, path: '/explore/amenities' }
+]
 
   const menuItems = publicView ? publicMenuItems : privateMenuItems.filter(item => item.roles.includes(user?.role))
 
-  const getPageTitle = () => {
-    const path = location.pathname
-    if (publicView) {
-      if (path === '/properties/select') return 'Property Selection'
-      if (path === '/amenities/explore') return 'Explore Amenities'
-      return 'Lakewood Oaks'
-    }
-    
-    const currentMenuItem = privateMenuItems.find(item => path.startsWith(item.path))
-    if (currentMenuItem) return currentMenuItem.text
-    return `Welcome, ${user?.firstName || 'User'}`
+// Actualiza getPageTitle para las rutas públicas:
+const getPageTitle = () => {
+  const path = location.pathname
+  if (publicView) {
+    if (path === '/explore/properties') return 'Get Your Quote'
+    if (path === '/explore/amenities') return 'Explore Amenities'
+    return 'Lakewood Oaks'
   }
+  
+  const currentMenuItem = privateMenuItems.find(item => path.startsWith(item.path))
+  if (currentMenuItem) return currentMenuItem.text
+  return `Welcome, ${user?.firstName || 'User'}`
+}
 
   const drawer = (
     <Box 
