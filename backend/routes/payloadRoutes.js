@@ -36,7 +36,7 @@ const router = express.Router()
  *               items:
  *                 $ref: '#/components/schemas/Payload'
  *   post:
- *     summary: Create a new payload (Admin only)
+ *     summary: Create a new payload (All authenticated users)
  *     tags: [Payloads]
  *     security:
  *       - bearerAuth: []
@@ -69,6 +69,7 @@ const router = express.Router()
  *                 type: string
  *                 enum: [pending, cleared, rejected]
  *                 default: pending
+ *                 description: Only admins can set status to 'cleared'. Regular users will have status set to 'pending' automatically.
  *               notes:
  *                 type: string
  *               folder:
@@ -89,7 +90,7 @@ const router = express.Router()
  */
 router.route('/')
   .get(protect, getAllPayloads)
-  .post(protect, admin, upload.array('images', 20), createPayload)
+  .post(protect, upload.array('images', 20), createPayload)
 
 /**
  * @swagger
@@ -154,7 +155,7 @@ router.get('/approved/this-month', protect, getApprovedPayloadsThisMonth)
  *       404:
  *         description: Payload not found
  *   put:
- *     summary: Update payload (Admin only)
+ *     summary: Update payload (Only admins can approve/reject)
  *     tags: [Payloads]
  *     security:
  *       - bearerAuth: []
@@ -184,6 +185,7 @@ router.get('/approved/this-month', protect, getApprovedPayloadsThisMonth)
  *               status:
  *                 type: string
  *                 enum: [pending, cleared, rejected]
+ *                 description: Only admins can set status to 'cleared' or 'rejected'
  *               notes:
  *                 type: string
  *               folder:
