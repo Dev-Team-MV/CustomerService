@@ -22,8 +22,8 @@ const app = express()
 connectDB()
 
 app.use(cors())
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+app.use(express.json({ limit: '100mb' })) // Increase JSON body size limit
+app.use(express.urlencoded({ extended: true, limit: '100mb' })) // Increase URL-encoded body size limit
 
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)

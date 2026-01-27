@@ -82,14 +82,14 @@ const router = express.Router()
  *       - in: formData
  *         name: images
  *         type: file
- *         description: Image files to upload (optional, max 10MB each, formats: jpeg, jpg, png, gif, webp)
+ *         description: Image files to upload (optional, max 50MB each, formats: jpeg, jpg, png, gif, webp)
  *     responses:
  *       201:
  *         description: Payload created
  */
 router.route('/')
   .get(protect, getAllPayloads)
-  .post(protect, admin, upload.array('images', 10), createPayload)
+  .post(protect, admin, upload.array('images', 20), createPayload)
 
 /**
  * @swagger
@@ -196,7 +196,7 @@ router.get('/approved/this-month', protect, getApprovedPayloadsThisMonth)
  *       - in: formData
  *         name: images
  *         type: file
- *         description: New image files to upload (optional, max 10MB each)
+ *         description: New image files to upload (optional, max 50MB each)
  *     responses:
  *       200:
  *         description: Payload updated
@@ -221,7 +221,7 @@ router.get('/approved/this-month', protect, getApprovedPayloadsThisMonth)
  */
 router.route('/:id')
   .get(protect, getPayloadById)
-  .put(protect, admin, upload.array('images', 10), updatePayload)
+  .put(protect, admin, upload.array('images', 20), updatePayload)
   .delete(protect, admin, deletePayload)
 
 export default router
