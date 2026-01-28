@@ -1,212 +1,3 @@
-// import { useState, useEffect } from 'react'
-// import { useNavigate } from 'react-router-dom'
-// import {
-//   Box,
-//   Typography,
-//   Paper,
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableContainer,
-//   TableHead,
-//   TableRow,
-//   Button,
-//   Chip,
-//   Avatar,
-//   IconButton
-// } from '@mui/material'
-// import { Add, Edit, Visibility } from '@mui/icons-material'
-// import api from '../services/api'
-
-// const Properties = () => {
-//   const navigate = useNavigate()
-//   const [properties, setProperties] = useState([])
-//   const [loading, setLoading] = useState(true)
-
-//   useEffect(() => {
-//     fetchData()
-//   }, [])
-
-//   const fetchData = async () => {
-//     try {
-//       const propertiesRes = await api.get('/properties')
-//       setProperties(propertiesRes.data)
-//     } catch (error) {
-//       console.error('Error fetching data:', error)
-//     } finally {
-//       setLoading(false)
-//     }
-//   }
-
-//   const handleAddProperty = () => {
-//     navigate('/properties/select')
-//   }
-
-//   const handleViewProperty = (property) => {
-//     // Opcional: navegar a una página de detalle
-//     console.log('View property:', property)
-//   }
-
-//   const getStatusColor = (status) => {
-//     switch (status) {
-//       case 'sold': return 'success'
-//       case 'active': return 'info'
-//       case 'pending': return 'warning'
-//       default: return 'default'
-//     }
-//   }
-
-//   if (loading) {
-//     return (
-//       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-//         <Typography>Loading properties...</Typography>
-//       </Box>
-//     )
-//   }
-
-//   return (
-//     <Box>
-//       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-//         <Box>
-//           <Typography variant="h4" fontWeight="bold">
-//             Property Management
-//           </Typography>
-//           <Typography variant="body2" color="text.secondary">
-//             Oversee inventory, pricing, and resident assignments across the estate.
-//           </Typography>
-//         </Box>
-//         <Button
-//           variant="contained"
-//           startIcon={<Add />}
-//           onClick={handleAddProperty}
-//           sx={{
-//             bgcolor: '#4a7c59',
-//             '&:hover': { bgcolor: '#3d664a' }
-//           }}
-//         >
-//           Add Property
-//         </Button>
-//       </Box>
-
-//       <Paper>
-//         <TableContainer>
-//           <Table>
-//             <TableHead>
-//               <TableRow>
-//                 <TableCell>LOT INFO</TableCell>
-//                 <TableCell>MODEL</TableCell>
-//                 <TableCell>FACADE</TableCell>
-//                 <TableCell>RESIDENT / OWNER</TableCell>
-//                 <TableCell>STATUS</TableCell>
-//                 <TableCell>PRICE</TableCell>
-//                 <TableCell>ACTIONS</TableCell>
-//               </TableRow>
-//             </TableHead>
-//             <TableBody>
-//               {properties.length === 0 ? (
-//                 <TableRow>
-//                   <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-//                     <Typography variant="body2" color="text.secondary">
-//                       No properties found. Click "Add Property" to create one.
-//                     </Typography>
-//                   </TableCell>
-//                 </TableRow>
-//               ) : (
-//                 properties.map((property) => (
-//                   <TableRow key={property._id} hover>
-//                     <TableCell>
-//                       <Box display="flex" alignItems="center" gap={1}>
-//                         <Avatar sx={{ bgcolor: 'primary.light' }}>
-//                           {property.lot?.number}
-//                         </Avatar>
-//                         <Box>
-//                           <Typography variant="body2" fontWeight="500">
-//                             Lot {property.lot?.number}
-//                           </Typography>
-//                           <Typography variant="caption" color="text.secondary">
-//                             Section {property.lot?.section || 'N/A'}
-//                           </Typography>
-//                         </Box>
-//                       </Box>
-//                     </TableCell>
-//                     <TableCell>
-//                       <Typography variant="body2" fontWeight="500">
-//                         {property.model?.model || 'N/A'}
-//                       </Typography>
-//                       <Typography variant="caption" color="text.secondary">
-//                         {property.model?.bedrooms}BR / {property.model?.bathrooms}BA
-//                       </Typography>
-//                     </TableCell>
-//                     <TableCell>
-//                       <Typography variant="body2">
-//                         {property.facade?.title || 'Not selected'}
-//                       </Typography>
-//                       {property.facade?.price > 0 && (
-//                         <Typography variant="caption" color="success.main">
-//                           +${property.facade.price.toLocaleString()}
-//                         </Typography>
-//                       )}
-//                     </TableCell>
-//                     <TableCell>
-//                       <Box display="flex" alignItems="center" gap={1}>
-//                         <Avatar sx={{ width: 32, height: 32, fontSize: '14px', bgcolor: 'secondary.main' }}>
-//                           {property.user?.firstName?.charAt(0) || property.client?.firstName?.charAt(0)}
-//                         </Avatar>
-//                         <Box>
-//                           <Typography variant="body2">
-//                             {property.user?.firstName || property.client?.firstName} {property.user?.lastName || property.client?.lastName}
-//                           </Typography>
-//                           <Typography variant="caption" color="text.secondary">
-//                             {property.user?.email || property.client?.email}
-//                           </Typography>
-//                         </Box>
-//                       </Box>
-//                     </TableCell>
-//                     <TableCell>
-//                       <Chip
-//                         label={property.status || 'pending'}
-//                         color={getStatusColor(property.status)}
-//                         size="small"
-//                       />
-//                     </TableCell>
-//                     <TableCell>
-//                       <Typography variant="body2" fontWeight="600">
-//                         ${property.presalePrice?.toLocaleString() || property.price?.toLocaleString()}
-//                       </Typography>
-//                       {property.pending > 0 && (
-//                         <Typography variant="caption" color="warning.main" display="block">
-//                           Pending: ${property.pending?.toLocaleString()}
-//                         </Typography>
-//                       )}
-//                       {property.initialPayment > 0 && (
-//                         <Typography variant="caption" color="success.main" display="block">
-//                           Paid: ${property.initialPayment?.toLocaleString()}
-//                         </Typography>
-//                       )}
-//                     </TableCell>
-//                     <TableCell>
-//                       <IconButton 
-//                         size="small" 
-//                         onClick={() => handleViewProperty(property)}
-//                         title="View details"
-//                       >
-//                         <Visibility fontSize="small" />
-//                       </IconButton>
-//                     </TableCell>
-//                   </TableRow>
-//                 ))
-//               )}
-//             </TableBody>
-//           </Table>
-//         </TableContainer>
-//       </Paper>
-//     </Box>
-//   )
-// }
-
-// export default Properties
-
-
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -293,18 +84,27 @@ const Properties = () => {
     if (!property.phases || property.phases.length === 0) {
       return { current: 1, total: 9, percentage: 0, completed: 0 }
     }
-
+  
+    const totalPhases = property.phases.length
     const completedPhases = property.phases.filter(p => p.constructionPercentage === 100).length
+    
     const totalProgress = property.phases.reduce((sum, phase) => sum + (phase.constructionPercentage || 0), 0)
-    const avgProgress = totalProgress / 9
-
+    const avgProgress = totalProgress / totalPhases
+  
+    // Encuentra la primera fase incompleta (no 100%)
+    const firstIncompleteIndex = property.phases.findIndex(p => p.constructionPercentage < 100)
+    // Si todas están completas, muestra la última fase
+    const current = firstIncompleteIndex === -1 ? totalPhases : firstIncompleteIndex + 1
+  
+    console.log('fases completas', completedPhases);
     return {
-      current: completedPhases < 9 ? completedPhases + 1 : 9,
+      current,
       completed: completedPhases,
-      total: 9,
+      total: totalPhases,
       percentage: Math.round(avgProgress)
     }
   }
+
 
   if (loading) {
     return (
