@@ -64,6 +64,16 @@ export const createPayload = async (req, res) => {
       return res.status(404).json({ message: 'Property not found' })
     }
 
+    // Verificar si el usuario es admin o superadmin
+    const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
+    
+    // Solo los administradores pueden crear payloads con status 'cleared'
+    // Los usuarios normales siempre crearán con status 'pending'
+    let finalStatus = status || 'pending'
+    if (!isAdmin && finalStatus === 'cleared') {
+      finalStatus = 'pending'
+    }
+
     // Procesar imágenes si se subieron
     let uploadedUrls = urls || []
     
@@ -97,12 +107,12 @@ export const createPayload = async (req, res) => {
       amount,
       support,
       urls: uploadedUrls,
-      status: status || 'pending',
+      status: finalStatus,
       notes,
       processedBy: req.user._id
     })
     
-    if (status === 'cleared') {
+    if (finalStatus === 'cleared') {
       propertyExists.pending = Math.max(0, propertyExists.pending - amount)
       
       if (propertyExists.pending === 0) {
@@ -139,6 +149,17 @@ export const updatePayload = async (req, res) => {
       const oldAmount = payload.amount
       const { folder } = req.body
       
+      // Verificar si el usuario es admin o superadmin
+      const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
+      
+      // Solo los administradores pueden cambiar el status a 'cleared' o 'rejected'
+      let newStatus = req.body.status !== undefined ? req.body.status : payload.status
+      if (!isAdmin && (newStatus === 'cleared' || newStatus === 'rejected')) {
+        return res.status(403).json({ 
+          message: 'Only administrators can approve or reject payloads' 
+        })
+      }
+      
       // Procesar nuevas imágenes si se subieron
       let updatedUrls = req.body.urls !== undefined ? req.body.urls : payload.urls
       
@@ -169,7 +190,7 @@ export const updatePayload = async (req, res) => {
       payload.amount = req.body.amount !== undefined ? req.body.amount : payload.amount
       payload.support = req.body.support || payload.support
       payload.urls = updatedUrls
-      payload.status = req.body.status || payload.status
+      payload.status = newStatus
       payload.notes = req.body.notes || payload.notes
       payload.processedBy = req.user._id
       

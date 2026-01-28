@@ -52,7 +52,7 @@ router.get('/test-connection', testGCSConnection)
  *         name: image
  *         type: file
  *         required: true
- *         description: Image file to upload (max 10MB, formats: jpeg, jpg, png, gif, webp)
+ *         description: Image file to upload (max 50MB, formats: jpeg, jpg, png, gif, webp)
  *       - in: formData
  *         name: folder
  *         type: string
@@ -109,7 +109,7 @@ router.post('/image', protect, upload.single('image'), uploadImage)
  *         name: images
  *         type: file
  *         required: true
- *         description: Image files to upload (max 10MB each, formats: jpeg, jpg, png, gif, webp)
+ *         description: Image files to upload (max 50MB each, formats: jpeg, jpg, png, gif, webp)
  *       - in: formData
  *         name: folder
  *         type: string
@@ -152,7 +152,7 @@ router.post('/image', protect, upload.single('image'), uploadImage)
  *       500:
  *         description: Error uploading images
  */
-router.post('/images', protect, upload.array('images', 10), uploadMultipleImages)
+router.post('/images', protect, upload.array('images', 20), uploadMultipleImages)
 
 /**
  * @swagger
