@@ -79,8 +79,82 @@ propertySchema.virtual('phases', {
   foreignField: 'property'
 })
 
+// Virtual for calculating total construction percentage based on phases
+propertySchema.virtual('totalConstructionPercentage').get(function() {
+  // Phase weights (percentage of total construction each phase represents)
+  const phaseWeights = {
+    1: 10.00,  // Site Preparation and Groundbreaking
+    2: 15.00,  // Foundation, Framing & Windows
+    3: 15.00,  // Exterior Cladding and Roofing Installation
+    4: 15.00,  // All MEP's starts rough in work
+    5: 10.00,  // Drywall Work and Paint
+    6: 10.00,  // Flooring and Millwork
+    7: 10.00,  // Kitchen and Bathrooms
+    8: 10.00,  // Interior Finishes, Driveway Applainces & Landscaping
+    9: 5.00    // Inspections (Delays)
+  }
+  
+  // If phases are populated, calculate the total percentage
+  if (this.phases && Array.isArray(this.phases) && this.phases.length > 0) {
+    let totalPercentage = 0
+    
+    this.phases.forEach(phase => {
+      const weight = phaseWeights[phase.phaseNumber] || 0
+      const phaseCompletion = phase.constructionPercentage || 0
+      // Contribution = (phase completion % * phase weight) / 100
+      totalPercentage += (phaseCompletion * weight) / 100
+    })
+    
+    // Round to 2 decimal places
+    return Math.round(totalPercentage * 100) / 100
+  }
+  
+  return 0
+})
+
 propertySchema.set('toJSON', { virtuals: true })
 propertySchema.set('toObject', { virtuals: true })
+
+// Instance method to calculate total construction percentage
+// This method can be called even when phases are not populated
+propertySchema.methods.calculateTotalConstructionPercentage = async function() {
+  const phaseWeights = {
+    1: 10.00,
+    2: 15.00,
+    3: 15.00,
+    4: 15.00,
+    5: 10.00,
+    6: 10.00,
+    7: 10.00,
+    8: 10.00,
+    9: 5.00
+  }
+  
+  // If phases are already populated, use them
+  if (this.phases && Array.isArray(this.phases) && this.phases.length > 0) {
+    let totalPercentage = 0
+    
+    this.phases.forEach(phase => {
+      const weight = phaseWeights[phase.phaseNumber] || 0
+      const phaseCompletion = phase.constructionPercentage || 0
+      totalPercentage += (phaseCompletion * weight) / 100
+    })
+    
+    return Math.round(totalPercentage * 100) / 100
+  }
+  
+  // Otherwise, fetch phases from database
+  const phases = await Phase.find({ property: this._id })
+  let totalPercentage = 0
+  
+  phases.forEach(phase => {
+    const weight = phaseWeights[phase.phaseNumber] || 0
+    const phaseCompletion = phase.constructionPercentage || 0
+    totalPercentage += (phaseCompletion * weight) / 100
+  })
+  
+  return Math.round(totalPercentage * 100) / 100
+}
 
 // Mark document as new before saving
 propertySchema.pre('save', function (next) {
