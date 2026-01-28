@@ -21,9 +21,12 @@ import {
   DialogActions,
   TextField,
   MenuItem,
-  Avatar
+  Avatar,
+  Tooltip
 } from '@mui/material'
 import { Add, Edit, AttachFile, CheckCircle, Cancel } from '@mui/icons-material'
+import Download from '@mui/icons-material/Download'
+
 import api from '../services/api'
 
 const Payloads = () => {
@@ -106,6 +109,53 @@ const Payloads = () => {
       fetchData()
     } catch (error) {
       console.error('Error saving payload:', error)
+    }
+  }
+
+  const getFileUrl = (payload) => {
+    if (!payload) return null
+    // common shapes: payload.supportFile { url }, payload.supportFile (string), payload.fileUrl, payload.documentUrl, payload.attachment
+    if (payload.support) {
+      if (typeof payload.support === 'string') return payload.support
+      if (payload.support.url) return payload.support.url
+    }
+    if (payload.fileUrl) return payload.fileUrl
+    if (payload.documentUrl) return payload.documentUrl
+    if (payload.attachment) return payload.attachment
+    return null
+  }
+
+  const handleDownload = (payload) => {
+    const url = getFileUrl(payload)
+    if (!url) {
+      alert('No attached file available for this payload.')
+      return
+    }
+    // abrir en nueva pestaña para revisar / descargar
+    window.open(url, '_blank', 'noopener')
+  }
+
+  const handleApprove = async (payload) => {
+    if (!payload) return
+    if (!window.confirm('Approve this payment and mark as cleared?')) return
+    try {
+      await api.put(`/payloads/${payload._id}`, { status: 'cleared' })
+      fetchData()
+    } catch (err) {
+      console.error('Error approving payload:', err)
+      alert('Error approving payload')
+    }
+  }
+
+  const handleReject = async (payload) => {
+    if (!payload) return
+    if (!window.confirm('Reject this payment? This will set status to rejected.')) return
+    try {
+      await api.put(`/payloads/${payload._id}`, { status: 'rejected' })
+      fetchData()
+    } catch (err) {
+      console.error('Error rejecting payload:', err)
+      alert('Error rejecting payload')
     }
   }
 
@@ -254,28 +304,97 @@ const Payloads = () => {
                       }
                     />
                   </TableCell>
+
                   <TableCell>
-                    <IconButton size="small">
-                      <AttachFile fontSize="small" />
-                    </IconButton>
+                    <Tooltip title={getFileUrl(payload) ? 'Download file' : 'No file attached'}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDownload(payload)}
+                          disabled={!getFileUrl(payload)}
+                        >
+                          <Download fontSize="small" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                    {/* {getFileUrl(payload) && (
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                        {getFileUrl(payload).split('/').slice(-1)[0]}
+                      </Typography>
+                    )} */}
                   </TableCell>
                   <TableCell>
-                    <IconButton size="small" onClick={() => handleOpenDialog(payload)}>
-                      <Edit fontSize="small" />
-                    </IconButton>
+                    <Tooltip title="Approve">
+                      <span>
+                        <IconButton
+                          size="small"
+                          color="success"
+                          onClick={() => handleApprove(payload)}
+                          disabled={payload.status === 'cleared'}
+                        >
+                          <CheckCircle fontSize="small" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                    <Tooltip title="Reject">
+                      <span>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleReject(payload)}
+                          disabled={payload.status === 'rejected'}
+                        >
+                          <Cancel fontSize="small" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
                   </TableCell>
-                </TableRow>
+                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
       </Paper>
 
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
+          }
+        }}
+      >
         <DialogTitle>
-          {selectedPayload ? 'Edit Payload' : 'Add New Payload'}
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: 3,
+                background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <AttachFile sx={{ color: 'white', fontSize: 24 }} />
+            </Box>
+            <Box>
+              <Typography variant="h6" fontWeight={700}>
+                {selectedPayload ? 'Edit Payload' : 'Add New Payload'}
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#6c757d' }}>
+                Manage and track payment record details
+              </Typography>
+            </Box>
+          </Box>
         </DialogTitle>
-        <DialogContent>
+
+        <DialogContent sx={{ pt: 3 }}>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12}>
               <TextField
@@ -284,6 +403,12 @@ const Payloads = () => {
                 label="Property"
                 value={formData.property}
                 onChange={(e) => setFormData({ ...formData, property: e.target.value })}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 3,
+                    '&.Mui-focused fieldset': { borderColor: '#4a7c59' }
+                  }
+                }}
               >
                 {properties.map((property) => (
                   <MenuItem key={property._id} value={property._id}>
@@ -292,6 +417,7 @@ const Payloads = () => {
                 ))}
               </TextField>
             </Grid>
+
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -300,8 +426,15 @@ const Payloads = () => {
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 InputLabelProps={{ shrink: true }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 3,
+                    '&.Mui-focused fieldset': { borderColor: '#4a7c59' }
+                  }
+                }}
               />
             </Grid>
+
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -309,8 +442,15 @@ const Payloads = () => {
                 label="Amount"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 3,
+                    '&.Mui-focused fieldset': { borderColor: '#4a7c59' }
+                  }
+                }}
               />
             </Grid>
+
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -318,12 +458,19 @@ const Payloads = () => {
                 label="Status"
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 3,
+                    '&.Mui-focused fieldset': { borderColor: '#4a7c59' }
+                  }
+                }}
               >
                 <MenuItem value="pending">Pending</MenuItem>
                 <MenuItem value="cleared">Cleared</MenuItem>
                 <MenuItem value="rejected">Rejected</MenuItem>
               </TextField>
             </Grid>
+
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -332,13 +479,53 @@ const Payloads = () => {
                 label="Notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 3,
+                    '&.Mui-focused fieldset': { borderColor: '#4a7c59' }
+                  }
+                }}
               />
             </Grid>
           </Grid>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
+
+        <DialogActions sx={{ p: 3, gap: 2 }}>
+          <Button
+            onClick={handleCloseDialog}
+            sx={{
+              borderRadius: 3,
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 3
+            }}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            disabled={!formData.amount}
+            startIcon={<CheckCircle />}
+            sx={{
+              borderRadius: 3,
+              background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+              color: 'white',
+              fontWeight: 700,
+              textTransform: 'none',
+              px: 4,
+              py: 1.5,
+              boxShadow: '0 8px 20px rgba(74, 124, 89, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
+                boxShadow: '0 12px 28px rgba(74, 124, 89, 0.4)'
+              },
+              '&:disabled': {
+                background: '#ccc'
+              }
+            }}
+          >
             {selectedPayload ? 'Update' : 'Create'}
           </Button>
         </DialogActions>

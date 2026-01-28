@@ -3,6 +3,7 @@ import Lot from '../models/Lot.js'
 import Model from '../models/Model.js'
 import Facade from '../models/Facade.js'
 import User from '../models/User.js'
+import Phase from '../models/Phase.js'
 
 export const getAllProperties = async (req, res) => {
   try {
@@ -17,9 +18,20 @@ export const getAllProperties = async (req, res) => {
       .populate('model', 'model price bedrooms bathrooms sqft images')
       .populate('facade', 'title url price')
       .populate('user', 'firstName lastName email phoneNumber')
+      .populate({
+        path: 'phases',
+        options: { sort: { phaseNumber: 1 } }
+      })
       .sort({ createdAt: -1 })
     
-    res.json(properties)
+    // Calculate total construction percentage for each property
+    const propertiesWithPercentage = properties.map(property => {
+      const propertyObj = property.toObject()
+      propertyObj.totalConstructionPercentage = property.totalConstructionPercentage || 0
+      return propertyObj
+    })
+    
+    res.json(propertiesWithPercentage)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -42,7 +54,9 @@ export const getPropertyById = async (req, res) => {
       })
     
     if (property) {
-      res.json(property)
+      const propertyObj = property.toObject()
+      propertyObj.totalConstructionPercentage = property.totalConstructionPercentage || 0
+      res.json(propertyObj)
     } else {
       res.status(404).json({ message: 'Property not found' })
     }
@@ -141,8 +155,15 @@ export const createProperty = async (req, res) => {
       .populate('model')
       .populate('facade')
       .populate('user')
+      .populate({
+        path: 'phases',
+        options: { sort: { phaseNumber: 1 } }
+      })
     
-    res.status(201).json(populatedProperty)
+    const propertyObj = populatedProperty.toObject()
+    propertyObj.totalConstructionPercentage = populatedProperty.totalConstructionPercentage || 0
+    
+    res.status(201).json(propertyObj)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -206,8 +227,15 @@ export const updateProperty = async (req, res) => {
         .populate('model')
         .populate('facade')
         .populate('user')
+        .populate({
+          path: 'phases',
+          options: { sort: { phaseNumber: 1 } }
+        })
       
-      res.json(populatedProperty)
+      const propertyObj = populatedProperty.toObject()
+      propertyObj.totalConstructionPercentage = populatedProperty.totalConstructionPercentage || 0
+      
+      res.json(propertyObj)
     } else {
       res.status(404).json({ message: 'Property not found' })
     }
