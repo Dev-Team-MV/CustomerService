@@ -5,6 +5,65 @@ import Facade from '../models/Facade.js'
 import User from '../models/User.js'
 import Phase from '../models/Phase.js'
 
+/**
+ * Calcula las imágenes (exterior e interior) de la propiedad según:
+ * - modelType: 'basic' | 'upgrade'
+ * - hasBalcony: true | false
+ *
+ * Basic sin balcón: imágenes interior y exterior del modelo base.
+ * Basic con balcón: imágenes interior y exterior del balcón.
+ * Upgrade sin balcón: exterior = modelo base; interior = interior del upgrade.
+ * Upgrade con balcón: exterior = exterior del balcón; interior = exterior del upgrade.
+ */
+function getPropertyImages(property) {
+  const model = property.model
+  if (!model || !model.images) {
+    return { exterior: [], interior: [] }
+  }
+
+  const baseExterior = model.images?.exterior || []
+  const baseInterior = model.images?.interior || []
+
+  const balcony = Array.isArray(model.balconies) && model.balconies.length
+    ? (model.balconies.find(b => b.status !== 'inactive') || model.balconies[0])
+    : null
+  const upgrade = Array.isArray(model.upgrades) && model.upgrades.length
+    ? (model.upgrades.find(u => u.status !== 'inactive') || model.upgrades[0])
+    : null
+
+  const balconyExterior = balcony?.images?.exterior || []
+  const balconyInterior = balcony?.images?.interior || []
+  const upgradeExterior = upgrade?.images?.exterior || []
+  const upgradeInterior = upgrade?.images?.interior || []
+
+  const isBasic = property.modelType === 'basic'
+  const hasBalcony = property.hasBalcony === true
+
+  let exterior = []
+  let interior = []
+
+  if (isBasic) {
+    if (!hasBalcony) {
+      exterior = baseExterior
+      interior = baseInterior
+    } else {
+      exterior = balconyExterior.length ? balconyExterior : baseExterior
+      interior = balconyInterior.length ? balconyInterior : baseInterior
+    }
+  } else {
+    // upgrade
+    if (!hasBalcony) {
+      exterior = baseExterior
+      interior = upgradeInterior.length ? upgradeInterior : baseInterior
+    } else {
+      exterior = balconyExterior.length ? balconyExterior : baseExterior
+      interior = upgradeExterior.length ? upgradeExterior : (upgradeInterior.length ? upgradeInterior : baseInterior)
+    }
+  }
+
+  return { exterior, interior }
+}
+
 export const getAllProperties = async (req, res) => {
   try {
     const { status, user } = req.query
@@ -15,7 +74,7 @@ export const getAllProperties = async (req, res) => {
     
     const properties = await Property.find(filter)
       .populate('lot', 'number section size')
-      .populate('model', 'model price bedrooms bathrooms sqft images')
+      .populate('model', 'model price bedrooms bathrooms sqft images balconies upgrades')
       .populate('facade', 'title url price')
       .populate('user', 'firstName lastName email phoneNumber')
       .populate({
@@ -24,10 +83,11 @@ export const getAllProperties = async (req, res) => {
       })
       .sort({ createdAt: -1 })
     
-    // Calculate total construction percentage for each property
+    // Calculate total construction percentage and images for each property
     const propertiesWithPercentage = properties.map(property => {
       const propertyObj = property.toObject()
       propertyObj.totalConstructionPercentage = property.totalConstructionPercentage || 0
+      propertyObj.images = getPropertyImages(property)
       return propertyObj
     })
     
@@ -41,7 +101,7 @@ export const getPropertyById = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id)
       .populate('lot', 'number section size price')
-      .populate('model', 'model price bedrooms bathrooms sqft images description')
+      .populate('model', 'model price bedrooms bathrooms sqft images description balconies upgrades')
       .populate('facade', 'title url price')
       .populate('user', 'firstName lastName email phoneNumber birthday')
       .populate({
@@ -56,6 +116,7 @@ export const getPropertyById = async (req, res) => {
     if (property) {
       const propertyObj = property.toObject()
       propertyObj.totalConstructionPercentage = property.totalConstructionPercentage || 0
+      propertyObj.images = getPropertyImages(property)
       res.json(propertyObj)
     } else {
       res.status(404).json({ message: 'Property not found' })
@@ -162,6 +223,7 @@ export const createProperty = async (req, res) => {
     
     const propertyObj = populatedProperty.toObject()
     propertyObj.totalConstructionPercentage = populatedProperty.totalConstructionPercentage || 0
+    propertyObj.images = getPropertyImages(populatedProperty)
     
     res.status(201).json(propertyObj)
   } catch (error) {
@@ -234,6 +296,7 @@ export const updateProperty = async (req, res) => {
       
       const propertyObj = populatedProperty.toObject()
       propertyObj.totalConstructionPercentage = populatedProperty.totalConstructionPercentage || 0
+      propertyObj.images = getPropertyImages(populatedProperty)
       
       res.json(propertyObj)
     } else {
