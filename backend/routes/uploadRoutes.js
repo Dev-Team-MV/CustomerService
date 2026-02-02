@@ -1,5 +1,5 @@
 import express from 'express'
-import { uploadImage, uploadMultipleImages, deleteImage, testGCSConnection, upload } from '../controllers/uploadController.js'
+import { uploadImage, uploadMultipleImages, updateImage, deleteImage, testGCSConnection, upload } from '../controllers/uploadController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -153,6 +153,67 @@ router.post('/image', protect, upload.single('image'), uploadImage)
  *         description: Error uploading images
  */
 router.post('/images', protect, upload.array('images', 20), uploadMultipleImages)
+
+/**
+ * @swagger
+ * /api/upload/image/update:
+ *   post:
+ *     summary: Upload image and update URL in Model / Balcony / Upgrade (Admin only)
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: formData
+ *         name: image
+ *         type: file
+ *         required: true
+ *         description: Image file to upload
+ *       - in: formData
+ *         name: modelId
+ *         type: string
+ *         required: true
+ *         description: Model _id
+ *       - in: formData
+ *         name: target
+ *         type: string
+ *         required: true
+ *         enum: [model, balcony, upgrade]
+ *         description: Where to save the image (model base, balcony or upgrade)
+ *       - in: formData
+ *         name: imageType
+ *         type: string
+ *         required: true
+ *         enum: [exterior, interior]
+ *         description: exterior or interior images array
+ *       - in: formData
+ *         name: imageIndex
+ *         type: integer
+ *         description: Optional. Replace image at this index; if omitted, appends
+ *       - in: formData
+ *         name: balconyId
+ *         type: string
+ *         description: Required when target=balcony (balcony subdocument _id)
+ *       - in: formData
+ *         name: upgradeId
+ *         type: string
+ *         description: Required when target=upgrade (upgrade subdocument _id)
+ *       - in: formData
+ *         name: folder
+ *         type: string
+ *         description: GCS folder (default models)
+ *     responses:
+ *       200:
+ *         description: Image updated successfully
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Model / Balcony / Upgrade not found
+ *       500:
+ *         description: Error updating image
+ */
+router.post('/image/update', protect, admin, upload.single('image'), updateImage)
 
 /**
  * @swagger
