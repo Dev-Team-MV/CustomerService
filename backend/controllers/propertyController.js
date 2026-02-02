@@ -64,6 +64,39 @@ function getPropertyImages(property) {
   return { exterior, interior }
 }
 
+/**
+ * Devuelve el array de blueprints de la propiedad según hasBalcony y hasStorage.
+ * default: sin balcón, sin storage
+ * withBalcony: con balcón, sin storage
+ * withStorage: sin balcón, con storage
+ * withBalconyAndStorage: con balcón, con storage
+ */
+function getPropertyBlueprints(property) {
+  const model = property.model
+  if (!model || !model.blueprints) {
+    return []
+  }
+  const b = model.blueprints
+  const defaultArr = b.default || []
+  const withBalcony = b.withBalcony || []
+  const withStorage = b.withStorage || []
+  const withBalconyAndStorage = b.withBalconyAndStorage || []
+
+  const hasBalcony = property.hasBalcony === true
+  const hasStorage = property.hasStorage === true
+
+  if (hasBalcony && hasStorage) {
+    return withBalconyAndStorage.length ? withBalconyAndStorage : defaultArr
+  }
+  if (hasBalcony) {
+    return withBalcony.length ? withBalcony : defaultArr
+  }
+  if (hasStorage) {
+    return withStorage.length ? withStorage : defaultArr
+  }
+  return defaultArr
+}
+
 export const getAllProperties = async (req, res) => {
   try {
     const { status, user } = req.query
@@ -74,7 +107,7 @@ export const getAllProperties = async (req, res) => {
     
     const properties = await Property.find(filter)
       .populate('lot', 'number section size')
-      .populate('model', 'model price bedrooms bathrooms sqft images balconies upgrades')
+      .populate('model', 'model price bedrooms bathrooms sqft images blueprints balconies upgrades')
       .populate('facade', 'title url price')
       .populate('user', 'firstName lastName email phoneNumber')
       .populate({
@@ -88,6 +121,7 @@ export const getAllProperties = async (req, res) => {
       const propertyObj = property.toObject()
       propertyObj.totalConstructionPercentage = property.totalConstructionPercentage || 0
       propertyObj.images = getPropertyImages(property)
+      propertyObj.blueprints = getPropertyBlueprints(property)
       return propertyObj
     })
     
@@ -101,7 +135,7 @@ export const getPropertyById = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id)
       .populate('lot', 'number section size price')
-      .populate('model', 'model price bedrooms bathrooms sqft images description balconies upgrades')
+      .populate('model', 'model price bedrooms bathrooms sqft images blueprints description balconies upgrades')
       .populate('facade', 'title url price')
       .populate('user', 'firstName lastName email phoneNumber birthday')
       .populate({
@@ -117,6 +151,7 @@ export const getPropertyById = async (req, res) => {
       const propertyObj = property.toObject()
       propertyObj.totalConstructionPercentage = property.totalConstructionPercentage || 0
       propertyObj.images = getPropertyImages(property)
+      propertyObj.blueprints = getPropertyBlueprints(property)
       res.json(propertyObj)
     } else {
       res.status(404).json({ message: 'Property not found' })
@@ -224,6 +259,7 @@ export const createProperty = async (req, res) => {
     const propertyObj = populatedProperty.toObject()
     propertyObj.totalConstructionPercentage = populatedProperty.totalConstructionPercentage || 0
     propertyObj.images = getPropertyImages(populatedProperty)
+    propertyObj.blueprints = getPropertyBlueprints(populatedProperty)
     
     res.status(201).json(propertyObj)
   } catch (error) {
@@ -297,6 +333,7 @@ export const updateProperty = async (req, res) => {
       const propertyObj = populatedProperty.toObject()
       propertyObj.totalConstructionPercentage = populatedProperty.totalConstructionPercentage || 0
       propertyObj.images = getPropertyImages(populatedProperty)
+      propertyObj.blueprints = getPropertyBlueprints(populatedProperty)
       
       res.json(propertyObj)
     } else {

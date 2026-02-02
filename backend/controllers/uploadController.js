@@ -1,5 +1,6 @@
 import multer from 'multer'
 import { uploadFile, deleteFile, testConnection } from '../services/storageService.js'
+import Model from '../models/Model.js'
 import crypto from 'crypto'
 import path from 'path'
 
@@ -159,6 +160,173 @@ export const deleteImage = async (req, res) => {
     res.status(500).json({ 
       success: false,
       message: error.message || 'Error deleting image' 
+    })
+  }
+}
+
+/**
+ * Update an image: upload new file to GCS and save URL in Model (base, balcony or upgrade).
+ * POST multipart: image (file), modelId, target (model|balcony|upgrade), imageType (exterior|interior),
+ * optional: imageIndex (replace at index), balconyId (if target=balcony), upgradeId (if target=upgrade), folder.
+ */
+export const updateImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded'
+      })
+    }
+
+    const { modelId, target, imageType, imageIndex, balconyId, upgradeId, folder, blueprintVariant } = req.body
+
+    if (!modelId || !target) {
+      return res.status(400).json({
+        success: false,
+        message: 'modelId and target are required'
+      })
+    }
+
+    const validTargets = ['model', 'balcony', 'upgrade', 'blueprints']
+    if (!validTargets.includes(target)) {
+      return res.status(400).json({
+        success: false,
+        message: 'target must be one of: model, balcony, upgrade, blueprints'
+      })
+    }
+
+    if (target !== 'blueprints' && !imageType) {
+      return res.status(400).json({
+        success: false,
+        message: 'imageType is required when target is model, balcony or upgrade'
+      })
+    }
+
+    const validImageTypes = ['exterior', 'interior']
+    if (target !== 'blueprints' && !validImageTypes.includes(imageType)) {
+      return res.status(400).json({
+        success: false,
+        message: 'imageType must be one of: exterior, interior'
+      })
+    }
+
+    const validBlueprintVariants = ['default', 'withBalcony', 'withStorage', 'withBalconyAndStorage']
+    if (target === 'blueprints') {
+      if (!blueprintVariant || !validBlueprintVariants.includes(blueprintVariant)) {
+        return res.status(400).json({
+          success: false,
+          message: 'blueprintVariant is required when target is blueprints (default, withBalcony, withStorage, withBalconyAndStorage)'
+        })
+      }
+    }
+
+    if (target === 'balcony' && !balconyId) {
+      return res.status(400).json({
+        success: false,
+        message: 'balconyId is required when target is balcony'
+      })
+    }
+    if (target === 'upgrade' && !upgradeId) {
+      return res.status(400).json({
+        success: false,
+        message: 'upgradeId is required when target is upgrade'
+      })
+    }
+
+    const model = await Model.findById(modelId)
+    if (!model) {
+      return res.status(404).json({
+        success: false,
+        message: 'Model not found'
+      })
+    }
+
+    let imageArray = null
+
+    if (target === 'blueprints') {
+      if (!model.blueprints) model.blueprints = { default: [], withBalcony: [], withStorage: [], withBalconyAndStorage: [] }
+      const variant = blueprintVariant
+      if (!Array.isArray(model.blueprints[variant])) model.blueprints[variant] = []
+      imageArray = model.blueprints[variant]
+    } else if (target === 'model') {
+      if (!model.images) model.images = { exterior: [], interior: [] }
+      if (!Array.isArray(model.images.exterior)) model.images.exterior = []
+      if (!Array.isArray(model.images.interior)) model.images.interior = []
+      imageArray = model.images[imageType]
+    } else if (target === 'balcony') {
+      const balcony = model.balconies.id(balconyId)
+      if (!balcony) {
+        return res.status(404).json({
+          success: false,
+          message: 'Balcony not found in this model'
+        })
+      }
+      if (!balcony.images) balcony.images = { exterior: [], interior: [] }
+      if (!Array.isArray(balcony.images.exterior)) balcony.images.exterior = []
+      if (!Array.isArray(balcony.images.interior)) balcony.images.interior = []
+      imageArray = balcony.images[imageType]
+    } else {
+      const upgrade = model.upgrades.id(upgradeId)
+      if (!upgrade) {
+        return res.status(404).json({
+          success: false,
+          message: 'Upgrade not found in this model'
+        })
+      }
+      if (!upgrade.images) upgrade.images = { exterior: [], interior: [] }
+      if (!Array.isArray(upgrade.images.exterior)) upgrade.images.exterior = []
+      if (!Array.isArray(upgrade.images.interior)) upgrade.images.interior = []
+      imageArray = upgrade.images[imageType]
+    }
+
+    const index = imageIndex !== undefined && imageIndex !== '' ? parseInt(imageIndex, 10) : -1
+    const hasValidIndex = !Number.isNaN(index) && index >= 0 && index < imageArray.length
+
+    const gcsFolder = folder || 'models'
+    const fileExtension = path.extname(req.file.originalname)
+    const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+
+    const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
+    const result = await uploadFile(
+      req.file.buffer,
+      fileName,
+      req.file.mimetype,
+      makePublic,
+      gcsFolder
+    )
+
+    const url = result.publicUrl || result.signedUrl
+
+    if (hasValidIndex) {
+      imageArray[index] = url
+    } else {
+      imageArray.push(url)
+    }
+
+    await model.save()
+
+    const responseData = {
+      url,
+      fileName: result.fileName,
+      target,
+      index: hasValidIndex ? index : imageArray.length - 1
+    }
+    if (target === 'blueprints') {
+      responseData.blueprintVariant = blueprintVariant
+    } else {
+      responseData.imageType = imageType
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Image updated successfully',
+      data: responseData
+    })
+  } catch (error) {
+    console.error('Update image error:', error)
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error updating image'
     })
   }
 }

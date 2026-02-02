@@ -53,6 +53,13 @@ const modelSchema = new mongoose.Schema(
         trim: true
       }]
     },
+    // Blueprints por combinación: balcón y storage (igual que imágenes)
+    blueprints: {
+      default: [{ type: String, trim: true }],
+      withBalcony: [{ type: String, trim: true }],
+      withStorage: [{ type: String, trim: true }],
+      withBalconyAndStorage: [{ type: String, trim: true }]
+    },
     description: {
       type: String,
       trim: true
