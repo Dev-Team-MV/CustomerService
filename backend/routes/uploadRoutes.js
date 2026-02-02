@@ -179,14 +179,18 @@ router.post('/images', protect, upload.array('images', 20), uploadMultipleImages
  *         name: target
  *         type: string
  *         required: true
- *         enum: [model, balcony, upgrade]
- *         description: Where to save the image (model base, balcony or upgrade)
+ *         enum: [model, balcony, upgrade, blueprints]
+ *         description: Where to save the image (model base, balcony, upgrade or blueprints)
  *       - in: formData
  *         name: imageType
  *         type: string
- *         required: true
  *         enum: [exterior, interior]
- *         description: exterior or interior images array
+ *         description: Required when target is model|balcony|upgrade. exterior or interior
+ *       - in: formData
+ *         name: blueprintVariant
+ *         type: string
+ *         enum: [default, withBalcony, withStorage, withBalconyAndStorage]
+ *         description: Required when target=blueprints
  *       - in: formData
  *         name: imageIndex
  *         type: integer

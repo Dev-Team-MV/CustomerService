@@ -25,6 +25,23 @@ const formatImages = (images) => {
   return { exterior: [], interior: [] }
 }
 
+// Helper to validate and format blueprints (4 variants by balcony + storage)
+const formatBlueprints = (blueprints) => {
+  const empty = {
+    default: [],
+    withBalcony: [],
+    withStorage: [],
+    withBalconyAndStorage: []
+  }
+  if (!blueprints || typeof blueprints !== 'object') return empty
+  return {
+    default: Array.isArray(blueprints.default) ? blueprints.default : [],
+    withBalcony: Array.isArray(blueprints.withBalcony) ? blueprints.withBalcony : [],
+    withStorage: Array.isArray(blueprints.withStorage) ? blueprints.withStorage : [],
+    withBalconyAndStorage: Array.isArray(blueprints.withBalconyAndStorage) ? blueprints.withBalconyAndStorage : []
+  }
+}
+
 export const getAllModels = async (req, res) => {
   try {
     const { status } = req.query
@@ -189,7 +206,8 @@ export const createModel = async (req, res) => {
       bathrooms, 
       sqft,
       stories,
-      images, 
+      images,
+      blueprints,
       description, 
       status,
       balconies,
@@ -280,6 +298,7 @@ export const createModel = async (req, res) => {
       sqft,
       stories,
       images: formatImages(images),
+      blueprints: formatBlueprints(blueprints),
       description: description || '',
       status: status || 'active',
       balconies: validatedBalconies,
@@ -329,6 +348,7 @@ export const updateModel = async (req, res) => {
     if (req.body.sqft !== undefined) model.sqft = req.body.sqft
     if (req.body.stories !== undefined) model.stories = req.body.stories
     if (req.body.images !== undefined) model.images = formatImages(req.body.images)
+    if (req.body.blueprints !== undefined) model.blueprints = formatBlueprints(req.body.blueprints)
     if (req.body.description !== undefined) model.description = req.body.description
     if (req.body.status !== undefined) model.status = req.body.status
     

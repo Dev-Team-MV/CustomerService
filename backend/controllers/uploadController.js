@@ -178,29 +178,46 @@ export const updateImage = async (req, res) => {
       })
     }
 
-    const { modelId, target, imageType, imageIndex, balconyId, upgradeId, folder } = req.body
+    const { modelId, target, imageType, imageIndex, balconyId, upgradeId, folder, blueprintVariant } = req.body
 
-    if (!modelId || !target || !imageType) {
+    if (!modelId || !target) {
       return res.status(400).json({
         success: false,
-        message: 'modelId, target and imageType are required'
+        message: 'modelId and target are required'
       })
     }
 
-    const validTargets = ['model', 'balcony', 'upgrade']
+    const validTargets = ['model', 'balcony', 'upgrade', 'blueprints']
     if (!validTargets.includes(target)) {
       return res.status(400).json({
         success: false,
-        message: 'target must be one of: model, balcony, upgrade'
+        message: 'target must be one of: model, balcony, upgrade, blueprints'
+      })
+    }
+
+    if (target !== 'blueprints' && !imageType) {
+      return res.status(400).json({
+        success: false,
+        message: 'imageType is required when target is model, balcony or upgrade'
       })
     }
 
     const validImageTypes = ['exterior', 'interior']
-    if (!validImageTypes.includes(imageType)) {
+    if (target !== 'blueprints' && !validImageTypes.includes(imageType)) {
       return res.status(400).json({
         success: false,
         message: 'imageType must be one of: exterior, interior'
       })
+    }
+
+    const validBlueprintVariants = ['default', 'withBalcony', 'withStorage', 'withBalconyAndStorage']
+    if (target === 'blueprints') {
+      if (!blueprintVariant || !validBlueprintVariants.includes(blueprintVariant)) {
+        return res.status(400).json({
+          success: false,
+          message: 'blueprintVariant is required when target is blueprints (default, withBalcony, withStorage, withBalconyAndStorage)'
+        })
+      }
     }
 
     if (target === 'balcony' && !balconyId) {
@@ -225,9 +242,13 @@ export const updateImage = async (req, res) => {
     }
 
     let imageArray = null
-    let arrayPath = null
 
-    if (target === 'model') {
+    if (target === 'blueprints') {
+      if (!model.blueprints) model.blueprints = { default: [], withBalcony: [], withStorage: [], withBalconyAndStorage: [] }
+      const variant = blueprintVariant
+      if (!Array.isArray(model.blueprints[variant])) model.blueprints[variant] = []
+      imageArray = model.blueprints[variant]
+    } else if (target === 'model') {
       if (!model.images) model.images = { exterior: [], interior: [] }
       if (!Array.isArray(model.images.exterior)) model.images.exterior = []
       if (!Array.isArray(model.images.interior)) model.images.interior = []
@@ -284,16 +305,22 @@ export const updateImage = async (req, res) => {
 
     await model.save()
 
+    const responseData = {
+      url,
+      fileName: result.fileName,
+      target,
+      index: hasValidIndex ? index : imageArray.length - 1
+    }
+    if (target === 'blueprints') {
+      responseData.blueprintVariant = blueprintVariant
+    } else {
+      responseData.imageType = imageType
+    }
+
     res.status(200).json({
       success: true,
       message: 'Image updated successfully',
-      data: {
-        url,
-        fileName: result.fileName,
-        target,
-        imageType,
-        index: hasValidIndex ? index : imageArray.length - 1
-      }
+      data: responseData
     })
   } catch (error) {
     console.error('Update image error:', error)
