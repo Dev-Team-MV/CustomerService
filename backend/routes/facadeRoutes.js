@@ -13,7 +13,7 @@ import {
   updateFacadeDeck,
   deleteFacadeDeck
 } from '../controllers/deckController.js'
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { protect, admin, requireTenant } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -67,8 +67,8 @@ const router = express.Router()
  *         description: Facade created
  */
 router.route('/')
-  .get(getAllFacades)
-  .post(protect, admin, createFacade)
+  .get(protect, requireTenant, getAllFacades)
+  .post(protect, requireTenant, admin, createFacade)
 
 /**
  * @swagger
@@ -167,9 +167,9 @@ router.get('/model/:modelId', getFacadesByModel)
  *         description: Facade not found
  */
 router.route('/:id')
-  .get(protect, getFacadeById)
-  .put(protect, admin, updateFacade)
-  .delete(protect, admin, deleteFacade)
+  .get(protect, requireTenant, getFacadeById)
+  .put(protect, requireTenant, admin, updateFacade)
+  .delete(protect, requireTenant, admin, deleteFacade)
 
 // ========== DECKS ROUTES ==========
 
@@ -281,7 +281,7 @@ router.route('/:id/decks')
  *         description: Facade or Deck not found
  */
 router.route('/:id/decks/:deckId')
-  .put(protect, admin, updateFacadeDeck)
-  .delete(protect, admin, deleteFacadeDeck)
+  .put(protect, requireTenant, admin, updateFacadeDeck)
+  .delete(protect, requireTenant, admin, deleteFacadeDeck)
 
 export default router

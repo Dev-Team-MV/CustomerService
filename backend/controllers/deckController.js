@@ -2,7 +2,7 @@ import Facade from '../models/Facade.js'
 
 export const getFacadeDecks = async (req, res) => {
   try {
-    const facade = await Facade.findById(req.params.id)
+    const facade = await Facade.findOne({ _id: req.params.id, tenant: req.tenantId })
     
     if (!facade) {
       return res.status(404).json({ message: 'Facade not found' })
@@ -16,7 +16,7 @@ export const getFacadeDecks = async (req, res) => {
 
 export const addFacadeDeck = async (req, res) => {
   try {
-    const facade = await Facade.findById(req.params.id)
+    const facade = await Facade.findOne({ _id: req.params.id, tenant: req.tenantId })
     
     if (!facade) {
       return res.status(404).json({ message: 'Facade not found' })
@@ -45,7 +45,7 @@ export const addFacadeDeck = async (req, res) => {
 
 export const updateFacadeDeck = async (req, res) => {
   try {
-    const facade = await Facade.findById(req.params.id)
+    const facade = await Facade.findOne({ _id: req.params.id, tenant: req.tenantId })
     
     if (!facade) {
       return res.status(404).json({ message: 'Facade not found' })
@@ -72,7 +72,7 @@ export const updateFacadeDeck = async (req, res) => {
 
 export const deleteFacadeDeck = async (req, res) => {
   try {
-    const facade = await Facade.findById(req.params.id)
+    const facade = await Facade.findOne({ _id: req.params.id, tenant: req.tenantId })
     
     if (!facade) {
       return res.status(404).json({ message: 'Facade not found' })

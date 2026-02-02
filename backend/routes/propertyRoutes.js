@@ -7,7 +7,7 @@ import {
   deleteProperty,
   getPropertyStats
 } from '../controllers/propertyController.js'
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { protect, admin, requireTenant } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -71,8 +71,8 @@ const router = express.Router()
  *         description: Property created (9 phases will be automatically created)
  */
 router.route('/')
-  .get(protect, getAllProperties)
-  .post(protect, admin, createProperty)
+  .get(protect, requireTenant, getAllProperties)
+  .post(protect, requireTenant, admin, createProperty)
 
 /**
  * @swagger
@@ -163,8 +163,8 @@ router.get('/stats', protect, getPropertyStats)
  *         description: Property not found
  */
 router.route('/:id')
-  .get(protect, getPropertyById)
-  .put(protect, admin, updateProperty)
-  .delete(protect, admin, deleteProperty)
+  .get(protect, requireTenant, getPropertyById)
+  .put(protect, requireTenant, admin, updateProperty)
+  .delete(protect, requireTenant, admin, deleteProperty)
 
 export default router

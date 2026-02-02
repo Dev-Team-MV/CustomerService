@@ -3,6 +3,11 @@ import deckOptionSchema from './Deck.js'
 
 const facadeSchema = new mongoose.Schema(
   {
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tenant',
+      required: [true, 'Tenant is required']
+    },
     model: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Model',

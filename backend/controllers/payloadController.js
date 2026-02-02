@@ -7,11 +7,10 @@ import path from 'path'
 export const getAllPayloads = async (req, res) => {
   try {
     const { status, property } = req.query
-    const filter = {}
-    
+    const filter = { tenant: req.tenantId }
     if (status) filter.status = status
     if (property) filter.property = property
-    
+
     const payloads = await Payload.find(filter)
       .populate({
         path: 'property',
@@ -33,7 +32,7 @@ export const getAllPayloads = async (req, res) => {
 
 export const getPayloadById = async (req, res) => {
   try {
-    const payload = await Payload.findById(req.params.id)
+    const payload = await Payload.findOne({ _id: req.params.id, tenant: req.tenantId })
       .populate({
         path: 'property',
         populate: [
@@ -59,7 +58,7 @@ export const createPayload = async (req, res) => {
   try {
     const { property, date, amount, support, urls, status, notes, folder } = req.body
     
-    const propertyExists = await Property.findById(property)
+    const propertyExists = await Property.findOne({ _id: property, tenant: req.tenantId })
     if (!propertyExists) {
       return res.status(404).json({ message: 'Property not found' })
     }
@@ -102,6 +101,7 @@ export const createPayload = async (req, res) => {
     }
     
     const payload = await Payload.create({
+      tenant: req.tenantId,
       property,
       date: date || Date.now(),
       amount,
@@ -142,8 +142,7 @@ export const createPayload = async (req, res) => {
 
 export const updatePayload = async (req, res) => {
   try {
-    const payload = await Payload.findById(req.params.id)
-    
+    const payload = await Payload.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (payload) {
       const oldStatus = payload.status
       const oldAmount = payload.amount
@@ -197,7 +196,7 @@ export const updatePayload = async (req, res) => {
       const updatedPayload = await payload.save()
       
       if (oldStatus !== updatedPayload.status || oldAmount !== updatedPayload.amount) {
-        const property = await Property.findById(payload.property)
+        const property = await Property.findOne({ _id: payload.property, tenant: req.tenantId })
         
         if (oldStatus === 'cleared') {
           property.pending += oldAmount
@@ -236,11 +235,10 @@ export const updatePayload = async (req, res) => {
 
 export const deletePayload = async (req, res) => {
   try {
-    const payload = await Payload.findById(req.params.id)
-    
+    const payload = await Payload.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (payload) {
       if (payload.status === 'cleared') {
-        const property = await Property.findById(payload.property)
+        const property = await Property.findOne({ _id: payload.property, tenant: req.tenantId })
         if (property) {
           property.pending += payload.amount
           await property.save()
@@ -259,16 +257,15 @@ export const deletePayload = async (req, res) => {
 
 export const getPayloadStats = async (req, res) => {
   try {
+    const baseMatch = { tenant: req.tenantId }
     const totalCollected = await Payload.aggregate([
-      { $match: { status: 'cleared' } },
+      { $match: { ...baseMatch, status: 'cleared' } },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ])
-    
-    const pendingPayloads = await Payload.countDocuments({ status: 'pending' })
-    const rejectedPayloads = await Payload.countDocuments({ status: 'rejected' })
-    
+    const pendingPayloads = await Payload.countDocuments({ ...baseMatch, status: 'pending' })
+    const rejectedPayloads = await Payload.countDocuments({ ...baseMatch, status: 'rejected' })
     const recentFailures = await Payload.aggregate([
-      { $match: { status: 'rejected' } },
+      { $match: { ...baseMatch, status: 'rejected' } },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ])
     
@@ -292,6 +289,7 @@ export const getApprovedPayloadsThisMonth = async (req, res) => {
     
     // Filtrar pagos aprobados (cleared) del mes actual
     const payloads = await Payload.find({
+      tenant: req.tenantId,
       status: 'cleared',
       date: {
         $gte: firstDayOfMonth,

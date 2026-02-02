@@ -2,6 +2,11 @@ import mongoose from 'mongoose'
 
 const payloadSchema = new mongoose.Schema(
   {
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tenant',
+      required: [true, 'Tenant is required']
+    },
     property: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Property',

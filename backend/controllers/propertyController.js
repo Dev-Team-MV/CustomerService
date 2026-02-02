@@ -67,11 +67,10 @@ function getPropertyImages(property) {
 export const getAllProperties = async (req, res) => {
   try {
     const { status, user } = req.query
-    const filter = {}
-    
+    const filter = { tenant: req.tenantId }
     if (status) filter.status = status
     if (user) filter.user = user
-    
+
     const properties = await Property.find(filter)
       .populate('lot', 'number section size')
       .populate('model', 'model price bedrooms bathrooms sqft images balconies upgrades')
@@ -99,7 +98,7 @@ export const getAllProperties = async (req, res) => {
 
 export const getPropertyById = async (req, res) => {
   try {
-    const property = await Property.findById(req.params.id)
+    const property = await Property.findOne({ _id: req.params.id, tenant: req.tenantId })
       .populate('lot', 'number section size price')
       .populate('model', 'model price bedrooms bathrooms sqft images description balconies upgrades')
       .populate('facade', 'title url price')
@@ -130,28 +129,26 @@ export const createProperty = async (req, res) => {
   try {
     const { lot, model, facade, user, initialPayment, hasBalcony, modelType, hasStorage } = req.body
     
-    // Validate lot
-    const lotExists = await Lot.findById(lot)
+    // Validate lot (must belong to tenant)
+    const lotExists = await Lot.findOne({ _id: lot, tenant: req.tenantId })
     if (!lotExists) {
       return res.status(404).json({ message: 'Lot not found' })
     }
-    
     if (lotExists.status === 'sold') {
       return res.status(400).json({ message: 'Lot is already sold' })
     }
-    
     if (lotExists.assignedUser && lotExists.assignedUser.toString() !== user) {
       return res.status(400).json({ message: 'Lot is already assigned to another user' })
     }
-    
-    // Validate model
-    const modelExists = await Model.findById(model)
+
+    // Validate model (must belong to tenant)
+    const modelExists = await Model.findOne({ _id: model, tenant: req.tenantId })
     if (!modelExists) {
       return res.status(404).json({ message: 'Model not found' })
     }
-    
-    // Validate facade
-    const facadeExists = await Facade.findById(facade)
+
+    // Validate facade (must belong to tenant)
+    const facadeExists = await Facade.findOne({ _id: facade, tenant: req.tenantId })
     if (!facadeExists) {
       return res.status(404).json({ message: 'Facade not found' })
     }
@@ -187,6 +184,7 @@ export const createProperty = async (req, res) => {
     const pendingAmount = totalPrice - initialPaymentAmount
     
     const property = await Property.create({
+      tenant: req.tenantId,
       lot,
       model,
       facade,
@@ -233,8 +231,7 @@ export const createProperty = async (req, res) => {
 
 export const updateProperty = async (req, res) => {
   try {
-    const property = await Property.findById(req.params.id)
-    
+    const property = await Property.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (property) {
       property.status = req.body.status || property.status
       property.pending = req.body.pending !== undefined ? req.body.pending : property.pending
@@ -252,9 +249,9 @@ export const updateProperty = async (req, res) => {
       
       // Recalculate price if any configuration changed
       if (req.body.hasBalcony !== undefined || req.body.modelType !== undefined || req.body.hasStorage !== undefined) {
-        const lotExists = await Lot.findById(property.lot)
-        const modelExists = await Model.findById(property.model)
-        const facadeExists = await Facade.findById(property.facade)
+        const lotExists = await Lot.findOne({ _id: property.lot, tenant: req.tenantId })
+        const modelExists = await Model.findOne({ _id: property.model, tenant: req.tenantId })
+        const facadeExists = await Facade.findOne({ _id: property.facade, tenant: req.tenantId })
         
         if (lotExists && modelExists && facadeExists) {
           let modelPrice = modelExists.price
@@ -309,8 +306,7 @@ export const updateProperty = async (req, res) => {
 
 export const deleteProperty = async (req, res) => {
   try {
-    const property = await Property.findById(req.params.id)
-    
+    const property = await Property.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (property) {
       await Lot.findByIdAndUpdate(property.lot, {
         status: 'available',
@@ -333,18 +329,18 @@ export const deleteProperty = async (req, res) => {
 
 export const getPropertyStats = async (req, res) => {
   try {
-    const totalProperties = await Property.countDocuments()
-    const activeProperties = await Property.countDocuments({ status: 'active' })
-    const pendingProperties = await Property.countDocuments({ status: 'pending' })
-    const soldProperties = await Property.countDocuments({ status: 'sold' })
-    
+    const baseFilter = { tenant: req.tenantId }
+    const totalProperties = await Property.countDocuments(baseFilter)
+    const activeProperties = await Property.countDocuments({ ...baseFilter, status: 'active' })
+    const pendingProperties = await Property.countDocuments({ ...baseFilter, status: 'pending' })
+    const soldProperties = await Property.countDocuments({ ...baseFilter, status: 'sold' })
+
     const totalRevenue = await Property.aggregate([
-      { $match: { status: { $in: ['active', 'sold'] } } },
+      { $match: { tenant: req.tenantId, status: { $in: ['active', 'sold'] } } },
       { $group: { _id: null, total: { $sum: '$price' } } }
     ])
-    
     const pendingPayments = await Property.aggregate([
-      { $match: { status: { $in: ['active', 'pending'] } } },
+      { $match: { tenant: req.tenantId, status: { $in: ['active', 'pending'] } } },
       { $group: { _id: null, total: { $sum: '$pending' } } }
     ])
     

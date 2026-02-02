@@ -7,6 +7,7 @@ import swaggerUi from 'swagger-ui-express'
 import swaggerSpec from './config/swagger.js'
 import connectDB from './config/db.js'
 import authRoutes from './routes/authRoutes.js'
+import tenantRoutes from './routes/tenantRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import lotRoutes from './routes/lotRoutes.js'
 import modelRoutes from './routes/modelRoutes.js'
@@ -26,6 +27,7 @@ app.use(express.json({ limit: '100mb' })) // Increase JSON body size limit
 app.use(express.urlencoded({ extended: true, limit: '100mb' })) // Increase URL-encoded body size limit
 
 app.use('/api/auth', authRoutes)
+app.use('/api/tenants', tenantRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/lots', lotRoutes)
 app.use('/api/models', modelRoutes)

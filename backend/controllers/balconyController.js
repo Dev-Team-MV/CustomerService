@@ -25,12 +25,10 @@ const formatImages = (images) => {
 
 export const getModelBalconies = async (req, res) => {
   try {
-    const model = await Model.findById(req.params.id)
-    
+    const model = await Model.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (!model) {
       return res.status(404).json({ message: 'Model not found' })
     }
-    
     res.json(model.balconies)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -39,8 +37,7 @@ export const getModelBalconies = async (req, res) => {
 
 export const addModelBalcony = async (req, res) => {
   try {
-    const model = await Model.findById(req.params.id)
-    
+    const model = await Model.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (!model) {
       return res.status(404).json({ message: 'Model not found' })
     }
@@ -69,8 +66,7 @@ export const addModelBalcony = async (req, res) => {
 
 export const updateModelBalcony = async (req, res) => {
   try {
-    const model = await Model.findById(req.params.id)
-    
+    const model = await Model.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (!model) {
       return res.status(404).json({ message: 'Model not found' })
     }
@@ -97,8 +93,7 @@ export const updateModelBalcony = async (req, res) => {
 
 export const deleteModelBalcony = async (req, res) => {
   try {
-    const model = await Model.findById(req.params.id)
-    
+    const model = await Model.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (!model) {
       return res.status(404).json({ message: 'Model not found' })
     }

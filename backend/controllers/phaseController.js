@@ -6,13 +6,11 @@ export const getPhasesByProperty = async (req, res) => {
   try {
     const { propertyId } = req.params
     
-    // Verify property exists
-    const property = await Property.findById(propertyId)
+    const property = await Property.findOne({ _id: propertyId, tenant: req.tenantId })
     if (!property) {
       return res.status(404).json({ message: 'Property not found' })
     }
-    
-    const phases = await Phase.find({ property: propertyId })
+    const phases = await Phase.find({ tenant: req.tenantId, property: propertyId })
       .sort({ phaseNumber: 1 })
       .populate('property', 'lot model user price status')
     
@@ -25,9 +23,8 @@ export const getPhasesByProperty = async (req, res) => {
 // Get a single phase by ID
 export const getPhaseById = async (req, res) => {
   try {
-    const phase = await Phase.findById(req.params.id)
+    const phase = await Phase.findOne({ _id: req.params.id, tenant: req.tenantId })
       .populate('property', 'lot model user price status')
-    
     if (phase) {
       res.json(phase)
     } else {
@@ -43,11 +40,11 @@ export const getPhaseByNumber = async (req, res) => {
   try {
     const { propertyId, phaseNumber } = req.params
     
-    const phase = await Phase.findOne({ 
-      property: propertyId, 
-      phaseNumber: parseInt(phaseNumber) 
+    const phase = await Phase.findOne({
+      tenant: req.tenantId,
+      property: propertyId,
+      phaseNumber: parseInt(phaseNumber)
     }).populate('property', 'lot model user price status')
-    
     if (phase) {
       res.json(phase)
     } else {
@@ -88,8 +85,7 @@ export const updatePhase = async (req, res) => {
 // Add media item to a phase
 export const addMediaItem = async (req, res) => {
   try {
-    const phase = await Phase.findById(req.params.id)
-    
+    const phase = await Phase.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (!phase) {
       return res.status(404).json({ message: 'Phase not found' })
     }
@@ -129,12 +125,10 @@ export const addMediaItem = async (req, res) => {
 export const updateMediaItem = async (req, res) => {
   try {
     const { id, mediaItemId } = req.params
-    const phase = await Phase.findById(id)
-    
+    const phase = await Phase.findOne({ _id: id, tenant: req.tenantId })
     if (!phase) {
       return res.status(404).json({ message: 'Phase not found' })
     }
-    
     const mediaItem = phase.mediaItems.id(mediaItemId)
     if (!mediaItem) {
       return res.status(404).json({ message: 'Media item not found' })
@@ -172,12 +166,10 @@ export const updateMediaItem = async (req, res) => {
 export const deleteMediaItem = async (req, res) => {
   try {
     const { id, mediaItemId } = req.params
-    const phase = await Phase.findById(id)
-    
+    const phase = await Phase.findOne({ _id: id, tenant: req.tenantId })
     if (!phase) {
       return res.status(404).json({ message: 'Phase not found' })
     }
-    
     const mediaItem = phase.mediaItems.id(mediaItemId)
     if (!mediaItem) {
       return res.status(404).json({ message: 'Media item not found' })
@@ -198,12 +190,9 @@ export const deleteMediaItem = async (req, res) => {
 export const getAllPhases = async (req, res) => {
   try {
     const { property } = req.query
-    const filter = {}
-    
-    if (property) {
-      filter.property = property
-    }
-    
+    const filter = { tenant: req.tenantId }
+    if (property) filter.property = property
+
     const phases = await Phase.find(filter)
       .populate('property', 'lot model user price status')
       .sort({ property: 1, phaseNumber: 1 })

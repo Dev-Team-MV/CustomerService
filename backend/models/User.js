@@ -43,6 +43,11 @@ const userSchema = new mongoose.Schema(
       enum: ['superadmin', 'admin', 'user'],
       default: 'user'
     },
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tenant'
+      // null para superadmin; requerido para admin/user
+    },
     lots: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Lot'

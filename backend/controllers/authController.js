@@ -3,8 +3,9 @@ import crypto from 'crypto'
 import User from '../models/User.js'
 import { sendSMSWithValidation } from '../services/twilioService.js'
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+const generateToken = (id, tenantId = null) => {
+  const payload = tenantId ? { id, tenantId } : { id }
+  return jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: '30d'
   })
 }
@@ -20,15 +21,15 @@ export const register = async (req, res) => {
     }
 
     // Si skipPasswordSetup es true, requiere autenticación de admin
+    let currentUser = null
     if (skipPasswordSetup) {
       let token
-      let currentUser = null
 
       if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
           token = req.headers.authorization.split(' ')[1]
           const decoded = jwt.verify(token, process.env.JWT_SECRET)
-          currentUser = await User.findById(decoded.id).select('-password')
+          currentUser = await User.findById(decoded.id).select('-password').populate('tenant', 'name slug')
         } catch (error) {
           return res.status(401).json({ message: 'Invalid or expired token' })
         }
@@ -47,6 +48,9 @@ export const register = async (req, res) => {
       }
     }
 
+    // Tenant: body.tenant o (si admin creando usuario) tenant del admin
+    const tenantId = req.body.tenant || (currentUser && (currentUser.tenant?._id || currentUser.tenant))
+
     // Si es admin creando usuario y skipPasswordSetup es true, crear sin contraseña
     const isAdminCreating = skipPasswordSetup
     
@@ -56,7 +60,8 @@ export const register = async (req, res) => {
       email,
       phoneNumber,
       birthday,
-      role: role || 'user'
+      role: role || 'user',
+      ...(tenantId && { tenant: tenantId })
     }
 
     // Si no es admin creando usuario, requiere contraseña
@@ -93,14 +98,20 @@ export const register = async (req, res) => {
         email: user.email,
         phoneNumber: user.phoneNumber,
         role: user.role,
+        tenant: user.tenant,
         message: 'User created successfully. Setup link sent via SMS.',
         setupToken: setupToken // Solo para desarrollo/testing, remover en producción
       })
     }
 
+    if (!tenantId) {
+      return res.status(400).json({ message: 'Tenant is required for registration. Send tenant (id) in body.' })
+    }
+
     const user = await User.create(userData)
 
     if (user) {
+      const uid = user.tenant?._id || user.tenant
       res.status(201).json({
         _id: user._id,
         firstName: user.firstName,
@@ -108,14 +119,16 @@ export const register = async (req, res) => {
         email: user.email,
         phoneNumber: user.phoneNumber,
         role: user.role,
-        token: generateToken(user._id),
+        tenant: user.tenant,
+        token: generateToken(user._id, uid),
         user: {
           id: user._id,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
           phoneNumber: user.phoneNumber,
-          role: user.role
+          role: user.role,
+          tenant: user.tenant
         }
       })
     } else {
@@ -141,7 +154,7 @@ export const login = async (req, res) => {
 
     // Buscar usuario por email o phoneNumber
     const query = email ? { email } : { phoneNumber }
-    const user = await User.findOne(query).select('+password').populate('lots')
+    const user = await User.findOne(query).select('+password').populate('lots').populate('tenant', 'name slug')
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' })
@@ -156,6 +169,7 @@ export const login = async (req, res) => {
     }
 
     if (await user.matchPassword(password)) {
+      const tenantId = user.tenant?._id || user.tenant
       res.json({
         _id: user._id,
         firstName: user.firstName,
@@ -163,8 +177,9 @@ export const login = async (req, res) => {
         email: user.email,
         phoneNumber: user.phoneNumber,
         role: user.role,
+        tenant: user.tenant,
         lots: user.lots,
-        token: generateToken(user._id),
+        token: generateToken(user._id, tenantId),
         user: {
           id: user._id,
           firstName: user.firstName,
@@ -172,6 +187,7 @@ export const login = async (req, res) => {
           email: user.email,
           phoneNumber: user.phoneNumber,
           role: user.role,
+          tenant: user.tenant,
           lots: user.lots
         }
       })
@@ -185,7 +201,7 @@ export const login = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).populate('lots')
+    const user = await User.findById(req.user._id).populate('lots').populate('tenant', 'name slug')
 
     if (user) {
       res.json({
@@ -196,6 +212,7 @@ export const getProfile = async (req, res) => {
         phoneNumber: user.phoneNumber,
         birthday: user.birthday,
         role: user.role,
+        tenant: user.tenant,
         lots: user.lots
       })
     } else {
@@ -274,16 +291,18 @@ export const setupPassword = async (req, res) => {
     user.setupTokenExpires = undefined
     await user.save()
 
+    const tenantId = user.tenant?._id || user.tenant
     res.json({ 
       message: 'Password set successfully. You can now login.',
-      token: generateToken(user._id),
+      token: generateToken(user._id, tenantId),
       user: {
         id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
         phoneNumber: user.phoneNumber,
-        role: user.role
+        role: user.role,
+        tenant: user.tenant
       }
     })
   } catch (error) {

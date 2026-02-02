@@ -7,7 +7,7 @@ import {
   deleteLot,
   getLotStats
 } from '../controllers/lotController.js'
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { protect, admin, requireTenant } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -57,8 +57,8 @@ const router = express.Router()
  *         description: Lot created
  */
 router.route('/')
-  .get(getAllLots)
-  .post(protect, admin, createLot)
+  .get(protect, requireTenant, getAllLots)
+  .post(protect, requireTenant, admin, createLot)
 
 /**
  * @swagger
@@ -144,8 +144,8 @@ router.get('/stats', protect, getLotStats)
  *         description: Lot not found
  */
 router.route('/:id')
-  .get(protect, getLotById)
-  .put(protect, admin, updateLot)
-  .delete(protect, admin, deleteLot)
+  .get(protect, requireTenant, getLotById)
+  .put(protect, requireTenant, admin, updateLot)
+  .delete(protect, requireTenant, admin, deleteLot)
 
 export default router

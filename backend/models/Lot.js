@@ -2,10 +2,14 @@ import mongoose from 'mongoose'
 
 const lotSchema = new mongoose.Schema(
   {
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tenant',
+      required: [true, 'Tenant is required']
+    },
     number: {
       type: String,
       required: [true, 'Lot number is required'],
-      unique: true,
       trim: true
     },
     section: {
@@ -35,6 +39,9 @@ const lotSchema = new mongoose.Schema(
     timestamps: true
   }
 )
+
+// Número de lote único por tenant
+lotSchema.index({ tenant: 1, number: 1 }, { unique: true })
 
 const Lot = mongoose.model('Lot', lotSchema)
 

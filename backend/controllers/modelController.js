@@ -28,8 +28,9 @@ const formatImages = (images) => {
 export const getAllModels = async (req, res) => {
   try {
     const { status } = req.query
-    const filter = status ? { status } : {}
-    
+    const filter = { tenant: req.tenantId }
+    if (status) filter.status = status
+
     const models = await Model.find(filter).sort({ model: 1 })
     res.json(models)
   } catch (error) {
@@ -39,8 +40,7 @@ export const getAllModels = async (req, res) => {
 
 export const getModelById = async (req, res) => {
   try {
-    const model = await Model.findById(req.params.id)
-    
+    const model = await Model.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (model) {
       res.json(model)
     } else {
@@ -53,8 +53,7 @@ export const getModelById = async (req, res) => {
 
 export const getModelPricingOptions = async (req, res) => {
   try {
-    const model = await Model.findById(req.params.id)
-    
+    const model = await Model.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (!model) {
       return res.status(404).json({ message: 'Model not found' })
     }
@@ -204,10 +203,10 @@ export const createModel = async (req, res) => {
       })
     }
     
-    // Verificar si el modelo ya existe
-    const modelExists = await Model.findOne({ model })
+    // Verificar si el modelo ya existe en este tenant
+    const modelExists = await Model.findOne({ tenant: req.tenantId, model })
     if (modelExists) {
-      return res.status(400).json({ message: 'Model already exists' })
+      return res.status(400).json({ message: 'Model already exists in this tenant' })
     }
     
     // Validar y preparar balcones
@@ -272,6 +271,7 @@ export const createModel = async (req, res) => {
     
     // Crear el modelo con todas las opciones validadas
     const newModel = await Model.create({
+      tenant: req.tenantId,
       model,
       modelNumber,
       price,
@@ -314,8 +314,7 @@ export const createModel = async (req, res) => {
 
 export const updateModel = async (req, res) => {
   try {
-    const model = await Model.findById(req.params.id)
-    
+    const model = await Model.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (!model) {
       return res.status(404).json({ message: 'Model not found' })
     }
@@ -435,8 +434,7 @@ export const updateModel = async (req, res) => {
 
 export const deleteModel = async (req, res) => {
   try {
-    const model = await Model.findById(req.params.id)
-    
+    const model = await Model.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (model) {
       await model.deleteOne()
       res.json({ message: 'Model deleted successfully' })

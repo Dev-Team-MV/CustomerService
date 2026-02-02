@@ -25,7 +25,7 @@ const formatImages = (images) => {
 
 export const getModelStorages = async (req, res) => {
   try {
-    const model = await Model.findById(req.params.id)
+    const model = await Model.findOne({ _id: req.params.id, tenant: req.tenantId })
     
     if (!model) {
       return res.status(404).json({ message: 'Model not found' })
@@ -39,7 +39,7 @@ export const getModelStorages = async (req, res) => {
 
 export const addModelStorage = async (req, res) => {
   try {
-    const model = await Model.findById(req.params.id)
+    const model = await Model.findOne({ _id: req.params.id, tenant: req.tenantId })
     
     if (!model) {
       return res.status(404).json({ message: 'Model not found' })
@@ -69,7 +69,7 @@ export const addModelStorage = async (req, res) => {
 
 export const updateModelStorage = async (req, res) => {
   try {
-    const model = await Model.findById(req.params.id)
+    const model = await Model.findOne({ _id: req.params.id, tenant: req.tenantId })
     
     if (!model) {
       return res.status(404).json({ message: 'Model not found' })
@@ -97,7 +97,7 @@ export const updateModelStorage = async (req, res) => {
 
 export const deleteModelStorage = async (req, res) => {
   try {
-    const model = await Model.findById(req.params.id)
+    const model = await Model.findOne({ _id: req.params.id, tenant: req.tenantId })
     
     if (!model) {
       return res.status(404).json({ message: 'Model not found' })

@@ -3,6 +3,11 @@ import Phase from './Phase.js'
 
 const propertySchema = new mongoose.Schema(
   {
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tenant',
+      required: [true, 'Tenant is required']
+    },
     lot: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Lot',
@@ -222,6 +227,7 @@ propertySchema.post('save', async function (doc) {
         ]
         
         const phasesToCreate = phasesData.map(phase => ({
+          tenant: doc.tenant,
           property: doc._id,
           phaseNumber: phase.phaseNumber,
           title: phase.title,

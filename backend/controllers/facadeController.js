@@ -4,12 +4,9 @@ import Model from '../models/Model.js'
 export const getAllFacades = async (req, res) => {
   try {
     const { model } = req.query
-    const filter = {}
-    
-    if (model) {
-      filter.model = model
-    }
-    
+    const filter = { tenant: req.tenantId }
+    if (model) filter.model = model
+
     const facades = await Facade.find(filter)
       .populate('model', 'model modelNumber price')
       .sort({ title: 1 })
@@ -22,9 +19,8 @@ export const getAllFacades = async (req, res) => {
 
 export const getFacadeById = async (req, res) => {
   try {
-    const facade = await Facade.findById(req.params.id)
+    const facade = await Facade.findOne({ _id: req.params.id, tenant: req.tenantId })
       .populate('model', 'model modelNumber price bedrooms bathrooms sqft images description')
-    
     if (facade) {
       res.json(facade)
     } else {
@@ -38,13 +34,11 @@ export const getFacadeById = async (req, res) => {
 export const getFacadesByModel = async (req, res) => {
   try {
     const { modelId } = req.params
-    
-    const modelExists = await Model.findById(modelId)
+    const modelExists = await Model.findOne({ _id: modelId, tenant: req.tenantId })
     if (!modelExists) {
       return res.status(404).json({ message: 'Model not found' })
     }
-    
-    const facades = await Facade.find({ model: modelId })
+    const facades = await Facade.find({ tenant: req.tenantId, model: modelId })
       .sort({ title: 1 })
     
     res.json(facades)
@@ -56,12 +50,11 @@ export const getFacadesByModel = async (req, res) => {
 export const createFacade = async (req, res) => {
   try {
     const { model, title, url, price, decks } = req.body
-    
-    const modelExists = await Model.findById(model)
+    const modelExists = await Model.findOne({ _id: model, tenant: req.tenantId })
     if (!modelExists) {
       return res.status(404).json({ message: 'Model not found' })
     }
-    
+
     // Validar y preparar decks si se proporcionan
     const validatedDecks = []
     if (decks && Array.isArray(decks)) {
@@ -82,6 +75,7 @@ export const createFacade = async (req, res) => {
     }
     
     const facade = await Facade.create({
+      tenant: req.tenantId,
       model,
       title,
       url,
@@ -100,14 +94,12 @@ export const createFacade = async (req, res) => {
 
 export const updateFacade = async (req, res) => {
   try {
-    const facade = await Facade.findById(req.params.id)
-    
+    const facade = await Facade.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (!facade) {
       return res.status(404).json({ message: 'Facade not found' })
     }
-    
     if (req.body.model !== undefined) {
-      const modelExists = await Model.findById(req.body.model)
+      const modelExists = await Model.findOne({ _id: req.body.model, tenant: req.tenantId })
       if (!modelExists) {
         return res.status(404).json({ message: 'Model not found' })
       }
@@ -162,8 +154,7 @@ export const updateFacade = async (req, res) => {
 
 export const deleteFacade = async (req, res) => {
   try {
-    const facade = await Facade.findById(req.params.id)
-    
+    const facade = await Facade.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (!facade) {
       return res.status(404).json({ message: 'Facade not found' })
     }

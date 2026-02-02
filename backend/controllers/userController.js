@@ -3,9 +3,10 @@ import User from '../models/User.js'
 export const getAllUsers = async (req, res) => {
   try {
     const { role } = req.query
-    const filter = role ? { role } : {}
-    
-    const users = await User.find(filter).select('-password').populate('lots', 'number section')
+    const filter = { tenant: req.tenantId }
+    if (role) filter.role = role
+
+    const users = await User.find(filter).select('-password').populate('lots', 'number section').populate('tenant', 'name slug')
     res.json(users)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -14,8 +15,7 @@ export const getAllUsers = async (req, res) => {
 
 export const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password').populate('lots')
-    
+    const user = await User.findOne({ _id: req.params.id, tenant: req.tenantId }).select('-password').populate('lots').populate('tenant', 'name slug')
     if (user) {
       res.json(user)
     } else {
@@ -28,8 +28,7 @@ export const getUserById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id)
-
+    const user = await User.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (user) {
       user.firstName = req.body.firstName || user.firstName
       user.lastName = req.body.lastName || user.lastName
@@ -62,8 +61,7 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id)
-
+    const user = await User.findOne({ _id: req.params.id, tenant: req.tenantId })
     if (user) {
       await user.deleteOne()
       res.json({ message: 'User deleted successfully' })

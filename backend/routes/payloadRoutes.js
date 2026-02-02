@@ -8,7 +8,7 @@ import {
   getPayloadStats,
   getApprovedPayloadsThisMonth
 } from '../controllers/payloadController.js'
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { protect, admin, requireTenant } from '../middleware/authMiddleware.js'
 import { upload } from '../controllers/uploadController.js'
 
 const router = express.Router()
@@ -89,8 +89,8 @@ const router = express.Router()
  *         description: Payload created
  */
 router.route('/')
-  .get(protect, getAllPayloads)
-  .post(protect, upload.array('images', 20), createPayload)
+  .get(protect, requireTenant, getAllPayloads)
+  .post(protect, requireTenant, upload.array('images', 20), createPayload)
 
 /**
  * @swagger
@@ -104,7 +104,7 @@ router.route('/')
  *       200:
  *         description: Payload statistics
  */
-router.get('/stats', protect, getPayloadStats)
+router.get('/stats', protect, requireTenant, getPayloadStats)
 
 /**
  * @swagger
@@ -222,8 +222,8 @@ router.get('/approved/this-month', protect, getApprovedPayloadsThisMonth)
  *         description: Payload not found
  */
 router.route('/:id')
-  .get(protect, getPayloadById)
-  .put(protect, admin, upload.array('images', 20), updatePayload)
-  .delete(protect, admin, deletePayload)
+  .get(protect, requireTenant, getPayloadById)
+  .put(protect, requireTenant, admin, upload.array('images', 20), updatePayload)
+  .delete(protect, requireTenant, admin, deletePayload)
 
 export default router

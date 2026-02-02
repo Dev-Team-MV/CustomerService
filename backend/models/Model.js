@@ -5,10 +5,14 @@ import storageOptionSchema from './Storage.js'
 
 const modelSchema = new mongoose.Schema(
   {
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tenant',
+      required: [true, 'Tenant is required']
+    },
     model: {
       type: String,
       required: [true, 'Model name is required'],
-      unique: true,
       trim: true
     },
     modelNumber: {
@@ -67,6 +71,9 @@ const modelSchema = new mongoose.Schema(
     timestamps: true
   }
 )
+
+// Nombre de modelo único por tenant
+modelSchema.index({ tenant: 1, model: 1 }, { unique: true })
 
 const Model = mongoose.model('Model', modelSchema)
 

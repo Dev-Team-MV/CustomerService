@@ -9,7 +9,7 @@ import {
   updateMediaItem,
   deleteMediaItem
 } from '../controllers/phaseController.js'
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { protect, admin, requireTenant } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -36,7 +36,7 @@ const router = express.Router()
  *               items:
  *                 $ref: '#/components/schemas/Phase'
  */
-router.get('/', protect, admin, getAllPhases)
+router.get('/', protect, requireTenant, admin, getAllPhases)
 
 /**
  * @swagger
@@ -97,7 +97,7 @@ router.get('/property/:propertyId', protect, getPhasesByProperty)
  *       404:
  *         description: Phase not found
  */
-router.get('/property/:propertyId/phase/:phaseNumber', protect, getPhaseByNumber)
+router.get('/property/:propertyId/phase/:phaseNumber', protect, requireTenant, getPhaseByNumber)
 
 /**
  * @swagger
@@ -151,8 +151,8 @@ router.get('/property/:propertyId/phase/:phaseNumber', protect, getPhaseByNumber
  *       404:
  *         description: Phase not found
  */
-router.get('/:id', protect, getPhaseById)
-router.put('/:id', protect, admin, updatePhase)
+router.get('/:id', protect, requireTenant, getPhaseById)
+router.put('/:id', protect, requireTenant, admin, updatePhase)
 
 /**
  * @swagger
@@ -264,7 +264,7 @@ router.post('/:id/media', protect, admin, addMediaItem)
  *       404:
  *         description: Phase or media item not found
  */
-router.put('/:id/media/:mediaItemId', protect, admin, updateMediaItem)
-router.delete('/:id/media/:mediaItemId', protect, admin, deleteMediaItem)
+router.put('/:id/media/:mediaItemId', protect, requireTenant, admin, updateMediaItem)
+router.delete('/:id/media/:mediaItemId', protect, requireTenant, admin, deleteMediaItem)
 
 export default router

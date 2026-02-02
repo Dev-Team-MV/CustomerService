@@ -25,7 +25,7 @@ import {
   updateModelStorage,
   deleteModelStorage
 } from '../controllers/storageController.js'
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { protect, admin, requireTenant } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -88,8 +88,8 @@ const router = express.Router()
  *         description: Model created
  */
 router.route('/')
-  .get(getAllModels)
-  .post(protect, admin, createModel)
+  .get(protect, requireTenant, getAllModels)
+  .post(protect, requireTenant, admin, createModel)
 
 /**
  * @swagger
@@ -194,7 +194,7 @@ router.route('/:id')
  *         description: Model not found
  */
 router.route('/:id/pricing-options')
-  .get(protect, getModelPricingOptions)
+  .get(protect, requireTenant, getModelPricingOptions)
 
 // ========== BALCONIES ROUTES ==========
 
@@ -304,8 +304,8 @@ router.route('/:id/balconies')
  *         description: Model or Balcony not found
  */
 router.route('/:id/balconies/:balconyId')
-  .put(protect, admin, updateModelBalcony)
-  .delete(protect, admin, deleteModelBalcony)
+  .put(protect, requireTenant, admin, updateModelBalcony)
+  .delete(protect, requireTenant, admin, deleteModelBalcony)
 
 // ========== UPGRADES ROUTES ==========
 
@@ -417,8 +417,8 @@ router.route('/:id/upgrades')
  *         description: Model or Upgrade not found
  */
 router.route('/:id/upgrades/:upgradeId')
-  .put(protect, admin, updateModelUpgrade)
-  .delete(protect, admin, deleteModelUpgrade)
+  .put(protect, requireTenant, admin, updateModelUpgrade)
+  .delete(protect, requireTenant, admin, deleteModelUpgrade)
 
 // ========== STORAGES ROUTES ==========
 
@@ -528,7 +528,7 @@ router.route('/:id/storages')
  *         description: Model or Storage not found
  */
 router.route('/:id/storages/:storageId')
-  .put(protect, admin, updateModelStorage)
-  .delete(protect, admin, deleteModelStorage)
+  .put(protect, requireTenant, admin, updateModelStorage)
+  .delete(protect, requireTenant, admin, deleteModelStorage)
 
 export default router
