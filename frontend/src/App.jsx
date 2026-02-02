@@ -20,6 +20,7 @@ import MyProperty from './pages/MyProperty'
 import AmenitiesPublic from './pages/AmenitiesPublic'
 import AmenitiesPrivate from './pages/AmenitiesPrivate'
 import NotFound from './pages/NotFound'
+import ViewModels from './pages/ViewModels'
 
 const theme = createTheme({
   palette: {
@@ -57,6 +58,7 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/my-property" element={<MyProperty />} />
                 <Route path="/amenities" element={<AmenitiesPrivate />} />
+                <Route path="/view-models" element={<ViewModels />} />
                 
                 {/* Property Management */}
                 <Route path="/properties" element={<Properties />} />

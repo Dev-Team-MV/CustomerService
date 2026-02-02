@@ -28,10 +28,14 @@ import {
   Delete,
   CheckCircle,
   Lock,
-  LockOpen
+  LockOpen,
+  ChevronLeft, 
+  ChevronRight,
+  Cancel
 } from '@mui/icons-material'
 import api from '../services/api'
 import uploadService from '../services/uploadService'
+import {motion, AnimatePresence} from 'framer-motion'
 
 const PHASE_TITLES = [
   'Site Preparation',
@@ -70,6 +74,14 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
       setCurrentPhaseIndex(firstIncomplete === -1 ? 0 : firstIncomplete)
     }
   }, [phases])
+
+  const [imageIdx, setImageIdx] = useState(0);
+  const [phaseLightboxOpen, setPhaseLightboxOpen] = useState(false)
+
+// Reinicia el índice cuando cambias de fase:
+useEffect(() => {
+  setImageIdx(0)
+}, [currentPhaseIndex])
 
   const fetchPhases = async () => {
     try {
@@ -394,67 +406,164 @@ const handleUploadImages = async () => {
                     />
                   </Box>
                   {/* Galería de imágenes */}
-                  {phases[currentPhaseIndex].mediaItems && phases[currentPhaseIndex].mediaItems.length > 0 ? (
-                    <ImageList cols={3} gap={16} sx={{ maxHeight: 350, borderRadius: 3, overflow: 'hidden', mb: 1 }}>
-                      {phases[currentPhaseIndex].mediaItems.map((media, index) => (
-                        <ImageListItem
-                          key={media._id || index}
+                    {phases[currentPhaseIndex].mediaItems && phases[currentPhaseIndex].mediaItems.length > 0 ? (
+                      <Box sx={{ mb: 2 }}>
+                        {/* Carrusel principal */}
+                        <Box
                           sx={{
-                            borderRadius: 3,
-                            overflow: 'hidden',
-                            boxShadow: '0 2px 8px rgba(74,124,89,0.08)',
-                            transition: 'transform 0.2s, box-shadow 0.2s',
-                            '&:hover': {
-                              transform: 'scale(1.04)',
-                              boxShadow: '0 8px 24px rgba(74,124,89,0.18)'
-                            }
+                            bgcolor: '#000',
+                            borderRadius: 2,
+                            p: 2,
+                            minHeight: 280,
+                            height: 340,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            position: 'relative',
+                            overflow: 'hidden'
                           }}
                         >
-                          <img
-                            src={media.url}
-                            alt={media.title}
-                            loading="lazy"
-                            style={{
-                              height: 160,
-                              objectFit: 'cover',
-                              width: '100%',
-                              borderRadius: 3
-                            }}
-                          />
-                          <ImageListItemBar
-                            title={media.title}
-                            subtitle={media.percentage ? `+${media.percentage}%` : null}
-                            actionIcon={
-                              isAdmin && (
-                                <IconButton
-                                  sx={{ color: 'rgba(255, 255, 255, 0.8)' }}
-                                  onClick={() => handleDeleteMedia(phases[currentPhaseIndex]._id, media._id)}
-                                >
-                                  <Delete />
-                                </IconButton>
-                              )
-                            }
-                            sx={{
-                              background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0) 100%)',
-                              borderRadius: '0 0 8px 8px'
-                            }}
-                          />
-                        </ImageListItem>
-                      ))}
-                    </ImageList>
-                  ) : (
-                    <Alert
-                      severity="info"
-                      sx={{
-                        borderRadius: 3,
-                        bgcolor: 'rgba(33, 150, 243, 0.08)',
-                        border: '1px solid rgba(33, 150, 243, 0.2)',
-                        fontWeight: 600
-                      }}
-                    >
-                      No images uploaded yet
-                    </Alert>
-                  )}
+                          <AnimatePresence mode="wait">
+                            <motion.img
+                              key={`phase-carousel-${currentPhaseIndex}-${imageIdx}`}
+                              src={phases[currentPhaseIndex].mediaItems[imageIdx].url}
+                              alt={phases[currentPhaseIndex].mediaItems[imageIdx].title}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.95 }}
+                              transition={{ duration: 0.3 }}
+                              style={{
+                                maxWidth: '90%',
+                                maxHeight: '100%',
+                                objectFit: 'contain',
+                                borderRadius: 8,
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => setPhaseLightboxOpen(true)}
+                            />
+                          </AnimatePresence>
+                          {phases[currentPhaseIndex].mediaItems.length > 1 && (
+                            <>
+                              <IconButton
+                                onClick={() => setImageIdx(idx => Math.max(idx - 1, 0))}
+                                sx={{
+                                  position: 'absolute',
+                                  left: 12,
+                                  top: '50%',
+                                  transform: 'translateY(-50%)',
+                                  bgcolor: 'rgba(255,255,255,0.95)',
+                                  boxShadow: 3
+                                }}
+                                disabled={imageIdx === 0}
+                              >
+                                <ChevronLeft />
+                              </IconButton>
+                              <IconButton
+                                onClick={() => setImageIdx(idx => Math.min(idx + 1, phases[currentPhaseIndex].mediaItems.length - 1))}
+                                sx={{
+                                  position: 'absolute',
+                                  right: 12,
+                                  top: '50%',
+                                  transform: 'translateY(-50%)',
+                                  bgcolor: 'rgba(255,255,255,0.95)',
+                                  boxShadow: 3
+                                }}
+                                disabled={imageIdx === phases[currentPhaseIndex].mediaItems.length - 1}
+                              >
+                                <ChevronRight />
+                              </IconButton>
+                            </>
+                          )}
+                          <Box sx={{ position: 'absolute', bottom: 12, left: 12, bgcolor: 'rgba(0,0,0,0.6)', color: 'white', px: 2, py: 0.5, borderRadius: 2 }}>
+                            <Typography variant="caption" fontWeight="600">
+                              {imageIdx + 1} / {phases[currentPhaseIndex].mediaItems.length}
+                            </Typography>
+                          </Box>
+                          {/* Botón de eliminar solo para admin */}
+                          {isAdmin && (
+                            <IconButton
+                              sx={{
+                                position: 'absolute',
+                                top: 16,
+                                right: 16,
+                                color: 'white',
+                                bgcolor: 'rgba(0,0,0,0.5)',
+                                zIndex: 10,
+                                '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' }
+                              }}
+                              onClick={() =>
+                                handleDeleteMedia(
+                                  phases[currentPhaseIndex]._id,
+                                  phases[currentPhaseIndex].mediaItems[imageIdx]._id
+                                )
+                              }
+                            >
+                              <Delete />
+                            </IconButton>
+                          )}
+                        </Box>
+                        {/* Miniaturas */}
+                        <Box sx={{ display: 'flex', gap: 1, mt: 1, overflowX: 'auto' }}>
+                          {phases[currentPhaseIndex].mediaItems.map((media, idx) => (
+                            <Box
+                              key={idx}
+                              onClick={() => setImageIdx(idx)}
+                              sx={{
+                                width: 64,
+                                height: 64,
+                                borderRadius: 1.5,
+                                overflow: 'hidden',
+                                cursor: 'pointer',
+                                border: idx === imageIdx ? '2px solid #4a7c59' : '1px solid rgba(0,0,0,0.06)',
+                                boxShadow: idx === imageIdx ? '0 4px 12px rgba(74,124,89,0.12)' : 'none'
+                              }}
+                            >
+                              <img src={media.url} alt={media.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            </Box>
+                          ))}
+                        </Box>
+                        {/* Lightbox para imagen ampliada */}
+                        <Dialog open={phaseLightboxOpen} onClose={() => setPhaseLightboxOpen(false)} maxWidth="lg" fullWidth>
+                          <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', bgcolor: 'transparent' }}>
+                            <Box sx={{ position: 'relative' }}>
+                              <IconButton
+                                onClick={() => setPhaseLightboxOpen(false)}
+                                sx={{
+                                  position: 'absolute',
+                                  top: 16,
+                                  right: 16,
+                                  color: 'white',
+                                  bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                  zIndex: 10,
+                                  '&:hover': {
+                                    bgcolor: 'rgba(0, 0, 0, 0.7)'
+                                  }
+                                }}
+                              >
+                                <Cancel />
+                              </IconButton>
+                              <img
+                                src={phases[currentPhaseIndex].mediaItems[imageIdx].url}
+                                alt="phase-lightbox"
+                                style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: 8 }}
+                              />
+                            </Box>
+                          </DialogContent>
+                        </Dialog>
+                      </Box>
+                    ) : (
+                      <Alert
+                        severity="info"
+                        sx={{
+                          borderRadius: 3,
+                          bgcolor: 'rgba(33, 150, 243, 0.08)',
+                          border: '1px solid rgba(33, 150, 243, 0.2)',
+                          fontWeight: 600
+                        }}
+                      >
+                        No images uploaded yet
+                      </Alert>
+                    )}
                 </Paper>
               )}
             </>

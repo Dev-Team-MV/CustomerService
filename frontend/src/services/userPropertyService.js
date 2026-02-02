@@ -180,6 +180,8 @@ const userPropertyService = {
     try {
       // Obtener propiedad
       const propResponse = await api.get(`/properties/${propertyId}`)
+      console.log('a ver', propResponse);
+      
       const property = propResponse.data
 
       // Obtener modelo

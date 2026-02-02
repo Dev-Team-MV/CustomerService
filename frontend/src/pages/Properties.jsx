@@ -26,7 +26,7 @@ import {
 import api from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import ConstructionPhasesModal from '../components/ConstructionPhasesModal'
-
+import { motion } from 'framer-motion'
 const Properties = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -115,6 +115,12 @@ const Properties = () => {
   }
 
   return (
+    <>
+              <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Box>
@@ -302,6 +308,8 @@ const Properties = () => {
         />
       )}
     </Box>
+    </motion.div>
+    </>
   )
 }
 

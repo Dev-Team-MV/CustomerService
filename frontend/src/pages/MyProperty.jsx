@@ -2231,122 +2231,10 @@ const MyProperty = () => {
   const [uploadingPayment, setUploadingPayment] = useState(false)
   const [selectedImage, setSelectedImage] = useState(null)
   const [hoveredCard, setHoveredCard] = useState(null)
-
-  // gallery / carousel states
   const [carouselIndex, setCarouselIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
-  const [galleryFilter, setGalleryFilter] = useState('all') // keep for future filtering
-
-  // We'll fetch the full model when propertyDetails changes and then compute images via modelImageService.
-  const [modelFullForGallery, setModelFullForGallery] = useState(null)
-
-  useEffect(() => {
-    let mounted = true
-    const loadFullModel = async () => {
-      if (!propertyDetails?.model) {
-        if (mounted) setModelFullForGallery(null)
-        return
-      }
-      // model could be an object (partial) or an id string
-      const modelId = typeof propertyDetails.model === 'string'
-        ? propertyDetails.model
-        : (propertyDetails.model._id || propertyDetails.model.id || propertyDetails.model)
-
-      try {
-        const full = await propertyService.getModelById(modelId)
-        if (mounted) setModelFullForGallery(full)
-      } catch (err) {
-        // fallback: keep whatever is embedded in propertyDetails.model (may be partial)
-        // eslint-disable-next-line no-console
-        console.warn('Could not fetch full model for gallery, using embedded model:', err)
-        if (mounted) setModelFullForGallery(typeof propertyDetails.model === 'object' ? propertyDetails.model : null)
-      }
-    }
-    loadFullModel()
-    return () => { mounted = false }
-  }, [propertyDetails?.model])
-
-  const modelGallery = (() => {
-    const modelSource = modelFullForGallery || (typeof propertyDetails?.model === 'object' ? propertyDetails.model : null)
-    if (!modelSource) return { exterior: [], interior: [], combined: [], categories: [] }
-
-    // PRIORIDAD: usar flags guardados en la propiedad (propiedad->backend)
-    const balconyFlag = (typeof propertyDetails?.hasBalcony === 'boolean')
-      ? propertyDetails.hasBalcony
-      : Boolean(propertyDetails?.customizations?.balcony || propertyDetails?.selectedOptions?.balcony)
-
-    const storageFlag = (typeof propertyDetails?.hasStorage === 'boolean')
-      ? propertyDetails.hasStorage
-      : Boolean(propertyDetails?.customizations?.storage || propertyDetails?.selectedOptions?.storage)
-
-    const upgradeFlag = (typeof propertyDetails?.modelType === 'string')
-      ? propertyDetails.modelType === 'upgrade'
-      : Boolean(propertyDetails?.customizations?.upgrade || propertyDetails?.selectedOptions?.upgrade)
-
-    const options = {
-      balcony: Boolean(balconyFlag),
-      upgrade: Boolean(upgradeFlag),
-      storage: Boolean(storageFlag)
-    }
-
-    // eslint-disable-next-line no-console
-    console.log('MyProperty -> getModelImagesForCombination options:', options, 'using model:', modelSource._id || modelSource)
-
-    const images = getModelImagesForCombination(modelSource, options) || {}
-    const exterior = Array.isArray(images.exterior) ? images.exterior : []
-    const interior = Array.isArray(images.interior) ? images.interior : []
-    const combined = [...new Set([...(exterior || []), ...(interior || [])])]
-
-    let rawCategories = []
-    try {
-      rawCategories = typeof getGalleryCategories === 'function' ? getGalleryCategories(modelSource) : []
-    } catch (e) {
-      rawCategories = []
-    }
-    const categories = Array.isArray(rawCategories)
-      ? rawCategories.map(c => (typeof c === 'string' ? c : (c.label || c.title || c.key || JSON.stringify(c))))
-      : []
-
-    return { exterior, interior, combined, categories }
-  })()
-  
-    // images used by the simple carousel (replicates left carousel from ModelCustomizationModal)
-    const carouselImages = (() => {
-      if (!modelGallery) return []
-      switch (galleryFilter) {
-        case 'exterior': return modelGallery.exterior || []
-        case 'interior': return modelGallery.interior || []
-        default: return modelGallery.combined || []
-      }
-    })()
-  // ...existing code...
-
-    useEffect(() => {
-    // reset carousel when images change
-    if (carouselImages && carouselImages.length > 0) {
-      setCarouselIndex(0)
-    } else {
-      setCarouselIndex(0)
-    }
-  }, [propertyDetails?.model, galleryFilter, modelGallery.combined?.length])
-
-  const handleCarouselPrev = () => {
-    if (!carouselImages.length) return
-    setCarouselIndex(i => (i - 1 + carouselImages.length) % carouselImages.length)
-  }
-  const handleCarouselNext = () => {
-    if (!carouselImages.length) return
-    setCarouselIndex(i => (i + 1) % carouselImages.length)
-  }
-  const handleThumbSelect = (idx) => {
-    setCarouselIndex(idx)
-    // DO NOT open lightbox here (avoid accidental opens)
-  }
-  const openLightbox = () => {
-    if (!carouselImages.length) return
-    setLightboxOpen(true)
-  }
-  const closeLightbox = () => setLightboxOpen(false)
+  const [galleryFilter, setGalleryFilter] = useState('all')
+  const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0)
 
   useEffect(() => {
     fetchData()
@@ -2359,12 +2247,68 @@ const MyProperty = () => {
     }
   }, [selectedProperty])
 
+  useEffect(() => {
+    if (phases.length > 0) {
+      const firstIncomplete = phases.findIndex(p => p.constructionPercentage < 100)
+      setCurrentPhaseIndex(firstIncomplete === -1 ? 0 : firstIncomplete)
+    }
+  }, [phases])
+
+  // ========== GALLERY LOGIC ==========
+  const galleryImages = propertyDetails?.property?.images || { exterior: [], interior: [] }  
+  const allImages = [
+    ...galleryImages.exterior.map(url => ({ url, type: "exterior" })),
+    ...galleryImages.interior.map(url => ({ url, type: "interior" }))
+  ]
+  const filterImages = (images) => {
+    if (galleryFilter === "exterior") return images.filter(img => img.type === "exterior")
+    if (galleryFilter === "interior") return images.filter(img => img.type === "interior")
+    return images
+  }
+  const carouselImages = filterImages(allImages)
+
+  useEffect(() => {
+    setCarouselIndex(0)
+    console.log('xd',propertyDetails);
+    
+  }, [galleryFilter, propertyDetails?.images])
+
+  const handleCarouselPrev = () => {
+    if (!carouselImages.length) return
+    setCarouselIndex(i => (i - 1 + carouselImages.length) % carouselImages.length)
+  }
+  const handleCarouselNext = () => {
+    if (!carouselImages.length) return
+    setCarouselIndex(i => (i + 1) % carouselImages.length)
+  }
+  const handleThumbSelect = (idx) => setCarouselIndex(idx)
+  const openLightbox = () => {
+    if (!carouselImages.length) return
+    setLightboxOpen(true)
+  }
+  const closeLightbox = () => setLightboxOpen(false)
+
+
+    // ...existing code...
+  const [phaseCarouselIndex, setPhaseCarouselIndex] = useState(0)
+  const [phaseLightboxOpen, setPhaseLightboxOpen] = useState(false)
+  
+  const handlePhaseCarouselPrev = () => {
+    if (!phases[currentPhaseIndex]?.mediaItems?.length) return
+    setPhaseCarouselIndex(i => (i - 1 + phases[currentPhaseIndex].mediaItems.length) % phases[currentPhaseIndex].mediaItems.length)
+  }
+  const handlePhaseCarouselNext = () => {
+    if (!phases[currentPhaseIndex]?.mediaItems?.length) return
+    setPhaseCarouselIndex(i => (i + 1) % phases[currentPhaseIndex].mediaItems.length)
+  }
+  // Reinicia el índice cuando cambias de fase
+  useEffect(() => { setPhaseCarouselIndex(0) }, [currentPhaseIndex])
+  // ...existing code...
+  // ========== DATA FETCHING ==========
   const fetchData = async () => {
     try {
       setLoading(true)
       const props = await userPropertyService.getMyProperties()
-      console.log('mis propiedades', props);
-      
       setProperties(props)
       const summary = await userPropertyService.getFinancialSummary()
       setFinancialSummary(summary)
@@ -2372,28 +2316,25 @@ const MyProperty = () => {
         handleSelectProperty(props[0]._id)
       }
     } catch (error) {
-      console.error('Error fetching data:', error)
       setError(error.message || 'Failed to load properties')
     } finally {
       setLoading(false)
     }
   }
-
- const handleSelectProperty = async (propertyId) => {
-    try {
-      setLoading(true)
-      const details = await userPropertyService.getPropertyDetails(propertyId)
-      setPropertyDetails(details)
-      setSelectedProperty(propertyId)
-      setActiveTab(0)
-      setGalleryFilter('all')
-    } catch (error) {
-      console.error('Error fetching property details:', error)
-      setError(error.message || 'Failed to load property details')
-    } finally {
-      setLoading(false)
-    }
+const handleSelectProperty = async (propertyId) => {
+  try {
+    setLoading(true)
+    const details = await userPropertyService.getPropertyDetails(propertyId)
+    console.log('PROPERTY DETAILS:', details.property) // <-- LOG AQUÍ
+    setPropertyDetails(details)
+    setSelectedProperty(propertyId)
+    setActiveTab(0)
+  } catch (error) {
+    setError(error.message || 'Failed to load property details')
+  } finally {
+    setLoading(false)
   }
+}
 
   const handleDeselectProperty = () => {
     setSelectedProperty(null)
@@ -2423,7 +2364,7 @@ const MyProperty = () => {
       }
       setPhases(allPhases)
     } catch (error) {
-      console.error('Error fetching phases:', error)
+      // handle error
     } finally {
       setLoadingPhases(false)
     }
@@ -2435,15 +2376,14 @@ const MyProperty = () => {
       const response = await api.get(`/payloads?property=${selectedProperty}`)
       setPayloads(response.data)
     } catch (error) {
-      console.error('Error fetching payloads:', error)
+      // handle error
     } finally {
       setLoadingPayloads(false)
     }
   }
 
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue)
-  }
+  const handleTabChange = (event, newValue) => setActiveTab(newValue)
+
 
   const handleOpenUploadPayment = () => {
     setUploadPaymentDialog(true)
@@ -2513,7 +2453,6 @@ const MyProperty = () => {
   }
 
   // phase index logic
-  const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0)
   useEffect(() => {
     if (phases.length > 0) {
       const firstIncomplete = phases.findIndex(p => p.constructionPercentage < 100)
@@ -2874,7 +2813,9 @@ const MyProperty = () => {
                       onHoverEnd={() => setHoveredCard(null)}
                     >
                       <Card
-                        onClick={() => handleSelectProperty(property._id)}
+                        onClick={() => 
+                          
+                          handleSelectProperty(property._id)}
                         sx={{
                           height: '100%',
                           borderRadius: 5,
@@ -2921,10 +2862,19 @@ const MyProperty = () => {
                                   width: 70,
                                   height: 70,
                                   background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
-                                  boxShadow: '0 8px 24px rgba(74, 124, 89, 0.3)'
+                                  boxShadow: '0 8px 24px rgba(74, 124, 89, 0.3)',
+                                  overflow: 'hidden'
                                 }}
                               >
-                                <Home sx={{ fontSize: 35, color: 'white' }} />
+                                {property.images?.exterior?.[0] ? (
+                                  <img
+                                    src={property.images.exterior[0]}
+                                    alt="Property"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                  />
+                                ) : (
+                                  <Home sx={{ fontSize: 35, color: 'white' }} />
+                                )}
                               </Avatar>
                             </motion.div>
                             <Box flex={1}>
@@ -3161,10 +3111,19 @@ const MyProperty = () => {
                                   height: 100,
                                   background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
                                   boxShadow: '0 15px 40px rgba(74, 124, 89, 0.4)',
-                                  border: '4px solid white'
+                                  border: '4px solid white',
+                                  overflow: 'hidden'
                                 }}
                               >
-                                <Home sx={{ fontSize: 50, color: 'white' }} />
+                                {propertyDetails?.property?.images?.exterior?.[0] ? (
+                                  <img
+                                    src={propertyDetails.property.images.exterior[0]}
+                                    alt="Property"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                  />
+                                ) : (
+                                  <Home sx={{ fontSize: 50, color: 'white' }} />
+                                )}
                               </Avatar>
                             </motion.div>
                             <Box>
@@ -3466,43 +3425,106 @@ const MyProperty = () => {
                                 </Box>
                                 {/* Galería de imágenes */}
                                 {phases[currentPhaseIndex].mediaItems && phases[currentPhaseIndex].mediaItems.length > 0 ? (
-                                  <ImageList cols={3} gap={16} sx={{ maxHeight: 450, borderRadius: 3, overflow: 'hidden', mb: 2 }}>
-                                    {phases[currentPhaseIndex].mediaItems.map((media, idx) => (
-                                      <ImageListItem
-                                        key={media._id || idx}
-                                        sx={{
-                                          borderRadius: 3,
-                                          overflow: 'hidden',
-                                          boxShadow: '0 2px 8px rgba(74,124,89,0.08)',
-                                          transition: 'transform 0.2s, box-shadow 0.2s',
-                                          '&:hover': {
-                                            transform: 'scale(1.04)',
-                                            boxShadow: '0 8px 24px rgba(74,124,89,0.18)'
-                                          }
-                                        }}
-                                      >
-                                        <img
-                                          src={media.url}
-                                          alt={media.title}
-                                          loading="lazy"
+                                  <Box sx={{ mb: 2 }}>
+                                    {/* Carrusel principal */}
+                                    <Box
+                                      sx={{
+                                        bgcolor: '#000',
+                                        borderRadius: 2,
+                                        p: 2,
+                                        minHeight: 280,
+                                        height: 340,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        position: 'relative',
+                                        overflow: 'hidden'
+                                      }}
+                                    >
+                                      <AnimatePresence mode="wait">
+                                        <motion.img
+                                          key={`phase-carousel-${currentPhaseIndex}-${phaseCarouselIndex}`}
+                                          src={phases[currentPhaseIndex].mediaItems[phaseCarouselIndex].url}
+                                          alt={phases[currentPhaseIndex].mediaItems[phaseCarouselIndex].title}
+                                          initial={{ opacity: 0, scale: 0.95 }}
+                                          animate={{ opacity: 1, scale: 1 }}
+                                          exit={{ opacity: 0, scale: 0.95 }}
+                                          transition={{ duration: 0.3 }}
                                           style={{
-                                            height: 220,
-                                            objectFit: 'cover',
-                                            width: '100%',
-                                            borderRadius: 3
+                                            maxWidth: '90%',
+                                            maxHeight: '100%',
+                                            objectFit: 'contain',
+                                            borderRadius: 8,
+                                            cursor: 'pointer'
                                           }}
+                                          onClick={() => setPhaseLightboxOpen(true)}
                                         />
-                                        <ImageListItemBar
-                                          title={media.title}
-                                          subtitle={media.percentage ? `+${media.percentage}%` : null}
+                                      </AnimatePresence>
+                                      {phases[currentPhaseIndex].mediaItems.length > 1 && (
+                                        <>
+                                          <IconButton onClick={handlePhaseCarouselPrev} sx={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.95)', boxShadow: 3 }}>
+                                            <KeyboardArrowLeft />
+                                          </IconButton>
+                                          <IconButton onClick={handlePhaseCarouselNext} sx={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.95)', boxShadow: 3 }}>
+                                            <KeyboardArrowRight />
+                                          </IconButton>
+                                        </>
+                                      )}
+                                      <Box sx={{ position: 'absolute', bottom: 12, left: 12, bgcolor: 'rgba(0,0,0,0.6)', color: 'white', px: 2, py: 0.5, borderRadius: 2 }}>
+                                        <Typography variant="caption" fontWeight="600">
+                                          {phaseCarouselIndex + 1} / {phases[currentPhaseIndex].mediaItems.length}
+                                        </Typography>
+                                      </Box>
+                                    </Box>
+                                    {/* Miniaturas */}
+                                    <Box sx={{ display: 'flex', gap: 1, mt: 1, overflowX: 'auto' }}>
+                                      {phases[currentPhaseIndex].mediaItems.map((media, idx) => (
+                                        <Box
+                                          key={idx}
+                                          onClick={() => setPhaseCarouselIndex(idx)}
                                           sx={{
-                                            background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0) 100%)',
-                                            borderRadius: '0 0 8px 8px'
+                                            width: 64,
+                                            height: 64,
+                                            borderRadius: 1.5,
+                                            overflow: 'hidden',
+                                            cursor: 'pointer',
+                                            border: idx === phaseCarouselIndex ? '2px solid #4a7c59' : '1px solid rgba(0,0,0,0.06)',
+                                            boxShadow: idx === phaseCarouselIndex ? '0 4px 12px rgba(74,124,89,0.12)' : 'none'
                                           }}
-                                        />
-                                      </ImageListItem>
-                                    ))}
-                                  </ImageList>
+                                        >
+                                          <img src={media.url} alt={media.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        </Box>
+                                      ))}
+                                    </Box>
+                                    {/* Lightbox para imagen ampliada */}
+                                    <Dialog open={phaseLightboxOpen} onClose={() => setPhaseLightboxOpen(false)} maxWidth="lg" fullWidth>
+                                      <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', bgcolor: 'transparent' }}>
+                                        <Box sx={{ position: 'relative' }}>
+                                          <IconButton
+                                            onClick={() => setPhaseLightboxOpen(false)}
+                                            sx={{
+                                              position: 'absolute',
+                                              top: 16,
+                                              right: 16,
+                                              color: 'white',
+                                              bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                              zIndex: 10,
+                                              '&:hover': {
+                                                bgcolor: 'rgba(0, 0, 0, 0.7)'
+                                              }
+                                            }}
+                                          >
+                                            <Cancel />
+                                          </IconButton>
+                                          <img
+                                            src={phases[currentPhaseIndex].mediaItems[phaseCarouselIndex].url}
+                                            alt="phase-lightbox"
+                                            style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: 8 }}
+                                          />
+                                        </Box>
+                                      </DialogContent>
+                                    </Dialog>
+                                  </Box>
                                 ) : (
                                   <Alert
                                     severity="info"
@@ -3789,166 +3811,290 @@ const MyProperty = () => {
 
                       {/* TAB 2: PROPERTY DETAILS */}
                       {activeTab === 2 && (
-                      <Paper elevation={0} sx={{ p: 4, background: 'white', borderRadius: 5, border: '1px solid rgba(0,0,0,0.06)' }}>
-                        <Box display="flex" alignItems="center" gap={2} mb={4}>
-                          <Box sx={{ width: 56, height: 56, borderRadius: 3, background: 'linear-gradient(135deg, #673ab7 0%, #9c27b0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Visibility sx={{ fontSize: 28, color: 'white' }} />
-                          </Box>
-                          <Box>
-                            <Typography variant="h5" fontWeight="700" sx={{ color: '#2c3e50' }}>Property Details</Typography>
-                            <Typography variant="body2" sx={{ color: '#6c757d' }}>Complete specifications of your property</Typography>
-                          </Box>
-                        </Box>
-
-                        {propertyDetails.model ? (
-                          <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                              <Card sx={{ borderRadius: 4, border: '1px solid rgba(74, 124, 89, 0.15)', boxShadow: '0 8px 24px rgba(74, 124, 89, 0.1)', overflow: 'hidden' }}>
-                                <Box sx={{ p: 3, background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)', color: 'white' }}>
-                                  <Typography variant="h5" fontWeight="800">{propertyDetails.model.model}</Typography>
-                                  <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>Model Information</Typography>
-                                </Box>
-                                <CardContent sx={{ p: 3 }}>
-                                  <Typography variant="body1" sx={{ color: '#6c757d', mb: 3, lineHeight: 1.8 }}>
-                                    {propertyDetails.model.description || 'No description available.'}
-                                  </Typography>
-
-                                  {/* REPLACED GALLERY: single carousel (replica of one carousel from ModelCustomizationModal) */}
-                                  <Box sx={{ mb: 3 }}>
-                                    <Box display="flex" gap={2} alignItems="flex-start" flexDirection={{ xs: 'column', md: 'row' }}>
-                                      {/* MAIN CAROUSEL (left) */}
-                                      <Box sx={{ flex: 1, bgcolor: '#000', borderRadius: 2, p: 2, minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                                        <AnimatePresence mode="wait">
-                                          {carouselImages && carouselImages[carouselIndex] ? (
-                                            <motion.img
-                                              key={`carousel-${carouselIndex}-${carouselImages.length}`}
-                                              src={carouselImages[carouselIndex]}
-                                              initial={{ opacity: 0, scale: 0.95 }}
-                                              animate={{ opacity: 1, scale: 1 }}
-                                              exit={{ opacity: 0, scale: 0.95 }}
-                                              transition={{ duration: 0.3 }}
-                                              style={{ maxWidth: '90%', maxHeight: '80%', objectFit: 'contain', borderRadius: 8 }}
-                                            />
-                                          ) : (
-                                            <Typography color="white">No model images available</Typography>
-                                          )}
-                                        </AnimatePresence>
-
-                                        {/* Prev / Next buttons */}
-                                        {carouselImages.length > 1 && (
-                                          <>
-                                            <IconButton onClick={handleCarouselPrev} sx={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.95)', boxShadow: 3 }}>
-                                              <KeyboardArrowLeft />
-                                            </IconButton>
-                                            <IconButton onClick={handleCarouselNext} sx={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.95)', boxShadow: 3 }}>
-                                              <KeyboardArrowRight />
-                                            </IconButton>
-                                          </>
-                                        )}
-
-                                        {/* Expand to lightbox icon (explicit) */}
-                                        {carouselImages.length > 0 && (
-                                          <IconButton onClick={openLightbox} sx={{ position: 'absolute', top: 12, right: 12, bgcolor: 'rgba(255,255,255,0.95)' }}>
-                                            <ZoomIn />
-                                          </IconButton>
-                                        )}
-
-                                        {/* index badge */}
-                                        {carouselImages.length > 0 && (
-                                          <Box sx={{ position: 'absolute', bottom: 12, left: 12, bgcolor: 'rgba(0,0,0,0.6)', color: 'white', px: 2, py: 0.5, borderRadius: 2 }}>
-                                            <Typography variant="caption" fontWeight="600">{carouselIndex + 1} / {carouselImages.length}</Typography>
-                                          </Box>
-                                        )}
-                                      </Box>
-
-                                      {/* THUMBNAILS (right) */}
-                                      <Box sx={{ width: { xs: '100%', md: 300 }, mt: { xs: 1, md: 0 } }}>
-                                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
-                                          <Chip label={`All (${modelGallery.combined.length})`} size="small" onClick={() => setGalleryFilter('all')} variant={galleryFilter === 'all' ? 'filled' : 'outlined'} />
-                                          <Chip label={`Exterior (${modelGallery.exterior.length})`} size="small" onClick={() => setGalleryFilter('exterior')} variant={galleryFilter === 'exterior' ? 'filled' : 'outlined'} />
-                                          <Chip label={`Interior (${modelGallery.interior.length})`} size="small" onClick={() => setGalleryFilter('interior')} variant={galleryFilter === 'interior' ? 'filled' : 'outlined'} />
-                                        </Box>
-
-                                        <Box sx={{ maxHeight: 420, overflowY: 'auto', pr: 1 }}>
-                                          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
-                                            {carouselImages.length === 0 ? (
-                                              <Typography variant="caption" color="text.secondary">No images</Typography>
-                                            ) : carouselImages.map((url, i) => (
-                                              <Box
-                                                key={i}
-                                                onClick={() => handleThumbSelect(i)}
-                                                sx={{
-                                                  width: '100%',
-                                                  height: 80,
-                                                  borderRadius: 1.5,
-                                                  overflow: 'hidden',
-                                                  cursor: 'pointer',
-                                                  border: i === carouselIndex ? '2px solid #4a7c59' : '1px solid rgba(0,0,0,0.06)',
-                                                  boxShadow: i === carouselIndex ? '0 8px 24px rgba(74,124,89,0.12)' : 'none'
-                                                }}
-                                              >
-                                                <img src={url} alt={`thumb-${i}`} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                              </Box>
-                                            ))}
-                                          </Box>
-                                        </Box>
-
-                                        {carouselImages.length > 8 && (
-                                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-                                            Showing {Math.min(carouselImages.length, 8)} of {carouselImages.length} images
-                                          </Typography>
-                                        )}
-                                      </Box>
-                                    </Box>
-                                  </Box>
-
-                                  <Divider sx={{ my: 3 }} />
-
-                                  {/* remaining property spec cards */}
-                                  <Grid container spacing={3}>
-                                    {[
-                                      { icon: <Bed />, label: 'Bedrooms', value: propertyDetails.model.bedrooms, color: '#4a7c59' },
-                                      { icon: <Bathtub />, label: 'Bathrooms', value: propertyDetails.model.bathrooms, color: '#2196f3' },
-                                      { icon: <SquareFoot />, label: 'Square Feet', value: `${propertyDetails.model.sqft} ft²`, color: '#ff9800' },
-                                      { icon: <Home />, label: 'Lot Number', value: `#${propertyDetails.property.lot?.number}`, color: '#9c27b0' },
-                                      { icon: <LocationOn />, label: 'Section', value: propertyDetails.property.lot?.section, color: '#f44336' },
-                                      { icon: <AttachMoney />, label: 'Property Value', value: `$${propertyDetails.property.price?.toLocaleString()}`, color: '#4caf50' }
-                                    ].map((spec, index) => (
-                                      <Grid item xs={12} sm={6} md={4} key={index}>
-                                        <Paper elevation={0} sx={{ p: 3, textAlign: 'center', borderRadius: 3, border: `2px solid ${spec.color}30`, bgcolor: `${spec.color}08` }}>
-                                          <Box sx={{ width: 56, height: 56, borderRadius: 3, background: `${spec.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: spec.color, margin: '0 auto', mb: 2 }}>
-                                            {spec.icon}
-                                          </Box>
-                                          <Typography variant="caption" sx={{ color: '#6c757d', fontWeight: 700, textTransform: 'uppercase', display: 'block', mb: 1 }}>{spec.label}</Typography>
-                                          <Typography variant="h4" fontWeight="800" sx={{ color: spec.color }}>{spec.value}</Typography>
-                                        </Paper>
-                                      </Grid>
-                                    ))}
-                                  </Grid>
-                                </CardContent>
-                              </Card>
+                        <Paper elevation={0} sx={{ p: 4, mt: 3 }}>
+                          {/* Carrusel y miniaturas */}
+                          <Box sx={{ mb: 3 }}>
+                            <Grid item xs={12} sx={{mb:3}}>
+                              <Box display="flex" gap={2} flexWrap="wrap" justifyContent="center" mt={2}>
+                                {propertyDetails.property?.hasBalcony && (
+                                  <Chip
+                                    icon={<AutoAwesome sx={{ color: '#fff' }} />}
+                                    label="Balcony"
+                                    sx={{
+                                      bgcolor: '#4a7c59',
+                                      color: 'white',
+                                      fontWeight: 700,
+                                      fontSize: '1rem'
+                                    }}
+                                  />
+                                )}
+                                {propertyDetails.property.modelType === "upgrade" && (
+                                  <Chip
+                                    icon={<Star sx={{ color: '#fff' }} />}
+                                    label="Upgrade"
+                                    sx={{
+                                      bgcolor: '#ff9800',
+                                      color: 'white',
+                                      fontWeight: 700,
+                                      fontSize: '1rem'
+                                    }}
+                                  />
+                                )}
+                                {propertyDetails.property?.hasStorage && (
+                                  <Chip
+                                    icon={<Layers sx={{ color: '#fff' }} />}
+                                    label="Storage"
+                                    sx={{
+                                      bgcolor: '#607d8b',
+                                      color: 'white',
+                                      fontWeight: 700,
+                                      fontSize: '1rem'
+                                    }}
+                                  />
+                                )}
+                              </Box>
                             </Grid>
+                            <Box display="flex" gap={2} alignItems="flex-start" flexDirection={{ xs: 'column', md: 'row' }}>
+                              {/* MAIN CAROUSEL */}
+                            <Box
+                              sx={{
+                                flex: 1,
+                                bgcolor: '#000',
+                                borderRadius: 2,
+                                p: 2,
+                                minHeight: 320,
+                                height: 420, // <-- altura fija
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                position: 'relative',
+                                overflow: 'hidden'
+                              }}
+                            >
+                              <AnimatePresence mode="wait">
+                                {carouselImages && carouselImages[carouselIndex] ? (
+                                  <motion.img
+                                    key={`carousel-${carouselIndex}-${carouselImages.length}`}
+                                    src={carouselImages[carouselIndex].url}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    transition={{ duration: 0.3 }}
+                                    style={{
+                                      maxWidth: '90%',
+                                      maxHeight: '100%', // <-- para que nunca sobrepase la altura fija
+                                      objectFit: 'contain',
+                                      borderRadius: 8
+                                    }}
+                                    onClick={openLightbox}
+                                  />
+                                ) : (
+                                  <Typography color="white">No property images available</Typography>
+                                )}
+                              </AnimatePresence>
+                                {carouselImages.length > 1 && (
+                                  <>
+                                    <IconButton onClick={handleCarouselPrev} sx={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.95)', boxShadow: 3 }}>
+                                      <KeyboardArrowLeft />
+                                    </IconButton>
+                                    <IconButton onClick={handleCarouselNext} sx={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.95)', boxShadow: 3 }}>
+                                      <KeyboardArrowRight />
+                                    </IconButton>
+                                  </>
+                                )}
+                                {carouselImages.length > 0 && (
+                                  <IconButton onClick={openLightbox} sx={{ position: 'absolute', top: 12, right: 12, bgcolor: 'rgba(255,255,255,0.95)' }}>
+                                    <ZoomIn />
+                                  </IconButton>
+                                )}
+                                {carouselImages.length > 0 && (
+                                  <Box sx={{ position: 'absolute', bottom: 12, left: 12, bgcolor: 'rgba(0,0,0,0.6)', color: 'white', px: 2, py: 0.5, borderRadius: 2 }}>
+                                    <Typography variant="caption" fontWeight="600">{carouselIndex + 1} / {carouselImages.length}</Typography>
+                                  </Box>
+                                )}
+                              </Box>
+                              {/* THUMBNAILS */}
+                              <Box sx={{ width: { xs: '100%', md: 300 }, mt: { xs: 1, md: 0 } }}>
+                                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
+                                  <Chip label={`All (${allImages.length})`} size="small" onClick={() => setGalleryFilter('all')} variant={galleryFilter === 'all' ? 'filled' : 'outlined'} />
+                                  <Chip label={`Exterior (${allImages.filter(img => img.type === 'exterior').length})`} size="small" onClick={() => setGalleryFilter('exterior')} variant={galleryFilter === 'exterior' ? 'filled' : 'outlined'} />
+                                  <Chip label={`Interior (${allImages.filter(img => img.type === 'interior').length})`} size="small" onClick={() => setGalleryFilter('interior')} variant={galleryFilter === 'interior' ? 'filled' : 'outlined'} />
+                                </Box>
+                                <Box sx={{ maxHeight: 420, overflowY: 'auto', pr: 1 }}>
+                                  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
+                                    {carouselImages.length === 0 ? (
+                                      <Typography variant="caption" color="text.secondary">No images</Typography>
+                                    ) : carouselImages.map((img, i) => (
+                                      <Box
+                                        key={i}
+                                        onClick={() => handleThumbSelect(i)}
+                                        sx={{
+                                          width: '100%',
+                                          height: 80,
+                                          borderRadius: 1.5,
+                                          overflow: 'hidden',
+                                          cursor: 'pointer',
+                                          border: i === carouselIndex ? '2px solid #4a7c59' : '1px solid rgba(0,0,0,0.06)',
+                                          boxShadow: i === carouselIndex ? '0 8px 24px rgba(74,124,89,0.12)' : 'none'
+                                        }}
+                                      >
+                                        <img src={img.url} alt={`thumb-${i}`} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                      </Box>
+                                    ))}
+                                  </Box>
+                                </Box>
+                              </Box>
+                            </Box>
+                          </Box>
+                      
+                          {/* LIGHTBOX DIALOG */}
+                          <Dialog open={lightboxOpen} onClose={closeLightbox} maxWidth="lg" fullWidth>
+                            <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', bgcolor: 'transparent' }}>
+                              <Box sx={{ position: 'relative' }}>
+                                <IconButton
+                                  onClick={() => closeLightbox()}
+                                  sx={{
+                                    position: 'absolute',
+                                    top: 16,
+                                    right: 16,
+                                    color: 'white',
+                                    bgcolor: 'rgba(0, 0, 0, 0.5)',
+                                    zIndex: 10,
+                                    '&:hover': {
+                                      bgcolor: 'rgba(0, 0, 0, 0.7)'
+                                    }
+                                  }}
+                                >
+                                  <Cancel />
+                                </IconButton>
+                                {carouselImages.length > 0 && (
+                                  <img src={carouselImages[carouselIndex].url} alt='lightbox'  style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: 8 }} />
+                                )}
+                              </Box>
+                            </DialogContent>
+                          </Dialog>
+                      
+                         
+                          <Grid container spacing={2} sx={{ mt: 1 }}>
+                            {[
+                              { 
+                                icon: <Bed sx={{ fontSize: 22 }} />, 
+                                label: 'Bedrooms', 
+                                value: propertyDetails.model?.bedrooms,
+                                color: '#4a7c59'
+                              },
+                              { 
+                                icon: <Bathtub sx={{ fontSize: 22 }} />, 
+                                label: 'Bathrooms', 
+                                value: propertyDetails.model?.bathrooms,
+                                color: '#2196f3'
+                              },
+                              { 
+                                icon: <SquareFoot sx={{ fontSize: 22 }} />, 
+                                label: 'Square Feet', 
+                                value: `${propertyDetails.model?.sqft} ft²`,
+                                color: '#ff9800'
+                              },
+                              propertyDetails.model?.stories && {
+                                icon: <Layers sx={{ fontSize: 22 }} />, 
+                                label: 'Stories', 
+                                value: propertyDetails.model?.stories,
+                                color: '#607d8b'
+                              },
+                              { 
+                                icon: <Home sx={{ fontSize: 22 }} />, 
+                                label: 'Lot Number', 
+                                value: `#${propertyDetails.property?.lot?.number}`,
+                                color: '#9c27b0'
+                              },
+                              { 
+                                icon: <LocationOn sx={{ fontSize: 22 }} />, 
+                                label: 'Section', 
+                                value: propertyDetails.property?.lot?.section,
+                                color: '#f44336'
+                              },
+                              { 
+                                icon: <AttachMoney sx={{ fontSize: 22 }} />, 
+                                label: 'Property Value', 
+                                value: `$${propertyDetails.property?.price?.toLocaleString()}`,
+                                color: '#4caf50'
+                              }
+                            ].filter(Boolean).map((spec, index) => (
+                              <Grid item xs={6} sm={4} md={3} key={index}>
+                                <motion.div
+                                  initial={{ opacity: 0, scale: 0.9 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  transition={{ delay: index * 0.08 }}
+                                  whileHover={{ scale: 1.04 }}
+                                >
+                                  <Paper
+                                    elevation={0}
+                                    sx={{
+                                      p: 1,
+                                      textAlign: 'center',
+                                      borderRadius: 2,
+                                      border: `1.5px solid ${spec.color}25`,
+                                      bgcolor: `${spec.color}06`,
+                                      transition: 'all 0.2s',
+                                      minHeight: 70,
+                                      '&:hover': {
+                                        borderColor: spec.color,
+                                        bgcolor: `${spec.color}15`,
+                                        boxShadow: `0 4px 12px ${spec.color}18`
+                                      }
+                                    }}
+                                  >
+                                    <Box
+                                      sx={{
+                                        width: 36,
+                                        height: 36,
+                                        borderRadius: 2,
+                                        background: `${spec.color}18`,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: spec.color,
+                                        margin: '0 auto',
+                                        mb: 0.5
+                                      }}
+                                    >
+                                      {spec.icon}
+                                    </Box>
+                                    <Typography 
+                                      variant="caption" 
+                                      sx={{ 
+                                        color: '#6c757d',
+                                        fontWeight: 700,
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.5px',
+                                        display: 'block',
+                                        mb: 0.2,
+                                        fontSize: '0.72rem'
+                                      }}
+                                    >
+                                      {spec.label}
+                                    </Typography>
+                                    <Typography 
+                                      variant="subtitle1"
+                                      fontWeight="700"
+                                      sx={{ 
+                                        color: spec.color,
+                                        letterSpacing: '-0.5px',
+                                        fontSize: '1.1rem'
+                                      }}
+                                    >
+                                      {spec.value}
+                                    </Typography>
+                                  </Paper>
+                                </motion.div>
+                              </Grid>
+                            ))}
                           </Grid>
-                        ) : (
-                          <Alert severity="warning">No model details available for this property.</Alert>
-                        )}
-                      </Paper>
+                         
+                        </Paper>
                       )}
                     </motion.div>
                   </AnimatePresence>
-                            {/* LIGHTBOX DIALOG (opened only when user clicks the explicit zoom button) */}
-            <Dialog open={lightboxOpen} onClose={closeLightbox} maxWidth="lg" fullWidth>
-              <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', bgcolor: 'transparent' }}>
-                <Box sx={{ position: 'relative' }}>
-                  <IconButton onClick={closeLightbox} sx={{ position: 'absolute', top: -48, right: 0 }}>
-                    <Cancel />
-                  </IconButton>
-                  {carouselImages.length > 0 && (
-                    <img src={carouselImages[carouselIndex]} alt="Lightbox" style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: 8 }} />
-                  )}
-                </Box>
-              </DialogContent>
-            </Dialog>
           </>
                 
               )}

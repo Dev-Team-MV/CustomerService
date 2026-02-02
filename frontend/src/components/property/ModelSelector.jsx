@@ -714,17 +714,38 @@ const ModelSelector = () => {
           }
         }}
       >
-        <Box sx={{ p: 2 }}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Typography variant="h6" fontWeight="bold">
-              Model Details
-            </Typography>
-            <IconButton onClick={() => setDrawerOpen(false)}>
-              <Close />
-            </IconButton>
-          </Box>
-          {selectedModel && <ModelInfoPanel />}
-        </Box>
+  <Box sx={{ p: 2 }}>
+    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Typography variant="h6" fontWeight="bold">
+        Model Details
+      </Typography>
+      <IconButton onClick={() => setDrawerOpen(false)}>
+        <Close />
+      </IconButton>
+    </Box>
+    {/* Clear button for mobile */}
+    {selectedModel && (
+      <Button
+        size="small"
+        variant="outlined"
+        onClick={handleDeselectModel}
+        startIcon={<Close />}
+        fullWidth
+        sx={{
+          mb: 2,
+          borderColor: '#e0e0e0',
+          color: '#666',
+          '&:hover': { 
+            borderColor: '#4a7c59',
+            color: '#4a7c59'
+          }
+        }}
+      >
+        Clear Selection
+      </Button>
+    )}
+    {selectedModel && <ModelInfoPanel />}
+  </Box>
       </Drawer>
 
       {/* Customization Modal */}

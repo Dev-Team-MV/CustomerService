@@ -47,6 +47,10 @@ import {
   PhotoLibrary,
   KeyboardArrowLeft,
   KeyboardArrowRight,
+  Bathtub,
+  Bed,
+  SquareFoot,
+  Layers, Deck    
 } from "@mui/icons-material";
 import api from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
@@ -55,6 +59,9 @@ import uploadService from "../services/uploadService";
 
 const Models = () => {
   const navigate = useNavigate();
+
+
+
   const [models, setModels] = useState([]);
   const [facades, setFacades] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -98,24 +105,28 @@ const Models = () => {
     images: {
       exterior: [],
       interior: [],
+      blueprints: []
     },
     hasBalcony: false,
     balconyPrice: 0,
     balconyImages: {
       exterior: [],
       interior: [],
+      blueprints: []
     },
     hasUpgrade: false,
     upgradePrice: 0,
     upgradeImages: {
       exterior: [],
       interior: [],
+      blueprints: []
     },
     hasStorage: false,
     storagePrice: 0,
     storageImages: {
       exterior: [],
       interior: [],
+      blueprints: []
     },
   });
 
@@ -254,7 +265,7 @@ const Models = () => {
 
     // ✅ BASE SIN BALCÓN (Exterior + Interior)
     categories.push({
-      label: "Base Model (Sin Balcón)",
+      label: "Base Model (Without Balcony)",
       key: "base",
       exteriorImages: model.images?.exterior || [],
       interiorImages: model.images?.interior || [],
@@ -273,7 +284,7 @@ const Models = () => {
     // ✅ UPGRADE SIN BALCÓN (Exterior base + Interior upgrade)
     if (hasUpgrade) {
       categories.push({
-        label: `${model.upgrades[0].name} (Sin Balcón)`,
+        label: `${model.upgrades[0].name} (Without Balcony)`,
         key: "upgrade",
         exteriorImages: model.images?.exterior || [], // Exterior base
         interiorImages: model.upgrades[0].images?.interior || [],
@@ -340,12 +351,13 @@ const Models = () => {
       const hasStorageOption = model.storages && model.storages.length > 0;
 
       const normalizeImages = (images) => {
-        if (!images) return { exterior: [], interior: [] };
+        if (!images) return { exterior: [], interior: [], blueprints: [] };
 
         if (images.exterior && images.interior) {
           return {
             exterior: Array.isArray(images.exterior) ? images.exterior : [],
             interior: Array.isArray(images.interior) ? images.interior : [],
+            blueprints: Array.isArray(images.blueprints) ? images.blueprints : [],
           };
         }
 
@@ -382,19 +394,19 @@ const Models = () => {
         balconyPrice: hasBalconyOption ? model.balconies[0].price : 0,
         balconyImages: hasBalconyOption
           ? normalizeImages(model.balconies[0].images)
-          : { exterior: [], interior: [] },
+          : { exterior: [], interior: [], blueprints: [] },
 
         hasUpgrade: hasUpgradeOption,
         upgradePrice: hasUpgradeOption ? model.upgrades[0].price : 0,
         upgradeImages: hasUpgradeOption
           ? normalizeImages(model.upgrades[0].images)
-          : { exterior: [], interior: [] },
+          : { exterior: [], interior: [], blueprints: [] },
 
         hasStorage: hasStorageOption,
         storagePrice: hasStorageOption ? model.storages[0].price : 0,
         storageImages: hasStorageOption
           ? normalizeImages(model.storages[0].images)
-          : { exterior: [], interior: [] },
+          : { exterior: [], interior: [], blueprints: [] },
       });
 
       setExpandedAccordions({
@@ -415,16 +427,16 @@ const Models = () => {
         stories: 1,
         description: "",
         status: "active",
-        images: { exterior: [], interior: [] },
+        images: { exterior: [], interior: [], blueprints: [] },
         hasBalcony: false,
         balconyPrice: 0,
-        balconyImages: { exterior: [], interior: [] },
+        balconyImages: { exterior: [], interior: [], blueprints: [] },
         hasUpgrade: false,
         upgradePrice: 0,
-        upgradeImages: { exterior: [], interior: [] },
+        upgradeImages: { exterior: [], interior: [], blueprints: [] },
         hasStorage: false,
         storagePrice: 0,
-        storageImages: { exterior: [], interior: [] },
+        storageImages: { exterior: [], interior: [], blueprints: [] },
       });
 
       setExpandedAccordions({
@@ -448,54 +460,8 @@ const Models = () => {
     setCurrentRoomType("general"); // ✅ Reset roomType
   };
 
-  const handleAddImage = () => {
-    if (!currentImageUrl.trim()) return;
-
-    const section = currentImageSection;
-    const type = currentImageType;
-
-    // ✅ Crear objeto con roomType si es interior
-    const imageData =
-      type === "interior" && currentRoomType !== "general"
-        ? { url: currentImageUrl.trim(), roomType: currentRoomType }
-        : currentImageUrl.trim();
-
-    if (section === "base") {
-      setFormData((prev) => ({
-        ...prev,
-        images: {
-          ...prev.images,
-          [type]: [...prev.images[type], imageData],
-        },
-      }));
-    } else if (section === "balcony") {
-      setFormData((prev) => ({
-        ...prev,
-        balconyImages: {
-          ...prev.balconyImages,
-          [type]: [...prev.balconyImages[type], imageData],
-        },
-      }));
-    } else if (section === "upgrade") {
-      setFormData((prev) => ({
-        ...prev,
-        upgradeImages: {
-          ...prev.upgradeImages,
-          [type]: [...prev.upgradeImages[type], imageData],
-        },
-      }));
-    } else if (section === "storage") {
-      setFormData((prev) => ({
-        ...prev,
-        storageImages: {
-          ...prev.storageImages,
-          [type]: [...prev.storageImages[type], imageData],
-        },
-      }));
-    }
-
-    setCurrentImageUrl("");
-    setCurrentRoomType("general"); // ✅ Reset roomType
+  const handleGoToDetail = (modelId) => {
+    navigate(`/models/${modelId}`);
   };
 
   const handleRemoveImage = (section, type, index) => {
@@ -541,103 +507,119 @@ const Models = () => {
     }));
   };
 
-  const handleSubmit = async () => {
-    try {
-      const balconies = [];
-      if (formData.hasBalcony && formData.balconyPrice > 0) {
-        balconies.push({
-          name: "Balcony Option",
-          price: formData.balconyPrice,
-          description: "Balcony add-on for this model",
-          sqft: 0,
-          images: {
-            exterior: Array.isArray(formData.balconyImages?.exterior)
-              ? formData.balconyImages.exterior
-              : [],
-            interior: Array.isArray(formData.balconyImages?.interior)
-              ? formData.balconyImages.interior
-              : [],
-          },
-          status: "active",
-        });
-      }
+const handleSubmit = async () => {
+  try {
+    // Construir blueprints para el modelo principal
+    const blueprints = {
+      default: Array.isArray(formData.images?.blueprints) ? formData.images.blueprints : [],
+      withBalcony: Array.isArray(formData.balconyImages?.blueprints) ? formData.balconyImages.blueprints : [],
+      withStorage: Array.isArray(formData.storageImages?.blueprints) ? formData.storageImages.blueprints : [],
+      withBalconyAndStorage:
+        Array.isArray(formData.balconyImages?.blueprints) && Array.isArray(formData.storageImages?.blueprints)
+          ? [...formData.balconyImages.blueprints, ...formData.storageImages.blueprints]
+          : [],
+    };
 
-      const upgrades = [];
-      if (formData.hasUpgrade && formData.upgradePrice > 0) {
-        upgrades.push({
-          name: "Upgrade Option",
-          price: formData.upgradePrice,
-          description: "Premium upgrade for this model",
-          features: [],
-          images: {
-            exterior: Array.isArray(formData.upgradeImages?.exterior)
-              ? formData.upgradeImages.exterior
-              : [],
-            interior: Array.isArray(formData.upgradeImages?.interior)
-              ? formData.upgradeImages.interior
-              : [],
-          },
-          status: "active",
-        });
-      }
-
-      const storages = [];
-      if (formData.hasStorage && formData.storagePrice > 0) {
-        storages.push({
-          name: "Storage Option",
-          price: formData.storagePrice,
-          description: "Additional storage space",
-          sqft: 0,
-          images: {
-            exterior: Array.isArray(formData.storageImages?.exterior)
-              ? formData.storageImages.exterior
-              : [],
-            interior: Array.isArray(formData.storageImages?.interior)
-              ? formData.storageImages.interior
-              : [],
-          },
-          status: "active",
-        });
-      }
-
-      const dataToSend = {
-        model: formData.model,
-        modelNumber: formData.modelNumber,
-        price: formData.price,
-        bedrooms: formData.bedrooms,
-        bathrooms: formData.bathrooms,
-        sqft: formData.sqft,
-        stories: formData.stories,
-        description: formData.description,
-        status: formData.status,
+    // Balconies
+    const balconies = [];
+    if (formData.hasBalcony && formData.balconyPrice > 0) {
+      balconies.push({
+        name: "Balcony Option",
+        price: formData.balconyPrice,
+        description: "Balcony add-on for this model",
+        sqft: 0,
         images: {
-          exterior: Array.isArray(formData.images?.exterior)
-            ? formData.images.exterior
+          exterior: Array.isArray(formData.balconyImages?.exterior)
+            ? formData.balconyImages.exterior
             : [],
-          interior: Array.isArray(formData.images?.interior)
-            ? formData.images.interior
+          interior: Array.isArray(formData.balconyImages?.interior)
+            ? formData.balconyImages.interior
             : [],
         },
-        balconies,
-        upgrades,
-        storages,
-      };
-
-      console.log("📤 Sending data to backend:", dataToSend);
-
-      if (selectedModel) {
-        await api.put(`/models/${selectedModel._id}`, dataToSend);
-      } else {
-        await api.post("/models", dataToSend);
-      }
-      handleCloseDialog();
-      fetchModels();
-    } catch (error) {
-      console.error("❌ Error saving model:", error);
-      console.error("Error details:", error.response?.data);
-      alert(error.response?.data?.message || "Error saving model");
+        status: "active",
+      });
     }
-  };
+
+    // Upgrades
+    const upgrades = [];
+    if (formData.hasUpgrade && formData.upgradePrice > 0) {
+      upgrades.push({
+        name: "Upgrade Option",
+        price: formData.upgradePrice,
+        description: "Premium upgrade for this model",
+        features: [],
+        images: {
+          exterior: Array.isArray(formData.upgradeImages?.exterior)
+            ? formData.upgradeImages.exterior
+            : [],
+          interior: Array.isArray(formData.upgradeImages?.interior)
+            ? formData.upgradeImages.interior
+            : [],
+        },
+        status: "active",
+      });
+    }
+
+    // Storages
+    const storages = [];
+    if (formData.hasStorage && formData.storagePrice > 0) {
+      storages.push({
+        name: "Storage Option",
+        price: formData.storagePrice,
+        description: "Additional storage space",
+        sqft: 0,
+        images: {
+          exterior: Array.isArray(formData.storageImages?.exterior)
+            ? formData.storageImages.exterior
+            : [],
+          interior: Array.isArray(formData.storageImages?.interior)
+            ? formData.storageImages.interior
+            : [],
+        },
+        status: "active",
+      });
+    }
+
+    // Payload final
+    const dataToSend = {
+      model: formData.model,
+      modelNumber: formData.modelNumber,
+      price: formData.price,
+      bedrooms: formData.bedrooms,
+      bathrooms: formData.bathrooms,
+      sqft: formData.sqft,
+      stories: formData.stories,
+      description: formData.description,
+      status: formData.status,
+      images: {
+        exterior: Array.isArray(formData.images?.exterior)
+          ? formData.images.exterior
+          : [],
+        interior: Array.isArray(formData.images?.interior)
+          ? formData.images.interior
+          : [],
+      },
+      blueprints,
+      balconies,
+      upgrades,
+      storages,
+    };
+
+    console.log("📤 Sending data to backend:", dataToSend);
+
+    if (selectedModel) {
+      await api.put(`/models/${selectedModel._id}`, dataToSend);
+    } else {
+      await api.post("/models", dataToSend);
+    }
+    handleCloseDialog();
+    fetchModels();
+  } catch (error) {
+    console.error("❌ Error saving model:", error);
+    console.error("Error details:", error.response?.data);
+    alert(error.response?.data?.message || "Error saving model");
+  }
+};
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this model?")) {
@@ -916,6 +898,7 @@ const Models = () => {
     return [
       ...(model.images?.exterior || []),
       ...(model.images?.interior || []),
+      ...(model.images?.blueprints || []),
     ];
   };
 
@@ -1129,13 +1112,14 @@ const Models = () => {
       </Box>
 
       {/* Models Grid */}
+      
       <Grid container spacing={3}>
         {models.map((model) => {
           const modelFacades = getModelFacades(model._id);
           const allImages = getAllModelImages(model);
           const currentModelImageIndex = modelImageIndices[model._id] || 0;
           const currentModelImage = allImages[currentModelImageIndex];
-
+      
           return (
             <Grid item xs={12} key={model._id}>
               <motion.div
@@ -1143,239 +1127,282 @@ const Models = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="hover:shadow-lg transition-shadow">
-                  <CardContent>
-                    <Box
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="start"
-                      mb={2}
-                    >
-                      <Box display="flex" gap={2} alignItems="start">
+                <Card
+                  sx={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    p: 2.5,
+                    borderRadius: 4,
+                    boxShadow: "0 8px 32px rgba(74,124,89,0.10)",
+                    mb: 2,
+                    transition: "box-shadow 0.2s",
+                    "&:hover": { boxShadow: "0 16px 48px rgba(74,124,89,0.18)" },
+                    position: "relative",
+                    overflow: "visible",
+                  }}
+                >
+                  {/* Estado */}
+                  <Chip
+                    label={model.status}
+                    color={getStatusColor(model.status)}
+                    size="small"
+                    sx={{
+                      position: "absolute",
+                      top: 16,
+                      right: 16,
+                      fontWeight: 700,
+                      zIndex: 2,
+                      textTransform: "capitalize",
+                    }}
+                  />
+      
+                  {/* Imagen principal */}
+                  <Box
+                    sx={{
+                      width: 120,
+                      height: 120,
+                      borderRadius: 3,
+                      overflow: "hidden",
+                      position: "relative",
+                      boxShadow: "0 2px 12px rgba(74,124,89,0.10)",
+                      mr: 3,
+                      bgcolor: "grey.200",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {currentModelImage ? (
+                      <>
+                        <Box
+                          component="img"
+                          src={currentModelImage}
+                          alt={model.model}
+                          sx={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            transition: "transform 0.2s",
+                            "&:hover": { transform: "scale(1.04)" },
+                          }}
+                        />
+                        {/* Overlay inferior */}
                         <Box
                           sx={{
-                            width: 80,
-                            height: 80,
-                            bgcolor: "grey.200",
-                            borderRadius: 2,
+                            position: "absolute",
+                            bottom: 0,
+                            left: 0,
+                            width: "100%",
+                            bgcolor: "rgba(0,0,0,0.5)",
+                            color: "white",
+                            px: 2,
+                            py: 0.5,
+                            fontSize: 13,
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "center",
-                            backgroundImage: currentModelImage
-                              ? `url(${currentModelImage})`
-                              : "none",
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            position: "relative",
-                            "&:hover .image-controls": {
-                              opacity: 1,
-                            },
+                            justifyContent: "space-between",
                           }}
                         >
-                          {!currentModelImage && (
-                            <Home sx={{ fontSize: 40, color: "grey.400" }} />
-                          )}
-
-                          {allImages.length > 1 && (
-                            <Box
-                              className="image-controls"
-                              sx={{
-                                opacity: 0,
-                                transition: "opacity 0.2s",
-                                position: "absolute",
-                                inset: 0,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                px: 0.5,
-                              }}
-                            >
-                              <IconButton
-                                size="small"
-                                onClick={(e) =>
-                                  handlePrevModelImage(
-                                    e,
-                                    model._id,
-                                    allImages.length,
-                                  )
-                                }
-                                sx={{
-                                  bgcolor: "rgba(255,255,255,0.9)",
-                                  width: 24,
-                                  height: 24,
-                                  "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-                                }}
-                              >
-                                <ChevronLeft fontSize="small" />
-                              </IconButton>
-                              <IconButton
-                                size="small"
-                                onClick={(e) =>
-                                  handleNextModelImage(
-                                    e,
-                                    model._id,
-                                    allImages.length,
-                                  )
-                                }
-                                sx={{
-                                  bgcolor: "rgba(255,255,255,0.9)",
-                                  width: 24,
-                                  height: 24,
-                                  "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-                                }}
-                              >
-                                <ChevronRight fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          )}
-
-                          {allImages.length > 1 && (
-                            <Chip
-                              label={`${currentModelImageIndex + 1}/${allImages.length}`}
+                          <span>
+                            <PhotoLibrary sx={{ fontSize: 16, mr: 0.5 }} />
+                            {allImages.length}
+                          </span>
+                          <span>
+                            {currentModelImageIndex + 1}/{allImages.length}
+                          </span>
+                        </Box>
+                        {/* Flechas navegación */}
+                        {allImages.length > 1 && (
+                          <>
+                            <IconButton
                               size="small"
+                              onClick={(e) =>
+                                handlePrevModelImage(e, model._id, allImages.length)
+                              }
                               sx={{
                                 position: "absolute",
-                                bottom: 4,
-                                right: 4,
-                                height: 16,
-                                bgcolor: "rgba(0,0,0,0.7)",
-                                color: "white",
-                                fontSize: "0.6rem",
-                                "& .MuiChip-label": { px: 0.5 },
+                                left: 4,
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                bgcolor: "rgba(255,255,255,0.9)",
+                                "&:hover": { bgcolor: "rgba(255,255,255,1)" },
                               }}
-                            />
-                          )}
-                        </Box>
-
-                        <Box>
-                          <Typography variant="h5" fontWeight="bold">
-                            {model.model}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            mb={1}
-                          >
-                            Model #{model.modelNumber}
-                          </Typography>
-                          <Box display="flex" gap={2} mb={1} flexWrap="wrap">
-                            <Typography variant="body2">
-                              <strong>{model.bedrooms}</strong> beds
-                            </Typography>
-                            <Typography variant="body2">
-                              <strong>{model.bathrooms}</strong> baths
-                            </Typography>
-                            <Typography variant="body2">
-                              <strong>{model.sqft?.toLocaleString()}</strong>{" "}
-                              sqft
-                            </Typography>
-                            {/* ✅ NUEVO: Stories */}
-                            <Typography variant="body2">
-                              <strong>{model.stories || 1}</strong>{" "}
-                              {model.stories === 1 ? "story" : "stories"}
-                            </Typography>
-                          </Box>
-                          <Typography
-                            variant="h6"
-                            color="primary"
-                            fontWeight="bold"
-                          >
-                            Base: ${model.price?.toLocaleString()}
-                          </Typography>
-
-                          {/* Pricing Options Badges */}
-                          {hasPricingOptions(model) && (
-                            <Box
-                              display="flex"
-                              gap={0.5}
-                              mt={1}
-                              flexWrap="wrap"
                             >
-                              {model.balconies?.length > 0 && (
-                                <Chip
-                                  label={`Balcony: +$${model.balconies[0].price.toLocaleString()}`}
-                                  size="small"
-                                  color="info"
-                                  variant="outlined"
-                                  icon={<Balcony />}
-                                />
-                              )}
-                              {model.upgrades?.length > 0 && (
-                                <Chip
-                                  label={`Upgrade: +$${model.upgrades[0].price.toLocaleString()}`}
-                                  size="small"
-                                  color="secondary"
-                                  variant="outlined"
-                                  icon={<UpgradeIcon />}
-                                />
-                              )}
-                              {model.storages?.length > 0 && (
-                                <Chip
-                                  label={`Storage: +$${model.storages[0].price.toLocaleString()}`}
-                                  size="small"
-                                  color="success"
-                                  variant="outlined"
-                                  icon={<StorageIcon />}
-                                />
-                              )}
-                            </Box>
-                          )}
-                        </Box>
-                      </Box>
-                      <Box
-                        display="flex"
-                        gap={1}
-                        alignItems="center"
-                        flexWrap="wrap"
-                      >
-                        <Chip
-                          label={model.status}
-                          color={getStatusColor(model.status)}
-                          size="small"
-                        />
-                        {/* ✅ NUEVO: Botón Gallery */}
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          startIcon={<PhotoLibrary />}
-                          onClick={() => handleOpenGallery(model)}
-                          color="primary"
-                        >
-                          Gallery
-                        </Button>
-                        {hasPricingOptions(model) && (
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            startIcon={<Visibility />}
-                            onClick={() => handleViewPricing(model)}
-                          >
-                            Pricing
-                          </Button>
+                              <ChevronLeft fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={(e) =>
+                                handleNextModelImage(e, model._id, allImages.length)
+                              }
+                              sx={{
+                                position: "absolute",
+                                right: 4,
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                bgcolor: "rgba(255,255,255,0.9)",
+                                "&:hover": { bgcolor: "rgba(255,255,255,1)" },
+                              }}
+                            >
+                              <ChevronRight fontSize="small" />
+                            </IconButton>
+                          </>
                         )}
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenDialog(model)}
-                        >
-                          <Edit fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleDelete(model._id)}
-                        >
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Box>
+                      </>
+                    ) : (
+                      <Home sx={{ fontSize: 48, color: "grey.400" }} />
+                    )}
+                  </Box>
+      
+                  {/* Info principal */}
+                  <Box flex={1} minWidth={0}>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Typography variant="h5" fontWeight="bold" sx={{ mr: 1 }}>
+                        {model.model}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ fontWeight: 500 }}
+                      >
+                        #{model.modelNumber}
+                      </Typography>
                     </Box>
-
+                    <Box display="flex" gap={2} alignItems="center" mt={0.5} mb={1}>
+                      <Tooltip title="Bedrooms">
+                        <Box display="flex" alignItems="center" gap={0.5}>
+                          <Home sx={{ fontSize: 18, color: "#4a7c59" }} />
+                          <Typography variant="body2">
+                            {model.bedrooms}
+                          </Typography>
+                        </Box>
+                      </Tooltip>
+                      <Tooltip title="Bathrooms">
+                        <Box display="flex" alignItems="center" gap={0.5}>
+                          <Bathtub sx={{ fontSize: 18, color: "#2196f3" }} />
+                          <Typography variant="body2">
+                            {model.bathrooms}
+                          </Typography>
+                        </Box>
+                      </Tooltip>
+                      <Tooltip title="Square Feet">
+                        <Box display="flex" alignItems="center" gap={0.5}>
+                          <SquareFoot sx={{ fontSize: 18, color: "#ff9800" }} />
+                          <Typography variant="body2">
+                            {model.sqft?.toLocaleString()}
+                          </Typography>
+                        </Box>
+                      </Tooltip>
+                      <Tooltip title="Stories">
+                        <Box display="flex" alignItems="center" gap={0.5}>
+                          <Layers sx={{ fontSize: 18, color: "#8bc34a" }} />
+                          <Typography variant="body2">
+                            {model.stories || 1}
+                          </Typography>
+                        </Box>
+                      </Tooltip>
+                    </Box>
+                    <Box
+                      sx={{
+                        bgcolor: "rgba(76,175,80,0.08)",
+                        border: "1px solid #c8e6c9",
+                        borderRadius: 2,
+                        px: 2,
+                        py: 0.5,
+                        display: "inline-block",
+                        mb: 1,
+                      }}
+                    >
+                      <Typography variant="h6" fontWeight="bold" color="success.main">
+                        ${model.price?.toLocaleString()}
+                      </Typography>
+                    </Box>
+                    {/* Opciones */}
+                    {hasPricingOptions(model) && (
+                      <Box display="flex" gap={0.5} mt={1} flexWrap="wrap">
+                        {model.balconies?.length > 0 && (
+                          <Chip
+                            label={`Balcony: +$${model.balconies[0].price.toLocaleString()}`}
+                            size="small"
+                            color="info"
+                            variant="outlined"
+                            icon={<Balcony />}
+                          />
+                        )}
+                        {model.upgrades?.length > 0 && (
+                          <Chip
+                            label={`Upgrade: +$${model.upgrades[0].price.toLocaleString()}`}
+                            size="small"
+                            color="secondary"
+                            variant="outlined"
+                            icon={<UpgradeIcon />}
+                          />
+                        )}
+                        {model.storages?.length > 0 && (
+                          <Chip
+                            label={`Storage: +$${model.storages[0].price.toLocaleString()}`}
+                            size="small"
+                            color="success"
+                            variant="outlined"
+                            icon={<StorageIcon />}
+                          />
+                        )}
+                      </Box>
+                    )}
+                    {/* Descripción */}
                     {model.description && (
-                      <Typography variant="body2" color="text.secondary" mb={2}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        mt={1}
+                        sx={{
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
                         {model.description}
                       </Typography>
                     )}
+                    {/* Acciones */}
+                    <Box display="flex" gap={1} alignItems="center" mt={2}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<PhotoLibrary />}
+                        onClick={() => handleOpenGallery(model)}
+                        color="primary"
+                      >
+                        Gallery
+                      </Button>
 
-                    {/* Facades Section */}
-                    <Box sx={{ borderTop: "1px solid #eee", pt: 2 }}>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleGoToDetail(model._id);
+                        }}
+                      >
+                        View Details
+                      </Button>
+
+                      <IconButton
+                        size="small"
+                        onClick={() => handleOpenDialog(model)}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDelete(model._id)}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Box>
+                    {/* Facades mini-carrusel */}
+                    <Box sx={{ borderTop: "1px solid #eee", pt: 2, mt: 2 }}>
                       <Box
                         display="flex"
                         justifyContent="space-between"
@@ -1394,245 +1421,120 @@ const Models = () => {
                           Add Facade
                         </Button>
                       </Box>
-
                       {modelFacades.length > 0 ? (
-                        <Box sx={{ position: "relative", mx: -1 }}>
-                          {modelFacades.length > 3 && (
-                            <IconButton
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const container = document.getElementById(
-                                  `facades-${model._id}`,
-                                );
-                                if (container) {
-                                  container.scrollBy({
-                                    left: -320,
-                                    behavior: "smooth",
-                                  });
-                                }
-                              }}
-                              sx={{
-                                position: "absolute",
-                                left: -8,
-                                top: "50%",
-                                transform: "translateY(-50%)",
-                                zIndex: 2,
-                                bgcolor: "white",
-                                boxShadow: 1,
-                                "&:hover": { bgcolor: "grey.100" },
-                              }}
-                            >
-                              <ChevronLeft />
-                            </IconButton>
-                          )}
-
-                          <Box
-                            id={`facades-${model._id}`}
-                            sx={{
-                              display: "flex",
-                              gap: 2,
-                              overflowX: "auto",
-                              px: 1,
-                              pb: 2,
-                              scrollbarWidth: "none",
-                              "&::-webkit-scrollbar": {
-                                display: "none",
-                              },
-                            }}
-                          >
-                            {modelFacades.map((facade) => {
-                              const facadeImages = getFacadeImages(facade);
-                              const currentFacadeImageIndex =
-                                facadeImageIndices[facade._id] || 0;
-                              const currentFacadeImage =
-                                facadeImages[currentFacadeImageIndex];
-
-                              return (
-                                <Card
-                                  key={facade._id}
-                                  variant="outlined"
+                        <Box sx={{ display: "flex", gap: 2, overflowX: "auto", pb: 1 }}>
+                          {modelFacades.map((facade) => {
+                            const facadeImages = getFacadeImages(facade);
+                            const currentFacadeImageIndex =
+                              facadeImageIndices[facade._id] || 0;
+                            const currentFacadeImage =
+                              facadeImages[currentFacadeImageIndex];
+      
+                            return (
+                              <Card
+                                key={facade._id}
+                                variant="outlined"
+                                sx={{
+                                  minWidth: 180,
+                                  maxWidth: 180,
+                                  flexShrink: 0,
+                                  borderRadius: 2,
+                                  overflow: "hidden",
+                                  position: "relative",
+                                }}
+                              >
+                                <Box
                                   sx={{
-                                    minWidth: 280,
-                                    maxWidth: 280,
-                                    flexShrink: 0,
+                                    width: "100%",
+                                    height: 100,
+                                    bgcolor: "grey.200",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    backgroundImage: currentFacadeImage
+                                      ? `url(${currentFacadeImage})`
+                                      : "none",
+                                    backgroundSize: "cover",
+                                    backgroundPosition: "center",
+                                    position: "relative",
                                   }}
                                 >
-                                  <Box
-                                    sx={{
-                                      width: "100%",
-                                      height: 180,
-                                      bgcolor: "grey.200",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      backgroundImage: currentFacadeImage
-                                        ? `url(${currentFacadeImage})`
-                                        : "none",
-                                      backgroundSize: "cover",
-                                      backgroundPosition: "center",
-                                      position: "relative",
-                                    }}
-                                  >
-                                    {!currentFacadeImage && (
-                                      <ImageIcon
-                                        sx={{ fontSize: 40, color: "grey.400" }}
-                                      />
-                                    )}
-
-                                    {facadeImages.length > 1 && (
-                                      <>
-                                        <IconButton
-                                          size="small"
-                                          onClick={(e) =>
-                                            handlePrevFacadeImage(
-                                              e,
-                                              facade._id,
-                                              facadeImages.length,
-                                            )
-                                          }
-                                          sx={{
-                                            position: "absolute",
-                                            left: 8,
-                                            top: "50%",
-                                            transform: "translateY(-50%)",
-                                            bgcolor: "rgba(255,255,255,0.9)",
-                                            width: 32,
-                                            height: 32,
-                                            "&:hover": {
-                                              bgcolor: "rgba(255,255,255,1)",
-                                            },
-                                          }}
-                                        >
-                                          <ChevronLeft fontSize="small" />
-                                        </IconButton>
-                                        <IconButton
-                                          size="small"
-                                          onClick={(e) =>
-                                            handleNextFacadeImage(
-                                              e,
-                                              facade._id,
-                                              facadeImages.length,
-                                            )
-                                          }
-                                          sx={{
-                                            position: "absolute",
-                                            right: 8,
-                                            top: "50%",
-                                            transform: "translateY(-50%)",
-                                            bgcolor: "rgba(255,255,255,0.9)",
-                                            width: 32,
-                                            height: 32,
-                                            "&:hover": {
-                                              bgcolor: "rgba(255,255,255,1)",
-                                            },
-                                          }}
-                                        >
-                                          <ChevronRight fontSize="small" />
-                                        </IconButton>
-                                      </>
-                                    )}
-
-                                    {facadeImages.length > 1 && (
-                                      <Chip
-                                        label={`${currentFacadeImageIndex + 1}/${facadeImages.length}`}
-                                        size="small"
-                                        sx={{
-                                          position: "absolute",
-                                          bottom: 8,
-                                          left: 8,
-                                          bgcolor: "rgba(0,0,0,0.7)",
-                                          color: "white",
-                                        }}
-                                      />
-                                    )}
-
-                                    <Box
+                                  {!currentFacadeImage && (
+                                    <ImageIcon
+                                      sx={{ fontSize: 40, color: "grey.400" }}
+                                    />
+                                  )}
+                                  {facadeImages.length > 1 && (
+                                    <Chip
+                                      label={`${currentFacadeImageIndex + 1}/${facadeImages.length}`}
+                                      size="small"
                                       sx={{
                                         position: "absolute",
-                                        top: 4,
-                                        right: 4,
-                                        display: "flex",
-                                        gap: 0.5,
+                                        bottom: 4,
+                                        left: 4,
+                                        bgcolor: "rgba(0,0,0,0.7)",
+                                        color: "white",
+                                      }}
+                                    />
+                                  )}
+                                  <Box
+                                    sx={{
+                                      position: "absolute",
+                                      top: 4,
+                                      right: 4,
+                                      display: "flex",
+                                      gap: 0.5,
+                                    }}
+                                  >
+                                    <IconButton
+                                      size="small"
+                                      sx={{
+                                        bgcolor: "rgba(255,255,255,0.9)",
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOpenFacadeDialog(model, facade);
                                       }}
                                     >
-                                      <IconButton
-                                        size="small"
-                                        sx={{
-                                          bgcolor: "rgba(255,255,255,0.9)",
-                                        }}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleOpenFacadeDialog(model, facade);
-                                        }}
-                                      >
-                                        <Edit fontSize="small" />
-                                      </IconButton>
-                                      <IconButton
-                                        size="small"
-                                        sx={{
-                                          bgcolor: "rgba(255,255,255,0.9)",
-                                        }}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleDeleteFacade(facade._id);
-                                        }}
-                                      >
-                                        <Delete fontSize="small" />
-                                      </IconButton>
-                                    </Box>
+                                      <Edit fontSize="small" />
+                                    </IconButton>
+                                    <IconButton
+                                      size="small"
+                                      sx={{
+                                        bgcolor: "rgba(255,255,255,0.9)",
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteFacade(facade._id);
+                                      }}
+                                    >
+                                      <Delete fontSize="small" />
+                                    </IconButton>
                                   </Box>
-                                  <CardContent>
-                                    <Typography
-                                      variant="subtitle2"
-                                      fontWeight="bold"
-                                    >
-                                      {facade.title}
-                                    </Typography>
-                                    <Typography
-                                      variant="body2"
-                                      color="primary"
-                                      fontWeight="600"
-                                    >
-                                      +${facade.price?.toLocaleString()}
-                                    </Typography>
-                                  </CardContent>
-                                </Card>
-                              );
-                            })}
-                          </Box>
-
-                          {modelFacades.length > 3 && (
-                            <IconButton
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const container = document.getElementById(
-                                  `facades-${model._id}`,
-                                );
-                                if (container) {
-                                  container.scrollBy({
-                                    left: 320,
-                                    behavior: "smooth",
-                                  });
-                                }
-                              }}
-                              sx={{
-                                position: "absolute",
-                                right: -8,
-                                top: "50%",
-                                transform: "translateY(-50%)",
-                                zIndex: 2,
-                                bgcolor: "white",
-                                boxShadow: 1,
-                                "&:hover": { bgcolor: "grey.100" },
-                              }}
-                            >
-                              <ChevronRight />
-                            </IconButton>
-                          )}
+                                </Box>
+                                <CardContent sx={{ p: 1.5 }}>
+                                  <Typography
+                                    variant="subtitle2"
+                                    fontWeight="bold"
+                                    noWrap
+                                  >
+                                    {facade.title}
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    color="primary"
+                                    fontWeight="600"
+                                  >
+                                    +${facade.price?.toLocaleString()}
+                                  </Typography>
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
                         </Box>
                       ) : (
                         <Paper
-                          sx={{ p: 3, textAlign: "center", bgcolor: "grey.50" }}
+                          sx={{ p: 2, textAlign: "center", bgcolor: "grey.50" }}
                         >
                           <ImageIcon
                             sx={{ fontSize: 40, color: "grey.400", mb: 1 }}
@@ -1643,13 +1545,14 @@ const Models = () => {
                         </Paper>
                       )}
                     </Box>
-                  </CardContent>
+                  </Box>
                 </Card>
               </motion.div>
             </Grid>
           );
         })}
       </Grid>
+      
 
       {/* ==================== GALLERY MODAL ==================== */}
       <Dialog
@@ -1885,28 +1788,34 @@ const Models = () => {
           },
         }}
       >
-        <DialogTitle
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            borderBottom: "1px solid #e0e0e0",
-          }}
-        >
+        <DialogTitle sx={{ pb: 2 }}>
           <Box display="flex" alignItems="center" gap={2}>
-            <Home color="primary" />
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: 3,
+                background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <Home sx={{ color: 'white', fontSize: 24 }} />
+            </Box>
             <Box>
-              <Typography variant="h5" fontWeight="bold">
+              <Typography variant="h6" fontWeight={700}>
                 {selectedModel ? "Edit Model" : "Add New Model"}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{ color: '#6c757d' }}>
                 Total Images: {getTotalImagesCount()}
               </Typography>
             </Box>
+            <Box flex={1} />
+            <IconButton onClick={handleCloseDialog}>
+              <Close />
+            </IconButton>
           </Box>
-          <IconButton onClick={handleCloseDialog}>
-            <Close />
-          </IconButton>
         </DialogTitle>
 
         <DialogContent sx={{ p: 0, overflow: "hidden" }}>
@@ -2333,6 +2242,7 @@ const Models = () => {
                     </TextField>
                   </Grid>
                   {/* ✅ SELECTOR DE TIPO CON LÓGICA CONDICIONAL */}
+                  
                   <Grid
                     item
                     xs={12}
@@ -2353,8 +2263,10 @@ const Models = () => {
                     >
                       <MenuItem value="exterior">Exterior</MenuItem>
                       <MenuItem value="interior">Interior</MenuItem>
+                      <MenuItem value="blueprints">Blueprints</MenuItem> {/* <-- NUEVO */}
                     </TextField>
                   </Grid>
+                  
 
                   {/* ✅ SELECTOR DE TIPO DE HABITACIÓN (SOLO SI ES INTERIOR) */}
                   {currentImageType === "interior" && (
@@ -2658,6 +2570,55 @@ const Models = () => {
                           </Paper>
                         )}
                       </Box>
+
+                      {/* Blueprints */}
+                      <Box>
+                        <Typography variant="subtitle2" fontWeight="600" gutterBottom>
+                          Blueprints ({formData.images.blueprints.length})
+                        </Typography>
+                        {formData.images.blueprints.length > 0 ? (
+                          <Grid container spacing={1}>
+                            {formData.images.blueprints.map((url, index) => (
+                              <Grid item xs={6} key={index}>
+                                <Box sx={{ position: "relative", pt: "75%", borderRadius: 1, overflow: "hidden", border: "1px solid #e0e0e0" }}>
+                                  <Box
+                                    component="img"
+                                    src={url}
+                                    alt={`Blueprint ${index + 1}`}
+                                    sx={{
+                                      position: "absolute",
+                                      top: 0,
+                                      left: 0,
+                                      width: "100%",
+                                      height: "100%",
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleRemoveImage("base", "blueprints", index)}
+                                    sx={{
+                                      position: "absolute",
+                                      top: 4,
+                                      right: 4,
+                                      bgcolor: "rgba(255,255,255,0.9)",
+                                      "&:hover": { bgcolor: "rgba(255,255,255,1)" },
+                                    }}
+                                  >
+                                    <Close fontSize="small" />
+                                  </IconButton>
+                                </Box>
+                              </Grid>
+                            ))}
+                          </Grid>
+                        ) : (
+                          <Paper sx={{ p: 2, textAlign: "center", bgcolor: "grey.100" }}>
+                            <Typography variant="caption" color="text.secondary">
+                              No blueprints
+                            </Typography>
+                          </Paper>
+                        )}
+                      </Box>
                     </Stack>
                   </AccordionDetails>
                 </Accordion>
@@ -2847,6 +2808,55 @@ const Models = () => {
                                 color="text.secondary"
                               >
                                 No interior images
+                              </Typography>
+                            </Paper>
+                          )}
+                        </Box>
+
+                        {/* Blueprints */}
+                        <Box>
+                          <Typography variant="subtitle2" fontWeight="600" gutterBottom>
+                            Blueprints ({formData.balconyImages.blueprints.length})
+                          </Typography>
+                          {formData.balconyImages.blueprints.length > 0 ? (
+                            <Grid container spacing={1}>
+                              {formData.balconyImages.blueprints.map((url, index) => (
+                                <Grid item xs={6} key={index}>
+                                  <Box sx={{ position: "relative", pt: "75%", borderRadius: 1, overflow: "hidden", border: "1px solid #e0e0e0" }}>
+                                    <Box
+                                      component="img"
+                                      src={url}
+                                      alt={`Blueprint ${index + 1}`}
+                                      sx={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover",
+                                      }}
+                                    />
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => handleRemoveImage("base", "blueprints", index)}
+                                      sx={{
+                                        position: "absolute",
+                                        top: 4,
+                                        right: 4,
+                                        bgcolor: "rgba(255,255,255,0.9)",
+                                        "&:hover": { bgcolor: "rgba(255,255,255,1)" },
+                                      }}
+                                    >
+                                      <Close fontSize="small" />
+                                    </IconButton>
+                                  </Box>
+                                </Grid>
+                              ))}
+                            </Grid>
+                          ) : (
+                            <Paper sx={{ p: 2, textAlign: "center", bgcolor: "grey.100" }}>
+                              <Typography variant="caption" color="text.secondary">
+                                No blueprints
                               </Typography>
                             </Paper>
                           )}
@@ -3045,6 +3055,55 @@ const Models = () => {
                             </Paper>
                           )}
                         </Box>
+
+                        {/* Blueprints */}
+                        <Box>
+                          <Typography variant="subtitle2" fontWeight="600" gutterBottom>
+                            Blueprints ({formData.upgradeImages.blueprints.length})
+                          </Typography>
+                          {formData.upgradeImages.blueprints.length > 0 ? (
+                            <Grid container spacing={1}>
+                              {formData.upgradeImages.blueprints.map((url, index) => (
+                                <Grid item xs={6} key={index}>
+                                  <Box sx={{ position: "relative", pt: "75%", borderRadius: 1, overflow: "hidden", border: "1px solid #e0e0e0" }}>
+                                    <Box
+                                      component="img"
+                                      src={url}
+                                      alt={`Blueprint ${index + 1}`}
+                                      sx={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover",
+                                      }}
+                                    />
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => handleRemoveImage("base", "blueprints", index)}
+                                      sx={{
+                                        position: "absolute",
+                                        top: 4,
+                                        right: 4,
+                                        bgcolor: "rgba(255,255,255,0.9)",
+                                        "&:hover": { bgcolor: "rgba(255,255,255,1)" },
+                                      }}
+                                    >
+                                      <Close fontSize="small" />
+                                    </IconButton>
+                                  </Box>
+                                </Grid>
+                              ))}
+                            </Grid>
+                          ) : (
+                            <Paper sx={{ p: 2, textAlign: "center", bgcolor: "grey.100" }}>
+                              <Typography variant="caption" color="text.secondary">
+                                No blueprints
+                              </Typography>
+                            </Paper>
+                          )}
+                        </Box>
                       </Stack>
                     </AccordionDetails>
                   </Accordion>
@@ -3239,6 +3298,56 @@ const Models = () => {
                             </Paper>
                           )}
                         </Box>
+
+                                                {/* Blueprints */}
+                        <Box>
+                          <Typography variant="subtitle2" fontWeight="600" gutterBottom>
+                            Blueprints ({formData.storageImages.blueprints.length})
+                          </Typography>
+                          {formData.storageImages.blueprints.length > 0 ? (
+                            <Grid container spacing={1}>
+                              {formData.storageImages.blueprints.map((url, index) => (
+                                <Grid item xs={6} key={index}>
+                                  <Box sx={{ position: "relative", pt: "75%", borderRadius: 1, overflow: "hidden", border: "1px solid #e0e0e0" }}>
+                                    <Box
+                                      component="img"
+                                      src={url}
+                                      alt={`Blueprint ${index + 1}`}
+                                      sx={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover",
+                                      }}
+                                    />
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => handleRemoveImage("base", "blueprints", index)}
+                                      sx={{
+                                        position: "absolute",
+                                        top: 4,
+                                        right: 4,
+                                        bgcolor: "rgba(255,255,255,0.9)",
+                                        "&:hover": { bgcolor: "rgba(255,255,255,1)" },
+                                      }}
+                                    >
+                                      <Close fontSize="small" />
+                                    </IconButton>
+                                  </Box>
+                                </Grid>
+                              ))}
+                            </Grid>
+                          ) : (
+                            <Paper sx={{ p: 2, textAlign: "center", bgcolor: "grey.100" }}>
+                              <Typography variant="caption" color="text.secondary">
+                                No blueprints
+                              </Typography>
+                            </Paper>
+                          )}
+                        </Box>
+
                       </Stack>
                     </AccordionDetails>
                   </Accordion>
@@ -3248,22 +3357,44 @@ const Models = () => {
           </Box>
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, py: 2, borderTop: "1px solid #e0e0e0" }}>
-          <Button onClick={handleCloseDialog} variant="outlined">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            variant="contained"
-            startIcon={selectedModel ? <Edit /> : <Add />}
-            sx={{
-              bgcolor: "#4a7c59",
-              "&:hover": { bgcolor: "#3d6649" },
-            }}
-          >
-            {selectedModel ? "Update Model" : "Create Model"}
-          </Button>
-        </DialogActions>
+  <DialogActions sx={{ px: 3, py: 2, borderTop: "1px solid #e0e0e0" }}>
+    <Button
+      onClick={handleCloseDialog}
+      sx={{
+        borderRadius: 3,
+        textTransform: 'none',
+        fontWeight: 600,
+        px: 3
+      }}
+      variant="outlined"
+    >
+      Cancel
+    </Button>
+    <Button
+      onClick={handleSubmit}
+      variant="contained"
+      startIcon={selectedModel ? <Edit /> : <Add />}
+      sx={{
+        borderRadius: 3,
+        background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+        color: 'white',
+        fontWeight: 700,
+        textTransform: 'none',
+        px: 4,
+        py: 1.5,
+        boxShadow: '0 8px 20px rgba(74, 124, 89, 0.3)',
+        '&:hover': {
+          background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
+          boxShadow: '0 12px 28px rgba(74, 124, 89, 0.4)'
+        },
+        '&:disabled': {
+          background: '#ccc'
+        }
+      }}
+    >
+      {selectedModel ? "Update Model" : "Create Model"}
+    </Button>
+  </DialogActions>
       </Dialog>
 
       {/* ==================== FACADE DIALOG ==================== */}
@@ -3272,13 +3403,36 @@ const Models = () => {
         onClose={handleCloseFacadeDialog}
         maxWidth="lg"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
+          }
+        }}
       >
-        <DialogTitle sx={{ pb: 1 }}>
-          <Box display="flex" alignItems="center" gap={1}>
-            <CloudUpload color="primary" />
-            <Typography variant="h6" component="span">
-              {selectedFacade ? "Edit Facade" : "Add New Facade"}
-            </Typography>
+        <DialogTitle sx={{ pb: 2 }}>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: 3,
+                background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <CloudUpload sx={{ color: 'white', fontSize: 24 }} />
+            </Box>
+            <Box>
+              <Typography variant="h6" fontWeight={700}>
+                {selectedFacade ? "Edit Facade" : "Add New Facade"}
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#6c757d' }}>
+                Manage facade images and options
+              </Typography>
+            </Box>
           </Box>
         </DialogTitle>
         <DialogContent sx={{ height: "70vh", display: "flex", p: 3 }}>
@@ -3586,16 +3740,223 @@ const Models = () => {
             </Box>
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseFacadeDialog}>Cancel</Button>
-          <Button
-            onClick={handleSubmitFacade}
-            variant="contained"
-            disabled={
-              !facadeFormData.title.trim() || facadeFormData.url.length === 0
-            }
+  <DialogActions sx={{ p: 3, gap: 2 }}>
+    <Button
+      onClick={handleCloseFacadeDialog}
+      sx={{
+        borderRadius: 3,
+        textTransform: 'none',
+        fontWeight: 600,
+        px: 3
+      }}
+    >
+      Cancel
+    </Button>
+    <Button
+      onClick={handleSubmitFacade}
+      variant="contained"
+      disabled={
+        !facadeFormData.title.trim() || facadeFormData.url.length === 0
+      }
+      sx={{
+        borderRadius: 3,
+        background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+        color: 'white',
+        fontWeight: 700,
+        textTransform: 'none',
+        px: 4,
+        py: 1.5,
+        boxShadow: '0 8px 20px rgba(74, 124, 89, 0.3)',
+        '&:hover': {
+          background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
+          boxShadow: '0 12px 28px rgba(74, 124, 89, 0.4)'
+        },
+        '&:disabled': {
+          background: '#ccc'
+        }
+      }}
+    >
+      {selectedFacade ? "Update" : "Create"}
+    </Button>
+  </DialogActions>
+      </Dialog>
+
+            {/* Deck Dialog */}
+      <Dialog
+        open={openDeckDialog}
+        onClose={handleCloseDeckDialog}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
+          }
+        }}
+      >
+        <DialogTitle>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: 3,
+                background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <CloudUpload sx={{ color: 'white', fontSize: 24 }} />
+            </Box>
+            <Typography variant="h6" fontWeight={700}>
+              {editingDeckIndex !== null ? "Edit Deck Option" : "Add New Deck Option"}
+            </Typography>
+          </Box>
+        </DialogTitle>
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
           >
-            {selectedFacade ? "Update" : "Create"}
+            <Grid container spacing={2} sx={{ mt: 0 }}>
+              <Grid item xs={12} sm={8}>
+                <TextField
+                  fullWidth
+                  label="Deck Name"
+                  value={deckFormData.name}
+                  onChange={(e) =>
+                    setDeckFormData({ ...deckFormData, name: e.target.value })
+                  }
+                  required
+                  placeholder="e.g. Standard Deck, Premium Composite"
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Price"
+                  value={deckFormData.price}
+                  onChange={(e) =>
+                    setDeckFormData({
+                      ...deckFormData,
+                      price: Number(e.target.value),
+                    })
+                  }
+                  required
+                  InputProps={{
+                    startAdornment: <Typography sx={{ mr: 0.5 }}>$</Typography>,
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={2}
+                  label="Description"
+                  value={deckFormData.description}
+                  onChange={(e) =>
+                    setDeckFormData({
+                      ...deckFormData,
+                      description: e.target.value,
+                    })
+                  }
+                />
+              </Grid>
+
+              {/* Deck Images */}
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Deck Images
+                </Typography>
+                <Box display="flex" gap={1} mb={2}>
+
+                  <Button
+                  variant="outlined"
+                  component="label"
+                  disabled={uploadingDeckImages}
+                  startIcon={<CloudUpload />}
+                >
+                  {uploadingDeckImages ? "Uploading..." : "Upload Files"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    multiple
+                    onChange={handleFileDeckUpload}
+                  />
+                </Button>
+                </Box>
+
+                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                  {deckFormData.images.map((url, index) => (
+                    <Box
+                      key={index}
+                      sx={{ position: "relative", width: 100, height: 100 }}
+                    >
+                      <Box
+                        component="img"
+                        src={url}
+                        sx={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          borderRadius: 1,
+                        }}
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRemoveDeckImageUrl(index)}
+                        sx={{
+                          position: "absolute",
+                          top: 0,
+                          right: 0,
+                          bgcolor: "rgba(255,255,255,0.8)",
+                          p: 0.5,
+                        }}
+                      >
+                        <Close fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  ))}
+                </Box>
+              </Grid>
+            </Grid>
+          </DialogContent>
+        <DialogActions sx={{ p: 3, gap: 2 }}>
+          <Button
+            onClick={handleCloseDeckDialog}
+            sx={{
+              borderRadius: 3,
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 3
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmitDeck}
+            variant="contained"
+            sx={{
+              borderRadius: 3,
+              background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+              color: 'white',
+              fontWeight: 700,
+              textTransform: 'none',
+              px: 4,
+              py: 1.5,
+              boxShadow: '0 8px 20px rgba(74, 124, 89, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
+                boxShadow: '0 12px 28px rgba(74, 124, 89, 0.4)'
+              },
+              '&:disabled': {
+                background: '#ccc'
+              }
+            }}
+          >
+            Save Deck
           </Button>
         </DialogActions>
       </Dialog>
@@ -3769,134 +4130,7 @@ const Models = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Deck Dialog */}
-      <Dialog
-        open={openDeckDialog}
-        onClose={handleCloseDeckDialog}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          {editingDeckIndex !== null
-            ? "Edit Deck Option"
-            : "Add New Deck Option"}
-        </DialogTitle>
-        <DialogContent
-          sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
-        >
-          <Grid container spacing={2} sx={{ mt: 0 }}>
-            <Grid item xs={12} sm={8}>
-              <TextField
-                fullWidth
-                label="Deck Name"
-                value={deckFormData.name}
-                onChange={(e) =>
-                  setDeckFormData({ ...deckFormData, name: e.target.value })
-                }
-                required
-                placeholder="e.g. Standard Deck, Premium Composite"
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Price"
-                value={deckFormData.price}
-                onChange={(e) =>
-                  setDeckFormData({
-                    ...deckFormData,
-                    price: Number(e.target.value),
-                  })
-                }
-                required
-                InputProps={{
-                  startAdornment: <Typography sx={{ mr: 0.5 }}>$</Typography>,
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                rows={2}
-                label="Description"
-                value={deckFormData.description}
-                onChange={(e) =>
-                  setDeckFormData({
-                    ...deckFormData,
-                    description: e.target.value,
-                  })
-                }
-              />
-            </Grid>
 
-            {/* Deck Images */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle2" gutterBottom>
-                Deck Images
-              </Typography>
-              <Box display="flex" gap={1} mb={2}>
-
-                <Button
-                 variant="outlined"
-                 component="label"
-                 disabled={uploadingDeckImages}
-                 startIcon={<CloudUpload />}
-               >
-                 {uploadingDeckImages ? "Uploading..." : "Upload Files"}
-                 <input
-                   type="file"
-                   accept="image/*"
-                   hidden
-                   multiple
-                   onChange={handleFileDeckUpload}
-                 />
-               </Button>
-              </Box>
-
-              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                {deckFormData.images.map((url, index) => (
-                  <Box
-                    key={index}
-                    sx={{ position: "relative", width: 100, height: 100 }}
-                  >
-                    <Box
-                      component="img"
-                      src={url}
-                      sx={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        borderRadius: 1,
-                      }}
-                    />
-                    <IconButton
-                      size="small"
-                      onClick={() => handleRemoveDeckImageUrl(index)}
-                      sx={{
-                        position: "absolute",
-                        top: 0,
-                        right: 0,
-                        bgcolor: "rgba(255,255,255,0.8)",
-                        p: 0.5,
-                      }}
-                    >
-                      <Close fontSize="small" />
-                    </IconButton>
-                  </Box>
-                ))}
-              </Box>
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeckDialog}>Cancel</Button>
-          <Button onClick={handleSubmitDeck} variant="contained">
-            Save Deck
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };

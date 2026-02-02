@@ -8,6 +8,7 @@ import ModelSelector from '../components/property/ModelSelector'
 import FacadeSelector from '../components/property/FacadeSelector'
 import ResidentAssignment from '../components/property/ResidentAssignment'
 import PriceCalculator from '../components/property/PriceCalculator'
+import { motion } from 'framer-motion'
 
 const PropertySelectionContent = () => {
   const { loading, error } = useProperty()
@@ -47,6 +48,12 @@ const PropertySelectionContent = () => {
   }
 
   return (
+    <>
+              <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
     <Box sx={{ py: 3 }}>
       <Box sx={{ mb: 3 }}>
         <Typography variant="h4" gutterBottom fontWeight="bold">
@@ -118,6 +125,8 @@ const PropertySelectionContent = () => {
         </Grid>
       </Container>
     </Box>
+    </motion.div>
+    </>
   )
 }
 
