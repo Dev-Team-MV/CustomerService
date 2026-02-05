@@ -1,0 +1,11 @@
+# Normalizar finales de línea a LF en el repositorio (evita el warning LF/CRLF en Windows)
+* text=auto eol=lf
+
+# Binarios que no deben convertirse
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

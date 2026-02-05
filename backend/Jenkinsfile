@@ -1,0 +1,45 @@
+// Job independiente: solo backend. En Jenkins → Script Path: backend/Jenkinsfile
+pipeline {
+  agent any
+
+  options {
+    timeout(time: 15, unit: 'MINUTES')
+  }
+
+  environment {
+    IMAGE_NAME = "customer-service-backend"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Install & Test') {
+      steps {
+        dir('backend') {
+          sh 'npm ci'
+          sh 'npm run test || true'
+        }
+      }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        dir('backend') {
+          script {
+            docker.build(env.IMAGE_NAME)
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
