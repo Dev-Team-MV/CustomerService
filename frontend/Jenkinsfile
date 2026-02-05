@@ -1,0 +1,71 @@
+// Job independiente: solo frontend. En Jenkins → Script Path: frontend/Jenkinsfile
+// Requiere: curl, bash, Docker. VITE_API_URL se define aquí o en Jenkins (Job → Configure → Variables de entorno).
+pipeline {
+  agent any
+
+  options {
+    timeout(time: 15, unit: 'MINUTES')
+  }
+
+  environment {
+    IMAGE_NAME = "customer-service-frontend"
+    // URL del backend en producción. Cambia la IP/host o define esta variable en el Job de Jenkins.
+    VITE_API_URL = "https://apics.michelangelodelvalle.com/api"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Install & Build') {
+      steps {
+        dir('frontend') {
+          sh '''#!/bin/bash
+            set -e
+            mkdir -p "${WORKSPACE}/.nvm"
+            export NVM_DIR="${WORKSPACE}/.nvm"
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+            [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+            nvm install 20
+            nvm use 20
+            npm ci
+            npm run build
+          '''
+        }
+      }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        dir('frontend') {
+          sh 'docker build -t "${IMAGE_NAME}" .'
+        }
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        script {
+          sh "docker stop frontend 2>/dev/null || true"
+          sh "docker rm frontend 2>/dev/null || true"
+          sh """
+            docker run -d \
+              --name frontend \
+              -p 5173:80 \
+              --restart unless-stopped \
+              ${env.IMAGE_NAME}:latest
+          """
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
