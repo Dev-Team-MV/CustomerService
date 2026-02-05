@@ -1,11 +1,7 @@
 // Job independiente: solo backend. En Jenkins → Script Path: backend/Jenkinsfile
-// Requiere: plugin "Node.js" + en Global Tool Configuration una instalación Node (nombre: NodeJS). Docker en el agente para Build Docker Image.
+// No requiere plugin Node.js: instala Node en el workspace con nvm. Requiere: curl, bash. Docker en el agente para Build Docker Image.
 pipeline {
   agent any
-
-  tools {
-    nodejs 'NodeJS'
-  }
 
   options {
     timeout(time: 15, unit: 'MINUTES')
@@ -25,8 +21,16 @@ pipeline {
     stage('Install & Test') {
       steps {
         dir('backend') {
-          sh 'npm ci'
-          sh 'npm run test || true'
+          sh '''#!/bin/bash
+            set -e
+            export NVM_DIR="${WORKSPACE}/.nvm"
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+            [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+            nvm install 20
+            nvm use 20
+            npm ci
+            npm run test || true
+          '''
         }
       }
     }
