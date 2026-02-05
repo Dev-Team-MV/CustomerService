@@ -54,7 +54,7 @@ pipeline {
                           -p 5000:5000 \
                           -e NODE_ENV=production \
                           -e PORT=5000 \
-                          -e MONGODB_URI=mongodb://mongo:27017/appdb \
+                          -e MONGODB_URI=mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice \
                           --restart unless-stopped \
                           ${env.IMAGE_NAME}:${env.BUILD_NUMBER}
                     """
