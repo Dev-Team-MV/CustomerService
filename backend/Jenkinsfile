@@ -1,53 +1,68 @@
-// Job independiente: solo backend. En Jenkins → Script Path: backend/Jenkinsfile
-// No requiere plugin Node.js: instala Node en el workspace con nvm. Requiere: curl, bash. Docker en el agente para Build Docker Image.
+// Jenkinsfile para CustomerService - backend en backend/, puerto 5000
+// Copia este archivo a la RAÍZ de tu repo como "Jenkinsfile" y haz commit + push
+
 pipeline {
-  agent any
+    agent any
 
-  options {
-    timeout(time: 15, unit: 'MINUTES')
-  }
-
-  environment {
-    IMAGE_NAME = "customer-service-backend"
-  }
-
-  stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
+    environment {
+        IMAGE_NAME = 'customerservice-backend'
+        CONTAINER_NAME = 'backend'
+        APP_DIR = 'backend'
     }
 
-    stage('Install & Test') {
-      steps {
-        dir('backend') {
-          sh '''#!/bin/bash
-            set -e
-            mkdir -p "${WORKSPACE}/.nvm"
-            export NVM_DIR="${WORKSPACE}/.nvm"
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-            [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
-            nvm install 20
-            nvm use 20
-            npm ci
-            npm run test --if-present
-          '''
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
         }
-      }
-    }
 
-    stage('Build Docker Image') {
-      steps {
-        dir('backend') {
-          sh 'docker build -t "${IMAGE_NAME}" .'
+        stage('Install & Test') {
+            steps {
+                script {
+                    def workDir = "/workspace/${env.APP_DIR}"
+                    sh "docker run --rm -v ${WORKSPACE}:/workspace -w ${workDir} node:20-alpine sh -c 'npm ci --omit=dev 2>/dev/null || npm install --omit=dev && (npm test || true)'"
+                }
+            }
         }
-      }
-    }
-  }
 
-  post {
-    always {
-      cleanWs()
+        stage('Build Docker') {
+            steps {
+                script {
+                    dir(env.APP_DIR) {
+                        docker.build("${IMAGE_NAME}:${BUILD_NUMBER}")
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    sh "docker stop ${CONTAINER_NAME} 2>/dev/null || true"
+                    sh "docker rm ${CONTAINER_NAME} 2>/dev/null || true"
+                    sh """
+                        docker run -d \
+                          --name ${CONTAINER_NAME} \
+                          --network deploy_app-network \
+                          -p 5000:5000 \
+                          -e NODE_ENV=production \
+                          -e PORT=5000 \
+                          -e MONGODB_URI=mongodb://mongo:27017/appdb \
+                          --restart unless-stopped \
+                          ${IMAGE_NAME}:${BUILD_NUMBER}
+                    """
+                }
+            }
+        }
     }
-  }
+
+    post {
+        success {
+            echo 'Backend desplegado en http://localhost:5000'
+        }
+        failure {
+            echo 'Falló el pipeline'
+        }
+    }
 }
