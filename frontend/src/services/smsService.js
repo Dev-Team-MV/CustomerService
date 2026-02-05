@@ -34,12 +34,13 @@ export const sendSMS = async (to, message) => {
 export const sendWelcomeSMS = async (userInfo) => {
   const { firstName, email, phoneNumber } = userInfo
   
-  const message = `¡Bienvenido a Customer Service! 🏡\n\n` +
-    `Hola ${firstName},\n\n` +
-    `Tu cuenta ha sido creada exitosamente.\n` +
+  const message = `Welcome to Customer Service! 🏡\n\n` +
+    `Hello ${firstName},\n\n` +
+    `Your account has been successfully created.\n` +
     `Email: ${email}\n\n` +
-    `Puedes iniciar sesión en: ${window.location.origin}\n\n` +
-    `¡Gracias por confiar en nosotros!`
+    `You can log in at: ${window.location.origin}\n\n` +
+    `Thank you for trusting us!`
+
 
   return await sendSMS(phoneNumber, message)
 }
@@ -58,15 +59,15 @@ export const sendPropertyAssignmentSMS = async (propertyInfo) => {
     status 
   } = propertyInfo
   
-  const message = `🏡 ¡Propiedad Asignada!\n\n` +
-    `Hola ${firstName},\n\n` +
-    `Se te ha asignado una nueva propiedad:\n\n` +
-    `📍 Lote: ${lotNumber} - Sección ${section}\n` +
-    `🏠 Modelo: ${modelName}\n` +
-    `💰 Precio: $${price?.toLocaleString() || 'N/A'}\n` +
-    `📊 Estado: ${status || 'Reservado'}\n\n` +
-    `Ingresa a tu portal para ver más detalles: ${window.location.origin}/my-property\n\n` +
-    `¡Felicidades por tu nueva propiedad!`
+  const message = `🏡 Property Assigned!\n\n` +
+    `Hello ${firstName},\n\n` +
+    `A new property has been assigned to you:\n\n` +
+    `📍 Lot: ${lotNumber} - Section ${section}\n` +
+    `🏠 Model: ${modelName}\n` +
+    `💰 Price: $${price?.toLocaleString() || 'N/A'}\n` +
+    `📊 Status: ${status || 'Reserved'}\n\n` +
+    `Log in to your portal for more details: ${window.location.origin}/my-property\n\n` +
+    `Congratulations on your new property!`
 
   return await sendSMS(phoneNumber, message)
 }

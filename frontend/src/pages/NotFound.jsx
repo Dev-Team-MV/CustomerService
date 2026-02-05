@@ -9,6 +9,7 @@ const NotFound = () => {
     <Container>
       <Box
         sx={{
+          p: 3,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',

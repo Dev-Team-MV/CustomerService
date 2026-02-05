@@ -339,7 +339,9 @@ const Analytics = () => {
   const projectSoldPercentage = stats.totalLots > 0 ? (stats.soldLots / stats.totalLots) * 100 : 0
 
   return (
-    <Box>
+    <Box
+    sx={{p: 3}}
+    >
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
         <Box>
           <Typography variant="h4" gutterBottom fontWeight="bold">

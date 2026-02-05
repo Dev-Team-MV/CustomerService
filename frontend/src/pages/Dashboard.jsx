@@ -1,7 +1,7 @@
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 
-import { useState, useEffect } from 'react'
+import React,{ useState, useEffect } from 'react'
 import {
   Grid,
   Paper,
@@ -252,7 +252,9 @@ const Dashboard = () => {
   }
 
   return (
-    <Box>
+    <Box
+    sx={{p: 3}}
+    >
           <motion.div
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -261,16 +263,17 @@ const Dashboard = () => {
             <Paper
               elevation={0}
               sx={{
-                p: 4,
+                p: { xs: 2, sm: 3, md: 4 },
                 mb: 4,
                 background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-                borderRadius: 6,
+                borderRadius: { xs: 4, md: 6 },
                 border: '1px solid rgba(74, 124, 89, 0.08)',
                 boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)',
                 overflow: 'hidden',
                 position: 'relative'
               }}
             >
+              {/* Patrón decorativo - Solo en pantallas grandes */}
               <Box
                 sx={{
                   position: 'absolute',
@@ -280,19 +283,30 @@ const Dashboard = () => {
                   height: '100%',
                   opacity: 0.03,
                   backgroundImage: 'radial-gradient(circle, #4a7c59 1px, transparent 1px)',
-                  backgroundSize: '20px 20px'
+                  backgroundSize: '20px 20px',
+                  display: { xs: 'none', md: 'block' }, // ✅ Ocultar en mobile
                 }}
               />
-              <Box display="flex" alignItems="center" gap={3} mb={2} position="relative" zIndex={1}>
+          
+              {/* HEADER RESPONSIVE */}
+              <Box
+                display="flex"
+                flexDirection={{ xs: 'column', sm: 'row' }}
+                alignItems={{ xs: 'flex-start', sm: 'center' }}
+                gap={{ xs: 2, sm: 3 }}
+                mb={2}
+                position="relative"
+                zIndex={1}
+              >
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   <Box
                     sx={{
-                      width: 90,
-                      height: 90,
-                      borderRadius: 4,
+                      width: { xs: 60, sm: 70, md: 90 },
+                      height: { xs: 60, sm: 70, md: 90 },
+                      borderRadius: { xs: 3, md: 4 },
                       background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
                       display: 'flex',
                       alignItems: 'center',
@@ -303,30 +317,45 @@ const Dashboard = () => {
                         content: '""',
                         position: 'absolute',
                         inset: -3,
-                        borderRadius: 4,
+                        borderRadius: { xs: 3, md: 4 },
                         background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
                         opacity: 0.3,
                         filter: 'blur(10px)'
                       }
                     }}
                   >
-                    <HomeWork sx={{ fontSize: 45, color: 'white' }} />
+                    <HomeWork 
+                      sx={{ 
+                        fontSize: { xs: 30, sm: 38, md: 45 }, 
+                        color: 'white' 
+                      }} 
+                    />
                   </Box>
                 </motion.div>
-                <Box>
+          
+                <Box flex={1}>
                   <Typography 
                     variant="h3" 
                     fontWeight="800" 
                     sx={{ 
                       color: '#2c3e50',
                       letterSpacing: '-1px',
-                      mb: 0.5
+                      mb: { xs: 0.5, sm: 0.5 },
+                      fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3rem' }
                     }}
                   >
                     Welcome, {user?.firstName}
                   </Typography>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Typography variant="h6" sx={{ color: '#6c757d', fontWeight: 400 }}>
+                  
+                  <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
+                    <Typography 
+                      variant="h6" 
+                      sx={{ 
+                        color: '#6c757d', 
+                        fontWeight: 400,
+                        fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' }
+                      }}
+                    >
                       Your Dashboard
                     </Typography>
                     <Chip
@@ -335,10 +364,17 @@ const Dashboard = () => {
                         background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
                         color: 'white',
                         fontWeight: 700,
-                        fontSize: '0.9rem',
-                        height: 32
+                        fontSize: { xs: '0.75rem', sm: '0.85rem', md: '0.9rem' },
+                        height: { xs: 26, sm: 30, md: 32 }
                       }}
-                      icon={<Star sx={{ color: 'white !important' }} />}
+                      icon={
+                        <Star 
+                          sx={{ 
+                            color: 'white !important',
+                            fontSize: { xs: 16, sm: 18, md: 20 }
+                          }} 
+                        />
+                      }
                     />
                   </Box>
                 </Box>
@@ -457,124 +493,183 @@ const Dashboard = () => {
         <Grid container spacing={3}>
           {/* Stats Cards */}
 
-          {[
-            {
-              label: 'Lots Listed / Sold',
-              value: `${stats.soldLots} / ${stats.totalLots}`,
-              icon: <HomeWork />,
-              color: '#4a7c59',
-              bgGradient: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
-              sub: stats.soldDifference !== 0
-                ? `${stats.soldDifference >= 0 ? '+' : ''}${stats.soldDifference} this month` +
-                  (stats.soldPercentageChange !== 0 && stats.soldPercentageChange !== 100
-                    ? ` (${stats.soldPercentageChange >= 0 ? '+' : ''}${stats.soldPercentageChange}%)`
-                    : '')
-                : 'No change this month',
-              subColor: stats.soldDifference !== 0
-                ? (stats.soldDifference >= 0 ? 'success.main' : 'error.main')
-                : 'text.secondary'
-            },
-            {
-              label: 'Monthly Revenue',
-              value: `$${(stats.currentMonthRevenue / 1000000).toFixed(1)}M`,
-              icon: <AttachMoney />,
-              color: '#f59e0b',
-              bgGradient: 'linear-gradient(135deg, #f59e0b 0%, #ffe082 100%)',
-              sub: stats.revenuePercentageChange !== 0
-                ? `${stats.revenuePercentageChange >= 0 ? '+' : ''}${stats.revenuePercentageChange}% vs last month`
-                : 'No change vs last month',
-              subColor: stats.revenuePercentageChange !== 0
-                ? (stats.revenuePercentageChange >= 0 ? 'success.main' : 'error.main')
-                : 'text.secondary'
-            },
-            {
-              label: 'Lots on Hold',
-              value: stats.holdLots,
-              icon: <Inbox />,
-              color: '#2196f3',
-              bgGradient: 'linear-gradient(135deg, #2196f3 0%, #90caf9 100%)',
-              sub: stats.totalLots > 0
-                ? `${((stats.holdLots / stats.totalLots) * 100).toFixed(1)}% of total inventory`
-                : '0% of total inventory',
-              subColor: 'primary.main'
-            },
-            {
-              label: 'Occupancy Rate',
-              value: `${stats.occupancyRate}%`,
-              icon: <TrendingUp />,
-              color: stats.occupancyRate >= 50 ? '#43a047' : '#0288d1',
-              bgGradient: stats.occupancyRate >= 50
-                ? 'linear-gradient(135deg, #43a047 0%, #a5d6a7 100%)'
-                : 'linear-gradient(135deg, #0288d1 0%, #b3e5fc 100%)',
-              sub: `${stats.soldLots} of ${stats.totalLots} sold`,
-              subColor: 'text.secondary'
-            }
-          ].map((stat, idx) => (
-            <Grid item xs={12} sm={6} md={3} key={stat.label}>
-              <motion.div
-                initial={{ opacity: 0, y: 30, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ delay: idx * 0.08, duration: 0.5, type: "spring" }}
-                whileHover={{ y: -8, boxShadow: `0 16px 48px ${stat.color}30`, scale: 1.03 }}
-              >
-                <Card
-                  sx={{
-                    borderRadius: 4,
-                    border: '1.5px solid rgba(0, 0, 0, 0.06)',
-                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    background: '#fff',
-                    '&:hover': {
-                      borderColor: stat.color,
-                      boxShadow: `0 16px 48px ${stat.color}30`
-                    },
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: 5,
-                      background: stat.bgGradient
-                    }
+            {[
+              {
+                label: 'Lots Listed / Sold',
+                value: `${stats.soldLots} / ${stats.totalLots}`,
+                icon: <HomeWork />,
+                color: '#4a7c59',
+                bgGradient: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+                sub: stats.soldDifference !== 0
+                  ? `${stats.soldDifference >= 0 ? '+' : ''}${stats.soldDifference} this month` +
+                    (stats.soldPercentageChange !== 0 && stats.soldPercentageChange !== 100
+                      ? ` (${stats.soldPercentageChange >= 0 ? '+' : ''}${stats.soldPercentageChange}%)`
+                      : '')
+                  : 'No change this month',
+                subColor: stats.soldDifference !== 0
+                  ? (stats.soldDifference >= 0 ? 'success.main' : 'error.main')
+                  : 'text.secondary'
+              },
+              {
+                label: 'Monthly Revenue',
+                value: `$${(stats.currentMonthRevenue / 1000000).toFixed(1)}M`,
+                icon: <AttachMoney />,
+                color: '#f59e0b',
+                bgGradient: 'linear-gradient(135deg, #f59e0b 0%, #ffe082 100%)',
+                sub: stats.revenuePercentageChange !== 0
+                  ? `${stats.revenuePercentageChange >= 0 ? '+' : ''}${stats.revenuePercentageChange}% vs last month`
+                  : 'No change vs last month',
+                subColor: stats.revenuePercentageChange !== 0
+                  ? (stats.revenuePercentageChange >= 0 ? 'success.main' : 'error.main')
+                  : 'text.secondary'
+              },
+              {
+                label: 'Lots on Hold',
+                value: stats.holdLots,
+                icon: <Inbox />,
+                color: '#2196f3',
+                bgGradient: 'linear-gradient(135deg, #2196f3 0%, #90caf9 100%)',
+                sub: stats.totalLots > 0
+                  ? `${((stats.holdLots / stats.totalLots) * 100).toFixed(1)}% of total inventory`
+                  : '0% of total inventory',
+                subColor: 'primary.main'
+              },
+              {
+                label: 'Occupancy Rate',
+                value: `${stats.occupancyRate}%`,
+                icon: <TrendingUp />,
+                color: stats.occupancyRate >= 50 ? '#43a047' : '#0288d1',
+                bgGradient: stats.occupancyRate >= 50
+                  ? 'linear-gradient(135deg, #43a047 0%, #a5d6a7 100%)'
+                  : 'linear-gradient(135deg, #0288d1 0%, #b3e5fc 100%)',
+                sub: `${stats.soldLots} of ${stats.totalLots} sold`,
+                subColor: 'text.secondary'
+              }
+            ].map((stat, idx) => (
+              <Grid item xs={6} sm={6} md={3} key={stat.label}>
+                <motion.div
+                  initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{
+                    delay: idx * 0.1,
+                    duration: 0.5,
+                    type: "spring",
+                    stiffness: 100,
+                  }}
+                  whileHover={{
+                    y: -8,
+                    transition: { duration: 0.2 },
                   }}
                 >
-                  <CardContent>
-                    <Box display="flex" alignItems="center" justifyContent="space-between">
-                      <Box>
-                        <Typography color="text.secondary" variant="body2" fontWeight={600}>
+                  <Card
+                    sx={{
+                      height: "100%",
+                      borderRadius: { xs: 3, md: 4 },
+                      border: "1px solid rgba(0, 0, 0, 0.06)",
+                      boxShadow: "0 8px 24px rgba(0, 0, 0, 0.08)",
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                      position: "relative",
+                      overflow: "hidden",
+                      "&:hover": {
+                        boxShadow: `0 16px 48px ${stat.color}30`,
+                        borderColor: stat.color,
+                        transform: "translateY(-4px)",
+                      },
+                      "&::before": {
+                        content: '""',
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: { xs: 3, md: 4 },
+                        background: stat.bgGradient,
+                      },
+                    }}
+                  >
+                    <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+                      <Box
+                        display="flex"
+                        alignItems="flex-start"
+                        justifyContent="space-between"
+                        mb={{ xs: 1.5, md: 2 }}
+                        flexDirection={{ xs: "column", sm: "row" }}
+                        gap={{ xs: 1, sm: 0 }}
+                      >
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "#6c757d",
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                            fontSize: { xs: "0.65rem", sm: "0.7rem" },
+                          }}
+                        >
                           {stat.label}
                         </Typography>
-                        <Typography variant="h4" fontWeight="bold" sx={{ mb: 0.5 }}>
-                          {stat.value}
-                        </Typography>
-                        <Typography variant="caption" color={stat.subColor}>
+                        <motion.div
+                          whileHover={{ rotate: 360, scale: 1.1 }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          <Box
+                            sx={{
+                              width: { xs: 36, sm: 42, md: 48 },
+                              height: { xs: 36, sm: 42, md: 48 },
+                              borderRadius: { xs: 2, md: 3 },
+                              background: `${stat.color}15`,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: stat.color,
+                            }}
+                          >
+                            {React.cloneElement(stat.icon, {
+                              sx: {
+                                fontSize: { xs: 18, sm: 20, md: 24 },
+                              },
+                            })}
+                          </Box>
+                        </motion.div>
+                      </Box>
+                      <Typography
+                        variant="h4"
+                        fontWeight="800"
+                        sx={{
+                          color: stat.color,
+                          mb: 0.5,
+                          letterSpacing: "-0.5px",
+                          fontSize: {
+                            xs: "1.25rem",
+                            sm: "1.5rem",
+                            md: "2rem",
+                          },
+                        }}
+                      >
+                        {stat.value}
+                      </Typography>
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <TrendingUp
+                          sx={{
+                            fontSize: { xs: 12, sm: 14 },
+                            color: stat.subColor,
+                          }}
+                        />
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: stat.subColor,
+                            fontWeight: 600,
+                            fontSize: { xs: "0.65rem", sm: "0.75rem" },
+                          }}
+                        >
                           {stat.sub}
                         </Typography>
                       </Box>
-                      <motion.div
-                        whileHover={{ rotate: 360, scale: 1.1 }}
-                        transition={{ duration: 0.7, type: "spring" }}
-                      >
-                        <Avatar
-                          sx={{
-                            bgcolor: stat.color,
-                            width: 56,
-                            height: 56,
-                            boxShadow: `0 4px 16px ${stat.color}40`,
-                            border: '3px solid #fff'
-                          }}
-                        >
-                          {stat.icon}
-                        </Avatar>
-                      </motion.div>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </Grid>
-          ))}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </Grid>
+            ))}
           {/* Map Section */}
           <Grid item xs={12} md={8}>
             <Paper sx={{ p: 1 }}>

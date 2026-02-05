@@ -27,6 +27,9 @@ import api from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import ConstructionPhasesModal from '../components/ConstructionPhasesModal'
 import { motion } from 'framer-motion'
+import DescriptionIcon from '@mui/icons-material/Description'
+import ContractsModal from '../components/ContractsModal'
+
 const Properties = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -36,6 +39,18 @@ const Properties = () => {
   const [phasesModalOpen, setPhasesModalOpen] = useState(false)
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
+
+    const [contractsModalOpen, setContractsModalOpen] = useState(false)
+  const [contractsProperty, setContractsProperty] = useState(null)
+  
+  const handleOpenContracts = (property) => {
+    setContractsProperty(property)
+    setContractsModalOpen(true)
+  }
+  const handleCloseContracts = () => {
+    setContractsModalOpen(false)
+    setContractsProperty(null)
+  }
 
   useEffect(() => {
     fetchData()
@@ -121,7 +136,9 @@ const Properties = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-    <Box>
+    <Box
+    sx={{p: 3}}
+    >
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Box>
           <Typography variant="h4" fontWeight="bold">
@@ -156,6 +173,7 @@ const Properties = () => {
                 <TableCell>STATUS</TableCell>
                 <TableCell>CONSTRUCTION PHASE</TableCell>
                 <TableCell>PRICE</TableCell>
+                {isAdmin && <TableCell>CONTRACTS</TableCell>}
                 <TableCell>ACTIONS</TableCell>
               </TableRow>
             </TableHead>
@@ -280,6 +298,17 @@ const Properties = () => {
                           </Typography>
                         )}
                       </TableCell>
+                                {isAdmin && (
+            <TableCell>
+              <IconButton
+                size="small"
+                onClick={() => handleOpenContracts(property)}
+                title="Manage contracts"
+              >
+                <DescriptionIcon />
+              </IconButton>
+            </TableCell>
+          )}
                       <TableCell>
                         <IconButton 
                           size="small" 
@@ -305,6 +334,14 @@ const Properties = () => {
           property={selectedProperty}
           onClose={handleClosePhases}
           isAdmin={isAdmin}
+        />
+      )}
+
+            {contractsProperty && (
+        <ContractsModal
+          open={contractsModalOpen}
+          onClose={handleCloseContracts}
+          property={contractsProperty}
         />
       )}
     </Box>

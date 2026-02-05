@@ -4,52 +4,66 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import { useState, useEffect } from 'react'
 
-const AmenitiesGalleryModal = ({ open, onClose, amenity, isPublicView }) => {
+const AmenitiesGalleryModal = ({
+  open,
+  onClose,
+  amenity,
+  amenityIndex = 0,
+  amenities = [],
+  isPublicView
+}) => {
+  const [currentAmenityIndex, setCurrentAmenityIndex] = useState(amenityIndex)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
+  // Sync with parent amenity selection
   useEffect(() => {
-    if (open) {
+    if (open && amenity) {
+      const idx = amenities.findIndex(a => a.id === amenity.id)
+      setCurrentAmenityIndex(idx >= 0 ? idx : 0)
       setCurrentImageIndex(0)
     }
-  }, [open, amenity])
+  }, [open, amenity, amenities])
 
-  const handlePrevImage = () => {
-    if (!amenity) return
-    const images = amenity.images || []
-    const displayImages = isPublicView ? images.slice(0, 3) : images
-    setCurrentImageIndex((prev) => (prev === 0 ? displayImages.length - 1 : prev - 1))
+  const currentAmenity = amenities[currentAmenityIndex] || amenity
+  if (!currentAmenity) return null
+
+  const images = currentAmenity.images || []
+  const displayImages = isPublicView ? images.slice(0, 3) : images
+  const hasImages = displayImages.length > 0
+  const totalImages = images.length
+
+  // Next image or next amenity
+  const handleNextImage = () => {
+    if (currentImageIndex < displayImages.length - 1) {
+      setCurrentImageIndex(currentImageIndex + 1)
+    } else if (currentAmenityIndex < amenities.length - 1) {
+      setCurrentAmenityIndex(currentAmenityIndex + 1)
+      setCurrentImageIndex(0)
+    }
   }
 
-  const handleNextImage = () => {
-    if (!amenity) return
-    const images = amenity.images || []
-    const displayImages = isPublicView ? images.slice(0, 3) : images
-    setCurrentImageIndex((prev) => (prev === displayImages.length - 1 ? 0 : prev + 1))
+  // Prev image or prev amenity
+  const handlePrevImage = () => {
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(currentImageIndex - 1)
+    } else if (currentAmenityIndex > 0) {
+      const prevAmenity = amenities[currentAmenityIndex - 1]
+      const prevImages = isPublicView ? prevAmenity.images.slice(0, 3) : prevAmenity.images
+      setCurrentAmenityIndex(currentAmenityIndex - 1)
+      setCurrentImageIndex(prevImages.length - 1)
+    }
   }
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!open) return
-      
-      if (e.key === 'Escape') {
-        onClose()
-      } else if (e.key === 'ArrowLeft') {
-        handlePrevImage()
-      } else if (e.key === 'ArrowRight') {
-        handleNextImage()
-      }
+      if (e.key === 'Escape') onClose()
+      else if (e.key === 'ArrowLeft') handlePrevImage()
+      else if (e.key === 'ArrowRight') handleNextImage()
     }
-
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [open, currentImageIndex, amenity, isPublicView])
-
-  if (!amenity) return null
-
-  const images = amenity.images || []
-  const displayImages = isPublicView ? images.slice(0, 3) : images
-  const hasImages = displayImages.length > 0
-  const totalImages = images.length
+  }, [open, currentImageIndex, currentAmenityIndex, amenities, isPublicView])
 
   return (
     <Dialog
@@ -74,23 +88,21 @@ const AmenitiesGalleryModal = ({ open, onClose, amenity, isPublicView }) => {
             right: 8,
             zIndex: 10,
             bgcolor: 'rgba(255, 255, 255, 0.9)',
-            '&:hover': {
-              bgcolor: 'rgba(255, 255, 255, 1)'
-            }
+            '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' }
           }}
         >
           <CloseIcon />
         </IconButton>
 
         {/* Header */}
-        <Box sx={{ 
-          p: 3, 
+        <Box sx={{
+          p: 3,
           pb: 2,
           bgcolor: '#fff',
           borderBottom: '1px solid #e0e0e0'
         }}>
           <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#333' }}>
-            {amenity.name}
+            {currentAmenity.name}
           </Typography>
           {hasImages && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -106,7 +118,6 @@ const AmenitiesGalleryModal = ({ open, onClose, amenity, isPublicView }) => {
 
         <DialogContent sx={{ p: 0, position: 'relative', minHeight: 400 }}>
           {!hasImages ? (
-            // No images available
             <Box
               sx={{
                 display: 'flex',
@@ -126,7 +137,6 @@ const AmenitiesGalleryModal = ({ open, onClose, amenity, isPublicView }) => {
               </Typography>
             </Box>
           ) : (
-            // Gallery
             <Box sx={{ position: 'relative', bgcolor: '#000' }}>
               {/* Current Image */}
               <Box
@@ -151,14 +161,11 @@ const AmenitiesGalleryModal = ({ open, onClose, amenity, isPublicView }) => {
                       top: '50%',
                       transform: 'translateY(-50%)',
                       bgcolor: 'rgba(255, 255, 255, 0.9)',
-                      '&:hover': {
-                        bgcolor: 'rgba(255, 255, 255, 1)'
-                      }
+                      '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' }
                     }}
                   >
                     <ArrowBackIosNewIcon />
                   </IconButton>
-
                   <IconButton
                     onClick={handleNextImage}
                     sx={{
@@ -167,9 +174,7 @@ const AmenitiesGalleryModal = ({ open, onClose, amenity, isPublicView }) => {
                       top: '50%',
                       transform: 'translateY(-50%)',
                       bgcolor: 'rgba(255, 255, 255, 0.9)',
-                      '&:hover': {
-                        bgcolor: 'rgba(255, 255, 255, 1)'
-                      }
+                      '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' }
                     }}
                   >
                     <ArrowForwardIosIcon />

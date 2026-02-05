@@ -34,12 +34,13 @@ const Profile = () => {
   }
 
   return (
-    <Box>
+    <Box sx={{p: 3}}
+    >
       <Typography variant="h4" gutterBottom fontWeight="bold">
-        Mi Perfil
+        My Profile
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Gestiona tu información personal
+        Manage your personal information
       </Typography>
 
       <Grid container spacing={3}>
