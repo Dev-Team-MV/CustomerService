@@ -43,6 +43,22 @@ pipeline {
         }
       }
     }
+
+    stage('Deploy') {
+      steps {
+        script {
+          sh "docker stop frontend 2>/dev/null || true"
+          sh "docker rm frontend 2>/dev/null || true"
+          sh """
+            docker run -d \
+              --name frontend \
+              -p 5173:80 \
+              --restart unless-stopped \
+              ${env.IMAGE_NAME}:latest
+          """
+        }
+      }
+    }
   }
 
   post {
