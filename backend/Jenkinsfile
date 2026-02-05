@@ -1,4 +1,5 @@
 // Job independiente: solo backend. En Jenkins → Script Path: backend/Jenkinsfile
+// Requiere: Docker en el agente (para "Build Docker Image" y para el contenedor Node de "Install & Test")
 pipeline {
   agent any
 
@@ -18,6 +19,12 @@ pipeline {
     }
 
     stage('Install & Test') {
+      agent {
+        docker {
+          image 'node:20-alpine'
+          reuseNode true
+        }
+      }
       steps {
         dir('backend') {
           sh 'npm ci'
