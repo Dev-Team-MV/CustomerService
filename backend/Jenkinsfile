@@ -1,7 +1,11 @@
 // Job independiente: solo backend. En Jenkins → Script Path: backend/Jenkinsfile
-// Requiere: Docker en el agente (para "Build Docker Image" y para el contenedor Node de "Install & Test")
+// Requiere: plugin "Node.js" + en Global Tool Configuration una instalación Node (nombre: NodeJS). Docker en el agente para Build Docker Image.
 pipeline {
   agent any
+
+  tools {
+    nodejs 'NodeJS'
+  }
 
   options {
     timeout(time: 15, unit: 'MINUTES')
@@ -19,12 +23,6 @@ pipeline {
     }
 
     stage('Install & Test') {
-      agent {
-        docker {
-          image 'node:20-alpine'
-          reuseNode true
-        }
-      }
       steps {
         dir('backend') {
           sh 'npm ci'

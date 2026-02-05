@@ -1,7 +1,11 @@
 // Job independiente: solo frontend. En Jenkins → Script Path: frontend/Jenkinsfile
-// Requiere: Docker en el agente (para "Build Docker Image" y para el contenedor Node de "Install & Build")
+// Requiere: plugin "Node.js" + en Global Tool Configuration una instalación Node (nombre: NodeJS). Docker en el agente para Build Docker Image.
 pipeline {
   agent any
+
+  tools {
+    nodejs 'NodeJS'
+  }
 
   options {
     timeout(time: 15, unit: 'MINUTES')
@@ -19,12 +23,6 @@ pipeline {
     }
 
     stage('Install & Build') {
-      agent {
-        docker {
-          image 'node:20-alpine'
-          reuseNode true
-        }
-      }
       steps {
         dir('frontend') {
           sh 'npm ci'
