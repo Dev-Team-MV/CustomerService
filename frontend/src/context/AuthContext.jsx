@@ -25,15 +25,32 @@ export const AuthProvider = ({ children }) => {
     setLoading(false)
   }, [])
 
-  const login = async (email, password) => {
+  // ✅ Login actualizado para manejar email o teléfono
+  const login = async (emailOrPhone, password) => {
     try {
-      const data = await authService.login(email, password)
+      // Determinar si es email o teléfono
+      const isPhone = emailOrPhone && emailOrPhone.startsWith('+')
+      
+      console.log('🔐 Login attempt:', { 
+        emailOrPhone, 
+        isPhone,
+        type: isPhone ? 'phone' : 'email'
+      })
+      
+      const data = await authService.login(emailOrPhone, password, isPhone)
+      
       setUser(data.user)
       localStorage.setItem('token', data.token)
       localStorage.setItem('user', JSON.stringify(data.user))
+      
       return { success: true }
     } catch (error) {
-      return { success: false, error: error.message }
+      console.error('❌ Login error:', error.response?.data)
+      return { 
+        success: false, 
+        error: error.response?.data?.message || error.message,
+        requiresPasswordSetup: error.response?.data?.requiresPasswordSetup
+      }
     }
   }
 
@@ -49,6 +66,17 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  // ✅ Nueva función para login directo con token
+  const loginWithToken = (token, userData) => {
+    console.log('🔐 loginWithToken called with:', { 
+      token: token?.substring(0, 20) + '...', 
+      userData 
+    })
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(userData))
+    setUser(userData)
+  }
+
   const logout = () => {
     setUser(null)
     localStorage.removeItem('token')
@@ -59,6 +87,7 @@ export const AuthProvider = ({ children }) => {
     user,
     login,
     register,
+    loginWithToken,
     logout,
     loading,
     isAuthenticated: !!user
