@@ -1,5 +1,5 @@
 // Job independiente: solo frontend. En Jenkins → Script Path: frontend/Jenkinsfile
-// No requiere plugin Node.js: instala Node en el workspace con nvm. Requiere: curl, bash. Docker en el agente para Build Docker Image.
+// Requiere: curl, bash, Docker. VITE_API_URL se define aquí o en Jenkins (Job → Configure → Variables de entorno).
 pipeline {
   agent any
 
@@ -9,6 +9,8 @@ pipeline {
 
   environment {
     IMAGE_NAME = "customer-service-frontend"
+    // URL del backend en producción. Cambia la IP/host o define esta variable en el Job de Jenkins.
+    VITE_API_URL = "https://apics.michelangelodelvalle.com/api"
   }
 
   stages {
