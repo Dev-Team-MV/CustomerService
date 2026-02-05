@@ -1,456 +1,5 @@
-// import { useState, useEffect, useRef } from 'react'
-// import { useParams, useNavigate } from 'react-router-dom'
-// import {
-//   Box,
-//   Typography,
-//   IconButton,
-//   Divider,
-//   Grid,
-//   Paper,
-//   Chip,
-//   Skeleton,
-//   useTheme,
-//   useMediaQuery
-// } from '@mui/material'
-// import {
-//   ArrowBack,
-//   ChevronLeft,
-//   ChevronRight,
-//   KingBed,
-//   Bathtub,
-//   SquareFoot,
-//   AttachMoney,
-//   Home,
-//   Landscape,
-//   Kitchen,
-//   Garage,
-//   Pool,
-//   Deck
-// } from '@mui/icons-material'
-// import api from '../services/api'
-
-// const ModelDetail = () => {
-//   const { id } = useParams()
-//   const navigate = useNavigate()
-//   const theme = useTheme()
-//   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  
-//   const [model, setModel] = useState(null)
-//   const [loading, setLoading] = useState(true)
-//   const [currentSlide, setCurrentSlide] = useState(0)
-//   const [touchStart, setTouchStart] = useState(0)
-//   const [touchEnd, setTouchEnd] = useState(0)
-//   const sliderRef = useRef(null)
-
-//   useEffect(() => {
-//     fetchModel()
-//   }, [id])
-
-//   const fetchModel = async () => {
-//     try {
-//       const response = await api.get(`/models/${id}`)
-//       setModel(response.data)
-//     } catch (error) {
-//       console.error('Error fetching model:', error)
-//     } finally {
-//       setLoading(false)
-//     }
-//   }
-
-//   const facades = model?.facades?.filter(img => img && img.trim() !== '') || []
-//   const hasFacades = facades.length > 0
-//   const images = model?.images?.filter(img => img && img.url && img.url.trim() !== '') || []
-
-//   const nextSlide = () => {
-//     if (hasFacades) {
-//       setCurrentSlide((prev) => (prev + 1) % facades.length)
-//     }
-//   }
-
-//   const prevSlide = () => {
-//     if (hasFacades) {
-//       setCurrentSlide((prev) => (prev - 1 + facades.length) % facades.length)
-//     }
-//   }
-
-//   const goToSlide = (index) => {
-//     setCurrentSlide(index)
-//   }
-
-//   const handleTouchStart = (e) => {
-//     setTouchStart(e.targetTouches[0].clientX)
-//   }
-
-//   const handleTouchMove = (e) => {
-//     setTouchEnd(e.targetTouches[0].clientX)
-//   }
-
-//   const handleTouchEnd = () => {
-//     if (touchStart - touchEnd > 75) {
-//       nextSlide()
-//     }
-//     if (touchStart - touchEnd < -75) {
-//       prevSlide()
-//     }
-//   }
-
-//   const getIconForFeature = (title) => {
-//     const lowerTitle = title?.toLowerCase() || ''
-//     if (lowerTitle.includes('cocina') || lowerTitle.includes('kitchen')) return <Kitchen sx={{ fontSize: 40 }} />
-//     if (lowerTitle.includes('garaje') || lowerTitle.includes('garage')) return <Garage sx={{ fontSize: 40 }} />
-//     if (lowerTitle.includes('piscina') || lowerTitle.includes('pool')) return <Pool sx={{ fontSize: 40 }} />
-//     if (lowerTitle.includes('terraza') || lowerTitle.includes('deck')) return <Deck sx={{ fontSize: 40 }} />
-//     if (lowerTitle.includes('jardín') || lowerTitle.includes('garden')) return <Landscape sx={{ fontSize: 40 }} />
-//     return <Home sx={{ fontSize: 40 }} />
-//   }
-
-//   if (loading) {
-//     return (
-//       <Box sx={{ maxWidth: 800, mx: 'auto', p: { xs: 0, md: 2 } }}>
-//         <Skeleton variant="rectangular" height={400} />
-//         <Box sx={{ p: 2 }}>
-//           <Skeleton variant="text" height={40} width="60%" />
-//           <Skeleton variant="text" height={30} width="40%" />
-//         </Box>
-//       </Box>
-//     )
-//   }
-
-//   if (!model) {
-//     return (
-//       <Box sx={{ p: 4, textAlign: 'center' }}>
-//         <Typography variant="h5">Modelo no encontrado</Typography>
-//       </Box>
-//     )
-//   }
-
-//   return (
-//     <Box sx={{ 
-//       maxWidth: 900, 
-//       mx: 'auto', 
-//       bgcolor: 'background.default',
-//       minHeight: '100vh'
-//     }}>
-//       {/* Header */}
-//       <Box sx={{ 
-//         display: 'flex', 
-//         alignItems: 'center', 
-//         p: 2,
-//         position: 'sticky',
-//         top: 0,
-//         bgcolor: 'background.paper',
-//         zIndex: 10,
-//         borderBottom: 1,
-//         borderColor: 'divider'
-//       }}>
-//         <IconButton onClick={() => navigate('/models')} sx={{ mr: 2 }}>
-//           <ArrowBack />
-//         </IconButton>
-//         <Typography variant="h6" fontWeight="600" noWrap sx={{ flex: 1 }}>
-//           {model.model}
-//         </Typography>
-//         <Chip 
-//           label={model.status} 
-//           color={model.status === 'active' ? 'success' : 'default'}
-//           size="small"
-//         />
-//       </Box>
-
-//       {/* Image Slider */}
-//       <Box
-//         ref={sliderRef}
-//         onTouchStart={handleTouchStart}
-//         onTouchMove={handleTouchMove}
-//         onTouchEnd={handleTouchEnd}
-//         sx={{
-//           position: 'relative',
-//           width: '100%',
-//           height: { xs: 300, sm: 400, md: 450 },
-//           bgcolor: 'grey.100',
-//           overflow: 'hidden'
-//         }}
-//       >
-//         {hasFacades ? (
-//           <>
-//             <Box
-//               sx={{
-//                 display: 'flex',
-//                 transition: 'transform 0.4s ease-in-out',
-//                 transform: `translateX(-${currentSlide * 100}%)`,
-//                 height: '100%'
-//               }}
-//             >
-//               {facades.map((img, index) => (
-//                 <Box
-//                   key={index}
-//                   sx={{
-//                     minWidth: '100%',
-//                     height: '100%',
-//                     display: 'flex',
-//                     alignItems: 'center',
-//                     justifyContent: 'center',
-//                     bgcolor: 'grey.100'
-//                   }}
-//                 >
-//                   <Box
-//                     component="img"
-//                     src={img}
-//                     alt={`${model.model} - Vista ${index + 1}`}
-//                     sx={{
-//                       maxWidth: '100%',
-//                       maxHeight: '100%',
-//                       objectFit: 'contain'
-//                     }}
-//                     onError={(e) => {
-//                       e.target.style.display = 'none'
-//                     }}
-//                   />
-//                 </Box>
-//               ))}
-//             </Box>
-
-//             {/* Navigation Arrows - Desktop */}
-//             {!isMobile && facades.length > 1 && (
-//               <>
-//                 <IconButton
-//                   onClick={prevSlide}
-//                   sx={{
-//                     position: 'absolute',
-//                     left: 8,
-//                     top: '50%',
-//                     transform: 'translateY(-50%)',
-//                     bgcolor: 'rgba(255,255,255,0.9)',
-//                     '&:hover': { bgcolor: 'white' }
-//                   }}
-//                 >
-//                   <ChevronLeft />
-//                 </IconButton>
-//                 <IconButton
-//                   onClick={nextSlide}
-//                   sx={{
-//                     position: 'absolute',
-//                     right: 8,
-//                     top: '50%',
-//                     transform: 'translateY(-50%)',
-//                     bgcolor: 'rgba(255,255,255,0.9)',
-//                     '&:hover': { bgcolor: 'white' }
-//                   }}
-//                 >
-//                   <ChevronRight />
-//                 </IconButton>
-//               </>
-//             )}
-//           </>
-//         ) : (
-//           <Box
-//             sx={{
-//               height: '100%',
-//               display: 'flex',
-//               alignItems: 'center',
-//               justifyContent: 'center',
-//               flexDirection: 'column',
-//               color: 'grey.400'
-//             }}
-//           >
-//             <Home sx={{ fontSize: 100 }} />
-//             <Typography variant="body2" color="text.secondary">
-//               Sin imágenes disponibles
-//             </Typography>
-//           </Box>
-//         )}
-//       </Box>
-
-//       {/* Slide Indicators */}
-//       {hasFacades && facades.length > 1 && (
-//         <Box sx={{ 
-//           display: 'flex', 
-//           justifyContent: 'center', 
-//           gap: 1, 
-//           py: 2,
-//           bgcolor: 'background.paper'
-//         }}>
-//           {facades.map((_, index) => (
-//             <Box
-//               key={index}
-//               onClick={() => goToSlide(index)}
-//               sx={{
-//                 width: currentSlide === index ? 24 : 8,
-//                 height: 8,
-//                 borderRadius: 4,
-//                 bgcolor: currentSlide === index ? 'text.primary' : 'grey.300',
-//                 cursor: 'pointer',
-//                 transition: 'all 0.3s ease'
-//               }}
-//             />
-//           ))}
-//         </Box>
-//       )}
-
-//       {/* Specifications */}
-//       <Box sx={{ px: 2, py: 3, bgcolor: 'background.paper' }}>
-//         <Typography variant="h4" fontWeight="bold" color="primary" gutterBottom>
-//           ${model.price?.toLocaleString()}
-//         </Typography>
-//         <Typography variant="body2" color="text.secondary" gutterBottom>
-//           Precio base
-//         </Typography>
-
-//         <Divider sx={{ my: 2 }} />
-
-//         <Box sx={{ mb: 2 }}>
-//           <Typography variant="h5" fontWeight="bold">
-//             {model.sqft?.toLocaleString()} sqft
-//           </Typography>
-//           <Typography variant="body2" color="text.secondary">
-//             Área total de construcción
-//           </Typography>
-//         </Box>
-
-//         <Divider sx={{ my: 2 }} />
-
-//         <Grid container spacing={2}>
-//           <Grid item xs={6}>
-//             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-//               <KingBed color="action" />
-//               <Box>
-//                 <Typography variant="h6" fontWeight="bold">
-//                   {model.bedrooms}
-//                 </Typography>
-//                 <Typography variant="caption" color="text.secondary">
-//                   Habitaciones
-//                 </Typography>
-//               </Box>
-//             </Box>
-//           </Grid>
-//           <Grid item xs={6}>
-//             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-//               <Bathtub color="action" />
-//               <Box>
-//                 <Typography variant="h6" fontWeight="bold">
-//                   {model.bathrooms}
-//                 </Typography>
-//                 <Typography variant="caption" color="text.secondary">
-//                   Baños
-//                 </Typography>
-//               </Box>
-//             </Box>
-//           </Grid>
-//         </Grid>
-//       </Box>
-
-//       {/* Description */}
-//       {model.description && (
-//         <Box sx={{ px: 2, py: 3, bgcolor: 'background.paper', mt: 1 }}>
-//           <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-//             Descripción
-//           </Typography>
-//           <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-//             {model.description}
-//           </Typography>
-//         </Box>
-//       )}
-
-//       {/* Features Grid */}
-//       {images.length > 0 && (
-//         <Box sx={{ px: 2, py: 3, bgcolor: 'background.paper', mt: 1 }}>
-//           <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ mb: 2 }}>
-//             Características
-//           </Typography>
-//           <Grid container spacing={2}>
-//             {images.map((feature, index) => (
-//               <Grid item xs={6} key={index}>
-//                 <Paper
-//                   elevation={0}
-//                   sx={{
-//                     position: 'relative',
-//                     height: { xs: 120, sm: 150 },
-//                     borderRadius: 2,
-//                     overflow: 'hidden',
-//                     bgcolor: 'grey.900',
-//                     display: 'flex',
-//                     alignItems: 'flex-end',
-//                     cursor: 'pointer',
-//                     '&:hover': {
-//                       '& .feature-overlay': {
-//                         bgcolor: 'rgba(0,0,0,0.5)'
-//                       }
-//                     }
-//                   }}
-//                 >
-//                   {feature.url ? (
-//                     <Box
-//                       component="img"
-//                       src={feature.url}
-//                       alt={feature.title || `Característica ${index + 1}`}
-//                       sx={{
-//                         position: 'absolute',
-//                         width: '100%',
-//                         height: '100%',
-//                         objectFit: 'cover'
-//                       }}
-//                       onError={(e) => {
-//                         e.target.style.display = 'none'
-//                       }}
-//                     />
-//                   ) : (
-//                     <Box
-//                       sx={{
-//                         position: 'absolute',
-//                         width: '100%',
-//                         height: '100%',
-//                         display: 'flex',
-//                         alignItems: 'center',
-//                         justifyContent: 'center',
-//                         color: 'grey.600'
-//                       }}
-//                     >
-//                       {getIconForFeature(feature.title)}
-//                     </Box>
-//                   )}
-//                   <Box
-//                     className="feature-overlay"
-//                     sx={{
-//                       position: 'absolute',
-//                       bottom: 0,
-//                       left: 0,
-//                       right: 0,
-//                       p: 1.5,
-//                       background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
-//                       transition: 'background 0.3s'
-//                     }}
-//                   >
-//                     <Typography
-//                       variant="body2"
-//                       fontWeight="600"
-//                       sx={{ color: 'white' }}
-//                     >
-//                       {feature.title || `Característica ${index + 1}`}
-//                     </Typography>
-//                   </Box>
-//                 </Paper>
-//               </Grid>
-//             ))}
-//           </Grid>
-//         </Box>
-//       )}
-
-//       {/* Model Number Footer */}
-//       <Box sx={{ px: 2, py: 3, textAlign: 'center' }}>
-//         <Typography variant="caption" color="text.secondary">
-//           Modelo #{model.modelNumber} • Las imágenes son de referencia
-//         </Typography>
-//       </Box>
-//     </Box>
-//   )
-// }
-
-// export default ModelDetail
-
-
-
-
-import { useState, useEffect, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -463,8 +12,9 @@ import {
   useTheme,
   useMediaQuery,
   Slide,
-  Fade
-} from '@mui/material'
+  Fade,
+  Button,
+} from "@mui/material";
 import {
   ArrowBack,
   ChevronLeft,
@@ -479,699 +29,1121 @@ import {
   Garage,
   Pool,
   Deck,
-} from '@mui/icons-material'
+} from "@mui/icons-material";
 
-import api from '../services/api'
-import ModelCustomizationPanel from '../components/ModelCustomizationPanel'
-import TuneIcon from '@mui/icons-material/Tune'
-import CloseIcon from '@mui/icons-material/Close'
+import api from "../services/api";
+import ModelCustomizationPanel from "../components/ModelCustomizationPanel";
+import TuneIcon from "@mui/icons-material/Tune";
+import CloseIcon from "@mui/icons-material/Close";
+import { motion, useScroll, useTransform } from "framer-motion";
+
+const MotionBox = motion(Box);
+const MotionPaper = motion(Paper);
+
 const ModelDetail = () => {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const [model, setModel] = useState(null)
-  const [loading, setLoading] = useState(true)
-
-    const [showCustomization, setShowCustomization] = useState(false)
+  const [model, setModel] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showCustomization, setShowCustomization] = useState(false);
+  const [blueprintSlide, setBlueprintSlide] = useState(0);
 
   // Exterior (fachada) carousel
-  const [exteriorSlide, setExteriorSlide] = useState(0)
-  const [exteriorTouchStart, setExteriorTouchStart] = useState(0)
-  const [exteriorTouchEnd, setExteriorTouchEnd] = useState(0)
-  const exteriorRef = useRef(null)
+  const [exteriorSlide, setExteriorSlide] = useState(0);
+  const [exteriorTouchStart, setExteriorTouchStart] = useState(0);
+  const [exteriorTouchEnd, setExteriorTouchEnd] = useState(0);
+  const exteriorRef = useRef(null);
 
   // Interior carousel
-  const [interiorSlide, setInteriorSlide] = useState(0)
-  const [interiorTouchStart, setInteriorTouchStart] = useState(0)
-  const [interiorTouchEnd, setInteriorTouchEnd] = useState(0)
-  const interiorRef = useRef(null)
+  const [interiorSlide, setInteriorSlide] = useState(0);
+  const [interiorTouchStart, setInteriorTouchStart] = useState(0);
+  const [interiorTouchEnd, setInteriorTouchEnd] = useState(0);
+  const interiorRef = useRef(null);
 
+  const [interiorType, setInteriorType] = useState("basic");
+  const [blueprintType, setBlueprintType] = useState("withoutBalcony");
+  // Filtra imágenes según el tipo seleccionado
+  let filteredInteriorImages = [];
+  if (model) {
+    if (interiorType === "basic") {
+      filteredInteriorImages = Array.isArray(model.images?.interior)
+        ? model.images.interior
+            .map((img) => (typeof img === "string" ? { url: img } : img))
+            .filter((img) => img && img.url && img.url.trim() !== "")
+        : [];
+    } else {
+      // Extrae todas las imágenes de interior de todos los upgrades
+      filteredInteriorImages = Array.isArray(model.upgrades)
+        ? model.upgrades.flatMap((upg) =>
+            Array.isArray(upg.images?.interior)
+              ? upg.images.interior
+                  .map((img) => (typeof img === "string" ? { url: img } : img))
+                  .filter((img) => img && img.url && img.url.trim() !== "")
+              : [],
+          )
+        : [];
+    }
+  }
+
+  let filteredBlueprints = [];
+  if (model) {
+    filteredBlueprints =
+      blueprintType === "balcony"
+        ? model.blueprints?.withBalcony || []
+        : model.blueprints?.default || [];
+  }
+
+  const principalRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: principalRef,
+    offset: ["end end", "start start"], // Cuando el final del principal llega al final del viewport, y cuando el inicio llega al inicio
+  });
+  // y: de 60px (abajo, oculto) a 0px (centrado)
+  // opacity: de 0 (invisible) a 1 (visible)
+  const y = useTransform(scrollYProgress, [0, 0.2], [60, 0]);
+  const opacity = useTransform(scrollYProgress, [0.1, 0.085, 0.095], [0, 1]);
   useEffect(() => {
-    fetchModel()
-    setExteriorSlide(0)
-    setInteriorSlide(0)
-  }, [id])
+    fetchModel();
+    setExteriorSlide(0);
+    setInteriorSlide(0);
+  }, [id]);
 
   const fetchModel = async () => {
     try {
-      const response = await api.get(`/models/${id}`)
-      console.log('modelo selected', response);
-      
-      setModel(response.data)
-      // console.log('modelo', model);
-      // console.log('modelo', model.images.exterior[0]);
-
-      
+      const response = await api.get(`/models/${id}`);
+      setModel(response.data);
     } catch (error) {
-      console.error('Error fetching model:', error)
+      console.error("Error fetching model:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  let exteriorImages = []
-  let interiorImages = []
-  
+  let exteriorImages = [];
+  let interiorImages = [];
+
   if (model) {
     const extractImagesFromOptions = (options, type) =>
       Array.isArray(options)
-        ? options.flatMap(opt =>
+        ? options.flatMap((opt) =>
             Array.isArray(opt.images?.[type])
               ? opt.images[type]
-                  .map(img => typeof img === 'string' ? { url: img } : img)
-                  .filter(img => img && img.url && img.url.trim() !== '')
-              : []
+                  .map((img) => (typeof img === "string" ? { url: img } : img))
+                  .filter((img) => img && img.url && img.url.trim() !== "")
+              : [],
           )
-        : []
-  
+        : [];
+
     exteriorImages = Array.isArray(model.images?.exterior)
       ? model.images.exterior
-          .map(img => typeof img === 'string' ? { url: img } : img)
-          .filter(img => img && img.url && img.url.trim() !== '')
-      : []
-  
+          .map((img) => (typeof img === "string" ? { url: img } : img))
+          .filter((img) => img && img.url && img.url.trim() !== "")
+      : [];
+
     interiorImages = Array.isArray(model.images?.interior)
       ? model.images.interior
-          .map(img => typeof img === 'string' ? { url: img } : img)
-          .filter(img => img && img.url && img.url.trim() !== '')
-      : []
-  
+          .map((img) => (typeof img === "string" ? { url: img } : img))
+          .filter((img) => img && img.url && img.url.trim() !== "")
+      : [];
+
     if (exteriorImages.length === 0) {
       exteriorImages = [
-        ...extractImagesFromOptions(model.upgrades, 'exterior'),
-        ...extractImagesFromOptions(model.storages, 'exterior'),
-        ...extractImagesFromOptions(model.balconies, 'exterior')
-      ]
+        ...extractImagesFromOptions(model.upgrades, "exterior"),
+        ...extractImagesFromOptions(model.storages, "exterior"),
+        ...extractImagesFromOptions(model.balconies, "exterior"),
+      ];
     }
     if (interiorImages.length === 0) {
       interiorImages = [
-        ...extractImagesFromOptions(model.upgrades, 'interior'),
-        ...extractImagesFromOptions(model.storages, 'interior'),
-        ...extractImagesFromOptions(model.balconies, 'interior')
-      ]
+        ...extractImagesFromOptions(model.upgrades, "interior"),
+        ...extractImagesFromOptions(model.storages, "interior"),
+        ...extractImagesFromOptions(model.balconies, "interior"),
+      ];
     }
-  
-    console.log('exteriorImages:', exteriorImages)
-    console.log('interiorImages:', interiorImages)
   }
+
   // Carrusel exterior
   const nextExterior = () => {
     if (exteriorImages.length > 0) {
-      setExteriorSlide((prev) => (prev + 1) % exteriorImages.length)
+      setExteriorSlide((prev) => (prev + 1) % exteriorImages.length);
     }
-  }
+  };
   const prevExterior = () => {
     if (exteriorImages.length > 0) {
-      setExteriorSlide((prev) => (prev - 1 + exteriorImages.length) % exteriorImages.length)
+      setExteriorSlide(
+        (prev) => (prev - 1 + exteriorImages.length) % exteriorImages.length,
+      );
     }
-  }
-  const goToExterior = (idx) => setExteriorSlide(idx)
-  const handleExteriorTouchStart = (e) => setExteriorTouchStart(e.targetTouches[0].clientX)
-  const handleExteriorTouchMove = (e) => setExteriorTouchEnd(e.targetTouches[0].clientX)
+  };
+  const goToExterior = (idx) => setExteriorSlide(idx);
+  const handleExteriorTouchStart = (e) =>
+    setExteriorTouchStart(e.targetTouches[0].clientX);
+  const handleExteriorTouchMove = (e) =>
+    setExteriorTouchEnd(e.targetTouches[0].clientX);
   const handleExteriorTouchEnd = () => {
-    if (exteriorTouchStart - exteriorTouchEnd > 75) nextExterior()
-    if (exteriorTouchStart - exteriorTouchEnd < -75) prevExterior()
-  }
+    if (exteriorTouchStart - exteriorTouchEnd > 75) nextExterior();
+    if (exteriorTouchStart - exteriorTouchEnd < -75) prevExterior();
+  };
 
   // Carrusel interior
   const nextInterior = () => {
     if (interiorImages.length > 0) {
-      setInteriorSlide((prev) => (prev + 1) % interiorImages.length)
+      setInteriorSlide((prev) => (prev + 1) % interiorImages.length);
     }
-  }
+  };
   const prevInterior = () => {
     if (interiorImages.length > 0) {
-      setInteriorSlide((prev) => (prev - 1 + interiorImages.length) % interiorImages.length)
+      setInteriorSlide(
+        (prev) => (prev - 1 + interiorImages.length) % interiorImages.length,
+      );
     }
-  }
-  const goToInterior = (idx) => setInteriorSlide(idx)
-  const handleInteriorTouchStart = (e) => setInteriorTouchStart(e.targetTouches[0].clientX)
-  const handleInteriorTouchMove = (e) => setInteriorTouchEnd(e.targetTouches[0].clientX)
+  };
+  const goToInterior = (idx) => setInteriorSlide(idx);
+  const handleInteriorTouchStart = (e) =>
+    setInteriorTouchStart(e.targetTouches[0].clientX);
+  const handleInteriorTouchMove = (e) =>
+    setInteriorTouchEnd(e.targetTouches[0].clientX);
   const handleInteriorTouchEnd = () => {
-    if (interiorTouchStart - interiorTouchEnd > 75) nextInterior()
-    if (interiorTouchStart - interiorTouchEnd < -75) prevInterior()
-  }
+    if (interiorTouchStart - interiorTouchEnd > 75) nextInterior();
+    if (interiorTouchStart - interiorTouchEnd < -75) prevInterior();
+  };
 
   // Características (features)
   const features =
     Array.isArray(model?.features) && model.features.length > 0
       ? model.features
-      : []
+      : [];
 
   const getIconForFeature = (title) => {
-    const lowerTitle = title?.toLowerCase() || ''
-    if (lowerTitle.includes('cocina') || lowerTitle.includes('kitchen')) return <Kitchen sx={{ fontSize: 40 }} />
-    if (lowerTitle.includes('garaje') || lowerTitle.includes('garage')) return <Garage sx={{ fontSize: 40 }} />
-    if (lowerTitle.includes('piscina') || lowerTitle.includes('pool')) return <Pool sx={{ fontSize: 40 }} />
-    if (lowerTitle.includes('terraza') || lowerTitle.includes('deck')) return <Deck sx={{ fontSize: 40 }} />
-    if (lowerTitle.includes('jardín') || lowerTitle.includes('garden')) return <Landscape sx={{ fontSize: 40 }} />
-    return <Home sx={{ fontSize: 40 }} />
-  }
+    const lowerTitle = title?.toLowerCase() || "";
+    if (lowerTitle.includes("cocina") || lowerTitle.includes("kitchen"))
+      return <Kitchen sx={{ fontSize: 40 }} />;
+    if (lowerTitle.includes("garaje") || lowerTitle.includes("garage"))
+      return <Garage sx={{ fontSize: 40 }} />;
+    if (lowerTitle.includes("piscina") || lowerTitle.includes("pool"))
+      return <Pool sx={{ fontSize: 40 }} />;
+    if (lowerTitle.includes("terraza") || lowerTitle.includes("deck"))
+      return <Deck sx={{ fontSize: 40 }} />;
+    if (lowerTitle.includes("jardín") || lowerTitle.includes("garden"))
+      return <Landscape sx={{ fontSize: 40 }} />;
+    return <Home sx={{ fontSize: 40 }} />;
+  };
 
   if (loading) {
     return (
-      <Box sx={{ maxWidth: 800, mx: 'auto', p: { xs: 0, md: 2 } }}>
-        <Skeleton variant="rectangular" height={400} />
-        <Box sx={{ p: 2 }}>
-          <Skeleton variant="text" height={40} width="60%" />
-          <Skeleton variant="text" height={30} width="40%" />
+      <Box sx={{ mb: 4 }}>
+        {/* Header Image Skeleton */}
+        <Skeleton 
+          variant="rectangular" 
+          height={{ xs: 300, sm: 400, md: 450, lg:700 }}
+          sx={{ 
+            width: '100%',
+            mb: 4,
+            borderRadius: { xs: 0, md: 4 }
+          }} 
+        />
+  
+        {/* Specifications Section Skeleton */}
+        <Box sx={{ p: { xs: 2, sm: 2, md: 3, lg: 4 } }}>
+          {/* Buttons Skeleton */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 3 }}>
+            <Skeleton variant="rounded" width={180} height={42} />
+            <Skeleton variant="rounded" width={150} height={42} />
+          </Box>
+  
+          {/* Main Paper Skeleton */}
+          <Box
+            sx={{
+              borderRadius: 4,
+              p: { xs: 2, md: 3 },
+              border: '1px solid rgba(0,0,0,0.08)',
+              mb: 3
+            }}
+          >
+            <Grid container spacing={3}>
+              {/* Left Column: Stats */}
+              <Grid item xs={12} md={6}>
+                {/* Price & Sqft */}
+                <Box sx={{ display: 'flex', gap: 4, mb: 3, justifyContent: 'center' }}>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Skeleton variant="text" width={140} height={60} />
+                    <Skeleton variant="text" width={80} height={24} />
+                  </Box>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Skeleton variant="text" width={120} height={60} />
+                    <Skeleton variant="text" width={60} height={24} />
+                  </Box>
+                </Box>
+  
+                {/* Bedrooms, Bathrooms, Stories */}
+                <Box sx={{ display: 'flex', gap: 4, justifyContent: 'center', mb: 2 }}>
+                  {[1, 2, 3].map((i) => (
+                    <Box key={i} sx={{ textAlign: 'center' }}>
+                      <Skeleton variant="circular" width={40} height={40} sx={{ mx: 'auto', mb: 1 }} />
+                      <Skeleton variant="text" width={50} height={40} sx={{ mx: 'auto' }} />
+                      <Skeleton variant="text" width={70} height={20} sx={{ mx: 'auto' }} />
+                    </Box>
+                  ))}
+                </Box>
+  
+                {/* Chips */}
+                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap', mt: 2 }}>
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} variant="rounded" width={120} height={32} />
+                  ))}
+                </Box>
+              </Grid>
+  
+              {/* Right Column: Blueprint */}
+              <Grid item xs={12} md={6}>
+                <Skeleton variant="text" width={100} height={28} sx={{ mb: 1 }} />
+                <Skeleton 
+                  variant="rounded" 
+                  height={{ xs: 220, md: 340 }}
+                  sx={{ borderRadius: 3 }}
+                />
+              </Grid>
+            </Grid>
+          </Box>
+  
+          {/* Principal Image Skeleton */}
+          <Skeleton 
+            variant="rounded" 
+            sx={{
+              width: { xs: '100%', md: '90%' },
+              height: { xs: 250, sm: 350, md: 450 },
+              mx: 'auto',
+              mt: 6,
+              mb: 6,
+              borderRadius: 4
+            }}
+          />
+  
+          {/* Interior Section Skeleton */}
+          <Box sx={{ position: 'relative', height: 500, mt: 10 }}>
+            {/* Buttons Skeleton */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, position: 'absolute', left: '10%', top: '20%' }}>
+              <Skeleton variant="rounded" width={120} height={40} />
+              <Skeleton variant="rounded" width={120} height={40} />
+              <Skeleton variant="rectangular" width={220} height={80} sx={{ mt: 2, borderRadius: 2 }} />
+            </Box>
+  
+            {/* Interior Image Skeleton */}
+            <Skeleton 
+              variant="rounded" 
+              sx={{
+                position: { xs: 'static', lg: 'absolute' },
+                right: { lg: '10%' },
+                top: { lg: '50%' },
+                transform: { lg: 'translateY(-50%)' },
+                width: { xs: '100%', lg: 600 },
+                height: { xs: 220, sm: 340, md: 480, lg: 700 },
+                borderRadius: 5,
+                mt: { xs: 4, lg: 0 }
+              }}
+            />
+          </Box>
+  
+          {/* Customize Button Skeleton */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
+            <Skeleton variant="rounded" width={260} height={56} sx={{ borderRadius: 3 }} />
+          </Box>
         </Box>
       </Box>
-    )
+    );
   }
 
   if (!model) {
     return (
-      <Box sx={{ p: 4, textAlign: 'center' }}>
-        <Typography variant="h5">Modelo no encontrado</Typography>
+      <Box sx={{ p: 4, textAlign: "center" }}>
+        <Typography variant="h5">Model not found</Typography>
       </Box>
-    )
+    );
   }
 
   return (
-<Box
-  sx={{
-    maxWidth: 900,
-    mx: 'auto',
-    // bgcolor: 'background.paper',
-    minHeight: '100vh',
-    borderRadius: { xs: 0, md: 4 },
-    // boxShadow: { xs: 0, md: 4 },
-    mt: { xs: 0, md: 4 },
-    mb: 4,
-    overflow: 'hidden'
-  }}
->
-      {/* Header */}
-    <Paper
-      elevation={2}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        p: 2,
-        borderRadius: 3,
-        position: 'sticky',
-        top: 0,
-        zIndex: 10,
-        borderBottom: 1,
-        borderColor: 'divider',
-        bgcolor: 'background.paper',
-      }}
-    >
-      <IconButton
-        onClick={() => {
-          if (window.history.length > 2) {
-            navigate(-1)
-          } else {
-            navigate('/models')
-          }
-        }}
-        sx={{ mr: 2 }}
-      >
-        <ArrowBack />
-      </IconButton>
-      <Typography variant="h6" fontWeight="600" noWrap sx={{ flex: 1 }}>
-        {model.model}
-      </Typography>
-      <Chip
-        label={model.status}
-        color={model.status === 'active' ? 'success' : 'default'}
-        size="small"
-      />
-    </Paper>
-
+    <Box sx={{ mb: 4 }}>
       {/* Carrusel Exterior */}
-      <Box
-        ref={exteriorRef}
-        onTouchStart={handleExteriorTouchStart}
-        onTouchMove={handleExteriorTouchMove}
-        onTouchEnd={handleExteriorTouchEnd}
+      <MotionBox
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
         sx={{
-          position: 'relative',
-          width: '100%',
-          height: { xs: 300, sm: 400, md: 450 },
-          bgcolor: 'grey.100',
-          overflow: 'hidden',
-          borderRadius: 3,
-          mt: 0.5
+          position: "relative",
+          width: "100%",
+          height: { xs: 300, sm: 400, md: 450, lg: 500 },
+          bgcolor: theme.palette.background.default,
+          boxShadow: { xs: 0, md: 4 },
+          overflow: "hidden",
+          mb: 4,
+          transition:
+            "box-shadow 0.4s cubic-bezier(.4,0,.2,1), background 0.4s",
         }}
       >
-        {exteriorImages.length > 0 ? (
-          <>
-            <Box
-              sx={{
-                display: 'flex',
-                transition: 'transform 0.4s ease-in-out',
-                transform: `translateX(-${exteriorSlide * 100}%)`,
-                height: '100%'
-              }}
-            >
-              {exteriorImages.map((img, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    minWidth: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    bgcolor: 'grey.100'
-                  }}
-                >
-                  <Box
-                    component="img"
-                    src={img.url}
-                    alt={img.title || `${model.model} - Exterior ${index + 1}`}
-                    sx={{
-                      maxWidth: '100%',
-                      maxHeight: '100%',
-                      objectFit: 'contain'
-                    }}
-                    onError={(e) => {
-                      e.target.style.display = 'none'
-                    }}
-                  />
-                </Box>
-              ))}
-            </Box>
-            {/* Navigation Arrows - Desktop */}
-            {!isMobile && exteriorImages.length > 1 && (
-              <>
-                <IconButton
-                  onClick={prevExterior}
-                  sx={{
-                    position: 'absolute',
-                    left: 8,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    bgcolor: 'rgba(255,255,255,0.9)',
-                    '&:hover': { bgcolor: 'white' }
-                  }}
-                >
-                  <ChevronLeft />
-                </IconButton>
-                <IconButton
-                  onClick={nextExterior}
-                  sx={{
-                    position: 'absolute',
-                    right: 8,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    bgcolor: 'rgba(255,255,255,0.9)',
-                    '&:hover': { bgcolor: 'white' }
-                  }}
-                >
-                  <ChevronRight />
-                </IconButton>
-              </>
-            )}
-            {/* Slide Indicators */}
-            {exteriorImages.length > 1 && (
-              <Box sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: 1,
-                py: 2,
-                bgcolor: 'background.paper'
-              }}>
-                {exteriorImages.map((_, index) => (
-                  <Box
-                    key={index}
-                    onClick={() => goToExterior(index)}
-                    sx={{
-                      width: exteriorSlide === index ? 24 : 8,
-                      height: 8,
-                      borderRadius: 4,
-                      bgcolor: exteriorSlide === index ? 'text.primary' : 'grey.300',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease'
-                    }}
-                  />
-                ))}
-              </Box>
-            )}
-          </>
-        ) : (
-          <Box
-            sx={{
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              color: 'grey.400'
-            }}
-          >
-            <Home sx={{ fontSize: 100 }} />
-            <Typography variant="body2" color="text.secondary">
-              Sin imágenes de fachada disponibles
-            </Typography>
-          </Box>
-        )}
-      </Box>
-
-      {/* Carrusel Interior */}
-      {interiorImages.length > 0 && (
         <Box
-          ref={interiorRef}
-          onTouchStart={handleInteriorTouchStart}
-          onTouchMove={handleInteriorTouchMove}
-          onTouchEnd={handleInteriorTouchEnd}
           sx={{
-            position: 'relative',
-            width: '100%',
-            height: { xs: 220, sm: 300, md: 340 },
-            bgcolor: 'grey.100',
-            overflow: 'hidden',
-            mt: 2,
-            borderRadius: 3
+            position: "relative",
+            width: "100%",
+            height: { xs: 300, sm: 400, md: 450, lg: 500 },
+            bgcolor: theme.palette.background.default,
+            // borderRadius: { xs: 0, md: 4 },
+            boxShadow: { xs: 0, md: 4 },
+            overflow: "hidden",
+            // mt: { xs: 0, md: 2 },
+            mb: 4,
+            transition:
+              "box-shadow 0.4s cubic-bezier(.4,0,.2,1), background 0.4s",
           }}
         >
-          {/* <Typography variant="subtitle1" fontWeight="bold" sx={{ p: 1, pb: 0 }}>
-            Interior
-          </Typography> */}
+          {/* Aquí iría el carrusel exterior */}
+        </Box>
+      </MotionBox>
+
+      <MotionBox
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
+        sx={{ p: { xs: 2, sm: 2, md: 3, lg: 4 } }}
+      >
+        {/* Especificaciones */}
+        <Box sx={{ p: { xs: 2, sm: 2, md: 3, lg: 4 } }}>
           <Box
             sx={{
-              display: 'flex',
-              transition: 'transform 0.4s ease-in-out',
-              transform: `translateX(-${interiorSlide * 100}%)`,
-              height: '100%'
+              display: "flex",
+              margin: "0 auto",
+              gap: 2,
+              justifyContent: "center",
+              mb: 2,
             }}
           >
-            {interiorImages.map((img, index) => (
-              <Box
-                key={index}
-                sx={{
-                  minWidth: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  bgcolor: 'grey.100'
-                }}
-              >
-                <Box
-                  component="img"
-                  src={img.url}
-                  alt={img.title || `${model.model} - Interior ${index + 1}`}
-                  sx={{
-                    maxWidth: '100%',
-                    maxHeight: '100%',
-                    objectFit: 'contain'
-                  }}
-                  onError={(e) => {
-                    e.target.style.display = 'none'
-                  }}
-                />
-              </Box>
-            ))}
+            <Button
+              variant={
+                blueprintType === "withoutBalcony" ? "contained" : "outlined"
+              }
+              color="primary"
+              onClick={() => setBlueprintType("withoutBalcony")}
+              startIcon={<Home />}
+            >
+              Without Balcony
+            </Button>
+            <Button
+              variant={blueprintType === "balcony" ? "contained" : "outlined"}
+              color="primary"
+              onClick={() => setBlueprintType("balcony")}
+              startIcon={<Deck />}
+            >
+              Balcony
+            </Button>
           </Box>
-          {/* Navigation Arrows - Desktop */}
-          {!isMobile && interiorImages.length > 1 && (
-            <>
-              <IconButton
-                onClick={prevInterior}
-                sx={{
-                  position: 'absolute',
-                  left: 8,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  bgcolor: 'rgba(255,255,255,0.9)',
-                  '&:hover': { bgcolor: 'white' }
-                }}
-              >
-                <ChevronLeft />
-              </IconButton>
-              <IconButton
-                onClick={nextInterior}
-                sx={{
-                  position: 'absolute',
-                  right: 8,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  bgcolor: 'rgba(255,255,255,0.9)',
-                  '&:hover': { bgcolor: 'white' }
-                }}
-              >
-                <ChevronRight />
-              </IconButton>
-            </>
-          )}
-          {/* Slide Indicators */}
-          {interiorImages.length > 1 && (
-            <Box sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: 1,
-              py: 2,
-              bgcolor: 'background.paper'
-            }}>
-              {interiorImages.map((_, index) => (
-                <Box
-                  key={index}
-                  onClick={() => goToInterior(index)}
-                  sx={{
-                    width: interiorSlide === index ? 24 : 8,
-                    height: 8,
-                    borderRadius: 4,
-                    bgcolor: interiorSlide === index ? 'text.primary' : 'grey.300',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
-                />
-              ))}
-            </Box>
-          )}
-        </Box>
-      )}
 
-{/* Especificaciones */}
-    <Paper
-      elevation={1}
-      sx={{
-        mb: 3,
-        borderRadius: 3,
-        p: { xs: 2, md: 3 },
-        bgcolor: 'background.paper'
-      }}
-    >
-      <Typography variant="h4" fontWeight="bold" color="primary" gutterBottom>
-        ${model.price?.toLocaleString()}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" gutterBottom>
-        Base price
-      </Typography>
-      <Divider sx={{ my: 2 }} />
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="h5" fontWeight="bold">
-          {model.sqft?.toLocaleString()} sqft
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Total construction area
-        </Typography>
-      </Box>
-      <Divider sx={{ my: 2 }} />
-      <Grid container spacing={2}>
-        <Grid item xs={6}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <KingBed color="action" />
-            <Box>
-              <Typography variant="h6" fontWeight="bold">
-                {model.bedrooms}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Bedrooms
-              </Typography>
-            </Box>
-          </Box>
-        </Grid>
-        <Grid item xs={6}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Bathtub color="action" />
-            <Box>
-              <Typography variant="h6" fontWeight="bold">
-                {model.bathrooms}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Bathrooms
-              </Typography>
-            </Box>
-          </Box>
-        </Grid>
-        <Grid item xs={6}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Bathtub color="action" />
-            <Box>
-              <Typography variant="h6" fontWeight="bold">
-                {model.stories}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Stories
-              </Typography>
-            </Box>
-          </Box>
-        </Grid>
-      </Grid>
-    </Paper>
-
-    {/* Descripción */}
-    {model.description && (
-      <Paper
-        elevation={1}
-        sx={{
-          mb: 3,
-          borderRadius: 3,
-          p: { xs: 2, md: 3 },
-          bgcolor: 'background.paper'
-        }}
-      >
-        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-          Descripción
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-          {model.description}
-        </Typography>
-      </Paper>
-    )}
-
-    {/* Características */}
-    {features.length > 0 && (
-      <Paper
-        elevation={1}
-        sx={{
-          mb: 3,
-          borderRadius: 3,
-          p: { xs: 2, md: 3 },
-          bgcolor: 'background.paper'
-        }}
-      >
-        <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ mb: 2 }}>
-          Características
-        </Typography>
-        <Grid container spacing={2}>
-          {features.map((feature, index) => (
-            <Grid item xs={6} key={index}>
-              <Paper
-                elevation={0}
-                sx={{
-                  position: 'relative',
-                  height: { xs: 120, sm: 150 },
-                  borderRadius: 2,
-                  overflow: 'hidden',
-                  bgcolor: 'grey.900',
-                  display: 'flex',
-                  alignItems: 'flex-end',
-                  cursor: 'pointer',
-                  '&:hover': {
-                    '& .feature-overlay': {
-                      bgcolor: 'rgba(0,0,0,0.5)'
-                    }
-                  }
-                }}
-              >
-                {feature.url ? (
-                  <Box
-                    component="img"
-                    src={feature.url}
-                    alt={feature.title || `Característica ${index + 1}`}
-                    sx={{
-                      position: 'absolute',
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }}
-                    onError={(e) => {
-                      e.target.style.display = 'none'
-                    }}
-                  />
-                ) : (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'grey.600'
-                    }}
-                  >
-                    {getIconForFeature(feature.title)}
-                  </Box>
-                )}
+          <MotionPaper
+            elevation={3}
+            sx={{
+              mt: 3,
+              mb: 3,
+              borderRadius: 4,
+              p: { xs: 2, md: 3 },
+              bgcolor: "background.paper",
+              boxShadow: "0 8px 32px 0 rgba(74,124,89,0.10)",
+              transition:
+                "box-shadow 0.4s cubic-bezier(.4,0,.2,1), background 0.4s",
+            }}
+          >
+            <Grid container spacing={3}>
+              {/* LEFT COLUMN: Specifications */}
+              <Grid item xs={12} md={6}>
                 <Box
-                  className="feature-overlay"
                   sx={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    p: 1.5,
-                    background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
-                    transition: 'background 0.3s'
+                    display: "flex",
+                    flexDirection: { xs: "column", md: "row", lg: "column" },
+                    gap: { xs: 3, md: 4 },
+                    width: "100%",
+                    py: 2,
                   }}
                 >
-                  <Typography
-                    variant="body2"
-                    fontWeight="600"
-                    sx={{ color: 'white' }}
+                  {/* Columna superior: Precio y sqft */}
+                  <Box
+                    sx={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: { xs: "column", md: "row", lg: "row" },
+                      alignItems: { xs: "flex-center", md: "center" },
+                      justifyContent: {
+                        xs: "center",
+                        md: "center",
+                        lg: "space-around",
+                      },
+                      gap: 2,
+                      mb: { xs: 2, md: 0 },
+                    }}
                   >
-                    {feature.title || `Característica ${index + 1}`}
-                  </Typography>
+                    <Box
+                      sx={{
+                        textAlign: { xs: "center", md: "center", lg: "center" },
+                      }}
+                    >
+                      <Typography
+                        variant="h2"
+                        fontWeight="bold"
+                        color="primary"
+                      >
+                        ${model.price?.toLocaleString()}
+                      </Typography>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Base price
+                      </Typography>
+                    </Box>
+                    <Box sx={{ textAlign: { xs: "center", md: "center" } }}>
+                      <Typography
+                        variant="h2"
+                        fontWeight="bold"
+                        color="primary"
+                      >
+                        {model.sqft?.toLocaleString()}
+                      </Typography>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        sqft
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Columna inferior: Habitaciones, baños y pisos */}
+                  <Box
+                    sx={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: { xs: "center", md: "center" },
+                      justifyContent: {
+                        xs: "center",
+                        md: "center",
+                        lg: "space-around",
+                      },
+                      gap: 4,
+                    }}
+                  >
+                    {/* Bedrooms */}
+                    <Box sx={{ textAlign: "center" }}>
+                      <KingBed
+                        sx={{ fontSize: 32, color: "primary.main", mb: 0.5 }}
+                      />
+                      <Typography
+                        variant="h3"
+                        fontWeight="bold"
+                        color="primary"
+                      >
+                        {model.bedrooms}
+                      </Typography>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Bedrooms
+                      </Typography>
+                    </Box>
+                    {/* Bathrooms */}
+                    <Box sx={{ textAlign: "center" }}>
+                      <Bathtub
+                        sx={{ fontSize: 32, color: "primary.main", mb: 0.5 }}
+                      />
+                      <Typography
+                        variant="h3"
+                        fontWeight="bold"
+                        color="primary"
+                      >
+                        {model.bathrooms}
+                      </Typography>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Bathrooms
+                      </Typography>
+                    </Box>
+                    {/* Stories */}
+                    <Box sx={{ textAlign: "center" }}>
+                      <Home
+                        sx={{ fontSize: 32, color: "primary.main", mb: 0.5 }}
+                      />
+                      <Typography
+                        variant="h3"
+                        fontWeight="bold"
+                        color="primary"
+                      >
+                        {model.stories}
+                      </Typography>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Stories
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
-              </Paper>
+                {/* Opcional: Extras */}
+                <Box
+                  sx={{
+                    mt: 2,
+                    display: "flex",
+                    gap: 1,
+                    flexWrap: "wrap",
+                    justifyContent: { xs: "center" },
+                  }}
+                >
+                  {Array.isArray(model.balconies) &&
+                    model.balconies.length > 0 && (
+                      <Chip
+                        icon={<Deck />}
+                        label="Balcony option"
+                        color="success"
+                        variant="outlined"
+                      />
+                    )}
+                  {Array.isArray(model.storages) &&
+                    model.storages.length > 0 && (
+                      <Chip
+                        icon={<Garage />}
+                        label="Storage option"
+                        color="info"
+                        variant="outlined"
+                      />
+                    )}
+                  {Array.isArray(model.upgrades) &&
+                    model.upgrades.length > 0 && (
+                      <Chip
+                        icon={<Home />}
+                        label="Upgrades available"
+                        color="warning"
+                        variant="outlined"
+                      />
+                    )}
+                  {model.status === "active" && (
+                    <Chip label="Active" color="primary" variant="outlined" />
+                  )}
+                </Box>
+              </Grid>
+              {/* RIGHT COLUMN: Blueprints */}
+              <Grid item xs={12} md={6}>
+                {Array.isArray(filteredBlueprints) &&
+                  filteredBlueprints.length > 0 && (
+                    <Box sx={{ height: "100%" }}>
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight="bold"
+                        gutterBottom
+                      >
+                        Blueprints
+                      </Typography>
+                      <Box
+                        sx={{
+                          position: "relative",
+                          width: "100%",
+                          height: { xs: 220, md: 340 },
+                          bgcolor: "grey.100",
+                          overflow: "hidden",
+                          borderRadius: 3,
+                          mb: 2,
+                        }}
+                      >
+                        {/* Carrusel de blueprints */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            transition:
+                              "transform 0.4s cubic-bezier(.4,0,.2,1)",
+                            transform: `translateX(-${blueprintSlide * 100}%)`,
+                            height: "100%",
+                          }}
+                        >
+                          {filteredBlueprints.map((url, index) => (
+                            <Box
+                              key={index}
+                              sx={{
+                                minWidth: "100%",
+                                height: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                bgcolor: "grey.100",
+                              }}
+                            >
+                              <Box
+                                component="img"
+                                src={url}
+                                alt={`Blueprint ${index + 1}`}
+                                sx={{
+                                  maxWidth: "100%",
+                                  maxHeight: "100%",
+                                  objectFit: "contain",
+                                  borderRadius: 2,
+                                  boxShadow: 2,
+                                }}
+                                onError={(e) => {
+                                  e.target.style.display = "none";
+                                }}
+                              />
+                            </Box>
+                          ))}
+                        </Box>
+                        {/* Flechas de navegación */}
+                        {model.blueprints.default.length > 1 && (
+                          <>
+                            <IconButton
+                              size="small"
+                              onClick={() =>
+                                setBlueprintSlide(
+                                  (prev) =>
+                                    (prev -
+                                      1 +
+                                      model.blueprints.default.length) %
+                                    model.blueprints.default.length,
+                                )
+                              }
+                              sx={{
+                                position: "absolute",
+                                top: "50%",
+                                left: 8,
+                                transform: "translateY(-50%)",
+                                bgcolor: "white",
+                                boxShadow: 2,
+                                zIndex: 1,
+                                "&:hover": { bgcolor: "#e8f5ee" },
+                              }}
+                            >
+                              <ChevronLeft />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() =>
+                                setBlueprintSlide(
+                                  (prev) =>
+                                    (prev + 1) %
+                                    model.blueprints.default.length,
+                                )
+                              }
+                              sx={{
+                                position: "absolute",
+                                top: "50%",
+                                right: 8,
+                                transform: "translateY(-50%)",
+                                bgcolor: "white",
+                                boxShadow: 2,
+                                zIndex: 1,
+                                "&:hover": { bgcolor: "#e8f5ee" },
+                              }}
+                            >
+                              <ChevronRight />
+                            </IconButton>
+                          </>
+                        )}
+                        {/* Indicadores */}
+                        {model.blueprints.default.length > 1 && (
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              bottom: 8,
+                              left: 0,
+                              right: 0,
+                              display: "flex",
+                              justifyContent: "center",
+                              gap: 1,
+                            }}
+                          >
+                            {model.blueprints.default.map((_, idx) => (
+                              <Box
+                                key={idx}
+                                sx={{
+                                  width: 10,
+                                  height: 10,
+                                  borderRadius: "50%",
+                                  bgcolor:
+                                    blueprintSlide === idx
+                                      ? "primary.main"
+                                      : "grey.400",
+                                  transition: "background 0.3s",
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        )}
+                      </Box>
+                    </Box>
+                  )}
+              </Grid>
             </Grid>
-          ))}
-        </Grid>
-      </Paper>
-    )}
+          </MotionPaper>
 
-    {/* Footer */}
-    <Box sx={{ px: 2, py: 3, textAlign: 'center', mb: 3 }}>
-      <Typography variant="caption" color="text.secondary">
-        Model #{model.modelNumber} • Images are for reference only
-      </Typography>
-    </Box>
+          {/* Imagen principal (footer visual) */}
+          <Box
+            ref={principalRef}
+            sx={{
+              width: { xs: "100%", md: "90%" },
+              aspectRatio: "16/9",
+              mt: 6,
+              mx: "auto",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              bgcolor: "white",
+              borderRadius: 4,
+              boxShadow: 3,
+              overflow: "hidden",
+              position: "relative", // importante para el overlay
+              mb: 6,
+              transition:
+                "box-shadow 0.4s cubic-bezier(.4,0,.2,1), background 0.4s",
+              "&:hover": {
+                boxShadow: "0 16px 48px 0 rgba(74,124,89,0.18)",
+              },
+            }}
+          >
+            {/* Imagen principal */}
+            <Fade in timeout={700}>
+              <Box
+                component="img"
+                src={
+                  model.images?.exterior?.[2]?.url ||
+                  model.images?.exterior?.[7] ||
+                  "/images/placeholder-house.png"
+                }
+                alt={`Render of model ${model.modelNumber}`}
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  borderRadius: 5,
+                  display: "block",
+                  background:
+                    "linear-gradient(135deg, #f5f5f5 60%, #e8f5ee 100%)",
+                  transition: "filter 0.3s",
+                  filter: "brightness(0.98)",
+                  boxShadow: "0 2px 16px 0 rgba(74,124,89,0.07)",
+                }}
+              />
+            </Fade>
 
-    {/* Botón de personalización */}
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        mb: 3,
-      }}
-    >
-      <IconButton
-        color="primary"
-        size="large"
-        sx={{
-          bgcolor: 'white',
-          boxShadow: 2,
-          '&:hover': { bgcolor: 'grey.100' }
-        }}
-        onClick={() => setShowCustomization((v) => !v)}
-      >
-        <TuneIcon fontSize="large" />
-        <Typography sx={{ ml: 1, fontWeight: 600 }}>Personalizar y comparar</Typography>
-      </IconButton>
-    </Box>
+            {/* Botones Basic/Upgrade - SOLO DESKTOP */}
+          </Box>
 
-    {/* Panel de personalización */}
-    <Slide direction="left" in={showCustomization} mountOnEnter unmountOnExit>
-      <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', pr: 2 }}>
-          <IconButton onClick={() => setShowCustomization(false)}>
-            <CloseIcon />
-          </IconButton>
+          <Box
+            sx={{
+              position: "absolute",
+              display: { xs: "flex", md: "flex" },
+              flexDirection: { xs: "row", lg: "column" },
+              alignItems: "align-center",
+              left: { xs: "9%", lg: "20%" }, // Ajusta según tu diseño
+              // top: '50%',
+              transform: { xs: "translateY(-20%)", lg: "translateY(200%)" },
+              zIndex: 3,
+              gap: 2,
+              zIndex: 999,
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                alignItems: { xs: "flex-start", md: "center" },
+                gap: 2,
+              }}
+            >
+              {/* Botones */}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "row", lg: "column" },
+                  alignItems: "flex-start",
+                  gap: 2,
+                }}
+              >
+                <Button
+                  variant={interiorType === "basic" ? "contained" : "outlined"}
+                  color="primary"
+                  size="large"
+                  onClick={() => {
+                    setInteriorType("basic");
+                    setInteriorSlide(0);
+                  }}
+                  sx={{ mb: 1 }}
+                  startIcon={<Home />}
+                >
+                  Basic
+                </Button>
+                <Button
+                  variant={
+                    interiorType === "upgrade" ? "contained" : "outlined"
+                  }
+                  color="primary"
+                  size="large"
+                  onClick={() => {
+                    setInteriorType("upgrade");
+                    setInteriorSlide(0);
+                  }}
+                  startIcon={<Home />}
+                >
+                  Upgrade
+                </Button>
+              </Box>
+              {/* Título y descripción */}
+              <Box
+                sx={{
+                  ml: { xs: 0, md: 2 },
+                  mt: { xs: 2, md: 0 },
+                  minWidth: 180,
+                  maxWidth: 260,
+                }}
+              >
+                <Typography variant="h6" fontWeight="bold" color="primary">
+                  {interiorType === "basic"
+                    ? "Main Room (Basic)"
+                    : "Main Room (Upgrade)"}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {interiorType === "basic"
+                    ? "Standard, functional and bright space, ideal for everyday living."
+                    : "Premium finishes, more spacious and modern details for an exclusive atmosphere."}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          <Box>
+            {/* Contenedor vertical sobrepuesto a la derecha */}
+            {/* <Fade in timeout={900}> */}
+            <motion.div
+              style={{
+                position: "relative", // Mantén relative para que no se salga de su espacio
+                width: "100%",
+                height: "500px",
+                zIndex: 10,
+                y,
+                opacity,
+                pointerEvents: opacity ? "auto" : "none",
+              }}
+            >
+              <Box
+                sx={{
+                  position: { xs: "static", md: "absolute", lg: "relative" },
+                  left: { xs: "auto", md: "0", lg: "55%", xl: "55%" },
+                  top: { xs: "auto", md: "55%" },
+                  transform: {
+                    xs: "translateY(80%)",
+                    sm: "translateY(50%)",
+                    md: "translateY(-35%)",
+                    lg: "translateY(-50%)",
+                    xl: "translateY(-50%)",
+                  },
+                  width: {
+                    xs: "100%",
+                    sm: "100%",
+                    md: "100%",
+                    lg: 600,
+                    xl: 700,
+                  },
+                  height: { xs: 220, sm: 340, md: 480, lg: 700, xl: 800 },
+                  mt: { xs: 2, md: 0 },
+                  bgcolor: "background.paper",
+                  borderRadius: 5,
+                  boxShadow: "0 8px 32px 0 rgba(74,124,89,0.18)",
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 2,
+                  border: "2px solid #e8f5ee",
+                  transition:
+                    "box-shadow 0.4s cubic-bezier(.4,0,.2,1), border 0.3s",
+                  position: "relative",
+                  "&:hover": {
+                    boxShadow: "0 16px 48px 0 rgba(74,124,89,0.22)",
+                    border: "2.5px solid #4a7c59",
+                  },
+                }}
+              >
+                {/* Carrusel de imágenes interiores */}
+                <Box
+                  sx={{ position: "relative", width: "100%", height: "100%" }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      width: "100%",
+                      height: "100%",
+                      transition: "transform 0.4s cubic-bezier(.4,0,.2,1)",
+                      transform: `translateX(-${interiorSlide * 100}%)`,
+                    }}
+                  >
+                    {filteredInteriorImages.length > 0 ? (
+                      filteredInteriorImages.map((img, idx) => (
+                        <Box
+                          key={idx}
+                          sx={{
+                            minWidth: "100%",
+                            height: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Box
+                            component="img"
+                            src={img.url}
+                            alt={`Interior ${idx + 1}`}
+                            sx={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              display: "block",
+                              backgroundPosition: "center",
+                              transition: "filter 0.3s",
+                              filter: "brightness(0.97)",
+                              borderRadius: 2,
+                              boxShadow: 2,
+                            }}
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                            }}
+                          />
+                        </Box>
+                      ))
+                    ) : (
+                      <Box
+                        component="img"
+                        src="/images/placeholder-interior.png"
+                        alt="Interior preview"
+                        sx={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          display: "block",
+                          backgroundPosition: "center",
+                          transition: "filter 0.3s",
+                          filter: "brightness(0.97)",
+                          borderRadius: 2,
+                          boxShadow: 2,
+                        }}
+                      />
+                    )}
+                  </Box>
+                  {/* Flechas de navegación */}
+                  {filteredInteriorImages.length > 1 && (
+                    <>
+                      <IconButton
+                        size="small"
+                        onClick={prevInterior}
+                        sx={{
+                          position: "absolute",
+                          top: "50%",
+                          left: 8,
+                          transform: "translateY(-50%)",
+                          bgcolor: "white",
+                          boxShadow: 2,
+                          zIndex: 1,
+                          "&:hover": { bgcolor: "#e8f5ee" },
+                        }}
+                      >
+                        <ChevronLeft />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={nextInterior}
+                        sx={{
+                          position: "absolute",
+                          top: "50%",
+                          right: 8,
+                          transform: "translateY(-50%)",
+                          bgcolor: "white",
+                          boxShadow: 2,
+                          zIndex: 1,
+                          "&:hover": { bgcolor: "#e8f5ee" },
+                        }}
+                      >
+                        <ChevronRight />
+                      </IconButton>
+                    </>
+                  )}
+                  {/* Indicadores */}
+                  {filteredInteriorImages.length > 1 && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        bottom: 8,
+                        left: 0,
+                        right: 0,
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: 1,
+                      }}
+                    >
+                      {filteredInteriorImages.map((_, idx) => (
+                        <Box
+                          key={idx}
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            bgcolor:
+                              interiorSlide === idx
+                                ? "primary.main"
+                                : "grey.400",
+                            transition: "background 0.3s",
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            </motion.div>
+            {/* </Fade> */}
+          </Box>
+
+          {/* Botón de personalización */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              mb: 3,
+              mt: "20%",
+              bgcolor: "transparent",
+            }}
+          >
+            <IconButton
+              color="primary"
+              size="large"
+              sx={{
+                bgcolor: "white",
+                boxShadow: 2,
+                px: 3,
+                py: 1.5,
+                borderRadius: 3,
+                transition: "box-shadow 0.3s, background 0.3s",
+                "&:hover": { bgcolor: "#e8f5ee", boxShadow: 4 },
+              }}
+              onClick={() => setShowCustomization((v) => !v)}
+            >
+              <TuneIcon fontSize="large" />
+              <Typography sx={{ ml: 1, fontWeight: 600 }}>
+                Customize and Compare
+              </Typography>
+            </IconButton>
+          </Box>
+
+          {/* Panel de personalización */}
+          <Slide
+            direction="left"
+            in={showCustomization}
+            mountOnEnter
+            unmountOnExit
+          >
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: "flex", justifyContent: "flex-end", pr: 2 }}>
+                <IconButton onClick={() => setShowCustomization(false)}>
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+              <ModelCustomizationPanel model={model} />
+            </Box>
+          </Slide>
         </Box>
-        <ModelCustomizationPanel model={model} />
-      </Box>
-    </Slide>
-  </Box>
-    
-  )
-}
+      </MotionBox>
+    </Box>
+  );
+};
 
-export default ModelDetail
+export default ModelDetail;

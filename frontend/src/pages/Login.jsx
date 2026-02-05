@@ -152,7 +152,8 @@ const handleSubmit = async (e) => {
               textAlign: 'center',
               color: 'white',
               width: '80%',
-              zIndex: 1
+              zIndex: 1,
+              mt:8
             }}
           >
             <motion.div
@@ -171,31 +172,32 @@ const handleSubmit = async (e) => {
                 }}
               >
                 <Box
-                  component="img"
-                  src="/images/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png"
-                  alt="Michelangelo Del Valle"
-                  sx={{
-                    width: '70%',
-                    height: 'auto',
-                    filter: 'brightness(0) invert(1)',
-                    objectFit: 'contain'
-                  }}
-                />
-              </motion.div>
-              
-              <Box
                 component="img"
                 src="/images/logos/Logo_LakewoodOaks-05.png"
                 alt="Lakewood Oaks on Lake Conroe"
                 sx={{
                   width: '90%',
-                  maxWidth: '500px',
+                  // maxWidth: '500px',
                   height: 'auto',
                   mb: 3,
                   filter: 'brightness(0) invert(1)',
                   objectFit: 'contain'
                 }}
               />
+
+              </motion.div>
+              
+                              <Box
+                  component="img"
+                  src="/images/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png"
+                  alt="Michelangelo Del Valle"
+                  sx={{
+                    width: '40%',
+                    height: 'auto',
+                    filter: 'brightness(0) invert(1)',
+                    objectFit: 'contain'
+                  }}
+                />
               <Box
                 sx={{
                   width: '120px',

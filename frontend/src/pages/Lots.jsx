@@ -115,7 +115,9 @@ const Lots = () => {
   }
 
   return (
-    <Box>
+    <Box
+    sx={{p: 3}}
+    >
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Box>
           <Typography variant="h4" fontWeight="bold">

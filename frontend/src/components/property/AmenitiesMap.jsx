@@ -502,10 +502,18 @@ const AmenitiesMap = ({ isPublicView = false }) => {
       </Paper>
 
       {/* Gallery Modal */}
-      <AmenitiesGalleryModal
+      {/* <AmenitiesGalleryModal
         open={modalOpen}
         onClose={handleCloseModal}
         amenity={selectedAmenity}
+        isPublicView={isPublicView}
+      /> */}
+            <AmenitiesGalleryModal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        amenity={selectedAmenity}
+        amenityIndex={selectedAmenity ? amenitiesData.findIndex(a => a.id === selectedAmenity.id) : 0}
+        amenities={amenitiesData}
         isPublicView={isPublicView}
       />
     </>

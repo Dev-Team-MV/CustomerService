@@ -47,6 +47,8 @@ const ModelSelector = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'))
+  const isLarge = useMediaQuery(theme.breakpoints.between('lg', 'xl')) // Nuevo breakpoint
+  
   
   const [models, setModels] = useState([])
   const [loading, setLoading] = useState(true)
@@ -189,10 +191,10 @@ const ModelSelector = () => {
     (pricingInfo?.hasStorage && selectedModel?.storages?.length > 0)
   )
 
-  // Panel de información del modelo seleccionado
+  // Panel de información del modelo seleccionado (más compacto)
   const ModelInfoPanel = () => (
     <Box sx={{ 
-      p: { xs: 2, md: 3 }, 
+      p: { xs: 2, md: 2.5 }, 
       bgcolor: 'grey.50', 
       borderRadius: 2,
       border: '2px solid #e0e0e0',
@@ -208,75 +210,75 @@ const ModelSelector = () => {
         borderRadius: 3
       }
     }}>
-      <Typography variant="h6" fontWeight="bold" mb={1}>
+      <Typography variant={isLarge ? "subtitle1" : "h6"} fontWeight="bold" mb={0.5}>
         {selectedModel.model}
       </Typography>
-      <Typography variant="caption" color="text.secondary" display="block" mb={3}>
+      <Typography variant="caption" color="text.secondary" display="block" mb={2}>
         Model #{selectedModel.modelNumber}
       </Typography>
 
       {/* Base Info */}
-      <Box mb={3}>
+      <Box mb={2}>
         <Typography variant="caption" fontWeight="bold" color="text.secondary" display="block" mb={1}>
           BASE SPECIFICATIONS
         </Typography>
-        <Box display="flex" flexDirection="column" gap={1}>
+        <Box display="flex" flexDirection="column" gap={0.5}>
           <Box display="flex" justifyContent="space-between">
-            <Typography variant="body2">🛏️ Bedrooms:</Typography>
-            <Typography variant="body2" fontWeight="bold">{selectedModel.bedrooms}</Typography>
+            <Typography variant="caption">🛏️ Bedrooms:</Typography>
+            <Typography variant="caption" fontWeight="bold">{selectedModel.bedrooms}</Typography>
           </Box>
           <Box display="flex" justifyContent="space-between">
-            <Typography variant="body2">🚿 Bathrooms:</Typography>
-            <Typography variant="body2" fontWeight="bold">{selectedModel.bathrooms}</Typography>
+            <Typography variant="caption">🚿 Bathrooms:</Typography>
+            <Typography variant="caption" fontWeight="bold">{selectedModel.bathrooms}</Typography>
           </Box>
           <Box display="flex" justifyContent="space-between">
-            <Typography variant="body2">📐 Square Feet:</Typography>
-            <Typography variant="body2" fontWeight="bold">{selectedModel.sqft?.toLocaleString()}</Typography>
+            <Typography variant="caption">📐 Square Feet:</Typography>
+            <Typography variant="caption" fontWeight="bold">{selectedModel.sqft?.toLocaleString()}</Typography>
           </Box>
           <Box display="flex" justifyContent="space-between">
-            <Typography variant="body2">🏢 Stories:</Typography>
-            <Typography variant="body2" fontWeight="bold">{selectedModel.stories || 1}</Typography>
+            <Typography variant="caption">🏢 Stories:</Typography>
+            <Typography variant="caption" fontWeight="bold">{selectedModel.stories || 1}</Typography>
           </Box>
         </Box>
       </Box>
 
       {/* Base Price */}
-      <Box mb={3} p={2} bgcolor="white" borderRadius={1} border="1px solid #e0e0e0">
+      <Box mb={2} p={1.5} bgcolor="white" borderRadius={1} border="1px solid #e0e0e0">
         <Typography variant="caption" fontWeight="bold" color="text.secondary">
           BASE PRICE
         </Typography>
-        <Typography variant="h4" color="primary.main" fontWeight="bold">
+        <Typography variant={isLarge ? "h5" : "h4"} color="primary.main" fontWeight="bold">
           ${selectedModel.price.toLocaleString()}
         </Typography>
       </Box>
 
       {/* Available Options Info */}
       {hasPricingOptions && (
-        <Box mb={3}>
+        <Box mb={2}>
           <Typography variant="caption" fontWeight="bold" color="text.secondary" display="block" mb={1}>
             AVAILABLE OPTIONS
           </Typography>
-          <Box display="flex" flexDirection="column" gap={1}>
+          <Box display="flex" flexDirection="column" gap={0.5}>
             {selectedModel.upgrades?.length > 0 && (
-              <Box display="flex" alignItems="center" gap={1}>
-                <Chip label="⭐ Upgrade" size="small" color="secondary" variant="outlined" />
-                <Typography variant="caption" color="text.secondary">
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Chip label="⭐ Upgrade" size="small" color="secondary" variant="outlined" sx={{ height: 24 }} />
+                <Typography variant="caption" color="text.secondary" fontWeight="bold">
                   +${(selectedModel.upgrades[0].price / 1000).toFixed(0)}K
                 </Typography>
               </Box>
             )}
             {selectedModel.balconies?.length > 0 && (
-              <Box display="flex" alignItems="center" gap={1}>
-                <Chip label="🌳 Balcony" size="small" color="info" variant="outlined" />
-                <Typography variant="caption" color="text.secondary">
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Chip label="🌳 Balcony" size="small" color="info" variant="outlined" sx={{ height: 24 }} />
+                <Typography variant="caption" color="text.secondary" fontWeight="bold">
                   +${(selectedModel.balconies[0].price / 1000).toFixed(0)}K
                 </Typography>
               </Box>
             )}
             {selectedModel.storages?.length > 0 && (
-              <Box display="flex" alignItems="center" gap={1}>
-                <Chip label="📦 Storage" size="small" color="success" variant="outlined" />
-                <Typography variant="caption" color="text.secondary">
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Chip label="📦 Storage" size="small" color="success" variant="outlined" sx={{ height: 24 }} />
+                <Typography variant="caption" color="text.secondary" fontWeight="bold">
                   +${(selectedModel.storages[0].price / 1000).toFixed(0)}K
                 </Typography>
               </Box>
@@ -287,30 +289,31 @@ const ModelSelector = () => {
 
       {/* Current Selection Summary */}
       {selectedPricingOption && (
-        <Box mb={3} p={2} bgcolor="primary.50" borderRadius={1} border="2px solid" borderColor="primary.main">
+        <Box mb={2} p={1.5} bgcolor="primary.50" borderRadius={1} border="2px solid" borderColor="primary.main">
           <Typography variant="caption" fontWeight="bold" color="primary.main">
             CURRENT CONFIGURATION
           </Typography>
           <Typography variant="body2" fontWeight="bold" mt={0.5}>
             {selectedPricingOption.label}
           </Typography>
-          <Typography variant="h5" color="primary.main" fontWeight="bold" mt={0.5}>
+          <Typography variant={isLarge ? "h6" : "h5"} color="primary.main" fontWeight="bold" mt={0.5}>
             ${selectedPricingOption.price.toLocaleString()}
           </Typography>
         </Box>
       )}
 
       {/* Action Buttons */}
-      <Box mt="auto" display="flex" flexDirection="column" gap={2}>
+      <Box mt="auto" display="flex" flexDirection="column" gap={1.5}>
         {hasPricingOptions && (
           <Button
             variant="contained"
-            size="large"
+            size={isLarge ? "medium" : "large"}
             fullWidth
             startIcon={<Tune />}
             onClick={handleOpenCustomization}
             sx={{
-              py: 1.5,
+              py: isLarge ? 1 : 1.5,
+              fontSize: isLarge ? '0.875rem' : '1rem',
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               fontWeight: 'bold',
               boxShadow: 3,
@@ -321,26 +324,27 @@ const ModelSelector = () => {
               }
             }}
           >
-            Customize Your Model
+            Customize
           </Button>
         )}
         
         <Button
           variant="outlined"
-          size="medium"
+          size="small"
           fullWidth
           startIcon={<Visibility />}
           onClick={(e) => handleViewDetails(e, selectedModel._id)}
           sx={{
             borderColor: '#4a7c59',
             color: '#4a7c59',
+            fontSize: '0.75rem',
             '&:hover': {
               borderColor: '#3d6849',
               bgcolor: 'rgba(74, 124, 89, 0.05)'
             }
           }}
         >
-          View Full Details
+          Full Details
         </Button>
       </Box>
 
@@ -349,15 +353,15 @@ const ModelSelector = () => {
         <Box 
           sx={{ 
             mt: 2,
-            p: 2,
+            p: 1.5,
             bgcolor: 'grey.100',
             borderRadius: 1,
             textAlign: 'center'
           }}
         >
-          <InfoOutlined sx={{ fontSize: 40, color: 'grey.400', mb: 1 }} />
-          <Typography variant="body2" color="text.secondary">
-            This model has no additional customization options
+          <InfoOutlined sx={{ fontSize: 32, color: 'grey.400', mb: 0.5 }} />
+          <Typography variant="caption" color="text.secondary">
+            No additional options available
           </Typography>
         </Box>
       )}
@@ -419,8 +423,8 @@ const ModelSelector = () => {
                 left: 0,
                 top: 0,
                 bottom: 0,
-                width: isTablet ? '35%' : '35%',
-                maxWidth: 380,
+                width: isTablet ? '40%' : isLarge ? '36%' : '32%',
+                maxWidth: isTablet ? 320 : isLarge ? 380 : 340,
                 transform: 'translateX(0)',
                 opacity: 1,
                 transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -438,7 +442,9 @@ const ModelSelector = () => {
               right: 0,
               top: 0,
               bottom: 0,
-              left: !isMobile && selectedModel ? (isTablet ? '37%' : '38%') : 0,
+              left: !isMobile && selectedModel 
+                ? (isTablet ? '34%' : isLarge ? '38%' : '34%')
+                : 0,
               transition: 'left 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
               overflow: 'hidden',
               display: 'flex',
@@ -483,8 +489,13 @@ const ModelSelector = () => {
                     key={model._id}
                     onClick={() => !selectedModel && handleSelectModel(model)}
                     sx={{
-                      minWidth: isSelected && !isMobile ? 380 : isMobile ? 260 : 300,
-                      maxWidth: isSelected && !isMobile ? 380 : isMobile ? 260 : 300,
+                      // minWidth: isSelected && !isMobile 
+                      //   ? (isLarge ? 300 : 350)
+                      //   : isMobile ? 260 : 300,
+                      minWidth:{xs:260, md:300, lg:400},
+                      maxWidth: isSelected && !isMobile 
+                        ? (isLarge ? 420 : 350)
+                        : isMobile ? 260 : 300,
                       flexShrink: 0,
                       cursor: selectedModel && !isMobile ? 'default' : 'pointer',
                       bgcolor: isSelected ? '#e8f5e9' : '#fff',
@@ -517,7 +528,10 @@ const ModelSelector = () => {
                     <Box
                       sx={{
                         width: '100%',
-                        height: isSelected && !isMobile ? 240 : isMobile ? 160 : 180,
+                        // height: isSelected && !isMobile 
+                        //   ? (isLarge ? 260 : 240)
+                        //   : isMobile ? 160 : 180,
+                        height:{xs:160, md:240, lg:250},
                         bgcolor: 'grey.200',
                         display: 'flex',
                         alignItems: 'center',
@@ -631,7 +645,6 @@ const ModelSelector = () => {
                         </Typography>
                       )}
 
-                      {/* Mobile: Botón para ver detalles */}
                       {isMobile && isSelected && (
                         <Button
                           size="small"

@@ -343,40 +343,27 @@ const Models = () => {
   const handleOpenDialog = (model = null) => {
     if (model) {
       setSelectedModel(model);
-
-      console.log("🔍 Loading model:", model);
-
+  
       const hasBalconyOption = model.balconies && model.balconies.length > 0;
       const hasUpgradeOption = model.upgrades && model.upgrades.length > 0;
       const hasStorageOption = model.storages && model.storages.length > 0;
-
+  
+      // Helper para normalizar imágenes
       const normalizeImages = (images) => {
         if (!images) return { exterior: [], interior: [], blueprints: [] };
-
-        if (images.exterior && images.interior) {
-          return {
-            exterior: Array.isArray(images.exterior) ? images.exterior : [],
-            interior: Array.isArray(images.interior) ? images.interior : [],
-            blueprints: Array.isArray(images.blueprints) ? images.blueprints : [],
-          };
-        }
-
-        if (Array.isArray(images)) {
-          return { exterior: images, interior: [] };
-        }
-
-        return { exterior: [], interior: [] };
+        return {
+          exterior: Array.isArray(images.exterior) ? images.exterior : [],
+          interior: Array.isArray(images.interior) ? images.interior : [],
+          blueprints: [], // blueprints se asignan abajo
+        };
       };
-
-      console.log("✅ Parsed options:", {
-        hasBalcony: hasBalconyOption,
-        hasUpgrade: hasUpgradeOption,
-        hasStorage: hasStorageOption,
-        balconyData: model.balconies?.[0],
-        upgradeData: model.upgrades?.[0],
-        storageData: model.storages?.[0],
-      });
-
+  
+      // Extraer blueprints del objeto raíz
+      const blueprintsObj = model.blueprints || {};
+      const defaultBlueprints = Array.isArray(blueprintsObj.default) ? blueprintsObj.default : [];
+      const withBalconyBlueprints = Array.isArray(blueprintsObj.withBalcony) ? blueprintsObj.withBalcony : [];
+      const withStorageBlueprints = Array.isArray(blueprintsObj.withStorage) ? blueprintsObj.withStorage : [];
+  
       setFormData({
         model: model.model,
         modelNumber: model.modelNumber || "",
@@ -387,28 +374,37 @@ const Models = () => {
         stories: model.stories || 1,
         description: model.description || "",
         status: model.status,
-
-        images: normalizeImages(model.images),
-
+  
+        images: {
+          ...normalizeImages(model.images),
+          blueprints: defaultBlueprints,
+        },
+  
         hasBalcony: hasBalconyOption,
         balconyPrice: hasBalconyOption ? model.balconies[0].price : 0,
         balconyImages: hasBalconyOption
-          ? normalizeImages(model.balconies[0].images)
+          ? {
+              ...normalizeImages(model.balconies[0].images),
+              blueprints: withBalconyBlueprints,
+            }
           : { exterior: [], interior: [], blueprints: [] },
-
+  
         hasUpgrade: hasUpgradeOption,
         upgradePrice: hasUpgradeOption ? model.upgrades[0].price : 0,
         upgradeImages: hasUpgradeOption
           ? normalizeImages(model.upgrades[0].images)
           : { exterior: [], interior: [], blueprints: [] },
-
+  
         hasStorage: hasStorageOption,
         storagePrice: hasStorageOption ? model.storages[0].price : 0,
         storageImages: hasStorageOption
-          ? normalizeImages(model.storages[0].images)
+          ? {
+              ...normalizeImages(model.storages[0].images),
+              blueprints: withStorageBlueprints,
+            }
           : { exterior: [], interior: [], blueprints: [] },
       });
-
+  
       setExpandedAccordions({
         base: true,
         balcony: hasBalconyOption,
@@ -438,7 +434,7 @@ const Models = () => {
         storagePrice: 0,
         storageImages: { exterior: [], interior: [], blueprints: [] },
       });
-
+  
       setExpandedAccordions({
         base: true,
         balcony: false,
@@ -446,7 +442,7 @@ const Models = () => {
         storage: false,
       });
     }
-
+  
     setCurrentImageUrl("");
     setCurrentImageType("exterior");
     setCurrentImageSection("base");
@@ -1083,7 +1079,9 @@ const handleSubmit = async () => {
    }
  };
   return (
-    <Box>
+    <Box
+    sx={{p: 3}}
+    >
       <Box
         display="flex"
         justifyContent="space-between"
@@ -1129,421 +1127,631 @@ const handleSubmit = async () => {
               >
                 <Card
                   sx={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    p: 2.5,
-                    borderRadius: 4,
-                    boxShadow: "0 8px 32px rgba(74,124,89,0.10)",
+                    borderRadius: 3,
+                    boxShadow: "0 4px 16px rgba(74,124,89,0.10)",
                     mb: 2,
                     transition: "box-shadow 0.2s",
-                    "&:hover": { boxShadow: "0 16px 48px rgba(74,124,89,0.18)" },
+                    "&:hover": { boxShadow: "0 8px 24px rgba(74,124,89,0.18)" },
                     position: "relative",
                     overflow: "visible",
                   }}
                 >
-                  {/* Estado */}
+                  {/* Estado - Adaptado por pantalla */}
                   <Chip
                     label={model.status}
                     color={getStatusColor(model.status)}
                     size="small"
                     sx={{
                       position: "absolute",
-                      top: 16,
-                      right: 16,
+                      top: { xs: 8, md: 16 },
+                      right: { xs: 8, md: 16 },
                       fontWeight: 700,
                       zIndex: 2,
                       textTransform: "capitalize",
                     }}
                   />
       
-                  {/* Imagen principal */}
+                  {/* Layout Mobile (xs, sm) - Stack vertical */}
                   <Box
                     sx={{
-                      width: 120,
-                      height: 120,
-                      borderRadius: 3,
-                      overflow: "hidden",
-                      position: "relative",
-                      boxShadow: "0 2px 12px rgba(74,124,89,0.10)",
-                      mr: 3,
-                      bgcolor: "grey.200",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      display: { xs: "flex", md: "none" },
+                      flexDirection: "column",
+                      p: 2,
                     }}
                   >
-                    {currentModelImage ? (
-                      <>
+                    {/* Imagen + Info básica */}
+                    <Box display="flex" gap={2} mb={2}>
+                      {/* Imagen */}
+                      <Box
+                        sx={{
+                          width: 100,
+                          height: 100,
+                          borderRadius: 2,
+                          overflow: "hidden",
+                          position: "relative",
+                          bgcolor: "grey.200",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {currentModelImage ? (
+                          <>
+                            <Box
+                              component="img"
+                              src={currentModelImage}
+                              alt={model.model}
+                              sx={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                            <Chip
+                              label={`${currentModelImageIndex + 1}/${allImages.length}`}
+                              size="small"
+                              sx={{
+                                position: "absolute",
+                                bottom: 4,
+                                right: 4,
+                                bgcolor: "rgba(0,0,0,0.7)",
+                                color: "white",
+                                height: 20,
+                                fontSize: "0.65rem",
+                              }}
+                            />
+                          </>
+                        ) : (
+                          <Home sx={{ fontSize: 40, color: "grey.400" }} />
+                        )}
+                      </Box>
+      
+                      {/* Info básica mobile */}
+                      <Box flex={1} minWidth={0}>
+                        <Typography variant="h6" fontWeight="bold" noWrap>
+                          {model.model}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          #{model.modelNumber}
+                        </Typography>
                         <Box
-                          component="img"
-                          src={currentModelImage}
-                          alt={model.model}
                           sx={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                            transition: "transform 0.2s",
-                            "&:hover": { transform: "scale(1.04)" },
-                          }}
-                        />
-                        {/* Overlay inferior */}
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            bottom: 0,
-                            left: 0,
-                            width: "100%",
-                            bgcolor: "rgba(0,0,0,0.5)",
-                            color: "white",
-                            px: 2,
+                            bgcolor: "rgba(76,175,80,0.08)",
+                            border: "1px solid #c8e6c9",
+                            borderRadius: 1,
+                            px: 1.5,
                             py: 0.5,
-                            fontSize: 13,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
+                            display: "inline-block",
+                            mt: 0.5,
                           }}
                         >
-                          <span>
-                            <PhotoLibrary sx={{ fontSize: 16, mr: 0.5 }} />
-                            {allImages.length}
-                          </span>
-                          <span>
-                            {currentModelImageIndex + 1}/{allImages.length}
-                          </span>
+                          <Typography variant="body2" fontWeight="bold" color="success.main">
+                            ${model.price?.toLocaleString()}
+                          </Typography>
                         </Box>
-                        {/* Flechas navegación */}
-                        {allImages.length > 1 && (
-                          <>
-                            <IconButton
-                              size="small"
-                              onClick={(e) =>
-                                handlePrevModelImage(e, model._id, allImages.length)
-                              }
-                              sx={{
-                                position: "absolute",
-                                left: 4,
-                                top: "50%",
-                                transform: "translateY(-50%)",
-                                bgcolor: "rgba(255,255,255,0.9)",
-                                "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-                              }}
-                            >
-                              <ChevronLeft fontSize="small" />
-                            </IconButton>
-                            <IconButton
-                              size="small"
-                              onClick={(e) =>
-                                handleNextModelImage(e, model._id, allImages.length)
-                              }
-                              sx={{
-                                position: "absolute",
-                                right: 4,
-                                top: "50%",
-                                transform: "translateY(-50%)",
-                                bgcolor: "rgba(255,255,255,0.9)",
-                                "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-                              }}
-                            >
-                              <ChevronRight fontSize="small" />
-                            </IconButton>
-                          </>
-                        )}
-                      </>
-                    ) : (
-                      <Home sx={{ fontSize: 48, color: "grey.400" }} />
-                    )}
-                  </Box>
+                      </Box>
+                    </Box>
       
-                  {/* Info principal */}
-                  <Box flex={1} minWidth={0}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography variant="h5" fontWeight="bold" sx={{ mr: 1 }}>
-                        {model.model}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ fontWeight: 500 }}
-                      >
-                        #{model.modelNumber}
-                      </Typography>
+                    {/* Specs mobile */}
+                    <Box display="flex" gap={2} mb={2} flexWrap="wrap">
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <Bed sx={{ fontSize: 16, color: "#4a7c59" }} />
+                        <Typography variant="caption">{model.bedrooms}</Typography>
+                      </Box>
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <Bathtub sx={{ fontSize: 16, color: "#2196f3" }} />
+                        <Typography variant="caption">{model.bathrooms}</Typography>
+                      </Box>
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <SquareFoot sx={{ fontSize: 16, color: "#ff9800" }} />
+                        <Typography variant="caption">{model.sqft?.toLocaleString()}</Typography>
+                      </Box>
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <Layers sx={{ fontSize: 16, color: "#8bc34a" }} />
+                        <Typography variant="caption">{model.stories || 1}</Typography>
+                      </Box>
                     </Box>
-                    <Box display="flex" gap={2} alignItems="center" mt={0.5} mb={1}>
-                      <Tooltip title="Bedrooms">
-                        <Box display="flex" alignItems="center" gap={0.5}>
-                          <Home sx={{ fontSize: 18, color: "#4a7c59" }} />
-                          <Typography variant="body2">
-                            {model.bedrooms}
-                          </Typography>
-                        </Box>
-                      </Tooltip>
-                      <Tooltip title="Bathrooms">
-                        <Box display="flex" alignItems="center" gap={0.5}>
-                          <Bathtub sx={{ fontSize: 18, color: "#2196f3" }} />
-                          <Typography variant="body2">
-                            {model.bathrooms}
-                          </Typography>
-                        </Box>
-                      </Tooltip>
-                      <Tooltip title="Square Feet">
-                        <Box display="flex" alignItems="center" gap={0.5}>
-                          <SquareFoot sx={{ fontSize: 18, color: "#ff9800" }} />
-                          <Typography variant="body2">
-                            {model.sqft?.toLocaleString()}
-                          </Typography>
-                        </Box>
-                      </Tooltip>
-                      <Tooltip title="Stories">
-                        <Box display="flex" alignItems="center" gap={0.5}>
-                          <Layers sx={{ fontSize: 18, color: "#8bc34a" }} />
-                          <Typography variant="body2">
-                            {model.stories || 1}
-                          </Typography>
-                        </Box>
-                      </Tooltip>
-                    </Box>
-                    <Box
-                      sx={{
-                        bgcolor: "rgba(76,175,80,0.08)",
-                        border: "1px solid #c8e6c9",
-                        borderRadius: 2,
-                        px: 2,
-                        py: 0.5,
-                        display: "inline-block",
-                        mb: 1,
-                      }}
-                    >
-                      <Typography variant="h6" fontWeight="bold" color="success.main">
-                        ${model.price?.toLocaleString()}
-                      </Typography>
-                    </Box>
-                    {/* Opciones */}
+      
+                    {/* Opciones mobile */}
                     {hasPricingOptions(model) && (
-                      <Box display="flex" gap={0.5} mt={1} flexWrap="wrap">
+                      <Box display="flex" gap={0.5} mb={2} flexWrap="wrap">
                         {model.balconies?.length > 0 && (
                           <Chip
-                            label={`Balcony: +$${model.balconies[0].price.toLocaleString()}`}
+                            label={`+$${(model.balconies[0].price / 1000).toFixed(0)}K`}
                             size="small"
                             color="info"
                             variant="outlined"
-                            icon={<Balcony />}
+                            sx={{ height: 24 }}
                           />
                         )}
                         {model.upgrades?.length > 0 && (
                           <Chip
-                            label={`Upgrade: +$${model.upgrades[0].price.toLocaleString()}`}
+                            label={`+$${(model.upgrades[0].price / 1000).toFixed(0)}K`}
                             size="small"
                             color="secondary"
                             variant="outlined"
-                            icon={<UpgradeIcon />}
+                            sx={{ height: 24 }}
                           />
                         )}
                         {model.storages?.length > 0 && (
                           <Chip
-                            label={`Storage: +$${model.storages[0].price.toLocaleString()}`}
+                            label={`+$${(model.storages[0].price / 1000).toFixed(0)}K`}
                             size="small"
                             color="success"
                             variant="outlined"
-                            icon={<StorageIcon />}
+                            sx={{ height: 24 }}
                           />
                         )}
                       </Box>
                     )}
-                    {/* Descripción */}
-                    {model.description && (
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        mt={1}
-                        sx={{
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                        }}
-                      >
-                        {model.description}
-                      </Typography>
-                    )}
-                    {/* Acciones */}
-                    <Box display="flex" gap={1} alignItems="center" mt={2}>
+      
+                    {/* Acciones mobile */}
+                    <Box display="flex" gap={1} mb={2}>
                       <Button
                         size="small"
                         variant="outlined"
                         startIcon={<PhotoLibrary />}
                         onClick={() => handleOpenGallery(model)}
-                        color="primary"
+                        sx={{ fontSize: "0.75rem" }}
                       >
                         Gallery
                       </Button>
-
                       <Button
                         variant="contained"
                         size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleGoToDetail(model._id);
-                        }}
+                        onClick={() => handleGoToDetail(model._id)}
+                        sx={{ fontSize: "0.75rem" }}
                       >
-                        View Details
+                        Details
                       </Button>
-
-                      <IconButton
-                        size="small"
-                        onClick={() => handleOpenDialog(model)}
-                      >
+                      <IconButton size="small" onClick={() => handleOpenDialog(model)}>
                         <Edit fontSize="small" />
                       </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDelete(model._id)}
-                      >
+                      <IconButton size="small" onClick={() => handleDelete(model._id)}>
                         <Delete fontSize="small" />
                       </IconButton>
                     </Box>
-                    {/* Facades mini-carrusel */}
-                    <Box sx={{ borderTop: "1px solid #eee", pt: 2, mt: 2 }}>
-                      <Box
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="center"
-                        mb={2}
-                      >
-                        <Typography variant="subtitle1" fontWeight="bold">
-                          Facades ({modelFacades.length})
-                        </Typography>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          startIcon={<Add />}
-                          onClick={() => handleOpenFacadeDialog(model)}
-                        >
-                          Add Facade
-                        </Button>
-                      </Box>
-                      {modelFacades.length > 0 ? (
-                        <Box sx={{ display: "flex", gap: 2, overflowX: "auto", pb: 1 }}>
+      
+                    {/* Facades mobile */}
+                    {modelFacades.length > 0 && (
+                      <Box>
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                          <Typography variant="caption" fontWeight="bold" color="text.secondary">
+                            Facades ({modelFacades.length})
+                          </Typography>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleOpenFacadeDialog(model)}
+                            sx={{
+                              bgcolor: "primary.main",
+                              color: "white",
+                              width: 24,
+                              height: 24,
+                              "&:hover": { bgcolor: "primary.dark" },
+                            }}
+                          >
+                            <Add sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        </Box>
+                        <Box display="flex" gap={1} overflowX="auto" pb={1}>
                           {modelFacades.map((facade) => {
                             const facadeImages = getFacadeImages(facade);
-                            const currentFacadeImageIndex =
-                              facadeImageIndices[facade._id] || 0;
-                            const currentFacadeImage =
-                              facadeImages[currentFacadeImageIndex];
-      
+                            const currentFacadeImage = facadeImages[0];
                             return (
-                              <Card
+                              <Box
                                 key={facade._id}
-                                variant="outlined"
                                 sx={{
-                                  minWidth: 180,
-                                  maxWidth: 180,
+                                  minWidth: 100,
+                                  maxWidth: 100,
                                   flexShrink: 0,
-                                  borderRadius: 2,
-                                  overflow: "hidden",
                                   position: "relative",
                                 }}
                               >
                                 <Box
                                   sx={{
-                                    width: "100%",
-                                    height: 100,
+                                    width: 100,
+                                    height: 75,
+                                    borderRadius: 1,
+                                    overflow: "hidden",
                                     bgcolor: "grey.200",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    backgroundImage: currentFacadeImage
-                                      ? `url(${currentFacadeImage})`
-                                      : "none",
+                                    backgroundImage: currentFacadeImage ? `url(${currentFacadeImage})` : "none",
                                     backgroundSize: "cover",
                                     backgroundPosition: "center",
+                                    mb: 0.5,
                                     position: "relative",
                                   }}
                                 >
-                                  {!currentFacadeImage && (
-                                    <ImageIcon
-                                      sx={{ fontSize: 40, color: "grey.400" }}
-                                    />
-                                  )}
-                                  {facadeImages.length > 1 && (
-                                    <Chip
-                                      label={`${currentFacadeImageIndex + 1}/${facadeImages.length}`}
-                                      size="small"
-                                      sx={{
-                                        position: "absolute",
-                                        bottom: 4,
-                                        left: 4,
-                                        bgcolor: "rgba(0,0,0,0.7)",
-                                        color: "white",
-                                      }}
-                                    />
-                                  )}
+                                  {/* Botones de acción en la imagen */}
                                   <Box
                                     sx={{
                                       position: "absolute",
-                                      top: 4,
-                                      right: 4,
+                                      top: 2,
+                                      right: 2,
                                       display: "flex",
                                       gap: 0.5,
                                     }}
                                   >
                                     <IconButton
                                       size="small"
-                                      sx={{
-                                        bgcolor: "rgba(255,255,255,0.9)",
-                                      }}
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         handleOpenFacadeDialog(model, facade);
                                       }}
+                                      sx={{
+                                        bgcolor: "rgba(255,255,255,0.95)",
+                                        width: 20,
+                                        height: 20,
+                                        "&:hover": { bgcolor: "white" },
+                                      }}
                                     >
-                                      <Edit fontSize="small" />
+                                      <Edit sx={{ fontSize: 12 }} />
                                     </IconButton>
                                     <IconButton
                                       size="small"
-                                      sx={{
-                                        bgcolor: "rgba(255,255,255,0.9)",
-                                      }}
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         handleDeleteFacade(facade._id);
                                       }}
+                                      sx={{
+                                        bgcolor: "rgba(255,255,255,0.95)",
+                                        width: 20,
+                                        height: 20,
+                                        "&:hover": { bgcolor: "white", color: "error.main" },
+                                      }}
                                     >
-                                      <Delete fontSize="small" />
+                                      <Delete sx={{ fontSize: 12 }} />
                                     </IconButton>
                                   </Box>
                                 </Box>
-                                <CardContent sx={{ p: 1.5 }}>
-                                  <Typography
-                                    variant="subtitle2"
-                                    fontWeight="bold"
-                                    noWrap
-                                  >
-                                    {facade.title}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    color="primary"
-                                    fontWeight="600"
-                                  >
-                                    +${facade.price?.toLocaleString()}
-                                  </Typography>
-                                </CardContent>
-                              </Card>
+                                <Typography variant="caption" noWrap fontWeight="600" display="block">
+                                  {facade.title}
+                                </Typography>
+                                <Typography variant="caption" color="primary" fontWeight="600">
+                                  +${facade.price?.toLocaleString()}
+                                </Typography>
+                              </Box>
                             );
                           })}
                         </Box>
-                      ) : (
-                        <Paper
-                          sx={{ p: 2, textAlign: "center", bgcolor: "grey.50" }}
-                        >
-                          <ImageIcon
-                            sx={{ fontSize: 40, color: "grey.400", mb: 1 }}
+                      </Box>
+                    )}
+                  </Box>
+      
+                  {/* Layout Desktop (md+) - Horizontal */}
+                  <Box
+                    sx={{
+                      display: { xs: "none", md: "flex" },
+                      alignItems: "flex-start",
+                      p: 2.5,
+                    }}
+                  >
+                    {/* Imagen principal desktop */}
+                    <Box
+                      sx={{
+                        width: 120,
+                        height: 120,
+                        borderRadius: 3,
+                        overflow: "hidden",
+                        position: "relative",
+                        boxShadow: "0 2px 12px rgba(74,124,89,0.10)",
+                        mr: 3,
+                        bgcolor: "grey.200",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {currentModelImage ? (
+                        <>
+                          <Box
+                            component="img"
+                            src={currentModelImage}
+                            alt={model.model}
+                            sx={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              transition: "transform 0.2s",
+                              "&:hover": { transform: "scale(1.04)" },
+                            }}
                           />
-                          <Typography variant="body2" color="text.secondary">
-                            No facades added yet
-                          </Typography>
-                        </Paper>
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              bottom: 0,
+                              left: 0,
+                              width: "100%",
+                              bgcolor: "rgba(0,0,0,0.5)",
+                              color: "white",
+                              px: 1,
+                              py: 0.5,
+                              fontSize: 12,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <span>
+                              <PhotoLibrary sx={{ fontSize: 14, mr: 0.5 }} />
+                              {allImages.length}
+                            </span>
+                            <span>
+                              {currentModelImageIndex + 1}/{allImages.length}
+                            </span>
+                          </Box>
+                          {allImages.length > 1 && (
+                            <>
+                              <IconButton
+                                size="small"
+                                onClick={(e) => handlePrevModelImage(e, model._id, allImages.length)}
+                                sx={{
+                                  position: "absolute",
+                                  left: 4,
+                                  top: "50%",
+                                  transform: "translateY(-50%)",
+                                  bgcolor: "rgba(255,255,255,0.9)",
+                                  "&:hover": { bgcolor: "rgba(255,255,255,1)" },
+                                  width: 24,
+                                  height: 24,
+                                }}
+                              >
+                                <ChevronLeft fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                onClick={(e) => handleNextModelImage(e, model._id, allImages.length)}
+                                sx={{
+                                  position: "absolute",
+                                  right: 4,
+                                  top: "50%",
+                                  transform: "translateY(-50%)",
+                                  bgcolor: "rgba(255,255,255,0.9)",
+                                  "&:hover": { bgcolor: "rgba(255,255,255,1)" },
+                                  width: 24,
+                                  height: 24,
+                                }}
+                              >
+                                <ChevronRight fontSize="small" />
+                              </IconButton>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <Home sx={{ fontSize: 48, color: "grey.400" }} />
                       )}
+                    </Box>
+      
+                    {/* Info principal desktop */}
+                    <Box flex={1} minWidth={0}>
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Typography variant="h5" fontWeight="bold" sx={{ mr: 1 }}>
+                          {model.model}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                          #{model.modelNumber}
+                        </Typography>
+                      </Box>
+      
+                      <Box display="flex" gap={2} alignItems="center" mt={0.5} mb={1}>
+                        <Tooltip title="Bedrooms">
+                          <Box display="flex" alignItems="center" gap={0.5}>
+                            <Bed sx={{ fontSize: 18, color: "#4a7c59" }} />
+                            <Typography variant="body2">{model.bedrooms}</Typography>
+                          </Box>
+                        </Tooltip>
+                        <Tooltip title="Bathrooms">
+                          <Box display="flex" alignItems="center" gap={0.5}>
+                            <Bathtub sx={{ fontSize: 18, color: "#2196f3" }} />
+                            <Typography variant="body2">{model.bathrooms}</Typography>
+                          </Box>
+                        </Tooltip>
+                        <Tooltip title="Square Feet">
+                          <Box display="flex" alignItems="center" gap={0.5}>
+                            <SquareFoot sx={{ fontSize: 18, color: "#ff9800" }} />
+                            <Typography variant="body2">{model.sqft?.toLocaleString()}</Typography>
+                          </Box>
+                        </Tooltip>
+                        <Tooltip title="Stories">
+                          <Box display="flex" alignItems="center" gap={0.5}>
+                            <Layers sx={{ fontSize: 18, color: "#8bc34a" }} />
+                            <Typography variant="body2">{model.stories || 1}</Typography>
+                          </Box>
+                        </Tooltip>
+                      </Box>
+      
+                      <Box
+                        sx={{
+                          bgcolor: "rgba(76,175,80,0.08)",
+                          border: "1px solid #c8e6c9",
+                          borderRadius: 2,
+                          px: 2,
+                          py: 0.5,
+                          display: "inline-block",
+                          mb: 1,
+                        }}
+                      >
+                        <Typography variant="h6" fontWeight="bold" color="success.main">
+                          ${model.price?.toLocaleString()}
+                        </Typography>
+                      </Box>
+      
+                      {hasPricingOptions(model) && (
+                        <Box display="flex" gap={0.5} mt={1} flexWrap="wrap">
+                          {model.balconies?.length > 0 && (
+                            <Chip
+                              label={`Balcony: +$${model.balconies[0].price.toLocaleString()}`}
+                              size="small"
+                              color="info"
+                              variant="outlined"
+                              icon={<Balcony />}
+                            />
+                          )}
+                          {model.upgrades?.length > 0 && (
+                            <Chip
+                              label={`Upgrade: +$${model.upgrades[0].price.toLocaleString()}`}
+                              size="small"
+                              color="secondary"
+                              variant="outlined"
+                              icon={<UpgradeIcon />}
+                            />
+                          )}
+                          {model.storages?.length > 0 && (
+                            <Chip
+                              label={`Storage: +$${model.storages[0].price.toLocaleString()}`}
+                              size="small"
+                              color="success"
+                              variant="outlined"
+                              icon={<StorageIcon />}
+                            />
+                          )}
+                        </Box>
+                      )}
+      
+                      {model.description && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          mt={1}
+                          sx={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {model.description}
+                        </Typography>
+                      )}
+      
+                      <Box display="flex" gap={1} alignItems="center" mt={2}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          startIcon={<PhotoLibrary />}
+                          onClick={() => handleOpenGallery(model)}
+                          color="primary"
+                        >
+                          Gallery
+                        </Button>
+                        <Button variant="contained" size="small" onClick={() => handleGoToDetail(model._id)}>
+                          View Details
+                        </Button>
+                        <IconButton size="small" onClick={() => handleOpenDialog(model)}>
+                          <Edit fontSize="small" />
+                        </IconButton>
+                        <IconButton size="small" onClick={() => handleDelete(model._id)}>
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </Box>
+      
+                      {/* Facades desktop */}
+                      <Box sx={{ borderTop: "1px solid #eee", pt: 2, mt: 2 }}>
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            Facades ({modelFacades.length})
+                          </Typography>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<Add />}
+                            onClick={() => handleOpenFacadeDialog(model)}
+                          >
+                            Add Facade
+                          </Button>
+                        </Box>
+                        {modelFacades.length > 0 ? (
+                          <Box sx={{ display: "flex", gap: 2, overflowX: "auto", pb: 1 }}>
+                            {modelFacades.map((facade) => {
+                              const facadeImages = getFacadeImages(facade);
+                              const currentFacadeImageIndex = facadeImageIndices[facade._id] || 0;
+                              const currentFacadeImage = facadeImages[currentFacadeImageIndex];
+      
+                              return (
+                                <Card
+                                  key={facade._id}
+                                  variant="outlined"
+                                  sx={{
+                                    minWidth: 180,
+                                    maxWidth: 180,
+                                    flexShrink: 0,
+                                    borderRadius: 2,
+                                    overflow: "hidden",
+                                    position: "relative",
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      width: "100%",
+                                      height: 100,
+                                      bgcolor: "grey.200",
+                                      backgroundImage: currentFacadeImage ? `url(${currentFacadeImage})` : "none",
+                                      backgroundSize: "cover",
+                                      backgroundPosition: "center",
+                                      position: "relative",
+                                    }}
+                                  >
+                                    {!currentFacadeImage && <ImageIcon sx={{ fontSize: 40, color: "grey.400" }} />}
+                                    {facadeImages.length > 1 && (
+                                      <Chip
+                                        label={`${currentFacadeImageIndex + 1}/${facadeImages.length}`}
+                                        size="small"
+                                        sx={{
+                                          position: "absolute",
+                                          bottom: 4,
+                                          left: 4,
+                                          bgcolor: "rgba(0,0,0,0.7)",
+                                          color: "white",
+                                        }}
+                                      />
+                                    )}
+                                    <Box
+                                      sx={{
+                                        position: "absolute",
+                                        top: 4,
+                                        right: 4,
+                                        display: "flex",
+                                        gap: 0.5,
+                                      }}
+                                    >
+                                      <IconButton
+                                        size="small"
+                                        sx={{ bgcolor: "rgba(255,255,255,0.9)" }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleOpenFacadeDialog(model, facade);
+                                        }}
+                                      >
+                                        <Edit fontSize="small" />
+                                      </IconButton>
+                                      <IconButton
+                                        size="small"
+                                        sx={{ bgcolor: "rgba(255,255,255,0.9)" }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteFacade(facade._id);
+                                        }}
+                                      >
+                                        <Delete fontSize="small" />
+                                      </IconButton>
+                                    </Box>
+                                  </Box>
+                                  <CardContent sx={{ p: 1.5 }}>
+                                    <Typography variant="subtitle2" fontWeight="bold" noWrap>
+                                      {facade.title}
+                                    </Typography>
+                                    <Typography variant="body2" color="primary" fontWeight="600">
+                                      +${facade.price?.toLocaleString()}
+                                    </Typography>
+                                  </CardContent>
+                                </Card>
+                              );
+                            })}
+                          </Box>
+                        ) : (
+                          <Paper sx={{ p: 2, textAlign: "center", bgcolor: "grey.50" }}>
+                            <ImageIcon sx={{ fontSize: 40, color: "grey.400", mb: 1 }} />
+                            <Typography variant="body2" color="text.secondary">
+                              No facades added yet
+                            </Typography>
+                          </Paper>
+                        )}
+                      </Box>
                     </Box>
                   </Box>
                 </Card>
@@ -1775,25 +1983,27 @@ const handleSubmit = async () => {
         </DialogActions>
       </Dialog>
 
-      {/* ==================== MODEL DIALOG CON ACORDEONES ==================== */}
+      {/* ==================== MODEL DIALOG RESPONSIVE ==================== */}
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
         maxWidth="xl"
         fullWidth
+        fullScreen={window.innerWidth < 960} // ✅ Fullscreen solo en mobile/tablet
         PaperProps={{
           sx: {
-            height: "90vh",
-            maxHeight: "90vh",
+            height: { xs: "100vh", md: "90vh" },
+            maxHeight: { xs: "100vh", md: "90vh" },
+            m: { xs: 0, md: 2 },
           },
         }}
       >
-        <DialogTitle sx={{ pb: 2 }}>
+        <DialogTitle sx={{ pb: 2, px: { xs: 2, md: 3 } }}>
           <Box display="flex" alignItems="center" gap={2}>
             <Box
               sx={{
-                width: 48,
-                height: 48,
+                width: { xs: 40, md: 48 },
+                height: { xs: 40, md: 48 },
                 borderRadius: 3,
                 background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
                 display: 'flex',
@@ -1801,32 +2011,42 @@ const handleSubmit = async () => {
                 justifyContent: 'center'
               }}
             >
-              <Home sx={{ color: 'white', fontSize: 24 }} />
+              <Home sx={{ color: 'white', fontSize: { xs: 20, md: 24 } }} />
             </Box>
-            <Box>
-              <Typography variant="h6" fontWeight={700}>
+            <Box flex={1} minWidth={0}>
+              <Typography 
+                variant="h6" 
+                fontWeight={700} 
+                fontSize={{ xs: "1rem", md: "1.25rem" }}
+                noWrap
+              >
                 {selectedModel ? "Edit Model" : "Add New Model"}
               </Typography>
               <Typography variant="caption" sx={{ color: '#6c757d' }}>
                 Total Images: {getTotalImagesCount()}
               </Typography>
             </Box>
-            <Box flex={1} />
-            <IconButton onClick={handleCloseDialog}>
+            <IconButton onClick={handleCloseDialog} size="small">
               <Close />
             </IconButton>
           </Box>
         </DialogTitle>
-
+      
         <DialogContent sx={{ p: 0, overflow: "hidden" }}>
-          <Box display="flex" height="100%">
+          <Box 
+            display="flex" 
+            height="100%"
+            flexDirection={{ xs: "column", md: "row" }} // ✅ Columna en mobile, fila en desktop
+          >
             {/* LEFT SIDE - Form */}
             <Box
               sx={{
-                width: "50%",
-                p: 3,
+                width: { xs: "100%", md: "50%" },
+                p: { xs: 2, md: 3 },
                 overflowY: "auto",
-                borderRight: "1px solid #e0e0e0",
+                borderRight: { xs: "none", md: "1px solid #e0e0e0" },
+                borderBottom: { xs: "1px solid #e0e0e0", md: "none" },
+                maxHeight: { xs: "45vh", md: "100%" }, // ✅ Altura limitada en mobile
                 "&::-webkit-scrollbar": {
                   width: "8px",
                 },
@@ -1836,22 +2056,24 @@ const handleSubmit = async () => {
                 },
               }}
             >
-              <Grid container spacing={2.5}>
+              <Grid container spacing={{ xs: 1.5, md: 2.5 }}>
                 {/* Basic Info */}
                 <Grid item xs={12}>
                   <Typography
                     variant="h6"
+                    fontSize={{ xs: "1rem", md: "1.25rem" }}
                     fontWeight="bold"
                     gutterBottom
                     sx={{ display: "flex", alignItems: "center", gap: 1 }}
                   >
-                    <Home /> Basic Information
+                    <Home fontSize="small" /> Basic Information
                   </Typography>
                 </Grid>
-
+      
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
+                    size="small"
                     label="Model Name"
                     value={formData.model}
                     onChange={(e) =>
@@ -1863,6 +2085,7 @@ const handleSubmit = async () => {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
+                    size="small"
                     label="Model Number"
                     value={formData.modelNumber}
                     onChange={(e) =>
@@ -1870,9 +2093,10 @@ const handleSubmit = async () => {
                     }
                   />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={6} sm={4}>
                   <TextField
                     fullWidth
+                    size="small"
                     type="number"
                     label="Base Price"
                     value={formData.price}
@@ -1885,14 +2109,15 @@ const handleSubmit = async () => {
                     required
                     InputProps={{
                       startAdornment: (
-                        <Typography sx={{ mr: 0.5 }}>$</Typography>
+                        <Typography sx={{ mr: 0.5, fontSize: "0.875rem" }}>$</Typography>
                       ),
                     }}
                   />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={6} sm={4}>
                   <TextField
                     fullWidth
+                    size="small"
                     type="number"
                     label="Stories"
                     value={formData.stories}
@@ -1907,6 +2132,7 @@ const handleSubmit = async () => {
                 <Grid item xs={12} sm={4}>
                   <TextField
                     fullWidth
+                    size="small"
                     select
                     label="Status"
                     value={formData.status}
@@ -1919,9 +2145,10 @@ const handleSubmit = async () => {
                     <MenuItem value="inactive">Inactive</MenuItem>
                   </TextField>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={4}>
                   <TextField
                     fullWidth
+                    size="small"
                     type="number"
                     label="Bedrooms"
                     value={formData.bedrooms}
@@ -1934,9 +2161,10 @@ const handleSubmit = async () => {
                     required
                   />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={4}>
                   <TextField
                     fullWidth
+                    size="small"
                     type="number"
                     label="Bathrooms"
                     value={formData.bathrooms}
@@ -1949,9 +2177,10 @@ const handleSubmit = async () => {
                     required
                   />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={4}>
                   <TextField
                     fullWidth
+                    size="small"
                     type="number"
                     label="Square Feet"
                     value={formData.sqft}
@@ -1964,8 +2193,9 @@ const handleSubmit = async () => {
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
+                    size="small"
                     multiline
-                    rows={3}
+                    rows={2}
                     label="Description"
                     value={formData.description}
                     onChange={(e) =>
@@ -1973,24 +2203,23 @@ const handleSubmit = async () => {
                     }
                   />
                 </Grid>
-
+      
                 <Grid item xs={12}>
-                  <Divider sx={{ my: 2 }} />
+                  <Divider sx={{ my: { xs: 1, md: 2 } }} />
                 </Grid>
-
+      
                 {/* Pricing Options */}
                 <Grid item xs={12}>
-                  <Typography variant="h6" fontWeight="bold" gutterBottom>
+                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom fontSize={{ xs: "0.9rem", md: "1rem" }}>
                     Pricing Options
                   </Typography>
-                  <Alert severity="info" sx={{ mb: 2 }}>
-                    Enable options to create different configurations with
-                    specific images
+                  <Alert severity="info" sx={{ mb: 1, py: 0.5, fontSize: "0.75rem" }}>
+                    Enable options to create different configurations
                   </Alert>
                 </Grid>
-
+      
                 {/* Balcony */}
-                <Grid item xs={12} sm={8}>
+                <Grid item xs={8}>
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -2013,21 +2242,22 @@ const handleSubmit = async () => {
                       />
                     }
                     label={
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Balcony />
-                        <Typography fontWeight="600">
-                          Balcony Available
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <Balcony fontSize="small" />
+                        <Typography fontWeight="600" fontSize={{ xs: "0.875rem", md: "1rem" }}>
+                          Balcony
                         </Typography>
                       </Box>
                     }
                   />
                 </Grid>
                 {formData.hasBalcony && (
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={4}>
                     <TextField
                       fullWidth
+                      size="small"
                       type="number"
-                      label="Additional Price"
+                      label="+ Price"
                       value={formData.balconyPrice}
                       onChange={(e) =>
                         setFormData({
@@ -2038,15 +2268,15 @@ const handleSubmit = async () => {
                       required
                       InputProps={{
                         startAdornment: (
-                          <Typography sx={{ mr: 0.5 }}>$</Typography>
+                          <Typography sx={{ mr: 0.5, fontSize: "0.75rem" }}>$</Typography>
                         ),
                       }}
                     />
                   </Grid>
                 )}
-
+      
                 {/* Upgrade */}
-                <Grid item xs={12} sm={8}>
+                <Grid item xs={8}>
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -2069,21 +2299,22 @@ const handleSubmit = async () => {
                       />
                     }
                     label={
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <UpgradeIcon />
-                        <Typography fontWeight="600">
-                          Upgrade Version Available
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <UpgradeIcon fontSize="small" />
+                        <Typography fontWeight="600" fontSize={{ xs: "0.875rem", md: "1rem" }}>
+                          Upgrade
                         </Typography>
                       </Box>
                     }
                   />
                 </Grid>
                 {formData.hasUpgrade && (
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={4}>
                     <TextField
                       fullWidth
+                      size="small"
                       type="number"
-                      label="Additional Price"
+                      label="+ Price"
                       value={formData.upgradePrice}
                       onChange={(e) =>
                         setFormData({
@@ -2094,15 +2325,15 @@ const handleSubmit = async () => {
                       required
                       InputProps={{
                         startAdornment: (
-                          <Typography sx={{ mr: 0.5 }}>$</Typography>
+                          <Typography sx={{ mr: 0.5, fontSize: "0.75rem" }}>$</Typography>
                         ),
                       }}
                     />
                   </Grid>
                 )}
-
+      
                 {/* Storage */}
-                <Grid item xs={12} sm={8}>
+                <Grid item xs={8}>
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -2125,21 +2356,22 @@ const handleSubmit = async () => {
                       />
                     }
                     label={
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <StorageIcon />
-                        <Typography fontWeight="600">
-                          Storage Available
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <StorageIcon fontSize="small" />
+                        <Typography fontWeight="600" fontSize={{ xs: "0.875rem", md: "1rem" }}>
+                          Storage
                         </Typography>
                       </Box>
                     }
                   />
                 </Grid>
                 {formData.hasStorage && (
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={4}>
                     <TextField
                       fullWidth
+                      size="small"
                       type="number"
-                      label="Additional Price"
+                      label="+ Price"
                       value={formData.storagePrice}
                       onChange={(e) =>
                         setFormData({
@@ -2150,13 +2382,13 @@ const handleSubmit = async () => {
                       required
                       InputProps={{
                         startAdornment: (
-                          <Typography sx={{ mr: 0.5 }}>$</Typography>
+                          <Typography sx={{ mr: 0.5, fontSize: "0.75rem" }}>$</Typography>
                         ),
                       }}
                     />
                   </Grid>
                 )}
-
+      
                 {/* Price Summary */}
                 {(formData.hasBalcony ||
                   formData.hasUpgrade ||
@@ -2164,62 +2396,59 @@ const handleSubmit = async () => {
                   <Grid item xs={12}>
                     <Paper
                       sx={{
-                        p: 2,
+                        p: { xs: 1.5, md: 2 },
                         bgcolor: "success.50",
                         border: "1px solid",
                         borderColor: "success.200",
                       }}
                     >
                       <Typography
-                        variant="subtitle2"
+                        variant="caption"
                         fontWeight="bold"
                         gutterBottom
+                        display="block"
                       >
                         Price Range Summary
                       </Typography>
-                      <Box display="flex" justifyContent="space-between" mb={1}>
-                        <Typography variant="body2">
-                          Minimum:{" "}
-                          <strong>${formData.price.toLocaleString()}</strong>
+                      <Box display="flex" justifyContent="space-between" mb={0.5} flexWrap="wrap" gap={1}>
+                        <Typography variant="caption">
+                          Min: <strong>${formData.price.toLocaleString()}</strong>
                         </Typography>
-                        <Typography variant="body2">
-                          Maximum:{" "}
-                          <strong>
-                            ${calculateMaxPrice().toLocaleString()}
-                          </strong>
+                        <Typography variant="caption">
+                          Max: <strong>${calculateMaxPrice().toLocaleString()}</strong>
                         </Typography>
                       </Box>
                       <Typography variant="caption" color="text.secondary">
-                        <strong>{calculatePricingCombinations()}</strong>{" "}
-                        pricing combinations
+                        <strong>{calculatePricingCombinations()}</strong> combinations
                       </Typography>
                     </Paper>
                   </Grid>
                 )}
               </Grid>
             </Box>
-
-            {/* RIGHT SIDE - Images with Accordions */}
+      
+            {/* RIGHT SIDE - Images */}
             <Box
               sx={{
-                width: "50%",
+                width: { xs: "100%", md: "50%" },
                 display: "flex",
                 flexDirection: "column",
                 bgcolor: "#fafafa",
+                maxHeight: { xs: "55vh", md: "100%" },
               }}
             >
               {/* Add Image Control */}
               <Box
                 sx={{
-                  p: 2,
+                  p: { xs: 1.5, md: 2 },
                   borderBottom: "1px solid #e0e0e0",
                   bgcolor: "white",
                 }}
               >
-                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                <Typography variant="caption" fontWeight="bold" gutterBottom display="block">
                   Add Images
                 </Typography>
-                <Grid container spacing={1}>
+                <Grid container spacing={0.5}>
                   <Grid item xs={12} sm={4}>
                     <TextField
                       fullWidth
@@ -2228,26 +2457,16 @@ const handleSubmit = async () => {
                       label="Section"
                       value={currentImageSection}
                       onChange={(e) => setCurrentImageSection(e.target.value)}
+                      sx={{ "& .MuiInputBase-root": { fontSize: "0.875rem" } }}
                     >
-                      <MenuItem value="base">Base Model</MenuItem>
-                      {formData.hasBalcony && (
-                        <MenuItem value="balcony">With Balcony</MenuItem>
-                      )}
-                      {formData.hasUpgrade && (
-                        <MenuItem value="upgrade">With Upgrade</MenuItem>
-                      )}
-                      {formData.hasStorage && (
-                        <MenuItem value="storage">With Storage</MenuItem>
-                      )}
+                      <MenuItem value="base">Base</MenuItem>
+                      {formData.hasBalcony && <MenuItem value="balcony">Balcony</MenuItem>}
+                      {formData.hasUpgrade && <MenuItem value="upgrade">Upgrade</MenuItem>}
+                      {formData.hasStorage && <MenuItem value="storage">Storage</MenuItem>}
                     </TextField>
                   </Grid>
-                  {/* ✅ SELECTOR DE TIPO CON LÓGICA CONDICIONAL */}
                   
-                  <Grid
-                    item
-                    xs={12}
-                    sm={currentImageType === "interior" ? 2.5 : 3}
-                  >
+                  <Grid item xs={currentImageType === "interior" ? 5 : 6} sm={currentImageType === "interior" ? 2.5 : 3}>
                     <TextField
                       fullWidth
                       size="small"
@@ -2256,21 +2475,20 @@ const handleSubmit = async () => {
                       value={currentImageType}
                       onChange={(e) => {
                         setCurrentImageType(e.target.value);
-                        if (e.target.value === "exterior") {
+                        if (e.target.value !== "interior") {
                           setCurrentRoomType("general");
                         }
                       }}
+                      sx={{ "& .MuiInputBase-root": { fontSize: "0.875rem" } }}
                     >
                       <MenuItem value="exterior">Exterior</MenuItem>
                       <MenuItem value="interior">Interior</MenuItem>
-                      <MenuItem value="blueprints">Blueprints</MenuItem> {/* <-- NUEVO */}
+                      <MenuItem value="blueprints">Blueprints</MenuItem>
                     </TextField>
                   </Grid>
-                  
-
-                  {/* ✅ SELECTOR DE TIPO DE HABITACIÓN (SOLO SI ES INTERIOR) */}
+      
                   {currentImageType === "interior" && (
-                    <Grid item xs={12} sm={2.5}>
+                    <Grid item xs={7} sm={2.5}>
                       <TextField
                         fullWidth
                         size="small"
@@ -2278,64 +2496,55 @@ const handleSubmit = async () => {
                         label="Room"
                         value={currentRoomType}
                         onChange={(e) => setCurrentRoomType(e.target.value)}
+                        sx={{ "& .MuiInputBase-root": { fontSize: "0.875rem" } }}
                       >
                         <MenuItem value="general">General</MenuItem>
-                        <MenuItem value="bedroom_closet">
-                          🛏️ Bed w/ Closet
-                        </MenuItem>
-                        <MenuItem value="bedroom_no_closet">
-                          🛌 Bed w/o Closet
-                        </MenuItem>
-                        <MenuItem value="bathroom">🚿 Bathroom</MenuItem>
-                        <MenuItem value="laundry">🧺 Laundry</MenuItem>
-                        <MenuItem value="dining">🍽️ Dining</MenuItem>
-                        <MenuItem value="living">🛋️ Living</MenuItem>
-                        <MenuItem value="kitchen">👨‍🍳 Kitchen</MenuItem>
-                        <MenuItem value="hallway">🚪 Hallway</MenuItem>
-                        <MenuItem value="garage">🚗 Garage</MenuItem>
-                        <MenuItem value="balcony">🌳 Balcony</MenuItem>
-                        <MenuItem value="patio">🏡 Patio</MenuItem>
-                        <MenuItem value="closet">👔 Closet</MenuItem>
+                        <MenuItem value="bedroom_closet">Bed+</MenuItem>
+                        <MenuItem value="bedroom_no_closet">Bed</MenuItem>
+                        <MenuItem value="bathroom">Bath</MenuItem>
+                        <MenuItem value="kitchen">Kitchen</MenuItem>
+                        <MenuItem value="living">Living</MenuItem>
+                        <MenuItem value="dining">Dining</MenuItem>
+                        <MenuItem value="garage">Garage</MenuItem>
                       </TextField>
                     </Grid>
                   )}
-
-                  <Grid item xs={12} sm={5}>
-                    <Box display="flex" gap={1}>
-                      <Button
-                        variant="contained"
-                        component="label"
-                        disabled={uploadingImage}
-                        size="small"
-                        sx={{ minWidth: "60px" }}
-                        startIcon={<CloudUpload />}
-                      >
-                        {uploadingImage ? "Uploading..." : "Upload"}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          hidden
-                          multiple
-                          onChange={handleFileImageUpload}
-                        />
-                      </Button>
-                    </Box>
+      
+                  <Grid item xs={12} sm={currentImageType === "interior" ? 3 : 5}>
+                    <Button
+                      variant="contained"
+                      component="label"
+                      disabled={uploadingImage}
+                      size="small"
+                      fullWidth
+                      startIcon={<CloudUpload />}
+                      sx={{ height: "40px", fontSize: "0.75rem" }}
+                    >
+                      {uploadingImage ? "..." : "Upload"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        multiple
+                        onChange={handleFileImageUpload}
+                      />
+                    </Button>
                   </Grid>
                 </Grid>
               </Box>
-
-              {/* Accordions - Images Preview */}
+      
+              {/* Accordions Preview */}
               <Box
                 sx={{
                   flex: 1,
                   overflowY: "auto",
-                  p: 2,
+                  p: { xs: 1, md: 2 },
                   "&::-webkit-scrollbar": {
-                    width: "8px",
+                    width: "6px",
                   },
                   "&::-webkit-scrollbar-thumb": {
                     backgroundColor: "rgba(0,0,0,0.2)",
-                    borderRadius: "4px",
+                    borderRadius: "3px",
                   },
                 }}
               >
@@ -2343,37 +2552,34 @@ const handleSubmit = async () => {
                 <Accordion
                   expanded={expandedAccordions.base}
                   onChange={handleAccordionChange("base")}
-                  sx={{ mb: 1 }}
+                  sx={{ mb: 0.5, "& .MuiAccordionSummary-root": { minHeight: { xs: 40, md: 48 } } }}
                 >
-                  <AccordionSummary expandIcon={<ExpandMore />}>
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      gap={1}
-                      width="100%"
-                    >
-                      <Home color="primary" />
-                      <Typography fontWeight="bold">
-                        Base Model Images
+                  <AccordionSummary expandIcon={<ExpandMore fontSize="small" />}>
+                    <Box display="flex" alignItems="center" gap={0.5} width="100%">
+                      <Home color="primary" fontSize="small" />
+                      <Typography fontWeight="bold" fontSize={{ xs: "0.875rem", md: "1rem" }}>
+                        Base Model
                       </Typography>
                       <Badge
                         badgeContent={
                           formData.images.exterior.length +
-                          formData.images.interior.length
+                          formData.images.interior.length +
+                          formData.images.blueprints.length
                         }
                         color="primary"
-                        sx={{ ml: "auto", mr: 2 }}
+                        sx={{ ml: "auto", mr: 1 }}
                       />
                     </Box>
                   </AccordionSummary>
-                  <AccordionDetails>
-                    <Stack spacing={2}>
+                  <AccordionDetails sx={{ p: { xs: 1, md: 2 } }}>
+                    <Stack spacing={1.5}>
                       {/* Exterior */}
                       <Box>
                         <Typography
-                          variant="subtitle2"
+                          variant="caption"
                           fontWeight="600"
                           gutterBottom
+                          display="block"
                         >
                           Exterior ({formData.images.exterior.length})
                         </Typography>
@@ -2417,6 +2623,8 @@ const handleSubmit = async () => {
                                       top: 4,
                                       right: 4,
                                       bgcolor: "rgba(255,255,255,0.9)",
+                                      width: 24,
+                                      height: 24,
                                       "&:hover": {
                                         bgcolor: "rgba(255,255,255,1)",
                                       },
@@ -2433,8 +2641,8 @@ const handleSubmit = async () => {
                                         position: "absolute",
                                         bottom: 4,
                                         left: 4,
-                                        height: 20,
-                                        fontSize: "0.7rem",
+                                        height: 18,
+                                        fontSize: "0.65rem",
                                       }}
                                     />
                                   )}
@@ -2445,7 +2653,7 @@ const handleSubmit = async () => {
                         ) : (
                           <Paper
                             sx={{
-                              p: 2,
+                              p: 1.5,
                               textAlign: "center",
                               bgcolor: "grey.100",
                             }}
@@ -2459,19 +2667,19 @@ const handleSubmit = async () => {
                           </Paper>
                         )}
                       </Box>
-
+      
                       {/* Interior */}
                       <Box>
                         <Typography
-                          variant="subtitle2"
+                          variant="caption"
                           fontWeight="600"
                           gutterBottom
+                          display="block"
                         >
                           Interior ({formData.images.interior.length})
                         </Typography>
                         {formData.images.interior.length > 0 ? (
-                          <Stack spacing={2}>
-                            {/* Agrupar y mostrar por tipo de habitación */}
+                          <Stack spacing={1.5}>
                             {Object.entries(
                               groupImagesByRoomType(formData.images.interior),
                             )
@@ -2482,7 +2690,7 @@ const handleSubmit = async () => {
                                     sx={{
                                       display: "flex",
                                       alignItems: "center",
-                                      mb: 1,
+                                      mb: 0.5,
                                       pb: 0.5,
                                       borderBottom: "1px solid #e0e0e0",
                                     }}
@@ -2494,6 +2702,7 @@ const handleSubmit = async () => {
                                       sx={{
                                         textTransform: "uppercase",
                                         letterSpacing: 0.5,
+                                        fontSize: "0.7rem",
                                       }}
                                     >
                                       {getRoomTypeName(roomType)} (
@@ -2539,6 +2748,8 @@ const handleSubmit = async () => {
                                               top: 4,
                                               right: 4,
                                               bgcolor: "rgba(255,255,255,0.9)",
+                                              width: 24,
+                                              height: 24,
                                               "&:hover": {
                                                 bgcolor: "rgba(255,255,255,1)",
                                               },
@@ -2556,7 +2767,7 @@ const handleSubmit = async () => {
                         ) : (
                           <Paper
                             sx={{
-                              p: 2,
+                              p: 1.5,
                               textAlign: "center",
                               bgcolor: "grey.100",
                             }}
@@ -2570,10 +2781,10 @@ const handleSubmit = async () => {
                           </Paper>
                         )}
                       </Box>
-
+      
                       {/* Blueprints */}
                       <Box>
-                        <Typography variant="subtitle2" fontWeight="600" gutterBottom>
+                        <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Blueprints ({formData.images.blueprints.length})
                         </Typography>
                         {formData.images.blueprints.length > 0 ? (
@@ -2602,6 +2813,8 @@ const handleSubmit = async () => {
                                       top: 4,
                                       right: 4,
                                       bgcolor: "rgba(255,255,255,0.9)",
+                                      width: 24,
+                                      height: 24,
                                       "&:hover": { bgcolor: "rgba(255,255,255,1)" },
                                     }}
                                   >
@@ -2612,7 +2825,7 @@ const handleSubmit = async () => {
                             ))}
                           </Grid>
                         ) : (
-                          <Paper sx={{ p: 2, textAlign: "center", bgcolor: "grey.100" }}>
+                          <Paper sx={{ p: 1.5, textAlign: "center", bgcolor: "grey.100" }}>
                             <Typography variant="caption" color="text.secondary">
                               No blueprints
                             </Typography>
@@ -2622,200 +2835,86 @@ const handleSubmit = async () => {
                     </Stack>
                   </AccordionDetails>
                 </Accordion>
-
+      
                 {/* BALCONY ACCORDION */}
                 {formData.hasBalcony && (
                   <Accordion
                     expanded={expandedAccordions.balcony}
                     onChange={handleAccordionChange("balcony")}
-                    sx={{ mb: 1 }}
+                    sx={{ mb: 0.5, "& .MuiAccordionSummary-root": { minHeight: { xs: 40, md: 48 } } }}
                   >
-                    <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        gap={1}
-                        width="100%"
-                      >
-                        <Balcony color="info" />
-                        <Typography fontWeight="bold">
-                          With Balcony Images
+                    <AccordionSummary expandIcon={<ExpandMore fontSize="small" />}>
+                      <Box display="flex" alignItems="center" gap={0.5} width="100%">
+                        <Balcony color="info" fontSize="small" />
+                        <Typography fontWeight="bold" fontSize={{ xs: "0.875rem", md: "1rem" }}>
+                          With Balcony
                         </Typography>
                         <Badge
                           badgeContent={
                             formData.balconyImages.exterior.length +
-                            formData.balconyImages.interior.length
+                            formData.balconyImages.interior.length +
+                            formData.balconyImages.blueprints.length
                           }
                           color="info"
-                          sx={{ ml: "auto", mr: 2 }}
+                          sx={{ ml: "auto", mr: 1 }}
                         />
                       </Box>
                     </AccordionSummary>
-                    <AccordionDetails>
-                      <Stack spacing={2}>
+                    <AccordionDetails sx={{ p: { xs: 1, md: 2 } }}>
+                      <Stack spacing={1.5}>
                         {/* Exterior */}
                         <Box>
-                          <Typography
-                            variant="subtitle2"
-                            fontWeight="600"
-                            gutterBottom
-                          >
+                          <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                             Exterior ({formData.balconyImages.exterior.length})
                           </Typography>
                           {formData.balconyImages.exterior.length > 0 ? (
                             <Grid container spacing={1}>
-                              {formData.balconyImages.exterior.map(
-                                (url, index) => (
-                                  <Grid item xs={6} key={index}>
-                                    <Box
-                                      sx={{
-                                        position: "relative",
-                                        pt: "75%",
-                                        borderRadius: 1,
-                                        overflow: "hidden",
-                                        border: "1px solid #e0e0e0",
-                                      }}
-                                    >
-                                      <Box
-                                        component="img"
-                                        src={url}
-                                        alt={`Balcony Exterior ${index + 1}`}
-                                        sx={{
-                                          position: "absolute",
-                                          top: 0,
-                                          left: 0,
-                                          width: "100%",
-                                          height: "100%",
-                                          objectFit: "cover",
-                                        }}
-                                      />
-                                      <IconButton
-                                        size="small"
-                                        onClick={() =>
-                                          handleRemoveImage(
-                                            "balcony",
-                                            "exterior",
-                                            index,
-                                          )
-                                        }
-                                        sx={{
-                                          position: "absolute",
-                                          top: 4,
-                                          right: 4,
-                                          bgcolor: "rgba(255,255,255,0.9)",
-                                          "&:hover": {
-                                            bgcolor: "rgba(255,255,255,1)",
-                                          },
-                                        }}
-                                      >
-                                        <Close fontSize="small" />
-                                      </IconButton>
-                                    </Box>
-                                  </Grid>
-                                ),
-                              )}
+                              {formData.balconyImages.exterior.map((url, index) => (
+                                <Grid item xs={6} key={index}>
+                                  <Box sx={{ position: "relative", pt: "75%", borderRadius: 1, overflow: "hidden", border: "1px solid #e0e0e0" }}>
+                                    <Box component="img" src={url} alt={`Balcony Exterior ${index + 1}`} sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                                    <IconButton size="small" onClick={() => handleRemoveImage("balcony", "exterior", index)} sx={{ position: "absolute", top: 4, right: 4, bgcolor: "rgba(255,255,255,0.9)", width: 24, height: 24, "&:hover": { bgcolor: "rgba(255,255,255,1)" } }}>
+                                      <Close fontSize="small" />
+                                    </IconButton>
+                                  </Box>
+                                </Grid>
+                              ))}
                             </Grid>
                           ) : (
-                            <Paper
-                              sx={{
-                                p: 2,
-                                textAlign: "center",
-                                bgcolor: "info.50",
-                              }}
-                            >
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                              >
-                                No exterior images
-                              </Typography>
+                            <Paper sx={{ p: 1.5, textAlign: "center", bgcolor: "info.50" }}>
+                              <Typography variant="caption" color="text.secondary">No exterior images</Typography>
                             </Paper>
                           )}
                         </Box>
-
+      
                         {/* Interior */}
                         <Box>
-                          <Typography
-                            variant="subtitle2"
-                            fontWeight="600"
-                            gutterBottom
-                          >
+                          <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                             Interior ({formData.balconyImages.interior.length})
                           </Typography>
                           {formData.balconyImages.interior.length > 0 ? (
                             <Grid container spacing={1}>
-                              {formData.balconyImages.interior.map(
-                                (url, index) => (
-                                  <Grid item xs={6} key={index}>
-                                    <Box
-                                      sx={{
-                                        position: "relative",
-                                        pt: "75%",
-                                        borderRadius: 1,
-                                        overflow: "hidden",
-                                        border: "1px solid #e0e0e0",
-                                      }}
-                                    >
-                                      <Box
-                                        component="img"
-                                        src={url}
-                                        alt={`Balcony Interior ${index + 1}`}
-                                        sx={{
-                                          position: "absolute",
-                                          top: 0,
-                                          left: 0,
-                                          width: "100%",
-                                          height: "100%",
-                                          objectFit: "cover",
-                                        }}
-                                      />
-                                      <IconButton
-                                        size="small"
-                                        onClick={() =>
-                                          handleRemoveImage(
-                                            "balcony",
-                                            "interior",
-                                            index,
-                                          )
-                                        }
-                                        sx={{
-                                          position: "absolute",
-                                          top: 4,
-                                          right: 4,
-                                          bgcolor: "rgba(255,255,255,0.9)",
-                                          "&:hover": {
-                                            bgcolor: "rgba(255,255,255,1)",
-                                          },
-                                        }}
-                                      >
-                                        <Close fontSize="small" />
-                                      </IconButton>
-                                    </Box>
-                                  </Grid>
-                                ),
-                              )}
+                              {formData.balconyImages.interior.map((url, index) => (
+                                <Grid item xs={6} key={index}>
+                                  <Box sx={{ position: "relative", pt: "75%", borderRadius: 1, overflow: "hidden", border: "1px solid #e0e0e0" }}>
+                                    <Box component="img" src={url} alt={`Balcony Interior ${index + 1}`} sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                                    <IconButton size="small" onClick={() => handleRemoveImage("balcony", "interior", index)} sx={{ position: "absolute", top: 4, right: 4, bgcolor: "rgba(255,255,255,0.9)", width: 24, height: 24, "&:hover": { bgcolor: "rgba(255,255,255,1)" } }}>
+                                      <Close fontSize="small" />
+                                    </IconButton>
+                                  </Box>
+                                </Grid>
+                              ))}
                             </Grid>
                           ) : (
-                            <Paper
-                              sx={{
-                                p: 2,
-                                textAlign: "center",
-                                bgcolor: "info.50",
-                              }}
-                            >
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                              >
-                                No interior images
-                              </Typography>
+                            <Paper sx={{ p: 1.5, textAlign: "center", bgcolor: "info.50" }}>
+                              <Typography variant="caption" color="text.secondary">No interior images</Typography>
                             </Paper>
                           )}
                         </Box>
-
+      
                         {/* Blueprints */}
                         <Box>
-                          <Typography variant="subtitle2" fontWeight="600" gutterBottom>
+                          <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                             Blueprints ({formData.balconyImages.blueprints.length})
                           </Typography>
                           {formData.balconyImages.blueprints.length > 0 ? (
@@ -2823,30 +2922,8 @@ const handleSubmit = async () => {
                               {formData.balconyImages.blueprints.map((url, index) => (
                                 <Grid item xs={6} key={index}>
                                   <Box sx={{ position: "relative", pt: "75%", borderRadius: 1, overflow: "hidden", border: "1px solid #e0e0e0" }}>
-                                    <Box
-                                      component="img"
-                                      src={url}
-                                      alt={`Blueprint ${index + 1}`}
-                                      sx={{
-                                        position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        width: "100%",
-                                        height: "100%",
-                                        objectFit: "cover",
-                                      }}
-                                    />
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => handleRemoveImage("base", "blueprints", index)}
-                                      sx={{
-                                        position: "absolute",
-                                        top: 4,
-                                        right: 4,
-                                        bgcolor: "rgba(255,255,255,0.9)",
-                                        "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-                                      }}
-                                    >
+                                    <Box component="img" src={url} alt={`Blueprint ${index + 1}`} sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                                    <IconButton size="small" onClick={() => handleRemoveImage("balcony", "blueprints", index)} sx={{ position: "absolute", top: 4, right: 4, bgcolor: "rgba(255,255,255,0.9)", width: 24, height: 24, "&:hover": { bgcolor: "rgba(255,255,255,1)" } }}>
                                       <Close fontSize="small" />
                                     </IconButton>
                                   </Box>
@@ -2854,10 +2931,8 @@ const handleSubmit = async () => {
                               ))}
                             </Grid>
                           ) : (
-                            <Paper sx={{ p: 2, textAlign: "center", bgcolor: "grey.100" }}>
-                              <Typography variant="caption" color="text.secondary">
-                                No blueprints
-                              </Typography>
+                            <Paper sx={{ p: 1.5, textAlign: "center", bgcolor: "grey.100" }}>
+                              <Typography variant="caption" color="text.secondary">No blueprints</Typography>
                             </Paper>
                           )}
                         </Box>
@@ -2865,200 +2940,86 @@ const handleSubmit = async () => {
                     </AccordionDetails>
                   </Accordion>
                 )}
-
+      
                 {/* UPGRADE ACCORDION */}
                 {formData.hasUpgrade && (
                   <Accordion
                     expanded={expandedAccordions.upgrade}
                     onChange={handleAccordionChange("upgrade")}
-                    sx={{ mb: 1 }}
+                    sx={{ mb: 0.5, "& .MuiAccordionSummary-root": { minHeight: { xs: 40, md: 48 } } }}
                   >
-                    <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        gap={1}
-                        width="100%"
-                      >
-                        <UpgradeIcon color="secondary" />
-                        <Typography fontWeight="bold">
-                          With Upgrade Images
+                    <AccordionSummary expandIcon={<ExpandMore fontSize="small" />}>
+                      <Box display="flex" alignItems="center" gap={0.5} width="100%">
+                        <UpgradeIcon color="secondary" fontSize="small" />
+                        <Typography fontWeight="bold" fontSize={{ xs: "0.875rem", md: "1rem" }}>
+                          With Upgrade
                         </Typography>
                         <Badge
                           badgeContent={
                             formData.upgradeImages.exterior.length +
-                            formData.upgradeImages.interior.length
+                            formData.upgradeImages.interior.length +
+                            formData.upgradeImages.blueprints.length
                           }
                           color="secondary"
-                          sx={{ ml: "auto", mr: 2 }}
+                          sx={{ ml: "auto", mr: 1 }}
                         />
                       </Box>
                     </AccordionSummary>
-                    <AccordionDetails>
-                      <Stack spacing={2}>
+                    <AccordionDetails sx={{ p: { xs: 1, md: 2 } }}>
+                      <Stack spacing={1.5}>
                         {/* Exterior */}
                         <Box>
-                          <Typography
-                            variant="subtitle2"
-                            fontWeight="600"
-                            gutterBottom
-                          >
+                          <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                             Exterior ({formData.upgradeImages.exterior.length})
                           </Typography>
                           {formData.upgradeImages.exterior.length > 0 ? (
                             <Grid container spacing={1}>
-                              {formData.upgradeImages.exterior.map(
-                                (url, index) => (
-                                  <Grid item xs={6} key={index}>
-                                    <Box
-                                      sx={{
-                                        position: "relative",
-                                        pt: "75%",
-                                        borderRadius: 1,
-                                        overflow: "hidden",
-                                        border: "1px solid #e0e0e0",
-                                      }}
-                                    >
-                                      <Box
-                                        component="img"
-                                        src={url}
-                                        alt={`Upgrade Exterior ${index + 1}`}
-                                        sx={{
-                                          position: "absolute",
-                                          top: 0,
-                                          left: 0,
-                                          width: "100%",
-                                          height: "100%",
-                                          objectFit: "cover",
-                                        }}
-                                      />
-                                      <IconButton
-                                        size="small"
-                                        onClick={() =>
-                                          handleRemoveImage(
-                                            "upgrade",
-                                            "exterior",
-                                            index,
-                                          )
-                                        }
-                                        sx={{
-                                          position: "absolute",
-                                          top: 4,
-                                          right: 4,
-                                          bgcolor: "rgba(255,255,255,0.9)",
-                                          "&:hover": {
-                                            bgcolor: "rgba(255,255,255,1)",
-                                          },
-                                        }}
-                                      >
-                                        <Close fontSize="small" />
-                                      </IconButton>
-                                    </Box>
-                                  </Grid>
-                                ),
-                              )}
+                              {formData.upgradeImages.exterior.map((url, index) => (
+                                <Grid item xs={6} key={index}>
+                                  <Box sx={{ position: "relative", pt: "75%", borderRadius: 1, overflow: "hidden", border: "1px solid #e0e0e0" }}>
+                                    <Box component="img" src={url} alt={`Upgrade Exterior ${index + 1}`} sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                                    <IconButton size="small" onClick={() => handleRemoveImage("upgrade", "exterior", index)} sx={{ position: "absolute", top: 4, right: 4, bgcolor: "rgba(255,255,255,0.9)", width: 24, height: 24, "&:hover": { bgcolor: "rgba(255,255,255,1)" } }}>
+                                      <Close fontSize="small" />
+                                    </IconButton>
+                                  </Box>
+                                </Grid>
+                              ))}
                             </Grid>
                           ) : (
-                            <Paper
-                              sx={{
-                                p: 2,
-                                textAlign: "center",
-                                bgcolor: "secondary.50",
-                              }}
-                            >
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                              >
-                                No exterior images
-                              </Typography>
+                            <Paper sx={{ p: 1.5, textAlign: "center", bgcolor: "secondary.50" }}>
+                              <Typography variant="caption" color="text.secondary">No exterior images</Typography>
                             </Paper>
                           )}
                         </Box>
-
+      
                         {/* Interior */}
                         <Box>
-                          <Typography
-                            variant="subtitle2"
-                            fontWeight="600"
-                            gutterBottom
-                          >
+                          <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                             Interior ({formData.upgradeImages.interior.length})
                           </Typography>
                           {formData.upgradeImages.interior.length > 0 ? (
                             <Grid container spacing={1}>
-                              {formData.upgradeImages.interior.map(
-                                (url, index) => (
-                                  <Grid item xs={6} key={index}>
-                                    <Box
-                                      sx={{
-                                        position: "relative",
-                                        pt: "75%",
-                                        borderRadius: 1,
-                                        overflow: "hidden",
-                                        border: "1px solid #e0e0e0",
-                                      }}
-                                    >
-                                      <Box
-                                        component="img"
-                                        src={url}
-                                        alt={`Upgrade Interior ${index + 1}`}
-                                        sx={{
-                                          position: "absolute",
-                                          top: 0,
-                                          left: 0,
-                                          width: "100%",
-                                          height: "100%",
-                                          objectFit: "cover",
-                                        }}
-                                      />
-                                      <IconButton
-                                        size="small"
-                                        onClick={() =>
-                                          handleRemoveImage(
-                                            "upgrade",
-                                            "interior",
-                                            index,
-                                          )
-                                        }
-                                        sx={{
-                                          position: "absolute",
-                                          top: 4,
-                                          right: 4,
-                                          bgcolor: "rgba(255,255,255,0.9)",
-                                          "&:hover": {
-                                            bgcolor: "rgba(255,255,255,1)",
-                                          },
-                                        }}
-                                      >
-                                        <Close fontSize="small" />
-                                      </IconButton>
-                                    </Box>
-                                  </Grid>
-                                ),
-                              )}
+                              {formData.upgradeImages.interior.map((url, index) => (
+                                <Grid item xs={6} key={index}>
+                                  <Box sx={{ position: "relative", pt: "75%", borderRadius: 1, overflow: "hidden", border: "1px solid #e0e0e0" }}>
+                                    <Box component="img" src={url} alt={`Upgrade Interior ${index + 1}`} sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                                    <IconButton size="small" onClick={() => handleRemoveImage("upgrade", "interior", index)} sx={{ position: "absolute", top: 4, right: 4, bgcolor: "rgba(255,255,255,0.9)", width: 24, height: 24, "&:hover": { bgcolor: "rgba(255,255,255,1)" } }}>
+                                      <Close fontSize="small" />
+                                    </IconButton>
+                                  </Box>
+                                </Grid>
+                              ))}
                             </Grid>
                           ) : (
-                            <Paper
-                              sx={{
-                                p: 2,
-                                textAlign: "center",
-                                bgcolor: "secondary.50",
-                              }}
-                            >
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                              >
-                                No interior images
-                              </Typography>
+                            <Paper sx={{ p: 1.5, textAlign: "center", bgcolor: "secondary.50" }}>
+                              <Typography variant="caption" color="text.secondary">No interior images</Typography>
                             </Paper>
                           )}
                         </Box>
-
+      
                         {/* Blueprints */}
                         <Box>
-                          <Typography variant="subtitle2" fontWeight="600" gutterBottom>
+                          <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                             Blueprints ({formData.upgradeImages.blueprints.length})
                           </Typography>
                           {formData.upgradeImages.blueprints.length > 0 ? (
@@ -3066,30 +3027,8 @@ const handleSubmit = async () => {
                               {formData.upgradeImages.blueprints.map((url, index) => (
                                 <Grid item xs={6} key={index}>
                                   <Box sx={{ position: "relative", pt: "75%", borderRadius: 1, overflow: "hidden", border: "1px solid #e0e0e0" }}>
-                                    <Box
-                                      component="img"
-                                      src={url}
-                                      alt={`Blueprint ${index + 1}`}
-                                      sx={{
-                                        position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        width: "100%",
-                                        height: "100%",
-                                        objectFit: "cover",
-                                      }}
-                                    />
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => handleRemoveImage("base", "blueprints", index)}
-                                      sx={{
-                                        position: "absolute",
-                                        top: 4,
-                                        right: 4,
-                                        bgcolor: "rgba(255,255,255,0.9)",
-                                        "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-                                      }}
-                                    >
+                                    <Box component="img" src={url} alt={`Blueprint ${index + 1}`} sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                                    <IconButton size="small" onClick={() => handleRemoveImage("upgrade", "blueprints", index)} sx={{ position: "absolute", top: 4, right: 4, bgcolor: "rgba(255,255,255,0.9)", width: 24, height: 24, "&:hover": { bgcolor: "rgba(255,255,255,1)" } }}>
                                       <Close fontSize="small" />
                                     </IconButton>
                                   </Box>
@@ -3097,10 +3036,8 @@ const handleSubmit = async () => {
                               ))}
                             </Grid>
                           ) : (
-                            <Paper sx={{ p: 2, textAlign: "center", bgcolor: "grey.100" }}>
-                              <Typography variant="caption" color="text.secondary">
-                                No blueprints
-                              </Typography>
+                            <Paper sx={{ p: 1.5, textAlign: "center", bgcolor: "grey.100" }}>
+                              <Typography variant="caption" color="text.secondary">No blueprints</Typography>
                             </Paper>
                           )}
                         </Box>
@@ -3108,231 +3045,45 @@ const handleSubmit = async () => {
                     </AccordionDetails>
                   </Accordion>
                 )}
-
+      
                 {/* STORAGE ACCORDION */}
                 {formData.hasStorage && (
                   <Accordion
                     expanded={expandedAccordions.storage}
                     onChange={handleAccordionChange("storage")}
-                    sx={{ mb: 1 }}
+                    sx={{ mb: 0.5, "& .MuiAccordionSummary-root": { minHeight: { xs: 40, md: 48 } } }}
                   >
-                    <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        gap={1}
-                        width="100%"
-                      >
-                        <StorageIcon color="success" />
-                        <Typography fontWeight="bold">
-                          With Storage Images
+                    <AccordionSummary expandIcon={<ExpandMore fontSize="small" />}>
+                      <Box display="flex" alignItems="center" gap={0.5} width="100%">
+                        <StorageIcon color="success" fontSize="small" />
+                        <Typography fontWeight="bold" fontSize={{ xs: "0.875rem", md: "1rem" }}>
+                          With Storage
                         </Typography>
                         <Badge
                           badgeContent={
                             formData.storageImages.exterior.length +
-                            formData.storageImages.interior.length
+                            formData.storageImages.interior.length +
+                            formData.storageImages.blueprints.length
                           }
                           color="success"
-                          sx={{ ml: "auto", mr: 2 }}
+                          sx={{ ml: "auto", mr: 1 }}
                         />
                       </Box>
                     </AccordionSummary>
-                    <AccordionDetails>
-                      <Stack spacing={2}>
+                    <AccordionDetails sx={{ p: { xs: 1, md: 2 } }}>
+                      <Stack spacing={1.5}>
                         {/* Exterior */}
                         <Box>
-                          <Typography
-                            variant="subtitle2"
-                            fontWeight="600"
-                            gutterBottom
-                          >
+                          <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                             Exterior ({formData.storageImages.exterior.length})
                           </Typography>
                           {formData.storageImages.exterior.length > 0 ? (
                             <Grid container spacing={1}>
-                              {formData.storageImages.exterior.map(
-                                (url, index) => (
-                                  <Grid item xs={6} key={index}>
-                                    <Box
-                                      sx={{
-                                        position: "relative",
-                                        pt: "75%",
-                                        borderRadius: 1,
-                                        overflow: "hidden",
-                                        border: "1px solid #e0e0e0",
-                                      }}
-                                    >
-                                      <Box
-                                        component="img"
-                                        src={url}
-                                        alt={`Storage Exterior ${index + 1}`}
-                                        sx={{
-                                          position: "absolute",
-                                          top: 0,
-                                          left: 0,
-                                          width: "100%",
-                                          height: "100%",
-                                          objectFit: "cover",
-                                        }}
-                                      />
-                                      <IconButton
-                                        size="small"
-                                        onClick={() =>
-                                          handleRemoveImage(
-                                            "storage",
-                                            "exterior",
-                                            index,
-                                          )
-                                        }
-                                        sx={{
-                                          position: "absolute",
-                                          top: 4,
-                                          right: 4,
-                                          bgcolor: "rgba(255,255,255,0.9)",
-                                          "&:hover": {
-                                            bgcolor: "rgba(255,255,255,1)",
-                                          },
-                                        }}
-                                      >
-                                        <Close fontSize="small" />
-                                      </IconButton>
-                                    </Box>
-                                  </Grid>
-                                ),
-                              )}
-                            </Grid>
-                          ) : (
-                            <Paper
-                              sx={{
-                                p: 2,
-                                textAlign: "center",
-                                bgcolor: "success.50",
-                              }}
-                            >
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                              >
-                                No exterior images
-                              </Typography>
-                            </Paper>
-                          )}
-                        </Box>
-
-                        {/* Interior */}
-                        <Box>
-                          <Typography
-                            variant="subtitle2"
-                            fontWeight="600"
-                            gutterBottom
-                          >
-                            Interior ({formData.storageImages.interior.length})
-                          </Typography>
-                          {formData.storageImages.interior.length > 0 ? (
-                            <Grid container spacing={1}>
-                              {formData.storageImages.interior.map(
-                                (url, index) => (
-                                  <Grid item xs={6} key={index}>
-                                    <Box
-                                      sx={{
-                                        position: "relative",
-                                        pt: "75%",
-                                        borderRadius: 1,
-                                        overflow: "hidden",
-                                        border: "1px solid #e0e0e0",
-                                      }}
-                                    >
-                                      <Box
-                                        component="img"
-                                        src={url}
-                                        alt={`Storage Interior ${index + 1}`}
-                                        sx={{
-                                          position: "absolute",
-                                          top: 0,
-                                          left: 0,
-                                          width: "100%",
-                                          height: "100%",
-                                          objectFit: "cover",
-                                        }}
-                                      />
-                                      <IconButton
-                                        size="small"
-                                        onClick={() =>
-                                          handleRemoveImage(
-                                            "storage",
-                                            "interior",
-                                            index,
-                                          )
-                                        }
-                                        sx={{
-                                          position: "absolute",
-                                          top: 4,
-                                          right: 4,
-                                          bgcolor: "rgba(255,255,255,0.9)",
-                                          "&:hover": {
-                                            bgcolor: "rgba(255,255,255,1)",
-                                          },
-                                        }}
-                                      >
-                                        <Close fontSize="small" />
-                                      </IconButton>
-                                    </Box>
-                                  </Grid>
-                                ),
-                              )}
-                            </Grid>
-                          ) : (
-                            <Paper
-                              sx={{
-                                p: 2,
-                                textAlign: "center",
-                                bgcolor: "success.50",
-                              }}
-                            >
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                              >
-                                No interior images
-                              </Typography>
-                            </Paper>
-                          )}
-                        </Box>
-
-                                                {/* Blueprints */}
-                        <Box>
-                          <Typography variant="subtitle2" fontWeight="600" gutterBottom>
-                            Blueprints ({formData.storageImages.blueprints.length})
-                          </Typography>
-                          {formData.storageImages.blueprints.length > 0 ? (
-                            <Grid container spacing={1}>
-                              {formData.storageImages.blueprints.map((url, index) => (
+                              {formData.storageImages.exterior.map((url, index) => (
                                 <Grid item xs={6} key={index}>
                                   <Box sx={{ position: "relative", pt: "75%", borderRadius: 1, overflow: "hidden", border: "1px solid #e0e0e0" }}>
-                                    <Box
-                                      component="img"
-                                      src={url}
-                                      alt={`Blueprint ${index + 1}`}
-                                      sx={{
-                                        position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        width: "100%",
-                                        height: "100%",
-                                        objectFit: "cover",
-                                      }}
-                                    />
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => handleRemoveImage("base", "blueprints", index)}
-                                      sx={{
-                                        position: "absolute",
-                                        top: 4,
-                                        right: 4,
-                                        bgcolor: "rgba(255,255,255,0.9)",
-                                        "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-                                      }}
-                                    >
+                                    <Box component="img" src={url} alt={`Storage Exterior ${index + 1}`} sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                                    <IconButton size="small" onClick={() => handleRemoveImage("storage", "exterior", index)} sx={{ position: "absolute", top: 4, right: 4, bgcolor: "rgba(255,255,255,0.9)", width: 24, height: 24, "&:hover": { bgcolor: "rgba(255,255,255,1)" } }}>
                                       <Close fontSize="small" />
                                     </IconButton>
                                   </Box>
@@ -3340,14 +3091,61 @@ const handleSubmit = async () => {
                               ))}
                             </Grid>
                           ) : (
-                            <Paper sx={{ p: 2, textAlign: "center", bgcolor: "grey.100" }}>
-                              <Typography variant="caption" color="text.secondary">
-                                No blueprints
-                              </Typography>
+                            <Paper sx={{ p: 1.5, textAlign: "center", bgcolor: "success.50" }}>
+                              <Typography variant="caption" color="text.secondary">No exterior images</Typography>
                             </Paper>
                           )}
                         </Box>
-
+      
+                        {/* Interior */}
+                        <Box>
+                          <Typography variant="caption" fontWeight="600" gutterBottom display="block">
+                            Interior ({formData.storageImages.interior.length})
+                          </Typography>
+                          {formData.storageImages.interior.length > 0 ? (
+                            <Grid container spacing={1}>
+                              {formData.storageImages.interior.map((url, index) => (
+                                <Grid item xs={6} key={index}>
+                                  <Box sx={{ position: "relative", pt: "75%", borderRadius: 1, overflow: "hidden", border: "1px solid #e0e0e0" }}>
+                                    <Box component="img" src={url} alt={`Storage Interior ${index + 1}`} sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                                    <IconButton size="small" onClick={() => handleRemoveImage("storage", "interior", index)} sx={{ position: "absolute", top: 4, right: 4, bgcolor: "rgba(255,255,255,0.9)", width: 24, height: 24, "&:hover": { bgcolor: "rgba(255,255,255,1)" } }}>
+                                      <Close fontSize="small" />
+                                    </IconButton>
+                                  </Box>
+                                </Grid>
+                              ))}
+                            </Grid>
+                          ) : (
+                            <Paper sx={{ p: 1.5, textAlign: "center", bgcolor: "success.50" }}>
+                              <Typography variant="caption" color="text.secondary">No interior images</Typography>
+                            </Paper>
+                          )}
+                        </Box>
+      
+                        {/* Blueprints */}
+                        <Box>
+                          <Typography variant="caption" fontWeight="600" gutterBottom display="block">
+                            Blueprints ({formData.storageImages.blueprints.length})
+                          </Typography>
+                          {formData.storageImages.blueprints.length > 0 ? (
+                            <Grid container spacing={1}>
+                              {formData.storageImages.blueprints.map((url, index) => (
+                                <Grid item xs={6} key={index}>
+                                  <Box sx={{ position: "relative", pt: "75%", borderRadius: 1, overflow: "hidden", border: "1px solid #e0e0e0" }}>
+                                    <Box component="img" src={url} alt={`Blueprint ${index + 1}`} sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                                    <IconButton size="small" onClick={() => handleRemoveImage("storage", "blueprints", index)} sx={{ position: "absolute", top: 4, right: 4, bgcolor: "rgba(255,255,255,0.9)", width: 24, height: 24, "&:hover": { bgcolor: "rgba(255,255,255,1)" } }}>
+                                      <Close fontSize="small" />
+                                    </IconButton>
+                                  </Box>
+                                </Grid>
+                              ))}
+                            </Grid>
+                          ) : (
+                            <Paper sx={{ p: 1.5, textAlign: "center", bgcolor: "grey.100" }}>
+                              <Typography variant="caption" color="text.secondary">No blueprints</Typography>
+                            </Paper>
+                          )}
+                        </Box>
                       </Stack>
                     </AccordionDetails>
                   </Accordion>
@@ -3356,66 +3154,70 @@ const handleSubmit = async () => {
             </Box>
           </Box>
         </DialogContent>
-
-  <DialogActions sx={{ px: 3, py: 2, borderTop: "1px solid #e0e0e0" }}>
-    <Button
-      onClick={handleCloseDialog}
-      sx={{
-        borderRadius: 3,
-        textTransform: 'none',
-        fontWeight: 600,
-        px: 3
-      }}
-      variant="outlined"
-    >
-      Cancel
-    </Button>
-    <Button
-      onClick={handleSubmit}
-      variant="contained"
-      startIcon={selectedModel ? <Edit /> : <Add />}
-      sx={{
-        borderRadius: 3,
-        background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
-        color: 'white',
-        fontWeight: 700,
-        textTransform: 'none',
-        px: 4,
-        py: 1.5,
-        boxShadow: '0 8px 20px rgba(74, 124, 89, 0.3)',
-        '&:hover': {
-          background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
-          boxShadow: '0 12px 28px rgba(74, 124, 89, 0.4)'
-        },
-        '&:disabled': {
-          background: '#ccc'
-        }
-      }}
-    >
-      {selectedModel ? "Update Model" : "Create Model"}
-    </Button>
-  </DialogActions>
+      
+        <DialogActions sx={{ px: { xs: 2, md: 3 }, py: 1.5, borderTop: "1px solid #e0e0e0", gap: 1 }}>
+          <Button
+            onClick={handleCloseDialog}
+            size="small"
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 2,
+              fontSize: "0.875rem"
+            }}
+            variant="outlined"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            size="small"
+            startIcon={selectedModel ? <Edit fontSize="small" /> : <Add fontSize="small" />}
+            sx={{
+              borderRadius: 2,
+              background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+              color: 'white',
+              fontWeight: 700,
+              textTransform: 'none',
+              px: 3,
+              fontSize: "0.875rem",
+              boxShadow: '0 4px 12px rgba(74, 124, 89, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
+              }
+            }}
+          >
+            {selectedModel ? "Update" : "Create"}
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* ==================== FACADE DIALOG ==================== */}
+      {/* ==================== FACADE DIALOG RESPONSIVE ==================== */}
       <Dialog
         open={openFacadeDialog}
         onClose={handleCloseFacadeDialog}
         maxWidth="lg"
         fullWidth
+        fullScreen={window.innerWidth < 960} // ✅ Fullscreen en mobile/tablet
         PaperProps={{
           sx: {
-            borderRadius: 4,
-            boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
+            height: { xs: "100vh", md: "90vh" },
+            maxHeight: { xs: "100vh", md: "90vh" },
+            m: { xs: 0, md: 2 },
+            borderRadius: { xs: 0, md: 4 },
+            boxShadow: { xs: 'none', md: '0 20px 60px rgba(0,0,0,0.2)' }
           }
         }}
       >
-        <DialogTitle sx={{ pb: 2 }}>
-          <Box display="flex" alignItems="center" gap={2}>
+        <DialogTitle sx={{ pb: { xs: 1.5, md: 2 }, px: { xs: 2, md: 3 } }}>
+          <Box display="flex" alignItems="center" gap={{ xs: 1.5, md: 2 }}>
             <Box
               sx={{
-                width: 48,
-                height: 48,
+                width: { xs: 40, md: 48 },
+                height: { xs: 40, md: 48 },
                 borderRadius: 3,
                 background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
                 display: 'flex',
@@ -3423,40 +3225,53 @@ const handleSubmit = async () => {
                 justifyContent: 'center'
               }}
             >
-              <CloudUpload sx={{ color: 'white', fontSize: 24 }} />
+              <CloudUpload sx={{ color: 'white', fontSize: { xs: 20, md: 24 } }} />
             </Box>
-            <Box>
-              <Typography variant="h6" fontWeight={700}>
+            <Box flex={1} minWidth={0}>
+              <Typography variant="h6" fontWeight={700} fontSize={{ xs: "1rem", md: "1.25rem" }} noWrap>
                 {selectedFacade ? "Edit Facade" : "Add New Facade"}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#6c757d' }}>
+              <Typography variant="caption" sx={{ color: '#6c757d', display: { xs: 'none', sm: 'block' } }}>
                 Manage facade images and options
               </Typography>
             </Box>
+            <IconButton onClick={handleCloseFacadeDialog} size="small">
+              <Close />
+            </IconButton>
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ height: "70vh", display: "flex", p: 3 }}>
-          <Box display="flex" gap={3} flex={1}>
+      
+        <DialogContent sx={{ p: 0, overflow: "hidden" }}>
+          <Box 
+            display="flex" 
+            height="100%"
+            flexDirection={{ xs: "column", md: "row" }} // ✅ Columna en mobile, fila en desktop
+          >
+            {/* LEFT SIDE - Form */}
             <Box
-              flex={1}
               sx={{
+                width: { xs: "100%", md: "60%" },
+                p: { xs: 2, md: 3 },
                 overflowY: "auto",
-                pr: 2,
+                borderRight: { xs: "none", md: "1px solid #e0e0e0" },
+                borderBottom: { xs: "1px solid #e0e0e0", md: "none" },
+                maxHeight: { xs: "50vh", md: "100%" }, // ✅ Altura limitada en mobile
                 "&::-webkit-scrollbar": {
-                  width: "6px",
+                  width: "8px",
                 },
                 "&::-webkit-scrollbar-thumb": {
                   backgroundColor: "rgba(0,0,0,0.2)",
-                  borderRadius: "3px",
+                  borderRadius: "4px",
                 },
               }}
             >
-              <Grid container spacing={2}>
+              <Grid container spacing={{ xs: 1.5, md: 2 }}>
+                {/* Selected Model Info */}
                 {selectedModelForFacades && (
                   <Grid item xs={12}>
                     <Paper
                       sx={{
-                        p: 2,
+                        p: { xs: 1.5, md: 2 },
                         bgcolor: "primary.50",
                         border: "1px solid",
                         borderColor: "primary.200",
@@ -3472,23 +3287,25 @@ const handleSubmit = async () => {
                       </Typography>
                       <Typography
                         variant="h6"
+                        fontSize={{ xs: "1rem", md: "1.25rem" }}
                         fontWeight="bold"
                         color="primary"
+                        noWrap
                       >
                         {selectedModelForFacades.model}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Base Price: $
-                        {selectedModelForFacades.price?.toLocaleString()} •
-                        Model #{selectedModelForFacades.modelNumber}
+                      <Typography variant="body2" fontSize={{ xs: "0.75rem", md: "0.875rem" }} color="text.secondary">
+                        Base Price: ${selectedModelForFacades.price?.toLocaleString()} • Model #{selectedModelForFacades.modelNumber}
                       </Typography>
                     </Paper>
                   </Grid>
                 )}
-
-                <Grid item xs={12} sm={8}>
+      
+                {/* Facade Title */}
+                <Grid item xs={12}>
                   <TextField
                     fullWidth
+                    size="small"
                     label="Facade Title *"
                     value={facadeFormData.title}
                     onChange={(e) =>
@@ -3498,18 +3315,17 @@ const handleSubmit = async () => {
                       })
                     }
                     required
-                    placeholder="e.g., Modern Colonial, Craftsman"
+                    placeholder="e.g., Modern Colonial"
                     helperText="Give this facade style a descriptive name"
+                    sx={{ "& .MuiInputBase-root": { fontSize: { xs: "0.875rem", md: "1rem" } } }}
                   />
                 </Grid>
-
+      
                 {/* Decks Section */}
                 <Grid item xs={12}>
                   <Box
                     sx={{
-                      mt: 2,
-                      mb: 2,
-                      p: 2,
+                      p: { xs: 1.5, md: 2 },
                       bgcolor: "background.paper",
                       borderRadius: 1,
                       border: "1px solid #e0e0e0",
@@ -3519,9 +3335,10 @@ const handleSubmit = async () => {
                       display="flex"
                       justifyContent="space-between"
                       alignItems="center"
-                      mb={2}
+                      mb={{ xs: 1.5, md: 2 }}
                     >
-                      <Typography variant="subtitle1" fontWeight="bold">
+                      <Typography variant="subtitle1" fontSize={{ xs: "0.9rem", md: "1rem" }} fontWeight="bold">
+                        <Deck sx={{ fontSize: { xs: 16, md: 18 }, mr: 0.5, verticalAlign: "middle" }} />
                         Decks Options
                       </Typography>
                       <Button
@@ -3529,36 +3346,38 @@ const handleSubmit = async () => {
                         size="small"
                         variant="outlined"
                         onClick={() => handleOpenDeckDialog()}
+                        sx={{ fontSize: { xs: "0.75rem", md: "0.875rem" } }}
                       >
-                        Add Deck
+                        Add
                       </Button>
                     </Box>
-
+      
                     {facadeFormData.decks.length === 0 ? (
                       <Typography
                         variant="body2"
+                        fontSize={{ xs: "0.8rem", md: "0.875rem" }}
                         color="text.secondary"
                         align="center"
-                        sx={{ py: 2 }}
+                        sx={{ py: { xs: 1.5, md: 2 } }}
                       >
                         No decks added yet. Add deck options for this facade.
                       </Typography>
                     ) : (
-                      <Stack spacing={2}>
+                      <Stack spacing={{ xs: 1, md: 1.5 }}>
                         {facadeFormData.decks.map((deck, index) => (
                           <Card key={index} variant="outlined">
                             <Box
                               sx={{
-                                p: 2,
+                                p: { xs: 1.5, md: 2 },
                                 display: "flex",
                                 alignItems: "center",
-                                gap: 2,
+                                gap: { xs: 1.5, md: 2 },
                               }}
                             >
                               <Box
                                 sx={{
-                                  width: 60,
-                                  height: 60,
+                                  width: { xs: 50, md: 60 },
+                                  height: { xs: 50, md: 60 },
                                   bgcolor: "grey.200",
                                   borderRadius: 1,
                                   backgroundImage:
@@ -3570,38 +3389,44 @@ const handleSubmit = async () => {
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
+                                  flexShrink: 0,
                                 }}
                               >
                                 {(!deck.images || deck.images.length === 0) && (
-                                  <ImageIcon sx={{ color: "grey.400" }} />
+                                  <ImageIcon sx={{ color: "grey.400", fontSize: { xs: 20, md: 24 } }} />
                                 )}
                               </Box>
-
-                              <Box sx={{ flex: 1 }}>
+      
+                              <Box sx={{ flex: 1, minWidth: 0 }}>
                                 <Typography
                                   variant="subtitle2"
+                                  fontSize={{ xs: "0.875rem", md: "1rem" }}
                                   fontWeight="bold"
+                                  noWrap
                                 >
                                   {deck.name}
                                 </Typography>
                                 <Typography
                                   variant="body2"
+                                  fontSize={{ xs: "0.75rem", md: "0.875rem" }}
                                   color="text.secondary"
                                 >
                                   Price: ${Number(deck.price).toLocaleString()}
                                 </Typography>
                               </Box>
-
-                              <Box>
+      
+                              <Box display="flex" gap={0.5}>
                                 <IconButton
                                   size="small"
                                   onClick={() => handleOpenDeckDialog(index)}
+                                  sx={{ width: { xs: 32, md: 36 }, height: { xs: 32, md: 36 } }}
                                 >
                                   <Edit fontSize="small" />
                                 </IconButton>
                                 <IconButton
                                   size="small"
                                   onClick={() => handleDeleteDeck(index)}
+                                  sx={{ width: { xs: 32, md: 36 }, height: { xs: 32, md: 36 } }}
                                 >
                                   <Delete fontSize="small" />
                                 </IconButton>
@@ -3613,11 +3438,12 @@ const handleSubmit = async () => {
                     )}
                   </Box>
                 </Grid>
-
+      
+                {/* Upload Section */}
                 <Grid item xs={12}>
                   <Box
                     sx={{
-                      p: 2,
+                      p: { xs: 1.5, md: 2 },
                       border: "2px dashed",
                       borderColor:
                         facadeFormData.url.length === 0
@@ -3632,57 +3458,68 @@ const handleSubmit = async () => {
                   >
                     <Typography
                       variant="subtitle2"
+                      fontSize={{ xs: "0.875rem", md: "1rem" }}
                       fontWeight="bold"
                       gutterBottom
                     >
                       Facade Images *
                     </Typography>
-                    <Box display="flex" gap={1}>
-                      <Button
-                        variant="contained"
-                        component="label"
-                        disabled={uploadingFacadeImage}
-                        startIcon={<CloudUpload />}
-                      >
-                        {uploadingFacadeImage ? "Uploading..." : "Upload"}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          hidden
-                          multiple
-                          onChange={handleFileFacadeUpload}
-                        />
-                      </Button>
-                    </Box>
+                    <Button
+                      variant="contained"
+                      component="label"
+                      disabled={uploadingFacadeImage}
+                      size="small"
+                      fullWidth
+                      startIcon={<CloudUpload />}
+                      sx={{ fontSize: { xs: "0.75rem", md: "0.875rem" } }}
+                    >
+                      {uploadingFacadeImage ? "Uploading..." : "Upload"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        multiple
+                        onChange={handleFileFacadeUpload}
+                      />
+                    </Button>
                   </Box>
                 </Grid>
               </Grid>
             </Box>
-
+      
+            {/* RIGHT SIDE - Image Preview */}
             <Box
               sx={{
-                width: 340,
-                borderLeft: "1px solid",
-                borderColor: "divider",
-                pl: 3,
+                width: { xs: "100%", md: "40%" },
                 display: "flex",
                 flexDirection: "column",
-                height: "100%",
+                bgcolor: "#fafafa",
+                maxHeight: { xs: "50vh", md: "100%" },
+                borderLeft: { xs: "none", md: "1px solid #e0e0e0" },
               }}
             >
-              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                Images ({facadeFormData.url.length})
-              </Typography>
-
+              <Box sx={{ p: { xs: 1.5, md: 2 }, borderBottom: "1px solid #e0e0e0", bgcolor: "white" }}>
+                <Typography variant="subtitle2" fontSize={{ xs: "0.875rem", md: "1rem" }} fontWeight="bold">
+                  Images ({facadeFormData.url.length})
+                </Typography>
+              </Box>
+      
               {facadeFormData.url.length > 0 ? (
                 <Box
                   sx={{
+                    flex: 1,
+                    overflowY: "auto",
+                    p: { xs: 1, md: 2 },
                     display: "flex",
                     flexDirection: "column",
                     gap: 1,
-                    flex: 1,
-                    overflowY: "auto",
-                    pr: 1,
+                    "&::-webkit-scrollbar": {
+                      width: "6px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: "rgba(0,0,0,0.2)",
+                      borderRadius: "3px",
+                    },
                   }}
                 >
                   {facadeFormData.url.map((url, index) => (
@@ -3701,7 +3538,7 @@ const handleSubmit = async () => {
                         alt={`Preview ${index + 1}`}
                         sx={{
                           width: "100%",
-                          height: 120,
+                          height: { xs: 200, md: 200, lg: 300, xl: 350 },
                           objectFit: "cover",
                         }}
                       />
@@ -3713,26 +3550,47 @@ const handleSubmit = async () => {
                           top: 4,
                           right: 4,
                           bgcolor: "rgba(255,255,255,0.9)",
+                          width: { xs: 24, md: 28 },
+                          height: { xs: 24, md: 28 },
+                          "&:hover": { bgcolor: "rgba(255,255,255,1)" }
                         }}
                       >
                         <Delete fontSize="small" />
                       </IconButton>
+                      {index === 0 && (
+                        <Chip
+                          label="Primary"
+                          size="small"
+                          color="primary"
+                          sx={{
+                            position: "absolute",
+                            bottom: 4,
+                            left: 4,
+                            height: { xs: 18, md: 20 },
+                            fontSize: { xs: "0.65rem", md: "0.7rem" },
+                          }}
+                        />
+                      )}
                     </Box>
                   ))}
                 </Box>
               ) : (
                 <Paper
                   sx={{
-                    p: 4,
-                    textAlign: "center",
-                    bgcolor: "grey.50",
                     flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    p: { xs: 3, md: 4 },
+                    m: { xs: 1, md: 2 },
+                    bgcolor: "grey.50",
                   }}
                 >
                   <CloudUpload
-                    sx={{ fontSize: 40, color: "grey.400", mb: 1 }}
+                    sx={{ fontSize: { xs: 32, md: 40 }, color: "grey.400", mb: 1 }}
                   />
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" fontSize={{ xs: "0.75rem", md: "0.875rem" }} color="text.secondary">
                     No images added yet
                   </Typography>
                 </Paper>
@@ -3740,45 +3598,48 @@ const handleSubmit = async () => {
             </Box>
           </Box>
         </DialogContent>
-  <DialogActions sx={{ p: 3, gap: 2 }}>
-    <Button
-      onClick={handleCloseFacadeDialog}
-      sx={{
-        borderRadius: 3,
-        textTransform: 'none',
-        fontWeight: 600,
-        px: 3
-      }}
-    >
-      Cancel
-    </Button>
-    <Button
-      onClick={handleSubmitFacade}
-      variant="contained"
-      disabled={
-        !facadeFormData.title.trim() || facadeFormData.url.length === 0
-      }
-      sx={{
-        borderRadius: 3,
-        background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
-        color: 'white',
-        fontWeight: 700,
-        textTransform: 'none',
-        px: 4,
-        py: 1.5,
-        boxShadow: '0 8px 20px rgba(74, 124, 89, 0.3)',
-        '&:hover': {
-          background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
-          boxShadow: '0 12px 28px rgba(74, 124, 89, 0.4)'
-        },
-        '&:disabled': {
-          background: '#ccc'
-        }
-      }}
-    >
-      {selectedFacade ? "Update" : "Create"}
-    </Button>
-  </DialogActions>
+      
+        <DialogActions sx={{ px: { xs: 2, md: 3 }, py: { xs: 1.5, md: 2 }, borderTop: "1px solid #e0e0e0", gap: 1 }}>
+          <Button
+            onClick={handleCloseFacadeDialog}
+            size="small"
+            sx={{
+              borderRadius: 3,
+              textTransform: 'none',
+              fontWeight: 600,
+              px: { xs: 2, md: 3 },
+              fontSize: { xs: "0.8rem", md: "0.875rem" }
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmitFacade}
+            variant="contained"
+            disabled={!facadeFormData.title.trim() || facadeFormData.url.length === 0}
+            size="small"
+            sx={{
+              borderRadius: 3,
+              background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+              color: 'white',
+              fontWeight: 700,
+              textTransform: 'none',
+              px: { xs: 3, md: 4 },
+              py: { xs: 1, md: 1.5 },
+              fontSize: { xs: "0.8rem", md: "0.875rem" },
+              boxShadow: '0 8px 20px rgba(74, 124, 89, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
+                boxShadow: '0 12px 28px rgba(74, 124, 89, 0.4)'
+              },
+              '&:disabled': {
+                background: '#ccc'
+              }
+            }}
+          >
+            {selectedFacade ? "Update" : "Create"}
+          </Button>
+        </DialogActions>
       </Dialog>
 
             {/* Deck Dialog */}

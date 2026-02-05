@@ -54,7 +54,7 @@ const PropertySelectionContent = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-    <Box sx={{ py: 3 }}>
+    <Box sx={{ p: 3 }}>
       <Box sx={{ mb: 3 }}>
         <Typography variant="h4" gutterBottom fontWeight="bold">
           Get Your Quote

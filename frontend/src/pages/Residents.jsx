@@ -141,7 +141,9 @@ const Residents = () => {
   };
 
   return (
-    <Box>
+    <Box
+    sx={{p: 3}}
+    >
       <Box
         display="flex"
         justifyContent="space-between"
