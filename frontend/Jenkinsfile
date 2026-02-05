@@ -39,9 +39,7 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         dir('frontend') {
-          script {
-            docker.build(env.IMAGE_NAME)
-          }
+          sh 'docker build -t "${IMAGE_NAME}" .'
         }
       }
     }
