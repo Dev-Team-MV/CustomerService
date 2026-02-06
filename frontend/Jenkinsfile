@@ -1,5 +1,6 @@
-// Job independiente: solo frontend. En Jenkins → Script Path: frontend/Jenkinsfile
-// Requiere: curl, bash, Docker. VITE_API_URL se define aquí o en Jenkins (Job → Configure → Variables de entorno).
+// Job independiente: solo frontend. main → producción, develop → desarrollo.
+// Requiere: curl, bash, Docker. Para dos despliegues crea 2 Jobs (rama main y rama develop).
+
 pipeline {
   agent any
 
@@ -8,8 +9,6 @@ pipeline {
   }
 
   environment {
-    IMAGE_NAME = "customer-service-frontend"
-    // URL del backend en producción. Cambia la IP/host o define esta variable en el Job de Jenkins.
     VITE_API_URL = "https://apics.michelangelodelvalle.com/api"
   }
 
@@ -17,6 +16,23 @@ pipeline {
     stage('Checkout') {
       steps {
         checkout scm
+      }
+    }
+
+    stage('Set environment') {
+      steps {
+        script {
+          def branch = env.BRANCH_NAME ?: env.GIT_BRANCH?.replaceFirst('^origin/', '') ?: 'develop'
+          env.IS_PRODUCTION = (env.DEPLOY_ENV == 'production' || branch == 'main').toString()
+          env.ENVIRONMENT = (env.IS_PRODUCTION == 'true') ? 'production' : 'development'
+          env.CONTAINER_NAME = (env.IS_PRODUCTION == 'true') ? 'frontend' : 'frontend-dev'
+          env.APP_PORT = (env.IS_PRODUCTION == 'true') ? '5173' : '5174'
+          env.IMAGE_NAME = "customer-service-frontend:${env.ENVIRONMENT}"
+          if (env.IS_PRODUCTION != 'true') {
+            env.VITE_API_URL = env.VITE_API_URL_DEV ?: 'http://localhost:5001/api'
+          }
+          echo "Desplegando ambiente: ${env.ENVIRONMENT} (contenedor: ${env.CONTAINER_NAME}, puerto: ${env.APP_PORT})"
+        }
       }
     }
 
@@ -41,7 +57,7 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         dir('frontend') {
-          sh 'docker build -t "${IMAGE_NAME}" .'
+          sh "docker build -t ${env.IMAGE_NAME}:${env.BUILD_NUMBER} --build-arg VITE_API_URL=${env.VITE_API_URL} ."
         }
       }
     }
@@ -49,14 +65,14 @@ pipeline {
     stage('Deploy') {
       steps {
         script {
-          sh "docker stop frontend 2>/dev/null || true"
-          sh "docker rm frontend 2>/dev/null || true"
+          sh "docker stop ${env.CONTAINER_NAME} 2>/dev/null || true"
+          sh "docker rm ${env.CONTAINER_NAME} 2>/dev/null || true"
           sh """
             docker run -d \
-              --name frontend \
-              -p 5173:80 \
+              --name ${env.CONTAINER_NAME} \
+              -p ${env.APP_PORT}:80 \
               --restart unless-stopped \
-              ${env.IMAGE_NAME}:latest
+              ${env.IMAGE_NAME}:${env.BUILD_NUMBER}
           """
         }
       }
@@ -64,6 +80,9 @@ pipeline {
   }
 
   post {
+    success {
+      echo "Frontend desplegado (${env.ENVIRONMENT}) en http://localhost:${env.APP_PORT}"
+    }
     always {
       cleanWs()
     }
