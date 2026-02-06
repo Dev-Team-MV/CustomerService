@@ -71,6 +71,8 @@ import {
   KeyboardArrowLeft,
   KeyboardArrowRight,
   ZoomIn,
+  Kitchen,
+  Deck
 } from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -382,6 +384,23 @@ const MyProperty = () => {
       setCurrentPhaseIndex(firstIncomplete === -1 ? 0 : firstIncomplete);
     }
   }, [phases]);
+
+    // ✅ CONSTANTE PARA IDENTIFICAR EL MODELO 10
+  const MODEL_10_ID = "6977c7bbd1f24768968719de";
+  const isModel10 = propertyDetails?.model?._id === MODEL_10_ID;
+
+  // ✅ LABELS CONDICIONALES PARA BALCONY/ESTUDIO
+  const balconyLabels = isModel10
+    ? {
+        chipLabel: "Estudio",
+        icon: Home,
+        color: "#2196f3"
+      }
+    : {
+        chipLabel: "Balcony",
+        icon: AutoAwesome,
+        color: "#4a7c59"
+      };
 
   if (loading && properties.length === 0) {
     return (
@@ -2705,447 +2724,628 @@ const MyProperty = () => {
                           </Box>
                         </Paper>
                       )}
-
+  
                       {/* TAB 2: PROPERTY DETAILS */}
-                      {activeTab === 2 && (
-                        <Paper elevation={0} sx={{ p: 4, mt: 3 }}>
-                          {/* Carrusel y miniaturas */}
-                          <Box sx={{ mb: 3 }}>
-                            <Grid item xs={12} sx={{ mb: 3 }}>
-                              <Box
-                                display="flex"
-                                gap={2}
-                                flexWrap="wrap"
-                                justifyContent="center"
-                                mt={2}
-                              >
-                                {propertyDetails.property?.hasBalcony && (
-                                  <Chip
-                                    icon={
-                                      <AutoAwesome sx={{ color: "#fff" }} />
-                                    }
-                                    label="Balcony"
-                                    sx={{
-                                      bgcolor: "#4a7c59",
-                                      color: "white",
-                                      fontWeight: 700,
-                                      fontSize: "1rem",
-                                    }}
-                                  />
-                                )}
-                                {propertyDetails.property.modelType ===
-                                  "upgrade" && (
-                                  <Chip
-                                    icon={<Star sx={{ color: "#fff" }} />}
-                                    label="Upgrade"
-                                    sx={{
-                                      bgcolor: "#ff9800",
-                                      color: "white",
-                                      fontWeight: 700,
-                                      fontSize: "1rem",
-                                    }}
-                                  />
-                                )}
-                                {propertyDetails.property?.hasStorage && (
-                                  <Chip
-                                    icon={<Layers sx={{ color: "#fff" }} />}
-                                    label="Storage"
-                                    sx={{
-                                      bgcolor: "#607d8b",
-                                      color: "white",
-                                      fontWeight: 700,
-                                      fontSize: "1rem",
-                                    }}
-                                  />
-                                )}
-                              </Box>
-                            </Grid>
-                            <Box
-                              display="flex"
-                              gap={2}
-                              alignItems="flex-start"
-                              flexDirection={{ xs: "column", md: "row" }}
+                                  {/* ✅ TAB 2: PROPERTY DETAILS - CON VALIDACIÓN MODELO 10 */}
+            {activeTab === 2 && (
+              <Paper elevation={0} sx={{ p: { xs: 2, sm: 3, md: 4 }, mt: 3 }}>
+                {/* ✅ CHIPS DE OPCIONES CON VALIDACIÓN CONDICIONAL */}
+                <Box sx={{ mb: 3 }}>
+                  <Grid item xs={12} sx={{ mb: 3 }}>
+                    <Box
+                      display="flex"
+                      gap={2}
+                      flexWrap="wrap"
+                      justifyContent="center"
+                      mt={2}
+                    >
+                      {/* ✅ Chip de Balcony/Estudio condicional */}
+                      {propertyDetails.property?.hasBalcony && (
+                        <Chip
+                          icon={React.createElement(balconyLabels.icon, {
+                            sx: { color: "#fff" }
+                          })}
+                          label={balconyLabels.chipLabel}
+                          sx={{
+                            bgcolor: balconyLabels.color,
+                            color: "white",
+                            fontWeight: 700,
+                            fontSize: { xs: "0.85rem", sm: "0.9rem", md: "1rem" },
+                            height: { xs: 32, sm: 36, md: 40 },
+                            px: { xs: 1.5, sm: 2 }
+                          }}
+                        />
+                      )}
+
+                      {/* ✅ Chip de Upgrade - sin cambios */}
+                      {propertyDetails.property.modelType === "upgrade" && (
+                        <Chip
+                          icon={<Star sx={{ color: "#fff" }} />}
+                          label="Upgrade"
+                          sx={{
+                            bgcolor: "#ff9800",
+                            color: "white",
+                            fontWeight: 700,
+                            fontSize: { xs: "0.85rem", sm: "0.9rem", md: "1rem" },
+                            height: { xs: 32, sm: 36, md: 40 },
+                            px: { xs: 1.5, sm: 2 }
+                          }}
+                        />
+                      )}
+
+                      {/* ✅ Chip de Storage - sin cambios */}
+                      {propertyDetails.property?.hasStorage && (
+                        <Chip
+                          icon={<Layers sx={{ color: "#fff" }} />}
+                          label="Storage"
+                          sx={{
+                            bgcolor: "#607d8b",
+                            color: "white",
+                            fontWeight: 700,
+                            fontSize: { xs: "0.85rem", sm: "0.9rem", md: "1rem" },
+                            height: { xs: 32, sm: 36, md: 40 },
+                            px: { xs: 1.5, sm: 2 }
+                          }}
+                        />
+                      )}
+
+                      {/* ✅ NUEVO: Badge especial para Modelo 10 */}
+                      {isModel10 && (
+                        <Chip
+                          label="Special Configuration"
+                          sx={{
+                            bgcolor: "#9c27b0",
+                            color: "white",
+                            fontWeight: 700,
+                            fontSize: { xs: "0.85rem", sm: "0.9rem", md: "1rem" },
+                            height: { xs: 32, sm: 36, md: 40 },
+                            px: { xs: 1.5, sm: 2 }
+                          }}
+                          icon={<Star sx={{ color: "#fff" }} />}
+                        />
+                      )}
+                    </Box>
+                  </Grid>
+
+                  {/* ✅ TOOLTIP INFORMATIVO PARA MODELO 10 */}
+                  {isModel10 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <Alert
+                        severity="info"
+                        icon={<Info />}
+                        sx={{
+                          mb: 3,
+                          borderRadius: 3,
+                          bgcolor: "rgba(33, 150, 243, 0.08)",
+                          border: "1px solid rgba(33, 150, 243, 0.2)",
+                          "& .MuiAlert-message": {
+                            width: "100%"
+                          }
+                        }}
+                      >
+                        <Box>
+                          <Typography variant="body2" fontWeight="600" sx={{ mb: 0.5 }}>
+                            🏠 Model 10 Special Features
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: "#6c757d" }}>
+                            {propertyDetails.property?.hasBalcony 
+                              ? "This property includes an Estudio - a flexible space perfect for home office or study area."
+                              : "This is a special configuration model with unique layout options."
+                            }
+                          </Typography>
+                        </Box>
+                      </Alert>
+                    </motion.div>
+                  )}
+
+                  {/* CARRUSEL Y MINIATURAS - Sin cambios en la estructura */}
+                  <Box
+                    display="flex"
+                    gap={2}
+                    alignItems="flex-start"
+                    flexDirection={{ xs: "column", md: "row" }}
+                  >
+                    {/* MAIN CAROUSEL */}
+                    <Box
+                      sx={{
+                        flex: 1,
+                        bgcolor: "#000",
+                        borderRadius: 2,
+                        p: 2,
+                        minHeight: 320,
+                        height: { xs: 300, sm: 360, md: 420 },
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        position: "relative",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <AnimatePresence mode="wait">
+                        {carouselImages && carouselImages[carouselIndex] ? (
+                          <motion.img
+                            key={`carousel-${carouselIndex}-${carouselImages.length}`}
+                            src={carouselImages[carouselIndex].url}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.3 }}
+                            style={{
+                              maxWidth: "90%",
+                              maxHeight: "100%",
+                              objectFit: "contain",
+                              borderRadius: 8,
+                              cursor: "pointer"
+                            }}
+                            onClick={openLightbox}
+                          />
+                        ) : (
+                          <Box textAlign="center">
+                            <Home sx={{ fontSize: 60, color: "#666", mb: 2 }} />
+                            <Typography color="white">
+                              No property images available
+                            </Typography>
+                          </Box>
+                        )}
+                      </AnimatePresence>
+
+                      {carouselImages.length > 1 && (
+                        <>
+                          <IconButton
+                            onClick={handleCarouselPrev}
+                            sx={{
+                              position: "absolute",
+                              left: 12,
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              bgcolor: "rgba(255,255,255,0.95)",
+                              boxShadow: 3,
+                              "&:hover": {
+                                bgcolor: "white",
+                                transform: "scale(1.1) translateY(-50%)"
+                              }
+                            }}
+                          >
+                            <KeyboardArrowLeft />
+                          </IconButton>
+                          <IconButton
+                            onClick={handleCarouselNext}
+                            sx={{
+                              position: "absolute",
+                              right: 12,
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              bgcolor: "rgba(255,255,255,0.95)",
+                              boxShadow: 3,
+                              "&:hover": {
+                                bgcolor: "white",
+                                transform: "scale(1.1) translateY(-50%)"
+                              }
+                            }}
+                          >
+                            <KeyboardArrowRight />
+                          </IconButton>
+                        </>
+                      )}
+
+                      {carouselImages.length > 0 && (
+                        <>
+                          <IconButton
+                            onClick={openLightbox}
+                            sx={{
+                              position: "absolute",
+                              top: 12,
+                              right: 12,
+                              bgcolor: "rgba(255,255,255,0.95)",
+                              "&:hover": {
+                                bgcolor: "white",
+                                transform: "scale(1.1)"
+                              }
+                            }}
+                          >
+                            <ZoomIn />
+                          </IconButton>
+
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              bottom: 12,
+                              left: 12,
+                              bgcolor: "rgba(0,0,0,0.7)",
+                              color: "white",
+                              px: 2,
+                              py: 0.5,
+                              borderRadius: 2,
+                              backdropFilter: "blur(4px)"
+                            }}
+                          >
+                            <Typography variant="caption" fontWeight="600">
+                              {carouselIndex + 1} / {carouselImages.length}
+                            </Typography>
+                          </Box>
+                        </>
+                      )}
+                    </Box>
+
+                    {/* THUMBNAILS */}
+                    <Box
+                      sx={{
+                        width: { xs: "100%", md: 300 },
+                        mt: { xs: 1, md: 0 },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: 1,
+                          flexWrap: "wrap",
+                          mb: 1,
+                        }}
+                      >
+                        <Chip
+                          label={`All (${allImages.length})`}
+                          size="small"
+                          onClick={() => setGalleryFilter("all")}
+                          variant={galleryFilter === "all" ? "filled" : "outlined"}
+                          color={galleryFilter === "all" ? "primary" : "default"}
+                          sx={{ 
+                            fontWeight: galleryFilter === "all" ? 700 : 500,
+                            cursor: "pointer"
+                          }}
+                        />
+                        <Chip
+                          label={`Exterior (${allImages.filter((img) => img.type === "exterior").length})`}
+                          size="small"
+                          onClick={() => setGalleryFilter("exterior")}
+                          variant={galleryFilter === "exterior" ? "filled" : "outlined"}
+                          color={galleryFilter === "exterior" ? "primary" : "default"}
+                          sx={{ 
+                            fontWeight: galleryFilter === "exterior" ? 700 : 500,
+                            cursor: "pointer"
+                          }}
+                        />
+                        <Chip
+                          label={`Interior (${allImages.filter((img) => img.type === "interior").length})`}
+                          size="small"
+                          onClick={() => setGalleryFilter("interior")}
+                          variant={galleryFilter === "interior" ? "filled" : "outlined"}
+                          color={galleryFilter === "interior" ? "primary" : "default"}
+                          sx={{ 
+                            fontWeight: galleryFilter === "interior" ? 700 : 500,
+                            cursor: "pointer"
+                          }}
+                        />
+                      </Box>
+
+                      <Box
+                        sx={{
+                          maxHeight: { xs: 240, md: 420 },
+                          overflowY: "auto",
+                          pr: 1,
+                          "&::-webkit-scrollbar": {
+                            width: 6
+                          },
+                          "&::-webkit-scrollbar-thumb": {
+                            bgcolor: "grey.400",
+                            borderRadius: 3
+                          }
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(2, 1fr)",
+                            gap: 1,
+                          }}
+                        >
+                          {carouselImages.length === 0 ? (
+                            <Box 
+                              sx={{ 
+                                gridColumn: "1 / -1", 
+                                textAlign: "center",
+                                py: 4 
+                              }}
                             >
-                              {/* MAIN CAROUSEL */}
+                              <ImageIcon sx={{ fontSize: 40, color: "#ccc", mb: 1 }} />
+                              <Typography variant="caption" color="text.secondary">
+                                No images available
+                              </Typography>
+                            </Box>
+                          ) : (
+                            carouselImages.map((img, i) => (
+                              <motion.div
+                                key={i}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                              >
+                                <Box
+                                  onClick={() => handleThumbSelect(i)}
+                                  sx={{
+                                    width: "100%",
+                                    height: { xs: 70, md: 80 },
+                                    borderRadius: 1.5,
+                                    overflow: "hidden",
+                                    cursor: "pointer",
+                                    border: i === carouselIndex
+                                      ? "3px solid #4a7c59"
+                                      : "1px solid rgba(0,0,0,0.06)",
+                                    boxShadow: i === carouselIndex
+                                      ? "0 8px 24px rgba(74,124,89,0.2)"
+                                      : "none",
+                                    transition: "all 0.3s ease",
+                                    position: "relative",
+                                    "&:hover": {
+                                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+                                    }
+                                  }}
+                                >
+                                  <img
+                                    src={img.url}
+                                    alt={`thumb-${i}`}
+                                    loading="lazy"
+                                    style={{
+                                      width: "100%",
+                                      height: "100%",
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                  {i === carouselIndex && (
+                                    <Box
+                                      sx={{
+                                        position: "absolute",
+                                        top: 4,
+                                        right: 4,
+                                        bgcolor: "#4a7c59",
+                                        borderRadius: "50%",
+                                        width: 20,
+                                        height: 20,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center"
+                                      }}
+                                    >
+                                      <CheckCircle sx={{ fontSize: 14, color: "white" }} />
+                                    </Box>
+                                  )}
+                                </Box>
+                              </motion.div>
+                            ))
+                          )}
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Box>
+
+                {/* LIGHTBOX DIALOG */}
+                <Dialog
+                  open={lightboxOpen}
+                  onClose={closeLightbox}
+                  maxWidth="lg"
+                  fullWidth
+                  PaperProps={{
+                    sx: {
+                      bgcolor: "transparent",
+                      boxShadow: "none",
+                      overflow: "visible"
+                    }
+                  }}
+                >
+                  <DialogContent
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      bgcolor: "transparent",
+                      p: 0
+                    }}
+                  >
+                    <Box sx={{ position: "relative" }}>
+                      <IconButton
+                        onClick={closeLightbox}
+                        sx={{
+                          position: "absolute",
+                          top: -50,
+                          right: 0,
+                          color: "white",
+                          bgcolor: "rgba(0, 0, 0, 0.6)",
+                          zIndex: 10,
+                          "&:hover": {
+                            bgcolor: "rgba(0, 0, 0, 0.8)",
+                            transform: "scale(1.1)"
+                          },
+                        }}
+                      >
+                        <Cancel />
+                      </IconButton>
+                      {carouselImages.length > 0 && (
+                        <motion.img
+                          initial={{ scale: 0.9, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.9, opacity: 0 }}
+                          src={carouselImages[carouselIndex].url}
+                          alt="lightbox"
+                          style={{
+                            width: "100%",
+                            maxHeight: "85vh",
+                            objectFit: "contain",
+                            borderRadius: 12,
+                            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)"
+                          }}
+                        />
+                      )}
+                    </Box>
+                  </DialogContent>
+                </Dialog>
+
+                {/* ✅ SPECIFICATIONS GRID - CON INFORMACIÓN ADICIONAL PARA MODELO 10 */}
+                <Box sx={{ mt: 4 }}>
+                  <Box 
+                    display="flex" 
+                    alignItems="center" 
+                    gap={2} 
+                    mb={3}
+                    flexWrap="wrap"
+                  >
+                    <Typography
+                      variant="h6"
+                      fontWeight="700"
+                      sx={{
+                        color: "#2c3e50",
+                        fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.5rem" }
+                      }}
+                    >
+                      Property Specifications
+                    </Typography>
+                    {isModel10 && (
+                      <Chip
+                        label="Model 10 Configuration"
+                        size="small"
+                        sx={{
+                          bgcolor: "#9c27b0",
+                          color: "white",
+                          fontWeight: 600
+                        }}
+                      />
+                    )}
+                  </Box>
+
+                  <Grid container spacing={2}>
+                    {[
+                      {
+                        icon: <Bed sx={{ fontSize: { xs: 20, sm: 22 } }} />,
+                        label: "Bedrooms",
+                        value: propertyDetails.model?.bedrooms,
+                        color: "#4a7c59",
+                      },
+                      {
+                        icon: <Bathtub sx={{ fontSize: { xs: 20, sm: 22 } }} />,
+                        label: "Bathrooms",
+                        value: propertyDetails.model?.bathrooms,
+                        color: "#2196f3",
+                      },
+                      {
+                        icon: <SquareFoot sx={{ fontSize: { xs: 20, sm: 22 } }} />,
+                        label: "Square Feet",
+                        value: `${propertyDetails.model?.sqft} ft²`,
+                        color: "#ff9800",
+                      },
+                      propertyDetails.model?.stories && {
+                        icon: <Layers sx={{ fontSize: { xs: 20, sm: 22 } }} />,
+                        label: "Stories",
+                        value: propertyDetails.model?.stories,
+                        color: "#607d8b",
+                      },
+                      {
+                        icon: <Home sx={{ fontSize: { xs: 20, sm: 22 } }} />,
+                        label: "Lot Number",
+                        value: `#${propertyDetails.property?.lot?.number}`,
+                        color: "#9c27b0",
+                      },
+                      {
+                        icon: <LocationOn sx={{ fontSize: { xs: 20, sm: 22 } }} />,
+                        label: "Section",
+                        value: propertyDetails.property?.lot?.section,
+                        color: "#f44336",
+                      },
+                      {
+                        icon: <AttachMoney sx={{ fontSize: { xs: 20, sm: 22 } }} />,
+                        label: "Property Value",
+                        value: `$${propertyDetails.property?.price?.toLocaleString()}`,
+                        color: "#4caf50",
+                      },
+                      // ✅ NUEVO: Card especial para Modelo 10 con hasBalcony
+                      isModel10 && propertyDetails.property?.hasBalcony && {
+                        icon: React.createElement(balconyLabels.icon, { 
+                          sx: { fontSize: { xs: 20, sm: 22 } } 
+                        }),
+                        label: balconyLabels.chipLabel,
+                        value: "Included",
+                        color: balconyLabels.color,
+                      },
+                    ]
+                      .filter(Boolean)
+                      .map((spec, index) => (
+                        <Grid item xs={6} sm={4} md={3} key={index}>
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.06 }}
+                            whileHover={{ scale: 1.05, y: -4 }}
+                          >
+                            <Paper
+                              elevation={0}
+                              sx={{
+                                p: { xs: 1.5, sm: 2 },
+                                textAlign: "center",
+                                borderRadius: { xs: 2, md: 2.5 },
+                                border: `2px solid ${spec.color}20`,
+                                bgcolor: `${spec.color}06`,
+                                transition: "all 0.3s ease",
+                                minHeight: { xs: 90, sm: 100, md: 110 },
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "center",
+                                "&:hover": {
+                                  borderColor: spec.color,
+                                  bgcolor: `${spec.color}15`,
+                                  boxShadow: `0 8px 24px ${spec.color}25`,
+                                },
+                              }}
+                            >
                               <Box
                                 sx={{
-                                  flex: 1,
-                                  bgcolor: "#000",
-                                  borderRadius: 2,
-                                  p: 2,
-                                  minHeight: 320,
-                                  height: 420, // <-- altura fija
+                                  width: { xs: 36, sm: 40, md: 44 },
+                                  height: { xs: 36, sm: 40, md: 44 },
+                                  borderRadius: { xs: 2, md: 2.5 },
+                                  background: `${spec.color}18`,
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  position: "relative",
-                                  overflow: "hidden",
+                                  color: spec.color,
+                                  margin: "0 auto",
+                                  mb: 1,
                                 }}
                               >
-                                <AnimatePresence mode="wait">
-                                  {carouselImages &&
-                                  carouselImages[carouselIndex] ? (
-                                    <motion.img
-                                      key={`carousel-${carouselIndex}-${carouselImages.length}`}
-                                      src={carouselImages[carouselIndex].url}
-                                      initial={{ opacity: 0, scale: 0.95 }}
-                                      animate={{ opacity: 1, scale: 1 }}
-                                      exit={{ opacity: 0, scale: 0.95 }}
-                                      transition={{ duration: 0.3 }}
-                                      style={{
-                                        maxWidth: "90%",
-                                        maxHeight: "100%", // <-- para que nunca sobrepase la altura fija
-                                        objectFit: "contain",
-                                        borderRadius: 8,
-                                      }}
-                                      onClick={openLightbox}
-                                    />
-                                  ) : (
-                                    <Typography color="white">
-                                      No property images available
-                                    </Typography>
-                                  )}
-                                </AnimatePresence>
-                                {carouselImages.length > 1 && (
-                                  <>
-                                    <IconButton
-                                      onClick={handleCarouselPrev}
-                                      sx={{
-                                        position: "absolute",
-                                        left: 12,
-                                        top: "50%",
-                                        transform: "translateY(-50%)",
-                                        bgcolor: "rgba(255,255,255,0.95)",
-                                        boxShadow: 3,
-                                      }}
-                                    >
-                                      <KeyboardArrowLeft />
-                                    </IconButton>
-                                    <IconButton
-                                      onClick={handleCarouselNext}
-                                      sx={{
-                                        position: "absolute",
-                                        right: 12,
-                                        top: "50%",
-                                        transform: "translateY(-50%)",
-                                        bgcolor: "rgba(255,255,255,0.95)",
-                                        boxShadow: 3,
-                                      }}
-                                    >
-                                      <KeyboardArrowRight />
-                                    </IconButton>
-                                  </>
-                                )}
-                                {carouselImages.length > 0 && (
-                                  <IconButton
-                                    onClick={openLightbox}
-                                    sx={{
-                                      position: "absolute",
-                                      top: 12,
-                                      right: 12,
-                                      bgcolor: "rgba(255,255,255,0.95)",
-                                    }}
-                                  >
-                                    <ZoomIn />
-                                  </IconButton>
-                                )}
-                                {carouselImages.length > 0 && (
-                                  <Box
-                                    sx={{
-                                      position: "absolute",
-                                      bottom: 12,
-                                      left: 12,
-                                      bgcolor: "rgba(0,0,0,0.6)",
-                                      color: "white",
-                                      px: 2,
-                                      py: 0.5,
-                                      borderRadius: 2,
-                                    }}
-                                  >
-                                    <Typography
-                                      variant="caption"
-                                      fontWeight="600"
-                                    >
-                                      {carouselIndex + 1} /{" "}
-                                      {carouselImages.length}
-                                    </Typography>
-                                  </Box>
-                                )}
+                                {spec.icon}
                               </Box>
-                              {/* THUMBNAILS */}
-                              <Box
+                              <Typography
+                                variant="caption"
                                 sx={{
-                                  width: { xs: "100%", md: 300 },
-                                  mt: { xs: 1, md: 0 },
+                                  color: "#6c757d",
+                                  fontWeight: 700,
+                                  textTransform: "uppercase",
+                                  letterSpacing: "0.5px",
+                                  display: "block",
+                                  mb: 0.5,
+                                  fontSize: { xs: "0.65rem", sm: "0.7rem", md: "0.72rem" },
                                 }}
                               >
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    gap: 1,
-                                    flexWrap: "wrap",
-                                    mb: 1,
-                                  }}
-                                >
-                                  <Chip
-                                    label={`All (${allImages.length})`}
-                                    size="small"
-                                    onClick={() => setGalleryFilter("all")}
-                                    variant={
-                                      galleryFilter === "all"
-                                        ? "filled"
-                                        : "outlined"
-                                    }
-                                  />
-                                  <Chip
-                                    label={`Exterior (${allImages.filter((img) => img.type === "exterior").length})`}
-                                    size="small"
-                                    onClick={() => setGalleryFilter("exterior")}
-                                    variant={
-                                      galleryFilter === "exterior"
-                                        ? "filled"
-                                        : "outlined"
-                                    }
-                                  />
-                                  <Chip
-                                    label={`Interior (${allImages.filter((img) => img.type === "interior").length})`}
-                                    size="small"
-                                    onClick={() => setGalleryFilter("interior")}
-                                    variant={
-                                      galleryFilter === "interior"
-                                        ? "filled"
-                                        : "outlined"
-                                    }
-                                  />
-                                </Box>
-                                <Box
-                                  sx={{
-                                    maxHeight: 420,
-                                    overflowY: "auto",
-                                    pr: 1,
-                                  }}
-                                >
-                                  <Box
-                                    sx={{
-                                      display: "grid",
-                                      gridTemplateColumns: "repeat(2, 1fr)",
-                                      gap: 1,
-                                    }}
-                                  >
-                                    {carouselImages.length === 0 ? (
-                                      <Typography
-                                        variant="caption"
-                                        color="text.secondary"
-                                      >
-                                        No images
-                                      </Typography>
-                                    ) : (
-                                      carouselImages.map((img, i) => (
-                                        <Box
-                                          key={i}
-                                          onClick={() => handleThumbSelect(i)}
-                                          sx={{
-                                            width: "100%",
-                                            height: 80,
-                                            borderRadius: 1.5,
-                                            overflow: "hidden",
-                                            cursor: "pointer",
-                                            border:
-                                              i === carouselIndex
-                                                ? "2px solid #4a7c59"
-                                                : "1px solid rgba(0,0,0,0.06)",
-                                            boxShadow:
-                                              i === carouselIndex
-                                                ? "0 8px 24px rgba(74,124,89,0.12)"
-                                                : "none",
-                                          }}
-                                        >
-                                          <img
-                                            src={img.url}
-                                            alt={`thumb-${i}`}
-                                            loading="lazy"
-                                            style={{
-                                              width: "100%",
-                                              height: "100%",
-                                              objectFit: "cover",
-                                            }}
-                                          />
-                                        </Box>
-                                      ))
-                                    )}
-                                  </Box>
-                                </Box>
-                              </Box>
-                            </Box>
-                          </Box>
-
-                          {/* LIGHTBOX DIALOG */}
-                          <Dialog
-                            open={lightboxOpen}
-                            onClose={closeLightbox}
-                            maxWidth="lg"
-                            fullWidth
-                          >
-                            <DialogContent
-                              sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                bgcolor: "transparent",
-                              }}
-                            >
-                              <Box sx={{ position: "relative" }}>
-                                <IconButton
-                                  onClick={() => closeLightbox()}
-                                  sx={{
-                                    position: "absolute",
-                                    top: 16,
-                                    right: 16,
-                                    color: "white",
-                                    bgcolor: "rgba(0, 0, 0, 0.5)",
-                                    zIndex: 10,
-                                    "&:hover": {
-                                      bgcolor: "rgba(0, 0, 0, 0.7)",
-                                    },
-                                  }}
-                                >
-                                  <Cancel />
-                                </IconButton>
-                                {carouselImages.length > 0 && (
-                                  <img
-                                    src={carouselImages[carouselIndex].url}
-                                    alt="lightbox"
-                                    style={{
-                                      width: "100%",
-                                      maxHeight: "80vh",
-                                      objectFit: "contain",
-                                      borderRadius: 8,
-                                    }}
-                                  />
-                                )}
-                              </Box>
-                            </DialogContent>
-                          </Dialog>
-
-                          <Grid container spacing={2} sx={{ mt: 1 }}>
-                            {[
-                              {
-                                icon: <Bed sx={{ fontSize: 22 }} />,
-                                label: "Bedrooms",
-                                value: propertyDetails.model?.bedrooms,
-                                color: "#4a7c59",
-                              },
-                              {
-                                icon: <Bathtub sx={{ fontSize: 22 }} />,
-                                label: "Bathrooms",
-                                value: propertyDetails.model?.bathrooms,
-                                color: "#2196f3",
-                              },
-                              {
-                                icon: <SquareFoot sx={{ fontSize: 22 }} />,
-                                label: "Square Feet",
-                                value: `${propertyDetails.model?.sqft} ft²`,
-                                color: "#ff9800",
-                              },
-                              propertyDetails.model?.stories && {
-                                icon: <Layers sx={{ fontSize: 22 }} />,
-                                label: "Stories",
-                                value: propertyDetails.model?.stories,
-                                color: "#607d8b",
-                              },
-                              {
-                                icon: <Home sx={{ fontSize: 22 }} />,
-                                label: "Lot Number",
-                                value: `#${propertyDetails.property?.lot?.number}`,
-                                color: "#9c27b0",
-                              },
-                              {
-                                icon: <LocationOn sx={{ fontSize: 22 }} />,
-                                label: "Section",
-                                value: propertyDetails.property?.lot?.section,
-                                color: "#f44336",
-                              },
-                              {
-                                icon: <AttachMoney sx={{ fontSize: 22 }} />,
-                                label: "Property Value",
-                                value: `$${propertyDetails.property?.price?.toLocaleString()}`,
-                                color: "#4caf50",
-                              },
-                            ]
-                              .filter(Boolean)
-                              .map((spec, index) => (
-                                <Grid item xs={6} sm={4} md={3} key={index}>
-                                  <motion.div
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: index * 0.08 }}
-                                    whileHover={{ scale: 1.04 }}
-                                  >
-                                    <Paper
-                                      elevation={0}
-                                      sx={{
-                                        p: 1,
-                                        textAlign: "center",
-                                        borderRadius: 2,
-                                        border: `1.5px solid ${spec.color}25`,
-                                        bgcolor: `${spec.color}06`,
-                                        transition: "all 0.2s",
-                                        minHeight: 70,
-                                        "&:hover": {
-                                          borderColor: spec.color,
-                                          bgcolor: `${spec.color}15`,
-                                          boxShadow: `0 4px 12px ${spec.color}18`,
-                                        },
-                                      }}
-                                    >
-                                      <Box
-                                        sx={{
-                                          width: 36,
-                                          height: 36,
-                                          borderRadius: 2,
-                                          background: `${spec.color}18`,
-                                          display: "flex",
-                                          alignItems: "center",
-                                          justifyContent: "center",
-                                          color: spec.color,
-                                          margin: "0 auto",
-                                          mb: 0.5,
-                                        }}
-                                      >
-                                        {spec.icon}
-                                      </Box>
-                                      <Typography
-                                        variant="caption"
-                                        sx={{
-                                          color: "#6c757d",
-                                          fontWeight: 700,
-                                          textTransform: "uppercase",
-                                          letterSpacing: "0.5px",
-                                          display: "block",
-                                          mb: 0.2,
-                                          fontSize: "0.72rem",
-                                        }}
-                                      >
-                                        {spec.label}
-                                      </Typography>
-                                      <Typography
-                                        variant="subtitle1"
-                                        fontWeight="700"
-                                        sx={{
-                                          color: spec.color,
-                                          letterSpacing: "-0.5px",
-                                          fontSize: "1.1rem",
-                                        }}
-                                      >
-                                        {spec.value}
-                                      </Typography>
-                                    </Paper>
-                                  </motion.div>
-                                </Grid>
-                              ))}
-                          </Grid>
-                        </Paper>
-                      )}
+                                {spec.label}
+                              </Typography>
+                              <Typography
+                                variant="subtitle1"
+                                fontWeight="800"
+                                sx={{
+                                  color: spec.color,
+                                  letterSpacing: "-0.5px",
+                                  fontSize: { xs: "0.95rem", sm: "1rem", md: "1.1rem" },
+                                }}
+                              >
+                                {spec.value}
+                              </Typography>
+                            </Paper>
+                          </motion.div>
+                        </Grid>
+                      ))}
+                  </Grid>
+                </Box>
+              </Paper>
+            )}
                     </motion.div>
                   </AnimatePresence>
                 </>

@@ -96,6 +96,25 @@ const ModelDetail = () => {
         : model.blueprints?.default || [];
   }
 
+    // ✅ CONSTANTE PARA IDENTIFICAR EL MODELO 10
+  const MODEL_10_ID = "6977c7bbd1f24768968719de";
+  const isModel10 = model?._id === MODEL_10_ID;
+
+  // ✅ LABELS CONDICIONALES PARA BLUEPRINTS
+  const blueprintLabels = isModel10
+    ? {
+        without: "With Comedor",
+        with: "With Estudio",
+        withoutIcon: Kitchen,
+        withIcon: Home,
+      }
+    : {
+        without: "Without Balcony",
+        with: "Balcony",
+        withoutIcon: Home,
+        withIcon: Deck,
+      };
+
   const principalRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: principalRef,
@@ -379,26 +398,79 @@ const ModelDetail = () => {
           boxShadow: { xs: 0, md: 4 },
           overflow: "hidden",
           mb: 4,
-          transition:
-            "box-shadow 0.4s cubic-bezier(.4,0,.2,1), background 0.4s",
+          transition: "box-shadow 0.4s cubic-bezier(.4,0,.2,1), background 0.4s",
         }}
       >
         <Box
           sx={{
             position: "relative",
             width: "100%",
-            height: { xs: 300, sm: 400, md: 450, lg: 500 },
+            height: "100%",
             bgcolor: theme.palette.background.default,
-            // borderRadius: { xs: 0, md: 4 },
             boxShadow: { xs: 0, md: 4 },
             overflow: "hidden",
-            // mt: { xs: 0, md: 2 },
             mb: 4,
-            transition:
-              "box-shadow 0.4s cubic-bezier(.4,0,.2,1), background 0.4s",
+            transition: "box-shadow 0.4s cubic-bezier(.4,0,.2,1), background 0.4s",
           }}
         >
-          {/* Aquí iría el carrusel exterior */}
+          {/* Video Player */}
+          {/* <Box
+            component="iframe"
+            src="https://www.youtube.com/watch?v=Zgdg2lwQ-Cw"
+            sx={{
+              width: "100%",
+              height: "100%",
+              border: "none",
+              display: "block",
+            }}
+            allow="autoplay; fullscreen"
+            title="Model Video Presentation"
+          /> */}
+                    <Box
+                      component="iframe"
+                      src="https://www.youtube.com/embed/Zgdg2lwQ-Cw?autoplay=1&mute=1&loop=1&playlist=Zgdg2lwQ-Cw&controls=0&modestbranding=1"
+                      sx={{
+                        width: "100%",
+                        height: "100%",
+                        border: "none",
+                      }}
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowFullScreen
+                      title="Model Video Presentation"
+                    />
+      
+          {/* Overlay opcional con información */}
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
+              p: 2,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              opacity: 0,
+              transition: "opacity 0.3s",
+              "&:hover": {
+                opacity: 1,
+              },
+            }}
+          >
+            <Typography variant="body2" color="white" fontWeight={600}>
+              {model.model} - Model #{model.modelNumber}
+            </Typography>
+            <Chip 
+              label="Video Tour" 
+              size="small" 
+              sx={{ 
+                bgcolor: "primary.main", 
+                color: "white",
+                fontWeight: 600 
+              }} 
+            />
+          </Box>
         </Box>
       </MotionBox>
 
@@ -425,17 +497,17 @@ const ModelDetail = () => {
               }
               color="primary"
               onClick={() => setBlueprintType("withoutBalcony")}
-              startIcon={<Home />}
+              startIcon={<blueprintLabels.withoutIcon />}
             >
-              Without Balcony
+              {blueprintLabels.without}
             </Button>
             <Button
               variant={blueprintType === "balcony" ? "contained" : "outlined"}
               color="primary"
               onClick={() => setBlueprintType("balcony")}
-              startIcon={<Deck />}
+              startIcon={<blueprintLabels.withIcon />}
             >
-              Balcony
+              {blueprintLabels.with}
             </Button>
           </Box>
 
@@ -576,6 +648,7 @@ const ModelDetail = () => {
                   </Box>
                 </Box>
                 {/* Opcional: Extras */}
+                {/* ✅ CHIPS CON VALIDACIÓN CONDICIONAL */}
                 <Box
                   sx={{
                     mt: 2,
@@ -585,15 +658,38 @@ const ModelDetail = () => {
                     justifyContent: { xs: "center" },
                   }}
                 >
-                  {Array.isArray(model.balconies) &&
-                    model.balconies.length > 0 && (
+                  {/* ✅ Si es Modelo 10, mostrar chips específicos */}
+                  {isModel10 ? (
+                    <>
                       <Chip
-                        icon={<Deck />}
-                        label="Balcony option"
+                        icon={<Kitchen />}
+                        label="Comedor Option"
                         color="success"
                         variant="outlined"
                       />
-                    )}
+                      <Chip
+                        icon={<Home />}
+                        label="Estudio Option"
+                        color="info"
+                        variant="outlined"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      {/* ✅ Para otros modelos, mostrar chips normales */}
+                      {Array.isArray(model.balconies) &&
+                        model.balconies.length > 0 && (
+                          <Chip
+                            icon={<Deck />}
+                            label="Balcony option"
+                            color="success"
+                            variant="outlined"
+                          />
+                        )}
+                    </>
+                  )}
+
+                  {/* ✅ Estos chips son comunes para todos los modelos */}
                   {Array.isArray(model.storages) &&
                     model.storages.length > 0 && (
                       <Chip
@@ -627,7 +723,8 @@ const ModelDetail = () => {
                         fontWeight="bold"
                         gutterBottom
                       >
-                        Blueprints
+                        {/* ✅ Título condicional */}
+                        {isModel10 ? "Floor Plans" : "Blueprints"}
                       </Typography>
                       <Box
                         sx={{

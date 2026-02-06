@@ -181,13 +181,30 @@ const Payloads = () => {
             Manage and track property payment records
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => handleOpenDialog()}
-        >
-          New Payload
-        </Button>
+        <Tooltip title="New Payload" placement="left">
+          <Button
+            variant="contained"
+            onClick={() => handleOpenDialog()}
+            sx={{
+              bgcolor: '#4a7c59',
+              '&:hover': { bgcolor: '#3d664a' },
+              minWidth: { xs: 48, sm: 'auto' },
+              width: { xs: 48, sm: 'auto' },
+              height: { xs: 48, sm: 'auto' },
+              p: { xs: 0, sm: '6px 16px' },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 50
+            }}
+          >
+            <Add sx={{ display: { xs: 'block', sm: 'none' }, fontSize: 24 }} />
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1 }}>
+              <Add />
+              New Payload
+            </Box>
+          </Button>
+        </Tooltip>
       </Box>
 
       <Grid container spacing={3} mb={3}>
