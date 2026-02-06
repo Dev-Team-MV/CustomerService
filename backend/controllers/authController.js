@@ -302,7 +302,7 @@ export const verifySetupToken = async (req, res) => {
     const user = await User.findOne({
       setupToken: hashedToken,
       setupTokenExpires: { $gt: Date.now() }
-    }).select('firstName lastName email')
+    }).select('firstName lastName email phoneNumber')
 
     if (!user) {
       return res.status(400).json({ 
@@ -311,12 +311,13 @@ export const verifySetupToken = async (req, res) => {
       })
     }
 
-    res.json({ 
+    res.json({
       valid: true,
       user: {
         firstName: user.firstName,
         lastName: user.lastName,
-        email: user.email
+        email: user.email,
+        phoneNumber: user.phoneNumber
       }
     })
   } catch (error) {
