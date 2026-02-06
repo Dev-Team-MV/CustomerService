@@ -75,7 +75,7 @@ export const register = async (req, res) => {
       // Enviar SMS con el link de setup
       if (phoneNumber) {
         try {
-          const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+          const frontendUrl = process.env.FRONTEND_URL || 'https://customerservice.michelangelodelvalle.com'
           const setupLink = `${frontendUrl}/setup-password/${setupToken}`
           const message = `Hola ${firstName}, tu cuenta ha sido creada. Por favor establece tu contraseña ingresando a este enlace: ${setupLink}`
           
