@@ -1,6 +1,7 @@
 # Stage 1: build
 FROM node:20-alpine AS builder
 
+# Para Jenkins: build-arg VITE_API_URL (producción vs desarrollo)
 ARG VITE_API_URL=https://apics.michelangelodelvalle.com/api
 ENV VITE_API_URL=$VITE_API_URL
 

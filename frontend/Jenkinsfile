@@ -1,5 +1,6 @@
 // Job independiente: solo frontend. main → producción, develop → desarrollo.
 // Tag de imagen: solo un ":" (ej. customer-service-frontend:development-1)
+// Requiere: curl, bash, Docker. Para dos despliegues crea 2 Jobs (rama main y rama develop).
 pipeline {
   agent any
 

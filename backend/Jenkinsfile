@@ -1,6 +1,7 @@
 // Jenkinsfile para CustomerService - backend
 // main → producción (puerto 5000), develop → desarrollo (puerto 5001)
 // Tag de imagen: solo un ":" (ej. customerservice-backend:development-1)
+// Para dos despliegues: crea 2 Jobs en Jenkins, uno con rama main y otro con rama develop.
 
 pipeline {
     agent any
