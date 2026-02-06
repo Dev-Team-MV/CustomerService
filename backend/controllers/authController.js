@@ -79,7 +79,8 @@ export const register = async (req, res) => {
           const setupLink = `${frontendUrl}/setup-password/${setupToken}`
           const message = `Hola ${firstName}, tu cuenta ha sido creada. Por favor establece tu contraseña ingresando a este enlace: ${setupLink}`
           
-          await sendSMSWithValidation(phoneNumber, message)
+          console.log('Sending SMS to:', phoneNumber)
+          // await sendSMSWithValidation(phoneNumber, message)
         } catch (smsError) {
           console.error('Error sending setup SMS:', smsError.message)
           // No fallar la creación del usuario si falla el SMS
