@@ -41,8 +41,9 @@ export const sendWelcomeSMS = async (userInfo) => {
     `You can log in at: ${window.location.origin}\n\n` +
     `Thank you for trusting us!`
 
-
-  return await sendSMS(phoneNumber, message)
+  console.log('Sending SMS to:', phoneNumber)
+  console.log('Message:', message)
+  // return await sendSMS(phoneNumber, message)
 }
 
 /**
@@ -69,7 +70,9 @@ export const sendPropertyAssignmentSMS = async (propertyInfo) => {
     `Log in to your portal for more details: ${window.location.origin}/my-property\n\n` +
     `Congratulations on your new property!`
 
-  return await sendSMS(phoneNumber, message)
+  console.log('Sending SMS to:', phoneNumber)
+  console.log('Message:', message)
+  // return await sendSMS(phoneNumber, message)
 }
 
 export default {

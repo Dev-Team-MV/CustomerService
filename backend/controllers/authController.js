@@ -75,11 +75,12 @@ export const register = async (req, res) => {
       // Enviar SMS con el link de setup
       if (phoneNumber) {
         try {
-          const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+          const frontendUrl = process.env.FRONTEND_URL || 'https://customerservice.michelangelodelvalle.com'
           const setupLink = `${frontendUrl}/setup-password/${setupToken}`
           const message = `Hola ${firstName}, tu cuenta ha sido creada. Por favor establece tu contraseña ingresando a este enlace: ${setupLink}`
           
-          await sendSMSWithValidation(phoneNumber, message)
+          console.log('Sending SMS to:', phoneNumber)
+          // await sendSMSWithValidation(phoneNumber, message)
         } catch (smsError) {
           console.error('Error sending setup SMS:', smsError.message)
           // No fallar la creación del usuario si falla el SMS
@@ -302,7 +303,7 @@ export const verifySetupToken = async (req, res) => {
     const user = await User.findOne({
       setupToken: hashedToken,
       setupTokenExpires: { $gt: Date.now() }
-    }).select('firstName lastName email')
+    }).select('firstName lastName email phoneNumber')
 
     if (!user) {
       return res.status(400).json({ 
@@ -311,12 +312,13 @@ export const verifySetupToken = async (req, res) => {
       })
     }
 
-    res.json({ 
+    res.json({
       valid: true,
       user: {
         firstName: user.firstName,
         lastName: user.lastName,
-        email: user.email
+        email: user.email,
+        phoneNumber: user.phoneNumber
       }
     })
   } catch (error) {

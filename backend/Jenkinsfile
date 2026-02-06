@@ -9,6 +9,12 @@ pipeline {
         CONTAINER_NAME = 'backend'
         APP_DIR = 'backend'
         JWT_SECRET = 'supersecretkey123456789'
+        // Twilio (crear credenciales en Jenkins: twilio-account-sid, twilio-auth-token)
+        TWILIO_PHONE_FROM = '+18327707897'
+        // Google Cloud Storage (crear credencial en Jenkins: gcs-credentials-json para el JSON completo)
+        GCS_PROJECT_ID = 'centurions-car-wash-442201'
+        GCS_BUCKET_NAME = 'customer-service-7cc'
+        GCS_MAKE_PUBLIC = 'false'
     }
 
     stages {
@@ -46,20 +52,36 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    sh "docker stop ${env.CONTAINER_NAME} 2>/dev/null || true"
-                    sh "docker rm ${env.CONTAINER_NAME} 2>/dev/null || true"
-                    sh """
-                        docker run -d \
-                          --name ${env.CONTAINER_NAME} \
-                          --network deploy_app-network \
-                          -p 5000:5000 \
-                          -e NODE_ENV=production \
-                          -e PORT=5000 \
-                          -e MONGODB_URI=mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice \
-                          -e JWT_SECRET=${env.JWT_SECRET} \
-                          --restart unless-stopped \
-                          ${env.IMAGE_NAME}:${env.BUILD_NUMBER}
-                    """
+                    // Twilio y GCS: usar credenciales de Jenkins (Secret text) con IDs: twilio-account-sid, twilio-auth-token, gcs-credentials-json
+                    withCredentials([
+                        string(credentialsId: 'twilio-account-sid', variable: 'TWILIO_ACCOUNT_SID'),
+                        string(credentialsId: 'twilio-auth-token', variable: 'TWILIO_AUTH_TOKEN'),
+                        string(credentialsId: 'gcs-credentials-json', variable: 'GCS_CREDENTIALS')
+                    ]) {
+                        sh "docker stop ${env.CONTAINER_NAME} 2>/dev/null || true"
+                        sh "docker rm ${env.CONTAINER_NAME} 2>/dev/null || true"
+                        // GCS_CREDENTIALS (JSON) se pasa por archivo para evitar problemas con comillas en shell
+                        sh '''
+                            printf 'GCS_CREDENTIALS=%s\\n' "$GCS_CREDENTIALS" > "${WORKSPACE}/backend/gcs.env"
+                            docker run -d \
+                              --name ''' + env.CONTAINER_NAME + ''' \
+                              --network deploy_app-network \
+                              -p 5000:5000 \
+                              -e NODE_ENV=production \
+                              -e PORT=5000 \
+                              -e MONGODB_URI=mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice \
+                              -e JWT_SECRET=''' + env.JWT_SECRET + ''' \
+                              -e TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID \
+                              -e TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN \
+                              -e TWILIO_PHONE_FROM=''' + env.TWILIO_PHONE_FROM + ''' \
+                              -e GCS_PROJECT_ID=''' + env.GCS_PROJECT_ID + ''' \
+                              -e GCS_BUCKET_NAME=''' + env.GCS_BUCKET_NAME + ''' \
+                              -e GCS_MAKE_PUBLIC=''' + env.GCS_MAKE_PUBLIC + ''' \
+                              --env-file "${WORKSPACE}/backend/gcs.env" \
+                              --restart unless-stopped \
+                              ''' + env.IMAGE_NAME + ':' + env.BUILD_NUMBER + '''
+                        '''
+                    }
                 }
             }
         }
