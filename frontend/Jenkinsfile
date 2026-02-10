@@ -48,7 +48,7 @@ pipeline {
       }
     }
 
-    stage('Install & Build') {
+    stage('Install') {
       steps {
         dir('frontend') {
           sh '''#!/bin/bash
@@ -60,7 +60,6 @@ pipeline {
             nvm install 20
             nvm use 20
             npm ci
-            npm run build
           '''
         }
       }
@@ -69,8 +68,9 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         dir('frontend') {
-          // Citar el build-arg para que la URL (con : y /) no se parta en el shell
-          sh "docker build -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} --build-arg 'VITE_API_URL=${env.VITE_API_URL}' ."
+          echo "Build Docker con VITE_API_URL=${env.VITE_API_URL}"
+          // Sin caché para que npm run build dentro del contenedor use siempre el ARG correcto
+          sh "docker build --no-cache -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} --build-arg 'VITE_API_URL=${env.VITE_API_URL}' ."
         }
       }
     }
