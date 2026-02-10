@@ -68,9 +68,12 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         dir('frontend') {
-          echo "Build Docker con VITE_API_URL=${env.VITE_API_URL}"
-          // Sin caché para que npm run build dentro del contenedor use siempre el ARG correcto
-          sh "docker build --no-cache -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} --build-arg 'VITE_API_URL=${env.VITE_API_URL}' ."
+          script {
+            echo "Build Docker con VITE_API_URL=${env.VITE_API_URL}"
+            // Construir comando en Groovy para que el build-arg llegue bien a Docker (evitar que el shell pierda la URL)
+            def buildArg = "VITE_API_URL=${env.VITE_API_URL}"
+            sh "docker build --no-cache -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} --build-arg \"${buildArg}\" ."
+          }
         }
       }
     }
