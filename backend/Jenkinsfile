@@ -34,6 +34,10 @@ pipeline {
                     env.IMAGE_NAME = 'customerservice-backend'
                     // Tag con un solo ":" -> nombre:tag (ej. customerservice-backend:development-1)
                     env.IMAGE_TAG = "${env.ENVIRONMENT}-${env.BUILD_NUMBER}"
+                    // BD pdn = VPS; BD dev = Atlas (actual)
+                    env.MONGODB_URI = (env.IS_PRODUCTION == 'true')
+                        ? 'mongodb://mongo_customerservice:WmSld1ZrUWzWcaDZ6QBKl7QDKQsMnPfp@72.61.6.13:27017/appdb?authSource=admin'
+                        : 'mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice'
                     echo "Desplegando ambiente: ${env.ENVIRONMENT} (contenedor: ${env.CONTAINER_NAME}, puerto: ${env.APP_PORT}, imagen: ${env.IMAGE_NAME}:${env.IMAGE_TAG})"
                 }
             }
@@ -82,7 +86,7 @@ pipeline {
                               -p ''' + env.APP_PORT + ''':5000 \
                               -e NODE_ENV=''' + (env.IS_PRODUCTION == 'true' ? 'production' : 'development') + ''' \
                               -e PORT=5000 \
-                              -e MONGODB_URI=mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice \
+                              -e MONGODB_URI=\'' + env.MONGODB_URI + '\' \
                               -e JWT_SECRET=''' + env.JWT_SECRET + ''' \
                               -e TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID \
                               -e TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN \
