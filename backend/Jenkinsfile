@@ -34,10 +34,10 @@ pipeline {
                     env.IMAGE_NAME = 'customerservice-backend'
                     // Tag con un solo ":" -> nombre:tag (ej. customerservice-backend:development-1)
                     env.IMAGE_TAG = "${env.ENVIRONMENT}-${env.BUILD_NUMBER}"
-                    // BD pdn = VPS; BD dev = Atlas (actual)
-                    env.MONGODB_URI = (env.IS_PRODUCTION == 'true')
-                        ? 'mongodb://mongo_customerservice:WmSld1ZrUWzWcaDZ6QBKl7QDKQsMnPfp@72.61.6.13:27017/customerservice?authSource=admin'
-                        : 'mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice'
+                    // Dev NUNCA debe apuntar a la BD de pdn. Siempre URIs separadas:
+                    def uriPdn = 'mongodb://mongo_customerservice:WmSld1ZrUWzWcaDZ6QBKl7QDKQsMnPfp@72.61.6.13:27017/customerservice?authSource=admin'
+                    def uriDev = 'mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice'
+                    env.MONGODB_URI = (env.IS_PRODUCTION == 'true') ? uriPdn : uriDev
                     echo "Desplegando ambiente: ${env.ENVIRONMENT} (contenedor: ${env.CONTAINER_NAME}, puerto: ${env.APP_PORT}, imagen: ${env.IMAGE_NAME}:${env.IMAGE_TAG})"
                 }
             }
