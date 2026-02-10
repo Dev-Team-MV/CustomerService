@@ -127,6 +127,7 @@ pipeline {
             echo "Ambiente: ${env.ENVIRONMENT} | Contenedor: ${env.CONTAINER_NAME} | Puerto: ${env.APP_PORT}"
             echo "URL local: http://localhost:${env.APP_PORT}"
             echo "BD usada: ${env.ENVIRONMENT == 'production' ? 'VPS pdn' : 'Atlas dev'}"
+            echo "MONGODB_URI: ${env.MONGODB_URI}"
             echo "===================================="
         }
         failure {
