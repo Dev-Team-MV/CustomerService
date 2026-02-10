@@ -1,8 +1,7 @@
 // Jenkinsfile para CustomerService - backend
-// main → producción (puerto 5000) → apics.michelangelodelvalle.com
-// develop → desarrollo (puerto 5001) → apicsdev.michelangelodelvalle.com
+// Jobs en Jenkins: CustomerService-Backend-Develop (BD Atlas dev) | CustomerService-Backend-Production (BD VPS pdn)
+// Develop → apicsdev.michelangelodelvalle.com:5001 | Production → apics.michelangelodelvalle.com:5000
 // Tag de imagen: solo un ":" (ej. customerservice-backend:development-1)
-// Para dos despliegues: crea 2 Jobs en Jenkins, uno con rama main y otro con rama develop.
 
 pipeline {
     agent any
@@ -27,18 +26,36 @@ pipeline {
             steps {
                 script {
                     def branch = env.BRANCH_NAME ?: env.GIT_BRANCH?.replaceFirst('^origin/', '') ?: 'develop'
-                    env.IS_PRODUCTION = (env.DEPLOY_ENV == 'production' || branch == 'main').toString()
+                    def jobName = (env.JOB_NAME ?: '').toLowerCase()
+                    // El ambiente lo define el JOB: Dev job = siempre BD dev; Prod job = siempre BD pdn (dev NUNCA apunta a pdn)
+                    def isProdJob = jobName.contains('production') || jobName.contains('prod') || jobName.contains('pdn')
+                    def isDevJob = jobName.contains('development') || jobName.contains('dev')
+                    if (isDevJob) {
+                        env.IS_PRODUCTION = 'false'
+                    } else if (isProdJob) {
+                        env.IS_PRODUCTION = 'true'
+                    } else {
+                        env.IS_PRODUCTION = (env.DEPLOY_ENV == 'production' || branch == 'main').toString()
+                    }
                     env.ENVIRONMENT = (env.IS_PRODUCTION == 'true') ? 'production' : 'development'
                     env.CONTAINER_NAME = (env.IS_PRODUCTION == 'true') ? 'backend' : 'backend-dev'
                     env.APP_PORT = (env.IS_PRODUCTION == 'true') ? '5000' : '5001'
                     env.IMAGE_NAME = 'customerservice-backend'
-                    // Tag con un solo ":" -> nombre:tag (ej. customerservice-backend:development-1)
                     env.IMAGE_TAG = "${env.ENVIRONMENT}-${env.BUILD_NUMBER}"
-                    // BD pdn = VPS; BD dev = Atlas (actual)
-                    env.MONGODB_URI = (env.IS_PRODUCTION == 'true')
-                        ? 'mongodb://mongo_customerservice:WmSld1ZrUWzWcaDZ6QBKl7QDKQsMnPfp@72.61.6.13:27017/customerservice?authSource=admin'
-                        : 'mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice'
-                    echo "Desplegando ambiente: ${env.ENVIRONMENT} (contenedor: ${env.CONTAINER_NAME}, puerto: ${env.APP_PORT}, imagen: ${env.IMAGE_NAME}:${env.IMAGE_TAG})"
+                    def uriPdn = 'mongodb://mongo_customerservice:WmSld1ZrUWzWcaDZ6QBKl7QDKQsMnPfp@72.61.6.13:27017/customerservice?authSource=admin'
+                    def uriDev = 'mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice'
+                    env.MONGODB_URI = (env.IS_PRODUCTION == 'true') ? uriPdn : uriDev
+                    // --- Logs para verificar configuración ---
+                    echo "========== CONFIGURACIÓN BACKEND =========="
+                    echo "Job name: ${env.JOB_NAME}"
+                    echo "Rama: ${branch}"
+                    echo "Ambiente resuelto por: ${isDevJob ? 'job (dev)' : isProdJob ? 'job (prod)' : 'rama'}"
+                    echo "IS_PRODUCTION: ${env.IS_PRODUCTION}"
+                    echo "ENVIRONMENT: ${env.ENVIRONMENT}"
+                    echo "Contenedor: ${env.CONTAINER_NAME} | Puerto: ${env.APP_PORT}"
+                    echo "BD: ${env.IS_PRODUCTION == 'true' ? 'VPS pdn (72.61.6.13:27017/customerservice)' : 'Atlas dev (customerservice.mkutnlt.mongodb.net)'}"
+                    echo "Imagen: ${env.IMAGE_NAME}:${env.IMAGE_TAG}"
+                    echo "==========================================="
                 }
             }
         }
@@ -106,7 +123,12 @@ pipeline {
 
     post {
         success {
-            echo "Backend desplegado (${env.ENVIRONMENT}) en http://localhost:${env.APP_PORT}"
+            echo "========== DESPLIEGUE OK =========="
+            echo "Ambiente: ${env.ENVIRONMENT} | Contenedor: ${env.CONTAINER_NAME} | Puerto: ${env.APP_PORT}"
+            echo "URL local: http://localhost:${env.APP_PORT}"
+            echo "BD usada: ${env.ENVIRONMENT == 'production' ? 'VPS pdn' : 'Atlas dev'}"
+            echo "MONGODB_URI: ${env.MONGODB_URI}"
+            echo "===================================="
         }
         failure {
             echo 'Falló el pipeline'

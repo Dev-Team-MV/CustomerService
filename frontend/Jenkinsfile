@@ -1,8 +1,6 @@
-// Job independiente: solo frontend. main → producción, develop → desarrollo.
-// Dominios: front pdn = customerservice.michelangelodelvalle.com → backend pdn = apics.michelangelodelvalle.com
-//           front dev = devcustomerservice.michelangelodelvalle.com → backend dev = apicsdev.michelangelodelvalle.com
-// Tag de imagen: solo un ":" (ej. customer-service-frontend:development-1)
-// Requiere: curl, bash, Docker. Para dos despliegues crea 2 Jobs (rama main y rama develop).
+// Jobs: CustomerService-Frontend-Develop → apicsdev | CustomerService-Frontend-Production → apics
+// Front dev = devcustomerservice.michelangelodelvalle.com → backend apicsdev.michelangelodelvalle.com
+// Front pdn = customerservice.michelangelodelvalle.com → backend apics.michelangelodelvalle.com
 pipeline {
   agent any
 
@@ -10,11 +8,7 @@ pipeline {
     timeout(time: 15, unit: 'MINUTES')
   }
 
-  environment {
-    // Production: front pdn apunta al backend pdn
-    VITE_API_URL = "https://apics.michelangelodelvalle.com/api"
-  }
-
+  // No definir VITE_API_URL aquí: se fija en "Set environment" según el Job (Develop → apicsdev, Production → apics)
   stages {
     stage('Checkout') {
       steps {
@@ -26,22 +20,39 @@ pipeline {
       steps {
         script {
           def branch = env.BRANCH_NAME ?: env.GIT_BRANCH?.replaceFirst('^origin/', '') ?: 'develop'
-          env.IS_PRODUCTION = (env.DEPLOY_ENV == 'production' || branch == 'main').toString()
+          def jobName = (env.JOB_NAME ?: '').toLowerCase()
+          // Ambiente por nombre del Job: Develop job → siempre API dev (apicsdev); Production job → API pdn (apics)
+          def isProdJob = jobName.contains('production') || jobName.contains('prod') || jobName.contains('pdn')
+          def isDevJob = jobName.contains('development') || jobName.contains('dev') || jobName.contains('develop')
+          if (isDevJob) {
+            env.IS_PRODUCTION = 'false'
+          } else if (isProdJob) {
+            env.IS_PRODUCTION = 'true'
+          } else {
+            env.IS_PRODUCTION = (env.DEPLOY_ENV == 'production' || branch == 'main').toString()
+          }
           env.ENVIRONMENT = (env.IS_PRODUCTION == 'true') ? 'production' : 'development'
           env.CONTAINER_NAME = (env.IS_PRODUCTION == 'true') ? 'frontend' : 'frontend-dev'
           env.APP_PORT = (env.IS_PRODUCTION == 'true') ? '5173' : '5174'
           env.IMAGE_NAME = 'customer-service-frontend'
           env.IMAGE_TAG = "${env.ENVIRONMENT}-${env.BUILD_NUMBER}"
-          // Dev: front dev apunta al backend dev (apicsdev)
-          if (env.IS_PRODUCTION != 'true') {
-            env.VITE_API_URL = env.VITE_API_URL_DEV ?: 'https://apicsdev.michelangelodelvalle.com/api'
+          // Fijar API por Job: Develop → siempre apicsdev; Production → siempre apics (no depender de env previo)
+          if (isDevJob) {
+            env.VITE_API_URL = 'https://apicsdev.michelangelodelvalle.com/api'
+          } else if (isProdJob) {
+            env.VITE_API_URL = 'https://apics.michelangelodelvalle.com/api'
+          } else {
+            env.VITE_API_URL = (branch == 'main') ? 'https://apics.michelangelodelvalle.com/api' : (env.VITE_API_URL_DEV ?: 'https://apicsdev.michelangelodelvalle.com/api')
           }
-          echo "Desplegando ambiente: ${env.ENVIRONMENT} (contenedor: ${env.CONTAINER_NAME}, puerto: ${env.APP_PORT}, imagen: ${env.IMAGE_NAME}:${env.IMAGE_TAG})"
+          echo "========== CONFIGURACIÓN FRONTEND =========="
+          echo "Job: ${env.JOB_NAME} | Rama: ${branch}"
+          echo "Ambiente: ${env.ENVIRONMENT} | API: ${env.VITE_API_URL}"
+          echo "============================================="
         }
       }
     }
 
-    stage('Install & Build') {
+    stage('Install') {
       steps {
         dir('frontend') {
           sh '''#!/bin/bash
@@ -53,7 +64,6 @@ pipeline {
             nvm install 20
             nvm use 20
             npm ci
-            npm run build
           '''
         }
       }
@@ -62,7 +72,12 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         dir('frontend') {
-          sh "docker build -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} --build-arg VITE_API_URL=${env.VITE_API_URL} ."
+          script {
+            echo "Build Docker con VITE_API_URL=${env.VITE_API_URL}"
+            // Construir comando en Groovy para que el build-arg llegue bien a Docker (evitar que el shell pierda la URL)
+            def buildArg = "VITE_API_URL=${env.VITE_API_URL}"
+            sh "docker build --no-cache -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} --build-arg \"${buildArg}\" ."
+          }
         }
       }
     }
