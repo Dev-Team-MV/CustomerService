@@ -1,8 +1,7 @@
 // Jenkinsfile para CustomerService - backend
-// main → producción (puerto 5000) → apics.michelangelodelvalle.com
-// develop → desarrollo (puerto 5001) → apicsdev.michelangelodelvalle.com
+// Jobs en Jenkins: CustomerService-Backend-Develop (BD Atlas dev) | CustomerService-Backend-Production (BD VPS pdn)
+// Develop → apicsdev.michelangelodelvalle.com:5001 | Production → apics.michelangelodelvalle.com:5000
 // Tag de imagen: solo un ":" (ej. customerservice-backend:development-1)
-// Para dos despliegues: crea 2 Jobs en Jenkins, uno con rama main y otro con rama develop.
 
 pipeline {
     agent any
@@ -27,18 +26,26 @@ pipeline {
             steps {
                 script {
                     def branch = env.BRANCH_NAME ?: env.GIT_BRANCH?.replaceFirst('^origin/', '') ?: 'develop'
-                    env.IS_PRODUCTION = (env.DEPLOY_ENV == 'production' || branch == 'main').toString()
+                    def jobName = (env.JOB_NAME ?: '').toLowerCase()
+                    // El ambiente lo define el JOB: Dev job = siempre BD dev; Prod job = siempre BD pdn (dev NUNCA apunta a pdn)
+                    def isProdJob = jobName.contains('production') || jobName.contains('prod') || jobName.contains('pdn')
+                    def isDevJob = jobName.contains('development') || jobName.contains('dev')
+                    if (isDevJob) {
+                        env.IS_PRODUCTION = 'false'
+                    } else if (isProdJob) {
+                        env.IS_PRODUCTION = 'true'
+                    } else {
+                        env.IS_PRODUCTION = (env.DEPLOY_ENV == 'production' || branch == 'main').toString()
+                    }
                     env.ENVIRONMENT = (env.IS_PRODUCTION == 'true') ? 'production' : 'development'
                     env.CONTAINER_NAME = (env.IS_PRODUCTION == 'true') ? 'backend' : 'backend-dev'
                     env.APP_PORT = (env.IS_PRODUCTION == 'true') ? '5000' : '5001'
                     env.IMAGE_NAME = 'customerservice-backend'
-                    // Tag con un solo ":" -> nombre:tag (ej. customerservice-backend:development-1)
                     env.IMAGE_TAG = "${env.ENVIRONMENT}-${env.BUILD_NUMBER}"
-                    // Dev NUNCA debe apuntar a la BD de pdn. Siempre URIs separadas:
                     def uriPdn = 'mongodb://mongo_customerservice:WmSld1ZrUWzWcaDZ6QBKl7QDKQsMnPfp@72.61.6.13:27017/customerservice?authSource=admin'
                     def uriDev = 'mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice'
                     env.MONGODB_URI = (env.IS_PRODUCTION == 'true') ? uriPdn : uriDev
-                    echo "Desplegando ambiente: ${env.ENVIRONMENT} (contenedor: ${env.CONTAINER_NAME}, puerto: ${env.APP_PORT}, imagen: ${env.IMAGE_NAME}:${env.IMAGE_TAG})"
+                    echo "Desplegando ambiente: ${env.ENVIRONMENT} (job: ${env.JOB_NAME}, contenedor: ${env.CONTAINER_NAME}, puerto: ${env.APP_PORT}, BD: ${env.ENVIRONMENT == 'production' ? 'VPS pdn' : 'Atlas dev'})"
                 }
             }
         }
