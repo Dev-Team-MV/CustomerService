@@ -45,7 +45,17 @@ pipeline {
                     def uriPdn = 'mongodb://mongo_customerservice:WmSld1ZrUWzWcaDZ6QBKl7QDKQsMnPfp@72.61.6.13:27017/customerservice?authSource=admin'
                     def uriDev = 'mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice'
                     env.MONGODB_URI = (env.IS_PRODUCTION == 'true') ? uriPdn : uriDev
-                    echo "Desplegando ambiente: ${env.ENVIRONMENT} (job: ${env.JOB_NAME}, contenedor: ${env.CONTAINER_NAME}, puerto: ${env.APP_PORT}, BD: ${env.ENVIRONMENT == 'production' ? 'VPS pdn' : 'Atlas dev'})"
+                    // --- Logs para verificar configuración ---
+                    echo "========== CONFIGURACIÓN BACKEND =========="
+                    echo "Job name: ${env.JOB_NAME}"
+                    echo "Rama: ${branch}"
+                    echo "Ambiente resuelto por: ${isDevJob ? 'job (dev)' : isProdJob ? 'job (prod)' : 'rama'}"
+                    echo "IS_PRODUCTION: ${env.IS_PRODUCTION}"
+                    echo "ENVIRONMENT: ${env.ENVIRONMENT}"
+                    echo "Contenedor: ${env.CONTAINER_NAME} | Puerto: ${env.APP_PORT}"
+                    echo "BD: ${env.IS_PRODUCTION == 'true' ? 'VPS pdn (72.61.6.13:27017/customerservice)' : 'Atlas dev (customerservice.mkutnlt.mongodb.net)'}"
+                    echo "Imagen: ${env.IMAGE_NAME}:${env.IMAGE_TAG}"
+                    echo "==========================================="
                 }
             }
         }
@@ -113,7 +123,11 @@ pipeline {
 
     post {
         success {
-            echo "Backend desplegado (${env.ENVIRONMENT}) en http://localhost:${env.APP_PORT}"
+            echo "========== DESPLIEGUE OK =========="
+            echo "Ambiente: ${env.ENVIRONMENT} | Contenedor: ${env.CONTAINER_NAME} | Puerto: ${env.APP_PORT}"
+            echo "URL local: http://localhost:${env.APP_PORT}"
+            echo "BD usada: ${env.ENVIRONMENT == 'production' ? 'VPS pdn' : 'Atlas dev'}"
+            echo "===================================="
         }
         failure {
             echo 'Falló el pipeline'
