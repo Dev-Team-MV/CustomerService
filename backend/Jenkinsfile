@@ -86,7 +86,7 @@ pipeline {
                               -p ''' + env.APP_PORT + ''':5000 \
                               -e NODE_ENV=''' + (env.IS_PRODUCTION == 'true' ? 'production' : 'development') + ''' \
                               -e PORT=5000 \
-                              -e MONGODB_URI=\'' + env.MONGODB_URI + '\' \
+                              -e MONGODB_URI="$MONGODB_URI" \
                               -e JWT_SECRET=''' + env.JWT_SECRET + ''' \
                               -e TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID \
                               -e TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN \
