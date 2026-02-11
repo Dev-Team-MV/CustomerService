@@ -30,6 +30,13 @@ pipeline {
                     // El ambiente lo define el JOB: Dev job = siempre BD dev; Prod job = siempre BD pdn (dev NUNCA apunta a pdn)
                     def isProdJob = jobName.contains('production') || jobName.contains('prod') || jobName.contains('pdn')
                     def isDevJob = jobName.contains('development') || jobName.contains('dev')
+                    // Solo disparar el ambiente correcto según la rama (evitar deploy equivocado si el job se configuró mal)
+                    if (isDevJob && branch != 'develop') {
+                        error "Job Develop solo debe ejecutarse con rama 'develop'. Rama actual: ${branch}. Revisa Branch Specifier del job (debe ser */develop)."
+                    }
+                    if (isProdJob && branch != 'main' && branch != 'master') {
+                        error "Job Production solo debe ejecutarse con rama 'main' (o 'master'). Rama actual: ${branch}. Revisa Branch Specifier del job (debe ser */main)."
+                    }
                     if (isDevJob) {
                         env.IS_PRODUCTION = 'false'
                     } else if (isProdJob) {
