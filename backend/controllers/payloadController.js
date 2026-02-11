@@ -57,7 +57,7 @@ export const getPayloadById = async (req, res) => {
 
 export const createPayload = async (req, res) => {
   try {
-    const { property, date, amount, support, urls, status, notes, folder } = req.body
+    const { property, date, amount, support, urls, status, type, notes, folder } = req.body
     
     const propertyExists = await Property.findById(property)
     if (!propertyExists) {
@@ -108,6 +108,7 @@ export const createPayload = async (req, res) => {
       support,
       urls: uploadedUrls,
       status: finalStatus,
+      type: type || undefined,
       notes,
       processedBy: req.user._id
     })
@@ -191,6 +192,7 @@ export const updatePayload = async (req, res) => {
       payload.support = req.body.support || payload.support
       payload.urls = updatedUrls
       payload.status = newStatus
+      if (req.body.type !== undefined) payload.type = req.body.type
       payload.notes = req.body.notes || payload.notes
       payload.processedBy = req.user._id
       
