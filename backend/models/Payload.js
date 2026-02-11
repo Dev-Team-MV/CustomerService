@@ -30,6 +30,17 @@ const payloadSchema = new mongoose.Schema(
       enum: ['pending', 'cleared', 'rejected'],
       default: 'pending'
     },
+    type: {
+      type: String,
+      enum: [
+        'initial down payment',
+        'complementary down payment',
+        'monthly payment',
+        'additional payment',
+        'closing payment'
+      ],
+      trim: true
+    },
     notes: {
       type: String,
       trim: true
