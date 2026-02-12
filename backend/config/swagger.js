@@ -135,7 +135,7 @@ const options = {
             amount: { type: 'number' },
             date: { type: 'string', format: 'date' },
             support: { type: 'string' },
-            status: { type: 'string', enum: ['pending', 'cleared', 'rejected'] },
+            status: { type: 'string', enum: ['pending', 'signed', 'rejected'] },
             notes: { type: 'string' },
             processedBy: { type: 'string' },
             createdAt: { type: 'string', format: 'date-time' },

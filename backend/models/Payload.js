@@ -27,7 +27,7 @@ const payloadSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'cleared', 'rejected'],
+      enum: ['pending', 'signed', 'rejected'],
       default: 'pending'
     },
     type: {

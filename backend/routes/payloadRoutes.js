@@ -67,9 +67,9 @@ const router = express.Router()
  *                 default: []
  *               status:
  *                 type: string
- *                 enum: [pending, cleared, rejected]
+ *                 enum: [pending, signed, rejected]
  *                 default: pending
- *                 description: Only admins can set status to 'cleared'. Regular users will have status set to 'pending' automatically.
+ *                 description: Only admins can set status to 'signed'. Regular users will have status set to 'pending' automatically.
  *               notes:
  *                 type: string
  *               folder:
@@ -184,8 +184,8 @@ router.get('/approved/this-month', protect, getApprovedPayloadsThisMonth)
  *                   type: string
  *               status:
  *                 type: string
- *                 enum: [pending, cleared, rejected]
- *                 description: Only admins can set status to 'cleared' or 'rejected'
+ *                 enum: [pending, signed, rejected]
+ *                 description: Only admins can set status to 'signed' or 'rejected'
  *               notes:
  *                 type: string
  *               folder:
