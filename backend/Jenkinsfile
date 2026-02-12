@@ -1,17 +1,15 @@
-// Jenkinsfile para CustomerService - backend en backend/, puerto 5000
-// Copia este archivo a la RAÍZ de tu repo como "Jenkinsfile" y haz commit + push
+// Jenkinsfile para CustomerService - backend
+// Jobs en Jenkins: CustomerService-Backend-Develop (BD Atlas dev) | CustomerService-Backend-Production (BD VPS pdn)
+// Develop → apicsdev.michelangelodelvalle.com:5001 | Production → apics.michelangelodelvalle.com:5000
+// Tag de imagen: solo un ":" (ej. customerservice-backend:development-1)
 
 pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'customerservice-backend'
-        CONTAINER_NAME = 'backend'
         APP_DIR = 'backend'
         JWT_SECRET = 'supersecretkey123456789'
-        // Twilio (crear credenciales en Jenkins: twilio-account-sid, twilio-auth-token)
         TWILIO_PHONE_FROM = '+18327707897'
-        // Google Cloud Storage (crear credencial en Jenkins: gcs-credentials-json para el JSON completo)
         GCS_PROJECT_ID = 'centurions-car-wash-442201'
         GCS_BUCKET_NAME = 'customer-service-7cc'
         GCS_MAKE_PUBLIC = 'false'
@@ -21,6 +19,51 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('Set environment') {
+            steps {
+                script {
+                    def branch = env.BRANCH_NAME ?: env.GIT_BRANCH?.replaceFirst('^origin/', '') ?: 'develop'
+                    def jobName = (env.JOB_NAME ?: '').toLowerCase()
+                    // El ambiente lo define el JOB: Dev job = siempre BD dev; Prod job = siempre BD pdn (dev NUNCA apunta a pdn)
+                    def isProdJob = jobName.contains('production') || jobName.contains('prod') || jobName.contains('pdn')
+                    def isDevJob = jobName.contains('development') || jobName.contains('dev')
+                    // Solo disparar el ambiente correcto según la rama (evitar deploy equivocado si el job se configuró mal)
+                    if (isDevJob && branch != 'develop') {
+                        error "Job Develop solo debe ejecutarse con rama 'develop'. Rama actual: ${branch}. Revisa Branch Specifier del job (debe ser */develop)."
+                    }
+                    if (isProdJob && branch != 'main' && branch != 'master') {
+                        error "Job Production solo debe ejecutarse con rama 'main' (o 'master'). Rama actual: ${branch}. Revisa Branch Specifier del job (debe ser */main)."
+                    }
+                    if (isDevJob) {
+                        env.IS_PRODUCTION = 'false'
+                    } else if (isProdJob) {
+                        env.IS_PRODUCTION = 'true'
+                    } else {
+                        env.IS_PRODUCTION = (env.DEPLOY_ENV == 'production' || branch == 'main').toString()
+                    }
+                    env.ENVIRONMENT = (env.IS_PRODUCTION == 'true') ? 'production' : 'development'
+                    env.CONTAINER_NAME = (env.IS_PRODUCTION == 'true') ? 'backend' : 'backend-dev'
+                    env.APP_PORT = (env.IS_PRODUCTION == 'true') ? '5000' : '5001'
+                    env.IMAGE_NAME = 'customerservice-backend'
+                    env.IMAGE_TAG = "${env.ENVIRONMENT}-${env.BUILD_NUMBER}"
+                    def uriPdn = 'mongodb://mongo_customerservice:WmSld1ZrUWzWcaDZ6QBKl7QDKQsMnPfp@72.61.6.13:27017/customerservice?authSource=admin'
+                    def uriDev = 'mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice'
+                    env.MONGODB_URI = (env.IS_PRODUCTION == 'true') ? uriPdn : uriDev
+                    // --- Logs para verificar configuración ---
+                    echo "========== CONFIGURACIÓN BACKEND =========="
+                    echo "Job name: ${env.JOB_NAME}"
+                    echo "Rama: ${branch}"
+                    echo "Ambiente resuelto por: ${isDevJob ? 'job (dev)' : isProdJob ? 'job (prod)' : 'rama'}"
+                    echo "IS_PRODUCTION: ${env.IS_PRODUCTION}"
+                    echo "ENVIRONMENT: ${env.ENVIRONMENT}"
+                    echo "Contenedor: ${env.CONTAINER_NAME} | Puerto: ${env.APP_PORT}"
+                    echo "BD: ${env.IS_PRODUCTION == 'true' ? 'VPS pdn (72.61.6.13:27017/customerservice)' : 'Atlas dev (customerservice.mkutnlt.mongodb.net)'}"
+                    echo "Imagen: ${env.IMAGE_NAME}:${env.IMAGE_TAG}"
+                    echo "==========================================="
+                }
             }
         }
 
@@ -44,7 +87,7 @@ pipeline {
         stage('Build Docker') {
             steps {
                 dir(env.APP_DIR) {
-                    sh "docker build -t ${env.IMAGE_NAME}:${env.BUILD_NUMBER} ."
+                    sh "docker build -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} ."
                 }
             }
         }
@@ -52,7 +95,6 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Twilio y GCS: usar credenciales de Jenkins (Secret text) con IDs: twilio-account-sid, twilio-auth-token, gcs-credentials-json
                     withCredentials([
                         string(credentialsId: 'twilio-account-sid', variable: 'TWILIO_ACCOUNT_SID'),
                         string(credentialsId: 'twilio-auth-token', variable: 'TWILIO_AUTH_TOKEN'),
@@ -60,16 +102,15 @@ pipeline {
                     ]) {
                         sh "docker stop ${env.CONTAINER_NAME} 2>/dev/null || true"
                         sh "docker rm ${env.CONTAINER_NAME} 2>/dev/null || true"
-                        // GCS_CREDENTIALS (JSON) se pasa por archivo para evitar problemas con comillas en shell
                         sh '''
                             printf 'GCS_CREDENTIALS=%s\\n' "$GCS_CREDENTIALS" > "${WORKSPACE}/backend/gcs.env"
                             docker run -d \
                               --name ''' + env.CONTAINER_NAME + ''' \
                               --network deploy_app-network \
-                              -p 5000:5000 \
-                              -e NODE_ENV=production \
+                              -p ''' + env.APP_PORT + ''':5000 \
+                              -e NODE_ENV=''' + (env.IS_PRODUCTION == 'true' ? 'production' : 'development') + ''' \
                               -e PORT=5000 \
-                              -e MONGODB_URI=mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice \
+                              -e MONGODB_URI="$MONGODB_URI" \
                               -e JWT_SECRET=''' + env.JWT_SECRET + ''' \
                               -e TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID \
                               -e TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN \
@@ -79,7 +120,7 @@ pipeline {
                               -e GCS_MAKE_PUBLIC=''' + env.GCS_MAKE_PUBLIC + ''' \
                               --env-file "${WORKSPACE}/backend/gcs.env" \
                               --restart unless-stopped \
-                              ''' + env.IMAGE_NAME + ':' + env.BUILD_NUMBER + '''
+                              ''' + env.IMAGE_NAME + ':' + env.IMAGE_TAG + '''
                         '''
                     }
                 }
@@ -89,7 +130,12 @@ pipeline {
 
     post {
         success {
-            echo 'Backend desplegado en http://localhost:5000'
+            echo "========== DESPLIEGUE OK =========="
+            echo "Ambiente: ${env.ENVIRONMENT} | Contenedor: ${env.CONTAINER_NAME} | Puerto: ${env.APP_PORT}"
+            echo "URL local: http://localhost:${env.APP_PORT}"
+            echo "BD usada: ${env.ENVIRONMENT == 'production' ? 'VPS pdn' : 'Atlas dev'}"
+            echo "MONGODB_URI: ${env.MONGODB_URI}"
+            echo "===================================="
         }
         failure {
             echo 'Falló el pipeline'

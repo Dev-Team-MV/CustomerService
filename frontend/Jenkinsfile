@@ -1,5 +1,6 @@
-// Job independiente: solo frontend. En Jenkins → Script Path: frontend/Jenkinsfile
-// Requiere: curl, bash, Docker. VITE_API_URL se define aquí o en Jenkins (Job → Configure → Variables de entorno).
+// Jobs: CustomerService-Frontend-Develop → apicsdev | CustomerService-Frontend-Production → apics
+// Front dev = devcustomerservice.michelangelodelvalle.com → backend apicsdev.michelangelodelvalle.com
+// Front pdn = customerservice.michelangelodelvalle.com → backend apics.michelangelodelvalle.com
 pipeline {
   agent any
 
@@ -7,12 +8,7 @@ pipeline {
     timeout(time: 15, unit: 'MINUTES')
   }
 
-  environment {
-    IMAGE_NAME = "customer-service-frontend"
-    // URL del backend en producción. Cambia la IP/host o define esta variable en el Job de Jenkins.
-    VITE_API_URL = "https://apics.michelangelodelvalle.com/api"
-  }
-
+  // No definir VITE_API_URL aquí: se fija en "Set environment" según el Job (Develop → apicsdev, Production → apics)
   stages {
     stage('Checkout') {
       steps {
@@ -20,7 +16,50 @@ pipeline {
       }
     }
 
-    stage('Install & Build') {
+    stage('Set environment') {
+      steps {
+        script {
+          def branch = env.BRANCH_NAME ?: env.GIT_BRANCH?.replaceFirst('^origin/', '') ?: 'develop'
+          def jobName = (env.JOB_NAME ?: '').toLowerCase()
+          // Ambiente por nombre del Job: Develop job → siempre API dev (apicsdev); Production job → API pdn (apics)
+          def isProdJob = jobName.contains('production') || jobName.contains('prod') || jobName.contains('pdn')
+          def isDevJob = jobName.contains('development') || jobName.contains('dev') || jobName.contains('develop')
+          // Solo disparar el ambiente correcto según la rama (evitar deploy equivocado si el job se configuró mal)
+          if (isDevJob && branch != 'develop') {
+            error "Job Develop solo debe ejecutarse con rama 'develop'. Rama actual: ${branch}. Revisa Branch Specifier del job (debe ser */develop)."
+          }
+          if (isProdJob && branch != 'main' && branch != 'master') {
+            error "Job Production solo debe ejecutarse con rama 'main' (o 'master'). Rama actual: ${branch}. Revisa Branch Specifier del job (debe ser */main)."
+          }
+          if (isDevJob) {
+            env.IS_PRODUCTION = 'false'
+          } else if (isProdJob) {
+            env.IS_PRODUCTION = 'true'
+          } else {
+            env.IS_PRODUCTION = (env.DEPLOY_ENV == 'production' || branch == 'main').toString()
+          }
+          env.ENVIRONMENT = (env.IS_PRODUCTION == 'true') ? 'production' : 'development'
+          env.CONTAINER_NAME = (env.IS_PRODUCTION == 'true') ? 'frontend' : 'frontend-dev'
+          env.APP_PORT = (env.IS_PRODUCTION == 'true') ? '5173' : '5174'
+          env.IMAGE_NAME = 'customer-service-frontend'
+          env.IMAGE_TAG = "${env.ENVIRONMENT}-${env.BUILD_NUMBER}"
+          // Fijar API por Job: Develop → siempre apicsdev; Production → siempre apics (no depender de env previo)
+          if (isDevJob) {
+            env.VITE_API_URL = 'https://apicsdev.michelangelodelvalle.com/api'
+          } else if (isProdJob) {
+            env.VITE_API_URL = 'https://apics.michelangelodelvalle.com/api'
+          } else {
+            env.VITE_API_URL = (branch == 'main') ? 'https://apics.michelangelodelvalle.com/api' : (env.VITE_API_URL_DEV ?: 'https://apicsdev.michelangelodelvalle.com/api')
+          }
+          echo "========== CONFIGURACIÓN FRONTEND =========="
+          echo "Job: ${env.JOB_NAME} | Rama: ${branch}"
+          echo "Ambiente: ${env.ENVIRONMENT} | API: ${env.VITE_API_URL}"
+          echo "============================================="
+        }
+      }
+    }
+
+    stage('Install') {
       steps {
         dir('frontend') {
           sh '''#!/bin/bash
@@ -32,7 +71,6 @@ pipeline {
             nvm install 20
             nvm use 20
             npm ci
-            npm run build
           '''
         }
       }
@@ -41,7 +79,12 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         dir('frontend') {
-          sh 'docker build -t "${IMAGE_NAME}" .'
+          script {
+            echo "Build Docker con VITE_API_URL=${env.VITE_API_URL}"
+            // Construir comando en Groovy para que el build-arg llegue bien a Docker (evitar que el shell pierda la URL)
+            def buildArg = "VITE_API_URL=${env.VITE_API_URL}"
+            sh "docker build --no-cache -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} --build-arg \"${buildArg}\" ."
+          }
         }
       }
     }
@@ -49,14 +92,14 @@ pipeline {
     stage('Deploy') {
       steps {
         script {
-          sh "docker stop frontend 2>/dev/null || true"
-          sh "docker rm frontend 2>/dev/null || true"
+          sh "docker stop ${env.CONTAINER_NAME} 2>/dev/null || true"
+          sh "docker rm ${env.CONTAINER_NAME} 2>/dev/null || true"
           sh """
             docker run -d \
-              --name frontend \
-              -p 5173:80 \
+              --name ${env.CONTAINER_NAME} \
+              -p ${env.APP_PORT}:80 \
               --restart unless-stopped \
-              ${env.IMAGE_NAME}:latest
+              ${env.IMAGE_NAME}:${env.IMAGE_TAG}
           """
         }
       }
@@ -64,6 +107,9 @@ pipeline {
   }
 
   post {
+    success {
+      echo "Frontend desplegado (${env.ENVIRONMENT}) en http://localhost:${env.APP_PORT}"
+    }
     always {
       cleanWs()
     }
