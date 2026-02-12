@@ -140,9 +140,9 @@ const Payloads = () => {
 
   const handleApprove = async (payload) => {
     if (!payload) return
-    if (!window.confirm('Approve this payment and mark as cleared?')) return
+    if (!window.confirm('Approve this payment and mark as signed?')) return
     try {
-      await api.put(`/payloads/${payload._id}`, { status: 'cleared' })
+      await api.put(`/payloads/${payload._id}`, { status: 'signed' })
       fetchData()
     } catch (err) {
       console.error('Error approving payload:', err)
@@ -164,7 +164,7 @@ const Payloads = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'cleared': return 'success'
+      case 'signed': return 'success'
       case 'pending': return 'warning'
       case 'rejected': return 'error'
       default: return 'default'
@@ -336,7 +336,7 @@ const Payloads = () => {
                       color={getStatusColor(payload.status)}
                       size="small"
                       icon={
-                        payload.status === 'cleared' ? <CheckCircle /> :
+                        payload.status === 'signed' ? <CheckCircle /> :
                         payload.status === 'rejected' ? <Cancel /> : undefined
                       }
                     />
@@ -371,7 +371,7 @@ const Payloads = () => {
                           size="small"
                           color="success"
                           onClick={() => handleApprove(payload)}
-                          disabled={payload.status === 'cleared'}
+                          disabled={payload.status === 'signed'}
                         >
                           <CheckCircle fontSize="small" />
                         </IconButton>
@@ -509,7 +509,7 @@ const Payloads = () => {
                 }}
               >
                 <MenuItem value="pending">Pending</MenuItem>
-                <MenuItem value="cleared">Cleared</MenuItem>
+                <MenuItem value="signed">signed</MenuItem>
                 <MenuItem value="rejected">Rejected</MenuItem>
               </TextField>
             </Grid>

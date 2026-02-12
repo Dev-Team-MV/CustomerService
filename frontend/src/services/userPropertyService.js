@@ -108,12 +108,12 @@ const userPropertyService = {
       // Calcular totales
       const totalInvestment = properties.reduce((sum, prop) => sum + (prop.price || 0), 0)
       const totalPaid = payloads
-        .filter(p => p.status === 'cleared')
+        .filter(p => p.status === 'signed')
         .reduce((sum, p) => sum + (p.amount || 0), 0)
       const totalPending = totalInvestment - totalPaid
 
       // Contar pagos
-      const clearedPayments = payloads.filter(p => p.status === 'cleared').length
+      const clearedPayments = payloads.filter(p => p.status === 'signed').length
       const pendingPayments = payloads.filter(p => p.status === 'pending').length
       const rejectedPayments = payloads.filter(p => p.status === 'rejected').length
 
@@ -124,7 +124,7 @@ const userPropertyService = {
         paymentProgress: totalInvestment > 0 ? (totalPaid / totalInvestment) * 100 : 0,
         payments: {
           total: payloads.length,
-          cleared: clearedPayments,
+          signed: clearedPayments,
           pending: pendingPayments,
           rejected: rejectedPayments
         },
@@ -222,7 +222,7 @@ const userPropertyService = {
 
       // Calcular información de pago
       const totalPaid = payloads
-        .filter(p => p.status === 'cleared')
+        .filter(p => p.status === 'signed')
         .reduce((sum, p) => sum + p.amount, 0)
       const totalPending = property.price - totalPaid
 

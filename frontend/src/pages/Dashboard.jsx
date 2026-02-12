@@ -157,7 +157,7 @@ const Dashboard = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'cleared': return 'success'
+      case 'signed': return 'success'
       case 'pending': return 'warning'
       case 'rejected': return 'error'
       default: return 'default'
@@ -166,7 +166,7 @@ const Dashboard = () => {
 
   const getStatusLabel = (status) => {
     switch (status) {
-      case 'cleared': return 'Cleared'
+      case 'signed': return 'Signed'
       case 'pending': return 'Pending'
       case 'rejected': return 'Rejected'
       default: return status

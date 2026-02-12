@@ -362,7 +362,7 @@ const handleSubmitPayment = async () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "cleared":
+      case "signed":
         return "success";
       case "pending":
         return "warning";
@@ -375,7 +375,7 @@ const handleSubmitPayment = async () => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case "cleared":
+      case "signed":
         return <CheckCircleOutline />;
       case "pending":
         return <Pending />;
@@ -498,6 +498,9 @@ const handleSubmitPayment = async () => {
     >
       <Container maxWidth="xl">
         {/* ========== HEADER CON ESTADÍSTICAS ========== */}
+        
+        
+        {/* ✅ HEADER CON ESTADÍSTICAS - Estilo brandbook minimalista */}
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -508,113 +511,120 @@ const handleSubmitPayment = async () => {
             sx={{
               p: { xs: 2, sm: 3, md: 4 },
               mb: 4,
-              background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+              background: 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)',
               borderRadius: { xs: 4, md: 6 },
-              border: "1px solid rgba(74, 124, 89, 0.08)",
-              boxShadow: "0 20px 60px rgba(0, 0, 0, 0.08)",
-              overflow: "hidden",
-              position: "relative",
+              border: '1.5px solid #e8f5ee',
+              boxShadow: '0 12px 32px rgba(74,124,89,0.12)',
+              overflow: 'hidden',
+              position: 'relative',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                boxShadow: '0 24px 48px rgba(74,124,89,0.18)',
+                border: '2px solid rgba(140, 165, 81, 0.3)',
+              },
             }}
           >
+            {/* ✅ Barra decorativa superior - Estilo brandbook */}
             <Box
               sx={{
-                position: "absolute",
+                position: 'absolute',
                 top: 0,
+                left: 0,
                 right: 0,
-                width: "40%",
-                height: "100%",
-                opacity: 0.03,
-                backgroundImage:
-                  "radial-gradient(circle, #4a7c59 1px, transparent 1px)",
-                backgroundSize: "20px 20px",
-                display: { xs: "none", md: "block" }, // ✅ Ocultar en mobile
+                height: 4,
+                background: 'linear-gradient(90deg, #333F1F, #8CA551, #333F1F)',
+                opacity: 0.9,
               }}
             />
-
-            {/* HEADER - Siempre visible */}
+        
+            {/* ✅ HEADER - Diseño minimalista */}
             <Box
               display="flex"
-              flexDirection={{ xs: "column", sm: "row" }}
-              alignItems={{ xs: "flex-start", sm: "center" }}
+              flexDirection={{ xs: 'column', sm: 'row' }}
+              alignItems={{ xs: 'flex-start', sm: 'center' }}
               gap={{ xs: 2, sm: 3 }}
               mb={4}
               position="relative"
               zIndex={1}
             >
-              <motion.div
-                whileHover={{ scale: 1.05, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 300 }}
+              {/* ✅ Ícono sin animaciones excesivas */}
+              <Box
+                sx={{
+                  width: { xs: 60, sm: 70, md: 90 },
+                  height: { xs: 60, sm: 70, md: 90 },
+                  borderRadius: { xs: 3, md: 4 },
+                  background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 8px 24px rgba(51, 63, 31, 0.3)',
+                  border: '3px solid white',
+                  flexShrink: 0,
+                }}
               >
-                <Box
+                <Home
                   sx={{
-                    width: { xs: 60, sm: 70, md: 90 },
-                    height: { xs: 60, sm: 70, md: 90 },
-                    borderRadius: { xs: 3, md: 4 },
-                    background:
-                      "linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    boxShadow: "0 12px 40px rgba(74, 124, 89, 0.3)",
-                    position: "relative",
-                    "&::before": {
-                      content: '""',
-                      position: "absolute",
-                      inset: -3,
-                      borderRadius: { xs: 3, md: 4 },
-                      background:
-                        "linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)",
-                      opacity: 0.3,
-                      filter: "blur(10px)",
-                    },
+                    fontSize: { xs: 30, sm: 38, md: 45 },
+                    color: 'white',
                   }}
-                >
-                  <Home
-                    sx={{
-                      fontSize: { xs: 30, sm: 38, md: 45 },
-                      color: "white",
-                    }}
-                  />
-                </Box>
-              </motion.div>
+                />
+              </Box>
+        
               <Box flex={1}>
+                {/* ✅ Título - Tipografía Poppins */}
                 <Typography
                   variant="h3"
-                  fontWeight="800"
                   sx={{
-                    color: "#2c3e50",
-                    letterSpacing: "-1px",
+                    fontFamily: '"Poppins", sans-serif',
+                    color: '#1a1a1a',
+                    fontWeight: 700,
+                    letterSpacing: '0.5px',
                     mb: { xs: 0.5, sm: 1 },
-                    fontSize: { xs: "1.75rem", sm: "2.25rem", md: "3rem" },
+                    fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3rem' },
+                    textTransform: 'uppercase',
                   }}
                 >
                   My Properties
                 </Typography>
+        
+                {/* ✅ Subtítulo con chip minimalista */}
                 <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
                   <Typography
                     variant="h6"
                     sx={{
-                      color: "#6c757d",
+                      color: '#706f6f',
                       fontWeight: 400,
-                      fontSize: { xs: "0.875rem", sm: "1rem", md: "1.25rem" },
+                      fontFamily: '"Poppins", sans-serif',
+                      fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' },
                     }}
                   >
                     Welcome back,
                   </Typography>
                   <Chip
-                    label={user?.firstName || "Investor"}
+                    label={user?.firstName || 'Investor'}
+                    size="small"
                     sx={{
-                      background:
-                        "linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)",
-                      color: "white",
+                      bgcolor: 'transparent',
+                      border: '1.5px solid #8CA551',
+                      color: '#3d5a4d',
                       fontWeight: 700,
-                      fontSize: { xs: "0.75rem", sm: "0.85rem", md: "0.9rem" },
+                      fontSize: { xs: '0.75rem', sm: '0.85rem', md: '0.9rem' },
                       height: { xs: 26, sm: 30, md: 32 },
+                      px: { xs: 1.5, sm: 2 },
+                      fontFamily: '"Poppins", sans-serif',
+                      letterSpacing: '0.5px',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        bgcolor: 'rgba(140, 165, 81, 0.08)',
+                        borderColor: '#8CA551',
+                      },
+                      '& .MuiChip-icon': {
+                        color: '#8CA551',
+                      },
                     }}
                     icon={
                       <Star
                         sx={{
-                          color: "white !important",
                           fontSize: { xs: 16, sm: 18, md: 20 },
                         }}
                       />
@@ -623,44 +633,40 @@ const handleSubmitPayment = async () => {
                 </Box>
               </Box>
             </Box>
-
-            {/* ESTADÍSTICAS - Con animación de entrada */}
+        
+            {/* ✅ ESTADÍSTICAS - Estilo brandbook */}
             <AnimatePresence>
               {financialSummary ? (
                 <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
                   {[
                     {
-                      label: "Total Investment",
+                      label: 'Total Investment',
                       value: `$${financialSummary.totalInvestment.toLocaleString()}`,
                       icon: <AccountBalance />,
-                      color: "#4a7c59",
-                      bgGradient:
-                        "linear-gradient(135deg, #4a7c59 0%, #5a9269 100%)",
+                      color: '#333F1F',
+                      borderColor: '#333F1F',
                     },
                     {
-                      label: "Total Paid",
+                      label: 'Total Paid',
                       value: `$${financialSummary.totalPaid.toLocaleString()}`,
                       icon: <CheckCircle />,
                       sub: `${Math.round(financialSummary.paymentProgress)}% completed`,
-                      color: "#8bc34a",
-                      bgGradient:
-                        "linear-gradient(135deg, #8bc34a 0%, #9ccc65 100%)",
+                      color: '#8CA551',
+                      borderColor: '#8CA551',
                     },
                     {
-                      label: "Pending Amount",
+                      label: 'Pending Amount',
                       value: `$${financialSummary.totalPending.toLocaleString()}`,
                       icon: <Pending />,
-                      color: "#ff9800",
-                      bgGradient:
-                        "linear-gradient(135deg, #ff9800 0%, #ffa726 100%)",
+                      color: '#E5863C',
+                      borderColor: '#E5863C',
                     },
                     {
-                      label: "Properties Owned",
+                      label: 'Properties Owned',
                       value: financialSummary.properties,
                       icon: <Home />,
-                      color: "#2196f3",
-                      bgGradient:
-                        "linear-gradient(135deg, #2196f3 0%, #42a5f5 100%)",
+                      color: '#706f6f',
+                      borderColor: '#706f6f',
                     },
                   ].map((stat, index) => (
                     <Grid item xs={6} sm={6} md={3} key={index}>
@@ -670,36 +676,38 @@ const handleSubmitPayment = async () => {
                         transition={{
                           delay: index * 0.1,
                           duration: 0.5,
-                          type: "spring",
+                          type: 'spring',
                           stiffness: 100,
                         }}
                         whileHover={{
-                          y: -8,
+                          y: -4,
                           transition: { duration: 0.2 },
                         }}
                       >
                         <Card
                           sx={{
-                            height: "100%",
+                            height: '100%',
                             borderRadius: { xs: 3, md: 4 },
-                            border: "1px solid rgba(0, 0, 0, 0.06)",
-                            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.08)",
-                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                            position: "relative",
-                            overflow: "hidden",
-                            "&:hover": {
-                              boxShadow: `0 16px 48px ${stat.color}30`,
-                              borderColor: stat.color,
-                              transform: "translateY(-4px)",
+                            border: `1.5px solid ${stat.borderColor}30`,
+                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            background: 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)',
+                            '&:hover': {
+                              boxShadow: `0 16px 48px ${stat.color}20`,
+                              borderColor: stat.borderColor,
+                              transform: 'translateY(-2px)',
                             },
-                            "&::before": {
+                            '&::before': {
                               content: '""',
-                              position: "absolute",
+                              position: 'absolute',
                               top: 0,
                               left: 0,
                               right: 0,
                               height: { xs: 3, md: 4 },
-                              background: stat.bgGradient,
+                              background: stat.color,
+                              opacity: 0.9,
                             },
                           }}
                         >
@@ -709,56 +717,54 @@ const handleSubmitPayment = async () => {
                               alignItems="flex-start"
                               justifyContent="space-between"
                               mb={{ xs: 1.5, md: 2 }}
-                              flexDirection={{ xs: "column", sm: "row" }}
+                              flexDirection={{ xs: 'column', sm: 'row' }}
                               gap={{ xs: 1, sm: 0 }}
                             >
                               <Typography
                                 variant="caption"
                                 sx={{
-                                  color: "#6c757d",
-                                  fontWeight: 700,
-                                  textTransform: "uppercase",
-                                  letterSpacing: "0.5px",
-                                  fontSize: { xs: "0.65rem", sm: "0.7rem" },
+                                  color: '#999999',
+                                  fontWeight: 500,
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '1px',
+                                  fontFamily: '"Poppins", sans-serif',
+                                  fontSize: { xs: '0.65rem', sm: '0.7rem' },
                                 }}
                               >
                                 {stat.label}
                               </Typography>
-                              <motion.div
-                                whileHover={{ rotate: 360, scale: 1.1 }}
-                                transition={{ duration: 0.5 }}
+                              <Box
+                                sx={{
+                                  width: { xs: 36, sm: 40, md: 44 },
+                                  height: { xs: 36, sm: 40, md: 44 },
+                                  borderRadius: '50%',
+                                  bgcolor: `${stat.color}10`,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  color: stat.color,
+                                  transition: 'all 0.3s ease',
+                                }}
                               >
-                                <Box
-                                  sx={{
-                                    width: { xs: 36, sm: 42, md: 48 },
-                                    height: { xs: 36, sm: 42, md: 48 },
-                                    borderRadius: { xs: 2, md: 3 },
-                                    background: `${stat.color}15`,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    color: stat.color,
-                                  }}
-                                >
-                                  {React.cloneElement(stat.icon, {
-                                    sx: {
-                                      fontSize: { xs: 18, sm: 20, md: 24 },
-                                    },
-                                  })}
-                                </Box>
-                              </motion.div>
+                                {React.cloneElement(stat.icon, {
+                                  sx: {
+                                    fontSize: { xs: 18, sm: 20, md: 22 },
+                                  },
+                                })}
+                              </Box>
                             </Box>
                             <Typography
                               variant="h4"
-                              fontWeight="800"
                               sx={{
                                 color: stat.color,
+                                fontWeight: 600,
+                                fontFamily: '"Poppins", sans-serif',
                                 mb: 0.5,
-                                letterSpacing: "-0.5px",
+                                letterSpacing: '-0.5px',
                                 fontSize: {
-                                  xs: "1.25rem",
-                                  sm: "1.5rem",
-                                  md: "2rem",
+                                  xs: '1.25rem',
+                                  sm: '1.5rem',
+                                  md: '2rem',
                                 },
                               }}
                             >
@@ -775,9 +781,10 @@ const handleSubmitPayment = async () => {
                                 <Typography
                                   variant="caption"
                                   sx={{
-                                    color: "#6c757d",
-                                    fontWeight: 600,
-                                    fontSize: { xs: "0.65rem", sm: "0.75rem" },
+                                    color: '#706f6f',
+                                    fontWeight: 500,
+                                    fontFamily: '"Poppins", sans-serif',
+                                    fontSize: { xs: '0.65rem', sm: '0.75rem' },
                                   }}
                                 >
                                   {stat.sub}
@@ -791,7 +798,7 @@ const handleSubmitPayment = async () => {
                   ))}
                 </Grid>
               ) : (
-                /* SKELETON LOADER mientras carga */
+                /* ✅ SKELETON LOADER - Estilo brandbook */
                 <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
                   {[0, 1, 2, 3].map((index) => (
                     <Grid item xs={6} sm={6} md={3} key={index}>
@@ -804,35 +811,36 @@ const handleSubmitPayment = async () => {
                           sx={{
                             height: { xs: 140, sm: 160, md: 180 },
                             borderRadius: { xs: 3, md: 4 },
-                            border: "1px solid rgba(0, 0, 0, 0.06)",
-                            overflow: "hidden",
+                            border: '1.5px solid #e8f5ee',
+                            overflow: 'hidden',
+                            background: 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)',
                           }}
                         >
                           <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
                             <Box
                               sx={{
-                                width: "100%",
+                                width: '100%',
                                 height: { xs: 12, sm: 14, md: 16 },
-                                bgcolor: "#e0e0e0",
+                                bgcolor: 'rgba(140, 165, 81, 0.15)',
                                 borderRadius: 1,
                                 mb: 2,
-                                animation: "pulse 1.5s ease-in-out infinite",
-                                "@keyframes pulse": {
-                                  "0%, 100%": { opacity: 1 },
-                                  "50%": { opacity: 0.5 },
+                                animation: 'pulse 1.5s ease-in-out infinite',
+                                '@keyframes pulse': {
+                                  '0%, 100%': { opacity: 1 },
+                                  '50%': { opacity: 0.5 },
                                 },
                               }}
                             />
                             <Box
                               sx={{
-                                width: "60%",
+                                width: '60%',
                                 height: { xs: 28, sm: 32, md: 36 },
-                                bgcolor: "#e0e0e0",
+                                bgcolor: 'rgba(140, 165, 81, 0.15)',
                                 borderRadius: 1,
-                                animation: "pulse 1.5s ease-in-out infinite",
-                                "@keyframes pulse": {
-                                  "0%, 100%": { opacity: 1 },
-                                  "50%": { opacity: 0.5 },
+                                animation: 'pulse 1.5s ease-in-out infinite',
+                                '@keyframes pulse': {
+                                  '0%, 100%': { opacity: 1 },
+                                  '50%': { opacity: 0.5 },
                                 },
                               }}
                             />
@@ -846,6 +854,8 @@ const handleSubmitPayment = async () => {
             </AnimatePresence>
           </Paper>
         </motion.div>
+        
+        
 
         {/* ========== GRID DE PROPIEDADES / DETALLES ========== */}
         <AnimatePresence mode="wait">
@@ -893,6 +903,8 @@ const handleSubmitPayment = async () => {
                 />
               </Box>
 
+              
+              
               <Grid container spacing={3}>
                 {properties.map((property, index) => (
                   <Grid item xs={12} md={6} lg={4} key={property._id}>
@@ -912,57 +924,55 @@ const handleSubmitPayment = async () => {
                         onClick={() => handleSelectProperty(property._id)}
                         sx={{
                           height: "100%",
-                          borderRadius: 5,
+                          minHeight: { xs: 420, sm: 440, md: 460 },
+                          borderRadius: 6,
                           cursor: "pointer",
-                          border:
-                            hoveredCard === property._id
-                              ? "2px solid #4a7c59"
-                              : "1px solid rgba(0, 0, 0, 0.06)",
-                          boxShadow:
-                            hoveredCard === property._id
-                              ? "0 24px 60px rgba(74, 124, 89, 0.25)"
-                              : "0 8px 24px rgba(0, 0, 0, 0.08)",
+                          border: hoveredCard === property._id
+                            ? "2px solid #333F1F"
+                            : "1.5px solid #e8f5ee",
+                          boxShadow: hoveredCard === property._id
+                            ? "0 24px 60px rgba(51, 63, 31, 0.25)"
+                            : "0 12px 32px rgba(74, 124, 89, 0.12)",
                           transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                           overflow: "hidden",
                           position: "relative",
-                          background:
-                            "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+                          background: "linear-gradient(180deg, #ffffff 0%, #fafafa 100%)",
+                          display: "flex",
+                          flexDirection: "column",
                         }}
                       >
-                        <motion.div
-                          style={{
+                        {/* ✅ Barra superior decorativa */}
+                        <Box
+                          sx={{
                             position: "absolute",
                             top: 0,
                             left: 0,
                             right: 0,
-                            height: 5,
-                            background:
-                              "linear-gradient(90deg, #4a7c59, #8bc34a, #4a7c59)",
-                            backgroundSize: "200% 100%",
+                            height: 4,
+                            background: hoveredCard === property._id
+                              ? "linear-gradient(90deg, #333F1F, #8CA551, #333F1F)"
+                              : "#8CA551",
+                            transition: "all 0.3s ease",
                           }}
-                          animate={
-                            hoveredCard === property._id
-                              ? {
-                                  backgroundPosition: ["0% 50%", "100% 50%"],
-                                }
-                              : {}
-                          }
-                          transition={{ duration: 1.5, repeat: Infinity }}
                         />
-
-                        <CardContent sx={{ p: 3 }}>
-                          <Box
-                            display="flex"
-                            alignItems="center"
-                            gap={2}
-                            mb={3}
-                          >
+              
+                        <CardContent 
+                          sx={{ 
+                            p: { xs: 2.5, sm: 3 },
+                            pt: 3.5,
+                            flex: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                          }}
+                        >
+                          {/* ✅ Header con imagen y modelo */}
+                          <Box display="flex" alignItems="center" gap={2} mb={3}>
                             <motion.div
                               animate={
                                 hoveredCard === property._id
                                   ? {
-                                      scale: [1, 1.1, 1],
-                                      rotate: [0, 5, -5, 0],
+                                      scale: [1, 1.05, 1],
+                                      rotate: [0, 3, -3, 0],
                                     }
                                   : {}
                               }
@@ -970,12 +980,11 @@ const handleSubmitPayment = async () => {
                             >
                               <Avatar
                                 sx={{
-                                  width: 70,
-                                  height: 70,
-                                  background:
-                                    "linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)",
-                                  boxShadow:
-                                    "0 8px 24px rgba(74, 124, 89, 0.3)",
+                                  width: { xs: 64, sm: 70 },
+                                  height: { xs: 64, sm: 70 },
+                                  background: "linear-gradient(135deg, #333F1F 0%, #8CA551 100%)",
+                                  boxShadow: "0 8px 24px rgba(51, 63, 31, 0.3)",
+                                  border: "3px solid white",
                                   overflow: "hidden",
                                 }}
                               >
@@ -990,201 +999,240 @@ const handleSubmitPayment = async () => {
                                     }}
                                   />
                                 ) : (
-                                  <Home sx={{ fontSize: 35, color: "white" }} />
+                                  <Home sx={{ fontSize: 32, color: "white" }} />
                                 )}
                               </Avatar>
                             </motion.div>
+                            
                             <Box flex={1}>
                               <Typography
                                 variant="h6"
-                                fontWeight="bold"
                                 sx={{
-                                  color: "#2c3e50",
+                                  fontFamily: '"Poppins", sans-serif',
+                                  color: "#1a1a1a",
+                                  fontWeight: 700,
                                   mb: 0.5,
+                                  fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                                  letterSpacing: "0.5px",
                                 }}
                               >
                                 {property.model?.model || "Model N/A"}
                               </Typography>
                               <Box display="flex" alignItems="center" gap={0.5}>
-                                <LocationOn
-                                  sx={{ fontSize: 16, color: "#4a7c59" }}
-                                />
+                                <LocationOn sx={{ fontSize: 16, color: "#8CA551" }} />
                                 <Typography
                                   variant="caption"
-                                  sx={{ color: "#6c757d", fontWeight: 500 }}
+                                  sx={{
+                                    color: "#706f6f",
+                                    fontWeight: 600,
+                                    fontFamily: '"Poppins", sans-serif',
+                                    fontSize: "0.75rem",
+                                  }}
                                 >
-                                  Lot #{property.lot?.number} • Sec{" "}
-                                  {property.lot?.section}
+                                  Lot #{property.lot?.number} • Sec {property.lot?.section}
                                 </Typography>
                               </Box>
                             </Box>
                           </Box>
-
+              
+                          {/* ✅ Línea decorativa */}
+                          <Box
+                            sx={{
+                              width: 40,
+                              height: 2,
+                              bgcolor: "#8CA551",
+                              mx: "auto",
+                              mb: 2.5,
+                              opacity: 0.8,
+                            }}
+                          />
+              
+                          {/* ✅ Grid de especificaciones - Estilo brandbook */}
                           {property.model && (
-                            <Grid container spacing={1.5} sx={{ mb: 2.5 }}>
+                            <Box
+                              sx={{
+                                display: "grid",
+                                gridTemplateColumns: "repeat(3, 1fr)",
+                                gap: 0,
+                                mb: 3,
+                                borderTop: "1px solid #e0e0e0",
+                                borderBottom: "1px solid #e0e0e0",
+                                py: 2,
+                              }}
+                            >
                               {[
                                 {
                                   icon: <Bed />,
                                   value: property.model.bedrooms,
-                                  label: "Bedrooms",
+                                  label: "BEDS",
                                 },
                                 {
                                   icon: <Bathtub />,
                                   value: property.model.bathrooms,
-                                  label: "Bathrooms",
+                                  label: "BATHS",
                                 },
                                 {
                                   icon: <SquareFoot />,
                                   value: property.model.sqft,
-                                  label: "Sq Ft",
+                                  label: "SQFT",
                                 },
                               ].map((spec, idx) => (
-                                <Grid item xs={4} key={idx}>
-                                  <motion.div
-                                    whileHover={{ scale: 1.05 }}
-                                    transition={{
-                                      type: "spring",
-                                      stiffness: 300,
+                                <Box
+                                  key={idx}
+                                  sx={{
+                                    textAlign: "center",
+                                    borderRight: idx < 2 ? "1px solid #e0e0e0" : "none",
+                                    px: 1,
+                                  }}
+                                >
+                                  <Typography
+                                    variant="caption"
+                                    sx={{
+                                      color: "#999999",
+                                      fontSize: "0.65rem",
+                                      fontWeight: 500,
+                                      textTransform: "uppercase",
+                                      letterSpacing: "1px",
+                                      fontFamily: '"Poppins", sans-serif',
+                                      display: "block",
+                                      mb: 0.8,
                                     }}
                                   >
-                                    <Paper
-                                      elevation={0}
-                                      sx={{
-                                        p: 1.5,
-                                        textAlign: "center",
-                                        bgcolor: "#f8f9fa",
-                                        borderRadius: 2.5,
-                                        border:
-                                          "1px solid rgba(74, 124, 89, 0.1)",
-                                        transition: "all 0.3s ease",
-                                        "&:hover": {
-                                          bgcolor: "rgba(74, 124, 89, 0.05)",
-                                          borderColor: "#4a7c59",
-                                          transform: "translateY(-2px)",
-                                        },
-                                      }}
-                                    >
-                                      <Box sx={{ color: "#4a7c59", mb: 0.5 }}>
-                                        {spec.icon}
-                                      </Box>
-                                      <Typography
-                                        variant="h6"
-                                        fontWeight="700"
-                                        color="#2c3e50"
-                                      >
-                                        {spec.value}
-                                      </Typography>
-                                      <Typography
-                                        variant="caption"
-                                        sx={{ color: "#6c757d" }}
-                                      >
-                                        {spec.label}
-                                      </Typography>
-                                    </Paper>
-                                  </motion.div>
-                                </Grid>
+                                    {spec.label}
+                                  </Typography>
+                                  <Typography
+                                    variant="h6"
+                                    sx={{
+                                      color: "#1a1a1a",
+                                      fontSize: { xs: "1.1rem", md: "1.2rem" },
+                                      fontWeight: 600,
+                                      fontFamily: '"Poppins", sans-serif',
+                                      lineHeight: 1,
+                                    }}
+                                  >
+                                    {spec.value}
+                                  </Typography>
+                                </Box>
                               ))}
-                            </Grid>
+                            </Box>
                           )}
-
-                          <Divider sx={{ my: 2 }} />
-
+              
+                          {/* ✅ Precio - Destacado */}
                           <Box
                             sx={{
                               p: 2.5,
                               borderRadius: 3,
-                              background:
-                                "linear-gradient(135deg, rgba(74, 124, 89, 0.08) 0%, rgba(139, 195, 74, 0.08) 100%)",
-                              border: "1px solid rgba(74, 124, 89, 0.15)",
+                              background: "linear-gradient(135deg, rgba(140, 165, 81, 0.08) 0%, rgba(51, 63, 31, 0.08) 100%)",
+                              border: "1px solid rgba(140, 165, 81, 0.2)",
                               textAlign: "center",
-                              mb: 2,
+                              mb: 2.5,
                             }}
                           >
                             <Typography
                               variant="caption"
                               sx={{
-                                color: "#6c757d",
+                                color: "#706f6f",
                                 fontWeight: 600,
+                                fontFamily: '"Poppins", sans-serif',
                                 display: "block",
                                 mb: 0.5,
+                                fontSize: "0.7rem",
+                                textTransform: "uppercase",
+                                letterSpacing: "1px",
                               }}
                             >
                               Property Value
                             </Typography>
                             <Typography
                               variant="h4"
-                              fontWeight="800"
                               sx={{
-                                color: "#4a7c59",
+                                color: "#333F1F",
+                                fontWeight: 800,
+                                fontFamily: '"Poppins", sans-serif',
                                 letterSpacing: "-0.5px",
+                                fontSize: { xs: "1.75rem", sm: "2rem" },
                               }}
                             >
                               ${property.price?.toLocaleString()}
                             </Typography>
                           </Box>
-
-                          <Box display="flex" justifyContent="center">
+              
+                          {/* ✅ Status Chip */}
+                          <Box display="flex" justifyContent="center" mb={2.5}>
                             <Chip
                               label={
                                 property.status === "sold"
                                   ? "Active Property"
                                   : "In Progress"
                               }
-                              color={
-                                property.status === "sold"
-                                  ? "success"
-                                  : "primary"
-                              }
-                              sx={{ fontWeight: 700, px: 2 }}
+                              size="small"
+                              sx={{
+                                bgcolor: property.status === "sold" ? "#8CA551" : "#E5863C",
+                                color: "white",
+                                fontWeight: 700,
+                                fontFamily: '"Poppins", sans-serif',
+                                fontSize: "0.75rem",
+                                height: 28,
+                                px: 2,
+                              }}
                             />
                           </Box>
-                        </CardContent>
-
-                        <Divider />
-
-                        <CardActions sx={{ p: 2.5 }}>
+              
+                          {/* ✅ Botón - Estilo consistente con ViewModels */}
                           <Button
                             fullWidth
-                            variant="contained"
-                            endIcon={
-                              <motion.div
-                                animate={
-                                  hoveredCard === property._id
-                                    ? { x: [0, 5, 0] }
-                                    : {}
-                                }
-                                transition={{ duration: 0.6, repeat: Infinity }}
-                              >
-                                <ChevronRight />
-                              </motion.div>
-                            }
                             sx={{
-                              py: 1.5,
-                              borderRadius: 3,
-                              background:
-                                "linear-gradient(135deg, #4a7c59 0%, #5a9269 100%)",
+                              mt: "auto",
+                              borderRadius: 0,
+                              bgcolor: "#333F1F",
                               color: "white",
-                              fontWeight: 700,
-                              textTransform: "none",
-                              fontSize: "1rem",
-                              boxShadow: "0 8px 20px rgba(74, 124, 89, 0.3)",
-                              transition: "all 0.3s ease",
+                              fontWeight: 600,
+                              fontSize: { xs: "0.85rem", md: "0.9rem" },
+                              px: 3,
+                              py: { xs: 1.5, md: 1.8 },
+                              letterSpacing: "1.5px",
+                              textTransform: "uppercase",
+                              fontFamily: '"Poppins", sans-serif',
+                              border: "none",
+                              position: "relative",
+                              overflow: "hidden",
+                              "&::before": {
+                                content: '""',
+                                position: "absolute",
+                                top: 0,
+                                left: "-100%",
+                                width: "100%",
+                                height: "100%",
+                                bgcolor: "#8CA551",
+                                transition: "left 0.4s ease",
+                                zIndex: 0,
+                              },
                               "&:hover": {
-                                background:
-                                  "linear-gradient(135deg, #3d664a 0%, #4a7c59 100%)",
-                                boxShadow: "0 12px 28px rgba(74, 124, 89, 0.4)",
-                                transform: "translateY(-2px)",
+                                bgcolor: "#333F1F",
+                                "&::before": {
+                                  left: 0,
+                                },
+                                "& .button-text": {
+                                  color: "white",
+                                },
+                              },
+                              "& .button-text": {
+                                position: "relative",
+                                zIndex: 1,
+                                transition: "color 0.3s ease",
                               },
                             }}
                           >
-                            View Full Details
+                            <span className="button-text">View Full Details</span>
                           </Button>
-                        </CardActions>
+                        </CardContent>
                       </Card>
                     </motion.div>
                   </Grid>
                 ))}
               </Grid>
+              
+              
             </motion.div>
           ) : (
             /* ========== PROPIEDAD SELECCIONADA ========== */
@@ -1229,7 +1277,9 @@ const handleSubmitPayment = async () => {
 
               {propertyDetails && (
                 <>
-                  {/* Property Header */}
+                  
+                  
+                  {/* ✅ Property Header - Estilo brandbook minimalista */}
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -1238,171 +1288,202 @@ const handleSubmitPayment = async () => {
                     <Paper
                       elevation={0}
                       sx={{
-                        p: 4,
+                        p: { xs: 3, sm: 3.5, md: 4 },
                         mb: 3,
-                        background:
-                          "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-                        borderRadius: 6,
-                        border: "1px solid rgba(74, 124, 89, 0.15)",
-                        boxShadow: "0 20px 60px rgba(0, 0, 0, 0.08)",
-                        overflow: "hidden",
-                        position: "relative",
+                        background: 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)',
+                        borderRadius: { xs: 4, md: 6 },
+                        border: '1.5px solid #e8f5ee',
+                        boxShadow: '0 12px 32px rgba(74,124,89,0.12)',
+                        overflow: 'hidden',
+                        position: 'relative',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          boxShadow: '0 24px 48px rgba(74,124,89,0.18)',
+                          border: '2px solid rgba(140, 165, 81, 0.3)',
+                        },
                       }}
                     >
-                      <motion.div
-                        style={{
-                          position: "absolute",
+                      {/* ✅ Barra decorativa superior - Estilo brandbook */}
+                      <Box
+                        sx={{
+                          position: 'absolute',
                           top: 0,
                           left: 0,
                           right: 0,
-                          height: 5,
-                          background:
-                            "linear-gradient(90deg, #4a7c59, #8bc34a, #4a7c59)",
-                          backgroundSize: "200% 100%",
+                          height: 4,
+                          background: 'linear-gradient(90deg, #333F1F, #8CA551, #333F1F)',
+                          opacity: 0.9,
                         }}
-                        animate={{
-                          backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                        }}
-                        transition={{ duration: 4, repeat: Infinity }}
                       />
-
-                      <Grid container spacing={4} alignItems="center">
+                  
+                      <Grid container spacing={{ xs: 3, md: 4 }} alignItems="center">
+                        {/* ✅ Columna izquierda - Información del modelo */}
                         <Grid item xs={12} md={8}>
                           <Box 
-                          display="flex" 
-                          alignItems="center" 
-                          gap={2}
+                            display="flex" 
+                            alignItems="center" 
+                            gap={{ xs: 2, md: 3 }}
+                            flexDirection={{ xs: 'column', sm: 'row' }}
+                            textAlign={{ xs: 'center', sm: 'left' }}
                           >
-                            <motion.div
-                              animate={{
-                                y: [0, -10, 0],
-                                scale: [1, 1.05, 1],
-                              }}
-                              transition={{ duration: 3, repeat: Infinity }}
-                            >
-                              <Avatar
-                                sx={{
-                                  width: 100,
-                                  height: 100,
-                                  background:
-                                    "linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)",
-                                  boxShadow:
-                                    "0 15px 40px rgba(74, 124, 89, 0.4)",
-                                  border: "4px solid white",
-                                  overflow: "hidden",
-                                }}
-                              >
-                                {propertyDetails?.property?.images
-                                  ?.exterior?.[0] ? (
-                                  <img
-                                    src={
-                                      propertyDetails.property.images
-                                        .exterior[0]
-                                    }
-                                    alt="Property"
-                                    style={{
-                                      width: "100%",
-                                      height: "100%",
-                                      objectFit: "cover",
-                                    }}
-                                  />
-                                ) : (
-                                  <Home sx={{ fontSize: 50, color: "white" }} />
-                                )}
-                              </Avatar>
-                            </motion.div>
-                            <Box
+                            {/* ✅ Avatar - Sin animaciones excesivas */}
+                            <Avatar
                               sx={{
-                                px: { xs: 2, sm: 0 }, // ✅ Padding horizontal en mobile
+                                width: { xs: 80, sm: 90, md: 100 },
+                                height: { xs: 80, sm: 90, md: 100 },
+                                background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
+                                boxShadow: '0 8px 24px rgba(51, 63, 31, 0.3)',
+                                border: '3px solid white',
+                                overflow: 'hidden',
+                                flexShrink: 0,
                               }}
                             >
+                              {propertyDetails?.property?.images?.exterior?.[0] ? (
+                                <img
+                                  src={propertyDetails.property.images.exterior[0]}
+                                  alt="Property"
+                                  style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                  }}
+                                />
+                              ) : (
+                                <Home sx={{ fontSize: { xs: 40, md: 50 }, color: 'white' }} />
+                              )}
+                            </Avatar>
+                  
+                            {/* ✅ Información principal */}
+                            <Box flex={1}>
+                              {/* ✅ Título del modelo - Tipografía elegante */}
                               <Typography
                                 variant="h3"
-                                fontWeight="800"
                                 sx={{
-                                  color: "#2c3e50",
-                                  letterSpacing: "-1px",
+                                  fontFamily: '"Poppins", sans-serif',
+                                  color: '#1a1a1a',
+                                  fontWeight: 700,
+                                  letterSpacing: '0.5px',
                                   mb: 1,
-                                  fontSize: { xs: "1.5rem", sm: "2rem", md: "3rem" }, // ✅ Responsive font
+                                  fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
+                                  textTransform: 'uppercase',
                                 }}
                               >
-                                {propertyDetails.model?.model || "Model N/A"}
+                                {propertyDetails.model?.model || 'Model N/A'}
                               </Typography>
-                            
+                  
+                              {/* ✅ Línea decorativa sutil */}
+                              <Box
+                                sx={{
+                                  width: { xs: 40, sm: 50, md: 60 },
+                                  height: 2,
+                                  bgcolor: '#8CA551',
+                                  mb: 1.5,
+                                  opacity: 0.8,
+                                  mx: { xs: 'auto', sm: 0 },
+                                }}
+                              />
+                  
+                              {/* ✅ Ubicación - Diseño minimalista */}
                               <Box
                                 display="flex"
                                 alignItems="center"
                                 gap={1}
                                 mb={2}
-                                flexWrap="wrap" // ✅ Permite salto de línea si es necesario
+                                flexWrap="wrap"
+                                justifyContent={{ xs: 'center', sm: 'flex-start' }}
                               >
-                                <LocationOn sx={{ color: "#4a7c59", fontSize: { xs: 18, sm: 20 } }} />
+                                <LocationOn 
+                                  sx={{ 
+                                    color: '#8CA551', 
+                                    fontSize: { xs: 18, sm: 20 } 
+                                  }} 
+                                />
                                 <Typography
                                   variant="h6"
                                   sx={{
-                                    color: "#6c757d",
+                                    color: '#706f6f',
                                     fontWeight: 500,
-                                    fontSize: { xs: "0.9rem", sm: "1rem", md: "1.25rem" }, // ✅ Responsive
+                                    fontFamily: '"Poppins", sans-serif',
+                                    fontSize: { xs: '0.9rem', sm: '1rem', md: '1.15rem' },
+                                    letterSpacing: '0.5px',
                                   }}
                                 >
-                                  Lot #{propertyDetails.property.lot?.number} • Section{" "}
+                                  Lot #{propertyDetails.property.lot?.number} • Section{' '}
                                   {propertyDetails.property.lot?.section}
                                 </Typography>
                               </Box>
-                            
-                              {/* CHIPS RESPONSIVE */}
+                  
+                              {/* ✅ Chips de estado - Estilo brandbook */}
                               <Box
                                 display="flex"
-                                gap={1}
+                                gap={1.5}
                                 flexWrap="wrap"
-                                sx={{
-                                  justifyContent: { xs: "flex-start", sm: "flex-start" }, // ✅ Alineación consistente
-                                }}
+                                justifyContent={{ xs: 'center', sm: 'flex-start' }}
                               >
                                 {propertyDetails.construction.currentPhase && (
                                   <Chip
                                     label={`Phase ${propertyDetails.construction.currentPhase.phaseNumber}: ${propertyDetails.construction.currentPhase.title}`}
+                                    size="small"
                                     sx={{
-                                      bgcolor: "#4a7c59",
-                                      color: "white",
+                                      bgcolor: 'transparent',
+                                      border: '1.5px solid #333F1F',
+                                      color: '#2c5530',
                                       fontWeight: 700,
-                                      fontSize: { xs: "0.7rem", sm: "0.8rem", md: "0.875rem" }, // ✅ Fuente adaptativa
-                                      height: { xs: 28, sm: 32 }, // ✅ Altura menor en mobile
-                                      "& .MuiChip-label": {
-                                        px: { xs: 1, sm: 1.5 }, // ✅ Padding interno
+                                      fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
+                                      height: { xs: 28, sm: 30, md: 32 },
+                                      px: { xs: 1.5, sm: 2 },
+                                      fontFamily: '"Poppins", sans-serif',
+                                      letterSpacing: '0.5px',
+                                      textTransform: 'uppercase',
+                                      transition: 'all 0.3s ease',
+                                      '&:hover': {
+                                        bgcolor: 'rgba(51, 63, 31, 0.08)',
+                                        borderColor: '#333F1F',
+                                      },
+                                      '& .MuiChip-icon': {
+                                        color: '#333F1F',
                                       },
                                     }}
                                     icon={
                                       <Layers
                                         sx={{
-                                          color: "white !important",
-                                          fontSize: { xs: 14, sm: 16 }, // ✅ Ícono más pequeño
+                                          fontSize: { xs: 14, sm: 16 },
                                         }}
                                       />
                                     }
                                   />
                                 )}
-                            
+                  
                                 <Chip
                                   label={
-                                    typeof propertyDetails.property.totalConstructionPercentage === "number"
+                                    typeof propertyDetails.property.totalConstructionPercentage === 'number'
                                       ? `${propertyDetails.property.totalConstructionPercentage}% Complete`
-                                      : "—"
+                                      : '—'
                                   }
+                                  size="small"
                                   sx={{
-                                    bgcolor: "#8bc34a",
-                                    color: "white",
+                                    bgcolor: 'transparent',
+                                    border: '1.5px solid #8CA551',
+                                    color: '#3d5a4d',
                                     fontWeight: 700,
-                                    fontSize: { xs: "0.7rem", sm: "0.8rem", md: "0.875rem" }, // ✅ Fuente adaptativa
-                                    height: { xs: 28, sm: 32 },
-                                    "& .MuiChip-label": {
-                                      px: { xs: 1, sm: 1.5 },
+                                    fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
+                                    height: { xs: 28, sm: 30, md: 32 },
+                                    px: { xs: 1.5, sm: 2 },
+                                    fontFamily: '"Poppins", sans-serif',
+                                    letterSpacing: '0.5px',
+                                    textTransform: 'uppercase',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                      bgcolor: 'rgba(140, 165, 81, 0.08)',
+                                      borderColor: '#8CA551',
+                                    },
+                                    '& .MuiChip-icon': {
+                                      color: '#8CA551',
                                     },
                                   }}
                                   icon={
                                     <Construction
                                       sx={{
-                                        color: "white !important",
                                         fontSize: { xs: 14, sm: 16 },
                                       }}
                                     />
@@ -1412,42 +1493,62 @@ const handleSubmitPayment = async () => {
                             </Box>
                           </Box>
                         </Grid>
+                  
+                        {/* ✅ Columna derecha - Precio destacado */}
                         <Grid item xs={12} md={4}>
                           <motion.div
-                            whileHover={{ scale: 1.05 }}
-                            transition={{ type: "spring", stiffness: 300 }}
+                            whileHover={{ scale: 1.03 }}
+                            transition={{ type: 'spring', stiffness: 300 }}
                           >
-                            <Card
+                            <Box
                               sx={{
-                                background:
-                                  "linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)",
-                                color: "white",
-                                borderRadius: 4,
-                                boxShadow: "0 12px 40px rgba(74, 124, 89, 0.4)",
+                                p: 3,
+                                borderRadius: 3,
+                                background: 'linear-gradient(135deg, rgba(140, 165, 81, 0.08) 0%, rgba(51, 63, 31, 0.08) 100%)',
+                                border: '1px solid rgba(140, 165, 81, 0.2)',
+                                textAlign: 'center',
+                                transition: 'all 0.3s ease',
+                                '&:hover': {
+                                  boxShadow: '0 8px 24px rgba(140, 165, 81, 0.15)',
+                                  borderColor: '#8CA551',
+                                },
                               }}
                             >
-                              <CardContent sx={{ textAlign: "center", p: 3 }}>
-                                <Typography
-                                  variant="caption"
-                                  sx={{ opacity: 0.9, fontWeight: 600 }}
-                                >
-                                  Property Value
-                                </Typography>
-                                <Typography
-                                  variant="h2"
-                                  fontWeight="900"
-                                  sx={{ letterSpacing: "-1px" }}
-                                >
-                                  $
-                                  {propertyDetails.property.price?.toLocaleString()}
-                                </Typography>
-                              </CardContent>
-                            </Card>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: '#706f6f',
+                                  fontWeight: 600,
+                                  fontFamily: '"Poppins", sans-serif',
+                                  display: 'block',
+                                  mb: 0.5,
+                                  fontSize: '0.75rem',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '1.5px',
+                                }}
+                              >
+                                Property Value
+                              </Typography>
+                              <Typography
+                                variant="h2"
+                                sx={{
+                                  color: '#333F1F',
+                                  fontWeight: 800,
+                                  fontFamily: '"Poppins", sans-serif',
+                                  letterSpacing: '-1px',
+                                  fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+                                }}
+                              >
+                                ${propertyDetails.property.price?.toLocaleString()}
+                              </Typography>
+                            </Box>
                           </motion.div>
                         </Grid>
                       </Grid>
                     </Paper>
                   </motion.div>
+                  
+                  
 
                   {/* Tabs */}
                   <motion.div
@@ -2762,83 +2863,133 @@ const handleSubmitPayment = async () => {
               <Paper elevation={0} sx={{ p: { xs: 2, sm: 3, md: 4 }, mt: 3 }}>
                 {/* ✅ CHIPS DE OPCIONES CON VALIDACIÓN CONDICIONAL */}
                 <Box sx={{ mb: 3 }}>
+                  
+                  
                   <Grid item xs={12} sx={{ mb: 3 }}>
                     <Box
                       display="flex"
-                      gap={2}
+                      gap={1.5}
                       flexWrap="wrap"
                       justifyContent="center"
                       mt={2}
                     >
-                      {/* ✅ Chip de Balcony/Estudio condicional */}
+                      {/* ✅ Chip de Balcony/Estudio - Estilo brandbook */}
                       {propertyDetails.property?.hasBalcony && (
                         <Chip
                           icon={React.createElement(balconyLabels.icon, {
-                            sx: { color: "#fff" }
+                            sx: { fontSize: { xs: 16, sm: 18 } }
                           })}
                           label={balconyLabels.chipLabel}
+                          size="small"
                           sx={{
-                            bgcolor: balconyLabels.color,
-                            color: "white",
+                            bgcolor: 'transparent',
+                            border: '1.5px solid #8CA551',
+                            color: '#3d5a4d',
                             fontWeight: 700,
-                            fontSize: { xs: "0.85rem", sm: "0.9rem", md: "1rem" },
-                            height: { xs: 32, sm: 36, md: 40 },
-                            px: { xs: 1.5, sm: 2 }
+                            fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
+                            height: { xs: 28, sm: 30, md: 32 },
+                            px: { xs: 1.5, sm: 2 },
+                            fontFamily: '"Poppins", sans-serif',
+                            letterSpacing: '0.5px',
+                            textTransform: 'uppercase',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              bgcolor: 'rgba(140, 165, 81, 0.08)',
+                              borderColor: '#8CA551',
+                            },
+                            '& .MuiChip-icon': {
+                              color: '#8CA551',
+                            },
                           }}
                         />
                       )}
-
-                      {/* ✅ Chip de Upgrade - sin cambios */}
+                  
+                      {/* ✅ Chip de Upgrade - Estilo brandbook */}
                       {propertyDetails.property.modelType === "upgrade" && (
                         <Chip
-                          icon={<Star sx={{ color: "#fff" }} />}
+                          icon={<Star sx={{ fontSize: { xs: 16, sm: 18 } }} />}
                           label="Upgrade"
+                          size="small"
                           sx={{
-                            bgcolor: "#ff9800",
-                            color: "white",
+                            bgcolor: 'transparent',
+                            border: '1.5px solid #333F1F',
+                            color: '#2c5530',
                             fontWeight: 700,
-                            fontSize: { xs: "0.85rem", sm: "0.9rem", md: "1rem" },
-                            height: { xs: 32, sm: 36, md: 40 },
-                            px: { xs: 1.5, sm: 2 }
+                            fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
+                            height: { xs: 28, sm: 30, md: 32 },
+                            px: { xs: 1.5, sm: 2 },
+                            fontFamily: '"Poppins", sans-serif',
+                            letterSpacing: '0.5px',
+                            textTransform: 'uppercase',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              bgcolor: 'rgba(51, 63, 31, 0.08)',
+                              borderColor: '#333F1F',
+                            },
+                            '& .MuiChip-icon': {
+                              color: '#333F1F',
+                            },
                           }}
                         />
                       )}
-
-                      {/* ✅ Chip de Storage - sin cambios */}
+                  
+                      {/* ✅ Chip de Storage - Estilo brandbook */}
                       {propertyDetails.property?.hasStorage && (
                         <Chip
-                          icon={<Layers sx={{ color: "#fff" }} />}
+                          icon={<Layers sx={{ fontSize: { xs: 16, sm: 18 } }} />}
                           label="Storage"
+                          size="small"
                           sx={{
-                            bgcolor: "#607d8b",
-                            color: "white",
+                            bgcolor: 'transparent',
+                            border: '1.5px solid #706f6f',
+                            color: '#5a5a5a',
                             fontWeight: 700,
-                            fontSize: { xs: "0.85rem", sm: "0.9rem", md: "1rem" },
-                            height: { xs: 32, sm: 36, md: 40 },
-                            px: { xs: 1.5, sm: 2 }
+                            fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
+                            height: { xs: 28, sm: 30, md: 32 },
+                            px: { xs: 1.5, sm: 2 },
+                            fontFamily: '"Poppins", sans-serif',
+                            letterSpacing: '0.5px',
+                            textTransform: 'uppercase',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              bgcolor: 'rgba(112, 111, 111, 0.08)',
+                              borderColor: '#706f6f',
+                            },
+                            '& .MuiChip-icon': {
+                              color: '#706f6f',
+                            },
                           }}
                         />
                       )}
-
-                      {/* ✅ NUEVO: Badge especial para Modelo 10 */}
+                  
+                      {/* ✅ Chip Model 10 - Estilo brandbook */}
                       {isModel10 && (
                         <Chip
-                          label="Special Configuration"
+                          label="Model 10"
+                          size="small"
                           sx={{
-                            bgcolor: "#9c27b0",
-                            color: "white",
+                            bgcolor: 'transparent',
+                            border: '1.5px solid #E5863C',
+                            color: '#8b6f47',
                             fontWeight: 700,
-                            fontSize: { xs: "0.85rem", sm: "0.9rem", md: "1rem" },
-                            height: { xs: 32, sm: 36, md: 40 },
-                            px: { xs: 1.5, sm: 2 }
+                            fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
+                            height: { xs: 28, sm: 30, md: 32 },
+                            px: { xs: 1.5, sm: 2 },
+                            fontFamily: '"Poppins", sans-serif',
+                            letterSpacing: '0.5px',
+                            textTransform: 'uppercase',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              bgcolor: 'rgba(229, 134, 60, 0.08)',
+                              borderColor: '#E5863C',
+                            },
                           }}
-                          icon={<Star sx={{ color: "#fff" }} />}
                         />
                       )}
                     </Box>
                   </Grid>
-
-                  {/* ✅ TOOLTIP INFORMATIVO PARA MODELO 10 */}
+                  
+                  {/* ✅ Alert informativo - Estilo brandbook */}
                   {isModel10 && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
@@ -2851,27 +3002,48 @@ const handleSubmitPayment = async () => {
                         sx={{
                           mb: 3,
                           borderRadius: 3,
-                          bgcolor: "rgba(33, 150, 243, 0.08)",
-                          border: "1px solid rgba(33, 150, 243, 0.2)",
-                          "& .MuiAlert-message": {
-                            width: "100%"
-                          }
+                          bgcolor: 'rgba(140, 165, 81, 0.05)',
+                          border: '1px solid rgba(140, 165, 81, 0.2)',
+                          '& .MuiAlert-message': {
+                            width: '100%',
+                          },
+                          '& .MuiAlert-icon': {
+                            color: '#8CA551',
+                          },
                         }}
                       >
                         <Box>
-                          <Typography variant="body2" fontWeight="600" sx={{ mb: 0.5 }}>
-                            🏠 Model 10 Special Features
+                          <Typography
+                            variant="body2"
+                            fontWeight="600"
+                            sx={{
+                              mb: 0.5,
+                              color: '#333F1F',
+                              fontFamily: '"Poppins", sans-serif',
+                              fontSize: { xs: '0.85rem', sm: '0.9rem' },
+                            }}
+                          >
+                            Model 10 Special Features
                           </Typography>
-                          <Typography variant="caption" sx={{ color: "#6c757d" }}>
-                            {propertyDetails.property?.hasBalcony 
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: '#706f6f',
+                              fontFamily: '"Poppins", sans-serif',
+                              fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                              lineHeight: 1.6,
+                            }}
+                          >
+                            {propertyDetails.property?.hasBalcony
                               ? "This property includes an Estudio - a flexible space perfect for home office or study area."
-                              : "This is a special configuration model with unique layout options."
-                            }
+                              : "This is a special configuration model with unique layout options."}
                           </Typography>
                         </Box>
                       </Alert>
                     </motion.div>
                   )}
+                  
+                  
 
                   {/* CARRUSEL Y MINIATURAS - Sin cambios en la estructura */}
                   <Box
@@ -3214,89 +3386,102 @@ const handleSubmitPayment = async () => {
                 </Dialog>
 
                 {/* ✅ SPECIFICATIONS GRID - CON INFORMACIÓN ADICIONAL PARA MODELO 10 */}
+                                
+                
                 <Box sx={{ mt: 4 }}>
-                  <Box 
-                    display="flex" 
-                    alignItems="center" 
-                    gap={2} 
-                    mb={3}
-                    flexWrap="wrap"
-                  >
-                    <Typography
-                      variant="h6"
-                      fontWeight="700"
-                      sx={{
-                        color: "#2c3e50",
-                        fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.5rem" }
-                      }}
-                    >
-                      Property Specifications
-                    </Typography>
-                    {isModel10 && (
-                      <Chip
-                        label="Model 10 Configuration"
-                        size="small"
+                  {/* ✅ Header con línea decorativa - Estilo brandbook */}
+                  <Box mb={3}>
+                    <Box display="flex" alignItems="center" gap={2} mb={1.5} flexWrap="wrap">
+                      <Typography
+                        variant="h6"
                         sx={{
-                          bgcolor: "#9c27b0",
-                          color: "white",
-                          fontWeight: 600
+                          fontFamily: '"Poppins", sans-serif',
+                          color: "#1a1a1a",
+                          fontWeight: 700,
+                          fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.5rem" },
+                          letterSpacing: "0.5px",
                         }}
-                      />
-                    )}
+                      >
+                        Property Specifications
+                      </Typography>
+                      {isModel10 && (
+                        <Chip
+                          label="Model 10"
+                          size="small"
+                          sx={{
+                            bgcolor: "transparent",
+                            border: "1.5px solid #E5863C",
+                            color: "#E5863C",
+                            fontWeight: 700,
+                            fontSize: "0.7rem",
+                            height: 28,
+                            px: 1.5,
+                            fontFamily: '"Poppins", sans-serif',
+                            letterSpacing: "0.5px",
+                            textTransform: "uppercase",
+                            "&:hover": {
+                              bgcolor: "rgba(229, 134, 60, 0.08)",
+                            },
+                          }}
+                        />
+                      )}
+                    </Box>
+                    
+                    {/* ✅ Línea decorativa sutil */}
+                    <Box
+                      sx={{
+                        width: 60,
+                        height: 2,
+                        bgcolor: "#8CA551",
+                        opacity: 0.8,
+                      }}
+                    />
                   </Box>
-
+                
+                  {/* ✅ Grid de especificaciones - Estilo minimalista brandbook */}
                   <Grid container spacing={2}>
                     {[
                       {
                         icon: <Bed sx={{ fontSize: { xs: 20, sm: 22 } }} />,
-                        label: "Bedrooms",
+                        label: "BEDROOMS",
                         value: propertyDetails.model?.bedrooms,
-                        color: "#4a7c59",
                       },
                       {
                         icon: <Bathtub sx={{ fontSize: { xs: 20, sm: 22 } }} />,
-                        label: "Bathrooms",
+                        label: "BATHROOMS",
                         value: propertyDetails.model?.bathrooms,
-                        color: "#2196f3",
                       },
                       {
                         icon: <SquareFoot sx={{ fontSize: { xs: 20, sm: 22 } }} />,
-                        label: "Square Feet",
-                        value: `${propertyDetails.model?.sqft} ft²`,
-                        color: "#ff9800",
+                        label: "SQUARE FEET",
+                        value: propertyDetails.model?.sqft,
                       },
                       propertyDetails.model?.stories && {
                         icon: <Layers sx={{ fontSize: { xs: 20, sm: 22 } }} />,
-                        label: "Stories",
+                        label: "STORIES",
                         value: propertyDetails.model?.stories,
-                        color: "#607d8b",
                       },
                       {
                         icon: <Home sx={{ fontSize: { xs: 20, sm: 22 } }} />,
-                        label: "Lot Number",
+                        label: "LOT NUMBER",
                         value: `#${propertyDetails.property?.lot?.number}`,
-                        color: "#9c27b0",
                       },
                       {
                         icon: <LocationOn sx={{ fontSize: { xs: 20, sm: 22 } }} />,
-                        label: "Section",
+                        label: "SECTION",
                         value: propertyDetails.property?.lot?.section,
-                        color: "#f44336",
                       },
                       {
                         icon: <AttachMoney sx={{ fontSize: { xs: 20, sm: 22 } }} />,
-                        label: "Property Value",
+                        label: "PROPERTY VALUE",
                         value: `$${propertyDetails.property?.price?.toLocaleString()}`,
-                        color: "#4caf50",
                       },
-                      // ✅ NUEVO: Card especial para Modelo 10 con hasBalcony
                       isModel10 && propertyDetails.property?.hasBalcony && {
                         icon: React.createElement(balconyLabels.icon, { 
                           sx: { fontSize: { xs: 20, sm: 22 } } 
                         }),
-                        label: balconyLabels.chipLabel,
+                        label: balconyLabels.chipLabel.toUpperCase(),
                         value: "Included",
-                        color: balconyLabels.color,
                       },
                     ]
                       .filter(Boolean)
@@ -3306,7 +3491,7 @@ const handleSubmitPayment = async () => {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: index * 0.06 }}
-                            whileHover={{ scale: 1.05, y: -4 }}
+                            whileHover={{ scale: 1.03, y: -2 }}
                           >
                             <Paper
                               elevation={0}
@@ -3314,57 +3499,66 @@ const handleSubmitPayment = async () => {
                                 p: { xs: 1.5, sm: 2 },
                                 textAlign: "center",
                                 borderRadius: { xs: 2, md: 2.5 },
-                                border: `2px solid ${spec.color}20`,
-                                bgcolor: `${spec.color}06`,
+                                border: "1px solid #e0e0e0",
+                                bgcolor: "#ffffff",
                                 transition: "all 0.3s ease",
                                 minHeight: { xs: 90, sm: 100, md: 110 },
                                 display: "flex",
                                 flexDirection: "column",
                                 justifyContent: "center",
                                 "&:hover": {
-                                  borderColor: spec.color,
-                                  bgcolor: `${spec.color}15`,
-                                  boxShadow: `0 8px 24px ${spec.color}25`,
+                                  borderColor: "#333F1F",
+                                  bgcolor: "rgba(140, 165, 81, 0.03)",
+                                  boxShadow: "0 8px 24px rgba(51, 63, 31, 0.12)",
                                 },
                               }}
                             >
+                              {/* ✅ Ícono - Diseño minimalista */}
                               <Box
                                 sx={{
                                   width: { xs: 36, sm: 40, md: 44 },
                                   height: { xs: 36, sm: 40, md: 44 },
-                                  borderRadius: { xs: 2, md: 2.5 },
-                                  background: `${spec.color}18`,
+                                  borderRadius: "50%",
+                                  bgcolor: "rgba(140, 165, 81, 0.08)",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  color: spec.color,
+                                  color: "#333F1F",
                                   margin: "0 auto",
                                   mb: 1,
+                                  transition: "all 0.3s ease",
                                 }}
                               >
                                 {spec.icon}
                               </Box>
+                
+                              {/* ✅ Label - Estilo brandbook */}
                               <Typography
                                 variant="caption"
                                 sx={{
-                                  color: "#6c757d",
-                                  fontWeight: 700,
+                                  color: "#999999",
+                                  fontWeight: 500,
                                   textTransform: "uppercase",
-                                  letterSpacing: "0.5px",
+                                  letterSpacing: "1px",
+                                  fontFamily: '"Poppins", sans-serif',
                                   display: "block",
                                   mb: 0.5,
-                                  fontSize: { xs: "0.65rem", sm: "0.7rem", md: "0.72rem" },
+                                  fontSize: { xs: "0.65rem", sm: "0.7rem" },
                                 }}
                               >
                                 {spec.label}
                               </Typography>
+                
+                              {/* ✅ Value - Tipografía elegante */}
                               <Typography
-                                variant="subtitle1"
-                                fontWeight="800"
+                                variant="h6"
                                 sx={{
-                                  color: spec.color,
+                                  color: "#1a1a1a",
+                                  fontWeight: 600,
+                                  fontFamily: '"Poppins", sans-serif',
                                   letterSpacing: "-0.5px",
-                                  fontSize: { xs: "0.95rem", sm: "1rem", md: "1.1rem" },
+                                  fontSize: { xs: "1.1rem", sm: "1.2rem", md: "1.3rem" },
+                                  lineHeight: 1,
                                 }}
                               >
                                 {spec.value}
@@ -3375,6 +3569,8 @@ const handleSubmitPayment = async () => {
                       ))}
                   </Grid>
                 </Box>
+                
+                
               </Paper>
             )}
                     </motion.div>
