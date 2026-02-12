@@ -19,8 +19,8 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 
 const DOCUMENT_TYPES = [
-  { key: 'landUse', label: 'Land Use' },
-  { key: 'salesContract', label: 'Sales Contract' },
+  { key: 'promise', label: 'Land Use' },
+  { key: 'PurchaseContract', label: 'Sales Contract' },
   { key: 'leaseContract', label: 'Lease Contract' },
   { key: 'payment', label: 'Payment' },
   { key: 'other1', label: 'Other Document 1' },

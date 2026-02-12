@@ -46,6 +46,7 @@ const Payloads = () => {
     date: new Date().toISOString().split('T')[0],
     amount: 0,
     status: 'pending',
+    type: '', // ✅ Agregado
     notes: ''
   })
 
@@ -78,6 +79,7 @@ const Payloads = () => {
         date: new Date(payload.date).toISOString().split('T')[0],
         amount: payload.amount,
         status: payload.status,
+        type: payload.type || '', // ✅ Agregado
         notes: payload.notes || ''
       })
     } else {
@@ -87,6 +89,7 @@ const Payloads = () => {
         date: new Date().toISOString().split('T')[0],
         amount: 0,
         status: 'pending',
+        type: '', // ✅ Agregado
         notes: ''
       })
     }
@@ -487,6 +490,29 @@ const Payloads = () => {
                 <MenuItem value="pending">Pending</MenuItem>
                 <MenuItem value="cleared">Cleared</MenuItem>
                 <MenuItem value="rejected">Rejected</MenuItem>
+              </TextField>
+            </Grid>
+
+                        <Grid item xs={12}>
+              <TextField
+                fullWidth
+                select
+                label="Payment Type"
+                value={formData.type || ""}
+                onChange={e => setFormData({ ...formData, type: e.target.value })}
+                required
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 3,
+                    '&.Mui-focused fieldset': { borderColor: '#4a7c59' }
+                  }
+                }}
+              >
+                <MenuItem value="initial down payment">Initial Down Payment</MenuItem>
+                <MenuItem value="complementary down payment">Complementary Down Payment</MenuItem>
+                <MenuItem value="monthly payment">Monthly Payment</MenuItem>
+                <MenuItem value="additional payment">Additional Payment</MenuItem>
+                <MenuItem value="closing payment">Closing Payment</MenuItem>
               </TextField>
             </Grid>
 

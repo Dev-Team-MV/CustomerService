@@ -36,6 +36,7 @@ import {
   CardActions,
   Avatar,
   Divider,
+  MenuItem
 } from "@mui/material";
 import {
   Home,
@@ -3423,6 +3424,28 @@ const MyProperty = () => {
                     },
                   }}
                 />
+              </Grid>
+                            <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  select
+                  label="Payment Type"
+                  value={paymentForm.type || ""}
+                  onChange={e => handlePaymentFormChange("type", e.target.value)}
+                  required
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                      "&.Mui-focused fieldset": { borderColor: "#4a7c59" }
+                    }
+                  }}
+                >
+                  <MenuItem value="initial down payment">Initial Down Payment</MenuItem>
+                  <MenuItem value="complementary down payment">Complementary Down Payment</MenuItem>
+                  <MenuItem value="monthly payment">Monthly Payment</MenuItem>
+                  <MenuItem value="additional payment">Additional Payment</MenuItem>
+                  <MenuItem value="closing payment">Closing Payment</MenuItem>
+                </TextField>
               </Grid>
               <Grid item xs={12}>
                 <TextField
