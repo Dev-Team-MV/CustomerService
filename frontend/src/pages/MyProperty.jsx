@@ -129,6 +129,7 @@ const MyProperty = () => {
   const [paymentForm, setPaymentForm] = useState({
     amount: "",
     date: new Date().toISOString().split("T")[0],
+      type: "", // ✅ Agregado
     support: "",
     notes: "",
   });
@@ -299,9 +300,16 @@ const MyProperty = () => {
 
   const handleTabChange = (event, newValue) => setActiveTab(newValue);
 
-  const handleOpenUploadPayment = () => {
-    setUploadPaymentDialog(true);
-  };
+const handleOpenUploadPayment = () => {
+  setPaymentForm({
+    amount: "",
+    date: new Date().toISOString().split("T")[0],
+    type: "", // ✅ Agregado
+    support: "",
+    notes: "",
+  });
+  setUploadPaymentDialog(true);
+};
 
   const handleCloseUploadPayment = () => {
     setUploadPaymentDialog(false);
@@ -317,38 +325,40 @@ const MyProperty = () => {
     setPaymentForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmitPayment = async () => {
-    if (!paymentForm.amount || parseFloat(paymentForm.amount) <= 0) {
-      alert("Please enter a valid amount");
-      return;
+const handleSubmitPayment = async () => {
+  if (!paymentForm.amount || !paymentForm.type) {
+    alert('Please fill in amount and payment type');
+    return;
+  }
+
+  setUploadingPayment(true);
+  try {
+    const formData = new FormData();
+    formData.append('property', selectedProperty);
+    formData.append('amount', paymentForm.amount);
+    formData.append('date', paymentForm.date);
+    formData.append('type', paymentForm.type); // ✅ Agregado
+    formData.append('status', 'pending');
+    
+    if (paymentForm.support) {
+      formData.append('support', paymentForm.support);
     }
-    try {
-      setUploadingPayment(true);
-      let supportUrl = paymentForm.support;
-      if (paymentForm.supportFile) {
-        supportUrl = await uploadService.uploadPaymentImage(
-          paymentForm.supportFile,
-        );
-      }
-      await api.post("/payloads", {
-        property: selectedProperty,
-        amount: parseFloat(paymentForm.amount),
-        date: paymentForm.date,
-        support: supportUrl,
-        notes: paymentForm.notes,
-        status: "pending",
-      });
-      alert("✅ Payment uploaded successfully!");
-      handleCloseUploadPayment();
-      fetchPayloads();
-      fetchData();
-    } catch (error) {
-      console.error("❌ Error submitting payment:", error);
-      alert(`❌ Error: ${error.message}`);
-    } finally {
-      setUploadingPayment(false);
+    
+    if (paymentForm.notes) {
+      formData.append('notes', paymentForm.notes);
     }
-  };
+
+    await api.post('/payloads', formData);
+    handleCloseUploadPayment();
+    fetchPayloads();
+    alert('Payment submitted successfully!');
+  } catch (err) {
+    console.error('Error submitting payment:', err);
+    alert('Error submitting payment');
+  } finally {
+    setUploadingPayment(false);
+  }
+};
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -2384,6 +2394,7 @@ const MyProperty = () => {
                           </Grid>
 
                           {/* PAYMENT HISTORY - RESPONSIVE TABLE */}
+                          
                           <Box>
                             <Typography
                               variant="h6"
@@ -2401,7 +2412,7 @@ const MyProperty = () => {
                               Payment History ({payloads.length} transaction
                               {payloads.length !== 1 ? "s" : ""})
                             </Typography>
-
+                          
                             {loadingPayloads ? (
                               <Box display="flex" justifyContent="center" p={4}>
                                 <CircularProgress sx={{ color: "#4a7c59" }} />
@@ -2444,6 +2455,14 @@ const MyProperty = () => {
                                             color: "#2c3e50",
                                           }}
                                         >
+                                          Type
+                                        </TableCell>
+                                        <TableCell
+                                          sx={{
+                                            fontWeight: 700,
+                                            color: "#2c3e50",
+                                          }}
+                                        >
                                           Status
                                         </TableCell>
                                         <TableCell
@@ -2474,8 +2493,7 @@ const MyProperty = () => {
                                           component={TableRow}
                                           sx={{
                                             "&:hover": {
-                                              bgcolor:
-                                                "rgba(74, 124, 89, 0.05)",
+                                              bgcolor: "rgba(74, 124, 89, 0.05)",
                                             },
                                             transition: "all 0.3s ease",
                                           }}
@@ -2485,9 +2503,7 @@ const MyProperty = () => {
                                               variant="body2"
                                               sx={{ fontWeight: 600 }}
                                             >
-                                              {new Date(
-                                                payload.date,
-                                              ).toLocaleDateString("en-US", {
+                                              {new Date(payload.date).toLocaleDateString("en-US", {
                                                 year: "numeric",
                                                 month: "short",
                                                 day: "numeric",
@@ -2507,13 +2523,22 @@ const MyProperty = () => {
                                           </TableCell>
                                           <TableCell>
                                             <Chip
-                                              icon={getStatusIcon(
-                                                payload.status,
-                                              )}
+                                              label={payload.type || "N/A"}
+                                              size="small"
+                                              sx={{
+                                                bgcolor: "#e3f2fd",
+                                                color: "#1976d2",
+                                                fontWeight: 600,
+                                                textTransform: "capitalize",
+                                                fontSize: "0.75rem",
+                                              }}
+                                            />
+                                          </TableCell>
+                                          <TableCell>
+                                            <Chip
+                                              icon={getStatusIcon(payload.status)}
                                               label={payload.status.toUpperCase()}
-                                              color={getStatusColor(
-                                                payload.status,
-                                              )}
+                                              color={getStatusColor(payload.status)}
                                               sx={{ fontWeight: 700 }}
                                             />
                                           </TableCell>
@@ -2556,11 +2581,9 @@ const MyProperty = () => {
                                     </TableBody>
                                   </Table>
                                 </TableContainer>
-
+                          
                                 {/* MOBILE CARDS (visible only on xs/sm) */}
-                                <Box
-                                  sx={{ display: { xs: "block", md: "none" } }}
-                                >
+                                <Box sx={{ display: { xs: "block", md: "none" } }}>
                                   {payloads.map((payload, index) => (
                                     <motion.div
                                       key={payload._id}
@@ -2572,14 +2595,11 @@ const MyProperty = () => {
                                         sx={{
                                           mb: 2,
                                           borderRadius: 3,
-                                          border:
-                                            "1px solid rgba(0, 0, 0, 0.06)",
-                                          boxShadow:
-                                            "0 4px 12px rgba(0, 0, 0, 0.06)",
+                                          border: "1px solid rgba(0, 0, 0, 0.06)",
+                                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.06)",
                                           transition: "all 0.3s ease",
                                           "&:hover": {
-                                            boxShadow:
-                                              "0 8px 24px rgba(74, 124, 89, 0.12)",
+                                            boxShadow: "0 8px 24px rgba(74, 124, 89, 0.12)",
                                             borderColor: "#4a7c59",
                                           },
                                         }}
@@ -2601,22 +2621,16 @@ const MyProperty = () => {
                                                 fontWeight: 600,
                                               }}
                                             >
-                                              {new Date(
-                                                payload.date,
-                                              ).toLocaleDateString("en-US", {
+                                              {new Date(payload.date).toLocaleDateString("en-US", {
                                                 year: "numeric",
                                                 month: "short",
                                                 day: "numeric",
                                               })}
                                             </Typography>
                                             <Chip
-                                              icon={getStatusIcon(
-                                                payload.status,
-                                              )}
+                                              icon={getStatusIcon(payload.status)}
                                               label={payload.status.toUpperCase()}
-                                              color={getStatusColor(
-                                                payload.status,
-                                              )}
+                                              color={getStatusColor(payload.status)}
                                               size="small"
                                               sx={{
                                                 fontWeight: 700,
@@ -2624,13 +2638,29 @@ const MyProperty = () => {
                                               }}
                                             />
                                           </Box>
-
+                          
+                                          {/* Payment Type */}
+                                          {payload.type && (
+                                            <Box mb={2}>
+                                              <Chip
+                                                label={payload.type}
+                                                size="small"
+                                                sx={{
+                                                  bgcolor: "#e3f2fd",
+                                                  color: "#1976d2",
+                                                  fontWeight: 600,
+                                                  textTransform: "capitalize",
+                                                  fontSize: "0.7rem",
+                                                }}
+                                              />
+                                            </Box>
+                                          )}
+                          
                                           {/* Amount - destacado */}
                                           <Box
                                             sx={{
                                               p: 2,
-                                              bgcolor:
-                                                "rgba(74, 124, 89, 0.05)",
+                                              bgcolor: "rgba(74, 124, 89, 0.05)",
                                               borderRadius: 2,
                                               mb: 2,
                                               textAlign: "center",
@@ -2657,7 +2687,7 @@ const MyProperty = () => {
                                               ${payload.amount.toLocaleString()}
                                             </Typography>
                                           </Box>
-
+                          
                                           {/* Notes */}
                                           {payload.notes && (
                                             <Box mb={2}>
@@ -2680,7 +2710,7 @@ const MyProperty = () => {
                                               </Typography>
                                             </Box>
                                           )}
-
+                          
                                           {/* Support Document Button */}
                                           {payload.support && (
                                             <Button
@@ -2718,11 +2748,11 @@ const MyProperty = () => {
                                   fontSize: { xs: "0.85rem", md: "1rem" },
                                 }}
                               >
-                                No payment transactions yet. Click "Upload
-                                Payment" to add your first payment.
+                                No payment transactions yet. Click "Upload Payment" to add your first payment.
                               </Alert>
                             )}
                           </Box>
+                          
                         </Paper>
                       )}
   

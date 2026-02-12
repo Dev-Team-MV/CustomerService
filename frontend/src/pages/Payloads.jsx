@@ -270,6 +270,8 @@ const Payloads = () => {
         </Grid>
       </Grid>
 
+      
+      
       <Paper>
         <TableContainer>
           <Table>
@@ -279,6 +281,7 @@ const Payloads = () => {
                 <TableCell>PAYER NAME</TableCell>
                 <TableCell>DATE</TableCell>
                 <TableCell>AMOUNT</TableCell>
+                <TableCell>TYPE</TableCell>
                 <TableCell>STATUS</TableCell>
                 <TableCell>DOCS</TableCell>
                 <TableCell>ACTION</TableCell>
@@ -317,6 +320,18 @@ const Payloads = () => {
                   </TableCell>
                   <TableCell>
                     <Chip
+                      label={payload.type || 'N/A'}
+                      size="small"
+                      sx={{
+                        bgcolor: '#e3f2fd',
+                        color: '#1976d2',
+                        fontWeight: 500,
+                        textTransform: 'capitalize'
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
                       label={payload.status}
                       color={getStatusColor(payload.status)}
                       size="small"
@@ -326,7 +341,7 @@ const Payloads = () => {
                       }
                     />
                   </TableCell>
-
+      
                   <TableCell>
                     <Tooltip title={getFileUrl(payload) ? 'Download file' : 'No file attached'}>
                       <span>
@@ -339,13 +354,17 @@ const Payloads = () => {
                         </IconButton>
                       </span>
                     </Tooltip>
-                    {/* {getFileUrl(payload) && (
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                        {getFileUrl(payload).split('/').slice(-1)[0]}
-                      </Typography>
-                    )} */}
                   </TableCell>
                   <TableCell>
+                    <Tooltip title="Edit">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => handleOpenDialog(payload)}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title="Approve">
                       <span>
                         <IconButton
@@ -371,12 +390,14 @@ const Payloads = () => {
                       </span>
                     </Tooltip>
                   </TableCell>
-                 </TableRow>
+                </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
       </Paper>
+      
+      
 
       <Dialog
         open={openDialog}
@@ -547,11 +568,11 @@ const Payloads = () => {
           >
             Cancel
           </Button>
-
+          
           <Button
             variant="contained"
             onClick={handleSubmit}
-            disabled={!formData.amount}
+            disabled={!formData.amount || !formData.property || !formData.type}
             startIcon={<CheckCircle />}
             sx={{
               borderRadius: 3,
