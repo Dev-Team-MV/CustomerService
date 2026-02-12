@@ -1,5 +1,4 @@
 # Lakewood Oaks - Property Management System
-
 Full-stack property management application built with:
 - **Frontend**: Vite + React + TailwindCSS + Material-UI
 - **Backend**: Node.js + Express

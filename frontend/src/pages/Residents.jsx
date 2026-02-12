@@ -20,6 +20,7 @@ import {
   TextField,
   MenuItem,
   Grid,
+  Tooltip
 } from "@mui/material";
 import { Add, Edit, Delete, PersonAdd } from "@mui/icons-material";
 import api from "../services/api";
@@ -91,29 +92,32 @@ const Residents = () => {
     setOpenDialog(false);
     setSelectedUser(null);
   };
+const handleSubmit = async () => {
+  try {
+    const payload = { ...formData };
 
-  const handleSubmit = async () => {
-    try {
-      const payload = { ...formData };
-
-      if (selectedUser) {
-        // Editar usuario - usar endpoint de users
-        if (!payload.password) {
-          delete payload.password;
-        }
-        await api.put(`/users/${selectedUser._id}`, payload);
-      } else {
-        // Crear usuario - usar endpoint de register
-        await api.post("/auth/register", payload);
+    if (selectedUser) {
+      // Editar usuario - usar endpoint de users
+      if (!payload.password) {
+        delete payload.password;
       }
-
-      handleCloseDialog();
-      fetchUsers();
-    } catch (error) {
-      console.error("Error saving user:", error);
-      alert(error.response?.data?.message || "Error saving user");
+      await api.put(`/users/${selectedUser._id}`, payload);
+    } else {
+      // ✅ Crear usuario - usar endpoint de register con skipPasswordSetup
+      await api.post("/auth/register", {
+        ...payload,
+        phoneNumber: `+${payload.phoneNumber}`, // ✅ Asegurar formato internacional
+        skipPasswordSetup: true // ✅ NO pedir contraseña inmediatamente
+      });
     }
-  };
+
+    handleCloseDialog();
+    fetchUsers();
+  } catch (error) {
+    console.error("Error saving user:", error);
+    alert(error.response?.data?.message || "Error saving user");
+  }
+};
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
@@ -158,13 +162,30 @@ const Residents = () => {
             Manage resident accounts and information
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => handleOpenDialog()}
-        >
-          Add User
-        </Button>
+        <Tooltip title="Add User" placement="left">
+          <Button
+            variant="contained"
+            onClick={() => handleOpenDialog()}
+            sx={{
+              bgcolor: '#4a7c59',
+              '&:hover': { bgcolor: '#3d664a' },
+              minWidth: { xs: 48, sm: 'auto' },
+              width: { xs: 48, sm: 'auto' },
+              height: { xs: 48, sm: 'auto' },
+              p: { xs: 0, sm: '6px 16px' },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 50
+            }}
+          >
+            <Add sx={{ display: { xs: 'block', sm: 'none' }, fontSize: 24 }} />
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1 }}>
+              <Add />
+              Add User
+            </Box>
+          </Button>
+        </Tooltip>
       </Box>
 
       <Paper>

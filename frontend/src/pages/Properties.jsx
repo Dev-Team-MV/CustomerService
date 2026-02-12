@@ -148,17 +148,30 @@ const Properties = () => {
             Oversee inventory, pricing, and resident assignments across the estate.
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={handleAddProperty}
-          sx={{
-            bgcolor: '#4a7c59',
-            '&:hover': { bgcolor: '#3d664a' }
-          }}
-        >
-          Add Property
-        </Button>
+        <Tooltip title="Add Property" placement="left">
+          <Button
+            variant="contained"
+            onClick={handleAddProperty}
+            sx={{
+              bgcolor: '#4a7c59',
+              '&:hover': { bgcolor: '#3d664a' },
+              minWidth: { xs: 48, sm: 'auto' },
+              width: { xs: 48, sm: 'auto' },
+              height: { xs: 48, sm: 'auto' },
+              p: { xs: 0, sm: '6px 16px' },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 50
+            }}
+          >
+            <Add sx={{ display: { xs: 'block', sm: 'none' }, fontSize: 24 }} />
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1 }}>
+              <Add />
+              Add Property
+            </Box>
+          </Button>
+        </Tooltip>
       </Box>
 
       <Paper>
