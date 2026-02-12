@@ -225,22 +225,46 @@ const Dashboard = () => {
       color: '#8b5cf6',
       onClick: () => navigate('/analytics')
     },
-    // { 
-    //   icon: '📅', 
-    //   label: 'Schedule', 
-    //   color: '#f59e0b',
-    //   onClick: () => navigate('/schedule')
-    // },
-{ icon: '🏡', label: 'Models', color: '#3b82f6', onClick: () => navigate('/view-models') },
-  { icon: '🏛️', label: 'Club House', color: '#10b981', onClick: () => {} },
-  { icon: '🆕', label: 'New', color: '#f59e0b', onClick: () => {} }
+    { 
+      icon: '🏡', 
+      label: 'Models', 
+      color: '#4a7c59', 
+      onClick: () => navigate('/view-models') 
+    },
+    { 
+      icon: '�️', 
+      label: 'Amenities', 
+      color: '#2196f3', 
+      onClick: () => navigate('/amenities') 
+    },
+    { 
+      icon: '📰', 
+      label: 'Manage News', 
+      color: '#f59e0b', 
+      onClick: () => navigate('/news') // ✅ Admin panel para crear/editar
+    }
   ]
-
+  
   // Quick Actions para user propietario
   const userQuickActions = [
-{ icon: '🏡', label: 'Models', color: '#3b82f6', onClick: () => navigate('/view-models') },
-    { icon: '🏛️', label: 'Club House', color: '#10b981', onClick: () => {} },
-    { icon: '🆕', label: 'New', color: '#f59e0b', onClick: () => {} }
+    { 
+      icon: '🏡', 
+      label: 'Models', 
+      color: '#4a7c59', 
+      onClick: () => navigate('/view-models') 
+    },
+    { 
+      icon: '🏛️', 
+      label: 'Amenities', 
+      color: '#2196f3', 
+      onClick: () => navigate('/amenities') 
+    },
+    { 
+      icon: '📰', 
+      label: 'News Feed', 
+      color: '#f59e0b', 
+      onClick: () => navigate('/explore/news')  // ✅ Vista pública del feed
+    }
   ]
 
   if (loading) {
@@ -394,10 +418,32 @@ const Dashboard = () => {
               {/* MAPA */}
               <Grid item xs={12} md={8}>
                 <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3, duration: 0.6 }}
                   whileHover={{ scale: 1.01 }}
-                  transition={{ type: "spring", stiffness: 200 }}
                 >
-                  <Paper sx={{ p: 1, borderRadius: 5, boxShadow: '0 8px 24px rgba(74,124,89,0.08)' }}>
+                  <Paper 
+                    sx={{ 
+                      p: 3,
+                      height: '100%', 
+                      borderRadius: 6,
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafb 100%)',
+                      boxShadow: '0 12px 40px rgba(74,124,89,0.08)',
+                      border: '1px solid rgba(74,124,89,0.08)',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: 3,
+                        background: 'linear-gradient(90deg, #4a7c59 0%, #8bc34a 100%)'
+                      }
+                    }}
+                  >
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                       <Typography variant="h6" fontWeight="bold">
                         Property Map
@@ -406,7 +452,7 @@ const Dashboard = () => {
                         variant="body2" 
                         color="primary" 
                         sx={{ cursor: 'pointer' }}
-                        onClick={() => navigate('/property-selection')}
+                        onClick={() => navigate('/explore/properties')}
                       >
                         View Full Map
                       </Typography>
@@ -415,65 +461,171 @@ const Dashboard = () => {
                   </Paper>
                 </motion.div>
               </Grid>
+      
               {/* QUICK ACTIONS */}
               <Grid item xs={12} md={4}>
                 <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3, duration: 0.6 }}
                   whileHover={{ scale: 1.01 }}
-                  transition={{ type: "spring", stiffness: 200 }}
                 >
-                  <Paper sx={{ p: 3, height: '100%', borderRadius: 5, boxShadow: '0 8px 24px rgba(74,124,89,0.08)' }}>
-                    <Typography variant="h6" gutterBottom fontWeight="bold">
-                      Quick Actions
-                    </Typography>
-                    <Box sx={{ mt: 2 }}>
+                  <Paper 
+                    sx={{ 
+                      p: 3,
+                      height: '100%', 
+                      borderRadius: 6,
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafb 100%)',
+                      boxShadow: '0 12px 40px rgba(74,124,89,0.08)',
+                      border: '1px solid rgba(74,124,89,0.08)',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: 3,
+                        background: 'linear-gradient(90deg, #4a7c59 0%, #8bc34a 100%)'
+                      }
+                    }}
+                  >
+                    <Box sx={{ mb: 2 }}>
+                      <Typography 
+                        variant="h6"
+                        fontWeight="800" 
+                        sx={{ 
+                          color: '#2c3e50',
+                          letterSpacing: '-0.5px',
+                          mb: 0.5
+                        }}
+                      >
+                        Quick Actions
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#6c757d' }}>
+                        Shortcuts to common tasks
+                      </Typography>
+                    </Box>
+              
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                       {userQuickActions.map((action, index) => (
                         <motion.div
                           key={index}
-                          whileHover={{ scale: 1.045, boxShadow: "0 8px 32px rgba(74,124,89,0.18)" }}
-                          transition={{ type: "spring", stiffness: 300 }}
-                          style={{ borderRadius: 18, marginBottom: 18 }}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.1 * index }}
+                          whileHover={{ 
+                            scale: 1.02,
+                            transition: { type: "spring", stiffness: 400 }
+                          }}
+                          whileTap={{ scale: 0.98 }}
                         >
-                          <Box
+                          <Card
                             onClick={action.onClick}
                             sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 2,
                               cursor: 'pointer',
                               borderRadius: 3,
-                              p: 1.5,
-                              mb: 1.5,
-                              background: 'linear-gradient(135deg, #f8fafc 0%, #e8f5e9 100%)',
-                              boxShadow: '0 2px 12px rgba(74,124,89,0.07)',
-                              border: '1.5px solid #e0e7ef',
-                              transition: 'all 0.2s cubic-bezier(.4,2,.3,1)',
+                              border: '1px solid transparent',
+                              background: 'white',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                              position: 'relative',
+                              overflow: 'hidden',
+                              '&::before': {
+                                content: '""',
+                                position: 'absolute',
+                                left: 0,
+                                top: 0,
+                                bottom: 0,
+                                width: 3,
+                                background: action.color,
+                                transform: 'scaleY(0)',
+                                transition: 'transform 0.3s ease'
+                              },
                               '&:hover': {
-                                background: 'linear-gradient(135deg, #e8f5e9 0%, #f8fafc 100%)',
-                                boxShadow: '0 8px 32px rgba(74,124,89,0.18)',
-                                borderColor: '#b2dfdb'
+                                borderColor: action.color,
+                                boxShadow: `0 8px 20px ${action.color}20`,
+                                transform: 'translateY(-2px)',
+                                '&::before': {
+                                  transform: 'scaleY(1)'
+                                }
                               }
                             }}
                           >
-                            <Box
-                        sx={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: '50%',
-                          background: `linear-gradient(135deg, ${action.color} 0%, #e0f2f1 100%)`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '1.5rem',
-                          color: '#fff',
-                          boxShadow: '0 4px 16px rgba(74,124,89,0.10)'
-                        }}
-                            >
-                              {action.icon}
-                            </Box>
-                            <Typography variant="body1" fontWeight={700} sx={{ color: '#2c3e50', letterSpacing: '-0.5px' }}>
-                              {action.label}
-                            </Typography>
-                          </Box>
+                            <CardContent sx={{ p: 1.8, '&:last-child': { pb: 1.8 } }}>
+                              <Box display="flex" alignItems="center" gap={1.5}>
+                                <Box
+                                  sx={{
+                                    width: 44,
+                                    height: 44,
+                                    borderRadius: 2.5,
+                                    background: `linear-gradient(135deg, ${action.color}15 0%, ${action.color}05 100%)`,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '1.4rem',
+                                    position: 'relative',
+                                    transition: 'all 0.3s',
+                                    '&::after': {
+                                      content: '""',
+                                      position: 'absolute',
+                                      inset: -2,
+                                      borderRadius: 2.5,
+                                      background: `linear-gradient(135deg, ${action.color}30, transparent)`,
+                                      opacity: 0,
+                                      transition: 'opacity 0.3s'
+                                    },
+                                    '&:hover::after': {
+                                      opacity: 1
+                                    }
+                                  }}
+                                >
+                                  {action.icon}
+                                </Box>
+                                <Box flex={1}>
+                                  <Typography 
+                                    variant="body2"
+                                    fontWeight={700} 
+                                    sx={{ 
+                                      color: '#2c3e50',
+                                      letterSpacing: '-0.3px',
+                                      mb: 0.3,
+                                      fontSize: '0.9rem'
+                                    }}
+                                  >
+                                    {action.label}
+                                  </Typography>
+                                  <Typography variant="caption" sx={{ color: '#6c757d', fontSize: '0.7rem' }}>
+                                    {action.label === 'Models' ? 'Browse designs' :
+                                     action.label === 'Amenities' ? 'View facilities' :
+                                     'Latest updates'}
+                                  </Typography>
+                                </Box>
+                                <Box
+                                  sx={{
+                                    width: 28,
+                                    height: 28,
+                                    borderRadius: '50%',
+                                    background: `${action.color}10`,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: action.color,
+                                    fontSize: '1rem',
+                                    fontWeight: 'bold',
+                                    transition: 'all 0.3s',
+                                    '&:hover': {
+                                      background: action.color,
+                                      color: 'white'
+                                    }
+                                  }}
+                                >
+                                  ›
+                                </Box>
+                              </Box>
+                            </CardContent>
+                          </Card>
                         </motion.div>
                       ))}
                     </Box>
@@ -671,8 +823,34 @@ const Dashboard = () => {
               </Grid>
             ))}
           {/* Map Section */}
-          <Grid item xs={12} md={8}>
-            <Paper sx={{ p: 1 }}>
+<Grid item xs={12} md={8}>
+  <motion.div
+    initial={{ opacity: 0, x: 50 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay: 0.3, duration: 0.6 }}
+    whileHover={{ scale: 1.01 }}
+  >
+    <Paper 
+      sx={{ 
+        p: 3, // ✅ Reducido de 4 a 3
+        height: '100%', 
+        borderRadius: 6,
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafb 100%)',
+        boxShadow: '0 12px 40px rgba(74,124,89,0.08)',
+        border: '1px solid rgba(74,124,89,0.08)',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 3, // ✅ Reducido de 4 a 3
+          background: 'linear-gradient(90deg, #4a7c59 0%, #8bc34a 100%)'
+        }
+      }}
+    >
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h6" fontWeight="bold">
                   Property Map
@@ -688,70 +866,210 @@ const Dashboard = () => {
               </Box>
               <DashboardMap />
             </Paper>
+          </motion.div>
           </Grid>
           {/* Quick Actions */}
           <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 3, height: '100%', borderRadius: 5, boxShadow: '0 8px 24px rgba(74,124,89,0.08)' }}>
-              <Typography variant="h6" gutterBottom fontWeight="bold">
-                Quick Actions
-              </Typography>
-              <Box sx={{ mt: 2 }}>
-                {quickActions.map((action, index) => (
-                  <motion.div
-                    key={index}
-                    whileHover={{ scale: 1.045, boxShadow: "0 8px 32px rgba(74,124,89,0.18)" }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                    style={{ borderRadius: 18, marginBottom: 18 }}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              whileHover={{ scale: 1.01 }}
+            >
+              <Paper 
+                sx={{ 
+                  p: 3, // ✅ Reducido de 4 a 3
+                  height: '100%', 
+                  borderRadius: 6,
+                  background: 'linear-gradient(135deg, #ffffff 0%, #f8fafb 100%)',
+                  boxShadow: '0 12px 40px rgba(74,124,89,0.08)',
+                  border: '1px solid rgba(74,124,89,0.08)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 3, // ✅ Reducido de 4 a 3
+                    background: 'linear-gradient(90deg, #4a7c59 0%, #8bc34a 100%)'
+                  }
+                }}
+              >
+                <Box sx={{ mb: 2 }}> {/* ✅ Reducido de 3 a 2 */}
+                  <Typography 
+                    variant="h6" // ✅ Cambiado de h5 a h6
+                    fontWeight="800" 
+                    sx={{ 
+                      color: '#2c3e50',
+                      letterSpacing: '-0.5px',
+                      mb: 0.5
+                    }}
                   >
-                    <Box
-                      onClick={action.onClick}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        cursor: 'pointer',
-                        borderRadius: 3,
-                        p: 1.5,
-                        mb: 1.5,
-                        background: 'linear-gradient(135deg, #f8fafc 0%, #e8f5e9 100%)',
-                        boxShadow: '0 2px 12px rgba(74,124,89,0.07)',
-                        border: '1.5px solid #e0e7ef',
-                        transition: 'all 0.2s cubic-bezier(.4,2,.3,1)',
-                        '&:hover': {
-                          background: 'linear-gradient(135deg, #e8f5e9 0%, #f8fafc 100%)',
-                          boxShadow: '0 8px 32px rgba(74,124,89,0.18)',
-                          borderColor: '#b2dfdb'
-                        }
+                    Quick Actions
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#6c757d' }}> {/* ✅ Cambiado de body2 a caption */}
+                    Shortcuts to common tasks
+                  </Typography>
+                </Box>
+          
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}> {/* ✅ Reducido de 2 a 1.5 */}
+                  {quickActions.map((action, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 * index }}
+                      whileHover={{ 
+                        scale: 1.02,
+                        transition: { type: "spring", stiffness: 400 }
                       }}
+                      whileTap={{ scale: 0.98 }}
                     >
-                      <Box
+                      <Card
+                        onClick={action.onClick}
                         sx={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: '50%',
-                          background: `linear-gradient(135deg, ${action.color} 0%, #e0f2f1 100%)`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '1.5rem',
-                          color: '#fff',
-                          boxShadow: '0 4px 16px rgba(74,124,89,0.10)'
+                          cursor: 'pointer',
+                          borderRadius: 3, // ✅ Reducido de 4 a 3
+                          border: '1px solid transparent', // ✅ Reducido de 1.5px a 1px
+                          background: 'white',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.04)', // ✅ Sombra más sutil
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: 3, // ✅ Reducido de 4 a 3
+                            background: action.color,
+                            transform: 'scaleY(0)',
+                            transition: 'transform 0.3s ease'
+                          },
+                          '&:hover': {
+                            borderColor: action.color,
+                            boxShadow: `0 8px 20px ${action.color}20`, // ✅ Sombra más compacta
+                            transform: 'translateY(-2px)',
+                            '&::before': {
+                              transform: 'scaleY(1)'
+                            }
+                          }
                         }}
                       >
-                        {action.icon}
-                      </Box>
-                      <Typography variant="body1" fontWeight={700} sx={{ color: '#2c3e50', letterSpacing: '-0.5px' }}>
-                        {action.label}
-                      </Typography>
-                    </Box>
-                  </motion.div>
-                ))}
-              </Box>
-            </Paper>
+                        <CardContent sx={{ p: 1.8, '&:last-child': { pb: 1.8 } }}> {/* ✅ Reducido de 2.5 a 1.8 */}
+                          <Box display="flex" alignItems="center" gap={1.5}> {/* ✅ Reducido de 2 a 1.5 */}
+                            <Box
+                              sx={{
+                                width: 44, // ✅ Reducido de 56 a 44
+                                height: 44, // ✅ Reducido de 56 a 44
+                                borderRadius: 2.5, // ✅ Reducido de 3 a 2.5
+                                background: `linear-gradient(135deg, ${action.color}15 0%, ${action.color}05 100%)`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '1.4rem', // ✅ Reducido de 1.75rem a 1.4rem
+                                position: 'relative',
+                                transition: 'all 0.3s',
+                                '&::after': {
+                                  content: '""',
+                                  position: 'absolute',
+                                  inset: -2,
+                                  borderRadius: 2.5,
+                                  background: `linear-gradient(135deg, ${action.color}30, transparent)`,
+                                  opacity: 0,
+                                  transition: 'opacity 0.3s'
+                                },
+                                '&:hover::after': {
+                                  opacity: 1
+                                }
+                              }}
+                            >
+                              {action.icon}
+                            </Box>
+                            <Box flex={1}>
+                              <Typography 
+                                variant="body2" // ✅ Cambiado de body1 a body2
+                                fontWeight={700} 
+                                sx={{ 
+                                  color: '#2c3e50',
+                                  letterSpacing: '-0.3px',
+                                  mb: 0.3, // ✅ Reducido de 0.5 a 0.3
+                                  fontSize: '0.9rem' // ✅ Tamaño específico
+                                }}
+                              >
+                                {action.label}
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: '#6c757d', fontSize: '0.7rem' }}> {/* ✅ Tamaño reducido */}
+                                {action.label === 'Add Property' ? 'Create new property' :
+                                 action.label === 'Invite User' ? 'Send invitation' :
+                                 action.label === 'Analytics' ? 'View reports' :
+                                 action.label === 'Models' ? 'Browse designs' :
+                                 action.label === 'Club House' ? 'Amenities' :
+                                 'Latest updates'}
+                              </Typography>
+                            </Box>
+                            <Box
+                              sx={{
+                                width: 28, // ✅ Reducido de 32 a 28
+                                height: 28, // ✅ Reducido de 32 a 28
+                                borderRadius: '50%',
+                                background: `${action.color}10`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: action.color,
+                                fontSize: '1rem', // ✅ Reducido de 1.2rem a 1rem
+                                fontWeight: 'bold',
+                                transition: 'all 0.3s',
+                                '&:hover': {
+                                  background: action.color,
+                                  color: 'white'
+                                }
+                              }}
+                            >
+                              ›
+                            </Box>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </Box>
+              </Paper>
+            </motion.div>
           </Grid>
           {/* Recent Payloads */}
-          <Grid item xs={12} md={8}>
-            <Paper sx={{ p: 3 }}>
+<Grid item xs={12} md={8}>
+  <motion.div
+    initial={{ opacity: 0, x: 50 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay: 0.3, duration: 0.6 }}
+    whileHover={{ scale: 1.01 }}
+  >
+    <Paper 
+      sx={{ 
+        p: 3, // ✅ Reducido de 4 a 3
+        height: '100%', 
+        borderRadius: 6,
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafb 100%)',
+        boxShadow: '0 12px 40px rgba(74,124,89,0.08)',
+        border: '1px solid rgba(74,124,89,0.08)',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 3, // ✅ Reducido de 4 a 3
+          background: 'linear-gradient(90deg, #4a7c59 0%, #8bc34a 100%)'
+        }
+      }}
+    >
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h6" fontWeight="bold">
                   Recent Payloads
@@ -817,47 +1135,7 @@ const Dashboard = () => {
                 )}
               </Box>
             </Paper>
-          </Grid>
-          {/* Recent Activity */}
-          <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom fontWeight="bold">
-                Recent Activity
-              </Typography>
-              <Box sx={{ mt: 2 }}>
-                {[
-                  { text: 'New showing booked', detail: '104 Lakeview Dr', time: '2 mins ago', color: 'success.main' },
-                  { text: 'Maintenance request', detail: 'Clubhouse HVAC', time: '1 hour ago', color: 'warning.main' },
-                  { text: 'New document uploaded', detail: 'Lease agreement #442', time: '3 hours ago', color: 'info.main' }
-                ].map((activity, index) => (
-                  <Box key={index} sx={{ mb: 2 }}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Box
-                        sx={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: '50%',
-                          bgcolor: activity.color
-                        }}
-                      />
-                      <Typography variant="body2" fontWeight="500">
-                        {activity.text}
-                      </Typography>
-                    </Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ ml: 2 }}>
-                      {activity.detail} • {activity.time}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
-              <Typography 
-                variant="body2" 
-                color="primary" 
-                sx={{ cursor: 'pointer', mt: 2, textAlign: 'center' }}
-              >
-                VIEW FULL HISTORY
-              </Typography>
-            </Paper>
+            </motion.div>
           </Grid>
         </Grid>
         </motion.div></>
