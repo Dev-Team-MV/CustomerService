@@ -15,10 +15,8 @@ const router = express.Router()
  * @swagger
  * /api/news:
  *   get:
- *     summary: Get all news articles (filter by category, status)
+ *     summary: Get all news articles (filter by category, status) - public, no auth
  *     tags: [News]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: category
@@ -77,7 +75,7 @@ const router = express.Router()
  */
 router
   .route('/')
-  .get(protect, getAllNews)
+  .get(getAllNews)
   .post(protect, admin, createNews)
 
 /**
@@ -101,10 +99,8 @@ router.get('/published', getPublishedNews)
  * @swagger
  * /api/news/{id}:
  *   get:
- *     summary: Get news article by ID
+ *     summary: Get news article by ID - public, no auth
  *     tags: [News]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -178,7 +174,7 @@ router.get('/published', getPublishedNews)
  */
 router
   .route('/:id')
-  .get(protect, getNewsById)
+  .get(getNewsById)
   .put(protect, admin, updateNews)
   .delete(protect, admin, deleteNews)
 
