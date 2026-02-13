@@ -5,6 +5,7 @@ import {
   getContractById,
   createContract,
   updateContract,
+  updateContractByPropertyId,
   deleteContract
 } from '../controllers/contractController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
@@ -94,6 +95,50 @@ router.get('/property/:propertyId', protect, getContractsByPropertyId)
 
 /**
  * @swagger
+ * /api/contracts/property/{propertyId}:
+ *   put:
+ *     summary: Add or update contract types for a property (Admin only). Merges by type; send only the type(s) to add or update.
+ *     tags: [Contracts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: propertyId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               contracts:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - type
+ *                     - fileUrl
+ *                   properties:
+ *                     type:
+ *                       type: string
+ *                       enum: [promissoryNote, purchaseContract, agreement]
+ *                     fileUrl:
+ *                       type: string
+ *                     uploadedAt:
+ *                       type: string
+ *                       format: date-time
+ *     responses:
+ *       200:
+ *         description: Contracts merged (added/updated by type)
+ *       404:
+ *         description: No contracts for this property; use POST to create first
+ */
+router.put('/property/:propertyId', protect, admin, updateContractByPropertyId)
+
+/**
+ * @swagger
  * /api/contracts/{id}:
  *   get:
  *     summary: Get contract document by ID
@@ -130,8 +175,12 @@ router.get('/property/:propertyId', protect, getContractsByPropertyId)
  *             properties:
  *               contracts:
  *                 type: array
+ *                 description: Items to add or update by type (merge). Send only the type(s) you want to add or change.
  *                 items:
  *                   type: object
+ *                   required:
+ *                     - type
+ *                     - fileUrl
  *                   properties:
  *                     type:
  *                       type: string
@@ -143,7 +192,7 @@ router.get('/property/:propertyId', protect, getContractsByPropertyId)
  *                       format: date-time
  *     responses:
  *       200:
- *         description: Contract updated
+ *         description: Contract updated (merged by type)
  *       404:
  *         description: Contract not found
  *   delete:
