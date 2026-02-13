@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import SendIcon from '@mui/icons-material/Send'
 import HomeIcon from '@mui/icons-material/Home'
 import LoginIcon from '@mui/icons-material/Login'
+import CalculateIcon from '@mui/icons-material/Calculate'
 
 const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
   const { 
@@ -49,7 +50,6 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
     }
 
     if (isPublic || !isAuthenticated) {
-      // Redirigir a login con la información de retorno
       navigate('/login', { 
         state: { 
           from: window.location.pathname,
@@ -69,7 +69,6 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
     }
 
     if (isPublic || !isAuthenticated) {
-      // Redirigir a login
       navigate('/login', { 
         state: { 
           from: window.location.pathname,
@@ -87,34 +86,57 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
 
   return (
     <Paper 
-      elevation={2} 
+      elevation={0} 
       sx={{ 
         p: 3, 
         bgcolor: '#fff', 
-        color: '#000',
-        borderRadius: 2,
+        color: '#333F1F',
+        borderRadius: 3,
         border: '1px solid #e0e0e0',
         maxWidth: '100%',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        boxShadow: '0 4px 12px rgba(51, 63, 31, 0.08)'
       }}
     >
-      <Typography variant="overline" sx={{ color: '#666', fontWeight: 'bold', mb: 2, display: 'block', letterSpacing: 1 }}>
-        PRICE CALCULATOR
-      </Typography>
+      {/* ✅ HEADER - Brandbook */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+        <CalculateIcon sx={{ color: '#8CA551', fontSize: 28 }} />
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            color: '#333F1F', 
+            fontWeight: 700, 
+            letterSpacing: '0.5px',
+            fontFamily: '"Poppins", sans-serif'
+          }}
+        >
+          Price Calculator
+        </Typography>
+      </Box>
 
-      {/* Alert para usuarios públicos */}
+      {/* ✅ ALERT - Brandbook */}
       {isPublic && (
         <Alert 
           severity="info" 
-          icon={<LoginIcon />}
-          sx={{ mb: 2 }}
+          icon={<LoginIcon sx={{ color: '#8CA551' }} />}
+          sx={{ 
+            mb: 3,
+            bgcolor: 'rgba(140, 165, 81, 0.08)',
+            border: '1px solid rgba(140, 165, 81, 0.2)',
+            borderRadius: 2,
+            '& .MuiAlert-message': {
+              fontFamily: '"Poppins", sans-serif',
+              fontSize: '0.875rem',
+              color: '#333F1F'
+            }
+          }}
         >
           Browsing as guest. <strong>Sign in</strong> to save your selections.
         </Alert>
       )}
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-        {/* List Price - Calculated automatically */}
+        {/* ✅ LIST PRICE - Brandbook */}
         <CalcField 
           label="List Price Phase I" 
           value={financials.listPrice.toFixed(2)} 
@@ -123,64 +145,128 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
           suffix="USD"
         />
 
-        {/* Selection Summary */}
-        <Box sx={{ p: 1.5, bgcolor: '#f5f5f5', borderRadius: 1, fontSize: '0.75rem' }}>
-          <Typography variant="caption" display="block" color="text.secondary">
-            <strong>Lot:</strong> {selectedLot ? `#${selectedLot.number} - $${selectedLot.price?.toLocaleString()}` : 'Not selected'}
+        {/* ✅ SELECTION SUMMARY - Brandbook */}
+        <Box sx={{ 
+          p: 2, 
+          bgcolor: '#fafafa', 
+          borderRadius: 2, 
+          border: '1px solid #e0e0e0',
+          fontSize: '0.875rem' 
+        }}>
+          <Typography 
+            variant="body2" 
+            display="block" 
+            sx={{ 
+              color: '#706f6f',
+              fontFamily: '"Poppins", sans-serif',
+              mb: 0.5
+            }}
+          >
+            <strong style={{ color: '#333F1F' }}>Lot:</strong> {selectedLot ? `#${selectedLot.number} - $${selectedLot.price?.toLocaleString()}` : 'Not selected'}
           </Typography>
-          <Typography variant="caption" display="block" color="text.secondary">
-            <strong>Model:</strong> {selectedModel ? `${selectedModel.model} - $${selectedModel.price?.toLocaleString()}` : 'Not selected'}
+          <Typography 
+            variant="body2" 
+            display="block" 
+            sx={{ 
+              color: '#706f6f',
+              fontFamily: '"Poppins", sans-serif',
+              mb: 0.5
+            }}
+          >
+            <strong style={{ color: '#333F1F' }}>Model:</strong> {selectedModel ? `${selectedModel.model} - $${selectedModel.price?.toLocaleString()}` : 'Not selected'}
           </Typography>
           
-          {/* Mostrar opciones seleccionadas */}
+          {/* ✅ OPTIONS CHIPS - Brandbook */}
           {selectedModel && pricingInfo && (
-            <Box display="flex" gap={0.5} mt={1} flexWrap="wrap">
+            <Box display="flex" gap={0.5} mt={1.5} flexWrap="wrap">
               {options.upgrade && pricingInfo.hasUpgrade && (
                 <Chip 
                   label={`Upgrade +$${pricingInfo.upgradePrice.toLocaleString()}`}
                   size="small"
-                  color="secondary"
-                  sx={{ height: 18, fontSize: '0.65rem' }}
+                  sx={{ 
+                    height: 20, 
+                    fontSize: '0.7rem',
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 600,
+                    bgcolor: 'rgba(140, 165, 81, 0.12)',
+                    color: '#333F1F',
+                    border: '1px solid rgba(140, 165, 81, 0.3)'
+                  }}
                 />
               )}
               {options.balcony && pricingInfo.hasBalcony && (
                 <Chip 
                   label={`Balcony +$${pricingInfo.balconyPrice.toLocaleString()}`}
                   size="small"
-                  color="info"
-                  sx={{ height: 18, fontSize: '0.65rem' }}
+                  sx={{ 
+                    height: 20, 
+                    fontSize: '0.7rem',
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 600,
+                    bgcolor: 'rgba(140, 165, 81, 0.12)',
+                    color: '#333F1F',
+                    border: '1px solid rgba(140, 165, 81, 0.3)'
+                  }}
                 />
               )}
               {options.storage && pricingInfo.hasStorage && (
                 <Chip 
                   label={`Storage +$${pricingInfo.storagePrice.toLocaleString()}`}
                   size="small"
-                  color="success"
-                  sx={{ height: 18, fontSize: '0.65rem' }}
+                  sx={{ 
+                    height: 20, 
+                    fontSize: '0.7rem',
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 600,
+                    bgcolor: 'rgba(229, 134, 60, 0.12)',
+                    color: '#333F1F',
+                    border: '1px solid rgba(229, 134, 60, 0.3)'
+                  }}
                 />
               )}
             </Box>
           )}
           
-          <Typography variant="caption" display="block" color="text.secondary" mt={1}>
-            <strong>Facade:</strong> {selectedFacade 
+          <Typography 
+            variant="body2" 
+            display="block" 
+            sx={{ 
+              color: '#706f6f',
+              fontFamily: '"Poppins", sans-serif',
+              mt: 1.5
+            }}
+          >
+            <strong style={{ color: '#333F1F' }}>Facade:</strong> {selectedFacade 
               ? `${selectedFacade.title} - ${selectedFacade.price > 0 ? `+$${selectedFacade.price?.toLocaleString()}` : 'Included'}`
               : 'Not selected'}
           </Typography>
           
-          {/* Mostrar configuración seleccionada */}
+          {/* ✅ PRICING OPTION - Brandbook */}
           {selectedPricingOption && (
-            <Box mt={1} p={1} bgcolor="rgba(74, 124, 89, 0.1)" borderRadius={1}>
-              <Typography variant="caption" fontWeight="bold" color="primary">
+            <Box 
+              mt={1.5} 
+              p={1.5} 
+              bgcolor="rgba(140, 165, 81, 0.08)" 
+              borderRadius={2}
+              border="1px solid rgba(140, 165, 81, 0.2)"
+            >
+              <Typography 
+                variant="body2" 
+                fontWeight={600}
+                sx={{ 
+                  color: '#333F1F',
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              >
                 📋 {selectedPricingOption.label}
               </Typography>
             </Box>
           )}
         </Box>
 
-        <Divider />
+        <Divider sx={{ borderColor: 'rgba(140, 165, 81, 0.2)' }} />
 
-        {/* Discount Section */}
+        {/* ✅ DISCOUNT SECTION - Brandbook */}
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ flex: 1 }}>
             <CalcField 
@@ -202,32 +288,64 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
           </Box>
         </Box>
 
-        <Divider />
+        <Divider sx={{ borderColor: 'rgba(140, 165, 81, 0.2)' }} />
 
-        {/* Presale Price Highlight */}
+        {/* ✅ PRESALE PRICE - Brandbook */}
         <Box sx={{ 
-          p: 2, 
-          bgcolor: 'linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%)', 
-          borderRadius: 2, 
-          border: '2px solid #4a7c59', 
+          p: 3, 
+          bgcolor: 'rgba(140, 165, 81, 0.08)', 
+          borderRadius: 3, 
+          border: '2px solid #8CA551', 
           textAlign: 'center',
-          boxShadow: '0 4px 12px rgba(74, 124, 89, 0.2)'
+          boxShadow: '0 4px 12px rgba(140, 165, 81, 0.15)'
         }}>
-          <Typography variant="caption" sx={{ color: '#558b2f', fontWeight: 'bold', letterSpacing: 1 }}>
+          <Typography 
+            variant="caption" 
+            sx={{ 
+              color: '#333F1F', 
+              fontWeight: 700, 
+              letterSpacing: '1.5px',
+              fontFamily: '"Poppins", sans-serif',
+              fontSize: '0.75rem'
+            }}
+          >
             PRESALE PRICE TODAY
           </Typography>
-          <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2e7d32', mt: 0.5 }}>
+          <Typography 
+            variant="h3" 
+            sx={{ 
+              fontWeight: 700, 
+              color: '#333F1F', 
+              mt: 0.5,
+              fontFamily: '"Poppins", sans-serif'
+            }}
+          >
             ${financials.presalePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </Typography>
-          <Typography variant="caption" sx={{ color: '#558b2f', fontStyle: 'italic' }}>
+          <Typography 
+            variant="caption" 
+            sx={{ 
+              color: '#706f6f', 
+              fontStyle: 'italic',
+              fontFamily: '"Poppins", sans-serif'
+            }}
+          >
             Limited time offer
           </Typography>
         </Box>
 
-        <Divider />
+        <Divider sx={{ borderColor: 'rgba(140, 165, 81, 0.2)' }} />
 
-        {/* Down Payment Section */}
-        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#4a7c59' }}>
+        {/* ✅ DOWN PAYMENT SECTION - Brandbook */}
+        <Typography 
+          variant="subtitle1" 
+          sx={{ 
+            fontWeight: 700, 
+            color: '#333F1F',
+            fontFamily: '"Poppins", sans-serif',
+            letterSpacing: '0.5px'
+          }}
+        >
           Down Payment Details
         </Typography>
 
@@ -252,7 +370,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
           </Box>
         </Box>
 
-        {/* Initial DP and Date */}
+        {/* ✅ INITIAL DP AND DATE - Brandbook */}
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ flex: 1 }}>
             <CalcField 
@@ -265,7 +383,16 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
             />
           </Box>
           <Box sx={{ flex: 1.5 }}>
-            <Typography variant="caption" sx={{ color: '#666', mb: 0.5, display: 'block', fontWeight: 'bold' }}>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: '#706f6f', 
+                mb: 0.5, 
+                display: 'block', 
+                fontWeight: 600,
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
               Payment Date
             </Typography>
             <TextField
@@ -275,7 +402,18 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               value={initialPaymentDate}
               onChange={(e) => setInitialPaymentDate(e.target.value)}
               InputLabelProps={{ shrink: true }}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+              sx={{ 
+                '& .MuiOutlinedInput-root': { 
+                  borderRadius: 2,
+                  fontFamily: '"Poppins", sans-serif',
+                  '&:hover fieldset': {
+                    borderColor: '#8CA551'
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#8CA551'
+                  }
+                }
+              }}
             />
           </Box>
         </Box>
@@ -288,10 +426,18 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
           highlighted
         />
 
-        <Divider />
+        <Divider sx={{ borderColor: 'rgba(140, 165, 81, 0.2)' }} />
 
-        {/* Monthly Payment Section */}
-        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#4a7c59' }}>
+        {/* ✅ MONTHLY PAYMENT SECTION - Brandbook */}
+        <Typography 
+          variant="subtitle1" 
+          sx={{ 
+            fontWeight: 700, 
+            color: '#333F1F',
+            fontFamily: '"Poppins", sans-serif',
+            letterSpacing: '0.5px'
+          }}
+        >
           Monthly Payment Plan
         </Typography>
 
@@ -324,43 +470,136 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
           highlighted
         />
 
-        {/* Payment Summary */}
-        <Box sx={{ p: 2, bgcolor: '#f9f9f9', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-          <Typography variant="caption" fontWeight="bold" display="block" mb={1}>
-            Payment Breakdown:
+        {/* ✅ PAYMENT SUMMARY - Brandbook */}
+        <Box sx={{ 
+          p: 2.5, 
+          bgcolor: '#fafafa', 
+          borderRadius: 2, 
+          border: '1px solid #e0e0e0' 
+        }}>
+          <Typography 
+            variant="subtitle2" 
+            fontWeight={700} 
+            display="block" 
+            mb={2}
+            sx={{ 
+              color: '#333F1F',
+              fontFamily: '"Poppins", sans-serif'
+            }}
+          >
+            Payment Breakdown
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography variant="caption" color="text.secondary">Initial Down Payment:</Typography>
-            <Typography variant="caption" fontWeight="bold">${financials.initialDownPayment.toLocaleString()}</Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: '#706f6f',
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
+              Initial Down Payment:
+            </Typography>
+            <Typography 
+              variant="body2" 
+              fontWeight={600}
+              sx={{ 
+                color: '#333F1F',
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
+              ${financials.initialDownPayment.toLocaleString()}
+            </Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography variant="caption" color="text.secondary">Remaining Down Payment:</Typography>
-            <Typography variant="caption" fontWeight="bold">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: '#706f6f',
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
+              Remaining Down Payment:
+            </Typography>
+            <Typography 
+              variant="body2" 
+              fontWeight={600}
+              sx={{ 
+                color: '#333F1F',
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
               ${(financials.totalDownPayment - financials.initialDownPayment).toLocaleString()}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography variant="caption" color="text.secondary">Monthly Payment:</Typography>
-            <Typography variant="caption" fontWeight="bold">${financials.monthlyPayment.toLocaleString()}</Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: '#706f6f',
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
+              Monthly Payment:
+            </Typography>
+            <Typography 
+              variant="body2" 
+              fontWeight={600}
+              sx={{ 
+                color: '#333F1F',
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
+              ${financials.monthlyPayment.toLocaleString()}
+            </Typography>
           </Box>
-          <Divider sx={{ my: 1 }} />
+          <Divider sx={{ my: 1.5, borderColor: 'rgba(140, 165, 81, 0.2)' }} />
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="caption" fontWeight="bold">Mortgage to Finance:</Typography>
-            <Typography variant="caption" fontWeight="bold" color="primary">
+            <Typography 
+              variant="body2" 
+              fontWeight={700}
+              sx={{ 
+                color: '#333F1F',
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
+              Mortgage to Finance:
+            </Typography>
+            <Typography 
+              variant="body2" 
+              fontWeight={700}
+              sx={{ 
+                color: '#8CA551',
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
               ${financials.mortgage.toLocaleString()}
             </Typography>
           </Box>
         </Box>
 
-        {/* Note */}
-        <Alert severity="warning" icon="⚠️" sx={{ fontSize: '0.75rem' }}>
-          <Typography variant="caption">
+        {/* ✅ NOTE ALERT - Brandbook */}
+        <Alert 
+          severity="warning" 
+          icon="⚠️" 
+          sx={{ 
+            fontSize: '0.875rem',
+            bgcolor: 'rgba(229, 134, 60, 0.08)',
+            border: '1px solid rgba(229, 134, 60, 0.2)',
+            borderRadius: 2,
+            '& .MuiAlert-message': {
+              fontFamily: '"Poppins", sans-serif',
+              fontSize: '0.875rem',
+              color: '#333F1F'
+            }
+          }}
+        >
+          <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
             <strong>Important:</strong> Every 10 houses sold, the discount is reduced by 2%
           </Typography>
         </Alert>
 
-        {/* Action Buttons */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 2 }}>
+        {/* ✅ ACTION BUTTONS - Brandbook */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
           <Button
             variant="outlined"
             fullWidth
@@ -368,20 +607,25 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
             startIcon={isPublic ? <LoginIcon /> : <HomeIcon />}
             disabled={!isSelectionComplete}
             sx={{
-              borderColor: '#4a7c59',
-              color: '#4a7c59',
+              borderColor: '#8CA551',
+              color: '#333F1F',
               py: 1.5,
               borderRadius: 3,
-              fontWeight: 'bold',
+              fontWeight: 600,
               textTransform: 'none',
               fontSize: '1rem',
+              fontFamily: '"Poppins", sans-serif',
+              border: '2px solid #8CA551',
               '&:hover': {
-                borderColor: '#3d664a',
-                bgcolor: 'rgba(74, 124, 89, 0.04)'
+                borderColor: '#8CA551',
+                bgcolor: 'rgba(140, 165, 81, 0.08)',
+                border: '2px solid #8CA551',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 12px rgba(140, 165, 81, 0.2)'
               },
               '&:disabled': {
-                borderColor: '#ccc',
-                color: '#999'
+                borderColor: '#e0e0e0',
+                color: '#706f6f'
               }
             }}
           >
@@ -395,26 +639,50 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
             startIcon={isPublic ? <LoginIcon /> : <SendIcon />}
             disabled={!isSelectionComplete}
             sx={{
-              bgcolor: '#4a7c59',
-              color: '#fff',
+              bgcolor: '#333F1F',
+              color: 'white',
               py: 1.5,
               borderRadius: 3,
-              fontWeight: 'bold',
+              fontWeight: 600,
               textTransform: 'none',
               fontSize: '1rem',
-              boxShadow: '0 4px 12px rgba(74, 124, 89, 0.3)',
+              fontFamily: '"Poppins", sans-serif',
+              boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: '-100%',
+                width: '100%',
+                height: '100%',
+                bgcolor: '#8CA551',
+                transition: 'left 0.4s ease',
+                zIndex: 0,
+              },
               '&:hover': {
-                bgcolor: '#3d664a',
-                boxShadow: '0 6px 16px rgba(74, 124, 89, 0.4)'
+                bgcolor: '#333F1F',
+                boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+                transform: 'translateY(-2px)',
+                '&::before': {
+                  left: 0,
+                },
               },
               '&:disabled': {
-                bgcolor: '#ccc',
-                color: '#666',
+                bgcolor: '#e0e0e0',
+                color: '#706f6f',
                 boxShadow: 'none'
+              },
+              '& .MuiButton-startIcon': {
+                position: 'relative',
+                zIndex: 1,
               }
             }}
           >
-            {isPublic ? 'Sign In to Send Quote' : 'Generate & Send Quote'}
+            <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
+              {isPublic ? 'Sign In to Send Quote' : 'Generate & Send Quote'}
+            </Box>
           </Button>
         </Box>
       </Box>
@@ -424,7 +692,16 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
 
 const CalcField = ({ label, value, onChange, prefix, suffix, disabled = false, highlighted = false, min, max }) => (
   <Box>
-    <Typography variant="caption" sx={{ color: '#666', mb: 0.5, display: 'block', fontWeight: 'bold' }}>
+    <Typography 
+      variant="caption" 
+      sx={{ 
+        color: '#706f6f', 
+        mb: 0.5, 
+        display: 'block', 
+        fontWeight: 600,
+        fontFamily: '"Poppins", sans-serif'
+      }}
+    >
       {label}
     </Typography>
     <TextField
@@ -444,9 +721,16 @@ const CalcField = ({ label, value, onChange, prefix, suffix, disabled = false, h
         endAdornment: suffix ? <InputAdornment position="end">{suffix}</InputAdornment> : null,
         sx: { 
           borderRadius: 2, 
-          bgcolor: disabled ? (highlighted ? '#fffde7' : '#f9f9f9') : '#fff',
-          fontWeight: highlighted ? 'bold' : 'normal',
-          border: highlighted ? '2px solid #ffd54f' : 'none'
+          bgcolor: disabled ? (highlighted ? 'rgba(140, 165, 81, 0.08)' : '#fafafa') : '#fff',
+          fontWeight: highlighted ? 700 : 400,
+          border: highlighted ? '2px solid #8CA551' : 'none',
+          fontFamily: '"Poppins", sans-serif',
+          '&:hover fieldset': {
+            borderColor: disabled ? 'inherit' : '#8CA551'
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: '#8CA551'
+          }
         }
       }}
     />

@@ -459,224 +459,398 @@ const Layout = ({ publicView = false }) => {
         {drawer}
       </Drawer>
 
-      {/* ✅ Drawer de Notificaciones */}
-      <Drawer
-        anchor="right"
-        variant="temporary"
-        open={notificationsOpen}
-        onClose={() => setNotificationsOpen(false)}
-        ModalProps={{
-          keepMounted: true,
-          BackdropProps: {
-            sx: {
-              bgcolor: 'rgba(0, 0, 0, 0.3)',
-              backdropFilter: 'blur(4px)'
-            }
-          }
-        }}
+{/* ✅ Drawer de Notificaciones - BRANDBOOK */}
+<Drawer
+  anchor="right"
+  variant="temporary"
+  open={notificationsOpen}
+  onClose={() => setNotificationsOpen(false)}
+  ModalProps={{
+    keepMounted: true,
+    BackdropProps: {
+      sx: {
+        bgcolor: 'rgba(0, 0, 0, 0.3)',
+        backdropFilter: 'blur(4px)'
+      }
+    }
+  }}
+  sx={{
+    zIndex: 1202,
+    '& .MuiDrawer-paper': {
+      width: { xs: '100%', sm: 380 },
+      boxSizing: 'border-box',
+      border: 'none'
+    }
+  }}
+>
+  <Box 
+    sx={{ 
+      height: '100%',
+      bgcolor: '#fafafa',
+      display: 'flex',
+      flexDirection: 'column'
+    }}
+  >
+    {/* ✅ HEADER - Brandbook colors */}
+    <Box 
+      sx={{ 
+        p: 3, 
+        background: 'linear-gradient(135deg, #333F1F 0%, #4a5d3a 100%)',
+        color: 'white',
+        boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}
+    >
+      {/* ✅ Decorative blur circle */}
+      <Box
         sx={{
-          zIndex: 1202,
-          '& .MuiDrawer-paper': {
-            width: { xs: '100%', sm: 360 },
-            boxSizing: 'border-box',
-            border: 'none'
-          }
+          position: 'absolute',
+          top: -30,
+          right: -30,
+          width: 120,
+          height: 120,
+          bgcolor: 'rgba(140, 165, 81, 0.15)',
+          borderRadius: '50%',
+          filter: 'blur(40px)'
         }}
-      >
-        <Box 
-          sx={{ 
-            height: '100%',
-            background: 'linear-gradient(135deg, #f8fafc 0%, #e8f5ee 100%)',
-            display: 'flex',
-            flexDirection: 'column'
-          }}
-        >
-          {/* Header */}
-          <Box 
-            sx={{ 
-              p: 3, 
-              background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
-              color: 'white',
-              boxShadow: '0 4px 12px rgba(74,124,89,0.2)'
+      />
+
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box
+            sx={{
+              width: 44,
+              height: 44,
+              borderRadius: 2,
+              bgcolor: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(10px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <NotificationsIcon sx={{ fontSize: 28 }} />
-                <Typography variant="h6" fontWeight="bold">
-                  Notifications
-                </Typography>
-              </Box>
-              <Badge 
-                badgeContent={notifications.filter(n => !n.read).length} 
-                color="error"
-              >
-                <IconButton
-                  onClick={() => setNotificationsOpen(false)}
-                  size="small"
+            <NotificationsIcon sx={{ fontSize: 24 }} />
+          </Box>
+          <Box>
+            <Typography 
+              variant="h6" 
+              fontWeight={700}
+              sx={{ 
+                fontFamily: '"Poppins", sans-serif',
+                letterSpacing: '0.5px'
+              }}
+            >
+              Notifications
+            </Typography>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                opacity: 0.9,
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
+              {notifications.filter(n => !n.read).length} unread
+            </Typography>
+          </Box>
+        </Box>
+        
+        <IconButton
+          onClick={() => setNotificationsOpen(false)}
+          size="small"
+          sx={{
+            color: 'white',
+            bgcolor: 'rgba(255,255,255,0.15)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            '&:hover': {
+              bgcolor: 'rgba(255,255,255,0.25)',
+              transform: 'rotate(90deg)',
+              transition: 'all 0.3s'
+            }
+          }}
+        >
+          <ChevronLeftIcon />
+        </IconButton>
+      </Box>
+    </Box>
+
+    {/* ✅ NOTIFICATIONS LIST */}
+    <Box sx={{ flex: 1, overflowY: 'auto', p: 2.5 }}>
+      {notifications.length === 0 ? (
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          height: '100%',
+          gap: 2
+        }}>
+          <Box
+            sx={{
+              width: 80,
+              height: 80,
+              borderRadius: 3,
+              bgcolor: 'rgba(112, 111, 111, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <NotificationsIcon sx={{ fontSize: 48, color: '#706f6f', opacity: 0.4 }} />
+          </Box>
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              color: '#706f6f',
+              fontFamily: '"Poppins", sans-serif',
+              fontWeight: 500
+            }}
+          >
+            No notifications yet
+          </Typography>
+          <Typography 
+            variant="caption" 
+            sx={{ 
+              color: '#9e9e9e',
+              fontFamily: '"Poppins", sans-serif',
+              textAlign: 'center',
+              maxWidth: 240
+            }}
+          >
+            We'll notify you when something important happens
+          </Typography>
+        </Box>
+      ) : (
+        notifications.map((n, index) => (
+          <motion.div
+            key={n.id}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.05, duration: 0.3 }}
+          >
+            <Box
+              sx={{
+                mb: 2,
+                p: 2.5,
+                borderRadius: 3,
+                bgcolor: n.read ? 'white' : 'rgba(140, 165, 81, 0.06)',
+                border: n.read ? '1px solid #e0e0e0' : '2px solid rgba(140, 165, 81, 0.2)',
+                boxShadow: n.read 
+                  ? '0 2px 8px rgba(0,0,0,0.04)' 
+                  : '0 4px 12px rgba(140, 165, 81, 0.12)',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                '&:hover': {
+                  boxShadow: n.read
+                    ? '0 4px 16px rgba(0,0,0,0.08)'
+                    : '0 6px 20px rgba(140, 165, 81, 0.18)',
+                  transform: 'translateX(-4px)',
+                  borderColor: n.read ? '#706f6f' : '#8CA551'
+                }
+              }}
+              onClick={() => {
+                setNotifications(prev => 
+                  prev.map(notif => 
+                    notif.id === n.id ? { ...notif, read: true } : notif
+                  )
+                )
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                {/* ✅ ICON BOX - Brandbook colors */}
+                <Box
                   sx={{
-                    color: 'white',
-                    bgcolor: 'rgba(255,255,255,0.2)',
-                    '&:hover': {
-                      bgcolor: 'rgba(255,255,255,0.3)',
-                    }
+                    width: 44,
+                    height: 44,
+                    borderRadius: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    bgcolor: n.read 
+                      ? 'rgba(112, 111, 111, 0.08)' 
+                      : 'rgba(140, 165, 81, 0.15)',
+                    border: `1px solid ${n.read ? 'rgba(112, 111, 111, 0.2)' : 'rgba(140, 165, 81, 0.3)'}`,
+                    flexShrink: 0,
+                    transition: 'all 0.3s'
                   }}
                 >
-                  <ChevronLeftIcon />
-                </IconButton>
-              </Badge>
-            </Box>
-          </Box>
+                  {n.title.includes('Payment') && (
+                    <PaymentIcon sx={{ 
+                      color: n.read ? '#706f6f' : '#333F1F',
+                      fontSize: 22 
+                    }} />
+                  )}
+                  {n.title.includes('message') && (
+                    <ChatIcon sx={{ 
+                      color: n.read ? '#706f6f' : '#8CA551',
+                      fontSize: 22 
+                    }} />
+                  )}
+                  {n.title.includes('Document') && (
+                    <CheckCircleIcon sx={{ 
+                      color: n.read ? '#706f6f' : '#8CA551',
+                      fontSize: 22 
+                    }} />
+                  )}
+                </Box>
 
-          {/* Notifications List */}
-          <Box sx={{ flex: 1, overflowY: 'auto', p: 2 }}>
-            {notifications.length === 0 ? (
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                height: '100%',
-                gap: 2
-              }}>
-                <NotificationsIcon sx={{ fontSize: 64, color: '#ccc' }} />
-                <Typography variant="body1" color="text.secondary" textAlign="center">
-                  No notifications yet
-                </Typography>
-              </Box>
-            ) : (
-              notifications.map((n, index) => (
-                <motion.div
-                  key={n.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05, duration: 0.3 }}
-                >
-                  <Box
-                    sx={{
-                      mb: 2,
-                      p: 2,
-                      borderRadius: 3,
-                      bgcolor: n.read ? 'white' : 'rgba(74,124,89,0.08)',
-                      border: n.read ? '1px solid #e0e0e0' : '1.5px solid rgba(74,124,89,0.2)',
-                      boxShadow: n.read ? '0 2px 8px rgba(0,0,0,0.04)' : '0 4px 12px rgba(74,124,89,0.12)',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        boxShadow: '0 6px 16px rgba(74,124,89,0.18)',
-                        transform: 'translateY(-2px)',
-                        transition: 'all 0.2s'
-                      }
-                    }}
-                    onClick={() => {
-                      setNotifications(prev => 
-                        prev.map(notif => 
-                          notif.id === n.id ? { ...notif, read: true } : notif
-                        )
-                      )
+                {/* ✅ CONTENT */}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography 
+                    variant="subtitle2" 
+                    fontWeight={n.read ? 600 : 700}
+                    sx={{ 
+                      color: n.read ? '#706f6f' : '#333F1F',
+                      mb: 0.5,
+                      fontFamily: '"Poppins", sans-serif',
+                      fontSize: '0.9rem',
+                      letterSpacing: '0.3px'
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                      <Box
-                        sx={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: 2,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          bgcolor: n.read ? '#f5f5f5' : 'rgba(74,124,89,0.15)',
-                          flexShrink: 0
-                        }}
-                      >
-                        {n.title.includes('Payment') && <PaymentIcon sx={{ color: '#4a7c59' }} />}
-                        {n.title.includes('message') && <ChatIcon sx={{ color: '#2196f3' }} />}
-                        {n.title.includes('Document') && <CheckCircleIcon sx={{ color: '#4caf50' }} />}
-                      </Box>
-
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography 
-                          variant="subtitle2" 
-                          fontWeight={n.read ? 600 : 700}
-                          sx={{ 
-                            color: n.read ? '#4a5568' : '#2d3748',
-                            mb: 0.5
-                          }}
-                        >
-                          {n.title}
-                        </Typography>
-                        <Typography 
-                          variant="caption" 
-                          sx={{ 
-                            color: '#718096',
-                            display: 'block',
-                            mb: 1
-                          }}
-                        >
-                          {n.description}
-                        </Typography>
-                        <Typography 
-                          variant="caption" 
-                          sx={{ 
-                            color: '#a0aec0',
-                            fontSize: '0.7rem'
-                          }}
-                        >
-                          2 hours ago
-                        </Typography>
-                      </Box>
-
-                      {!n.read && (
-                        <Box
-                          sx={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: '50%',
-                            bgcolor: '#4a7c59',
-                            flexShrink: 0,
-                            mt: 0.5
-                          }}
-                        />
-                      )}
-                    </Box>
+                    {n.title}
+                  </Typography>
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      color: '#9e9e9e',
+                      display: 'block',
+                      mb: 1,
+                      fontFamily: '"Poppins", sans-serif',
+                      lineHeight: 1.5
+                    }}
+                  >
+                    {n.description}
+                  </Typography>
+                  <Box 
+                    sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1 
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 4,
+                        height: 4,
+                        borderRadius: '50%',
+                        bgcolor: '#9e9e9e'
+                      }}
+                    />
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        color: '#9e9e9e',
+                        fontSize: '0.7rem',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      2 hours ago
+                    </Typography>
                   </Box>
-                </motion.div>
-              ))
-            )}
-          </Box>
+                </Box>
 
-          {/* Footer */}
-          {notifications.length > 0 && (
-            <Box sx={{ 
-              p: 2, 
-              borderTop: '1px solid #e0e0e0',
-              bgcolor: 'white'
-            }}>
-              <Button
-                fullWidth
-                variant="outlined"
-                size="small"
-                onClick={() => {
-                  setNotifications(prev => 
-                    prev.map(n => ({ ...n, read: true }))
-                  )
-                }}
-                sx={{
-                  borderRadius: 2,
-                  borderColor: '#4a7c59',
-                  color: '#4a7c59',
-                  fontWeight: 600,
-                  '&:hover': {
-                    borderColor: '#3d664a',
-                    bgcolor: 'rgba(74,124,89,0.05)'
-                  }
-                }}
-              >
-                Mark all as read
-              </Button>
+                {/* ✅ UNREAD DOT - Brandbook color */}
+                {!n.read && (
+                  <Box
+                    sx={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      bgcolor: '#8CA551',
+                      flexShrink: 0,
+                      mt: 0.5,
+                      boxShadow: '0 0 0 3px rgba(140, 165, 81, 0.2)',
+                      animation: 'pulse 2s infinite',
+                      '@keyframes pulse': {
+                        '0%, 100%': { 
+                          opacity: 1,
+                          transform: 'scale(1)' 
+                        },
+                        '50%': { 
+                          opacity: 0.6,
+                          transform: 'scale(1.1)' 
+                        }
+                      }
+                    }}
+                  />
+                )}
+              </Box>
             </Box>
-          )}
-        </Box>
-      </Drawer>
+          </motion.div>
+        ))
+      )}
+    </Box>
+
+    {/* ✅ FOOTER - Brandbook */}
+    {notifications.length > 0 && (
+      <Box sx={{ 
+        p: 2.5, 
+        borderTop: '1px solid #e0e0e0',
+        bgcolor: 'white',
+        boxShadow: '0 -4px 12px rgba(0,0,0,0.04)'
+      }}>
+        <Button
+          fullWidth
+          variant="outlined"
+          size="medium"
+          onClick={() => {
+            setNotifications(prev => 
+              prev.map(n => ({ ...n, read: true }))
+            )
+          }}
+          sx={{
+            borderRadius: 3,
+            border: '2px solid #333F1F',
+            color: '#333F1F',
+            fontWeight: 600,
+            py: 1.2,
+            fontFamily: '"Poppins", sans-serif',
+            letterSpacing: '0.5px',
+            textTransform: 'none',
+            fontSize: '0.9rem',
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: '-100%',
+              width: '100%',
+              height: '100%',
+              bgcolor: '#333F1F',
+              transition: 'left 0.4s ease',
+              zIndex: 0
+            },
+            '&:hover': {
+              borderColor: '#333F1F',
+              bgcolor: 'transparent',
+              '&::before': {
+                left: 0
+              },
+              '& span': {
+                color: 'white'
+              }
+            },
+            '& span': {
+              position: 'relative',
+              zIndex: 1,
+              transition: 'color 0.3s ease'
+            }
+          }}
+        >
+          <span>Mark all as read</span>
+        </Button>
+      </Box>
+    )}
+  </Box>
+</Drawer>
 
       {/* Main content */}
       <Box 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -14,69 +14,68 @@ import {
   Avatar,
   Button,
   Menu,
-  MenuItem
+  MenuItem,
+  CircularProgress,
+  Alert,
+  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import {
   MoreVert,
   Edit,
   Delete,
   Visibility,
-  Add
+  Add,
+  Warning,
+  Article
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import NewsModal from '../components/news/NewsModal';
-
-// ✅ DATA QUEMADA TEMPORAL
-const mockNews = [
-  {
-    id: 1,
-    title: 'Club House Construction Begins',
-    description: 'Today we officially started the construction of our new club house facility...',
-    category: 'construction',
-    status: 'published',
-    author: 'John Admin',
-    date: '2026-02-10',
-    views: 245,
-    image: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=150',
-    hasVideo: true
-  },
-  {
-    id: 2,
-    title: 'New Model 10 Available',
-    description: 'Exciting news! We are launching our new Model 10 with premium upgrades...',
-    category: 'announcement',
-    status: 'draft',
-    author: 'Sarah Manager',
-    date: '2026-02-08',
-    views: 0,
-    image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=150',
-    hasVideo: false
-  },
-  {
-    id: 3,
-    title: 'Monthly Progress Report - January',
-    description: 'Check out our monthly progress report with construction updates and milestones...',
-    category: 'report',
-    status: 'published',
-    author: 'John Admin',
-    date: '2026-02-01',
-    views: 432,
-    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=150',
-    hasVideo: true
-  }
-];
+import newsService from '../services/newsService';
 
 const NewsTable = () => {
   const navigate = useNavigate();
+  
+  // ✅ Estados
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedNews, setSelectedNews] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingNews, setEditingNews] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  const handleMenuOpen = (event, news) => {
+  // ✅ Cargar noticias al montar
+  useEffect(() => {
+    fetchNews();
+  }, []);
+
+  // ✅ Fetch news
+  const fetchNews = async () => {
+    try {
+      setLoading(true);
+      const data = await newsService.getAllNews();
+      setNews(data);
+      setError(null);
+    } catch (err) {
+      console.error('❌ Error fetching news:', err);
+      setError(err.message || 'Error loading news');
+      showSnackbar(err.message || 'Error loading news', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Handlers de menú
+  const handleMenuOpen = (event, newsItem) => {
     setAnchorEl(event.currentTarget);
-    setSelectedNews(news);
+    setSelectedNews(newsItem);
   };
 
   const handleMenuClose = () => {
@@ -84,49 +83,76 @@ const NewsTable = () => {
     setSelectedNews(null);
   };
 
-  // ✅ Abrir modal para crear noticia
+  // ✅ Crear nueva noticia
   const handleCreateNew = () => {
     setEditingNews(null);
     setModalOpen(true);
   };
 
-  // ✅ Abrir modal para editar noticia
+  // ✅ Editar noticia
   const handleEdit = () => {
     setEditingNews(selectedNews);
     setModalOpen(true);
     handleMenuClose();
   };
 
-  // ✅ Ver noticia - Navegar a página de detalle
+  // ✅ Ver noticia
   const handleView = () => {
-    navigate(`/explore/news/${selectedNews.id}`);
+    navigate(`/explore/news/${selectedNews._id}`);
+    handleMenuClose();
+  };
+
+  // ✅ Abrir diálogo de confirmación
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
     handleMenuClose();
   };
 
   // ✅ Eliminar noticia
-  const handleDelete = () => {
-    console.log('🗑️ Deleting news:', selectedNews);
-    // TODO: Implementar lógica de eliminación
-    handleMenuClose();
-  };
-
-  // ✅ Guardar noticia (crear o editar)
-  const handleSubmit = (newsData) => {
-    if (editingNews) {
-      console.log('✏️ Updating news:', newsData);
-    } else {
-      console.log('✨ Creating new news:', newsData);
+  const handleDelete = async () => {
+    try {
+      await newsService.deleteNews(selectedNews._id);
+      showSnackbar('News deleted successfully', 'success');
+      fetchNews();
+      setDeleteDialogOpen(false);
+      setSelectedNews(null);
+    } catch (err) {
+      showSnackbar(err.message || 'Error deleting news', 'error');
     }
-    setModalOpen(false);
-    setEditingNews(null);
   };
 
+  // ✅ Guardar noticia (crear o actualizar)
+  const handleSubmit = async (newsData) => {
+    try {
+      if (editingNews) {
+        await newsService.updateNews(editingNews._id, newsData);
+        showSnackbar('News updated successfully', 'success');
+      } else {
+        await newsService.createNews(newsData);
+        showSnackbar('News created successfully', 'success');
+      }
+      
+      fetchNews();
+      setModalOpen(false);
+      setEditingNews(null);
+    } catch (err) {
+      showSnackbar(err.message || 'Error saving news', 'error');
+    }
+  };
+
+  // ✅ Snackbar helper
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  // ✅ Obtener colores - Brandbook
   const getCategoryColor = (category) => {
     switch (category) {
-      case 'construction': return '#f59e0b';
-      case 'announcement': return '#3b82f6';
-      case 'report': return '#8b5cf6';
-      default: return '#6c757d';
+      case 'construction': return '#E5863C';
+      case 'announcement': return '#8CA551';
+      case 'report': return '#333F1F';
+      case 'event': return '#8CA551';
+      default: return '#706f6f';
     }
   };
 
@@ -134,29 +160,77 @@ const NewsTable = () => {
     return status === 'published' ? 'success' : 'warning';
   };
 
+  // ✅ Loading state
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+        <CircularProgress size={60} sx={{ color: '#8CA551' }} />
+      </Box>
+    );
+  }
+
+  // ✅ Error state
+  if (error && news.length === 0) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert 
+          severity="error" 
+          sx={{ 
+            mb: 3,
+            borderRadius: 3,
+            fontFamily: '"Poppins", sans-serif'
+          }}
+        >
+          {error}
+        </Alert>
+        <Button 
+          variant="contained" 
+          onClick={fetchNews}
+          sx={{
+            borderRadius: 3,
+            bgcolor: '#333F1F',
+            color: 'white',
+            fontWeight: 600,
+            textTransform: 'none',
+            fontFamily: '"Poppins", sans-serif',
+            px: 3,
+            py: 1.2,
+            '&:hover': {
+              bgcolor: '#8CA551'
+            }
+          }}
+        >
+          Retry
+        </Button>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ p: 3 }}>
-      {/* ✅ HEADER */}
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
-      >
+      {/* ✅ HEADER - Brandbook */}
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Box>
           <Typography
             variant="h4"
-            fontWeight="800"
+            fontWeight={700}
             sx={{
-              color: '#2c3e50',
-              letterSpacing: '-1px',
+              color: '#333F1F',
+              fontFamily: '"Poppins", sans-serif',
+              letterSpacing: '-0.5px',
               mb: 0.5
             }}
           >
             News & Updates
           </Typography>
-          <Typography variant="body2" sx={{ color: '#6c757d' }}>
-            Manage project updates and announcements
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              color: '#706f6f',
+              fontFamily: '"Poppins", sans-serif'
+            }}
+          >
+            Manage project updates and announcements ({news.length} total)
           </Typography>
         </Box>
 
@@ -166,24 +240,48 @@ const NewsTable = () => {
           onClick={handleCreateNew}
           sx={{
             borderRadius: 3,
-            background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+            bgcolor: '#333F1F',
             color: 'white',
-            fontWeight: 700,
-            px: 3,
-            py: 1.5,
+            fontWeight: 600,
             textTransform: 'none',
-            boxShadow: '0 8px 20px rgba(74,124,89,0.3)',
+            letterSpacing: '1px',
+            fontFamily: '"Poppins", sans-serif',
+            px: 4,
+            py: 1.5,
+            boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: '-100%',
+              width: '100%',
+              height: '100%',
+              bgcolor: '#8CA551',
+              transition: 'left 0.4s ease',
+              zIndex: 0,
+            },
             '&:hover': {
-              background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
-              boxShadow: '0 12px 28px rgba(74,124,89,0.4)'
+              bgcolor: '#333F1F',
+              boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+              '&::before': {
+                left: 0,
+              },
+            },
+            '& .MuiButton-startIcon': {
+              position: 'relative',
+              zIndex: 1,
             }
           }}
         >
-          Create News
+          <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
+            Create News
+          </Box>
         </Button>
       </Box>
 
-      {/* ✅ TABLE */}
+      {/* ✅ TABLE - Brandbook */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -193,60 +291,136 @@ const NewsTable = () => {
           component={Paper}
           sx={{
             borderRadius: 4,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-            border: '1px solid rgba(0,0,0,0.06)'
+            boxShadow: '0 8px 24px rgba(51, 63, 31, 0.08)',
+            border: '1px solid #e0e0e0'
           }}
         >
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: '#f8f9fa' }}>
-                <TableCell sx={{ fontWeight: 700, color: '#2c3e50' }}>News</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#2c3e50' }}>Category</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#2c3e50' }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#2c3e50' }}>Author</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#2c3e50' }}>Date</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#2c3e50' }}>Views</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#2c3e50' }}>Actions</TableCell>
+              <TableRow sx={{ bgcolor: '#fafafa' }}>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 700, 
+                    color: '#333F1F',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
+                >
+                  News
+                </TableCell>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 700, 
+                    color: '#333F1F',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
+                >
+                  Category
+                </TableCell>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 700, 
+                    color: '#333F1F',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
+                >
+                  Status
+                </TableCell>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 700, 
+                    color: '#333F1F',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
+                >
+                  Date
+                </TableCell>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 700, 
+                    color: '#333F1F',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
+                >
+                  Tags
+                </TableCell>
+                <TableCell 
+                  sx={{ 
+                    fontWeight: 700, 
+                    color: '#333F1F',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
+                >
+                  Actions
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {mockNews.map((news) => (
+              {news.map((newsItem) => (
                 <TableRow
-                  key={news.id}
+                  key={newsItem._id}
                   sx={{
-                    '&:hover': { bgcolor: '#f8fafb' },
+                    '&:hover': { 
+                      bgcolor: 'rgba(140, 165, 81, 0.04)'
+                    },
                     transition: 'background 0.2s'
                   }}
                 >
                   {/* NEWS INFO */}
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={2}>
-                      <Avatar
-                        src={news.image}
-                        variant="rounded"
-                        sx={{ width: 56, height: 56, borderRadius: 2 }}
-                      />
-                      <Box>
+                      {newsItem.heroImage ? (
+                        <Avatar
+                          src={newsItem.heroImage}
+                          variant="rounded"
+                          sx={{ 
+                            width: 56, 
+                            height: 56, 
+                            borderRadius: 2,
+                            border: '1px solid #e0e0e0'
+                          }}
+                        />
+                      ) : (
+                        <Box
+                          sx={{
+                            width: 56,
+                            height: 56,
+                            borderRadius: 2,
+                            bgcolor: '#fafafa',
+                            border: '1px solid #e0e0e0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <Article sx={{ color: '#706f6f', fontSize: 24 }} />
+                        </Box>
+                      )}
+                      <Box sx={{ minWidth: 0, flex: 1 }}>
                         <Typography
                           variant="body1"
                           fontWeight={600}
-                          sx={{ color: '#2c3e50', mb: 0.5 }}
+                          sx={{ 
+                            color: '#333F1F', 
+                            mb: 0.5,
+                            fontFamily: '"Poppins", sans-serif'
+                          }}
                         >
-                          {news.title}
+                          {newsItem.title}
                         </Typography>
                         <Typography
                           variant="caption"
                           sx={{
-                            color: '#6c757d',
+                            color: '#706f6f',
+                            fontFamily: '"Poppins", sans-serif',
                             display: '-webkit-box',
                             WebkitLineClamp: 1,
                             WebkitBoxOrient: 'vertical',
                             overflow: 'hidden'
                           }}
                         >
-                          {news.description}
+                          {newsItem.description || 'No description'}
                         </Typography>
-                        {news.hasVideo && (
+                        {newsItem.videos && newsItem.videos.length > 0 && (
                           <Chip
                             label="📹 Video"
                             size="small"
@@ -254,8 +428,11 @@ const NewsTable = () => {
                               mt: 0.5,
                               height: 20,
                               fontSize: '0.7rem',
-                              bgcolor: '#fef3c7',
-                              color: '#f59e0b'
+                              bgcolor: 'rgba(229, 134, 60, 0.12)',
+                              color: '#E5863C',
+                              border: '1px solid rgba(229, 134, 60, 0.3)',
+                              fontWeight: 600,
+                              fontFamily: '"Poppins", sans-serif'
                             }}
                           />
                         )}
@@ -266,13 +443,15 @@ const NewsTable = () => {
                   {/* CATEGORY */}
                   <TableCell>
                     <Chip
-                      label={news.category}
+                      label={newsItem.category}
                       size="small"
                       sx={{
-                        bgcolor: `${getCategoryColor(news.category)}20`,
-                        color: getCategoryColor(news.category),
+                        bgcolor: `${getCategoryColor(newsItem.category)}20`,
+                        color: getCategoryColor(newsItem.category),
+                        border: `1px solid ${getCategoryColor(newsItem.category)}40`,
                         fontWeight: 600,
-                        textTransform: 'capitalize'
+                        textTransform: 'capitalize',
+                        fontFamily: '"Poppins", sans-serif'
                       }}
                     />
                   </TableCell>
@@ -280,57 +459,153 @@ const NewsTable = () => {
                   {/* STATUS */}
                   <TableCell>
                     <Chip
-                      label={news.status}
-                      color={getStatusColor(news.status)}
+                      label={newsItem.status}
+                      color={getStatusColor(newsItem.status)}
                       size="small"
                       sx={{
                         fontWeight: 600,
-                        textTransform: 'capitalize'
+                        textTransform: 'capitalize',
+                        fontFamily: '"Poppins", sans-serif'
                       }}
                     />
                   </TableCell>
 
-                  {/* AUTHOR */}
-                  <TableCell>
-                    <Typography variant="body2" sx={{ color: '#6c757d' }}>
-                      {news.author}
-                    </Typography>
-                  </TableCell>
-
                   {/* DATE */}
                   <TableCell>
-                    <Typography variant="body2" sx={{ color: '#6c757d' }}>
-                      {new Date(news.date).toLocaleDateString()}
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        color: '#706f6f',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      {new Date(newsItem.createdAt).toLocaleDateString()}
                     </Typography>
                   </TableCell>
 
-                  {/* VIEWS */}
+                  {/* TAGS */}
                   <TableCell>
-                    <Box display="flex" alignItems="center" gap={0.5}>
-                      <Visibility sx={{ fontSize: 16, color: '#6c757d' }} />
-                      <Typography variant="body2" fontWeight={600}>
-                        {news.views}
-                      </Typography>
+                    <Box display="flex" gap={0.5} flexWrap="wrap">
+                      {newsItem.tags?.slice(0, 2).map((tag, idx) => (
+                        <Chip
+                          key={idx}
+                          label={tag}
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: '0.7rem',
+                            bgcolor: '#fafafa',
+                            border: '1px solid #e0e0e0',
+                            fontFamily: '"Poppins", sans-serif'
+                          }}
+                        />
+                      ))}
+                      {newsItem.tags?.length > 2 && (
+                        <Chip
+                          label={`+${newsItem.tags.length - 2}`}
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: '0.7rem',
+                            bgcolor: 'rgba(140, 165, 81, 0.12)',
+                            color: '#8CA551',
+                            border: '1px solid rgba(140, 165, 81, 0.3)',
+                            fontWeight: 600,
+                            fontFamily: '"Poppins", sans-serif'
+                          }}
+                        />
+                      )}
                     </Box>
                   </TableCell>
 
                   {/* ACTIONS */}
                   <TableCell>
                     <IconButton
-                      onClick={(e) => handleMenuOpen(e, news)}
-                      sx={{ color: '#6c757d' }}
+                      onClick={(e) => handleMenuOpen(e, newsItem)}
+                      sx={{ 
+                        color: '#706f6f',
+                        '&:hover': {
+                          bgcolor: 'rgba(112, 111, 111, 0.08)'
+                        }
+                      }}
                     >
                       <MoreVert />
                     </IconButton>
                   </TableCell>
                 </TableRow>
               ))}
+
+              {/* ✅ Empty State */}
+              {news.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6}>
+                    <Box textAlign="center" py={5}>
+                      <Box
+                        sx={{
+                          width: 64,
+                          height: 64,
+                          borderRadius: 3,
+                          bgcolor: '#fafafa',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          margin: '0 auto',
+                          mb: 2
+                        }}
+                      >
+                        <Article sx={{ fontSize: 32, color: '#706f6f' }} />
+                      </Box>
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
+                          color: '#333F1F',
+                          fontFamily: '"Poppins", sans-serif',
+                          fontWeight: 600,
+                          mb: 1
+                        }}
+                      >
+                        No news articles yet
+                      </Typography>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          color: '#706f6f',
+                          fontFamily: '"Poppins", sans-serif',
+                          mb: 3
+                        }}
+                      >
+                        Create your first news article to get started
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={handleCreateNew}
+                        sx={{
+                          borderRadius: 3,
+                          bgcolor: '#333F1F',
+                          color: 'white',
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          fontFamily: '"Poppins", sans-serif',
+                          px: 3,
+                          py: 1.2,
+                          '&:hover': {
+                            bgcolor: '#8CA551'
+                          }
+                        }}
+                      >
+                        Create News
+                      </Button>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
       </motion.div>
 
-      {/* ✅ MENU DE ACCIONES */}
+      {/* ✅ MENU DE ACCIONES - Brandbook */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -338,26 +613,55 @@ const NewsTable = () => {
         PaperProps={{
           sx: {
             borderRadius: 3,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+            boxShadow: '0 8px 24px rgba(51, 63, 31, 0.12)',
+            border: '1px solid #e0e0e0',
             mt: 1
           }
         }}
       >
-        <MenuItem onClick={handleView} sx={{ gap: 1.5 }}>
-          <Visibility sx={{ fontSize: 20, color: '#3b82f6' }} />
-          <Typography>View</Typography>
+        <MenuItem 
+          onClick={handleView} 
+          sx={{ 
+            gap: 1.5,
+            fontFamily: '"Poppins", sans-serif',
+            '&:hover': {
+              bgcolor: 'rgba(140, 165, 81, 0.08)'
+            }
+          }}
+        >
+          <Visibility sx={{ fontSize: 20, color: '#8CA551' }} />
+          <Typography sx={{ fontFamily: '"Poppins", sans-serif' }}>View</Typography>
         </MenuItem>
-        <MenuItem onClick={handleEdit} sx={{ gap: 1.5 }}>
-          <Edit sx={{ fontSize: 20, color: '#f59e0b' }} />
-          <Typography>Edit</Typography>
+        <MenuItem 
+          onClick={handleEdit} 
+          sx={{ 
+            gap: 1.5,
+            fontFamily: '"Poppins", sans-serif',
+            '&:hover': {
+              bgcolor: 'rgba(229, 134, 60, 0.08)'
+            }
+          }}
+        >
+          <Edit sx={{ fontSize: 20, color: '#E5863C' }} />
+          <Typography sx={{ fontFamily: '"Poppins", sans-serif' }}>Edit</Typography>
         </MenuItem>
-        <MenuItem onClick={handleDelete} sx={{ gap: 1.5, color: 'error.main' }}>
+        <MenuItem 
+          onClick={handleDeleteClick} 
+          sx={{ 
+            gap: 1.5,
+            color: '#d32f2f',
+            fontFamily: '"Poppins", sans-serif',
+            '&:hover': {
+              bgcolor: 'rgba(211, 47, 47, 0.08)'
+            }
+          }}
+        >
           <Delete sx={{ fontSize: 20 }} />
-          <Typography>Delete</Typography>
+          <Typography sx={{ fontFamily: '"Poppins", sans-serif' }}>Delete</Typography>
         </MenuItem>
       </Menu>
 
-      {/* ✅ MODAL DE CREAR/EDITAR NOTICIA */}
+      {/* ✅ MODAL DE CREAR/EDITAR */}
       <NewsModal
         open={modalOpen}
         onClose={() => {
@@ -367,6 +671,132 @@ const NewsTable = () => {
         newsData={editingNews}
         onSubmit={handleSubmit}
       />
+
+      {/* ✅ DIALOG DE CONFIRMACIÓN - Brandbook exacto */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        PaperProps={{
+          sx: { 
+            borderRadius: 4,
+            boxShadow: '0 20px 60px rgba(51, 63, 31, 0.15)'
+          }
+        }}
+      >
+        <DialogTitle>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: 3,
+                bgcolor: 'rgba(211, 47, 47, 0.12)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid rgba(211, 47, 47, 0.3)'
+              }}
+            >
+              <Warning sx={{ color: '#d32f2f', fontSize: 24 }} />
+            </Box>
+            <Box>
+              <Typography 
+                variant="h6" 
+                fontWeight={700}
+                sx={{ 
+                  color: '#333F1F',
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              >
+                Delete News Article?
+              </Typography>
+              <Typography 
+                variant="caption"
+                sx={{ 
+                  color: '#706f6f',
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              >
+                This action cannot be undone
+              </Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 3 }}>
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              color: '#706f6f',
+              fontFamily: '"Poppins", sans-serif'
+            }}
+          >
+            Are you sure you want to delete <strong>"{selectedNews?.title}"</strong>? This will permanently remove the article and all its associated data.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, gap: 2 }}>
+          <Button
+            onClick={() => setDeleteDialogOpen(false)}
+            sx={{
+              borderRadius: 3,
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 3,
+              py: 1.2,
+              color: '#706f6f',
+              fontFamily: '"Poppins", sans-serif',
+              border: '2px solid #e0e0e0',
+              '&:hover': {
+                bgcolor: 'rgba(112, 111, 111, 0.05)',
+                borderColor: '#706f6f'
+              }
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDelete}
+            variant="contained"
+            sx={{
+              borderRadius: 3,
+              bgcolor: '#d32f2f',
+              color: 'white',
+              fontWeight: 600,
+              textTransform: 'none',
+              fontFamily: '"Poppins", sans-serif',
+              px: 4,
+              py: 1.5,
+              boxShadow: '0 4px 12px rgba(211, 47, 47, 0.25)',
+              '&:hover': {
+                bgcolor: '#b71c1c',
+                boxShadow: '0 8px 20px rgba(211, 47, 47, 0.35)'
+              }
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ✅ SNACKBAR - Brandbook */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ 
+            width: '100%', 
+            borderRadius: 3,
+            fontFamily: '"Poppins", sans-serif',
+            boxShadow: '0 8px 24px rgba(51, 63, 31, 0.15)'
+          }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

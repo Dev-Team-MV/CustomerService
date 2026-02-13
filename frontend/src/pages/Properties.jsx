@@ -148,30 +148,75 @@ const Properties = () => {
             Oversee inventory, pricing, and resident assignments across the estate.
           </Typography>
         </Box>
+        
         <Tooltip title="Add Property" placement="left">
           <Button
             variant="contained"
             onClick={handleAddProperty}
             sx={{
-              bgcolor: '#4a7c59',
-              '&:hover': { bgcolor: '#3d664a' },
               minWidth: { xs: 48, sm: 'auto' },
               width: { xs: 48, sm: 'auto' },
               height: { xs: 48, sm: 'auto' },
-              p: { xs: 0, sm: '6px 16px' },
+              p: { xs: 0, sm: '8px 24px' },
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: 50
+              borderRadius: { xs: '50%', sm: 3 },
+              bgcolor: '#333F1F',
+              color: 'white',
+              fontWeight: 600,
+              fontSize: { xs: '0.85rem', sm: '0.9rem' },
+              letterSpacing: '1.5px',
+              textTransform: 'uppercase',
+              fontFamily: '"Poppins", sans-serif',
+              border: 'none',
+              position: 'relative',
+              overflow: 'hidden',
+              boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+              transition: 'all 0.3s ease',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: '-100%',
+                width: '100%',
+                height: '100%',
+                bgcolor: '#8CA551',
+                transition: 'left 0.4s ease',
+                zIndex: 0,
+              },
+              '&:hover': {
+                bgcolor: '#333F1F',
+                boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+                transform: 'translateY(-2px)',
+                '&::before': {
+                  left: 0,
+                },
+                '& .MuiBox-root, & .MuiSvgIcon-root': {
+                  color: 'white',
+                  position: 'relative',
+                  zIndex: 1,
+                },
+              },
+              '&:active': {
+                transform: 'translateY(0px)',
+                boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)'
+              },
+              '& .MuiBox-root, & .MuiSvgIcon-root': {
+                position: 'relative',
+                zIndex: 1,
+                transition: 'color 0.3s ease',
+              },
             }}
           >
             <Add sx={{ display: { xs: 'block', sm: 'none' }, fontSize: 24 }} />
             <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1 }}>
               <Add />
-              Add Property
+              <span>Add Property</span>
             </Box>
           </Button>
         </Tooltip>
+        
       </Box>
 
       <Paper>

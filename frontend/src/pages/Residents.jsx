@@ -167,16 +167,59 @@ const handleSubmit = async () => {
             variant="contained"
             onClick={() => handleOpenDialog()}
             sx={{
-              bgcolor: '#4a7c59',
-              '&:hover': { bgcolor: '#3d664a' },
               minWidth: { xs: 48, sm: 'auto' },
               width: { xs: 48, sm: 'auto' },
               height: { xs: 48, sm: 'auto' },
-              p: { xs: 0, sm: '6px 16px' },
+              p: { xs: 0, sm: '8px 24px' },
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: 50
+              borderRadius: { xs: '50%', sm: 3 },
+              bgcolor: '#333F1F',
+              color: 'white',
+              fontWeight: 600,
+              fontSize: { xs: '0.85rem', sm: '0.9rem' },
+              letterSpacing: '1.5px',
+              textTransform: 'uppercase',
+              fontFamily: '"Poppins", sans-serif',
+              border: 'none',
+              position: 'relative',
+              overflow: 'hidden',
+              boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+              transition: 'all 0.3s ease',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: '-100%',
+                width: '100%',
+                height: '100%',
+                bgcolor: '#8CA551',
+                transition: 'left 0.4s ease',
+                zIndex: 0,
+              },
+              '&:hover': {
+                bgcolor: '#333F1F',
+                boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+                transform: 'translateY(-2px)',
+                '&::before': {
+                  left: 0,
+                },
+                '& .MuiBox-root, & .MuiSvgIcon-root': {
+                  color: 'white',
+                  position: 'relative',
+                  zIndex: 1,
+                },
+              },
+              '&:active': {
+                transform: 'translateY(0px)',
+                boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)'
+              },
+              '& .MuiBox-root, & .MuiSvgIcon-root': {
+                position: 'relative',
+                zIndex: 1,
+                transition: 'color 0.3s ease',
+              },
             }}
           >
             <Add sx={{ display: { xs: 'block', sm: 'none' }, fontSize: 24 }} />
@@ -261,6 +304,7 @@ const handleSubmit = async () => {
         </TableContainer>
       </Paper>
 
+      
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
@@ -269,7 +313,7 @@ const handleSubmit = async () => {
         PaperProps={{
           sx: {
             borderRadius: 4,
-            boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+            boxShadow: "0 20px 60px rgba(51, 63, 31, 0.15)",
           },
         }}
       >
@@ -280,30 +324,56 @@ const handleSubmit = async () => {
                 width: 48,
                 height: 48,
                 borderRadius: 3,
-                background: "linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)",
+                bgcolor: "#333F1F",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                boxShadow: "0 4px 12px rgba(51, 63, 31, 0.2)",
               }}
             >
               <PersonAdd sx={{ color: "white", fontSize: 24 }} />
             </Box>
             <Box>
-              <Typography variant="h6" fontWeight={700}>
+              <Typography 
+                variant="h6" 
+                fontWeight={700}
+                sx={{ 
+                  color: "#333F1F",
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              >
                 {selectedUser ? "Edit User" : "Invite New User"}
               </Typography>
-              <Typography variant="caption" sx={{ color: "#6c757d" }}>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: "#706f6f",
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              >
                 The user will receive an invitation to set their password
               </Typography>
             </Box>
           </Box>
         </DialogTitle>
-
+      
         <DialogContent sx={{ pt: 3 }}>
-          <Alert severity="info" sx={{ mb: 2 }}>
+          <Alert 
+            severity="info" 
+            sx={{ 
+              mb: 2,
+              borderRadius: 3,
+              bgcolor: "rgba(140, 165, 81, 0.08)",
+              border: "1px solid rgba(140, 165, 81, 0.3)",
+              fontFamily: '"Poppins", sans-serif',
+              "& .MuiAlert-icon": {
+                color: "#8CA551"
+              }
+            }}
+          >
             The user will receive an invitation to set their password
           </Alert>
-
+      
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -317,12 +387,25 @@ const handleSubmit = async () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    "&.Mui-focused fieldset": { borderColor: "#4a7c59" },
+                    fontFamily: '"Poppins", sans-serif',
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    }
                   },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    "&.Mui-focused": {
+                      color: "#333F1F"
+                    }
+                  }
                 }}
               />
             </Grid>
-
+      
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -335,12 +418,25 @@ const handleSubmit = async () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    "&.Mui-focused fieldset": { borderColor: "#4a7c59" },
+                    fontFamily: '"Poppins", sans-serif',
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    }
                   },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    "&.Mui-focused": {
+                      color: "#333F1F"
+                    }
+                  }
                 }}
               />
             </Grid>
-
+      
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -354,18 +450,35 @@ const handleSubmit = async () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    "&.Mui-focused fieldset": { borderColor: "#4a7c59" },
+                    fontFamily: '"Poppins", sans-serif',
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    }
                   },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    "&.Mui-focused": {
+                      color: "#333F1F"
+                    }
+                  }
                 }}
               />
             </Grid>
-
+      
             <Grid item xs={12} sm={6}>
               <Box>
                 <Typography
                   variant="caption"
-                  color="text.secondary"
-                  sx={{ mb: 0.5, display: "block" }}
+                  sx={{ 
+                    mb: 0.5, 
+                    display: "block",
+                    color: "#706f6f",
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
                 >
                   Phone Number *
                 </Typography>
@@ -384,17 +497,24 @@ const handleSubmit = async () => {
                     width: "100%",
                     height: "56px",
                     fontSize: "16px",
-                    border: "1px solid #c4c4c4",
-                    borderRadius: 6,
+                    border: "2px solid #e0e0e0",
+                    borderRadius: 12,
+                    transition: "all 0.3s",
+                    fontFamily: '"Poppins", sans-serif'
                   }}
                   buttonStyle={{
-                    border: "1px solid #c4c4c4",
+                    border: "2px solid #e0e0e0",
                     borderRight: "none",
+                    borderRadius: "12px 0 0 12px"
+                  }}
+                  dropdownStyle={{
+                    borderRadius: 12,
+                    fontFamily: '"Poppins", sans-serif'
                   }}
                 />
               </Box>
             </Grid>
-
+      
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -408,12 +528,25 @@ const handleSubmit = async () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    "&.Mui-focused fieldset": { borderColor: "#4a7c59" },
+                    fontFamily: '"Poppins", sans-serif',
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    }
                   },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    "&.Mui-focused": {
+                      color: "#333F1F"
+                    }
+                  }
                 }}
               />
             </Grid>
-
+      
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -426,16 +559,47 @@ const handleSubmit = async () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    "&.Mui-focused fieldset": { borderColor: "#4a7c59" },
+                    fontFamily: '"Poppins", sans-serif',
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    }
                   },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    "&.Mui-focused": {
+                      color: "#333F1F"
+                    }
+                  },
+                  "& .MuiMenuItem-root": {
+                    fontFamily: '"Poppins", sans-serif'
+                  }
                 }}
               >
-                <MenuItem value="user">User</MenuItem>
-                <MenuItem value="admin">Admin</MenuItem>
-                <MenuItem value="superadmin">Super Admin</MenuItem>
+                <MenuItem 
+                  value="user"
+                  sx={{ fontFamily: '"Poppins", sans-serif' }}
+                >
+                  User
+                </MenuItem>
+                <MenuItem 
+                  value="admin"
+                  sx={{ fontFamily: '"Poppins", sans-serif' }}
+                >
+                  Admin
+                </MenuItem>
+                <MenuItem 
+                  value="superadmin"
+                  sx={{ fontFamily: '"Poppins", sans-serif' }}
+                >
+                  Super Admin
+                </MenuItem>
               </TextField>
             </Grid>
-
+      
             {selectedUser && (
               <Grid item xs={12}>
                 <TextField
@@ -450,20 +614,56 @@ const handleSubmit = async () => {
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 3,
-                      "&.Mui-focused fieldset": { borderColor: "#4a7c59" },
+                      fontFamily: '"Poppins", sans-serif',
+                      "&.Mui-focused fieldset": { 
+                        borderColor: "#333F1F",
+                        borderWidth: "2px"
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#8CA551"
+                      }
                     },
+                    "& .MuiInputLabel-root": {
+                      fontFamily: '"Poppins", sans-serif',
+                      "&.Mui-focused": {
+                        color: "#333F1F"
+                      }
+                    },
+                    "& .MuiFormHelperText-root": {
+                      fontFamily: '"Poppins", sans-serif'
+                    }
                   }}
                 />
               </Grid>
             )}
-
+      
             {selectedUser && (
               <Grid item xs={12}>
-                <Paper sx={{ p: 2, bgcolor: "grey.50" }}>
-                  <Typography variant="body2" color="text.secondary">
+                <Paper 
+                  sx={{ 
+                    p: 2.5, 
+                    bgcolor: "rgba(112, 111, 111, 0.05)",
+                    borderRadius: 3,
+                    border: "1px solid rgba(112, 111, 111, 0.1)"
+                  }}
+                >
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: "#706f6f",
+                      fontFamily: '"Poppins", sans-serif',
+                      mb: 0.5
+                    }}
+                  >
                     User ID: {selectedUser._id}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: "#706f6f",
+                      fontFamily: '"Poppins", sans-serif'
+                    }}
+                  >
                     Created:{" "}
                     {new Date(
                       selectedUser.createdAt || Date.now(),
@@ -474,7 +674,7 @@ const handleSubmit = async () => {
             )}
           </Grid>
         </DialogContent>
-
+      
         <DialogActions sx={{ p: 3, gap: 2 }}>
           <Button
             onClick={handleCloseDialog}
@@ -483,11 +683,19 @@ const handleSubmit = async () => {
               textTransform: "none",
               fontWeight: 600,
               px: 3,
+              py: 1.2,
+              color: "#706f6f",
+              fontFamily: '"Poppins", sans-serif',
+              border: "2px solid #e0e0e0",
+              "&:hover": {
+                bgcolor: "rgba(112, 111, 111, 0.05)",
+                borderColor: "#706f6f"
+              }
             }}
           >
             Cancel
           </Button>
-
+      
           <Button
             onClick={handleSubmit}
             variant="contained"
@@ -499,26 +707,51 @@ const handleSubmit = async () => {
             }
             sx={{
               borderRadius: 3,
-              background: "linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)",
+              bgcolor: "#333F1F",
               color: "white",
-              fontWeight: 700,
+              fontWeight: 600,
               textTransform: "none",
+              letterSpacing: "1px",
+              fontFamily: '"Poppins", sans-serif',
               px: 4,
               py: 1.5,
-              boxShadow: "0 8px 20px rgba(74, 124, 89, 0.3)",
+              boxShadow: "0 4px 12px rgba(51, 63, 31, 0.25)",
+              position: "relative",
+              overflow: "hidden",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                bgcolor: "#8CA551",
+                transition: "left 0.4s ease",
+                zIndex: 0,
+              },
               "&:hover": {
-                background: "linear-gradient(135deg, #3d664a 0%, #7ba843 100%)",
-                boxShadow: "0 12px 28px rgba(74, 124, 89, 0.4)",
+                bgcolor: "#333F1F",
+                boxShadow: "0 8px 20px rgba(51, 63, 31, 0.35)",
+                "&::before": {
+                  left: 0,
+                },
               },
               "&:disabled": {
-                background: "#ccc",
+                bgcolor: "#e0e0e0",
+                color: "#9e9e9e",
+                boxShadow: "none",
               },
+              "& span": {
+                position: "relative",
+                zIndex: 1,
+              }
             }}
           >
-            {selectedUser ? "Update" : "Send Invitation"}
+            <span>{selectedUser ? "Update" : "Send Invitation"}</span>
           </Button>
         </DialogActions>
       </Dialog>
+      
     </Box>
   );
 };

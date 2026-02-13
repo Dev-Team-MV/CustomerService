@@ -120,6 +120,7 @@ import ViewModels from './pages/ViewModels'
 import NewsTable from './pages/NewsTable'
 import NewsDetails from './components/news/NewsDetails'
 import NewsFeed from './pages/NewsFeed'
+import TermsAndCondition from './pages/TermsAndCondition'
 
 const theme = createTheme({
   palette: {
@@ -151,6 +152,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/setup-password/:token" element={<Register />} />
+            <Route path="/terms-and-conditions" element={<TermsAndCondition />} />
             
             {/* ✅ Public Routes - Layout Público (solo para no autenticados) */}
             <Route element={<Layout publicView={true} />}>

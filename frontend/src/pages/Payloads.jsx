@@ -189,16 +189,59 @@ const Payloads = () => {
             variant="contained"
             onClick={() => handleOpenDialog()}
             sx={{
-              bgcolor: '#4a7c59',
-              '&:hover': { bgcolor: '#3d664a' },
               minWidth: { xs: 48, sm: 'auto' },
               width: { xs: 48, sm: 'auto' },
               height: { xs: 48, sm: 'auto' },
-              p: { xs: 0, sm: '6px 16px' },
+              p: { xs: 0, sm: '8px 24px' },
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: 50
+              borderRadius: { xs: '50%', sm: 3 },
+              bgcolor: '#333F1F',
+              color: 'white',
+              fontWeight: 600,
+              fontSize: { xs: '0.85rem', sm: '0.9rem' },
+              letterSpacing: '1.5px',
+              textTransform: 'uppercase',
+              fontFamily: '"Poppins", sans-serif',
+              border: 'none',
+              position: 'relative',
+              overflow: 'hidden',
+              boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+              transition: 'all 0.3s ease',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: '-100%',
+                width: '100%',
+                height: '100%',
+                bgcolor: '#8CA551',
+                transition: 'left 0.4s ease',
+                zIndex: 0,
+              },
+              '&:hover': {
+                bgcolor: '#333F1F',
+                boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+                transform: 'translateY(-2px)',
+                '&::before': {
+                  left: 0,
+                },
+                '& .MuiBox-root, & .MuiSvgIcon-root': {
+                  color: 'white',
+                  position: 'relative',
+                  zIndex: 1,
+                },
+              },
+              '&:active': {
+                transform: 'translateY(0px)',
+                boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)'
+              },
+              '& .MuiBox-root, & .MuiSvgIcon-root': {
+                position: 'relative',
+                zIndex: 1,
+                transition: 'color 0.3s ease',
+              },
             }}
           >
             <Add sx={{ display: { xs: 'block', sm: 'none' }, fontSize: 24 }} />
@@ -399,6 +442,8 @@ const Payloads = () => {
       
       
 
+      
+      
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
@@ -407,10 +452,11 @@ const Payloads = () => {
         PaperProps={{
           sx: {
             borderRadius: 4,
-            boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
+            boxShadow: "0 20px 60px rgba(51, 63, 31, 0.15)",
           }
         }}
       >
+        {/* ✅ DIALOG TITLE - Mismo estilo que Residents */}
         <DialogTitle>
           <Box display="flex" alignItems="center" gap={2}>
             <Box
@@ -418,27 +464,41 @@ const Payloads = () => {
                 width: 48,
                 height: 48,
                 borderRadius: 3,
-                background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
+                bgcolor: "#333F1F",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 4px 12px rgba(51, 63, 31, 0.2)",
               }}
             >
-              <AttachFile sx={{ color: 'white', fontSize: 24 }} />
+              <AttachFile sx={{ color: "white", fontSize: 24 }} />
             </Box>
             <Box>
-              <Typography variant="h6" fontWeight={700}>
+              <Typography 
+                variant="h6" 
+                fontWeight={700}
+                sx={{ 
+                  color: "#333F1F",
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              >
                 {selectedPayload ? 'Edit Payload' : 'Add New Payload'}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#6c757d' }}>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: "#706f6f",
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              >
                 Manage and track payment record details
               </Typography>
             </Box>
           </Box>
         </DialogTitle>
-
+      
         <DialogContent sx={{ pt: 3 }}>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid container spacing={2.5}>
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -447,20 +507,56 @@ const Payloads = () => {
                 value={formData.property}
                 onChange={(e) => setFormData({ ...formData, property: e.target.value })}
                 sx={{
-                  '& .MuiOutlinedInput-root': {
+                  "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    '&.Mui-focused fieldset': { borderColor: '#4a7c59' }
+                    fontFamily: '"Poppins", sans-serif',
+                    "& fieldset": {
+                      borderColor: 'rgba(140, 165, 81, 0.3)',
+                      borderWidth: '2px'
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    },
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    }
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    color: '#706f6f',
+                    "&.Mui-focused": {
+                      color: "#333F1F",
+                      fontWeight: 600
+                    }
                   }
                 }}
               >
                 {properties.map((property) => (
-                  <MenuItem key={property._id} value={property._id}>
+                  <MenuItem 
+                    key={property._id} 
+                    value={property._id}
+                    sx={{
+                      fontFamily: '"Poppins", sans-serif',
+                      fontWeight: 500,
+                      '&:hover': {
+                        bgcolor: 'rgba(140, 165, 81, 0.08)'
+                      },
+                      '&.Mui-selected': {
+                        bgcolor: 'rgba(140, 165, 81, 0.12)',
+                        '&:hover': {
+                          bgcolor: 'rgba(140, 165, 81, 0.18)'
+                        }
+                      }
+                    }}
+                  >
                     Lot {property.lot?.number} - {property.user?.firstName} {property.user?.lastName}
                   </MenuItem>
                 ))}
               </TextField>
             </Grid>
-
+      
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -470,14 +566,34 @@ const Payloads = () => {
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 InputLabelProps={{ shrink: true }}
                 sx={{
-                  '& .MuiOutlinedInput-root': {
+                  "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    '&.Mui-focused fieldset': { borderColor: '#4a7c59' }
+                    fontFamily: '"Poppins", sans-serif',
+                    "& fieldset": {
+                      borderColor: 'rgba(140, 165, 81, 0.3)',
+                      borderWidth: '2px'
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    },
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    }
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    color: '#706f6f',
+                    "&.Mui-focused": {
+                      color: "#333F1F",
+                      fontWeight: 600
+                    }
                   }
                 }}
               />
             </Grid>
-
+      
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -485,15 +601,40 @@ const Payloads = () => {
                 label="Amount"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
+                InputProps={{
+                  startAdornment: (
+                    <Typography sx={{ mr: 0.5, fontSize: "0.875rem", color: '#333F1F', fontWeight: 600 }}>$</Typography>
+                  ),
+                }}
                 sx={{
-                  '& .MuiOutlinedInput-root': {
+                  "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    '&.Mui-focused fieldset': { borderColor: '#4a7c59' }
+                    fontFamily: '"Poppins", sans-serif',
+                    "& fieldset": {
+                      borderColor: 'rgba(140, 165, 81, 0.3)',
+                      borderWidth: '2px'
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    },
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    }
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    color: '#706f6f',
+                    "&.Mui-focused": {
+                      color: "#333F1F",
+                      fontWeight: 600
+                    }
                   }
                 }}
               />
             </Grid>
-
+      
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -502,19 +643,90 @@ const Payloads = () => {
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 sx={{
-                  '& .MuiOutlinedInput-root': {
+                  "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    '&.Mui-focused fieldset': { borderColor: '#4a7c59' }
+                    fontFamily: '"Poppins", sans-serif',
+                    "& fieldset": {
+                      borderColor: 'rgba(140, 165, 81, 0.3)',
+                      borderWidth: '2px'
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    },
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    }
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    color: '#706f6f',
+                    "&.Mui-focused": {
+                      color: "#333F1F",
+                      fontWeight: 600
+                    }
                   }
                 }}
               >
-                <MenuItem value="pending">Pending</MenuItem>
-                <MenuItem value="signed">signed</MenuItem>
-                <MenuItem value="rejected">Rejected</MenuItem>
+                <MenuItem 
+                  value="pending"
+                  sx={{
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    '&:hover': {
+                      bgcolor: 'rgba(229, 134, 60, 0.08)'
+                    },
+                    '&.Mui-selected': {
+                      bgcolor: 'rgba(229, 134, 60, 0.12)',
+                      '&:hover': {
+                        bgcolor: 'rgba(229, 134, 60, 0.18)'
+                      }
+                    }
+                  }}
+                >
+                  Pending
+                </MenuItem>
+                <MenuItem 
+                  value="signed"
+                  sx={{
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    '&:hover': {
+                      bgcolor: 'rgba(140, 165, 81, 0.08)'
+                    },
+                    '&.Mui-selected': {
+                      bgcolor: 'rgba(140, 165, 81, 0.12)',
+                      '&:hover': {
+                        bgcolor: 'rgba(140, 165, 81, 0.18)'
+                      }
+                    }
+                  }}
+                >
+                  Signed
+                </MenuItem>
+                <MenuItem 
+                  value="rejected"
+                  sx={{
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    '&:hover': {
+                      bgcolor: 'rgba(211, 47, 47, 0.08)'
+                    },
+                    '&.Mui-selected': {
+                      bgcolor: 'rgba(211, 47, 47, 0.12)',
+                      '&:hover': {
+                        bgcolor: 'rgba(211, 47, 47, 0.18)'
+                      }
+                    }
+                  }}
+                >
+                  Rejected
+                </MenuItem>
               </TextField>
             </Grid>
-
-                        <Grid item xs={12}>
+      
+            <Grid item xs={12}>
               <TextField
                 fullWidth
                 select
@@ -523,20 +735,125 @@ const Payloads = () => {
                 onChange={e => setFormData({ ...formData, type: e.target.value })}
                 required
                 sx={{
-                  '& .MuiOutlinedInput-root': {
+                  "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    '&.Mui-focused fieldset': { borderColor: '#4a7c59' }
+                    fontFamily: '"Poppins", sans-serif',
+                    "& fieldset": {
+                      borderColor: 'rgba(140, 165, 81, 0.3)',
+                      borderWidth: '2px'
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    },
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    }
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    color: '#706f6f',
+                    "&.Mui-focused": {
+                      color: "#333F1F",
+                      fontWeight: 600
+                    }
                   }
                 }}
               >
-                <MenuItem value="initial down payment">Initial Down Payment</MenuItem>
-                <MenuItem value="complementary down payment">Complementary Down Payment</MenuItem>
-                <MenuItem value="monthly payment">Monthly Payment</MenuItem>
-                <MenuItem value="additional payment">Additional Payment</MenuItem>
-                <MenuItem value="closing payment">Closing Payment</MenuItem>
+                <MenuItem 
+                  value="initial down payment"
+                  sx={{
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    '&:hover': {
+                      bgcolor: 'rgba(140, 165, 81, 0.08)'
+                    },
+                    '&.Mui-selected': {
+                      bgcolor: 'rgba(140, 165, 81, 0.12)',
+                      '&:hover': {
+                        bgcolor: 'rgba(140, 165, 81, 0.18)'
+                      }
+                    }
+                  }}
+                >
+                  Initial Down Payment
+                </MenuItem>
+                <MenuItem 
+                  value="complementary down payment"
+                  sx={{
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    '&:hover': {
+                      bgcolor: 'rgba(140, 165, 81, 0.08)'
+                    },
+                    '&.Mui-selected': {
+                      bgcolor: 'rgba(140, 165, 81, 0.12)',
+                      '&:hover': {
+                        bgcolor: 'rgba(140, 165, 81, 0.18)'
+                      }
+                    }
+                  }}
+                >
+                  Complementary Down Payment
+                </MenuItem>
+                <MenuItem 
+                  value="monthly payment"
+                  sx={{
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    '&:hover': {
+                      bgcolor: 'rgba(140, 165, 81, 0.08)'
+                    },
+                    '&.Mui-selected': {
+                      bgcolor: 'rgba(140, 165, 81, 0.12)',
+                      '&:hover': {
+                        bgcolor: 'rgba(140, 165, 81, 0.18)'
+                      }
+                    }
+                  }}
+                >
+                  Monthly Payment
+                </MenuItem>
+                <MenuItem 
+                  value="additional payment"
+                  sx={{
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    '&:hover': {
+                      bgcolor: 'rgba(140, 165, 81, 0.08)'
+                    },
+                    '&.Mui-selected': {
+                      bgcolor: 'rgba(140, 165, 81, 0.12)',
+                      '&:hover': {
+                        bgcolor: 'rgba(140, 165, 81, 0.18)'
+                      }
+                    }
+                  }}
+                >
+                  Additional Payment
+                </MenuItem>
+                <MenuItem 
+                  value="closing payment"
+                  sx={{
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    '&:hover': {
+                      bgcolor: 'rgba(140, 165, 81, 0.08)'
+                    },
+                    '&.Mui-selected': {
+                      bgcolor: 'rgba(140, 165, 81, 0.12)',
+                      '&:hover': {
+                        bgcolor: 'rgba(140, 165, 81, 0.18)'
+                      }
+                    }
+                  }}
+                >
+                  Closing Payment
+                </MenuItem>
               </TextField>
             </Grid>
-
+      
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -546,24 +863,52 @@ const Payloads = () => {
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 sx={{
-                  '& .MuiOutlinedInput-root': {
+                  "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
-                    '&.Mui-focused fieldset': { borderColor: '#4a7c59' }
+                    fontFamily: '"Poppins", sans-serif',
+                    "& fieldset": {
+                      borderColor: 'rgba(140, 165, 81, 0.3)',
+                      borderWidth: '2px'
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    },
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    }
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    color: '#706f6f',
+                    "&.Mui-focused": {
+                      color: "#333F1F",
+                      fontWeight: 600
+                    }
                   }
                 }}
               />
             </Grid>
           </Grid>
         </DialogContent>
-
+      
         <DialogActions sx={{ p: 3, gap: 2 }}>
           <Button
             onClick={handleCloseDialog}
             sx={{
               borderRadius: 3,
-              textTransform: 'none',
+              textTransform: "none",
               fontWeight: 600,
-              px: 3
+              px: 3,
+              py: 1.2,
+              color: "#706f6f",
+              fontFamily: '"Poppins", sans-serif',
+              border: "2px solid #e0e0e0",
+              "&:hover": {
+                bgcolor: "rgba(112, 111, 111, 0.05)",
+                borderColor: "#706f6f"
+              }
             }}
           >
             Cancel
@@ -576,19 +921,38 @@ const Payloads = () => {
             startIcon={<CheckCircle />}
             sx={{
               borderRadius: 3,
-              background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
-              color: 'white',
-              fontWeight: 700,
-              textTransform: 'none',
+              bgcolor: "#333F1F",
+              color: "white",
+              fontWeight: 600,
+              textTransform: "none",
+              letterSpacing: "1px",
+              fontFamily: '"Poppins", sans-serif',
               px: 4,
               py: 1.5,
-              boxShadow: '0 8px 20px rgba(74, 124, 89, 0.3)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
-                boxShadow: '0 12px 28px rgba(74, 124, 89, 0.4)'
+              boxShadow: "0 4px 12px rgba(51, 63, 31, 0.25)",
+              position: "relative",
+              overflow: "hidden",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                bgcolor: "#8CA551",
+                transition: "left 0.4s ease",
+                zIndex: 0,
               },
-              '&:disabled': {
-                background: '#ccc'
+              "&:hover": {
+                bgcolor: "#333F1F",
+                boxShadow: "0 8px 20px rgba(51, 63, 31, 0.35)",
+                "&::before": {
+                  left: 0,
+                },
+              },
+              "& span": {
+                position: "relative",
+                zIndex: 1,
               }
             }}
           >
@@ -596,6 +960,8 @@ const Payloads = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      
+      
     </Box>
   )
 }

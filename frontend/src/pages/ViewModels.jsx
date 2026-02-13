@@ -489,51 +489,51 @@ function ModelCard({ model, onGoDetail, selected, onSelect }) {
         
           {/* ✅ BOTÓN VIEW DETAILS - Minimalista y elegante */}
           <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              onGoDetail(model._id);
-            }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onGoDetail(model._id);
+          }}
             fullWidth
             sx={{
-              mt: 'auto',
+              mt: "auto",
               borderRadius: 0,
-              bgcolor: '#333F1F',
-              color: 'white',
+              bgcolor: "#333F1F",
+              color: "white",
               fontWeight: 600,
-              fontSize: { xs: '0.85rem', md: '0.9rem' },
+              fontSize: { xs: "0.85rem", md: "0.9rem" },
               px: 3,
               py: { xs: 1.5, md: 1.8 },
-              letterSpacing: '1.5px',
-              textTransform: 'uppercase',
+              letterSpacing: "1.5px",
+              textTransform: "uppercase",
               fontFamily: '"Poppins", sans-serif',
-              border: 'none',
-              position: 'relative',
-              overflow: 'hidden',
-              '&::before': {
+              border: "none",
+              position: "relative",
+              overflow: "hidden",
+              "&::before": {
                 content: '""',
-                position: 'absolute',
+                position: "absolute",
                 top: 0,
-                left: '-100%',
-                width: '100%',
-                height: '100%',
-                bgcolor: '#4a7c59',
-                transition: 'left 0.4s ease',
-                zIndex: 0
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                bgcolor: "#8CA551",
+                transition: "left 0.4s ease",
+                zIndex: 0,
               },
-              '&:hover': {
-                bgcolor: '#2c5530',
-                '&::before': {
-                  left: 0
+              "&:hover": {
+                bgcolor: "#333F1F",
+                "&::before": {
+                  left: 0,
                 },
-                '& .button-text': {
-                  color: 'white'
-                }
+                "& .button-text": {
+                  color: "white",
+                },
               },
-              '& .button-text': {
-                position: 'relative',
+              "& .button-text": {
+                position: "relative",
                 zIndex: 1,
-                transition: 'color 0.3s ease'
-              }
+                transition: "color 0.3s ease",
+              },
             }}
           >
             <span className="button-text">View Details</span>
@@ -581,25 +581,69 @@ const ViewModels = () => {
       </Typography>
       
       <Box sx={{ mb: 4 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={selected.length !== 2}
-          onClick={handleCompare}
-          sx={{
-            borderRadius: 3,
-            background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
-            fontWeight: 700,
-            textTransform: 'none',
-            px: 4,
-            py: 1.5,
-            '&:hover': {
-              background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
-            },
-          }}
-        >
-          Compare Selected
-        </Button>
+<Button
+  disabled={selected.length !== 2}
+  onClick={handleCompare}
+  sx={{
+    borderRadius: 3,
+    bgcolor: "#333F1F",
+    color: "white",
+    fontWeight: 600,
+    fontSize: { xs: "0.85rem", md: "0.9rem" },
+    px: 4,
+    py: 1.5,
+    letterSpacing: "1.5px",
+    textTransform: "uppercase",
+    fontFamily: '"Poppins", sans-serif',
+    border: "none",
+    position: "relative",
+    overflow: "hidden",
+    boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)',
+    transition: 'all 0.3s ease',
+    "&::before": {
+      content: '""',
+      position: "absolute",
+      top: 0,
+      left: "-100%",
+      width: "100%",
+      height: "100%",
+      bgcolor: "#8CA551",
+      transition: "left 0.4s ease",
+      zIndex: 0,
+    },
+    "&:hover": {
+      bgcolor: "#333F1F",
+      boxShadow: '0 8px 20px rgba(51, 63, 31, 0.3)',
+      transform: 'translateY(-2px)',
+      "&::before": {
+        left: 0,
+      },
+      "& .button-text": {
+        color: "white",
+      },
+    },
+    "&:active": {
+      transform: 'translateY(0px)',
+      boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
+    },
+    "&:disabled": {
+      bgcolor: '#e0e0e0',
+      color: '#9e9e9e',
+      boxShadow: 'none',
+      transform: 'none',
+      '&::before': {
+        display: 'none'
+      }
+    },
+    "& .button-text": {
+      position: "relative",
+      zIndex: 1,
+      transition: "color 0.3s ease",
+    },
+  }}
+>
+  <span className="button-text">Compare Selected</span>
+</Button>
         <Typography variant="caption" sx={{ ml: 2, color: '#6c757d' }}>
           Select 2 models to compare
         </Typography>
