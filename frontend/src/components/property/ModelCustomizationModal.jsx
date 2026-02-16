@@ -10,7 +10,6 @@ import {
   Paper,
   Divider,
   Chip,
-  Stack,
   ToggleButtonGroup,
   ToggleButton,
   Tabs,
@@ -18,21 +17,17 @@ import {
   Switch,
   FormControlLabel
 } from '@mui/material'
-import { alpha } from '@mui/material/styles'
 import {
   Close,
   CheckCircle,
   KeyboardArrowLeft,
   KeyboardArrowRight,
-  AutoAwesome,
   Balcony as BalconyIcon,
   Upgrade as UpgradeIcon,
   Storage as StorageIcon,
   Sync,
   SyncDisabled,
-  Home as HomeIcon,
-  Kitchen,
-  Deck
+  Home as HomeIcon
 } from '@mui/icons-material'
 
 import { getGalleryCategories } from '../../services/modelImageService'
@@ -54,19 +49,17 @@ const ROOM_TYPES = [
 ]
 
 const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptions = {} }) => {
-  // ✅ CONSTANTE PARA IDENTIFICAR EL MODELO 10
   const MODEL_10_ID = "6977c7bbd1f24768968719de";
   const isModel10 = model?._id === MODEL_10_ID;
 
-  // ✅ LABELS CONDICIONALES PARA BALCONY/ESTUDIO
   const balconyLabels = isModel10
     ? {
-        label: "Estudio",
+        label: "Study",
         icon: HomeIcon,
-        chipLabel: "Estudio Option",
-        title: "Estudio Addition",
+        chipLabel: "Study Option",
+        title: "Study Addition",
         description: "Flexible space perfect for home office or study area",
-        categoryPrefix: "With Estudio"
+        categoryPrefix: "With Study"
       }
     : {
         label: "Balcony",
@@ -115,11 +108,9 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
 
   if (!model) return null
 
-  // Utiliza la función de combinaciones para obtener las imágenes base y personalizadas
   const categories = getGalleryCategories(model)
   const baseCategory = categories.find(cat => cat.key === 'base')
   
-  // Determinar la clave de categoría personalizada
   let customKey = 'base'
   if (options.upgrade && options.balcony) customKey = 'upgrade-balcony'
   else if (options.upgrade) customKey = 'upgrade'
@@ -127,17 +118,13 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
   
   const customCategory = categories.find(cat => cat.key === customKey) || baseCategory
 
-  // ✅ Ajustar labels de categorías basados en el modelo
   const getAdjustedCategoryLabel = (label) => {
     if (!isModel10) return label;
-    
-    // Reemplazar referencias a "Balcony" por "Estudio" para Modelo 10
     return label
-      .replace(/Balcony/gi, 'Estudio')
-      .replace(/balcony/gi, 'estudio');
+      .replace(/Balcony/gi, 'Study')
+      .replace(/balcony/gi, 'study');
   };
 
-  // Unifica imágenes para el modal
   const processImages = (cat) => [
     ...(cat.exteriorImages || []).map(url => ({ url, type: 'exterior', roomType: 'general' })),
     ...(cat.interiorImages || []).map(img =>
@@ -213,60 +200,83 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
     setRightImageIndex(newIndex)
   }
 
-  // ✅ Componente de Chip de Balcony/Estudio condicional
-  const BalconyChip = ({ isMobileVersion = false }) => {
-    const BalconyIconComponent = balconyLabels.icon;
-    
-    if (isMobileVersion) {
-      // Versión mobile - más compacta
-      return (
+  // ✅ OPTION CHIPS - Brandbook
+  const OptionChips = () => (
+    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2, justifyContent: 'center' }}>
+      {model.upgrades && model.upgrades.length > 0 && (
         <Chip
-          icon={<BalconyIconComponent sx={{ color: options.balcony ? '#2196f3' : '#aaa' }} />}
+          icon={<UpgradeIcon sx={{ color: options.upgrade ? '#8CA551' : '#706f6f' }} />}
+          label="Upgrade"
+          clickable
+          onClick={() => toggleOption('upgrade')}
+          sx={{
+            fontWeight: 600,
+            px: 2,
+            fontSize: '0.875rem',
+            fontFamily: '"Poppins", sans-serif',
+            bgcolor: options.upgrade ? 'rgba(140, 165, 81, 0.12)' : '#fafafa',
+            color: options.upgrade ? '#333F1F' : '#706f6f',
+            border: `1px solid ${options.upgrade ? '#8CA551' : '#e0e0e0'}`,
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              bgcolor: options.upgrade ? 'rgba(140, 165, 81, 0.18)' : 'rgba(140, 165, 81, 0.08)',
+              borderColor: '#8CA551',
+              transform: 'translateY(-2px)',
+              boxShadow: '0 4px 12px rgba(140, 165, 81, 0.2)'
+            }
+          }}
+        />
+      )}
+      {model.balconies && model.balconies.length > 0 && (
+        <Chip
+          icon={<balconyLabels.icon sx={{ color: options.balcony ? '#8CA551' : '#706f6f' }} />}
           label={balconyLabels.label}
           clickable
-          color={options.balcony ? 'primary' : 'default'}
           onClick={() => toggleOption('balcony')}
-          sx={{ fontWeight: 700, px: 2, fontSize: '1rem' }}
-        />
-      );
-    }
-
-    // Versión desktop - Paper completo
-    return (
-      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-        <Paper
-          onClick={() => toggleOption('balcony')}
-          elevation={options.balcony ? 4 : 1}
           sx={{
-            p: 3,
-            cursor: 'pointer',
-            border: '3px solid',
-            borderColor: options.balcony ? '#2196f3' : 'transparent',
-            background: options.balcony 
-              ? 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)'
-              : 'white',
-            transition: 'all 0.3s',
-            position: 'relative',
-            '&:hover': { boxShadow: 6, transform: 'translateY(-2px)' }
+            fontWeight: 600,
+            px: 2,
+            fontSize: '0.875rem',
+            fontFamily: '"Poppins", sans-serif',
+            bgcolor: options.balcony ? 'rgba(140, 165, 81, 0.12)' : '#fafafa',
+            color: options.balcony ? '#333F1F' : '#706f6f',
+            border: `1px solid ${options.balcony ? '#8CA551' : '#e0e0e0'}`,
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              bgcolor: options.balcony ? 'rgba(140, 165, 81, 0.18)' : 'rgba(140, 165, 81, 0.08)',
+              borderColor: '#8CA551',
+              transform: 'translateY(-2px)',
+              boxShadow: '0 4px 12px rgba(140, 165, 81, 0.2)'
+            }
           }}
-        >
-          {options.balcony && (
-            <CheckCircle sx={{ position: 'absolute', top: 12, right: 12, color: '#2196f3', fontSize: 28 }} />
-          )}
-          <Box display="flex" alignItems="center" gap={1} mb={1}>
-            <BalconyIconComponent sx={{ color: '#2196f3', fontSize: 28 }} />
-            <Typography variant="h6" fontWeight="bold">{balconyLabels.title}</Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary" mb={2}>
-            {balconyLabels.description}
-          </Typography>
-          <Typography variant="h5" color="#2196f3" fontWeight="bold">
-            +${balconyPrice.toLocaleString()}
-          </Typography>
-        </Paper>
-      </motion.div>
-    );
-  };
+        />
+      )}
+      {model.storages && model.storages.length > 0 && (
+        <Chip
+          icon={<StorageIcon sx={{ color: options.storage ? '#E5863C' : '#706f6f' }} />}
+          label="Storage"
+          clickable
+          onClick={() => toggleOption('storage')}
+          sx={{
+            fontWeight: 600,
+            px: 2,
+            fontSize: '0.875rem',
+            fontFamily: '"Poppins", sans-serif',
+            bgcolor: options.storage ? 'rgba(229, 134, 60, 0.12)' : '#fafafa',
+            color: options.storage ? '#333F1F' : '#706f6f',
+            border: `1px solid ${options.storage ? '#E5863C' : '#e0e0e0'}`,
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              bgcolor: options.storage ? 'rgba(229, 134, 60, 0.18)' : 'rgba(229, 134, 60, 0.08)',
+              borderColor: '#E5863C',
+              transform: 'translateY(-2px)',
+              boxShadow: '0 4px 12px rgba(229, 134, 60, 0.2)'
+            }
+          }}
+        />
+      )}
+    </Box>
+  )
 
   return (
     <Dialog 
@@ -279,17 +289,18 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
           height: '95vh',
           maxWidth: '1800px',
           m: 0,
-          borderRadius: 3,
-          overflow: 'hidden'
+          borderRadius: 4,
+          overflow: 'hidden',
+          boxShadow: '0 20px 60px rgba(51, 63, 31, 0.15)'
         }
       }}
     >
       <DialogContent sx={{ p: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
-        {/* Header */}
+        {/* ✅ HEADER - Brandbook */}
         <Box sx={{ 
           p: 3, 
-          borderBottom: '2px solid #e0e0e0',
-          background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+          borderBottom: '2px solid rgba(140, 165, 81, 0.2)',
+          bgcolor: '#333F1F',
           color: 'white',
           position: 'relative'
         }}>
@@ -300,40 +311,55 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
               top: 16,
               right: 16,
               color: 'white',
-              bgcolor: (theme) => alpha(theme.palette.common.white, 0.12),
-              '&:hover': { bgcolor: (theme) => alpha(theme.palette.common.white, 0.18) }
+              bgcolor: 'rgba(255, 255, 255, 0.12)',
+              '&:hover': { 
+                bgcolor: 'rgba(255, 255, 255, 0.18)',
+                transform: 'scale(1.05)'
+              }
             }}
           >
             <Close />
           </IconButton>
-          <Typography variant="h4" fontWeight="bold" mb={0.5}>
+          <Typography 
+            variant="h4" 
+            fontWeight={700} 
+            mb={0.5}
+            sx={{ fontFamily: '"Poppins", sans-serif' }}
+          >
             {model.model}
-            {/* ✅ Badge opcional para Modelo 10 */}
             {isModel10 && (
               <Chip 
                 label="Special Configuration" 
                 size="small" 
                 sx={{ 
                   ml: 2, 
-                  bgcolor: 'rgba(255,255,255,0.2)', 
+                  bgcolor: 'rgba(140, 165, 81, 0.2)', 
                   color: 'white',
-                  fontWeight: 600 
+                  fontWeight: 600,
+                  fontFamily: '"Poppins", sans-serif',
+                  border: '1px solid rgba(140, 165, 81, 0.4)'
                 }} 
               />
             )}
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.9 }}>
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              opacity: 0.9,
+              fontFamily: '"Poppins", sans-serif'
+            }}
+          >
             {isModel10 
-              ? "Customize your dream home - Compare Comedor vs Estudio configurations"
+              ? "Customize your dream home - Compare Comedor vs Study configurations"
               : "Customize your dream home - Compare configurations side by side"
             }
           </Typography>
         </Box>
 
-        {/* Responsive Layout */}
+        {/* ✅ RESPONSIVE LAYOUT */}
         {isMobile ? (
           <>
-            {/* Controles y opciones arriba */}
+            {/* Mobile Controls */}
             <Box sx={{
               px: 2,
               pt: 2,
@@ -341,22 +367,33 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
               display: 'flex',
               flexDirection: 'column',
               gap: 2,
-              bgcolor: '#f8f9fa',
-              borderBottom: '1px solid #dee2e6'
+              bgcolor: '#fafafa',
+              borderBottom: '1px solid #e0e0e0'
             }}>
-              <Box display="flex" alignItems="center" flexDirection={{xs:'column', sm:'row'}} justifyContent="space-between" mb={2} gap={2}>
+              <Box display="flex" alignItems="center" flexDirection="column" justifyContent="space-between" mb={2} gap={2}>
                 <FormControlLabel
                   control={
                     <Switch
                       checked={isSynced}
                       onChange={(e) => setIsSynced(e.target.checked)}
-                      color="primary"
+                      sx={{
+                        '& .MuiSwitch-switchBase.Mui-checked': {
+                          color: '#8CA551',
+                        },
+                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                          backgroundColor: '#8CA551',
+                        },
+                      }}
                     />
                   }
                   label={
                     <Box display="flex" alignItems="center" gap={0.5}>
-                      {isSynced ? <Sync fontSize="small" /> : <SyncDisabled fontSize="small" />}
-                      <Typography variant="body2" fontWeight="600">
+                      {isSynced ? <Sync fontSize="small" sx={{ color: '#333F1F' }} /> : <SyncDisabled fontSize="small" sx={{ color: '#706f6f' }} />}
+                      <Typography 
+                        variant="body2" 
+                        fontWeight={600}
+                        sx={{ fontFamily: '"Poppins", sans-serif', color: '#333F1F' }}
+                      >
                         {isSynced ? 'Synced' : 'Independent'}
                       </Typography>
                     </Box>
@@ -374,6 +411,26 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                     }
                   }}
                   size="small"
+                  sx={{
+                    '& .MuiToggleButton-root': {
+                      fontFamily: '"Poppins", sans-serif',
+                      fontWeight: 600,
+                      fontSize: '0.75rem',
+                      color: '#706f6f',
+                      border: '1px solid #e0e0e0',
+                      '&.Mui-selected': {
+                        bgcolor: 'rgba(140, 165, 81, 0.12)',
+                        color: '#333F1F',
+                        borderColor: '#8CA551',
+                        '&:hover': {
+                          bgcolor: 'rgba(140, 165, 81, 0.18)',
+                        }
+                      },
+                      '&:hover': {
+                        bgcolor: 'rgba(140, 165, 81, 0.05)',
+                      }
+                    }
+                  }}
                 >
                   <ToggleButton value="all">
                     <HomeIcon sx={{ mr: 0.5 }} fontSize="small" />
@@ -399,7 +456,18 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                     '& .MuiTab-root': {
                       minHeight: 36,
                       py: 0.5,
-                      fontSize: '0.75rem'
+                      fontSize: '0.75rem',
+                      fontFamily: '"Poppins", sans-serif',
+                      fontWeight: 500,
+                      color: '#706f6f',
+                      '&.Mui-selected': {
+                        color: '#333F1F',
+                        fontWeight: 600
+                      }
+                    },
+                    '& .MuiTabs-indicator': {
+                      backgroundColor: '#8CA551',
+                      height: 3
                     }
                   }}
                 >
@@ -413,95 +481,162 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                   ))}
                 </Tabs>
               )}
-              {/* ✅ Opciones de personalización compactas con Chip condicional */}
-              <Box sx={{ 
-                display: 'flex', 
-                gap: 1, 
-                flexWrap: 'wrap', 
-                mb: 2, 
-                justifyContent:{xs:'space-around',sm:'space-around', md:'space-around', lg:'center'} 
-              }}>
-                {model.upgrades && model.upgrades.length > 0 && (
-                  <Chip
-                    icon={<UpgradeIcon sx={{ color: options.upgrade ? '#9c27b0' : '#aaa' }} />}
-                    label="Upgrade"
-                    clickable
-                    color={options.upgrade ? 'secondary' : 'default'}
-                    onClick={() => toggleOption('upgrade')}
-                    sx={{ fontWeight: 700, px: 2, fontSize: '1rem' }}
-                  />
-                )}
-                {/* ✅ Chip de Balcony/Estudio condicional para mobile */}
-                {model.balconies && model.balconies.length > 0 && <BalconyChip isMobileVersion={true} />}
-                {model.storages && model.storages.length > 0 && (
-                  <Chip
-                    icon={<StorageIcon sx={{ color: options.storage ? '#4caf50' : '#aaa' }} />}
-                    label="Storage"
-                    clickable
-                    color={options.storage ? 'success' : 'default'}
-                    onClick={() => toggleOption('storage')}
-                    sx={{ fontWeight: 700, px: 2, fontSize: '1rem' }}
-                  />
-                )}
-              </Box>
-              {/* Info básica y total */}
-              <Paper elevation={3} sx={{ p: 2, mb: 2, background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
-                <Typography variant="caption" color="text.secondary" fontWeight="bold">
+              <OptionChips />
+              
+              {/* Mobile Info Card */}
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  p: 2, 
+                  mb: 2, 
+                  bgcolor: '#fafafa',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: 3
+                }}
+              >
+                <Typography 
+                  variant="caption" 
+                  sx={{
+                    color: '#706f6f',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    fontFamily: '"Poppins", sans-serif',
+                    fontSize: '0.7rem'
+                  }}
+                >
                   BASE PRICE
                 </Typography>
-                <Typography variant="h4" fontWeight="bold" color="primary" mb={1}>
+                <Typography 
+                  variant="h4" 
+                  fontWeight={700} 
+                  sx={{
+                    color: '#333F1F',
+                    mb: 1,
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
+                >
                   ${model.price.toLocaleString()}
                 </Typography>
                 <Box sx={{ 
                   display: 'flex', 
                   flexWrap: 'wrap',
-                  justifyContent: { xs: 'center', sm: 'center', md: 'center', lg: 'space-around', xl:'space-around' },
-                  gap: 2, 
+                  justifyContent: 'center',
+                  gap: 1.5, 
                   mb: 2 
                 }}>
-                  <Chip icon={<HomeIcon />} label={`${model.bedrooms} Beds`} />
-                  <Chip icon={<HomeIcon />} label={`${model.bathrooms} Baths`} />
-                  <Chip icon={<HomeIcon />} label={`${model.sqft} sqft`} />
+                  <Chip 
+                    icon={<HomeIcon />} 
+                    label={`${model.bedrooms} Beds`}
+                    sx={{
+                      fontFamily: '"Poppins", sans-serif',
+                      fontWeight: 500,
+                      bgcolor: 'white',
+                      border: '1px solid #e0e0e0'
+                    }}
+                  />
+                  <Chip 
+                    icon={<HomeIcon />} 
+                    label={`${model.bathrooms} Baths`}
+                    sx={{
+                      fontFamily: '"Poppins", sans-serif',
+                      fontWeight: 500,
+                      bgcolor: 'white',
+                      border: '1px solid #e0e0e0'
+                    }}
+                  />
+                  <Chip 
+                    icon={<HomeIcon />} 
+                    label={`${model.sqft} sqft`}
+                    sx={{
+                      fontFamily: '"Poppins", sans-serif',
+                      fontWeight: 500,
+                      bgcolor: 'white',
+                      border: '1px solid #e0e0e0'
+                    }}
+                  />
                 </Box>
               </Paper>
-              <Paper elevation={6} sx={{ p: 2, mt: 2, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', position: 'relative', overflow: 'hidden' }}>
-                <AutoAwesome sx={{ position: 'absolute', top: 16, right: 16, fontSize: 28, opacity: 0.18, color: (theme) => alpha(theme.palette.common.white, 0.9) }} />
-                <Typography variant="caption" fontWeight="bold" sx={{ opacity: 0.9 }}>TOTAL PRICE</Typography>
-                <Typography variant="h5" fontWeight="bold" mb={1}>${calculatePrice().toLocaleString()}</Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9 }}>Includes all selected options</Typography>
-              </Paper>
-              <Button
-                variant="contained"
-                size="large"
-                fullWidth
-                startIcon={<CheckCircle />}
-                onClick={handleConfirm}
-                sx={{
-                  mt: 2,
-                  py: 1.5,
-                  background: 'linear-gradient(135deg, #4a7c59 0%, #3d6649 100%)',
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  boxShadow: 4,
-                  '&:hover': { boxShadow: 8, transform: 'translateY(-2px)', transition: 'all 0.3s' }
-                }}
-              >
-                Confirm Selection
-              </Button>
+{/* ✅ BOTÓN MOBILE - Corregido */}
+<Button
+  variant="contained"
+  size="large"
+  fullWidth
+  startIcon={<CheckCircle />}
+  onClick={handleConfirm}
+  sx={{
+    mt: 2,
+    py: 1.5,
+    borderRadius: 3,
+    bgcolor: '#333F1F',
+    color: 'white',
+    fontWeight: 600,
+    fontSize: '1rem',
+    letterSpacing: '1px',
+    textTransform: 'uppercase',
+    fontFamily: '"Poppins", sans-serif',
+    boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+    position: 'relative',
+    overflow: 'hidden',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: '-100%',
+      width: '100%',
+      height: '100%',
+      bgcolor: '#8CA551',
+      transition: 'left 0.4s ease',
+      zIndex: 0,
+    },
+    '&:hover': {
+      bgcolor: '#333F1F',
+      boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+      transform: 'translateY(-2px)',
+      '&::before': {
+        left: 0,
+      },
+    },
+    // ✅ Asegurar que TODO el contenido esté por encima del ::before
+    '& .MuiButton-startIcon': {
+      position: 'relative',
+      zIndex: 1,
+    },
+    '& .MuiButton-endIcon': {
+      position: 'relative',
+      zIndex: 1,
+    }
+  }}
+>
+  <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
+    Confirm Selection
+  </Box>
+</Button>
             </Box>
-            {/* Carruseles en dos columnas */}
+            
+            {/* Mobile Carousels */}
             <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', gap: 2, px: 2, pb: 2 }}>
-              {/* Carrusel izquierdo */}
-              <Box sx={{ flex: 1, bgcolor: '#f8f9fa', borderRadius: 2, overflow: 'hidden' }}>
-                <Chip label={leftData.label} size="small" sx={{ bgcolor: '#6c757d', color: 'white', fontWeight: 'bold', m: 1 }} />
+              {/* Left Carousel */}
+              <Box sx={{ flex: 1, bgcolor: '#fafafa', borderRadius: 3, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
+                <Chip 
+                  label={leftData.label} 
+                  size="small" 
+                  sx={{ 
+                    bgcolor: '#333F1F', 
+                    color: 'white', 
+                    fontWeight: 600, 
+                    m: 1,
+                    fontFamily: '"Poppins", sans-serif'
+                  }} 
+                />
                 <Box
                   sx={{
                     bgcolor: '#000',
                     borderRadius: 2,
                     overflow: 'hidden',
                     position: 'relative',
-                    minHeight: 220,
-                    height: { xs: 220, sm: 220, md: 220 },
+                    width: '100%',
+                    height: 220,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
@@ -517,13 +652,18 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.3 }}
                         style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'contain'
+                          maxWidth: '100%',
+                          maxHeight: '100%',
+                          width: 'auto',
+                          height: 'auto',
+                          objectFit: 'contain',
+                          position: 'absolute'
                         }}
                       />
                     ) : (
-                      <Typography color="white">No images available</Typography>
+                      <Typography color="white" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                        No images available
+                      </Typography>
                     )}
                   </AnimatePresence>
                   {leftData.images.length > 1 && (
@@ -536,12 +676,16 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                           top: '50%',
                           transform: 'translateY(-50%)',
                           bgcolor: 'rgba(255,255,255,0.95)',
-                          '&:hover': { bgcolor: 'white', transform: 'scale(1.1) translateY(-50%)' },
-                          boxShadow: 3,
+                          '&:hover': { 
+                            bgcolor: 'white', 
+                            transform: 'scale(1.1) translateY(-50%)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                          },
+                          boxShadow: 2,
                           zIndex: 2
                         }}
                       >
-                        <KeyboardArrowLeft />
+                        <KeyboardArrowLeft sx={{ color: '#333F1F' }} />
                       </IconButton>
                       <IconButton
                         onClick={handleLeftNext}
@@ -551,15 +695,28 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                           top: '50%',
                           transform: 'translateY(-50%)',
                           bgcolor: 'rgba(255,255,255,0.95)',
-                          '&:hover': { bgcolor: 'white', transform: 'scale(1.1) translateY(-50%)' },
-                          boxShadow: 3,
+                          '&:hover': { 
+                            bgcolor: 'white', 
+                            transform: 'scale(1.1) translateY(-50%)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                          },
+                          boxShadow: 2,
                           zIndex: 2
                         }}
                       >
-                        <KeyboardArrowRight />
+                        <KeyboardArrowRight sx={{ color: '#333F1F' }} />
                       </IconButton>
-                      <Box sx={{ position: 'absolute', bottom: 8, left: 8, bgcolor: 'rgba(0,0,0,0.8)', color: 'white', px: 2, py: 0.5, borderRadius: 2 }}>
-                        <Typography variant="caption" fontWeight="600">
+                      <Box sx={{ 
+                        position: 'absolute', 
+                        bottom: 8, 
+                        left: 8, 
+                        bgcolor: 'rgba(51, 63, 31, 0.9)', 
+                        color: 'white', 
+                        px: 2, 
+                        py: 0.5, 
+                        borderRadius: 2 
+                      }}>
+                        <Typography variant="caption" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
                           {leftImageIndex + 1} / {leftData.images.length}
                         </Typography>
                       </Box>
@@ -567,17 +724,28 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                   )}
                 </Box>
               </Box>
-              {/* Carrusel derecho */}
-              <Box sx={{ flex: 1, bgcolor: '#f8f9fa', borderRadius: 2, overflow: 'hidden' }}>
-                <Chip label={rightData.label} size="small" sx={{ bgcolor: options.upgrade || options.balcony || options.storage ? '#667eea' : '#6c757d', color: 'white', fontWeight: 'bold', m: 1 }} />
+              
+              {/* Right Carousel */}
+              <Box sx={{ flex: 1, bgcolor: '#fafafa', borderRadius: 3, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
+                <Chip 
+                  label={rightData.label} 
+                  size="small" 
+                  sx={{ 
+                    bgcolor: options.upgrade || options.balcony || options.storage ? '#8CA551' : '#333F1F', 
+                    color: 'white', 
+                    fontWeight: 600, 
+                    m: 1,
+                    fontFamily: '"Poppins", sans-serif'
+                  }} 
+                />
                 <Box
                   sx={{
                     bgcolor: '#000',
                     borderRadius: 2,
                     overflow: 'hidden',
                     position: 'relative',
-                    minHeight: 220,
-                    height: { xs: 220, sm: 220, md: 220 },
+                    width: '100%',
+                    height: 220,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
@@ -593,13 +761,18 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.3 }}
                         style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'contain'
+                          maxWidth: '100%',
+                          maxHeight: '100%',
+                          width: 'auto',
+                          height: 'auto',
+                          objectFit: 'contain',
+                          position: 'absolute'
                         }}
                       />
                     ) : (
-                      <Typography color="white">No images available</Typography>
+                      <Typography color="white" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                        No images available
+                      </Typography>
                     )}
                   </AnimatePresence>
                   {rightData.images.length > 1 && (
@@ -612,12 +785,16 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                           top: '50%',
                           transform: 'translateY(-50%)',
                           bgcolor: 'rgba(255,255,255,0.95)',
-                          '&:hover': { bgcolor: 'white', transform: 'scale(1.1) translateY(-50%)' },
-                          boxShadow: 3,
+                          '&:hover': { 
+                            bgcolor: 'white', 
+                            transform: 'scale(1.1) translateY(-50%)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                          },
+                          boxShadow: 2,
                           zIndex: 2
                         }}
                       >
-                        <KeyboardArrowLeft />
+                        <KeyboardArrowLeft sx={{ color: '#333F1F' }} />
                       </IconButton>
                       <IconButton
                         onClick={handleRightNext}
@@ -627,15 +804,28 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                           top: '50%',
                           transform: 'translateY(-50%)',
                           bgcolor: 'rgba(255,255,255,0.95)',
-                          '&:hover': { bgcolor: 'white', transform: 'scale(1.1) translateY(-50%)' },
-                          boxShadow: 3,
+                          '&:hover': { 
+                            bgcolor: 'white', 
+                            transform: 'scale(1.1) translateY(-50%)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                          },
+                          boxShadow: 2,
                           zIndex: 2
                         }}
                       >
-                        <KeyboardArrowRight />
+                        <KeyboardArrowRight sx={{ color: '#333F1F' }} />
                       </IconButton>
-                      <Box sx={{ position: 'absolute', bottom: 8, left: 8, bgcolor: 'rgba(0,0,0,0.8)', color: 'white', px: 2, py: 0.5, borderRadius: 2 }}>
-                        <Typography variant="caption" fontWeight="600">
+                      <Box sx={{ 
+                        position: 'absolute', 
+                        bottom: 8, 
+                        left: 8, 
+                        bgcolor: 'rgba(140, 165, 81, 0.9)', 
+                        color: 'white', 
+                        px: 2, 
+                        py: 0.5, 
+                        borderRadius: 2 
+                      }}>
+                        <Typography variant="caption" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
                           {rightImageIndex + 1} / {rightData.images.length}
                         </Typography>
                       </Box>
@@ -646,29 +836,30 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
             </Box>
           </>
         ) : (
-          // Desktop: tres columnas
+          // ✅ DESKTOP LAYOUT - Brandbook
           <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
             {/* LEFT COLUMN - BASE MODEL */}
             <Box sx={{ 
               flex: 1, 
               display: 'flex', 
               flexDirection: 'column',
-              borderRight: '2px solid #e0e0e0',
-              bgcolor: '#f8f9fa'
+              borderRight: '1px solid #e0e0e0',
+              bgcolor: '#fafafa'
             }}>
               <Box sx={{ 
                 p: 2, 
-                bgcolor: '#e9ecef',
-                borderBottom: '1px solid #dee2e6',
+                bgcolor: '#f5f5f5',
+                borderBottom: '1px solid #e0e0e0',
                 textAlign: 'center'
               }}>
                 <Chip 
                   label={leftData.label}
                   size="small"
                   sx={{ 
-                    bgcolor: '#6c757d',
+                    bgcolor: '#333F1F',
                     color: 'white',
-                    fontWeight: 'bold'
+                    fontWeight: 600,
+                    fontFamily: '"Poppins", sans-serif'
                   }}
                 />
               </Box>
@@ -692,13 +883,18 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ duration: 0.3 }}
                       style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain'
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        width: 'auto',
+                        height: 'auto',
+                        objectFit: 'contain',
+                        position: 'absolute'
                       }}
                     />
                   ) : (
-                    <Typography color="white">No images available</Typography>
+                    <Typography color="white" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                      No images available
+                    </Typography>
                   )}
                 </AnimatePresence>
                 {leftData.images.length > 1 && (
@@ -711,12 +907,16 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                         top: '50%',
                         transform: 'translateY(-50%)',
                         bgcolor: 'rgba(255,255,255,0.95)',
-                        '&:hover': { bgcolor: 'white', transform: 'scale(1.1) translateY(-50%)' },
+                        '&:hover': { 
+                          bgcolor: 'white', 
+                          transform: 'scale(1.1) translateY(-50%)',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                        },
                         boxShadow: 3,
                         zIndex: 2
                       }}
                     >
-                      <KeyboardArrowLeft />
+                      <KeyboardArrowLeft sx={{ color: '#333F1F' }} />
                     </IconButton>
                     <IconButton
                       onClick={handleLeftNext}
@@ -726,15 +926,28 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                         top: '50%',
                         transform: 'translateY(-50%)',
                         bgcolor: 'rgba(255,255,255,0.95)',
-                        '&:hover': { bgcolor: 'white', transform: 'scale(1.1) translateY(-50%)' },
+                        '&:hover': { 
+                          bgcolor: 'white', 
+                          transform: 'scale(1.1) translateY(-50%)',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                        },
                         boxShadow: 3,
                         zIndex: 2
                       }}
                     >
-                      <KeyboardArrowRight />
+                      <KeyboardArrowRight sx={{ color: '#333F1F' }} />
                     </IconButton>
-                    <Box sx={{ position: 'absolute', bottom: 16, left: 16, bgcolor: 'rgba(0,0,0,0.8)', color: 'white', px: 2, py: 0.5, borderRadius: 2 }}>
-                      <Typography variant="caption" fontWeight="600">
+                    <Box sx={{ 
+                      position: 'absolute', 
+                      bottom: 16, 
+                      left: 16, 
+                      bgcolor: 'rgba(51, 63, 31, 0.9)', 
+                      color: 'white', 
+                      px: 2, 
+                      py: 0.5, 
+                      borderRadius: 2 
+                    }}>
+                      <Typography variant="caption" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
                         {leftImageIndex + 1} / {leftData.images.length}
                       </Typography>
                     </Box>
@@ -748,135 +961,190 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
               width: 400,
               display: 'flex',
               flexDirection: 'column',
-              borderRight: '2px solid #e0e0e0',
+              borderRight: '1px solid #e0e0e0',
               bgcolor: '#fff',
               overflow: 'auto'
             }}>
               <Box sx={{ p: 3 }}>
-                <Paper elevation={3} sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
-                  <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                <Paper 
+                  elevation={0} 
+                  sx={{ 
+                    p: 3, 
+                    mb: 3, 
+                    bgcolor: '#fafafa',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: 3
+                  }}
+                >
+                  <Typography 
+                    variant="caption" 
+                    sx={{
+                      color: '#706f6f',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px',
+                      fontFamily: '"Poppins", sans-serif',
+                      fontSize: '0.7rem'
+                    }}
+                  >
                     BASE PRICE
                   </Typography>
-                  <Typography variant="h3" fontWeight="bold" color="primary" mb={1}>
+                  <Typography 
+                    variant="h3" 
+                    fontWeight={700} 
+                    sx={{
+                      color: '#333F1F',
+                      mb: 1,
+                      fontFamily: '"Poppins", sans-serif'
+                    }}
+                  >
                     ${model.price.toLocaleString()}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: '#706f6f',
+                      fontFamily: '"Poppins", sans-serif'
+                    }}
+                  >
                     {model.bedrooms} beds • {model.bathrooms} baths • {model.sqft?.toLocaleString()} sqft
                   </Typography>
                 </Paper>
-                <Divider sx={{ mb: 3 }}>
-                  <Chip label="Customization Options" size="small" />
+                <Divider sx={{ mb: 3, borderColor: 'rgba(140, 165, 81, 0.2)' }}>
+                  <Chip 
+                    label="Customization Options" 
+                    size="small"
+                    sx={{
+                      fontFamily: '"Poppins", sans-serif',
+                      fontWeight: 600
+                    }}
+                  />
                 </Divider>
-                <Stack spacing={2}>
-                  {model.upgrades && model.upgrades.length > 0 && (
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Paper
-                        onClick={() => toggleOption('upgrade')}
-                        elevation={options.upgrade ? 4 : 1}
-                        sx={{
-                          p: 3,
-                          cursor: 'pointer',
-                          border: '3px solid',
-                          borderColor: options.upgrade ? '#9c27b0' : 'transparent',
-                          background: options.upgrade 
-                            ? 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)'
-                            : 'white',
-                          transition: 'all 0.3s',
-                          position: 'relative',
-                          overflow: 'hidden',
-                          '&:hover': { boxShadow: 6, transform: 'translateY(-2px)' }
-                        }}
-                      >
-                        {options.upgrade && (
-                          <CheckCircle sx={{ position: 'absolute', top: 12, right: 12, color: '#9c27b0', fontSize: 28 }} />
-                        )}
-                        <Box display="flex" alignItems="center" gap={1} mb={1}>
-                          <UpgradeIcon sx={{ color: '#9c27b0', fontSize: 28 }} />
-                          <Typography variant="h6" fontWeight="bold">Premium Upgrade</Typography>
-                        </Box>
-                        <Typography variant="body2" color="text.secondary" mb={2}>
-                          Premium finishes with high-end materials
-                        </Typography>
-                        <Typography variant="h5" color="#9c27b0" fontWeight="bold">
-                          +${upgradePrice.toLocaleString()}
-                        </Typography>
-                      </Paper>
-                    </motion.div>
-                  )}
-                  {/* ✅ Chip de Balcony/Estudio condicional para desktop */}
-                  {model.balconies && model.balconies.length > 0 && <BalconyChip isMobileVersion={false} />}
-                  {model.storages && model.storages.length > 0 && (
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Paper
-                        onClick={() => toggleOption('storage')}
-                        elevation={options.storage ? 4 : 1}
-                        sx={{
-                          p: 3,
-                          cursor: 'pointer',
-                          border: '3px solid',
-                          borderColor: options.storage ? '#4caf50' : 'transparent',
-                          background: options.storage 
-                            ? 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)'
-                            : 'white',
-                          transition: 'all 0.3s',
-                          position: 'relative',
-                          '&:hover': { boxShadow: 6, transform: 'translateY(-2px)' }
-                        }}
-                      >
-                        {options.storage && (
-                          <CheckCircle sx={{ position: 'absolute', top: 12, right: 12, color: '#4caf50', fontSize: 28 }} />
-                        )}
-                        <Box display="flex" alignItems="center" gap={1} mb={1}>
-                          <StorageIcon sx={{ color: '#4caf50', fontSize: 28 }} />
-                          <Typography variant="h6" fontWeight="bold">Storage Unit</Typography>
-                        </Box>
-                        <Typography variant="body2" color="text.secondary" mb={2}>
-                          Additional storage for all your needs
-                        </Typography>
-                        <Typography variant="h5" color="#4caf50" fontWeight="bold">
-                          +${storagePrice.toLocaleString()}
-                        </Typography>
-                      </Paper>
-                    </motion.div>
-                  )}
-                </Stack>
-                <Paper elevation={6} sx={{ p: 3, mt: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', position: 'relative', overflow: 'hidden' }}>
-                  <AutoAwesome sx={{ position: 'absolute', top: 16, right: 16, fontSize: 32, opacity: 0.18, color: (theme) => alpha(theme.palette.common.white, 0.9) }} />
-                  <Typography variant="caption" fontWeight="bold" sx={{ opacity: 0.9 }}>TOTAL PRICE</Typography>
-                  <Typography variant="h3" fontWeight="bold" mb={1}>${calculatePrice().toLocaleString()}</Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>Includes all selected options</Typography>
-                </Paper>
-                <Button
-                  variant="contained"
-                  size="large"
-                  fullWidth
-                  startIcon={<CheckCircle />}
-                  onClick={handleConfirm}
-                  sx={{
-                    mt: 3,
-                    py: 2,
-                    background: 'linear-gradient(135deg, #4a7c59 0%, #3d6649 100%)',
-                    fontSize: '1.1rem',
-                    fontWeight: 'bold',
-                    boxShadow: 4,
-                    '&:hover': { boxShadow: 8, transform: 'translateY(-2px)', transition: 'all 0.3s' }
+                <OptionChips />
+                <Paper 
+                  elevation={0} 
+                  sx={{ 
+                    p: 3, 
+                    mt: 3, 
+                    bgcolor: '#fafafa',
+                    border: '2px solid #8CA551',
+                    borderRadius: 3
                   }}
                 >
-                  Confirm Selection
-                </Button>
+                  <Typography 
+                    variant="caption" 
+                    sx={{
+                      color: '#706f6f',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px',
+                      fontFamily: '"Poppins", sans-serif',
+                      fontSize: '0.7rem'
+                    }}
+                  >
+                    TOTAL PRICE
+                  </Typography>
+                  <Typography 
+                    variant="h3" 
+                    fontWeight={700} 
+                    sx={{
+                      color: '#333F1F',
+                      mb: 1,
+                      fontFamily: '"Poppins", sans-serif'
+                    }}
+                  >
+                    ${calculatePrice().toLocaleString()}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: '#706f6f',
+                      fontFamily: '"Poppins", sans-serif'
+                    }}
+                  >
+                    Includes all selected options
+                  </Typography>
+                </Paper>
+
+{/* ✅ BOTÓN DESKTOP - Corregido */}
+<Button
+  variant="contained"
+  size="large"
+  fullWidth
+  startIcon={<CheckCircle />}
+  onClick={handleConfirm}
+  sx={{
+    mt: 3,
+    py: 2,
+    borderRadius: 3,
+    bgcolor: '#333F1F',
+    color: 'white',
+    fontWeight: 600,
+    fontSize: '1.1rem',
+    letterSpacing: '1px',
+    textTransform: 'uppercase',
+    fontFamily: '"Poppins", sans-serif',
+    boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+    position: 'relative',
+    overflow: 'hidden',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: '-100%',
+      width: '100%',
+      height: '100%',
+      bgcolor: '#8CA551',
+      transition: 'left 0.4s ease',
+      zIndex: 0,
+    },
+    '&:hover': {
+      bgcolor: '#333F1F',
+      boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+      transform: 'translateY(-2px)',
+      '&::before': {
+        left: 0,
+      },
+    },
+    // ✅ Asegurar que TODO el contenido esté por encima del ::before
+    '& .MuiButton-startIcon': {
+      position: 'relative',
+      zIndex: 1,
+    },
+    '& .MuiButton-endIcon': {
+      position: 'relative',
+      zIndex: 1,
+    }
+  }}
+>
+  <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
+    Confirm Selection
+  </Box>
+</Button>
               </Box>
             </Box>
 
             {/* RIGHT COLUMN - CUSTOMIZED MODEL */}
-            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', bgcolor: '#f8f9fa' }}>
-              <Box sx={{ p: 2, bgcolor: '#e9ecef', borderBottom: '1px solid #dee2e6', textAlign: 'center' }}>
+            <Box sx={{ 
+              flex: 1, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              bgcolor: '#fafafa' 
+            }}>
+              <Box sx={{ 
+                p: 2, 
+                bgcolor: '#f5f5f5', 
+                borderBottom: '1px solid #e0e0e0', 
+                textAlign: 'center' 
+              }}>
                 <Chip 
                   label={rightData.label}
                   size="small"
                   sx={{ 
-                    bgcolor: options.upgrade || options.balcony || options.storage ? '#667eea' : '#6c757d',
+                    bgcolor: options.upgrade || options.balcony || options.storage ? '#8CA551' : '#333F1F',
                     color: 'white',
-                    fontWeight: 'bold'
+                    fontWeight: 600,
+                    fontFamily: '"Poppins", sans-serif'
                   }}
                 />
               </Box>
@@ -900,13 +1168,18 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ duration: 0.3 }}
                       style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain'
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        width: 'auto',
+                        height: 'auto',
+                        objectFit: 'contain',
+                        position: 'absolute'
                       }}
                     />
                   ) : (
-                    <Typography color="white">No images available</Typography>
+                    <Typography color="white" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                      No images available
+                    </Typography>
                   )}
                 </AnimatePresence>
                 {rightData.images.length > 1 && (
@@ -919,12 +1192,16 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                         top: '50%',
                         transform: 'translateY(-50%)',
                         bgcolor: 'rgba(255,255,255,0.95)',
-                        '&:hover': { bgcolor: 'white', transform: 'scale(1.1) translateY(-50%)' },
+                        '&:hover': { 
+                          bgcolor: 'white', 
+                          transform: 'scale(1.1) translateY(-50%)',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                        },
                         boxShadow: 3,
                         zIndex: 2
                       }}
                     >
-                      <KeyboardArrowLeft />
+                      <KeyboardArrowLeft sx={{ color: '#333F1F' }} />
                     </IconButton>
                     <IconButton
                       onClick={handleRightNext}
@@ -934,15 +1211,28 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                         top: '50%',
                         transform: 'translateY(-50%)',
                         bgcolor: 'rgba(255,255,255,0.95)',
-                        '&:hover': { bgcolor: 'white', transform: 'scale(1.1) translateY(-50%)' },
+                        '&:hover': { 
+                          bgcolor: 'white', 
+                          transform: 'scale(1.1) translateY(-50%)',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                        },
                         boxShadow: 3,
                         zIndex: 2
                       }}
                     >
-                      <KeyboardArrowRight />
+                      <KeyboardArrowRight sx={{ color: '#333F1F' }} />
                     </IconButton>
-                    <Box sx={{ position: 'absolute', bottom: 16, left: 16, bgcolor: 'rgba(0,0,0,0.8)', color: 'white', px: 2, py: 0.5, borderRadius: 2 }}>
-                      <Typography variant="caption" fontWeight="600">
+                    <Box sx={{ 
+                      position: 'absolute', 
+                      bottom: 16, 
+                      left: 16, 
+                      bgcolor: 'rgba(140, 165, 81, 0.9)', 
+                      color: 'white', 
+                      px: 2, 
+                      py: 0.5, 
+                      borderRadius: 2 
+                    }}>
+                      <Typography variant="caption" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
                         {rightImageIndex + 1} / {rightData.images.length}
                       </Typography>
                     </Box>

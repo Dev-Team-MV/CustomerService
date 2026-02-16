@@ -8,7 +8,7 @@ const AmenitiesPrivate = () => {
       <Paper
         elevation={0}
         sx={{
-          p: 3,
+          // p: 3,
           mb: 3,
           borderRadius: 2,
           bgcolor: 'transparent'

@@ -48,6 +48,27 @@ const uploadService = {
   },
 
   /**
+   * Subir archivos de contratos (PDF, DOC, DOCX)
+   * @param {File[]} files - Array de archivos de contratos
+   * @returns {Promise<string[]>} Array de URLs de archivos subidos
+   */
+  uploadContractFiles: async (files) => {
+    try {
+      console.log(`📤 Uploading ${files.length} contract file(s) to GCS...`)
+      
+      // Subir cada contrato individualmente usando la misma lógica que las imágenes
+      const uploadPromises = files.map(file => uploadService.uploadImage(file, 'contracts'))
+      const urls = await Promise.all(uploadPromises)
+      
+      console.log('✅ All contract files uploaded:', urls)
+      return urls
+    } catch (error) {
+      console.error('❌ Error uploading contract files:', error)
+      throw new Error(error.message || 'Failed to upload contract files')
+    }
+  },
+
+  /**
    * Subir imagen de payment/payload
    */
   uploadPaymentImage: async (file) => {
