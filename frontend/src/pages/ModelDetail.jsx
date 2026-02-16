@@ -104,7 +104,7 @@ const ModelDetail = () => {
   // y: de 60px (abajo, oculto) a 0px (centrado)
   // opacity: de 0 (invisible) a 1 (visible)
   const y = useTransform(scrollYProgress, [0, 0.2], [60, 0]);
-  const opacity = useTransform(scrollYProgress, [0.1, 0.085, 0.095], [0, 1]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2], [0, 1]);
   useEffect(() => {
     fetchModel();
     setExteriorSlide(0);

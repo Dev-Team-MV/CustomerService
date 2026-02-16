@@ -225,15 +225,9 @@ const Dashboard = () => {
       color: '#8b5cf6',
       onClick: () => navigate('/analytics')
     },
-    // { 
-    //   icon: '📅', 
-    //   label: 'Schedule', 
-    //   color: '#f59e0b',
-    //   onClick: () => navigate('/schedule')
-    // },
-{ icon: '🏡', label: 'Models', color: '#3b82f6', onClick: () => navigate('/view-models') },
-  { icon: '🏛️', label: 'Club House', color: '#10b981', onClick: () => {} },
-  { icon: '🆕', label: 'New', color: '#f59e0b', onClick: () => {} }
+    { icon: '🏡', label: 'Models', color: '#3b82f6', onClick: () => navigate('/view-models') },
+    { icon: '🏛️', label: 'Club House', color: '#10b981', onClick: () => navigate('/club-house-detail') },
+    { icon: '🆕', label: 'New', color: '#f59e0b', onClick: () => {} }
   ]
 
   // Quick Actions para user propietario

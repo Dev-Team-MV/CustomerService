@@ -21,6 +21,7 @@ import AmenitiesPublic from './pages/AmenitiesPublic'
 import AmenitiesPrivate from './pages/AmenitiesPrivate'
 import NotFound from './pages/NotFound'
 import ViewModels from './pages/ViewModels'
+import ClubHouseDetail from './pages/ClubHouseDetail'
 
 const theme = createTheme({
   palette: {
@@ -71,6 +72,7 @@ function App() {
                 <Route path="/residents" element={<Residents />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/club-house-detail" element={<ClubHouseDetail />} />
               </Route>
             </Route>
             
