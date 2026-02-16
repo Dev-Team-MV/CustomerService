@@ -24,7 +24,9 @@ import {
   Close,
   InfoOutlined,
   Visibility,
-  Tune
+  Tune,
+  Kitchen,
+  Deck
 } from '@mui/icons-material'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { useProperty } from '../../context/PropertyContext'
@@ -47,8 +49,7 @@ const ModelSelector = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'))
-  const isLarge = useMediaQuery(theme.breakpoints.between('lg', 'xl')) // Nuevo breakpoint
-  
+  const isLarge = useMediaQuery(theme.breakpoints.between('lg', 'xl'))
   
   const [models, setModels] = useState([])
   const [loading, setLoading] = useState(true)
@@ -57,6 +58,23 @@ const ModelSelector = () => {
   const [openCustomizationModal, setOpenCustomizationModal] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const scrollContainerRef = useRef(null)
+
+  // ✅ CONSTANTE PARA IDENTIFICAR EL MODELO 10
+  const MODEL_10_ID = "6977c7bbd1f24768968719de";
+  const isModel10 = selectedModel?._id === MODEL_10_ID;
+
+  // ✅ LABELS CONDICIONALES PARA BALCONY/ESTUDIO
+  const balconyLabels = isModel10
+    ? {
+        chipLabel: "🏠 Estudio",
+        label: "Estudio",
+        icon: Home
+      }
+    : {
+        chipLabel: "🌳 Balcony",
+        label: "Balcony",
+        icon: Deck
+      };
 
   useEffect(() => {
     fetchModels()
@@ -191,7 +209,7 @@ const ModelSelector = () => {
     (pricingInfo?.hasStorage && selectedModel?.storages?.length > 0)
   )
 
-  // Panel de información del modelo seleccionado (más compacto)
+  // ✅ Panel de información del modelo seleccionado (con labels condicionales)
   const ModelInfoPanel = () => (
     <Box sx={{ 
       p: { xs: 2, md: 2.5 }, 
@@ -212,6 +230,21 @@ const ModelSelector = () => {
     }}>
       <Typography variant={isLarge ? "subtitle1" : "h6"} fontWeight="bold" mb={0.5}>
         {selectedModel.model}
+        {/* ✅ Badge para Modelo 10 */}
+        {isModel10 && (
+          <Chip 
+            label="Special" 
+            size="small" 
+            sx={{ 
+              ml: 1, 
+              height: 20,
+              fontSize: '0.65rem',
+              bgcolor: 'primary.main', 
+              color: 'white',
+              fontWeight: 600 
+            }} 
+          />
+        )}
       </Typography>
       <Typography variant="caption" color="text.secondary" display="block" mb={2}>
         Model #{selectedModel.modelNumber}
@@ -252,7 +285,7 @@ const ModelSelector = () => {
         </Typography>
       </Box>
 
-      {/* Available Options Info */}
+      {/* ✅ Available Options Info - Con labels condicionales */}
       {hasPricingOptions && (
         <Box mb={2}>
           <Typography variant="caption" fontWeight="bold" color="text.secondary" display="block" mb={1}>
@@ -267,9 +300,16 @@ const ModelSelector = () => {
                 </Typography>
               </Box>
             )}
+            {/* ✅ Chip de Balcony/Estudio condicional */}
             {selectedModel.balconies?.length > 0 && (
               <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Chip label="🌳 Balcony" size="small" color="info" variant="outlined" sx={{ height: 24 }} />
+                <Chip 
+                  label={balconyLabels.chipLabel} 
+                  size="small" 
+                  color="info" 
+                  variant="outlined" 
+                  sx={{ height: 24 }} 
+                />
                 <Typography variant="caption" color="text.secondary" fontWeight="bold">
                   +${(selectedModel.balconies[0].price / 1000).toFixed(0)}K
                 </Typography>
@@ -361,7 +401,10 @@ const ModelSelector = () => {
         >
           <InfoOutlined sx={{ fontSize: 32, color: 'grey.400', mb: 0.5 }} />
           <Typography variant="caption" color="text.secondary">
-            No additional options available
+            {isModel10 
+              ? "Comedor and Estudio options in customization"
+              : "No additional options available"
+            }
           </Typography>
         </Box>
       )}
@@ -489,9 +532,6 @@ const ModelSelector = () => {
                     key={model._id}
                     onClick={() => !selectedModel && handleSelectModel(model)}
                     sx={{
-                      // minWidth: isSelected && !isMobile 
-                      //   ? (isLarge ? 300 : 350)
-                      //   : isMobile ? 260 : 300,
                       minWidth:{xs:260, md:300, lg:400},
                       maxWidth: isSelected && !isMobile 
                         ? (isLarge ? 420 : 350)
@@ -528,9 +568,6 @@ const ModelSelector = () => {
                     <Box
                       sx={{
                         width: '100%',
-                        // height: isSelected && !isMobile 
-                        //   ? (isLarge ? 260 : 240)
-                        //   : isMobile ? 160 : 180,
                         height:{xs:160, md:240, lg:250},
                         bgcolor: 'grey.200',
                         display: 'flex',
@@ -714,7 +751,7 @@ const ModelSelector = () => {
         )}
       </Paper>
 
-      {/* Mobile Drawer para detalles del modelo */}
+      {/* ✅ Mobile Drawer para detalles del modelo - Con labels condicionales */}
       <Drawer
         anchor="bottom"
         open={isMobile && drawerOpen}
@@ -727,38 +764,54 @@ const ModelSelector = () => {
           }
         }}
       >
-  <Box sx={{ p: 2 }}>
-    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-      <Typography variant="h6" fontWeight="bold">
-        Model Details
-      </Typography>
-      <IconButton onClick={() => setDrawerOpen(false)}>
-        <Close />
-      </IconButton>
-    </Box>
-    {/* Clear button for mobile */}
-    {selectedModel && (
-      <Button
-        size="small"
-        variant="outlined"
-        onClick={handleDeselectModel}
-        startIcon={<Close />}
-        fullWidth
-        sx={{
-          mb: 2,
-          borderColor: '#e0e0e0',
-          color: '#666',
-          '&:hover': { 
-            borderColor: '#4a7c59',
-            color: '#4a7c59'
-          }
-        }}
-      >
-        Clear Selection
-      </Button>
-    )}
-    {selectedModel && <ModelInfoPanel />}
-  </Box>
+        <Box sx={{ p: 2 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography variant="h6" fontWeight="bold">
+                Model Details
+              </Typography>
+              {/* ✅ Badge para Modelo 10 en drawer */}
+              {isModel10 && (
+                <Chip 
+                  label="Special" 
+                  size="small" 
+                  sx={{ 
+                    height: 20,
+                    fontSize: '0.65rem',
+                    bgcolor: 'primary.main', 
+                    color: 'white',
+                    fontWeight: 600 
+                  }} 
+                />
+              )}
+            </Box>
+            <IconButton onClick={() => setDrawerOpen(false)}>
+              <Close />
+            </IconButton>
+          </Box>
+          {/* Clear button for mobile */}
+          {selectedModel && (
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={handleDeselectModel}
+              startIcon={<Close />}
+              fullWidth
+              sx={{
+                mb: 2,
+                borderColor: '#e0e0e0',
+                color: '#666',
+                '&:hover': { 
+                  borderColor: '#4a7c59',
+                  color: '#4a7c59'
+                }
+              }}
+            >
+              Clear Selection
+            </Button>
+          )}
+          {selectedModel && <ModelInfoPanel />}
+        </Box>
       </Drawer>
 
       {/* Customization Modal */}

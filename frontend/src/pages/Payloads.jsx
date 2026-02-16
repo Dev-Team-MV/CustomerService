@@ -46,6 +46,7 @@ const Payloads = () => {
     date: new Date().toISOString().split('T')[0],
     amount: 0,
     status: 'pending',
+    type: '', // ✅ Agregado
     notes: ''
   })
 
@@ -78,6 +79,7 @@ const Payloads = () => {
         date: new Date(payload.date).toISOString().split('T')[0],
         amount: payload.amount,
         status: payload.status,
+        type: payload.type || '', // ✅ Agregado
         notes: payload.notes || ''
       })
     } else {
@@ -87,6 +89,7 @@ const Payloads = () => {
         date: new Date().toISOString().split('T')[0],
         amount: 0,
         status: 'pending',
+        type: '', // ✅ Agregado
         notes: ''
       })
     }
@@ -181,13 +184,30 @@ const Payloads = () => {
             Manage and track property payment records
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => handleOpenDialog()}
-        >
-          New Payload
-        </Button>
+        <Tooltip title="New Payload" placement="left">
+          <Button
+            variant="contained"
+            onClick={() => handleOpenDialog()}
+            sx={{
+              bgcolor: '#4a7c59',
+              '&:hover': { bgcolor: '#3d664a' },
+              minWidth: { xs: 48, sm: 'auto' },
+              width: { xs: 48, sm: 'auto' },
+              height: { xs: 48, sm: 'auto' },
+              p: { xs: 0, sm: '6px 16px' },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 50
+            }}
+          >
+            <Add sx={{ display: { xs: 'block', sm: 'none' }, fontSize: 24 }} />
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1 }}>
+              <Add />
+              New Payload
+            </Box>
+          </Button>
+        </Tooltip>
       </Box>
 
       <Grid container spacing={3} mb={3}>
@@ -250,6 +270,8 @@ const Payloads = () => {
         </Grid>
       </Grid>
 
+      
+      
       <Paper>
         <TableContainer>
           <Table>
@@ -259,6 +281,7 @@ const Payloads = () => {
                 <TableCell>PAYER NAME</TableCell>
                 <TableCell>DATE</TableCell>
                 <TableCell>AMOUNT</TableCell>
+                <TableCell>TYPE</TableCell>
                 <TableCell>STATUS</TableCell>
                 <TableCell>DOCS</TableCell>
                 <TableCell>ACTION</TableCell>
@@ -297,6 +320,18 @@ const Payloads = () => {
                   </TableCell>
                   <TableCell>
                     <Chip
+                      label={payload.type || 'N/A'}
+                      size="small"
+                      sx={{
+                        bgcolor: '#e3f2fd',
+                        color: '#1976d2',
+                        fontWeight: 500,
+                        textTransform: 'capitalize'
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
                       label={payload.status}
                       color={getStatusColor(payload.status)}
                       size="small"
@@ -306,7 +341,7 @@ const Payloads = () => {
                       }
                     />
                   </TableCell>
-
+      
                   <TableCell>
                     <Tooltip title={getFileUrl(payload) ? 'Download file' : 'No file attached'}>
                       <span>
@@ -319,13 +354,17 @@ const Payloads = () => {
                         </IconButton>
                       </span>
                     </Tooltip>
-                    {/* {getFileUrl(payload) && (
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                        {getFileUrl(payload).split('/').slice(-1)[0]}
-                      </Typography>
-                    )} */}
                   </TableCell>
                   <TableCell>
+                    <Tooltip title="Edit">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => handleOpenDialog(payload)}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title="Approve">
                       <span>
                         <IconButton
@@ -351,12 +390,14 @@ const Payloads = () => {
                       </span>
                     </Tooltip>
                   </TableCell>
-                 </TableRow>
+                </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
       </Paper>
+      
+      
 
       <Dialog
         open={openDialog}
@@ -473,6 +514,29 @@ const Payloads = () => {
               </TextField>
             </Grid>
 
+                        <Grid item xs={12}>
+              <TextField
+                fullWidth
+                select
+                label="Payment Type"
+                value={formData.type || ""}
+                onChange={e => setFormData({ ...formData, type: e.target.value })}
+                required
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 3,
+                    '&.Mui-focused fieldset': { borderColor: '#4a7c59' }
+                  }
+                }}
+              >
+                <MenuItem value="initial down payment">Initial Down Payment</MenuItem>
+                <MenuItem value="complementary down payment">Complementary Down Payment</MenuItem>
+                <MenuItem value="monthly payment">Monthly Payment</MenuItem>
+                <MenuItem value="additional payment">Additional Payment</MenuItem>
+                <MenuItem value="closing payment">Closing Payment</MenuItem>
+              </TextField>
+            </Grid>
+
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -504,11 +568,11 @@ const Payloads = () => {
           >
             Cancel
           </Button>
-
+          
           <Button
             variant="contained"
             onClick={handleSubmit}
-            disabled={!formData.amount}
+            disabled={!formData.amount || !formData.property || !formData.type}
             startIcon={<CheckCircle />}
             sx={{
               borderRadius: 3,

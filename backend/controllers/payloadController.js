@@ -16,10 +16,10 @@ export const getAllPayloads = async (req, res) => {
       .populate({
         path: 'property',
         populate: [
-          { path: 'lot', select: 'number section' },
+          { path: 'lot', select: 'number' },
           { path: 'model', select: 'model' },
           { path: 'facade', select: 'title' },
-          { path: 'user', select: 'firstName lastName email' }
+          { path: 'users', select: 'firstName lastName email' }
         ]
       })
       .populate('processedBy', 'firstName lastName')
@@ -40,7 +40,7 @@ export const getPayloadById = async (req, res) => {
           { path: 'lot' },
           { path: 'model' },
           { path: 'facade' },
-          { path: 'user' }
+          { path: 'users' }
         ]
       })
       .populate('processedBy', 'firstName lastName')
@@ -57,7 +57,7 @@ export const getPayloadById = async (req, res) => {
 
 export const createPayload = async (req, res) => {
   try {
-    const { property, date, amount, support, urls, status, notes, folder } = req.body
+    const { property, date, amount, support, urls, status, type, notes, folder } = req.body
     
     const propertyExists = await Property.findById(property)
     if (!propertyExists) {
@@ -67,10 +67,10 @@ export const createPayload = async (req, res) => {
     // Verificar si el usuario es admin o superadmin
     const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
     
-    // Solo los administradores pueden crear payloads con status 'cleared'
+    // Solo los administradores pueden crear payloads con status 'signed'
     // Los usuarios normales siempre crearán con status 'pending'
     let finalStatus = status || 'pending'
-    if (!isAdmin && finalStatus === 'cleared') {
+    if (!isAdmin && finalStatus === 'signed') {
       finalStatus = 'pending'
     }
 
@@ -108,11 +108,12 @@ export const createPayload = async (req, res) => {
       support,
       urls: uploadedUrls,
       status: finalStatus,
+      type: type || undefined,
       notes,
       processedBy: req.user._id
     })
     
-    if (finalStatus === 'cleared') {
+    if (finalStatus === 'signed') {
       propertyExists.pending = Math.max(0, propertyExists.pending - amount)
       
       if (propertyExists.pending === 0) {
@@ -129,7 +130,7 @@ export const createPayload = async (req, res) => {
           { path: 'lot' },
           { path: 'model' },
           { path: 'facade' },
-          { path: 'user' }
+          { path: 'users' }
         ]
       })
       .populate('processedBy')
@@ -152,9 +153,9 @@ export const updatePayload = async (req, res) => {
       // Verificar si el usuario es admin o superadmin
       const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
       
-      // Solo los administradores pueden cambiar el status a 'cleared' o 'rejected'
+      // Solo los administradores pueden cambiar el status a 'signed' o 'rejected'
       let newStatus = req.body.status !== undefined ? req.body.status : payload.status
-      if (!isAdmin && (newStatus === 'cleared' || newStatus === 'rejected')) {
+      if (!isAdmin && (newStatus === 'signed' || newStatus === 'rejected')) {
         return res.status(403).json({ 
           message: 'Only administrators can approve or reject payloads' 
         })
@@ -191,6 +192,7 @@ export const updatePayload = async (req, res) => {
       payload.support = req.body.support || payload.support
       payload.urls = updatedUrls
       payload.status = newStatus
+      if (req.body.type !== undefined) payload.type = req.body.type
       payload.notes = req.body.notes || payload.notes
       payload.processedBy = req.user._id
       
@@ -199,11 +201,11 @@ export const updatePayload = async (req, res) => {
       if (oldStatus !== updatedPayload.status || oldAmount !== updatedPayload.amount) {
         const property = await Property.findById(payload.property)
         
-        if (oldStatus === 'cleared') {
+        if (oldStatus === 'signed') {
           property.pending += oldAmount
         }
         
-        if (updatedPayload.status === 'cleared') {
+        if (updatedPayload.status === 'signed') {
           property.pending = Math.max(0, property.pending - updatedPayload.amount)
           
           if (property.pending === 0) {
@@ -220,7 +222,7 @@ export const updatePayload = async (req, res) => {
           populate: [
             { path: 'lot' },
             { path: 'model' },
-            { path: 'user' }
+            { path: 'users' }
           ]
         })
         .populate('processedBy')
@@ -239,7 +241,7 @@ export const deletePayload = async (req, res) => {
     const payload = await Payload.findById(req.params.id)
     
     if (payload) {
-      if (payload.status === 'cleared') {
+      if (payload.status === 'signed') {
         const property = await Property.findById(payload.property)
         if (property) {
           property.pending += payload.amount
@@ -260,7 +262,7 @@ export const deletePayload = async (req, res) => {
 export const getPayloadStats = async (req, res) => {
   try {
     const totalCollected = await Payload.aggregate([
-      { $match: { status: 'cleared' } },
+      { $match: { status: 'signed' } },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ])
     
@@ -290,9 +292,9 @@ export const getApprovedPayloadsThisMonth = async (req, res) => {
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
     
-    // Filtrar pagos aprobados (cleared) del mes actual
+    // Filtrar pagos aprobados (signed) del mes actual
     const payloads = await Payload.find({
-      status: 'cleared',
+      status: 'signed',
       date: {
         $gte: firstDayOfMonth,
         $lte: lastDayOfMonth
@@ -301,10 +303,10 @@ export const getApprovedPayloadsThisMonth = async (req, res) => {
       .populate({
         path: 'property',
         populate: [
-          { path: 'lot', select: 'number section size' },
+          { path: 'lot', select: 'number' },
           { path: 'model', select: 'model modelNumber price' },
           { path: 'facade', select: 'title url price' },
-          { path: 'user', select: 'firstName lastName email phoneNumber' }
+          { path: 'users', select: 'firstName lastName email phoneNumber' }
         ]
       })
       .populate('processedBy', 'firstName lastName')

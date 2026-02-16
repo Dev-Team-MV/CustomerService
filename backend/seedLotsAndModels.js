@@ -13,16 +13,12 @@ const randomPrice = (min, max) => {
 // Generar lotes del 1 al 71 (sin el 13)
 const generateLots = () => {
   const lots = []
-  const sections = ['A', 'B', 'C', 'D', 'E']
-  const sizes = ['0.25 Acres', '0.5 Acres', '0.75 Acres', '1 Acre', '1.25 Acres']
   
   for (let i = 1; i <= 71; i++) {
     if (i === 13) continue // Saltar el número 13
     
     lots.push({
       number: i.toString(),
-      section: sections[Math.floor(Math.random() * sections.length)],
-      size: sizes[Math.floor(Math.random() * sizes.length)],
       price: randomPrice(200000, 400000),
       status: 'available'
     })
@@ -82,7 +78,6 @@ const seedData = async () => {
     await Lot.insertMany(lots)
     console.log(`✅ ${lots.length} lotes creados (del 1 al 71, sin el 13)`)
     console.log(`   Precios: $200,000 - $400,000 USD`)
-    console.log(`   Secciones: A, B, C, D, E`)
     console.log(`   Estado: Todos disponibles\n`)
 
     // Crear modelos

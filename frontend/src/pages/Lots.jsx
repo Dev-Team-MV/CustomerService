@@ -20,7 +20,8 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  MenuItem
+  MenuItem,
+  Tooltip
 } from '@mui/material'
 import { Add, Edit, Delete, Landscape } from '@mui/icons-material'
 import api from '../services/api'
@@ -127,13 +128,30 @@ const Lots = () => {
             Manage availability, pricing, and details for Lake Conroe properties.
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => handleOpenDialog()}
-        >
-          Add New Lot
-        </Button>
+        <Tooltip title="Add New Lot" placement="left">
+          <Button
+            variant="contained"
+            onClick={() => handleOpenDialog()}
+            sx={{
+              bgcolor: '#4a7c59',
+              '&:hover': { bgcolor: '#3d664a' },
+              minWidth: { xs: 48, sm: 'auto' },
+              width: { xs: 48, sm: 'auto' },
+              height: { xs: 48, sm: 'auto' },
+              p: { xs: 0, sm: '6px 16px' },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 50
+            }}
+          >
+            <Add sx={{ display: { xs: 'block', sm: 'none' }, fontSize: 24 }} />
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1 }}>
+              <Add />
+              Add New Lot
+            </Box>
+          </Button>
+        </Tooltip>
       </Box>
 
       <Grid container spacing={3} mb={3}>
