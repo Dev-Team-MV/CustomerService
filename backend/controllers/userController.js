@@ -5,7 +5,7 @@ export const getAllUsers = async (req, res) => {
     const { role } = req.query
     const filter = role ? { role } : {}
     
-    const users = await User.find(filter).select('-password').populate('lots', 'number section')
+    const users = await User.find(filter).select('-password').populate('lots', 'number')
     res.json(users)
   } catch (error) {
     res.status(500).json({ message: error.message })

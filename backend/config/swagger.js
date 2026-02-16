@@ -47,8 +47,6 @@ const options = {
           properties: {
             _id: { type: 'string' },
             number: { type: 'string' },
-            section: { type: 'string' },
-            size: { type: 'string' },
             price: { type: 'number' },
             status: { type: 'string', enum: ['available', 'pending', 'sold'] },
             assignedUser: { type: 'string' },

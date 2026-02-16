@@ -30,7 +30,7 @@ export const getAllContracts = async (req, res) => {
       .populate({
         path: 'property',
         populate: [
-          { path: 'lot', select: 'number section' },
+          { path: 'lot', select: 'number' },
           { path: 'model', select: 'model modelNumber' },
           { path: 'user', select: 'firstName lastName email' }
         ]
@@ -49,7 +49,7 @@ export const getContractsByPropertyId = async (req, res) => {
       .populate({
         path: 'property',
         populate: [
-          { path: 'lot', select: 'number section' },
+          { path: 'lot', select: 'number' },
           { path: 'model', select: 'model modelNumber' },
           { path: 'user', select: 'firstName lastName email' }
         ]

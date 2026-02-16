@@ -16,7 +16,7 @@ export const getAllPayloads = async (req, res) => {
       .populate({
         path: 'property',
         populate: [
-          { path: 'lot', select: 'number section' },
+          { path: 'lot', select: 'number' },
           { path: 'model', select: 'model' },
           { path: 'facade', select: 'title' },
           { path: 'user', select: 'firstName lastName email' }
@@ -303,7 +303,7 @@ export const getApprovedPayloadsThisMonth = async (req, res) => {
       .populate({
         path: 'property',
         populate: [
-          { path: 'lot', select: 'number section size' },
+          { path: 'lot', select: 'number' },
           { path: 'model', select: 'model modelNumber price' },
           { path: 'facade', select: 'title url price' },
           { path: 'user', select: 'firstName lastName email phoneNumber' }

@@ -43,10 +43,6 @@ const router = express.Router()
  *             properties:
  *               number:
  *                 type: string
- *               section:
- *                 type: string
- *               size:
- *                 type: string
  *               price:
  *                 type: number
  *               status:
@@ -111,10 +107,6 @@ router.get('/stats', protect, getLotStats)
  *             type: object
  *             properties:
  *               number:
- *                 type: string
- *               section:
- *                 type: string
- *               size:
  *                 type: string
  *               price:
  *                 type: number

@@ -106,7 +106,7 @@ export const getAllProperties = async (req, res) => {
     if (user) filter.user = user
     
     const properties = await Property.find(filter)
-      .populate('lot', 'number section size')
+      .populate('lot', 'number price')
       .populate('model', 'model price bedrooms bathrooms sqft images blueprints balconies upgrades')
       .populate('facade', 'title url price')
       .populate('user', 'firstName lastName email phoneNumber')
@@ -134,7 +134,7 @@ export const getAllProperties = async (req, res) => {
 export const getPropertyById = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id)
-      .populate('lot', 'number section size price')
+      .populate('lot', 'number price')
       .populate('model', 'model price bedrooms bathrooms sqft images blueprints description balconies upgrades')
       .populate('facade', 'title url price')
       .populate('user', 'firstName lastName email phoneNumber birthday')
