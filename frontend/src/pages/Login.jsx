@@ -20,7 +20,8 @@ import {
   KeyboardArrowRight, 
   Home,
   Email,
-  Phone
+  Phone,
+  Gavel
 } from '@mui/icons-material'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -29,7 +30,7 @@ import 'react-phone-input-2/lib/style.css'
 import TypingFooter from '../components/Footer'
 
 const Login = () => {
-  const [loginMethod, setLoginMethod] = useState('email') // 'email' o 'phone'
+  const [loginMethod, setLoginMethod] = useState('email')
   const [email, setEmail] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [password, setPassword] = useState('')
@@ -52,38 +53,29 @@ const Login = () => {
     }
   }
 
-// Actualizar solo handleSubmit:
-const handleSubmit = async (e) => {
-  e.preventDefault()
-  setError('')
-  setLoading(true)
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
 
-  // ✅ Preparar las credenciales según el método de login
-  const credentials = loginMethod === 'email' 
-    ? email
-    : `+${phoneNumber}` // Agregar el + al número de teléfono
+    const credentials = loginMethod === 'email' 
+      ? email
+      : `+${phoneNumber}`
 
-  console.log('🔐 Login with:', { 
-    method: loginMethod, 
-    credentials: loginMethod === 'phone' ? credentials : email,
-    password: '***'
-  })
-
-  // ✅ Pasar solo el email/phone y password
-  const result = await login(credentials, password)
-  
-  if (result.success) {
-    navigate(from, { replace: true })
-  } else {
-    if (result.requiresPasswordSetup) {
-      setError('Password not set. Please check your phone for the setup link.')
+    const result = await login(credentials, password)
+    
+    if (result.success) {
+      navigate(from, { replace: true })
     } else {
-      setError(result.error || 'Login failed')
+      if (result.requiresPasswordSetup) {
+        setError('Password not set. Please check your phone for the setup link.')
+      } else {
+        setError(result.error || 'Login failed')
+      }
     }
+    
+    setLoading(false)
   }
-  
-  setLoading(false)
-}
 
   return (
     <Box
@@ -94,7 +86,7 @@ const handleSubmit = async (e) => {
         overflow: 'hidden'
       }}
     >
-      {/* Animated Background Side */}
+      {/* ✅ ANIMATED BACKGROUND SIDE - Colores brandbook */}
       <Box
         sx={{
           width: isMobile ? '0%' : '60%',
@@ -123,13 +115,13 @@ const handleSubmit = async (e) => {
             }}
           />
 
-          {/* Animated Gradient Overlay */}
+          {/* ✅ GRADIENT OVERLAY - Brandbook colors */}
           <motion.div
             animate={{
               background: [
-                'linear-gradient(135deg, rgba(74, 124, 89, 0.9) 0%, rgba(26, 35, 46, 0.85) 100%)',
-                'linear-gradient(135deg, rgba(74, 124, 89, 0.85) 0%, rgba(26, 35, 46, 0.9) 100%)',
-                'linear-gradient(135deg, rgba(74, 124, 89, 0.9) 0%, rgba(26, 35, 46, 0.85) 100%)'
+                'linear-gradient(135deg, rgba(51, 63, 31, 0.92) 0%, rgba(140, 165, 81, 0.88) 100%)',
+                'linear-gradient(135deg, rgba(140, 165, 81, 0.88) 0%, rgba(51, 63, 31, 0.92) 100%)',
+                'linear-gradient(135deg, rgba(51, 63, 31, 0.92) 0%, rgba(140, 165, 81, 0.88) 100%)'
               ]
             }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
@@ -142,7 +134,7 @@ const handleSubmit = async (e) => {
             }}
           />
 
-          {/* Floating Content */}
+          {/* ✅ FLOATING CONTENT */}
           <Box
             sx={{
               position: 'absolute',
@@ -153,7 +145,7 @@ const handleSubmit = async (e) => {
               color: 'white',
               width: '80%',
               zIndex: 1,
-              mt:8
+              mt: 8
             }}
           >
             <motion.div
@@ -172,48 +164,51 @@ const handleSubmit = async (e) => {
                 }}
               >
                 <Box
-                component="img"
-                src="/images/logos/Logo_LakewoodOaks-05.png"
-                alt="Lakewood Oaks on Lake Conroe"
-                sx={{
-                  width: '90%',
-                  // maxWidth: '500px',
-                  height: 'auto',
-                  mb: 3,
-                  filter: 'brightness(0) invert(1)',
-                  objectFit: 'contain'
-                }}
-              />
-
-              </motion.div>
-              
-                              <Box
                   component="img"
                   src="/images/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png"
-                  alt="Michelangelo Del Valle"
+                  alt="Lakewood Oaks on Lake Conroe"
                   sx={{
-                    width: '40%',
+                    width: '90%',
                     height: 'auto',
+                    mb: 3,
                     filter: 'brightness(0) invert(1)',
                     objectFit: 'contain'
                   }}
                 />
+              </motion.div>
+              
+              <Box
+                component="img"
+                src="/images/logos/Logo_LakewoodOaks-05.png"
+                alt="Michelangelo Del Valle"
+                sx={{
+                  width: '40%',
+                  height: 'auto',
+                  filter: 'brightness(0) invert(1)',
+                  objectFit: 'contain'
+                }}
+              />
+              
+              {/* ✅ LÍNEA DECORATIVA - Color brandbook */}
               <Box
                 sx={{
                   width: '120px',
                   height: '2px',
-                  bgcolor: 'white',
+                  bgcolor: '#8CA551',
                   margin: '0 auto',
-                  mb: 3
+                  my: 3,
+                  opacity: 0.9
                 }}
               />
+              
               <Typography 
                 variant="h6" 
                 fontWeight="300"
                 sx={{ 
-                  opacity: 0.9,
+                  opacity: 0.95,
                   letterSpacing: '2px',
-                  fontSize: { xs: '1rem', md: '1.25rem' }
+                  fontSize: { xs: '1rem', md: '1.25rem' },
+                  fontFamily: '"Poppins", sans-serif'
                 }}
               >
                 Resort Lifestyle
@@ -221,7 +216,7 @@ const handleSubmit = async (e) => {
             </motion.div>
           </Box>
 
-          {/* Animated Lines Decoration */}
+          {/* ✅ ANIMATED LINE - Color brandbook */}
           <motion.div
             animate={{ 
               width: ['0%', '30%', '0%']
@@ -236,21 +231,21 @@ const handleSubmit = async (e) => {
               bottom: '20%',
               left: 0,
               height: '2px',
-              background: 'white',
-              opacity: 0.5
+              background: '#8CA551',
+              opacity: 0.6
             }}
           />
         </motion.div>
       </Box>
 
-      {/* Form Side */}
+      {/* ✅ FORM SIDE */}
       <Box
         sx={{
           width: isMobile ? '100%' : '40%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          bgcolor: 'white',
+          bgcolor: '#fafafa',
           position: 'relative',
           p: 4
         }}
@@ -261,15 +256,16 @@ const handleSubmit = async (e) => {
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            {/* Header */}
+            {/* ✅ HEADER - Colores brandbook */}
             <Box sx={{ mb: 6 }}>
               <Typography 
                 variant="h4" 
                 fontWeight="300"
                 sx={{ 
                   mb: 1,
-                  color: '#1a1a1a',
-                  letterSpacing: '1px'
+                  color: '#706f6f',
+                  letterSpacing: '1px',
+                  fontFamily: '"Poppins", sans-serif'
                 }}
               >
                 Welcome
@@ -279,8 +275,9 @@ const handleSubmit = async (e) => {
                 fontWeight="700"
                 sx={{ 
                   mb: 2,
-                  color: '#4a7c59',
-                  letterSpacing: '1px'
+                  color: '#333F1F',
+                  letterSpacing: '1px',
+                  fontFamily: '"Poppins", sans-serif'
                 }}
               >
                 Sign In
@@ -293,7 +290,7 @@ const handleSubmit = async (e) => {
                 <Box
                   sx={{
                     height: '3px',
-                    background: 'linear-gradient(90deg, #4a7c59, #8bc34a)'
+                    background: 'linear-gradient(90deg, #333F1F, #8CA551)'
                   }}
                 />
               </motion.div>
@@ -306,14 +303,23 @@ const handleSubmit = async (e) => {
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                 >
-                  <Alert severity="error" sx={{ mb: 3, borderRadius: 0 }}>
+                  <Alert 
+                    severity="error" 
+                    sx={{ 
+                      mb: 3, 
+                      borderRadius: 3,
+                      border: '1px solid #d32f2f',
+                      bgcolor: '#ffebee',
+                      fontFamily: '"Poppins", sans-serif'
+                    }}
+                  >
                     {error}
                   </Alert>
                 </motion.div>
               </AnimatePresence>
             )}
 
-            {/* Login Method Toggle */}
+            {/* ✅ LOGIN METHOD TOGGLE - Brandbook colors */}
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
               <ToggleButtonGroup
                 value={loginMethod}
@@ -322,15 +328,22 @@ const handleSubmit = async (e) => {
                 aria-label="login method"
                 sx={{
                   '& .MuiToggleButton-root': {
-                    borderRadius: 0,
+                    borderRadius: 3,
                     border: '2px solid #e0e0e0',
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 600,
+                    letterSpacing: '0.5px',
+                    color: '#706f6f',
                     '&.Mui-selected': {
-                      bgcolor: '#4a7c59',
+                      bgcolor: '#333F1F',
                       color: 'white',
-                      borderColor: '#4a7c59',
+                      borderColor: '#333F1F',
                       '&:hover': {
-                        bgcolor: '#3d664a'
+                        bgcolor: '#4a5d3a'
                       }
+                    },
+                    '&:hover': {
+                      bgcolor: 'rgba(51, 63, 31, 0.05)'
                     }
                   }
                 }}
@@ -346,9 +359,8 @@ const handleSubmit = async (e) => {
               </ToggleButtonGroup>
             </Box>
 
-            {/* Form */}
+            {/* ✅ FORM */}
             <Box component="form" onSubmit={handleSubmit}>
-              {/* Email or Phone Input */}
               <AnimatePresence mode="wait">
                 {loginMethod === 'email' ? (
                   <motion.div
@@ -379,15 +391,24 @@ const handleSubmit = async (e) => {
                         sx={{
                           mb: 3,
                           '& .MuiOutlinedInput-root': {
-                            borderRadius: 0,
+                            borderRadius: 3,
+                            bgcolor: 'white',
+                            fontFamily: '"Poppins", sans-serif',
                             '& fieldset': {
                               borderWidth: '2px',
-                              borderColor: focusedField === 'email' ? '#4a7c59' : '#e0e0e0',
+                              borderColor: focusedField === 'email' ? '#333F1F' : '#e0e0e0',
                               transition: 'all 0.3s'
+                            },
+                            '&:hover fieldset': {
+                              borderColor: '#8CA551'
                             }
                           },
-                          '& .MuiInputLabel-root.Mui-focused': {
-                            color: '#4a7c59'
+                          '& .MuiInputLabel-root': {
+                            fontFamily: '"Poppins", sans-serif',
+                            color: '#706f6f',
+                            '&.Mui-focused': {
+                              color: '#333F1F'
+                            }
                           }
                         }}
                       />
@@ -420,20 +441,21 @@ const handleSubmit = async (e) => {
                           width: '100%',
                           height: '56px',
                           fontSize: '16px',
-                          borderRadius: 0,
-                          border: `2px solid ${focusedField === 'phone' ? '#4a7c59' : '#e0e0e0'}`,
-                          transition: 'all 0.3s'
+                          borderRadius: '12px',
+                          border: `2px solid ${focusedField === 'phone' ? '#333F1F' : '#e0e0e0'}`,
+                          transition: 'all 0.3s',
+                          backgroundColor: 'white',
+                          fontFamily: '"Poppins", sans-serif'
                         }}
                         buttonStyle={{
-                          borderRadius: 0,
-                          border: `2px solid ${focusedField === 'phone' ? '#4a7c59' : '#e0e0e0'}`,
-                          borderRight: 'none'
+                          borderRadius: '12px 0 0 12px',
+                          border: `2px solid ${focusedField === 'phone' ? '#333F1F' : '#e0e0e0'}`,
+                          borderRight: 'none',
+                          backgroundColor: 'white'
                         }}
                         dropdownStyle={{
-                          borderRadius: 0
-                        }}
-                        searchStyle={{
-                          borderRadius: 0
+                          borderRadius: '12px',
+                          fontFamily: '"Poppins", sans-serif'
                         }}
                       />
                     </Box>
@@ -441,7 +463,7 @@ const handleSubmit = async (e) => {
                 )}
               </AnimatePresence>
 
-              {/* Password Input */}
+              {/* ✅ PASSWORD INPUT */}
               <motion.div
                 animate={{ 
                   y: focusedField === 'password' ? -5 : 0
@@ -461,17 +483,26 @@ const handleSubmit = async (e) => {
                   onFocus={() => setFocusedField('password')}
                   onBlur={() => setFocusedField(null)}
                   sx={{
-                    mb: 4,
+                    mb: 2,
                     '& .MuiOutlinedInput-root': {
-                      borderRadius: 0,
+                      borderRadius: 3,
+                      bgcolor: 'white',
+                      fontFamily: '"Poppins", sans-serif',
                       '& fieldset': {
                         borderWidth: '2px',
-                        borderColor: focusedField === 'password' ? '#4a7c59' : '#e0e0e0',
+                        borderColor: focusedField === 'password' ? '#333F1F' : '#e0e0e0',
                         transition: 'all 0.3s'
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#8CA551'
                       }
                     },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: '#4a7c59'
+                    '& .MuiInputLabel-root': {
+                      fontFamily: '"Poppins", sans-serif',
+                      color: '#706f6f',
+                      '&.Mui-focused': {
+                        color: '#333F1F'
+                      }
                     }
                   }}
                   InputProps={{
@@ -480,6 +511,7 @@ const handleSubmit = async (e) => {
                         <IconButton
                           onClick={() => setShowPassword(!showPassword)}
                           edge="end"
+                          sx={{ color: '#706f6f' }}
                         >
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
@@ -489,6 +521,57 @@ const handleSubmit = async (e) => {
                 />
               </motion.div>
 
+              {/* ✅ TÉRMINOS Y CONDICIONES LINK */}
+              <Box 
+                sx={{ 
+                  mb: 3, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 1,
+                  justifyContent: 'center'
+                }}
+              >
+                <Gavel sx={{ fontSize: 16, color: '#706f6f' }} />
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: '#706f6f',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
+                >
+                  By signing in, you agree to our{' '}
+                  <Link
+                    component={RouterLink}
+                    to="/terms-and-conditions"
+                    sx={{
+                      color: '#333F1F',
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                      position: 'relative',
+                      '&:hover': {
+                        color: '#8CA551',
+                        '&::after': {
+                          width: '100%'
+                        }
+                      },
+                      '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        bottom: -2,
+                        left: 0,
+                        width: 0,
+                        height: '2px',
+                        bgcolor: '#8CA551',
+                        transition: 'width 0.3s ease'
+                      }
+                    }}
+                  >
+                    Terms & Conditions
+                  </Link>
+                </Typography>
+              </Box>
+
+              {/* ✅ SUBMIT BUTTON - Brandbook style */}
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -501,28 +584,53 @@ const handleSubmit = async (e) => {
                   endIcon={<KeyboardArrowRight />}
                   sx={{
                     py: 1.8,
-                    borderRadius: 0,
-                    bgcolor: '#1a1a1a',
+                    borderRadius: 3,
+                    bgcolor: '#333F1F',
                     fontSize: '0.95rem',
                     fontWeight: 600,
                     textTransform: 'uppercase',
                     letterSpacing: '2px',
+                    fontFamily: '"Poppins", sans-serif',
+                    boxShadow: '0 4px 12px rgba(51, 63, 31, 0.3)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: '-100%',
+                      width: '100%',
+                      height: '100%',
+                      bgcolor: '#8CA551',
+                      transition: 'left 0.4s ease',
+                      zIndex: 0
+                    },
                     '&:hover': {
-                      bgcolor: '#2d2d2d',
+                      bgcolor: '#333F1F',
+                      boxShadow: '0 8px 20px rgba(51, 63, 31, 0.4)',
+                      '&::before': {
+                        left: 0
+                      }
                     },
                     '&:disabled': {
-                      bgcolor: '#ccc'
+                      bgcolor: '#e0e0e0',
+                      color: '#9e9e9e'
+                    },
+                    '& .MuiButton-endIcon': {
+                      position: 'relative',
+                      zIndex: 1
                     }
                   }}
                 >
-                  {loading ? 'Signing in...' : 'Sign In'}
+                  <span style={{ position: 'relative', zIndex: 1 }}>
+                    {loading ? 'Signing in...' : 'Sign In'}
+                  </span>
                 </Button>
               </motion.div>
             </Box>
           </motion.div>
-        {/* {!isMobile && <TypingFooter variant="dark" />} */}
         </Box>
-      <TypingFooter variant="dark" />
+        <TypingFooter variant="dark" />
       </Box>
     </Box>
   )

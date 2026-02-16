@@ -537,39 +537,51 @@ const CreateModelModal = ({
         },
       }}
     >
-      <DialogTitle sx={{ pb: 2, px: { xs: 2, md: 3 } }}>
-        <Box display="flex" alignItems="center" gap={2}>
-          <Box
-            sx={{
-              width: { xs: 40, md: 48 },
-              height: { xs: 40, md: 48 },
-              borderRadius: 3,
-              background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <Home sx={{ color: 'white', fontSize: { xs: 20, md: 24 } }} />
-          </Box>
-          <Box flex={1} minWidth={0}>
-            <Typography 
-              variant="h6" 
-              fontWeight={700} 
-              fontSize={{ xs: "1rem", md: "1.25rem" }}
-              noWrap
-            >
-              {selectedModel ? "Edit Model" : "Add New Model"}
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#6c757d' }}>
-              Total Images: {getTotalImagesCount()}
-            </Typography>
-          </Box>
-          <IconButton onClick={handleClose} size="small">
-            <Close />
-          </IconButton>
-        </Box>
-      </DialogTitle>
+      {/* ✅ DIALOG TITLE - Brandbook colors */}
+  {/* ✅ DIALOG TITLE - Mismo estilo que Residents */}
+  <DialogTitle sx={{ pb: 2, px: { xs: 2, md: 3 } }}>
+    <Box display="flex" alignItems="center" gap={2}>
+      <Box
+        sx={{
+          width: { xs: 44, md: 52 },
+          height: { xs: 44, md: 52 },
+          borderRadius: 3,
+          bgcolor: "#333F1F",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 4px 12px rgba(51, 63, 31, 0.2)",
+        }}
+      >
+        <Home sx={{ color: "white", fontSize: { xs: 24, md: 28 } }} />
+      </Box>
+      <Box flex={1} minWidth={0}>
+        <Typography 
+          variant="h6" 
+          fontWeight={700} 
+          fontSize={{ xs: "1.1rem", md: "1.35rem" }}
+          noWrap
+          sx={{ 
+            color: "#333F1F",
+            fontFamily: '"Poppins", sans-serif',
+            letterSpacing: '0.5px'
+          }}
+        >
+          {selectedModel ? "Edit Model" : "Add New Model"}
+        </Typography>
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            color: "#706f6f",
+            fontFamily: '"Poppins", sans-serif',
+            fontSize: '0.85rem'
+          }}
+        >
+          Total Images: <strong>{getTotalImagesCount()}</strong>
+        </Typography>
+      </Box>
+    </Box>
+  </DialogTitle>
     
       <DialogContent sx={{ p: 0, overflow: "hidden" }}>
         <Box 
@@ -578,7 +590,7 @@ const CreateModelModal = ({
           flexDirection={{ xs: "column", md: "row" }}
         >
           {/* LEFT SIDE - Form */}
-          <Box
+<Box
             sx={{
               width: { xs: "100%", md: "50%" },
               p: { xs: 2, md: 3 },
@@ -586,29 +598,58 @@ const CreateModelModal = ({
               borderRight: { xs: "none", md: "1px solid #e0e0e0" },
               borderBottom: { xs: "1px solid #e0e0e0", md: "none" },
               maxHeight: { xs: "45vh", md: "100%" },
+              bgcolor: '#fafafa',
               "&::-webkit-scrollbar": {
                 width: "8px",
               },
               "&::-webkit-scrollbar-thumb": {
-                backgroundColor: "rgba(0,0,0,0.2)",
+                backgroundColor: "rgba(51, 63, 31, 0.2)",
                 borderRadius: "4px",
               },
             }}
           >
             <Grid container spacing={{ xs: 1.5, md: 2.5 }}>
-              {/* Basic Info */}
+              {/* ✅ BASIC INFO SECTION */}
               <Grid item xs={12}>
-                <Typography
-                  variant="h6"
-                  fontSize={{ xs: "1rem", md: "1.25rem" }}
-                  fontWeight="bold"
-                  gutterBottom
-                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                    mb: 2,
+                    pb: 2,
+                    borderBottom: '2px solid rgba(140, 165, 81, 0.2)'
+                  }}
                 >
-                  <Home fontSize="small" /> Basic Information
-                </Typography>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(51, 63, 31, 0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <Home sx={{ fontSize: 22, color: '#333F1F' }} />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    fontSize={{ xs: "1rem", md: "1.15rem" }}
+                    fontWeight={700}
+                    sx={{ 
+                      color: '#333F1F',
+                      fontFamily: '"Poppins", sans-serif',
+                      letterSpacing: '0.5px'
+                    }}
+                  >
+                    Basic Information
+                  </Typography>
+                </Box>
               </Grid>
     
+              {/* ✅ TEXT FIELDS - Brandbook styling */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -619,6 +660,26 @@ const CreateModelModal = ({
                     setFormData({ ...formData, model: e.target.value })
                   }
                   required
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      fontFamily: '"Poppins", sans-serif',
+                      bgcolor: 'white',
+                      "&.Mui-focused fieldset": { 
+                        borderColor: "#333F1F",
+                        borderWidth: "2px"
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#8CA551"
+                      }
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontFamily: '"Poppins", sans-serif',
+                      "&.Mui-focused": {
+                        color: "#333F1F"
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -630,6 +691,26 @@ const CreateModelModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, modelNumber: e.target.value })
                   }
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      fontFamily: '"Poppins", sans-serif',
+                      bgcolor: 'white',
+                      "&.Mui-focused fieldset": { 
+                        borderColor: "#333F1F",
+                        borderWidth: "2px"
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#8CA551"
+                      }
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontFamily: '"Poppins", sans-serif',
+                      "&.Mui-focused": {
+                        color: "#333F1F"
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={6} sm={4}>
@@ -648,8 +729,28 @@ const CreateModelModal = ({
                   required
                   InputProps={{
                     startAdornment: (
-                      <Typography sx={{ mr: 0.5, fontSize: "0.875rem" }}>$</Typography>
+                      <Typography sx={{ mr: 0.5, fontSize: "0.875rem", color: '#333F1F', fontWeight: 600 }}>$</Typography>
                     ),
+                  }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      fontFamily: '"Poppins", sans-serif',
+                      bgcolor: 'white',
+                      "&.Mui-focused fieldset": { 
+                        borderColor: "#333F1F",
+                        borderWidth: "2px"
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#8CA551"
+                      }
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontFamily: '"Poppins", sans-serif',
+                      "&.Mui-focused": {
+                        color: "#333F1F"
+                      }
+                    }
                   }}
                 />
               </Grid>
@@ -666,6 +767,26 @@ const CreateModelModal = ({
                       stories: Number(e.target.value),
                     })
                   }
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      fontFamily: '"Poppins", sans-serif',
+                      bgcolor: 'white',
+                      "&.Mui-focused fieldset": { 
+                        borderColor: "#333F1F",
+                        borderWidth: "2px"
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#8CA551"
+                      }
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontFamily: '"Poppins", sans-serif',
+                      "&.Mui-focused": {
+                        color: "#333F1F"
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -678,10 +799,30 @@ const CreateModelModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      fontFamily: '"Poppins", sans-serif',
+                      bgcolor: 'white',
+                      "&.Mui-focused fieldset": { 
+                        borderColor: "#333F1F",
+                        borderWidth: "2px"
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#8CA551"
+                      }
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontFamily: '"Poppins", sans-serif',
+                      "&.Mui-focused": {
+                        color: "#333F1F"
+                      }
+                    }
+                  }}
                 >
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="draft">Draft</MenuItem>
-                  <MenuItem value="inactive">Inactive</MenuItem>
+                  <MenuItem value="active" sx={{ fontFamily: '"Poppins", sans-serif' }}>Active</MenuItem>
+                  <MenuItem value="draft" sx={{ fontFamily: '"Poppins", sans-serif' }}>Draft</MenuItem>
+                  <MenuItem value="inactive" sx={{ fontFamily: '"Poppins", sans-serif' }}>Inactive</MenuItem>
                 </TextField>
               </Grid>
               <Grid item xs={4}>
@@ -698,6 +839,26 @@ const CreateModelModal = ({
                     })
                   }
                   required
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      fontFamily: '"Poppins", sans-serif',
+                      bgcolor: 'white',
+                      "&.Mui-focused fieldset": { 
+                        borderColor: "#333F1F",
+                        borderWidth: "2px"
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#8CA551"
+                      }
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontFamily: '"Poppins", sans-serif',
+                      "&.Mui-focused": {
+                        color: "#333F1F"
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={4}>
@@ -714,6 +875,26 @@ const CreateModelModal = ({
                     })
                   }
                   required
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      fontFamily: '"Poppins", sans-serif',
+                      bgcolor: 'white',
+                      "&.Mui-focused fieldset": { 
+                        borderColor: "#333F1F",
+                        borderWidth: "2px"
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#8CA551"
+                      }
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontFamily: '"Poppins", sans-serif',
+                      "&.Mui-focused": {
+                        color: "#333F1F"
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={4}>
@@ -727,6 +908,26 @@ const CreateModelModal = ({
                     setFormData({ ...formData, sqft: Number(e.target.value) })
                   }
                   required
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      fontFamily: '"Poppins", sans-serif',
+                      bgcolor: 'white',
+                      "&.Mui-focused fieldset": { 
+                        borderColor: "#333F1F",
+                        borderWidth: "2px"
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#8CA551"
+                      }
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontFamily: '"Poppins", sans-serif',
+                      "&.Mui-focused": {
+                        color: "#333F1F"
+                      }
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -740,24 +941,89 @@ const CreateModelModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      fontFamily: '"Poppins", sans-serif',
+                      bgcolor: 'white',
+                      "&.Mui-focused fieldset": { 
+                        borderColor: "#333F1F",
+                        borderWidth: "2px"
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#8CA551"
+                      }
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontFamily: '"Poppins", sans-serif',
+                      "&.Mui-focused": {
+                        color: "#333F1F"
+                      }
+                    }
+                  }}
                 />
               </Grid>
     
               <Grid item xs={12}>
-                <Divider sx={{ my: { xs: 1, md: 2 } }} />
+                <Divider sx={{ my: { xs: 1, md: 2 }, borderColor: 'rgba(112, 111, 111, 0.2)' }} />
               </Grid>
     
-              {/* Pricing Options */}
+              {/* ✅ PRICING OPTIONS */}
               <Grid item xs={12}>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom fontSize={{ xs: "0.9rem", md: "1rem" }}>
-                  Pricing Options
-                </Typography>
-                <Alert severity="info" sx={{ mb: 1, py: 0.5, fontSize: "0.75rem" }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                    mb: 1
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(140, 165, 81, 0.12)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <UpgradeIcon sx={{ fontSize: 22, color: '#8CA551' }} />
+                  </Box>
+                  <Typography 
+                    variant="subtitle1" 
+                    fontWeight={700} 
+                    fontSize={{ xs: "0.95rem", md: "1.05rem" }}
+                    sx={{ 
+                      color: '#333F1F',
+                      fontFamily: '"Poppins", sans-serif',
+                      letterSpacing: '0.5px'
+                    }}
+                  >
+                    Pricing Options
+                  </Typography>
+                </Box>
+                <Alert 
+                  severity="info" 
+                  sx={{ 
+                    mb: 2, 
+                    py: 0.5, 
+                    fontSize: "0.75rem",
+                    borderRadius: 2,
+                    bgcolor: 'rgba(140, 165, 81, 0.08)',
+                    border: '1px solid rgba(140, 165, 81, 0.3)',
+                    fontFamily: '"Poppins", sans-serif',
+                    "& .MuiAlert-icon": {
+                      color: "#8CA551"
+                    }
+                  }}
+                >
                   Enable options to create different configurations
                 </Alert>
               </Grid>
     
-              {/* Balcony */}
+              {/* ✅ BALCONY CHECKBOX - Brandbook */}
               <Grid item xs={8}>
                 <FormControlLabel
                   control={
@@ -773,12 +1039,24 @@ const CreateModelModal = ({
                           setExpandedAccordions((prev) => ({ ...prev, balcony: true }));
                         }
                       }}
+                      sx={{
+                        '&.Mui-checked': {
+                          color: '#8CA551'
+                        }
+                      }}
                     />
                   }
                   label={
                     <Box display="flex" alignItems="center" gap={0.5}>
-                      <Balcony fontSize="small" />
-                      <Typography fontWeight="600" fontSize={{ xs: "0.875rem", md: "1rem" }}>
+                      <Balcony fontSize="small" sx={{ color: formData.hasBalcony ? '#8CA551' : '#706f6f' }} />
+                      <Typography 
+                        fontWeight={600} 
+                        fontSize={{ xs: "0.875rem", md: "0.95rem" }}
+                        sx={{ 
+                          color: formData.hasBalcony ? '#333F1F' : '#706f6f',
+                          fontFamily: '"Poppins", sans-serif'
+                        }}
+                      >
                         Balcony
                       </Typography>
                     </Box>
@@ -799,14 +1077,35 @@ const CreateModelModal = ({
                     required
                     InputProps={{
                       startAdornment: (
-                        <Typography sx={{ mr: 0.5, fontSize: "0.75rem" }}>$</Typography>
+                        <Typography sx={{ mr: 0.5, fontSize: "0.75rem", color: '#8CA551', fontWeight: 600 }}>$</Typography>
                       ),
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 2,
+                        fontFamily: '"Poppins", sans-serif',
+                        bgcolor: 'white',
+                        borderColor: '#8CA551',
+                        "&.Mui-focused fieldset": { 
+                          borderColor: "#8CA551",
+                          borderWidth: "2px"
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#8CA551"
+                        }
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontFamily: '"Poppins", sans-serif',
+                        "&.Mui-focused": {
+                          color: "#8CA551"
+                        }
+                      }
                     }}
                   />
                 </Grid>
               )}
     
-              {/* Upgrade */}
+              {/* ✅ UPGRADE CHECKBOX - Brandbook */}
               <Grid item xs={8}>
                 <FormControlLabel
                   control={
@@ -822,12 +1121,24 @@ const CreateModelModal = ({
                           setExpandedAccordions((prev) => ({ ...prev, upgrade: true }));
                         }
                       }}
+                      sx={{
+                        '&.Mui-checked': {
+                          color: '#9c27b0'
+                        }
+                      }}
                     />
                   }
                   label={
                     <Box display="flex" alignItems="center" gap={0.5}>
-                      <UpgradeIcon fontSize="small" />
-                      <Typography fontWeight="600" fontSize={{ xs: "0.875rem", md: "1rem" }}>
+                      <UpgradeIcon fontSize="small" sx={{ color: formData.hasUpgrade ? '#9c27b0' : '#706f6f' }} />
+                      <Typography 
+                        fontWeight={600} 
+                        fontSize={{ xs: "0.875rem", md: "0.95rem" }}
+                        sx={{ 
+                          color: formData.hasUpgrade ? '#333F1F' : '#706f6f',
+                          fontFamily: '"Poppins", sans-serif'
+                        }}
+                      >
                         Upgrade
                       </Typography>
                     </Box>
@@ -848,14 +1159,34 @@ const CreateModelModal = ({
                     required
                     InputProps={{
                       startAdornment: (
-                        <Typography sx={{ mr: 0.5, fontSize: "0.75rem" }}>$</Typography>
+                        <Typography sx={{ mr: 0.5, fontSize: "0.75rem", color: '#9c27b0', fontWeight: 600 }}>$</Typography>
                       ),
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 2,
+                        fontFamily: '"Poppins", sans-serif',
+                        bgcolor: 'white',
+                        "&.Mui-focused fieldset": { 
+                          borderColor: "#9c27b0",
+                          borderWidth: "2px"
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#9c27b0"
+                        }
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontFamily: '"Poppins", sans-serif',
+                        "&.Mui-focused": {
+                          color: "#9c27b0"
+                        }
+                      }
                     }}
                   />
                 </Grid>
               )}
     
-              {/* Storage */}
+              {/* ✅ STORAGE CHECKBOX - Brandbook */}
               <Grid item xs={8}>
                 <FormControlLabel
                   control={
@@ -871,12 +1202,24 @@ const CreateModelModal = ({
                           setExpandedAccordions((prev) => ({ ...prev, storage: true }));
                         }
                       }}
+                      sx={{
+                        '&.Mui-checked': {
+                          color: '#4caf50'
+                        }
+                      }}
                     />
                   }
                   label={
                     <Box display="flex" alignItems="center" gap={0.5}>
-                      <StorageIcon fontSize="small" />
-                      <Typography fontWeight="600" fontSize={{ xs: "0.875rem", md: "1rem" }}>
+                      <StorageIcon fontSize="small" sx={{ color: formData.hasStorage ? '#4caf50' : '#706f6f' }} />
+                      <Typography 
+                        fontWeight={600} 
+                        fontSize={{ xs: "0.875rem", md: "0.95rem" }}
+                        sx={{ 
+                          color: formData.hasStorage ? '#333F1F' : '#706f6f',
+                          fontFamily: '"Poppins", sans-serif'
+                        }}
+                      >
                         Storage
                       </Typography>
                     </Box>
@@ -897,37 +1240,81 @@ const CreateModelModal = ({
                     required
                     InputProps={{
                       startAdornment: (
-                        <Typography sx={{ mr: 0.5, fontSize: "0.75rem" }}>$</Typography>
+                        <Typography sx={{ mr: 0.5, fontSize: "0.75rem", color: '#4caf50', fontWeight: 600 }}>$</Typography>
                       ),
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 2,
+                        fontFamily: '"Poppins", sans-serif',
+                        bgcolor: 'white',
+                        "&.Mui-focused fieldset": { 
+                          borderColor: "#4caf50",
+                          borderWidth: "2px"
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#4caf50"
+                        }
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontFamily: '"Poppins", sans-serif',
+                        "&.Mui-focused": {
+                          color: "#4caf50"
+                        }
+                      }
                     }}
                   />
                 </Grid>
               )}
     
-              {/* Price Summary */}
+              {/* ✅ PRICE SUMMARY - Brandbook */}
               {(formData.hasBalcony || formData.hasUpgrade || formData.hasStorage) && (
                 <Grid item xs={12}>
                   <Paper
                     sx={{
-                      p: { xs: 1.5, md: 2 },
-                      bgcolor: "success.50",
-                      border: "1px solid",
-                      borderColor: "success.200",
+                      p: { xs: 2, md: 2.5 },
+                      background: 'linear-gradient(135deg, rgba(51, 63, 31, 0.05) 0%, rgba(140, 165, 81, 0.08) 100%)',
+                      border: "2px solid rgba(140, 165, 81, 0.25)",
+                      borderRadius: 3
                     }}
                   >
-                    <Typography variant="caption" fontWeight="bold" gutterBottom display="block">
+                    <Typography 
+                      variant="caption" 
+                      fontWeight={700} 
+                      gutterBottom 
+                      display="block"
+                      sx={{
+                        color: '#333F1F',
+                        fontFamily: '"Poppins", sans-serif',
+                        letterSpacing: '1px',
+                        textTransform: 'uppercase',
+                        fontSize: '0.7rem'
+                      }}
+                    >
                       Price Range Summary
                     </Typography>
                     <Box display="flex" justifyContent="space-between" mb={0.5} flexWrap="wrap" gap={1}>
-                      <Typography variant="caption">
-                        Min: <strong>${formData.price.toLocaleString()}</strong>
+                      <Typography 
+                        variant="caption"
+                        sx={{ fontFamily: '"Poppins", sans-serif', color: '#706f6f' }}
+                      >
+                        Min: <strong style={{ color: '#333F1F' }}>${formData.price.toLocaleString()}</strong>
                       </Typography>
-                      <Typography variant="caption">
-                        Max: <strong>${calculateMaxPrice().toLocaleString()}</strong>
+                      <Typography 
+                        variant="caption"
+                        sx={{ fontFamily: '"Poppins", sans-serif', color: '#706f6f' }}
+                      >
+                        Max: <strong style={{ color: '#8CA551' }}>${calculateMaxPrice().toLocaleString()}</strong>
                       </Typography>
                     </Box>
-                    <Typography variant="caption" color="text.secondary">
-                      <strong>{calculatePricingCombinations()}</strong> combinations
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        color: '#706f6f',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      <strong style={{ color: '#333F1F' }}>{calculatePricingCombinations()}</strong> combinations available
                     </Typography>
                   </Paper>
                 </Grid>
@@ -946,6 +1333,7 @@ const CreateModelModal = ({
             }}
           >
             {/* Add Image Control */}
+            {/* Upload Controls */}
             <Box
               sx={{
                 p: { xs: 1.5, md: 2 },
@@ -953,7 +1341,20 @@ const CreateModelModal = ({
                 bgcolor: "white",
               }}
             >
-              <Typography variant="caption" fontWeight="bold" gutterBottom display="block">
+              <Typography 
+                variant="caption" 
+                fontWeight={700} 
+                gutterBottom 
+                display="block"
+                sx={{
+                  color: '#333F1F',
+                  fontFamily: '"Poppins", sans-serif',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase',
+                  fontSize: '0.7rem',
+                  mb: 1
+                }}
+              >
                 Add Images
               </Typography>
               <Grid container spacing={0.5}>
@@ -1026,7 +1427,17 @@ const CreateModelModal = ({
                     size="small"
                     fullWidth
                     startIcon={<CloudUpload />}
-                    sx={{ height: "40px", fontSize: "0.75rem" }}
+                    sx={{ 
+                      height: "40px", 
+                      fontSize: "0.75rem",
+                      borderRadius: 2,
+                      bgcolor: '#333F1F',
+                      fontFamily: '"Poppins", sans-serif',
+                      fontWeight: 600,
+                      '&:hover': {
+                        bgcolor: '#4a5d3a'
+                      }
+                    }}
                   >
                     {uploadingImage ? "..." : "Upload"}
                     <input
@@ -1252,43 +1663,83 @@ const CreateModelModal = ({
         </Box>
       </DialogContent>
     
-      <DialogActions sx={{ px: { xs: 2, md: 3 }, py: 1.5, borderTop: "1px solid #e0e0e0", gap: 1 }}>
-        <Button
-          onClick={handleClose}
-          size="small"
-          variant="outlined"
-          sx={{
-            borderRadius: 2,
-            textTransform: 'none',
-            fontWeight: 600,
-            px: 2,
-            fontSize: "0.875rem"
-          }}
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          size="small"
-          startIcon={selectedModel ? <Edit fontSize="small" /> : <Add fontSize="small" />}
-          sx={{
-            borderRadius: 2,
-            background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
-            color: 'white',
-            fontWeight: 700,
-            textTransform: 'none',
-            px: 3,
-            fontSize: "0.875rem",
-            boxShadow: '0 4px 12px rgba(74, 124, 89, 0.3)',
-            '&:hover': {
-              background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
-            }
-          }}
-        >
-          {selectedModel ? "Update" : "Create"}
-        </Button>
-      </DialogActions>
+      {/* ✅ DIALOG ACTIONS - Brandbook */}
+  <DialogActions 
+    sx={{ 
+      px: { xs: 2, md: 3 }, 
+      py: 2, 
+      borderTop: "1px solid #e0e0e0",
+      bgcolor: '#fafafa',
+      gap: 2
+    }}
+  >
+    <Button
+      onClick={handleClose}
+      size="small"
+      variant="outlined"
+      sx={{
+        borderRadius: 3,
+        textTransform: 'none',
+        fontWeight: 600,
+        px: 3,
+        py: 1.2,
+        fontSize: "0.875rem",
+        color: '#706f6f',
+        border: '2px solid #e0e0e0',
+        fontFamily: '"Poppins", sans-serif',
+        '&:hover': {
+          bgcolor: 'rgba(112, 111, 111, 0.05)',
+          borderColor: '#706f6f'
+        }
+      }}
+    >
+      Cancel
+    </Button>
+    <Button
+      onClick={handleSubmit}
+      variant="contained"
+      size="small"
+      startIcon={selectedModel ? <Edit fontSize="small" /> : <Add fontSize="small" />}
+            sx={{
+              borderRadius: 3,
+              bgcolor: "#333F1F",
+              color: "white",
+              fontWeight: 600,
+              textTransform: "none",
+              letterSpacing: "1px",
+              fontFamily: '"Poppins", sans-serif',
+              px: 4,
+              py: 1.5,
+              boxShadow: "0 4px 12px rgba(51, 63, 31, 0.25)",
+              position: "relative",
+              overflow: "hidden",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                bgcolor: "#8CA551",
+                transition: "left 0.4s ease",
+                zIndex: 0,
+              },
+              "&:hover": {
+                bgcolor: "#333F1F",
+                boxShadow: "0 8px 20px rgba(51, 63, 31, 0.35)",
+                "&::before": {
+                  left: 0,
+                },
+              },
+              "& span": {
+                position: "relative",
+                zIndex: 1,
+              }
+            }}
+    >
+      {selectedModel ? "Update Model" : "Create Model"}
+    </Button>
+  </DialogActions>
     </Dialog>
   );
 };

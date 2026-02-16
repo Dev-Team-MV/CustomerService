@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   Container, Grid, Typography, Box, Card, CardContent, Button, Checkbox, Dialog, Chip, Divider
 } from '@mui/material'
-import { motion } from 'framer-motion'
+import { motion, useMotionValue, useTransform } from 'framer-motion'
 import api from '../services/api'
 import ModelCustomizationPanel from '../components/ModelCustomizationPanel'
 
@@ -17,6 +17,30 @@ const modelImages = {
 // ✅ UNA SOLA DEFINICIÓN de ModelCard
 function ModelCard({ model, onGoDetail, selected, onSelect }) {
   const imgSrc = modelImages[model._id] || '/no-image.png';
+
+    
+  // ✅ Valores de movimiento del mouse
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  
+  // ✅ Transformar movimiento a rotación 3D
+  const rotateX = useTransform(y, [-100, 100], [15, -15]);
+  const rotateY = useTransform(x, [-100, 100], [-15, 15]);
+
+  // ✅ Manejar movimiento del mouse
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    x.set(e.clientX - centerX);
+    y.set(e.clientY - centerY);
+  };
+
+  // ✅ Resetear al salir
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
 
   return (
     <motion.div whileHover={{ scale: 1.04 }}>
@@ -59,9 +83,11 @@ function ModelCard({ model, onGoDetail, selected, onSelect }) {
         
         {/* ✅ Imagen flotante */}
         <Box
+                  onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
           sx={{
             position: 'absolute',
-            top: { xs: '-115px', sm: '-140px', md: '-10pc' },
+            top: { xs: '-115px', sm: '-140px', md: '-12pc' },
             left: '50%',
             transform: 'translateX(-50%)',
             width: '85%',
@@ -74,168 +100,229 @@ function ModelCard({ model, onGoDetail, selected, onSelect }) {
             overflow: 'hidden',
           }}
         >
-          <img
+          <motion.img
             src={imgSrc}
             alt={model.model}
             style={{
               width: '90%',
               height: '90%',
               objectFit: 'cover',
-              borderBottomLeftRadius: 25,
-              borderBottomRightRadius: 25,
+              rotateX,
+              rotateY,
+              transition: 'transform 0.1s ease-out',
             }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           />
         </Box>
       
         <CardContent 
           sx={{ 
-            flex: 1, // ✅ Ocupa todo el espacio disponible
+            flex: 1,
             display: 'flex', 
             flexDirection: 'column', 
-            p: { xs: 2, sm: 2.5, md: 3 },
-            mt: { xs: 8, sm: 10, md: 13 }
+            p: { xs: 2.5, sm: 3, md: 3.5 },
+            mt: { xs: 8, sm: 10, md: 13 },
+            background: 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)',
+            borderRadius: 6,
           }}
         >
-          {/* ✅ TÍTULO DEL MODELO */}
+          {/* ✅ TÍTULO DEL MODELO - Más elegante */}
           <Typography
             variant="h5"
-            fontWeight="bold"
             sx={{
-              fontFamily: '"Playfair Display", serif',
-              color: '#2c3e50',
+              fontFamily: '"Poppins", sans-serif',  // Fuente más elegante y formal
+              color: '#1a1a1a',
+              fontWeight: 600,
               mb: 0.5,
-              fontSize: { xs: '1.4rem', sm: '1.6rem', md: '1.8rem' },
-              letterSpacing: '-0.5px',
-              textAlign: 'center'
+              fontSize: { xs: '1.5rem', sm: '1.7rem', md: '1.9rem' },
+              letterSpacing: '1px',
+              textAlign: 'center',
+              textTransform: 'uppercase'
             }}
           >
             {model.model}
           </Typography>
         
-          {/* ✅ PRECIO */}
+          {/* ✅ LÍNEA DECORATIVA SUTIL */}
+          <Box
+            sx={{
+              width: 60,
+              height: 2,
+              bgcolor: '#8CA551',
+              mx: 'auto',
+              mb: 2,
+              opacity: 0.8
+            }}
+          />
+        
+          {/* ✅ PRECIO - Más sofisticado */}
           <Typography
             variant="h6"
             sx={{
-              color: '#4a7c59',
-              fontWeight: 700,
-              mb: 2,
-              fontSize: { xs: '1.1rem', sm: '1.2rem', md: '1.4rem' },
-              textAlign: 'center'
-            }}
-          >
-            ${model.price ? `${model.price.toLocaleString()}.00` : 'Consult'}
-          </Typography>
-        
-          {/* ✅ CHIPS INFORMATIVOS - Altura fija */}
-          <Box 
-            sx={{ 
-              display: 'flex', 
+              color: '#2c5530',
+              fontWeight: 500, 
+              mb: 3, 
+              fontSize: { xs: '1.15rem', sm: '1.25rem', md: '1.35rem' }, 
+              textAlign: 'center', 
+              fontFamily: '"Poppins", sans-serif', 
+              letterSpacing: '0.5px' 
+            }} > 
+            ${model.price ? `${model.price.toLocaleString()}` : 'Consult'} 
+          </Typography> {/* ✅ CHIPS INFORMATIVOS - Diseño más sobrio */} 
+          <Box sx={{ display: 'flex',
               gap: 1, 
               flexWrap: 'wrap', 
-              mb: 2.5, 
+              mb: 3, 
               justifyContent: 'center',
-              minHeight: 56, // ✅ Altura mínima fija para chips (2 filas máximo)
-              alignContent: 'flex-start' // ✅ Alinear chips desde arriba
+              minHeight: 56,
+              alignContent: 'flex-start'
             }}
           >
-            {/* ✅ MODELO 10 - Caso especial */}
             {model.modelNumber === "10" ? (
               <>
                 <Chip 
-                  label="🍽️ Dining Room" 
+                  label="Dining Room" 
                   size="small"
                   sx={{ 
-                    bgcolor: '#fce4ec', 
-                    color: '#c2185b',
-                    fontWeight: 700, 
+                    bgcolor: 'transparent',
+                    border: '1.5px solid #E5863C ',
+                    color: '#8b6f47',
+                    fontWeight: 600, 
                     fontSize: '0.7rem',
-                    height: 24,
-                    px: 0.5
+                    height: 28,
+                    px: 1.5,
+                    fontFamily: '"Poppins", sans-serif', 
+                    letterSpacing: '0.5px',
+                    textTransform: 'uppercase',
+                    '&:hover': {
+                      bgcolor: 'rgba(212, 165, 116, 0.08)'
+                    }
                   }} 
                 />
                 <Chip 
-                  label="📚 Study" 
+                  label="Study" 
                   size="small"
                   sx={{ 
-                    bgcolor: '#f3e5f5', 
-                    color: '#7b1fa2',
-                    fontWeight: 700, 
+                    bgcolor: 'transparent',
+                    border: '1.5px solid #706f6f',
+                    color: '#4a5d6f',
+                    fontWeight: 600, 
                     fontSize: '0.7rem',
-                    height: 24,
-                    px: 0.5
+                    height: 28,
+                    px: 1.5,
+                    fontFamily: '"Poppins", sans-serif', 
+                    letterSpacing: '0.5px',
+                    textTransform: 'uppercase',
+                    '&:hover': {
+                      bgcolor: 'rgba(123, 140, 158, 0.08)'
+                    }
                   }} 
                 />
                 {model.storages && model.storages.length > 0 && (
                   <Chip 
-                    label="📦 Storage" 
+                    label="Storage" 
                     size="small"
                     sx={{ 
-                      bgcolor: '#fff3e0', 
-                      color: '#f57c00',
-                      fontWeight: 700, 
+                      bgcolor: 'transparent',
+                      border: '1.5px solid #706f6f',
+                      color: '#5a5a5a',
+                      fontWeight: 600, 
                       fontSize: '0.7rem',
-                      height: 24,
-                      px: 0.5
+                      height: 28,
+                      px: 1.5,
+                      fontFamily: '"Poppins", sans-serif', 
+                      letterSpacing: '0.5px',
+                      textTransform: 'uppercase',
+                      '&:hover': {
+                        bgcolor: 'rgba(158, 158, 158, 0.08)'
+                      }
                     }} 
                   />
                 )}
                 {model.upgrades && model.upgrades.length > 0 && (
                   <Chip 
-                    label="⭐ Upgrades" 
+                    label="Upgrades" 
                     size="small"
                     sx={{ 
-                      bgcolor: '#fff9c4', 
-                      color: '#f57f17',
-                      fontWeight: 700, 
+                      bgcolor: 'transparent',
+                      border: '1.5px solid #333F1F',
+                      color: '#2c5530',
+                      fontWeight: 600, 
                       fontSize: '0.7rem',
-                      height: 24,
-                      px: 0.5
+                      height: 28,
+                      px: 1.5,
+                      fontFamily: '"Poppins", sans-serif', 
+                      letterSpacing: '0.5px',
+                      textTransform: 'uppercase',
+                      '&:hover': {
+                        bgcolor: 'rgba(74, 124, 89, 0.08)'
+                      }
                     }} 
                   />
                 )}
               </>
             ) : (
-              /* ✅ MODELOS 5 y 9 - Caso estándar */
               <>
                 {model.balconies && model.balconies.length > 0 && (
                   <Chip 
-                    label="🌿 Balcony" 
+                    label="Balcony" 
                     size="small"
                     sx={{ 
-                      bgcolor: '#e3f2fd', 
-                      color: '#2196f3',
-                      fontWeight: 700, 
+                      bgcolor: 'transparent',
+                      border: '1.5px solid #8CA551',
+                      color: '#3d5a4d',
+                      fontWeight: 600, 
                       fontSize: '0.7rem',
-                      height: 24,
-                      px: 0.5
+                      height: 28,
+                      px: 1.5,
+                      fontFamily: '"Poppins", sans-serif', 
+                      letterSpacing: '0.5px',
+                      textTransform: 'uppercase',
+                      '&:hover': {
+                        bgcolor: 'rgba(107, 144, 128, 0.08)'
+                      }
                     }} 
                   />
                 )}
                 {model.storages && model.storages.length > 0 && (
                   <Chip 
-                    label="📦 Storage" 
+                    label="Storage" 
                     size="small"
                     sx={{ 
-                      bgcolor: '#fff3e0', 
-                      color: '#f57c00',
-                      fontWeight: 700, 
+                      bgcolor: 'transparent',
+                      border: '1.5px solid #9e9e9e',
+                      color: '#5a5a5a',
+                      fontWeight: 600, 
                       fontSize: '0.7rem',
-                      height: 24,
-                      px: 0.5
+                      height: 28,
+                      px: 1.5,
+                      fontFamily: '"Poppins", sans-serif', 
+                      letterSpacing: '0.5px',
+                      textTransform: 'uppercase',
+                      '&:hover': {
+                        bgcolor: 'rgba(158, 158, 158, 0.08)'
+                      }
                     }} 
                   />
                 )}
                 {model.upgrades && model.upgrades.length > 0 && (
                   <Chip 
-                    label="⭐ Upgrades" 
+                    label="Upgrades" 
                     size="small"
                     sx={{ 
-                      bgcolor: '#fff9c4', 
-                      color: '#f57f17',
-                      fontWeight: 700, 
+                      bgcolor: 'transparent',
+                      border: '1.5px solid #4a7c59',
+                      color: '#2c5530',
+                      fontWeight: 600, 
                       fontSize: '0.7rem',
-                      height: 24,
-                      px: 0.5
+                      height: 28,
+                      px: 1.5,
+                      fontFamily: '"Poppins", sans-serif', 
+                      letterSpacing: '0.5px',
+                      textTransform: 'uppercase',
+                      '&:hover': {
+                        bgcolor: 'rgba(74, 124, 89, 0.08)'
+                      }
                     }} 
                   />
                 )}
@@ -243,151 +330,213 @@ function ModelCard({ model, onGoDetail, selected, onSelect }) {
             )}
           </Box>
         
-          {/* ✅ GRID DE ESPECIFICACIONES */}
+          {/* ✅ GRID DE ESPECIFICACIONES - Diseño minimalista */}
+          {/* ✅ GRID DE ESPECIFICACIONES - Estilo brandbook */}
           <Box 
             sx={{ 
               display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: 2,
-              mb: 2,
-              p: 2,
-              bgcolor: '#f8f9fa',
-              borderRadius: 3
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: 0,
+              mb: 3,
+              borderTop: '1px solid #e0e0e0',
+              borderBottom: '1px solid #e0e0e0',
+              py: 2
             }}
           >
-            <Box sx={{ textAlign: 'center' }}>
+            <Box 
+              sx={{ 
+                textAlign: 'center',
+                borderRight: '1px solid #e0e0e0',
+                px: 1
+              }}
+            >
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: '#999999', 
+                  fontSize: '0.65rem',
+                  fontWeight: 500,
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  fontFamily: '"Poppins", sans-serif',
+                  display: 'block',
+                  mb: 0.8
+                }}
+              >
+                SQFT
+              </Typography>
               <Typography 
                 variant="h6" 
-                fontWeight="800" 
                 sx={{ 
-                  color: '#2c3e50', 
-                  fontSize: { xs: '1.3rem', md: '1.5rem' },
-                  mb: 0.5
+                  color: '#1a1a1a', 
+                  fontSize: { xs: '1.1rem', md: '1.3rem' },
+                  fontWeight: 600,
+                  fontFamily: '"Poppins", sans-serif',
+                  lineHeight: 1
                 }}
               >
                 {model.sqft?.toLocaleString()}
               </Typography>
+            </Box>
+          
+            <Box 
+              sx={{ 
+                textAlign: 'center',
+                borderRight: '1px solid #e0e0e0',
+                px: 1
+              }}
+            >
               <Typography 
                 variant="caption" 
                 sx={{ 
-                  color: '#6c757d', 
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
+                  color: '#999999', 
+                  fontSize: '0.65rem',
+                  fontWeight: 500,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
+                  letterSpacing: '1px',
+                  fontFamily: '"Poppins", sans-serif',
+                  display: 'block',
+                  mb: 0.8
                 }}
               >
-                sqft
+                BEDS
               </Typography>
-            </Box>
-        
-            <Box sx={{ textAlign: 'center' }}>
               <Typography 
                 variant="h6" 
-                fontWeight="800" 
                 sx={{ 
-                  color: '#2c3e50', 
-                  fontSize: { xs: '1.3rem', md: '1.5rem' },
-                  mb: 0.5
-                }}
-              >
-                {model.stories}
-              </Typography>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: '#6c757d', 
-                  fontSize: '0.7rem',
+                  color: '#1a1a1a', 
+                  fontSize: { xs: '1.1rem', md: '1.3rem' },
                   fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}
-              >
-                Stories
-              </Typography>
-            </Box>
-        
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography 
-                variant="h6" 
-                fontWeight="800" 
-                sx={{ 
-                  color: '#2c3e50', 
-                  fontSize: { xs: '1.3rem', md: '1.5rem' },
-                  mb: 0.5
+                  fontFamily: '"Poppins", sans-serif',
+                  lineHeight: 1
                 }}
               >
                 {model.bedrooms}
               </Typography>
+            </Box>
+          
+            <Box 
+              sx={{ 
+                textAlign: 'center',
+                borderRight: '1px solid #e0e0e0',
+                px: 1
+              }}
+            >
               <Typography 
                 variant="caption" 
                 sx={{ 
-                  color: '#6c757d', 
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
+                  color: '#999999', 
+                  fontSize: '0.65rem',
+                  fontWeight: 500,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
+                  letterSpacing: '1px',
+                  fontFamily: '"Poppins", sans-serif',
+                  display: 'block',
+                  mb: 0.8
                 }}
               >
-                Bedrooms
+                BATHS
               </Typography>
-            </Box>
-        
-            <Box sx={{ textAlign: 'center' }}>
               <Typography 
                 variant="h6" 
-                fontWeight="800" 
                 sx={{ 
-                  color: '#2c3e50', 
-                  fontSize: { xs: '1.3rem', md: '1.5rem' },
-                  mb: 0.5
+                  color: '#1a1a1a', 
+                  fontSize: { xs: '1.1rem', md: '1.3rem' },
+                  fontWeight: 600,
+                  fontFamily: '"Poppins", sans-serif',
+                  lineHeight: 1
                 }}
               >
                 {model.bathrooms}
               </Typography>
+            </Box>
+          
+            <Box 
+              sx={{ 
+                textAlign: 'center',
+                px: 1
+              }}
+            >
               <Typography 
                 variant="caption" 
                 sx={{ 
-                  color: '#6c757d', 
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
+                  color: '#999999', 
+                  fontSize: '0.65rem',
+                  fontWeight: 500,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
+                  letterSpacing: '1px',
+                  fontFamily: '"Poppins", sans-serif',
+                  display: 'block',
+                  mb: 0.8
                 }}
               >
-                Bathrooms
+                STORIES
+              </Typography>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  color: '#1a1a1a', 
+                  fontSize: { xs: '1.1rem', md: '1.3rem' },
+                  fontWeight: 600,
+                  fontFamily: '"Poppins", sans-serif',
+                  lineHeight: 1
+                }}
+              >
+                {model.stories}
               </Typography>
             </Box>
           </Box>
         
-          {/* ✅ BOTÓN VIEW DETAILS */}
+          {/* ✅ BOTÓN VIEW DETAILS - Minimalista y elegante */}
           <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              onGoDetail(model._id);
-            }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onGoDetail(model._id);
+          }}
             fullWidth
             sx={{
-              mt: 'auto', // ✅ Empuja el botón al fondo
-              borderRadius: 3,
-              background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
-              color: 'white',
-              fontWeight: 700,
-              fontSize: { xs: '0.85rem', md: '0.95rem' },
-              boxShadow: '0 4px 16px rgba(74,124,89,0.15)',
+              mt: "auto",
+              borderRadius: 0,
+              bgcolor: "#333F1F",
+              color: "white",
+              fontWeight: 600,
+              fontSize: { xs: "0.85rem", md: "0.9rem" },
               px: 3,
-              py: { xs: 1.3, md: 1.5 },
-              letterSpacing: '0.5px',
-              textTransform: 'none',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
-                boxShadow: '0 8px 24px rgba(74,124,89,0.25)',
-                transform: 'translateY(-2px)'
+              py: { xs: 1.5, md: 1.8 },
+              letterSpacing: "1.5px",
+              textTransform: "uppercase",
+              fontFamily: '"Poppins", sans-serif',
+              border: "none",
+              position: "relative",
+              overflow: "hidden",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                bgcolor: "#8CA551",
+                transition: "left 0.4s ease",
+                zIndex: 0,
               },
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              "&:hover": {
+                bgcolor: "#333F1F",
+                "&::before": {
+                  left: 0,
+                },
+                "& .button-text": {
+                  color: "white",
+                },
+              },
+              "& .button-text": {
+                position: "relative",
+                zIndex: 1,
+                transition: "color 0.3s ease",
+              },
             }}
           >
-            View Details →
+            <span className="button-text">View Details</span>
           </Button>
         </CardContent>
       </Card>
@@ -432,25 +581,69 @@ const ViewModels = () => {
       </Typography>
       
       <Box sx={{ mb: 4 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={selected.length !== 2}
-          onClick={handleCompare}
-          sx={{
-            borderRadius: 3,
-            background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
-            fontWeight: 700,
-            textTransform: 'none',
-            px: 4,
-            py: 1.5,
-            '&:hover': {
-              background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
-            },
-          }}
-        >
-          Compare Selected
-        </Button>
+<Button
+  disabled={selected.length !== 2}
+  onClick={handleCompare}
+  sx={{
+    borderRadius: 3,
+    bgcolor: "#333F1F",
+    color: "white",
+    fontWeight: 600,
+    fontSize: { xs: "0.85rem", md: "0.9rem" },
+    px: 4,
+    py: 1.5,
+    letterSpacing: "1.5px",
+    textTransform: "uppercase",
+    fontFamily: '"Poppins", sans-serif',
+    border: "none",
+    position: "relative",
+    overflow: "hidden",
+    boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)',
+    transition: 'all 0.3s ease',
+    "&::before": {
+      content: '""',
+      position: "absolute",
+      top: 0,
+      left: "-100%",
+      width: "100%",
+      height: "100%",
+      bgcolor: "#8CA551",
+      transition: "left 0.4s ease",
+      zIndex: 0,
+    },
+    "&:hover": {
+      bgcolor: "#333F1F",
+      boxShadow: '0 8px 20px rgba(51, 63, 31, 0.3)',
+      transform: 'translateY(-2px)',
+      "&::before": {
+        left: 0,
+      },
+      "& .button-text": {
+        color: "white",
+      },
+    },
+    "&:active": {
+      transform: 'translateY(0px)',
+      boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
+    },
+    "&:disabled": {
+      bgcolor: '#e0e0e0',
+      color: '#9e9e9e',
+      boxShadow: 'none',
+      transform: 'none',
+      '&::before': {
+        display: 'none'
+      }
+    },
+    "& .button-text": {
+      position: "relative",
+      zIndex: 1,
+      transition: "color 0.3s ease",
+    },
+  }}
+>
+  <span className="button-text">Compare Selected</span>
+</Button>
         <Typography variant="caption" sx={{ ml: 2, color: '#6c757d' }}>
           Select 2 models to compare
         </Typography>

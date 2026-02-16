@@ -25,7 +25,6 @@ import {
   InfoOutlined,
   Visibility,
   Tune,
-  Kitchen,
   Deck
 } from '@mui/icons-material'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
@@ -33,6 +32,7 @@ import { useProperty } from '../../context/PropertyContext'
 import { useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import ModelCustomizationModal from './ModelCustomizationModal'
+import { motion } from 'framer-motion'
 
 const ModelSelector = () => {
   const { 
@@ -66,12 +66,12 @@ const ModelSelector = () => {
   // ✅ LABELS CONDICIONALES PARA BALCONY/ESTUDIO
   const balconyLabels = isModel10
     ? {
-        chipLabel: "🏠 Estudio",
+        chipLabel: "Estudio",
         label: "Estudio",
         icon: Home
       }
     : {
-        chipLabel: "🌳 Balcony",
+        chipLabel: "Balcony",
         label: "Balcony",
         icon: Deck
       };
@@ -169,15 +169,28 @@ const ModelSelector = () => {
   if (!selectedLot) {
     return (
       <Paper 
-        elevation={2} 
+        elevation={0} 
         sx={{ 
           p: { xs: 2, md: 3 }, 
           bgcolor: '#fff', 
-          borderRadius: 2,
-          border: '1px solid #e0e0e0'
+          borderRadius: 4,
+          border: '1px solid #e0e0e0',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.06)'
         }}
       >
-        <Typography variant={isMobile ? "body1" : "subtitle1"} color="text.secondary" textAlign="center" sx={{ py: 2 }}>
+        <Typography 
+          variant={isMobile ? "body1" : "subtitle1"} 
+          color="text.secondary" 
+          textAlign="center" 
+          sx={{ 
+            py: 2,
+            fontFamily: '"Poppins", sans-serif',
+            letterSpacing: '1px',
+            textTransform: 'uppercase',
+            fontSize: '0.85rem',
+            fontWeight: 500
+          }}
+        >
           SELECT A LOT TO VIEW MODELS
         </Typography>
       </Paper>
@@ -186,9 +199,9 @@ const ModelSelector = () => {
 
   if (loading) {
     return (
-      <Paper elevation={2} sx={{ p: { xs: 2, md: 3 }, bgcolor: '#fff', borderRadius: 2, border: '1px solid #e0e0e0' }}>
+      <Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, bgcolor: '#fff', borderRadius: 4, border: '1px solid #e0e0e0' }}>
         <Box display="flex" justifyContent="center">
-          <CircularProgress />
+          <CircularProgress sx={{ color: '#333F1F' }} />
         </Box>
       </Paper>
     )
@@ -196,7 +209,7 @@ const ModelSelector = () => {
 
   if (error) {
     return (
-      <Paper elevation={2} sx={{ p: { xs: 2, md: 3 }, bgcolor: '#fff', borderRadius: 2, border: '1px solid #e0e0e0' }}>
+      <Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, bgcolor: '#fff', borderRadius: 4, border: '1px solid #e0e0e0' }}>
         <Alert severity="error">{error}</Alert>
       </Paper>
     )
@@ -209,116 +222,398 @@ const ModelSelector = () => {
     (pricingInfo?.hasStorage && selectedModel?.storages?.length > 0)
   )
 
-  // ✅ Panel de información del modelo seleccionado (con labels condicionales)
+  // ✅ PANEL DE INFORMACIÓN DEL MODELO SELECCIONADO - Estilo brandbook
   const ModelInfoPanel = () => (
     <Box sx={{ 
       p: { xs: 2, md: 2.5 }, 
-      bgcolor: 'grey.50', 
-      borderRadius: 2,
-      border: '2px solid #e0e0e0',
+      bgcolor: '#fafafa', 
+      borderRadius: 3,
+      border: '1px solid #e0e0e0',
       height: '100%',
       overflowY: 'auto',
       display: 'flex',
       flexDirection: 'column',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
       '&::-webkit-scrollbar': {
         width: 6
       },
       '&::-webkit-scrollbar-thumb': {
-        bgcolor: 'grey.400',
+        bgcolor: 'rgba(51, 63, 31, 0.2)',
         borderRadius: 3
       }
     }}>
-      <Typography variant={isLarge ? "subtitle1" : "h6"} fontWeight="bold" mb={0.5}>
-        {selectedModel.model}
-        {/* ✅ Badge para Modelo 10 */}
-        {isModel10 && (
-          <Chip 
-            label="Special" 
-            size="small" 
-            sx={{ 
-              ml: 1, 
-              height: 20,
-              fontSize: '0.65rem',
-              bgcolor: 'primary.main', 
-              color: 'white',
-              fontWeight: 600 
-            }} 
-          />
-        )}
-      </Typography>
-      <Typography variant="caption" color="text.secondary" display="block" mb={2}>
-        Model #{selectedModel.modelNumber}
-      </Typography>
-
-      {/* Base Info */}
-      <Box mb={2}>
-        <Typography variant="caption" fontWeight="bold" color="text.secondary" display="block" mb={1}>
-          BASE SPECIFICATIONS
+      {/* ✅ HEADER - Título + Badge */}
+      <Box sx={{ mb: 2.5 }}>
+        <Box display="flex" alignItems="center" gap={1} mb={0.5}>
+          <Typography 
+            variant={isLarge ? "subtitle1" : "h6"} 
+            fontWeight={700}
+            sx={{
+              color: '#333F1F',
+              fontFamily: '"Poppins", sans-serif',
+              letterSpacing: '0.5px'
+            }}
+          >
+            {selectedModel.model}
+          </Typography>
+          {isModel10 && (
+            <Chip 
+              label="Special" 
+              size="small" 
+              sx={{ 
+                height: 20,
+                fontSize: '0.65rem',
+                bgcolor: '#E5863C', 
+                color: 'white',
+                fontWeight: 600,
+                fontFamily: '"Poppins", sans-serif',
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase'
+              }} 
+            />
+          )}
+        </Box>
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            color: '#706f6f',
+            fontFamily: '"Poppins", sans-serif',
+            fontSize: '0.75rem',
+            display: 'block'
+          }}
+        >
+          Model #{selectedModel.modelNumber}
         </Typography>
-        <Box display="flex" flexDirection="column" gap={0.5}>
-          <Box display="flex" justifyContent="space-between">
-            <Typography variant="caption">🛏️ Bedrooms:</Typography>
-            <Typography variant="caption" fontWeight="bold">{selectedModel.bedrooms}</Typography>
+      </Box>
+
+      {/* ✅ LÍNEA DECORATIVA */}
+      <Box
+        sx={{
+          width: '100%',
+          height: 2,
+          bgcolor: 'rgba(140, 165, 81, 0.2)',
+          mb: 2.5
+        }}
+      />
+
+      {/* ✅ BASE SPECIFICATIONS - Grid minimalista */}
+      <Box mb={2.5}>
+        <Typography 
+          variant="caption" 
+          fontWeight={700}
+          sx={{
+            color: '#706f6f',
+            fontFamily: '"Poppins", sans-serif',
+            letterSpacing: '1.5px',
+            textTransform: 'uppercase',
+            fontSize: '0.65rem',
+            display: 'block',
+            mb: 1.5
+          }}
+        >
+          Base Specifications
+        </Typography>
+        <Box 
+          sx={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: 0,
+            borderTop: '1px solid #e0e0e0',
+            borderBottom: '1px solid #e0e0e0',
+            py: 1.5,
+            bgcolor: 'white',
+            borderRadius: 2
+          }}
+        >
+          <Box sx={{ textAlign: 'center', borderRight: '1px solid #e0e0e0', px: 0.5 }}>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: '#999999', 
+                fontSize: '0.6rem',
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                fontFamily: '"Poppins", sans-serif',
+                display: 'block',
+                mb: 0.5
+              }}
+            >
+              Beds
+            </Typography>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                color: '#333F1F', 
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
+              {selectedModel.bedrooms}
+            </Typography>
           </Box>
-          <Box display="flex" justifyContent="space-between">
-            <Typography variant="caption">🚿 Bathrooms:</Typography>
-            <Typography variant="caption" fontWeight="bold">{selectedModel.bathrooms}</Typography>
+
+          <Box sx={{ textAlign: 'center', borderRight: '1px solid #e0e0e0', px: 0.5 }}>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: '#999999', 
+                fontSize: '0.6rem',
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                fontFamily: '"Poppins", sans-serif',
+                display: 'block',
+                mb: 0.5
+              }}
+            >
+              Baths
+            </Typography>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                color: '#333F1F', 
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
+              {selectedModel.bathrooms}
+            </Typography>
           </Box>
-          <Box display="flex" justifyContent="space-between">
-            <Typography variant="caption">📐 Square Feet:</Typography>
-            <Typography variant="caption" fontWeight="bold">{selectedModel.sqft?.toLocaleString()}</Typography>
+
+          <Box sx={{ textAlign: 'center', borderRight: '1px solid #e0e0e0', px: 0.5 }}>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: '#999999', 
+                fontSize: '0.6rem',
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                fontFamily: '"Poppins", sans-serif',
+                display: 'block',
+                mb: 0.5
+              }}
+            >
+              SQFT
+            </Typography>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                color: '#333F1F', 
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
+              {selectedModel.sqft?.toLocaleString()}
+            </Typography>
           </Box>
-          <Box display="flex" justifyContent="space-between">
-            <Typography variant="caption">🏢 Stories:</Typography>
-            <Typography variant="caption" fontWeight="bold">{selectedModel.stories || 1}</Typography>
+
+          <Box sx={{ textAlign: 'center', px: 0.5 }}>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: '#999999', 
+                fontSize: '0.6rem',
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                fontFamily: '"Poppins", sans-serif',
+                display: 'block',
+                mb: 0.5
+              }}
+            >
+              Stories
+            </Typography>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                color: '#333F1F', 
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
+              {selectedModel.stories || 1}
+            </Typography>
           </Box>
         </Box>
       </Box>
 
-      {/* Base Price */}
-      <Box mb={2} p={1.5} bgcolor="white" borderRadius={1} border="1px solid #e0e0e0">
-        <Typography variant="caption" fontWeight="bold" color="text.secondary">
-          BASE PRICE
+      {/* ✅ BASE PRICE - Minimalista */}
+      <Box 
+        mb={2.5} 
+        p={2} 
+        sx={{
+          bgcolor: 'white',
+          borderRadius: 2,
+          border: '2px solid #e0e0e0',
+          textAlign: 'center'
+        }}
+      >
+        <Typography 
+          variant="caption" 
+          fontWeight={700}
+          sx={{
+            color: '#706f6f',
+            fontFamily: '"Poppins", sans-serif',
+            letterSpacing: '1.5px',
+            textTransform: 'uppercase',
+            fontSize: '0.65rem',
+            display: 'block',
+            mb: 1
+          }}
+        >
+          Base Price
         </Typography>
-        <Typography variant={isLarge ? "h5" : "h4"} color="primary.main" fontWeight="bold">
+        <Typography 
+          variant={isLarge ? "h5" : "h4"} 
+          sx={{
+            color: '#333F1F',
+            fontWeight: 700,
+            fontFamily: '"Poppins", sans-serif',
+            letterSpacing: '-0.5px'
+          }}
+        >
           ${selectedModel.price.toLocaleString()}
         </Typography>
       </Box>
 
-      {/* ✅ Available Options Info - Con labels condicionales */}
+      {/* ✅ AVAILABLE OPTIONS - Chips minimalistas */}
       {hasPricingOptions && (
-        <Box mb={2}>
-          <Typography variant="caption" fontWeight="bold" color="text.secondary" display="block" mb={1}>
-            AVAILABLE OPTIONS
+        <Box mb={2.5}>
+          <Typography 
+            variant="caption" 
+            fontWeight={700}
+            sx={{
+              color: '#706f6f',
+              fontFamily: '"Poppins", sans-serif',
+              letterSpacing: '1.5px',
+              textTransform: 'uppercase',
+              fontSize: '0.65rem',
+              display: 'block',
+              mb: 1.5
+            }}
+          >
+            Available Options
           </Typography>
-          <Box display="flex" flexDirection="column" gap={0.5}>
+          <Box display="flex" flexDirection="column" gap={1}>
             {selectedModel.upgrades?.length > 0 && (
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Chip label="⭐ Upgrade" size="small" color="secondary" variant="outlined" sx={{ height: 24 }} />
-                <Typography variant="caption" color="text.secondary" fontWeight="bold">
+              <Box 
+                display="flex" 
+                alignItems="center" 
+                justifyContent="space-between"
+                sx={{
+                  p: 1.5,
+                  bgcolor: 'white',
+                  borderRadius: 2,
+                  border: '1px solid #e0e0e0'
+                }}
+              >
+                <Chip 
+                  label="Upgrade" 
+                  size="small" 
+                  sx={{ 
+                    height: 24,
+                    bgcolor: 'transparent',
+                    border: '1.5px solid #9c27b0',
+                    color: '#9c27b0',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                    fontFamily: '"Poppins", sans-serif',
+                    letterSpacing: '0.5px'
+                  }} 
+                />
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: '#333F1F',
+                    fontWeight: 700,
+                    fontFamily: '"Poppins", sans-serif',
+                    fontSize: '0.85rem'
+                  }}
+                >
                   +${(selectedModel.upgrades[0].price / 1000).toFixed(0)}K
                 </Typography>
               </Box>
             )}
-            {/* ✅ Chip de Balcony/Estudio condicional */}
             {selectedModel.balconies?.length > 0 && (
-              <Box display="flex" alignItems="center" justifyContent="space-between">
+              <Box 
+                display="flex" 
+                alignItems="center" 
+                justifyContent="space-between"
+                sx={{
+                  p: 1.5,
+                  bgcolor: 'white',
+                  borderRadius: 2,
+                  border: '1px solid #e0e0e0'
+                }}
+              >
                 <Chip 
                   label={balconyLabels.chipLabel} 
                   size="small" 
-                  color="info" 
-                  variant="outlined" 
-                  sx={{ height: 24 }} 
+                  sx={{ 
+                    height: 24,
+                    bgcolor: 'transparent',
+                    border: '1.5px solid #8CA551',
+                    color: '#8CA551',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                    fontFamily: '"Poppins", sans-serif',
+                    letterSpacing: '0.5px'
+                  }} 
                 />
-                <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: '#333F1F',
+                    fontWeight: 700,
+                    fontFamily: '"Poppins", sans-serif',
+                    fontSize: '0.85rem'
+                  }}
+                >
                   +${(selectedModel.balconies[0].price / 1000).toFixed(0)}K
                 </Typography>
               </Box>
             )}
             {selectedModel.storages?.length > 0 && (
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Chip label="📦 Storage" size="small" color="success" variant="outlined" sx={{ height: 24 }} />
-                <Typography variant="caption" color="text.secondary" fontWeight="bold">
+              <Box 
+                display="flex" 
+                alignItems="center" 
+                justifyContent="space-between"
+                sx={{
+                  p: 1.5,
+                  bgcolor: 'white',
+                  borderRadius: 2,
+                  border: '1px solid #e0e0e0'
+                }}
+              >
+                <Chip 
+                  label="Storage" 
+                  size="small" 
+                  sx={{ 
+                    height: 24,
+                    bgcolor: 'transparent',
+                    border: '1.5px solid #706f6f',
+                    color: '#706f6f',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                    fontFamily: '"Poppins", sans-serif',
+                    letterSpacing: '0.5px'
+                  }} 
+                />
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: '#333F1F',
+                    fontWeight: 700,
+                    fontFamily: '"Poppins", sans-serif',
+                    fontSize: '0.85rem'
+                  }}
+                >
                   +${(selectedModel.storages[0].price / 1000).toFixed(0)}K
                 </Typography>
               </Box>
@@ -327,22 +622,59 @@ const ModelSelector = () => {
         </Box>
       )}
 
-      {/* Current Selection Summary */}
+      {/* ✅ CURRENT CONFIGURATION - Destacado */}
       {selectedPricingOption && (
-        <Box mb={2} p={1.5} bgcolor="primary.50" borderRadius={1} border="2px solid" borderColor="primary.main">
-          <Typography variant="caption" fontWeight="bold" color="primary.main">
-            CURRENT CONFIGURATION
+        <Box 
+          mb={2.5} 
+          p={2.5} 
+          sx={{
+            bgcolor: 'rgba(140, 165, 81, 0.08)',
+            borderRadius: 2,
+            border: '2px solid #8CA551',
+            textAlign: 'center'
+          }}
+        >
+          <Typography 
+            variant="caption" 
+            fontWeight={700}
+            sx={{
+              color: '#8CA551',
+              fontFamily: '"Poppins", sans-serif',
+              letterSpacing: '1.5px',
+              textTransform: 'uppercase',
+              fontSize: '0.65rem',
+              display: 'block',
+              mb: 1
+            }}
+          >
+            Current Configuration
           </Typography>
-          <Typography variant="body2" fontWeight="bold" mt={0.5}>
+          <Typography 
+            variant="body2" 
+            fontWeight={600}
+            sx={{
+              color: '#333F1F',
+              fontFamily: '"Poppins", sans-serif',
+              mb: 1
+            }}
+          >
             {selectedPricingOption.label}
           </Typography>
-          <Typography variant={isLarge ? "h6" : "h5"} color="primary.main" fontWeight="bold" mt={0.5}>
+          <Typography 
+            variant={isLarge ? "h6" : "h5"} 
+            sx={{
+              color: '#8CA551',
+              fontWeight: 700,
+              fontFamily: '"Poppins", sans-serif',
+              letterSpacing: '-0.5px'
+            }}
+          >
             ${selectedPricingOption.price.toLocaleString()}
           </Typography>
         </Box>
       )}
 
-      {/* Action Buttons */}
+      {/* ✅ ACTION BUTTONS - Brandbook */}
       <Box mt="auto" display="flex" flexDirection="column" gap={1.5}>
         {hasPricingOptions && (
           <Button
@@ -354,13 +686,38 @@ const ModelSelector = () => {
             sx={{
               py: isLarge ? 1 : 1.5,
               fontSize: isLarge ? '0.875rem' : '1rem',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              fontWeight: 'bold',
-              boxShadow: 3,
+              borderRadius: 2,
+              bgcolor: '#333F1F',
+              color: 'white',
+              fontWeight: 600,
+              textTransform: 'none',
+              letterSpacing: '1px',
+              fontFamily: '"Poppins", sans-serif',
+              boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: '-100%',
+                width: '100%',
+                height: '100%',
+                bgcolor: '#8CA551',
+                transition: 'left 0.4s ease',
+                zIndex: 0
+              },
               '&:hover': {
-                boxShadow: 6,
+                bgcolor: '#333F1F',
+                boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
                 transform: 'translateY(-2px)',
-                transition: 'all 0.3s'
+                '&::before': {
+                  left: 0
+                }
+              },
+              '& .MuiButton-startIcon, & span': {
+                position: 'relative',
+                zIndex: 1
               }
             }}
           >
@@ -375,12 +732,21 @@ const ModelSelector = () => {
           startIcon={<Visibility />}
           onClick={(e) => handleViewDetails(e, selectedModel._id)}
           sx={{
-            borderColor: '#4a7c59',
-            color: '#4a7c59',
+            borderRadius: 2,
+            borderColor: '#e0e0e0',
+            borderWidth: '2px',
+            color: '#706f6f',
             fontSize: '0.75rem',
+            fontWeight: 600,
+            textTransform: 'none',
+            letterSpacing: '1px',
+            fontFamily: '"Poppins", sans-serif',
+            py: 1,
             '&:hover': {
-              borderColor: '#3d6849',
-              bgcolor: 'rgba(74, 124, 89, 0.05)'
+              borderColor: '#333F1F',
+              borderWidth: '2px',
+              bgcolor: 'rgba(51, 63, 31, 0.05)',
+              color: '#333F1F'
             }
           }}
         >
@@ -388,19 +754,27 @@ const ModelSelector = () => {
         </Button>
       </Box>
 
-      {/* Info message when no options */}
+      {/* ✅ INFO MESSAGE - Sin opciones */}
       {!hasPricingOptions && (
         <Box 
           sx={{ 
             mt: 2,
-            p: 1.5,
-            bgcolor: 'grey.100',
-            borderRadius: 1,
+            p: 2,
+            bgcolor: '#f5f5f5',
+            borderRadius: 2,
+            border: '1px solid #e0e0e0',
             textAlign: 'center'
           }}
         >
-          <InfoOutlined sx={{ fontSize: 32, color: 'grey.400', mb: 0.5 }} />
-          <Typography variant="caption" color="text.secondary">
+          <InfoOutlined sx={{ fontSize: 28, color: '#999', mb: 0.5 }} />
+          <Typography 
+            variant="caption" 
+            sx={{ 
+              color: '#706f6f',
+              fontFamily: '"Poppins", sans-serif',
+              fontSize: '0.75rem'
+            }}
+          >
             {isModel10 
               ? "Comedor and Estudio options in customization"
               : "No additional options available"
@@ -414,18 +788,40 @@ const ModelSelector = () => {
   return (
     <>
       <Paper 
-        elevation={2} 
+        elevation={0} 
         sx={{ 
           p: { xs: 2, md: 3 }, 
           bgcolor: '#fff', 
-          borderRadius: 2,
-          border: '1px solid #e0e0e0'
+          borderRadius: 4,
+          border: '1px solid #e0e0e0',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.06)'
         }}
       >
-        {/* Header */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={1}>
-          <Typography variant={isMobile ? "body1" : "subtitle1"} fontWeight="bold">
-            02 MODEL SELECTION
+        {/* ✅ HEADER - Brandbook */}
+        <Box 
+          display="flex" 
+          justifyContent="space-between" 
+          alignItems="center" 
+          mb={3} 
+          flexWrap="wrap" 
+          gap={1}
+          sx={{
+            pb: 2,
+            borderBottom: '2px solid rgba(140, 165, 81, 0.2)'
+          }}
+        >
+          <Typography 
+            variant={isMobile ? "body1" : "subtitle1"} 
+            fontWeight={700}
+            sx={{
+              color: '#333F1F',
+              fontFamily: '"Poppins", sans-serif',
+              letterSpacing: '1.5px',
+              textTransform: 'uppercase',
+              fontSize: isMobile ? '0.85rem' : '0.95rem'
+            }}
+          >
+            02 Model Selection
           </Typography>
           <Box display="flex" alignItems="center" gap={1}>
             {selectedModel && !isMobile && (
@@ -435,47 +831,69 @@ const ModelSelector = () => {
                 onClick={handleDeselectModel}
                 startIcon={<Close />}
                 sx={{ 
+                  borderRadius: 2,
                   borderColor: '#e0e0e0',
-                  color: '#666',
+                  borderWidth: '2px',
+                  color: '#706f6f',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontFamily: '"Poppins", sans-serif',
+                  fontSize: '0.75rem',
                   '&:hover': { 
-                    borderColor: '#4a7c59',
-                    color: '#4a7c59'
+                    borderColor: '#333F1F',
+                    borderWidth: '2px',
+                    color: '#333F1F',
+                    bgcolor: 'rgba(51, 63, 31, 0.05)'
                   }
                 }}
               >
                 Clear
               </Button>
             )}
-            <Typography variant="caption" color="success.main" fontWeight="bold">
-              {models.length} OPTIONS
-            </Typography>
+            <Chip 
+              label={`${models.length} OPTIONS`}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(140, 165, 81, 0.12)',
+                color: '#8CA551',
+                fontWeight: 700,
+                fontSize: '0.65rem',
+                fontFamily: '"Poppins", sans-serif',
+                letterSpacing: '1px',
+                height: 26,
+                px: 1
+              }}
+            />
           </Box>
         </Box>
 
         {/* Main Content Area */}
         <Box sx={{ 
           position: 'relative',
-          minHeight: isMobile ? 350 : 450,
+          minHeight: isMobile ? 400 : 500,
           overflow: 'hidden'
         }}>
           {/* Desktop/Tablet Layout - Side Panel */}
           {!isMobile && selectedModel && (
-            <Box
-              sx={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: isTablet ? '40%' : isLarge ? '36%' : '32%',
-                maxWidth: isTablet ? 320 : isLarge ? 380 : 340,
-                transform: 'translateX(0)',
-                opacity: 1,
-                transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                zIndex: 10
-              }}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
             >
-              <ModelInfoPanel />
-            </Box>
+              <Box
+                sx={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: isTablet ? '40%' : isLarge ? '36%' : '32%',
+                  maxWidth: isTablet ? 320 : isLarge ? 380 : 340,
+                  zIndex: 10
+                }}
+              >
+                <ModelInfoPanel />
+              </Box>
+            </motion.div>
           )}
 
           {/* Models Container */}
@@ -514,7 +932,7 @@ const ModelSelector = () => {
                   height: 6
                 },
                 '&::-webkit-scrollbar-thumb': {
-                  bgcolor: 'grey.400',
+                  bgcolor: 'rgba(51, 63, 31, 0.2)',
                   borderRadius: 3
                 }
               }}
@@ -528,177 +946,258 @@ const ModelSelector = () => {
                 if (!isMobile && selectedModel && !isSelected) return null
                 
                 return (
-                  <Card
-                    key={model._id}
-                    onClick={() => !selectedModel && handleSelectModel(model)}
-                    sx={{
-                      minWidth:{xs:260, md:300, lg:400},
-                      maxWidth: isSelected && !isMobile 
-                        ? (isLarge ? 420 : 350)
-                        : isMobile ? 260 : 300,
-                      flexShrink: 0,
-                      cursor: selectedModel && !isMobile ? 'default' : 'pointer',
-                      bgcolor: isSelected ? '#e8f5e9' : '#fff',
-                      border: isSelected ? '3px solid #4a7c59' : '1px solid #e0e0e0',
-                      borderRadius: 2,
-                      position: 'relative',
-                      boxShadow: isSelected ? 4 : 1,
-                      transition: 'all 0.3s ease',
-                      '&:hover': !selectedModel || isMobile ? {
-                        transform: 'translateY(-4px)',
-                        boxShadow: 3
-                      } : {}
-                    }}
-                  >
-                    {isSelected && (
-                      <CheckCircleIcon 
-                        color="success" 
-                        sx={{ 
-                          position: 'absolute',
-                          top: 8,
-                          right: 8,
-                          bgcolor: '#fff',
-                          borderRadius: '50%',
-                          zIndex: 2,
-                          fontSize: isMobile ? 24 : 32
-                        }} 
-                      />
-                    )}
-
-                    <Box
+                  <div key={model._id}>
+                    <Card
+                      elevation={0}
+                      onClick={() => !selectedModel && handleSelectModel(model)}
                       sx={{
-                        width: '100%',
-                        height:{xs:160, md:240, lg:250},
-                        bgcolor: 'grey.200',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundImage: currentImage ? `url(${currentImage})` : 'none',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
+                        minWidth: { xs: 260, md: 300, lg: 400 },
+                        maxWidth: isSelected && !isMobile 
+                          ? (isLarge ? 420 : 350)
+                          : isMobile ? 260 : 300,
+                        flexShrink: 0,
+                        cursor: selectedModel && !isMobile ? 'default' : 'pointer',
+                        bgcolor: isSelected ? 'rgba(140, 165, 81, 0.08)' : '#fff',
+                        border: isSelected ? '2px solid #8CA551' : '1px solid #e0e0e0',
+                        borderRadius: 3,
                         position: 'relative',
-                        transition: 'height 0.3s ease'
+                        boxShadow: isSelected ? '0 8px 24px rgba(140, 165, 81, 0.15)' : '0 4px 12px rgba(0,0,0,0.04)',
+                        transition: 'none',
+                        '&:hover': {
+                          transform: 'none',
+                          boxShadow: isSelected ? '0 8px 24px rgba(140, 165, 81, 0.15)' : '0 4px 12px rgba(0,0,0,0.04)'
+                        }
                       }}
                     >
-                      {!currentImage && <Home sx={{ fontSize: isMobile ? 40 : 60, color: 'grey.400' }} />}
-                      
-                      {modelImages.length > 1 && (
-                        <>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => handlePrevImage(e, model._id, modelImages.length)}
-                            sx={{
-                              position: 'absolute',
-                              left: 4,
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              bgcolor: 'rgba(255,255,255,0.9)',
-                              width: isMobile ? 28 : 36,
-                              height: isMobile ? 28 : 36,
-                              '&:hover': { bgcolor: 'rgba(255,255,255,1)' }
-                            }}
-                          >
-                            <ChevronLeft fontSize={isMobile ? "small" : "medium"} />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => handleNextImage(e, model._id, modelImages.length)}
-                            sx={{
-                              position: 'absolute',
-                              right: 4,
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              bgcolor: 'rgba(255,255,255,0.9)',
-                              width: isMobile ? 28 : 36,
-                              height: isMobile ? 28 : 36,
-                              '&:hover': { bgcolor: 'rgba(255,255,255,1)' }
-                            }}
-                          >
-                            <ChevronRight fontSize={isMobile ? "small" : "medium"} />
-                          </IconButton>
-                          <Chip
-                            label={`${currentImageIndex + 1}/${modelImages.length}`}
-                            size="small"
-                            sx={{
-                              position: 'absolute',
-                              bottom: 4,
-                              left: 4,
-                              bgcolor: 'rgba(0,0,0,0.7)',
-                              color: 'white',
-                              fontSize: '0.7rem',
-                              height: 20
-                            }}
-                          />
-                        </>
+                      {isSelected && (
+                        <CheckCircleIcon 
+                          sx={{ 
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            bgcolor: 'white',
+                            borderRadius: '50%',
+                            zIndex: 2,
+                            fontSize: isMobile ? 24 : 32,
+                            color: '#8CA551'
+                          }} 
+                        />
                       )}
-                    </Box>
 
-                    <CardContent sx={{ p: isMobile ? 1.5 : 2.5 }}>
-                      <Box display="flex" justifyContent="space-between" alignItems="start" mb={1}>
-                        <Typography variant={isMobile ? "body1" : "h6"} fontWeight="bold" sx={{ flex: 1, minWidth: 0 }}>
-                          {model.model}
-                        </Typography>
-                        <Typography 
-                          variant={isSelected && !isMobile ? "h5" : isMobile ? "body1" : "h6"} 
-                          sx={{ color: '#4a7c59', fontWeight: 'bold', ml: 1 }}
-                        >
-                          ${(model.price / 1000).toFixed(0)}K
-                        </Typography>
+                      <Box
+                        sx={{
+                          width: '100%',
+                          height: { xs: 160, md: 240, lg: 250 },
+                          bgcolor: '#f5f5f5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundImage: currentImage ? `url(${currentImage})` : 'none',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          position: 'relative',
+                          transition: 'height 0.3s ease'
+                        }}
+                      >
+                        {!currentImage && <Home sx={{ fontSize: isMobile ? 40 : 60, color: '#e0e0e0' }} />}
+                        
+                        {modelImages.length > 1 && (
+                          <>
+                            <IconButton
+                              size="small"
+                              onClick={(e) => handlePrevImage(e, model._id, modelImages.length)}
+                              sx={{
+                                position: 'absolute',
+                                left: 4,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                bgcolor: 'rgba(255,255,255,0.95)',
+                                width: isMobile ? 28 : 36,
+                                height: isMobile ? 28 : 36,
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                '&:hover': { 
+                                  bgcolor: 'white',
+                                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                                }
+                              }}
+                            >
+                              <ChevronLeft fontSize={isMobile ? "small" : "medium"} sx={{ color: '#333F1F' }} />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={(e) => handleNextImage(e, model._id, modelImages.length)}
+                              sx={{
+                                position: 'absolute',
+                                right: 4,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                bgcolor: 'rgba(255,255,255,0.95)',
+                                width: isMobile ? 28 : 36,
+                                height: isMobile ? 28 : 36,
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                '&:hover': { 
+                                  bgcolor: 'white',
+                                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                                }
+                              }}
+                            >
+                              <ChevronRight fontSize={isMobile ? "small" : "medium"} sx={{ color: '#333F1F' }} />
+                            </IconButton>
+                            <Chip
+                              label={`${currentImageIndex + 1}/${modelImages.length}`}
+                              size="small"
+                              sx={{
+                                position: 'absolute',
+                                bottom: 4,
+                                left: 4,
+                                bgcolor: 'rgba(51, 63, 31, 0.9)',
+                                color: 'white',
+                                fontSize: '0.65rem',
+                                height: 20,
+                                fontFamily: '"Poppins", sans-serif',
+                                fontWeight: 600
+                              }}
+                            />
+                          </>
+                        )}
                       </Box>
 
-                      <Typography variant="caption" color="text.secondary" display="block" mb={isMobile ? 1 : 2}>
-                        Model #{model.modelNumber}
-                      </Typography>
+                      <CardContent sx={{ p: isMobile ? 1.5 : 2.5 }}>
+                        <Box display="flex" justifyContent="space-between" alignItems="start" mb={1}>
+                          <Typography 
+                            variant={isMobile ? "body1" : "h6"} 
+                            fontWeight={700}
+                            sx={{ 
+                              flex: 1, 
+                              minWidth: 0,
+                              color: '#333F1F',
+                              fontFamily: '"Poppins", sans-serif',
+                              letterSpacing: '0.5px'
+                            }}
+                          >
+                            {model.model}
+                          </Typography>
+                          <Typography 
+                            variant={isSelected && !isMobile ? "h5" : isMobile ? "body1" : "h6"} 
+                            sx={{ 
+                              color: '#8CA551',
+                              fontWeight: 700,
+                              ml: 1,
+                              fontFamily: '"Poppins", sans-serif'
+                            }}
+                          >
+                            ${(model.price / 1000).toFixed(0)}K
+                          </Typography>
+                        </Box>
 
-                      <Box display="flex" gap={isMobile ? 1.5 : 2.5} flexWrap="wrap" mb={isMobile ? 1 : 2}>
-                        <Box display="flex" alignItems="center" gap={0.5}>
-                          <Bed fontSize="small" color="action" />
-                          <Typography variant={isMobile ? "caption" : "body2"} fontWeight="500">{model.bedrooms}</Typography>
-                        </Box>
-                        <Box display="flex" alignItems="center" gap={0.5}>
-                          <Bathtub fontSize="small" color="action" />
-                          <Typography variant={isMobile ? "caption" : "body2"} fontWeight="500">{model.bathrooms}</Typography>
-                        </Box>
-                        <Box display="flex" alignItems="center" gap={0.5}>
-                          <SquareFoot fontSize="small" color="action" />
-                          <Typography variant={isMobile ? "caption" : "body2"} fontWeight="500">{model.sqft?.toLocaleString()}</Typography>
-                        </Box>
-                      </Box>
-
-                      {model.description && !isMobile && (
                         <Typography 
                           variant="caption" 
-                          color="text.secondary" 
-                          sx={{ 
-                            display: '-webkit-box',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            lineHeight: 1.5
-                          }}
-                        >
-                          {model.description}
-                        </Typography>
-                      )}
-
-                      {isMobile && isSelected && (
-                        <Button
-                          size="small"
-                          variant="contained"
-                          fullWidth
-                          onClick={() => setDrawerOpen(true)}
+                          display="block" 
+                          mb={isMobile ? 1 : 2}
                           sx={{
-                            mt: 1,
-                            bgcolor: '#4a7c59',
-                            '&:hover': { bgcolor: '#3d6849' }
+                            color: '#706f6f',
+                            fontFamily: '"Poppins", sans-serif',
+                            fontSize: '0.75rem'
                           }}
                         >
-                          View Details
-                        </Button>
-                      )}
-                    </CardContent>
-                  </Card>
+                          Model #{model.modelNumber}
+                        </Typography>
+
+                        {/* ✅ SPECS - Grid brandbook */}
+                        <Box 
+                          display="grid"
+                          gridTemplateColumns="repeat(3, 1fr)"
+                          gap={0}
+                          mb={isMobile ? 1 : 2}
+                          sx={{
+                            borderTop: '1px solid #e0e0e0',
+                            borderBottom: '1px solid #e0e0e0',
+                            py: 1
+                          }}
+                        >
+                          <Box sx={{ textAlign: 'center', borderRight: '1px solid #e0e0e0' }}>
+                            <Bed fontSize="small" sx={{ color: '#999', mb: 0.3 }} />
+                            <Typography 
+                              variant={isMobile ? "caption" : "body2"} 
+                              fontWeight={600}
+                              sx={{ 
+                                color: '#333F1F',
+                                fontFamily: '"Poppins", sans-serif'
+                              }}
+                            >
+                              {model.bedrooms}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ textAlign: 'center', borderRight: '1px solid #e0e0e0' }}>
+                            <Bathtub fontSize="small" sx={{ color: '#999', mb: 0.3 }} />
+                            <Typography 
+                              variant={isMobile ? "caption" : "body2"} 
+                              fontWeight={600}
+                              sx={{ 
+                                color: '#333F1F',
+                                fontFamily: '"Poppins", sans-serif'
+                              }}
+                            >
+                              {model.bathrooms}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ textAlign: 'center' }}>
+                            <SquareFoot fontSize="small" sx={{ color: '#999', mb: 0.3 }} />
+                            <Typography 
+                              variant={isMobile ? "caption" : "body2"} 
+                              fontWeight={600}
+                              sx={{ 
+                                color: '#333F1F',
+                                fontFamily: '"Poppins", sans-serif'
+                              }}
+                            >
+                              {model.sqft?.toLocaleString()}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        {model.description && !isMobile && (
+                          <Typography 
+                            variant="caption" 
+                            sx={{ 
+                              display: '-webkit-box',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              lineHeight: 1.5,
+                              color: '#706f6f',
+                              fontFamily: '"Poppins", sans-serif',
+                              fontSize: '0.75rem'
+                            }}
+                          >
+                            {model.description}
+                          </Typography>
+                        )}
+
+                        {isMobile && isSelected && (
+                          <Button
+                            size="small"
+                            variant="contained"
+                            fullWidth
+                            onClick={() => setDrawerOpen(true)}
+                            sx={{
+                              mt: 1,
+                              bgcolor: '#333F1F',
+                              borderRadius: 2,
+                              fontWeight: 600,
+                              textTransform: 'none',
+                              fontFamily: '"Poppins", sans-serif',
+                              letterSpacing: '1px',
+                              '&:hover': { bgcolor: '#4a5d3a' }
+                            }}
+                          >
+                            View Details
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
                 )
               })}
             </Box>
@@ -714,12 +1213,20 @@ const ModelSelector = () => {
                     top: '50%',
                     transform: 'translateY(-50%)',
                     bgcolor: '#fff',
-                    boxShadow: 2,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                     zIndex: 10,
-                    '&:hover': { bgcolor: 'grey.100', boxShadow: 3 }
+                    width: 40,
+                    height: 40,
+                    '&:hover': { 
+                      bgcolor: '#f5f5f5',
+                      boxShadow: '0 6px 16px rgba(0,0,0,0.15)',
+                      '& .MuiSvgIcon-root': {
+                        color: '#333F1F'
+                      }
+                    }
                   }}
                 >
-                  <ChevronLeft />
+                  <ChevronLeft sx={{ color: '#706f6f' }} />
                 </IconButton>
 
                 <IconButton
@@ -730,12 +1237,20 @@ const ModelSelector = () => {
                     top: '50%',
                     transform: 'translateY(-50%)',
                     bgcolor: '#fff',
-                    boxShadow: 2,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                     zIndex: 10,
-                    '&:hover': { bgcolor: 'grey.100', boxShadow: 3 }
+                    width: 40,
+                    height: 40,
+                    '&:hover': { 
+                      bgcolor: '#f5f5f5',
+                      boxShadow: '0 6px 16px rgba(0,0,0,0.15)',
+                      '& .MuiSvgIcon-root': {
+                        color: '#333F1F'
+                      }
+                    }
                   }}
                 >
-                  <ChevronRight />
+                  <ChevronRight sx={{ color: '#706f6f' }} />
                 </IconButton>
               </>
             )}
@@ -744,14 +1259,20 @@ const ModelSelector = () => {
 
         {models.length === 0 && (
           <Box py={4} textAlign="center">
-            <Typography variant="body2" color="text.secondary">
+            <Typography 
+              variant="body2" 
+              sx={{
+                color: '#706f6f',
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
               No models available
             </Typography>
           </Box>
         )}
       </Paper>
 
-      {/* ✅ Mobile Drawer para detalles del modelo - Con labels condicionales */}
+      {/* ✅ Mobile Drawer para detalles del modelo */}
       <Drawer
         anchor="bottom"
         open={isMobile && drawerOpen}
@@ -767,10 +1288,16 @@ const ModelSelector = () => {
         <Box sx={{ p: 2 }}>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
             <Box display="flex" alignItems="center" gap={1}>
-              <Typography variant="h6" fontWeight="bold">
+              <Typography 
+                variant="h6" 
+                fontWeight={700}
+                sx={{
+                  color: '#333F1F',
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              >
                 Model Details
               </Typography>
-              {/* ✅ Badge para Modelo 10 en drawer */}
               {isModel10 && (
                 <Chip 
                   label="Special" 
@@ -778,18 +1305,18 @@ const ModelSelector = () => {
                   sx={{ 
                     height: 20,
                     fontSize: '0.65rem',
-                    bgcolor: 'primary.main', 
+                    bgcolor: '#E5863C', 
                     color: 'white',
-                    fontWeight: 600 
+                    fontWeight: 600,
+                    fontFamily: '"Poppins", sans-serif'
                   }} 
                 />
               )}
             </Box>
             <IconButton onClick={() => setDrawerOpen(false)}>
-              <Close />
+              <Close sx={{ color: '#706f6f' }} />
             </IconButton>
           </Box>
-          {/* Clear button for mobile */}
           {selectedModel && (
             <Button
               size="small"
@@ -799,11 +1326,18 @@ const ModelSelector = () => {
               fullWidth
               sx={{
                 mb: 2,
+                borderRadius: 2,
                 borderColor: '#e0e0e0',
-                color: '#666',
+                borderWidth: '2px',
+                color: '#706f6f',
+                fontWeight: 600,
+                textTransform: 'none',
+                fontFamily: '"Poppins", sans-serif',
                 '&:hover': { 
-                  borderColor: '#4a7c59',
-                  color: '#4a7c59'
+                  borderColor: '#333F1F',
+                  borderWidth: '2px',
+                  color: '#333F1F',
+                  bgcolor: 'rgba(51, 63, 31, 0.05)'
                 }
               }}
             >
