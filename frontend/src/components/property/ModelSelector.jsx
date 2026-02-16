@@ -946,14 +946,9 @@ const ModelSelector = () => {
                 if (!isMobile && selectedModel && !isSelected) return null
                 
                 return (
-                  <motion.div
-                    key={model._id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4 }}
-                    whileHover={!selectedModel || isMobile ? { scale: 1.02 } : {}}
-                  >
+                  <div key={model._id}>
                     <Card
+                      elevation={0}
                       onClick={() => !selectedModel && handleSelectModel(model)}
                       sx={{
                         minWidth: { xs: 260, md: 300, lg: 400 },
@@ -967,12 +962,11 @@ const ModelSelector = () => {
                         borderRadius: 3,
                         position: 'relative',
                         boxShadow: isSelected ? '0 8px 24px rgba(140, 165, 81, 0.15)' : '0 4px 12px rgba(0,0,0,0.04)',
-                        transition: 'all 0.3s ease',
-                        '&:hover': !selectedModel || isMobile ? {
-                          transform: 'translateY(-4px)',
-                          boxShadow: '0 12px 32px rgba(0,0,0,0.12)',
-                          borderColor: '#8CA551'
-                        } : {}
+                        transition: 'none',
+                        '&:hover': {
+                          transform: 'none',
+                          boxShadow: isSelected ? '0 8px 24px rgba(140, 165, 81, 0.15)' : '0 4px 12px rgba(0,0,0,0.04)'
+                        }
                       }}
                     >
                       {isSelected && (
@@ -1203,7 +1197,7 @@ const ModelSelector = () => {
                         )}
                       </CardContent>
                     </Card>
-                  </motion.div>
+                  </div>
                 )
               })}
             </Box>

@@ -212,78 +212,6 @@ const Dashboard = () => {
     }
   }
 
-  // // Quick Actions para admin/superadmin
-  // const quickActions = [
-  //   { 
-  //     icon: '🏠', 
-  //     label: 'Add Property', 
-  //     color: '#333F1F',
-  //     bgColor: '#e8f5ee',
-  //     onClick: () => navigate('/properties/select')
-  //   },
-  //   { 
-  //     icon: '👥', 
-  //     label: 'Invite User', 
-  //     color: '#8CA551',
-  //     bgColor: '#f0f7e8',
-  //     onClick: handleOpenUserDialog
-  //   },
-  //   { 
-  //     icon: '📊', 
-  //     label: 'Analytics', 
-  //     color: '#E5863C',
-  //     bgColor: '#fff5e6',
-  //     onClick: () => navigate('/analytics')
-  //   },
-  //   { 
-  //     icon: '🏡', 
-  //     label: 'Models', 
-  //     color: '#333F1F', 
-  //     bgColor: '#e8f5ee',
-  //     onClick: () => navigate('/view-models') 
-  //   },
-  //   { 
-  //     icon: '🏛️', 
-  //     label: 'Amenities', 
-  //     color: '#8CA551', 
-  //     bgColor: '#f0f7e8',
-  //     onClick: () => navigate('/amenities') 
-  //   },
-  //   { 
-  //     icon: '📰', 
-  //     label: 'Manage News', 
-  //     color: '#E5863C', 
-  //     bgColor: '#fff5e6',
-  //     onClick: () => navigate('/news')
-  //   }
-  // ]
-  
-  // // Quick Actions para user propietario
-  // const userQuickActions = [
-  //   { 
-  //     icon: '🏡', 
-  //     label: 'Models', 
-  //     color: '#333F1F', 
-  //     bgColor: '#e8f5ee',
-  //     onClick: () => navigate('/view-models') 
-  //   },
-  //   { 
-  //     icon: '🏛️', 
-  //     label: 'Amenities', 
-  //     color: '#8CA551', 
-  //     bgColor: '#f0f7e8',
-  //     onClick: () => navigate('/amenities') 
-  //   },
-  //   { 
-  //     icon: '📰', 
-  //     label: 'News Feed', 
-  //     color: '#E5863C', 
-  //     bgColor: '#fff5e6',
-  //     onClick: () => navigate('/explore/news')
-  //   }
-  // ]
-
-  // ✅ QUICK ACTIONS PARA ADMIN/SUPERADMIN
 const quickActions = [
   { 
     icon: <Business />, 
@@ -326,6 +254,13 @@ const quickActions = [
     color: '#E5863C', 
     bgColor: '#fff5e6',
     onClick: () => navigate('/news')
+  },
+  { 
+    icon: <Business />, 
+    label: 'Club House', 
+    color: '#333F1F', 
+    bgColor: '#e8f5ee',
+    onClick: () => navigate('/club-house-detail')
   }
 ]
 
@@ -351,6 +286,13 @@ const userQuickActions = [
     color: '#E5863C', 
     bgColor: '#fff5e6',
     onClick: () => navigate('/explore/news')
+  },
+  { 
+    icon: <Business />, 
+    label: 'Club House', 
+    color: '#333F1F', 
+    bgColor: '#e8f5ee',
+    onClick: () => navigate('/club-house-detail')
   }
 ]
 
