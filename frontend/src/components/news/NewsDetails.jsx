@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useCallback } from 'react';
+
 import {
   Box,
   Container,
@@ -67,6 +69,30 @@ const NewsDetail = () => {
     }
   };
 
+  const [relatedNews, setRelatedNews] = useState([]);
+const [loadingRelated, setLoadingRelated] = useState(false);
+
+const fetchRelatedNews = useCallback(async () => {
+  if (!news?.category) return;
+  setLoadingRelated(true);
+  try {
+    const allNews = await newsService.getAllNews();
+    // Filtra por categoría, excluyendo la noticia actual
+    const filtered = allNews.filter(
+      n => n.category === news.category && n._id !== news._id
+    );
+    setRelatedNews(filtered.slice(0, 4)); // Muestra máximo 4
+  } catch (err) {
+    setRelatedNews([]);
+  } finally {
+    setLoadingRelated(false);
+  }
+}, [news]);
+
+useEffect(() => {
+  fetchRelatedNews();
+}, [news, fetchRelatedNews]);
+
   const getCategoryColor = (category) => {
     switch (category) {
       case 'construction': return '#E5863C';
@@ -103,7 +129,7 @@ const NewsDetail = () => {
               color: '#333F1F',
               fontWeight: block.level === 2 ? 800 : 700,
               fontSize: block.level === 2 ? { xs: '1.8rem', md: '2.2rem' } : { xs: '1.4rem', md: '1.8rem' },
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Poppins", sans-serif',
               mt: { xs: 4, md: 6 },
               mb: { xs: 2, md: 3 },
               lineHeight: 1.3,
@@ -134,7 +160,7 @@ const NewsDetail = () => {
               fontSize: { xs: '1.05rem', md: '1.15rem' },
               lineHeight: 1.9,
               mb: { xs: 2.5, md: 3 },
-              fontFamily: '"Lora", serif',
+              fontFamily: '"Poppins", sans-serif',
               fontWeight: 400,
               textAlign: 'justify',
               '& strong': {
@@ -162,7 +188,7 @@ const NewsDetail = () => {
               lineHeight: 1.9,
               mb: { xs: 2.5, md: 3 },
               pl: { xs: 3, md: 4 },
-              fontFamily: '"Lora", serif',
+              fontFamily: '"Poppins", sans-serif',
               '& li': {
                 mb: 1.5,
                 position: 'relative',
@@ -200,7 +226,7 @@ const NewsDetail = () => {
                 left: 20,
                 fontSize: '6rem',
                 color: 'rgba(140, 165, 81, 0.15)',
-                fontFamily: 'Georgia, serif',
+                fontFamily: '"Poppins", sans-serif',
                 lineHeight: 1
               }
             }}
@@ -209,7 +235,7 @@ const NewsDetail = () => {
               sx={{ 
                 fontSize: { xs: '1.15rem', md: '1.3rem' },
                 lineHeight: 1.7,
-                fontFamily: '"Playfair Display", serif',
+                fontFamily: '"Poppins", sans-serif',
                 fontStyle: 'italic',
                 color: '#333F1F',
                 fontWeight: 500,
@@ -381,7 +407,7 @@ const NewsDetail = () => {
                 color: 'white',
                 fontWeight: 900,
                 fontSize: { xs: '2rem', sm: '3rem', md: '4rem' },
-                fontFamily: '"Playfair Display", serif',
+                fontFamily: '"Poppins", sans-serif',
                 lineHeight: 1.1,
                 mb: 2,
                 textShadow: '0 4px 20px rgba(0,0,0,0.5)',
@@ -396,7 +422,7 @@ const NewsDetail = () => {
               sx={{
                 color: 'rgba(255,255,255,0.95)',
                 fontWeight: 400,
-                fontFamily: '"Lora", serif',
+                fontFamily: '"Poppins", sans-serif',
                 fontStyle: 'italic',
                 maxWidth: '800px',
                 fontSize: { xs: '1rem', md: '1.25rem' },
@@ -548,14 +574,14 @@ const NewsDetail = () => {
                     sx={{
                       fontSize: { xs: '1.05rem', md: '1.15rem' },
                       lineHeight: 1.9,
-                      fontFamily: '"Lora", serif',
+                      fontFamily: '"Poppins", sans-serif',
                       color: '#495057',
                       mb: 4,
                       '&::first-letter': {
                         float: 'left',
                         fontSize: '5rem',
                         lineHeight: 0.8,
-                        fontFamily: '"Playfair Display", serif',
+                        fontFamily: '"Poppins", sans-serif',
                         fontWeight: 900,
                         color: '#333F1F',
                         pr: 1.5,
@@ -582,7 +608,7 @@ const NewsDetail = () => {
                           fontWeight={800}
                           sx={{
                             color: '#333F1F',
-                            fontFamily: '"Playfair Display", serif',
+                            fontFamily: '"Poppins", sans-serif',
                             mb: 1
                           }}
                         >
@@ -635,7 +661,7 @@ const NewsDetail = () => {
                           fontWeight={800}
                           sx={{
                             color: '#333F1F',
-                            fontFamily: '"Playfair Display", serif',
+                            fontFamily: '"Poppins", sans-serif',
                             mb: 1
                           }}
                         >
@@ -808,78 +834,122 @@ const NewsDetail = () => {
                 </Paper>
 
                 {/* SHARE CARD */}
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 3,
-                    borderRadius: 4,
-                    bgcolor: 'white',
-                    boxShadow: '0 8px 24px rgba(51, 63, 31, 0.1)',
-                    border: '1px solid rgba(0,0,0,0.05)'
-                  }}
-                >
-                  <Typography 
-                    variant="subtitle1" 
-                    fontWeight={700} 
-                    mb={2}
-                    sx={{
-                      color: '#333F1F',
-                      fontFamily: '"Poppins", sans-serif'
-                    }}
-                  >
-                    Enjoying this article?
-                  </Typography>
 
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    startIcon={bookmarked ? <Bookmark /> : <BookmarkBorder />}
-                    onClick={() => setBookmarked(!bookmarked)}
-                    sx={{
-                      mb: 1.5,
-                      borderRadius: 3,
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      fontFamily: '"Poppins", sans-serif',
-                      py: 1.2,
-                      bgcolor: bookmarked ? '#8CA551' : '#333F1F',
-                      '&:hover': { 
-                        bgcolor: bookmarked ? '#333F1F' : '#8CA551',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 8px 20px rgba(51, 63, 31, 0.25)'
-                      },
-                      transition: 'all 0.3s'
-                    }}
-                  >
-                    {bookmarked ? 'Saved' : 'Save for Later'}
-                  </Button>
+                
+                <Grid item xs={12} md={3.5}>
+                  <Box sx={{ position: 'sticky', top: 120 }}>
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.8, delay: 0.6 }}
+                    >
+                      {/* QUICK INFO */}
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 3,
+                          borderRadius: 4,
+                          bgcolor: 'rgba(140, 165, 81, 0.05)',
+                          border: '1px solid rgba(140, 165, 81, 0.2)',
+                          mb: 3
+                        }}
+                      >
+                        {/* ...existing quick info... */}
+                      </Paper>
+                
+                      {/* ✅ Noticias relacionadas */}
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 3,
+                          borderRadius: 4,
+                          bgcolor: 'white',
+                          boxShadow: '0 8px 24px rgba(51, 63, 31, 0.1)',
+                          border: '1px solid rgba(0,0,0,0.05)'
+                        }}
+                      >
+                        <Typography 
+                          variant="subtitle1" 
+                          fontWeight={700} 
+                          mb={2}
+                          sx={{
+                            color: '#333F1F',
+                            fontFamily: '"Poppins", sans-serif'
+                          }}
+                        >
+                          Related News
+                        </Typography>
+                        {loadingRelated ? (
+                          <Box display="flex" justifyContent="center" py={2}>
+                            <CircularProgress size={28} sx={{ color: '#8CA551' }} />
+                          </Box>
+                        ) : relatedNews.length === 0 ? (
+                          <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+                            No related news found.
+                          </Typography>
+                        ) : (
+                          <Box display="flex" flexDirection="column" gap={2}>
+                            {relatedNews.map(item => (
+                              <Button
+                                key={item._id}
+                                fullWidth
+                                variant="outlined"
+                                onClick={() => navigate(`/explore/news/${item._id}`)}
+                                sx={{
+                                  borderRadius: 3,
+                                  textTransform: 'none',
+                                  fontWeight: 600,
+                                  fontFamily: '"Poppins", sans-serif',
+                                  py: 1.2,
+                                  borderColor: 'rgba(140, 165, 81, 0.3)',
+                                  borderWidth: '2px',
+                                  color: '#333F1F',
+                                  justifyContent: 'flex-start',
+                                  alignItems: 'center',
+                                  gap: 1.5,
+                                  '&:hover': { 
+                                    borderColor: '#8CA551',
+                                    borderWidth: '2px',
+                                    bgcolor: 'rgba(140, 165, 81, 0.08)',
+                                    transform: 'translateY(-2px)'
+                                  },
+                                  transition: 'all 0.3s'
+                                }}
+                                startIcon={
+                                  <Box
+                                    sx={{
+                                      width: 36,
+                                      height: 36,
+                                      borderRadius: 2,
+                                      bgcolor: 'rgba(140, 165, 81, 0.08)',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      border: '1px solid rgba(140, 165, 81, 0.2)'
+                                    }}
+                                  >
+                                    <CalendarToday sx={{ fontSize: 18, color: '#8CA551' }} />
+                                  </Box>
+                                }
+                              >
+                                <Box>
+                                  <Typography variant="body2" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+                                    {item.title}
+                                  </Typography>
+                                  <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+                                    {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                  </Typography>
+                                </Box>
+                              </Button>
+                            ))}
+                          </Box>
+                        )}
+                      </Paper>
+                    </motion.div>
+                  </Box>
+                </Grid>
+                
 
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    startIcon={<Share />}
-                    onClick={handleShare}
-                    sx={{
-                      borderRadius: 3,
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      fontFamily: '"Poppins", sans-serif',
-                      py: 1.2,
-                      borderColor: 'rgba(140, 165, 81, 0.3)',
-                      borderWidth: '2px',
-                      color: '#333F1F',
-                      '&:hover': { 
-                        borderColor: '#8CA551',
-                        borderWidth: '2px',
-                        bgcolor: 'rgba(140, 165, 81, 0.08)',
-                        transform: 'translateY(-2px)'
-                      },
-                      transition: 'all 0.3s'
-                    }}
-                  >
-                    Share Article
-                  </Button>
-                </Paper>
               </motion.div>
             </Box>
           </Grid>

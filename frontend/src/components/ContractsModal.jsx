@@ -1,535 +1,3 @@
-// import { useState, useEffect } from 'react'
-// import {
-//   Dialog,
-//   DialogTitle,
-//   DialogContent,
-//   DialogActions,
-//   Button,
-//   Box,
-//   Typography,
-//   IconButton,
-//   Stepper,
-//   Step,
-//   StepLabel,
-//   StepContent,
-//   CircularProgress,
-//   Paper,
-//   Chip
-// } from '@mui/material'
-// import {
-//   Close,
-//   Description,
-//   AttachFile,
-//   Delete,
-//   CheckCircle,
-//   CloudUpload,
-//   Download,
-//   Cancel
-// } from '@mui/icons-material'
-// import api from '../services/api'
-// import uploadService from '../services/uploadService'
-
-// const DOCUMENT_TYPES = [
-//   { key: 'promissoryNote', label: 'Promissory note', icon: '📄' },
-//   { key: 'purchaseContract', label: 'Purchase contract', icon: '📝' },
-//   { key: 'agreement', label: 'Agreement', icon: '📋' }
-// ]
-
-// const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
-//   const [documents, setDocuments] = useState({})
-//   const [activeStep, setActiveStep] = useState(0)
-//   const [loading, setLoading] = useState(false)
-//   const [uploading, setUploading] = useState(false)
-
-//   useEffect(() => {
-//     if (open && property) {
-//       fetchContracts()
-//     }
-//   }, [open, property])
-
-//   const fetchContracts = async () => {
-//     try {
-//       setLoading(true)
-//       const response = await api.get(`/contracts/property/${property._id}`)
-      
-//       // Organizar por tipo de documento
-//       const organizedDocs = {}
-//       response.data.forEach(contract => {
-//         organizedDocs[contract.type] = contract
-//       })
-      
-//       setDocuments(organizedDocs)
-//     } catch (error) {
-//       console.error('Error fetching contracts:', error)
-//     } finally {
-//       setLoading(false)
-//     }
-//   }
-
-//   const handleFileChange = async (docType, file) => {
-//     if (!file) return
-
-//     try {
-//       setUploading(true)
-
-//       // Upload file to GCS
-//       const [fileUrl] = await uploadService.uploadContractFiles([file])
-
-//       // Create/Update contract
-//       const contractData = {
-//         property: property._id,
-//         type: docType.key,
-//         title: docType.label,
-//         fileUrl,
-//         status: 'pending'
-//       }
-
-//       if (documents[docType.key]?._id) {
-//         // Update existing
-//         await api.put(`/contracts/${documents[docType.key]._id}`, contractData)
-//       } else {
-//         // Create new
-//         await api.post('/contracts', contractData)
-//       }
-
-//       alert('✅ Contract uploaded successfully!')
-//       fetchContracts()
-//       if (onContractUpdated) onContractUpdated()
-//     } catch (error) {
-//       console.error('Error uploading contract:', error)
-//       alert(`❌ Error: ${error.response?.data?.message || error.message}`)
-//     } finally {
-//       setUploading(false)
-//     }
-//   }
-
-//   const handleRemoveFile = async (docType) => {
-//     if (!window.confirm('Are you sure you want to delete this contract?')) return
-
-//     try {
-//       await api.delete(`/contracts/${documents[docType.key]._id}`)
-//       alert('✅ Contract deleted')
-//       fetchContracts()
-//       if (onContractUpdated) onContractUpdated()
-//     } catch (error) {
-//       console.error('Error deleting contract:', error)
-//       alert('❌ Error deleting contract')
-//     }
-//   }
-
-//   const handleDownload = (docType) => {
-//     const contract = documents[docType.key]
-//     if (contract?.fileUrl) {
-//       window.open(contract.fileUrl, '_blank')
-//     }
-//   }
-
-//   const getCompletedCount = () => {
-//     return DOCUMENT_TYPES.filter(doc => documents[doc.key]).length
-//   }
-
-//   return (
-//     <Dialog
-//       open={open}
-//       onClose={onClose}
-//       maxWidth="md"
-//       fullWidth
-//       PaperProps={{
-//         sx: {
-//           borderRadius: 4,
-//           boxShadow: '0 20px 60px rgba(51, 63, 31, 0.15)'
-//         }
-//       }}
-//     >
-//       {/* ✅ DIALOG TITLE - Mismo estilo que Payloads */}
-//       <DialogTitle>
-//         <Box display="flex" justifyContent="space-between" alignItems="center">
-//           <Box display="flex" alignItems="center" gap={2}>
-//             <Box
-//               sx={{
-//                 width: 48,
-//                 height: 48,
-//                 borderRadius: 3,
-//                 bgcolor: '#333F1F',
-//                 display: 'flex',
-//                 alignItems: 'center',
-//                 justifyContent: 'center',
-//                 boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)',
-//               }}
-//             >
-//               <Description sx={{ color: 'white', fontSize: 24 }} />
-//             </Box>
-//             <Box>
-//               <Typography
-//                 variant="h6"
-//                 fontWeight={700}
-//                 sx={{
-//                   color: '#333F1F',
-//                   fontFamily: '"Poppins", sans-serif'
-//                 }}
-//               >
-//                 Contract Management
-//               </Typography>
-//               <Typography
-//                 variant="caption"
-//                 sx={{
-//                   color: '#706f6f',
-//                   fontFamily: '"Poppins", sans-serif'
-//                 }}
-//               >
-//                 Upload and manage property contracts - Lot {property?.lot?.number}
-//               </Typography>
-//             </Box>
-//           </Box>
-//           <IconButton
-//             onClick={onClose}
-//             sx={{
-//               color: '#706f6f',
-//               '&:hover': {
-//                 bgcolor: 'rgba(112, 111, 111, 0.08)',
-//                 transform: 'scale(1.05)'
-//               }
-//             }}
-//           >
-//             <Close />
-//           </IconButton>
-//         </Box>
-//       </DialogTitle>
-
-//       <DialogContent sx={{ pt: 3 }}>
-//         {loading ? (
-//           <Box display="flex" justifyContent="center" p={4}>
-//             <CircularProgress sx={{ color: '#8CA551' }} />
-//           </Box>
-//         ) : (
-//           <>
-//             {/* ✅ PROGRESS INDICATOR */}
-//             <Paper
-//               elevation={0}
-//               sx={{
-//                 p: 2.5,
-//                 mb: 3,
-//                 bgcolor: '#fafafa',
-//                 borderRadius: 3,
-//                 border: '1px solid #e0e0e0',
-//                 display: 'flex',
-//                 alignItems: 'center',
-//                 justifyContent: 'space-between'
-//               }}
-//             >
-//               <Box>
-//                 <Typography
-//                   variant="body2"
-//                   fontWeight={600}
-//                   sx={{
-//                     color: '#333F1F',
-//                     fontFamily: '"Poppins", sans-serif',
-//                     mb: 0.5
-//                   }}
-//                 >
-//                   Contract Upload Progress
-//                 </Typography>
-//                 <Typography
-//                   variant="caption"
-//                   sx={{
-//                     color: '#706f6f',
-//                     fontFamily: '"Poppins", sans-serif'
-//                   }}
-//                 >
-//                   {getCompletedCount()} of {DOCUMENT_TYPES.length} contracts uploaded
-//                 </Typography>
-//               </Box>
-//               <Chip
-//                 label={`${Math.round((getCompletedCount() / DOCUMENT_TYPES.length) * 100)}%`}
-//                 sx={{
-//                   bgcolor: getCompletedCount() === DOCUMENT_TYPES.length
-//                     ? 'rgba(140, 165, 81, 0.12)'
-//                     : 'rgba(229, 134, 60, 0.12)',
-//                   color: '#333F1F',
-//                   border: `1px solid ${getCompletedCount() === DOCUMENT_TYPES.length ? '#8CA551' : '#E5863C'}`,
-//                   fontWeight: 700,
-//                   fontSize: '1rem',
-//                   fontFamily: '"Poppins", sans-serif',
-//                   px: 2
-//                 }}
-//               />
-//             </Paper>
-
-//             {/* ✅ STEPPER TIMELINE - Brandbook Style */}
-//             <Stepper 
-//               activeStep={activeStep} 
-//               orientation="vertical"
-//               sx={{
-//                 '& .MuiStepLabel-root': {
-//                   cursor: 'pointer'
-//                 },
-//                 '& .MuiStepConnector-line': {
-//                   borderColor: 'rgba(140, 165, 81, 0.3)',
-//                   borderWidth: '2px',
-//                   minHeight: 24
-//                 },
-//                 '& .MuiStepLabel-label': {
-//                   fontFamily: '"Poppins", sans-serif',
-//                   fontWeight: 600,
-//                   color: '#706f6f',
-//                   '&.Mui-active': {
-//                     color: '#333F1F',
-//                     fontWeight: 700
-//                   },
-//                   '&.Mui-completed': {
-//                     color: '#8CA551',
-//                     fontWeight: 600
-//                   }
-//                 }
-//               }}
-//             >
-//               {DOCUMENT_TYPES.map((docType, idx) => {
-//                 const contract = documents[docType.key]
-//                 const isCompleted = !!contract
-
-//                 return (
-//                   <Step key={docType.key} completed={isCompleted}>
-//                     <StepLabel
-//                       StepIconComponent={() => (
-//                         <Box
-//                           sx={{
-//                             width: 40,
-//                             height: 40,
-//                             borderRadius: 2,
-//                             bgcolor: isCompleted ? '#8CA551' : '#e0e0e0',
-//                             display: 'flex',
-//                             alignItems: 'center',
-//                             justifyContent: 'center',
-//                             boxShadow: isCompleted ? '0 4px 12px rgba(140, 165, 81, 0.25)' : 'none',
-//                             transition: 'all 0.3s ease'
-//                           }}
-//                         >
-//                           {isCompleted ? (
-//                             <CheckCircle sx={{ fontSize: 24, color: 'white' }} />
-//                           ) : (
-//                             <Typography fontSize="1.2rem">{docType.icon}</Typography>
-//                           )}
-//                         </Box>
-//                       )}
-//                       onClick={() => setActiveStep(idx)}
-//                     >
-//                       <Box display="flex" alignItems="center" gap={1.5}>
-//                         <Typography
-//                           variant="body1"
-//                           fontWeight={activeStep === idx ? 700 : 600}
-//                           sx={{
-//                             color: isCompleted ? '#8CA551' : (activeStep === idx ? '#333F1F' : '#706f6f'),
-//                             fontFamily: '"Poppins", sans-serif'
-//                           }}
-//                         >
-//                           {docType.label}
-//                         </Typography>
-//                         {isCompleted && (
-//                           <Chip
-//                             label="Uploaded"
-//                             size="small"
-//                             sx={{
-//                               bgcolor: 'rgba(140, 165, 81, 0.12)',
-//                               color: '#8CA551',
-//                               border: '1px solid #8CA551',
-//                               fontWeight: 600,
-//                               fontFamily: '"Poppins", sans-serif',
-//                               height: 22
-//                             }}
-//                           />
-//                         )}
-//                       </Box>
-//                     </StepLabel>
-
-//                     <StepContent>
-//                       <Paper
-//                         elevation={0}
-//                         sx={{
-//                           p: 2.5,
-//                           mt: 1.5,
-//                           mb: 2,
-//                           bgcolor: '#fafafa',
-//                           border: '1px solid #e0e0e0',
-//                           borderRadius: 2
-//                         }}
-//                       >
-//                         {contract ? (
-//                           // ✅ DOCUMENTO YA SUBIDO
-//                           <Box>
-//                             <Typography
-//                               variant="body2"
-//                               sx={{
-//                                 color: '#333F1F',
-//                                 fontFamily: '"Poppins", sans-serif',
-//                                 fontWeight: 600,
-//                                 mb: 1.5
-//                               }}
-//                             >
-//                               {contract.title}
-//                             </Typography>
-//                             <Box display="flex" gap={1}>
-//                               <Button
-//                                 variant="outlined"
-//                                 size="small"
-//                                 startIcon={<Download />}
-//                                 onClick={() => handleDownload(docType)}
-//                                 sx={{
-//                                   borderRadius: 2,
-//                                   textTransform: 'none',
-//                                   fontWeight: 600,
-//                                   fontFamily: '"Poppins", sans-serif',
-//                                   borderColor: 'rgba(140, 165, 81, 0.3)',
-//                                   borderWidth: '2px',
-//                                   color: '#333F1F',
-//                                   '&:hover': {
-//                                     borderColor: '#8CA551',
-//                                     borderWidth: '2px',
-//                                     bgcolor: 'rgba(140, 165, 81, 0.08)'
-//                                   }
-//                                 }}
-//                               >
-//                                 Download
-//                               </Button>
-//                               <Button
-//                                 variant="outlined"
-//                                 size="small"
-//                                 startIcon={<Delete />}
-//                                 onClick={() => handleRemoveFile(docType)}
-//                                 sx={{
-//                                   borderRadius: 2,
-//                                   textTransform: 'none',
-//                                   fontWeight: 600,
-//                                   fontFamily: '"Poppins", sans-serif',
-//                                   borderColor: 'rgba(229, 134, 60, 0.3)',
-//                                   borderWidth: '2px',
-//                                   color: '#E5863C',
-//                                   '&:hover': {
-//                                     borderColor: '#E5863C',
-//                                     borderWidth: '2px',
-//                                     bgcolor: 'rgba(229, 134, 60, 0.08)'
-//                                   }
-//                                 }}
-//                               >
-//                                 Remove
-//                               </Button>
-//                             </Box>
-//                           </Box>
-//                         ) : (
-//                           // ✅ FORMULARIO PARA SUBIR
-//                           <Box>
-//                             <Typography
-//                               variant="body2"
-//                               sx={{
-//                                 color: '#706f6f',
-//                                 fontFamily: '"Poppins", sans-serif',
-//                                 mb: 2
-//                               }}
-//                             >
-//                               Upload the {docType.label} document for this property
-//                             </Typography>
-//                             <Button
-//                               component="label"
-//                               variant="contained"
-//                               fullWidth
-//                               startIcon={uploading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <CloudUpload />}
-//                               disabled={uploading}
-//                               sx={{
-//                                 borderRadius: 3,
-//                                 bgcolor: '#333F1F',
-//                                 color: 'white',
-//                                 fontWeight: 600,
-//                                 textTransform: 'none',
-//                                 letterSpacing: '1px',
-//                                 fontFamily: '"Poppins", sans-serif',
-//                                 py: 1.5,
-//                                 boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
-//                                 position: 'relative',
-//                                 overflow: 'hidden',
-//                                 '&::before': {
-//                                   content: '""',
-//                                   position: 'absolute',
-//                                   top: 0,
-//                                   left: '-100%',
-//                                   width: '100%',
-//                                   height: '100%',
-//                                   bgcolor: '#8CA551',
-//                                   transition: 'left 0.4s ease',
-//                                   zIndex: 0,
-//                                 },
-//                                 '&:hover': {
-//                                   bgcolor: '#333F1F',
-//                                   boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
-//                                   '&::before': {
-//                                     left: 0,
-//                                   },
-//                                 },
-//                                 '&:disabled': {
-//                                   bgcolor: '#e0e0e0',
-//                                   color: '#706f6f',
-//                                   boxShadow: 'none'
-//                                 },
-//                                 '& .MuiButton-startIcon': {
-//                                   position: 'relative',
-//                                   zIndex: 1,
-//                                 }
-//                               }}
-//                             >
-//                               <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-//                                 {uploading ? 'Uploading...' : 'Select & Upload File'}
-//                               </Box>
-//                               <input
-//                                 type="file"
-//                                 hidden
-//                                 accept=".pdf,.doc,.docx"
-//                                 onChange={(e) => {
-//                                   if (e.target.files[0]) {
-//                                     handleFileChange(docType, e.target.files[0])
-//                                   }
-//                                   e.target.value = ''
-//                                 }}
-//                               />
-//                             </Button>
-//                           </Box>
-//                         )}
-//                       </Paper>
-//                     </StepContent>
-//                   </Step>
-//                 )
-//               })}
-//             </Stepper>
-//           </>
-//         )}
-//       </DialogContent>
-
-//       {/* ✅ DIALOG ACTIONS - Mismo estilo que Payloads */}
-//       <DialogActions sx={{ p: 3, gap: 2 }}>
-//         <Button
-//           onClick={onClose}
-//           sx={{
-//             borderRadius: 3,
-//             textTransform: 'none',
-//             fontWeight: 600,
-//             px: 3,
-//             py: 1.2,
-//             color: '#706f6f',
-//             fontFamily: '"Poppins", sans-serif',
-//             border: '2px solid #e0e0e0',
-//             '&:hover': {
-//               bgcolor: 'rgba(112, 111, 111, 0.05)',
-//               borderColor: '#706f6f'
-//             }
-//           }}
-//         >
-//           Close
-//         </Button>
-//       </DialogActions>
-//     </Dialog>
-//   )
-// }
-
-// export default ContractsModal
-
-
 import { useState, useEffect } from 'react'
 import {
   Dialog,
@@ -556,7 +24,8 @@ import {
   CheckCircle,
   CloudUpload,
   Send,
-  AttachFile
+  AttachFile,
+  Download
 } from '@mui/icons-material'
 import contractsService from '../services/contractsService'
 import uploadService from '../services/uploadService'
@@ -573,6 +42,7 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
   const [activeStep, setActiveStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [deleting, setDeleting] = useState(null) // Track which contract is being deleted
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -652,6 +122,92 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
       return newFiles
     })
     console.log('🗑️ Removed pending file:', docType.key)
+  }
+
+  // ✅ ELIMINAR CONTRATO EXISTENTE
+  
+  // ✅ ELIMINAR CONTRATO EXISTENTE (MODIFICADO)
+  const handleDeleteContract = async (docType) => {
+    const contract = existingContracts[docType.key]
+    if (!contract) return
+  
+    // Confirmación
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the ${docType.label}?\n\n` +
+      `This action cannot be undone. You can upload a new document after deletion.`
+    )
+  
+    if (!confirmDelete) return
+  
+    try {
+      setDeleting(docType.key)
+      console.log('🗑️ Deleting contract:', {
+        type: docType.key,
+        propertyId: property._id
+      })
+  
+      // ✅ SOLUCIÓN: Enviar solo los contratos que NO queremos eliminar
+      // Filtrar el tipo que queremos eliminar del array actual
+      const remainingContracts = Object.entries(existingContracts)
+        .filter(([key]) => key !== docType.key) // Excluir el que queremos eliminar
+        .map(([_, contract]) => ({
+          type: contract.type,
+          fileUrl: contract.fileUrl,
+          uploadedAt: contract.uploadedAt
+        }))
+  
+      console.log('📤 Sending remaining contracts:', remainingContracts)
+  
+      // Si no quedan contratos, eliminar todo el documento
+      if (remainingContracts.length === 0) {
+        console.log('🗑️ No contracts remaining, deleting entire document...')
+        
+        // Obtener el ID del documento de contratos
+        const response = await contractsService.getContractsByProperty(property._id)
+        if (response?._id) {
+          await contractsService.deleteContract(response._id)
+          console.log('✅ Contract document deleted completely')
+        }
+      } else {
+        // Actualizar con los contratos restantes (esto sobrescribe todo el array)
+        await contractsService.updateContractsByProperty(
+          property._id,
+          remainingContracts
+        )
+        console.log('✅ Contract deleted successfully (keeping others)')
+      }
+  
+      // Actualizar estado local
+      setExistingContracts(prev => {
+        const newContracts = { ...prev }
+        delete newContracts[docType.key]
+        return newContracts
+      })
+  
+      alert(`✅ ${docType.label} deleted successfully. You can now upload a new document.`)
+      
+      if (onContractUpdated) onContractUpdated()
+    } catch (error) {
+      console.error('❌ Delete error:', error)
+      setError(error.response?.data?.message || 'Failed to delete contract')
+      alert(`❌ Error: ${error.response?.data?.message || error.message}`)
+    } finally {
+      setDeleting(null)
+    }
+  }
+  
+
+  // ✅ DESCARGAR CONTRATO
+  const handleDownloadContract = (docType) => {
+    const contract = existingContracts[docType.key]
+    if (contract?.fileUrl) {
+      console.log('📥 Downloading contract:', {
+        type: docType.key,
+        url: contract.fileUrl
+      })
+      // Abrir en nueva pestaña
+      window.open(contract.fileUrl, '_blank')
+    }
   }
 
   // ✅ SUBMIT ALL CONTRACTS (batch upload)
@@ -784,7 +340,7 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
           </Box>
           <IconButton
             onClick={onClose}
-            disabled={submitting}
+            disabled={submitting || deleting}
             sx={{
               color: '#706f6f',
               '&:hover': {
@@ -931,6 +487,7 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
                 const existingContract = existingContracts[docType.key]
                 const pendingFile = pendingFiles[docType.key]
                 const isCompleted = !!existingContract
+                const isDeleting = deleting === docType.key
 
                 return (
                   <Step key={docType.key} completed={isCompleted}>
@@ -1015,7 +572,7 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
                         }}
                       >
                         {existingContract ? (
-                          // ✅ YA ESTÁ SUBIDO
+                          // ✅ YA ESTÁ SUBIDO - Con opciones de descarga y eliminación
                           <Box>
                             <Typography
                               variant="body2"
@@ -1033,7 +590,8 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
                               sx={{
                                 color: '#706f6f',
                                 fontFamily: '"Poppins", sans-serif',
-                                display: 'block'
+                                display: 'block',
+                                mb: 2
                               }}
                             >
                               Uploaded on {new Date(existingContract.uploadedAt).toLocaleDateString('en-US', {
@@ -1041,6 +599,76 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
                                 day: 'numeric',
                                 year: 'numeric'
                               })}
+                            </Typography>
+
+                            {/* ✅ BOTONES DE ACCIÓN */}
+                            <Box display="flex" gap={1}>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<Download />}
+                                onClick={() => handleDownloadContract(docType)}
+                                disabled={isDeleting}
+                                sx={{
+                                  borderRadius: 2,
+                                  textTransform: 'none',
+                                  fontWeight: 600,
+                                  fontFamily: '"Poppins", sans-serif',
+                                  borderColor: 'rgba(140, 165, 81, 0.3)',
+                                  borderWidth: '2px',
+                                  color: '#333F1F',
+                                  '&:hover': {
+                                    borderColor: '#8CA551',
+                                    borderWidth: '2px',
+                                    bgcolor: 'rgba(140, 165, 81, 0.08)'
+                                  },
+                                  '&:disabled': {
+                                    opacity: 0.5
+                                  }
+                                }}
+                              >
+                                Download
+                              </Button>
+
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={isDeleting ? <CircularProgress size={16} /> : <Delete />}
+                                onClick={() => handleDeleteContract(docType)}
+                                disabled={isDeleting || submitting}
+                                sx={{
+                                  borderRadius: 2,
+                                  textTransform: 'none',
+                                  fontWeight: 600,
+                                  fontFamily: '"Poppins", sans-serif',
+                                  borderColor: 'rgba(229, 134, 60, 0.3)',
+                                  borderWidth: '2px',
+                                  color: '#E5863C',
+                                  '&:hover': {
+                                    borderColor: '#E5863C',
+                                    borderWidth: '2px',
+                                    bgcolor: 'rgba(229, 134, 60, 0.08)'
+                                  },
+                                  '&:disabled': {
+                                    opacity: 0.5
+                                  }
+                                }}
+                              >
+                                {isDeleting ? 'Deleting...' : 'Delete'}
+                              </Button>
+                            </Box>
+
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: '#706f6f',
+                                fontFamily: '"Poppins", sans-serif',
+                                fontStyle: 'italic',
+                                display: 'block',
+                                mt: 1.5
+                              }}
+                            >
+                              💡 Delete this document to upload a new one if needed
                             </Typography>
                           </Box>
                         ) : pendingFile ? (
@@ -1123,7 +751,7 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
                               variant="outlined"
                               fullWidth
                               startIcon={<CloudUpload />}
-                              disabled={submitting}
+                              disabled={submitting || isDeleting}
                               sx={{
                                 borderRadius: 3,
                                 borderColor: 'rgba(140, 165, 81, 0.3)',
@@ -1172,7 +800,7 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
       <DialogActions sx={{ p: 3, borderTop: '1px solid #e0e0e0', gap: 2 }}>
         <Button
           onClick={onClose}
-          disabled={submitting}
+          disabled={submitting || deleting}
           sx={{
             borderRadius: 3,
             textTransform: 'none',
@@ -1196,7 +824,7 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
 
         <Button
           onClick={handleSubmitContracts}
-          disabled={getPendingCount() === 0 || submitting}
+          disabled={getPendingCount() === 0 || submitting || deleting}
           variant="contained"
           startIcon={submitting ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <Send />}
           sx={{

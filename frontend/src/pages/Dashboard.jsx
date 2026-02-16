@@ -28,7 +28,13 @@ import {
   Inbox,
   Star,
   ArrowUpward,
-  ArrowDownward
+  ArrowDownward,
+  // ✅ NUEVOS ICONOS PARA QUICK ACTIONS
+  Business,
+  PersonAdd,
+  BarChart,
+  Deck,
+  Article
 } from '@mui/icons-material'
 import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
@@ -206,76 +212,147 @@ const Dashboard = () => {
     }
   }
 
-  // Quick Actions para admin/superadmin
-  const quickActions = [
-    { 
-      icon: '🏠', 
-      label: 'Add Property', 
-      color: '#333F1F',
-      bgColor: '#e8f5ee',
-      onClick: () => navigate('/properties/select')
-    },
-    { 
-      icon: '👥', 
-      label: 'Invite User', 
-      color: '#8CA551',
-      bgColor: '#f0f7e8',
-      onClick: handleOpenUserDialog
-    },
-    { 
-      icon: '📊', 
-      label: 'Analytics', 
-      color: '#E5863C',
-      bgColor: '#fff5e6',
-      onClick: () => navigate('/analytics')
-    },
-    { 
-      icon: '🏡', 
-      label: 'Models', 
-      color: '#333F1F', 
-      bgColor: '#e8f5ee',
-      onClick: () => navigate('/view-models') 
-    },
-    { 
-      icon: '🏛️', 
-      label: 'Amenities', 
-      color: '#8CA551', 
-      bgColor: '#f0f7e8',
-      onClick: () => navigate('/amenities') 
-    },
-    { 
-      icon: '📰', 
-      label: 'Manage News', 
-      color: '#E5863C', 
-      bgColor: '#fff5e6',
-      onClick: () => navigate('/news')
-    }
-  ]
+  // // Quick Actions para admin/superadmin
+  // const quickActions = [
+  //   { 
+  //     icon: '🏠', 
+  //     label: 'Add Property', 
+  //     color: '#333F1F',
+  //     bgColor: '#e8f5ee',
+  //     onClick: () => navigate('/properties/select')
+  //   },
+  //   { 
+  //     icon: '👥', 
+  //     label: 'Invite User', 
+  //     color: '#8CA551',
+  //     bgColor: '#f0f7e8',
+  //     onClick: handleOpenUserDialog
+  //   },
+  //   { 
+  //     icon: '📊', 
+  //     label: 'Analytics', 
+  //     color: '#E5863C',
+  //     bgColor: '#fff5e6',
+  //     onClick: () => navigate('/analytics')
+  //   },
+  //   { 
+  //     icon: '🏡', 
+  //     label: 'Models', 
+  //     color: '#333F1F', 
+  //     bgColor: '#e8f5ee',
+  //     onClick: () => navigate('/view-models') 
+  //   },
+  //   { 
+  //     icon: '🏛️', 
+  //     label: 'Amenities', 
+  //     color: '#8CA551', 
+  //     bgColor: '#f0f7e8',
+  //     onClick: () => navigate('/amenities') 
+  //   },
+  //   { 
+  //     icon: '📰', 
+  //     label: 'Manage News', 
+  //     color: '#E5863C', 
+  //     bgColor: '#fff5e6',
+  //     onClick: () => navigate('/news')
+  //   }
+  // ]
   
-  // Quick Actions para user propietario
-  const userQuickActions = [
-    { 
-      icon: '🏡', 
-      label: 'Models', 
-      color: '#333F1F', 
-      bgColor: '#e8f5ee',
-      onClick: () => navigate('/view-models') 
-    },
-    { 
-      icon: '🏛️', 
-      label: 'Amenities', 
-      color: '#8CA551', 
-      bgColor: '#f0f7e8',
-      onClick: () => navigate('/amenities') 
-    },
-    { 
-      icon: '📰', 
-      label: 'News Feed', 
-      color: '#E5863C', 
-      bgColor: '#fff5e6',
-      onClick: () => navigate('/explore/news')
-    }
-  ]
+  // // Quick Actions para user propietario
+  // const userQuickActions = [
+  //   { 
+  //     icon: '🏡', 
+  //     label: 'Models', 
+  //     color: '#333F1F', 
+  //     bgColor: '#e8f5ee',
+  //     onClick: () => navigate('/view-models') 
+  //   },
+  //   { 
+  //     icon: '🏛️', 
+  //     label: 'Amenities', 
+  //     color: '#8CA551', 
+  //     bgColor: '#f0f7e8',
+  //     onClick: () => navigate('/amenities') 
+  //   },
+  //   { 
+  //     icon: '📰', 
+  //     label: 'News Feed', 
+  //     color: '#E5863C', 
+  //     bgColor: '#fff5e6',
+  //     onClick: () => navigate('/explore/news')
+  //   }
+  // ]
+
+  // ✅ QUICK ACTIONS PARA ADMIN/SUPERADMIN
+const quickActions = [
+  { 
+    icon: <Business />, 
+    label: 'Add Property', 
+    color: '#333F1F',
+    bgColor: '#e8f5ee',
+    onClick: () => navigate('/properties/select')
+  },
+  { 
+    icon: <PersonAdd />, 
+    label: 'Invite User', 
+    color: '#8CA551',
+    bgColor: '#f0f7e8',
+    onClick: handleOpenUserDialog
+  },
+  { 
+    icon: <BarChart />, 
+    label: 'Analytics', 
+    color: '#E5863C',
+    bgColor: '#fff5e6',
+    onClick: () => navigate('/analytics')
+  },
+  { 
+    icon: <HomeWork />, 
+    label: 'Models', 
+    color: '#333F1F', 
+    bgColor: '#e8f5ee',
+    onClick: () => navigate('/view-models') 
+  },
+  { 
+    icon: <Deck />, 
+    label: 'Amenities', 
+    color: '#8CA551', 
+    bgColor: '#f0f7e8',
+    onClick: () => navigate('/amenities') 
+  },
+  { 
+    icon: <Article />, 
+    label: 'Manage News', 
+    color: '#E5863C', 
+    bgColor: '#fff5e6',
+    onClick: () => navigate('/news')
+  }
+]
+
+// ✅ QUICK ACTIONS PARA USER
+const userQuickActions = [
+  { 
+    icon: <HomeWork />, 
+    label: 'Models', 
+    color: '#333F1F', 
+    bgColor: '#e8f5ee',
+    onClick: () => navigate('/view-models') 
+  },
+  { 
+    icon: <Deck />, 
+    label: 'Amenities', 
+    color: '#8CA551', 
+    bgColor: '#f0f7e8',
+    onClick: () => navigate('/amenities') 
+  },
+  { 
+    icon: <Article />, 
+    label: 'News Feed', 
+    color: '#E5863C', 
+    bgColor: '#fff5e6',
+    onClick: () => navigate('/explore/news')
+  }
+]
 
 
   // ✅ REEMPLAZAR CON ESTE LOADING STATE SIMPLE
@@ -478,171 +555,194 @@ const Dashboard = () => {
               </Grid>
       
               {/* QUICK ACTIONS */}
-              <Grid item xs={12} md={4}>
-                <motion.div
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3, duration: 0.6 }}
-                  whileHover={{ y: -4 }}
-                >
-                  <Paper 
-                    elevation={0}
-                    sx={{ 
-                      p: 3,
-                      height: '100%', 
-                      borderRadius: 4,
-                      bgcolor: 'white',
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-                      border: '1px solid #e5e7eb',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: 3,
-                        background: 'linear-gradient(90deg, #333F1F 0%, #8CA551 100%)'
+
+<Grid item xs={12} md={4}>
+  <motion.div
+    initial={{ opacity: 0, x: 30 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay: 0.3, duration: 0.6 }}
+    whileHover={{ y: -4 }}
+  >
+    <Paper 
+      elevation={0}
+      sx={{ 
+        p: 3,
+        height: '100%', 
+        borderRadius: 4,
+        bgcolor: 'white',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+        border: '1px solid #e5e7eb',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 3,
+          background: 'linear-gradient(90deg, #333F1F 0%, #8CA551 100%)'
+        }
+      }}
+    >
+      <Box sx={{ mb: 2.5 }}>
+        <Typography 
+          variant="h6"
+          sx={{ 
+            color: '#333F1F',
+            fontWeight: 700,
+            letterSpacing: '0.5px',
+            mb: 0.5,
+            fontFamily: '"Poppins", sans-serif'
+          }}
+        >
+          Quick Actions
+        </Typography>
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            color: '#706f6f',
+            fontFamily: '"Poppins", sans-serif'
+          }}
+        >
+          Shortcuts to common tasks
+        </Typography>
+      </Box>
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        {userQuickActions.map((action, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 * index }}
+            whileHover={{ 
+              scale: 1.02,
+              transition: { type: "spring", stiffness: 400 }
+            }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Card
+              onClick={action.onClick}
+              elevation={0}
+              sx={{
+                cursor: 'pointer',
+                borderRadius: 3,
+                border: '1px solid transparent',
+                bgcolor: 'white',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                position: 'relative',
+                overflow: 'hidden',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 3,
+                  bgcolor: action.color,
+                  transform: 'scaleY(0)',
+                  transition: 'transform 0.3s'
+                },
+                '&:hover': {
+                  borderColor: action.color,
+                  boxShadow: `0 8px 20px ${action.color}20`,
+                  '&::before': {
+                    transform: 'scaleY(1)'
+                  },
+                  '& .action-icon-container': {
+                    transform: 'scale(1.1) rotate(5deg)',
+                    bgcolor: action.color,
+                    '& svg': {
+                      color: 'white'
+                    }
+                  },
+                  '& .arrow-container': {
+                    transform: 'translateX(4px)',
+                    bgcolor: action.color,
+                    color: 'white'
+                  }
+                }
+              }}
+            >
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Box display="flex" alignItems="center" gap={1.5}>
+                  <Box
+                    className="action-icon-container"
+                    sx={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 2.5,
+                      bgcolor: action.bgColor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      '& svg': {
+                        fontSize: 24,
+                        color: action.color,
+                        transition: 'all 0.3s'
                       }
                     }}
                   >
-                    <Box sx={{ mb: 2.5 }}>
-                      <Typography 
-                        variant="h6"
-                        sx={{ 
-                          color: '#333F1F',
-                          fontWeight: 700,
-                          letterSpacing: '0.5px',
-                          mb: 0.5,
-                          fontFamily: '"Poppins", sans-serif'
-                        }}
-                      >
-                        Quick Actions
-                      </Typography>
-                      <Typography 
-                        variant="caption" 
-                        sx={{ 
-                          color: '#706f6f',
-                          fontFamily: '"Poppins", sans-serif'
-                        }}
-                      >
-                        Shortcuts to common tasks
-                      </Typography>
-                    </Box>
-              
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                      {userQuickActions.map((action, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.1 * index }}
-                          whileHover={{ 
-                            scale: 1.02,
-                            transition: { type: "spring", stiffness: 400 }
-                          }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <Card
-                            onClick={action.onClick}
-                            elevation={0}
-                            sx={{
-                              cursor: 'pointer',
-                              borderRadius: 3,
-                              border: '1px solid transparent',
-                              bgcolor: 'white',
-                              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                              transition: 'all 0.3s',
-                              position: 'relative',
-                              overflow: 'hidden',
-                              '&::before': {
-                                content: '""',
-                                position: 'absolute',
-                                left: 0,
-                                top: 0,
-                                bottom: 0,
-                                width: 3,
-                                bgcolor: action.color,
-                                transform: 'scaleY(0)',
-                                transition: 'transform 0.3s'
-                              },
-                              '&:hover': {
-                                borderColor: action.color,
-                                boxShadow: `0 8px 20px ${action.color}20`,
-                                '&::before': {
-                                  transform: 'scaleY(1)'
-                                }
-                              }
-                            }}
-                          >
-                            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                              <Box display="flex" alignItems="center" gap={1.5}>
-                                <Box
-                                  sx={{
-                                    width: 48,
-                                    height: 48,
-                                    borderRadius: 2.5,
-                                    bgcolor: action.bgColor,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '1.5rem'
-                                  }}
-                                >
-                                  {action.icon}
-                                </Box>
-                                <Box flex={1}>
-                                  <Typography 
-                                    variant="body2"
-                                    sx={{ 
-                                      color: '#333F1F',
-                                      fontWeight: 600,
-                                      mb: 0.3,
-                                      fontSize: '0.9rem',
-                                      fontFamily: '"Poppins", sans-serif'
-                                    }}
-                                  >
-                                    {action.label}
-                                  </Typography>
-                                  <Typography 
-                                    variant="caption" 
-                                    sx={{ 
-                                      color: '#706f6f', 
-                                      fontSize: '0.7rem',
-                                      fontFamily: '"Poppins", sans-serif'
-                                    }}
-                                  >
-                                    {action.label === 'Models' ? 'Browse designs' :
-                                     action.label === 'Amenities' ? 'View facilities' :
-                                     'Latest updates'}
-                                  </Typography>
-                                </Box>
-                                <Box
-                                  sx={{
-                                    width: 32,
-                                    height: 32,
-                                    borderRadius: '50%',
-                                    bgcolor: action.bgColor,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: action.color,
-                                    fontSize: '1.1rem',
-                                    fontWeight: 'bold'
-                                  }}
-                                >
-                                  ›
-                                </Box>
-                              </Box>
-                            </CardContent>
-                          </Card>
-                        </motion.div>
-                      ))}
-                    </Box>
-                  </Paper>
-                </motion.div>
-              </Grid>
+                    {action.icon}
+                  </Box>
+
+                  <Box flex={1}>
+                    <Typography 
+                      variant="body2"
+                      sx={{ 
+                        color: '#333F1F',
+                        fontWeight: 600,
+                        mb: 0.3,
+                        fontSize: '0.9rem',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      {action.label}
+                    </Typography>
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        color: '#706f6f', 
+                        fontSize: '0.7rem',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      {action.label === 'Models' ? 'Browse designs' :
+                       action.label === 'Amenities' ? 'View facilities' :
+                       'Latest updates'}
+                    </Typography>
+                  </Box>
+
+                  <Box
+                    className="arrow-container"
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      bgcolor: action.bgColor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: action.color,
+                      fontSize: '1.1rem',
+                      fontWeight: 'bold',
+                      transition: 'all 0.3s'
+                    }}
+                  >
+                    ›
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </Box>
+    </Paper>
+  </motion.div>
+</Grid>
             </Grid>
           </motion.div>
         </>
@@ -894,174 +994,202 @@ const Dashboard = () => {
               </Grid>
 
               {/* QUICK ACTIONS */}
-              <Grid item xs={12} md={4}>
-                <motion.div
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3, duration: 0.6 }}
-                  whileHover={{ y: -4 }}
-                >
-                  <Paper 
-                    elevation={0}
-                    sx={{ 
-                      p: 3,
-                      height: '100%', 
-                      borderRadius: 4,
-                      bgcolor: 'white',
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-                      border: '1px solid #e5e7eb',
+<Grid item xs={12} md={4}>
+  <motion.div
+    initial={{ opacity: 0, x: 30 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay: 0.3, duration: 0.6 }}
+    whileHover={{ y: -4 }}
+  >
+    <Paper 
+      elevation={0}
+      sx={{ 
+        p: 3,
+        height: '100%', 
+        borderRadius: 4,
+        bgcolor: 'white',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+        border: '1px solid #e5e7eb',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 3,
+          background: 'linear-gradient(90deg, #333F1F 0%, #8CA551 100%)'
+        }
+      }}
+    >
+      <Box sx={{ mb: 2.5 }}>
+        <Typography 
+          variant="h6"
+          sx={{ 
+            color: '#333F1F',
+            fontWeight: 700,
+            letterSpacing: '0.5px',
+            mb: 0.5,
+            fontFamily: '"Poppins", sans-serif'
+          }}
+        >
+          Quick Actions
+        </Typography>
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            color: '#706f6f',
+            fontFamily: '"Poppins", sans-serif'
+          }}
+        >
+          Shortcuts to common tasks
+        </Typography>
+      </Box>
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        {quickActions.map((action, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 * index }}
+            whileHover={{ 
+              scale: 1.02,
+              transition: { type: "spring", stiffness: 400 }
+            }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Card
+              onClick={action.onClick}
+              elevation={0}
+              sx={{
+                cursor: 'pointer',
+                borderRadius: 3,
+                border: '1px solid transparent',
+                bgcolor: 'white',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                position: 'relative',
+                overflow: 'hidden',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 3,
+                  bgcolor: action.color,
+                  transform: 'scaleY(0)',
+                  transition: 'transform 0.3s'
+                },
+                '&:hover': {
+                  borderColor: action.color,
+                  boxShadow: `0 8px 20px ${action.color}20`,
+                  '&::before': {
+                    transform: 'scaleY(1)'
+                  },
+                  // ✅ ANIMACIÓN DEL ICONO
+                  '& .action-icon-container': {
+                    transform: 'scale(1.1) rotate(5deg)',
+                    bgcolor: action.color,
+                    '& svg': {
+                      color: 'white'
+                    }
+                  },
+                  // ✅ ANIMACIÓN DE LA FLECHA
+                  '& .arrow-container': {
+                    transform: 'translateX(4px)',
+                    bgcolor: action.color,
+                    color: 'white'
+                  }
+                }
+              }}
+            >
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Box display="flex" alignItems="center" gap={1.5}>
+                  {/* ✅ ICONO MEJORADO */}
+                  <Box
+                    className="action-icon-container"
+                    sx={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 2.5,
+                      bgcolor: action.bgColor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                       position: 'relative',
-                      overflow: 'hidden',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: 3,
-                        background: 'linear-gradient(90deg, #333F1F 0%, #8CA551 100%)'
+                      '& svg': {
+                        fontSize: 24,
+                        color: action.color,
+                        transition: 'all 0.3s',
+                        zIndex: 1
                       }
                     }}
                   >
-                    <Box sx={{ mb: 2.5 }}>
-                      <Typography 
-                        variant="h6"
-                        sx={{ 
-                          color: '#333F1F',
-                          fontWeight: 700,
-                          letterSpacing: '0.5px',
-                          mb: 0.5,
-                          fontFamily: '"Poppins", sans-serif'
-                        }}
-                      >
-                        Quick Actions
-                      </Typography>
-                      <Typography 
-                        variant="caption" 
-                        sx={{ 
-                          color: '#706f6f',
-                          fontFamily: '"Poppins", sans-serif'
-                        }}
-                      >
-                        Shortcuts to common tasks
-                      </Typography>
-                    </Box>
+                    {action.icon}
+                  </Box>
 
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                      {quickActions.map((action, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.1 * index }}
-                          whileHover={{ 
-                            scale: 1.02,
-                            transition: { type: "spring", stiffness: 400 }
-                          }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <Card
-                            onClick={action.onClick}
-                            elevation={0}
-                            sx={{
-                              cursor: 'pointer',
-                              borderRadius: 3,
-                              border: '1px solid transparent',
-                              bgcolor: 'white',
-                              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                              transition: 'all 0.3s',
-                              position: 'relative',
-                              overflow: 'hidden',
-                              '&::before': {
-                                content: '""',
-                                position: 'absolute',
-                                left: 0,
-                                top: 0,
-                                bottom: 0,
-                                width: 3,
-                                bgcolor: action.color,
-                                transform: 'scaleY(0)',
-                                transition: 'transform 0.3s'
-                              },
-                              '&:hover': {
-                                borderColor: action.color,
-                                boxShadow: `0 8px 20px ${action.color}20`,
-                                '&::before': {
-                                  transform: 'scaleY(1)'
-                                }
-                              }
-                            }}
-                          >
-                            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                              <Box display="flex" alignItems="center" gap={1.5}>
-                                <Box
-                                  sx={{
-                                    width: 48,
-                                    height: 48,
-                                    borderRadius: 2.5,
-                                    bgcolor: action.bgColor,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '1.5rem'
-                                  }}
-                                >
-                                  {action.icon}
-                                </Box>
-                                <Box flex={1}>
-                                  <Typography 
-                                    variant="body2"
-                                    sx={{ 
-                                      color: '#333F1F',
-                                      fontWeight: 600,
-                                      mb: 0.3,
-                                      fontSize: '0.9rem',
-                                      fontFamily: '"Poppins", sans-serif'
-                                    }}
-                                  >
-                                    {action.label}
-                                  </Typography>
-                                  <Typography 
-                                    variant="caption" 
-                                    sx={{ 
-                                      color: '#706f6f', 
-                                      fontSize: '0.7rem',
-                                      fontFamily: '"Poppins", sans-serif'
-                                    }}
-                                  >
-                                    {action.label === 'Add Property' ? 'Create new property' :
-                                     action.label === 'Invite User' ? 'Send invitation' :
-                                     action.label === 'Analytics' ? 'View reports' :
-                                     action.label === 'Models' ? 'Browse designs' :
-                                     action.label === 'Amenities' ? 'View facilities' :
-                                     'Latest updates'}
-                                  </Typography>
-                                </Box>
-                                <Box
-                                  sx={{
-                                    width: 32,
-                                    height: 32,
-                                    borderRadius: '50%',
-                                    bgcolor: action.bgColor,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: action.color,
-                                    fontSize: '1.1rem',
-                                    fontWeight: 'bold'
-                                  }}
-                                >
-                                  ›
-                                </Box>
-                              </Box>
-                            </CardContent>
-                          </Card>
-                        </motion.div>
-                      ))}
-                    </Box>
-                  </Paper>
-                </motion.div>
-              </Grid>
+                  <Box flex={1}>
+                    <Typography 
+                      variant="body2"
+                      sx={{ 
+                        color: '#333F1F',
+                        fontWeight: 600,
+                        mb: 0.3,
+                        fontSize: '0.9rem',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      {action.label}
+                    </Typography>
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        color: '#706f6f', 
+                        fontSize: '0.7rem',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      {action.label === 'Add Property' ? 'Create new property' :
+                       action.label === 'Invite User' ? 'Send invitation' :
+                       action.label === 'Analytics' ? 'View reports' :
+                       action.label === 'Models' ? 'Browse designs' :
+                       action.label === 'Amenities' ? 'View facilities' :
+                       'Latest updates'}
+                    </Typography>
+                  </Box>
+
+                  {/* ✅ FLECHA MEJORADA */}
+                  <Box
+                    className="arrow-container"
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      bgcolor: action.bgColor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: action.color,
+                      fontSize: '1.1rem',
+                      fontWeight: 'bold',
+                      transition: 'all 0.3s'
+                    }}
+                  >
+                    ›
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </Box>
+    </Paper>
+  </motion.div>
+</Grid>
 
               {/* RECENT PAYLOADS */}
               <Grid item xs={12}>

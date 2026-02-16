@@ -247,6 +247,7 @@ const NewsFeed = () => {
               sx={{
                 mb: 5,
                 borderRadius: 4,
+                p: 2,
                 overflow: 'hidden',
                 cursor: 'pointer',
                 border: '1px solid #e0e0e0',
@@ -265,7 +266,7 @@ const NewsFeed = () => {
                     sx={{
                       height: { xs: 300, md: 500 },
                       backgroundImage: `url(${featuredNews.heroImage})`,
-                      backgroundSize: 'contain',
+                      backgroundSize: 'cover',
                       backgroundRepeat: 'no-repeat',
                       backgroundPosition: 'center',
                       position: 'relative',
