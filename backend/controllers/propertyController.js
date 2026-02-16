@@ -103,13 +103,13 @@ export const getAllProperties = async (req, res) => {
     const filter = {}
     
     if (status) filter.status = status
-    if (user) filter.user = user
+    if (user) filter.users = user
     
     const properties = await Property.find(filter)
       .populate('lot', 'number price')
       .populate('model', 'model price bedrooms bathrooms sqft images blueprints balconies upgrades')
       .populate('facade', 'title url price')
-      .populate('user', 'firstName lastName email phoneNumber')
+      .populate('users', 'firstName lastName email phoneNumber')
       .populate({
         path: 'phases',
         options: { sort: { phaseNumber: 1 } }
@@ -137,7 +137,7 @@ export const getPropertyById = async (req, res) => {
       .populate('lot', 'number price')
       .populate('model', 'model price bedrooms bathrooms sqft images blueprints description balconies upgrades')
       .populate('facade', 'title url price')
-      .populate('user', 'firstName lastName email phoneNumber birthday')
+      .populate('users', 'firstName lastName email phoneNumber birthday')
       .populate({
         path: 'payloads',
         options: { sort: { date: -1 } }
@@ -163,7 +163,17 @@ export const getPropertyById = async (req, res) => {
 
 export const createProperty = async (req, res) => {
   try {
-    const { lot, model, facade, user, initialPayment, hasBalcony, modelType, hasStorage } = req.body
+    const { lot, model, facade, user, users, initialPayment, hasBalcony, modelType, hasStorage } = req.body
+    
+    // Normalize owners: accept single user or users array
+    const ownerIds = users && Array.isArray(users) && users.length > 0
+      ? users
+      : user
+        ? [user]
+        : []
+    if (ownerIds.length === 0) {
+      return res.status(400).json({ message: 'At least one owner (user or users) is required' })
+    }
     
     // Validate lot
     const lotExists = await Lot.findById(lot)
@@ -175,7 +185,8 @@ export const createProperty = async (req, res) => {
       return res.status(400).json({ message: 'Lot is already sold' })
     }
     
-    if (lotExists.assignedUser && lotExists.assignedUser.toString() !== user) {
+    const firstOwner = ownerIds[0]
+    if (lotExists.assignedUser && lotExists.assignedUser.toString() !== firstOwner) {
       return res.status(400).json({ message: 'Lot is already assigned to another user' })
     }
     
@@ -225,7 +236,7 @@ export const createProperty = async (req, res) => {
       lot,
       model,
       facade,
-      user,
+      users: ownerIds,
       price: totalPrice,
       pending: pendingAmount,
       initialPayment: initialPaymentAmount,
@@ -237,20 +248,22 @@ export const createProperty = async (req, res) => {
     
     await Lot.findByIdAndUpdate(lot, {
       status: 'pending',
-      assignedUser: user
+      assignedUser: firstOwner
     })
     
-    const userDoc = await User.findById(user)
-    if (userDoc && !userDoc.lots.includes(lot)) {
-      userDoc.lots.push(lot)
-      await userDoc.save()
+    for (const userId of ownerIds) {
+      const userDoc = await User.findById(userId)
+      if (userDoc && !userDoc.lots.some(id => id.toString() === lot)) {
+        userDoc.lots.push(lot)
+        await userDoc.save()
+      }
     }
     
     const populatedProperty = await Property.findById(property._id)
       .populate('lot')
       .populate('model')
       .populate('facade')
-      .populate('user')
+      .populate('users')
       .populate({
         path: 'phases',
         options: { sort: { phaseNumber: 1 } }
@@ -284,6 +297,25 @@ export const updateProperty = async (req, res) => {
       }
       if (req.body.hasStorage !== undefined) {
         property.hasStorage = req.body.hasStorage
+      }
+      
+      // Update owners if provided (must be non-empty array)
+      if (req.body.users !== undefined && Array.isArray(req.body.users) && req.body.users.length > 0) {
+        const previousIds = (property.users || []).map(id => id.toString())
+        const newIds = req.body.users.map(id => id.toString?.() || id)
+        property.users = req.body.users
+        for (const userId of newIds) {
+          const userDoc = await User.findById(userId)
+          if (userDoc && !userDoc.lots.some(id => id.toString() === property.lot.toString())) {
+            userDoc.lots.push(property.lot)
+            await userDoc.save()
+          }
+        }
+        for (const userId of previousIds) {
+          if (!newIds.includes(userId)) {
+            await User.findByIdAndUpdate(userId, { $pull: { lots: property.lot } })
+          }
+        }
       }
       
       // Recalculate price if any configuration changed
@@ -324,7 +356,7 @@ export const updateProperty = async (req, res) => {
         .populate('lot')
         .populate('model')
         .populate('facade')
-        .populate('user')
+        .populate('users')
         .populate({
           path: 'phases',
           options: { sort: { phaseNumber: 1 } }
@@ -354,9 +386,11 @@ export const deleteProperty = async (req, res) => {
         assignedUser: null
       })
       
-      await User.findByIdAndUpdate(property.user, {
-        $pull: { lots: property.lot }
-      })
+      for (const userId of property.users || []) {
+        await User.findByIdAndUpdate(userId, {
+          $pull: { lots: property.lot }
+        })
+      }
       
       await property.deleteOne()
       res.json({ message: 'Property deleted successfully' })

@@ -90,7 +90,7 @@ const options = {
             lot: { type: 'string' },
             model: { type: 'string' },
             facade: { type: 'string' },
-            user: { type: 'string' },
+            users: { type: 'array', items: { type: 'string' }, description: 'Owner user IDs (at least one required)' },
             price: { type: 'number' },
             pending: { type: 'number' },
             initialPayment: { type: 'number' },

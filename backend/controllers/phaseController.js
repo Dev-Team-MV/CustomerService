@@ -14,7 +14,7 @@ export const getPhasesByProperty = async (req, res) => {
     
     const phases = await Phase.find({ property: propertyId })
       .sort({ phaseNumber: 1 })
-      .populate('property', 'lot model user price status')
+      .populate('property', 'lot model users price status')
     
     res.json(phases)
   } catch (error) {
@@ -26,7 +26,7 @@ export const getPhasesByProperty = async (req, res) => {
 export const getPhaseById = async (req, res) => {
   try {
     const phase = await Phase.findById(req.params.id)
-      .populate('property', 'lot model user price status')
+      .populate('property', 'lot model users price status')
     
     if (phase) {
       res.json(phase)
@@ -46,7 +46,7 @@ export const getPhaseByNumber = async (req, res) => {
     const phase = await Phase.findOne({ 
       property: propertyId, 
       phaseNumber: parseInt(phaseNumber) 
-    }).populate('property', 'lot model user price status')
+    }).populate('property', 'lot model users price status')
     
     if (phase) {
       res.json(phase)
@@ -77,7 +77,7 @@ export const updatePhase = async (req, res) => {
     
     const updatedPhase = await phase.save()
     const populatedPhase = await Phase.findById(updatedPhase._id)
-      .populate('property', 'lot model user price status')
+      .populate('property', 'lot model users price status')
     
     res.json(populatedPhase)
   } catch (error) {
@@ -117,7 +117,7 @@ export const addMediaItem = async (req, res) => {
     
     const updatedPhase = await phase.save()
     const populatedPhase = await Phase.findById(updatedPhase._id)
-      .populate('property', 'lot model user price status')
+      .populate('property', 'lot model users price status')
     
     res.status(201).json(populatedPhase)
   } catch (error) {
@@ -160,7 +160,7 @@ export const updateMediaItem = async (req, res) => {
     
     const updatedPhase = await phase.save()
     const populatedPhase = await Phase.findById(updatedPhase._id)
-      .populate('property', 'lot model user price status')
+      .populate('property', 'lot model users price status')
     
     res.json(populatedPhase)
   } catch (error) {
@@ -186,7 +186,7 @@ export const deleteMediaItem = async (req, res) => {
     phase.mediaItems.pull(mediaItemId)
     const updatedPhase = await phase.save()
     const populatedPhase = await Phase.findById(updatedPhase._id)
-      .populate('property', 'lot model user price status')
+      .populate('property', 'lot model users price status')
     
     res.json(populatedPhase)
   } catch (error) {
@@ -205,7 +205,7 @@ export const getAllPhases = async (req, res) => {
     }
     
     const phases = await Phase.find(filter)
-      .populate('property', 'lot model user price status')
+      .populate('property', 'lot model users price status')
       .sort({ property: 1, phaseNumber: 1 })
     
     res.json(phases)

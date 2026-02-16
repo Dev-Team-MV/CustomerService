@@ -19,7 +19,7 @@ export const getAllPayloads = async (req, res) => {
           { path: 'lot', select: 'number' },
           { path: 'model', select: 'model' },
           { path: 'facade', select: 'title' },
-          { path: 'user', select: 'firstName lastName email' }
+          { path: 'users', select: 'firstName lastName email' }
         ]
       })
       .populate('processedBy', 'firstName lastName')
@@ -40,7 +40,7 @@ export const getPayloadById = async (req, res) => {
           { path: 'lot' },
           { path: 'model' },
           { path: 'facade' },
-          { path: 'user' }
+          { path: 'users' }
         ]
       })
       .populate('processedBy', 'firstName lastName')
@@ -130,7 +130,7 @@ export const createPayload = async (req, res) => {
           { path: 'lot' },
           { path: 'model' },
           { path: 'facade' },
-          { path: 'user' }
+          { path: 'users' }
         ]
       })
       .populate('processedBy')
@@ -222,7 +222,7 @@ export const updatePayload = async (req, res) => {
           populate: [
             { path: 'lot' },
             { path: 'model' },
-            { path: 'user' }
+            { path: 'users' }
           ]
         })
         .populate('processedBy')
@@ -306,7 +306,7 @@ export const getApprovedPayloadsThisMonth = async (req, res) => {
           { path: 'lot', select: 'number' },
           { path: 'model', select: 'model modelNumber price' },
           { path: 'facade', select: 'title url price' },
-          { path: 'user', select: 'firstName lastName email phoneNumber' }
+          { path: 'users', select: 'firstName lastName email phoneNumber' }
         ]
       })
       .populate('processedBy', 'firstName lastName')
