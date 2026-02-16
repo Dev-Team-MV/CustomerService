@@ -23,6 +23,7 @@ import {
   Delete,
   Image as ImageIcon,
   Deck,
+  CheckCircle,
 } from '@mui/icons-material';
 import uploadService from '../../services/uploadService';
 
@@ -256,10 +257,11 @@ const CreateFacade = ({
             maxHeight: { xs: "100vh", md: "90vh" },
             m: { xs: 0, md: 2 },
             borderRadius: { xs: 0, md: 4 },
-            boxShadow: { xs: 'none', md: '0 20px 60px rgba(0,0,0,0.2)' }
+            boxShadow: { xs: 'none', md: '0 20px 60px rgba(51, 63, 31, 0.15)' }
           }
         }}
       >
+        {/* ✅ DIALOG TITLE - Brandbook exacto */}
         <DialogTitle sx={{ pb: { xs: 1.5, md: 2 }, px: { xs: 2, md: 3 } }}>
           <Box display="flex" alignItems="center" gap={{ xs: 1.5, md: 2 }}>
             <Box
@@ -267,23 +269,50 @@ const CreateFacade = ({
                 width: { xs: 40, md: 48 },
                 height: { xs: 40, md: 48 },
                 borderRadius: 3,
-                background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+                bgcolor: '#333F1F',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)',
               }}
             >
               <CloudUpload sx={{ color: 'white', fontSize: { xs: 20, md: 24 } }} />
             </Box>
             <Box flex={1} minWidth={0}>
-              <Typography variant="h6" fontWeight={700} fontSize={{ xs: "1rem", md: "1.25rem" }} noWrap>
+              <Typography 
+                variant="h6" 
+                fontWeight={700}
+                fontSize={{ xs: "1rem", md: "1.25rem" }}
+                noWrap
+                sx={{ 
+                  color: '#333F1F',
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              >
                 {selectedFacade ? "Edit Facade" : "Add New Facade"}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#6c757d', display: { xs: 'none', sm: 'block' } }}>
-                Manage facade images and options
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: '#706f6f',
+                  fontFamily: '"Poppins", sans-serif',
+                  display: { xs: 'none', sm: 'block' }
+                }}
+              >
+                Manage facade images and deck options
               </Typography>
             </Box>
-            <IconButton onClick={handleClose} size="small">
+            <IconButton 
+              onClick={handleClose} 
+              size="small"
+              sx={{
+                color: '#706f6f',
+                '&:hover': {
+                  bgcolor: 'rgba(112, 111, 111, 0.08)',
+                  transform: 'scale(1.05)'
+                }
+              }}
+            >
               <Close />
             </IconButton>
           </Box>
@@ -308,41 +337,58 @@ const CreateFacade = ({
                   width: "8px",
                 },
                 "&::-webkit-scrollbar-thumb": {
-                  backgroundColor: "rgba(0,0,0,0.2)",
+                  backgroundColor: "rgba(140, 165, 81, 0.3)",
                   borderRadius: "4px",
+                  "&:hover": {
+                    backgroundColor: "#8CA551"
+                  }
                 },
               }}
             >
-              <Grid container spacing={{ xs: 1.5, md: 2 }}>
+              <Grid container spacing={{ xs: 1.5, md: 2.5 }}>
                 {/* Selected Model Info */}
                 {selectedModel && (
                   <Grid item xs={12}>
                     <Paper
+                      elevation={0}
                       sx={{
                         p: { xs: 1.5, md: 2 },
-                        bgcolor: "primary.50",
-                        border: "1px solid",
-                        borderColor: "primary.200",
+                        bgcolor: '#fafafa',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: 2,
                       }}
                     >
                       <Typography
                         variant="caption"
-                        color="text.secondary"
-                        display="block"
-                        gutterBottom
+                        sx={{
+                          color: '#706f6f',
+                          fontFamily: '"Poppins", sans-serif',
+                          display: "block",
+                          mb: 0.5
+                        }}
                       >
                         Selected Model
                       </Typography>
                       <Typography
                         variant="h6"
                         fontSize={{ xs: "1rem", md: "1.25rem" }}
-                        fontWeight="bold"
-                        color="primary"
+                        fontWeight={700}
                         noWrap
+                        sx={{
+                          color: '#333F1F',
+                          fontFamily: '"Poppins", sans-serif'
+                        }}
                       >
                         {selectedModel.model}
                       </Typography>
-                      <Typography variant="body2" fontSize={{ xs: "0.75rem", md: "0.875rem" }} color="text.secondary">
+                      <Typography 
+                        variant="body2" 
+                        fontSize={{ xs: "0.75rem", md: "0.875rem" }}
+                        sx={{
+                          color: '#706f6f',
+                          fontFamily: '"Poppins", sans-serif'
+                        }}
+                      >
                         Base Price: ${selectedModel.price?.toLocaleString()} • Model #{selectedModel.modelNumber}
                       </Typography>
                     </Paper>
@@ -353,7 +399,6 @@ const CreateFacade = ({
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    size="small"
                     label="Facade Title *"
                     value={facadeFormData.title}
                     onChange={(e) =>
@@ -365,18 +410,47 @@ const CreateFacade = ({
                     required
                     placeholder="e.g., Modern Colonial"
                     helperText="Give this facade style a descriptive name"
-                    sx={{ "& .MuiInputBase-root": { fontSize: { xs: "0.875rem", md: "1rem" } } }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        fontFamily: '"Poppins", sans-serif',
+                        "& fieldset": {
+                          borderColor: 'rgba(140, 165, 81, 0.3)',
+                          borderWidth: '2px'
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#8CA551"
+                        },
+                        "&.Mui-focused fieldset": { 
+                          borderColor: "#333F1F",
+                          borderWidth: "2px"
+                        }
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontFamily: '"Poppins", sans-serif',
+                        fontWeight: 500,
+                        color: '#706f6f',
+                        "&.Mui-focused": {
+                          color: "#333F1F",
+                          fontWeight: 600
+                        }
+                      },
+                      "& .MuiFormHelperText-root": {
+                        fontFamily: '"Poppins", sans-serif'
+                      }
+                    }}
                   />
                 </Grid>
       
                 {/* Decks Section */}
                 <Grid item xs={12}>
-                  <Box
+                  <Paper
+                    elevation={0}
                     sx={{
                       p: { xs: 1.5, md: 2 },
-                      bgcolor: "background.paper",
-                      borderRadius: 1,
-                      border: "1px solid #e0e0e0",
+                      bgcolor: '#fafafa',
+                      borderRadius: 2,
+                      border: '1px solid #e0e0e0',
                     }}
                   >
                     <Box
@@ -385,16 +459,38 @@ const CreateFacade = ({
                       alignItems="center"
                       mb={{ xs: 1.5, md: 2 }}
                     >
-                      <Typography variant="subtitle1" fontSize={{ xs: "0.9rem", md: "1rem" }} fontWeight="bold">
+                      <Typography 
+                        variant="subtitle1" 
+                        fontSize={{ xs: "0.9rem", md: "1rem" }} 
+                        fontWeight={700}
+                        sx={{
+                          color: '#333F1F',
+                          fontFamily: '"Poppins", sans-serif'
+                        }}
+                      >
                         <Deck sx={{ fontSize: { xs: 16, md: 18 }, mr: 0.5, verticalAlign: "middle" }} />
-                        Decks Options
+                        Deck Options
                       </Typography>
                       <Button
                         startIcon={<Add />}
                         size="small"
                         variant="outlined"
                         onClick={() => handleOpenDeckDialog()}
-                        sx={{ fontSize: { xs: "0.75rem", md: "0.875rem" } }}
+                        sx={{
+                          fontSize: { xs: "0.75rem", md: "0.875rem" },
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          fontWeight: 600,
+                          fontFamily: '"Poppins", sans-serif',
+                          borderColor: 'rgba(140, 165, 81, 0.3)',
+                          borderWidth: '2px',
+                          color: '#333F1F',
+                          '&:hover': {
+                            borderColor: '#8CA551',
+                            borderWidth: '2px',
+                            bgcolor: 'rgba(140, 165, 81, 0.08)'
+                          }
+                        }}
                       >
                         Add
                       </Button>
@@ -404,16 +500,19 @@ const CreateFacade = ({
                       <Typography
                         variant="body2"
                         fontSize={{ xs: "0.8rem", md: "0.875rem" }}
-                        color="text.secondary"
                         align="center"
-                        sx={{ py: { xs: 1.5, md: 2 } }}
+                        sx={{ 
+                          py: { xs: 1.5, md: 2 },
+                          color: '#706f6f',
+                          fontFamily: '"Poppins", sans-serif'
+                        }}
                       >
                         No decks added yet. Add deck options for this facade.
                       </Typography>
                     ) : (
                       <Stack spacing={{ xs: 1, md: 1.5 }}>
                         {facadeFormData.decks.map((deck, index) => (
-                          <Card key={index} variant="outlined">
+                          <Card key={index} variant="outlined" sx={{ borderColor: '#e0e0e0' }}>
                             <Box
                               sx={{
                                 p: { xs: 1.5, md: 2 },
@@ -426,8 +525,8 @@ const CreateFacade = ({
                                 sx={{
                                   width: { xs: 50, md: 60 },
                                   height: { xs: 50, md: 60 },
-                                  bgcolor: "grey.200",
-                                  borderRadius: 1,
+                                  bgcolor: '#e0e0e0',
+                                  borderRadius: 2,
                                   backgroundImage:
                                     deck.images && deck.images.length > 0
                                       ? `url(${deck.images[0]})`
@@ -441,7 +540,7 @@ const CreateFacade = ({
                                 }}
                               >
                                 {(!deck.images || deck.images.length === 0) && (
-                                  <ImageIcon sx={{ color: "grey.400", fontSize: { xs: 20, md: 24 } }} />
+                                  <ImageIcon sx={{ color: '#706f6f', fontSize: { xs: 20, md: 24 } }} />
                                 )}
                               </Box>
       
@@ -449,15 +548,22 @@ const CreateFacade = ({
                                 <Typography
                                   variant="subtitle2"
                                   fontSize={{ xs: "0.875rem", md: "1rem" }}
-                                  fontWeight="bold"
+                                  fontWeight={600}
                                   noWrap
+                                  sx={{
+                                    color: '#333F1F',
+                                    fontFamily: '"Poppins", sans-serif'
+                                  }}
                                 >
                                   {deck.name}
                                 </Typography>
                                 <Typography
                                   variant="body2"
                                   fontSize={{ xs: "0.75rem", md: "0.875rem" }}
-                                  color="text.secondary"
+                                  sx={{
+                                    color: '#706f6f',
+                                    fontFamily: '"Poppins", sans-serif'
+                                  }}
                                 >
                                   Price: ${Number(deck.price).toLocaleString()}
                                 </Typography>
@@ -467,14 +573,28 @@ const CreateFacade = ({
                                 <IconButton
                                   size="small"
                                   onClick={() => handleOpenDeckDialog(index)}
-                                  sx={{ width: { xs: 32, md: 36 }, height: { xs: 32, md: 36 } }}
+                                  sx={{ 
+                                    width: { xs: 32, md: 36 }, 
+                                    height: { xs: 32, md: 36 },
+                                    color: '#333F1F',
+                                    '&:hover': {
+                                      bgcolor: 'rgba(51, 63, 31, 0.08)'
+                                    }
+                                  }}
                                 >
                                   <Edit fontSize="small" />
                                 </IconButton>
                                 <IconButton
                                   size="small"
                                   onClick={() => handleDeleteDeck(index)}
-                                  sx={{ width: { xs: 32, md: 36 }, height: { xs: 32, md: 36 } }}
+                                  sx={{ 
+                                    width: { xs: 32, md: 36 }, 
+                                    height: { xs: 32, md: 36 },
+                                    color: '#E5863C',
+                                    '&:hover': {
+                                      bgcolor: 'rgba(229, 134, 60, 0.08)'
+                                    }
+                                  }}
                                 >
                                   <Delete fontSize="small" />
                                 </IconButton>
@@ -484,31 +604,36 @@ const CreateFacade = ({
                         ))}
                       </Stack>
                     )}
-                  </Box>
+                  </Paper>
                 </Grid>
       
                 {/* Upload Section */}
                 <Grid item xs={12}>
-                  <Box
+                  <Paper
+                    elevation={0}
                     sx={{
                       p: { xs: 1.5, md: 2 },
                       border: "2px dashed",
                       borderColor:
                         facadeFormData.url.length === 0
-                          ? "error.main"
-                          : "grey.300",
+                          ? '#E5863C'
+                          : 'rgba(140, 165, 81, 0.3)',
                       borderRadius: 2,
                       bgcolor:
                         facadeFormData.url.length === 0
-                          ? "error.50"
-                          : "grey.50",
+                          ? 'rgba(229, 134, 60, 0.05)'
+                          : '#fafafa',
                     }}
                   >
                     <Typography
                       variant="subtitle2"
                       fontSize={{ xs: "0.875rem", md: "1rem" }}
-                      fontWeight="bold"
+                      fontWeight={700}
                       gutterBottom
+                      sx={{
+                        color: '#333F1F',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
                     >
                       Facade Images *
                     </Typography>
@@ -516,12 +641,52 @@ const CreateFacade = ({
                       variant="contained"
                       component="label"
                       disabled={uploadingFacadeImage}
-                      size="small"
                       fullWidth
                       startIcon={<CloudUpload />}
-                      sx={{ fontSize: { xs: "0.75rem", md: "0.875rem" } }}
+                      sx={{
+                        fontSize: { xs: "0.75rem", md: "0.875rem" },
+                        borderRadius: 3,
+                        bgcolor: '#333F1F',
+                        color: 'white',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        fontFamily: '"Poppins", sans-serif',
+                        py: 1.2,
+                        boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: 0,
+                          left: '-100%',
+                          width: '100%',
+                          height: '100%',
+                          bgcolor: '#8CA551',
+                          transition: 'left 0.4s ease',
+                          zIndex: 0,
+                        },
+                        '&:hover': {
+                          bgcolor: '#333F1F',
+                          boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+                          '&::before': {
+                            left: 0,
+                          },
+                        },
+                        '&:disabled': {
+                          bgcolor: '#e0e0e0',
+                          color: '#706f6f',
+                          boxShadow: 'none'
+                        },
+                        '& .MuiButton-startIcon': {
+                          position: 'relative',
+                          zIndex: 1,
+                        }
+                      }}
                     >
-                      {uploadingFacadeImage ? "Uploading..." : "Upload"}
+                      <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
+                        {uploadingFacadeImage ? "Uploading..." : "Upload Images"}
+                      </Box>
                       <input
                         type="file"
                         accept="image/*"
@@ -530,7 +695,7 @@ const CreateFacade = ({
                         onChange={handleFileFacadeUpload}
                       />
                     </Button>
-                  </Box>
+                  </Paper>
                 </Grid>
               </Grid>
             </Box>
@@ -547,7 +712,15 @@ const CreateFacade = ({
               }}
             >
               <Box sx={{ p: { xs: 1.5, md: 2 }, borderBottom: "1px solid #e0e0e0", bgcolor: "white" }}>
-                <Typography variant="subtitle2" fontSize={{ xs: "0.875rem", md: "1rem" }} fontWeight="bold">
+                <Typography 
+                  variant="subtitle2" 
+                  fontSize={{ xs: "0.875rem", md: "1rem" }} 
+                  fontWeight={700}
+                  sx={{
+                    color: '#333F1F',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
+                >
                   Images ({facadeFormData.url.length})
                 </Typography>
               </Box>
@@ -565,8 +738,11 @@ const CreateFacade = ({
                       width: "6px",
                     },
                     "&::-webkit-scrollbar-thumb": {
-                      backgroundColor: "rgba(0,0,0,0.2)",
+                      backgroundColor: "rgba(140, 165, 81, 0.3)",
                       borderRadius: "3px",
+                      "&:hover": {
+                        backgroundColor: "#8CA551"
+                      }
                     },
                   }}
                 >
@@ -575,7 +751,7 @@ const CreateFacade = ({
                       key={index}
                       sx={{
                         position: "relative",
-                        borderRadius: 1,
+                        borderRadius: 2,
                         overflow: "hidden",
                         border: "1px solid #e0e0e0",
                       }}
@@ -595,12 +771,16 @@ const CreateFacade = ({
                         size="small"
                         sx={{
                           position: "absolute",
-                          top: 4,
-                          right: 4,
-                          bgcolor: "rgba(255,255,255,0.9)",
-                          width: { xs: 24, md: 28 },
-                          height: { xs: 24, md: 28 },
-                          "&:hover": { bgcolor: "rgba(255,255,255,1)" }
+                          top: 8,
+                          right: 8,
+                          bgcolor: "rgba(229, 134, 60, 0.9)",
+                          color: 'white',
+                          width: { xs: 28, md: 32 },
+                          height: { xs: 28, md: 32 },
+                          "&:hover": { 
+                            bgcolor: '#E5863C',
+                            transform: 'scale(1.1)'
+                          }
                         }}
                       >
                         <Delete fontSize="small" />
@@ -609,13 +789,17 @@ const CreateFacade = ({
                         <Chip
                           label="Primary"
                           size="small"
-                          color="primary"
                           sx={{
                             position: "absolute",
-                            bottom: 4,
-                            left: 4,
-                            height: { xs: 18, md: 20 },
-                            fontSize: { xs: "0.65rem", md: "0.7rem" },
+                            bottom: 8,
+                            left: 8,
+                            height: { xs: 20, md: 22 },
+                            fontSize: { xs: "0.65rem", md: "0.75rem" },
+                            bgcolor: 'rgba(140, 165, 81, 0.9)',
+                            color: 'white',
+                            fontWeight: 600,
+                            fontFamily: '"Poppins", sans-serif',
+                            border: '1px solid #8CA551'
                           }}
                         />
                       )}
@@ -624,6 +808,7 @@ const CreateFacade = ({
                 </Box>
               ) : (
                 <Paper
+                  elevation={0}
                   sx={{
                     flex: 1,
                     display: "flex",
@@ -632,13 +817,22 @@ const CreateFacade = ({
                     justifyContent: "center",
                     p: { xs: 3, md: 4 },
                     m: { xs: 1, md: 2 },
-                    bgcolor: "grey.50",
+                    bgcolor: 'white',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: 2,
                   }}
                 >
                   <CloudUpload
-                    sx={{ fontSize: { xs: 32, md: 40 }, color: "grey.400", mb: 1 }}
+                    sx={{ fontSize: { xs: 32, md: 40 }, color: '#706f6f', mb: 1 }}
                   />
-                  <Typography variant="caption" fontSize={{ xs: "0.75rem", md: "0.875rem" }} color="text.secondary">
+                  <Typography 
+                    variant="caption" 
+                    fontSize={{ xs: "0.75rem", md: "0.875rem" }}
+                    sx={{
+                      color: '#706f6f',
+                      fontFamily: '"Poppins", sans-serif'
+                    }}
+                  >
                     No images added yet
                   </Typography>
                 </Paper>
@@ -647,17 +841,24 @@ const CreateFacade = ({
           </Box>
         </DialogContent>
       
-        <DialogActions sx={{ px: { xs: 2, md: 3 }, py: { xs: 1.5, md: 2 }, borderTop: "1px solid #e0e0e0", gap: 1 }}>
+        {/* ✅ DIALOG ACTIONS - Brandbook exacto */}
+        <DialogActions sx={{ px: { xs: 2, md: 3 }, py: { xs: 1.5, md: 2 }, borderTop: "1px solid #e0e0e0", gap: 2 }}>
           <Button
             onClick={handleClose}
-            size="small"
-            variant="outlined"
             sx={{
               borderRadius: 3,
               textTransform: 'none',
               fontWeight: 600,
-              px: { xs: 2, md: 3 },
-              fontSize: { xs: "0.8rem", md: "0.875rem" }
+              px: 3,
+              py: 1.2,
+              color: '#706f6f',
+              fontFamily: '"Poppins", sans-serif',
+              border: '2px solid #e0e0e0',
+              fontSize: { xs: "0.8rem", md: "0.875rem" },
+              '&:hover': {
+                bgcolor: 'rgba(112, 111, 111, 0.05)',
+                borderColor: '#706f6f'
+              }
             }}
           >
             Cancel
@@ -666,27 +867,53 @@ const CreateFacade = ({
             onClick={handleSubmit}
             variant="contained"
             disabled={!facadeFormData.title.trim() || facadeFormData.url.length === 0}
-            size="small"
+            startIcon={<CheckCircle />}
             sx={{
               borderRadius: 3,
-              background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+              bgcolor: '#333F1F',
               color: 'white',
-              fontWeight: 700,
+              fontWeight: 600,
               textTransform: 'none',
-              px: { xs: 3, md: 4 },
-              py: { xs: 1, md: 1.5 },
+              letterSpacing: '1px',
+              fontFamily: '"Poppins", sans-serif',
+              px: 4,
+              py: 1.5,
               fontSize: { xs: "0.8rem", md: "0.875rem" },
-              boxShadow: '0 8px 20px rgba(74, 124, 89, 0.3)',
+              boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: '-100%',
+                width: '100%',
+                height: '100%',
+                bgcolor: '#8CA551',
+                transition: 'left 0.4s ease',
+                zIndex: 0,
+              },
               '&:hover': {
-                background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
-                boxShadow: '0 12px 28px rgba(74, 124, 89, 0.4)'
+                bgcolor: '#333F1F',
+                boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+                '&::before': {
+                  left: 0,
+                },
               },
               '&:disabled': {
-                background: '#ccc'
+                bgcolor: '#e0e0e0',
+                color: '#706f6f',
+                boxShadow: 'none'
+              },
+              '& .MuiButton-startIcon': {
+                position: 'relative',
+                zIndex: 1,
               }
             }}
           >
-            {selectedFacade ? "Update" : "Create"}
+            <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
+              {selectedFacade ? "Update" : "Create"}
+            </Box>
           </Button>
         </DialogActions>
       </Dialog>
@@ -700,10 +927,11 @@ const CreateFacade = ({
         PaperProps={{
           sx: {
             borderRadius: 4,
-            boxShadow: '0 20px 60px rgba(0,0,0,0.2)'
+            boxShadow: '0 20px 60px rgba(51, 63, 31, 0.15)'
           }
         }}
       >
+        {/* ✅ DECK DIALOG TITLE - Brandbook exacto */}
         <DialogTitle>
           <Box display="flex" alignItems="center" gap={2}>
             <Box
@@ -711,40 +939,84 @@ const CreateFacade = ({
                 width: 48,
                 height: 48,
                 borderRadius: 3,
-                background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+                bgcolor: '#333F1F',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)',
               }}
             >
-              <CloudUpload sx={{ color: 'white', fontSize: 24 }} />
+              <Deck sx={{ color: 'white', fontSize: 24 }} />
             </Box>
-            <Typography variant="h6" fontWeight={700}>
-              {editingDeckIndex !== null ? "Edit Deck Option" : "Add New Deck Option"}
-            </Typography>
+            <Box>
+              <Typography 
+                variant="h6" 
+                fontWeight={700}
+                sx={{
+                  color: '#333F1F',
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              >
+                {editingDeckIndex !== null ? "Edit Deck Option" : "Add New Deck Option"}
+              </Typography>
+              <Typography 
+                variant="caption"
+                sx={{
+                  color: '#706f6f',
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              >
+                Configure deck specifications and pricing
+              </Typography>
+            </Box>
           </Box>
         </DialogTitle>
-        <DialogContent
-          sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
-        >
-          <Grid container spacing={2} sx={{ mt: 0 }}>
+
+        <DialogContent sx={{ pt: 3 }}>
+          <Grid container spacing={2.5}>
             <Grid item xs={12} sm={8}>
               <TextField
                 fullWidth
-                label="Deck Name"
+                label="Deck Name *"
                 value={deckFormData.name}
                 onChange={(e) =>
                   setDeckFormData({ ...deckFormData, name: e.target.value })
                 }
                 required
                 placeholder="e.g. Standard Deck, Premium Composite"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 3,
+                    fontFamily: '"Poppins", sans-serif',
+                    "& fieldset": {
+                      borderColor: 'rgba(140, 165, 81, 0.3)',
+                      borderWidth: '2px'
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    },
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    }
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    color: '#706f6f',
+                    "&.Mui-focused": {
+                      color: "#333F1F",
+                      fontWeight: 600
+                    }
+                  }
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
                 type="number"
-                label="Price"
+                label="Price *"
                 value={deckFormData.price}
                 onChange={(e) =>
                   setDeckFormData({
@@ -754,7 +1026,33 @@ const CreateFacade = ({
                 }
                 required
                 InputProps={{
-                  startAdornment: <Typography sx={{ mr: 0.5 }}>$</Typography>,
+                  startAdornment: <Typography sx={{ mr: 0.5, fontSize: "0.875rem", color: '#333F1F', fontWeight: 600 }}>$</Typography>,
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 3,
+                    fontFamily: '"Poppins", sans-serif',
+                    "& fieldset": {
+                      borderColor: 'rgba(140, 165, 81, 0.3)',
+                      borderWidth: '2px'
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    },
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    }
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    color: '#706f6f',
+                    "&.Mui-focused": {
+                      color: "#333F1F",
+                      fontWeight: 600
+                    }
+                  }
                 }}
               />
             </Grid>
@@ -771,33 +1069,83 @@ const CreateFacade = ({
                     description: e.target.value,
                   })
                 }
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 3,
+                    fontFamily: '"Poppins", sans-serif',
+                    "& fieldset": {
+                      borderColor: 'rgba(140, 165, 81, 0.3)',
+                      borderWidth: '2px'
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    },
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    }
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    color: '#706f6f',
+                    "&.Mui-focused": {
+                      color: "#333F1F",
+                      fontWeight: 600
+                    }
+                  }
+                }}
               />
             </Grid>
 
             {/* Deck Images */}
             <Grid item xs={12}>
-              <Typography variant="subtitle2" gutterBottom>
+              <Typography 
+                variant="subtitle2" 
+                gutterBottom
+                sx={{
+                  color: '#333F1F',
+                  fontFamily: '"Poppins", sans-serif',
+                  fontWeight: 700,
+                  mb: 1.5
+                }}
+              >
                 Deck Images
               </Typography>
-              <Box display="flex" gap={1} mb={2}>
-                <Button
-                  variant="outlined"
-                  component="label"
-                  disabled={uploadingDeckImages}
-                  startIcon={<CloudUpload />}
-                >
-                  {uploadingDeckImages ? "Uploading..." : "Upload Files"}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    multiple
-                    onChange={handleFileDeckUpload}
-                  />
-                </Button>
-              </Box>
+              <Button
+                variant="outlined"
+                component="label"
+                disabled={uploadingDeckImages}
+                fullWidth
+                startIcon={<CloudUpload />}
+                sx={{
+                  mb: 2,
+                  borderRadius: 3,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontFamily: '"Poppins", sans-serif',
+                  borderColor: 'rgba(140, 165, 81, 0.3)',
+                  borderWidth: '2px',
+                  color: '#333F1F',
+                  py: 1.2,
+                  '&:hover': {
+                    borderColor: '#8CA551',
+                    borderWidth: '2px',
+                    bgcolor: 'rgba(140, 165, 81, 0.08)'
+                  }
+                }}
+              >
+                {uploadingDeckImages ? "Uploading..." : "Upload Deck Images"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  multiple
+                  onChange={handleFileDeckUpload}
+                />
+              </Button>
 
-              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+              <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
                 {deckFormData.images.map((url, index) => (
                   <Box
                     key={index}
@@ -810,7 +1158,8 @@ const CreateFacade = ({
                         width: "100%",
                         height: "100%",
                         objectFit: "cover",
-                        borderRadius: 1,
+                        borderRadius: 2,
+                        border: '1px solid #e0e0e0'
                       }}
                     />
                     <IconButton
@@ -818,10 +1167,16 @@ const CreateFacade = ({
                       onClick={() => handleRemoveDeckImageUrl(index)}
                       sx={{
                         position: "absolute",
-                        top: 0,
-                        right: 0,
-                        bgcolor: "rgba(255,255,255,0.8)",
-                        p: 0.5,
+                        top: -8,
+                        right: -8,
+                        bgcolor: 'rgba(229, 134, 60, 0.9)',
+                        color: 'white',
+                        width: 24,
+                        height: 24,
+                        '&:hover': {
+                          bgcolor: '#E5863C',
+                          transform: 'scale(1.1)'
+                        }
                       }}
                     >
                       <Close fontSize="small" />
@@ -832,6 +1187,8 @@ const CreateFacade = ({
             </Grid>
           </Grid>
         </DialogContent>
+
+        {/* ✅ DECK DIALOG ACTIONS - Brandbook exacto */}
         <DialogActions sx={{ p: 3, gap: 2 }}>
           <Button
             onClick={handleCloseDeckDialog}
@@ -839,7 +1196,15 @@ const CreateFacade = ({
               borderRadius: 3,
               textTransform: 'none',
               fontWeight: 600,
-              px: 3
+              px: 3,
+              py: 1.2,
+              color: '#706f6f',
+              fontFamily: '"Poppins", sans-serif',
+              border: '2px solid #e0e0e0',
+              '&:hover': {
+                bgcolor: 'rgba(112, 111, 111, 0.05)',
+                borderColor: '#706f6f'
+              }
             }}
           >
             Cancel
@@ -847,25 +1212,53 @@ const CreateFacade = ({
           <Button
             onClick={handleSubmitDeck}
             variant="contained"
+            disabled={!deckFormData.name.trim()}
+            startIcon={<CheckCircle />}
             sx={{
               borderRadius: 3,
-              background: 'linear-gradient(135deg, #4a7c59 0%, #8bc34a 100%)',
+              bgcolor: '#333F1F',
               color: 'white',
-              fontWeight: 700,
+              fontWeight: 600,
               textTransform: 'none',
+              letterSpacing: '1px',
+              fontFamily: '"Poppins", sans-serif',
               px: 4,
               py: 1.5,
-              boxShadow: '0 8px 20px rgba(74, 124, 89, 0.3)',
+              boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: '-100%',
+                width: '100%',
+                height: '100%',
+                bgcolor: '#8CA551',
+                transition: 'left 0.4s ease',
+                zIndex: 0,
+              },
               '&:hover': {
-                background: 'linear-gradient(135deg, #3d664a 0%, #7ba843 100%)',
-                boxShadow: '0 12px 28px rgba(74, 124, 89, 0.4)'
+                bgcolor: '#333F1F',
+                boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+                '&::before': {
+                  left: 0,
+                },
               },
               '&:disabled': {
-                background: '#ccc'
+                bgcolor: '#e0e0e0',
+                color: '#706f6f',
+                boxShadow: 'none'
+              },
+              '& .MuiButton-startIcon': {
+                position: 'relative',
+                zIndex: 1,
               }
             }}
           >
-            Save Deck
+            <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
+              Save Deck
+            </Box>
           </Button>
         </DialogActions>
       </Dialog>

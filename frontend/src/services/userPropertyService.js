@@ -124,7 +124,7 @@ const userPropertyService = {
         paymentProgress: totalInvestment > 0 ? (totalPaid / totalInvestment) * 100 : 0,
         payments: {
           total: payloads.length,
-          cleared: clearedPayments,
+          signed: clearedPayments,
           pending: pendingPayments,
           rejected: rejectedPayments
         },

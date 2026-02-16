@@ -18,16 +18,16 @@ import { useProperty } from '../../context/PropertyContext'
 import { useNavigate } from 'react-router-dom'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import PersonIcon from '@mui/icons-material/Person'
 import api from '../../services/api'
 import { sendWelcomeSMS, sendPropertyAssignmentSMS } from '../../services/smsService'
-
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
-// ...existing code...
 
 const ResidentAssignment = ({ expanded, onToggle }) => {
   const navigate = useNavigate()
-  // Added options and selectedPricingOption from context to determine flags
   const { selectedLot, selectedModel, selectedFacade, financials, options, selectedPricingOption } = useProperty()
   const [tabValue, setTabValue] = useState(0)
   const [users, setUsers] = useState([])
@@ -36,7 +36,6 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
   const [submitting, setSubmitting] = useState(false)
   const [smsStatus, setSmsStatus] = useState(null)
   
-  // Form data for new user
   const [newUserData, setNewUserData] = useState({
     firstName: '',
     lastName: '',
@@ -51,7 +50,6 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
     if (expanded && tabValue === 0 && users.length === 0) {
       fetchUsers()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expanded, tabValue])
 
   const fetchUsers = async () => {
@@ -59,7 +57,6 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
       setLoadingUsers(true)
       const response = await api.get('/users')
       const all = Array.isArray(response.data) ? response.data : []
-      // filter to role 'user'
       setUsers(all.filter(u => u.role === 'user'))
     } catch (error) {
       console.error('Error fetching users:', error)
@@ -76,11 +73,9 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
       let userInfo = null
       let isNewUser = false
   
-      // If creating new user
       if (tabValue === 1) {
         isNewUser = true
 
-        // Normalize phone: ensure leading +
         const normalizedPhone = newUserData.phoneNumber
           ? newUserData.phoneNumber.startsWith('+')
             ? newUserData.phoneNumber
@@ -90,7 +85,6 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
         const payload = {
           ...newUserData,
           phoneNumber: normalizedPhone,
-          // prefer backend flow that sends invite/SMS instead of requiring password
           skipPasswordSetup: true
         }
 
@@ -102,7 +96,6 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
           phoneNumber: normalizedPhone
         }
 
-        // Send welcome SMS if phone available — backend might already send, but keep best-effort
         if (userInfo.phoneNumber) {
           setSmsStatus('sending-welcome')
           try {
@@ -119,7 +112,6 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
           }
         }
       } else {
-        // Obtener info del usuario seleccionado
         userInfo = users.find(u => u._id === selectedUser) || users.find(u => u.id === selectedUser)
       }
   
@@ -129,17 +121,13 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
         return
       }
 
-      // --- Normalización y armado del payload para el backend ---
-      // IDs: asegurar que sean strings
       const lotId = selectedLot?._id || selectedLot
       const modelId = selectedModel?._id || selectedModel
       const facadeId = selectedFacade?._id || selectedFacade || null
       const finalUserId = userId
 
-      // initialPayment: usar valor calculado (Number)
       const initialPaymentAmount = Number(financials.initialDownPayment || 0)
 
-      // Determinar flags: prioridad a selectedPricingOption, luego toggles manuales
       const hasBalcony = selectedPricingOption
         ? Boolean(selectedPricingOption.hasBalcony)
         : Boolean(options?.balcony)
@@ -152,7 +140,6 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
         ? String(selectedPricingOption.modelType)
         : (options?.upgrade ? 'upgrade' : 'basic')
 
-      // Build payload including existing financial fields and the normalized option flags
       const propertyPayload = {
         lot: String(lotId),
         model: String(modelId),
@@ -165,7 +152,6 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
         discountPercent: Number(financials.discountPercent || 0),
         totalDownPayment: Number(financials.totalDownPayment || 0),
         downPaymentPercent: Number(financials.downPaymentPercent || 0),
-        // use normalized initial payment
         initialPayment: Number(initialPaymentAmount),
         initialPaymentPercent: Number(financials.initialDownPaymentPercent || 0),
         monthlyPayment: Number(financials.monthlyPayment || 0),
@@ -174,19 +160,15 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
         pending: Number(financials.presalePrice || 0),
         price: Number(financials.presalePrice || 0),
         status: 'pending',
-        // Configuration options expected by backend:
         hasBalcony: Boolean(hasBalcony),
         modelType: modelType || 'basic',
         hasStorage: Boolean(hasStorage)
       }
 
-      // Debug: revisar en consola (dev) antes de enviar
       console.log('Property payload (normalized):', propertyPayload)
-      // --- Fin normalización ---
 
       await api.post('/properties', propertyPayload)
   
-      // Send property assignment SMS if we have a phone
       if (userInfo?.phoneNumber) {
         setSmsStatus('sending-property')
         try {
@@ -232,7 +214,6 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
     if (tabValue === 0) {
       return selectedUser !== ''
     } else {
-      // New user flow uses phone + skipPasswordSetup, require phone instead of password
       return Boolean(newUserData.firstName && newUserData.lastName && newUserData.email && newUserData.phoneNumber)
     }
   }
@@ -240,16 +221,29 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
   if (!selectedLot || !selectedModel) {
     return (
       <Paper 
-        elevation={2} 
+        elevation={0} 
         sx={{ 
           p: 3, 
           bgcolor: '#fff', 
-          borderRadius: 2,
+          borderRadius: 4,
           border: '1px solid #e0e0e0',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
           opacity: 0.6
         }}
       >
-        <Typography variant="subtitle1" color="text.secondary" textAlign="center" sx={{ py: 2 }}>
+        <Typography 
+          variant="subtitle1" 
+          textAlign="center" 
+          sx={{ 
+            py: 2,
+            fontFamily: '"Poppins", sans-serif',
+            letterSpacing: '1.5px',
+            textTransform: 'uppercase',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+            color: '#706f6f'
+          }}
+        >
           SELECT LOT AND MODEL TO ASSIGN RESIDENT
         </Typography>
       </Paper>
@@ -258,78 +252,177 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
 
   return (
     <Paper 
-      elevation={2} 
+      elevation={0} 
       sx={{ 
         bgcolor: '#fff', 
-        borderRadius: 2,
-        border: expanded ? '2px solid #4a7c59' : '1px solid #e0e0e0',
+        borderRadius: 4,
+        border: expanded ? '2px solid #8CA551' : '1px solid #e0e0e0',
         overflow: 'hidden',
-        transition: 'all 0.3s ease'
+        transition: 'all 0.3s ease',
+        boxShadow: expanded ? '0 8px 24px rgba(140, 165, 81, 0.15)' : '0 4px 20px rgba(0,0,0,0.06)'
       }}
     >
-      {/* Header - Clickeable */}
+      {/* ✅ HEADER - Brandbook */}
       <Box 
         onClick={onToggle}
         sx={{ 
           p: 3, 
           cursor: 'pointer',
-          bgcolor: expanded ? '#f1f8e9' : '#fff',
-          transition: 'background-color 0.3s ease',
+          bgcolor: expanded ? 'rgba(140, 165, 81, 0.08)' : '#fff',
+          transition: 'all 0.3s ease',
+          borderBottom: expanded ? '2px solid rgba(140, 165, 81, 0.2)' : 'none',
           '&:hover': {
-            bgcolor: expanded ? '#f1f8e9' : '#f9fafb'
+            bgcolor: expanded ? 'rgba(140, 165, 81, 0.12)' : 'rgba(51, 63, 31, 0.03)'
           }
         }}
       >
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="subtitle1" fontWeight="bold">
-            04 RESIDENT ASSIGNMENT
-          </Typography>
-          <Typography 
-            variant="caption" 
-            color={expanded ? 'success.main' : 'text.secondary'}
-            fontWeight="bold"
-          >
-            {expanded ? 'EXPANDED' : 'CLICK TO EXPAND'}
-          </Typography>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: 3,
+                bgcolor: expanded ? '#333F1F' : 'rgba(51, 63, 31, 0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.3s',
+                boxShadow: expanded ? '0 4px 12px rgba(51, 63, 31, 0.2)' : 'none'
+              }}
+            >
+              <PersonIcon sx={{ color: expanded ? 'white' : '#333F1F', fontSize: 24 }} />
+            </Box>
+            <Box>
+              <Typography 
+                variant="subtitle1" 
+                fontWeight={700}
+                sx={{
+                  color: '#333F1F',
+                  fontFamily: '"Poppins", sans-serif',
+                  letterSpacing: '1.5px',
+                  textTransform: 'uppercase',
+                  fontSize: '0.95rem'
+                }}
+              >
+                04 Resident Assignment
+              </Typography>
+              <Typography 
+                variant="caption" 
+                sx={{
+                  color: '#706f6f',
+                  fontFamily: '"Poppins", sans-serif',
+                  fontSize: '0.75rem'
+                }}
+              >
+                {expanded ? 'Select or create a resident' : 'Click to expand'}
+              </Typography>
+            </Box>
+          </Box>
+          
+          <Box display="flex" alignItems="center" gap={2}>
+            {expanded ? (
+              <ExpandLessIcon sx={{ color: '#8CA551', fontSize: 28 }} />
+            ) : (
+              <ExpandMoreIcon sx={{ color: '#706f6f', fontSize: 28 }} />
+            )}
+          </Box>
         </Box>
       </Box>
 
-      {/* Collapsible Content */}
+      {/* ✅ COLLAPSIBLE CONTENT */}
       <Collapse in={expanded}>
-        <Box sx={{ px: 3, pb: 3 }}>
-          <Divider sx={{ mb: 2 }} />
-
-          {/* ✅ SMS Status Alert */}
+        <Box sx={{ p: 3 }}>
+          {/* ✅ SMS STATUS ALERTS - Brandbook */}
           {smsStatus === 'sending-welcome' && (
-            <Alert severity="info" sx={{ mb: 2 }}>
+            <Alert 
+              severity="info" 
+              sx={{ 
+                mb: 2,
+                borderRadius: 3,
+                bgcolor: 'rgba(33, 150, 243, 0.08)',
+                border: '1px solid rgba(33, 150, 243, 0.3)',
+                fontFamily: '"Poppins", sans-serif',
+                "& .MuiAlert-icon": {
+                  color: "#2196f3"
+                }
+              }}
+            >
               📱 Sending welcome SMS to new user...
             </Alert>
           )}
           {smsStatus === 'sending-property' && (
-            <Alert severity="info" sx={{ mb: 2 }}>
+            <Alert 
+              severity="info" 
+              sx={{ 
+                mb: 2,
+                borderRadius: 3,
+                bgcolor: 'rgba(33, 150, 243, 0.08)',
+                border: '1px solid rgba(33, 150, 243, 0.3)',
+                fontFamily: '"Poppins", sans-serif',
+                "& .MuiAlert-icon": {
+                  color: "#2196f3"
+                }
+              }}
+            >
               📱 Sending property assignment SMS...
             </Alert>
           )}
           {smsStatus === 'sent' && (
-            <Alert severity="success" sx={{ mb: 2 }}>
+            <Alert 
+              severity="success" 
+              sx={{ 
+                mb: 2,
+                borderRadius: 3,
+                bgcolor: 'rgba(140, 165, 81, 0.08)',
+                border: '1px solid rgba(140, 165, 81, 0.3)',
+                fontFamily: '"Poppins", sans-serif',
+                "& .MuiAlert-icon": {
+                  color: "#8CA551"
+                }
+              }}
+            >
               ✅ SMS notifications sent successfully!
             </Alert>
           )}
           {smsStatus === 'failed' && (
-            <Alert severity="warning" sx={{ mb: 2 }}>
+            <Alert 
+              severity="warning" 
+              sx={{ 
+                mb: 2,
+                borderRadius: 3,
+                bgcolor: 'rgba(229, 134, 60, 0.08)',
+                border: '1px solid rgba(229, 134, 60, 0.3)',
+                fontFamily: '"Poppins", sans-serif',
+                "& .MuiAlert-icon": {
+                  color: "#E5863C"
+                }
+              }}
+            >
               ⚠️ SMS notification failed but property was created
             </Alert>
           )}
 
-          {/* Tabs */}
-          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          {/* ✅ TABS - Brandbook */}
+          <Box sx={{ borderBottom: '2px solid rgba(140, 165, 81, 0.2)', mb: 3 }}>
             <Tabs 
               value={tabValue} 
               onChange={(e, newValue) => setTabValue(newValue)}
               sx={{
                 '& .MuiTab-root': {
                   textTransform: 'none',
-                  fontWeight: 500
+                  fontWeight: 600,
+                  fontFamily: '"Poppins", sans-serif',
+                  fontSize: '0.9rem',
+                  letterSpacing: '0.5px',
+                  color: '#706f6f',
+                  '&.Mui-selected': {
+                    color: '#333F1F'
+                  }
+                },
+                '& .MuiTabs-indicator': {
+                  bgcolor: '#8CA551',
+                  height: 3
                 }
               }}
             >
@@ -339,7 +432,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
           </Box>
 
           {tabValue === 0 ? (
-            // Select Existing User Tab
+            // ✅ SELECT EXISTING USER TAB
             <Box>
               <TextField
                 fullWidth
@@ -349,14 +442,64 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                 onChange={(e) => setSelectedUser(e.target.value)}
                 helperText="Choose an existing resident to assign this property"
                 disabled={loadingUsers}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 3,
+                    fontFamily: '"Poppins", sans-serif',
+                    "& fieldset": {
+                      borderColor: 'rgba(140, 165, 81, 0.3)',
+                      borderWidth: '2px'
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#8CA551"
+                    },
+                    "&.Mui-focused fieldset": { 
+                      borderColor: "#333F1F",
+                      borderWidth: "2px"
+                    }
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    fontWeight: 500,
+                    color: '#706f6f',
+                    "&.Mui-focused": {
+                      color: "#333F1F",
+                      fontWeight: 600
+                    }
+                  },
+                  "& .MuiFormHelperText-root": {
+                    fontFamily: '"Poppins", sans-serif',
+                    fontSize: '0.75rem'
+                  }
+                }}
               >
                 {loadingUsers ? (
-                  <MenuItem disabled>Loading users...</MenuItem>
+                  <MenuItem disabled sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                    Loading users...
+                  </MenuItem>
                 ) : users.length === 0 ? (
-                  <MenuItem disabled>No users available</MenuItem>
+                  <MenuItem disabled sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                    No users available
+                  </MenuItem>
                 ) : (
                   users.map((user) => (
-                    <MenuItem key={user._id} value={user._id}>
+                    <MenuItem 
+                      key={user._id} 
+                      value={user._id}
+                      sx={{
+                        fontFamily: '"Poppins", sans-serif',
+                        fontWeight: 500,
+                        '&:hover': {
+                          bgcolor: 'rgba(140, 165, 81, 0.08)'
+                        },
+                        '&.Mui-selected': {
+                          bgcolor: 'rgba(140, 165, 81, 0.12)',
+                          '&:hover': {
+                            bgcolor: 'rgba(140, 165, 81, 0.18)'
+                          }
+                        }
+                      }}
+                    >
                       {user.firstName} {user.lastName} - {user.email}
                       {user.phoneNumber && ` 📱 ${user.phoneNumber}`}
                     </MenuItem>
@@ -364,35 +507,167 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                 )}
               </TextField>
 
-              {/* Property Summary */}
-              <Paper sx={{ p: 2, mt: 3, bgcolor: 'grey.50', borderRadius: 2 }}>
-                <Typography variant="subtitle2" fontWeight="bold" mb={1}>
+              {/* ✅ PROPERTY SUMMARY - Brandbook */}
+              <Paper 
+                sx={{ 
+                  p: 3, 
+                  mt: 3, 
+                  bgcolor: 'rgba(140, 165, 81, 0.05)', 
+                  borderRadius: 3,
+                  border: '2px solid rgba(140, 165, 81, 0.2)'
+                }}
+              >
+                <Typography 
+                  variant="subtitle2" 
+                  fontWeight={700} 
+                  mb={2}
+                  sx={{
+                    color: '#333F1F',
+                    fontFamily: '"Poppins", sans-serif',
+                    letterSpacing: '1px',
+                    textTransform: 'uppercase',
+                    fontSize: '0.8rem'
+                  }}
+                >
                   Property Summary
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Lot: #{selectedLot?.number}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Model: {selectedModel?.model}
-                </Typography>
-                {selectedFacade && (
-                  <Typography variant="body2" color="text.secondary">
-                    Facade: {selectedFacade.title}
-                  </Typography>
-                )}
-                <Divider sx={{ my: 1 }} />
-                <Typography variant="body2" color="primary" fontWeight="bold">
-                  Total Price: ${financials.presalePrice.toLocaleString()}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Initial Payment: ${financials.initialDownPayment.toLocaleString()}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Mortgage: ${financials.mortgage.toLocaleString()}
-                </Typography>
+                <Box display="flex" flexDirection="column" gap={1}>
+                  <Box display="flex" justifyContent="space-between">
+                    <Typography 
+                      variant="body2"
+                      sx={{ 
+                        color: '#706f6f',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      Lot:
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      fontWeight={600}
+                      sx={{ 
+                        color: '#333F1F',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      #{selectedLot?.number}
+                    </Typography>
+                  </Box>
+                  <Box display="flex" justifyContent="space-between">
+                    <Typography 
+                      variant="body2"
+                      sx={{ 
+                        color: '#706f6f',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      Model:
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      fontWeight={600}
+                      sx={{ 
+                        color: '#333F1F',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      {selectedModel?.model}
+                    </Typography>
+                  </Box>
+                  {selectedFacade && (
+                    <Box display="flex" justifyContent="space-between">
+                      <Typography 
+                        variant="body2"
+                        sx={{ 
+                          color: '#706f6f',
+                          fontFamily: '"Poppins", sans-serif'
+                        }}
+                      >
+                        Facade:
+                      </Typography>
+                      <Typography 
+                        variant="body2" 
+                        fontWeight={600}
+                        sx={{ 
+                          color: '#333F1F',
+                          fontFamily: '"Poppins", sans-serif'
+                        }}
+                      >
+                        {selectedFacade.title}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+                <Divider sx={{ my: 2, borderColor: 'rgba(140, 165, 81, 0.3)' }} />
+                <Box display="flex" flexDirection="column" gap={1}>
+                  <Box display="flex" justifyContent="space-between">
+                    <Typography 
+                      variant="body2" 
+                      fontWeight={700}
+                      sx={{ 
+                        color: '#8CA551',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      Total Price:
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      fontWeight={700}
+                      sx={{ 
+                        color: '#8CA551',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      ${financials.presalePrice.toLocaleString()}
+                    </Typography>
+                  </Box>
+                  <Box display="flex" justifyContent="space-between">
+                    <Typography 
+                      variant="body2"
+                      sx={{ 
+                        color: '#706f6f',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      Initial Payment:
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      fontWeight={600}
+                      sx={{ 
+                        color: '#333F1F',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      ${financials.initialDownPayment.toLocaleString()}
+                    </Typography>
+                  </Box>
+                  <Box display="flex" justifyContent="space-between">
+                    <Typography 
+                      variant="body2"
+                      sx={{ 
+                        color: '#706f6f',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      Mortgage:
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      fontWeight={600}
+                      sx={{ 
+                        color: '#333F1F',
+                        fontFamily: '"Poppins", sans-serif'
+                      }}
+                    >
+                      ${financials.mortgage.toLocaleString()}
+                    </Typography>
+                  </Box>
+                </Box>
               </Paper>
 
-              {/* Action Button */}
+              {/* ✅ ACTION BUTTON - Brandbook */}
               <Button
                 variant="contained"
                 fullWidth
@@ -401,19 +676,45 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                 startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <CheckCircleIcon />}
                 sx={{
                   mt: 3,
-                  bgcolor: '#4a7c59',
-                  color: '#fff',
-                  py: 1.5,
                   borderRadius: 3,
-                  fontWeight: 'bold',
+                  bgcolor: '#333F1F',
+                  color: 'white',
+                  fontWeight: 600,
                   textTransform: 'none',
-                  fontSize: '1rem',
+                  letterSpacing: '1px',
+                  fontFamily: '"Poppins", sans-serif',
+                  px: 4,
+                  py: 1.8,
+                  fontSize: '0.95rem',
+                  boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: '-100%',
+                    width: '100%',
+                    height: '100%',
+                    bgcolor: '#8CA551',
+                    transition: 'left 0.4s ease',
+                    zIndex: 0
+                  },
                   '&:hover': {
-                    bgcolor: '#3d664a'
+                    bgcolor: '#333F1F',
+                    boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+                    '&::before': {
+                      left: 0
+                    }
                   },
                   '&:disabled': {
-                    bgcolor: '#ccc',
-                    color: '#666'
+                    bgcolor: '#e0e0e0',
+                    color: '#9e9e9e',
+                    boxShadow: 'none'
+                  },
+                  '& .MuiButton-startIcon, & span': {
+                    position: 'relative',
+                    zIndex: 1
                   }
                 }}
               >
@@ -421,9 +722,9 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
               </Button>
             </Box>
           ) : (
-            // Create New User Tab
+            // ✅ CREATE NEW USER TAB
             <Box>
-              <Grid container spacing={2}>
+              <Grid container spacing={2.5}>
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
@@ -431,6 +732,32 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                     value={newUserData.firstName}
                     onChange={(e) => setNewUserData({ ...newUserData, firstName: e.target.value })}
                     required
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        fontFamily: '"Poppins", sans-serif',
+                        "& fieldset": {
+                          borderColor: 'rgba(140, 165, 81, 0.3)',
+                          borderWidth: '2px'
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#8CA551"
+                        },
+                        "&.Mui-focused fieldset": { 
+                          borderColor: "#333F1F",
+                          borderWidth: "2px"
+                        }
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontFamily: '"Poppins", sans-serif',
+                        fontWeight: 500,
+                        color: '#706f6f',
+                        "&.Mui-focused": {
+                          color: "#333F1F",
+                          fontWeight: 600
+                        }
+                      }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -440,6 +767,32 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                     value={newUserData.lastName}
                     onChange={(e) => setNewUserData({ ...newUserData, lastName: e.target.value })}
                     required
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        fontFamily: '"Poppins", sans-serif',
+                        "& fieldset": {
+                          borderColor: 'rgba(140, 165, 81, 0.3)',
+                          borderWidth: '2px'
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#8CA551"
+                        },
+                        "&.Mui-focused fieldset": { 
+                          borderColor: "#333F1F",
+                          borderWidth: "2px"
+                        }
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontFamily: '"Poppins", sans-serif',
+                        fontWeight: 500,
+                        color: '#706f6f',
+                        "&.Mui-focused": {
+                          color: "#333F1F",
+                          fontWeight: 600
+                        }
+                      }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -450,6 +803,32 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                     value={newUserData.email}
                     onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
                     required
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        fontFamily: '"Poppins", sans-serif',
+                        "& fieldset": {
+                          borderColor: 'rgba(140, 165, 81, 0.3)',
+                          borderWidth: '2px'
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#8CA551"
+                        },
+                        "&.Mui-focused fieldset": { 
+                          borderColor: "#333F1F",
+                          borderWidth: "2px"
+                        }
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontFamily: '"Poppins", sans-serif',
+                        fontWeight: 500,
+                        color: '#706f6f',
+                        "&.Mui-focused": {
+                          color: "#333F1F",
+                          fontWeight: 600
+                        }
+                      }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -460,12 +839,51 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                     value={newUserData.password}
                     onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
                     helperText="If left empty, user will receive an SMS to set up access"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        fontFamily: '"Poppins", sans-serif',
+                        "& fieldset": {
+                          borderColor: 'rgba(140, 165, 81, 0.3)',
+                          borderWidth: '2px'
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#8CA551"
+                        },
+                        "&.Mui-focused fieldset": { 
+                          borderColor: "#333F1F",
+                          borderWidth: "2px"
+                        }
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontFamily: '"Poppins", sans-serif',
+                        fontWeight: 500,
+                        color: '#706f6f',
+                        "&.Mui-focused": {
+                          color: "#333F1F",
+                          fontWeight: 600
+                        }
+                      },
+                      "& .MuiFormHelperText-root": {
+                        fontFamily: '"Poppins", sans-serif',
+                        fontSize: '0.7rem'
+                      }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
-                      Phone Number
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        mb: 0.5, 
+                        display: 'block',
+                        color: '#706f6f',
+                        fontFamily: '"Poppins", sans-serif',
+                        fontWeight: 500
+                      }}
+                    >
+                      Phone Number *
                     </Typography>
                     <PhoneInput
                       country={'us'}
@@ -477,12 +895,29 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                         width: '100%',
                         height: '56px',
                         fontSize: '16px',
-                        border: '1px solid #c4c4c4',
-                        borderRadius: 6
+                        border: '2px solid rgba(140, 165, 81, 0.3)',
+                        borderRadius: 12,
+                        transition: 'all 0.3s',
+                        fontFamily: '"Poppins", sans-serif'
                       }}
-                      buttonStyle={{ border: '1px solid #c4c4c4', borderRight: 'none' }}
+                      buttonStyle={{ 
+                        border: '2px solid rgba(140, 165, 81, 0.3)', 
+                        borderRight: 'none',
+                        borderRadius: '12px 0 0 12px'
+                      }}
                     />
-                    <Typography variant="caption" color="text.secondary">Include for SMS notifications</Typography>
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        color: '#706f6f',
+                        fontFamily: '"Poppins", sans-serif',
+                        fontSize: '0.7rem',
+                        display: 'block',
+                        mt: 0.5
+                      }}
+                    >
+                      Include for SMS notifications
+                    </Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -493,39 +928,173 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                     value={newUserData.birthday}
                     onChange={(e) => setNewUserData({ ...newUserData, birthday: e.target.value })}
                     InputLabelProps={{ shrink: true }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        fontFamily: '"Poppins", sans-serif',
+                        "& fieldset": {
+                          borderColor: 'rgba(140, 165, 81, 0.3)',
+                          borderWidth: '2px'
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#8CA551"
+                        },
+                        "&.Mui-focused fieldset": { 
+                          borderColor: "#333F1F",
+                          borderWidth: "2px"
+                        }
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontFamily: '"Poppins", sans-serif',
+                        fontWeight: 500,
+                        color: '#706f6f',
+                        "&.Mui-focused": {
+                          color: "#333F1F",
+                          fontWeight: 600
+                        }
+                      }
+                    }}
                   />
                 </Grid>
 
-                {/* Property Summary */}
+                {/* ✅ PROPERTY SUMMARY - Brandbook */}
                 <Grid item xs={12}>
-                  <Paper sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
-                    <Typography variant="subtitle2" fontWeight="bold" mb={1}>
+                  <Paper 
+                    sx={{ 
+                      p: 3, 
+                      bgcolor: 'rgba(140, 165, 81, 0.05)', 
+                      borderRadius: 3,
+                      border: '2px solid rgba(140, 165, 81, 0.2)'
+                    }}
+                  >
+                    <Typography 
+                      variant="subtitle2" 
+                      fontWeight={700} 
+                      mb={2}
+                      sx={{
+                        color: '#333F1F',
+                        fontFamily: '"Poppins", sans-serif',
+                        letterSpacing: '1px',
+                        textTransform: 'uppercase',
+                        fontSize: '0.8rem'
+                      }}
+                    >
                       Property to Assign
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Lot: #{selectedLot?.number} | Model: {selectedModel?.model}
-                    </Typography>
-                    {selectedFacade && (
-                      <Typography variant="body2" color="text.secondary">
-                        Facade: {selectedFacade.title}
+                    <Box display="flex" flexDirection="column" gap={1}>
+                      <Box display="flex" justifyContent="space-between">
+                        <Typography 
+                          variant="body2"
+                          sx={{ 
+                            color: '#706f6f',
+                            fontFamily: '"Poppins", sans-serif'
+                          }}
+                        >
+                          Lot:
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          fontWeight={600}
+                          sx={{ 
+                            color: '#333F1F',
+                            fontFamily: '"Poppins", sans-serif'
+                          }}
+                        >
+                          #{selectedLot?.number}
+                        </Typography>
+                      </Box>
+                      <Box display="flex" justifyContent="space-between">
+                        <Typography 
+                          variant="body2"
+                          sx={{ 
+                            color: '#706f6f',
+                            fontFamily: '"Poppins", sans-serif'
+                          }}
+                        >
+                          Model:
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          fontWeight={600}
+                          sx={{ 
+                            color: '#333F1F',
+                            fontFamily: '"Poppins", sans-serif'
+                          }}
+                        >
+                          {selectedModel?.model}
+                        </Typography>
+                      </Box>
+                      {selectedFacade && (
+                        <Box display="flex" justifyContent="space-between">
+                          <Typography 
+                            variant="body2"
+                            sx={{ 
+                              color: '#706f6f',
+                              fontFamily: '"Poppins", sans-serif'
+                            }}
+                          >
+                            Facade:
+                          </Typography>
+                          <Typography 
+                            variant="body2" 
+                            fontWeight={600}
+                            sx={{ 
+                              color: '#333F1F',
+                              fontFamily: '"Poppins", sans-serif'
+                            }}
+                          >
+                            {selectedFacade.title}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                    <Divider sx={{ my: 2, borderColor: 'rgba(140, 165, 81, 0.3)' }} />
+                    <Box display="flex" justifyContent="space-between">
+                      <Typography 
+                        variant="body2" 
+                        fontWeight={700}
+                        sx={{ 
+                          color: '#8CA551',
+                          fontFamily: '"Poppins", sans-serif'
+                        }}
+                      >
+                        Total:
                       </Typography>
-                    )}
-                    <Divider sx={{ my: 1 }} />
-                    <Typography variant="body2" color="primary" fontWeight="bold">
-                      Total: ${financials.presalePrice.toLocaleString()}
-                    </Typography>
+                      <Typography 
+                        variant="body2" 
+                        fontWeight={700}
+                        sx={{ 
+                          color: '#8CA551',
+                          fontFamily: '"Poppins", sans-serif'
+                        }}
+                      >
+                        ${financials.presalePrice.toLocaleString()}
+                      </Typography>
+                    </Box>
                   </Paper>
                 </Grid>
               </Grid>
 
-              {/* Validation Message */}
+              {/* ✅ VALIDATION MESSAGE - Brandbook */}
               {!isFormValid() && (
-                <Alert severity="info" sx={{ mt: 2 }}>
+                <Alert 
+                  severity="info" 
+                  sx={{ 
+                    mt: 2,
+                    borderRadius: 3,
+                    bgcolor: 'rgba(33, 150, 243, 0.08)',
+                    border: '1px solid rgba(33, 150, 243, 0.3)',
+                    fontFamily: '"Poppins", sans-serif',
+                    "& .MuiAlert-icon": {
+                      color: "#2196f3"
+                    }
+                  }}
+                >
                   Please fill in all required fields (First Name, Last Name, Email, Phone Number)
                 </Alert>
               )}
 
-              {/* Action Button */}
+              {/* ✅ ACTION BUTTON - Brandbook */}
               <Button
                 variant="contained"
                 fullWidth
@@ -534,19 +1103,45 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                 startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <PersonAddIcon />}
                 sx={{
                   mt: 3,
-                  bgcolor: '#4a7c59',
-                  color: '#fff',
-                  py: 1.5,
                   borderRadius: 3,
-                  fontWeight: 'bold',
+                  bgcolor: '#333F1F',
+                  color: 'white',
+                  fontWeight: 600,
                   textTransform: 'none',
-                  fontSize: '1rem',
+                  letterSpacing: '1px',
+                  fontFamily: '"Poppins", sans-serif',
+                  px: 4,
+                  py: 1.8,
+                  fontSize: '0.95rem',
+                  boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: '-100%',
+                    width: '100%',
+                    height: '100%',
+                    bgcolor: '#8CA551',
+                    transition: 'left 0.4s ease',
+                    zIndex: 0
+                  },
                   '&:hover': {
-                    bgcolor: '#3d664a'
+                    bgcolor: '#333F1F',
+                    boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+                    '&::before': {
+                      left: 0
+                    }
                   },
                   '&:disabled': {
-                    bgcolor: '#ccc',
-                    color: '#666'
+                    bgcolor: '#e0e0e0',
+                    color: '#9e9e9e',
+                    boxShadow: 'none'
+                  },
+                  '& .MuiButton-startIcon, & span': {
+                    position: 'relative',
+                    zIndex: 1
                   }
                 }}
               >
@@ -561,4 +1156,3 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
 }
 
 export default ResidentAssignment
-// ...existing code...
