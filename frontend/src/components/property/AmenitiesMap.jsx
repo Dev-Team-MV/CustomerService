@@ -315,49 +315,16 @@ const AmenitiesMap = ({ isPublicView = false }) => {
 
   return (
     <>
-      <Paper 
-        elevation={2} 
+      <Box 
         sx={{ 
           p: 0, 
-          bgcolor: '#fff',
           borderRadius: 2,
           overflow: 'hidden',
-          border: '1px solid #e0e0e0',
           width: '100%',
           maxWidth: '100%',
           boxSizing: 'border-box'
         }}
       >
-        {/* Header */}
-        <Box sx={{ 
-          p: 2, 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          bgcolor: '#fff', 
-          borderBottom: '1px solid #eee',
-          flexWrap: 'wrap',
-          gap: 1
-        }}>
-          <Typography variant="subtitle2" sx={{ 
-            fontWeight: 'bold', 
-            color: '#333', 
-            letterSpacing: 0.5,
-            fontSize: { xs: '0.75rem', sm: '0.875rem' }
-          }}>
-            AMENITIES MAP
-          </Typography>
-          
-          <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 }, alignItems: 'center', flexWrap: 'wrap' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#2196f3' }} />
-              <Typography variant="caption" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' } }}>
-                Points of Interest
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-
         {/* Map Container */}
         <Box
           ref={mapRef}
@@ -475,31 +442,9 @@ const AmenitiesMap = ({ isPublicView = false }) => {
               </Paper>
             </Box>
 
-            {/* Info Label */}
-            <Box sx={{ 
-              position: 'absolute', 
-              bottom: 10, 
-              left: 10, 
-              zIndex: 100 
-            }}>
-              <Paper sx={{ 
-                px: { xs: 1, sm: 1.5 }, 
-                py: 0.5, 
-                borderRadius: 2, 
-                bgcolor: 'rgba(255,255,255,0.95)',
-                boxShadow: 2
-              }}>
-                <Typography variant="caption" sx={{ 
-                  fontWeight: 'bold', 
-                  fontSize: { xs: '0.6rem', sm: '0.65rem' } 
-                }}>
-                  {isPublicView ? 'PUBLIC VIEW - Limited Access' : 'FULL ACCESS'}
-                </Typography>
-              </Paper>
-            </Box>
           </Box>
         </Box>
-      </Paper>
+      </Box>
 
       {/* Gallery Modal */}
       {/* <AmenitiesGalleryModal
