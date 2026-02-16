@@ -18,10 +18,13 @@ const propertySchema = new mongoose.Schema(
       ref: 'Facade',
       required: [true, 'Facade is required']
     },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'User is required']
+    users: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+      required: [true, 'At least one owner is required'],
+      validate: {
+        validator: (v) => Array.isArray(v) && v.length > 0,
+        message: 'Property must have at least one owner'
+      }
     },
     price: {
       type: Number,

@@ -30,9 +30,9 @@ export const getAllContracts = async (req, res) => {
       .populate({
         path: 'property',
         populate: [
-          { path: 'lot', select: 'number section' },
+          { path: 'lot', select: 'number' },
           { path: 'model', select: 'model modelNumber' },
-          { path: 'user', select: 'firstName lastName email' }
+          { path: 'users', select: 'firstName lastName email' }
         ]
       })
       .sort({ updatedAt: -1 })
@@ -49,9 +49,9 @@ export const getContractsByPropertyId = async (req, res) => {
       .populate({
         path: 'property',
         populate: [
-          { path: 'lot', select: 'number section' },
+          { path: 'lot', select: 'number' },
           { path: 'model', select: 'model modelNumber' },
-          { path: 'user', select: 'firstName lastName email' }
+          { path: 'users', select: 'firstName lastName email' }
         ]
       })
 
@@ -73,7 +73,7 @@ export const getContractById = async (req, res) => {
         { path: 'lot' },
         { path: 'model' },
         { path: 'facade' },
-        { path: 'user' }
+        { path: 'users' }
       ]
     })
 
@@ -115,7 +115,7 @@ export const createContract = async (req, res) => {
         populate: [
           { path: 'lot' },
           { path: 'model' },
-          { path: 'user' }
+          { path: 'users' }
         ]
       })
       return res.json(updated)
@@ -131,7 +131,7 @@ export const createContract = async (req, res) => {
       populate: [
         { path: 'lot' },
         { path: 'model' },
-        { path: 'user' }
+        { path: 'users' }
       ]
     })
 
@@ -169,7 +169,7 @@ export const updateContract = async (req, res) => {
       populate: [
         { path: 'lot' },
         { path: 'model' },
-        { path: 'user' }
+        { path: 'users' }
       ]
     })
     res.json(populated)
@@ -208,7 +208,7 @@ export const updateContractByPropertyId = async (req, res) => {
       populate: [
         { path: 'lot' },
         { path: 'model' },
-        { path: 'user' }
+        { path: 'users' }
       ]
     })
     res.json(populated)

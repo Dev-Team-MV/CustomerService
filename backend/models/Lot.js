@@ -8,14 +8,6 @@ const lotSchema = new mongoose.Schema(
       unique: true,
       trim: true
     },
-    section: {
-      type: String,
-      trim: true
-    },
-    size: {
-      type: String,
-      trim: true
-    },
     price: {
       type: Number,
       required: [true, 'Price is required'],

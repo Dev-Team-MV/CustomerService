@@ -117,6 +117,7 @@ import AmenitiesPublic from './pages/AmenitiesPublic'
 import AmenitiesPrivate from './pages/AmenitiesPrivate'
 import NotFound from './pages/NotFound'
 import ViewModels from './pages/ViewModels'
+import ClubHouseDetail from './pages/ClubHouseDetail'
 import NewsTable from './pages/NewsTable'
 import NewsDetails from './components/news/NewsDetails'
 import NewsFeed from './pages/NewsFeed'
@@ -189,6 +190,7 @@ function App() {
                 <Route path="/residents" element={<Residents />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/club-house-detail" element={<ClubHouseDetail />} />
               </Route>
             </Route>
             

@@ -2,11 +2,10 @@ import Lot from '../models/Lot.js'
 
 export const getAllLots = async (req, res) => {
   try {
-    const { status, section } = req.query
+    const { status } = req.query
     const filter = {}
     
     if (status) filter.status = status
-    if (section) filter.section = section
     
     const lots = await Lot.find(filter).populate('assignedUser', 'firstName lastName email').sort({ number: 1 })
     res.json(lots)
@@ -31,7 +30,7 @@ export const getLotById = async (req, res) => {
 
 export const createLot = async (req, res) => {
   try {
-    const { number, section, size, price, status } = req.body
+    const { number, price, status } = req.body
     
     const lotExists = await Lot.findOne({ number })
     if (lotExists) {
@@ -40,8 +39,6 @@ export const createLot = async (req, res) => {
     
     const lot = await Lot.create({
       number,
-      section,
-      size,
       price,
       status: status || 'available'
     })
@@ -58,8 +55,6 @@ export const updateLot = async (req, res) => {
     
     if (lot) {
       lot.number = req.body.number || lot.number
-      lot.section = req.body.section || lot.section
-      lot.size = req.body.size || lot.size
       lot.price = req.body.price !== undefined ? req.body.price : lot.price
       lot.status = req.body.status || lot.status
       lot.assignedUser = req.body.assignedUser || lot.assignedUser

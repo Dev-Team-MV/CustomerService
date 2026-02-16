@@ -53,7 +53,6 @@ const router = express.Router()
  *               - lot
  *               - model
  *               - facade
- *               - user
  *             properties:
  *               lot:
  *                 type: string
@@ -63,6 +62,12 @@ const router = express.Router()
  *                 type: string
  *               user:
  *                 type: string
+ *                 description: Single owner (use users for multiple)
+ *               users:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Owner user IDs (at least one of user or users required)
  *               initialPayment:
  *                 type: number
  *                 description: Initial payment amount (price and pending will be calculated automatically as lot.price + model.price + facade.price)
