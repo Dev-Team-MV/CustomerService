@@ -117,9 +117,11 @@ import AmenitiesPublic from './pages/AmenitiesPublic'
 import AmenitiesPrivate from './pages/AmenitiesPrivate'
 import NotFound from './pages/NotFound'
 import ViewModels from './pages/ViewModels'
+import ClubHouseDetail from './pages/ClubHouseDetail'
 import NewsTable from './pages/NewsTable'
 import NewsDetails from './components/news/NewsDetails'
 import NewsFeed from './pages/NewsFeed'
+import TermsAndCondition from './pages/TermsAndCondition'
 
 const theme = createTheme({
   palette: {
@@ -151,6 +153,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/setup-password/:token" element={<Register />} />
+            <Route path="/terms-and-conditions" element={<TermsAndCondition />} />
             
             {/* ✅ Public Routes - Layout Público (solo para no autenticados) */}
             <Route element={<Layout publicView={true} />}>
@@ -187,6 +190,7 @@ function App() {
                 <Route path="/residents" element={<Residents />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/club-house-detail" element={<ClubHouseDetail />} />
               </Route>
             </Route>
             
