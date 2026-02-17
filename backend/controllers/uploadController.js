@@ -1,6 +1,7 @@
 import multer from 'multer'
 import { uploadFile, deleteFile, testConnection, listFilesInFolder } from '../services/storageService.js'
 import Model from '../models/Model.js'
+import ClubHouse from '../models/ClubHouse.js'
 import crypto from 'crypto'
 import path from 'path'
 
@@ -166,8 +167,36 @@ export const deleteImage = async (req, res) => {
 }
 
 /**
+ * Build a map: filename (e.g. "abc123.jpg") -> { section, interiorKey? } from ClubHouse doc.
+ * URLs in DB can be full signed URLs; we match by filename (last path segment).
+ */
+function mapClubHouseFilesToSections (clubHouseDoc) {
+  const byFilename = {}
+  if (!clubHouseDoc) return byFilename
+
+  const add = (section, interiorKey, urls) => {
+    if (!Array.isArray(urls)) return
+    urls.forEach(url => {
+      const filename = typeof url === 'string' && url.includes('/') ? url.split('/').pop().split('?')[0] : null
+      if (filename) byFilename[filename] = { section, ...(interiorKey && { interiorKey }) }
+    })
+  }
+
+  add('exterior', null, clubHouseDoc.exterior)
+  add('blueprints', null, clubHouseDoc.blueprints)
+  if (clubHouseDoc.interior && typeof clubHouseDoc.interior === 'object') {
+    Object.entries(clubHouseDoc.interior).forEach(([key, urls]) => {
+      add('interior', key, urls)
+    })
+  }
+  return byFilename
+}
+
+/**
  * List files in a GCS folder (prefix). Returns file names and URLs (public or signed).
+ * For folder=clubhouse, enriches each file with section (exterior|blueprints|interior) and interiorKey when applicable.
  * GET /api/upload/files?folder=clubhouse
+ * GET /api/upload/files?folder=clubhouse&enrich=false to skip ClubHouse enrichment
  */
 export const getFolderFiles = async (req, res) => {
   try {
@@ -179,11 +208,24 @@ export const getFolderFiles = async (req, res) => {
       })
     }
     const includeUrls = req.query.urls !== 'false'
+    const enrich = req.query.enrich !== 'false'
     const files = await listFilesInFolder(folder, { includeSignedUrls: includeUrls })
+
+    let filesOut = files
+    if (folder.toLowerCase() === 'clubhouse' && enrich) {
+      const clubHouse = await ClubHouse.findOne()
+      const sectionByFilename = mapClubHouseFilesToSections(clubHouse)
+      filesOut = files.map(f => {
+        const filename = f.name.includes('/') ? f.name.split('/').pop().split('?')[0] : f.name
+        const meta = sectionByFilename[filename] || { section: null, interiorKey: null }
+        return { ...f, section: meta.section, interiorKey: meta.interiorKey || undefined }
+      })
+    }
+
     res.json({
       folder,
-      count: files.length,
-      files
+      count: filesOut.length,
+      files: filesOut
     })
   } catch (error) {
     console.error('List folder error:', error)
