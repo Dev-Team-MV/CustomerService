@@ -206,7 +206,23 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
       {model.upgrades && model.upgrades.length > 0 && (
         <Chip
           icon={<UpgradeIcon sx={{ color: options.upgrade ? '#8CA551' : '#706f6f' }} />}
-          label="Upgrade"
+          label={
+            <Box display="flex" alignItems="center" gap={1}>
+              Upgrade
+              <Typography
+                component="span"
+                sx={{
+                  fontWeight: 700,
+                  color: '#8CA551',
+                  fontSize: '0.85em',
+                  ml: 0.5,
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              >
+                +${upgradePrice.toLocaleString()}
+              </Typography>
+            </Box>
+          }
           clickable
           onClick={() => toggleOption('upgrade')}
           sx={{
@@ -230,7 +246,23 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
       {model.balconies && model.balconies.length > 0 && (
         <Chip
           icon={<balconyLabels.icon sx={{ color: options.balcony ? '#8CA551' : '#706f6f' }} />}
-          label={balconyLabels.label}
+          label={
+            <Box display="flex" alignItems="center" gap={1}>
+              {balconyLabels.label}
+              <Typography
+                component="span"
+                sx={{
+                  fontWeight: 700,
+                  color: '#8CA551',
+                  fontSize: '0.85em',
+                  ml: 0.5,
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              >
+                +${balconyPrice.toLocaleString()}
+              </Typography>
+            </Box>
+          }
           clickable
           onClick={() => toggleOption('balcony')}
           sx={{
@@ -254,7 +286,23 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
       {model.storages && model.storages.length > 0 && (
         <Chip
           icon={<StorageIcon sx={{ color: options.storage ? '#E5863C' : '#706f6f' }} />}
-          label="Storage"
+          label={
+            <Box display="flex" alignItems="center" gap={1}>
+              Storage
+              <Typography
+                component="span"
+                sx={{
+                  fontWeight: 700,
+                  color: '#E5863C',
+                  fontSize: '0.85em',
+                  ml: 0.5,
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              >
+                +${storagePrice.toLocaleString()}
+              </Typography>
+            </Box>
+          }
           clickable
           onClick={() => toggleOption('storage')}
           sx={{
@@ -487,11 +535,13 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
               <Paper 
                 elevation={0} 
                 sx={{ 
-                  p: 2, 
+                  p: 1.5, 
                   mb: 2, 
                   bgcolor: '#fafafa',
                   border: '1px solid #e0e0e0',
-                  borderRadius: 3
+                  borderRadius: 3,
+                  maxWidth: 320,
+                  margin: '0 auto'
                 }}
               >
                 <Typography 
@@ -522,8 +572,8 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                   display: 'flex', 
                   flexWrap: 'wrap',
                   justifyContent: 'center',
-                  gap: 1.5, 
-                  mb: 2 
+                  gap: 1, 
+                  mb: 1 
                 }}>
                   <Chip 
                     icon={<HomeIcon />} 
@@ -556,6 +606,53 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                     }}
                   />
                 </Box>
+              </Paper>
+              
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  p: 2, 
+                  mb: 2, 
+                  bgcolor: '#fafafa',
+                  border: '2px solid #8CA551',
+                  borderRadius: 3,
+                  maxWidth: 320,
+                  margin: '0 auto'
+                }}
+              >
+                <Typography 
+                  variant="caption" 
+                  sx={{
+                    color: '#706f6f',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    fontFamily: '"Poppins", sans-serif',
+                    fontSize: '0.7rem'
+                  }}
+                >
+                  TOTAL PRICE
+                </Typography>
+                <Typography 
+                  variant="h3" 
+                  fontWeight={700} 
+                  sx={{
+                    color: '#333F1F',
+                    mb: 1,
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
+                >
+                  ${calculatePrice().toLocaleString()}
+                </Typography>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: '#706f6f',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
+                >
+                  Includes all selected options
+                </Typography>
               </Paper>
 {/* ✅ BOTÓN MOBILE - Corregido */}
 <Button
@@ -1020,6 +1117,120 @@ const ModelCustomizationModal = ({ open, model, onClose, onConfirm, initialOptio
                     }}
                   />
                 </Divider>
+
+                    <Box display="flex" alignItems="center" gap={2} mb={2}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={isSynced}
+                            onChange={(e) => setIsSynced(e.target.checked)}
+                            sx={{
+                              '& .MuiSwitch-switchBase.Mui-checked': {
+                                color: '#8CA551',
+                              },
+                              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                backgroundColor: '#8CA551',
+                              },
+                            }}
+                          />
+                        }
+                        label={
+                          <Box display="flex" alignItems="center" gap={0.5}>
+                            {isSynced ? <Sync fontSize="small" sx={{ color: '#333F1F' }} /> : <SyncDisabled fontSize="small" sx={{ color: '#706f6f' }} />}
+                            <Typography 
+                              variant="body2" 
+                              fontWeight={600}
+                              sx={{ fontFamily: '"Poppins", sans-serif', color: '#333F1F' }}
+                            >
+                              {isSynced ? 'Synced' : 'Independent'}
+                            </Typography>
+                          </Box>
+                        }
+                      />
+                      <ToggleButtonGroup
+                        value={viewType}
+                        exclusive
+                        onChange={(e, newValue) => {
+                          if (newValue !== null) {
+                            setViewType(newValue)
+                            if (newValue !== 'interior') {
+                              setSelectedRoomType('all')
+                            }
+                          }
+                        }}
+                        size="small"
+                        sx={{
+                          '& .MuiToggleButton-root': {
+                            fontFamily: '"Poppins", sans-serif',
+                            fontWeight: 600,
+                            fontSize: '0.75rem',
+                            color: '#706f6f',
+                            border: '1px solid #e0e0e0',
+                            '&.Mui-selected': {
+                              bgcolor: 'rgba(140, 165, 81, 0.12)',
+                              color: '#333F1F',
+                              borderColor: '#8CA551',
+                              '&:hover': {
+                                bgcolor: 'rgba(140, 165, 81, 0.18)',
+                              }
+                            },
+                            '&:hover': {
+                              bgcolor: 'rgba(140, 165, 81, 0.05)',
+                            }
+                          }
+                        }}
+                      >
+                        <ToggleButton value="all">
+                          <HomeIcon sx={{ mr: 0.5 }} fontSize="small" />
+                          All
+                        </ToggleButton>
+                        <ToggleButton value="exterior">
+                          Exterior
+                        </ToggleButton>
+                        <ToggleButton value="interior">
+                          Interior
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+                    </Box>
+                    {viewType === 'interior' && (
+                      <Tabs
+                        value={selectedRoomType}
+                        onChange={(e, newValue) => setSelectedRoomType(newValue)}
+                        variant="scrollable"
+                        scrollButtons="auto"
+                        sx={{
+                          minHeight: 36,
+                          mb: 2,
+                          '& .MuiTab-root': {
+                            minHeight: 36,
+                            py: 0.5,
+                            fontSize: '0.75rem',
+                            fontFamily: '"Poppins", sans-serif',
+                            fontWeight: 500,
+                            color: '#706f6f',
+                            '&.Mui-selected': {
+                              color: '#333F1F',
+                              fontWeight: 600
+                            }
+                          },
+                          '& .MuiTabs-indicator': {
+                            backgroundColor: '#8CA551',
+                            height: 3
+                          }
+                        }}
+                      >
+                        <Tab label="All Rooms" value="all" />
+                        {ROOM_TYPES.map(room => (
+                          <Tab
+                            key={room.id}
+                            label={`${room.icon} ${room.label}`}
+                            value={room.id}
+                          />
+                        ))}
+                      </Tabs>
+                    )}
+
+
                 <OptionChips />
                 <Paper 
                   elevation={0} 

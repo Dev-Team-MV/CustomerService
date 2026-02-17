@@ -1,11 +1,17 @@
-import { Box, Paper, Typography, Tooltip, Chip, IconButton } from '@mui/material'
+import { Box, Paper, Typography, Tooltip, Chip, IconButton, Button } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import MyLocationIcon from '@mui/icons-material/MyLocation'
 import { useState, useEffect, useRef } from 'react'
-import { Home, SquareFoot, AttachMoney } from '@mui/icons-material'
+import { Home, SquareFoot, AttachMoney, } from '@mui/icons-material'
 import api from '../services/api'
 import map from '../../public/images/mapLakewood.png'
+import MasterPlanUploadModal from '../components/masterPlan/MasterPlanUpload'
+import MapIcon from '@mui/icons-material/Map'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import { useAuth } from '../context/AuthContext' // Asegúrate de importar tu contexto de auth
+
+
 
 const lotPositions = {
   1: { x: 23, y: 25 },
@@ -91,13 +97,19 @@ const DashboardMap = () => {
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [hasMoved, setHasMoved] = useState(false)
+  const [mapUrl, setMapUrl] = useState(map)
+  const [modalOpen, setModalOpen] = useState(false)
   const isOverPopupRef = useRef(false)
   const isOverMarkerRef = useRef(false)
   const closeTimeoutRef = useRef(null)
   const mapRef = useRef(null)
 
+    const { user } = useAuth() // Obtén el usuario autenticado
+
+
   useEffect(() => {
     fetchData()
+    fetchMap()
   }, [])
 
   const fetchData = async () => {
@@ -111,6 +123,19 @@ const DashboardMap = () => {
     } catch (error) {
       console.error('Error loading map data:', error)
     }
+  }
+
+  const fetchMap = async () => {
+    try {
+      const res = await api.get('/masterplan')
+      setMapUrl(res.data.url || '/images/mapLakewood.png')
+    } catch {
+      setMapUrl('/images/mapLakewood.png')
+    }
+  }
+
+  const handleMapUpdated = () => {
+    fetchMap()
   }
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.3, 3))
@@ -214,6 +239,24 @@ const DashboardMap = () => {
 
   return (
     <Box sx={{ position: 'relative' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        {/* Solo mostrar si es admin o superadmin */}
+        {(user?.role === 'admin' || user?.role === 'superadmin') && (
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={<CloudUploadIcon />}
+            onClick={() => setModalOpen(true)}
+          >
+            Update MasterPlan
+          </Button>
+        )}
+      </Box>
+      <MasterPlanUploadModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onUploaded={handleMapUpdated}
+      />
       {/* Map Container */}
       <Box
         ref={mapRef}

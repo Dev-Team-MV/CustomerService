@@ -22,5 +22,14 @@ export const authService = {
   logout: () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+  },
+
+    changePassword: async (currentPassword, newPassword) => {
+    // Asegúrate que la URL sea relativa al backend, no al frontend
+    const response = await api.put('/auth/change-password', {
+      currentPassword,
+      newPassword
+    })
+    return response.data
   }
 }

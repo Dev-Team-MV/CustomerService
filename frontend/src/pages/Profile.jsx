@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import axios from 'axios'
 import {
   Box,
   Paper,
@@ -30,6 +31,7 @@ import {
 } from '@mui/icons-material'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
+import { authService } from '../services/authService'
 
 const Profile = () => {
   const { user, token } = useAuth()  
@@ -105,18 +107,7 @@ const Profile = () => {
         return
       }
       try {
-        await axios.post(
-          '/api/auth/change-password',
-          {
-            currentPassword: passwordData.current,
-            newPassword: passwordData.new
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
-        )
+        await authService.changePassword(passwordData.current, passwordData.new)
         setSnackbar({
           open: true,
           message: 'Password changed successfully!',
@@ -134,7 +125,7 @@ const Profile = () => {
         return
       }
     }
-
+  
     // Aquí iría la lógica de guardado de datos personales si aplica
     setIsEditing(false)
     setSnackbar({
