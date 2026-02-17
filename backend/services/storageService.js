@@ -136,6 +136,50 @@ export const getSignedUrl = async (fileName, expiresIn = 60 * 60 * 1000) => {
 }
 
 /**
+ * List files in a folder (prefix) in GCS
+ * @param {string} folderPrefix - Folder path (e.g. 'clubhouse', 'payloads', 'clubhouse/')
+ * @param {Object} options - { includeSignedUrls: boolean, makePublic: boolean }
+ * @returns {Promise<Array<{ name: string, url?: string }>>} List of files with optional URL
+ */
+export const listFilesInFolder = async (folderPrefix, options = {}) => {
+  const { includeSignedUrls = true } = options
+  try {
+    const prefix = (folderPrefix || '').replace(/^\/|\/$/g, '').trim()
+    if (!prefix) return []
+    const prefixWithSlash = `${prefix}/`
+    const [files] = await bucket.getFiles({ prefix: prefixWithSlash })
+    const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
+    const result = []
+    for (const file of files) {
+      // Skip "directory" placeholders (GCS has no real folders, but we skip empty names)
+      const name = file.name
+      if (!name || name.endsWith('/')) continue
+      const item = { name }
+      if (includeSignedUrls) {
+        if (makePublic) {
+          item.url = `https://storage.googleapis.com/${bucketName}/${name}`
+        } else {
+          try {
+            const [signedUrl] = await file.getSignedUrl({
+              action: 'read',
+              expires: Date.now() + 365 * 24 * 60 * 60 * 1000
+            })
+            item.url = signedUrl
+          } catch (e) {
+            item.url = null
+          }
+        }
+      }
+      result.push(item)
+    }
+    return result
+  } catch (error) {
+    console.error('Error listing files in GCS:', error)
+    throw new Error(`Failed to list files: ${error.message}`)
+  }
+}
+
+/**
  * Test connection to Google Cloud Storage bucket
  * @returns {Promise<Object>} Connection status and bucket info
  */
@@ -179,5 +223,6 @@ export default {
   uploadFile,
   deleteFile,
   getSignedUrl,
+  listFilesInFolder,
   testConnection
 }

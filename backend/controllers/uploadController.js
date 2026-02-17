@@ -1,5 +1,5 @@
 import multer from 'multer'
-import { uploadFile, deleteFile, testConnection } from '../services/storageService.js'
+import { uploadFile, deleteFile, testConnection, listFilesInFolder } from '../services/storageService.js'
 import Model from '../models/Model.js'
 import crypto from 'crypto'
 import path from 'path'
@@ -161,6 +161,35 @@ export const deleteImage = async (req, res) => {
     res.status(500).json({ 
       success: false,
       message: error.message || 'Error deleting image' 
+    })
+  }
+}
+
+/**
+ * List files in a GCS folder (prefix). Returns file names and URLs (public or signed).
+ * GET /api/upload/files?folder=clubhouse
+ */
+export const getFolderFiles = async (req, res) => {
+  try {
+    const folder = (req.query.folder || req.params.folder || '').trim()
+    if (!folder) {
+      return res.status(400).json({
+        success: false,
+        message: 'Query "folder" is required (e.g. ?folder=clubhouse or ?folder=payloads)'
+      })
+    }
+    const includeUrls = req.query.urls !== 'false'
+    const files = await listFilesInFolder(folder, { includeSignedUrls: includeUrls })
+    res.json({
+      folder,
+      count: files.length,
+      files
+    })
+  } catch (error) {
+    console.error('List folder error:', error)
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error listing folder'
     })
   }
 }
