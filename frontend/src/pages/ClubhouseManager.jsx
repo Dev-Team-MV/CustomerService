@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { PhotoLibrary, Map, Layers, MeetingRoom } from '@mui/icons-material';
 import ClubhouseImagesModal from '../components/ClubHouse/ClubImagesModal';
 import uploadService from '../services/uploadService';
-
+import PageHeader from '../components/PageHeader';
 const ClubhouseManager = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [images, setImages] = useState({
@@ -19,6 +19,8 @@ const ClubhouseManager = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+// ...existing code...
 
   const loadData = async () => {
     setLoading(true);
@@ -49,7 +51,7 @@ const ClubhouseManager = () => {
         organized.interior[key] = [];
       });
 
-      // ✅ SIMPLIFICADO: Usar los campos section e interiorKey del backend
+      // ✅ CORREGIDO: Usar matching case-insensitive para interior keys
       if (filesResponse.files && filesResponse.files.length > 0) {
         filesResponse.files.forEach(file => {
           const { section, interiorKey, url, publicUrl } = file;
@@ -63,11 +65,16 @@ const ClubhouseManager = () => {
           } else if (section === 'blueprints') {
             organized.blueprints.push(imageUrl);
           } else if (section === 'interior' && interiorKey) {
-            // Verificar que la key existe en nuestro array
-            if (organized.interior[interiorKey] !== undefined) {
-              organized.interior[interiorKey].push(imageUrl);
+            // ✅ NUEVO: Buscar la key correcta (case-insensitive)
+            const matchingKey = keys.find(
+              key => key.toLowerCase() === interiorKey.toLowerCase()
+            );
+
+            if (matchingKey) {
+              organized.interior[matchingKey].push(imageUrl);
+              console.log(`✅ Matched interior key: ${interiorKey} → ${matchingKey}`);
             } else {
-              console.warn(`⚠️ Unknown interior key: ${interiorKey}`);
+              console.warn(`⚠️ Unknown interior key: ${interiorKey} (available keys: ${keys.join(', ')})`);
             }
           } else {
             console.warn(`⚠️ File without proper categorization:`, file.name);
@@ -84,6 +91,8 @@ const ClubhouseManager = () => {
       setLoading(false);
     }
   };
+
+// ...existing code...
 
   const getTotalInteriorImages = () => {
     return Object.values(images.interior).reduce((acc, imgs) => acc + imgs.length, 0);
@@ -148,123 +157,17 @@ const ClubhouseManager = () => {
         )}
 
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <Paper
-            elevation={0}
-            sx={{
-              p: 3,
-              mb: 3,
-              borderRadius: 4,
-              border: '1px solid rgba(0,0,0,0.08)',
-              background: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
-              position: 'relative',
-              overflow: 'hidden',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 4,
-                background: 'linear-gradient(90deg, #333F1F, #8CA551, #333F1F)'
-              }
-            }}
-          >
-            <Box display="flex" alignItems="center" justifyContent="space-between" gap={2}>
-              <Box display="flex" alignItems="center" gap={2}>
-                <Box
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 3,
-                    background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 8px 24px rgba(51, 63, 31, 0.3)'
-                  }}
-                >
-                  <PhotoLibrary sx={{ fontSize: 28, color: 'white' }} />
-                </Box>
-                <Box>
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      fontWeight: 800,
-                      color: '#333F1F',
-                      fontFamily: '"Poppins", sans-serif',
-                      letterSpacing: '0.5px'
-                    }}
-                  >
-                    Clubhouse Image Manager
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: '#706f6f',
-                      fontFamily: '"Poppins", sans-serif'
-                    }}
-                  >
-                    Manage and upload images for the Clubhouse. You can upload exterior, interior (by section), and blueprint images.
-                  </Typography>
-                </Box>
-              </Box>
-              <Tooltip title="Manage Clubhouse Images" placement="left">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant="contained"
-                    onClick={() => setModalOpen(true)}
-                    startIcon={<PhotoLibrary />}
-                    sx={{
-                      borderRadius: 3,
-                      bgcolor: '#333F1F',
-                      color: 'white',
-                      fontWeight: 600,
-                      textTransform: 'none',
-                      letterSpacing: '1px',
-                      fontFamily: '"Poppins", sans-serif',
-                      px: 3,
-                      py: 1.5,
-                      boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        left: '-100%',
-                        width: '100%',
-                        height: '100%',
-                        bgcolor: '#8CA551',
-                        transition: 'left 0.4s ease',
-                        zIndex: 0
-                      },
-                      '&:hover': {
-                        bgcolor: '#333F1F',
-                        boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
-                        '&::before': { left: 0 },
-                        '& .MuiButton-startIcon': { color: 'white' }
-                      },
-                      '& .MuiButton-startIcon': {
-                        position: 'relative',
-                        zIndex: 1,
-                        color: 'white'
-                      }
-                    }}
-                  >
-                    <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-                      Manage Images
-                    </Box>
-                  </Button>
-                </motion.div>
-              </Tooltip>
-            </Box>
-          </Paper>
-        </motion.div>
+        <PageHeader
+          icon={PhotoLibrary}
+          title="Clubhouse Image Manager"
+          subtitle="Manage and upload images for the Clubhouse. You can upload exterior, interior (by section), and blueprint images."
+          actionButton={{
+            label: 'Manage Images',
+            onClick: () => setModalOpen(true),
+            icon: <PhotoLibrary />,
+            tooltip: 'Manage Clubhouse Images'
+          }}
+        />
 
         {/* Preview Cards */}
         <Grid container spacing={2}>

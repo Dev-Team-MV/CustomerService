@@ -105,21 +105,21 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
           organized.interior[key] = [];
         });
 
+        // ✅ CORREGIDO: Usar section e interiorKey del backend
         response.files.forEach(file => {
-          const pathParts = file.name?.split('/') || [];
-          
-          if (pathParts.length < 2) return;
+          const { section, interiorKey, url, publicUrl } = file;
+          const imageUrl = url || publicUrl;
 
-          const section = pathParts[1];
-          
           if (section === 'exterior') {
-            organized.exterior.push(file.url || file.publicUrl);
+            organized.exterior.push(imageUrl);
           } else if (section === 'blueprints') {
-            organized.blueprints.push(file.url || file.publicUrl);
-          } else if (section === 'interior' && pathParts.length >= 3) {
-            const interiorKey = pathParts[2];
+            organized.blueprints.push(imageUrl);
+          } else if (section === 'interior' && interiorKey) {
+            // ✅ Verificar que el key existe
             if (organized.interior[interiorKey]) {
-              organized.interior[interiorKey].push(file.url || file.publicUrl);
+              organized.interior[interiorKey].push(imageUrl);
+            } else {
+              console.warn(`⚠️ Unknown interior key: ${interiorKey}`);
             }
           }
         });

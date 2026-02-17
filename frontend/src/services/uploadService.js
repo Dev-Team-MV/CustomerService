@@ -86,23 +86,26 @@ const uploadService = {
   // ========================================
   // ✅ CLUBHOUSE FUNCTIONS - ENDPOINTS CORREGIDOS
   // ========================================
-
-  uploadClubhouseImages: async (files, section, interiorKey = null) => {
+uploadClubhouseImages: async (files, section, interiorKey = null) => {
     try {
       const formData = new FormData()
+      
+      // ✅ IMPORTANTE: Enviar section
       formData.append('section', section)
       
+      // ✅ CORREGIDO: Enviar interiorKey solo si existe Y section es interior
       if (section === 'interior' && interiorKey) {
+        console.log(`📤 Uploading to interior section: ${interiorKey}`)
         formData.append('interiorKey', interiorKey)
       }
       
+      // ✅ Agregar archivos
       files.forEach(file => {
         formData.append('images', file)
       })
 
       console.log(`📤 Uploading ${files.length} image(s) to clubhouse/${section}${interiorKey ? `/${interiorKey}` : ''}`)
 
-      // ✅ CORREGIDO: Quitar /api/ del inicio
       const response = await api.post('/clubhouse/images', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
@@ -119,7 +122,6 @@ const uploadService = {
     try {
       console.log(`📂 Getting files from folder: ${folder}`)
       
-      // ✅ CORREGIDO: Quitar /api/ del inicio
       const response = await api.get('/upload/files', {
         params: { folder, urls }
       })
@@ -136,10 +138,8 @@ const uploadService = {
     try {
       console.log('📋 Getting clubhouse interior keys...')
       
-      // ✅ CORREGIDO: Quitar /api/ del inicio
       const response = await api.get('/clubhouse/interior-keys')
 
-      // ✅ CORREGIDO: Mostrar la clave correcta
       console.log('✅ Interior keys loaded:', response.data.interiorKeys)
       return response.data
     } catch (error) {

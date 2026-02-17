@@ -3,15 +3,13 @@ import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import MyLocationIcon from '@mui/icons-material/MyLocation'
 import { useState, useEffect, useRef } from 'react'
-import { Home, SquareFoot, AttachMoney, } from '@mui/icons-material'
+import { Home, SquareFoot, AttachMoney } from '@mui/icons-material'
 import api from '../services/api'
 import map from '../../public/images/mapLakewood.png'
 import MasterPlanUploadModal from '../components/masterPlan/MasterPlanUpload'
-import MapIcon from '@mui/icons-material/Map'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
-import { useAuth } from '../context/AuthContext' // Asegúrate de importar tu contexto de auth
-
-
+import { useAuth } from '../context/AuthContext'
+import uploadService from '../services/uploadService' // ✅ NUEVO IMPORT
 
 const lotPositions = {
   1: { x: 23, y: 25 },
@@ -97,19 +95,18 @@ const DashboardMap = () => {
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [hasMoved, setHasMoved] = useState(false)
-  const [mapUrl, setMapUrl] = useState(map)
+  const [mapUrl, setMapUrl] = useState(map) // ✅ Cambiado de imagen local a URL dinámica
   const [modalOpen, setModalOpen] = useState(false)
   const isOverPopupRef = useRef(false)
   const isOverMarkerRef = useRef(false)
   const closeTimeoutRef = useRef(null)
   const mapRef = useRef(null)
 
-    const { user } = useAuth() // Obtén el usuario autenticado
-
+  const { user } = useAuth()
 
   useEffect(() => {
     fetchData()
-    fetchMap()
+    fetchMasterPlanImages() // ✅ CAMBIADO: Cargar desde GCS
   }, [])
 
   const fetchData = async () => {
@@ -125,17 +122,33 @@ const DashboardMap = () => {
     }
   }
 
-  const fetchMap = async () => {
+  // ✅ NUEVA FUNCIÓN: Cargar imagen desde carpeta 'masterplan' en GCS
+  const fetchMasterPlanImages = async () => {
     try {
-      const res = await api.get('/masterplan')
-      setMapUrl(res.data.url || '/images/mapLakewood.png')
-    } catch {
-      setMapUrl('/images/mapLakewood.png')
+      console.log('📂 Loading master plan images from GCS...')
+      
+      const response = await uploadService.getFilesByFolder('masterplan', true)
+      
+      if (response.files && response.files.length > 0) {
+        // ✅ Usar la imagen más reciente (última en el array)
+        const latestImage = response.files[response.files.length - 1]
+        console.log('✅ Master plan loaded:', latestImage.url)
+        setMapUrl(latestImage.url)
+      } else {
+        console.log('⚠️ No master plan found, using default image')
+        setMapUrl(map) // Fallback a imagen local
+      }
+    } catch (error) {
+      console.error('❌ Error loading master plan:', error)
+      setMapUrl(map) // Fallback a imagen local
     }
   }
 
-  const handleMapUpdated = () => {
-    fetchMap()
+  // ✅ CALLBACK cuando se sube nueva imagen
+  const handleImageUploaded = (imageUrl) => {
+    console.log('✅ New master plan uploaded, updating map:', imageUrl)
+    setMapUrl(imageUrl) // Actualizar mapa inmediatamente
+    setModalOpen(false) // Cerrar modal
   }
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.3, 3))
@@ -239,24 +252,42 @@ const DashboardMap = () => {
 
   return (
     <Box sx={{ position: 'relative' }}>
+      {/* ✅ Botón de actualización solo para admin/superadmin */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        {/* Solo mostrar si es admin o superadmin */}
         {(user?.role === 'admin' || user?.role === 'superadmin') && (
           <Button
             variant="contained"
-            color="success"
             startIcon={<CloudUploadIcon />}
             onClick={() => setModalOpen(true)}
+            sx={{
+              borderRadius: 3,
+              bgcolor: '#333F1F',
+              color: 'white',
+              fontWeight: 600,
+              textTransform: 'none',
+              letterSpacing: '1px',
+              fontFamily: '"Poppins", sans-serif',
+              px: 3,
+              py: 1.2,
+              boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+              '&:hover': {
+                bgcolor: '#8CA551',
+                boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)'
+              }
+            }}
           >
-            Update MasterPlan
+            Update Master Plan
           </Button>
         )}
       </Box>
+
+      {/* ✅ Modal de upload - Ahora pasa el callback */}
       <MasterPlanUploadModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onUploaded={handleMapUpdated}
+        onUploaded={handleImageUploaded} // ✅ Recibe la URL cuando termina
       />
+
       {/* Map Container */}
       <Box
         ref={mapRef}
@@ -287,7 +318,7 @@ const DashboardMap = () => {
             height: '100%'
           }}
         >
-          {/* Map Background with Zoom & Pan */}
+          {/* ✅ Map Background - Ahora usa mapUrl dinámico desde GCS */}
           <Box
             sx={{
               position: 'absolute',
@@ -297,13 +328,13 @@ const DashboardMap = () => {
               height: '100%',
               transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
               transition: isDragging ? 'none' : 'transform 0.3s ease',
-              backgroundImage: `url(${map})`,
+              backgroundImage: `url(${mapUrl})`, // ✅ URL dinámica
               backgroundSize: 'contain',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
             }}
           >
-            {/* Lot Markers */}
+            {/* Lot Markers - Sin cambios */}
             {lots.map((lot) => {
               const position = lotPositions[lot.number]
               if (!position) return null
@@ -366,7 +397,7 @@ const DashboardMap = () => {
             })}
           </Box>
 
-          {/* Zoom Controls */}
+          {/* Zoom Controls - Sin cambios */}
           <Box sx={{ 
             position: 'absolute', 
             bottom: { xs: 10, sm: 15 }, 
@@ -385,7 +416,7 @@ const DashboardMap = () => {
             </Paper>
           </Box>
 
-          {/* Legend */}
+          {/* Legend - Sin cambios */}
           <Box sx={{ 
             position: 'absolute', 
             bottom: 10, 
@@ -417,7 +448,7 @@ const DashboardMap = () => {
         </Box>
       </Box>
 
-      {/* Custom Popup - Posicionado absolutamente */}
+      {/* Custom Popup - Sin cambios */}
       {showPopup && selectedProperty && (
         <Paper
           onMouseEnter={handlePopupEnter}

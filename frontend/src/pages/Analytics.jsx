@@ -22,7 +22,7 @@ import api from '../services/api'
 import StatCard from '../components/analitycs/StatCard'
 import AnimatedProgressBar from '../components/analitycs/AnimatedProgressBar'
 import ModelProgressBar from '../components/analitycs/ModelProgressBar'
-
+import PageHeader from '../components/PageHeader'
 const Analytics = () => {
   const [stats, setStats] = useState({
     totalLots: 0,
@@ -152,122 +152,18 @@ const Analytics = () => {
     >
       <Container maxWidth="xl">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <Paper
-            elevation={0}
-            sx={{
-              p: { xs: 3, md: 4 },
-              mb: 4,
-              borderRadius: 4,
-              border: '1px solid rgba(0,0,0,0.08)',
-              background: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
-              position: 'relative',
-              overflow: 'hidden',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 4,
-                background: 'linear-gradient(90deg, #333F1F, #8CA551, #333F1F)'
-              }
-            }}
-          >
-            <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
-              <Box display="flex" alignItems="center" gap={2}>
-                <motion.div
-                  animate={{
-                    scale: [1, 1.1, 1],
-                    rotate: [0, 5, -5, 0]
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    repeatDelay: 3
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: { xs: 56, md: 64 },
-                      height: { xs: 56, md: 64 },
-                      borderRadius: 3,
-                      background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 8px 24px rgba(51, 63, 31, 0.3)'
-                    }}
-                  >
-                    <AnalyticsIcon sx={{ fontSize: { xs: 28, md: 32 }, color: 'white' }} />
-                  </Box>
-                </motion.div>
-
-                <Box>
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontWeight: 800,
-                      color: '#333F1F',
-                      fontFamily: '"Poppins", sans-serif',
-                      letterSpacing: '0.5px',
-                      fontSize: { xs: '1.75rem', md: '2.125rem' }
-                    }}
-                  >
-                    Analytics Dashboard
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: '#706f6f',
-                      fontFamily: '"Poppins", sans-serif',
-                      fontSize: { xs: '0.875rem', md: '1rem' }
-                    }}
-                  >
-                    Real-time project statistics and sales insights
-                  </Typography>
-                </Box>
-              </Box>
-
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <IconButton
-                  onClick={fetchAnalytics}
-                  disabled={loading}
-                  sx={{
-                    width: { xs: 48, md: 56 },
-                    height: { xs: 48, md: 56 },
-                    bgcolor: '#333F1F',
-                    color: 'white',
-                    boxShadow: '0 4px 12px rgba(51, 63, 31, 0.3)',
-                    '&:hover': {
-                      bgcolor: '#8CA551',
-                      boxShadow: '0 8px 24px rgba(140, 165, 81, 0.4)',
-                      transform: 'rotate(180deg)'
-                    },
-                    '&:disabled': {
-                      bgcolor: '#e0e0e0',
-                      color: '#999'
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  {loading ? (
-                    <CircularProgress size={24} sx={{ color: 'white' }} />
-                  ) : (
-                    <Refresh sx={{ fontSize: { xs: 22, md: 24 } }} />
-                  )}
-                </IconButton>
-              </motion.div>
-            </Box>
-          </Paper>
-        </motion.div>
+        <PageHeader
+          icon={AnalyticsIcon}
+          title="Analytics Dashboard"
+          subtitle="Real-time project statistics and sales insights"
+          actionButton={{
+            label: '',
+            onClick: fetchAnalytics,
+            icon: loading ? <CircularProgress size={24} /> : <Refresh />,
+            tooltip: 'Refresh Data',
+            // Usar custom render si es necesario
+          }}
+        />
 
         <AnimatePresence mode="wait">
           {loading && !stats.totalLots ? (
