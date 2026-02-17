@@ -288,6 +288,16 @@ export const updateProperty = async (req, res) => {
       property.status = req.body.status || property.status
       property.pending = req.body.pending !== undefined ? req.body.pending : property.pending
       
+      // Update price directly if provided
+      if (req.body.price !== undefined) {
+        const newPrice = Number(req.body.price)
+        if (!Number.isNaN(newPrice) && newPrice >= 0) {
+          const priceDifference = newPrice - property.price
+          property.price = newPrice
+          property.pending = Math.max(0, property.pending + priceDifference)
+        }
+      }
+      
       // Update configuration options if provided
       if (req.body.hasBalcony !== undefined) {
         property.hasBalcony = req.body.hasBalcony
