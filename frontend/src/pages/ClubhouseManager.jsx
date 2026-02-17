@@ -16,7 +16,6 @@ const ClubhouseManager = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ Load images on mount
   useEffect(() => {
     loadData();
   }, []);
@@ -26,15 +25,19 @@ const ClubhouseManager = () => {
     setError(null);
     
     try {
-      // Load interior keys first
+      // Load interior keys
       const keysResponse = await uploadService.getClubhouseInteriorKeys();
-      const keys = keysResponse.keys || [];
+      const keys = keysResponse.interiorKeys || [];
+      
+      console.log('📋 Interior keys loaded:', keys);
       setInteriorKeys(keys);
 
       // Load all clubhouse images
       const filesResponse = await uploadService.getFilesByFolder('clubhouse', true);
       
-      // Organize images by section
+      console.log('📦 Files response:', filesResponse);
+
+      // ✅ NUEVO: Organizar usando section e interiorKey directamente
       const organized = {
         exterior: [],
         blueprints: [],
@@ -46,34 +49,36 @@ const ClubhouseManager = () => {
         organized.interior[key] = [];
       });
 
-      // Parse files from response
+      // ✅ SIMPLIFICADO: Usar los campos section e interiorKey del backend
       if (filesResponse.files && filesResponse.files.length > 0) {
         filesResponse.files.forEach(file => {
-          // Example: file.name = "clubhouse/exterior/image1.jpg"
-          // or file.path if backend provides it
-          const path = file.name || file.path || '';
-          const pathParts = path.split('/');
-          
-          if (pathParts.length < 2) return;
+          const { section, interiorKey, url, publicUrl } = file;
+          const imageUrl = url || publicUrl;
 
-          const section = pathParts[1]; // 'exterior', 'blueprints', 'interior'
+          console.log('📁 Processing file:', { section, interiorKey, url: imageUrl });
 
+          // Categorizar por section
           if (section === 'exterior') {
-            organized.exterior.push(file.url || file.publicUrl);
+            organized.exterior.push(imageUrl);
           } else if (section === 'blueprints') {
-            organized.blueprints.push(file.url || file.publicUrl);
-          } else if (section === 'interior' && pathParts.length >= 3) {
-            const interiorKey = pathParts[2]; // e.g., 'Reception'
-            if (organized.interior[interiorKey]) {
-              organized.interior[interiorKey].push(file.url || file.publicUrl);
+            organized.blueprints.push(imageUrl);
+          } else if (section === 'interior' && interiorKey) {
+            // Verificar que la key existe en nuestro array
+            if (organized.interior[interiorKey] !== undefined) {
+              organized.interior[interiorKey].push(imageUrl);
+            } else {
+              console.warn(`⚠️ Unknown interior key: ${interiorKey}`);
             }
+          } else {
+            console.warn(`⚠️ File without proper categorization:`, file.name);
           }
         });
       }
 
+      console.log('✅ Organized images:', organized);
       setImages(organized);
     } catch (err) {
-      console.error('Error loading clubhouse data:', err);
+      console.error('❌ Error loading clubhouse data:', err);
       setError(err.message || 'Failed to load clubhouse images');
     } finally {
       setLoading(false);
@@ -86,7 +91,11 @@ const ClubhouseManager = () => {
 
   const handleModalClose = () => {
     setModalOpen(false);
-    // Reload data after modal closes (in case new images were uploaded)
+    loadData();
+  };
+
+  const handleImagesUploaded = () => {
+    console.log('🔄 Images uploaded, reloading data...');
     loadData();
   };
 
@@ -445,6 +454,7 @@ const ClubhouseManager = () => {
         <ClubhouseImagesModal 
           open={modalOpen} 
           onClose={handleModalClose}
+          onImagesUploaded={handleImagesUploaded}
         />
       </Container>
     </Box>
