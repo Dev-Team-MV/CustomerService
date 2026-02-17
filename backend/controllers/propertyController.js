@@ -185,6 +185,14 @@ export const createProperty = async (req, res) => {
       return res.status(400).json({ message: 'Lot is already sold' })
     }
     
+    // If lot has assignedUser but no property exists for this lot (e.g. after a delete that left stale data), treat as available
+    const existingPropertyForLot = await Property.findOne({ lot })
+    if (!existingPropertyForLot && (lotExists.assignedUser || lotExists.status !== 'available')) {
+      await Lot.findByIdAndUpdate(lot, { status: 'available', assignedUser: null })
+      lotExists.assignedUser = null
+      lotExists.status = 'available'
+    }
+    
     const firstOwner = ownerIds[0]
     if (lotExists.assignedUser && lotExists.assignedUser.toString() !== firstOwner) {
       return res.status(400).json({ message: 'Lot is already assigned to another user' })
@@ -392,9 +400,8 @@ export const deleteProperty = async (req, res) => {
     
     if (property) {
       await Lot.findByIdAndUpdate(property.lot, {
-        status: 'available',
-        assignedUser: null
-      })
+        $set: { status: 'available', assignedUser: null }
+      }, { runValidators: false })
       
       for (const userId of property.users || []) {
         await User.findByIdAndUpdate(userId, {
