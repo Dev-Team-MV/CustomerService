@@ -165,7 +165,7 @@ const Login = () => {
               >
                 <Box
                   component="img"
-                  src="/images/logos/Logo_LakewoodOaks-05.png"
+                  src="/images/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png"
                   alt="Lakewood Oaks on Lake Conroe"
                   sx={{
                     width: '90%',
@@ -179,7 +179,7 @@ const Login = () => {
               
               <Box
                 component="img"
-                src="/images/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png"
+                src="/images/logos/Logo_LakewoodOaks-05.png"
                 alt="Michelangelo Del Valle"
                 sx={{
                   width: '40%',
