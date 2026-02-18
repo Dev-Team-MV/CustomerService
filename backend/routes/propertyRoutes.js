@@ -140,11 +140,36 @@ router.get('/stats', protect, getPropertyStats)
  *           schema:
  *             type: object
  *             properties:
+ *               lot:
+ *                 type: string
+ *               model:
+ *                 type: string
+ *               facade:
+ *                 type: string
+ *               users:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               price:
+ *                 type: number
+ *               pending:
+ *                 type: number
+ *               initialPayment:
+ *                 type: number
  *               status:
  *                 type: string
  *                 enum: [active, pending, sold, cancelled]
- *               pending:
- *                 type: number
+ *               saleDate:
+ *                 type: string
+ *                 format: date-time
+ *               hasBalcony:
+ *                 type: boolean
+ *               modelType:
+ *                 type: string
+ *                 enum: [basic, upgrade]
+ *               hasStorage:
+ *                 type: boolean
+ *             description: Any combination of the above fields; only provided fields are updated.
  *     responses:
  *       200:
  *         description: Property updated
