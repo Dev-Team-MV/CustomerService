@@ -9,7 +9,12 @@ import {
   Tooltip,
   Container,
   Chip,
-  Button
+  Button,
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel
 } from '@mui/material'
 import { 
   Add, 
@@ -22,7 +27,9 @@ import {
   TrendingUp,
   AttachMoney,
   Edit as EditIcon,
-  Description as DescriptionIcon
+  Description as DescriptionIcon,
+  SortByAlpha,
+  FilterList
 } from '@mui/icons-material'
 import api from '../services/api'
 import { useAuth } from '../context/AuthContext'
@@ -47,8 +54,44 @@ const Properties = () => {
   const [propertyToEdit, setPropertyToEdit] = useState(null)
   const [editingPriceValue, setEditingPriceValue] = useState('')
   const [savingPrice, setSavingPrice] = useState(false)
+  const [modelFilter, setModelFilter] = useState('')
+  const [residentSortOrder, setResidentSortOrder] = useState('none') // 'none' | 'asc' | 'desc'
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
+
+  // Extract unique model names for filter dropdown
+  const modelOptions = useMemo(() => {
+    const models = properties
+      .map(p => p.model?.model)
+      .filter(Boolean)
+    return [...new Set(models)].sort()
+  }, [properties])
+
+  // Processed data: default sort by lot number, then apply model filter and resident sort
+  const processedData = useMemo(() => {
+    let result = [...properties]
+
+    // Filter by model
+    if (modelFilter) {
+      result = result.filter(p => p.model?.model === modelFilter)
+    }
+
+    // Sort by resident/owner name if toggled
+    if (residentSortOrder !== 'none') {
+      result.sort((a, b) => {
+        const nameA = (a.users?.[0]?.firstName || a.client?.firstName || '').toLowerCase()
+        const nameB = (b.users?.[0]?.firstName || b.client?.firstName || '').toLowerCase()
+        if (nameA < nameB) return residentSortOrder === 'asc' ? -1 : 1
+        if (nameA > nameB) return residentSortOrder === 'asc' ? 1 : -1
+        return 0
+      })
+    } else {
+      // Default sort: by lot number ascending
+      result.sort((a, b) => (a.lot?.number || 0) - (b.lot?.number || 0))
+    }
+
+    return result
+  }, [properties, modelFilter, residentSortOrder])
 
   useEffect(() => {
     fetchData()
@@ -664,10 +707,111 @@ const Properties = () => {
         {/* Stats Cards */}
         <StatsCards stats={propertiesStats} loading={loading} />
 
+        {/* Filters Bar */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            mb: 2,
+            flexWrap: 'wrap'
+          }}
+        >
+          {/* Model Filter */}
+          <FormControl size="small" sx={{ minWidth: 200 }}>
+            <InputLabel
+              sx={{
+                fontFamily: '"Poppins", sans-serif',
+                fontSize: '0.85rem',
+                '&.Mui-focused': { color: '#333F1F' }
+              }}
+            >
+              Filter by Model
+            </InputLabel>
+            <Select
+              value={modelFilter}
+              label="Filter by Model"
+              onChange={(e) => setModelFilter(e.target.value)}
+              startAdornment={<FilterList sx={{ fontSize: 18, color: '#8CA551', mr: 0.5 }} />}
+              sx={{
+                fontFamily: '"Poppins", sans-serif',
+                fontSize: '0.85rem',
+                borderRadius: 2,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(140, 165, 81, 0.3)'
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#8CA551'
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#333F1F'
+                }
+              }}
+            >
+              <MenuItem value="">
+                <em>All Models</em>
+              </MenuItem>
+              {modelOptions.map((model) => (
+                <MenuItem key={model} value={model}>
+                  {model}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Resident/Owner Sort Toggle */}
+          <Tooltip
+            title={
+              residentSortOrder === 'none'
+                ? 'Sort Resident/Owner A-Z'
+                : residentSortOrder === 'asc'
+                ? 'Sort Resident/Owner Z-A'
+                : 'Remove Resident/Owner sort'
+            }
+            placement="top"
+          >
+            <Button
+              variant={residentSortOrder !== 'none' ? 'contained' : 'outlined'}
+              size="small"
+              startIcon={<SortByAlpha />}
+              onClick={() => {
+                setResidentSortOrder(prev =>
+                  prev === 'none' ? 'asc' : prev === 'asc' ? 'desc' : 'none'
+                )
+              }}
+              sx={{
+                fontFamily: '"Poppins", sans-serif',
+                fontWeight: 600,
+                fontSize: '0.78rem',
+                textTransform: 'none',
+                borderRadius: 2,
+                px: 2,
+                height: 40,
+                ...(residentSortOrder !== 'none'
+                  ? {
+                      bgcolor: '#333F1F',
+                      color: 'white',
+                      '&:hover': { bgcolor: '#4a5d3a' }
+                    }
+                  : {
+                      color: '#333F1F',
+                      borderColor: 'rgba(140, 165, 81, 0.3)',
+                      '&:hover': {
+                        borderColor: '#333F1F',
+                        bgcolor: 'rgba(51, 63, 31, 0.04)'
+                      }
+                    })
+              }}
+            >
+              Resident {residentSortOrder === 'asc' ? 'A → Z' : residentSortOrder === 'desc' ? 'Z → A' : 'A-Z'}
+            </Button>
+          </Tooltip>
+        </Box>
+
         {/* ✅ TABLA REUTILIZABLE */}
         <DataTable
           columns={columns}
-          data={properties}
+          data={processedData}
           loading={loading}
           emptyState={
             <EmptyState
