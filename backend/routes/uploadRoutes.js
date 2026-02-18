@@ -1,5 +1,5 @@
 import express from 'express'
-import { uploadImage, uploadMultipleImages, updateImage, deleteImage, testGCSConnection, upload } from '../controllers/uploadController.js'
+import { uploadImage, uploadMultipleImages, updateImage, deleteImage, testGCSConnection, getFolderFiles, upload } from '../controllers/uploadController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -36,6 +36,57 @@ const router = express.Router()
  *         description: Connection failed
  */
 router.get('/test-connection', testGCSConnection)
+
+/**
+ * @swagger
+ * /api/upload/files:
+ *   get:
+ *     summary: List files in a GCS folder (images/directory by prefix)
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: folder
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Folder name in GCS (e.g. clubhouse, payloads, models)
+ *       - in: query
+ *         name: urls
+ *         schema:
+ *           type: boolean
+ *           default: true
+ *         description: Include public/signed URL for each file (set false for names only)
+ *     responses:
+ *       200:
+ *         description: List of files in the folder with optional URLs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 folder:
+ *                   type: string
+ *                 count:
+ *                   type: number
+ *                 files:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                       url:
+ *                         type: string
+ *                         nullable: true
+ *       400:
+ *         description: Missing folder query
+ *       500:
+ *         description: Error listing folder
+ */
+router.get('/files', protect, getFolderFiles)
+router.get('/folder/:folder', protect, getFolderFiles)
 
 /**
  * @swagger

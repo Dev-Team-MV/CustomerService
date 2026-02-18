@@ -26,6 +26,7 @@ import NewsTable from './pages/NewsTable'
 import NewsDetails from './components/news/NewsDetails'
 import NewsFeed from './pages/NewsFeed'
 import TermsAndCondition from './pages/TermsAndCondition'
+import ClubhouseManager from './pages/ClubhouseManager'
 
 const theme = createTheme({
   palette: {
@@ -95,6 +96,7 @@ function App() {
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/club-house-detail" element={<ClubHouseDetail />} />
+                <Route path="/clubhouse-manager" element={<ClubhouseManager />} />
               </Route>
             </Route>
             

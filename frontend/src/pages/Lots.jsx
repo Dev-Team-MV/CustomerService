@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Box,
   Typography,
@@ -40,6 +40,12 @@ import {
 } from '@mui/icons-material'
 import { motion, AnimatePresence } from 'framer-motion'
 import api from '../services/api'
+import PageHeader from '../components/PageHeader'
+import StatsCards from '../components/statscard'
+import DataTable from '../components/table/DataTable';
+import EmptyState from '../components/table/EmptyState';
+
+
 
 const Lots = () => {
   const [lots, setLots] = useState([])
@@ -117,6 +123,203 @@ const Lots = () => {
       }
     }
   }
+    // ✅ DEFINIR COLUMNAS
+  
+  const columns = useMemo(() => [
+    {
+      field: 'number',
+      headerName: 'LOT NUMBER',
+      minWidth: 150,
+      renderCell: ({ row }) => (
+        <Box display="flex" alignItems="center" gap={1.5}>
+          <Avatar
+            sx={{
+              width: 48,
+              height: 48,
+              bgcolor: 'transparent',
+              background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
+              color: 'white',
+              fontWeight: 700,
+              fontSize: '1rem',
+              fontFamily: '"Poppins", sans-serif',
+              border: '2px solid rgba(255, 255, 255, 0.9)',
+              boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
+            }}
+          >
+            {row.number}
+          </Avatar>
+          <Box>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+                color: '#1a1a1a',
+                fontFamily: '"Poppins", sans-serif',
+                fontSize: '0.95rem'
+              }}
+            >
+              Lot {row.number}
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                color: '#706f6f',
+                fontFamily: '"Poppins", sans-serif',
+                fontSize: '0.7rem'
+              }}
+            >
+              ID: {row._id?.slice(-6)}
+            </Typography>
+          </Box>
+        </Box>
+      )
+    },
+    {
+      field: 'price',
+      headerName: 'PRICE',
+      renderCell: ({ value }) => (
+        <Box display="flex" alignItems="center" gap={0.5}>
+          <AttachMoney sx={{ fontSize: 18, color: '#8CA551' }} />
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 700,
+              color: '#333F1F',
+              fontFamily: '"Poppins", sans-serif',
+              fontSize: '1rem'
+            }}
+          >
+            {value?.toLocaleString()}
+          </Typography>
+        </Box>
+      )
+    },
+    {
+      field: 'status',
+      headerName: 'STATUS',
+      renderCell: ({ value }) => {
+        const config = {
+          available: { icon: CheckCircle, color: '#8CA551', bg: 'rgba(140, 165, 81, 0.12)' },
+          pending: { icon: Schedule, color: '#E5863C', bg: 'rgba(229, 134, 60, 0.12)' },
+          sold: { icon: Cancel, color: '#706f6f', bg: 'rgba(112, 111, 111, 0.12)' }
+        }[value] || { icon: CheckCircle, color: '#8CA551', bg: 'rgba(140, 165, 81, 0.12)' }; // ✅ FIX: Cambiar config.available por objeto default
+  
+        return (
+          <Chip
+            label={value}
+            icon={<config.icon />}
+            size="small"
+            sx={{
+              fontWeight: 600,
+              fontFamily: '"Poppins", sans-serif',
+              height: 28,
+              px: 1.5,
+              fontSize: '0.75rem',
+              letterSpacing: '0.5px',
+              borderRadius: 2,
+              textTransform: 'capitalize',
+              bgcolor: config.bg,
+              color: config.color,
+              border: `1px solid ${config.color}40`,
+              '& .MuiChip-icon': { color: config.color }
+            }}
+          />
+        );
+      }
+    },
+    {
+      field: 'actions',
+      headerName: 'ACTIONS',
+      align: 'center',
+      renderCell: ({ row }) => (
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <Tooltip title="Edit Lot" placement="top">
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                // ✅ FIX: Llamar a handleOpenDialog en lugar de setSelectedLot + setOpenDialog
+                handleOpenDialog(row);
+              }}
+              sx={{
+                bgcolor: 'rgba(140, 165, 81, 0.08)',
+                border: '1px solid rgba(140, 165, 81, 0.2)',
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  bgcolor: '#8CA551',
+                  borderColor: '#8CA551',
+                  transform: 'scale(1.1)',
+                  '& .MuiSvgIcon-root': { color: 'white' }
+                }
+              }}
+            >
+              <Edit sx={{ fontSize: 18, color: '#8CA551' }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete Lot" placement="top">
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(row._id);
+              }}
+              sx={{
+                bgcolor: 'rgba(229, 134, 60, 0.08)',
+                border: '1px solid rgba(229, 134, 60, 0.2)',
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  bgcolor: '#E5863C',
+                  borderColor: '#E5863C',
+                  transform: 'scale(1.1)',
+                  '& .MuiSvgIcon-root': { color: 'white' }
+                }
+              }}
+            >
+              <Delete sx={{ fontSize: 18, color: '#E5863C' }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )
+    }
+  ], [handleOpenDialog, handleDelete]); // ✅ IMPORTANTE: Agregar dependencias
+  
+
+  const lotsStats = [
+  {
+    title: 'Total Lots',
+    value: stats.total,
+    icon: Terrain,
+    gradient: 'linear-gradient(135deg, #333F1F 0%, #4a5d3a 100%)',
+    color: '#333F1F',
+    delay: 0
+  },
+  {
+    title: 'Available',
+    value: stats.available,
+    icon: CheckCircle,
+    gradient: 'linear-gradient(135deg, #8CA551 0%, #a8bf6f 100%)',
+    color: '#8CA551',
+    delay: 0.1
+  },
+  {
+    title: 'Pending',
+    value: stats.pending,
+    icon: Schedule,
+    gradient: 'linear-gradient(135deg, #E5863C 0%, #f59c5a 100%)',
+    color: '#E5863C',
+    delay: 0.2
+  },
+  {
+    title: 'Sold',
+    value: stats.sold,
+    icon: TrendingUp,
+    gradient: 'linear-gradient(135deg, #706f6f 0%, #8a8989 100%)',
+    color: '#706f6f',
+    delay: 0.3
+  }
+];
 
   return (
     <Box
@@ -127,549 +330,38 @@ const Lots = () => {
       }}
     >
       <Container maxWidth="xl">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <Paper
-            elevation={0}
-            sx={{
-              p: { xs: 3, md: 4 },
-              mb: 4,
-              borderRadius: 4,
-              border: '1px solid rgba(0,0,0,0.08)',
-              background: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
-              position: 'relative',
-              overflow: 'hidden',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 4,
-                background: 'linear-gradient(90deg, #333F1F, #8CA551, #333F1F)'
-              }
-            }}
-          >
-            <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
-              <Box display="flex" alignItems="center" gap={2}>
-                <motion.div
-                  animate={{
-                    scale: [1, 1.1, 1],
-                    rotate: [0, 5, -5, 0]
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    repeatDelay: 3
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: { xs: 56, md: 64 },
-                      height: { xs: 56, md: 64 },
-                      borderRadius: 3,
-                      background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 8px 24px rgba(51, 63, 31, 0.3)'
-                    }}
-                  >
-                    <Landscape sx={{ fontSize: { xs: 28, md: 32 }, color: 'white' }} />
-                  </Box>
-                </motion.div>
-
-                <Box>
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontWeight: 800,
-                      color: '#333F1F',
-                      fontFamily: '"Poppins", sans-serif',
-                      letterSpacing: '0.5px',
-                      fontSize: { xs: '1.75rem', md: '2.125rem' }
-                    }}
-                  >
-                    Lot Inventory
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: '#706f6f',
-                      fontFamily: '"Poppins", sans-serif',
-                      fontSize: { xs: '0.875rem', md: '1rem' }
-                    }}
-                  >
-                    Manage availability and pricing for Lake Conroe properties
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Tooltip title="Add New Lot" placement="left">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button
-                    variant="contained"
-                    onClick={() => handleOpenDialog()}
-                    startIcon={<Add />}
-                    sx={{
-                      borderRadius: 3,
-                      bgcolor: '#333F1F',
-                      color: 'white',
-                      fontWeight: 600,
-                      textTransform: 'none',
-                      letterSpacing: '1px',
-                      fontFamily: '"Poppins", sans-serif',
-                      px: 3,
-                      py: 1.5,
-                      boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        left: '-100%',
-                        width: '100%',
-                        height: '100%',
-                        bgcolor: '#8CA551',
-                        transition: 'left 0.4s ease',
-                        zIndex: 0
-                      },
-                      '&:hover': {
-                        bgcolor: '#333F1F',
-                        boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
-                        '&::before': {
-                          left: 0
-                        },
-                        '& .MuiButton-startIcon': {
-                          color: 'white'
-                        }
-                      },
-                      '& .MuiButton-startIcon': {
-                        position: 'relative',
-                        zIndex: 1,
-                        color: 'white'
-                      }
-                    }}
-                  >
-                    <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-                      Add New Lot
-                    </Box>
-                  </Button>
-                </motion.div>
-              </Tooltip>
-            </Box>
-          </Paper>
-        </motion.div>
+        {/* ✅ REEMPLAZAR TODO EL HEADER POR: */}
+        <PageHeader
+          icon={Landscape}
+          title="Lot Inventory"
+          subtitle="Manage availability and pricing for Lake Conroe properties"
+          actionButton={{
+            label: 'Add New Lot',
+            onClick: () => handleOpenDialog(),
+            icon: <Add />,
+            tooltip: 'Add New Lot'
+          }}
+        />
 
         {/* Stats Cards */}
-        <Grid container spacing={3} mb={4}>
-          {[
-            {
-              title: 'Total Lots',
-              value: stats.total,
-              icon: Terrain,
-              gradient: 'linear-gradient(135deg, #333F1F 0%, #4a5d3a 100%)',
-              delay: 0
-            },
-            {
-              title: 'Available',
-              value: stats.available,
-              icon: CheckCircle,
-              gradient: 'linear-gradient(135deg, #8CA551 0%, #a8bf6f 100%)',
-              delay: 0.1
-            },
-            {
-              title: 'Pending',
-              value: stats.pending,
-              icon: Schedule,
-              gradient: 'linear-gradient(135deg, #E5863C 0%, #f59c5a 100%)',
-              delay: 0.2
-            },
-            {
-              title: 'Sold',
-              value: stats.sold,
-              icon: TrendingUp,
-              gradient: 'linear-gradient(135deg, #706f6f 0%, #8a8989 100%)',
-              delay: 0.3
-            }
-          ].map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: stat.delay, duration: 0.5 }}
-                whileHover={{ y: -8 }}
-              >
-                <Card
-                  sx={{
-                    borderRadius: 4,
-                    border: '1px solid rgba(0,0,0,0.08)',
-                    background: stat.gradient,
-                    color: 'white',
-                    overflow: 'hidden',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      boxShadow: '0 16px 48px rgba(0,0,0,0.15)',
-                      transform: 'translateY(-4px)'
-                    }
-                  }}
-                >
-                  <CardContent sx={{ p: 3 }}>
-                    <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          opacity: 0.85,
-                          fontWeight: 600,
-                          letterSpacing: '0.5px',
-                          textTransform: 'uppercase',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontSize: '0.75rem'
-                        }}
-                      >
-                        {stat.title}
-                      </Typography>
-                      <Box
-                        sx={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: '50%',
-                          bgcolor: 'rgba(255,255,255,0.2)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <stat.icon sx={{ fontSize: 20 }} />
-                      </Box>
-                    </Box>
-                    <Typography
-                      variant="h3"
-                      sx={{
-                        fontWeight: 800,
-                        fontFamily: '"Poppins", sans-serif',
-                        letterSpacing: '-1px',
-                        fontSize: '2.5rem'
-                      }}
-                    >
-                      {stat.value}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </Grid>
-          ))}
-        </Grid>
+              <StatsCards stats={lotsStats} loading={loading} />
 
-        {/* Table */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-        >
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: 4,
-              overflow: 'hidden',
-              boxShadow: '0 4px 20px rgba(51, 63, 31, 0.08)',
-              border: '1px solid rgba(140, 165, 81, 0.12)',
-              background: 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)'
-            }}
-          >
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow
-                    sx={{
-                      background: 'linear-gradient(135deg, rgba(51, 63, 31, 0.03) 0%, rgba(140, 165, 81, 0.03) 100%)',
-                      borderBottom: '2px solid rgba(140, 165, 81, 0.2)'
-                    }}
-                  >
-                    {['LOT NUMBER', 'PRICE', 'STATUS', 'ACTIONS'].map((header) => (
-                      <TableCell
-                        key={header}
-                        sx={{
-                          fontWeight: 700,
-                          color: '#333F1F',
-                          fontFamily: '"Poppins", sans-serif',
-                          fontSize: '0.75rem',
-                          letterSpacing: '1.5px',
-                          textTransform: 'uppercase',
-                          py: 2,
-                          borderBottom: 'none'
-                        }}
-                      >
-                        {header}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <AnimatePresence>
-                    {loading ? (
-                      <TableRow>
-                        <TableCell colSpan={4}>
-                          <Box display="flex" justifyContent="center" p={6}>
-                            <CircularProgress sx={{ color: '#333F1F' }} />
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    ) : lots.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={4}>
-                          <Box
-                            sx={{
-                              py: 8,
-                              textAlign: 'center',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              gap: 2
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                width: 80,
-                                height: 80,
-                                borderRadius: 4,
-                                bgcolor: 'rgba(140, 165, 81, 0.08)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                mb: 1
-                              }}
-                            >
-                              <Landscape sx={{ fontSize: 40, color: '#8CA551' }} />
-                            </Box>
-                            <Typography
-                              variant="h6"
-                              sx={{
-                                color: '#333F1F',
-                                fontWeight: 600,
-                                fontFamily: '"Poppins", sans-serif',
-                                mb: 0.5
-                              }}
-                            >
-                              No lots available
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: '#706f6f',
-                                fontFamily: '"Poppins", sans-serif',
-                                mb: 2
-                              }}
-                            >
-                              Get started by adding your first lot
-                            </Typography>
-                            <Button
-                              variant="contained"
-                              startIcon={<Add />}
-                              onClick={() => handleOpenDialog()}
-                              sx={{
-                                borderRadius: 3,
-                                bgcolor: '#333F1F',
-                                textTransform: 'none',
-                                fontFamily: '"Poppins", sans-serif',
-                                fontWeight: 600,
-                                px: 3,
-                                '&:hover': {
-                                  bgcolor: '#8CA551'
-                                }
-                              }}
-                            >
-                              Add New Lot
-                            </Button>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      lots.map((lot, index) => (
-                        <motion.tr
-                          key={lot._id}
-                          component={TableRow}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: index * 0.05 }}
-                          sx={{
-                            transition: 'all 0.3s ease',
-                            borderLeft: '3px solid transparent',
-                            '&:hover': {
-                              bgcolor: 'rgba(140, 165, 81, 0.04)',
-                              transform: 'translateX(4px)',
-                              boxShadow: '0 2px 8px rgba(51, 63, 31, 0.08)',
-                              borderLeftColor: '#8CA551'
-                            },
-                            '&:last-child td': {
-                              borderBottom: 'none'
-                            }
-                          }}
-                        >
-                          <TableCell>
-                            <Box display="flex" alignItems="center" gap={1.5}>
-                              <Avatar
-                                sx={{
-                                  width: 48,
-                                  height: 48,
-                                  bgcolor: 'transparent',
-                                  background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
-                                  color: 'white',
-                                  fontWeight: 700,
-                                  fontSize: '1rem',
-                                  fontFamily: '"Poppins", sans-serif',
-                                  border: '2px solid rgba(255, 255, 255, 0.9)',
-                                  boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
-                                }}
-                              >
-                                {lot.number}
-                              </Avatar>
-                              <Box>
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    fontWeight: 600,
-                                    color: '#1a1a1a',
-                                    fontFamily: '"Poppins", sans-serif',
-                                    fontSize: '0.95rem'
-                                  }}
-                                >
-                                  Lot {lot.number}
-                                </Typography>
-                                <Typography
-                                  variant="caption"
-                                  sx={{
-                                    color: '#706f6f',
-                                    fontFamily: '"Poppins", sans-serif',
-                                    fontSize: '0.7rem'
-                                  }}
-                                >
-                                  ID: {lot._id.slice(-6)}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Box display="flex" alignItems="center" gap={0.5}>
-                              <AttachMoney sx={{ fontSize: 18, color: '#8CA551' }} />
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  fontWeight: 700,
-                                  color: '#333F1F',
-                                  fontFamily: '"Poppins", sans-serif',
-                                  fontSize: '1rem'
-                                }}
-                              >
-                                {lot.price?.toLocaleString()}
-                              </Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={lot.status}
-                              icon={
-                                lot.status === 'available' ? <CheckCircle /> :
-                                lot.status === 'pending' ? <Schedule /> :
-                                <Cancel />
-                              }
-                              size="small"
-                              sx={{
-                                fontWeight: 600,
-                                fontFamily: '"Poppins", sans-serif',
-                                height: 28,
-                                px: 1.5,
-                                fontSize: '0.75rem',
-                                letterSpacing: '0.5px',
-                                borderRadius: 2,
-                                textTransform: 'capitalize',
-                                ...(lot.status === 'available' && {
-                                  bgcolor: 'rgba(140, 165, 81, 0.12)',
-                                  color: '#333F1F',
-                                  border: '1px solid rgba(140, 165, 81, 0.3)',
-                                  '& .MuiChip-icon': { color: '#8CA551' }
-                                }),
-                                ...(lot.status === 'pending' && {
-                                  bgcolor: 'rgba(229, 134, 60, 0.12)',
-                                  color: '#E5863C',
-                                  border: '1px solid rgba(229, 134, 60, 0.3)',
-                                  '& .MuiChip-icon': { color: '#E5863C' }
-                                }),
-                                ...(lot.status === 'sold' && {
-                                  bgcolor: 'rgba(112, 111, 111, 0.12)',
-                                  color: '#706f6f',
-                                  border: '1px solid rgba(112, 111, 111, 0.3)',
-                                  '& .MuiChip-icon': { color: '#706f6f' }
-                                })
-                              }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', gap: 0.5 }}>
-                              <Tooltip title="Edit Lot" placement="top">
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleOpenDialog(lot)}
-                                  sx={{
-                                    bgcolor: 'rgba(140, 165, 81, 0.08)',
-                                    border: '1px solid rgba(140, 165, 81, 0.2)',
-                                    borderRadius: 2,
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': {
-                                      bgcolor: '#8CA551',
-                                      borderColor: '#8CA551',
-                                      transform: 'scale(1.1)',
-                                      '& .MuiSvgIcon-root': {
-                                        color: 'white'
-                                      }
-                                    }
-                                  }}
-                                >
-                                  <Edit sx={{ fontSize: 18, color: '#8CA551' }} />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Delete Lot" placement="top">
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleDelete(lot._id)}
-                                  sx={{
-                                    bgcolor: 'rgba(229, 134, 60, 0.08)',
-                                    border: '1px solid rgba(229, 134, 60, 0.2)',
-                                    borderRadius: 2,
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': {
-                                      bgcolor: '#E5863C',
-                                      borderColor: '#E5863C',
-                                      transform: 'scale(1.1)',
-                                      '& .MuiSvgIcon-root': {
-                                        color: 'white'
-                                      }
-                                    }
-                                  }}
-                                >
-                                  <Delete sx={{ fontSize: 18, color: '#E5863C' }} />
-                                </IconButton>
-                              </Tooltip>
-                            </Box>
-                          </TableCell>
-                        </motion.tr>
-                      ))
-                    )}
-                  </AnimatePresence>
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        </motion.div>
+                {/* ✅ TABLA REUTILIZABLE */}
+        <DataTable
+          columns={columns}
+          data={lots}
+          loading={loading}
+          emptyState={
+            <EmptyState
+              icon={Landscape}
+              title="No lots available"
+              description="Get started by adding your first lot"
+              actionLabel="Add New Lot"
+              onAction={() => setOpenDialog(true)}
+            />
+          }
+          onRowClick={(row) => console.log('Row clicked:', row)}
+        />
 
         {/* Dialog */}
         <Dialog

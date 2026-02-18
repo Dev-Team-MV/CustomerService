@@ -33,7 +33,7 @@ import uploadService from '../services/uploadService'
 const DOCUMENT_TYPES = [
   { key: 'promissoryNote', label: 'Promissory note', icon: '📄' },
   { key: 'purchaseContract', label: 'Purchase contract', icon: '📝' },
-  { key: 'agreement', label: 'Agreement', icon: '📋' }
+  { key: 'agreement', label: 'Credit agreement', icon: '📋' }
 ]
 
 const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
