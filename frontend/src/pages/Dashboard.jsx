@@ -256,6 +256,13 @@ const quickActions = [
     color: '#E5863C', 
     bgColor: '#fff5e6',
     onClick: () => navigate('/news')
+  },
+  { 
+    icon: <Business />, 
+    label: 'Club House', 
+    color: '#333F1F', 
+    bgColor: '#e8f5ee',
+    onClick: () => navigate('/club-house-detail')
   }
 ]
 
@@ -281,6 +288,13 @@ const userQuickActions = [
     color: '#E5863C', 
     bgColor: '#fff5e6',
     onClick: () => navigate('/explore/news')
+  },
+  { 
+    icon: <Business />, 
+    label: 'Club House', 
+    color: '#333F1F', 
+    bgColor: '#e8f5ee',
+    onClick: () => navigate('/club-house-detail')
   }
 ]
 
