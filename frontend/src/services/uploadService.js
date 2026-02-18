@@ -1,9 +1,6 @@
 import api from './api'
 
 const uploadService = {
-  /**
-   * Subir una sola imagen
-   */
   uploadImage: async (file, folder = '') => {
     try {
       const formData = new FormData()
@@ -28,14 +25,10 @@ const uploadService = {
     }
   },
 
-  /**
-   * Subir múltiples imágenes (una por una)
-   */
   uploadMultipleImages: async (files, folder = '') => {
     try {
       console.log(`📤 Uploading ${files.length} images to folder: ${folder || 'root'}`)
       
-      // Subir cada imagen individualmente
       const uploadPromises = files.map(file => uploadService.uploadImage(file, folder))
       const urls = await Promise.all(uploadPromises)
       
@@ -47,16 +40,10 @@ const uploadService = {
     }
   },
 
-  /**
-   * Subir archivos de contratos (PDF, DOC, DOCX)
-   * @param {File[]} files - Array de archivos de contratos
-   * @returns {Promise<string[]>} Array de URLs de archivos subidos
-   */
   uploadContractFiles: async (files) => {
     try {
       console.log(`📤 Uploading ${files.length} contract file(s) to GCS...`)
       
-      // Subir cada contrato individualmente usando la misma lógica que las imágenes
       const uploadPromises = files.map(file => uploadService.uploadImage(file, 'contracts'))
       const urls = await Promise.all(uploadPromises)
       
@@ -68,46 +55,97 @@ const uploadService = {
     }
   },
 
-  /**
-   * Subir imagen de payment/payload
-   */
   uploadPaymentImage: async (file) => {
     return uploadService.uploadImage(file, 'payments')
   },
 
-  /**
-   * Subir imágenes de fases de construcción
-   */
   uploadPhaseImages: async (files) => {
     return uploadService.uploadMultipleImages(files, 'construction-phases')
   },
 
-  /**
-   * Subir imagen de fachada
-   */
   uploadFacadeImage: async (file) => {
     return uploadService.uploadImage(file, 'facades')
   },
 
-  /**
-   * Subir imagen de modelo
-   */
   uploadModelImage: async (file) => {
     return uploadService.uploadImage(file, 'models')
   },
 
-  /**
-   * Subir imagen de lote
-   */
   uploadLotImage: async (file) => {
     return uploadService.uploadImage(file, 'lots')
   },
 
-  /**
-   * Subir imagen de upgrade
-   */
   uploadUpgradeImage: async (file) => {
     return uploadService.uploadImage(file, 'upgrades')
+  },
+
+  uploadClubhouseImage: async (file) => {
+    return uploadService.uploadImage(file, 'clubhouse')
+  },
+
+  // ========================================
+  // ✅ CLUBHOUSE FUNCTIONS - ENDPOINTS CORREGIDOS
+  // ========================================
+uploadClubhouseImages: async (files, section, interiorKey = null) => {
+    try {
+      const formData = new FormData()
+      
+      // ✅ IMPORTANTE: Enviar section
+      formData.append('section', section)
+      
+      // ✅ CORREGIDO: Enviar interiorKey solo si existe Y section es interior
+      if (section === 'interior' && interiorKey) {
+        console.log(`📤 Uploading to interior section: ${interiorKey}`)
+        formData.append('interiorKey', interiorKey)
+      }
+      
+      // ✅ Agregar archivos
+      files.forEach(file => {
+        formData.append('images', file)
+      })
+
+      console.log(`📤 Uploading ${files.length} image(s) to clubhouse/${section}${interiorKey ? `/${interiorKey}` : ''}`)
+
+      const response = await api.post('/clubhouse/images', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+
+      console.log('✅ Clubhouse images uploaded:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('❌ Error uploading clubhouse images:', error.response?.data || error.message)
+      throw new Error(error.response?.data?.message || 'Failed to upload clubhouse images')
+    }
+  },
+
+  getFilesByFolder: async (folder, urls = true) => {
+    try {
+      console.log(`📂 Getting files from folder: ${folder}`)
+      
+      const response = await api.get('/upload/files', {
+        params: { folder, urls }
+      })
+
+      console.log(`✅ Found ${response.data.files?.length || 0} files in ${folder}`)
+      return response.data
+    } catch (error) {
+      console.error(`❌ Error getting files from folder ${folder}:`, error.response?.data || error.message)
+      throw new Error(error.response?.data?.message || `Failed to get files from ${folder}`)
+    }
+  },
+
+  getClubhouseInteriorKeys: async () => {
+    try {
+      console.log('📋 Getting clubhouse interior keys...')
+      
+      const response = await api.get('/clubhouse/interior-keys')
+
+      console.log('✅ Interior keys loaded:', response.data.interiorKeys)
+      return response.data
+    } catch (error) {
+      console.error('❌ Error getting clubhouse interior keys:', error.response?.data || error.message)
+      throw new Error(error.response?.data?.message || 'Failed to get clubhouse interior keys')
+    }
   }
 }
 

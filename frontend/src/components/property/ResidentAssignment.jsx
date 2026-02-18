@@ -12,7 +12,8 @@ import {
   Collapse,
   Alert,
   Button,
-  CircularProgress
+  CircularProgress,
+  Tooltip
 } from '@mui/material'
 import { useProperty } from '../../context/PropertyContext'
 import { useNavigate } from 'react-router-dom'
@@ -25,6 +26,7 @@ import api from '../../services/api'
 import { sendWelcomeSMS, sendPropertyAssignmentSMS } from '../../services/smsService'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
+import {motion, AnimatePresence} from 'framer-motion'
 
 const ResidentAssignment = ({ expanded, onToggle }) => {
   const navigate = useNavigate()
@@ -676,49 +678,49 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                 startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <CheckCircleIcon />}
                 sx={{
                   mt: 3,
-                  borderRadius: 3,
-                  bgcolor: '#333F1F',
-                  color: 'white',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  letterSpacing: '1px',
-                  fontFamily: '"Poppins", sans-serif',
-                  px: 4,
-                  py: 1.8,
-                  fontSize: '0.95rem',
-                  boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: 0,
-                    left: '-100%',
-                    width: '100%',
-                    height: '100%',
-                    bgcolor: '#8CA551',
-                    transition: 'left 0.4s ease',
-                    zIndex: 0
-                  },
-                  '&:hover': {
-                    bgcolor: '#333F1F',
-                    boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
-                    '&::before': {
-                      left: 0
-                    }
-                  },
-                  '&:disabled': {
-                    bgcolor: '#e0e0e0',
-                    color: '#9e9e9e',
-                    boxShadow: 'none'
-                  },
-                  '& .MuiButton-startIcon, & span': {
-                    position: 'relative',
-                    zIndex: 1
-                  }
-                }}
+        borderRadius: 3,
+        bgcolor: '#333F1F',
+        color: 'white',
+        fontWeight: 600,
+        textTransform: 'none',
+        letterSpacing: '1px',
+        fontFamily: '"Poppins", sans-serif',
+        px: 3,
+        py: 1.5,
+        boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: '-100%',
+          width: '100%',
+          height: '100%',
+          bgcolor: '#8CA551',
+          transition: 'left 0.4s ease',
+          zIndex: 0
+        },
+        '&:hover': {
+          bgcolor: '#333F1F',
+          boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+          '&::before': {
+            left: 0
+          },
+          '& .MuiButton-startIcon': {
+            color: 'white'
+          }
+        },
+        '& .MuiButton-startIcon': {
+          position: 'relative',
+          zIndex: 1,
+          color: 'white'
+        }
+      }}
               >
+                <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
                 {submitting ? 'Assigning Property...' : 'Assign Property to Selected User'}
+                </Box>
               </Button>
             </Box>
           ) : (
@@ -1095,58 +1097,65 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
               )}
 
               {/* ✅ ACTION BUTTON - Brandbook */}
-              <Button
-                variant="contained"
-                fullWidth
-                onClick={handleAssignProperty}
-                disabled={!isFormValid() || submitting}
-                startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <PersonAddIcon />}
-                sx={{
-                  mt: 3,
-                  borderRadius: 3,
-                  bgcolor: '#333F1F',
-                  color: 'white',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  letterSpacing: '1px',
-                  fontFamily: '"Poppins", sans-serif',
-                  px: 4,
-                  py: 1.8,
-                  fontSize: '0.95rem',
-                  boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: 0,
-                    left: '-100%',
-                    width: '100%',
-                    height: '100%',
-                    bgcolor: '#8CA551',
-                    transition: 'left 0.4s ease',
-                    zIndex: 0
-                  },
-                  '&:hover': {
-                    bgcolor: '#333F1F',
-                    boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
-                    '&::before': {
-                      left: 0
-                    }
-                  },
-                  '&:disabled': {
-                    bgcolor: '#e0e0e0',
-                    color: '#9e9e9e',
-                    boxShadow: 'none'
-                  },
-                  '& .MuiButton-startIcon, & span': {
-                    position: 'relative',
-                    zIndex: 1
-                  }
-                }}
-              >
-                {submitting ? 'Creating User & Assigning...' : 'Create User & Assign Property'}
-              </Button>
+              <Tooltip title="Create User & Assign Property" placement="left">
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={handleAssignProperty}
+                    disabled={!isFormValid() || submitting}
+                    startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <PersonAddIcon />}
+                    sx={{
+                      mt: 3,
+                      borderRadius: 3,
+                      bgcolor: '#333F1F',
+                      color: 'white',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      letterSpacing: '1px',
+                      fontFamily: '"Poppins", sans-serif',
+                      px: 3,
+                      py: 1.5,
+                      boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: '-100%',
+                        width: '100%',
+                        height: '100%',
+                        bgcolor: '#8CA551',
+                        transition: 'left 0.4s ease',
+                        zIndex: 0
+                      },
+                      '&:hover': {
+                        bgcolor: '#333F1F',
+                        boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+                        '&::before': {
+                          left: 0
+                        },
+                        '& .MuiButton-startIcon': {
+                          color: 'white'
+                        }
+                      },
+                      '& .MuiButton-startIcon': {
+                        position: 'relative',
+                        zIndex: 1,
+                        color: 'white'
+                      }
+                    }}
+                  >
+                    <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
+                      {submitting ? 'Creating User & Assigning...' : 'Create User & Assign Property'}
+                    </Box>
+                  </Button>
+                </motion.div>
+              </Tooltip>
             </Box>
           )}
         </Box>

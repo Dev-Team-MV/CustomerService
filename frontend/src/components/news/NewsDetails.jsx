@@ -13,7 +13,8 @@ import {
   CircularProgress,
   Alert,
   IconButton,
-  Fade
+  Fade,
+  Stack
 } from '@mui/material';
 import {
   ArrowBack,
@@ -534,39 +535,6 @@ useEffect(() => {
                         </Typography>
                       </Box>
                     </Box>
-
-                    <Box display="flex" gap={1}>
-                      <IconButton
-                        onClick={() => setBookmarked(!bookmarked)}
-                        sx={{
-                          bgcolor: bookmarked ? 'rgba(140, 165, 81, 0.12)' : 'rgba(0,0,0,0.04)',
-                          color: bookmarked ? '#8CA551' : '#706f6f',
-                          border: bookmarked ? '1px solid rgba(140, 165, 81, 0.3)' : '1px solid transparent',
-                          '&:hover': {
-                            bgcolor: 'rgba(140, 165, 81, 0.15)',
-                            transform: 'scale(1.05)'
-                          },
-                          transition: 'all 0.3s'
-                        }}
-                      >
-                        {bookmarked ? <Bookmark /> : <BookmarkBorder />}
-                      </IconButton>
-                      <IconButton
-                        onClick={handleShare}
-                        sx={{
-                          bgcolor: 'rgba(0,0,0,0.04)',
-                          color: '#706f6f',
-                          '&:hover': {
-                            bgcolor: 'rgba(140, 165, 81, 0.15)',
-                            color: '#8CA551',
-                            transform: 'scale(1.05)'
-                          },
-                          transition: 'all 0.3s'
-                        }}
-                      >
-                        <Share />
-                      </IconButton>
-                    </Box>
                   </Box>
 
                   {/* DROP CAP FIRST PARAGRAPH */}
@@ -757,199 +725,224 @@ useEffect(() => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.6 }}
               >
-                {/* QUICK INFO */}
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 3,
-                    borderRadius: 4,
-                    bgcolor: 'rgba(140, 165, 81, 0.05)',
-                    border: '1px solid rgba(140, 165, 81, 0.2)',
-                    mb: 3
-                  }}
-                >
-                  <Typography 
-                    variant="subtitle1" 
-                    fontWeight={700} 
-                    mb={3}
-                    sx={{
-                      color: '#333F1F',
-                      fontFamily: '"Poppins", sans-serif'
-                    }}
-                  >
-                    Article Info
-                  </Typography>
-
-                  <Box display="flex" flexDirection="column" gap={2}>
-                    <Box display="flex" alignItems="center" gap={1.5}>
-                      <Box
-                        sx={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: 2,
-                          bgcolor: 'white',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          border: '1px solid rgba(140, 165, 81, 0.2)'
-                        }}
-                      >
-                        <CalendarToday sx={{ fontSize: 18, color: '#8CA551' }} />
-                      </Box>
-                      <Box>
-                        <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
-                          Published
-                        </Typography>
-                        <Typography variant="body2" fontWeight={600} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
-                          {new Date(news.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </Typography>
-                      </Box>
-                    </Box>
-
-                    <Box display="flex" alignItems="center" gap={1.5}>
-                      <Box
-                        sx={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: 2,
-                          bgcolor: 'white',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          border: '1px solid rgba(140, 165, 81, 0.2)'
-                        }}
-                      >
-                        <AccessTime sx={{ fontSize: 18, color: '#8CA551' }} />
-                      </Box>
-                      <Box>
-                        <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
-                          Reading Time
-                        </Typography>
-                        <Typography variant="body2" fontWeight={600} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
-                          {Math.ceil((news.contentBlocks?.length || 3) * 0.5)} min read
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                </Paper>
-
-                {/* SHARE CARD */}
-
-                
-                <Grid item xs={12} md={3.5}>
-                  <Box sx={{ position: 'sticky', top: 120 }}>
-                    <motion.div
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.8, delay: 0.6 }}
+                {/* Article Info & Related News in 2 columns on mobile, stacked on desktop */}
+                <Grid container spacing={3}>
+                  {/* Article Info */}
+                  <Grid item xs={12} md={12}>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        p: 3,
+                        borderRadius: 4,
+                        bgcolor: 'rgba(140, 165, 81, 0.05)',
+                        border: '1px solid rgba(140, 165, 81, 0.2)',
+                        height: '100%'
+                      }}
                     >
-                      {/* QUICK INFO */}
-                      <Paper
-                        elevation={0}
+                      <Typography 
+                        variant="subtitle1" 
+                        fontWeight={700} 
+                        mb={3}
                         sx={{
-                          p: 3,
-                          borderRadius: 4,
-                          bgcolor: 'rgba(140, 165, 81, 0.05)',
-                          border: '1px solid rgba(140, 165, 81, 0.2)',
-                          mb: 3
+                          color: '#333F1F',
+                          fontFamily: '"Poppins", sans-serif'
                         }}
                       >
-                        {/* ...existing quick info... */}
-                      </Paper>
-                
-                      {/* ✅ Noticias relacionadas */}
-                      <Paper
-                        elevation={0}
+                        Article Info
+                      </Typography>
+          
+                      <Stack spacing={2}>
+                        <Box display="flex" alignItems="center" gap={1.5}>
+                          <Box
+                            sx={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: 2,
+                              bgcolor: 'white',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              border: '1px solid rgba(140, 165, 81, 0.2)'
+                            }}
+                          >
+                            <CalendarToday sx={{ fontSize: 18, color: '#8CA551' }} />
+                          </Box>
+                          <Box>
+                            <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', display: 'block' }}>
+                              Published
+                            </Typography>
+                            <Typography variant="body2" fontWeight={600} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+                              {new Date(news.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </Typography>
+                          </Box>
+                        </Box>
+          
+                        <Box display="flex" alignItems="center" gap={1.5}>
+                          <Box
+                            sx={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: 2,
+                              bgcolor: 'white',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              border: '1px solid rgba(140, 165, 81, 0.2)'
+                            }}
+                          >
+                            <AccessTime sx={{ fontSize: 18, color: '#8CA551' }} />
+                          </Box>
+                          <Box>
+                            <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', display: 'block' }}>
+                              Reading Time
+                            </Typography>
+                            <Typography variant="body2" fontWeight={600} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+                              {Math.ceil((news.contentBlocks?.length || 3) * 0.5)} min read
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Stack>
+                    </Paper>
+                  </Grid>
+          
+                  {/* Related News */}
+                  <Grid item xs={12} md={12}>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        p: 3,
+                        borderRadius: 4,
+                        border: '1px solid #e0e0e0',
+                        bgcolor: 'white',
+                        height: '100%'
+                      }}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight={700}
+                        mb={3}
                         sx={{
-                          p: 3,
-                          borderRadius: 4,
-                          bgcolor: 'white',
-                          boxShadow: '0 8px 24px rgba(51, 63, 31, 0.1)',
-                          border: '1px solid rgba(0,0,0,0.05)'
+                          color: '#333F1F',
+                          fontFamily: '"Poppins", sans-serif'
                         }}
                       >
+                        Related News
+                      </Typography>
+          
+                      {loadingRelated ? (
+                        <Box display="flex" justifyContent="center" py={3}>
+                          <CircularProgress size={30} sx={{ color: '#8CA551' }} />
+                        </Box>
+                      ) : relatedNews.length === 0 ? (
                         <Typography 
-                          variant="subtitle1" 
-                          fontWeight={700} 
-                          mb={2}
-                          sx={{
-                            color: '#333F1F',
-                            fontFamily: '"Poppins", sans-serif'
+                          variant="caption" 
+                          sx={{ 
+                            color: '#706f6f',
+                            fontFamily: '"Poppins", sans-serif',
+                            display: 'block',
+                            textAlign: 'center',
+                            py: 2
                           }}
                         >
-                          Related News
+                          No related articles found
                         </Typography>
-                        {loadingRelated ? (
-                          <Box display="flex" justifyContent="center" py={2}>
-                            <CircularProgress size={28} sx={{ color: '#8CA551' }} />
-                          </Box>
-                        ) : relatedNews.length === 0 ? (
-                          <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
-                            No related news found.
-                          </Typography>
-                        ) : (
-                          <Box display="flex" flexDirection="column" gap={2}>
-                            {relatedNews.map(item => (
-                              <Button
-                                key={item._id}
-                                fullWidth
-                                variant="outlined"
-                                onClick={() => navigate(`/explore/news/${item._id}`)}
-                                sx={{
-                                  borderRadius: 3,
-                                  textTransform: 'none',
-                                  fontWeight: 600,
-                                  fontFamily: '"Poppins", sans-serif',
-                                  py: 1.2,
-                                  borderColor: 'rgba(140, 165, 81, 0.3)',
-                                  borderWidth: '2px',
-                                  color: '#333F1F',
-                                  justifyContent: 'flex-start',
-                                  alignItems: 'center',
-                                  gap: 1.5,
-                                  '&:hover': { 
-                                    borderColor: '#8CA551',
-                                    borderWidth: '2px',
-                                    bgcolor: 'rgba(140, 165, 81, 0.08)',
-                                    transform: 'translateY(-2px)'
-                                  },
-                                  transition: 'all 0.3s'
-                                }}
-                                startIcon={
-                                  <Box
-                                    sx={{
-                                      width: 36,
-                                      height: 36,
-                                      borderRadius: 2,
-                                      bgcolor: 'rgba(140, 165, 81, 0.08)',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      border: '1px solid rgba(140, 165, 81, 0.2)'
-                                    }}
-                                  >
-                                    <CalendarToday sx={{ fontSize: 18, color: '#8CA551' }} />
-                                  </Box>
+                      ) : (
+                        <Stack spacing={2}>
+                          {relatedNews.slice(0, 3).map((item) => (
+                            <Box
+                              key={item._id}
+                              onClick={() => {
+                                navigate(`/explore/news/${item._id}`);
+                                window.scrollTo(0, 0);
+                              }}
+                              sx={{
+                                display: 'flex',
+                                gap: 2,
+                                p: 2,
+                                borderRadius: 3,
+                                border: '1px solid #e0e0e0',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s',
+                                '&:hover': {
+                                  bgcolor: '#fafafa',
+                                  borderColor: 'rgba(140, 165, 81, 0.4)',
+                                  transform: 'translateX(4px)'
                                 }
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  width: 80,
+                                  height: 80,
+                                  borderRadius: 2,
+                                  overflow: 'hidden',
+                                  flexShrink: 0,
+                                  bgcolor: '#fafafa'
+                                }}
                               >
-                                <Box>
-                                  <Typography variant="body2" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
-                                    {item.title}
-                                  </Typography>
-                                  <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
-                                    {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                  </Typography>
-                                </Box>
-                              </Button>
-                            ))}
-                          </Box>
-                        )}
-                      </Paper>
-                    </motion.div>
-                  </Box>
+                                <Box
+                                  component="img"
+                                  src={item.heroImage}
+                                  alt={item.title}
+                                  sx={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover'
+                                  }}
+                                />
+                              </Box>
+                              <Box flex={1}>
+                                <Chip
+                                  label={item.category}
+                                  size="small"
+                                  sx={{
+                                    bgcolor: getCategoryColor(item.category),
+                                    color: 'white',
+                                    fontWeight: 600,
+                                    fontSize: '0.65rem',
+                                    height: 20,
+                                    mb: 1,
+                                    fontFamily: '"Poppins", sans-serif'
+                                  }}
+                                />
+                                <Typography
+                                  variant="body2"
+                                  fontWeight={600}
+                                  sx={{
+                                    color: '#333F1F',
+                                    fontFamily: '"Poppins", sans-serif',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    lineHeight: 1.4,
+                                    mb: 0.5
+                                  }}
+                                >
+                                  {item.title}
+                                </Typography>
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    color: '#706f6f',
+                                    fontFamily: '"Poppins", sans-serif',
+                                    display: 'block'
+                                  }}
+                                >
+                                  {new Date(item.createdAt).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                  })}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          ))}
+                        </Stack>
+                      )}
+                    </Paper>
+                  </Grid>
                 </Grid>
-                
-
               </motion.div>
             </Box>
           </Grid>
