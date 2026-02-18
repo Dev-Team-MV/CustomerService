@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import Property from '../models/Property.js'
 import Lot from '../models/Lot.js'
 import Model from '../models/Model.js'
@@ -299,6 +300,8 @@ export const updateProperty = async (req, res) => {
     const property = await Property.findById(req.params.id)
     
     if (property) {
+      const previousLotId = property.lot ? property.lot.toString() : null
+
       // Apply any allowed field present in the request body
       for (const key of ALLOWED_PROPERTY_UPDATES) {
         if (req.body[key] !== undefined) {
@@ -330,6 +333,40 @@ export const updateProperty = async (req, res) => {
             }
           } else {
             property[key] = req.body[key]
+          }
+        }
+      }
+
+      // When lot is changed: free old lot (so it appears available again) and assign new lot
+      const newLotId = property.lot ? property.lot.toString() : null
+      if (req.body.lot !== undefined && previousLotId && newLotId && previousLotId !== newLotId) {
+        await Lot.findByIdAndUpdate(previousLotId, {
+          status: 'available',
+          assignedUser: null
+        }, { runValidators: false })
+        const previousLotObjectId = new mongoose.Types.ObjectId(previousLotId)
+        await User.updateMany(
+          { lots: previousLotObjectId },
+          { $pull: { lots: previousLotObjectId } }
+        )
+        const firstOwner = (property.users && property.users.length) ? property.users[0] : null
+        await Lot.findByIdAndUpdate(property.lot, {
+          status: property.status === 'sold' ? 'sold' : 'pending',
+          assignedUser: firstOwner || undefined
+        }, { runValidators: false })
+        if (firstOwner) {
+          const userDoc = await User.findById(firstOwner)
+          if (userDoc && !userDoc.lots.some(id => id.toString() === newLotId)) {
+            userDoc.lots.push(property.lot)
+            await userDoc.save()
+          }
+          for (let i = 1; i < (property.users?.length || 0); i++) {
+            const uid = property.users[i]
+            const u = await User.findById(uid)
+            if (u && !u.lots.some(id => id.toString() === newLotId)) {
+              u.lots.push(property.lot)
+              await u.save()
+            }
           }
         }
       }
