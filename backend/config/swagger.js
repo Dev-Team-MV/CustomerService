@@ -140,6 +140,21 @@ const options = {
             updatedAt: { type: 'string', format: 'date-time' }
           }
         },
+        ClubHouse: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            exterior: { type: 'array', items: { type: 'string' }, description: 'Exterior image URLs' },
+            blueprints: { type: 'array', items: { type: 'string' }, description: 'Blueprint image URLs' },
+            interior: {
+              type: 'object',
+              additionalProperties: { type: 'array', items: { type: 'string' } },
+              description: 'Amenity name -> array of image URLs (e.g. Reception, Managers Office, Conference Room)'
+            },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
         Error: {
           type: 'object',
           properties: {
