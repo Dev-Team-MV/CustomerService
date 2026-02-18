@@ -184,6 +184,66 @@ export const login = async (req, res) => {
   }
 }
 
+/**
+ * Login exclusivo para usuarios con rol admin o superadmin.
+ * Misma interfaz que login (email o phoneNumber + password) pero rechaza a usuarios con rol "user".
+ */
+export const loginAdmin = async (req, res) => {
+  try {
+    const { email, phoneNumber, password } = req.body
+
+    if (!email && !phoneNumber) {
+      return res.status(400).json({ message: 'Email or phone number is required' })
+    }
+
+    if (!password) {
+      return res.status(400).json({ message: 'Password is required' })
+    }
+
+    const query = email ? { email } : { phoneNumber }
+    const user = await User.findOne(query).select('+password')
+
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' })
+    }
+
+    if (user.role !== 'admin' && user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Access denied. Admin login only.' })
+    }
+
+    if (!user.password || !user.passwordSet) {
+      return res.status(403).json({
+        message: 'Password not set. Please set your password first.',
+        requiresPasswordSetup: true
+      })
+    }
+
+    if (await user.matchPassword(password)) {
+      res.json({
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        role: user.role,
+        token: generateToken(user._id),
+        user: {
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          role: user.role
+        }
+      })
+    } else {
+      res.status(401).json({ message: 'Invalid credentials' })
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate('lots')
