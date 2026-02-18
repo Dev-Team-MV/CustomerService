@@ -288,55 +288,53 @@ export const createProperty = async (req, res) => {
   }
 }
 
+// Schema fields that can be updated via PUT (any value allowed by the model)
+const ALLOWED_PROPERTY_UPDATES = [
+  'lot', 'model', 'facade', 'users', 'price', 'pending', 'initialPayment',
+  'status', 'saleDate', 'hasBalcony', 'modelType', 'hasStorage'
+]
+
 export const updateProperty = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id)
     
     if (property) {
-      property.status = req.body.status || property.status
-      property.pending = req.body.pending !== undefined ? req.body.pending : property.pending
-      
-      // Update price directly if provided
-      if (req.body.price !== undefined) {
-        const newPrice = Number(req.body.price)
-        if (!Number.isNaN(newPrice) && newPrice >= 0) {
-          const priceDifference = newPrice - property.price
-          property.price = newPrice
-          property.pending = Math.max(0, property.pending + priceDifference)
-        }
-      }
-      
-      // Update configuration options if provided
-      if (req.body.hasBalcony !== undefined) {
-        property.hasBalcony = req.body.hasBalcony
-      }
-      if (req.body.modelType !== undefined) {
-        property.modelType = req.body.modelType
-      }
-      if (req.body.hasStorage !== undefined) {
-        property.hasStorage = req.body.hasStorage
-      }
-      
-      // Update owners if provided (must be non-empty array)
-      if (req.body.users !== undefined && Array.isArray(req.body.users) && req.body.users.length > 0) {
-        const previousIds = (property.users || []).map(id => id.toString())
-        const newIds = req.body.users.map(id => id.toString?.() || id)
-        property.users = req.body.users
-        for (const userId of newIds) {
-          const userDoc = await User.findById(userId)
-          if (userDoc && !userDoc.lots.some(id => id.toString() === property.lot.toString())) {
-            userDoc.lots.push(property.lot)
-            await userDoc.save()
-          }
-        }
-        for (const userId of previousIds) {
-          if (!newIds.includes(userId)) {
-            await User.findByIdAndUpdate(userId, { $pull: { lots: property.lot } })
+      // Apply any allowed field present in the request body
+      for (const key of ALLOWED_PROPERTY_UPDATES) {
+        if (req.body[key] !== undefined) {
+          if (key === 'price') {
+            const newPrice = Number(req.body.price)
+            if (!Number.isNaN(newPrice) && newPrice >= 0) {
+              const priceDifference = newPrice - property.price
+              property.price = newPrice
+              property.pending = Math.max(0, property.pending + priceDifference)
+            }
+          } else if (key === 'users') {
+            const newUsers = req.body.users
+            if (Array.isArray(newUsers) && newUsers.length > 0) {
+              const previousIds = (property.users || []).map(id => id.toString())
+              const newIds = newUsers.map(id => id.toString?.() || id)
+              property.users = newUsers
+              for (const userId of newIds) {
+                const userDoc = await User.findById(userId)
+                if (userDoc && !userDoc.lots.some(id => id.toString() === property.lot.toString())) {
+                  userDoc.lots.push(property.lot)
+                  await userDoc.save()
+                }
+              }
+              for (const userId of previousIds) {
+                if (!newIds.includes(userId)) {
+                  await User.findByIdAndUpdate(userId, { $pull: { lots: property.lot } })
+                }
+              }
+            }
+          } else {
+            property[key] = req.body[key]
           }
         }
       }
       
-      // Recalculate price if any configuration changed
+      // Recalculate price/pending when configuration changes (hasBalcony, modelType, hasStorage)
       if (req.body.hasBalcony !== undefined || req.body.modelType !== undefined || req.body.hasStorage !== undefined) {
         const lotExists = await Lot.findById(property.lot)
         const modelExists = await Model.findById(property.model)
@@ -361,11 +359,11 @@ export const updateProperty = async (req, res) => {
           const priceDifference = totalPrice - property.price
           
           property.price = totalPrice
-          property.pending = property.pending + priceDifference
+          property.pending = Math.max(0, property.pending + priceDifference)
         }
       }
       
-      if (req.body.status === 'sold' && property.lot) {
+      if (property.status === 'sold' && property.lot) {
         await Lot.findByIdAndUpdate(property.lot, { status: 'sold' })
       }
       
