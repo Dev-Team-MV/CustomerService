@@ -89,6 +89,8 @@ export const uploadClubHouseImages = async (req, res) => {
       if (!doc.interior) doc.interior = {}
       if (!Array.isArray(doc.interior[key])) doc.interior[key] = []
       doc.interior[key].push(...uploadedUrls)
+      // Mongoose no detecta cambios en subpropiedades de Mixed; hay que marcar explícitamente
+      doc.markModified('interior')
     }
 
     await doc.save()
