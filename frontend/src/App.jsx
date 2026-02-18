@@ -27,7 +27,7 @@ import NewsDetails from './components/news/NewsDetails'
 import NewsFeed from './pages/NewsFeed'
 import TermsAndCondition from './pages/TermsAndCondition'
 import ClubhouseManager from './pages/ClubhouseManager'
-
+import MasterPlanManager from './pages/MasterPlanManager'
 const theme = createTheme({
   palette: {
     primary: {
@@ -80,6 +80,7 @@ function App() {
                 <Route path="/my-property" element={<MyProperty />} />
                 <Route path="/amenities" element={<AmenitiesPrivate />} />
                 <Route path="/view-models" element={<ViewModels />} />
+                <Route path="/master-plan/inventory" element={<MasterPlanManager />} />
                 
                 {/* ✅ Admin-only News Management */}
                 <Route path="/news" element={<NewsTable />} />

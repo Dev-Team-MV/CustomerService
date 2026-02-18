@@ -78,6 +78,12 @@ export const privateMenuItems = [
     path: "/amenities",
     roles: ["superadmin", "admin", "user"],
   },
+  {
+    text:"Master Plan Inventory",
+    icon: LandscapeIcon,
+    path: "/master-plan/inventory",
+    roles: ["superadmin", "admin"],
+  }
 ];
 
 export const publicMenuItems = [
