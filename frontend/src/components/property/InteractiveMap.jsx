@@ -367,8 +367,8 @@ const InteractiveMap = () => {
         p: 2, 
         bgcolor: '#f9f9f9', 
         borderTop: '1px solid #eee',
-        width: '100%', // ✅ Ancho completo
-        boxSizing: 'border-box' // ✅ Importante
+        width: '100%',
+        boxSizing: 'border-box'
       }}>
         <Select
           fullWidth
@@ -379,24 +379,27 @@ const InteractiveMap = () => {
           sx={{
             bgcolor: '#fff',
             borderRadius: 2,
-            width: '100%', // ✅ Ocupar todo el ancho disponible
+            width: '100%',
             '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ddd' }
           }}
         >
           <MenuItem value="" disabled>Select a lot...</MenuItem>
-          {lots.map(lot => (
-            <MenuItem 
-              key={lot._id} 
-              value={lot.number}
-              disabled={lot.status !== 'available'}
-              sx={{
-                opacity: lot.status === 'available' ? 1 : 0.5
-              }}
-            >
-              Lot {lot.number} - {lot.status.toUpperCase()}
-              {(lot.status === 'sold' || lot.status === 'pending') && ' 🔒'}
-            </MenuItem>
-          ))}
+          {lots
+            .slice()
+            .sort((a, b) => Number(a.number) - Number(b.number))
+            .map(lot => (
+              <MenuItem 
+                key={lot._id} 
+                value={lot.number}
+                disabled={lot.status !== 'available'}
+                sx={{
+                  opacity: lot.status === 'available' ? 1 : 0.5
+                }}
+              >
+                Lot {lot.number} - {lot.status.toUpperCase()}
+                {(lot.status === 'sold' || lot.status === 'pending') && ' 🔒'}
+              </MenuItem>
+            ))}
         </Select>
       </Box>
     </Paper>

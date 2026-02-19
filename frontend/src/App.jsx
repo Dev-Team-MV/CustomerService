@@ -3,7 +3,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
-import Layout from './components/Layout'
+import Layout from './components/LayoutComponents/Layout'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
@@ -27,7 +27,7 @@ import NewsDetails from './components/news/NewsDetails'
 import NewsFeed from './pages/NewsFeed'
 import TermsAndCondition from './pages/TermsAndCondition'
 import ClubhouseManager from './pages/ClubhouseManager'
-
+import MasterPlanManager from './pages/MasterPlanManager'
 const theme = createTheme({
   palette: {
     primary: {
@@ -80,6 +80,7 @@ function App() {
                 <Route path="/my-property" element={<MyProperty />} />
                 <Route path="/amenities" element={<AmenitiesPrivate />} />
                 <Route path="/view-models" element={<ViewModels />} />
+                <Route path="/master-plan/inventory" element={<MasterPlanManager />} />
                 
                 {/* ✅ Admin-only News Management */}
                 <Route path="/news" element={<NewsTable />} />

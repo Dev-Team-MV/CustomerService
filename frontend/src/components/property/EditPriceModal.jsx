@@ -3,14 +3,26 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
-import { Box, Typography, Button, IconButton } from '@mui/material';
-import { AttachMoney, Close } from '@mui/icons-material';
+import { Box, Typography, Button, IconButton, MenuItem, Select, InputLabel, FormControl, Chip, Checkbox, FormControlLabel } from '@mui/material';
+import { AttachMoney, Close, HomeWork, People, House, Storefront } from '@mui/icons-material';
 
-const EditPriceModal = ({ open, onClose, property, value, onChange, onSave, saving }) => (
+const EditPropertyModal = ({
+  open,
+  onClose,
+  property,
+  values,
+  onChange,
+  onSave,
+  saving,
+  lots = [],
+  models = [],
+  facades = [],
+  users = [],
+}) => (
   <Dialog
     open={open}
     onClose={onClose}
-    maxWidth="xs"
+    maxWidth="sm"
     fullWidth
     PaperProps={{
       sx: {
@@ -46,7 +58,7 @@ const EditPriceModal = ({ open, onClose, property, value, onChange, onSave, savi
         pr: 5
       }}
     >
-      Edit Property Price
+      Edit Property
       <IconButton
         onClick={onClose}
         sx={{
@@ -60,39 +72,204 @@ const EditPriceModal = ({ open, onClose, property, value, onChange, onSave, savi
       </IconButton>
     </DialogTitle>
     <DialogContent sx={{ py: 3 }}>
-      <Typography
-        variant="subtitle1"
-        sx={{
-          mb: 2,
-          fontFamily: '"Poppins", sans-serif',
-          color: '#8CA551',
-          fontWeight: 700
-        }}
+      {/* Lot selector */}
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel>Lot</InputLabel>
+        <Select
+          label="Lot"
+          value={values.lot || property?.lot?._id || ''}
+          onChange={e => onChange({ ...values, lot: e.target.value })}
+          startAdornment={<HomeWork sx={{ color: '#8CA551', mr: 1 }} />}
+        >
+          {lots
+            .filter(lot => lot.status === 'available' || lot._id === property?.lot?._id)
+            .sort((a, b) => Number(a.number) - Number(b.number))
+            .map(lot => (
+              <MenuItem key={lot._id} value={lot._id}>
+                Lot {lot.number} - ${lot.price}
+              </MenuItem>
+            ))}
+        </Select>
+      </FormControl>
+
+      {/* Model selector */}
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel>Model</InputLabel>
+        <Select
+          label="Model"
+          value={values.model || property?.model?._id || ''}
+          onChange={e => onChange({ ...values, model: e.target.value })}
+          startAdornment={<House sx={{ color: '#8CA551', mr: 1 }} />}
+        >
+          {models.map(model => (
+            <MenuItem key={model._id} value={model._id}>
+              {model.model} - {model.sqft} sqft
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      {/* Facade selector */}
+    <FormControl fullWidth sx={{ mb: 2 }}>
+      <InputLabel>Facade</InputLabel>
+      <Select
+        label="Facade"
+        value={values.facade || ''}
+  onChange={e => onChange({ ...values, facade: e.target.value })}
+        startAdornment={<Storefront sx={{ color: '#8CA551', mr: 1 }} />}
       >
-        Lot {property?.lot?.number} - {property?.model?.model}
-      </Typography>
+        {facades.map(facade => (
+          <MenuItem key={facade._id} value={facade._id}>
+            {facade.title}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+
+      {/* Owners selector */}
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel>Owners</InputLabel>
+        <Select
+          label="Owners"
+          multiple
+          value={values.users || property?.users?.map(u => u._id) || []}
+          onChange={e => onChange({ ...values, users: e.target.value })}
+          startAdornment={<People sx={{ color: '#8CA551', mr: 1 }} />}
+          renderValue={selected => (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {selected.map(id => {
+                const user = users.find(u => u._id === id);
+                return (
+                  <Chip
+                    key={id}
+                    label={user ? `${user.firstName} ${user.lastName}` : id}
+                    sx={{
+                      fontFamily: '"Poppins", sans-serif',
+                      bgcolor: '#e8f5ee',
+                      color: '#333F1F',
+                    }}
+                  />
+                );
+              })}
+            </Box>
+          )}
+        >
+          {users.map(user => (
+            <MenuItem key={user._id} value={user._id}>
+              {user.firstName} {user.lastName} ({user.email})
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      {/* Price input */}
       <TextField
         label="Price"
         type="number"
-        value={value}
-        onChange={onChange}
+        value={values.price ?? property?.price ?? ''}
+        onChange={e => onChange({ ...values, price: Number(e.target.value) })}
         fullWidth
         InputProps={{
           startAdornment: <AttachMoney sx={{ color: '#8CA551' }} />,
         }}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            fontFamily: '"Poppins", sans-serif',
-            fontWeight: 600,
-            '&.Mui-focused fieldset': {
-              borderColor: '#8CA551',
-              borderWidth: 2
-            }
-          },
-          '& .MuiInputLabel-root.Mui-focused': {
-            color: '#8CA551'
-          }
+        sx={{ mb: 2 }}
+      />
+
+      {/* Pending input */}
+      <TextField
+        label="Pending"
+        type="number"
+        value={values.pending ?? property?.pending ?? ''}
+        onChange={e => onChange({ ...values, pending: Number(e.target.value) })}
+        fullWidth
+        InputProps={{
+          startAdornment: <AttachMoney sx={{ color: '#8CA551' }} />,
         }}
+        sx={{ mb: 2 }}
+      />
+
+      {/* Initial Payment input */}
+      <TextField
+        label="Initial Payment"
+        type="number"
+        value={values.initialPayment ?? property?.initialPayment ?? ''}
+        onChange={e => onChange({ ...values, initialPayment: Number(e.target.value) })}
+        fullWidth
+        InputProps={{
+          startAdornment: <AttachMoney sx={{ color: '#8CA551' }} />,
+        }}
+        sx={{ mb: 2 }}
+      />
+
+      {/* Status input */}
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel>Status</InputLabel>
+        <Select
+          label="Status"
+          value={values.status ?? property?.status ?? ''}
+          onChange={e => onChange({ ...values, status: e.target.value })}
+        >
+          <MenuItem value="active">Active</MenuItem>
+          <MenuItem value="pending">Pending</MenuItem>
+          <MenuItem value="sold">Sold</MenuItem>
+          <MenuItem value="cancelled">Cancelled</MenuItem>
+        </Select>
+      </FormControl>
+
+      {/* Sale Date input */}
+      <TextField
+        label="Sale Date"
+        type="date"
+        value={
+          values.saleDate
+            ? values.saleDate.slice(0, 10)
+            : property?.saleDate
+            ? property.saleDate.slice(0, 10)
+            : ''
+        }
+        onChange={e => onChange({ ...values, saleDate: e.target.value })}
+        fullWidth
+        InputLabelProps={{ shrink: true }}
+        sx={{ mb: 2 }}
+      />
+
+      {/* Model Type */}
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel>Model Type</InputLabel>
+        <Select
+          label="Model Type"
+          value={values.modelType ?? property?.modelType ?? 'basic'}
+          onChange={e => onChange({ ...values, modelType: e.target.value })}
+        >
+          <MenuItem value="basic">Basic</MenuItem>
+          <MenuItem value="upgrade">Upgrade</MenuItem>
+        </Select>
+      </FormControl>
+
+      {/* Has Balcony */}
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={values.hasBalcony ?? property?.hasBalcony ?? false}
+            onChange={e => onChange({ ...values, hasBalcony: e.target.checked })}
+            sx={{ color: '#8CA551' }}
+          />
+        }
+        label="Has Balcony"
+        sx={{ mb: 1 }}
+      />
+
+      {/* Has Storage */}
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={values.hasStorage ?? property?.hasStorage ?? false}
+            onChange={e => onChange({ ...values, hasStorage: e.target.checked })}
+            sx={{ color: '#8CA551' }}
+          />
+        }
+        label="Has Storage"
+        sx={{ mb: 1 }}
       />
     </DialogContent>
     <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -134,4 +311,4 @@ const EditPriceModal = ({ open, onClose, property, value, onChange, onSave, savi
   </Dialog>
 );
 
-export default EditPriceModal;
+export default EditPropertyModal;
