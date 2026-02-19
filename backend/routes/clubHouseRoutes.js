@@ -58,7 +58,8 @@ router.get('/interior-keys', protect, getClubHouseInteriorKeys)
  *                 enum: [exterior, blueprints, interior]
  *               interiorKey:
  *                 type: string
- *                 description: Required when section=interior (e.g. Reception, Managers Office)
+ *                 description: Required when section=interior. Use one of GET /api/clubhouse/interior-keys (e.g. Reception, Managers Office, Conference Room)
+ *                 example: Reception
  *               images:
  *                 type: array
  *                 items:

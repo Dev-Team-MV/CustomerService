@@ -1,5 +1,5 @@
 import express from 'express'
-import { register, login, getProfile, changePassword, setupPassword, verifySetupToken } from '../controllers/authController.js'
+import { register, login, loginAdmin, getProfile, changePassword, setupPassword, verifySetupToken } from '../controllers/authController.js'
 import { protect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -107,6 +107,50 @@ router.post('/register', register)
  *         description: Password not set (requires password setup)
  */
 router.post('/login', login)
+
+/**
+ * @swagger
+ * /api/auth/admin/login:
+ *   post:
+ *     summary: Login for admin/superadmin only
+ *     tags: [Auth]
+ *     description: Same as login but only accepts users with role admin or superadmin. Rejects regular users with 403.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               phoneNumber:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful (admin/superadmin)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Missing email/phoneNumber or password
+ *       401:
+ *         description: Invalid credentials
+ *       403:
+ *         description: Access denied (not admin/superadmin) or password not set
+ */
+router.post('/admin/login', loginAdmin)
 
 /**
  * @swagger

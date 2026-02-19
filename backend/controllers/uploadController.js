@@ -32,7 +32,52 @@ export const upload = multer({
 })
 
 /**
+ * Sanitize optional custom fileName from client. Prevents path traversal; ensures extension matches file.
+ * @returns {string|null} Safe file name to use, or null to fall back to hash.
+ */
+function sanitizeCustomFileName (customName, fileExtension) {
+  if (!customName || typeof customName !== 'string') return null
+  const trimmed = customName.trim()
+  if (!trimmed) return null
+  // No path traversal or slashes
+  if (trimmed.includes('..') || trimmed.includes('/') || trimmed.includes('\\')) return null
+  // Only allow safe chars: letters, numbers, space, hyphen, underscore, dot
+  const safe = trimmed.replace(/[^a-zA-Z0-9 _\-.]/g, '')
+  if (!safe) return null
+  // Force correct extension so we don't serve wrong type
+  const base = safe.endsWith(fileExtension) ? safe.slice(0, -fileExtension.length) : path.basename(safe, path.extname(safe))
+  const final = (base.trim() || 'image') + fileExtension
+  return final.length <= 200 ? final : null
+}
+
+/** Build full path like storageService.uploadFile (same cleanFolder logic). */
+function buildFullPath (folder, fileName) {
+  if (!folder) return fileName
+  const cleanFolder = folder.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()
+  return `${cleanFolder}/${fileName}`
+}
+
+/**
+ * Elimina del bucket todos los archivos en la carpeta que tengan el mismo nombre base
+ * (cualquier extensión: .png, .jpg, .jpeg, etc.). Ej: recorrido.1.png y recorrido.1.jpg → ambos se borran.
+ */
+async function deleteFilesWithSameBaseName (folder, fileName) {
+  if (!folder || !fileName) return
+  const baseName = path.basename(fileName, path.extname(fileName))
+  const prefix = baseName + '.' // "recorrido.1." para no matchear "recorrido.10"
+  const files = await listFilesInFolder(folder, { includeSignedUrls: false })
+  for (const f of files) {
+    const nameInFolder = f.name.includes('/') ? f.name.split('/').pop() : f.name
+    if (nameInFolder.startsWith(prefix)) {
+      await deleteFile(f.name).catch(() => {})
+    }
+  }
+}
+
+/**
  * Upload single image
+ * Body: folder (optional), fileName (optional) — e.g. "recorrido.1.png" for predictable names in bucket.
+ * If the same base name exists with any extension (png, jpg, jpeg...), those files are deleted and the new one is saved.
  */
 export const uploadImage = async (req, res) => {
   try {
@@ -43,12 +88,17 @@ export const uploadImage = async (req, res) => {
       })
     }
 
-    // Obtener carpeta del body (si se especifica)
-    const { folder } = req.body
+    // Obtener carpeta y nombre personalizado del body
+    const { folder, fileName: customName } = req.body
 
-    // Generar nombre único para el archivo
     const fileExtension = path.extname(req.file.originalname)
-    const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+    const fileName = sanitizeCustomFileName(customName, fileExtension) ||
+      `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+
+    // Si se usa nombre custom, eliminar en el bucket todos los que tengan el mismo nombre base (cualquier extensión)
+    if (customName && sanitizeCustomFileName(customName, fileExtension) && folder) {
+      await deleteFilesWithSameBaseName(folder, fileName)
+    }
 
     // Subir a Google Cloud Storage
     // makePublic: true para URLs públicas, false para signed URLs
@@ -84,6 +134,7 @@ export const uploadImage = async (req, res) => {
 
 /**
  * Upload multiple images
+ * Body: folder (optional), fileNames (optional) — JSON array of names, e.g. ["punto 1.png","punto 2.png"]
  */
 export const uploadMultipleImages = async (req, res) => {
   try {
@@ -94,13 +145,26 @@ export const uploadMultipleImages = async (req, res) => {
       })
     }
 
-    // Obtener carpeta del body (si se especifica)
-    const { folder } = req.body
+    const { folder, fileNames: customNamesRaw } = req.body
+    let customNames = null
+    if (customNamesRaw) {
+      try {
+        const parsed = typeof customNamesRaw === 'string' ? JSON.parse(customNamesRaw) : customNamesRaw
+        if (Array.isArray(parsed) && parsed.length === req.files.length) customNames = parsed
+      } catch (_) { /* ignore */ }
+    }
 
     const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
-    const uploadPromises = req.files.map(async (file) => {
+    const uploadPromises = req.files.map(async (file, index) => {
       const fileExtension = path.extname(file.originalname)
-      const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+      const customName = customNames && customNames[index] != null ? customNames[index] : null
+      const fileName = sanitizeCustomFileName(String(customName), fileExtension) ||
+        `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+
+      // Si este archivo usa nombre custom, eliminar todos los del mismo nombre base (cualquier extensión)
+      if (fileName && sanitizeCustomFileName(String(customName), fileExtension) && folder) {
+        await deleteFilesWithSameBaseName(folder, fileName)
+      }
 
       const result = await uploadFile(
         file.buffer,
@@ -209,7 +273,19 @@ export const getFolderFiles = async (req, res) => {
     }
     const includeUrls = req.query.urls !== 'false'
     const enrich = req.query.enrich !== 'false'
-    const files = await listFilesInFolder(folder, { includeSignedUrls: includeUrls })
+    let files = await listFilesInFolder(folder, { includeSignedUrls: includeUrls })
+
+    // Orden natural para carpeta recorrido (punto 1, punto 2, ... punto 10)
+    if (folder.toLowerCase() === 'recorrido' && files.length > 0) {
+      const naturalSort = (a, b) => {
+        const nameA = a.name.includes('/') ? a.name.split('/').pop() : a.name
+        const nameB = b.name.includes('/') ? b.name.split('/').pop() : b.name
+        const numA = nameA.replace(/\D/g, '') || '0'
+        const numB = nameB.replace(/\D/g, '') || '0'
+        return parseInt(numA, 10) - parseInt(numB, 10) || nameA.localeCompare(nameB)
+      }
+      files = [...files].sort(naturalSort)
+    }
 
     let filesOut = files
     if (folder.toLowerCase() === 'clubhouse' && enrich) {

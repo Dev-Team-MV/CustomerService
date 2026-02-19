@@ -349,7 +349,7 @@ const Lots = () => {
                 {/* ✅ TABLA REUTILIZABLE */}
         <DataTable
           columns={columns}
-          data={lots}
+  data={lots.slice().sort((a, b) => Number(a.number) - Number(b.number))} // Ordena por número de lote
           loading={loading}
           emptyState={
             <EmptyState
