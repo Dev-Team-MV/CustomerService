@@ -139,6 +139,25 @@ uploadClubhouseImages: async (files, section, interiorKey = null) => {
       console.error('❌ Error getting clubhouse interior keys:', error.response?.data || error.message)
       throw new Error(error.response?.data?.message || 'Failed to get clubhouse interior keys')
     }
+  },
+
+    // Obtener todas las amenities exteriores
+  getOutdoorAmenities: async () => {
+    const res = await api.get('/outdoor-amenities')
+    return res.data // { amenities: [...] }
+  },
+
+  // Subir imágenes a storage y retorna URLs
+  uploadOutdoorAmenityImages: async (files, amenityId) => {
+    // Sube a storage, folder: outdoor-amenities/{amenityId}
+    return await uploadService.uploadMultipleImages(files, `outdoor-amenities/${amenityId}`)
+  },
+
+  // Asignar imágenes a un amenity específico
+  saveOutdoorAmenityImages: async (amenityId, urls) => {
+    return api.post('/outdoor-amenities', {
+      amenities: [{ id: amenityId, images: urls }]
+    })
   }
 }
 

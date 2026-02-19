@@ -12,26 +12,26 @@ import RecorridoImageUploadModal from '../masterPlan/RecorridoImagesModal'
 
 // 20 puntos de recorrido, ajusta x/y según tu plano
 const puntosBase = [
-  { id: 1, name: "Punto 1", x: 10, y: 20 },
-  { id: 2, name: "Punto 2", x: 15, y: 25 },
-  { id: 3, name: "Punto 3", x: 20, y: 30 },
-  { id: 4, name: "Punto 4", x: 25, y: 35 },
-  { id: 5, name: "Punto 5", x: 30, y: 40 },
-  { id: 6, name: "Punto 6", x: 35, y: 45 },
-  { id: 7, name: "Punto 7", x: 40, y: 50 },
-  { id: 8, name: "Punto 8", x: 45, y: 55 },
-  { id: 9, name: "Punto 9", x: 50, y: 60 },
-  { id: 10, name: "Punto 10", x: 55, y: 65 },
-  { id: 11, name: "Punto 11", x: 60, y: 70 },
-  { id: 12, name: "Punto 12", x: 65, y: 75 },
-  { id: 13, name: "Punto 13", x: 70, y: 80 },
-  { id: 14, name: "Punto 14", x: 75, y: 85 },
-  { id: 15, name: "Punto 15", x: 80, y: 60 },
-  { id: 16, name: "Punto 16", x: 85, y: 55 },
-  { id: 17, name: "Punto 17", x: 90, y: 50 },
-  { id: 18, name: "Punto 18", x: 95, y: 45 },
-  { id: 19, name: "Punto 19", x: 80, y: 30 },
-  { id: 20, name: "Punto 20", x: 60, y: 20 }
+  { id: 1, name: "Point 1", x: 77, y: 78 },
+  { id: 2, name: "Point 2", x: 89.3, y: 50 },
+  { id: 3, name: "Point 3", x: 93, y: 30 },
+  { id: 4, name: "Point 4", x: 82, y: 33 },
+  { id: 5, name: "Point 5", x: 75, y: 60 },
+  { id: 6, name: "Point 6", x: 35, y: 45 },
+  { id: 7, name: "Point 7", x: 40, y: 50 },
+  { id: 8, name: "Point 8", x: 45, y: 55 },
+  { id: 9, name: "Point 9", x: 50, y: 60 },
+  { id: 10, name: "Point 10", x: 55, y: 65 },
+  { id: 11, name: "Point 11", x: 60, y: 70 },
+  { id: 12, name: "Point 12", x: 65, y: 75 },
+  { id: 13, name: "Point 13", x: 70, y: 80 },
+  { id: 14, name: "Point 14", x: 75, y: 85 },
+  { id: 15, name: "Point 15", x: 30, y: 40  },
+  { id: 16, name: "Point 16", x: 85, y: 55 },
+  { id: 17, name: "Point 17", x: 15, y: 25 },
+  { id: 18, name: "Point 18", x: 95, y: 45 },
+  { id: 19, name: "Point 19", x: 25, y: 35  },
+  { id: 20, name: "Point 20", x: 60, y: 20 }
 ]
 
 const RecorridoTab = () => {
@@ -43,7 +43,7 @@ const RecorridoTab = () => {
   const [selectedIdx, setSelectedIdx] = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [mapUrl, setMapUrl] = useState(defaultMap)
-  const [images, setImages] = useState([]) // URLs de imágenes reales
+  const [imagesMap, setImagesMap] = useState({}) // { [id]: url }
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
   const mapRef = useRef(null)
@@ -67,29 +67,26 @@ const RecorridoTab = () => {
       setMapUrl(defaultMap)
     }
   }
-
-  // Obtener imágenes del recorrido
 const fetchRecorridoImages = async () => {
   try {
-    const response = await uploadService.getFilesByFolder('recorrido', true)
-    // Extrae el número del nombre: point-1.jpg → 1
-    const sorted = (response.files || []).sort((a, b) => {
-      const getNum = name => {
-        const match = name.match(/point-(\d+)/)
-        return match ? parseInt(match[1], 10) : 0
+    const response = await uploadService.getFilesByFolder('recorrido', true);
+    const map = {};
+    (response.files || []).forEach(file => {
+      const match = file.name.match(/recorrido\.(\d+)\./);
+      if (match) {
+        map[String(match[1])] = file.url; // <-- Aquí, usa String
       }
-      return getNum(a.name) - getNum(b.name)
-    })
-    setImages(sorted.map(f => f.url))
+    });
+    setImagesMap(map);
   } catch (error) {
-    setImages([])
+    setImagesMap({});
   }
-}
+};
 
-  // Asocia cada imagen al punto por índice
-  const recorridoPoints = puntosBase.map((p, idx) => ({
+  // Asocia cada imagen al punto por id
+  const recorridoPoints = puntosBase.map((p) => ({
     ...p,
-    image: images[idx] || null
+    image: imagesMap[p.id] || null
   }))
 
   // --- ZOOM & PAN ---
@@ -156,14 +153,14 @@ const fetchRecorridoImages = async () => {
   }
 
   // --- UPLOAD ---
-const handleUpload = async (idx, file) => {
-  setUploading(true)
-  const ext = file.name.substring(file.name.lastIndexOf('.'))
-  const filename = `recorrido.${puntosBase[idx].id}${ext}` // Usa el id del punto
-  await uploadService.uploadImage(file, 'recorrido', filename)
-  setUploading(false)
-  fetchRecorridoImages()
-}
+  const handleUpload = async (id, file) => {
+    setUploading(true)
+    const ext = file.name.substring(file.name.lastIndexOf('.'))
+    const filename = `recorrido.${id}${ext}` // Usa el id del punto
+    await uploadService.uploadImage(file, 'recorrido', filename)
+    setUploading(false)
+    fetchRecorridoImages()
+  }
 
   return (
     <>
@@ -177,14 +174,14 @@ const handleUpload = async (idx, file) => {
           boxSizing: 'border-box'
         }}
       >
-  <Button
-    variant="contained"
-    startIcon={<UploadFileIcon />}
-    sx={{ mb: 2 }}
-    onClick={() => setUploadModalOpen(true)}
-  >
-    Administrar imágenes del recorrido
-  </Button>
+        <Button
+          variant="contained"
+          startIcon={<UploadFileIcon />}
+          sx={{ mb: 2 }}
+          onClick={() => setUploadModalOpen(true)}
+        >
+Manage MasterPlan Images
+        </Button>
 
         {/* Map Container */}
         <Box
@@ -405,14 +402,14 @@ const handleUpload = async (idx, file) => {
       </Dialog>
 
       {/* Modal de subida de imagen */}
-  <RecorridoImageUploadModal
-    open={uploadModalOpen}
-    onClose={() => setUploadModalOpen(false)}
-    puntos={puntosBase}
-    images={images}
-    onUpload={handleUpload}
-    loading={uploading}
-  />
+      <RecorridoImageUploadModal
+        open={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        puntos={puntosBase}
+        imagesMap={imagesMap}
+        onUpload={handleUpload}
+        loading={uploading}
+      />
     </>
   )
 }
