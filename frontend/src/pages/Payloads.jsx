@@ -123,10 +123,13 @@ const Payloads = () => {
 
   const getFileUrl = useCallback((payload) => {
     if (!payload) return null
-    if (payload.support) {
-      if (typeof payload.support === 'string') return payload.support
-      if (payload.support.url) return payload.support.url
+    if (payload.urls && payload.urls.length > 0) {
+      // Si es un array de strings
+      if (typeof payload.urls[0] === 'string') return payload.urls[0]
+      // Si es un array de objetos tipo { url: ... }
+      if (payload.urls[0] && payload.urls[0].url) return payload.urls[0].url
     }
+    if (typeof payload.urls === 'string') return payload.urls
     if (payload.fileUrl) return payload.fileUrl
     if (payload.documentUrl) return payload.documentUrl
     if (payload.attachment) return payload.attachment
@@ -294,7 +297,7 @@ const Payloads = () => {
               boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
             }}
           >
-            {row.property?.user?.firstName?.charAt(0) || 'U'}
+            {row.property?.users?.[0]?.firstName?.charAt(0) || 'U'}
           </Avatar>
           <Box>
             <Typography
@@ -305,7 +308,7 @@ const Payloads = () => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              {row.property?.user?.firstName} {row.property?.user?.lastName}
+              {row.property?.users?.[0]?.firstName} {row.property?.users?.[0]?.lastName}
             </Typography>
           </Box>
         </Box>
