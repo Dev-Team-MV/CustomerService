@@ -1,8 +1,14 @@
 import OutdoorAmenities from '../models/OutdoorAmenities.js'
 
-function normalizeAmenity (a) {
+/**
+ * @param {object} a - amenity object (may have id, name, images)
+ * @param {number} [defaultId] - when id is missing or invalid (e.g. in "replace all" payload)
+ */
+function normalizeAmenity (a, defaultId) {
+  const numId = Number(a.id)
+  const id = (a.id !== undefined && a.id !== null && !Number.isNaN(numId)) ? numId : (defaultId ?? 0)
   return {
-    id: Number(a.id) ?? 0,
+    id,
     name: typeof a.name === 'string' ? a.name : '',
     images: Array.isArray(a.images) ? a.images.filter((u) => typeof u === 'string') : []
   }
@@ -72,7 +78,7 @@ export const createOrUpdateOutdoorAmenities = async (req, res) => {
     }
 
     if (Array.isArray(bodyAmenities)) {
-      doc.amenities = bodyAmenities.map(normalizeAmenity)
+      doc.amenities = bodyAmenities.map((a, i) => normalizeAmenity(a, i + 1))
       doc.markModified('amenities')
       await doc.save()
       return res.status(200).json({
