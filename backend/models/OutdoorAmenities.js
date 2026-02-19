@@ -2,13 +2,19 @@ import mongoose from 'mongoose'
 
 /**
  * Singleton: single document.
- * sections: { "Pool": [url1, url2], "BBQ": [url1], ... } — same shape as ClubHouse exterior by section.
+ * amenities: [{ id, name, images: [urls] }, ...] — images per amenity.
  */
 const outdoorAmenitiesSchema = new mongoose.Schema(
   {
-    sections: {
-      type: mongoose.Schema.Types.Mixed,
-      default: () => ({})
+    amenities: {
+      type: [
+        {
+          id: { type: Number, required: true },
+          name: { type: String, default: '' },
+          images: { type: [String], default: () => [] }
+        }
+      ],
+      default: () => []
     }
   },
   {
