@@ -58,9 +58,26 @@ function buildFullPath (folder, fileName) {
 }
 
 /**
+ * Elimina del bucket todos los archivos en la carpeta que tengan el mismo nombre base
+ * (cualquier extensión: .png, .jpg, .jpeg, etc.). Ej: recorrido.1.png y recorrido.1.jpg → ambos se borran.
+ */
+async function deleteFilesWithSameBaseName (folder, fileName) {
+  if (!folder || !fileName) return
+  const baseName = path.basename(fileName, path.extname(fileName))
+  const prefix = baseName + '.' // "recorrido.1." para no matchear "recorrido.10"
+  const files = await listFilesInFolder(folder, { includeSignedUrls: false })
+  for (const f of files) {
+    const nameInFolder = f.name.includes('/') ? f.name.split('/').pop() : f.name
+    if (nameInFolder.startsWith(prefix)) {
+      await deleteFile(f.name).catch(() => {})
+    }
+  }
+}
+
+/**
  * Upload single image
  * Body: folder (optional), fileName (optional) — e.g. "recorrido.1.png" for predictable names in bucket.
- * If the same folder+fileName already exists, the previous file is deleted and replaced.
+ * If the same base name exists with any extension (png, jpg, jpeg...), those files are deleted and the new one is saved.
  */
 export const uploadImage = async (req, res) => {
   try {
@@ -78,10 +95,9 @@ export const uploadImage = async (req, res) => {
     const fileName = sanitizeCustomFileName(customName, fileExtension) ||
       `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
 
-    // Si se usa nombre custom, eliminar el archivo anterior en el bucket (mismo nombre) para reemplazarlo
-    if (customName && sanitizeCustomFileName(customName, fileExtension)) {
-      const fullPath = buildFullPath(folder, fileName)
-      await deleteFile(fullPath).catch(() => {}) // 404 = no existía, ignorar
+    // Si se usa nombre custom, eliminar en el bucket todos los que tengan el mismo nombre base (cualquier extensión)
+    if (customName && sanitizeCustomFileName(customName, fileExtension) && folder) {
+      await deleteFilesWithSameBaseName(folder, fileName)
     }
 
     // Subir a Google Cloud Storage
@@ -145,10 +161,9 @@ export const uploadMultipleImages = async (req, res) => {
       const fileName = sanitizeCustomFileName(String(customName), fileExtension) ||
         `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
 
-      // Si este archivo usa nombre custom, eliminar el existente en el bucket antes de subir
-      if (fileName && sanitizeCustomFileName(String(customName), fileExtension)) {
-        const fullPath = buildFullPath(folder, fileName)
-        await deleteFile(fullPath).catch(() => {})
+      // Si este archivo usa nombre custom, eliminar todos los del mismo nombre base (cualquier extensión)
+      if (fileName && sanitizeCustomFileName(String(customName), fileExtension) && folder) {
+        await deleteFilesWithSameBaseName(folder, fileName)
       }
 
       const result = await uploadFile(
