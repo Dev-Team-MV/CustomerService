@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from 'react'
 import uploadService from '../../services/uploadService'
 import defaultMap from '../../../public/images/mapLakewood.png'
 import RecorridoImageUploadModal from '../masterPlan/RecorridoImagesModal'
+import { CloudUpload } from '@mui/icons-material'
 
 // 20 puntos de recorrido, ajusta x/y según tu plano
 const puntosBase = [
@@ -16,22 +17,32 @@ const puntosBase = [
   { id: 2, name: "Point 2", x: 89.3, y: 50 },
   { id: 3, name: "Point 3", x: 93, y: 30 },
   { id: 4, name: "Point 4", x: 82, y: 33 },
-  { id: 5, name: "Point 5", x: 75, y: 60 },
-  { id: 6, name: "Point 6", x: 35, y: 45 },
-  { id: 7, name: "Point 7", x: 40, y: 50 },
-  { id: 8, name: "Point 8", x: 45, y: 55 },
-  { id: 9, name: "Point 9", x: 50, y: 60 },
-  { id: 10, name: "Point 10", x: 55, y: 65 },
-  { id: 11, name: "Point 11", x: 60, y: 70 },
-  { id: 12, name: "Point 12", x: 65, y: 75 },
-  { id: 13, name: "Point 13", x: 70, y: 80 },
-  { id: 14, name: "Point 14", x: 75, y: 85 },
-  { id: 15, name: "Point 15", x: 30, y: 40  },
-  { id: 16, name: "Point 16", x: 85, y: 55 },
-  { id: 17, name: "Point 17", x: 15, y: 25 },
-  { id: 18, name: "Point 18", x: 95, y: 45 },
-  { id: 19, name: "Point 19", x: 25, y: 35  },
-  { id: 20, name: "Point 20", x: 60, y: 20 }
+  { id: 5, name: "Point 5", x: 80, y: 60 },
+  { id: 6, name: "Point 6", x: 72, y: 62 },
+  { id: 7, name: "Point 7", x: 67, y: 49.8 },
+  { id: 8, name: "Point 8", x: 63, y: 32 },
+  { id: 9, name: "Point 9", x: 61, y: 38 },
+  { id: 10, name: "Point 10", x: 59.8, y: 32 },
+  { id: 11, name: "Point 11", x: 55, y: 36 },
+  { id: 12, name: "Point 12", x: 49, y: 32  },
+  { id: 13, name: "Point 13", x: 37, y: 36},
+  { id: 14, name: "Point 14", x: 30, y: 36 },
+  { id: 15, name: "Point 15", x: 25, y: 32  },
+  { id: 16, name: "Point 16", x: 17, y: 46 },
+  { id: 17, name: "Point 17", x: 8, y: 35 },
+  { id: 18, name: "Point 18", x: 8, y: 58 },
+  { id: 19, name: "Point 19", x: 5, y: 65  },
+  { id: 20, name: "Point 20", x: 13, y: 75  },
+  { id: 21, name: "Point 21", x: 18, y: 70 },
+  { id: 22, name: "Point 22", x: 26, y: 60 },
+  { id: 23, name: "Point 23", x: 30, y: 45 },
+  { id: 24, name: "Point 24", x: 32.7, y: 50 },
+  { id: 25, name: "Point 25",x: 37, y: 59 },
+  { id: 26, name: "Point 26", x: 46, y: 63  },
+  { id: 27, name: "Point 27", x: 49, y: 63 },
+  { id: 28, name: "Point 28", x: 52, y: 63 },
+  { id: 29, name: "Point 29", x: 43, y: 78.5 },
+  { id: 30, name: "Point 30", x: 65, y: 75 },
 ]
 
 const RecorridoTab = () => {
@@ -176,11 +187,26 @@ const fetchRecorridoImages = async () => {
       >
         <Button
           variant="contained"
-          startIcon={<UploadFileIcon />}
-          sx={{ mb: 2 }}
+          startIcon={<CloudUpload />} // Usa el mismo ícono para consistencia
+          sx={{
+            mb: 2,
+            borderRadius: 3,
+            fontWeight: 600,
+            textTransform: 'none',
+            fontFamily: '"Poppins", sans-serif',
+            bgcolor: '#333F1F',
+            color: 'white',
+            px: 3,
+            py: 1.2,
+            boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+            '&:hover': {
+              bgcolor: '#8CA551',
+              boxShadow: '0 6px 16px rgba(140, 165, 81, 0.35)'
+            }
+          }}
           onClick={() => setUploadModalOpen(true)}
         >
-Manage MasterPlan Images
+          Manage Master Plan Images
         </Button>
 
         {/* Map Container */}

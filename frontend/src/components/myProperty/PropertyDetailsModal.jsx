@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -25,7 +25,7 @@ import PageHeader from '../PageHeader'
 import DataTable from '../table/DataTable'
 import EmptyState from '../table/EmptyState'
 import PayloadDialog from '../payloads/createPayload'
-
+import AdminPropertyDetails from './AdminPropertyDetails'
 import { Edit, Download, CheckCircle, Cancel, ErrorOutline } from '@mui/icons-material'
 
 
@@ -60,29 +60,7 @@ const [formData, setFormData] = useState({
   type: '',
   notes: ''
 })
-const handleCreatePayload = async () => {
-  setCreating(true)
-  try {
-    await api.post('/payloads', {
-      ...formData,
-      property: property._id
-    })
-    setCreateModalOpen(false)
-    setFormData({
-      property: property?._id || '',
-      amount: '',
-      date: '',
-      status: 'pending',
-      type: '',
-      notes: ''
-    })
-    fetchPayloads()
-  } catch (err) {
-    // Manejo de error
-  } finally {
-    setCreating(false)
-  }
-}
+
 
   useEffect(() => {
     if (open && property?._id) {
@@ -176,6 +154,16 @@ const getFileUrl = (row) => {
   if (row.attachment) return row.attachment
   return null
 }
+
+
+  const handleDownload = useCallback((payload) => {
+    const url = getFileUrl(payload)
+    if (!url) {
+      alert('No attached file available for this payload.')
+      return
+    }
+    window.open(url, '_blank', 'noopener')
+  }, [getFileUrl])
 
 const paymentColumns = [
   {
@@ -315,7 +303,7 @@ const paymentColumns = [
             size="small"
             onClick={(e) => {
               e.stopPropagation()
-              // handleDownload(row) <-- implementa si lo necesitas
+              handleDownload(row) 
             }}
             disabled={!getFileUrl(row)}
             sx={{
@@ -344,6 +332,74 @@ const paymentColumns = [
     )
   }
 ]
+
+const propertyImages = React.useMemo(() => {
+  if (!propertyDetails) return {
+    exterior: [],
+    interior: [],
+    facade: [],
+    blueprints: [],
+    main: ''
+  }
+
+  // Imágenes del objeto raíz
+  const rootImages = propertyDetails.images || {}
+  // Imágenes del modelo (pueden estar en propertyDetails.model)
+  const modelImages = propertyDetails.model?.images || {}
+
+  // Facade puede estar en raíz o en modelo
+  const facade = propertyDetails.facade
+    ? Array.isArray(propertyDetails.facade)
+      ? propertyDetails.facade
+      : [propertyDetails.facade]
+    : (
+      propertyDetails.model?.facade
+        ? (Array.isArray(propertyDetails.model.facade)
+            ? propertyDetails.model.facade
+            : [propertyDetails.model.facade])
+        : []
+    )
+
+  // Blueprints puede estar en raíz o en modelo
+  let blueprints = []
+  if (propertyDetails.blueprints) {
+    if (Array.isArray(propertyDetails.blueprints)) {
+      blueprints = propertyDetails.blueprints
+    } else if (propertyDetails.blueprints.default) {
+      blueprints = propertyDetails.blueprints.default
+    }
+  } else if (propertyDetails.model?.blueprints) {
+    if (Array.isArray(propertyDetails.model.blueprints)) {
+      blueprints = propertyDetails.model.blueprints
+    } else if (propertyDetails.model.blueprints.default) {
+      blueprints = propertyDetails.model.blueprints.default
+    }
+  }
+
+  // Unir imágenes exterior/interior de ambos niveles
+  const exterior = [
+    ...(rootImages.exterior || []),
+    ...(modelImages.exterior || [])
+  ]
+  const interior = [
+    ...(rootImages.interior || []),
+    ...(modelImages.interior || [])
+  ]
+
+  // Imagen principal: primera exterior, o facade, o vacío
+  const main =
+    exterior[0] ||
+    facade[0] ||
+    ''
+
+  return {
+    exterior,
+    interior,
+    facade,
+    blueprints,
+    main
+  }
+}, [propertyDetails])
 
   if (!property) return null
 
@@ -377,21 +433,17 @@ const paymentColumns = [
                   textTransform: "none"
                 }
               }}
-            >
-              <Tab icon={<Construction />} label="Construction Progress" iconPosition="start" />
-              <Tab icon={<Payment />} label="Payment Status" iconPosition="start" />
+            >              <Tab icon={<Payment />} label="Payment Status" iconPosition="start" />
               <Tab icon={<Visibility />} label="Property Details" iconPosition="start" />
             </Tabs>
 
             {activeTab === 0 && (
-              <ConstructionTab phases={phases} loadingPhases={loadingPhases} />
-            )}
-{activeTab === 1 && (
-  <Box>
+
+                <Box>
     <PageHeader
       icon={AccountBalance}
-      title="Pagos de la Propiedad"
-      subtitle="Historial y gestión de pagos de esta propiedad"
+      title="Payment History"
+      subtitle="Payment history and management for this property"
       actionButton={{
         label: 'Add Payment',
         onClick: () => {
@@ -406,7 +458,7 @@ const paymentColumns = [
           setCreateModalOpen(true)
         },
         icon: <AccountBalance />,
-        tooltip: 'Agregar nuevo pago'
+        tooltip: 'Add new payment'
       }}
       animateIcon={false}
       gradientColors={['#333F1F', '#8CA551', '#333F1F']}
@@ -442,14 +494,17 @@ const paymentColumns = [
       selectedPayload={null}
     />
   </Box>
-)}
-            {activeTab === 2 && (
-              <PropertyDetailsTab
-                propertyDetails={propertyDetails}
-                isModel10={isModel10}
-                balconyLabels={balconyLabels}
-              />
             )}
+{activeTab === 1 && (
+  <>
+    {console.log(propertyDetails)}
+    <AdminPropertyDetails
+    propertyDetails={propertyDetails}
+    isModel10={isModel10}
+    balconyLabels={balconyLabels}
+    />
+  </>
+)}
           </>
         )}
       </DialogContent>

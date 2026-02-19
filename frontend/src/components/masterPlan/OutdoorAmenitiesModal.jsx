@@ -1,40 +1,87 @@
 import { useState, useEffect } from 'react'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Box, Typography, Button, Grid, Paper, IconButton, CircularProgress, MenuItem, Select, FormControl, InputLabel
+  Box, Typography, Button, Grid, Paper, IconButton, CircularProgress, Chip
 } from '@mui/material'
 import { CloudUpload, Close, Delete, Check } from '@mui/icons-material'
 import uploadService from '../../services/uploadService'
 
+const EXTERIOR_AMENITIES = [
+  "Dock, Boats & Jet Ski",
+  "Visitors Parking",
+  "Dog Park",
+  "Pickleball Courts",
+  "Semi-Olimpic Pool",
+  "Grills",
+  "Sunset Place",
+  "Lake Park",
+  "Viewpoint",
+  "Access",
+  "Maintenance Area"
+]
+
 const OutdoorAmenitiesModal = ({
   open,
   onClose,
-  amenitiesList = [], // [{ id, name, images }]
+  amenitiesList = [], // [{ name, images }]
   onUploaded
 }) => {
-  const [selectedFiles, setSelectedFiles] = useState([])
+  // Estado para amenidad seleccionada
+  const [selectedAmenity, setSelectedAmenity] = useState('')
+  // Estado para archivos seleccionados por amenidad
+  const [selectedFiles, setSelectedFiles] = useState(
+    EXTERIOR_AMENITIES.reduce((acc, name) => ({ ...acc, [name]: [] }), {})
+  )
   const [uploading, setUploading] = useState(false)
-const [selectedAmenityName, setSelectedAmenityName] = useState('')
 
-useEffect(() => {
-  if (open && amenitiesList.length > 0) {
-    setSelectedAmenityName(amenitiesList[0].name)
-  }
-}, [open, amenitiesList])
+  useEffect(() => {
+    if (open) {
+      setSelectedAmenity('')
+    }
+  }, [open])
+
+  // Seleccionar archivos para la amenidad actual
   const handleFileSelect = (e) => {
-    setSelectedFiles(Array.from(e.target.files))
+    const files = Array.from(e.target.files)
+    setSelectedFiles(prev => ({
+      ...prev,
+      [selectedAmenity]: [...prev[selectedAmenity], ...files]
+    }))
   }
 
-  const handleRemoveSelectedFile = (idx) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== idx))
+  // Remover archivo seleccionado
+  const handleRemoveSelectedFile = (amenity, idx) => {
+    setSelectedFiles(prev => ({
+      ...prev,
+      [amenity]: prev[amenity].filter((_, i) => i !== idx)
+    }))
   }
 
+  // Subir todas las imágenes seleccionadas para todas las amenidades
 const handleUpload = async () => {
   setUploading(true)
   try {
-    const urls = await uploadService.uploadOutdoorAmenityImages(selectedFiles, selectedAmenityName)
-    await uploadService.saveOutdoorAmenityImages(selectedAmenityName, urls)
-    setSelectedFiles([])
+    const uploadPromises = []
+    EXTERIOR_AMENITIES.forEach(name => {
+      if (selectedFiles[name].length > 0) {
+        // Buscar si ya existe la amenidad por nombre
+        const existing = amenitiesList.find(a => a.name === name)
+        uploadPromises.push(
+          uploadService.uploadOutdoorAmenityImages(selectedFiles[name], name)
+            .then(urls => {
+              // Si existe, actualiza (manda id, name, images)
+              if (existing) {
+                return uploadService.saveOutdoorAmenityImages({ id: existing.id, name, images: urls })
+              } else {
+                // Si no existe, crea (manda name, images)
+                return uploadService.saveOutdoorAmenityImages({ name, images: urls })
+              }
+            })
+        )
+      }
+    })
+    await Promise.all(uploadPromises)
+    setSelectedFiles(EXTERIOR_AMENITIES.reduce((acc, name) => ({ ...acc, [name]: [] }), {}))
     if (onUploaded) onUploaded()
     onClose()
   } catch (err) {
@@ -43,7 +90,11 @@ const handleUpload = async () => {
     setUploading(false)
   }
 }
-  const currentImages = amenitiesList.find(a => a.name === selectedAmenityName)?.images || []
+
+  // Imágenes existentes para la amenidad seleccionada
+  const currentImages = amenitiesList.find(a => a.name === selectedAmenity)?.images || []
+  // Archivos seleccionados para la amenidad seleccionada
+  const currentSelectedFiles = selectedFiles[selectedAmenity] || []
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -54,19 +105,54 @@ const handleUpload = async () => {
         </Box>
       </DialogTitle>
       <DialogContent>
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel id="amenity-select-label">Amenity</InputLabel>
-  <Select
-    labelId="amenity-select-label"
-    value={selectedAmenityName}
-    label="Amenity"
-    onChange={e => setSelectedAmenityName(e.target.value)}
-  >
-    {amenitiesList.map(a => (
-      <MenuItem key={a.name} value={a.name}>{a.name}</MenuItem>
-    ))}
-  </Select>
-        </FormControl>
+        <Typography variant="subtitle2" fontWeight={700} mb={1.5} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+          Select Amenity
+        </Typography>
+        <Box display="flex" flexWrap="wrap" gap={1} mb={2}>
+          {EXTERIOR_AMENITIES.map(name => {
+            const count =
+              (amenitiesList.find(a => a.name === name)?.images.length || 0) +
+              (selectedFiles[name]?.length || 0)
+            return (
+              <Chip
+                key={name}
+                label={
+                  <Box display="flex" alignItems="center" gap={0.5}>
+                    {name}
+                    {count > 0 && (
+                      <Box
+                        component="span"
+                        sx={{
+                          ml: 0.5,
+                          px: 0.8,
+                          py: 0.2,
+                          bgcolor: selectedAmenity === name ? 'rgba(255,255,255,0.3)' : '#8CA551',
+                          color: 'white',
+                          borderRadius: 1,
+                          fontSize: '0.7rem',
+                          fontWeight: 700
+                        }}
+                      >
+                        {count}
+                      </Box>
+                    )}
+                  </Box>
+                }
+                onClick={() => setSelectedAmenity(name)}
+                sx={{
+                  bgcolor: selectedAmenity === name ? '#8CA551' : 'rgba(140, 165, 81, 0.1)',
+                  color: selectedAmenity === name ? 'white' : '#333F1F',
+                  fontWeight: 600,
+                  fontFamily: '"Poppins", sans-serif',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    bgcolor: selectedAmenity === name ? '#8CA551' : 'rgba(140, 165, 81, 0.2)'
+                  }
+                }}
+              />
+            )
+          })}
+        </Box>
         <Box mb={2}>
           <Button
             variant="contained"
@@ -85,7 +171,7 @@ const handleUpload = async () => {
           </Button>
         </Box>
         <Grid container spacing={2}>
-          {selectedFiles.map((file, idx) => (
+          {currentSelectedFiles.map((file, idx) => (
             <Grid item xs={6} key={idx}>
               <Paper sx={{ position: 'relative', borderRadius: 2 }}>
                 <Box
@@ -96,7 +182,7 @@ const handleUpload = async () => {
                 />
                 <IconButton
                   size="small"
-                  onClick={() => handleRemoveSelectedFile(idx)}
+                  onClick={() => handleRemoveSelectedFile(selectedAmenity, idx)}
                   sx={{
                     position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(255,255,255,0.8)'
                   }}
@@ -130,10 +216,12 @@ const handleUpload = async () => {
         <Button
           variant="contained"
           onClick={handleUpload}
-          disabled={selectedFiles.length === 0 || uploading}
+          disabled={
+            EXTERIOR_AMENITIES.every(name => selectedFiles[name].length === 0) || uploading
+          }
           startIcon={uploading ? <CircularProgress size={20} /> : <Check />}
         >
-          {uploading ? 'Uploading...' : 'Upload'}
+          {uploading ? 'Uploading...' : 'Upload All'}
         </Button>
       </DialogActions>
     </Dialog>

@@ -146,18 +146,16 @@ uploadClubhouseImages: async (files, section, interiorKey = null) => {
     const res = await api.get('/outdoor-amenities')
     return res.data // { amenities: [...] }
   },
-
+  
   // Subir imágenes a storage y retorna URLs
-  uploadOutdoorAmenityImages: async (files, amenityId) => {
-    // Sube a storage, folder: outdoor-amenities/{amenityId}
-    return await uploadService.uploadMultipleImages(files, `outdoor-amenities/${amenityId}`)
+  uploadOutdoorAmenityImages: async (files, amenityName) => {
+    // Sube a storage, folder: outdoor-amenities/{amenityName}
+    return await uploadService.uploadMultipleImages(files, `outdoor-amenities/${amenityName}`)
   },
-
-  // Asignar imágenes a un amenity específico
-  saveOutdoorAmenityImages: async (amenityId, urls) => {
-    return api.post('/outdoor-amenities', {
-      amenities: [{ id: amenityId, images: urls }]
-    })
+  
+  // Recibe un objeto { id?, name, images }
+  saveOutdoorAmenityImages: async (amenity) => {
+    return api.post('/outdoor-amenities', amenity)
   }
 }
 
