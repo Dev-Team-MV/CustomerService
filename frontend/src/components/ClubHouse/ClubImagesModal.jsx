@@ -50,117 +50,109 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+useEffect(() => {
+  if (open) {
+    loadInteriorKeys();
+  }
+}, [open]);
 
-  useEffect(() => {
-    if (open) {
-      loadInteriorKeys();
-      loadExistingImages();
-    }
-  }, [open]);
+useEffect(() => {
+  if (open && interiorKeys.length > 0) {
+    loadExistingImages();
+    setSelectedInteriorSection(interiorKeys[0]);
+  }
+}, [open, interiorKeys]);
 
-  const loadInteriorKeys = async () => {
-    try {
-      const response = await uploadService.getClubhouseInteriorKeys();
-      const keys = response.interiorKeys || [];
-      
-      if (!keys || keys.length === 0) {
-        setError('No interior sections available');
-        return;
-      }
+const loadInteriorKeys = async () => {
+  try {
+    const response = await uploadService.getClubhouseInteriorKeys();
+    const keys = response.interiorKeys || [];
+    setInteriorKeys(keys);
 
-      setInteriorKeys(keys);
-      
-      // Initialize interior objects
-      const interiorObj = {};
-      const selectedInteriorObj = {};
-      keys.forEach(key => {
-        interiorObj[key] = [];
-        selectedInteriorObj[key] = [];
+    // Inicializa los objetos para interior
+    setExistingImages(prev => ({
+      ...prev,
+      interior: keys.reduce((acc, key) => ({ ...acc, [key]: [] }), {})
+    }));
+    setSelectedFiles(prev => ({
+      ...prev,
+      interior: keys.reduce((acc, key) => ({ ...acc, [key]: [] }), {})
+    }));
+    setError(null);
+  } catch (err) {
+    setError('Failed to load interior sections');
+  }
+};
+
+const loadExistingImages = async () => {
+  setLoading(true);
+  try {
+    const response = await uploadService.getFilesByFolder('clubhouse', true);
+
+    if (response.files) {
+      const organized = {
+        exterior: [],
+        blueprints: [],
+        interior: {}
+      };
+
+      // Inicializa interior con las keys actuales
+      interiorKeys.forEach(key => {
+        organized.interior[key] = [];
       });
-      
-      setExistingImages(prev => ({ ...prev, interior: interiorObj }));
-      setSelectedFiles(prev => ({ ...prev, interior: selectedInteriorObj }));
-      
-      setError(null);
-    } catch (err) {
-      console.error('Error loading interior keys:', err);
-      setError('Failed to load interior sections');
-    }
-  };
 
-  const loadExistingImages = async () => {
-    setLoading(true);
-    try {
-      const response = await uploadService.getFilesByFolder('clubhouse', true);
-      
-      if (response.files) {
-        const organized = {
-          exterior: [],
-          blueprints: [],
-          interior: {}
-        };
+      response.files.forEach(file => {
+        const { section, interiorKey, url, publicUrl } = file;
+        const imageUrl = url || publicUrl;
 
-        // Initialize interior keys
-        interiorKeys.forEach(key => {
-          organized.interior[key] = [];
-        });
-
-        // ✅ CORREGIDO: Usar section e interiorKey del backend
-        response.files.forEach(file => {
-          const { section, interiorKey, url, publicUrl } = file;
-          const imageUrl = url || publicUrl;
-
-          if (section === 'exterior') {
-            organized.exterior.push(imageUrl);
-          } else if (section === 'blueprints') {
-            organized.blueprints.push(imageUrl);
-          } else if (section === 'interior' && interiorKey) {
-            // ✅ Verificar que el key existe
-            if (organized.interior[interiorKey]) {
-              organized.interior[interiorKey].push(imageUrl);
-            } else {
-              console.warn(`⚠️ Unknown interior key: ${interiorKey}`);
-            }
+        if (section === 'exterior') {
+          organized.exterior.push(imageUrl);
+        } else if (section === 'blueprints') {
+          organized.blueprints.push(imageUrl);
+        } else if (section === 'interior' && interiorKey) {
+          if (organized.interior[interiorKey]) {
+            organized.interior[interiorKey].push(imageUrl);
           }
-        });
+        }
+      });
 
-        console.log('📦 Organized images:', organized);
-        setExistingImages(organized);
-      }
-    } catch (err) {
-      console.error('Error loading clubhouse images:', err);
-    } finally {
-      setLoading(false);
+      setExistingImages(organized);
     }
-  };
+  } catch (err) {
+    console.error('Error loading clubhouse images:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ✅ NUEVO: Solo selecciona archivos, NO los sube
-  const handleFileSelect = (event, section) => {
-    const files = Array.from(event.target.files);
-    if (files.length === 0) return;
+const handleFileSelect = (event, section) => {
+  const files = Array.from(event.target.files);
+  if (files.length === 0) return;
 
-    console.log(`📁 Selected ${files.length} files for ${section}`);
-
-    setSelectedFiles(prev => {
-      if (section === 'interior') {
-        return {
-          ...prev,
-          interior: {
-            ...prev.interior,
-            [selectedInteriorSection]: [
-              ...(prev.interior[selectedInteriorSection] || []),
-              ...files
-            ]
-          }
-        };
-      } else {
-        return {
-          ...prev,
-          [section]: [...prev[section], ...files]
-        };
-      }
-    });
-  };
+  setSelectedFiles(prev => {
+    if (section === 'interior') {
+      return {
+        ...prev,
+        interior: {
+          ...prev.interior,
+          [selectedInteriorSection]: [
+            ...(Array.isArray(prev.interior[selectedInteriorSection]) ? prev.interior[selectedInteriorSection] : []),
+            ...files
+          ]
+        }
+      };
+    } else {
+      return {
+        ...prev,
+        [section]: [
+          ...(Array.isArray(prev[section]) ? prev[section] : []),
+          ...files
+        ]
+      };
+    }
+  });
+};
 
   // ✅ NUEVO: Remover archivo seleccionado (antes de subir)
   const handleRemoveSelectedFile = (section, index, interiorKey = null) => {

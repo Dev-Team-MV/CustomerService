@@ -1,29 +1,22 @@
 import api from './api'
 
 const uploadService = {
-  uploadImage: async (file, folder = '') => {
-    try {
-      const formData = new FormData()
-      formData.append('image', file)
-      if (folder) {
-        formData.append('folder', folder)
-      }
-
+  uploadImage: async (file, folder = '', fileName = '') => {
+  try {
+    const formData = new FormData()
+    formData.append('image', file)
+    if (folder) formData.append('folder', folder)
+    if (fileName) formData.append('fileName', fileName)
+      
       console.log(`📤 Uploading image to folder: ${folder || 'root'}`)
-
-      const response = await api.post('/upload/image', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-
-      console.log('✅ Image uploaded:', response.data)
-      return response.data.data.url
-    } catch (error) {
-      console.error('❌ Error uploading image:', error.response?.data || error.message)
-      throw new Error(error.response?.data?.message || 'Failed to upload image')
-    }
-  },
+    const response = await api.post('/upload/image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return response.data.data.url
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to upload image')
+  }
+},
 
   uploadMultipleImages: async (files, folder = '') => {
     try {

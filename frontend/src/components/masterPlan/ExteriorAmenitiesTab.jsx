@@ -156,20 +156,19 @@ const ExteriorAmenitiesTab = () => {
           >
             {/* Map Background */}
             <Box
-              sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                width: '100%',
-                height: '100%',
-                transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                transition: isDragging ? 'none' : 'transform 0.3s ease',
-                backgroundImage: `url(${mapUrl})`, // <--- Aquí usa la imagen dinámica
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                willChange: 'transform'
-              }}
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              width: '100%',
+              height: '100%',
+              transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+              transition: isDragging ? 'none' : 'transform 0.3s ease',
+              backgroundImage: `url(${mapUrl})`, // ✅ URL dinámica
+              backgroundSize: 'contain',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
             >
               {/* Amenity Markers */}
               {exteriorAmenities.map((amenity) => (
