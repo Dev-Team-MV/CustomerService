@@ -50,9 +50,17 @@ function sanitizeCustomFileName (customName, fileExtension) {
   return final.length <= 200 ? final : null
 }
 
+/** Build full path like storageService.uploadFile (same cleanFolder logic). */
+function buildFullPath (folder, fileName) {
+  if (!folder) return fileName
+  const cleanFolder = folder.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()
+  return `${cleanFolder}/${fileName}`
+}
+
 /**
  * Upload single image
- * Body: folder (optional), fileName (optional) — e.g. "punto 1.png" for predictable names in bucket
+ * Body: folder (optional), fileName (optional) — e.g. "recorrido.1.png" for predictable names in bucket.
+ * If the same folder+fileName already exists, the previous file is deleted and replaced.
  */
 export const uploadImage = async (req, res) => {
   try {
@@ -69,6 +77,12 @@ export const uploadImage = async (req, res) => {
     const fileExtension = path.extname(req.file.originalname)
     const fileName = sanitizeCustomFileName(customName, fileExtension) ||
       `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+
+    // Si se usa nombre custom, eliminar el archivo anterior en el bucket (mismo nombre) para reemplazarlo
+    if (customName && sanitizeCustomFileName(customName, fileExtension)) {
+      const fullPath = buildFullPath(folder, fileName)
+      await deleteFile(fullPath).catch(() => {}) // 404 = no existía, ignorar
+    }
 
     // Subir a Google Cloud Storage
     // makePublic: true para URLs públicas, false para signed URLs
@@ -130,6 +144,12 @@ export const uploadMultipleImages = async (req, res) => {
       const customName = customNames && customNames[index] != null ? customNames[index] : null
       const fileName = sanitizeCustomFileName(String(customName), fileExtension) ||
         `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+
+      // Si este archivo usa nombre custom, eliminar el existente en el bucket antes de subir
+      if (fileName && sanitizeCustomFileName(String(customName), fileExtension)) {
+        const fullPath = buildFullPath(folder, fileName)
+        await deleteFile(fullPath).catch(() => {})
+      }
 
       const result = await uploadFile(
         file.buffer,
