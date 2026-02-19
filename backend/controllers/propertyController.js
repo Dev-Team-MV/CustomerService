@@ -302,7 +302,7 @@ export const updateProperty = async (req, res) => {
     if (property) {
       const previousLotId = property.lot ? property.lot.toString() : null
 
-      // Apply any allowed field present in the request body
+      // Apply any allowed field present in the request body (price is only calculated on create; updates use the sent values)
       for (const key of ALLOWED_PROPERTY_UPDATES) {
         if (req.body[key] !== undefined) {
           if (key === 'price') {
@@ -311,16 +311,33 @@ export const updateProperty = async (req, res) => {
               const priceDifference = newPrice - property.price
               property.price = newPrice
               property.pending = Math.max(0, property.pending + priceDifference)
+              property.markModified('price')
+              property.markModified('pending')
+            }
+          } else if (key === 'pending') {
+            const newPending = Number(req.body.pending)
+            if (!Number.isNaN(newPending) && newPending >= 0) {
+              property.pending = newPending
+              property.markModified('pending')
+            }
+          } else if (key === 'initialPayment') {
+            const newInitial = Number(req.body.initialPayment)
+            if (!Number.isNaN(newInitial) && newInitial >= 0) {
+              property.initialPayment = newInitial
+              property.pending = Math.max(0, property.price - newInitial)
+              property.markModified('initialPayment')
+              property.markModified('pending')
             }
           } else if (key === 'users') {
             const newUsers = req.body.users
             if (Array.isArray(newUsers) && newUsers.length > 0) {
               const previousIds = (property.users || []).map(id => id.toString())
-              const newIds = newUsers.map(id => id.toString?.() || id)
-              property.users = newUsers
+              const newIds = newUsers.map(id => (id && (id._id || id).toString?.()) || String(id))
+              property.users = newIds
+              property.markModified('users')
               for (const userId of newIds) {
                 const userDoc = await User.findById(userId)
-                if (userDoc && !userDoc.lots.some(id => id.toString() === property.lot.toString())) {
+                if (userDoc && !userDoc.lots.some(lid => lid.toString() === property.lot.toString())) {
                   userDoc.lots.push(property.lot)
                   await userDoc.save()
                 }
@@ -331,8 +348,13 @@ export const updateProperty = async (req, res) => {
                 }
               }
             }
+          } else if (key === 'saleDate') {
+            const val = req.body.saleDate
+            property.saleDate = (val === '' || val == null) ? null : val
+            property.markModified('saleDate')
           } else {
             property[key] = req.body[key]
+            property.markModified(key)
           }
         }
       }
@@ -368,35 +390,6 @@ export const updateProperty = async (req, res) => {
               await u.save()
             }
           }
-        }
-      }
-      
-      // Recalculate price/pending when configuration changes (hasBalcony, modelType, hasStorage)
-      if (req.body.hasBalcony !== undefined || req.body.modelType !== undefined || req.body.hasStorage !== undefined) {
-        const lotExists = await Lot.findById(property.lot)
-        const modelExists = await Model.findById(property.model)
-        const facadeExists = await Facade.findById(property.facade)
-        
-        if (lotExists && modelExists && facadeExists) {
-          let modelPrice = modelExists.price
-          
-          if (property.hasBalcony && modelExists.balconyPrice) {
-            modelPrice += modelExists.balconyPrice
-          }
-          
-          if (property.modelType === 'upgrade' && modelExists.upgradePrice) {
-            modelPrice += modelExists.upgradePrice
-          }
-          
-          if (property.hasStorage && modelExists.storagePrice) {
-            modelPrice += modelExists.storagePrice
-          }
-          
-          const totalPrice = lotExists.price + modelPrice + facadeExists.price
-          const priceDifference = totalPrice - property.price
-          
-          property.price = totalPrice
-          property.pending = Math.max(0, property.pending + priceDifference)
         }
       }
       
