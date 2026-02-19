@@ -35,11 +35,12 @@ import api from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import ConstructionPhasesModal from '../components/ConstructionPhasesModal'
 import ContractsModal from '../components/ContractsModal'
-import EditPriceModal from '../components/property/EditPriceModal'
+import EditPropertyModal from '../components/property/EditPriceModal'
 import PageHeader from '../components/PageHeader'
 import StatsCards from '../components/statscard'
 import DataTable from '../components/table/DataTable'
 import EmptyState from '../components/table/EmptyState'
+import propertyService from '../services/propertyService'
 
 const Properties = () => {
   const navigate = useNavigate()
@@ -56,6 +57,13 @@ const Properties = () => {
   const [savingPrice, setSavingPrice] = useState(false)
   const [modelFilter, setModelFilter] = useState('')
   const [residentSortOrder, setResidentSortOrder] = useState('none') // 'none' | 'asc' | 'desc'
+const [editValues, setEditValues] = useState({})
+const [savingEdit, setSavingEdit] = useState(false)
+
+const [lotsArray, setLotsArray] = useState([])
+const [modelsArray, setModelsArray] = useState([])
+const [usersArray, setUsersArray] = useState([])
+const [facades, setFacades] = useState([]);
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
 
@@ -95,7 +103,57 @@ const Properties = () => {
 
   useEffect(() => {
     fetchData()
+    fetchLots()
+    fetchModels()
+    fetchUsers()
   }, [])
+  
+  const fetchLots = async () => {
+    try {
+      const res = await api.get('/lots')
+      setLotsArray(res.data)
+    } catch (error) {
+      console.error('Error fetching lots:', error)
+    }
+  }
+  
+  const fetchModels = async () => {
+    try {
+      const res = await api.get('/models')
+      setModelsArray(res.data)
+    } catch (error) {
+      console.error('Error fetching models:', error)
+    }
+  }
+
+    const fetchFacades = async (modelId) => {
+    if (!modelId) {
+      setFacades([]);
+      return;
+    }
+    try {
+      const res = await api.get(`/models/${modelId}/facades`);
+      setFacades(res.data);
+    } catch (err) {
+      setFacades([]);
+    }
+  };
+
+    useEffect(() => {
+      if (editValues.model) {
+        propertyService.getFacades(editValues.model).then(setFacades)
+      } else {
+        setFacades([])
+      }
+    }, [editValues.model])
+  const fetchUsers = async () => {
+    try {
+      const res = await api.get('/users')
+      setUsersArray(res.data)
+    } catch (error) {
+      console.error('Error fetching users:', error)
+    }
+  }
 
   const fetchData = async () => {
     setLoading(true)
@@ -139,37 +197,48 @@ const Properties = () => {
     setContractsProperty(null)
   }, [])
 
-  const handleEditPrice = useCallback((property) => {
-    setPropertyToEdit(property)
-    setEditingPriceValue(property.price)
-    setEditModalOpen(true)
-  }, [])
+const handleEditProperty = useCallback((property) => {
+  setPropertyToEdit(property)
+  setEditValues({
+    lot: property.lot?._id || '',
+    model: property.model?._id || '',
+    facade: property.facade?._id || '', // <-- Asegúrate de que sea string
+    users: property.users?.map(u => u._id) || [],
+    price: property.price ?? '',
+    pending: property.pending ?? '',
+    initialPayment: property.initialPayment ?? '',
+    status: property.status ?? '',
+    saleDate: property.saleDate ? property.saleDate.slice(0, 10) : '',
+    hasBalcony: property.hasBalcony ?? false,
+    modelType: property.modelType ?? 'basic',
+    hasStorage: property.hasStorage ?? false,
+  })
+  setEditModalOpen(true)
+}, [])
 
-  const handlePriceChange = useCallback((e) => {
-    setEditingPriceValue(e.target.value.replace(/[^0-9]/g, ''))
-  }, [])
+const handleEditValuesChange = (newValues) => {
+  setEditValues(newValues)
+}
 
-  const handleSavePrice = useCallback(async () => {
+  const handleSaveEdit = useCallback(async () => {
     if (!propertyToEdit) return
-    setSavingPrice(true)
+    setSavingEdit(true)
     try {
-      await api.put(`/properties/${propertyToEdit._id}`, { 
-        price: Number(editingPriceValue) 
-      })
+      await api.put(`/properties/${propertyToEdit._id}`, editValues)
       setEditModalOpen(false)
       setPropertyToEdit(null)
-      setEditingPriceValue('')
+      setEditValues({})
       fetchData()
     } catch (err) {
-      alert('Error updating price')
+      alert('Error updating property')
     }
-    setSavingPrice(false)
-  }, [propertyToEdit, editingPriceValue])
+    setSavingEdit(false)
+  }, [propertyToEdit, editValues])
 
   const handleCloseEditModal = useCallback(() => {
     setEditModalOpen(false)
     setPropertyToEdit(null)
-    setEditingPriceValue('')
+    setEditValues({})
   }, [])
 
   // ✅ HELPERS
@@ -655,7 +724,7 @@ const Properties = () => {
               size="small"
               onClick={(e) => {
                 e.stopPropagation()
-                handleEditPrice(row)
+                handleEditProperty(row)
               }}
               sx={{
                 bgcolor: 'rgba(140, 165, 81, 0.08)',
@@ -680,7 +749,7 @@ const Properties = () => {
     })
 
     return baseColumns
-  }, [isAdmin, getStatusColor, getPhaseProgress, handleOpenPhases, handleOpenContracts, handleViewProperty, handleEditPrice])
+  }, [isAdmin, getStatusColor, getPhaseProgress, handleOpenPhases, handleOpenContracts, handleViewProperty, handleEditProperty])
 
   return (
     <Box
@@ -845,14 +914,18 @@ const Properties = () => {
           />
         )}
 
-        <EditPriceModal
+        <EditPropertyModal
           open={editModalOpen}
           onClose={handleCloseEditModal}
           property={propertyToEdit}
-          value={editingPriceValue}
-          onChange={handlePriceChange}
-          onSave={handleSavePrice}
-          saving={savingPrice}
+          values={editValues}
+          onChange={handleEditValuesChange}
+          onSave={handleSaveEdit}
+          saving={savingEdit}
+          lots={lotsArray}
+          models={modelsArray}
+          facades={facades}
+          users={usersArray}
         />
       </Container>
     </Box>
