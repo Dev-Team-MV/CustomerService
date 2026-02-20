@@ -8,31 +8,33 @@ const AmenitiesGalleryModal = ({
   open,
   onClose,
   amenity,
-  amenityIndex = 0,
   amenities = [],
   isPublicView
 }) => {
+  // Siempre busca el index por name para evitar problemas de id
+  const amenityIndex = amenity && amenities.length
+    ? amenities.findIndex(a => a.name === amenity.name)
+    : 0
+
   const [currentAmenityIndex, setCurrentAmenityIndex] = useState(amenityIndex)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-  // Sync with parent amenity selection
+  // Sincroniza el index cuando cambian las props
   useEffect(() => {
-    if (open && amenity) {
-      const idx = amenities.findIndex(a => a.id === amenity.id)
+    if (open && amenity && amenities.length) {
+      const idx = amenities.findIndex(a => a.name === amenity.name)
       setCurrentAmenityIndex(idx >= 0 ? idx : 0)
       setCurrentImageIndex(0)
     }
   }, [open, amenity, amenities])
 
   const currentAmenity = amenities[currentAmenityIndex] || amenity
-  if (!currentAmenity) return null
-
-  const images = currentAmenity.images || []
+  const images = currentAmenity?.images || []
   const displayImages = isPublicView ? images.slice(0, 3) : images
   const hasImages = displayImages.length > 0
   const totalImages = images.length
 
-  // Next image or next amenity
+  // Navegación
   const handleNextImage = () => {
     if (currentImageIndex < displayImages.length - 1) {
       setCurrentImageIndex(currentImageIndex + 1)
@@ -42,7 +44,6 @@ const AmenitiesGalleryModal = ({
     }
   }
 
-  // Prev image or prev amenity
   const handlePrevImage = () => {
     if (currentImageIndex > 0) {
       setCurrentImageIndex(currentImageIndex - 1)
@@ -63,7 +64,11 @@ const AmenitiesGalleryModal = ({
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
+    // eslint-disable-next-line
   }, [open, currentImageIndex, currentAmenityIndex, amenities, isPublicView])
+
+  // No renderices nada si no hay amenity
+  if (!currentAmenity) return null
 
   return (
     <Dialog

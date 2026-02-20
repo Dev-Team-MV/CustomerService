@@ -1,35 +1,48 @@
-import { Box, Paper, Typography, IconButton, Tooltip, Dialog, DialogContent } from '@mui/material'
+import { Box, Paper, Typography, IconButton, Tooltip, Dialog, DialogContent, Button } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import MyLocationIcon from '@mui/icons-material/MyLocation'
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
+import UploadFileIcon from '@mui/icons-material/UploadFile'
 import { useState, useRef, useEffect } from 'react'
 import uploadService from '../../services/uploadService'
 import defaultMap from '../../../public/images/mapLakewood.png'
+import RecorridoImageUploadModal from '../masterPlan/RecorridoImagesModal'
+import { CloudUpload } from '@mui/icons-material'
 
 // 20 puntos de recorrido, ajusta x/y según tu plano
-const recorridoPoints = [
-  { id: 1, name: "Punto 1", x: 10, y: 20, image: "https://via.placeholder.com/600x400?text=Punto+1" },
-  { id: 2, name: "Punto 2", x: 15, y: 25, image: "https://via.placeholder.com/600x400?text=Punto+2" },
-  { id: 3, name: "Punto 3", x: 20, y: 30, image: "https://via.placeholder.com/600x400?text=Punto+3" },
-  { id: 4, name: "Punto 4", x: 25, y: 35, image: "https://via.placeholder.com/600x400?text=Punto+4" },
-  { id: 5, name: "Punto 5", x: 30, y: 40, image: "https://via.placeholder.com/600x400?text=Punto+5" },
-  { id: 6, name: "Punto 6", x: 35, y: 45, image: "https://via.placeholder.com/600x400?text=Punto+6" },
-  { id: 7, name: "Punto 7", x: 40, y: 50, image: "https://via.placeholder.com/600x400?text=Punto+7" },
-  { id: 8, name: "Punto 8", x: 45, y: 55, image: "https://via.placeholder.com/600x400?text=Punto+8" },
-  { id: 9, name: "Punto 9", x: 50, y: 60, image: "https://via.placeholder.com/600x400?text=Punto+9" },
-  { id: 10, name: "Punto 10", x: 55, y: 65, image: "https://via.placeholder.com/600x400?text=Punto+10" },
-  { id: 11, name: "Punto 11", x: 60, y: 70, image: "https://via.placeholder.com/600x400?text=Punto+11" },
-  { id: 12, name: "Punto 12", x: 65, y: 75, image: "https://via.placeholder.com/600x400?text=Punto+12" },
-  { id: 13, name: "Punto 13", x: 70, y: 80, image: "https://via.placeholder.com/600x400?text=Punto+13" },
-  { id: 14, name: "Punto 14", x: 75, y: 85, image: "https://via.placeholder.com/600x400?text=Punto+14" },
-  { id: 15, name: "Punto 15", x: 80, y: 60, image: "https://via.placeholder.com/600x400?text=Punto+15" },
-  { id: 16, name: "Punto 16", x: 85, y: 55, image: "https://via.placeholder.com/600x400?text=Punto+16" },
-  { id: 17, name: "Punto 17", x: 90, y: 50, image: "https://via.placeholder.com/600x400?text=Punto+17" },
-  { id: 18, name: "Punto 18", x: 95, y: 45, image: "https://via.placeholder.com/600x400?text=Punto+18" },
-  { id: 19, name: "Punto 19", x: 80, y: 30, image: "https://via.placeholder.com/600x400?text=Punto+19" },
-  { id: 20, name: "Punto 20", x: 60, y: 20, image: "https://via.placeholder.com/600x400?text=Punto+20" }
+const puntosBase = [
+  { id: 1, name: "Point 1", x: 77, y: 78 },
+  { id: 2, name: "Point 2", x: 89.3, y: 50 },
+  { id: 3, name: "Point 3", x: 93, y: 30 },
+  { id: 4, name: "Point 4", x: 82, y: 33 },
+  { id: 5, name: "Point 5", x: 80, y: 60 },
+  { id: 6, name: "Point 6", x: 72, y: 62 },
+  { id: 7, name: "Point 7", x: 67, y: 49.8 },
+  { id: 8, name: "Point 8", x: 63, y: 32 },
+  { id: 9, name: "Point 9", x: 61, y: 38 },
+  { id: 10, name: "Point 10", x: 59.8, y: 32 },
+  { id: 11, name: "Point 11", x: 55, y: 36 },
+  { id: 12, name: "Point 12", x: 49, y: 32  },
+  { id: 13, name: "Point 13", x: 37, y: 36},
+  { id: 14, name: "Point 14", x: 30, y: 36 },
+  { id: 15, name: "Point 15", x: 25, y: 32  },
+  { id: 16, name: "Point 16", x: 17, y: 46 },
+  { id: 17, name: "Point 17", x: 8, y: 35 },
+  { id: 18, name: "Point 18", x: 8, y: 58 },
+  { id: 19, name: "Point 19", x: 5, y: 65  },
+  { id: 20, name: "Point 20", x: 13, y: 75  },
+  { id: 21, name: "Point 21", x: 18, y: 70 },
+  { id: 22, name: "Point 22", x: 26, y: 60 },
+  { id: 23, name: "Point 23", x: 30, y: 45 },
+  { id: 24, name: "Point 24", x: 32.7, y: 50 },
+  { id: 25, name: "Point 25",x: 37, y: 59 },
+  { id: 26, name: "Point 26", x: 46, y: 63  },
+  { id: 27, name: "Point 27", x: 49, y: 63 },
+  { id: 28, name: "Point 28", x: 52, y: 63 },
+  { id: 29, name: "Point 29", x: 43, y: 78.5 },
+  { id: 30, name: "Point 30", x: 65, y: 75 },
 ]
 
 const RecorridoTab = () => {
@@ -41,11 +54,15 @@ const RecorridoTab = () => {
   const [selectedIdx, setSelectedIdx] = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [mapUrl, setMapUrl] = useState(defaultMap)
+  const [imagesMap, setImagesMap] = useState({}) // { [id]: url }
+  const [uploadModalOpen, setUploadModalOpen] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const mapRef = useRef(null)
 
-  // Cargar imagen dinámica del master plan
+  // Cargar imagen dinámica del master plan y las imágenes del recorrido
   useEffect(() => {
     fetchMasterPlanImages()
+    fetchRecorridoImages()
   }, [])
 
   const fetchMasterPlanImages = async () => {
@@ -61,7 +78,29 @@ const RecorridoTab = () => {
       setMapUrl(defaultMap)
     }
   }
+const fetchRecorridoImages = async () => {
+  try {
+    const response = await uploadService.getFilesByFolder('recorrido', true);
+    const map = {};
+    (response.files || []).forEach(file => {
+      const match = file.name.match(/recorrido\.(\d+)\./);
+      if (match) {
+        map[String(match[1])] = file.url; // <-- Aquí, usa String
+      }
+    });
+    setImagesMap(map);
+  } catch (error) {
+    setImagesMap({});
+  }
+};
 
+  // Asocia cada imagen al punto por id
+  const recorridoPoints = puntosBase.map((p) => ({
+    ...p,
+    image: imagesMap[p.id] || null
+  }))
+
+  // --- ZOOM & PAN ---
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.3, 3))
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.3, 0.5))
   const handleResetView = () => {
@@ -69,6 +108,7 @@ const RecorridoTab = () => {
     setPan({ x: 0, y: 0 })
   }
 
+  // --- DRAG ---
   const handleMouseDown = (e) => {
     if (e.button === 0) {
       setIsDragging(true)
@@ -77,17 +117,14 @@ const RecorridoTab = () => {
       e.preventDefault()
     }
   }
-
   const handleMouseMove = (e) => {
     if (isDragging) {
       setHasMoved(true)
       setPan({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y })
     }
   }
-
   const handleMouseUp = () => setIsDragging(false)
   const handleMouseLeave = () => setIsDragging(false)
-
   const handleTouchStart = (e) => {
     if (e.touches.length === 1) {
       const touch = e.touches[0]
@@ -96,7 +133,6 @@ const RecorridoTab = () => {
       setDragStart({ x: touch.clientX - pan.x, y: touch.clientY - pan.y })
     }
   }
-
   const handleTouchMove = (e) => {
     if (isDragging && e.touches.length === 1) {
       setHasMoved(true)
@@ -105,16 +141,15 @@ const RecorridoTab = () => {
       e.preventDefault()
     }
   }
-
   const handleTouchEnd = () => setIsDragging(false)
 
+  // --- MODAL ---
   const handlePointClick = (idx) => {
     if (!hasMoved) {
       setSelectedIdx(idx)
       setModalOpen(true)
     }
   }
-
   const handleCloseModal = () => {
     setModalOpen(false)
     setTimeout(() => setSelectedIdx(null), 300)
@@ -126,6 +161,16 @@ const RecorridoTab = () => {
   }
   const handlePrev = () => {
     if (selectedIdx > 0) setSelectedIdx(selectedIdx - 1)
+  }
+
+  // --- UPLOAD ---
+  const handleUpload = async (id, file) => {
+    setUploading(true)
+    const ext = file.name.substring(file.name.lastIndexOf('.'))
+    const filename = `recorrido.${id}${ext}` // Usa el id del punto
+    await uploadService.uploadImage(file, 'recorrido', filename)
+    setUploading(false)
+    fetchRecorridoImages()
   }
 
   return (
@@ -140,6 +185,30 @@ const RecorridoTab = () => {
           boxSizing: 'border-box'
         }}
       >
+        <Button
+          variant="contained"
+          startIcon={<CloudUpload />} // Usa el mismo ícono para consistencia
+          sx={{
+            mb: 2,
+            borderRadius: 3,
+            fontWeight: 600,
+            textTransform: 'none',
+            fontFamily: '"Poppins", sans-serif',
+            bgcolor: '#333F1F',
+            color: 'white',
+            px: 3,
+            py: 1.2,
+            boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+            '&:hover': {
+              bgcolor: '#8CA551',
+              boxShadow: '0 6px 16px rgba(140, 165, 81, 0.35)'
+            }
+          }}
+          onClick={() => setUploadModalOpen(true)}
+        >
+          Manage Master Plan Images
+        </Button>
+
         {/* Map Container */}
         <Box
           ref={mapRef}
@@ -183,7 +252,7 @@ const RecorridoTab = () => {
                 transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
                 transition: isDragging ? 'none' : 'transform 0.3s ease',
                 backgroundImage: `url(${mapUrl})`,
-                backgroundSize: 'cover',
+                backgroundSize: 'contain',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
                 willChange: 'transform'
@@ -277,17 +346,53 @@ const RecorridoTab = () => {
                 {selectedIdx + 1} / {recorridoPoints.length}
               </Typography>
             </Box>
-            <Box sx={{ position: 'relative', bgcolor: '#000' }}>
-              <Box
-                sx={{
-                  width: '100%',
-                  height: 500,
-                  backgroundImage: `url(${recorridoPoints[selectedIdx].image})`,
-                  backgroundSize: 'contain',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat'
-                }}
-              />
+            <Box sx={{ position: 'relative', bgcolor: '#000', minHeight: 320 }}>
+              {/* Imagen del punto */}
+              {recorridoPoints[selectedIdx].image ? (
+                <Box
+                  component="img"
+                  src={recorridoPoints[selectedIdx].image}
+                  alt={recorridoPoints[selectedIdx].name}
+                  sx={{
+                    width: '100%',
+                    maxHeight: 500,
+                    objectFit: 'contain',
+                    background: '#222',
+                    display: 'block',
+                    mx: 'auto'
+                  }}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: 320,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#888',
+                    fontSize: 22,
+                    fontWeight: 600,
+                    bgcolor: '#fafafa'
+                  }}
+                >
+                  No image uploaded for this point
+                </Box>
+              )}
+
+              {/* Upload section */}
+              <Box sx={{ mt: 2, p: 2, textAlign: 'center', bgcolor: '#fff', borderRadius: 2 }}>
+                <Button
+                  variant="outlined"
+                  component="span"
+                  startIcon={<UploadFileIcon />}
+                  onClick={() => setUploadModalOpen(true)}
+                  disabled={uploading}
+                >
+                  {recorridoPoints[selectedIdx].image ? 'Replace Image' : 'Upload Image'}
+                </Button>
+              </Box>
+
               {/* Navigation Buttons */}
               <IconButton
                 onClick={handlePrev}
@@ -321,6 +426,16 @@ const RecorridoTab = () => {
           </DialogContent>
         )}
       </Dialog>
+
+      {/* Modal de subida de imagen */}
+      <RecorridoImageUploadModal
+        open={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        puntos={puntosBase}
+        imagesMap={imagesMap}
+        onUpload={handleUpload}
+        loading={uploading}
+      />
     </>
   )
 }

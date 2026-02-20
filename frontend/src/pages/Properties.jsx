@@ -41,6 +41,7 @@ import StatsCards from '../components/statscard'
 import DataTable from '../components/table/DataTable'
 import EmptyState from '../components/table/EmptyState'
 import propertyService from '../services/propertyService'
+import PropertyDetailsModal from '../components/myProperty/PropertyDetailsModal'
 
 const Properties = () => {
   const navigate = useNavigate()
@@ -64,6 +65,10 @@ const [lotsArray, setLotsArray] = useState([])
 const [modelsArray, setModelsArray] = useState([])
 const [usersArray, setUsersArray] = useState([])
 const [facades, setFacades] = useState([]);
+
+const [detailsOpen, setDetailsOpen] = useState(false)
+const [detailsProperty, setDetailsProperty] = useState(null)
+
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
 
@@ -172,9 +177,10 @@ const [facades, setFacades] = useState([]);
     navigate('/properties/select')
   }, [navigate])
 
-  const handleViewProperty = useCallback((property) => {
-    console.log('View property:', property)
-  }, [])
+const handleViewProperty = useCallback((property) => {
+  setDetailsProperty(property)
+  setDetailsOpen(true)
+}, [])
 
   const handleOpenPhases = useCallback((property) => {
     setSelectedProperty(property)
@@ -215,6 +221,8 @@ const handleEditProperty = useCallback((property) => {
   })
   setEditModalOpen(true)
 }, [])
+
+
 
 const handleEditValuesChange = (newValues) => {
   setEditValues(newValues)
@@ -897,6 +905,12 @@ const handleEditValuesChange = (newValues) => {
         />
 
         {/* Modals */}
+        <PropertyDetailsModal
+          open={detailsOpen}
+          onClose={() => setDetailsOpen(false)}
+          property={detailsProperty}
+        />
+
         {selectedProperty && (
           <ConstructionPhasesModal
             open={phasesModalOpen}
