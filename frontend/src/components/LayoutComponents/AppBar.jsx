@@ -21,6 +21,8 @@ import {
   Person as PersonIcon,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from '../LanguageSwitcher'
 
 const AppBarBrandbook = ({
   publicView,
@@ -35,7 +37,9 @@ const AppBarBrandbook = ({
   anchorElUser,
   onOpenUserMenu,
   onCloseUserMenu,
-}) => (
+}) => {
+  const { t } = useTranslation()
+  return (
   <AppBar
     position="fixed"
     sx={{
@@ -60,7 +64,7 @@ const AppBarBrandbook = ({
     }}
   >
     <Toolbar sx={{ px: { xs: 2, sm: 3 } }}>
-      <Tooltip title="Open menu" placement="right">
+      <Tooltip title={t('navigation:tooltips.openMenu')} placement="right">
         <IconButton
           color="inherit"
           edge="start"
@@ -113,9 +117,10 @@ const AppBarBrandbook = ({
       </Box>
 
       {/* USER ACTIONS */}
-      <Box sx={{ ml: 2, display: "flex", alignItems: "center", gap: 1.5 }}>
+      <Box sx={{ ml: 2, display: "flex", alignItems: "center", gap: 1 }}>
+        <LanguageSwitcher />
         {!publicView && user && (
-          <Tooltip title="Notifications" placement="bottom">
+          <Tooltip title={t('navigation:tooltips.notifications')} placement="bottom">
             <IconButton
               onClick={onNotificationsClick}
               sx={{
@@ -150,7 +155,7 @@ const AppBarBrandbook = ({
 
         {user ? (
           <>
-            <Tooltip title="Account settings" placement="bottom">
+            <Tooltip title={t('navigation:tooltips.accountSettings')} placement="bottom">
               <IconButton onClick={onOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar
                   sx={{
@@ -262,7 +267,7 @@ const AppBarBrandbook = ({
                     color: "#333F1F",
                   }}
                 >
-                  Profile
+                  {t('navigation:userMenu.profile')}
                 </Typography>
               </MenuItem>
               <Divider
@@ -292,13 +297,13 @@ const AppBarBrandbook = ({
                     color: "#d32f2f",
                   }}
                 >
-                  Logout
+                  {t('navigation:userMenu.logout')}
                 </Typography>
               </MenuItem>
             </Menu>
           </>
         ) : (
-          <Tooltip title="Sign in to your account" placement="bottom">
+          <Tooltip title={t('auth:signInToAccount')} placement="bottom">
             <Button
               variant="contained"
               startIcon={<LoginIcon />}
@@ -346,7 +351,7 @@ const AppBarBrandbook = ({
               }}
             >
               <Box component="span" sx={{ position: "relative", zIndex: 1 }}>
-                Login
+                {t('auth:login')}
               </Box>
             </Button>
           </Tooltip>
@@ -354,6 +359,7 @@ const AppBarBrandbook = ({
       </Box>
     </Toolbar>
   </AppBar>
-);
+  )
+}
 
 export default AppBarBrandbook;

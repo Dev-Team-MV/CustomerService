@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from 'react-i18next'
 import {
   Drawer,
   Box,
@@ -29,6 +30,7 @@ const SidebarDrawer = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleNavigate = (path) => {
     navigate(path);
@@ -107,7 +109,7 @@ const SidebarDrawer = ({
           {menuItems.map((item, index) => {
             const isActive = location.pathname === item.path;
             return (
-              <ListItem key={item.text} disablePadding sx={{ mb: 1.5 }}>
+              <ListItem key={item.textKey} disablePadding sx={{ mb: 1.5 }}>
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -190,7 +192,7 @@ const SidebarDrawer = ({
                       </Box>
                     </ListItemIcon>
                     <ListItemText
-                      primary={item.text}
+                      primary={t(item.textKey)}
                       primaryTypographyProps={{
                         fontSize: "0.95rem",
                         fontWeight: isActive ? 700 : 600,
@@ -216,7 +218,7 @@ const SidebarDrawer = ({
               "linear-gradient(180deg, rgba(140, 165, 81, 0.03) 0%, transparent 100%)",
           }}
         >
-          <Tooltip title="Close menu" placement="right">
+          <Tooltip title={t('navigation:tooltips.closeMenu')} placement="right">
             <IconButton
               onClick={onClose}
               sx={{

@@ -36,6 +36,7 @@ import { motion } from "framer-motion";
 import ModelCard from "./modelComponent/Modelcard";
 import ModelInfoPanel from "./modelComponent/ModelInfoPanel";
 
+
 const ModelSelector = () => {
   const {
     selectedModel,
@@ -602,13 +603,14 @@ const ModelSelector = () => {
       </Drawer>
 
       {/* Customization Modal */}
-      <ModelCustomizationModal
-        open={openCustomizationModal}
-        model={selectedModel}
-        initialOptions={options}
-        onClose={() => setOpenCustomizationModal(false)}
-        onConfirm={handleConfirmCustomization}
-      />
+<ModelCustomizationModal
+  open={openCustomizationModal}
+  model={selectedModel}
+  initialOptions={options}
+  onClose={() => setOpenCustomizationModal(false)}
+  onConfirm={handleConfirmCustomization}
+  labels={balconyLabels} // <-- pásalo aquí
+/>
     </>
   );
 };

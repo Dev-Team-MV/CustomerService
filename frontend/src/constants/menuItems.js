@@ -13,73 +13,73 @@ import {
 
 export const privateMenuItems = [
   {
-    text: "Dashboard",
+    textKey: "navigation:menu.dashboard",
     icon: DashboardIcon,
     path: "/dashboard",
     roles: ["superadmin", "admin", "user"],
   },
   {
-    text: "Club House",
+    textKey: "navigation:menu.clubHouse",
     icon: Deck,
     path: "/clubhouse-manager",
     roles: ["superadmin", "admin"],
   },
   {
-    text: "Properties",
+    textKey: "navigation:menu.properties",
     icon: HomeWorkIcon,
     path: "/properties",
     roles: ["superadmin", "admin"],
   },
   {
-    text: "Lot Inventory",
+    textKey: "navigation:menu.lotInventory",
     icon: LandscapeIcon,
     path: "/lots",
     roles: ["superadmin", "admin"],
   },
   {
-    text: "Models",
+    textKey: "navigation:menu.models",
     icon: HomeIcon,
     path: "/models",
     roles: ["superadmin", "admin"],
   },
   {
-    text: "Payloads",
+    textKey: "navigation:menu.payloads",
     icon: PaymentIcon,
     path: "/payloads",
     roles: ["superadmin", "admin"],
   },
   {
-    text: "Residents",
+    textKey: "navigation:menu.residents",
     icon: PeopleIcon,
     path: "/residents",
     roles: ["superadmin", "admin"],
   },
   {
-    text: "Analytics",
+    textKey: "navigation:menu.analytics",
     icon: BarChartIcon,
     path: "/analytics",
     roles: ["superadmin", "admin"],
   },
   {
-    text: "News",
+    textKey: "navigation:menu.news",
     icon: Article,
     path: "/news",
     roles: ["superadmin", "admin"],
   },
   {
-    text: "My Property",
+    textKey: "navigation:menu.myProperty",
     icon: HomeIcon,
     path: "/my-property",
     roles: ["superadmin", "admin", "user"],
   },
   {
-    text: "Amenities",
+    textKey: "navigation:menu.amenities",
     icon: Deck,
     path: "/amenities",
     roles: ["superadmin", "admin", "user"],
   },
   {
-    text:"Master Plan Inventory",
+    textKey: "navigation:menu.masterPlanInventory",
     icon: LandscapeIcon,
     path: "/master-plan/inventory",
     roles: ["superadmin", "admin"],
@@ -87,8 +87,8 @@ export const privateMenuItems = [
 ];
 
 export const publicMenuItems = [
-  { text: "Home", icon: HomeIcon, path: "/" },
-  { text: "News", icon: Article, path: "/explore/news" },
-  { text: "Get Your Quote", icon: Explore, path: "/explore/properties" },
-  { text: "Explore Amenities", icon: Deck, path: "/explore/amenities" },
+  { textKey: "navigation:menu.home", icon: HomeIcon, path: "/" },
+  { textKey: "navigation:menu.news", icon: Article, path: "/explore/news" },
+  { textKey: "navigation:menu.getYourQuote", icon: Explore, path: "/explore/properties" },
+  { textKey: "navigation:menu.exploreAmenities", icon: Deck, path: "/explore/amenities" },
 ];

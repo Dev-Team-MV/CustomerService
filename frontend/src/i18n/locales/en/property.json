@@ -1,0 +1,56 @@
+{
+  "title": "Property Management",
+  "subtitle": "Oversee inventory, pricing, and resident assignments across the estate",
+  "stats": {
+    "totalProperties": "Total Properties",
+    "sold": "Sold",
+    "active": "Active",
+    "pending": "Pending"
+  },
+  "table": {
+    "lotInfo": "LOT INFO",
+    "lot": "Lot",
+    "section": "Section",
+    "model": "MODEL",
+    "facade": "FACADE",
+    "notSelected": "Not selected",
+    "residentOwner": "RESIDENT / OWNER",
+    "noEmail": "No email",
+    "status": "STATUS",
+    "constructionPhase": "CONSTRUCTION PHASE",
+    "phase": "Phase",
+    "phasesCompleted": "{{count}} phases completed",
+    "completed": "completed",
+    "price": "PRICE",
+    "pending": "Pending",
+    "paid": "Paid",
+    "contracts": "CONTRACTS",
+    "actions": "ACTIONS"
+  },
+  "status": {
+    "sold": "Sold",
+    "active": "Active",
+    "pending": "Pending"
+  },
+  "actions": {
+    "addProperty": "Add a New Property",
+    "viewDetails": "View details",
+    "editPrice": "Edit Price",
+    "manageContracts": "Manage contracts",
+    "managePhases": "Manage Phases",
+    "viewProgress": "View Progress"
+  },
+  "filters": {
+    "filterByModel": "Filter by Model",
+    "allModels": "All Models",
+    "resident": "Resident",
+    "sortResidentAZ": "Sort Resident/Owner A-Z",
+    "sortResidentZA": "Sort Resident/Owner Z-A",
+    "removeResidentSort": "Remove Resident/Owner sort"
+  },
+  "empty": {
+    "title": "No properties found",
+    "description": "Click 'Add Property' to create one",
+    "action": "Add Property"
+  }
+}

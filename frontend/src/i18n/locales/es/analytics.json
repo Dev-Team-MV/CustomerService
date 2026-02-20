@@ -1,0 +1,33 @@
+{
+  "title": "Panel de Análisis",
+  "subtitle": "Estadísticas del proyecto e información de ventas en tiempo real",
+  "refreshData": "Actualizar Datos",
+  "stats": {
+    "totalInventory": "Inventario Total",
+    "availableLots": "Lotes disponibles",
+    "propertiesSold": "Propiedades Vendidas",
+    "occupancy": "ocupación",
+    "pendingSales": "Ventas Pendientes",
+    "actionRequired": "Requiere atención",
+    "allClear": "Todo al día",
+    "avgLotPrice": "Precio Promedio"
+  },
+  "progress": {
+    "title": "Progreso de Ventas del Proyecto",
+    "totalLotsSold": "Total de Lotes Vendidos",
+    "occupancyRate": "Tasa de Ocupación",
+    "lots": "lotes"
+  },
+  "summary": {
+    "title": "Resumen Rápido",
+    "totalProperties": "Propiedades Totales",
+    "sold": "Vendidas",
+    "pending": "Pendientes",
+    "available": "Disponibles"
+  },
+  "models": {
+    "title": "Ventas de Propiedades por Modelo",
+    "subtitle": "Distribución detallada de propiedades por tipo",
+    "noData": "No hay datos de modelos disponibles"
+  }
+}

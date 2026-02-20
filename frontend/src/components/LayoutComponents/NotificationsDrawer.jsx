@@ -12,6 +12,7 @@ import PaymentIcon from "@mui/icons-material/Payment"
 import ChatIcon from "@mui/icons-material/Chat"
 import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 import { motion } from "framer-motion"
+import { useTranslation } from "react-i18next"
 
 const NotificationsDrawer = ({
   open,
@@ -19,7 +20,10 @@ const NotificationsDrawer = ({
   notifications,
   setNotifications,
   width = { xs: "100%", sm: 400 },
-}) => (
+}) => {
+  const { t } = useTranslation('navigation')
+
+  return (
   <Drawer
     anchor="right"
     variant="temporary"
@@ -110,7 +114,7 @@ const NotificationsDrawer = ({
                   letterSpacing: "0.5px",
                 }}
               >
-                Notifications
+                {t('notifications.title')}
               </Typography>
               <Typography
                 variant="caption"
@@ -119,7 +123,7 @@ const NotificationsDrawer = ({
                   fontFamily: '"Poppins", sans-serif',
                 }}
               >
-                {notifications.filter((n) => !n.read).length} unread
+                {t('unread', { count: notifications.filter((n) => !n.read).length })}
               </Typography>
             </Box>
           </Box>
@@ -181,7 +185,7 @@ const NotificationsDrawer = ({
                 fontWeight: 500,
               }}
             >
-              No notifications yet
+              {t('noNotifications')}
             </Typography>
             <Typography
               variant="caption"
@@ -192,7 +196,7 @@ const NotificationsDrawer = ({
                 maxWidth: 240,
               }}
             >
-              We'll notify you when something important happens
+              {t('noNotificationsDesc')}
             </Typography>
           </Box>
         ) : (
@@ -327,7 +331,7 @@ const NotificationsDrawer = ({
                           fontFamily: '"Poppins", sans-serif',
                         }}
                       >
-                        2 hours ago
+                        {t('hoursAgo', { count: 2 })}
                       </Typography>
                     </Box>
                   </Box>
@@ -422,12 +426,13 @@ const NotificationsDrawer = ({
               },
             }}
           >
-            <span>Mark all as read</span>
+            <span>{t('markAllAsRead')}</span>
           </Button>
         </Box>
       )}
     </Box>
   </Drawer>
-)
+  )
+}
 
 export default NotificationsDrawer

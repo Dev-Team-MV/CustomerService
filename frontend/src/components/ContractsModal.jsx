@@ -197,16 +197,45 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
   }
 
   // ✅ DESCARGAR CONTRATO (FORZAR DESCARGA)
-  // ✅ DESCARGAR CONTRATO (vía API para evitar CORS con GCS)
-  const handleDownloadContract = async (docType) => {
+const handleDownloadContract = async (docType) => {
+  const contract = existingContracts[docType.key]
+  if (!contract?.fileUrl) return
+
+  try {
+    const fileName = contract.fileUrl.split('/').pop()?.split('?')[0] || `${docType.key}.pdf`
+    const response = await fetch(contract.fileUrl)
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const blob = await response.blob()
+    const blobUrl = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = blobUrl
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(blobUrl)
+  } catch (error) {
+    alert('No se pudo descargar automáticamente. El archivo se abrirá en otra pestaña.')
+    // Fallback: abrir en nueva pestaña
+    const link = document.createElement('a')
+    link.href = contract.fileUrl
+    link.download = ''
+    link.target = '_blank'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+}
+
+  // ✅ VER CONTRATO (abrir en nueva pestaña)
+  const handleViewContract = (docType) => {
     const contract = existingContracts[docType.key]
-    if (!contract?.fileUrl || !property?._id) return
-    try {
-      console.log('📥 Downloading contract:', { type: docType.key, propertyId: property._id })
-      await contractsService.downloadContract(property._id, docType.key)
-    } catch (error) {
-      console.error('❌ Download error:', error)
-      alert(error.message || 'No se pudo descargar el contrato.')
+    if (contract?.fileUrl) {
+      console.log('�️ Opening contract in new tab:', {
+        type: docType.key,
+        url: contract.fileUrl
+      })
+      window.open(contract.fileUrl, '_blank')
     }
   }
 
@@ -606,21 +635,21 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
                                 <Button
                                   variant="outlined"
                                   size="small"
-                                  startIcon={<Download />}
-                                  onClick={() => handleDownloadContract(docType)}
+                                  startIcon={<Description />}
+                                  onClick={() => handleViewContract(docType)}
                                   disabled={isDeleting}
                                   sx={{
                                     borderRadius: 2,
                                     textTransform: 'none',
                                     fontWeight: 600,
                                     fontFamily: '"Poppins", sans-serif',
-                                    borderColor: 'rgba(140, 165, 81, 0.3)',
+                                    borderColor: 'rgba(25, 118, 210, 0.3)',
                                     borderWidth: '2px',
-                                    color: '#333F1F',
+                                    color: '#1976d2',
                                     '&:hover': {
-                                      borderColor: '#8CA551',
+                                      borderColor: '#1976d2',
                                       borderWidth: '2px',
-                                      bgcolor: 'rgba(140, 165, 81, 0.08)'
+                                      bgcolor: 'rgba(25, 118, 210, 0.08)'
                                     },
                                     '&:disabled': {
                                       opacity: 0.5

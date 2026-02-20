@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Typography,
@@ -23,7 +24,10 @@ import StatCard from '../components/analitycs/StatCard'
 import AnimatedProgressBar from '../components/analitycs/AnimatedProgressBar'
 import ModelProgressBar from '../components/analitycs/ModelProgressBar'
 import PageHeader from '../components/PageHeader'
+
 const Analytics = () => {
+  const { t } = useTranslation(['analytics', 'common'])
+  
   const [stats, setStats] = useState({
     totalLots: 0,
     soldLots: 0,
@@ -154,14 +158,13 @@ const Analytics = () => {
         {/* Header */}
         <PageHeader
           icon={AnalyticsIcon}
-          title="Analytics Dashboard"
-          subtitle="Real-time project statistics and sales insights"
+          title={t('analytics:title')}
+          subtitle={t('analytics:subtitle')}
           actionButton={{
             label: '',
             onClick: fetchAnalytics,
             icon: loading ? <CircularProgress size={24} /> : <Refresh />,
-            tooltip: 'Refresh Data',
-            // Usar custom render si es necesario
+            tooltip: t('analytics:refreshData')
           }}
         />
 
@@ -188,9 +191,9 @@ const Analytics = () => {
                 {/* Stat Cards */}
                 <Grid item xs={12} sm={6} lg={3}>
                   <StatCard
-                    title="Total Inventory"
+                    title={t('analytics:stats.totalInventory')}
                     value={stats.totalLots}
-                    subtitle="Available lots"
+                    subtitle={t('analytics:stats.availableLots')}
                     icon={Home}
                     gradient="linear-gradient(135deg, #333F1F 0%, #4a5d3a 100%)"
                     delay={0}
@@ -199,9 +202,9 @@ const Analytics = () => {
 
                 <Grid item xs={12} sm={6} lg={3}>
                   <StatCard
-                    title="Properties Sold"
+                    title={t('analytics:stats.propertiesSold')}
                     value={stats.soldLots}
-                    subtitle={`${stats.occupancyRate}% occupancy`}
+                    subtitle={`${stats.occupancyRate}% ${t('analytics:stats.occupancy')}`}
                     icon={CheckCircle}
                     gradient="linear-gradient(135deg, #8CA551 0%, #a8bf6f 100%)"
                     delay={0.1}
@@ -210,9 +213,9 @@ const Analytics = () => {
 
                 <Grid item xs={12} sm={6} lg={3}>
                   <StatCard
-                    title="Pending Sales"
+                    title={t('analytics:stats.pendingSales')}
                     value={stats.pendingLots}
-                    subtitle={stats.pendingLots > 0 ? 'Action required' : 'All clear'}
+                    subtitle={stats.pendingLots > 0 ? t('analytics:stats.actionRequired') : t('analytics:stats.allClear')}
                     icon={Schedule}
                     gradient="linear-gradient(135deg, #E5863C 0%, #f59c5a 100%)"
                     delay={0.2}
@@ -221,7 +224,7 @@ const Analytics = () => {
 
                 <Grid item xs={12} sm={6} lg={3}>
                   <StatCard
-                    title="Avg. Lot Price"
+                    title={t('analytics:stats.avgLotPrice')}
                     value={`$${stats.avgLotPrice > 0 ? (stats.avgLotPrice / 1000).toFixed(0) : 0}k`}
                     subtitle={`$${stats.avgLotPrice > 0 ? stats.avgLotPrice.toLocaleString('en-US', { maximumFractionDigits: 0 }) : 0}`}
                     icon={AttachMoney}
@@ -262,7 +265,7 @@ const Analytics = () => {
                             mb: 0.5
                           }}
                         >
-                          Project Sales Progress
+                          {t('analytics:progress.title')}
                         </Typography>
                         <Box
                           sx={{
@@ -276,17 +279,17 @@ const Analytics = () => {
 
                       <Box sx={{ mt: 4 }}>
                         <AnimatedProgressBar
-                          label="Total Lots Sold"
+                          label={t('analytics:progress.totalLotsSold')}
                           current={stats.soldLots}
                           target={stats.totalLots}
-                          suffix=" lots"
+                          suffix={` ${t('analytics:progress.lots')}`}
                           height={14}
                         />
                       </Box>
 
                       <Box sx={{ mt: 5 }}>
                         <AnimatedProgressBar
-                          label="Occupancy Rate"
+                          label={t('analytics:progress.occupancyRate')}
                           current={stats.occupancyRate}
                           target={stats.targetRate}
                           suffix="%"
@@ -341,7 +344,7 @@ const Analytics = () => {
                             mb: 0.5
                           }}
                         >
-                          Quick Summary
+                          {t('analytics:summary.title')}
                         </Typography>
                         <Box
                           sx={{
@@ -356,25 +359,25 @@ const Analytics = () => {
                       <Grid container spacing={3}>
                         {[
                           {
-                            label: 'Total Properties',
+                            label: t('analytics:summary.totalProperties'),
                             value: stats.totalLots,
                             color: '#333F1F',
                             icon: Home
                           },
                           {
-                            label: 'Sold',
+                            label: t('analytics:summary.sold'),
                             value: stats.soldLots,
                             color: '#8CA551',
                             icon: CheckCircle
                           },
                           {
-                            label: 'Pending',
+                            label: t('analytics:summary.pending'),
                             value: stats.pendingLots,
                             color: '#E5863C',
                             icon: Schedule
                           },
                           {
-                            label: 'Available',
+                            label: t('analytics:summary.available'),
                             value: stats.totalLots - stats.soldLots - stats.pendingLots,
                             color: '#706f6f',
                             icon: TrendingUp
@@ -465,7 +468,7 @@ const Analytics = () => {
                             mb: 0.5
                           }}
                         >
-                          Property Sales by Model
+                          {t('analytics:models.title')}
                         </Typography>
                         <Box
                           sx={{
@@ -505,7 +508,7 @@ const Analytics = () => {
                               color: '#706f6f'
                             }}
                           >
-                            No model data available
+                            {t('analytics:models.noData')}
                           </Typography>
                         </Box>
                       )}

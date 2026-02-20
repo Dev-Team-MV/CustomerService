@@ -1,0 +1,15 @@
+{
+    "title": "Amenidades",
+    "explore": "Explorar Amenidades",
+    "private": "Amenidades Privadas",
+    "public": "Amenidades Públicas",
+    "clubHouse": {
+        "title": "Club House",
+        "detail": "Detalle Club House",
+        "manager": "Administrar Clubhouse"
+    },
+    "masterPlan": {
+        "title": "Plan Maestro",
+        "inventory": "Inventario Plan Maestro"
+    }
+}

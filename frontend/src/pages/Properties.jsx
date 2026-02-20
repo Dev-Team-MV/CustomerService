@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Typography,
@@ -44,6 +45,7 @@ import propertyService from '../services/propertyService'
 import PropertyDetailsModal from '../components/myProperty/PropertyDetailsModal'
 
 const Properties = () => {
+  const { t } = useTranslation(['property', 'common'])
   const navigate = useNavigate()
   const { user } = useAuth()
   const [properties, setProperties] = useState([])
@@ -57,22 +59,20 @@ const Properties = () => {
   const [editingPriceValue, setEditingPriceValue] = useState('')
   const [savingPrice, setSavingPrice] = useState(false)
   const [modelFilter, setModelFilter] = useState('')
-  const [residentSortOrder, setResidentSortOrder] = useState('none') // 'none' | 'asc' | 'desc'
-const [editValues, setEditValues] = useState({})
-const [savingEdit, setSavingEdit] = useState(false)
+  const [residentSortOrder, setResidentSortOrder] = useState('none')
+  const [editValues, setEditValues] = useState({})
+  const [savingEdit, setSavingEdit] = useState(false)
 
-const [lotsArray, setLotsArray] = useState([])
-const [modelsArray, setModelsArray] = useState([])
-const [usersArray, setUsersArray] = useState([])
-const [facades, setFacades] = useState([]);
+  const [lotsArray, setLotsArray] = useState([])
+  const [modelsArray, setModelsArray] = useState([])
+  const [usersArray, setUsersArray] = useState([])
+  const [facades, setFacades] = useState([])
 
-const [detailsOpen, setDetailsOpen] = useState(false)
-const [detailsProperty, setDetailsProperty] = useState(null)
-
+  const [detailsOpen, setDetailsOpen] = useState(false)
+  const [detailsProperty, setDetailsProperty] = useState(null)
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
 
-  // Extract unique model names for filter dropdown
   const modelOptions = useMemo(() => {
     const models = properties
       .map(p => p.model?.model)
@@ -80,16 +80,13 @@ const [detailsProperty, setDetailsProperty] = useState(null)
     return [...new Set(models)].sort()
   }, [properties])
 
-  // Processed data: default sort by lot number, then apply model filter and resident sort
   const processedData = useMemo(() => {
     let result = [...properties]
 
-    // Filter by model
     if (modelFilter) {
       result = result.filter(p => p.model?.model === modelFilter)
     }
 
-    // Sort by resident/owner name if toggled
     if (residentSortOrder !== 'none') {
       result.sort((a, b) => {
         const nameA = (a.users?.[0]?.firstName || a.client?.firstName || '').toLowerCase()
@@ -99,7 +96,6 @@ const [detailsProperty, setDetailsProperty] = useState(null)
         return 0
       })
     } else {
-      // Default sort: by lot number ascending
       result.sort((a, b) => (a.lot?.number || 0) - (b.lot?.number || 0))
     }
 
@@ -131,26 +127,27 @@ const [detailsProperty, setDetailsProperty] = useState(null)
     }
   }
 
-    const fetchFacades = async (modelId) => {
+  const fetchFacades = async (modelId) => {
     if (!modelId) {
-      setFacades([]);
-      return;
+      setFacades([])
+      return
     }
     try {
-      const res = await api.get(`/models/${modelId}/facades`);
-      setFacades(res.data);
+      const res = await api.get(`/models/${modelId}/facades`)
+      setFacades(res.data)
     } catch (err) {
-      setFacades([]);
+      setFacades([])
     }
-  };
+  }
 
-    useEffect(() => {
-      if (editValues.model) {
-        propertyService.getFacades(editValues.model).then(setFacades)
-      } else {
-        setFacades([])
-      }
-    }, [editValues.model])
+  useEffect(() => {
+    if (editValues.model) {
+      propertyService.getFacades(editValues.model).then(setFacades)
+    } else {
+      setFacades([])
+    }
+  }, [editValues.model])
+
   const fetchUsers = async () => {
     try {
       const res = await api.get('/users')
@@ -172,15 +169,14 @@ const [detailsProperty, setDetailsProperty] = useState(null)
     }
   }
 
-  // ✅ HANDLERS CON useCallback
   const handleAddProperty = useCallback(() => {
     navigate('/properties/select')
   }, [navigate])
 
-const handleViewProperty = useCallback((property) => {
-  setDetailsProperty(property)
-  setDetailsOpen(true)
-}, [])
+  const handleViewProperty = useCallback((property) => {
+    setDetailsProperty(property)
+    setDetailsOpen(true)
+  }, [])
 
   const handleOpenPhases = useCallback((property) => {
     setSelectedProperty(property)
@@ -203,30 +199,28 @@ const handleViewProperty = useCallback((property) => {
     setContractsProperty(null)
   }, [])
 
-const handleEditProperty = useCallback((property) => {
-  setPropertyToEdit(property)
-  setEditValues({
-    lot: property.lot?._id || '',
-    model: property.model?._id || '',
-    facade: property.facade?._id || '', // <-- Asegúrate de que sea string
-    users: property.users?.map(u => u._id) || [],
-    price: property.price ?? '',
-    pending: property.pending ?? '',
-    initialPayment: property.initialPayment ?? '',
-    status: property.status ?? '',
-    saleDate: property.saleDate ? property.saleDate.slice(0, 10) : '',
-    hasBalcony: property.hasBalcony ?? false,
-    modelType: property.modelType ?? 'basic',
-    hasStorage: property.hasStorage ?? false,
-  })
-  setEditModalOpen(true)
-}, [])
+  const handleEditProperty = useCallback((property) => {
+    setPropertyToEdit(property)
+    setEditValues({
+      lot: property.lot?._id || '',
+      model: property.model?._id || '',
+      facade: property.facade?._id || '',
+      users: property.users?.map(u => u._id) || [],
+      price: property.price ?? '',
+      pending: property.pending ?? '',
+      initialPayment: property.initialPayment ?? '',
+      status: property.status ?? '',
+      saleDate: property.saleDate ? property.saleDate.slice(0, 10) : '',
+      hasBalcony: property.hasBalcony ?? false,
+      modelType: property.modelType ?? 'basic',
+      hasStorage: property.hasStorage ?? false,
+    })
+    setEditModalOpen(true)
+  }, [])
 
-
-
-const handleEditValuesChange = (newValues) => {
-  setEditValues(newValues)
-}
+  const handleEditValuesChange = (newValues) => {
+    setEditValues(newValues)
+  }
 
   const handleSaveEdit = useCallback(async () => {
     if (!propertyToEdit) return
@@ -238,10 +232,10 @@ const handleEditValuesChange = (newValues) => {
       setEditValues({})
       fetchData()
     } catch (err) {
-      alert('Error updating property')
+      alert(t('common:errors.updateFailed'))
     }
     setSavingEdit(false)
-  }, [propertyToEdit, editValues])
+  }, [propertyToEdit, editValues, t])
 
   const handleCloseEditModal = useCallback(() => {
     setEditModalOpen(false)
@@ -249,7 +243,6 @@ const handleEditValuesChange = (newValues) => {
     setEditValues({})
   }, [])
 
-  // ✅ HELPERS
   const getStatusColor = useCallback((status) => {
     switch (status) {
       case 'sold': 
@@ -299,7 +292,6 @@ const handleEditValuesChange = (newValues) => {
     }
   }, [])
 
-  // ✅ STATS
   const stats = useMemo(() => ({
     total: properties.length,
     sold: properties.filter(p => p.status === 'sold').length,
@@ -309,7 +301,7 @@ const handleEditValuesChange = (newValues) => {
 
   const propertiesStats = useMemo(() => [
     {
-      title: 'Total Properties',
+      title: t('property:stats.totalProperties'),
       value: stats.total,
       icon: Home,
       gradient: 'linear-gradient(135deg, #333F1F 0%, #4a5d3a 100%)',
@@ -317,7 +309,7 @@ const handleEditValuesChange = (newValues) => {
       delay: 0
     },
     {
-      title: 'Sold',
+      title: t('property:stats.sold'),
       value: stats.sold,
       icon: CheckCircle,
       gradient: 'linear-gradient(135deg, #8CA551 0%, #a8bf6f 100%)',
@@ -325,7 +317,7 @@ const handleEditValuesChange = (newValues) => {
       delay: 0.1
     },
     {
-      title: 'Active',
+      title: t('property:stats.active'),
       value: stats.active,
       icon: TrendingUp,
       gradient: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
@@ -333,21 +325,20 @@ const handleEditValuesChange = (newValues) => {
       delay: 0.2
     },
     {
-      title: 'Pending',
+      title: t('property:stats.pending'),
       value: stats.pending,
       icon: Schedule,
       gradient: 'linear-gradient(135deg, #E5863C 0%, #f59c5a 100%)',
       color: '#E5863C',
       delay: 0.3
     }
-  ], [stats])
+  ], [stats, t])
 
-  // ✅ DEFINIR COLUMNAS
   const columns = useMemo(() => {
     const baseColumns = [
       {
         field: 'lot',
-        headerName: 'LOT INFO',
+        headerName: t('property:table.lotInfo'),
         minWidth: 150,
         renderCell: ({ row }) => (
           <Box display="flex" alignItems="center" gap={1.5}>
@@ -376,7 +367,7 @@ const handleEditValuesChange = (newValues) => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                Lot {row.lot?.number}
+                {t('property:table.lot')} {row.lot?.number}
               </Typography>
               <Typography
                 variant="caption"
@@ -386,7 +377,7 @@ const handleEditValuesChange = (newValues) => {
                   fontSize: '0.7rem'
                 }}
               >
-                Section {row.lot?.section || 'N/A'}
+                {t('property:table.section')} {row.lot?.section || 'N/A'}
               </Typography>
             </Box>
           </Box>
@@ -394,7 +385,7 @@ const handleEditValuesChange = (newValues) => {
       },
       {
         field: 'model',
-        headerName: 'MODEL',
+        headerName: t('property:table.model'),
         minWidth: 120,
         renderCell: ({ row }) => (
           <Box>
@@ -423,7 +414,7 @@ const handleEditValuesChange = (newValues) => {
       },
       {
         field: 'facade',
-        headerName: 'FACADE',
+        headerName: t('property:table.facade'),
         minWidth: 120,
         renderCell: ({ row }) => (
           <Box>
@@ -435,7 +426,7 @@ const handleEditValuesChange = (newValues) => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              {row.facade?.title || 'Not selected'}
+              {row.facade?.title || t('property:table.notSelected')}
             </Typography>
             {row.facade?.price > 0 && (
               <Typography
@@ -455,7 +446,7 @@ const handleEditValuesChange = (newValues) => {
       },
       {
         field: 'user',
-        headerName: 'RESIDENT / OWNER',
+        headerName: t('property:table.residentOwner'),
         minWidth: 180,
         renderCell: ({ row }) => (
           <Box display="flex" alignItems="center" gap={1}>
@@ -495,7 +486,7 @@ const handleEditValuesChange = (newValues) => {
                   fontSize: '0.7rem'
                 }}
               >
-                {row.users?.[0]?.email || row.client?.email || 'No email'}
+                {row.users?.[0]?.email || row.client?.email || t('property:table.noEmail')}
               </Typography>
             </Box>
           </Box>
@@ -503,13 +494,13 @@ const handleEditValuesChange = (newValues) => {
       },
       {
         field: 'status',
-        headerName: 'STATUS',
+        headerName: t('property:table.status'),
         minWidth: 100,
         renderCell: ({ row }) => {
           const statusColors = getStatusColor(row.status)
           return (
             <Chip
-              label={row.status || 'pending'}
+              label={t(`property:status.${row.status || 'pending'}`)}
               size="small"
               sx={{
                 fontWeight: 600,
@@ -530,7 +521,7 @@ const handleEditValuesChange = (newValues) => {
       },
       {
         field: 'phases',
-        headerName: 'CONSTRUCTION PHASE',
+        headerName: t('property:table.constructionPhase'),
         minWidth: 200,
         renderCell: ({ row }) => {
           const phaseProgress = getPhaseProgress(row)
@@ -547,10 +538,10 @@ const handleEditValuesChange = (newValues) => {
                     fontSize: '0.8rem'
                   }}
                 >
-                  Phase {phaseProgress.current} / {phaseProgress.total}
+                  {t('property:table.phase')} {phaseProgress.current} / {phaseProgress.total}
                 </Typography>
               </Box>
-              <Tooltip title={`${phaseProgress.completed} phases completed`}>
+              <Tooltip title={t('property:table.phasesCompleted', { count: phaseProgress.completed })}>
                 <LinearProgress
                   variant="determinate"
                   value={phaseProgress.percentage}
@@ -575,7 +566,7 @@ const handleEditValuesChange = (newValues) => {
                   mt: 0.5
                 }}
               >
-                {phaseProgress.completed} completed • {phaseProgress.percentage}%
+                {phaseProgress.completed} {t('property:table.completed')} • {phaseProgress.percentage}%
               </Typography>
               <Button
                 size="small"
@@ -599,7 +590,7 @@ const handleEditValuesChange = (newValues) => {
                 }}
                 variant="outlined"
               >
-                {isAdmin ? 'Manage Phases' : 'View Progress'}
+                {isAdmin ? t('property:actions.managePhases') : t('property:actions.viewProgress')}
               </Button>
             </Box>
           )
@@ -607,7 +598,7 @@ const handleEditValuesChange = (newValues) => {
       },
       {
         field: 'price',
-        headerName: 'PRICE',
+        headerName: t('property:table.price'),
         minWidth: 140,
         renderCell: ({ row }) => (
           <Box>
@@ -635,7 +626,7 @@ const handleEditValuesChange = (newValues) => {
                   display: 'block'
                 }}
               >
-                Pending: ${row.pending?.toLocaleString()}
+                {t('property:table.pending')}: ${row.pending?.toLocaleString()}
               </Typography>
             )}
             {row.initialPayment > 0 && (
@@ -649,7 +640,7 @@ const handleEditValuesChange = (newValues) => {
                   display: 'block'
                 }}
               >
-                Paid: ${row.initialPayment?.toLocaleString()}
+                {t('property:table.paid')}: ${row.initialPayment?.toLocaleString()}
               </Typography>
             )}
           </Box>
@@ -657,15 +648,14 @@ const handleEditValuesChange = (newValues) => {
       }
     ]
 
-    // ✅ Agregar columna de contratos solo para admins
     if (isAdmin) {
       baseColumns.push({
         field: 'contracts',
-        headerName: 'CONTRACTS',
+        headerName: t('property:table.contracts'),
         align: 'center',
         width: 100,
         renderCell: ({ row }) => (
-          <Tooltip title="Manage contracts" placement="top">
+          <Tooltip title={t('property:actions.manageContracts')} placement="top">
             <IconButton
               size="small"
               onClick={(e) => {
@@ -694,15 +684,14 @@ const handleEditValuesChange = (newValues) => {
       })
     }
 
-    // ✅ Agregar columna de acciones
     baseColumns.push({
       field: 'actions',
-      headerName: 'ACTIONS',
+      headerName: t('property:table.actions'),
       align: 'center',
       width: 120,
       renderCell: ({ row }) => (
         <Box display="flex" alignItems="center" gap={1}>
-          <Tooltip title="View details" placement="top">
+          <Tooltip title={t('property:actions.viewDetails')} placement="top">
             <IconButton
               size="small"
               onClick={(e) => {
@@ -727,7 +716,7 @@ const handleEditValuesChange = (newValues) => {
               <Visibility sx={{ fontSize: 18, color: '#8CA551' }} />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Edit Price" placement="top">
+          <Tooltip title={t('property:actions.editPrice')} placement="top">
             <IconButton
               size="small"
               onClick={(e) => {
@@ -757,7 +746,7 @@ const handleEditValuesChange = (newValues) => {
     })
 
     return baseColumns
-  }, [isAdmin, getStatusColor, getPhaseProgress, handleOpenPhases, handleOpenContracts, handleViewProperty, handleEditProperty])
+  }, [isAdmin, getStatusColor, getPhaseProgress, handleOpenPhases, handleOpenContracts, handleViewProperty, handleEditProperty, t])
 
   return (
     <Box
@@ -768,23 +757,20 @@ const handleEditValuesChange = (newValues) => {
       }}
     >
       <Container maxWidth="xl">
-        {/* Header */}
         <PageHeader
           icon={Home}
-          title="Property Management"
-          subtitle="Oversee inventory, pricing, and resident assignments across the estate"
+          title={t('property:title')}
+          subtitle={t('property:subtitle')}
           actionButton={{
-            label: 'Add a New Property',
+            label: t('property:actions.addProperty'),
             onClick: handleAddProperty,
             icon: <Add />,
-            tooltip: 'Add Property'
+            tooltip: t('property:actions.addProperty')
           }}
         />
 
-        {/* Stats Cards */}
         <StatsCards stats={propertiesStats} loading={loading} />
 
-        {/* Filters Bar */}
         <Box
           sx={{
             display: 'flex',
@@ -794,7 +780,6 @@ const handleEditValuesChange = (newValues) => {
             flexWrap: 'wrap'
           }}
         >
-          {/* Model Filter */}
           <FormControl size="small" sx={{ minWidth: 200 }}>
             <InputLabel
               sx={{
@@ -803,11 +788,11 @@ const handleEditValuesChange = (newValues) => {
                 '&.Mui-focused': { color: '#333F1F' }
               }}
             >
-              Filter by Model
+              {t('property:filters.filterByModel')}
             </InputLabel>
             <Select
               value={modelFilter}
-              label="Filter by Model"
+              label={t('property:filters.filterByModel')}
               onChange={(e) => setModelFilter(e.target.value)}
               startAdornment={<FilterList sx={{ fontSize: 18, color: '#8CA551', mr: 0.5 }} />}
               sx={{
@@ -826,7 +811,7 @@ const handleEditValuesChange = (newValues) => {
               }}
             >
               <MenuItem value="">
-                <em>All Models</em>
+                <em>{t('property:filters.allModels')}</em>
               </MenuItem>
               {modelOptions.map((model) => (
                 <MenuItem key={model} value={model}>
@@ -836,14 +821,13 @@ const handleEditValuesChange = (newValues) => {
             </Select>
           </FormControl>
 
-          {/* Resident/Owner Sort Toggle */}
           <Tooltip
             title={
               residentSortOrder === 'none'
-                ? 'Sort Resident/Owner A-Z'
+                ? t('property:filters.sortResidentAZ')
                 : residentSortOrder === 'asc'
-                ? 'Sort Resident/Owner Z-A'
-                : 'Remove Resident/Owner sort'
+                ? t('property:filters.sortResidentZA')
+                : t('property:filters.removeResidentSort')
             }
             placement="top"
           >
@@ -880,12 +864,11 @@ const handleEditValuesChange = (newValues) => {
                     })
               }}
             >
-              Resident {residentSortOrder === 'asc' ? 'A → Z' : residentSortOrder === 'desc' ? 'Z → A' : 'A-Z'}
+              {t('property:filters.resident')} {residentSortOrder === 'asc' ? 'A → Z' : residentSortOrder === 'desc' ? 'Z → A' : 'A-Z'}
             </Button>
           </Tooltip>
         </Box>
 
-        {/* ✅ TABLA REUTILIZABLE */}
         <DataTable
           columns={columns}
           data={processedData}
@@ -893,9 +876,9 @@ const handleEditValuesChange = (newValues) => {
           emptyState={
             <EmptyState
               icon={Home}
-              title="No properties found"
-              description="Click 'Add Property' to create one"
-              actionLabel="Add Property"
+              title={t('property:empty.title')}
+              description={t('property:empty.description')}
+              actionLabel={t('property:empty.action')}
               onAction={handleAddProperty}
             />
           }
@@ -904,7 +887,6 @@ const handleEditValuesChange = (newValues) => {
           maxHeight={600}
         />
 
-        {/* Modals */}
         <PropertyDetailsModal
           open={detailsOpen}
           onClose={() => setDetailsOpen(false)}
