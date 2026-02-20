@@ -25,16 +25,26 @@ const PropertySpecsGrid = ({ propertyDetails, isModel10, balconyLabels, gridProp
       label: "STORIES",
       value: propertyDetails.model?.stories,
     },
+    // ...existing code...
     {
       icon: <Home sx={{ fontSize: { xs: 20, sm: 22 } }} />,
       label: "LOT NUMBER",
-      value: `#${propertyDetails.property?.lot?.number}`,
+      value: propertyDetails.lot?.number
+        ? `#${propertyDetails.lot.number}`
+        : propertyDetails.model?.lot?.number
+          ? `#${propertyDetails.model.lot.number}`
+          : "N/A",
     },
     {
       icon: <AttachMoney sx={{ fontSize: { xs: 20, sm: 22 } }} />,
       label: "PROPERTY VALUE",
-      value: `$${propertyDetails.property?.price?.toLocaleString()}`,
+      value: propertyDetails.price
+        ? `$${propertyDetails.price.toLocaleString()}`
+        : propertyDetails.model?.price
+          ? `$${propertyDetails.model.price.toLocaleString()}`
+          : "N/A",
     },
+    // ...existing code...
     isModel10 && propertyDetails.property?.hasBalcony && {
       icon: React.createElement(balconyLabels.icon, {
         sx: { fontSize: { xs: 20, sm: 22 } }
