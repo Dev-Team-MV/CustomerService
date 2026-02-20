@@ -1,4 +1,4 @@
-import { Box, Paper, Typography, IconButton, Tooltip } from '@mui/material'
+import { Box, Paper,Button, Typography, IconButton, Tooltip } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import MyLocationIcon from '@mui/icons-material/MyLocation'
@@ -6,21 +6,23 @@ import { useState, useRef, useEffect } from 'react'
 import AmenitiesGalleryModal from '../property/AmenitiesGalleryModal'
 import uploadService from '../../services/uploadService'
 import defaultMap from '../../../public/images/mapLakewood.png'
+import { CloudUpload } from '@mui/icons-material'
+import OutdoorAmenitiesModal from '../masterPlan/OutdoorAmenitiesModal'
+// ...otros imports...
 
 // Amenidades exteriores (ajusta x, y, id, name, images según tu plano)
 const exteriorAmenities = [
-  { id: 1, name: "Dock", x: 8, y: 90, images: [] },
-  { id: 2, name: "Boats & Jet Ski", x: 12, y: 95, images: [] },
-  { id: 3, name: "Dog Park", x: 25, y: 20, images: [] },
-  { id: 4, name: "Pickleball Courts", x: 15, y: 80, images: [] },
-  { id: 5, name: "Semi-Olimpic Pool", x: 10, y: 60, images: [] },
-  { id: 6, name: "Grills", x: 40, y: 30, images: [] },
-  { id: 7, name: "Sunset Place", x: 60, y: 10, images: [] },
-  { id: 8, name: "Lake Park", x: 80, y: 20, images: [] },
-  { id: 9, name: "Viewpoint", x: 90, y: 40, images: [] },
-  { id: 10, name: "Access", x: 95, y: 80, images: [] },
-  { id: 11, name: "Maintenance Area", x: 70, y: 90, images: [] },
-  { id: 12, name: "Visitors Parking", x: 50, y: 95, images: [] }
+  { id: 1, name: "Dock, Boats & Jet Ski", x: 5, y: 65, images: [] },
+  { id: 2, name: "Visitors Parking", x: 85, y: 78, images: [] },
+  { id: 3, name: "Dog Park", x: 13, y: 75, images: [] },
+  { id: 4, name: "Pickleball Courts", x: 18, y: 70, images: [] },
+  { id: 5, name: "Semi-Olimpic Pool", x: 17, y: 46, images: [] },
+  { id: 6, name: "Grills", x: 15, y: 35, images: [] },
+  { id: 7, name: "Sunset Place", x: 14, y: 46, images: [] },
+  { id: 8, name: "Lake Park", x: 8, y: 35, images: [] },
+  { id: 9, name: "Viewpoint", x: 12, y: 39, images: [] },
+  { id: 10, name: "Access", x: 71, y: 82, images: [] },
+  { id: 11, name: "Maintenance Area", x: 29, y: 79, images: [] },
 ]
 
 const ExteriorAmenitiesTab = () => {
@@ -31,13 +33,30 @@ const ExteriorAmenitiesTab = () => {
   const [hasMoved, setHasMoved] = useState(false)
   const [selectedAmenity, setSelectedAmenity] = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [amenityModalOpen, setAmenityModalOpen] = useState(false)
   const [mapUrl, setMapUrl] = useState(defaultMap)
   const mapRef = useRef(null)
+  const [amenitiesData, setAmenitiesData] = useState([]) // [{ id, name, images }]
+
+  
+    const handleOpenModal = () => setModalOpen(true)
+    const handleOpenAmenityModal = () => setAmenityModalOpen(true)
+
 
   // Cargar imagen dinámica del master plan
   useEffect(() => {
     fetchMasterPlanImages()
+    fetchOutdoorAmenities()
   }, [])
+
+    const fetchOutdoorAmenities = async () => {
+    try {
+      const res = await uploadService.getOutdoorAmenities()
+      setAmenitiesData(res.amenities || [])
+    } catch (err) {
+      setAmenitiesData([])
+    }
+  }
 
   const fetchMasterPlanImages = async () => {
     try {
@@ -101,12 +120,16 @@ const ExteriorAmenitiesTab = () => {
   const handleAmenityClick = (amenity) => {
     if (!hasMoved) {
       setSelectedAmenity(amenity)
-      setModalOpen(true)
+      setAmenityModalOpen(true)
     }
   }
 
   const handleCloseModal = () => {
     setModalOpen(false)
+    setTimeout(() => setSelectedAmenity(null), 300)
+  }
+  const handleAmenityCloseModal = () => {
+    setAmenityModalOpen(false)
     setTimeout(() => setSelectedAmenity(null), 300)
   }
 
@@ -122,6 +145,29 @@ const ExteriorAmenitiesTab = () => {
           boxSizing: 'border-box'
         }}
       >
+                <Button
+                  variant="contained"
+                  startIcon={<CloudUpload />} // Usa el ícono que prefieras, por ejemplo CloudUpload
+                  sx={{
+                    mb: 2,
+                    borderRadius: 3,
+                    fontWeight: 600,
+                    textTransform: 'none',
+                    fontFamily: '"Poppins", sans-serif',
+                    bgcolor: '#333F1F',
+                    color: 'white',
+                    px: 3,
+                    py: 1.2,
+                    boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+                    '&:hover': {
+                      bgcolor: '#8CA551',
+                      boxShadow: '0 6px 16px rgba(140, 165, 81, 0.35)'
+                    }
+                  }}
+                  onClick={handleOpenModal}
+                >
+Manage Outdoor Amenities
+                </Button>
         {/* Map Container */}
         <Box
           ref={mapRef}
@@ -156,20 +202,19 @@ const ExteriorAmenitiesTab = () => {
           >
             {/* Map Background */}
             <Box
-              sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                width: '100%',
-                height: '100%',
-                transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                transition: isDragging ? 'none' : 'transform 0.3s ease',
-                backgroundImage: `url(${mapUrl})`, // <--- Aquí usa la imagen dinámica
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                willChange: 'transform'
-              }}
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              width: '100%',
+              height: '100%',
+              transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+              transition: isDragging ? 'none' : 'transform 0.3s ease',
+              backgroundImage: `url(${mapUrl})`, // ✅ URL dinámica
+              backgroundSize: 'contain',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
             >
               {/* Amenity Markers */}
               {exteriorAmenities.map((amenity) => (
@@ -236,15 +281,27 @@ const ExteriorAmenitiesTab = () => {
         </Box>
       </Box>
 
-      {/* Gallery Modal */}
-      <AmenitiesGalleryModal
+            <OutdoorAmenitiesModal
         open={modalOpen}
         onClose={handleCloseModal}
-        amenity={selectedAmenity}
-        amenityIndex={selectedAmenity ? exteriorAmenities.findIndex(a => a.id === selectedAmenity.id) : 0}
-        amenities={exteriorAmenities}
-        isPublicView={false}
+        amenitiesList={amenitiesData}
+        onUploaded={fetchOutdoorAmenities}
       />
+
+      {/* Gallery Modal */}
+    <AmenitiesGalleryModal
+      open={amenityModalOpen}
+      onClose={handleAmenityCloseModal}
+      amenity={selectedAmenity}
+      images={
+        selectedAmenity
+          ? (amenitiesData.find(a => a.name === selectedAmenity.name)?.images || [])
+          : []
+      }
+      amenityIndex={selectedAmenity ? amenitiesData.findIndex(a => a.name === selectedAmenity.name) : -1}
+      amenities={amenitiesData} // <--- usa el array del backend, no el quemado
+      isPublicView={false}
+    />
     </>
   )
 }

@@ -195,8 +195,8 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
       setDeleting(null)
     }
   }
-  
 
+  // ✅ DESCARGAR CONTRATO (FORZAR DESCARGA)
   // ✅ DESCARGAR CONTRATO (vía API para evitar CORS con GCS)
   const handleDownloadContract = async (docType) => {
     const contract = existingContracts[docType.key]
@@ -603,6 +603,32 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
 
                             {/* ✅ BOTONES DE ACCIÓN */}
                             <Box display="flex" gap={1}>
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  startIcon={<Download />}
+                                  onClick={() => handleDownloadContract(docType)}
+                                  disabled={isDeleting}
+                                  sx={{
+                                    borderRadius: 2,
+                                    textTransform: 'none',
+                                    fontWeight: 600,
+                                    fontFamily: '"Poppins", sans-serif',
+                                    borderColor: 'rgba(140, 165, 81, 0.3)',
+                                    borderWidth: '2px',
+                                    color: '#333F1F',
+                                    '&:hover': {
+                                      borderColor: '#8CA551',
+                                      borderWidth: '2px',
+                                      bgcolor: 'rgba(140, 165, 81, 0.08)'
+                                    },
+                                    '&:disabled': {
+                                      opacity: 0.5
+                                    }
+                                  }}
+                                >
+                                  View
+                                </Button>
                               <Button
                                 variant="outlined"
                                 size="small"

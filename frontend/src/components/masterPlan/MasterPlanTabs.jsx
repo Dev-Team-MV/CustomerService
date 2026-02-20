@@ -1,6 +1,6 @@
 import { Tabs, Tab, Box, Paper } from '@mui/material'
 import { useState } from 'react'
-import InventoryTab from './InventoryTab'
+import InventoryTab from './inventoryTab'
 import ExteriorAmenitiesTab from './ExteriorAmenitiesTab'
 import RecorridoTab from './RecorridoTab'
 

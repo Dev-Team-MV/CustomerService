@@ -5,7 +5,9 @@ import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
 import { Box, Typography, Button, IconButton, MenuItem, Select, InputLabel, FormControl, Chip, Checkbox, FormControlLabel } from '@mui/material';
 import { AttachMoney, Close, HomeWork, People, House, Storefront } from '@mui/icons-material';
-
+    import PriceInput from '../../constants/PriceInput'
+    
+    
 const EditPropertyModal = ({
   open,
   onClose,
@@ -163,43 +165,27 @@ const EditPropertyModal = ({
       </FormControl>
 
       {/* Price input */}
-      <TextField
-        label="Price"
-        type="number"
-        value={values.price ?? property?.price ?? ''}
-        onChange={e => onChange({ ...values, price: Number(e.target.value) })}
-        fullWidth
-        InputProps={{
-          startAdornment: <AttachMoney sx={{ color: '#8CA551' }} />,
-        }}
-        sx={{ mb: 2 }}
-      />
 
-      {/* Pending input */}
-      <TextField
-        label="Pending"
-        type="number"
-        value={values.pending ?? property?.pending ?? ''}
-        onChange={e => onChange({ ...values, pending: Number(e.target.value) })}
-        fullWidth
-        InputProps={{
-          startAdornment: <AttachMoney sx={{ color: '#8CA551' }} />,
-        }}
-        sx={{ mb: 2 }}
-      />
-
-      {/* Initial Payment input */}
-      <TextField
-        label="Initial Payment"
-        type="number"
-        value={values.initialPayment ?? property?.initialPayment ?? ''}
-        onChange={e => onChange({ ...values, initialPayment: Number(e.target.value) })}
-        fullWidth
-        InputProps={{
-          startAdornment: <AttachMoney sx={{ color: '#8CA551' }} />,
-        }}
-        sx={{ mb: 2 }}
-      />
+    <PriceInput
+      label="Price"
+      value={values.price ?? property?.price ?? ''}
+      onChange={val => onChange({ ...values, price: val })}
+      sx={{ mb: 2 }}
+    />
+    
+    <PriceInput
+      label="Pending"
+      value={values.pending ?? property?.pending ?? ''}
+      onChange={val => onChange({ ...values, pending: val })}
+      sx={{ mb: 2 }}
+    />
+    
+    <PriceInput
+      label="Initial Payment"
+      value={values.initialPayment ?? property?.initialPayment ?? ''}
+      onChange={val => onChange({ ...values, initialPayment: val })}
+      sx={{ mb: 2 }}
+    />
 
       {/* Status input */}
       <FormControl fullWidth sx={{ mb: 2 }}>
