@@ -197,16 +197,16 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
   }
   
 
-  // ✅ DESCARGAR CONTRATO
-  const handleDownloadContract = (docType) => {
+  // ✅ DESCARGAR CONTRATO (vía API para evitar CORS con GCS)
+  const handleDownloadContract = async (docType) => {
     const contract = existingContracts[docType.key]
-    if (contract?.fileUrl) {
-      console.log('📥 Downloading contract:', {
-        type: docType.key,
-        url: contract.fileUrl
-      })
-      // Abrir en nueva pestaña
-      window.open(contract.fileUrl, '_blank')
+    if (!contract?.fileUrl || !property?._id) return
+    try {
+      console.log('📥 Downloading contract:', { type: docType.key, propertyId: property._id })
+      await contractsService.downloadContract(property._id, docType.key)
+    } catch (error) {
+      console.error('❌ Download error:', error)
+      alert(error.message || 'No se pudo descargar el contrato.')
     }
   }
 

@@ -6,7 +6,8 @@ import {
   createContract,
   updateContract,
   updateContractByPropertyId,
-  deleteContract
+  deleteContract,
+  downloadContractByPropertyAndType
 } from '../controllers/contractController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
@@ -136,6 +137,34 @@ router.get('/property/:propertyId', protect, getContractsByPropertyId)
  *         description: No contracts for this property; use POST to create first
  */
 router.put('/property/:propertyId', protect, admin, updateContractByPropertyId)
+
+/**
+ * @swagger
+ * /api/contracts/property/{propertyId}/download/{type}:
+ *   get:
+ *     summary: Download contract file by property and type (proxy; avoids CORS)
+ *     tags: [Contracts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: propertyId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: type
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [promissoryNote, purchaseContract, agreement]
+ *     responses:
+ *       200:
+ *         description: File stream (attachment)
+ *       404:
+ *         description: No contract found for this property/type
+ */
+router.get('/property/:propertyId/download/:type', protect, downloadContractByPropertyAndType)
 
 /**
  * @swagger
