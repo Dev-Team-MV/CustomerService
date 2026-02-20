@@ -51,6 +51,9 @@ const PaymentTab = ({
   onPaymentUploaded,
   user
 }) => {
+      if (!propertyDetails) {
+    return <Box p={3}>Loading...</Box>
+  }
   const [uploadPaymentDialog, setUploadPaymentDialog] = useState(false)
   const [uploadingPayment, setUploadingPayment] = useState(false)
   const [paymentForm, setPaymentForm] = useState({
@@ -146,7 +149,7 @@ const handleSubmitPayment = async () => {
     setUploadingPayment(false)
   }
 }
-
+const totalPaid = propertyDetails?.totalPaid ?? 0;
 const columns = [
   {
     field: 'date',

@@ -195,10 +195,40 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
       setDeleting(null)
     }
   }
-  
+
+  // ✅ DESCARGAR CONTRATO (FORZAR DESCARGA)
+const handleDownloadContract = async (docType) => {
+  const contract = existingContracts[docType.key]
+  if (!contract?.fileUrl) return
+
+  try {
+    const fileName = contract.fileUrl.split('/').pop()?.split('?')[0] || `${docType.key}.pdf`
+    const response = await fetch(contract.fileUrl)
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const blob = await response.blob()
+    const blobUrl = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = blobUrl
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(blobUrl)
+  } catch (error) {
+    alert('No se pudo descargar automáticamente. El archivo se abrirá en otra pestaña.')
+    // Fallback: abrir en nueva pestaña
+    const link = document.createElement('a')
+    link.href = contract.fileUrl
+    link.download = ''
+    link.target = '_blank'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+}
 
   // ✅ DESCARGAR CONTRATO
-  const handleDownloadContract = (docType) => {
+  const handleViewContract = (docType) => {
     const contract = existingContracts[docType.key]
     if (contract?.fileUrl) {
       console.log('📥 Downloading contract:', {
@@ -603,6 +633,32 @@ const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {
 
                             {/* ✅ BOTONES DE ACCIÓN */}
                             <Box display="flex" gap={1}>
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  startIcon={<Download />}
+                                  onClick={() => handleViewContract(docType)}
+                                  disabled={isDeleting}
+                                  sx={{
+                                    borderRadius: 2,
+                                    textTransform: 'none',
+                                    fontWeight: 600,
+                                    fontFamily: '"Poppins", sans-serif',
+                                    borderColor: 'rgba(140, 165, 81, 0.3)',
+                                    borderWidth: '2px',
+                                    color: '#333F1F',
+                                    '&:hover': {
+                                      borderColor: '#8CA551',
+                                      borderWidth: '2px',
+                                      bgcolor: 'rgba(140, 165, 81, 0.08)'
+                                    },
+                                    '&:disabled': {
+                                      opacity: 0.5
+                                    }
+                                  }}
+                                >
+                                  View
+                                </Button>
                               <Button
                                 variant="outlined"
                                 size="small"
