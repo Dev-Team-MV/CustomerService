@@ -1,5 +1,5 @@
 import PageHeader from '../components/PageHeader'
-import MasterPlanTabs from '../components/masterplan/MasterPlanTabs'
+import MasterPlanTabs from '../components/masterPlan/MasterPlanTabs'
 import MapIcon from '@mui/icons-material/Map'
 import { Box, Container, Paper } from '@mui/material'
 import { motion } from 'framer-motion'

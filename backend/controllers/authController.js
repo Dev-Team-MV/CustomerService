@@ -385,3 +385,59 @@ export const verifySetupToken = async (req, res) => {
     res.status(500).json({ message: error.message })
   }
 }
+
+/**
+ * Envía al propietario (usuario) un link para establecer su contraseña.
+ * Solo administradores. Útil para usuarios creados sin contraseña (ej. cuando el SMS en registro estaba comentado).
+ * Genera un nuevo setup token, lo guarda y envía por SMS el enlace.
+ */
+export const sendSetupPasswordLink = async (req, res) => {
+  try {
+    const { userId, email } = req.body
+
+    if (!userId && !email) {
+      return res.status(400).json({ message: 'userId or email is required' })
+    }
+
+    const query = userId ? { _id: userId } : { email: email.trim().toLowerCase() }
+    const user = await User.findOne(query).select('+setupToken +setupTokenExpires')
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    if (!user.phoneNumber) {
+      return res.status(400).json({
+        message: 'User has no phone number. Cannot send setup link via SMS.'
+      })
+    }
+
+    const setupToken = user.generateSetupToken()
+    await user.save()
+
+    const frontendUrl = process.env.FRONTEND_URL || 'https://customerservice.michelangelodelvalle.com'
+    const setupLink = `${frontendUrl}/setup-password/${setupToken}`
+    const message = `Hola ${user.firstName}, puedes establecer tu contraseña ingresando a este enlace: ${setupLink}`
+
+    try {
+      await sendSMSWithValidation(user.phoneNumber, message)
+    } catch (smsError) {
+      console.error('Error sending setup SMS:', smsError.message)
+      return res.status(502).json({
+        message: 'User and token updated, but SMS could not be sent.',
+        setupLink,
+        smsError: smsError.message
+      })
+    }
+
+    return res.status(200).json({
+      message: 'Setup link sent via SMS.',
+      userId: user._id,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      setupLink // por si el admin necesita copiarlo (ej. si SMS falla o para pruebas)
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
