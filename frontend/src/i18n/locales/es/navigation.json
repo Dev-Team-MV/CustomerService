@@ -1,0 +1,44 @@
+{
+    "menu": {
+        "dashboard": "Panel Principal",
+        "clubHouse": "Club House",
+        "properties": "Propiedades",
+        "lotInventory": "Inventario de Lotes",
+        "models": "Modelos",
+        "payloads": "Pagos",
+        "residents": "Residentes",
+        "analytics": "Analíticas",
+        "news": "Noticias",
+        "myProperty": "Mi Propiedad",
+        "amenities": "Amenidades",
+        "masterPlanInventory": "Inventario Plan Maestro",
+        "home": "Inicio",
+        "getYourQuote": "Obtén Tu Cotización",
+        "exploreAmenities": "Explorar Amenidades",
+        "clubhouseManager": "Administrar Clubhouse"
+    },
+    "tooltips": {
+        "openMenu": "Abrir menú",
+        "closeMenu": "Cerrar menú",
+        "notifications": "Notificaciones",
+        "accountSettings": "Configuración de cuenta"
+    },
+    "userMenu": {
+        "profile": "Perfil",
+        "logout": "Cerrar Sesión"
+    },
+    "notifications": {
+        "title": "Notificaciones",
+        "paymentReceived": "Pago recibido",
+        "paymentReceivedDesc": "Tu pago ha sido procesado.",
+        "newMessage": "Nuevo mensaje",
+        "newMessageDesc": "Tienes un nuevo mensaje del administrador.",
+        "documentApproved": "Documento aprobado",
+        "documentApprovedDesc": "Tu documento fue aprobado."
+    },
+    "noNotifications": "Aún no hay notificaciones",
+    "noNotificationsDesc": "Te notificaremos cuando ocurra algo importante",
+    "markAllAsRead": "Marcar todo como leído",
+    "unread": "{{count}} sin leer",
+    "hoursAgo": "hace {{count}} horas"
+}

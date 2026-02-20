@@ -1,0 +1,15 @@
+{
+    "title": "Amenities",
+    "explore": "Explore Amenities",
+    "private": "Private Amenities",
+    "public": "Public Amenities",
+    "clubHouse": {
+        "title": "Club House",
+        "detail": "Club House Detail",
+        "manager": "Clubhouse Manager"
+    },
+    "masterPlan": {
+        "title": "Master Plan",
+        "inventory": "Master Plan Inventory"
+    }
+}

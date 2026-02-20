@@ -1,0 +1,44 @@
+{
+    "menu": {
+        "dashboard": "Dashboard",
+        "clubHouse": "Club House",
+        "properties": "Properties",
+        "lotInventory": "Lot Inventory",
+        "models": "Models",
+        "payloads": "Payloads",
+        "residents": "Residents",
+        "analytics": "Analytics",
+        "news": "News",
+        "myProperty": "My Property",
+        "amenities": "Amenities",
+        "masterPlanInventory": "Master Plan Inventory",
+        "home": "Home",
+        "getYourQuote": "Get Your Quote",
+        "exploreAmenities": "Explore Amenities",
+        "clubhouseManager": "Clubhouse Manager"
+    },
+    "tooltips": {
+        "openMenu": "Open menu",
+        "closeMenu": "Close menu",
+        "notifications": "Notifications",
+        "accountSettings": "Account settings"
+    },
+    "userMenu": {
+        "profile": "Profile",
+        "logout": "Logout"
+    },
+    "notifications": {
+        "title": "Notifications",
+        "paymentReceived": "Payment received",
+        "paymentReceivedDesc": "Your payment has been processed.",
+        "newMessage": "New message",
+        "newMessageDesc": "You have a new message from admin.",
+        "documentApproved": "Document approved",
+        "documentApprovedDesc": "Your document was approved."
+    },
+    "noNotifications": "No notifications yet",
+    "noNotificationsDesc": "We'll notify you when something important happens",
+    "markAllAsRead": "Mark all as read",
+    "unread": "{{count}} unread",
+    "hoursAgo": "{{count}} hours ago"
+}

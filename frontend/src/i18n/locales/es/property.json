@@ -1,0 +1,56 @@
+{
+  "title": "Gestión de Propiedades",
+  "subtitle": "Supervise el inventario, precios y asignaciones de residentes en el desarrollo",
+  "stats": {
+    "totalProperties": "Total de Propiedades",
+    "sold": "Vendidas",
+    "active": "Activas",
+    "pending": "Pendientes"
+  },
+  "table": {
+    "lotInfo": "INFO LOTE",
+    "lot": "Lote",
+    "section": "Sección",
+    "model": "MODELO",
+    "facade": "FACHADA",
+    "notSelected": "No seleccionada",
+    "residentOwner": "RESIDENTE / PROPIETARIO",
+    "noEmail": "Sin correo",
+    "status": "ESTADO",
+    "constructionPhase": "FASE DE CONSTRUCCIÓN",
+    "phase": "Fase",
+    "phasesCompleted": "{{count}} fases completadas",
+    "completed": "completadas",
+    "price": "PRECIO",
+    "pending": "Pendiente",
+    "paid": "Pagado",
+    "contracts": "CONTRATOS",
+    "actions": "ACCIONES"
+  },
+  "status": {
+    "sold": "Vendida",
+    "active": "Activa",
+    "pending": "Pendiente"
+  },
+  "actions": {
+    "addProperty": "Agregar Nueva Propiedad",
+    "viewDetails": "Ver detalles",
+    "editPrice": "Editar Precio",
+    "manageContracts": "Gestionar contratos",
+    "managePhases": "Gestionar Fases",
+    "viewProgress": "Ver Progreso"
+  },
+  "filters": {
+    "filterByModel": "Filtrar por Modelo",
+    "allModels": "Todos los Modelos",
+    "resident": "Residente",
+    "sortResidentAZ": "Ordenar Residente/Propietario A-Z",
+    "sortResidentZA": "Ordenar Residente/Propietario Z-A",
+    "removeResidentSort": "Quitar ordenamiento de Residente/Propietario"
+  },
+  "empty": {
+    "title": "No se encontraron propiedades",
+    "description": "Haz clic en 'Agregar Propiedad' para crear una",
+    "action": "Agregar Propiedad"
+  }
+}

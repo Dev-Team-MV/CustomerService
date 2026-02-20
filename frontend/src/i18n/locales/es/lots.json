@@ -1,0 +1,45 @@
+{
+  "title": "Inventario de Lotes",
+  "subtitle": "Gestiona la disponibilidad y precios de los lotes",
+  "stats": {
+    "total": "Total de Lotes",
+    "available": "Disponibles",
+    "pending": "Pendientes",
+    "sold": "Vendidos"
+  },
+  "table": {
+    "lotNumber": "NÚMERO DE LOTE",
+    "lot": "Lote",
+    "price": "PRECIO",
+    "status": "ESTADO",
+    "actions": "ACCIONES"
+  },
+  "status": {
+    "available": "Disponible",
+    "pending": "Pendiente",
+    "sold": "Vendido"
+  },
+  "actions": {
+    "add": "Agregar Lote",
+    "edit": "Editar Lote",
+    "delete": "Eliminar Lote"
+  },
+  "empty": {
+    "title": "No hay lotes disponibles",
+    "description": "Comienza agregando tu primer lote",
+    "action": "Agregar Lote"
+  },
+  "dialog": {
+    "addTitle": "Agregar Lote",
+    "editTitle": "Editar Lote",
+    "subtitle": "Gestiona los detalles del lote",
+    "update": "Actualizar",
+    "create": "Crear"
+  },
+  "form": {
+    "number": "Número de Lote",
+    "price": "Precio",
+    "status": "Estado"
+  },
+  "confirmDelete": "¿Seguro que deseas eliminar este lote?"
+}

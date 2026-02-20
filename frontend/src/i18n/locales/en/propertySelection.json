@@ -1,0 +1,5 @@
+{
+  "title": "Property Selection",
+  "subtitle": "Choose your lot, model and facade. Calculate your price and assign residents.",
+  "errorLoading": "Error loading property data: {{error}}"
+}

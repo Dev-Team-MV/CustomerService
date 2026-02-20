@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react'
-import { 
-  Box, 
-  Paper, 
-  Typography, 
-  Tabs, 
-  Tab, 
-  TextField, 
-  Grid, 
-  MenuItem, 
+import {
+  Box,
+  Paper,
+  Typography,
+  TextField,
+  MenuItem,
   Divider,
   Collapse,
   Alert,
@@ -24,35 +21,31 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import PersonIcon from '@mui/icons-material/Person'
 import api from '../../services/api'
 import { sendWelcomeSMS, sendPropertyAssignmentSMS } from '../../services/smsService'
-import PhoneInput from 'react-phone-input-2'
-import 'react-phone-input-2/lib/style.css'
-import {motion, AnimatePresence} from 'framer-motion'
+import ResidentDialog from '../ResidentDialog'
 
 const ResidentAssignment = ({ expanded, onToggle }) => {
   const navigate = useNavigate()
   const { selectedLot, selectedModel, selectedFacade, financials, options, selectedPricingOption } = useProperty()
-  const [tabValue, setTabValue] = useState(0)
   const [users, setUsers] = useState([])
   const [selectedUser, setSelectedUser] = useState('')
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [smsStatus, setSmsStatus] = useState(null)
-  
+  const [dialogOpen, setDialogOpen] = useState(false)
   const [newUserData, setNewUserData] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    password: '',
     phoneNumber: '',
     birthday: '',
     role: 'user'
   })
 
   useEffect(() => {
-    if (expanded && tabValue === 0 && users.length === 0) {
+    if (expanded && users.length === 0) {
       fetchUsers()
     }
-  }, [expanded, tabValue])
+  }, [expanded])
 
   const fetchUsers = async () => {
     try {
@@ -72,53 +65,10 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
       setSubmitting(true)
       setSmsStatus(null)
       let userId = selectedUser
-      let userInfo = null
-      let isNewUser = false
-  
-      if (tabValue === 1) {
-        isNewUser = true
+      let userInfo = users.find(u => u._id === selectedUser) || users.find(u => u.id === selectedUser)
 
-        const normalizedPhone = newUserData.phoneNumber
-          ? newUserData.phoneNumber.startsWith('+')
-            ? newUserData.phoneNumber
-            : `+${newUserData.phoneNumber}`
-          : undefined
-
-        const payload = {
-          ...newUserData,
-          phoneNumber: normalizedPhone,
-          skipPasswordSetup: true
-        }
-
-        const userResponse = await api.post('/auth/register', payload)
-        userId = userResponse.data?.user?._id || userResponse.data?._id || userResponse.data?.userId
-        userInfo = {
-          firstName: newUserData.firstName,
-          email: newUserData.email,
-          phoneNumber: normalizedPhone
-        }
-
-        if (userInfo.phoneNumber) {
-          setSmsStatus('sending-welcome')
-          try {
-            const welcomeSMS = await sendWelcomeSMS(userInfo)
-            if (welcomeSMS?.success) {
-              setSmsStatus('sent')
-            } else {
-              console.warn('Welcome SMS result:', welcomeSMS)
-              setSmsStatus('failed')
-            }
-          } catch (e) {
-            console.warn('Welcome SMS error:', e)
-            setSmsStatus('failed')
-          }
-        }
-      } else {
-        userInfo = users.find(u => u._id === selectedUser) || users.find(u => u.id === selectedUser)
-      }
-  
       if (!userId) {
-        alert('Please select or create a user')
+        alert('Please select a user')
         setSubmitting(false)
         return
       }
@@ -167,10 +117,8 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
         hasStorage: Boolean(hasStorage)
       }
 
-      console.log('Property payload (normalized):', propertyPayload)
-
       await api.post('/properties', propertyPayload)
-  
+
       if (userInfo?.phoneNumber) {
         setSmsStatus('sending-property')
         try {
@@ -186,25 +134,22 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
           if (propertySMS?.success) {
             setSmsStatus('sent')
           } else {
-            console.warn('Property SMS failed:', propertySMS)
             setSmsStatus('failed')
           }
         } catch (e) {
-          console.warn('Property SMS error:', e)
           setSmsStatus('failed')
         }
       }
-      
-      const smsMessage = smsStatus === 'sent' 
+
+      const smsMessage = smsStatus === 'sent'
         ? '\n\n📱 SMS notifications sent successfully!'
         : userInfo?.phoneNumber && smsStatus === 'failed'
         ? '\n\n⚠️ Property created but SMS notification failed'
         : ''
-  
+
       alert(`Property assigned successfully!${smsMessage}`)
       navigate('/properties')
     } catch (error) {
-      console.error('Error assigning property:', error)
       alert(error.response?.data?.message || 'Error assigning property')
     } finally {
       setSubmitting(false)
@@ -212,40 +157,89 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
     }
   }
 
-  const isFormValid = () => {
-    if (tabValue === 0) {
-      return selectedUser !== ''
-    } else {
-      return Boolean(newUserData.firstName && newUserData.lastName && newUserData.email && newUserData.phoneNumber)
+  // Handler para crear usuario desde el modal
+  const handleCreateUser = async () => {
+    try {
+      setSubmitting(true)
+      setSmsStatus(null)
+
+      const normalizedPhone = newUserData.phoneNumber
+        ? newUserData.phoneNumber.startsWith('+')
+          ? newUserData.phoneNumber
+          : `+${newUserData.phoneNumber}`
+        : undefined
+
+      const payload = {
+        ...newUserData,
+        phoneNumber: normalizedPhone,
+        skipPasswordSetup: true
+      }
+
+      const userResponse = await api.post('/auth/register', payload)
+      const userId = userResponse.data?.user?._id || userResponse.data?._id || userResponse.data?.userId
+      const userInfo = {
+        _id: userId,
+        firstName: newUserData.firstName,
+        lastName: newUserData.lastName,
+        email: newUserData.email,
+        phoneNumber: normalizedPhone
+      }
+
+      // Agrega el usuario a la lista y selecciónalo
+      setUsers(prev => [...prev, userInfo])
+      setSelectedUser(userId)
+
+      setDialogOpen(false)
+      setNewUserData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phoneNumber: '',
+        birthday: '',
+        role: 'user'
+      })
+
+      // Envía SMS de bienvenida
+      if (userInfo.phoneNumber) {
+        setSmsStatus('sending-welcome')
+        try {
+          const welcomeSMS = await sendWelcomeSMS(userInfo)
+          if (welcomeSMS?.success) {
+            setSmsStatus('sent')
+          } else {
+            setSmsStatus('failed')
+          }
+        } catch (e) {
+          setSmsStatus('failed')
+        }
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || 'Error creating user')
+    } finally {
+      setSubmitting(false)
+      setSmsStatus(null)
     }
   }
 
   if (!selectedLot || !selectedModel) {
     return (
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          p: 3, 
-          bgcolor: '#fff', 
-          borderRadius: 4,
-          border: '1px solid #e0e0e0',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-          opacity: 0.6
-        }}
-      >
-        <Typography 
-          variant="subtitle1" 
-          textAlign="center" 
-          sx={{ 
-            py: 2,
-            fontFamily: '"Poppins", sans-serif',
-            letterSpacing: '1.5px',
-            textTransform: 'uppercase',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            color: '#706f6f'
-          }}
-        >
+      <Paper elevation={0} sx={{
+        p: 3,
+        bgcolor: '#fff',
+        borderRadius: 4,
+        border: '1px solid #e0e0e0',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+        opacity: 0.6
+      }}>
+        <Typography variant="subtitle1" textAlign="center" sx={{
+          py: 2,
+          fontFamily: '"Poppins", sans-serif',
+          letterSpacing: '1.5px',
+          textTransform: 'uppercase',
+          fontSize: '0.85rem',
+          fontWeight: 600,
+          color: '#706f6f'
+        }}>
           SELECT LOT AND MODEL TO ASSIGN RESIDENT
         </Typography>
       </Paper>
@@ -253,75 +247,59 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
   }
 
   return (
-    <Paper 
-      elevation={0} 
-      sx={{ 
-        bgcolor: '#fff', 
-        borderRadius: 4,
-        border: expanded ? '2px solid #8CA551' : '1px solid #e0e0e0',
-        overflow: 'hidden',
+    <Paper elevation={0} sx={{
+      bgcolor: '#fff',
+      borderRadius: 4,
+      border: expanded ? '2px solid #8CA551' : '1px solid #e0e0e0',
+      overflow: 'hidden',
+      transition: 'all 0.3s ease',
+      boxShadow: expanded ? '0 8px 24px rgba(140, 165, 81, 0.15)' : '0 4px 20px rgba(0,0,0,0.06)'
+    }}>
+      {/* HEADER */}
+      <Box onClick={onToggle} sx={{
+        p: 3,
+        cursor: 'pointer',
+        bgcolor: expanded ? 'rgba(140, 165, 81, 0.08)' : '#fff',
         transition: 'all 0.3s ease',
-        boxShadow: expanded ? '0 8px 24px rgba(140, 165, 81, 0.15)' : '0 4px 20px rgba(0,0,0,0.06)'
-      }}
-    >
-      {/* ✅ HEADER - Brandbook */}
-      <Box 
-        onClick={onToggle}
-        sx={{ 
-          p: 3, 
-          cursor: 'pointer',
-          bgcolor: expanded ? 'rgba(140, 165, 81, 0.08)' : '#fff',
-          transition: 'all 0.3s ease',
-          borderBottom: expanded ? '2px solid rgba(140, 165, 81, 0.2)' : 'none',
-          '&:hover': {
-            bgcolor: expanded ? 'rgba(140, 165, 81, 0.12)' : 'rgba(51, 63, 31, 0.03)'
-          }
-        }}
-      >
+        borderBottom: expanded ? '2px solid rgba(140, 165, 81, 0.2)' : 'none',
+        '&:hover': {
+          bgcolor: expanded ? 'rgba(140, 165, 81, 0.12)' : 'rgba(51, 63, 31, 0.03)'
+        }
+      }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box display="flex" alignItems="center" gap={2}>
-            <Box
-              sx={{
-                width: 48,
-                height: 48,
-                borderRadius: 3,
-                bgcolor: expanded ? '#333F1F' : 'rgba(51, 63, 31, 0.08)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.3s',
-                boxShadow: expanded ? '0 4px 12px rgba(51, 63, 31, 0.2)' : 'none'
-              }}
-            >
+            <Box sx={{
+              width: 48,
+              height: 48,
+              borderRadius: 3,
+              bgcolor: expanded ? '#333F1F' : 'rgba(51, 63, 31, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.3s',
+              boxShadow: expanded ? '0 4px 12px rgba(51, 63, 31, 0.2)' : 'none'
+            }}>
               <PersonIcon sx={{ color: expanded ? 'white' : '#333F1F', fontSize: 24 }} />
             </Box>
             <Box>
-              <Typography 
-                variant="subtitle1" 
-                fontWeight={700}
-                sx={{
-                  color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif',
-                  letterSpacing: '1.5px',
-                  textTransform: 'uppercase',
-                  fontSize: '0.95rem'
-                }}
-              >
+              <Typography variant="subtitle1" fontWeight={700} sx={{
+                color: '#333F1F',
+                fontFamily: '"Poppins", sans-serif',
+                letterSpacing: '1.5px',
+                textTransform: 'uppercase',
+                fontSize: '0.95rem'
+              }}>
                 04 Resident Assignment
               </Typography>
-              <Typography 
-                variant="caption" 
-                sx={{
-                  color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif',
-                  fontSize: '0.75rem'
-                }}
-              >
+              <Typography variant="caption" sx={{
+                color: '#706f6f',
+                fontFamily: '"Poppins", sans-serif',
+                fontSize: '0.75rem'
+              }}>
                 {expanded ? 'Select or create a resident' : 'Click to expand'}
               </Typography>
             </Box>
           </Box>
-          
           <Box display="flex" alignItems="center" gap={2}>
             {expanded ? (
               <ExpandLessIcon sx={{ color: '#8CA551', fontSize: 28 }} />
@@ -332,110 +310,62 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
         </Box>
       </Box>
 
-      {/* ✅ COLLAPSIBLE CONTENT */}
+      {/* COLLAPSIBLE CONTENT */}
       <Collapse in={expanded}>
         <Box sx={{ p: 3 }}>
-          {/* ✅ SMS STATUS ALERTS - Brandbook */}
+          {/* SMS STATUS ALERTS */}
           {smsStatus === 'sending-welcome' && (
-            <Alert 
-              severity="info" 
-              sx={{ 
-                mb: 2,
-                borderRadius: 3,
-                bgcolor: 'rgba(33, 150, 243, 0.08)',
-                border: '1px solid rgba(33, 150, 243, 0.3)',
-                fontFamily: '"Poppins", sans-serif',
-                "& .MuiAlert-icon": {
-                  color: "#2196f3"
-                }
-              }}
-            >
+            <Alert severity="info" sx={{
+              mb: 2,
+              borderRadius: 3,
+              bgcolor: 'rgba(33, 150, 243, 0.08)',
+              border: '1px solid rgba(33, 150, 243, 0.3)',
+              fontFamily: '"Poppins", sans-serif',
+              "& .MuiAlert-icon": { color: "#2196f3" }
+            }}>
               📱 Sending welcome SMS to new user...
             </Alert>
           )}
           {smsStatus === 'sending-property' && (
-            <Alert 
-              severity="info" 
-              sx={{ 
-                mb: 2,
-                borderRadius: 3,
-                bgcolor: 'rgba(33, 150, 243, 0.08)',
-                border: '1px solid rgba(33, 150, 243, 0.3)',
-                fontFamily: '"Poppins", sans-serif',
-                "& .MuiAlert-icon": {
-                  color: "#2196f3"
-                }
-              }}
-            >
+            <Alert severity="info" sx={{
+              mb: 2,
+              borderRadius: 3,
+              bgcolor: 'rgba(33, 150, 243, 0.08)',
+              border: '1px solid rgba(33, 150, 243, 0.3)',
+              fontFamily: '"Poppins", sans-serif',
+              "& .MuiAlert-icon": { color: "#2196f3" }
+            }}>
               📱 Sending property assignment SMS...
             </Alert>
           )}
           {smsStatus === 'sent' && (
-            <Alert 
-              severity="success" 
-              sx={{ 
-                mb: 2,
-                borderRadius: 3,
-                bgcolor: 'rgba(140, 165, 81, 0.08)',
-                border: '1px solid rgba(140, 165, 81, 0.3)',
-                fontFamily: '"Poppins", sans-serif',
-                "& .MuiAlert-icon": {
-                  color: "#8CA551"
-                }
-              }}
-            >
+            <Alert severity="success" sx={{
+              mb: 2,
+              borderRadius: 3,
+              bgcolor: 'rgba(140, 165, 81, 0.08)',
+              border: '1px solid rgba(140, 165, 81, 0.3)',
+              fontFamily: '"Poppins", sans-serif',
+              "& .MuiAlert-icon": { color: "#8CA551" }
+            }}>
               ✅ SMS notifications sent successfully!
             </Alert>
           )}
           {smsStatus === 'failed' && (
-            <Alert 
-              severity="warning" 
-              sx={{ 
-                mb: 2,
-                borderRadius: 3,
-                bgcolor: 'rgba(229, 134, 60, 0.08)',
-                border: '1px solid rgba(229, 134, 60, 0.3)',
-                fontFamily: '"Poppins", sans-serif',
-                "& .MuiAlert-icon": {
-                  color: "#E5863C"
-                }
-              }}
-            >
+            <Alert severity="warning" sx={{
+              mb: 2,
+              borderRadius: 3,
+              bgcolor: 'rgba(229, 134, 60, 0.08)',
+              border: '1px solid rgba(229, 134, 60, 0.3)',
+              fontFamily: '"Poppins", sans-serif',
+              "& .MuiAlert-icon": { color: "#E5863C" }
+            }}>
               ⚠️ SMS notification failed but property was created
             </Alert>
           )}
 
-          {/* ✅ TABS - Brandbook */}
-          <Box sx={{ borderBottom: '2px solid rgba(140, 165, 81, 0.2)', mb: 3 }}>
-            <Tabs 
-              value={tabValue} 
-              onChange={(e, newValue) => setTabValue(newValue)}
-              sx={{
-                '& .MuiTab-root': {
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif',
-                  fontSize: '0.9rem',
-                  letterSpacing: '0.5px',
-                  color: '#706f6f',
-                  '&.Mui-selected': {
-                    color: '#333F1F'
-                  }
-                },
-                '& .MuiTabs-indicator': {
-                  bgcolor: '#8CA551',
-                  height: 3
-                }
-              }}
-            >
-              <Tab label="Select Existing User" />
-              <Tab label="Create New User" />
-            </Tabs>
-          </Box>
-
-          {tabValue === 0 ? (
-            // ✅ SELECT EXISTING USER TAB
-            <Box>
+          {/* SELECT EXISTING USER */}
+          <Box>
+            <Box display="flex" alignItems="flex-start" gap={2}>
               <TextField
                 fullWidth
                 select
@@ -452,10 +382,8 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                       borderColor: 'rgba(140, 165, 81, 0.3)',
                       borderWidth: '2px'
                     },
-                    "&:hover fieldset": {
-                      borderColor: "#8CA551"
-                    },
-                    "&.Mui-focused fieldset": { 
+                    "&:hover fieldset": { borderColor: "#8CA551" },
+                    "&.Mui-focused fieldset": {
                       borderColor: "#333F1F",
                       borderWidth: "2px"
                     }
@@ -485,20 +413,16 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                   </MenuItem>
                 ) : (
                   users.map((user) => (
-                    <MenuItem 
-                      key={user._id} 
+                    <MenuItem
+                      key={user._id}
                       value={user._id}
                       sx={{
                         fontFamily: '"Poppins", sans-serif',
                         fontWeight: 500,
-                        '&:hover': {
-                          bgcolor: 'rgba(140, 165, 81, 0.08)'
-                        },
+                        '&:hover': { bgcolor: 'rgba(140, 165, 81, 0.08)' },
                         '&.Mui-selected': {
                           bgcolor: 'rgba(140, 165, 81, 0.12)',
-                          '&:hover': {
-                            bgcolor: 'rgba(140, 165, 81, 0.18)'
-                          }
+                          '&:hover': { bgcolor: 'rgba(140, 165, 81, 0.18)' }
                         }
                       }}
                     >
@@ -508,656 +432,198 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                   ))
                 )}
               </TextField>
-
-              {/* ✅ PROPERTY SUMMARY - Brandbook */}
-              <Paper 
-                sx={{ 
-                  p: 3, 
-                  mt: 3, 
-                  bgcolor: 'rgba(140, 165, 81, 0.05)', 
-                  borderRadius: 3,
-                  border: '2px solid rgba(140, 165, 81, 0.2)'
-                }}
-              >
-                <Typography 
-                  variant="subtitle2" 
-                  fontWeight={700} 
-                  mb={2}
+              <Tooltip title="Add New Resident">
+                <Button
+                  variant="outlined"
+                  onClick={() => setDialogOpen(true)}
                   sx={{
-                    color: '#333F1F',
-                    fontFamily: '"Poppins", sans-serif',
-                    letterSpacing: '1px',
-                    textTransform: 'uppercase',
-                    fontSize: '0.8rem'
-                  }}
-                >
-                  Property Summary
-                </Typography>
-                <Box display="flex" flexDirection="column" gap={1}>
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography 
-                      variant="body2"
-                      sx={{ 
-                        color: '#706f6f',
-                        fontFamily: '"Poppins", sans-serif'
-                      }}
-                    >
-                      Lot:
-                    </Typography>
-                    <Typography 
-                      variant="body2" 
-                      fontWeight={600}
-                      sx={{ 
-                        color: '#333F1F',
-                        fontFamily: '"Poppins", sans-serif'
-                      }}
-                    >
-                      #{selectedLot?.number}
-                    </Typography>
-                  </Box>
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography 
-                      variant="body2"
-                      sx={{ 
-                        color: '#706f6f',
-                        fontFamily: '"Poppins", sans-serif'
-                      }}
-                    >
-                      Model:
-                    </Typography>
-                    <Typography 
-                      variant="body2" 
-                      fontWeight={600}
-                      sx={{ 
-                        color: '#333F1F',
-                        fontFamily: '"Poppins", sans-serif'
-                      }}
-                    >
-                      {selectedModel?.model}
-                    </Typography>
-                  </Box>
-                  {selectedFacade && (
-                    <Box display="flex" justifyContent="space-between">
-                      <Typography 
-                        variant="body2"
-                        sx={{ 
-                          color: '#706f6f',
-                          fontFamily: '"Poppins", sans-serif'
-                        }}
-                      >
-                        Facade:
-                      </Typography>
-                      <Typography 
-                        variant="body2" 
-                        fontWeight={600}
-                        sx={{ 
-                          color: '#333F1F',
-                          fontFamily: '"Poppins", sans-serif'
-                        }}
-                      >
-                        {selectedFacade.title}
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-                <Divider sx={{ my: 2, borderColor: 'rgba(140, 165, 81, 0.3)' }} />
-                <Box display="flex" flexDirection="column" gap={1}>
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography 
-                      variant="body2" 
-                      fontWeight={700}
-                      sx={{ 
-                        color: '#8CA551',
-                        fontFamily: '"Poppins", sans-serif'
-                      }}
-                    >
-                      Total Price:
-                    </Typography>
-                    <Typography 
-                      variant="body2" 
-                      fontWeight={700}
-                      sx={{ 
-                        color: '#8CA551',
-                        fontFamily: '"Poppins", sans-serif'
-                      }}
-                    >
-                      ${financials.presalePrice.toLocaleString()}
-                    </Typography>
-                  </Box>
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography 
-                      variant="body2"
-                      sx={{ 
-                        color: '#706f6f',
-                        fontFamily: '"Poppins", sans-serif'
-                      }}
-                    >
-                      Initial Payment:
-                    </Typography>
-                    <Typography 
-                      variant="body2" 
-                      fontWeight={600}
-                      sx={{ 
-                        color: '#333F1F',
-                        fontFamily: '"Poppins", sans-serif'
-                      }}
-                    >
-                      ${financials.initialDownPayment.toLocaleString()}
-                    </Typography>
-                  </Box>
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography 
-                      variant="body2"
-                      sx={{ 
-                        color: '#706f6f',
-                        fontFamily: '"Poppins", sans-serif'
-                      }}
-                    >
-                      Mortgage:
-                    </Typography>
-                    <Typography 
-                      variant="body2" 
-                      fontWeight={600}
-                      sx={{ 
-                        color: '#333F1F',
-                        fontFamily: '"Poppins", sans-serif'
-                      }}
-                    >
-                      ${financials.mortgage.toLocaleString()}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Paper>
-
-              {/* ✅ ACTION BUTTON - Brandbook */}
-              <Button
-                variant="contained"
-                fullWidth
-                onClick={handleAssignProperty}
-                disabled={!selectedUser || submitting}
-                startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <CheckCircleIcon />}
-                sx={{
-                  mt: 3,
-        borderRadius: 3,
-        bgcolor: '#333F1F',
-        color: 'white',
-        fontWeight: 600,
-        textTransform: 'none',
-        letterSpacing: '1px',
-        fontFamily: '"Poppins", sans-serif',
-        px: 3,
-        py: 1.5,
-        boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
-        position: 'relative',
-        overflow: 'hidden',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: '-100%',
-          width: '100%',
-          height: '100%',
-          bgcolor: '#8CA551',
-          transition: 'left 0.4s ease',
-          zIndex: 0
-        },
-        '&:hover': {
-          bgcolor: '#333F1F',
-          boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
-          '&::before': {
-            left: 0
-          },
-          '& .MuiButton-startIcon': {
-            color: 'white'
-          }
-        },
-        '& .MuiButton-startIcon': {
-          position: 'relative',
-          zIndex: 1,
-          color: 'white'
-        }
-      }}
-              >
-                <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-                {submitting ? 'Assigning Property...' : 'Assign Property to Selected User'}
-                </Box>
-              </Button>
-            </Box>
-          ) : (
-            // ✅ CREATE NEW USER TAB
-            <Box>
-              <Grid container spacing={2.5}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="First Name"
-                    value={newUserData.firstName}
-                    onChange={(e) => setNewUserData({ ...newUserData, firstName: e.target.value })}
-                    required
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
-                        fontFamily: '"Poppins", sans-serif',
-                        "& fieldset": {
-                          borderColor: 'rgba(140, 165, 81, 0.3)',
-                          borderWidth: '2px'
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "#8CA551"
-                        },
-                        "&.Mui-focused fieldset": { 
-                          borderColor: "#333F1F",
-                          borderWidth: "2px"
-                        }
-                      },
-                      "& .MuiInputLabel-root": {
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 500,
-                        color: '#706f6f',
-                        "&.Mui-focused": {
-                          color: "#333F1F",
-                          fontWeight: 600
-                        }
-                      }
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Last Name"
-                    value={newUserData.lastName}
-                    onChange={(e) => setNewUserData({ ...newUserData, lastName: e.target.value })}
-                    required
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
-                        fontFamily: '"Poppins", sans-serif',
-                        "& fieldset": {
-                          borderColor: 'rgba(140, 165, 81, 0.3)',
-                          borderWidth: '2px'
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "#8CA551"
-                        },
-                        "&.Mui-focused fieldset": { 
-                          borderColor: "#333F1F",
-                          borderWidth: "2px"
-                        }
-                      },
-                      "& .MuiInputLabel-root": {
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 500,
-                        color: '#706f6f',
-                        "&.Mui-focused": {
-                          color: "#333F1F",
-                          fontWeight: 600
-                        }
-                      }
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    type="email"
-                    label="Email"
-                    value={newUserData.email}
-                    onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
-                    required
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
-                        fontFamily: '"Poppins", sans-serif',
-                        "& fieldset": {
-                          borderColor: 'rgba(140, 165, 81, 0.3)',
-                          borderWidth: '2px'
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "#8CA551"
-                        },
-                        "&.Mui-focused fieldset": { 
-                          borderColor: "#333F1F",
-                          borderWidth: "2px"
-                        }
-                      },
-                      "& .MuiInputLabel-root": {
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 500,
-                        color: '#706f6f',
-                        "&.Mui-focused": {
-                          color: "#333F1F",
-                          fontWeight: 600
-                        }
-                      }
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    type="password"
-                    label="Password (optional)"
-                    value={newUserData.password}
-                    onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
-                    helperText="If left empty, user will receive an SMS to set up access"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
-                        fontFamily: '"Poppins", sans-serif',
-                        "& fieldset": {
-                          borderColor: 'rgba(140, 165, 81, 0.3)',
-                          borderWidth: '2px'
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "#8CA551"
-                        },
-                        "&.Mui-focused fieldset": { 
-                          borderColor: "#333F1F",
-                          borderWidth: "2px"
-                        }
-                      },
-                      "& .MuiInputLabel-root": {
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 500,
-                        color: '#706f6f',
-                        "&.Mui-focused": {
-                          color: "#333F1F",
-                          fontWeight: 600
-                        }
-                      },
-                      "& .MuiFormHelperText-root": {
-                        fontFamily: '"Poppins", sans-serif',
-                        fontSize: '0.7rem'
-                      }
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box>
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
-                        mb: 0.5, 
-                        display: 'block',
-                        color: '#706f6f',
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 500
-                      }}
-                    >
-                      Phone Number *
-                    </Typography>
-                    <PhoneInput
-                      country={'us'}
-                      value={newUserData.phoneNumber}
-                      onChange={(value) => setNewUserData({ ...newUserData, phoneNumber: value })}
-                      inputProps={{ name: 'phone' }}
-                      containerStyle={{ width: '100%' }}
-                      inputStyle={{
-                        width: '100%',
-                        height: '56px',
-                        fontSize: '16px',
-                        border: '2px solid rgba(140, 165, 81, 0.3)',
-                        borderRadius: 12,
-                        transition: 'all 0.3s',
-                        fontFamily: '"Poppins", sans-serif'
-                      }}
-                      buttonStyle={{ 
-                        border: '2px solid rgba(140, 165, 81, 0.3)', 
-                        borderRight: 'none',
-                        borderRadius: '12px 0 0 12px'
-                      }}
-                    />
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
-                        color: '#706f6f',
-                        fontFamily: '"Poppins", sans-serif',
-                        fontSize: '0.7rem',
-                        display: 'block',
-                        mt: 0.5
-                      }}
-                    >
-                      Include for SMS notifications
-                    </Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    type="date"
-                    label="Birthday"
-                    value={newUserData.birthday}
-                    onChange={(e) => setNewUserData({ ...newUserData, birthday: e.target.value })}
-                    InputLabelProps={{ shrink: true }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
-                        fontFamily: '"Poppins", sans-serif',
-                        "& fieldset": {
-                          borderColor: 'rgba(140, 165, 81, 0.3)',
-                          borderWidth: '2px'
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "#8CA551"
-                        },
-                        "&.Mui-focused fieldset": { 
-                          borderColor: "#333F1F",
-                          borderWidth: "2px"
-                        }
-                      },
-                      "& .MuiInputLabel-root": {
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 500,
-                        color: '#706f6f',
-                        "&.Mui-focused": {
-                          color: "#333F1F",
-                          fontWeight: 600
-                        }
-                      }
-                    }}
-                  />
-                </Grid>
-
-                {/* ✅ PROPERTY SUMMARY - Brandbook */}
-                <Grid item xs={12}>
-                  <Paper 
-                    sx={{ 
-                      p: 3, 
-                      bgcolor: 'rgba(140, 165, 81, 0.05)', 
-                      borderRadius: 3,
-                      border: '2px solid rgba(140, 165, 81, 0.2)'
-                    }}
-                  >
-                    <Typography 
-                      variant="subtitle2" 
-                      fontWeight={700} 
-                      mb={2}
-                      sx={{
-                        color: '#333F1F',
-                        fontFamily: '"Poppins", sans-serif',
-                        letterSpacing: '1px',
-                        textTransform: 'uppercase',
-                        fontSize: '0.8rem'
-                      }}
-                    >
-                      Property to Assign
-                    </Typography>
-                    <Box display="flex" flexDirection="column" gap={1}>
-                      <Box display="flex" justifyContent="space-between">
-                        <Typography 
-                          variant="body2"
-                          sx={{ 
-                            color: '#706f6f',
-                            fontFamily: '"Poppins", sans-serif'
-                          }}
-                        >
-                          Lot:
-                        </Typography>
-                        <Typography 
-                          variant="body2" 
-                          fontWeight={600}
-                          sx={{ 
-                            color: '#333F1F',
-                            fontFamily: '"Poppins", sans-serif'
-                          }}
-                        >
-                          #{selectedLot?.number}
-                        </Typography>
-                      </Box>
-                      <Box display="flex" justifyContent="space-between">
-                        <Typography 
-                          variant="body2"
-                          sx={{ 
-                            color: '#706f6f',
-                            fontFamily: '"Poppins", sans-serif'
-                          }}
-                        >
-                          Model:
-                        </Typography>
-                        <Typography 
-                          variant="body2" 
-                          fontWeight={600}
-                          sx={{ 
-                            color: '#333F1F',
-                            fontFamily: '"Poppins", sans-serif'
-                          }}
-                        >
-                          {selectedModel?.model}
-                        </Typography>
-                      </Box>
-                      {selectedFacade && (
-                        <Box display="flex" justifyContent="space-between">
-                          <Typography 
-                            variant="body2"
-                            sx={{ 
-                              color: '#706f6f',
-                              fontFamily: '"Poppins", sans-serif'
-                            }}
-                          >
-                            Facade:
-                          </Typography>
-                          <Typography 
-                            variant="body2" 
-                            fontWeight={600}
-                            sx={{ 
-                              color: '#333F1F',
-                              fontFamily: '"Poppins", sans-serif'
-                            }}
-                          >
-                            {selectedFacade.title}
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                    <Divider sx={{ my: 2, borderColor: 'rgba(140, 165, 81, 0.3)' }} />
-                    <Box display="flex" justifyContent="space-between">
-                      <Typography 
-                        variant="body2" 
-                        fontWeight={700}
-                        sx={{ 
-                          color: '#8CA551',
-                          fontFamily: '"Poppins", sans-serif'
-                        }}
-                      >
-                        Total:
-                      </Typography>
-                      <Typography 
-                        variant="body2" 
-                        fontWeight={700}
-                        sx={{ 
-                          color: '#8CA551',
-                          fontFamily: '"Poppins", sans-serif'
-                        }}
-                      >
-                        ${financials.presalePrice.toLocaleString()}
-                      </Typography>
-                    </Box>
-                  </Paper>
-                </Grid>
-              </Grid>
-
-              {/* ✅ VALIDATION MESSAGE - Brandbook */}
-              {!isFormValid() && (
-                <Alert 
-                  severity="info" 
-                  sx={{ 
-                    mt: 2,
+                    minWidth: 48,
+                    height: '56px', // igual que el TextField por default
                     borderRadius: 3,
-                    bgcolor: 'rgba(33, 150, 243, 0.08)',
-                    border: '1px solid rgba(33, 150, 243, 0.3)',
-                    fontFamily: '"Poppins", sans-serif',
-                    "& .MuiAlert-icon": {
-                      color: "#2196f3"
-                    }
+                    ml: 1,
+                    px: 0,
+                    bgcolor: '#fff',
+                    border: '2px solid #8CA551',
+                    color: '#8CA551',
+                    alignSelf: 'flex-start', // <-- fuerza alineación arriba
+                    mt: '0px', // <-- asegura sin margen superior
+                    '&:hover': { bgcolor: 'rgba(140, 165, 81, 0.08)' }
                   }}
                 >
-                  Please fill in all required fields (First Name, Last Name, Email, Phone Number)
-                </Alert>
-              )}
-
-              {/* ✅ ACTION BUTTON - Brandbook */}
-              <Tooltip title="Create User & Assign Property" placement="left">
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    onClick={handleAssignProperty}
-                    disabled={!isFormValid() || submitting}
-                    startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <PersonAddIcon />}
-                    sx={{
-                      mt: 3,
-                      borderRadius: 3,
-                      bgcolor: '#333F1F',
-                      color: 'white',
-                      fontWeight: 600,
-                      textTransform: 'none',
-                      letterSpacing: '1px',
-                      fontFamily: '"Poppins", sans-serif',
-                      px: 3,
-                      py: 1.5,
-                      boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        left: '-100%',
-                        width: '100%',
-                        height: '100%',
-                        bgcolor: '#8CA551',
-                        transition: 'left 0.4s ease',
-                        zIndex: 0
-                      },
-                      '&:hover': {
-                        bgcolor: '#333F1F',
-                        boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
-                        '&::before': {
-                          left: 0
-                        },
-                        '& .MuiButton-startIcon': {
-                          color: 'white'
-                        }
-                      },
-                      '& .MuiButton-startIcon': {
-                        position: 'relative',
-                        zIndex: 1,
-                        color: 'white'
-                      }
-                    }}
-                  >
-                    <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-                      {submitting ? 'Creating User & Assigning...' : 'Create User & Assign Property'}
-                    </Box>
-                  </Button>
-                </motion.div>
+                  <PersonAddIcon />
+                </Button>
               </Tooltip>
             </Box>
-          )}
+            {/* PROPERTY SUMMARY */}
+            <Paper sx={{
+              p: 3,
+              mt: 3,
+              bgcolor: 'rgba(140, 165, 81, 0.05)',
+              borderRadius: 3,
+              border: '2px solid rgba(140, 165, 81, 0.2)'
+            }}>
+              <Typography variant="subtitle2" fontWeight={700} mb={2} sx={{
+                color: '#333F1F',
+                fontFamily: '"Poppins", sans-serif',
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+                fontSize: '0.8rem'
+              }}>
+                Property Summary
+              </Typography>
+              <Box display="flex" flexDirection="column" gap={1}>
+                <Box display="flex" justifyContent="space-between">
+                  <Typography variant="body2" sx={{
+                    color: '#706f6f',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}>
+                    Lot:
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600} sx={{
+                    color: '#333F1F',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}>
+                    #{selectedLot?.number}
+                  </Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between">
+                  <Typography variant="body2" sx={{
+                    color: '#706f6f',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}>
+                    Model:
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600} sx={{
+                    color: '#333F1F',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}>
+                    {selectedModel?.model}
+                  </Typography>
+                </Box>
+                {selectedFacade && (
+                  <Box display="flex" justifyContent="space-between">
+                    <Typography variant="body2" sx={{
+                      color: '#706f6f',
+                      fontFamily: '"Poppins", sans-serif'
+                    }}>
+                      Facade:
+                    </Typography>
+                    <Typography variant="body2" fontWeight={600} sx={{
+                      color: '#333F1F',
+                      fontFamily: '"Poppins", sans-serif'
+                    }}>
+                      {selectedFacade.title}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+              <Divider sx={{ my: 2, borderColor: 'rgba(140, 165, 81, 0.3)' }} />
+              <Box display="flex" flexDirection="column" gap={1}>
+                <Box display="flex" justifyContent="space-between">
+                  <Typography variant="body2" fontWeight={700} sx={{
+                    color: '#8CA551',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}>
+                    Total Price:
+                  </Typography>
+                  <Typography variant="body2" fontWeight={700} sx={{
+                    color: '#8CA551',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}>
+                    ${financials.presalePrice.toLocaleString()}
+                  </Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between">
+                  <Typography variant="body2" sx={{
+                    color: '#706f6f',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}>
+                    Initial Payment:
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600} sx={{
+                    color: '#333F1F',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}>
+                    ${financials.initialDownPayment.toLocaleString()}
+                  </Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between">
+                  <Typography variant="body2" sx={{
+                    color: '#706f6f',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}>
+                    Mortgage:
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600} sx={{
+                    color: '#333F1F',
+                    fontFamily: '"Poppins", sans-serif'
+                  }}>
+                    ${financials.mortgage.toLocaleString()}
+                  </Typography>
+                </Box>
+              </Box>
+            </Paper>
+
+            {/* ACTION BUTTON */}
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleAssignProperty}
+              disabled={!selectedUser || submitting}
+              startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <CheckCircleIcon />}
+              sx={{
+                mt: 3,
+                borderRadius: 3,
+                bgcolor: '#333F1F',
+                color: 'white',
+                fontWeight: 600,
+                textTransform: 'none',
+                letterSpacing: '1px',
+                fontFamily: '"Poppins", sans-serif',
+                px: 3,
+                py: 1.5,
+                boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+                position: 'relative',
+                overflow: 'hidden',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: '-100%',
+                  width: '100%',
+                  height: '100%',
+                  bgcolor: '#8CA551',
+                  transition: 'left 0.4s ease',
+                  zIndex: 0
+                },
+                '&:hover': {
+                  bgcolor: '#333F1F',
+                  boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+                  '&::before': { left: 0 },
+                  '& .MuiButton-startIcon': { color: 'white' }
+                },
+                '& .MuiButton-startIcon': {
+                  position: 'relative',
+                  zIndex: 1,
+                  color: 'white'
+                }
+              }}
+            >
+              <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
+                {submitting ? 'Assigning Property...' : 'Assign Property to Selected User'}
+              </Box>
+            </Button>
+          </Box>
+
+          {/* MODAL PARA CREAR USUARIO */}
+          <ResidentDialog
+            open={dialogOpen}
+            onClose={() => setDialogOpen(false)}
+            onSubmit={handleCreateUser}
+            formData={newUserData}
+            setFormData={setNewUserData}
+            selectedUser={null}
+          />
         </Box>
       </Collapse>
     </Paper>

@@ -1,0 +1,63 @@
+{
+    "actions": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "submit": "Submit",
+        "confirm": "Confirm",
+        "close": "Close",
+        "back": "Back",
+        "viewAll": "View all",
+        "add": "Add",
+        "create": "Create",
+        "update": "Update",
+        "search": "Search",
+        "filter": "Filter",
+        "upload": "Upload",
+        "download": "Download",
+        "send": "Send",
+        "retry": "Retry"
+    },
+    "status": {
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "success": "Operation successful",
+        "signed": "Signed",
+        "pending": "Pending",
+        "rejected": "Rejected",
+        "available": "Available",
+        "sold": "Sold",
+        "active": "Active",
+        "inactive": "Inactive",
+        "paid": "Paid",
+        "unpaid": "Unpaid"
+    },
+    "validation": {
+        "required": "This field is required",
+        "invalidEmail": "Invalid email address",
+        "invalidPhone": "Invalid phone number",
+        "passwordTooShort": "Password is too short"
+    },
+    "noData": "No data found",
+    "copyright": "© 2026 Developed by Michelangelo Del Valle • All Rights Reserved",
+    "premiumTagline": "Premium Lakefront Living Experience",
+    "resortLifestyle": "Resort Lifestyle",
+    "notFound": {
+        "title": "Page Not Found",
+        "description": "Sorry, the page you're looking for doesn't exist.",
+        "goHome": "Go to Home"
+    },
+    "activeUser": "Active User",
+    "accountDetails": "Account Details",
+    "enableEditMode": "Enable edit mode to change your password",
+    "managePersonalInfo": "Manage your personal information and security settings",
+    "myProfile": "My Profile",
+    "editProfile": "Edit Profile",
+    "passwordFillAll": "Please fill all password fields.",
+    "passwordsNoMatch": "New passwords do not match.",
+    "passwordMinLength": "New password must be at least 6 characters.",
+    "passwordChanged": "Password changed successfully!",
+    "passwordChangeError": "Error changing password. Please try again.",
+    "profileUpdated": "Profile updated successfully!"
+}

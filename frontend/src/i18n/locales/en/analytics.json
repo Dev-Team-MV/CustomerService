@@ -1,0 +1,33 @@
+{
+  "title": "Analytics Dashboard",
+  "subtitle": "Real-time project statistics and sales insights",
+  "refreshData": "Refresh Data",
+  "stats": {
+    "totalInventory": "Total Inventory",
+    "availableLots": "Available lots",
+    "propertiesSold": "Properties Sold",
+    "occupancy": "occupancy",
+    "pendingSales": "Pending Sales",
+    "actionRequired": "Action required",
+    "allClear": "All clear",
+    "avgLotPrice": "Avg. Lot Price"
+  },
+  "progress": {
+    "title": "Project Sales Progress",
+    "totalLotsSold": "Total Lots Sold",
+    "occupancyRate": "Occupancy Rate",
+    "lots": "lots"
+  },
+  "summary": {
+    "title": "Quick Summary",
+    "totalProperties": "Total Properties",
+    "sold": "Sold",
+    "pending": "Pending",
+    "available": "Available"
+  },
+  "models": {
+    "title": "Property Sales by Model",
+    "subtitle": "Detailed distribution of properties by type",
+    "noData": "No model data available"
+  }
+}

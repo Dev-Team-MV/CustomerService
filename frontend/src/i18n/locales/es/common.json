@@ -1,0 +1,63 @@
+{
+    "actions": {
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "submit": "Enviar",
+        "confirm": "Confirmar",
+        "close": "Cerrar",
+        "back": "Volver",
+        "viewAll": "Ver todo",
+        "add": "Agregar",
+        "create": "Crear",
+        "update": "Actualizar",
+        "search": "Buscar",
+        "filter": "Filtrar",
+        "upload": "Subir",
+        "download": "Descargar",
+        "send": "Enviar",
+        "retry": "Reintentar"
+    },
+    "status": {
+        "loading": "Cargando...",
+        "error": "Ocurrió un error",
+        "success": "Operación exitosa",
+        "signed": "Firmado",
+        "pending": "Pendiente",
+        "rejected": "Rechazado",
+        "available": "Disponible",
+        "sold": "Vendido",
+        "active": "Activo",
+        "inactive": "Inactivo",
+        "paid": "Pagado",
+        "unpaid": "Sin pagar"
+    },
+    "validation": {
+        "required": "Este campo es obligatorio",
+        "invalidEmail": "Dirección de correo inválida",
+        "invalidPhone": "Número de teléfono inválido",
+        "passwordTooShort": "La contraseña es muy corta"
+    },
+    "noData": "No se encontraron datos",
+    "copyright": "© 2026 Desarrollado por Michelangelo Del Valle • Todos los Derechos Reservados",
+    "premiumTagline": "Experiencia Premium de Vida Frente al Lago",
+    "resortLifestyle": "Estilo de Vida Resort",
+    "notFound": {
+        "title": "Página No Encontrada",
+        "description": "Lo sentimos, la página que buscas no existe.",
+        "goHome": "Ir al Inicio"
+    },
+    "activeUser": "Usuario Activo",
+    "accountDetails": "Detalles de Cuenta",
+    "enableEditMode": "Activa el modo de edición para cambiar tu contraseña",
+    "managePersonalInfo": "Administra tu información personal y configuración de seguridad",
+    "myProfile": "Mi Perfil",
+    "editProfile": "Editar Perfil",
+    "passwordFillAll": "Por favor completa todos los campos de contraseña.",
+    "passwordsNoMatch": "Las nuevas contraseñas no coinciden.",
+    "passwordMinLength": "La nueva contraseña debe tener al menos 6 caracteres.",
+    "passwordChanged": "¡Contraseña cambiada exitosamente!",
+    "passwordChangeError": "Error al cambiar contraseña. Inténtalo de nuevo.",
+    "profileUpdated": "¡Perfil actualizado exitosamente!"
+}

@@ -1,0 +1,41 @@
+{
+  "title": "Residentes",
+  "subtitle": "Gestiona las cuentas e información de los residentes",
+  "stats": {
+    "total": "Usuarios Totales",
+    "superadmins": "Super Administradores",
+    "admins": "Administradores",
+    "residents": "Residentes"
+  },
+  "table": {
+    "name": "NOMBRE",
+    "email": "CORREO",
+    "phone": "TELÉFONO",
+    "role": "ROL",
+    "properties": "PROPIEDADES",
+    "actions": "ACCIONES"
+  },
+  "role": {
+    "superadmin": "Super Administrador",
+    "admin": "Administrador",
+    "user": "Residente"
+  },
+  "actions": {
+    "add": "Agregar Usuario",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "sendSMS": "Enviar SMS para configurar contraseña"
+  },
+  "empty": {
+    "title": "Aún no hay residentes",
+    "description": "Comienza invitando a tu primer residente",
+    "action": "Agregar Primer Residente"
+  },
+  "snackbar": {
+    "smsSent": "SMS de configuración de contraseña enviado exitosamente a {{phone}}",
+    "smsUnavailable": "Servicio de SMS no disponible. ¡Enlace copiado al portapapeles!",
+    "noPhone": "El usuario no tiene un número de teléfono registrado",
+    "smsError": "No se pudo enviar el SMS de configuración de contraseña"
+  },
+  "confirmDelete": "¿Seguro que deseas eliminar este usuario?"
+}
