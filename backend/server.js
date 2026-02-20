@@ -19,6 +19,7 @@ import uploadRoutes from './routes/uploadRoutes.js'
 import newsRoutes from './routes/newsRoutes.js'
 import contractRoutes from './routes/contractRoutes.js'
 import clubHouseRoutes from './routes/clubHouseRoutes.js'
+import outdoorAmenitiesRoutes from './routes/outdoorAmenitiesRoutes.js'
 
 const app = express()
 
@@ -41,6 +42,7 @@ app.use('/api/upload', uploadRoutes)
 app.use('/api/news', newsRoutes)
 app.use('/api/contracts', contractRoutes)
 app.use('/api/clubhouse', clubHouseRoutes)
+app.use('/api/outdoor-amenities', outdoorAmenitiesRoutes)
 
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
