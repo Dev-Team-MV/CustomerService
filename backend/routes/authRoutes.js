@@ -1,6 +1,6 @@
 import express from 'express'
-import { register, login, loginAdmin, getProfile, changePassword, setupPassword, verifySetupToken } from '../controllers/authController.js'
-import { protect } from '../middleware/authMiddleware.js'
+import { register, login, loginAdmin, getProfile, changePassword, setupPassword, verifySetupToken, sendSetupPasswordLink } from '../controllers/authController.js'
+import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -302,5 +302,12 @@ router.post('/setup-password/:token', setupPassword)
  *         description: Invalid or expired token
  */
 router.get('/verify-setup-token/:token', verifySetupToken)
+
+/**
+ * POST /api/auth/admin/send-setup-password-link
+ * Admin only. Sends SMS to a user (by userId or email) with link to set password.
+ * Body: { userId } or { email }
+ */
+router.post('/admin/send-setup-password-link', protect, admin, sendSetupPasswordLink)
 
 export default router
