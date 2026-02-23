@@ -5,16 +5,13 @@ import Model from '../models/Model.js'
 import Facade from '../models/Facade.js'
 import User from '../models/User.js'
 import Phase from '../models/Phase.js'
+import { normalizeImageArray } from '../utils/imageUtils.js'
 
 /**
  * Calcula las imágenes (exterior e interior) de la propiedad según:
  * - modelType: 'basic' | 'upgrade'
  * - hasBalcony: true | false
- *
- * Basic sin balcón: imágenes interior y exterior del modelo base.
- * Basic con balcón: imágenes interior y exterior del balcón.
- * Upgrade sin balcón: exterior = modelo base; interior = interior del upgrade.
- * Upgrade con balcón: exterior = exterior del balcón; interior = exterior del upgrade.
+ * Siempre devuelve arrays de { url, isPublic }.
  */
 function getPropertyImages(property) {
   const model = property.model
@@ -22,8 +19,8 @@ function getPropertyImages(property) {
     return { exterior: [], interior: [] }
   }
 
-  const baseExterior = model.images?.exterior || []
-  const baseInterior = model.images?.interior || []
+  const baseExterior = normalizeImageArray(model.images?.exterior)
+  const baseInterior = normalizeImageArray(model.images?.interior)
 
   const balcony = Array.isArray(model.balconies) && model.balconies.length
     ? (model.balconies.find(b => b.status !== 'inactive') || model.balconies[0])
@@ -32,10 +29,10 @@ function getPropertyImages(property) {
     ? (model.upgrades.find(u => u.status !== 'inactive') || model.upgrades[0])
     : null
 
-  const balconyExterior = balcony?.images?.exterior || []
-  const balconyInterior = balcony?.images?.interior || []
-  const upgradeExterior = upgrade?.images?.exterior || []
-  const upgradeInterior = upgrade?.images?.interior || []
+  const balconyExterior = normalizeImageArray(balcony?.images?.exterior)
+  const balconyInterior = normalizeImageArray(balcony?.images?.interior)
+  const upgradeExterior = normalizeImageArray(upgrade?.images?.exterior)
+  const upgradeInterior = normalizeImageArray(upgrade?.images?.interior)
 
   const isBasic = property.modelType === 'basic'
   const hasBalcony = property.hasBalcony === true
@@ -52,7 +49,6 @@ function getPropertyImages(property) {
       interior = balconyInterior.length ? balconyInterior : baseInterior
     }
   } else {
-    // upgrade
     if (!hasBalcony) {
       exterior = baseExterior
       interior = upgradeInterior.length ? upgradeInterior : baseInterior
@@ -67,10 +63,7 @@ function getPropertyImages(property) {
 
 /**
  * Devuelve el array de blueprints de la propiedad según hasBalcony y hasStorage.
- * default: sin balcón, sin storage
- * withBalcony: con balcón, sin storage
- * withStorage: sin balcón, con storage
- * withBalconyAndStorage: con balcón, con storage
+ * Siempre [{ url, isPublic }].
  */
 function getPropertyBlueprints(property) {
   const model = property.model
@@ -78,10 +71,10 @@ function getPropertyBlueprints(property) {
     return []
   }
   const b = model.blueprints
-  const defaultArr = b.default || []
-  const withBalcony = b.withBalcony || []
-  const withStorage = b.withStorage || []
-  const withBalconyAndStorage = b.withBalconyAndStorage || []
+  const defaultArr = normalizeImageArray(b.default)
+  const withBalcony = normalizeImageArray(b.withBalcony)
+  const withStorage = normalizeImageArray(b.withStorage)
+  const withBalconyAndStorage = normalizeImageArray(b.withBalconyAndStorage)
 
   const hasBalcony = property.hasBalcony === true
   const hasStorage = property.hasStorage === true
