@@ -1,5 +1,6 @@
 import ClubHouse, { DEFAULT_INTERIOR_KEYS } from '../models/ClubHouse.js'
 import { uploadFile } from '../services/storageService.js'
+import { processImageForUpload } from '../services/imageProcessingService.js'
 import crypto from 'crypto'
 import path from 'path'
 
@@ -130,12 +131,12 @@ export const uploadClubHouseImages = async (req, res) => {
     const uploadedItems = []
 
     for (const file of files) {
-      const fileExtension = path.extname(file.originalname)
-      const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+      const processed = await processImageForUpload(file.buffer, file.originalname, file.mimetype)
+      const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${processed.extension}`
       const result = await uploadFile(
-        file.buffer,
+        processed.buffer,
         fileName,
-        file.mimetype,
+        processed.mimeType,
         makePublic,
         GCS_FOLDER
       )
