@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Box, Button, Modal, TextField, Typography, IconButton, Paper, Stack, Container } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Box, Button, Modal, TextField, Typography, IconButton, Paper, Stack, Container, CircularProgress } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import ImageIcon from '@mui/icons-material/Image';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
@@ -11,24 +11,19 @@ import DataTable from '../components/table/DataTable';
 import EmptyState from '../components/table/EmptyState';
 import TimeLineService from '../services/TimeLineService';
 import uploadService from '../services/uploadService';
-
-const mockSteps = [
-  {
-    id: 1,
-    createdAt: new Date().toISOString(),
-    title: 'Inicio de obra',
-    description: 'Se comenzó la obra.',
-    media: [
-      { type: 'image', url: 'https://via.placeholder.com/150', name: 'inicio-1', order: 1 },
-      { type: 'image', url: 'https://via.placeholder.com/150', name: 'inicio-2', order: 2 }
-    ]
-  }
-];
+import TimeLineStepModal from '../components/timeLine/TimeLineStepModal';
+import { useTranslation } from 'react-i18next';
+import EditIcon from '@mui/icons-material/Edit';
+import Tooltip from '@mui/material/Tooltip';
 
 const TimeLine = () => {
-  const [steps, setSteps] = useState(mockSteps);
+  const { t } = useTranslation('timeLine');     
+  const [steps, setSteps] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingStep, setEditingStep] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   // Form state
   const [form, setForm] = useState({
@@ -37,6 +32,23 @@ const TimeLine = () => {
     images: [],
     videos: []
   });
+
+  // --- Cargar datos del backend ---
+  useEffect(() => {
+    const fetchSteps = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await TimeLineService.getAll();
+        setSteps(data);
+      } catch (err) {
+        setError('No se pudo cargar la línea de tiempo.');
+        setSteps([]); // O puedes dejar el mockSteps si quieres fallback
+      }
+      setLoading(false);
+    };
+    fetchSteps();
+  }, []);
 
   // --- Modal handlers ---
   const openCreateModal = () => {
@@ -59,35 +71,35 @@ const TimeLine = () => {
   const closeModal = () => setModalOpen(false);
 
   // --- Image/video handlers ---
-const handleAddImage = (e) => {
-  const files = Array.from(e.target.files);
-  if (!files.length) return;
-  setForm((prev) => {
-    const currentCount = prev.images.length + prev.videos.length;
-    const newImages = files.map((file, i) => {
-      const order = currentCount + i + 1;
-      const name = `${prev.title || 'imagen'}-${order}`;
-      const url = URL.createObjectURL(file);
-      return { type: 'image', url, name, order, file };
+  const handleAddImage = (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setForm((prev) => {
+      const currentCount = prev.images.length + prev.videos.length;
+      const newImages = files.map((file, i) => {
+        const order = currentCount + i + 1;
+        const name = `${prev.title || 'imagen'}-${order}`;
+        const url = URL.createObjectURL(file);
+        return { type: 'image', url, name, order, file };
+      });
+      return {
+        ...prev,
+        images: [...prev.images, ...newImages]
+      };
     });
-    return {
-      ...prev,
-      images: [...prev.images, ...newImages]
-    };
-  });
-};
+  };
 
-const handleAddVideo = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const order = form.images.length + form.videos.length + 1;
-  const name = `${form.title || 'video'}-${order}`;
-  const url = URL.createObjectURL(file);
-  setForm((prev) => ({
-    ...prev,
-    videos: [...prev.videos, { type: 'video', url, name, order, file }]
-  }));
-};
+  const handleAddVideo = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const order = form.images.length + form.videos.length + 1;
+    const name = `${form.title || 'video'}-${order}`;
+    const url = URL.createObjectURL(file);
+    setForm((prev) => ({
+      ...prev,
+      videos: [...prev.videos, { type: 'video', url, name, order, file }]
+    }));
+  };
 
   // --- Orden y edición ---
   const updateOrders = (images, videos) => {
@@ -121,152 +133,246 @@ const handleAddVideo = (e) => {
     }));
   };
 
-  // --- CRUD handlers ---
-const handleSave = async () => {
-  // Filtra los archivos locales (blob:) para subirlos
-  const imagesToUpload = form.images.filter(img => img.url.startsWith('blob:'));
-  const videosToUpload = form.videos.filter(vid => vid.url.startsWith('blob:'));
-
-  let uploadedImages = [];
-  let uploadedVideos = [];
-
-  if (imagesToUpload.length > 0) {
-    uploadedImages = await uploadService.uploadTimeLineImages(
-      imagesToUpload.map(img => img.file)
-    );
-  }
-  if (videosToUpload.length > 0) {
-    uploadedVideos = await uploadService.uploadTimeLineImages(
-      videosToUpload.map(vid => vid.file)
-    );
-  }
-
-  // Reemplaza las URLs locales por las URLs reales
-  const images = form.images.map(img => {
-    if (img.url.startsWith('blob:')) {
-      return {
-        ...img,
-        url: uploadedImages.shift(),
-      };
-    }
-    return img;
-  });
-
-  const videos = form.videos.map(vid => {
-    if (vid.url.startsWith('blob:')) {
-      return {
-        ...vid,
-        url: uploadedVideos.shift(),
-      };
-    }
-    return vid;
-  });
-
-  // Unifica imágenes y videos en un solo array media y los ordena por order
-  const media = [
-    ...images.map(img => ({
-      type: 'image',
-      url: img.url,
-      name: img.name,
-      order: img.order
-    })),
-    ...videos.map(vid => ({
-      type: 'video',
-      url: vid.url,
-      name: vid.name,
-      order: vid.order
-    }))
-  ].sort((a, b) => a.order - b.order);
-
-  const payload = {
-    title: form.title,
-    description: form.description,
-    media
+  const moveMedia = (idx, dir) => {
+    const all = [...form.images, ...form.videos].sort((a, b) => a.order - b.order);
+    const newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= all.length) return;
+    [all[idx], all[newIdx]] = [all[newIdx], all[idx]];
+    all.forEach((item, i) => {
+      item.order = i + 1;
+      item.name = `${form.title || (item.type === 'image' ? 'imagen' : 'video')}-${item.order}`;
+    });
+    setForm({
+      ...form,
+      images: all.filter(i => i.type === 'image'),
+      videos: all.filter(i => i.type === 'video')
+    });
   };
 
-  if (editingStep) {
-    await TimeLineService.update(editingStep.id, payload);
-    setSteps((prev) =>
-      prev.map((s) =>
-        s.id === editingStep.id
-          ? { ...s, ...payload, id: editingStep.id, createdAt: s.createdAt }
-          : s
-      )
-    );
-  } else {
-    await TimeLineService.create(payload);
-    setSteps((prev) => [
-      {
-        id: Date.now(),
-        createdAt: new Date().toISOString(),
-        ...payload
-      },
-      ...prev
-    ]);
-  }
-  setModalOpen(false);
-};
+  const removeVideo = (idx) => {
+    const arr = form.videos.filter((_, i) => i !== idx);
+    const updated = updateOrders(form.images, arr);
+    setForm((prev) => ({
+      ...prev,
+      images: updated.filter(i => i.type === 'image'),
+      videos: updated.filter(i => i.type === 'video')
+    }));
+  };
 
-  const moveMedia = (idx, dir) => {
-  const all = [...form.images, ...form.videos].sort((a, b) => a.order - b.order);
-  const newIdx = idx + dir;
-  if (newIdx < 0 || newIdx >= all.length) return;
-  [all[idx], all[newIdx]] = [all[newIdx], all[idx]];
-  all.forEach((item, i) => {
-    item.order = i + 1;
-    item.name = `${form.title || (item.type === 'image' ? 'imagen' : 'video')}-${item.order}`;
-  });
-  setForm({
-    ...form,
-    images: all.filter(i => i.type === 'image'),
-    videos: all.filter(i => i.type === 'video')
-  });
-};
+  // --- CRUD handlers ---
+  const handleSave = async () => {
+    setSaving(true);
+    // Filtra los archivos locales (blob:) para subirlos
+    const imagesToUpload = form.images.filter(img => img.url.startsWith('blob:'));
+    const videosToUpload = form.videos.filter(vid => vid.url.startsWith('blob:'));
 
-const removeVideo = (idx) => {
-  const arr = form.videos.filter((_, i) => i !== idx);
-  const updated = updateOrders(form.images, arr);
-  setForm((prev) => ({
-    ...prev,
-    images: updated.filter(i => i.type === 'image'),
-    videos: updated.filter(i => i.type === 'video')
-  }));
-};
+    let uploadedImages = [];
+    let uploadedVideos = [];
+
+    if (imagesToUpload.length > 0) {
+      uploadedImages = await uploadService.uploadTimeLineImages(
+        imagesToUpload.map(img => img.file)
+      );
+    }
+    if (videosToUpload.length > 0) {
+      uploadedVideos = await uploadService.uploadTimeLineImages(
+        videosToUpload.map(vid => vid.file)
+      );
+    }
+
+    // Reemplaza las URLs locales por las URLs reales
+    const images = form.images.map(img => {
+      if (img.url.startsWith('blob:')) {
+        return {
+          ...img,
+          url: uploadedImages.shift(),
+        };
+      }
+      return img;
+    });
+
+    const videos = form.videos.map(vid => {
+      if (vid.url.startsWith('blob:')) {
+        return {
+          ...vid,
+          url: uploadedVideos.shift(),
+        };
+      }
+      return vid;
+    });
+
+    // Unifica imágenes y videos en un solo array media y los ordena por order
+    const media = [
+      ...images.map(img => ({
+        type: 'image',
+        url: img.url,
+        name: img.name,
+        order: img.order
+      })),
+      ...videos.map(vid => ({
+        type: 'video',
+        url: vid.url,
+        name: vid.name,
+        order: vid.order
+      }))
+    ].sort((a, b) => a.order - b.order);
+
+    const payload = {
+      title: form.title,
+      description: form.description,
+      media
+    };
+
+    try {
+      if (editingStep) {
+        const updated = await TimeLineService.update(editingStep.id, payload);
+        setSteps((prev) =>
+          prev.map((s) =>
+            s.id === editingStep.id
+              ? updated
+              : s
+          )
+        );
+      } else {
+        const created = await TimeLineService.create(payload);
+        setSteps((prev) => [created, ...prev]);
+      }
+      setModalOpen(false);
+    } catch (err) {
+      alert('Error al guardar. Intenta de nuevo.');
+    }
+    setSaving(false);
+  };
 
   // --- DataTable columns ---
-  const columns = [
-    {
-      field: 'createdAt',
-      headerName: 'Fecha',
-      width: 120,
-      renderCell: ({ row }) =>
-        new Date(row.createdAt).toLocaleDateString()
-    },
-    { field: 'title', headerName: 'Título', width: 180 },
-    { field: 'description', headerName: 'Descripción', width: 300 },
-    {
-      field: 'images',
-      headerName: 'Imágenes',
-      width: 120,
-      renderCell: ({ row }) => (row.media || []).filter(m => m.type === 'image').length
-    },
-    {
-      field: 'videos',
-      headerName: 'Videos',
-      width: 120,
-      renderCell: ({ row }) => (row.media || []).filter(m => m.type === 'video').length
-    },
-    {
-      field: 'actions',
-      headerName: 'Acciones',
-      width: 120,
-      renderCell: ({ row }) => (
-        <Button size="small" onClick={() => openEditModal(row)}>
-          Editar
-        </Button>
-      )
-    }
-  ];
+const columns = [
+  {
+    field: 'createdAt',
+    headerName: t('date', 'Date'),
+    width: 120,
+    renderCell: ({ row }) => (
+      <Typography
+        variant="body2"
+        sx={{
+          color: '#706f6f',
+          fontFamily: '"Poppins", sans-serif',
+          fontWeight: 500
+        }}
+      >
+        {new Date(row.createdAt).toLocaleDateString()}
+      </Typography>
+    )
+  },
+  {
+    field: 'title',
+    headerName: t('title', 'Title'),
+    width: 180,
+    renderCell: ({ row }) => (
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 600,
+          color: '#1a1a1a',
+          fontFamily: '"Poppins", sans-serif'
+        }}
+      >
+        {row.title}
+      </Typography>
+    )
+  },
+  {
+    field: 'description',
+    headerName: t('description', 'Description'),
+    width: 300,
+    renderCell: ({ row }) => (
+      <Typography
+        variant="body2"
+        sx={{
+          color: '#706f6f',
+          fontFamily: '"Poppins", sans-serif',
+          fontSize: '0.95rem',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden'
+        }}
+      >
+        {row.description}
+      </Typography>
+    )
+  },
+  {
+    field: 'images',
+    headerName: t('images', 'Images'),
+    width: 120,
+    align: 'center',
+    renderCell: ({ row }) => (
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 700,
+          color: '#8CA551',
+          fontFamily: '"Poppins", sans-serif'
+        }}
+      >
+        {(row.media || []).filter(m => m.type === 'image').length}
+      </Typography>
+    )
+  },
+  {
+    field: 'videos',
+    headerName: t('videos', 'Videos'),
+    width: 120,
+    align: 'center',
+    renderCell: ({ row }) => (
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 700,
+          color: '#E5863C',
+          fontFamily: '"Poppins", sans-serif'
+        }}
+      >
+        {(row.media || []).filter(m => m.type === 'video').length}
+      </Typography>
+    )
+  },
+  {
+    field: 'actions',
+    headerName: t('actions', 'Actions'),
+    width: 100,
+    align: 'center',
+    renderCell: ({ row }) => (
+      <Box display="flex" alignItems="center" gap={1}>
+        <Tooltip title={t('edit', 'Edit')} placement="top">
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              openEditModal(row);
+            }}
+            sx={{
+              bgcolor: 'rgba(140, 165, 81, 0.08)',
+              border: '1px solid rgba(140, 165, 81, 0.2)',
+              borderRadius: 2,
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                bgcolor: '#8CA551',
+                borderColor: '#8CA551',
+                transform: 'scale(1.1)',
+                '& .MuiSvgIcon-root': {
+                  color: 'white'
+                }
+              }
+            }}
+          >
+            <EditIcon sx={{ fontSize: 18, color: '#8CA551' }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    )
+  }
+];
 
   return (
     <Box
@@ -277,173 +383,56 @@ const removeVideo = (idx) => {
       }}
     >
       <Container maxWidth="xl">
-        <PageHeader
-          icon={AddIcon}
-          title="Línea de Tiempo"
-          subtitle="Gestiona los avances y etapas del proyecto"
-          actionButton={{
-            label: 'Nuevo Step',
-            icon: <AddIcon />,
-            onClick: openCreateModal
-          }}
-        />
+<PageHeader
+  icon={AddIcon}
+  title={t('timelineTitle', 'Timeline')}
+  subtitle={t('timelineSubtitle', 'Manage project progress and stages')}
+  actionButton={{
+    label: t('newStep', 'New Step'),
+    icon: <AddIcon />,
+    onClick: openCreateModal
+  }}
+/>
 
-        <DataTable
-          columns={columns}
-          data={steps}
-          emptyState={
-            <EmptyState
-              icon={AddIcon}
-              title="Sin pasos aún"
-              description="Agrega el primer paso para comenzar la línea de tiempo."
-              actionLabel="Nuevo Step"
-              onAction={openCreateModal}
-            />
-          }
-        />
+        {loading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight={300}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Box color="error.main" textAlign="center" py={4}>{error}</Box>
+        ) : (
+<DataTable
+  columns={columns}
+  data={steps}
+  emptyState={
+    <EmptyState
+      icon={AddIcon}
+      title={t('noSteps', 'No steps yet')}
+      description={t('addFirstStep', 'Add the first step to start the timeline.')}
+      actionLabel={t('newStep', 'New Step')}
+      onAction={openCreateModal}
+    />
+  }
+/>
+        )}
 
         {/* MODAL CREAR/EDITAR STEP */}
-        <Modal open={modalOpen} onClose={closeModal}>
-          <Paper
-            sx={{
-              p: 4,
-              maxWidth: 500,
-              mx: 'auto',
-              mt: 8,
-              borderRadius: 4,
-              outline: 'none'
-            }}
-          >
-            <Typography variant="h6" mb={2}>
-              {editingStep ? 'Editar Step' : 'Nuevo Step'}
-            </Typography>
-            <Stack spacing={2}>
-              <TextField
-                label="Título"
-                value={form.title}
-                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                fullWidth
-              />
-              <TextField
-                label="Descripción"
-                value={form.description}
-                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                fullWidth
-                multiline
-                minRows={2}
-              />
-            {/* Media (Imágenes y Videos unificados) */}
-            <Box>
-              <Typography variant="subtitle2" mb={1}>
-                Media
-              </Typography>
-              <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-                <Button
-                  component="label"
-                  startIcon={<ImageIcon />}
-                  sx={{ mb: 0 }}
-                >
-                  Agregar Imagen
-                  <input
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    multiple
-                    onChange={handleAddImage}
-                  />
-                </Button>
-                <Button
-                  component="label"
-                  startIcon={<VideoLibraryIcon />}
-                  sx={{ mb: 0 }}
-                >
-                  Agregar Video
-                  <input
-                    type="file"
-                    accept="video/*"
-                    hidden
-                    onChange={handleAddVideo}
-                  />
-                </Button>
-              </Stack>
-              <Stack direction="row" spacing={1}>
-                {[...form.images, ...form.videos]
-                  .sort((a, b) => a.order - b.order)
-                  .map((media, idx, arr) => (
-                    <Box key={media.url} sx={{ position: 'relative', minWidth: 70 }}>
-                      {media.type === 'image' ? (
-                        <img
-                          src={media.url}
-                          alt={media.name}
-                          width={60}
-                          height={60}
-                          style={{ borderRadius: 8, objectFit: 'cover' }}
-                        />
-                      ) : (
-                        <video
-                          src={media.url}
-                          width={60}
-                          height={60}
-                          style={{ borderRadius: 8, objectFit: 'cover' }}
-                          controls
-                        />
-                      )}
-                      <IconButton
-                        size="small"
-                        sx={{ position: 'absolute', top: 0, right: 0 }}
-                        onClick={() => {
-                          if (media.type === 'image') removeImage(form.images.findIndex(i => i.url === media.url));
-                          else removeVideo(form.videos.findIndex(v => v.url === media.url));
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        sx={{ position: 'absolute', bottom: 0, left: 0 }}
-                        onClick={() => moveMedia(idx, -1)}
-                        disabled={idx === 0}
-                      >
-                        <ArrowUpwardIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        sx={{ position: 'absolute', bottom: 0, right: 0 }}
-                        onClick={() => moveMedia(idx, 1)}
-                        disabled={idx === arr.length - 1}
-                      >
-                        <ArrowDownwardIcon fontSize="small" />
-                      </IconButton>
-                      {/* Orden editable */}
-                      <Box sx={{ mt: 1, textAlign: 'center' }}>
-                        <TextField
-                          label="Orden"
-                          type="number"
-                          size="small"
-                          value={media.order}
-                          inputProps={{ min: 1, max: arr.length, style: { width: 40, textAlign: 'center' } }}
-                          onChange={e => {
-                            let newOrder = parseInt(e.target.value, 10);
-                            if (isNaN(newOrder) || newOrder < 1 || newOrder > arr.length) return;
-                            moveMedia(idx, newOrder - (idx + 1));
-                          }}
-                        />
-                      </Box>
-                    </Box>
-                  ))}
-              </Stack>
-            </Box>
-              <Box display="flex" gap={2} mt={2}>
-                <Button variant="contained" onClick={handleSave}>
-                  Guardar
-                </Button>
-                <Button variant="outlined" onClick={closeModal}>
-                  Cancelar
-                </Button>
-              </Box>
-            </Stack>
-          </Paper>
-        </Modal>
+
+
+<TimeLineStepModal
+  open={modalOpen}
+  onClose={closeModal}
+  onSave={handleSave}
+  form={form}
+  setForm={setForm}
+  saving={saving}
+  handleAddImage={handleAddImage}
+  handleAddVideo={handleAddVideo}
+  moveMedia={moveMedia}
+  removeImage={removeImage}
+  removeVideo={removeVideo}
+  editingStep={editingStep}
+/>
       </Container>
     </Box>
   );

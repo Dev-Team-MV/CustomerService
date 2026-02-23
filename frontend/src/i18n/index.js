@@ -19,6 +19,7 @@ import enModels from './locales/en/models.json'
 import enPayloads from './locales/en/payloads.json'
 import enClubHouse from './locales/en/clubhouse.json'
 import enMasterPlan from './locales/en/masterPlan.json'
+import enTimeLine from './locales/en/timeLine.json'
 
 // ES
 import esCommon from './locales/es/common.json'
@@ -37,6 +38,7 @@ import esModels from './locales/es/models.json'
 import esPayloads from './locales/es/payloads.json'
 import esClubHouse from './locales/es/clubhouse.json'
 import esMasterPlan from './locales/es/masterPlan.json'
+import esTimeLine from './locales/es/timeLine.json'
 
 i18n
     .use(LanguageDetector)
@@ -61,6 +63,7 @@ i18n
                 payloads: enPayloads,
                 clubHouse: enClubHouse,
                 masterPlan: enMasterPlan,
+                timeLine: enTimeLine,
             },
             es: {
                 common: esCommon,
@@ -80,11 +83,12 @@ i18n
                 payloads: esPayloads,
                 clubHouse: esClubHouse,
                 masterPlan: esMasterPlan,
+                timeLine: esTimeLine,
             },
         },
         fallbackLng: 'en',
         defaultNS: 'common',
-        ns: ['common', 'auth', 'navigation', 'dashboard', 'property', 'amenities', 'news', 'profile', 'analytics', 'lots', 'propertySelection', 'residents', 'models', 'payloads', 'clubHouse', 'masterPlan'],
+        ns: ['common', 'auth', 'navigation', 'dashboard', 'property', 'amenities', 'news', 'profile', 'analytics', 'lots', 'propertySelection', 'residents', 'models', 'payloads', 'clubHouse', 'masterPlan', 'timeLine'],
         interpolation: {
             escapeValue: false, // React already escapes
         },

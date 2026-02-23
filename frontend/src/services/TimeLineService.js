@@ -1,6 +1,6 @@
 import api from './api' // Ajusta el import según tu configuración de axios o fetch
 
-const ENDPOINT = '/api/under-construction';
+const ENDPOINT = '/under-construction';
 
 const TimeLineService = {
   // Obtener todos los steps (público)

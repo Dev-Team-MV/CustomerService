@@ -1,0 +1,26 @@
+{
+    "timelineTitle": "Timeline",
+  "timelineSubtitle": "Manage project progress and stages",
+  "date": "Date",
+  "title": "Title",
+  "description": "Description",
+  "images": "Images",
+  "videos": "Videos",
+  "actions": "Actions",
+  "edit": "Edit",
+  "newStep": "New Step",
+  "noSteps": "No steps yet",
+  "addFirstStep": "Add the first step to start the timeline.",
+
+"editStep": "Edit Step",
+  "media": "Media",
+  "addImage": "Add Image",
+  "addVideo": "Add Video",
+  "delete": "Delete",
+  "moveUp": "Move Up",
+  "moveDown": "Move Down",
+  "order": "Order",
+  "cancel": "Cancel",
+  "save": "Save",
+  "saving": "Saving..."
+}
