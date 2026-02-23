@@ -76,6 +76,14 @@ const uploadService = {
     return uploadService.uploadImage(file, 'clubhouse')
   },
 
+    uploadTimeLineImages: async (files) => {
+    return uploadService.uploadMultipleImages(files, 'timeline')
+  },
+  
+  uploadTimeLineImage: async (file) => {
+    return uploadService.uploadImage(file, 'timeline')
+  },
+
   // ========================================
   // ✅ CLUBHOUSE FUNCTIONS - ENDPOINTS CORREGIDOS
   // ========================================

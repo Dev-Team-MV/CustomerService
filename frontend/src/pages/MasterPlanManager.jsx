@@ -3,17 +3,20 @@ import MasterPlanTabs from '../components/masterPlan/MasterPlanTabs'
 import MapIcon from '@mui/icons-material/Map'
 import { Box, Container, Paper } from '@mui/material'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
-const MasterPlanManager = () => (
+const MasterPlanManager = () => {
+    const { t } = useTranslation(['masterPlan', 'common']);
+  return (
   <Box sx={{ minHeight: '100vh', bgcolor: '#f8f9fa', py: 3 }}>
     <Container maxWidth="xl">
       {/* HEADER */}
 
           <PageHeader
-            icon={MapIcon}
-            title="Master Plan Manager"
-            subtitle="Manage inventory, exterior amenities, and master plan tour"
-          />
+          icon={MapIcon}
+          title={t('masterPlan:title')}
+          subtitle={t('masterPlan:subtitle')}
+        />
 
 
       {/* TABS Y CONTENIDO */}
@@ -28,6 +31,7 @@ const MasterPlanManager = () => (
       </motion.div>
     </Container>
   </Box>
-)
+  )
+}
 
 export default MasterPlanManager

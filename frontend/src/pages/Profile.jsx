@@ -30,11 +30,13 @@ import {
   Cancel
 } from '@mui/icons-material'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/authService'
 
 const Profile = () => {
   const { user, token } = useAuth()  
+  const { t } = useTranslation('common')
   const [isEditing, setIsEditing] = useState(false)
   const [showPassword, setShowPassword] = useState({
     current: false,
@@ -85,7 +87,7 @@ const Profile = () => {
       if (!passwordData.current || !passwordData.new || !passwordData.confirm) {
         setSnackbar({
           open: true,
-          message: 'Please fill all password fields.',
+          message: t('passwordFillAll'),
           severity: 'error'
         })
         return
@@ -93,7 +95,7 @@ const Profile = () => {
       if (passwordData.new !== passwordData.confirm) {
         setSnackbar({
           open: true,
-          message: 'New passwords do not match.',
+          message: t('passwordsNoMatch'),
           severity: 'error'
         })
         return
@@ -101,7 +103,7 @@ const Profile = () => {
       if (passwordData.new.length < 6) {
         setSnackbar({
           open: true,
-          message: 'New password must be at least 6 characters.',
+          message: t('passwordMinLength'),
           severity: 'error'
         })
         return
@@ -110,7 +112,7 @@ const Profile = () => {
         await authService.changePassword(passwordData.current, passwordData.new)
         setSnackbar({
           open: true,
-          message: 'Password changed successfully!',
+          message: t('passwordChanged'),
           severity: 'success'
         })
         setPasswordData({ current: '', new: '', confirm: '' })
@@ -119,7 +121,7 @@ const Profile = () => {
           open: true,
           message:
             err.response?.data?.message ||
-            'Error changing password. Please try again.',
+            t('passwordChangeError'),
           severity: 'error'
         })
         return
@@ -130,7 +132,7 @@ const Profile = () => {
     setIsEditing(false)
     setSnackbar({
       open: true,
-      message: 'Profile updated successfully!',
+      message: t('profileUpdated'),
       severity: 'success'
     })
   }
@@ -232,7 +234,7 @@ const Profile = () => {
                     fontSize: { xs: '1.75rem', md: '2.125rem' }
                   }}
                 >
-                  My Profile
+                  {t('myProfile')}
                 </Typography>
                 <Typography
                   variant="body1"
@@ -242,7 +244,7 @@ const Profile = () => {
                     fontSize: { xs: '0.875rem', md: '1rem' }
                   }}
                 >
-                  Manage your personal information and security settings
+                  {t('managePersonalInfo')}
                 </Typography>
               </Box>
             </Box>
@@ -348,7 +350,7 @@ const Profile = () => {
                 </Typography>
 
                 <Chip
-                  label="Active User"
+                  label={t('activeUser')}
                   size="small"
                   icon={<CheckCircle />}
                   sx={{
@@ -378,7 +380,7 @@ const Profile = () => {
                       display: 'block'
                     }}
                   >
-                    Account Details
+                    {t('accountDetails')}
                   </Typography>
                   
                   <Box display="flex" alignItems="center" gap={1.5} mb={1.5}>
@@ -444,7 +446,7 @@ const Profile = () => {
                         fontSize: { xs: '1.1rem', md: '1.25rem' }
                       }}
                     >
-                      Personal Information
+                      {t('personalInformation', { ns: 'profile' })}
                     </Typography>
                     <Box
                       sx={{
@@ -482,7 +484,7 @@ const Profile = () => {
                                 }
                               }}
                             >
-                              Cancel
+                              {t('actions.cancel')}
                             </Button>
                           </motion.div>
                           <motion.div
@@ -506,7 +508,7 @@ const Profile = () => {
                                 }
                               }}
                             >
-                              Save
+                              {t('actions.save')}
                             </Button>
                           </motion.div>
                         </>
@@ -532,7 +534,7 @@ const Profile = () => {
                               }
                             }}
                           >
-                            Edit Profile
+                            {t('editProfile')}
                           </Button>
                         </motion.div>
                       )}
@@ -547,7 +549,7 @@ const Profile = () => {
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      label="First Name"
+                      label={t('firstName', { ns: 'auth' })}
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleChange}
@@ -577,7 +579,7 @@ const Profile = () => {
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      label="Last Name"
+                      label={t('lastName', { ns: 'auth' })}
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleChange}
@@ -607,7 +609,7 @@ const Profile = () => {
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      label="Email Address"
+                      label={t('emailAddress', { ns: 'auth' })}
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
@@ -637,7 +639,7 @@ const Profile = () => {
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      label="Phone Number"
+                      label={t('phoneNumber', { ns: 'auth' })}
                       name="phoneNumber"
                       value={formData.phoneNumber}
                       onChange={handleChange}
@@ -686,7 +688,7 @@ const Profile = () => {
                       fontSize: { xs: '1.1rem', md: '1.25rem' }
                     }}
                   >
-                    Change Password
+                    {t('changePassword', { ns: 'profile' })}
                   </Typography>
                   <Box
                     sx={{
@@ -712,7 +714,7 @@ const Profile = () => {
                       }
                     }}
                   >
-                    Enable edit mode to change your password
+                    {t('enableEditMode')}
                   </Alert>
                 )}
 
@@ -720,7 +722,7 @@ const Profile = () => {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label="Current Password"
+                      label={t('currentPassword', { ns: 'profile' })}
                       name="current"
                       type={showPassword.current ? 'text' : 'password'}
                       value={passwordData.current}
@@ -762,7 +764,7 @@ const Profile = () => {
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      label="New Password"
+                      label={t('newPassword', { ns: 'profile' })}
                       name="new"
                       type={showPassword.new ? 'text' : 'password'}
                       value={passwordData.new}
@@ -804,7 +806,7 @@ const Profile = () => {
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      label="Confirm Password"
+                      label={t('confirmPassword', { ns: 'auth' })}
                       name="confirm"
                       type={showPassword.confirm ? 'text' : 'password'}
                       value={passwordData.confirm}

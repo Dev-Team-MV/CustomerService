@@ -5,8 +5,10 @@ import { PhotoLibrary, Map, Layers, MeetingRoom } from '@mui/icons-material';
 import ClubhouseImagesModal from '../components/ClubHouse/ClubImagesModal';
 import uploadService from '../services/uploadService';
 import PageHeader from '../components/PageHeader';
+import { useTranslation } from 'react-i18next';
 
 const ClubhouseManager = () => {
+  const { t } = useTranslation(['clubhouse', 'common']);
   const [modalOpen, setModalOpen] = useState(false);
   const [images, setImages] = useState({
     exterior: [],
@@ -160,17 +162,17 @@ return (
       )}
 
       {/* Header */}
-      <PageHeader
-        icon={PhotoLibrary}
-        title="Clubhouse Image Manager"
-        subtitle="Manage and upload images for the Clubhouse. You can upload exterior, interior (by section), and blueprint images."
-        actionButton={{
-          label: 'Manage Images',
-          onClick: () => setModalOpen(true),
-          icon: <PhotoLibrary />,
-          tooltip: 'Manage Clubhouse Images'
-        }}
-      />
+<PageHeader
+  icon={PhotoLibrary}
+  title={t('clubHouse:title')}
+  subtitle={t('clubHouse:subtitle')}
+  actionButton={{
+    label: t('clubHouse:manageImages'),
+    onClick: () => setModalOpen(true),
+    icon: <PhotoLibrary />,
+    tooltip: t('clubHouse:manageImagesTooltip')
+  }}
+/>
 
       {/* Tabs */}
       <Paper
@@ -208,9 +210,9 @@ return (
             },
           }}
         >
-          <Tab label="Exterior" />
-          <Tab label="Plans" />
-          <Tab label="Interior" />
+          <Tab label={t('clubHouse:tabs.exterior')} />
+          <Tab label={t('clubHouse:tabs.plans')} />
+          <Tab label={t('clubHouse:tabs.interior')} />
         </Tabs>
       </Paper>
 
@@ -232,7 +234,7 @@ return (
             {images.exterior.length === 0 ? (
               <Grid item xs={12}>
                 <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100', borderRadius: 2 }}>
-                  <Typography variant="caption" color="text.secondary">No images uploaded</Typography>
+                  <Typography variant="caption" color="text.secondary"> {t('clubHouse:noImagesUploaded')}</Typography>
                 </Paper>
               </Grid>
             ) : (
@@ -262,7 +264,7 @@ return (
             {images.blueprints.length === 0 ? (
               <Grid item xs={12}>
                 <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100', borderRadius: 2 }}>
-                  <Typography variant="caption" color="text.secondary">No plans uploaded</Typography>
+                  <Typography variant="caption" color="text.secondary">{t('clubHouse:noPlansUploaded')}</Typography>
                 </Paper>
               </Grid>
             ) : (
@@ -292,7 +294,7 @@ return (
             {interiorKeys.length === 0 ? (
               <Grid item xs={12}>
                 <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100', borderRadius: 2 }}>
-                  <Typography variant="caption" color="text.secondary">No sections configured</Typography>
+                  <Typography variant="caption" color="text.secondary">{t('clubHouse:noSectionsConfigured')}</Typography>
                 </Paper>
               </Grid>
             ) : (
@@ -306,7 +308,7 @@ return (
                       {(images.interior[section] || []).length === 0 ? (
                         <Grid item xs={12}>
                           <Paper sx={{ p: 1, textAlign: 'center', bgcolor: 'grey.100', borderRadius: 2 }}>
-                            <Typography variant="caption" color="text.secondary">No images</Typography>
+                            <Typography variant="caption" color="text.secondary">{t('clubHouse:noImages')}</Typography>
                           </Paper>
                         </Grid>
                       ) : (

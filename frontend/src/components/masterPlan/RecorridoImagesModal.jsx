@@ -1,7 +1,9 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, Grid, CircularProgress } from '@mui/material'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, loading }) => {
+  const { t } = useTranslation(['masterPlan']);
   const [files, setFiles] = useState({})
   const [previews, setPreviews] = useState({})
 
@@ -13,13 +15,13 @@ const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, load
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Manage Tour Images</DialogTitle>
+      <DialogTitle>{t('manageTourImages')}</DialogTitle>
       <DialogContent>
         <Grid container spacing={2}>
           {puntos.map((point) => (
             <Grid item xs={12} sm={6} md={4} key={point.id}>
               <Box sx={{ border: '1px solid #eee', borderRadius: 2, p: 2 }}>
-                <Typography fontWeight={600}>{point.name}</Typography>
+                <Typography fontWeight={600}>{t(`tourPoints.${point.name}`, point.name)}</Typography>
                 {previews[String(point.id)] ? (
                   <Box
                     component="img"
@@ -56,7 +58,7 @@ const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, load
                     fullWidth
                     disabled={loading}
                   >
-                    {imagesMap[point.id] ? 'Replace' : 'Upload'} image
+                    {imagesMap[point.id] ? t('replaceImage') : t('uploadImage')}
                   </Button>
                 </label>
                 {files[point.id] && (
@@ -77,7 +79,7 @@ const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, load
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={loading}>Close</Button>
+        <Button onClick={onClose} disabled={loading}>{t('common:close')}</Button>
       </DialogActions>
     </Dialog>
   )

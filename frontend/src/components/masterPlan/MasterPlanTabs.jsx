@@ -3,8 +3,10 @@ import { useState } from 'react'
 import InventoryTab from './inventoryTab'
 import ExteriorAmenitiesTab from './ExteriorAmenitiesTab'
 import RecorridoTab from './RecorridoTab'
+import { useTranslation } from 'react-i18next'
 
 const MasterPlanTabs = () => {
+  const { t } = useTranslation('masterPlan')
   const [tab, setTab] = useState(0)
   return (
     <Box>
@@ -44,9 +46,9 @@ const MasterPlanTabs = () => {
             },
           }}
         >
-          <Tab label="Inventory" />
-          <Tab label="Exterior Amenities" />
-          <Tab label="Master Plan Tour" />
+          <Tab label={t('inventoryTab')} />
+          <Tab label={t('exteriorAmenitiesTab')} />
+          <Tab label={t('tourTab')} />
         </Tabs>
       </Paper>
 

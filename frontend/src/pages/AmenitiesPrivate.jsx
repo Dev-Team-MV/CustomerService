@@ -19,15 +19,17 @@ import {
   Layers  
 } from "@mui/icons-material";
 import PageHeader from '../components/PageHeader';
+import { useTranslation } from 'react-i18next';
 const AmenitiesPrivate = () => {
+  const { t } = useTranslation(['amenities']);
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4, p: 3 }}>
       {/* Header */}
-<PageHeader
-  icon={Home}
-  title="Amenities Map"
-  subtitle="Explore all premium amenities available in the community. Click on any point to view detailed photos and information."
-/>
+      <PageHeader
+        icon={Home}
+        title={t('mapTitle')}
+        subtitle={t('mapSubtitle')}
+      />
 
       {/* Map Component - Full Access */}
       <AmenitiesMap isPublicView={false} />

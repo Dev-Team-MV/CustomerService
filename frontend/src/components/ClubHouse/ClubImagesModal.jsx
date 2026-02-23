@@ -27,8 +27,10 @@ import {
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import uploadService from '../../services/uploadService';
+import { useTranslation } from 'react-i18next';
 
 const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
+  const { t } = useTranslation(['clubHouse', 'common']);
   const [tab, setTab] = useState(0);
   const [selectedInteriorSection, setSelectedInteriorSection] = useState('Reception');
   const [interiorKeys, setInteriorKeys] = useState([]);
@@ -306,7 +308,7 @@ const handleFileSelect = (event, section) => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                Clubhouse Image Manager
+                {t('clubHouse:title')}
               </Typography>
               {getTotalSelectedFiles() > 0 && (
                 <Typography
@@ -317,7 +319,8 @@ const handleFileSelect = (event, section) => {
                     fontWeight: 600
                   }}
                 >
-                  {getTotalSelectedFiles()} file(s) ready to upload
+                        {t('clubHouse:readyToUpload', { count: getTotalSelectedFiles() })}
+
                 </Typography>
               )}
             </Box>
@@ -357,7 +360,7 @@ const handleFileSelect = (event, section) => {
             icon={<Map />} 
             label={
               <Box display="flex" alignItems="center" gap={1}>
-                Exterior
+                {t('clubHouse:tabs.exterior')}
                 {(existingImages.exterior.length + selectedFiles.exterior.length) > 0 && (
                   <Chip 
                     label={existingImages.exterior.length + selectedFiles.exterior.length} 
@@ -373,7 +376,7 @@ const handleFileSelect = (event, section) => {
             icon={<Layers />} 
             label={
               <Box display="flex" alignItems="center" gap={1}>
-                Blueprints
+                {t('clubHouse:tabs.plans')}
                 {(existingImages.blueprints.length + selectedFiles.blueprints.length) > 0 && (
                   <Chip 
                     label={existingImages.blueprints.length + selectedFiles.blueprints.length} 
@@ -385,7 +388,11 @@ const handleFileSelect = (event, section) => {
             }
             iconPosition="start" 
           />
-          <Tab icon={<MeetingRoom />} label="Interior" iconPosition="start" />
+          <Tab 
+            icon={<MeetingRoom />} 
+            label={t('clubHouse:tabs.interior')}
+            iconPosition="start" 
+          />
         </Tabs>
 
         {tab === 2 && (
@@ -396,7 +403,7 @@ const handleFileSelect = (event, section) => {
               mb={1.5}
               sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}
             >
-              Select Interior Section
+              {t('clubHouse:selectSection')}
             </Typography>
             <Box display="flex" flexWrap="wrap" gap={1}>
               {interiorKeys.map(key => {
@@ -460,7 +467,7 @@ const handleFileSelect = (event, section) => {
               '&:hover': { bgcolor: '#8CA551' }
             }}
           >
-            Select Images
+            {t('clubHouse:selectImages')}
             <input
               type="file"
               hidden
@@ -469,9 +476,11 @@ const handleFileSelect = (event, section) => {
               onChange={(e) => handleFileSelect(e, getCurrentSection())}
             />
           </Button>
-          <Typography variant="caption" display="block" mt={1} sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
-            {tab === 2 ? `Selecting for: ${selectedInteriorSection}` : `Selecting for: ${getCurrentSection()}`}
-          </Typography>
+  <Typography variant="caption" display="block" mt={1} sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+    {tab === 2
+      ? t('clubHouse:selectingFor', { section: selectedInteriorSection })
+      : t('clubHouse:selectingFor', { section: getCurrentSection() })}
+  </Typography>
         </Box>
 
         {loading ? (
@@ -496,7 +505,7 @@ const handleFileSelect = (event, section) => {
                   }}
                 >
                   <CloudUpload fontSize="small" />
-                  Ready to Upload ({getCurrentSelectedFiles().length})
+          {t('clubHouse:readyToUpload', { count: getCurrentSelectedFiles().length })}
                 </Typography>
                 <Grid container spacing={2}>
                   {getCurrentSelectedFiles().map((file, idx) => (
@@ -576,7 +585,7 @@ const handleFileSelect = (event, section) => {
                   mb={1.5}
                   sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}
                 >
-                  Uploaded Images ({getCurrentExistingImages().length})
+          {t('clubHouse:uploadedImages', { count: getCurrentExistingImages().length })}
                 </Typography>
                 <Grid container spacing={2}>
                   <AnimatePresence>
@@ -645,7 +654,7 @@ const handleFileSelect = (event, section) => {
                 }}
               >
                 <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
-                  No images yet. Select files to upload.
+                {t('clubHouse:noImagesYet')}               
                 </Typography>
               </Paper>
             )}
@@ -665,7 +674,7 @@ const handleFileSelect = (event, section) => {
             color: '#706f6f'
           }}
         >
-          Close
+          {t('clubHouse:close')}
         </Button>
         <Button
           variant="contained"
@@ -683,7 +692,7 @@ const handleFileSelect = (event, section) => {
             '&:disabled': { bgcolor: '#e0e0e0' }
           }}
         >
-          {uploading ? 'Uploading...' : `Upload ${getTotalSelectedFiles()} Image(s)`}
+          {uploading ? t('clubHouse:uploading') : t('clubHouse:upload', { count: getTotalSelectedFiles() })}
         </Button>
       </DialogActions>
     </Dialog>

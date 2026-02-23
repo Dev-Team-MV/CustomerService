@@ -28,6 +28,8 @@ import NewsFeed from './pages/NewsFeed'
 import TermsAndCondition from './pages/TermsAndCondition'
 import ClubhouseManager from './pages/ClubhouseManager'
 import MasterPlanManager from './pages/MasterPlanManager'
+import TimeLine from './pages/TimeLine'
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -96,6 +98,7 @@ function App() {
                 <Route path="/residents" element={<Residents />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/timeline" element={<TimeLine />} />
                 <Route path="/club-house-detail" element={<ClubHouseDetail />} />
                 <Route path="/clubhouse-manager" element={<ClubhouseManager />} />
               </Route>

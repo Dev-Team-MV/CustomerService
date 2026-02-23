@@ -1,11 +1,13 @@
 import { Box, Typography } from '@mui/material'
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const TypingFooter = ({ variant = 'light' }) => {
   const isDark = variant === 'dark'
   const [displayText, setDisplayText] = useState('')
-  const fullText = "Premium Lakefront Living Experience"
+  const { t } = useTranslation('common')
+  const fullText = t('premiumTagline')
 
   useEffect(() => {
     let index = 0
@@ -88,7 +90,7 @@ const TypingFooter = ({ variant = 'light' }) => {
           letterSpacing: '1px'
         }}
       >
-        © 2026 Developed by Michelangelo Del Valle • All Rights Reserved
+        {t('copyright')}
       </Typography>
     </Box>
   )

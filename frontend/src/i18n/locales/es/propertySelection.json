@@ -1,0 +1,5 @@
+{
+  "title": "Selección de Propiedad",
+  "subtitle": "Elige tu lote, modelo y fachada. Calcula tu precio y asigna residentes.",
+  "errorLoading": "Error al cargar los datos de la propiedad: {{error}}"
+}

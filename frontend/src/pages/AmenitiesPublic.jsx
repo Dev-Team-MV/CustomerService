@@ -1,9 +1,11 @@
 import { Box, Container, Typography, Paper, Button } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import AmenitiesMap from '../components/property/AmenitiesMap'
+import { useTranslation } from 'react-i18next';
 
 const AmenitiesPublic = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation(['amenities']);
 
   return (
     <Box
@@ -31,10 +33,10 @@ const AmenitiesPublic = () => {
           }}
         >
           <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#e65100', mb: 1 }}>
-            🔒 Limited Preview Mode
+            🔒 {t('limitedPreview')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            You're viewing a limited preview. Sign in to unlock full access to all amenity photos and detailed information.
+            {t('limitedPreviewDesc')}
           </Typography>
         </Paper>
       </Container>
