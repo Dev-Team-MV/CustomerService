@@ -1,7 +1,8 @@
 import OutdoorAmenities from '../models/OutdoorAmenities.js'
+import { normalizeImageArray } from '../utils/imageUtils.js'
 
 /**
- * @param {object} a - amenity object (may have id, name, images)
+ * @param {object} a - amenity object (may have id, name, images as strings or [{ url, isPublic }])
  * @param {number} [defaultId] - when id is missing or invalid (e.g. in "replace all" payload)
  */
 function normalizeAmenity (a, defaultId) {
@@ -10,7 +11,7 @@ function normalizeAmenity (a, defaultId) {
   return {
     id,
     name: typeof a.name === 'string' ? a.name : '',
-    images: Array.isArray(a.images) ? a.images.filter((u) => typeof u === 'string') : []
+    images: normalizeImageArray(a.images)
   }
 }
 
@@ -21,7 +22,7 @@ function nextId (amenities) {
 
 /**
  * GET all outdoor amenities (singleton document).
- * Returns { _id, amenities: [{ id, name, images }, ...], createdAt, updatedAt }.
+ * Returns { _id, amenities: [{ id, name, images: [{ url, isPublic }] }, ...], createdAt, updatedAt }.
  */
 export const getOutdoorAmenities = async (req, res) => {
   try {
@@ -29,7 +30,14 @@ export const getOutdoorAmenities = async (req, res) => {
     if (!doc) {
       doc = await OutdoorAmenities.create({ amenities: [] })
     }
-    res.json(doc)
+    const payload = doc.toObject ? doc.toObject() : doc
+    if (Array.isArray(payload.amenities)) {
+      payload.amenities = payload.amenities.map((a) => ({
+        ...a,
+        images: normalizeImageArray(a.images)
+      }))
+    }
+    res.json(payload)
   } catch (error) {
     console.error('OutdoorAmenities get error:', error)
     res.status(500).json({ message: error.message })
@@ -54,7 +62,9 @@ export const getOutdoorAmenityById = async (req, res) => {
     if (!amenity) {
       return res.status(404).json({ message: `Amenity with id ${id} not found` })
     }
-    res.json(amenity)
+    const payload = amenity.toObject ? amenity.toObject() : { ...amenity }
+    payload.images = normalizeImageArray(amenity.images)
+    res.json(payload)
   } catch (error) {
     console.error('OutdoorAmenities getById error:', error)
     res.status(500).json({ message: error.message })
@@ -112,7 +122,7 @@ export const createOrUpdateOutdoorAmenities = async (req, res) => {
     const payload = normalizeAmenity({
       id: numId,
       name: name !== undefined && name !== null ? name : (existing?.name ?? ''),
-      images: Array.isArray(images) ? images.filter((u) => typeof u === 'string') : (existing?.images ?? [])
+      images: Array.isArray(images) ? images : (existing?.images ?? [])
     })
 
     if (index >= 0) {
@@ -158,7 +168,7 @@ export const updateOutdoorAmenity = async (req, res) => {
     const updated = {
       id: current.id,
       name: name !== undefined && name !== null ? String(name) : current.name,
-      images: Array.isArray(images) ? images.filter((u) => typeof u === 'string') : current.images
+      images: Array.isArray(images) ? normalizeImageArray(images) : current.images
     }
     doc.amenities[index] = updated
     doc.markModified('amenities')

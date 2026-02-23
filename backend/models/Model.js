@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 import balconyOptionSchema from './Balcony.js'
 import upgradeOptionSchema from './Upgrade.js'
 import storageOptionSchema from './Storage.js'
+import imageItemSchema from './schemas/imageItemSchema.js'
 
 const modelSchema = new mongoose.Schema(
   {
@@ -44,21 +45,15 @@ const modelSchema = new mongoose.Schema(
       min: 1
     },
     images: {
-      exterior: [{
-        type: String,
-        trim: true
-      }],
-      interior: [{
-        type: String,
-        trim: true
-      }]
+      exterior: [imageItemSchema],
+      interior: [imageItemSchema]
     },
-    // Blueprints por combinación: balcón y storage (igual que imágenes)
+    // Blueprints por combinación: balcón y storage (cada imagen con url e isPublic)
     blueprints: {
-      default: [{ type: String, trim: true }],
-      withBalcony: [{ type: String, trim: true }],
-      withStorage: [{ type: String, trim: true }],
-      withBalconyAndStorage: [{ type: String, trim: true }]
+      default: [imageItemSchema],
+      withBalcony: [imageItemSchema],
+      withStorage: [imageItemSchema],
+      withBalconyAndStorage: [imageItemSchema]
     },
     description: {
       type: String,

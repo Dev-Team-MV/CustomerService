@@ -238,9 +238,10 @@ function mapClubHouseFilesToSections (clubHouseDoc) {
   const byFilename = {}
   if (!clubHouseDoc) return byFilename
 
-  const add = (section, interiorKey, urls) => {
-    if (!Array.isArray(urls)) return
-    urls.forEach(url => {
+  const add = (section, interiorKey, items) => {
+    if (!Array.isArray(items)) return
+    items.forEach((item) => {
+      const url = typeof item === 'string' ? item : item?.url
       const filename = typeof url === 'string' && url.includes('/') ? url.split('/').pop().split('?')[0] : null
       if (filename) byFilename[filename] = { section, ...(interiorKey && { interiorKey }) }
     })
@@ -314,8 +315,9 @@ export const getFolderFiles = async (req, res) => {
 
 /**
  * Update an image: upload new file to GCS and save URL in Model (base, balcony or upgrade).
- * POST multipart: image (file), modelId, target (model|balcony|upgrade), imageType (exterior|interior),
- * optional: imageIndex (replace at index), balconyId (if target=balcony), upgradeId (if target=upgrade), folder.
+ * POST multipart: image (file), modelId, target (model|balcony|upgrade|blueprints), imageType (exterior|interior),
+ * optional: imageIndex (replace at index), balconyId (if target=balcony), upgradeId (if target=upgrade), folder,
+ * isPublic (true|false): si la imagen se puede mostrar sin token. Por defecto true.
  */
 export const updateImage = async (req, res) => {
   try {
@@ -326,7 +328,8 @@ export const updateImage = async (req, res) => {
       })
     }
 
-    const { modelId, target, imageType, imageIndex, balconyId, upgradeId, folder, blueprintVariant } = req.body
+    const { modelId, target, imageType, imageIndex, balconyId, upgradeId, folder, blueprintVariant, isPublic } = req.body
+    const isPublicBool = isPublic === undefined || isPublic === '' ? true : (isPublic === 'true' || isPublic === true)
 
     if (!modelId || !target) {
       return res.status(400).json({
@@ -444,20 +447,35 @@ export const updateImage = async (req, res) => {
     )
 
     const url = result.publicUrl || result.signedUrl
+    const imageItem = { url, isPublic: isPublicBool }
 
+    const { normalizeImageArray } = await import('../utils/imageUtils.js')
+    const normalized = normalizeImageArray(imageArray)
     if (hasValidIndex) {
-      imageArray[index] = url
+      normalized[index] = imageItem
     } else {
-      imageArray.push(url)
+      normalized.push(imageItem)
+    }
+    if (target === 'blueprints') {
+      model.blueprints[blueprintVariant] = normalized
+    } else if (target === 'model') {
+      model.images[imageType] = normalized
+    } else if (target === 'balcony') {
+      const balcony = model.balconies.id(balconyId)
+      balcony.images[imageType] = normalized
+    } else {
+      const upgrade = model.upgrades.id(upgradeId)
+      upgrade.images[imageType] = normalized
     }
 
     await model.save()
 
     const responseData = {
       url,
+      isPublic: isPublicBool,
       fileName: result.fileName,
       target,
-      index: hasValidIndex ? index : imageArray.length - 1
+      index: hasValidIndex ? index : normalized.length - 1
     }
     if (target === 'blueprints') {
       responseData.blueprintVariant = blueprintVariant

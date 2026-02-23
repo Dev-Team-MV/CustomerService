@@ -1,25 +1,17 @@
 import Model from '../models/Model.js'
+import { normalizeImageArray } from '../utils/imageUtils.js'
 
-// Helper function to validate and format images structure
 const formatImages = (images) => {
-  if (!images) {
-    return { exterior: [], interior: [] }
-  }
-  
+  if (!images) return { exterior: [], interior: [] }
   if (images.exterior !== undefined || images.interior !== undefined) {
     return {
-      exterior: Array.isArray(images.exterior) ? images.exterior : [],
-      interior: Array.isArray(images.interior) ? images.interior : []
+      exterior: normalizeImageArray(images.exterior),
+      interior: normalizeImageArray(images.interior)
     }
   }
-  
   if (Array.isArray(images)) {
-    return {
-      exterior: images,
-      interior: []
-    }
+    return { exterior: normalizeImageArray(images), interior: [] }
   }
-  
   return { exterior: [], interior: [] }
 }
 

@@ -1,31 +1,22 @@
 import Model from '../models/Model.js'
+import { normalizeImageArray } from '../utils/imageUtils.js'
 
-// Helper function to validate and format images structure
+// Helper: format images to { exterior: [{ url, isPublic }], interior: [...] }
 const formatImages = (images) => {
-  if (!images) {
-    return { exterior: [], interior: [] }
-  }
-  
-  // If it's already in the correct format
+  if (!images) return { exterior: [], interior: [] }
   if (images.exterior !== undefined || images.interior !== undefined) {
     return {
-      exterior: Array.isArray(images.exterior) ? images.exterior : [],
-      interior: Array.isArray(images.interior) ? images.interior : []
+      exterior: normalizeImageArray(images.exterior),
+      interior: normalizeImageArray(images.interior)
     }
   }
-  
-  // If it's an old array format, convert to new format (backward compatibility)
   if (Array.isArray(images)) {
-    return {
-      exterior: images,
-      interior: []
-    }
+    return { exterior: normalizeImageArray(images), interior: [] }
   }
-  
   return { exterior: [], interior: [] }
 }
 
-// Helper to validate and format blueprints (4 variants by balcony + storage)
+// Helper: format blueprints (cada array como [{ url, isPublic }])
 const formatBlueprints = (blueprints) => {
   const empty = {
     default: [],
@@ -35,11 +26,67 @@ const formatBlueprints = (blueprints) => {
   }
   if (!blueprints || typeof blueprints !== 'object') return empty
   return {
-    default: Array.isArray(blueprints.default) ? blueprints.default : [],
-    withBalcony: Array.isArray(blueprints.withBalcony) ? blueprints.withBalcony : [],
-    withStorage: Array.isArray(blueprints.withStorage) ? blueprints.withStorage : [],
-    withBalconyAndStorage: Array.isArray(blueprints.withBalconyAndStorage) ? blueprints.withBalconyAndStorage : []
+    default: normalizeImageArray(blueprints.default),
+    withBalcony: normalizeImageArray(blueprints.withBalcony),
+    withStorage: normalizeImageArray(blueprints.withStorage),
+    withBalconyAndStorage: normalizeImageArray(blueprints.withBalconyAndStorage)
   }
+}
+
+// Normaliza imágenes de un modelo (y balconies/upgrades/storages) para respuesta API
+function normalizeModelForResponse (model) {
+  const doc = model.toObject ? model.toObject() : { ...model }
+  if (doc.images) {
+    doc.images = {
+      exterior: normalizeImageArray(doc.images.exterior),
+      interior: normalizeImageArray(doc.images.interior)
+    }
+  }
+  if (doc.blueprints) {
+    doc.blueprints = {
+      default: normalizeImageArray(doc.blueprints.default),
+      withBalcony: normalizeImageArray(doc.blueprints.withBalcony),
+      withStorage: normalizeImageArray(doc.blueprints.withStorage),
+      withBalconyAndStorage: normalizeImageArray(doc.blueprints.withBalconyAndStorage)
+    }
+  }
+  if (Array.isArray(doc.balconies)) {
+    doc.balconies = doc.balconies.map((b) => {
+      const out = b.toObject ? b.toObject() : { ...b }
+      if (out.images) {
+        out.images = {
+          exterior: normalizeImageArray(out.images.exterior),
+          interior: normalizeImageArray(out.images.interior)
+        }
+      }
+      return out
+    })
+  }
+  if (Array.isArray(doc.upgrades)) {
+    doc.upgrades = doc.upgrades.map((u) => {
+      const out = u.toObject ? u.toObject() : { ...u }
+      if (out.images) {
+        out.images = {
+          exterior: normalizeImageArray(out.images.exterior),
+          interior: normalizeImageArray(out.images.interior)
+        }
+      }
+      return out
+    })
+  }
+  if (Array.isArray(doc.storages)) {
+    doc.storages = doc.storages.map((s) => {
+      const out = s.toObject ? s.toObject() : { ...s }
+      if (out.images) {
+        out.images = {
+          exterior: normalizeImageArray(out.images.exterior),
+          interior: normalizeImageArray(out.images.interior)
+        }
+      }
+      return out
+    })
+  }
+  return doc
 }
 
 export const getAllModels = async (req, res) => {
@@ -48,7 +95,7 @@ export const getAllModels = async (req, res) => {
     const filter = status ? { status } : {}
     
     const models = await Model.find(filter).sort({ model: 1 })
-    res.json(models)
+    res.json(models.map(normalizeModelForResponse))
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -59,7 +106,7 @@ export const getModelById = async (req, res) => {
     const model = await Model.findById(req.params.id)
     
     if (model) {
-      res.json(model)
+      res.json(normalizeModelForResponse(model))
     } else {
       res.status(404).json({ message: 'Model not found' })
     }
