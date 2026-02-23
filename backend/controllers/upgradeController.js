@@ -79,7 +79,16 @@ export const updateModelUpgrade = async (req, res) => {
     if (req.body.features !== undefined) upgrade.features = req.body.features
     if (req.body.images !== undefined) upgrade.images = formatImages(req.body.images)
     if (req.body.status !== undefined) upgrade.status = req.body.status
-    
+
+    if (upgrade.images) {
+      if (Array.isArray(upgrade.images.exterior) && upgrade.images.exterior.some((x) => typeof x === 'string')) {
+        upgrade.images.exterior = normalizeImageArray(upgrade.images.exterior)
+      }
+      if (Array.isArray(upgrade.images.interior) && upgrade.images.interior.some((x) => typeof x === 'string')) {
+        upgrade.images.interior = normalizeImageArray(upgrade.images.interior)
+      }
+    }
+
     await model.save()
     res.json(upgrade)
   } catch (error) {

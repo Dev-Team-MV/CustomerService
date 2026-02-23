@@ -20,6 +20,21 @@ function nextId (amenities) {
   return Math.max(...amenities.map((a) => Number(a.id) || 0), 0) + 1
 }
 
+/** Normaliza images de todos los amenities (legacy → { url, isPublic }) antes de guardar */
+function normalizeAmenitiesBeforeSave (doc) {
+  if (!doc.amenities || !Array.isArray(doc.amenities)) return
+  let changed = false
+  doc.amenities.forEach((a) => {
+    if (!Array.isArray(a.images)) return
+    const hasLegacy = a.images.some((x) => typeof x === 'string')
+    if (hasLegacy) {
+      a.images = normalizeImageArray(a.images)
+      changed = true
+    }
+  })
+  if (changed) doc.markModified('amenities')
+}
+
 /**
  * GET all outdoor amenities (singleton document).
  * Returns { _id, amenities: [{ id, name, images: [{ url, isPublic }] }, ...], createdAt, updatedAt }.
@@ -90,6 +105,7 @@ export const createOrUpdateOutdoorAmenities = async (req, res) => {
     if (Array.isArray(bodyAmenities)) {
       doc.amenities = bodyAmenities.map((a, i) => normalizeAmenity(a, i + 1))
       doc.markModified('amenities')
+      normalizeAmenitiesBeforeSave(doc)
       await doc.save()
       return res.status(200).json({
         message: 'Amenities list updated',
@@ -107,6 +123,7 @@ export const createOrUpdateOutdoorAmenities = async (req, res) => {
       })
       doc.amenities.push(newAmenity)
       doc.markModified('amenities')
+      normalizeAmenitiesBeforeSave(doc)
       await doc.save()
       return res.status(201).json({
         message: `Amenity created with id ${newId}`,
@@ -131,6 +148,7 @@ export const createOrUpdateOutdoorAmenities = async (req, res) => {
       doc.amenities.push(payload)
     }
     doc.markModified('amenities')
+    normalizeAmenitiesBeforeSave(doc)
     await doc.save()
 
     res.status(200).json({
@@ -172,6 +190,7 @@ export const updateOutdoorAmenity = async (req, res) => {
     }
     doc.amenities[index] = updated
     doc.markModified('amenities')
+    normalizeAmenitiesBeforeSave(doc)
     await doc.save()
 
     res.status(200).json({
@@ -206,6 +225,7 @@ export const deleteOutdoorAmenity = async (req, res) => {
 
     const removed = doc.amenities.splice(index, 1)[0]
     doc.markModified('amenities')
+    normalizeAmenitiesBeforeSave(doc)
     await doc.save()
 
     res.status(200).json({

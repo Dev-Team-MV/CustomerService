@@ -33,6 +33,64 @@ const formatBlueprints = (blueprints) => {
   }
 }
 
+// Normaliza imágenes en el documento (legacy strings → { url, isPublic }) antes de guardar
+function normalizeModelBeforeSave (model) {
+  if (model.images) {
+    if (Array.isArray(model.images.exterior)) {
+      const hasLegacy = model.images.exterior.some((x) => typeof x === 'string')
+      if (hasLegacy) model.images.exterior = normalizeImageArray(model.images.exterior)
+    }
+    if (Array.isArray(model.images.interior)) {
+      const hasLegacy = model.images.interior.some((x) => typeof x === 'string')
+      if (hasLegacy) model.images.interior = normalizeImageArray(model.images.interior)
+    }
+  }
+  if (model.blueprints && typeof model.blueprints === 'object') {
+    const variants = ['default', 'withBalcony', 'withStorage', 'withBalconyAndStorage']
+    variants.forEach((key) => {
+      if (Array.isArray(model.blueprints[key]) && model.blueprints[key].some((x) => typeof x === 'string')) {
+        model.blueprints[key] = normalizeImageArray(model.blueprints[key])
+      }
+    })
+  }
+  if (Array.isArray(model.balconies)) {
+    model.balconies.forEach((b) => {
+      if (b.images) {
+        if (Array.isArray(b.images.exterior) && b.images.exterior.some((x) => typeof x === 'string')) {
+          b.images.exterior = normalizeImageArray(b.images.exterior)
+        }
+        if (Array.isArray(b.images.interior) && b.images.interior.some((x) => typeof x === 'string')) {
+          b.images.interior = normalizeImageArray(b.images.interior)
+        }
+      }
+    })
+  }
+  if (Array.isArray(model.upgrades)) {
+    model.upgrades.forEach((u) => {
+      if (u.images) {
+        if (Array.isArray(u.images.exterior) && u.images.exterior.some((x) => typeof x === 'string')) {
+          u.images.exterior = normalizeImageArray(u.images.exterior)
+        }
+        if (Array.isArray(u.images.interior) && u.images.interior.some((x) => typeof x === 'string')) {
+          u.images.interior = normalizeImageArray(u.images.interior)
+        }
+      }
+    })
+  }
+  if (Array.isArray(model.storages)) {
+    model.storages.forEach((s) => {
+      if (s.images) {
+        if (Array.isArray(s.images.exterior) && s.images.exterior.some((x) => typeof x === 'string')) {
+          s.images.exterior = normalizeImageArray(s.images.exterior)
+        }
+        if (Array.isArray(s.images.interior) && s.images.interior.some((x) => typeof x === 'string')) {
+          s.images.interior = normalizeImageArray(s.images.interior)
+        }
+      }
+    })
+  }
+}
+
 // Normaliza imágenes de un modelo (y balconies/upgrades/storages) para respuesta API
 function normalizeModelForResponse (model) {
   const doc = model.toObject ? model.toObject() : { ...model }
@@ -473,7 +531,9 @@ export const updateModel = async (req, res) => {
       }
       model.storages = validatedStorages
     }
-    
+
+    normalizeModelBeforeSave(model)
+
     const updatedModel = await model.save()
     res.json({
       message: 'Model updated successfully',

@@ -79,7 +79,16 @@ export const updateModelBalcony = async (req, res) => {
     if (req.body.sqft !== undefined) balcony.sqft = req.body.sqft
     if (req.body.images !== undefined) balcony.images = formatImages(req.body.images)
     if (req.body.status !== undefined) balcony.status = req.body.status
-    
+
+    if (balcony.images) {
+      if (Array.isArray(balcony.images.exterior) && balcony.images.exterior.some((x) => typeof x === 'string')) {
+        balcony.images.exterior = normalizeImageArray(balcony.images.exterior)
+      }
+      if (Array.isArray(balcony.images.interior) && balcony.images.interior.some((x) => typeof x === 'string')) {
+        balcony.images.interior = normalizeImageArray(balcony.images.interior)
+      }
+    }
+
     await model.save()
     res.json(balcony)
   } catch (error) {
