@@ -1,18 +1,27 @@
 import UnderConstruction from '../models/UnderConstruction.js'
 
 /**
- * Ordena los ítems por `order` y asigna nombre consistente: {title}-{posición}.
- * Así al reordenar desde el front, en el back guardamos siempre nombre por orden (ej: "prueba crear-1", "prueba crear-2").
+ * Ordena por `order` y asigna nombre: base-1, base-2, ...
+ * La base se obtiene del name que envía el front (ej. "cualquiera-1" → "cualquiera") o del title del doc.
  */
-function normalizeMediaItems (items, title) {
+function getBaseFromName (name) {
+  if (!name || typeof name !== 'string') return null
+  const match = name.trim().match(/^(.+)-\d+$/)
+  return match ? match[1].trim() : null
+}
+
+function normalizeMedia (items, title) {
   if (!Array.isArray(items) || items.length === 0) return []
   const sorted = [...items]
-    .filter((item) => item && typeof item.order === 'number')
+    .filter((item) => item && typeof item.order === 'number' && ['image', 'video'].includes(item.type))
     .sort((a, b) => a.order - b.order)
-  const safeTitle = (title || 'item').replace(/[/\\?*:]/g, '').trim() || 'item'
+  const firstBase = sorted.length ? getBaseFromName(sorted[0].name) : null
+  const fallback = (title || 'item').replace(/[/\\?*:]/g, '').trim() || 'item'
+  const base = firstBase || fallback
   return sorted.map((item, index) => ({
+    type: item.type,
     url: item.url || '',
-    name: `${safeTitle}-${index + 1}`,
+    name: `${base}-${index + 1}`,
     order: index + 1
   }))
 }
@@ -41,16 +50,14 @@ export const getUnderConstructionById = async (req, res) => {
 
 export const createUnderConstruction = async (req, res) => {
   try {
-    const { title, description, images = [], videos = [] } = req.body
+    const { title, description, media = [] } = req.body
 
-    const normalizedImages = normalizeMediaItems(images, title)
-    const normalizedVideos = normalizeMediaItems(videos, title)
+    const normalizedMedia = normalizeMedia(media, title)
 
     const doc = await UnderConstruction.create({
       title: title || '',
       description: description || '',
-      images: normalizedImages,
-      videos: normalizedVideos
+      media: normalizedMedia
     })
 
     res.status(201).json(doc)
@@ -66,12 +73,11 @@ export const updateUnderConstruction = async (req, res) => {
       return res.status(404).json({ message: 'UnderConstruction not found' })
     }
 
-    const { title, description, images, videos } = req.body
+    const { title, description, media } = req.body
 
     if (title !== undefined) doc.title = title
     if (description !== undefined) doc.description = description
-    if (images !== undefined) doc.images = normalizeMediaItems(images, doc.title)
-    if (videos !== undefined) doc.videos = normalizeMediaItems(videos, doc.title)
+    if (media !== undefined) doc.media = normalizeMedia(media, doc.title)
 
     const updated = await doc.save()
     res.json(updated)

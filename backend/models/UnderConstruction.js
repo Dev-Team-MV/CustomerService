@@ -2,6 +2,11 @@ import mongoose from 'mongoose'
 
 const mediaItemSchema = new mongoose.Schema(
   {
+    type: {
+      type: String,
+      required: true,
+      enum: ['image', 'video']
+    },
     url: { type: String, required: true, trim: true },
     name: { type: String, trim: true, default: '' },
     order: { type: Number, required: true, min: 1 }
@@ -21,11 +26,7 @@ const underConstructionSchema = new mongoose.Schema(
       trim: true,
       default: ''
     },
-    images: {
-      type: [mediaItemSchema],
-      default: []
-    },
-    videos: {
+    media: {
       type: [mediaItemSchema],
       default: []
     }

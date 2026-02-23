@@ -37,19 +37,14 @@ const router = express.Router()
  *                 type: string
  *               description:
  *                 type: string
- *               images:
+ *               media:
  *                 type: array
+ *                 description: Lista ordenada (imagen-1, video-2, imagen-3, etc.)
  *                 items:
  *                   type: object
+ *                   required: [type, url, order]
  *                   properties:
- *                     url: { type: string }
- *                     name: { type: string }
- *                     order: { type: number }
- *               videos:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
+ *                     type: { type: string, enum: [image, video] }
  *                     url: { type: string }
  *                     name: { type: string }
  *                     order: { type: number }
@@ -98,19 +93,12 @@ router
  *             properties:
  *               title: { type: string }
  *               description: { type: string }
- *               images:
+ *               media:
  *                 type: array
  *                 items:
  *                   type: object
  *                   properties:
- *                     url: { type: string }
- *                     name: { type: string }
- *                     order: { type: number }
- *               videos:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
+ *                     type: { type: string, enum: [image, video] }
  *                     url: { type: string }
  *                     name: { type: string }
  *                     order: { type: number }
