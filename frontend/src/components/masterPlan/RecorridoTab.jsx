@@ -10,7 +10,7 @@ import uploadService from '../../services/uploadService'
 import defaultMap from '../../../public/images/mapLakewood.png'
 import RecorridoImageUploadModal from '../masterPlan/RecorridoImagesModal'
 import { CloudUpload } from '@mui/icons-material'
-
+import { useTranslation } from 'react-i18next'
 // 20 puntos de recorrido, ajusta x/y según tu plano
 const puntosBase = [
   { id: 1, name: "Point 1", x: 77, y: 78 },
@@ -46,6 +46,7 @@ const puntosBase = [
 ]
 
 const RecorridoTab = () => {
+  const { t } = useTranslation(['masterPlan']);
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -206,7 +207,7 @@ const fetchRecorridoImages = async () => {
           }}
           onClick={() => setUploadModalOpen(true)}
         >
-          Manage Master Plan Images
+          {t('manageTourImages')}
         </Button>
 
         {/* Map Container */}
@@ -262,7 +263,7 @@ const fetchRecorridoImages = async () => {
               {recorridoPoints.map((point, idx) => (
                 <Tooltip 
                   key={point.id} 
-                  title={point.name} 
+              title={t(`tourPoints.${point.name}`, point.name)} 
                   arrow
                 >
                   <Box
@@ -340,7 +341,7 @@ const fetchRecorridoImages = async () => {
           <DialogContent sx={{ p: 0, position: 'relative', minHeight: 400, bgcolor: '#f5f5f5' }}>
             <Box sx={{ p: 3, pb: 2, bgcolor: '#fff', borderBottom: '1px solid #e0e0e0' }}>
               <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#333' }}>
-                {recorridoPoints[selectedIdx].name}
+                {t(`tourPoints.${recorridoPoints[selectedIdx].name}`, recorridoPoints[selectedIdx].name)}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                 {selectedIdx + 1} / {recorridoPoints.length}
@@ -389,7 +390,7 @@ const fetchRecorridoImages = async () => {
                   onClick={() => setUploadModalOpen(true)}
                   disabled={uploading}
                 >
-                  {recorridoPoints[selectedIdx].image ? 'Replace Image' : 'Upload Image'}
+                {recorridoPoints[selectedIdx].image ? t('replaceImage') : t('uploadImage')}
                 </Button>
               </Box>
 

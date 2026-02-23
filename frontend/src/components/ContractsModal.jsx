@@ -231,11 +231,14 @@ const handleDownloadContract = async (docType) => {
   const handleViewContract = (docType) => {
     const contract = existingContracts[docType.key]
     if (contract?.fileUrl) {
-      console.log('�️ Opening contract in new tab:', {
-        type: docType.key,
-        url: contract.fileUrl
-      })
-      window.open(contract.fileUrl, '_blank')
+      const isPDF = contract.fileUrl.endsWith('.pdf')
+      if (isPDF) {
+        window.open(contract.fileUrl, '_blank')
+      } else {
+        // Usar Google Docs Viewer para DOC/DOCX
+        const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(contract.fileUrl)}&embedded=true`
+        window.open(viewerUrl, '_blank')
+      }
     }
   }
 

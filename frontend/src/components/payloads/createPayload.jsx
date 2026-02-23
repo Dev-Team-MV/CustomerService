@@ -11,6 +11,7 @@ import {
   Button
 } from '@mui/material'
 import { AttachFile, CheckCircle } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 
 const paymentTypes = [
   'initial down payment',
@@ -30,12 +31,14 @@ const PayloadDialog = ({
   setFormData,
   properties,
   selectedPayload
-}) => (
-  <Dialog
-    open={open}
-    onClose={onClose}
-    maxWidth="sm"
-    fullWidth
+}) => {
+  const { t } = useTranslation(['payloads', 'common']);
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
     PaperProps={{
       sx: {
         borderRadius: 4,
@@ -68,7 +71,7 @@ const PayloadDialog = ({
               fontFamily: '"Poppins", sans-serif'
             }}
           >
-            {selectedPayload ? 'Edit Payment' : 'Add New Payment'}
+              {selectedPayload ? t('payloads:editPayment') : t('payloads:addPayment')}
           </Typography>
           <Typography 
             variant="caption" 
@@ -77,7 +80,7 @@ const PayloadDialog = ({
               fontFamily: '"Poppins", sans-serif'
             }}
           >
-            Manage and track payment record details
+            {t('payloads:manageDetails')}
           </Typography>
         </Box>
       </Box>
@@ -89,7 +92,7 @@ const PayloadDialog = ({
           <TextField
             fullWidth
             select
-            label="Property"
+            label={t('payloads:property')}
             value={formData.property}
             onChange={(e) => setFormData({ ...formData, property: e.target.value })}
             sx={{
@@ -137,7 +140,7 @@ const PayloadDialog = ({
                   }
                 }}
               >
-                Lot {property.lot?.number} - {property.users?.[0]?.firstName} {property.users?.[0]?.lastName}
+                  {t('payloads:unit')} {property.lot?.number} - {property.users?.[0]?.firstName} {property.users?.[0]?.lastName}
               </MenuItem>
             ))}
           </TextField>
@@ -147,7 +150,7 @@ const PayloadDialog = ({
           <TextField
             fullWidth
             type="date"
-            label="Payment Date"
+            label={t('payloads:paymentDate')}
             value={formData.date}
             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
             InputLabelProps={{ shrink: true }}
@@ -184,7 +187,7 @@ const PayloadDialog = ({
           <TextField
             fullWidth
             type="number"
-            label="Amount"
+            label={t('payloads:amount')}
             value={formData.amount}
             onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
             InputProps={{
@@ -225,7 +228,7 @@ const PayloadDialog = ({
           <TextField
             fullWidth
             select
-            label="Status"
+            label={t('payloads:status')}
             value={formData.status}
             onChange={(e) => setFormData({ ...formData, status: e.target.value })}
             sx={{
@@ -284,7 +287,7 @@ const PayloadDialog = ({
           <TextField
             fullWidth
             select
-            label="Payment Type"
+            label={t('payloads:paymentType')}
             value={formData.type || ""}
             onChange={e => setFormData({ ...formData, type: e.target.value })}
             required
@@ -334,7 +337,7 @@ const PayloadDialog = ({
                   }
                 }}
               >
-                {type}
+                    {type}
               </MenuItem>
             ))}
           </TextField>
@@ -345,7 +348,7 @@ const PayloadDialog = ({
             fullWidth
             multiline
             rows={3}
-            label="Notes"
+            label={t('payloads:notes')}
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
             sx={{
@@ -397,7 +400,7 @@ const PayloadDialog = ({
           }
         }}
       >
-        Cancel
+        {t('payloads:cancel')}
       </Button>
       
       <Button
@@ -448,11 +451,13 @@ const PayloadDialog = ({
         }}
       >
         <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-        {selectedPayload ? 'Update' : 'Create'}
+            {selectedPayload ? t('payloads:update') : t('payloads:create')}
         </Box>
       </Button>
     </DialogActions>
   </Dialog>
+  
 );
+}
 
 export default PayloadDialog;

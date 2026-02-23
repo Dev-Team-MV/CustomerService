@@ -3,6 +3,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const AmenitiesGalleryModal = ({
   open,
@@ -11,6 +12,7 @@ const AmenitiesGalleryModal = ({
   amenities = [],
   isPublicView
 }) => {
+  const { t } = useTranslation(['amenities']);  
   // Siempre busca el index por name para evitar problemas de id
   const amenityIndex = amenity && amenities.length
     ? amenities.findIndex(a => a.name === amenity.name)
@@ -107,14 +109,14 @@ const AmenitiesGalleryModal = ({
           borderBottom: '1px solid #e0e0e0'
         }}>
           <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#333' }}>
-            {currentAmenity.name}
+            {t(`amenityNames.${currentAmenity.name}`, currentAmenity.name)}
           </Typography>
           {hasImages && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
               {currentImageIndex + 1} / {displayImages.length}
               {isPublicView && totalImages > 3 && (
                 <span style={{ color: '#f57c00', fontWeight: 'bold', marginLeft: 8 }}>
-                  (Showing {displayImages.length} of {totalImages})
+                  {t('showing', { shown: displayImages.length, total: totalImages })}
                 </span>
               )}
             </Typography>
@@ -134,11 +136,11 @@ const AmenitiesGalleryModal = ({
                 textAlign: 'center'
               }}
             >
-              <Typography variant="h6" color="text.secondary" gutterBottom>
-                No images available yet
+               <Typography variant="h6" color="text.secondary" gutterBottom>
+                {t('noImages')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Images for this amenity will be added soon.
+                {t('imagesSoon')}
               </Typography>
             </Box>
           ) : (
@@ -191,19 +193,12 @@ const AmenitiesGalleryModal = ({
 
           {/* Public View Message */}
           {isPublicView && totalImages > 3 && (
-            <Box
-              sx={{
-                p: 3,
-                bgcolor: '#fff3e0',
-                borderTop: '1px solid #ffe0b2',
-                textAlign: 'center'
-              }}
-            >
+            <Box sx={{ p: 3, bgcolor: '#fff3e0', borderTop: '1px solid #ffe0b2', textAlign: 'center' }}>
               <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#e65100', mb: 1 }}>
-                🔒 Sign in to view all {totalImages} images
+                {t('signInToViewAll', { count: totalImages })}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Create an account to unlock full access to all amenity photos
+                {t('signInToUnlock')}
               </Typography>
               <Button
                 variant="contained"
@@ -211,7 +206,7 @@ const AmenitiesGalleryModal = ({
                 href="/login"
                 sx={{ borderRadius: 2 }}
               >
-                Sign In / Register
+                {t('signInRegister')}
               </Button>
             </Box>
           )}

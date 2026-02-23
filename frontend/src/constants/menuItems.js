@@ -9,6 +9,7 @@ import {
   Article,
   Deck,
   Explore,
+  Timeline as TimelineIcon
 } from "@mui/icons-material";
 
 export const privateMenuItems = [
@@ -83,6 +84,12 @@ export const privateMenuItems = [
     icon: LandscapeIcon,
     path: "/master-plan/inventory",
     roles: ["superadmin", "admin"],
+  },
+  {
+    textKey: "navigation:menu.timeline",
+    icon: TimelineIcon,
+    path: "/timeline",
+    roles: ["superadmin", "admin", "user"],
   }
 ];
 

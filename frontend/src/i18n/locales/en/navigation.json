@@ -15,7 +15,8 @@
         "home": "Home",
         "getYourQuote": "Get Your Quote",
         "exploreAmenities": "Explore Amenities",
-        "clubhouseManager": "Clubhouse Manager"
+        "clubhouseManager": "Clubhouse Manager",
+        "timeline": "Timeline"
     },
     "tooltips": {
         "openMenu": "Open menu",

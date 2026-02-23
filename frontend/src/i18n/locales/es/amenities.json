@@ -11,5 +11,33 @@
     "masterPlan": {
         "title": "Plan Maestro",
         "inventory": "Inventario Plan Maestro"
+    },
+    "mapTitle": "Mapa de Amenidades",
+    "mapSubtitle": "Explora todas las amenidades premium disponibles en la comunidad. Haz clic en cualquier punto para ver fotos e información detallada.",
+    "limitedPreview": "Modo de Vista Previa Limitada",
+    "limitedPreviewDesc": "Estás viendo una vista previa limitada. Inicia sesión para desbloquear el acceso completo a todas las fotos e información de amenidades.",
+    "noImages": "Aún no hay imágenes disponibles",
+    "imagesSoon": "Las imágenes de esta amenidad se agregarán pronto.",
+    "signInToViewAll": "🔒 Inicia sesión para ver las {{count}} imágenes",
+    "signInToUnlock": "Crea una cuenta para desbloquear el acceso completo a todas las fotos de amenidades",
+    "signInRegister": "Iniciar Sesión / Registrarse",
+    "showing": "(Mostrando {{shown}} de {{total}})",
+    "amenityNames": {
+        "Semi-Olympic Pool": "Alberca Semi-Olímpica",
+        "Entry": "Entrada",
+        "Fitness Center": "Gimnasio",
+        "Terrace": "Terraza",
+        "Managers Office": "Oficina de Administración",
+        "Bathrooms": "Baños",
+        "Meeting Room": "Sala de Juntas",
+        "Reception": "Recepción",
+        "Laundry": "Lavandería",
+        "Golf Simulator": "Simulador de Golf",
+        "Game Room": "Sala de Juegos",
+        "General Manager": "Gerencia General",
+        "Lounge Area": "Área Lounge",
+        "Bar": "Bar",
+        "Multipurpose Room": "Sala Multifuncional",
+        "Coworking": "Coworking"
     }
 }

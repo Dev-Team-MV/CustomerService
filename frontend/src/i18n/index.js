@@ -15,6 +15,11 @@ import enAnalytics from './locales/en/analytics.json'
 import enLots from './locales/en/lots.json'
 import enPropertySelection from './locales/en/propertySelection.json'
 import enResidents from './locales/en/residents.json'
+import enModels from './locales/en/models.json'
+import enPayloads from './locales/en/payloads.json'
+import enClubHouse from './locales/en/clubhouse.json'
+import enMasterPlan from './locales/en/masterPlan.json'
+
 // ES
 import esCommon from './locales/es/common.json'
 import esAuth from './locales/es/auth.json'
@@ -28,6 +33,10 @@ import esAnalytics from './locales/es/analytics.json'
 import esLots from './locales/es/lots.json'
 import esPropertySelection from './locales/es/propertySelection.json'
 import esResidents from './locales/es/residents.json'
+import esModels from './locales/es/models.json'
+import esPayloads from './locales/es/payloads.json'
+import esClubHouse from './locales/es/clubhouse.json'
+import esMasterPlan from './locales/es/masterPlan.json'
 
 i18n
     .use(LanguageDetector)
@@ -48,6 +57,10 @@ i18n
                 lots: enLots,
                 propertySelection: enPropertySelection,
                 residents: enResidents,
+                models: enModels,
+                payloads: enPayloads,
+                clubHouse: enClubHouse,
+                masterPlan: enMasterPlan,
             },
             es: {
                 common: esCommon,
@@ -63,11 +76,15 @@ i18n
                 lots: esLots,
                 propertySelection: esPropertySelection,
                 residents: esResidents,
+                models: esModels,
+                payloads: esPayloads,
+                clubHouse: esClubHouse,
+                masterPlan: esMasterPlan,
             },
         },
         fallbackLng: 'en',
         defaultNS: 'common',
-        ns: ['common', 'auth', 'navigation', 'dashboard', 'property', 'amenities', 'news', 'profile', 'analytics', 'lots', 'propertySelection', 'residents'],
+        ns: ['common', 'auth', 'navigation', 'dashboard', 'property', 'amenities', 'news', 'profile', 'analytics', 'lots', 'propertySelection', 'residents', 'models', 'payloads', 'clubHouse', 'masterPlan'],
         interpolation: {
             escapeValue: false, // React already escapes
         },

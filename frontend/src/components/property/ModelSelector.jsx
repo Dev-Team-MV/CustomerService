@@ -35,6 +35,7 @@ import ModelCustomizationModal from "./ModelCustomizationModal";
 import { motion } from "framer-motion";
 import ModelCard from "./modelComponent/Modelcard";
 import ModelInfoPanel from "./modelComponent/ModelInfoPanel";
+import { useTranslation } from "react-i18next";
 
 
 const ModelSelector = () => {
@@ -47,6 +48,9 @@ const ModelSelector = () => {
     getModelPricingInfo,
     selectedPricingOption,
   } = useProperty();
+
+    const { t } = useTranslation('models')
+
 
   const navigate = useNavigate();
   const theme = useTheme();
@@ -199,7 +203,7 @@ const ModelSelector = () => {
             fontWeight: 500,
           }}
         >
-          SELECT A LOT TO VIEW MODELS
+          {t("selectALotToViewModels", "Select a lot to view models")}
         </Typography>
       </Paper>
     );
@@ -282,7 +286,7 @@ const ModelSelector = () => {
               fontSize: isMobile ? "0.85rem" : "0.95rem",
             }}
           >
-            02 Model Selection
+            {t("modelSelection", "02 Model Selection")}
           </Typography>
           <Box display="flex" alignItems="center" gap={1}>
             {selectedModel && !isMobile && (
@@ -308,11 +312,11 @@ const ModelSelector = () => {
                   },
                 }}
               >
-                Clear
+                {t("clear", "Clear")}
               </Button>
             )}
             <Chip
-              label={`${models.length} OPTIONS`}
+              label={t("optionsCount", { count: models.length, defaultValue: `${models.length} OPTIONS` })}
               size="small"
               sx={{
                 bgcolor: "rgba(140, 165, 81, 0.12)",
@@ -504,7 +508,7 @@ const ModelSelector = () => {
                 fontFamily: '"Poppins", sans-serif',
               }}
             >
-              No models available
+              {t("noModels", "No models available")}
             </Typography>
           </Box>
         )}
@@ -539,11 +543,11 @@ const ModelSelector = () => {
                   fontFamily: '"Poppins", sans-serif',
                 }}
               >
-                Model Details
+                {t("modelDetails", "Model Details")}
               </Typography>
               {isModel10 && (
                 <Chip
-                  label="Special"
+                  label={t("special", "Special")}
                   size="small"
                   sx={{
                     height: 20,
@@ -584,7 +588,7 @@ const ModelSelector = () => {
                 },
               }}
             >
-              Clear Selection
+              {t("clearSelection", "Clear Selection")}
             </Button>
           )}
           {selectedModel && (

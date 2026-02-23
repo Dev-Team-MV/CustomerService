@@ -30,7 +30,8 @@ import {
   Edit as EditIcon,
   Description as DescriptionIcon,
   SortByAlpha,
-  FilterList
+  FilterList,
+  Delete as DeleteIcon
 } from '@mui/icons-material'
 import api from '../services/api'
 import { useAuth } from '../context/AuthContext'
@@ -242,6 +243,17 @@ const Properties = () => {
     setPropertyToEdit(null)
     setEditValues({})
   }, [])
+
+    const handleDeleteProperty = async (property) => {
+    if (window.confirm(t('property:actions.confirmDelete'))) {
+      try {
+        await propertyService.deleteProperty(property._id)
+        fetchData() // Actualiza la lista
+      } catch (error) {
+        alert(t('property:actions.deleteFailed'))
+      }
+    }
+  }
 
   const getStatusColor = useCallback((status) => {
     switch (status) {
@@ -688,7 +700,7 @@ const Properties = () => {
       field: 'actions',
       headerName: t('property:table.actions'),
       align: 'center',
-      width: 120,
+      width: 160, // aumenta el ancho para el nuevo botón
       renderCell: ({ row }) => (
         <Box display="flex" alignItems="center" gap={1}>
           <Tooltip title={t('property:actions.viewDetails')} placement="top">
@@ -739,6 +751,31 @@ const Properties = () => {
               }}
             >
               <EditIcon sx={{ fontSize: 18, color: '#8CA551' }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t('property:actions.deleteProperty')} placement="top">
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleDeleteProperty(row)
+              }}
+              sx={{
+                bgcolor: 'rgba(229, 134, 60, 0.08)',
+                border: '1px solid rgba(229, 134, 60, 0.2)',
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  bgcolor: '#E5863C',
+                  borderColor: '#E5863C',
+                  transform: 'scale(1.1)',
+                  '& .MuiSvgIcon-root': {
+                    color: 'white'
+                  }
+                }
+              }}
+            >
+              <DeleteIcon sx={{ fontSize: 18, color: '#E5863C' }} />
             </IconButton>
           </Tooltip>
         </Box>

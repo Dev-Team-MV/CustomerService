@@ -22,8 +22,10 @@ import PersonIcon from '@mui/icons-material/Person'
 import api from '../../services/api'
 import { sendWelcomeSMS, sendPropertyAssignmentSMS } from '../../services/smsService'
 import ResidentDialog from '../ResidentDialog'
+import { useTranslation } from 'react-i18next'
 
 const ResidentAssignment = ({ expanded, onToggle }) => {
+  const { t } = useTranslation('models')
   const navigate = useNavigate()
   const { selectedLot, selectedModel, selectedFacade, financials, options, selectedPricingOption } = useProperty()
   const [users, setUsers] = useState([])
@@ -240,7 +242,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
           fontWeight: 600,
           color: '#706f6f'
         }}>
-          SELECT LOT AND MODEL TO ASSIGN RESIDENT
+          {t('selectLotAndModelToAssignResident', 'SELECT LOT AND MODEL TO ASSIGN RESIDENT')}
         </Typography>
       </Paper>
     )
@@ -289,14 +291,15 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                 textTransform: 'uppercase',
                 fontSize: '0.95rem'
               }}>
-                04 Resident Assignment
+                                {t('residentAssignment', '04 Resident Assignment')}
+
               </Typography>
               <Typography variant="caption" sx={{
                 color: '#706f6f',
                 fontFamily: '"Poppins", sans-serif',
                 fontSize: '0.75rem'
               }}>
-                {expanded ? 'Select or create a resident' : 'Click to expand'}
+                {expanded ? t('selectOrCreateResident', 'Select or create a resident') : t('clickToExpand', 'Click to expand')}
               </Typography>
             </Box>
           </Box>
@@ -323,7 +326,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
               fontFamily: '"Poppins", sans-serif',
               "& .MuiAlert-icon": { color: "#2196f3" }
             }}>
-              📱 Sending welcome SMS to new user...
+              📱 {t('sendingWelcomeSMS', 'Sending welcome SMS to new user...')}
             </Alert>
           )}
           {smsStatus === 'sending-property' && (
@@ -335,7 +338,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
               fontFamily: '"Poppins", sans-serif',
               "& .MuiAlert-icon": { color: "#2196f3" }
             }}>
-              📱 Sending property assignment SMS...
+              📱 {t('sendingPropertySMS', 'Sending property assignment SMS...')}
             </Alert>
           )}
           {smsStatus === 'sent' && (
@@ -347,7 +350,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
               fontFamily: '"Poppins", sans-serif',
               "& .MuiAlert-icon": { color: "#8CA551" }
             }}>
-              ✅ SMS notifications sent successfully!
+              ✅ {t('smsSent', 'SMS notifications sent successfully!')}
             </Alert>
           )}
           {smsStatus === 'failed' && (
@@ -359,7 +362,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
               fontFamily: '"Poppins", sans-serif',
               "& .MuiAlert-icon": { color: "#E5863C" }
             }}>
-              ⚠️ SMS notification failed but property was created
+              ⚠️ {t('smsFailed', 'SMS notification failed but property was created')}
             </Alert>
           )}
 
@@ -369,10 +372,10 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
               <TextField
                 fullWidth
                 select
-                label="Select Resident"
+                label={t('selectResident', 'Select Resident')}
                 value={selectedUser}
                 onChange={(e) => setSelectedUser(e.target.value)}
-                helperText="Choose an existing resident to assign this property"
+                helperText={t('chooseExistingResident', 'Choose an existing resident to assign this property')}
                 disabled={loadingUsers}
                 sx={{
                   "& .MuiOutlinedInput-root": {
@@ -405,11 +408,11 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
               >
                 {loadingUsers ? (
                   <MenuItem disabled sx={{ fontFamily: '"Poppins", sans-serif' }}>
-                    Loading users...
+                    {t('loadingUsers', 'Loading users...')}
                   </MenuItem>
                 ) : users.length === 0 ? (
                   <MenuItem disabled sx={{ fontFamily: '"Poppins", sans-serif' }}>
-                    No users available
+                    {t('noUsersAvailable', 'No users available')}
                   </MenuItem>
                 ) : (
                   users.map((user) => (
@@ -432,7 +435,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                   ))
                 )}
               </TextField>
-              <Tooltip title="Add New Resident">
+              <Tooltip title={t('addNewResident', 'Add New Resident')}>
                 <Button
                   variant="outlined"
                   onClick={() => setDialogOpen(true)}
@@ -469,7 +472,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                 textTransform: 'uppercase',
                 fontSize: '0.8rem'
               }}>
-                Property Summary
+                {t('propertySummary', 'Property Summary')}
               </Typography>
               <Box display="flex" flexDirection="column" gap={1}>
                 <Box display="flex" justifyContent="space-between">
@@ -477,7 +480,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                     color: '#706f6f',
                     fontFamily: '"Poppins", sans-serif'
                   }}>
-                    Lot:
+                    {t('lot', 'Lot')}:
                   </Typography>
                   <Typography variant="body2" fontWeight={600} sx={{
                     color: '#333F1F',
@@ -491,7 +494,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                     color: '#706f6f',
                     fontFamily: '"Poppins", sans-serif'
                   }}>
-                    Model:
+                    {t('model', 'Model')}:
                   </Typography>
                   <Typography variant="body2" fontWeight={600} sx={{
                     color: '#333F1F',
@@ -506,7 +509,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                       color: '#706f6f',
                       fontFamily: '"Poppins", sans-serif'
                     }}>
-                      Facade:
+                      {t('facade', 'Facade')}:
                     </Typography>
                     <Typography variant="body2" fontWeight={600} sx={{
                       color: '#333F1F',
@@ -524,7 +527,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                     color: '#8CA551',
                     fontFamily: '"Poppins", sans-serif'
                   }}>
-                    Total Price:
+                    {t('totalPrice', 'Total Price')}:
                   </Typography>
                   <Typography variant="body2" fontWeight={700} sx={{
                     color: '#8CA551',
@@ -538,7 +541,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                     color: '#706f6f',
                     fontFamily: '"Poppins", sans-serif'
                   }}>
-                    Initial Payment:
+                    {t('initialPayment', 'Initial Payment')}:
                   </Typography>
                   <Typography variant="body2" fontWeight={600} sx={{
                     color: '#333F1F',
@@ -552,7 +555,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
                     color: '#706f6f',
                     fontFamily: '"Poppins", sans-serif'
                   }}>
-                    Mortgage:
+                    {t('mortgage', 'Mortgage')}:
                   </Typography>
                   <Typography variant="body2" fontWeight={600} sx={{
                     color: '#333F1F',
@@ -610,7 +613,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
               }}
             >
               <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-                {submitting ? 'Assigning Property...' : 'Assign Property to Selected User'}
+                {submitting ? t('assigningProperty', 'Assigning Property...') : t('assignPropertyToSelectedUser', 'Assign Property to Selected User')}
               </Box>
             </Button>
           </Box>

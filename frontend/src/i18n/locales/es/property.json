@@ -38,7 +38,11 @@
     "editPrice": "Editar Precio",
     "manageContracts": "Gestionar contratos",
     "managePhases": "Gestionar Fases",
-    "viewProgress": "Ver Progreso"
+    "viewProgress": "Ver Progreso",
+        "deleteProperty": "Eliminar Propiedad",
+    "confirmDelete": "¿Estás seguro de que deseas eliminar esta propiedad?",
+    "deleteFailed": "Error al eliminar la propiedad."
+
   },
   "filters": {
     "filterByModel": "Filtrar por Modelo",

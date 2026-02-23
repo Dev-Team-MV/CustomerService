@@ -11,5 +11,33 @@
     "masterPlan": {
         "title": "Master Plan",
         "inventory": "Master Plan Inventory"
+    },
+    "mapTitle": "Amenities Map",
+    "mapSubtitle": "Explore all premium amenities available in the community. Click on any point to view detailed photos and information.",
+    "limitedPreview": "Limited Preview Mode",
+    "limitedPreviewDesc": "You're viewing a limited preview. Sign in to unlock full access to all amenity photos and detailed information.",
+    "noImages": "No images available yet",
+    "imagesSoon": "Images for this amenity will be added soon.",
+    "signInToViewAll": "🔒 Sign in to view all {{count}} images",
+    "signInToUnlock": "Create an account to unlock full access to all amenity photos",
+    "signInRegister": "Sign In / Register",
+    "showing": "(Showing {{shown}} of {{total}})",
+    "amenityNames": {
+        "Semi-Olympic Pool": "Semi-Olympic Pool",
+        "Entry": "Entry",
+        "Fitness Center": "Fitness Center",
+        "Terrace": "Terrace",
+        "Managers Office": "Managers Office",
+        "Bathrooms": "Bathrooms",
+        "Meeting Room": "Meeting Room",
+        "Reception": "Reception",
+        "Laundry": "Laundry",
+        "Golf Simulator": "Golf Simulator",
+        "Game Room": "Game Room",
+        "General Manager": "General Manager",
+        "Lounge Area": "Lounge Area",
+        "Bar": "Bar",
+        "Multipurpose Room": "Multipurpose Room",
+        "Coworking": "Coworking"
     }
 }

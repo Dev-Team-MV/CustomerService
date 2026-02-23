@@ -1,11 +1,12 @@
 import React from "react"
 import { Card, CardContent, Box, Typography, Chip, Button, Checkbox } from "@mui/material"
 import { useMotionValue, useTransform, motion } from "framer-motion"
+import { useTranslation } from 'react-i18next'
 
 const modelImages = {} // Puedes importar o definir tu objeto de imágenes aquí
 
 function ViewModelCard({ model, onGoDetail, selected, onSelect, imgSrc }) {
-
+  const { t } = useTranslation(['models', 'common'])
   const x = useMotionValue(0)
   const y = useMotionValue(0)
   const rotateX = useTransform(y, [-100, 100], [15, -15])
@@ -144,7 +145,7 @@ function ViewModelCard({ model, onGoDetail, selected, onSelect, imgSrc }) {
               fontFamily: '"Poppins", sans-serif',
               letterSpacing: '0.5px'
             }} >
-            ${model.price ? `${model.price.toLocaleString()}` : 'Consult'}
+            ${model.price ? `${model.price.toLocaleString()}` : t('models:consult', 'Consult')}
           </Typography>
 
           <Box sx={{
@@ -159,7 +160,7 @@ function ViewModelCard({ model, onGoDetail, selected, onSelect, imgSrc }) {
             {model.modelNumber === "10" ? (
               <>
                 <Chip
-                  label="Dining Room"
+                  label={t('models:diningRoom', 'Dining Room')} 
                   size="small"
                   sx={{
                     bgcolor: 'transparent',
@@ -178,7 +179,7 @@ function ViewModelCard({ model, onGoDetail, selected, onSelect, imgSrc }) {
                   }}
                 />
                 <Chip
-                  label="Study"
+                  label={t('models:study', 'Study')}
                   size="small"
                   sx={{
                     bgcolor: 'transparent',
@@ -198,7 +199,7 @@ function ViewModelCard({ model, onGoDetail, selected, onSelect, imgSrc }) {
                 />
                 {model.storages && model.storages.length > 0 && (
                   <Chip
-                    label="Storage"
+                    label={t('models:storage', 'Storage')}
                     size="small"
                     sx={{
                       bgcolor: 'transparent',
@@ -219,7 +220,7 @@ function ViewModelCard({ model, onGoDetail, selected, onSelect, imgSrc }) {
                 )}
                 {model.upgrades && model.upgrades.length > 0 && (
                   <Chip
-                    label="Upgrades"
+                    label={t('models:upgrades', 'Upgrades')}
                     size="small"
                     sx={{
                       bgcolor: 'transparent',
@@ -243,7 +244,7 @@ function ViewModelCard({ model, onGoDetail, selected, onSelect, imgSrc }) {
               <>
                 {model.balconies && model.balconies.length > 0 && (
                   <Chip
-                    label="Balcony"
+                    label={t('models:balcony', 'Balcony')}
                     size="small"
                     sx={{
                       bgcolor: 'transparent',
@@ -264,7 +265,7 @@ function ViewModelCard({ model, onGoDetail, selected, onSelect, imgSrc }) {
                 )}
                 {model.storages && model.storages.length > 0 && (
                   <Chip
-                    label="Storage"
+                    label={t('models:storage', 'Storage')}
                     size="small"
                     sx={{
                       bgcolor: 'transparent',
@@ -285,7 +286,7 @@ function ViewModelCard({ model, onGoDetail, selected, onSelect, imgSrc }) {
                 )}
                 {model.upgrades && model.upgrades.length > 0 && (
                   <Chip
-                    label="Upgrades"
+                    label={t('models:upgrades', 'Upgrades')}
                     size="small"
                     sx={{
                       bgcolor: 'transparent',
@@ -339,7 +340,7 @@ function ViewModelCard({ model, onGoDetail, selected, onSelect, imgSrc }) {
                   mb: 0.8
                 }}
               >
-                SQFT
+                {t('models:sqft', 'SQFT')}
               </Typography>
               <Typography
                 variant="h6"
@@ -375,7 +376,7 @@ function ViewModelCard({ model, onGoDetail, selected, onSelect, imgSrc }) {
                   mb: 0.8
                 }}
               >
-                BEDS
+                {t('models:bedroomsCapital', 'BEDS')}
               </Typography>
               <Typography
                 variant="h6"
@@ -411,7 +412,7 @@ function ViewModelCard({ model, onGoDetail, selected, onSelect, imgSrc }) {
                   mb: 0.8
                 }}
               >
-                BATHS
+                {t('models:bathroomsCapital', 'BATHS')}
               </Typography>
               <Typography
                 variant="h6"
@@ -446,7 +447,7 @@ function ViewModelCard({ model, onGoDetail, selected, onSelect, imgSrc }) {
                   mb: 0.8
                 }}
               >
-                STORIES
+                {t('models:storiesCapital', 'STORIES')}
               </Typography>
               <Typography
                 variant="h6"
@@ -511,7 +512,7 @@ function ViewModelCard({ model, onGoDetail, selected, onSelect, imgSrc }) {
               },
             }}
           >
-            <span className="button-text">View Details</span>
+            <span className="button-text">{t('models:viewDetails', 'View Details')}</span>
           </Button>
         </CardContent>
       </Card>

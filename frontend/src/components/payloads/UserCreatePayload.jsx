@@ -12,6 +12,7 @@ import {
   MenuItem
 } from '@mui/material'
 import { CloudUpload, Upload, CheckCircle, Info } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 
 const paymentTypes = [
   "initial down payment",
@@ -28,7 +29,9 @@ const UserCreatePayload = ({
   paymentForm,
   handlePaymentFormChange,
   uploadingPayment
-}) => (
+}) => {
+  const { t } = useTranslation(['payloads', 'common']);
+  return (
   <Dialog
     open={open}
     onClose={onClose}
@@ -63,13 +66,13 @@ const UserCreatePayload = ({
             fontWeight={700}
             sx={{ color: "#333F1F", fontFamily: '"Poppins", sans-serif' }}
           >
-            Upload Payment
+            {t('payloads:add')}
           </Typography>
           <Typography
             variant="caption"
             sx={{ color: "#706f6f", fontFamily: '"Poppins", sans-serif' }}
           >
-            Submit your payment information for approval
+            {t('payloads:submitInfo')}
           </Typography>
         </Box>
       </Box>
@@ -80,7 +83,7 @@ const UserCreatePayload = ({
         <Grid item xs={12}>
           <TextField
             fullWidth
-            label="Payment Amount"
+            label={t('payloads:paymentAmount')}
             type="number"
             value={paymentForm.amount}
             onChange={(e) => handlePaymentFormChange("amount", e.target.value)}
@@ -114,7 +117,7 @@ const UserCreatePayload = ({
           <TextField
             fullWidth
             select
-            label="Payment Type"
+            label={t('payloads:paymentType')}
             value={paymentForm.type || ""}
             onChange={e => handlePaymentFormChange("type", e.target.value)}
             required
@@ -160,7 +163,7 @@ const UserCreatePayload = ({
         <Grid item xs={12}>
           <TextField
             fullWidth
-            label="Payment Date"
+            label={t('payloads:paymentDate')}
             type="date"
             value={paymentForm.date}
             onChange={(e) => handlePaymentFormChange("date", e.target.value)}
@@ -207,7 +210,7 @@ const UserCreatePayload = ({
               },
             }}
           >
-            Upload Receipt / Support Document
+            {t('payloads:uploadReceipt')}
             <input
               type="file"
               hidden
@@ -233,7 +236,8 @@ const UserCreatePayload = ({
                 fontWeight="600"
                 sx={{ fontFamily: '"Poppins", sans-serif', color: '#333F1F' }}
               >
-                File selected: {paymentForm.support.name}
+                {t('payloads:fileSelected', { name: paymentForm.support.name })}
+
               </Typography>
             </Alert>
           )}
@@ -242,12 +246,12 @@ const UserCreatePayload = ({
         <Grid item xs={12}>
           <TextField
             fullWidth
-            label="Notes (Optional)"
+             label={t('payloads:notes')}
             multiline
             rows={3}
             value={paymentForm.notes}
             onChange={(e) => handlePaymentFormChange("notes", e.target.value)}
-            placeholder="Add any additional information about this payment..."
+            placeholder={t('payloads:notesPlaceholder')}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: 3,
@@ -287,7 +291,7 @@ const UserCreatePayload = ({
             fontSize: '0.875rem'
           }}
         >
-          Your payment will be reviewed and approved by administration within 24-48 hours.
+          {t('payloads:reviewInfo')}
         </Typography>
       </Alert>
     </DialogContent>
@@ -310,7 +314,7 @@ const UserCreatePayload = ({
           }
         }}
       >
-        Cancel
+        {t('payloads:cancel')}
       </Button>
 
       <Button
@@ -357,10 +361,11 @@ const UserCreatePayload = ({
           }
         }}
       >
-        {uploadingPayment ? "Uploading..." : "Submit Payment"}
+          {uploadingPayment ? t('payloads:uploading') : t('payloads:submit')}
       </Button>
     </DialogActions>
   </Dialog>
 )
+}
 
 export default UserCreatePayload

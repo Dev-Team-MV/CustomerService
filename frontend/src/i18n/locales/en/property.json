@@ -38,7 +38,10 @@
     "editPrice": "Edit Price",
     "manageContracts": "Manage contracts",
     "managePhases": "Manage Phases",
-    "viewProgress": "View Progress"
+    "viewProgress": "View Progress",
+    "deleteProperty": "Delete Property",
+    "confirmDelete": "Are you sure you want to delete this property?",
+    "deleteFailed": "Failed to delete property."
   },
   "filters": {
     "filterByModel": "Filter by Model",

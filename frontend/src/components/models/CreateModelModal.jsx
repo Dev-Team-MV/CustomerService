@@ -35,6 +35,8 @@ import {
   Edit,
 } from '@mui/icons-material';
 import uploadService from '../../services/uploadService';
+import { useTranslation } from 'react-i18next';
+
 
 const CreateModelModal = ({ 
   open, 
@@ -42,6 +44,9 @@ const CreateModelModal = ({
   selectedModel, 
   onSubmit 
 }) => {
+    const { t } = useTranslation(['models', 'common']);
+
+
   const [formData, setFormData] = useState({
     model: "",
     modelNumber: "",
@@ -567,7 +572,7 @@ const CreateModelModal = ({
             letterSpacing: '0.5px'
           }}
         >
-          {selectedModel ? "Edit Model" : "Add New Model"}
+          {selectedModel ? t('models:editModel') : t('models:addModel')}
         </Typography>
         <Typography 
           variant="caption" 
@@ -644,7 +649,7 @@ const CreateModelModal = ({
                       letterSpacing: '0.5px'
                     }}
                   >
-                    Basic Information
+                    {t('models:basicInfo')}
                   </Typography>
                 </Box>
               </Grid>
@@ -654,7 +659,7 @@ const CreateModelModal = ({
                 <TextField
                   fullWidth
                   size="small"
-                  label="Model Name"
+                  label={t('models:modelName')}
                   value={formData.model}
                   onChange={(e) =>
                     setFormData({ ...formData, model: e.target.value })
@@ -686,7 +691,7 @@ const CreateModelModal = ({
                 <TextField
                   fullWidth
                   size="small"
-                  label="Model Number"
+                  label={t('models:modelNumber')}
                   value={formData.modelNumber}
                   onChange={(e) =>
                     setFormData({ ...formData, modelNumber: e.target.value })
@@ -718,7 +723,7 @@ const CreateModelModal = ({
                   fullWidth
                   size="small"
                   type="number"
-                  label="Base Price"
+                  label={t('models:price')}
                   value={formData.price}
                   onChange={(e) =>
                     setFormData({
@@ -759,7 +764,7 @@ const CreateModelModal = ({
                   fullWidth
                   size="small"
                   type="number"
-                  label="Stories"
+                  label={t('models:stories')}
                   value={formData.stories}
                   onChange={(e) =>
                     setFormData({
@@ -794,7 +799,7 @@ const CreateModelModal = ({
                   fullWidth
                   size="small"
                   select
-                  label="Status"
+                  label={t('models:statusLabel')}
                   value={formData.status}
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
@@ -830,7 +835,7 @@ const CreateModelModal = ({
                   fullWidth
                   size="small"
                   type="number"
-                  label="Bedrooms"
+                  label={t('models:bedrooms')}
                   value={formData.bedrooms}
                   onChange={(e) =>
                     setFormData({
@@ -866,7 +871,7 @@ const CreateModelModal = ({
                   fullWidth
                   size="small"
                   type="number"
-                  label="Bathrooms"
+                  label={t('models:bathrooms')}
                   value={formData.bathrooms}
                   onChange={(e) =>
                     setFormData({
@@ -902,7 +907,7 @@ const CreateModelModal = ({
                   fullWidth
                   size="small"
                   type="number"
-                  label="Square Feet"
+                  label={t('models:sqft')}
                   value={formData.sqft}
                   onChange={(e) =>
                     setFormData({ ...formData, sqft: Number(e.target.value) })
@@ -936,7 +941,7 @@ const CreateModelModal = ({
                   size="small"
                   multiline
                   rows={2}
-                  label="Description"
+                  label={t('models:description')}
                   value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
@@ -1001,7 +1006,7 @@ const CreateModelModal = ({
                       letterSpacing: '0.5px'
                     }}
                   >
-                    Pricing Options
+                    {t('models:pricingOptions') }
                   </Typography>
                 </Box>
                 <Alert 
@@ -1019,7 +1024,7 @@ const CreateModelModal = ({
                     }
                   }}
                 >
-                  Enable options to create different configurations
+                  {t('models:pricingOptionsDescription')}
                 </Alert>
               </Grid>
     
@@ -1057,7 +1062,7 @@ const CreateModelModal = ({
                           fontFamily: '"Poppins", sans-serif'
                         }}
                       >
-                        Balcony
+                        {t('models:balcony')}
                       </Typography>
                     </Box>
                   }
@@ -1139,7 +1144,7 @@ const CreateModelModal = ({
                           fontFamily: '"Poppins", sans-serif'
                         }}
                       >
-                        Upgrade
+                        {t('models:upgrade')}
                       </Typography>
                     </Box>
                   }
@@ -1220,7 +1225,7 @@ const CreateModelModal = ({
                           fontFamily: '"Poppins", sans-serif'
                         }}
                       >
-                        Storage
+                        {t('models:storage')}
                       </Typography>
                     </Box>
                   }
@@ -1291,7 +1296,7 @@ const CreateModelModal = ({
                         fontSize: '0.7rem'
                       }}
                     >
-                      Price Range Summary
+                      {t('models:priceRangeSummary')}
                     </Typography>
                     <Box display="flex" justifyContent="space-between" mb={0.5} flexWrap="wrap" gap={1}>
                       <Typography 
@@ -1314,7 +1319,7 @@ const CreateModelModal = ({
                         fontFamily: '"Poppins", sans-serif'
                       }}
                     >
-                      <strong style={{ color: '#333F1F' }}>{calculatePricingCombinations()}</strong> combinations available
+                      <strong style={{ color: '#333F1F' }}>{calculatePricingCombinations()}</strong> {t('models:combinationsAvailable')}
                     </Typography>
                   </Paper>
                 </Grid>
@@ -1355,7 +1360,8 @@ const CreateModelModal = ({
                   mb: 1
                 }}
               >
-                Add Images
+                {t('models:addImages')}
+                
               </Typography>
               <Grid container spacing={0.5}>
                 <Grid item xs={12} sm={4}>
@@ -1693,7 +1699,7 @@ const CreateModelModal = ({
         }
       }}
     >
-      Cancel
+      {t('common:actions.cancel')}
     </Button>
     <Button
       onClick={handleSubmit}
@@ -1737,7 +1743,7 @@ const CreateModelModal = ({
               }
             }}
     >
-      {selectedModel ? "Update Model" : "Create Model"}
+            {selectedModel ? t('common:actions.update') : t('common:actions.create')}
     </Button>
   </DialogActions>
     </Dialog>
