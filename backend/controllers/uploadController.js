@@ -8,24 +8,24 @@ import path from 'path'
 // Configurar multer para almacenar en memoria
 const storage = multer.memoryStorage()
 
-// Filtro de archivos - imágenes y PDF
+// Filtro de archivos - imágenes, PDF y videos
 const fileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase().replace(/^\./, '')
-  const allowedExtensions = /^(jpeg|jpg|png|gif|webp|pdf)$/
-  const allowedMimetypes = /^image\/(jpeg|jpg|png|gif|webp)$|^application\/pdf$/
+  const allowedExtensions = /^(jpeg|jpg|png|gif|webp|pdf|mp4|webm|mov|avi|mkv)$/
+  const allowedMimetypes = /^image\/(jpeg|jpg|png|gif|webp)$|^application\/pdf$|^video\/(mp4|webm|quicktime|x-msvideo|x-matroska)$/
   const extOk = allowedExtensions.test(ext)
   const mimeOk = allowedMimetypes.test(file.mimetype)
 
   if (extOk && mimeOk) {
     return cb(null, true)
   }
-  cb(new Error('Only image files (jpeg, jpg, png, gif, webp) and PDF are allowed'))
+  cb(new Error('Only image files (jpeg, jpg, png, gif, webp), PDF and videos (mp4, webm, mov, avi, mkv) are allowed'))
 }
 
 export const upload = multer({
   storage,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB max per file
+    fileSize: 300 * 1024 * 1024, // 300MB max per file
     files: 20 // Maximum number of files
   },
   fileFilter
