@@ -10,6 +10,7 @@ import MasterPlanUploadModal from '../components/masterPlan/MasterPlanUpload'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { useAuth } from '../context/AuthContext'
 import uploadService from '../services/uploadService' // ✅ NUEVO IMPORT
+import { useTranslation } from 'react-i18next'
 
 const lotPositions = {
   1: { x: 23, y: 25 },
@@ -85,6 +86,7 @@ const lotPositions = {
 }
 
 const DashboardMap = () => {
+  const { t } = useTranslation(['masterPlan'])
   const [lots, setLots] = useState([])
   const [properties, setProperties] = useState([])
   const [selectedProperty, setSelectedProperty] = useState(null)
@@ -276,7 +278,7 @@ const DashboardMap = () => {
               }
             }}
           >
-            Update Master Plan
+            {t('updateMasterPlan')}
           </Button>
         )}
       </Box>

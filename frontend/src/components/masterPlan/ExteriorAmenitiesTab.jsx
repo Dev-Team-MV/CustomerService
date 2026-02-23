@@ -8,6 +8,7 @@ import uploadService from '../../services/uploadService'
 import defaultMap from '../../../public/images/mapLakewood.png'
 import { CloudUpload } from '@mui/icons-material'
 import OutdoorAmenitiesModal from '../masterPlan/OutdoorAmenitiesModal'
+import { useTranslation } from 'react-i18next'
 // ...otros imports...
 
 // Amenidades exteriores (ajusta x, y, id, name, images según tu plano)
@@ -26,6 +27,7 @@ const exteriorAmenities = [
 ]
 
 const ExteriorAmenitiesTab = () => {
+    const { t } = useTranslation(['masterPlan']);
  const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -166,7 +168,7 @@ const ExteriorAmenitiesTab = () => {
                   }}
                   onClick={handleOpenModal}
                 >
-Manage Outdoor Amenities
+          {t('manageOutdoorAmenities')}
                 </Button>
         {/* Map Container */}
         <Box
@@ -220,7 +222,7 @@ Manage Outdoor Amenities
               {exteriorAmenities.map((amenity) => (
                 <Tooltip 
                   key={amenity.id} 
-                  title={amenity.name} 
+              title={t(`exteriorAmenities.${amenity.name}`, amenity.name)} 
                   arrow
                 >
                   <Box

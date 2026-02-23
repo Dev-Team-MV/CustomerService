@@ -2,8 +2,10 @@ import { Box, Paper, Typography, Card } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 const DeckPanel = ({ selectedFacade, selectedDeck, onSelectDeck }) => {
+  const { t } = useTranslation('models');
   if (!selectedFacade) {
     return null;
   }
@@ -44,7 +46,7 @@ const DeckPanel = ({ selectedFacade, selectedDeck, onSelectDeck }) => {
             mb: 0.5
           }}
         >
-          Available Decks
+          {t('availableDecks', 'Available Decks')}
         </Typography>
         <Typography 
           variant="caption" 
@@ -54,7 +56,7 @@ const DeckPanel = ({ selectedFacade, selectedDeck, onSelectDeck }) => {
             fontSize: '0.75rem'
           }}
         >
-          For {selectedFacade.title}
+          {t('forFacade', { facade: selectedFacade.title, defaultValue: `For ${selectedFacade.title}` })}
         </Typography>
       </Box>
 
@@ -183,7 +185,7 @@ const DeckPanel = ({ selectedFacade, selectedDeck, onSelectDeck }) => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              No decks available for this facade
+              {t('noDecksForFacade', 'No decks available for this facade')}
             </Typography>
           </Box>
         )}

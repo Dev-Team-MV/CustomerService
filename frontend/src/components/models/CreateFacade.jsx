@@ -26,6 +26,7 @@ import {
   CheckCircle,
 } from '@mui/icons-material';
 import uploadService from '../../services/uploadService';
+import { useTranslation } from 'react-i18next';
 
 const CreateFacade = ({ 
   open, 
@@ -34,6 +35,7 @@ const CreateFacade = ({
   selectedFacade,
   onSubmit 
 }) => {
+  const { t } = useTranslation(['models', 'common']);
   const [facadeFormData, setFacadeFormData] = useState({
     model: "",
     title: "",
@@ -289,7 +291,7 @@ const CreateFacade = ({
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                {selectedFacade ? "Edit Facade" : "Add New Facade"}
+      {selectedFacade ? t('models:editFacade', 'Edit Facade') : t('models:addFacade', 'Add New Facade')}
               </Typography>
               <Typography 
                 variant="caption" 
@@ -299,7 +301,7 @@ const CreateFacade = ({
                   display: { xs: 'none', sm: 'block' }
                 }}
               >
-                Manage facade images and deck options
+      {t('models:manageFacadeSubtitle', 'Manage facade images and deck options')}
               </Typography>
             </Box>
             <IconButton 
@@ -367,7 +369,7 @@ const CreateFacade = ({
                           mb: 0.5
                         }}
                       >
-                        Selected Model
+                         {t('models:selectedModel')}
                       </Typography>
                       <Typography
                         variant="h6"
@@ -389,8 +391,10 @@ const CreateFacade = ({
                           fontFamily: '"Poppins", sans-serif'
                         }}
                       >
-                        Base Price: ${selectedModel.price?.toLocaleString()} • Model #{selectedModel.modelNumber}
-                      </Typography>
+{t('models:basePrice', {
+                        price: selectedModel.price?.toLocaleString(),
+                        number: selectedModel.modelNumber
+                      })}                      </Typography>
                     </Paper>
                   </Grid>
                 )}
@@ -399,7 +403,7 @@ const CreateFacade = ({
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Facade Title *"
+                    label={t('models:facadeTitle') + ' *'}
                     value={facadeFormData.title}
                     onChange={(e) =>
                       setFacadeFormData({
@@ -408,8 +412,8 @@ const CreateFacade = ({
                       })
                     }
                     required
-                    placeholder="e.g., Modern Colonial"
-                    helperText="Give this facade style a descriptive name"
+                  placeholder={t('models:facadeTitlePlaceholder')}
+                  helperText={t('models:facadeTitleHelper')}
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 3,
@@ -469,7 +473,7 @@ const CreateFacade = ({
                         }}
                       >
                         <Deck sx={{ fontSize: { xs: 16, md: 18 }, mr: 0.5, verticalAlign: "middle" }} />
-                        Deck Options
+                        {t('models:deckOptions')}
                       </Typography>
                       <Button
                         startIcon={<Add />}
@@ -492,7 +496,7 @@ const CreateFacade = ({
                           }
                         }}
                       >
-                        Add
+                        {t('models:addDeck')}
                       </Button>
                     </Box>
       
@@ -507,7 +511,7 @@ const CreateFacade = ({
                           fontFamily: '"Poppins", sans-serif'
                         }}
                       >
-                        No decks added yet. Add deck options for this facade.
+                        {t('models:noDecks')}
                       </Typography>
                     ) : (
                       <Stack spacing={{ xs: 1, md: 1.5 }}>
@@ -565,7 +569,7 @@ const CreateFacade = ({
                                     fontFamily: '"Poppins", sans-serif'
                                   }}
                                 >
-                                  Price: ${Number(deck.price).toLocaleString()}
+                                  {t('models:price')}: ${Number(deck.price).toLocaleString()}
                                 </Typography>
                               </Box>
       
@@ -635,7 +639,7 @@ const CreateFacade = ({
                         fontFamily: '"Poppins", sans-serif'
                       }}
                     >
-                      Facade Images *
+                      {t('models:uploadImages')}
                     </Typography>
                     <Button
                       variant="contained"
@@ -685,7 +689,9 @@ const CreateFacade = ({
                       }}
                     >
                       <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-                        {uploadingFacadeImage ? "Uploading..." : "Upload Images"}
+                     {uploadingFacadeImage
+                      ? t('models:uploading')
+                      : t('models:uploadImages')}
                       </Box>
                       <input
                         type="file"
@@ -721,7 +727,7 @@ const CreateFacade = ({
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  Images ({facadeFormData.url.length})
+                   {t('models:images', { count: facadeFormData.url.length })}
                 </Typography>
               </Box>
       
@@ -787,7 +793,7 @@ const CreateFacade = ({
                       </IconButton>
                       {index === 0 && (
                         <Chip
-                          label="Primary"
+                          label={t('models:primary')}
                           size="small"
                           sx={{
                             position: "absolute",
@@ -833,7 +839,7 @@ const CreateFacade = ({
                       fontFamily: '"Poppins", sans-serif'
                     }}
                   >
-                    No images added yet
+                   {t('models:noImages')}
                   </Typography>
                 </Paper>
               )}
@@ -861,7 +867,7 @@ const CreateFacade = ({
               }
             }}
           >
-            Cancel
+            {t('common:actions.cancel')}
           </Button>
           <Button
             onClick={handleSubmit}
@@ -912,7 +918,9 @@ const CreateFacade = ({
             }}
           >
             <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-              {selectedFacade ? "Update" : "Create"}
+          {selectedFacade
+            ? t('common:actions.update')
+            : t('common:actions.create')}            
             </Box>
           </Button>
         </DialogActions>
@@ -957,8 +965,9 @@ const CreateFacade = ({
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                {editingDeckIndex !== null ? "Edit Deck Option" : "Add New Deck Option"}
-              </Typography>
+              {editingDeckIndex !== null
+                ? t('models:editDeck')
+                : t('models:addDeckOption')}              </Typography>
               <Typography 
                 variant="caption"
                 sx={{
@@ -966,7 +975,7 @@ const CreateFacade = ({
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                Configure deck specifications and pricing
+              {t('models:deckSubtitle')}
               </Typography>
             </Box>
           </Box>
@@ -977,13 +986,13 @@ const CreateFacade = ({
             <Grid item xs={12} sm={8}>
               <TextField
                 fullWidth
-                label="Deck Name *"
+                label={t('models:deckName') + ' *'}
                 value={deckFormData.name}
                 onChange={(e) =>
                   setDeckFormData({ ...deckFormData, name: e.target.value })
                 }
                 required
-                placeholder="e.g. Standard Deck, Premium Composite"
+              placeholder={t('models:deckNamePlaceholder')}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 3,
@@ -1016,7 +1025,7 @@ const CreateFacade = ({
               <TextField
                 fullWidth
                 type="number"
-                label="Price *"
+                label={t('models:price') + ' *'}                
                 value={deckFormData.price}
                 onChange={(e) =>
                   setDeckFormData({
@@ -1061,7 +1070,7 @@ const CreateFacade = ({
                 fullWidth
                 multiline
                 rows={2}
-                label="Description"
+              label={t('models:description')}
                 value={deckFormData.description}
                 onChange={(e) =>
                   setDeckFormData({
@@ -1110,7 +1119,7 @@ const CreateFacade = ({
                   mb: 1.5
                 }}
               >
-                Deck Images
+              {t('models:uploadDeckImages')}
               </Typography>
               <Button
                 variant="outlined"
@@ -1135,7 +1144,9 @@ const CreateFacade = ({
                   }
                 }}
               >
-                {uploadingDeckImages ? "Uploading..." : "Upload Deck Images"}
+              {uploadingDeckImages
+                ? t('models:uploading')
+                : t('models:uploadDeckImages')}               
                 <input
                   type="file"
                   accept="image/*"
@@ -1207,7 +1218,8 @@ const CreateFacade = ({
               }
             }}
           >
-            Cancel
+                      {t('common:actions.cancel')}
+
           </Button>
           <Button
             onClick={handleSubmitDeck}
@@ -1257,7 +1269,7 @@ const CreateFacade = ({
             }}
           >
             <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-              Save Deck
+               {t('models:saveDeck')}
             </Box>
           </Button>
         </DialogActions>

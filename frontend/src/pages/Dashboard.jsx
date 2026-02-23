@@ -43,10 +43,12 @@ import DashboardMap from '../components/DashboardMap'
 import { motion, AnimatePresence } from 'framer-motion'
 import StatsCards from '../components/statscard'
 import ResidentDialog from '../components/ResidentDialog'
+import { useTranslation } from 'react-i18next'
 
 const Dashboard = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation('dashboard')
   const [stats, setStats] = useState({
     totalLots: 0,
     availableLots: 0,
@@ -174,9 +176,9 @@ const Dashboard = () => {
 
   const getStatusLabel = (status) => {
     switch (status) {
-      case 'signed': return 'Signed'
-      case 'pending': return 'Pending'
-      case 'rejected': return 'Rejected'
+      case 'signed': return t('common:status.signed')
+      case 'pending': return t('common:status.pending')
+      case 'rejected': return t('common:status.rejected')
       default: return status
     }
   }
@@ -207,9 +209,9 @@ const Dashboard = () => {
         skipPasswordSetup: true
       })
       handleCloseUserDialog()
-      alert('✅ User invited successfully! They will receive an SMS with setup instructions.')
+      alert(t('auth:userInvitedSuccess'))
     } catch (error) {
-      alert(error.response?.data?.message || 'Error inviting user')
+      alert(error.response?.data?.message || t('auth:errorInvitingUser'))
     }
   }
 
@@ -217,49 +219,49 @@ const Dashboard = () => {
 const quickActions = [
   { 
     icon: <Business />, 
-    label: 'Add Property', 
+    label: t('quickActions.addProperty'), 
     color: '#333F1F',
     bgColor: '#e8f5ee',
     onClick: () => navigate('/properties/select')
   },
   { 
     icon: <PersonAdd />, 
-    label: 'Invite User', 
+    label: t('quickActions.inviteUser'), 
     color: '#8CA551',
     bgColor: '#f0f7e8',
     onClick: handleOpenUserDialog
   },
   { 
     icon: <BarChart />, 
-    label: 'Analytics', 
+    label: t('quickActions.analytics'), 
     color: '#E5863C',
     bgColor: '#fff5e6',
     onClick: () => navigate('/analytics')
   },
   { 
     icon: <HomeWork />, 
-    label: 'Models', 
+    label: t('quickActions.models'), 
     color: '#333F1F', 
     bgColor: '#e8f5ee',
     onClick: () => navigate('/view-models') 
   },
   { 
     icon: <Deck />, 
-    label: 'Amenities', 
+    label: t('quickActions.amenities'), 
     color: '#8CA551', 
     bgColor: '#f0f7e8',
     onClick: () => navigate('/amenities') 
   },
   { 
     icon: <Article />, 
-    label: 'Manage News', 
+    label: t('quickActions.manageNews'), 
     color: '#E5863C', 
     bgColor: '#fff5e6',
     onClick: () => navigate('/news')
   },
   { 
     icon: <Business />, 
-    label: 'Club House', 
+    label: t('quickActions.clubHouse'), 
     color: '#333F1F', 
     bgColor: '#e8f5ee',
     onClick: () => navigate('/club-house-detail')
@@ -270,28 +272,28 @@ const quickActions = [
 const userQuickActions = [
   { 
     icon: <HomeWork />, 
-    label: 'Models', 
+    label: t('quickActions.models'), 
     color: '#333F1F', 
     bgColor: '#e8f5ee',
     onClick: () => navigate('/view-models') 
   },
   { 
     icon: <Deck />, 
-    label: 'Amenities', 
+    label: t('quickActions.amenities'), 
     color: '#8CA551', 
     bgColor: '#f0f7e8',
     onClick: () => navigate('/amenities') 
   },
   { 
     icon: <Article />, 
-    label: 'News Feed', 
+    label: t('quickActions.newsFeed'), 
     color: '#E5863C', 
     bgColor: '#fff5e6',
     onClick: () => navigate('/explore/news')
   },
   { 
     icon: <Business />, 
-    label: 'Club House', 
+    label: t('quickActions.clubHouse'), 
     color: '#333F1F', 
     bgColor: '#e8f5ee',
     onClick: () => navigate('/club-house-detail')
@@ -301,7 +303,7 @@ const userQuickActions = [
 // ✅ REEMPLAZAR el array de stats por:
 const dashboardStats = [
   {
-    label: 'Lots Listed / Sold',
+    label: t('stats.lotsListedSold'),
     value: `${stats.soldLots} / ${stats.totalLots}`,
     icon: HomeWork,
     color: '#333F1F',
@@ -312,14 +314,14 @@ const dashboardStats = [
         (stats.soldPercentageChange !== 0 && stats.soldPercentageChange !== 100
           ? ` (${stats.soldPercentageChange >= 0 ? '+' : ''}${stats.soldPercentageChange}%)`
           : '')
-      : 'No change this month',
+      : t('stats.noChangeThisMonth'),
     subColor: stats.soldDifference !== 0
       ? (stats.soldDifference >= 0 ? '#8CA551' : '#E5863C')
       : '#706f6f',
     trend: stats.soldDifference >= 0 ? 'up' : 'down'
   },
   {
-    label: 'Monthly Revenue',
+    label: t('stats.monthlyRevenue'),
     value: `$${(stats.currentMonthRevenue / 1000000).toFixed(1)}M`,
     icon: AttachMoney,
     color: '#8CA551',
@@ -327,27 +329,27 @@ const dashboardStats = [
     bgColor: '#f0f7e8',
     sub: stats.revenuePercentageChange !== 0
       ? `${stats.revenuePercentageChange >= 0 ? '+' : ''}${stats.revenuePercentageChange}% vs last month`
-      : 'No change vs last month',
+      : t('stats.noChangeVsLastMonth'),
     subColor: stats.revenuePercentageChange !== 0
       ? (stats.revenuePercentageChange >= 0 ? '#8CA551' : '#E5863C')
       : '#706f6f',
     trend: stats.revenuePercentageChange >= 0 ? 'up' : 'down'
   },
   {
-    label: 'Lots on Hold',
+    label: t('stats.lotsOnHold'),
     value: stats.holdLots,
     icon: Inbox,
     color: '#E5863C',
     bgGradient: 'linear-gradient(135deg, #E5863C 0%, #f5a563 100%)',
     bgColor: '#fff5e6',
     sub: stats.totalLots > 0
-      ? `${((stats.holdLots / stats.totalLots) * 100).toFixed(1)}% of total inventory`
-      : '0% of total inventory',
+      ? `${((stats.holdLots / stats.totalLots) * 100).toFixed(1)}% ${t('stats.ofTotalInventory')}`
+      : `0% ${t('stats.ofTotalInventory')}`,
     subColor: '#706f6f',
     trend: null
   },
   {
-    label: 'Occupancy Rate',
+    label: t('stats.occupancyRate'),
     value: `${stats.occupancyRate}%`,
     icon: TrendingUp,
     color: stats.occupancyRate >= 50 ? '#8CA551' : '#706f6f',
@@ -355,7 +357,7 @@ const dashboardStats = [
       ? 'linear-gradient(135deg, #8CA551 0%, #a8c76f 100%)'
       : 'linear-gradient(135deg, #706f6f 0%, #8a8a8a 100%)',
     bgColor: stats.occupancyRate >= 50 ? '#f0f7e8' : '#f5f5f5',
-    sub: `${stats.soldLots} of ${stats.totalLots} sold`,
+    sub: t('stats.ofSold', { sold: stats.soldLots, total: stats.totalLots }),
     subColor: '#706f6f',
     trend: null
   }
@@ -454,7 +456,7 @@ const dashboardStats = [
                   textTransform: 'uppercase'
                 }}
               >
-                Welcome, {user?.firstName}
+                {t('welcomeUser', { name: user?.firstName })}
               </Typography>
               
               <Box display="flex" alignItems="center" gap={1.5} flexWrap="wrap">
@@ -467,7 +469,7 @@ const dashboardStats = [
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  Your Dashboard Overview
+                  {t('overviewSubtitle')}
                 </Typography>
                 <Chip
                   label={user?.role || 'User'}
@@ -539,7 +541,7 @@ const dashboardStats = [
                           letterSpacing: '0.5px'
                         }}
                       >
-                        Property Map
+                        {t('propertyMap')}
                       </Typography>
                     </Box>
                     <DashboardMap />
@@ -589,7 +591,7 @@ const dashboardStats = [
             fontFamily: '"Poppins", sans-serif'
           }}
         >
-          Quick Actions
+          {t('quickActions.title')}
         </Typography>
         <Typography 
           variant="caption" 
@@ -598,7 +600,7 @@ const dashboardStats = [
             fontFamily: '"Poppins", sans-serif'
           }}
         >
-          Shortcuts to common tasks
+          {t('quickActions.subtitle')}
         </Typography>
       </Box>
 
@@ -703,9 +705,9 @@ const dashboardStats = [
                         fontFamily: '"Poppins", sans-serif'
                       }}
                     >
-                      {action.label === 'Models' ? 'Browse designs' :
-                       action.label === 'Amenities' ? 'View facilities' :
-                       'Latest updates'}
+                      {action.label === t('quickActions.models') ? t('quickActions.modelsDesc') :
+                       action.label === t('quickActions.amenities') ? t('quickActions.amenitiesDesc') :
+                       t('quickActions.newsFeedDesc')}
                     </Typography>
                   </Box>
 
@@ -793,7 +795,7 @@ const dashboardStats = [
                           letterSpacing: '0.5px'
                         }}
                       >
-                        Property Map
+                        {t('propertyMap')}
                       </Typography>
                     </Box>
                     <DashboardMap />
@@ -842,7 +844,7 @@ const dashboardStats = [
             fontFamily: '"Poppins", sans-serif'
           }}
         >
-          Quick Actions
+          {t('quickActions.title')}
         </Typography>
         <Typography 
           variant="caption" 
@@ -851,7 +853,7 @@ const dashboardStats = [
             fontFamily: '"Poppins", sans-serif'
           }}
         >
-          Shortcuts to common tasks
+          {t('quickActions.subtitle')}
         </Typography>
       </Box>
 
@@ -961,12 +963,12 @@ const dashboardStats = [
                         fontFamily: '"Poppins", sans-serif'
                       }}
                     >
-                      {action.label === 'Add Property' ? 'Create new property' :
-                       action.label === 'Invite User' ? 'Send invitation' :
-                       action.label === 'Analytics' ? 'View reports' :
-                       action.label === 'Models' ? 'Browse designs' :
-                       action.label === 'Amenities' ? 'View facilities' :
-                       'Latest updates'}
+                      {action.label === t('quickActions.addProperty') ? t('quickActions.addPropertyDesc') :
+                       action.label === t('quickActions.inviteUser') ? t('quickActions.inviteUserDesc') :
+                       action.label === t('quickActions.analytics') ? t('quickActions.analyticsDesc') :
+                       action.label === t('quickActions.models') ? t('quickActions.modelsDesc') :
+                       action.label === t('quickActions.amenities') ? t('quickActions.amenitiesDesc') :
+                       t('quickActions.manageNewsDesc')}
                     </Typography>
                   </Box>
 
@@ -1038,7 +1040,7 @@ const dashboardStats = [
                           letterSpacing: '0.5px'
                         }}
                       >
-                        Recent Payloads
+                        {t('recentPayloads.title')}
                       </Typography>
                       <Button
                         onClick={() => navigate('/payloads')}
@@ -1053,7 +1055,7 @@ const dashboardStats = [
                           }
                         }}
                       >
-                        View all
+                        {t('common:actions.viewAll')}
                       </Button>
                     </Box>
                     <Box>
@@ -1101,7 +1103,7 @@ const dashboardStats = [
                                     color: '#333F1F'
                                   }}
                                 >
-                                  {payload.property?.lot?.number ? `Lot ${payload.property.lot.number}` : 'N/A'}
+                                  {payload.property?.lot?.number ? t('recentPayloads.lot', { number: payload.property.lot.number }) : 'N/A'}
                                 </Typography>
                                 <Typography 
                                   variant="caption" 
@@ -1150,7 +1152,7 @@ const dashboardStats = [
                               fontFamily: '"Poppins", sans-serif'
                             }}
                           >
-                            No recent payloads found
+                            {t('recentPayloads.noPayloads')}
                           </Typography>
                         </Box>
                       )}

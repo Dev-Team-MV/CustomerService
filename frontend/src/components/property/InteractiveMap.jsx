@@ -5,6 +5,8 @@ import MyLocationIcon from '@mui/icons-material/MyLocation'
 import { useProperty } from '../../context/PropertyContext'
 import { useState, useRef } from 'react'
 import map from '../../../public/images/mapLakewood.png'
+import { useTranslation } from 'react-i18next'
+
 
 const lotPositions = {
   1: { x: 23, y: 25 },
@@ -87,6 +89,9 @@ const InteractiveMap = () => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [hasMoved, setHasMoved] = useState(false)
   const mapRef = useRef(null)
+
+    const { t } = useTranslation('models')
+
 
   const handleLotSelect = (e) => {
     const lotNumber = e.target.value
@@ -187,21 +192,21 @@ const InteractiveMap = () => {
           letterSpacing: 0.5,
           fontSize: { xs: '0.75rem', sm: '0.875rem' }
         }}>
-          01 LOT PANORAMIC VIEW
+          {t('lotPanoramicView', '01 LOT PANORAMIC VIEW')}
         </Typography>
         
         <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 }, alignItems: 'center', flexWrap: 'wrap' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#4caf50' }} />
-            <Typography variant="caption" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' } }}>Available</Typography>
+            <Typography variant="caption" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' } }}>{t('available', 'Available')}</Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#1976d2' }} />
-            <Typography variant="caption" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' } }}>Hold</Typography>
+            <Typography variant="caption" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' } }}>{t('hold', 'Hold')}</Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#f44336' }} />
-            <Typography variant="caption" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' } }}>Sold</Typography>
+            <Typography variant="caption" sx={{ fontSize: { xs: '0.65rem', sm: '0.7rem' } }}>{t('sold', 'Sold')}</Typography>
           </Box>
         </Box>
       </Box>
@@ -383,12 +388,14 @@ const InteractiveMap = () => {
             '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ddd' }
           }}
         >
-          <MenuItem value="" disabled>Select a lot...</MenuItem>
+          <MenuItem value="" disabled>            
+            {t('selectLot', 'Select a lot...')}
+          </MenuItem>
           {lots
             .slice()
             .sort((a, b) => Number(a.number) - Number(b.number))
             .map(lot => (
-              <MenuItem 
+<MenuItem 
                 key={lot._id} 
                 value={lot.number}
                 disabled={lot.status !== 'available'}
@@ -396,7 +403,7 @@ const InteractiveMap = () => {
                   opacity: lot.status === 'available' ? 1 : 0.5
                 }}
               >
-                Lot {lot.number} - {lot.status.toUpperCase()}
+                {t('lotDropdown', { number: lot.number, status: lot.status.toUpperCase() }, `Lot ${lot.number} - ${lot.status.toUpperCase()}`)}
                 {(lot.status === 'sold' || lot.status === 'pending') && ' 🔒'}
               </MenuItem>
             ))}

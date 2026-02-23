@@ -1,0 +1,25 @@
+{
+  "title": "Clubhouse Image Manager",
+  "subtitle": "Manage and upload images for the Clubhouse. You can upload exterior, interior (by section), and blueprint images.",
+  "manageImages": "Manage Images",
+  "manageImagesTooltip": "Manage Clubhouse Images",
+  "tabs": {
+    "exterior": "Exterior",
+    "plans": "Plans",
+    "interior": "Interior"
+  },
+  "noImagesUploaded": "No images uploaded",
+  "noPlansUploaded": "No plans uploaded",
+  "noSectionsConfigured": "No sections configured",
+  "noImages": "No images",
+  "selectSection": "Select Interior Section",
+  "selectImages": "Select Images",
+  "selectingFor": "Selecting for: {{section}}",
+  "readyToUpload": "Ready to Upload ({{count}})",
+  "uploadedImages": "Uploaded Images ({{count}})",
+  "noImagesYet": "No images yet. Select files to upload.",
+  "close": "Close",
+  "upload": "Upload {{count}} Image(s)",
+  "uploading": "Uploading...",
+  "new": "NEW"
+}

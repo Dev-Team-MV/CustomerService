@@ -25,6 +25,7 @@ import {
 } from '@mui/icons-material'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import TypingFooter from '../components/Footer'
@@ -43,6 +44,7 @@ const Login = () => {
   const location = useLocation()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const { t } = useTranslation('auth')
 
   const from = location.state?.from || '/dashboard'
 
@@ -68,9 +70,9 @@ const Login = () => {
       navigate(from, { replace: true })
     } else {
       if (result.requiresPasswordSetup) {
-        setError('Password not set. Please check your phone for the setup link.')
+        setError(t('passwordNotSet'))
       } else {
-        setError(result.error || 'Login failed')
+        setError(result.error || t('loginFailed'))
       }
     }
     
@@ -211,7 +213,7 @@ const Login = () => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                Resort Lifestyle
+                {t('common:resortLifestyle')}
               </Typography>
             </motion.div>
           </Box>
@@ -268,7 +270,7 @@ const Login = () => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                Welcome
+                {t('welcome')}
               </Typography>
               <Typography 
                 variant="h5" 
@@ -280,7 +282,7 @@ const Login = () => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                Sign In
+                {t('signIn')}
               </Typography>
               <motion.div
                 initial={{ width: 0 }}
@@ -354,7 +356,7 @@ const Login = () => {
                 </ToggleButton>
                 <ToggleButton value="phone" aria-label="phone login">
                   <Phone sx={{ mr: 1 }} />
-                  Phone
+                  {t('phone')}
                 </ToggleButton>
               </ToggleButtonGroup>
             </Box>
@@ -380,7 +382,7 @@ const Login = () => {
                         required
                         fullWidth
                         id="email"
-                        label="Email Address"
+                        label={t('emailAddress')}
                         name="email"
                         autoComplete="email"
                         autoFocus
@@ -474,7 +476,7 @@ const Login = () => {
                   required
                   fullWidth
                   name="password"
-                  label="Password"
+                  label={t('password')}
                   type={showPassword ? 'text' : 'password'}
                   id="password"
                   autoComplete="current-password"
@@ -539,7 +541,7 @@ const Login = () => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  By signing in, you agree to our{' '}
+                  {t('termsAgreement')}{' '}
                   <Link
                     component={RouterLink}
                     to="/terms-and-conditions"
@@ -566,7 +568,7 @@ const Login = () => {
                       }
                     }}
                   >
-                    Terms & Conditions
+                    {t('termsAndConditions')}
                   </Link>
                 </Typography>
               </Box>
@@ -623,7 +625,7 @@ const Login = () => {
                   }}
                 >
                   <span style={{ position: 'relative', zIndex: 1 }}>
-                    {loading ? 'Signing in...' : 'Sign In'}
+                    {loading ? t('signingIn') : t('signIn')}
                   </span>
                 </Button>
               </motion.div>

@@ -1,0 +1,41 @@
+{
+  "title": "Residents",
+  "subtitle": "Manage resident accounts and information",
+  "stats": {
+    "total": "Total Users",
+    "superadmins": "Super Admins",
+    "admins": "Admins",
+    "residents": "Residents"
+  },
+  "table": {
+    "name": "NAME",
+    "email": "EMAIL",
+    "phone": "PHONE",
+    "role": "ROLE",
+    "properties": "PROPERTIES",
+    "actions": "ACTIONS"
+  },
+  "role": {
+    "superadmin": "Super Admin",
+    "admin": "Admin",
+    "user": "Resident"
+  },
+  "actions": {
+    "add": "Add User",
+    "edit": "Edit",
+    "delete": "Delete",
+    "sendSMS": "Send password setup SMS"
+  },
+  "empty": {
+    "title": "No residents yet",
+    "description": "Start by inviting your first resident",
+    "action": "Add First Resident"
+  },
+  "snackbar": {
+    "smsSent": "Password setup SMS sent successfully to {{phone}}",
+    "smsUnavailable": "SMS service unavailable. Setup link copied to clipboard!",
+    "noPhone": "User does not have a phone number registered",
+    "smsError": "Failed to send password setup SMS"
+  },
+  "confirmDelete": "Are you sure you want to delete this user?"
+}
