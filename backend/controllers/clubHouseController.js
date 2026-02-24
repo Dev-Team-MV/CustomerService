@@ -6,12 +6,16 @@ import path from 'path'
 
 const GCS_FOLDER = 'clubhouse'
 
-/** Normaliza un ítem de imagen (legacy string o { url, isPublic }) a { url, isPublic }. */
+/** Normaliza un ítem de imagen (legacy string o { url, isPublic }) a { url, isPublic }. Filtra ítems sin url válido. */
 function normalizeImageItem (item) {
   if (item == null) return null
-  if (typeof item === 'string') return { url: item, isPublic: true }
+  if (typeof item === 'string') {
+    const url = (item || '').trim()
+    return url ? { url, isPublic: true } : null
+  }
   if (typeof item === 'object' && typeof item.url === 'string') {
-    return { url: item.url, isPublic: item.isPublic !== false }
+    const url = item.url.trim()
+    return url ? { url, isPublic: item.isPublic !== false } : null
   }
   return null
 }
@@ -22,14 +26,17 @@ function normalizeImageArray (arr) {
   return arr.map(normalizeImageItem).filter(Boolean)
 }
 
-/** Migra y normaliza el documento: strings -> { url, isPublic: true }. Guarda si hubo cambios. */
+/** Migra y normaliza el documento: strings -> { url, isPublic: true }. Elimina ítems sin url válido. Guarda si hubo cambios. */
 async function migrateAndNormalize (doc) {
   let changed = false
 
   if (Array.isArray(doc.exterior)) {
     const normalized = normalizeImageArray(doc.exterior)
-    const hasLegacy = doc.exterior.some((x) => typeof x === 'string')
-    if (hasLegacy || (normalized.length > 0 && typeof doc.exterior[0] === 'string')) {
+    const same = normalized.length === doc.exterior.length && normalized.every((n, i) => {
+      const o = doc.exterior[i]
+      return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic
+    })
+    if (!same) {
       doc.exterior = normalized
       changed = true
     }
@@ -37,8 +44,11 @@ async function migrateAndNormalize (doc) {
 
   if (Array.isArray(doc.blueprints)) {
     const normalized = normalizeImageArray(doc.blueprints)
-    const hasLegacy = doc.blueprints.some((x) => typeof x === 'string')
-    if (hasLegacy || (normalized.length > 0 && typeof doc.blueprints[0] === 'string')) {
+    const same = normalized.length === doc.blueprints.length && normalized.every((n, i) => {
+      const o = doc.blueprints[i]
+      return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic
+    })
+    if (!same) {
       doc.blueprints = normalized
       changed = true
     }
@@ -49,8 +59,11 @@ async function migrateAndNormalize (doc) {
       const arr = doc.interior[key]
       if (!Array.isArray(arr)) continue
       const normalized = normalizeImageArray(arr)
-      const hasLegacy = arr.some((x) => typeof x === 'string')
-      if (hasLegacy || (normalized.length > 0 && typeof arr[0] === 'string')) {
+      const same = normalized.length === arr.length && normalized.every((n, i) => {
+        const o = arr[i]
+        return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic
+      })
+      if (!same) {
         doc.interior[key] = normalized
         changed = true
       }
@@ -126,6 +139,16 @@ export const uploadClubHouseImages = async (req, res) => {
     }
 
     doc = await migrateAndNormalize(doc)
+
+    // Asegurar arrays válidos por si la DB tenía ítems sin url (evitar fallo de validación al guardar)
+    doc.exterior = normalizeImageArray(doc.exterior || [])
+    doc.blueprints = normalizeImageArray(doc.blueprints || [])
+    if (doc.interior && typeof doc.interior === 'object') {
+      for (const k of Object.keys(doc.interior)) {
+        if (Array.isArray(doc.interior[k])) doc.interior[k] = normalizeImageArray(doc.interior[k])
+      }
+      doc.markModified('interior')
+    }
 
     const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
     const uploadedItems = []
