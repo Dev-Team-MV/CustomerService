@@ -17,9 +17,9 @@ import enPropertySelection from './locales/en/propertySelection.json'
 import enResidents from './locales/en/residents.json'
 import enModels from './locales/en/models.json'
 import enPayloads from './locales/en/payloads.json'
-import enClubHouse from './locales/en/clubhouse.json'
+import enClubHouse from './locales/en/clubHouse.json'
 import enMasterPlan from './locales/en/masterPlan.json'
-import enTimeLine from './locales/en/timeLine.json'
+import enTimeLine from './locales/en/timeline.json'
 
 // ES
 import esCommon from './locales/es/common.json'
@@ -36,9 +36,9 @@ import esPropertySelection from './locales/es/propertySelection.json'
 import esResidents from './locales/es/residents.json'
 import esModels from './locales/es/models.json'
 import esPayloads from './locales/es/payloads.json'
-import esClubHouse from './locales/es/clubhouse.json'
+import esClubHouse from './locales/es/clubHouse.json'
 import esMasterPlan from './locales/es/masterPlan.json'
-import esTimeLine from './locales/es/timeLine.json'
+import esTimeLine from './locales/es/timeline.json'
 
 i18n
     .use(LanguageDetector)
