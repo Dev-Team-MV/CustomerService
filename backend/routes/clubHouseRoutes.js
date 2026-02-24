@@ -1,5 +1,5 @@
 import express from 'express'
-import { getClubHouse, uploadClubHouseImages, getClubHouseInteriorKeys, updateClubHouseImageVisibility } from '../controllers/clubHouseController.js'
+import { getClubHouse, getClubHousePublic, uploadClubHouseImages, getClubHouseInteriorKeys, updateClubHouseImageVisibility } from '../controllers/clubHouseController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 import { upload } from '../controllers/uploadController.js'
 
@@ -22,6 +22,38 @@ const router = express.Router()
  *               $ref: '#/components/schemas/ClubHouse'
  */
 router.get('/', protect, getClubHouse)
+
+/**
+ * @swagger
+ * /api/clubhouse/public:
+ *   get:
+ *     summary: Get Club House (public)
+ *     description: Returns clubhouse content with only public images (isPublic true). No authentication required.
+ *     tags: [ClubHouse]
+ *     responses:
+ *       200:
+ *         description: Club house with exterior[], blueprints[], interior{} and optional recorridoVisibility (only public images included)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 exterior:
+ *                   type: array
+ *                   items: { type: object, properties: { url: { type: string }, isPublic: { type: boolean } } }
+ *                 blueprints:
+ *                   type: array
+ *                   items: { type: object, properties: { url: { type: string }, isPublic: { type: boolean } } }
+ *                 interior:
+ *                   type: object
+ *                   additionalProperties:
+ *                     type: array
+ *                     items: { type: object, properties: { url: { type: string }, isPublic: { type: boolean } } }
+ *                 recorridoVisibility:
+ *                   type: object
+ *                   description: Optional. Map of filename -> boolean for recorrido folder images.
+ */
+router.get('/public', getClubHousePublic)
 
 /**
  * @swagger

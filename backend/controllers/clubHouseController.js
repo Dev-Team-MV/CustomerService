@@ -92,6 +92,44 @@ export const getClubHouse = async (req, res) => {
   }
 }
 
+/** Filtra un array de imágenes dejando solo las que tienen isPublic === true. */
+function filterPublicImages (arr) {
+  if (!Array.isArray(arr)) return []
+  return arr.map(normalizeImageItem).filter(Boolean).filter((item) => item.isPublic === true)
+}
+
+/**
+ * GET Club House (public). Returns clubhouse with only public images (isPublic: true).
+ * No authentication required. For public site, landing, etc.
+ */
+export const getClubHousePublic = async (req, res) => {
+  try {
+    let doc = await ClubHouse.findOne()
+    if (!doc) {
+      doc = await ClubHouse.create({})
+    }
+    doc = await migrateAndNormalize(doc)
+
+    const publicPayload = {
+      exterior: filterPublicImages(doc.exterior),
+      blueprints: filterPublicImages(doc.blueprints),
+      interior: {}
+    }
+    if (doc.interior && typeof doc.interior === 'object') {
+      for (const key of Object.keys(doc.interior)) {
+        publicPayload.interior[key] = filterPublicImages(doc.interior[key])
+      }
+    }
+    if (doc.recorridoVisibility && typeof doc.recorridoVisibility === 'object') {
+      publicPayload.recorridoVisibility = doc.recorridoVisibility
+    }
+
+    res.json(publicPayload)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 /**
  * POST Upload images to Club House.
  * Body (form-data): section = 'exterior' | 'blueprints' | 'interior'
