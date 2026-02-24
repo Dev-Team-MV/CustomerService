@@ -17,7 +17,11 @@ const DEFAULT_INTERIOR_KEYS = [
   'Laundry',
   'Counter',
   'Catering',
-  'Mural'
+  'Mural',
+  'Lakeside',
+  'Machines',
+  'Counter Hallway',
+  'Bathroom Hallway'
 ]
 
 function defaultInterior () {
