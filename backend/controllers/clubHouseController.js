@@ -54,6 +54,18 @@ async function migrateAndNormalize (doc) {
     }
   }
 
+  if (Array.isArray(doc.deck)) {
+    const normalized = normalizeImageArray(doc.deck)
+    const same = normalized.length === doc.deck.length && normalized.every((n, i) => {
+      const o = doc.deck[i]
+      return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic
+    })
+    if (!same) {
+      doc.deck = normalized
+      changed = true
+    }
+  }
+
   if (doc.interior && typeof doc.interior === 'object') {
     for (const key of Object.keys(doc.interior)) {
       const arr = doc.interior[key]
@@ -76,7 +88,7 @@ async function migrateAndNormalize (doc) {
 }
 
 /**
- * GET Club House (singleton). Returns the single document with exterior, blueprints, interior.
+ * GET Club House (singleton). Returns the single document with exterior, blueprints, interior, deck.
  * Cada imagen es { url, isPublic }. isPublic = true si se puede mostrar sin token.
  */
 export const getClubHouse = async (req, res) => {
@@ -113,6 +125,7 @@ export const getClubHousePublic = async (req, res) => {
     const publicPayload = {
       exterior: filterPublicImages(doc.exterior),
       blueprints: filterPublicImages(doc.blueprints),
+      deck: filterPublicImages(doc.deck),
       interior: {}
     }
     if (doc.interior && typeof doc.interior === 'object') {
@@ -132,7 +145,7 @@ export const getClubHousePublic = async (req, res) => {
 
 /**
  * POST Upload images to Club House.
- * Body (form-data): section = 'exterior' | 'blueprints' | 'interior'
+ * Body (form-data): section = 'exterior' | 'blueprints' | 'deck' | 'interior'
  *   - If section = 'interior', required: interiorKey (e.g. 'Reception', 'Managers Office', ...)
  *   - isPublic = 'true' | 'false' (opcional): si la(s) imagen(es) se pueden mostrar sin token. Por defecto true.
  * Files: 'images' (array of files) or 'image' (single file)
@@ -151,9 +164,9 @@ export const uploadClubHouseImages = async (req, res) => {
     }
 
     const section = (req.body.section || '').toLowerCase()
-    if (!['exterior', 'blueprints', 'interior'].includes(section)) {
+    if (!['exterior', 'blueprints', 'deck', 'interior'].includes(section)) {
       return res.status(400).json({
-        message: "section is required and must be one of: exterior, blueprints, interior"
+        message: "section is required and must be one of: exterior, blueprints, deck, interior"
       })
     }
 
@@ -181,6 +194,7 @@ export const uploadClubHouseImages = async (req, res) => {
     // Asegurar arrays válidos por si la DB tenía ítems sin url (evitar fallo de validación al guardar)
     doc.exterior = normalizeImageArray(doc.exterior || [])
     doc.blueprints = normalizeImageArray(doc.blueprints || [])
+    doc.deck = normalizeImageArray(doc.deck || [])
     if (doc.interior && typeof doc.interior === 'object') {
       for (const k of Object.keys(doc.interior)) {
         if (Array.isArray(doc.interior[k])) doc.interior[k] = normalizeImageArray(doc.interior[k])
@@ -211,6 +225,9 @@ export const uploadClubHouseImages = async (req, res) => {
     } else if (section === 'blueprints') {
       doc.blueprints = doc.blueprints || []
       doc.blueprints.push(...uploadedItems)
+    } else if (section === 'deck') {
+      doc.deck = doc.deck || []
+      doc.deck.push(...uploadedItems)
     } else {
       const key = req._clubHouseInteriorKey
       if (!doc.interior) doc.interior = {}
@@ -244,9 +261,9 @@ export const updateClubHouseImageVisibility = async (req, res) => {
   try {
     const { section, interiorKey, index, isPublic } = req.body
     const sec = (section || '').toLowerCase()
-    if (!['exterior', 'blueprints', 'interior'].includes(sec)) {
+    if (!['exterior', 'blueprints', 'deck', 'interior'].includes(sec)) {
       return res.status(400).json({
-        message: "section is required and must be one of: exterior, blueprints, interior"
+        message: "section is required and must be one of: exterior, blueprints, deck, interior"
       })
     }
     const idx = index !== undefined && index !== '' ? parseInt(index, 10) : -1
@@ -264,6 +281,7 @@ export const updateClubHouseImageVisibility = async (req, res) => {
     let arr = null
     if (sec === 'exterior') arr = doc.exterior || []
     else if (sec === 'blueprints') arr = doc.blueprints || []
+    else if (sec === 'deck') arr = doc.deck || []
     else {
       const key = (interiorKey || req.body.interior_key || '').trim()
       if (!key) {
