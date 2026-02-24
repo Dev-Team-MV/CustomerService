@@ -1,9 +1,11 @@
 import { Box, Typography, Button, Container } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { Home } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 
 const NotFound = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation('common')
 
   return (
     <Container>
@@ -22,10 +24,10 @@ const NotFound = () => {
           404
         </Typography>
         <Typography variant="h4" gutterBottom>
-          Página No Encontrada
+          {t('notFound.title')}
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          Lo sentimos, la página que buscas no existe.
+          {t('notFound.description')}
         </Typography>
         <Button
           variant="contained"
@@ -33,7 +35,7 @@ const NotFound = () => {
           startIcon={<Home />}
           onClick={() => navigate('/dashboard')}
         >
-          Volver al Inicio
+          {t('notFound.goHome')}
         </Button>
       </Box>
     </Container>

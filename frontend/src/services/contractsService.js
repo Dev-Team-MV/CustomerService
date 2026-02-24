@@ -122,6 +122,43 @@ const contractsService = {
       console.error('Error fetching all contracts:', error)
       throw error
     }
+  },
+
+  /**
+   * Descargar archivo de contrato por propiedad y tipo (vía backend para evitar CORS con GCS).
+   * GET /api/contracts/property/:propertyId/download/:type
+   * @param {string} propertyId - ID de la propiedad
+   * @param {string} type - Tipo de contrato (promissoryNote, purchaseContract, agreement)
+   * @param {string} [suggestedFilename] - Nombre sugerido para el archivo descargado
+   * @returns {Promise<void>}
+   */
+  downloadContract: async (propertyId, type, suggestedFilename = null) => {
+    const token = localStorage.getItem('token')
+    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api'
+    const url = `${baseURL}/contracts/property/${propertyId}/download/${type}`
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    })
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      throw new Error(data.message || `Download failed: ${response.status}`)
+    }
+    const blob = await response.blob()
+    const disposition = response.headers.get('Content-Disposition')
+    let filename = suggestedFilename || `${type}.pdf`
+    if (disposition) {
+      const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";\n]+)"?/i) || disposition.match(/filename="?([^";\n]+)"?/i)
+      if (match && match[1]) filename = match[1].trim().replace(/^["']|["']$/g, '')
+    }
+    const objectUrl = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = objectUrl
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(objectUrl)
   }
 }
 

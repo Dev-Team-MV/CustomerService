@@ -1,31 +1,22 @@
 import Model from '../models/Model.js'
+import { normalizeImageArray } from '../utils/imageUtils.js'
 
-// Helper function to validate and format images structure
+// Helper: format images to { exterior: [{ url, isPublic }], interior: [...] }
 const formatImages = (images) => {
-  if (!images) {
-    return { exterior: [], interior: [] }
-  }
-  
-  // If it's already in the correct format
+  if (!images) return { exterior: [], interior: [] }
   if (images.exterior !== undefined || images.interior !== undefined) {
     return {
-      exterior: Array.isArray(images.exterior) ? images.exterior : [],
-      interior: Array.isArray(images.interior) ? images.interior : []
+      exterior: normalizeImageArray(images.exterior),
+      interior: normalizeImageArray(images.interior)
     }
   }
-  
-  // If it's an old array format, convert to new format (backward compatibility)
   if (Array.isArray(images)) {
-    return {
-      exterior: images,
-      interior: []
-    }
+    return { exterior: normalizeImageArray(images), interior: [] }
   }
-  
   return { exterior: [], interior: [] }
 }
 
-// Helper to validate and format blueprints (4 variants by balcony + storage)
+// Helper: format blueprints (cada array como [{ url, isPublic }])
 const formatBlueprints = (blueprints) => {
   const empty = {
     default: [],
@@ -35,11 +26,125 @@ const formatBlueprints = (blueprints) => {
   }
   if (!blueprints || typeof blueprints !== 'object') return empty
   return {
-    default: Array.isArray(blueprints.default) ? blueprints.default : [],
-    withBalcony: Array.isArray(blueprints.withBalcony) ? blueprints.withBalcony : [],
-    withStorage: Array.isArray(blueprints.withStorage) ? blueprints.withStorage : [],
-    withBalconyAndStorage: Array.isArray(blueprints.withBalconyAndStorage) ? blueprints.withBalconyAndStorage : []
+    default: normalizeImageArray(blueprints.default),
+    withBalcony: normalizeImageArray(blueprints.withBalcony),
+    withStorage: normalizeImageArray(blueprints.withStorage),
+    withBalconyAndStorage: normalizeImageArray(blueprints.withBalconyAndStorage)
   }
+}
+
+// Normaliza imágenes en el documento (legacy strings → { url, isPublic }) antes de guardar
+function normalizeModelBeforeSave (model) {
+  if (model.images) {
+    if (Array.isArray(model.images.exterior)) {
+      const hasLegacy = model.images.exterior.some((x) => typeof x === 'string')
+      if (hasLegacy) model.images.exterior = normalizeImageArray(model.images.exterior)
+    }
+    if (Array.isArray(model.images.interior)) {
+      const hasLegacy = model.images.interior.some((x) => typeof x === 'string')
+      if (hasLegacy) model.images.interior = normalizeImageArray(model.images.interior)
+    }
+  }
+  if (model.blueprints && typeof model.blueprints === 'object') {
+    const variants = ['default', 'withBalcony', 'withStorage', 'withBalconyAndStorage']
+    variants.forEach((key) => {
+      if (Array.isArray(model.blueprints[key]) && model.blueprints[key].some((x) => typeof x === 'string')) {
+        model.blueprints[key] = normalizeImageArray(model.blueprints[key])
+      }
+    })
+  }
+  if (Array.isArray(model.balconies)) {
+    model.balconies.forEach((b) => {
+      if (b.images) {
+        if (Array.isArray(b.images.exterior) && b.images.exterior.some((x) => typeof x === 'string')) {
+          b.images.exterior = normalizeImageArray(b.images.exterior)
+        }
+        if (Array.isArray(b.images.interior) && b.images.interior.some((x) => typeof x === 'string')) {
+          b.images.interior = normalizeImageArray(b.images.interior)
+        }
+      }
+    })
+  }
+  if (Array.isArray(model.upgrades)) {
+    model.upgrades.forEach((u) => {
+      if (u.images) {
+        if (Array.isArray(u.images.exterior) && u.images.exterior.some((x) => typeof x === 'string')) {
+          u.images.exterior = normalizeImageArray(u.images.exterior)
+        }
+        if (Array.isArray(u.images.interior) && u.images.interior.some((x) => typeof x === 'string')) {
+          u.images.interior = normalizeImageArray(u.images.interior)
+        }
+      }
+    })
+  }
+  if (Array.isArray(model.storages)) {
+    model.storages.forEach((s) => {
+      if (s.images) {
+        if (Array.isArray(s.images.exterior) && s.images.exterior.some((x) => typeof x === 'string')) {
+          s.images.exterior = normalizeImageArray(s.images.exterior)
+        }
+        if (Array.isArray(s.images.interior) && s.images.interior.some((x) => typeof x === 'string')) {
+          s.images.interior = normalizeImageArray(s.images.interior)
+        }
+      }
+    })
+  }
+}
+
+// Normaliza imágenes de un modelo (y balconies/upgrades/storages) para respuesta API
+function normalizeModelForResponse (model) {
+  const doc = model.toObject ? model.toObject() : { ...model }
+  if (doc.images) {
+    doc.images = {
+      exterior: normalizeImageArray(doc.images.exterior),
+      interior: normalizeImageArray(doc.images.interior)
+    }
+  }
+  if (doc.blueprints) {
+    doc.blueprints = {
+      default: normalizeImageArray(doc.blueprints.default),
+      withBalcony: normalizeImageArray(doc.blueprints.withBalcony),
+      withStorage: normalizeImageArray(doc.blueprints.withStorage),
+      withBalconyAndStorage: normalizeImageArray(doc.blueprints.withBalconyAndStorage)
+    }
+  }
+  if (Array.isArray(doc.balconies)) {
+    doc.balconies = doc.balconies.map((b) => {
+      const out = b.toObject ? b.toObject() : { ...b }
+      if (out.images) {
+        out.images = {
+          exterior: normalizeImageArray(out.images.exterior),
+          interior: normalizeImageArray(out.images.interior)
+        }
+      }
+      return out
+    })
+  }
+  if (Array.isArray(doc.upgrades)) {
+    doc.upgrades = doc.upgrades.map((u) => {
+      const out = u.toObject ? u.toObject() : { ...u }
+      if (out.images) {
+        out.images = {
+          exterior: normalizeImageArray(out.images.exterior),
+          interior: normalizeImageArray(out.images.interior)
+        }
+      }
+      return out
+    })
+  }
+  if (Array.isArray(doc.storages)) {
+    doc.storages = doc.storages.map((s) => {
+      const out = s.toObject ? s.toObject() : { ...s }
+      if (out.images) {
+        out.images = {
+          exterior: normalizeImageArray(out.images.exterior),
+          interior: normalizeImageArray(out.images.interior)
+        }
+      }
+      return out
+    })
+  }
+  return doc
 }
 
 export const getAllModels = async (req, res) => {
@@ -48,7 +153,7 @@ export const getAllModels = async (req, res) => {
     const filter = status ? { status } : {}
     
     const models = await Model.find(filter).sort({ model: 1 })
-    res.json(models)
+    res.json(models.map(normalizeModelForResponse))
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -59,7 +164,7 @@ export const getModelById = async (req, res) => {
     const model = await Model.findById(req.params.id)
     
     if (model) {
-      res.json(model)
+      res.json(normalizeModelForResponse(model))
     } else {
       res.status(404).json({ message: 'Model not found' })
     }
@@ -426,7 +531,9 @@ export const updateModel = async (req, res) => {
       }
       model.storages = validatedStorages
     }
-    
+
+    normalizeModelBeforeSave(model)
+
     const updatedModel = await model.save()
     res.json({
       message: 'Model updated successfully',

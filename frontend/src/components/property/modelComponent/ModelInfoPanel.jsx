@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Typography, Chip, Button } from '@mui/material';
 import { InfoOutlined, Visibility, Tune } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 const ModelInfoPanel = ({
   model,
@@ -12,6 +13,7 @@ const ModelInfoPanel = ({
   onOpenCustomization,
   onViewDetails
 }) => {
+  const { t } = useTranslation('models');
   return (
     <Box
       sx={{
@@ -49,7 +51,7 @@ const ModelInfoPanel = ({
           </Typography>
           {isModel10 && (
             <Chip
-              label="Special"
+              label={t("special", "Special")}
               size="small"
               sx={{
                 height: 20,
@@ -73,7 +75,7 @@ const ModelInfoPanel = ({
             display: "block",
           }}
         >
-          Model #{model.modelNumber}
+          {t("modelNumber", { number: model.modelNumber, defaultValue: "Model #{{number}}" })}
         </Typography>
       </Box>
 
@@ -102,7 +104,7 @@ const ModelInfoPanel = ({
             mb: 1.5,
           }}
         >
-          Base Specifications
+          {t("baseSpecifications", "Base Specifications")}
         </Typography>
         <Box
           sx={{
@@ -137,7 +139,7 @@ const ModelInfoPanel = ({
                 mb: 0.5,
               }}
             >
-              Beds
+              {t("beds", "Beds")}
             </Typography>
             <Typography
               variant="h6"
@@ -173,7 +175,7 @@ const ModelInfoPanel = ({
                 mb: 0.5,
               }}
             >
-              Baths
+              {t("baths", "Baths")}
             </Typography>
             <Typography
               variant="h6"
@@ -209,7 +211,7 @@ const ModelInfoPanel = ({
                 mb: 0.5,
               }}
             >
-              SQFT
+              {t("sqft", "SQFT")}
             </Typography>
             <Typography
               variant="h6"
@@ -239,7 +241,7 @@ const ModelInfoPanel = ({
                 mb: 0.5,
               }}
             >
-              Stories
+              {t("stories", "Stories")}
             </Typography>
             <Typography
               variant="h6"
@@ -280,7 +282,7 @@ const ModelInfoPanel = ({
             mb: 1,
           }}
         >
-          Base Price
+  {t("basePriceWithModel", { price: model.price.toLocaleString(), number: model.modelNumber })}
         </Typography>
         <Typography
           variant={isLarge ? "h5" : "h4"}
@@ -311,7 +313,8 @@ const ModelInfoPanel = ({
               mb: 1.5,
             }}
           >
-            Available Options
+            {t("availableOptions", "Available Options")}
+
           </Typography>
           <Box display="flex" flexDirection="column" gap={1}>
             {/* Upgrade */}
@@ -328,7 +331,7 @@ const ModelInfoPanel = ({
                 }}
               >
                 <Chip
-                  label="Upgrade"
+                  label={t("upgrade", "Upgrade")}
                   size="small"
                   sx={{
                     height: 24,
@@ -410,7 +413,7 @@ const ModelInfoPanel = ({
                 }}
               >
                 <Chip
-                  label="Storage"
+                  label={t("storage", "Storage")}
                   size="small"
                   sx={{
                     height: 24,
@@ -465,7 +468,8 @@ const ModelInfoPanel = ({
               mb: 1,
             }}
           >
-            Current Configuration
+                        {t("currentConfiguration", "Current Configuration")}
+
           </Typography>
           <Typography
             variant="body2"
@@ -543,7 +547,7 @@ const ModelInfoPanel = ({
             }}
           >
             <Box component="span" sx={{ position: "relative", zIndex: 1 }}>
-              Customize
+              {t("customize", "Customize")}
             </Box>
           </Button>
         )}
@@ -573,7 +577,7 @@ const ModelInfoPanel = ({
             },
           }}
         >
-          Full Details
+          {t("fullDetails", "Full Details")}
         </Button>
       </Box>
 
@@ -590,17 +594,10 @@ const ModelInfoPanel = ({
           }}
         >
           <InfoOutlined sx={{ fontSize: 28, color: "#999", mb: 0.5 }} />
-          <Typography
-            variant="caption"
-            sx={{
-              color: "#706f6f",
-              fontFamily: '"Poppins", sans-serif',
-              fontSize: "0.75rem",
-            }}
-          >
+          <Typography variant="caption" sx={{ color: "#706f6f", fontFamily: '"Poppins", sans-serif', fontSize: "0.75rem" }}>
             {isModel10
-              ? "Comedor and Estudio options in customization"
-              : "No additional options available"}
+              ? t("comedorEstudioInCustomization", "Comedor and Estudio options in customization")
+              : t("noAdditionalOptions", "No additional options available")}
           </Typography>
         </Box>
       )}

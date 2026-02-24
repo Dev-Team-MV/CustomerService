@@ -1,25 +1,17 @@
 import Model from '../models/Model.js'
+import { normalizeImageArray } from '../utils/imageUtils.js'
 
-// Helper function to validate and format images structure
 const formatImages = (images) => {
-  if (!images) {
-    return { exterior: [], interior: [] }
-  }
-  
+  if (!images) return { exterior: [], interior: [] }
   if (images.exterior !== undefined || images.interior !== undefined) {
     return {
-      exterior: Array.isArray(images.exterior) ? images.exterior : [],
-      interior: Array.isArray(images.interior) ? images.interior : []
+      exterior: normalizeImageArray(images.exterior),
+      interior: normalizeImageArray(images.interior)
     }
   }
-  
   if (Array.isArray(images)) {
-    return {
-      exterior: images,
-      interior: []
-    }
+    return { exterior: normalizeImageArray(images), interior: [] }
   }
-  
   return { exterior: [], interior: [] }
 }
 
@@ -87,7 +79,16 @@ export const updateModelStorage = async (req, res) => {
     if (req.body.sqft !== undefined) storage.sqft = req.body.sqft
     if (req.body.images !== undefined) storage.images = formatImages(req.body.images)
     if (req.body.status !== undefined) storage.status = req.body.status
-    
+
+    if (storage.images) {
+      if (Array.isArray(storage.images.exterior) && storage.images.exterior.some((x) => typeof x === 'string')) {
+        storage.images.exterior = normalizeImageArray(storage.images.exterior)
+      }
+      if (Array.isArray(storage.images.interior) && storage.images.interior.some((x) => typeof x === 'string')) {
+        storage.images.interior = normalizeImageArray(storage.images.interior)
+      }
+    }
+
     await model.save()
     res.json(storage)
   } catch (error) {

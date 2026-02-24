@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import imageItemSchema from './schemas/imageItemSchema.js'
 
 const storageOptionSchema = new mongoose.Schema({
   name: {
@@ -20,14 +21,8 @@ const storageOptionSchema = new mongoose.Schema({
     min: 0
   },
   images: {
-    exterior: [{
-      type: String,
-      trim: true
-    }],
-    interior: [{
-      type: String,
-      trim: true
-    }]
+    exterior: [imageItemSchema],
+    interior: [imageItemSchema]
   },
   status: {
     type: String,

@@ -227,16 +227,18 @@ const handleDownloadContract = async (docType) => {
   }
 }
 
-  // ✅ DESCARGAR CONTRATO
+  // ✅ VER CONTRATO (abrir en nueva pestaña)
   const handleViewContract = (docType) => {
     const contract = existingContracts[docType.key]
     if (contract?.fileUrl) {
-      console.log('📥 Downloading contract:', {
-        type: docType.key,
-        url: contract.fileUrl
-      })
-      // Abrir en nueva pestaña
-      window.open(contract.fileUrl, '_blank')
+      const isPDF = contract.fileUrl.endsWith('.pdf')
+      if (isPDF) {
+        window.open(contract.fileUrl, '_blank')
+      } else {
+        // Usar Google Docs Viewer para DOC/DOCX
+        const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(contract.fileUrl)}&embedded=true`
+        window.open(viewerUrl, '_blank')
+      }
     }
   }
 
@@ -636,7 +638,7 @@ const handleDownloadContract = async (docType) => {
                                 <Button
                                   variant="outlined"
                                   size="small"
-                                  startIcon={<Download />}
+                                  startIcon={<Description />}
                                   onClick={() => handleViewContract(docType)}
                                   disabled={isDeleting}
                                   sx={{
@@ -644,13 +646,13 @@ const handleDownloadContract = async (docType) => {
                                     textTransform: 'none',
                                     fontWeight: 600,
                                     fontFamily: '"Poppins", sans-serif',
-                                    borderColor: 'rgba(140, 165, 81, 0.3)',
+                                    borderColor: 'rgba(25, 118, 210, 0.3)',
                                     borderWidth: '2px',
-                                    color: '#333F1F',
+                                    color: '#1976d2',
                                     '&:hover': {
-                                      borderColor: '#8CA551',
+                                      borderColor: '#1976d2',
                                       borderWidth: '2px',
-                                      bgcolor: 'rgba(140, 165, 81, 0.08)'
+                                      bgcolor: 'rgba(25, 118, 210, 0.08)'
                                     },
                                     '&:disabled': {
                                       opacity: 0.5

@@ -1,5 +1,6 @@
 import multer from 'multer'
 import { uploadFile, deleteFile, testConnection, listFilesInFolder } from '../services/storageService.js'
+import { processImageForUpload } from '../services/imageProcessingService.js'
 import Model from '../models/Model.js'
 import ClubHouse from '../models/ClubHouse.js'
 import crypto from 'crypto'
@@ -8,24 +9,24 @@ import path from 'path'
 // Configurar multer para almacenar en memoria
 const storage = multer.memoryStorage()
 
-// Filtro de archivos - imágenes y PDF
+// Filtro de archivos - imágenes, PDF y videos
 const fileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase().replace(/^\./, '')
-  const allowedExtensions = /^(jpeg|jpg|png|gif|webp|pdf)$/
-  const allowedMimetypes = /^image\/(jpeg|jpg|png|gif|webp)$|^application\/pdf$/
+  const allowedExtensions = /^(jpeg|jpg|png|gif|webp|pdf|mp4|webm|mov|avi|mkv)$/
+  const allowedMimetypes = /^image\/(jpeg|jpg|png|gif|webp)$|^application\/pdf$|^video\/(mp4|webm|quicktime|x-msvideo|x-matroska)$/
   const extOk = allowedExtensions.test(ext)
   const mimeOk = allowedMimetypes.test(file.mimetype)
 
   if (extOk && mimeOk) {
     return cb(null, true)
   }
-  cb(new Error('Only image files (jpeg, jpg, png, gif, webp) and PDF are allowed'))
+  cb(new Error('Only image files (jpeg, jpg, png, gif, webp), PDF and videos (mp4, webm, mov, avi, mkv) are allowed'))
 }
 
 export const upload = multer({
   storage,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB max per file
+    fileSize: 300 * 1024 * 1024, // 300MB max per file
     files: 20 // Maximum number of files
   },
   fileFilter
@@ -91,7 +92,12 @@ export const uploadImage = async (req, res) => {
     // Obtener carpeta y nombre personalizado del body
     const { folder, fileName: customName } = req.body
 
-    const fileExtension = path.extname(req.file.originalname)
+    const processed = await processImageForUpload(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype
+    )
+    const fileExtension = processed.extension
     const fileName = sanitizeCustomFileName(customName, fileExtension) ||
       `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
 
@@ -104,9 +110,9 @@ export const uploadImage = async (req, res) => {
     // makePublic: true para URLs públicas, false para signed URLs
     const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
     const result = await uploadFile(
-      req.file.buffer,
+      processed.buffer,
       fileName,
-      req.file.mimetype,
+      processed.mimeType,
       makePublic,
       folder // Pasar la carpeta si se especificó
     )
@@ -119,8 +125,8 @@ export const uploadImage = async (req, res) => {
         url: result.publicUrl || result.signedUrl,
         publicUrl: result.publicUrl,
         signedUrl: result.signedUrl,
-        size: req.file.size,
-        mimeType: req.file.mimetype
+        size: processed.size,
+        mimeType: processed.mimeType
       }
     })
   } catch (error) {
@@ -156,7 +162,8 @@ export const uploadMultipleImages = async (req, res) => {
 
     const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
     const uploadPromises = req.files.map(async (file, index) => {
-      const fileExtension = path.extname(file.originalname)
+      const processed = await processImageForUpload(file.buffer, file.originalname, file.mimetype)
+      const fileExtension = processed.extension
       const customName = customNames && customNames[index] != null ? customNames[index] : null
       const fileName = sanitizeCustomFileName(String(customName), fileExtension) ||
         `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
@@ -167,9 +174,9 @@ export const uploadMultipleImages = async (req, res) => {
       }
 
       const result = await uploadFile(
-        file.buffer,
+        processed.buffer,
         fileName,
-        file.mimetype,
+        processed.mimeType,
         makePublic,
         folder // Pasar la carpeta si se especificó
       )
@@ -179,8 +186,8 @@ export const uploadMultipleImages = async (req, res) => {
         url: result.publicUrl || result.signedUrl,
         publicUrl: result.publicUrl,
         signedUrl: result.signedUrl,
-        size: file.size,
-        mimeType: file.mimetype,
+        size: processed.size,
+        mimeType: processed.mimeType,
         originalName: file.originalname
       }
     })
@@ -231,18 +238,28 @@ export const deleteImage = async (req, res) => {
 }
 
 /**
- * Build a map: filename (e.g. "abc123.jpg") -> { section, interiorKey? } from ClubHouse doc.
+ * Build a map: filename (e.g. "abc123.jpg") -> { section, interiorKey?, isPublic, imageIndex } from ClubHouse doc.
  * URLs in DB can be full signed URLs; we match by filename (last path segment).
+ * imageIndex = index inside that section's array (for PATCH /clubhouse/images/visibility).
  */
 function mapClubHouseFilesToSections (clubHouseDoc) {
   const byFilename = {}
   if (!clubHouseDoc) return byFilename
 
-  const add = (section, interiorKey, urls) => {
-    if (!Array.isArray(urls)) return
-    urls.forEach(url => {
+  const add = (section, interiorKey, items) => {
+    if (!Array.isArray(items)) return
+    items.forEach((item, index) => {
+      const url = typeof item === 'string' ? item : item?.url
       const filename = typeof url === 'string' && url.includes('/') ? url.split('/').pop().split('?')[0] : null
-      if (filename) byFilename[filename] = { section, ...(interiorKey && { interiorKey }) }
+      if (filename) {
+        const isPublic = typeof item === 'object' && item !== null && 'isPublic' in item ? item.isPublic !== false : true
+        byFilename[filename] = {
+          section,
+          ...(interiorKey && { interiorKey }),
+          isPublic,
+          imageIndex: index
+        }
+      }
     })
   }
 
@@ -293,8 +310,26 @@ export const getFolderFiles = async (req, res) => {
       const sectionByFilename = mapClubHouseFilesToSections(clubHouse)
       filesOut = files.map(f => {
         const filename = f.name.includes('/') ? f.name.split('/').pop().split('?')[0] : f.name
-        const meta = sectionByFilename[filename] || { section: null, interiorKey: null }
-        return { ...f, section: meta.section, interiorKey: meta.interiorKey || undefined }
+        const meta = sectionByFilename[filename] || { section: null, interiorKey: null, isPublic: true, imageIndex: null }
+        return {
+          ...f,
+          section: meta.section,
+          interiorKey: meta.interiorKey || undefined,
+          isPublic: meta.isPublic !== false,
+          imageIndex: meta.imageIndex
+        }
+      })
+    }
+
+    if (folder.toLowerCase() === 'recorrido' && enrich) {
+      const clubHouse = await ClubHouse.findOne()
+      const recorridoVisibility = (clubHouse?.recorridoVisibility && typeof clubHouse.recorridoVisibility === 'object')
+        ? clubHouse.recorridoVisibility
+        : {}
+      filesOut = files.map(f => {
+        const filename = f.name.includes('/') ? f.name.split('/').pop().split('?')[0] : f.name
+        const isPublic = filename in recorridoVisibility ? recorridoVisibility[filename] !== false : true
+        return { ...f, isPublic }
       })
     }
 
@@ -313,9 +348,47 @@ export const getFolderFiles = async (req, res) => {
 }
 
 /**
+ * PATCH Update visibility (isPublic) of a single recorrido file.
+ * Body: { filename, isPublic }. filename = e.g. "recorrido.1.jpg"
+ */
+export const updateRecorridoVisibility = async (req, res) => {
+  try {
+    const { filename, isPublic } = req.body
+    if (!filename || typeof filename !== 'string') {
+      return res.status(400).json({ success: false, message: 'filename is required' })
+    }
+    const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '')
+    if (!safeName) {
+      return res.status(400).json({ success: false, message: 'Invalid filename' })
+    }
+    const wantPublic = isPublic === true || isPublic === 'true'
+
+    let doc = await ClubHouse.findOne()
+    if (!doc) doc = await ClubHouse.create({})
+    if (!doc.recorridoVisibility || typeof doc.recorridoVisibility !== 'object') {
+      doc.recorridoVisibility = {}
+    }
+    doc.recorridoVisibility[safeName] = wantPublic
+    doc.markModified('recorridoVisibility')
+    await doc.save()
+
+    res.status(200).json({
+      success: true,
+      message: 'Recorrido image visibility updated',
+      filename: safeName,
+      isPublic: wantPublic
+    })
+  } catch (error) {
+    console.error('Recorrido visibility error:', error)
+    res.status(500).json({ success: false, message: error.message || 'Error updating recorrido visibility' })
+  }
+}
+
+/**
  * Update an image: upload new file to GCS and save URL in Model (base, balcony or upgrade).
- * POST multipart: image (file), modelId, target (model|balcony|upgrade), imageType (exterior|interior),
- * optional: imageIndex (replace at index), balconyId (if target=balcony), upgradeId (if target=upgrade), folder.
+ * POST multipart: image (file), modelId, target (model|balcony|upgrade|blueprints), imageType (exterior|interior),
+ * optional: imageIndex (replace at index), balconyId (if target=balcony), upgradeId (if target=upgrade), folder,
+ * isPublic (true|false): si la imagen se puede mostrar sin token. Por defecto true.
  */
 export const updateImage = async (req, res) => {
   try {
@@ -326,7 +399,8 @@ export const updateImage = async (req, res) => {
       })
     }
 
-    const { modelId, target, imageType, imageIndex, balconyId, upgradeId, folder, blueprintVariant } = req.body
+    const { modelId, target, imageType, imageIndex, balconyId, upgradeId, folder, blueprintVariant, isPublic } = req.body
+    const isPublicBool = isPublic === undefined || isPublic === '' ? true : (isPublic === 'true' || isPublic === true)
 
     if (!modelId || !target) {
       return res.status(400).json({
@@ -431,33 +505,52 @@ export const updateImage = async (req, res) => {
     const hasValidIndex = !Number.isNaN(index) && index >= 0 && index < imageArray.length
 
     const gcsFolder = folder || 'models'
-    const fileExtension = path.extname(req.file.originalname)
-    const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+    const processed = await processImageForUpload(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype
+    )
+    const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${processed.extension}`
 
     const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
     const result = await uploadFile(
-      req.file.buffer,
+      processed.buffer,
       fileName,
-      req.file.mimetype,
+      processed.mimeType,
       makePublic,
       gcsFolder
     )
 
     const url = result.publicUrl || result.signedUrl
+    const imageItem = { url, isPublic: isPublicBool }
 
+    const { normalizeImageArray } = await import('../utils/imageUtils.js')
+    const normalized = normalizeImageArray(imageArray)
     if (hasValidIndex) {
-      imageArray[index] = url
+      normalized[index] = imageItem
     } else {
-      imageArray.push(url)
+      normalized.push(imageItem)
+    }
+    if (target === 'blueprints') {
+      model.blueprints[blueprintVariant] = normalized
+    } else if (target === 'model') {
+      model.images[imageType] = normalized
+    } else if (target === 'balcony') {
+      const balcony = model.balconies.id(balconyId)
+      balcony.images[imageType] = normalized
+    } else {
+      const upgrade = model.upgrades.id(upgradeId)
+      upgrade.images[imageType] = normalized
     }
 
     await model.save()
 
     const responseData = {
       url,
+      isPublic: isPublicBool,
       fileName: result.fileName,
       target,
-      index: hasValidIndex ? index : imageArray.length - 1
+      index: hasValidIndex ? index : normalized.length - 1
     }
     if (target === 'blueprints') {
       responseData.blueprintVariant = blueprintVariant

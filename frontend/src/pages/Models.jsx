@@ -21,8 +21,12 @@ import CreateModelModal from "../components/models/CreateModelModal";
 import CreateFacade from "../components/models/CreateFacade";
 import ModelCard from "../components/models/listModels"; // ✅ NUEVO IMPORT
 import PageHeader from "../components/PageHeader";
+import { useTranslation } from "react-i18next";
+
 
 const Models = () => {
+    const { t } = useTranslation(['models', 'common']);
+
   const navigate = useNavigate();
 
   // Estados
@@ -107,9 +111,9 @@ const Models = () => {
       const balconies = [];
       if (formData.hasBalcony && formData.balconyPrice > 0) {
         balconies.push({
-          name: "Balcony Option",
+          name: t('models:balconyOption'),
           price: formData.balconyPrice,
-          description: "Balcony add-on for this model",
+          description: t('models:balconyDescription'),
           sqft: 0,
           images: {
             exterior: Array.isArray(formData.balconyImages?.exterior) ? formData.balconyImages.exterior : [],
@@ -122,9 +126,9 @@ const Models = () => {
       const upgrades = [];
       if (formData.hasUpgrade && formData.upgradePrice > 0) {
         upgrades.push({
-          name: "Upgrade Option",
+          name: t('models:upgradeOption'),
           price: formData.upgradePrice,
-          description: "Premium upgrade for this model",
+          description: t('models:upgradeDescription'),
           features: [],
           images: {
             exterior: Array.isArray(formData.upgradeImages?.exterior) ? formData.upgradeImages.exterior : [],
@@ -137,9 +141,9 @@ const Models = () => {
       const storages = [];
       if (formData.hasStorage && formData.storagePrice > 0) {
         storages.push({
-          name: "Storage Option",
+          name: t('models:storageOption'),
           price: formData.storagePrice,
-          description: "Additional storage space",
+          description: t('models:storageDescription'),
           sqft: 0,
           images: {
             exterior: Array.isArray(formData.storageImages?.exterior) ? formData.storageImages.exterior : [],
@@ -178,18 +182,18 @@ const Models = () => {
       fetchModels();
     } catch (error) {
       console.error("❌ Error saving model:", error);
-      alert(error.response?.data?.message || "Error saving model");
+      alert(error.response?.data?.message || t('models:errorSaving'));
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this model?")) {
+    if (window.confirm(t('models:confirmDelete'))) {
       try {
         await api.delete(`/models/${id}`);
         fetchModels();
       } catch (error) {
         console.error("Error deleting model:", error);
-        alert(error.response?.data?.message || "Error deleting model");
+        alert(error.response?.data?.message || t('models:errorDelete'));
       }
     }
   };
@@ -224,14 +228,15 @@ const Models = () => {
     }
   };
 
+
   const handleDeleteFacade = async (id) => {
-    if (window.confirm("Are you sure you want to delete this facade?")) {
+    if (window.confirm(t('models:confirmDeleteFacade'))) {
       try {
         await api.delete(`/facades/${id}`);
         fetchFacades();
       } catch (error) {
         console.error("Error deleting facade:", error);
-        alert(error.response?.data?.message || "Error deleting facade");
+        alert(error.response?.data?.message || t('models:errorDeletingFacade'));
       }
     }
   };
@@ -255,20 +260,20 @@ const Models = () => {
       }}
     >
       <Container maxWidth="xl">
-              {/* ✅ HEADER DINÁMICO */}
-      <PageHeader
-        icon={Home}
-        title="Property Models & Facades"
-        subtitle="Manage floorplans, facades, pricing, and availability"
-        actionButton={{
-          label: 'Add New Model',
-          onClick: () => handleOpenDialog(),
-          icon: <Add />,
-          tooltip: 'Add New Model'
-        }}
-      />
+        {/* HEADER */}
+        <PageHeader
+          icon={Home}
+          title={t('models:title')}
+          subtitle={t('models:subtitle')}
+          actionButton={{
+            label: t('models:actions.add'),
+            onClick: () => handleOpenDialog(),
+            icon: <Add />,
+            tooltip: t('models:actions.add')
+          }}
+        />
 
-        {/* MODELS GRID - ✅ USANDO COMPONENTE */}
+        {/* MODELS GRID */}
         <AnimatePresence mode="wait">
           {loading ? (
             <Box display="flex" justifyContent="center" p={6}>
@@ -314,7 +319,7 @@ const Models = () => {
                     mb: 1
                   }}
                 >
-                  No models found
+                  {t('models:empty.title')}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -324,7 +329,7 @@ const Models = () => {
                     mb: 3
                   }}
                 >
-                  Create your first property model to get started
+                  {t('models:empty.description')}
                 </Typography>
                 <Button
                   variant="contained"
@@ -342,7 +347,7 @@ const Models = () => {
                     }
                   }}
                 >
-                  Add New Model
+                  {t('models:actions.add')}
                 </Button>
               </Paper>
             </motion.div>
@@ -378,7 +383,7 @@ const Models = () => {
           open={openDialog}
           onClose={handleCloseDialog}
           selectedModel={selectedModel}
-          onSubmit={handleSubmitModel}  
+          onSubmit={handleSubmitModel}
         />
 
         <CreateFacade

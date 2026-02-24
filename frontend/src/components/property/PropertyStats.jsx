@@ -1,9 +1,12 @@
 import { Box, Paper, Typography, LinearProgress } from '@mui/material'
 import { useProperty } from '../../context/PropertyContext'
 import { Home, ShoppingCart, CheckCircle } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 
 const PropertyStats = () => {
   const { lots } = useProperty()
+    const { t } = useTranslation('models')
+
 
   // Calculate lot counts from the lots array
   const getLotCounts = () => {
@@ -40,14 +43,14 @@ const PropertyStats = () => {
           letterSpacing: 0.5 
         }}
       >
-        LOT AVAILABILITY STATS
+        {t('lotAvailabilityStats', 'LOT AVAILABILITY STATS')}
       </Typography>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {/* Available */}
         <StatItem
           icon={<Home sx={{ color: '#4caf50' }} />}
-          label="Available"
+          label={t('available', 'Available')}
           count={stats.available}
           total={stats.total}
           color="#4caf50"
@@ -57,7 +60,7 @@ const PropertyStats = () => {
         {/* Pending/Hold */}
         <StatItem
           icon={<ShoppingCart sx={{ color: '#2196f3' }} />}
-          label="Hold"
+          label={t('hold', 'Hold')}
           count={stats.pending}
           total={stats.total}
           color="#2196f3"
@@ -67,7 +70,7 @@ const PropertyStats = () => {
         {/* Sold */}
         <StatItem
           icon={<CheckCircle sx={{ color: '#f44336' }} />}
-          label="Sold"
+          label={t('sold', 'Sold')}
           count={stats.sold}
           total={stats.total}
           color="#f44336"
@@ -88,52 +91,56 @@ const PropertyStats = () => {
           {stats.total}
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          Total Lots in Phase II
+          {t('totalLotsInPhase', 'Total Lots in Phase II')}
         </Typography>
       </Box>
     </Paper>
   )
 }
 
-const StatItem = ({ icon, label, count, total, color, percentage }) => (
-  <Box>
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-      {icon}
-      <Box sx={{ flex: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-          <Typography variant="body2" sx={{ fontWeight: 500, color: '#333' }}>
-            {label}
-          </Typography>
-          <Typography variant="body2" sx={{ fontWeight: 'bold', color }}>
-            {count} / {total}
-          </Typography>
+const StatItem = ({ icon, label, count, total, color, percentage }) => {
+  const { t } = useTranslation('models'); // <--- Agrega esto aquí
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+        {icon}
+        <Box sx={{ flex: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+            <Typography variant="body2" sx={{ fontWeight: 500, color: '#333' }}>
+              {label}
+            </Typography>
+            <Typography variant="body2" sx={{ fontWeight: 'bold', color }}>
+              {count} / {total}
+            </Typography>
+          </Box>
+          <LinearProgress
+            variant="determinate"
+            value={percentage}
+            sx={{
+              height: 8,
+              borderRadius: 4,
+              bgcolor: '#f0f0f0',
+              '& .MuiLinearProgress-bar': {
+                bgcolor: color,
+                borderRadius: 4
+              }
+            }}
+          />
         </Box>
-        <LinearProgress
-          variant="determinate"
-          value={percentage}
-          sx={{
-            height: 8,
-            borderRadius: 4,
-            bgcolor: '#f0f0f0',
-            '& .MuiLinearProgress-bar': {
-              bgcolor: color,
-              borderRadius: 4
-            }
-          }}
-        />
       </Box>
+      <Typography 
+        variant="caption" 
+        sx={{ 
+          ml: 5, 
+          color: 'text.secondary',
+          display: 'block' 
+        }}
+      >
+        {t('percentageOfTotal', { percentage: percentage.toFixed(1) }, '{{percentage}}% of total inventory')}
+      </Typography>
     </Box>
-    <Typography 
-      variant="caption" 
-      sx={{ 
-        ml: 5, 
-        color: 'text.secondary',
-        display: 'block' 
-      }}
-    >
-      {percentage.toFixed(1)}% of total inventory
-    </Typography>
-  </Box>
-)
+  )
+}
 
 export default PropertyStats

@@ -15,6 +15,7 @@ import {
   CircularProgress
 } from '@mui/material'
 import { Visibility, VisibilityOff, KeyboardArrowRight, Gavel } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import PhoneInput from 'react-phone-input-2'
@@ -26,6 +27,7 @@ const Register = () => {
   const { token } = useParams()
   const navigate = useNavigate()
   const { register: authRegister, loginWithToken } = useAuth()
+  const { t } = useTranslation('auth')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -76,11 +78,11 @@ const Register = () => {
         setPhoneNumber(cleanPhone)
         console.log('📝 User data loaded into form')
       } else {
-        setError('Invalid or expired setup link')
+        setError(t('invalidOrExpiredLink'))
       }
     } catch (error) {
       console.error('❌ Error verifying token:', error)
-      setError(error.response?.data?.message || 'Invalid or expired setup link')
+      setError(error.response?.data?.message || t('invalidOrExpiredLink'))
     } finally {
       setVerifying(false)
     }
@@ -91,12 +93,12 @@ const Register = () => {
     setError('')
 
     if (password !== confirmPassword) {
-      setError('The passwords do not match')
+      setError(t('passwordsDoNotMatch'))
       return
     }
 
     if (password.length < 6) {
-      setError('The password must be at least 6 characters long')
+      setError(t('passwordTooShort'))
       return
     }
 
@@ -126,12 +128,12 @@ const Register = () => {
         if (result.success) {
           navigate('/dashboard')
         } else {
-          setError(result.error || 'Error registering account')
+          setError(result.error || t('errorRegistering'))
         }
       }
     } catch (error) {
       console.error('❌ Error in form submission:', error)
-      setError(error.response?.data?.message || 'An error occurred')
+      setError(error.response?.data?.message || t('loginFailed'))
       setLoading(false)
     }
   }
@@ -156,7 +158,7 @@ const Register = () => {
               fontFamily: '"Poppins", sans-serif'
             }}
           >
-            Verifying your setup link...
+            {t('verifyingSetupLink')}
           </Typography>
         </Box>
       </Box>
@@ -202,7 +204,7 @@ const Register = () => {
               '&:hover': { bgcolor: '#4a5d3a' }
             }}
           >
-            Go to Login
+            {t('goToLogin')}
           </Button>
         </Box>
       </Box>
@@ -343,7 +345,7 @@ const Register = () => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  Resort Lifestyle
+                  {t('resortLifestyle', { ns: 'common' })}
                 </Typography>
               </motion.div>
             </Box>
@@ -402,7 +404,7 @@ const Register = () => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                {isPasswordSetup ? 'Complete Your' : 'Create Your'}
+                {isPasswordSetup ? t('completeYour') : t('createYour')}
               </Typography>
               <Typography 
                 variant="h5" 
@@ -414,7 +416,7 @@ const Register = () => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                {isPasswordSetup ? 'Account Setup' : 'Account'}
+                {isPasswordSetup ? t('accountSetup') : t('account')}
               </Typography>
               <motion.div
                 initial={{ width: 0 }}
@@ -441,7 +443,7 @@ const Register = () => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                Welcome, <strong>{firstName}</strong>! Please set your password to complete your account setup.
+                {t('welcomeSetupPlain', { name: firstName })}
               </Alert>
             )}
 
@@ -483,7 +485,7 @@ const Register = () => {
                       required
                       fullWidth
                       id="firstName"
-                      label="First Name"
+                      label={t('firstName')}
                       name="firstName"
                       autoComplete="given-name"
                       autoFocus={!isPasswordSetup}
@@ -530,7 +532,7 @@ const Register = () => {
                       required
                       fullWidth
                       id="lastName"
-                      label="Last Name"
+                      label={t('lastName')}
                       name="lastName"
                       autoComplete="family-name"
                       value={lastName}
@@ -576,7 +578,7 @@ const Register = () => {
                       required
                       fullWidth
                       id="email"
-                      label="Email Address"
+                      label={t('emailAddress')}
                       name="email"
                       autoComplete="email"
                       value={email}
@@ -622,7 +624,7 @@ const Register = () => {
                         fontFamily: '"Poppins", sans-serif'
                       }}
                     >
-                      Phone Number {!isPasswordSetup && '(Optional)'}
+                      {isPasswordSetup ? t('phoneNumber') : t('phoneOptional')}
                     </Typography>
                     <PhoneInput
                       country={'us'}
@@ -683,7 +685,7 @@ const Register = () => {
                       required
                       fullWidth
                       name="password"
-                      label="Password"
+                      label={t('password')}
                       type={showPassword ? 'text' : 'password'}
                       id="password"
                       autoComplete="new-password"
@@ -727,7 +729,7 @@ const Register = () => {
                           </InputAdornment>
                         ),
                       }}
-                      helperText="Must be at least 6 characters"
+                      helperText={t('passwordMinChars')}
                     />
                   </motion.div>
                 </Grid>
@@ -744,7 +746,7 @@ const Register = () => {
                       required
                       fullWidth
                       name="confirmPassword"
-                      label="Confirm Password"
+                      label={t('confirmPassword')}
                       type={showPassword ? 'text' : 'password'}
                       id="confirmPassword"
                       autoComplete="new-password"
@@ -798,7 +800,7 @@ const Register = () => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  By creating an account, you agree to our{' '}
+                  {t('byCreatingAccount')}{' '}
                   <Link
                     component={RouterLink}
                     to="/terms-and-conditions"
@@ -825,7 +827,7 @@ const Register = () => {
                       }
                     }}
                   >
-                    Terms & Conditions
+                    {t('termsAndConditions')}
                   </Link>
                 </Typography>
               </Box>
@@ -883,8 +885,8 @@ const Register = () => {
                 >
                   <span style={{ position: 'relative', zIndex: 1 }}>
                     {loading 
-                      ? (isPasswordSetup ? 'Setting Password...' : 'Creating Account...') 
-                      : (isPasswordSetup ? 'Complete Setup' : 'Create Account')
+                      ? (isPasswordSetup ? t('settingPassword') : t('creatingAccount')) 
+                      : (isPasswordSetup ? t('completeSetup') : t('createAccount'))
                     }
                   </span>
                 </Button>
@@ -899,7 +901,7 @@ const Register = () => {
                       fontFamily: '"Poppins", sans-serif'
                     }}
                   >
-                    Already have an account?{' '}
+                    {t('alreadyHaveAccount')}{' '}
                     <Link 
                       component={RouterLink} 
                       to="/login"
@@ -926,7 +928,7 @@ const Register = () => {
                         }
                       }}
                     >
-                      Sign in
+                      {t('signIn')}
                     </Link>
                   </Typography>
                 </Box>

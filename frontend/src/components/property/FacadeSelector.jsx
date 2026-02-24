@@ -15,6 +15,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useProperty } from '../../context/PropertyContext';
 import FacadeCard from './facadeComponent/facadeCard';
 import DeckPanel from './facadeComponent/DeckPanel';
+import { useTranslation } from 'react-i18next';
 
 const SCROLL_GAP_PX = 16;
 
@@ -64,6 +65,7 @@ function useScrollControls(itemsCount = 0) {
 }
 
 const FacadeSelector = () => {
+  const { t } = useTranslation(['models']);
   const { 
     facades, 
     selectedFacade, 
@@ -116,7 +118,7 @@ const FacadeSelector = () => {
             color: '#706f6f'
           }}
         >
-          SELECT A MODEL TO VIEW FACADES
+          {t('selectModelToViewFacades', 'SELECT A MODEL TO VIEW FACADES')}
         </Typography>
       </Paper>
     );
@@ -155,7 +157,7 @@ const FacadeSelector = () => {
               fontSize: '0.95rem'
             }}
           >
-            03 Facade Selection
+            {t('facadeSelection', '03 Facade Selection')}
           </Typography>
           <Typography 
             variant="caption" 
@@ -168,7 +170,7 @@ const FacadeSelector = () => {
               fontSize: '0.75rem'
             }}
           >
-            FOR {selectedModel.model}
+            {t('forModel', { model: selectedModel.model, defaultValue: `FOR ${selectedModel.model}` })}
           </Typography>
         </Box>
         <Typography 
@@ -180,7 +182,7 @@ const FacadeSelector = () => {
             fontFamily: '"Poppins", sans-serif'
           }}
         >
-          No facades available for this model
+          {t('noFacades', 'No facades available for this model')}
         </Typography>
       </Paper>
     );
@@ -222,10 +224,10 @@ const FacadeSelector = () => {
                 fontSize: '0.85rem'
               }}
             >
-              03 Facade Selection
+              {t('facadeSelection', '03 Facade Selection')}
             </Typography>
             <Chip
-              label={`FOR ${selectedModel.model}`}
+              label={t('forModel', { model: selectedModel.model, defaultValue: `FOR ${selectedModel.model}` })}
               size="small"
               sx={{
                 bgcolor: 'rgba(140, 165, 81, 0.12)',
@@ -307,7 +309,7 @@ const FacadeSelector = () => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                Facade Details
+                {t('facadeDetails', 'Facade Details')}
               </Typography>
               <IconButton onClick={handleCloseDrawer}>
                 <CloseIcon sx={{ color: '#706f6f' }} />
@@ -360,7 +362,7 @@ const FacadeSelector = () => {
             fontSize: '0.95rem'
           }}
         >
-          03 Facade Selection
+          {t('facadeSelection', '03 Facade Selection')}
         </Typography>
         
         <Box display="flex" alignItems="center" gap={2}>
@@ -390,12 +392,12 @@ const FacadeSelector = () => {
                   fontSize: '0.7rem'
                 }}
               >
-                Change Facade
+                {t('changeFacade', 'Change Facade')}
               </Typography>
             </IconButton>
           )}
           <Chip
-            label={`FOR ${selectedModel.model}`}
+            label={t('forModel', { model: selectedModel.model, defaultValue: `FOR ${selectedModel.model}` })}
             size="small"
             sx={{
               bgcolor: 'rgba(140, 165, 81, 0.12)',

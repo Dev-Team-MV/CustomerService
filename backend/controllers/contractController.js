@@ -231,3 +231,58 @@ export const deleteContract = async (req, res) => {
     res.status(500).json({ message: error.message })
   }
 }
+
+/**
+ * Download a contract file by property and type (proxy to avoid CORS when fetching from GCS).
+ * Streams the file from the stored fileUrl (GCS signed URL) to the client with Content-Disposition: attachment.
+ */
+export const downloadContractByPropertyAndType = async (req, res) => {
+  try {
+    const { propertyId, type } = req.params
+    if (!VALID_TYPES.includes(type)) {
+      return res.status(400).json({ message: `Invalid contract type. Allowed: ${VALID_TYPES.join(', ')}` })
+    }
+
+    const contractDoc = await Contract.findOne({ property: propertyId })
+    if (!contractDoc) {
+      return res.status(404).json({ message: 'No contracts found for this property' })
+    }
+
+    const contractItem = contractDoc.contracts.find((c) => c.type === type)
+    if (!contractItem?.fileUrl) {
+      return res.status(404).json({ message: `No contract of type "${type}" found for this property` })
+    }
+
+    const fileUrl = contractItem.fileUrl
+    const response = await fetch(fileUrl, { method: 'GET' })
+    if (!response.ok) {
+      return res.status(502).json({ message: 'Failed to fetch file from storage' })
+    }
+
+    const contentType = response.headers.get('content-type') || 'application/pdf'
+    const contentDisposition = response.headers.get('content-disposition')
+    let filename = `${type}.pdf`
+    if (contentDisposition) {
+      const match = contentDisposition.match(/filename\*?=(?:UTF-8'')?"?([^";\n]+)"?/i) || contentDisposition.match(/filename="?([^";\n]+)"?/i)
+      if (match && match[1]) filename = match[1].trim().replace(/^["']|["']$/g, '')
+    } else {
+      try {
+        const urlPath = new URL(fileUrl).pathname
+        const segment = urlPath.split('/').filter(Boolean).pop()
+        if (segment) filename = decodeURIComponent(segment)
+      } catch (_) {}
+    }
+
+    res.setHeader('Content-Type', contentType)
+    res.setHeader('Content-Disposition', `attachment; filename="${filename.replace(/"/g, '\\"')}"`)
+
+    const { Readable } = await import('stream')
+    const nodeStream = Readable.fromWeb(response.body)
+    nodeStream.pipe(res)
+  } catch (error) {
+    console.error('Download contract error:', error)
+    if (!res.headersSent) {
+      res.status(500).json({ message: error.message || 'Failed to download contract' })
+    }
+  }
+}

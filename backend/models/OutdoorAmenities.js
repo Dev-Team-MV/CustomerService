@@ -1,8 +1,10 @@
 import mongoose from 'mongoose'
+import imageItemSchema from './schemas/imageItemSchema.js'
 
 /**
  * Singleton: single document.
- * amenities: [{ id, name, images: [urls] }, ...] — images per amenity.
+ * amenities: [{ id, name, images: [{ url, isPublic }] }, ...] — images per amenity.
+ * isPublic: true = mostrar sin token; false = requiere token.
  */
 const outdoorAmenitiesSchema = new mongoose.Schema(
   {
@@ -11,7 +13,7 @@ const outdoorAmenitiesSchema = new mongoose.Schema(
         {
           id: { type: Number, required: true },
           name: { type: String, default: '' },
-          images: { type: [String], default: () => [] }
+          images: { type: [imageItemSchema], default: () => [] }
         }
       ],
       default: () => []

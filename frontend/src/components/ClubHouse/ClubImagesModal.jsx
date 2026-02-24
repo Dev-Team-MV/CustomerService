@@ -23,12 +23,16 @@ import {
   Map,
   Layers,
   MeetingRoom,
-  Check
+  Check,
+  Lock,
+  LockOpen
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import uploadService from '../../services/uploadService';
+import { useTranslation } from 'react-i18next';
 
 const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
+  const { t } = useTranslation(['clubHouse', 'common']);
   const [tab, setTab] = useState(0);
   const [selectedInteriorSection, setSelectedInteriorSection] = useState('Reception');
   const [interiorKeys, setInteriorKeys] = useState([]);
@@ -102,16 +106,17 @@ const loadExistingImages = async () => {
       });
 
       response.files.forEach(file => {
-        const { section, interiorKey, url, publicUrl } = file;
+        const { section, interiorKey, url, publicUrl, isPublic, imageIndex } = file;
         const imageUrl = url || publicUrl;
+        const item = { url: imageUrl, isPublic: isPublic !== false, imageIndex, interiorKey: interiorKey || undefined };
 
         if (section === 'exterior') {
-          organized.exterior.push(imageUrl);
+          organized.exterior.push(item);
         } else if (section === 'blueprints') {
-          organized.blueprints.push(imageUrl);
+          organized.blueprints.push(item);
         } else if (section === 'interior' && interiorKey) {
           if (organized.interior[interiorKey]) {
-            organized.interior[interiorKey].push(imageUrl);
+            organized.interior[interiorKey].push(item);
           }
         }
       });
@@ -240,6 +245,19 @@ const handleFileSelect = (event, section) => {
     // TODO: Implementar endpoint de eliminación
   };
 
+  const handleToggleVisibility = async (section, imageIndex, interiorKey, currentIsPublic) => {
+    try {
+      const payload = { section, index: imageIndex, isPublic: !currentIsPublic };
+      if (section === 'interior' && interiorKey) payload.interiorKey = interiorKey;
+      await uploadService.updateClubhouseImageVisibility(payload);
+      await loadExistingImages();
+      if (onImagesUploaded) onImagesUploaded();
+    } catch (err) {
+      console.error('Error updating visibility:', err);
+      setError(err.message || 'Failed to update visibility');
+    }
+  };
+
   const getCurrentExistingImages = () => {
     if (tab === 0) return existingImages.exterior;
     if (tab === 1) return existingImages.blueprints;
@@ -306,7 +324,7 @@ const handleFileSelect = (event, section) => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                Clubhouse Image Manager
+                {t('clubHouse:title')}
               </Typography>
               {getTotalSelectedFiles() > 0 && (
                 <Typography
@@ -317,7 +335,8 @@ const handleFileSelect = (event, section) => {
                     fontWeight: 600
                   }}
                 >
-                  {getTotalSelectedFiles()} file(s) ready to upload
+                        {t('clubHouse:readyToUpload', { count: getTotalSelectedFiles() })}
+
                 </Typography>
               )}
             </Box>
@@ -357,7 +376,7 @@ const handleFileSelect = (event, section) => {
             icon={<Map />} 
             label={
               <Box display="flex" alignItems="center" gap={1}>
-                Exterior
+                {t('clubHouse:tabs.exterior')}
                 {(existingImages.exterior.length + selectedFiles.exterior.length) > 0 && (
                   <Chip 
                     label={existingImages.exterior.length + selectedFiles.exterior.length} 
@@ -373,7 +392,7 @@ const handleFileSelect = (event, section) => {
             icon={<Layers />} 
             label={
               <Box display="flex" alignItems="center" gap={1}>
-                Blueprints
+                {t('clubHouse:tabs.plans')}
                 {(existingImages.blueprints.length + selectedFiles.blueprints.length) > 0 && (
                   <Chip 
                     label={existingImages.blueprints.length + selectedFiles.blueprints.length} 
@@ -385,7 +404,11 @@ const handleFileSelect = (event, section) => {
             }
             iconPosition="start" 
           />
-          <Tab icon={<MeetingRoom />} label="Interior" iconPosition="start" />
+          <Tab 
+            icon={<MeetingRoom />} 
+            label={t('clubHouse:tabs.interior')}
+            iconPosition="start" 
+          />
         </Tabs>
 
         {tab === 2 && (
@@ -396,7 +419,7 @@ const handleFileSelect = (event, section) => {
               mb={1.5}
               sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}
             >
-              Select Interior Section
+              {t('clubHouse:selectSection')}
             </Typography>
             <Box display="flex" flexWrap="wrap" gap={1}>
               {interiorKeys.map(key => {
@@ -460,7 +483,7 @@ const handleFileSelect = (event, section) => {
               '&:hover': { bgcolor: '#8CA551' }
             }}
           >
-            Select Images
+            {t('clubHouse:selectImages')}
             <input
               type="file"
               hidden
@@ -469,9 +492,11 @@ const handleFileSelect = (event, section) => {
               onChange={(e) => handleFileSelect(e, getCurrentSection())}
             />
           </Button>
-          <Typography variant="caption" display="block" mt={1} sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
-            {tab === 2 ? `Selecting for: ${selectedInteriorSection}` : `Selecting for: ${getCurrentSection()}`}
-          </Typography>
+  <Typography variant="caption" display="block" mt={1} sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+    {tab === 2
+      ? t('clubHouse:selectingFor', { section: selectedInteriorSection })
+      : t('clubHouse:selectingFor', { section: getCurrentSection() })}
+  </Typography>
         </Box>
 
         {loading ? (
@@ -496,7 +521,7 @@ const handleFileSelect = (event, section) => {
                   }}
                 >
                   <CloudUpload fontSize="small" />
-                  Ready to Upload ({getCurrentSelectedFiles().length})
+          {t('clubHouse:readyToUpload', { count: getCurrentSelectedFiles().length })}
                 </Typography>
                 <Grid container spacing={2}>
                   {getCurrentSelectedFiles().map((file, idx) => (
@@ -576,58 +601,81 @@ const handleFileSelect = (event, section) => {
                   mb={1.5}
                   sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}
                 >
-                  Uploaded Images ({getCurrentExistingImages().length})
+          {t('clubHouse:uploadedImages', { count: getCurrentExistingImages().length })}
                 </Typography>
                 <Grid container spacing={2}>
                   <AnimatePresence>
-                    {getCurrentExistingImages().map((img, idx) => (
-                      <Grid item xs={6} sm={4} key={idx}>
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              position: 'relative',
-                              borderRadius: 3,
-                              overflow: 'hidden',
-                              border: '1px solid #e0e0e0',
-                              '&:hover .delete-btn': { opacity: 1 }
-                            }}
+                    {getCurrentExistingImages().map((img, idx) => {
+                      const url = typeof img === 'string' ? img : img?.url;
+                      const isPublic = typeof img === 'object' && img != null && 'isPublic' in img ? img.isPublic : true;
+                      const imageIndex = typeof img === 'object' && img != null && img.imageIndex != null ? img.imageIndex : idx;
+                      const interiorKey = typeof img === 'object' && img != null ? img.interiorKey : (tab === 2 ? selectedInteriorSection : null);
+                      return (
+                        <Grid item xs={6} sm={4} key={idx}>
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.3 }}
                           >
-                            <Box
-                              component="img"
-                              src={img}
-                              alt={`Image ${idx + 1}`}
+                            <Paper
+                              elevation={0}
                               sx={{
-                                width: '100%',
-                                height: 160,
-                                objectFit: 'cover'
-                              }}
-                            />
-                            <IconButton
-                              className="delete-btn"
-                              size="small"
-                              onClick={() => handleDeleteExistingImage(getCurrentSection(), img, tab === 2 ? selectedInteriorSection : null)}
-                              sx={{
-                                position: 'absolute',
-                                top: 8,
-                                right: 8,
-                                bgcolor: 'rgba(255, 255, 255, 0.9)',
-                                opacity: 0,
-                                transition: 'opacity 0.3s',
-                                '&:hover': { bgcolor: '#ff5252', color: 'white' }
+                                position: 'relative',
+                                borderRadius: 3,
+                                overflow: 'hidden',
+                                border: '1px solid #e0e0e0',
+                                '&:hover .action-btn': { opacity: 1 }
                               }}
                             >
-                              <Delete fontSize="small" />
-                            </IconButton>
-                          </Paper>
-                        </motion.div>
-                      </Grid>
-                    ))}
+                              <Box
+                                component="img"
+                                src={url}
+                                alt={`Image ${idx + 1}`}
+                                sx={{
+                                  width: '100%',
+                                  height: 160,
+                                  objectFit: 'cover'
+                                }}
+                              />
+                              <IconButton
+                                className="action-btn"
+                                size="small"
+                                onClick={() => handleToggleVisibility(getCurrentSection(), imageIndex, interiorKey, isPublic)}
+                                title={isPublic ? 'Pública (clic para ocultar sin token)' : 'Privada (clic para hacer pública)'}
+                                sx={{
+                                  position: 'absolute',
+                                  bottom: 8,
+                                  left: 8,
+                                  bgcolor: 'rgba(255, 255, 255, 0.9)',
+                                  opacity: 0,
+                                  transition: 'opacity 0.3s',
+                                  '&:hover': { bgcolor: isPublic ? '#8CA551' : '#666', color: 'white' }
+                                }}
+                              >
+                                {isPublic ? <LockOpen fontSize="small" /> : <Lock fontSize="small" />}
+                              </IconButton>
+                              <IconButton
+                                className="action-btn"
+                                size="small"
+                                onClick={() => handleDeleteExistingImage(getCurrentSection(), url, tab === 2 ? selectedInteriorSection : null)}
+                                sx={{
+                                  position: 'absolute',
+                                  top: 8,
+                                  right: 8,
+                                  bgcolor: 'rgba(255, 255, 255, 0.9)',
+                                  opacity: 0,
+                                  transition: 'opacity 0.3s',
+                                  '&:hover': { bgcolor: '#ff5252', color: 'white' }
+                                }}
+                              >
+                                <Delete fontSize="small" />
+                              </IconButton>
+                            </Paper>
+                          </motion.div>
+                        </Grid>
+                      );
+                    })}
                   </AnimatePresence>
                 </Grid>
               </Box>
@@ -645,7 +693,7 @@ const handleFileSelect = (event, section) => {
                 }}
               >
                 <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
-                  No images yet. Select files to upload.
+                {t('clubHouse:noImagesYet')}               
                 </Typography>
               </Paper>
             )}
@@ -665,7 +713,7 @@ const handleFileSelect = (event, section) => {
             color: '#706f6f'
           }}
         >
-          Close
+          {t('clubHouse:close')}
         </Button>
         <Button
           variant="contained"
@@ -683,7 +731,7 @@ const handleFileSelect = (event, section) => {
             '&:disabled': { bgcolor: '#e0e0e0' }
           }}
         >
-          {uploading ? 'Uploading...' : `Upload ${getTotalSelectedFiles()} Image(s)`}
+          {uploading ? t('clubHouse:uploading') : t('clubHouse:upload', { count: getTotalSelectedFiles() })}
         </Button>
       </DialogActions>
     </Dialog>

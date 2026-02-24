@@ -5,7 +5,7 @@ import MyLocationIcon from '@mui/icons-material/MyLocation'
 import { useState, useRef } from 'react'
 import AmenitiesGalleryModal from './AmenitiesGalleryModal'
 import aerialMap from '../../../public/images/amenities/250114_001_100_PLANTA-CASA-CLUB-2-scaled.png'
-
+import { useTranslation } from 'react-i18next'
 // Puntos de interés basados en el plano arquitectónico
 const amenitiesData = [
   { 
@@ -239,6 +239,7 @@ const amenitiesData = [
 ]
 
 const AmenitiesMap = ({ isPublicView = false }) => {
+  const { t } = useTranslation(['amenities']);
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -378,7 +379,7 @@ const AmenitiesMap = ({ isPublicView = false }) => {
               {amenitiesData.map((amenity) => (
                 <Tooltip 
                   key={amenity.id} 
-                  title={amenity.name} 
+                  title={t(`amenityNames.${amenity.name}`, amenity.name)} 
                   arrow
                 >
                   <Box
