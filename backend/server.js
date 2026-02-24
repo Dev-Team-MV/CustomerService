@@ -20,6 +20,7 @@ import newsRoutes from './routes/newsRoutes.js'
 import contractRoutes from './routes/contractRoutes.js'
 import clubHouseRoutes from './routes/clubHouseRoutes.js'
 import outdoorAmenitiesRoutes from './routes/outdoorAmenitiesRoutes.js'
+import underConstructionRoutes from './routes/underConstructionRoutes.js'
 import familyGroupRoutes from './routes/familyGroupRoutes.js'
 
 const app = express()
