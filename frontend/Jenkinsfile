@@ -16,7 +16,29 @@ pipeline {
       }
     }
 
+    // Solo seguir si hubo cambios en frontend/ (evita construir frontend cuando el commit solo toca backend)
+    stage('Check changes') {
+      steps {
+        script {
+          def changed = sh(script: """
+            if [ -n \"${env.GIT_PREVIOUS_COMMIT ?: ''}\" ] && [ \"${env.GIT_PREVIOUS_COMMIT}\" != \"${env.GIT_COMMIT ?: ''}\" ]; then
+              git diff --name-only \"${env.GIT_PREVIOUS_COMMIT}\" \"${env.GIT_COMMIT}\" 2>/dev/null || true
+            else
+              (git rev-parse --quiet --verify HEAD~1 >/dev/null 2>&1 && git diff --name-only HEAD~1 HEAD) || echo 'frontend/'
+            fi
+          """, returnStdout: true).trim()
+          env.SHOULD_RUN = (changed != '' && changed.split('\n').any { it.startsWith('frontend/') }) ? 'true' : 'false'
+          echo "Changed files: ${changed.replace('\n', ', ')}"
+          echo "SHOULD_RUN (frontend): ${env.SHOULD_RUN}"
+          if (env.SHOULD_RUN == 'false') {
+            currentBuild.description = 'Skipped (no frontend changes)'
+          }
+        }
+      }
+    }
+
     stage('Set environment') {
+      when { expression { env.SHOULD_RUN == 'true' } }
       steps {
         script {
           def branch = env.BRANCH_NAME ?: env.GIT_BRANCH?.replaceFirst('^origin/', '') ?: 'develop'
@@ -60,6 +82,7 @@ pipeline {
     }
 
     stage('Install') {
+      when { expression { env.SHOULD_RUN == 'true' } }
       steps {
         dir('frontend') {
           sh '''#!/bin/bash
@@ -77,6 +100,7 @@ pipeline {
     }
 
     stage('Build Docker Image') {
+      when { expression { env.SHOULD_RUN == 'true' } }
       steps {
         dir('frontend') {
           script {
@@ -90,6 +114,7 @@ pipeline {
     }
 
     stage('Deploy') {
+      when { expression { env.SHOULD_RUN == 'true' } }
       steps {
         script {
           sh "docker stop ${env.CONTAINER_NAME} 2>/dev/null || true"
