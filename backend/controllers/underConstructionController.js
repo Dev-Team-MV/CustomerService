@@ -22,7 +22,8 @@ function normalizeMedia (items, title) {
     type: item.type,
     url: item.url || '',
     name: `${base}-${index + 1}`,
-    order: index + 1
+    order: index + 1,
+    isPublic: item.isPublic !== false
   }))
 }
 
@@ -79,6 +80,33 @@ export const updateUnderConstruction = async (req, res) => {
     if (description !== undefined) doc.description = description
     if (media !== undefined) doc.media = normalizeMedia(media, doc.title)
 
+    const updated = await doc.save()
+    res.json(updated)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+/**
+ * PATCH Update visibility (isPublic) of a single media item by index.
+ * PATCH /api/under-construction/:id/media/:index/visibility — Body: { isPublic }
+ */
+export const updateUnderConstructionMediaVisibility = async (req, res) => {
+  try {
+    const doc = await UnderConstruction.findById(req.params.id)
+    if (!doc) {
+      return res.status(404).json({ message: 'UnderConstruction not found' })
+    }
+    const index = parseInt(req.params.index, 10)
+    if (Number.isNaN(index) || index < 0) {
+      return res.status(400).json({ message: 'Valid media index is required' })
+    }
+    if (!Array.isArray(doc.media) || index >= doc.media.length) {
+      return res.status(404).json({ message: 'Media item not found at index' })
+    }
+    const wantPublic = req.body.isPublic === true || req.body.isPublic === 'true'
+    doc.media[index].isPublic = wantPublic
+    doc.markModified('media')
     const updated = await doc.save()
     res.json(updated)
   } catch (error) {

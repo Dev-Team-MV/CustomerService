@@ -4,6 +4,7 @@ import {
   getUnderConstructionById,
   createUnderConstruction,
   updateUnderConstruction,
+  updateUnderConstructionMediaVisibility,
   deleteUnderConstruction
 } from '../controllers/underConstructionController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
@@ -129,5 +130,10 @@ router
   .get(getUnderConstructionById)
   .put(protect, admin, updateUnderConstruction)
   .delete(protect, admin, deleteUnderConstruction)
+
+/**
+ * PATCH /api/under-construction/:id/media/:index/visibility — Body: { isPublic }. Admin only.
+ */
+router.patch('/:id/media/:index/visibility', protect, admin, updateUnderConstructionMediaVisibility)
 
 export default router
