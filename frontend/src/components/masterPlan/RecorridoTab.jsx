@@ -86,7 +86,13 @@ const fetchRecorridoImages = async () => {
     (response.files || []).forEach(file => {
       const match = file.name.match(/recorrido\.(\d+)\./);
       if (match) {
-        map[String(match[1])] = file.url; // <-- Aquí, usa String
+        const id = String(match[1]);
+        const filename = file.name.includes('/') ? file.name.split('/').pop() : file.name;
+        map[id] = {
+          url: file.url,
+          isPublic: file.isPublic !== false,
+          filename: filename || `recorrido.${id}.jpg`
+        };
       }
     });
     setImagesMap(map);
@@ -95,7 +101,7 @@ const fetchRecorridoImages = async () => {
   }
 };
 
-  // Asocia cada imagen al punto por id
+  // Asocia cada imagen al punto por id (image puede ser { url, isPublic, filename } o null)
   const recorridoPoints = puntosBase.map((p) => ({
     ...p,
     image: imagesMap[p.id] || null
@@ -171,6 +177,11 @@ const fetchRecorridoImages = async () => {
     const filename = `recorrido.${id}${ext}` // Usa el id del punto
     await uploadService.uploadImage(file, 'recorrido', filename)
     setUploading(false)
+    fetchRecorridoImages()
+  }
+
+  const handleRecorridoVisibility = async (filename, isPublic) => {
+    await uploadService.updateRecorridoVisibility(filename, isPublic)
     fetchRecorridoImages()
   }
 
@@ -352,7 +363,7 @@ const fetchRecorridoImages = async () => {
               {recorridoPoints[selectedIdx].image ? (
                 <Box
                   component="img"
-                  src={recorridoPoints[selectedIdx].image}
+                  src={typeof recorridoPoints[selectedIdx].image === 'object' ? recorridoPoints[selectedIdx].image.url : recorridoPoints[selectedIdx].image}
                   alt={recorridoPoints[selectedIdx].name}
                   sx={{
                     width: '100%',
@@ -435,6 +446,7 @@ const fetchRecorridoImages = async () => {
         puntos={puntosBase}
         imagesMap={imagesMap}
         onUpload={handleUpload}
+        onVisibilityChange={handleRecorridoVisibility}
         loading={uploading}
       />
     </>
