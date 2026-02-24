@@ -6,6 +6,7 @@ import Facade from '../models/Facade.js'
 import User from '../models/User.js'
 import Phase from '../models/Phase.js'
 import { normalizeImageArray } from '../utils/imageUtils.js'
+import { getVisiblePropertyIdsForUser, canUserAccessProperty } from '../utils/propertyVisibility.js'
 
 /**
  * Calcula las imágenes (exterior e interior) de la propiedad según:
@@ -94,11 +95,19 @@ function getPropertyBlueprints(property) {
 export const getAllProperties = async (req, res) => {
   try {
     const { status, user } = req.query
+    const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
     const filter = {}
-    
+
     if (status) filter.status = status
-    if (user) filter.users = user
-    
+
+    if (user && isAdmin) {
+      filter.users = user
+    } else if (!isAdmin) {
+      // Non-admin: only properties they own or that are shared with them (ignore user query)
+      const visibleIds = await getVisiblePropertyIdsForUser(req.user._id)
+      filter._id = { $in: visibleIds }
+    }
+
     const properties = await Property.find(filter)
       .populate('lot', 'number price')
       .populate('model', 'model price bedrooms bathrooms sqft images blueprints balconies upgrades')
@@ -140,16 +149,21 @@ export const getPropertyById = async (req, res) => {
         path: 'phases',
         options: { sort: { phaseNumber: 1 } }
       })
-    
-    if (property) {
-      const propertyObj = property.toObject()
-      propertyObj.totalConstructionPercentage = property.totalConstructionPercentage || 0
-      propertyObj.images = getPropertyImages(property)
-      propertyObj.blueprints = getPropertyBlueprints(property)
-      res.json(propertyObj)
-    } else {
-      res.status(404).json({ message: 'Property not found' })
+
+    if (!property) {
+      return res.status(404).json({ message: 'Property not found' })
     }
+
+    const canAccess = await canUserAccessProperty(req.user._id, property._id)
+    if (!canAccess) {
+      return res.status(403).json({ message: 'You do not have access to this property' })
+    }
+
+    const propertyObj = property.toObject()
+    propertyObj.totalConstructionPercentage = property.totalConstructionPercentage || 0
+    propertyObj.images = getPropertyImages(property)
+    propertyObj.blueprints = getPropertyBlueprints(property)
+    res.json(propertyObj)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
