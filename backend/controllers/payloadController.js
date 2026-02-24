@@ -1,6 +1,7 @@
 import Payload from '../models/Payload.js'
 import Property from '../models/Property.js'
 import { uploadFile } from '../services/storageService.js'
+import { processImageForUpload } from '../services/imageProcessingService.js'
 import crypto from 'crypto'
 import path from 'path'
 
@@ -83,13 +84,13 @@ export const createPayload = async (req, res) => {
       const folderPath = folder || 'payloads' // Carpeta por defecto: 'payloads'
       
       const uploadPromises = req.files.map(async (file) => {
-        const fileExtension = path.extname(file.originalname)
-        const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+        const processed = await processImageForUpload(file.buffer, file.originalname, file.mimetype)
+        const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${processed.extension}`
         
         const result = await uploadFile(
-          file.buffer,
+          processed.buffer,
           fileName,
-          file.mimetype,
+          processed.mimeType,
           makePublic,
           folderPath
         )
@@ -169,13 +170,13 @@ export const updatePayload = async (req, res) => {
         const folderPath = folder || 'payloads'
         
         const uploadPromises = req.files.map(async (file) => {
-          const fileExtension = path.extname(file.originalname)
-          const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+          const processed = await processImageForUpload(file.buffer, file.originalname, file.mimetype)
+          const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${processed.extension}`
           
           const result = await uploadFile(
-            file.buffer,
+            processed.buffer,
             fileName,
-            file.mimetype,
+            processed.mimeType,
             makePublic,
             folderPath
           )

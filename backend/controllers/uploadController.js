@@ -1,5 +1,6 @@
 import multer from 'multer'
 import { uploadFile, deleteFile, testConnection, listFilesInFolder } from '../services/storageService.js'
+import { processImageForUpload } from '../services/imageProcessingService.js'
 import Model from '../models/Model.js'
 import ClubHouse from '../models/ClubHouse.js'
 import crypto from 'crypto'
@@ -91,7 +92,12 @@ export const uploadImage = async (req, res) => {
     // Obtener carpeta y nombre personalizado del body
     const { folder, fileName: customName } = req.body
 
-    const fileExtension = path.extname(req.file.originalname)
+    const processed = await processImageForUpload(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype
+    )
+    const fileExtension = processed.extension
     const fileName = sanitizeCustomFileName(customName, fileExtension) ||
       `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
 
@@ -104,9 +110,9 @@ export const uploadImage = async (req, res) => {
     // makePublic: true para URLs públicas, false para signed URLs
     const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
     const result = await uploadFile(
-      req.file.buffer,
+      processed.buffer,
       fileName,
-      req.file.mimetype,
+      processed.mimeType,
       makePublic,
       folder // Pasar la carpeta si se especificó
     )
@@ -119,8 +125,8 @@ export const uploadImage = async (req, res) => {
         url: result.publicUrl || result.signedUrl,
         publicUrl: result.publicUrl,
         signedUrl: result.signedUrl,
-        size: req.file.size,
-        mimeType: req.file.mimetype
+        size: processed.size,
+        mimeType: processed.mimeType
       }
     })
   } catch (error) {
@@ -156,7 +162,8 @@ export const uploadMultipleImages = async (req, res) => {
 
     const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
     const uploadPromises = req.files.map(async (file, index) => {
-      const fileExtension = path.extname(file.originalname)
+      const processed = await processImageForUpload(file.buffer, file.originalname, file.mimetype)
+      const fileExtension = processed.extension
       const customName = customNames && customNames[index] != null ? customNames[index] : null
       const fileName = sanitizeCustomFileName(String(customName), fileExtension) ||
         `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
@@ -167,9 +174,9 @@ export const uploadMultipleImages = async (req, res) => {
       }
 
       const result = await uploadFile(
-        file.buffer,
+        processed.buffer,
         fileName,
-        file.mimetype,
+        processed.mimeType,
         makePublic,
         folder // Pasar la carpeta si se especificó
       )
@@ -179,8 +186,8 @@ export const uploadMultipleImages = async (req, res) => {
         url: result.publicUrl || result.signedUrl,
         publicUrl: result.publicUrl,
         signedUrl: result.signedUrl,
-        size: file.size,
-        mimeType: file.mimetype,
+        size: processed.size,
+        mimeType: processed.mimeType,
         originalName: file.originalname
       }
     })
@@ -434,14 +441,18 @@ export const updateImage = async (req, res) => {
     const hasValidIndex = !Number.isNaN(index) && index >= 0 && index < imageArray.length
 
     const gcsFolder = folder || 'models'
-    const fileExtension = path.extname(req.file.originalname)
-    const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+    const processed = await processImageForUpload(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype
+    )
+    const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${processed.extension}`
 
     const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
     const result = await uploadFile(
-      req.file.buffer,
+      processed.buffer,
       fileName,
-      req.file.mimetype,
+      processed.mimeType,
       makePublic,
       gcsFolder
     )
