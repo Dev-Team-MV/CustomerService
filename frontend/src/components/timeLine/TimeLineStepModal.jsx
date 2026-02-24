@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Typography, Stack, IconButton, Tooltip, Avatar, Fade, Paper } from '@mui/material';
 import ImageIcon from '@mui/icons-material/Image';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
@@ -6,6 +7,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useTranslation } from 'react-i18next';
+import { Switch, FormControlLabel } from '@mui/material';
 
 const getItemStyle = (isDragging, draggableStyle) => ({
   userSelect: 'none',
@@ -51,6 +53,26 @@ const TimeLineStepModal = ({
       videos: arr.filter(i => i.type === 'video')
     });
   };
+
+  const [customVisibility, setCustomVisibility] = useState(false);
+
+    // Cambia el valor de isPublic para una imagen
+const handleToggleAllImages = (isPublic) => {
+  setForm(prev => ({
+    ...prev,
+    images: prev.images.map(img => ({ ...img, isPublic })),
+  }));
+};
+
+const handleToggleIsPublic = (idx, type) => {
+  setForm(prev => {
+    const arr = [...prev[type]];
+    arr[idx] = { ...arr[idx], isPublic: !arr[idx].isPublic };
+        console.log(`[TimeLineStepModal] Imagen ${arr[idx].name} isPublic:`, arr[idx].isPublic);
+
+    return { ...prev, [type]: arr };
+  });
+};
 
   return (
     <Dialog
@@ -145,6 +167,30 @@ const TimeLineStepModal = ({
                 />
               </Button>
             </Stack>
+            <Box mb={2}>
+  <FormControlLabel
+    control={
+      <Switch
+        checked={form.images.every(img => img.isPublic)}
+        onChange={e => handleToggleAllImages(e.target.checked)}
+        color="success"
+      />
+    }
+    label={t('allPublic', 'All images public')}
+    sx={{ fontFamily: '"Poppins", sans-serif', mr: 3 }}
+  />
+  <FormControlLabel
+    control={
+      <Switch
+        checked={customVisibility}
+        onChange={e => setCustomVisibility(e.target.checked)}
+        color="primary"
+      />
+    }
+    label={t('customVisibility', 'Customize visibility per image')}
+    sx={{ fontFamily: '"Poppins", sans-serif' }}
+  />
+</Box>
             <DragDropContext onDragEnd={onDragEnd}>
               <Droppable droppableId="media-droppable" direction="horizontal">
                 {(provided) => (
@@ -170,44 +216,59 @@ const TimeLineStepModal = ({
                     {mediaArr.map((media, idx, arr) => (
                       <Draggable key={media.url} draggableId={media.url} index={idx}>
                         {(provided, snapshot) => (
-                          <Paper
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            elevation={snapshot.isDragging ? 8 : 2}
-                            sx={{
-                              ...getItemStyle(snapshot.isDragging, provided.draggableProps.style),
-                              minWidth: 170,
-                              maxWidth: 200,
-                              mb: 2,
-                              borderRadius: 3,
-                              p: 2,
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              bgcolor: 'background.paper',
-                              position: 'relative'
-                            }}
-                          >
-                            <Box sx={{ width: 120, height: 120, mb: 1, borderRadius: 2, overflow: 'hidden', bgcolor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              {media.type === 'image' ? (
-                                <img
-                                  src={media.url}
-                                  alt={media.name}
-                                  width={120}
-                                  height={120}
-                                  style={{ objectFit: 'cover', borderRadius: 12 }}
-                                />
-                              ) : (
-                                <video
-                                  src={media.url}
-                                  width={120}
-                                  height={120}
-                                  style={{ borderRadius: 12, objectFit: 'cover', background: '#eee' }}
-                                  controls
-                                />
-                              )}
-                            </Box>
+<Paper
+  ref={provided.innerRef}
+  {...provided.draggableProps}
+  {...provided.dragHandleProps}
+  elevation={snapshot.isDragging ? 8 : 2}
+  sx={{
+    ...getItemStyle(snapshot.isDragging, provided.draggableProps.style),
+    minWidth: 170,
+    maxWidth: 200,
+    mb: 2,
+    borderRadius: 3,
+    p: 2,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    bgcolor: 'background.paper',
+    position: 'relative' // Necesario para posicionar el switch
+  }}
+>
+  {/* Switch en la esquina superior derecha */}
+  {media.type === 'image' && customVisibility && (
+    <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }}>
+      <Switch
+        checked={!!media.isPublic}
+        onChange={() => {
+          const idxInArr = form.images.findIndex(i => i.url === media.url);
+          handleToggleIsPublic(idxInArr, 'images');
+        }}
+        color="success"
+        size="small"
+      />
+    </Box>
+  )}
+  {/* Imagen o video */}
+  <Box sx={{ width: 120, height: 120, mb: 1, borderRadius: 2, overflow: 'hidden', bgcolor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    {media.type === 'image' ? (
+      <img
+        src={media.url}
+        alt={media.name}
+        width={120}
+        height={120}
+        style={{ objectFit: 'cover', borderRadius: 12 }}
+      />
+    ) : (
+      <video
+        src={media.url}
+        width={120}
+        height={120}
+        style={{ borderRadius: 12, objectFit: 'cover', background: '#eee' }}
+        controls
+      />
+    )}
+  </Box>
                             <Typography variant="caption" sx={{ mb: 0.5, fontWeight: 600, fontFamily: '"Poppins", sans-serif', color: '#333F1F' }}>
                               {media.name}
                             </Typography>

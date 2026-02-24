@@ -6,6 +6,8 @@ import {
 import { CloudUpload, Close, Delete, Check } from '@mui/icons-material'
 import uploadService from '../../services/uploadService'
 import { useTranslation } from 'react-i18next'
+import { Switch, FormControlLabel } from '@mui/material';
+
 
 const EXTERIOR_AMENITIES = [
   "Dock, Boats & Jet Ski",
@@ -43,13 +45,17 @@ const OutdoorAmenitiesModal = ({
   }, [open])
 
   // Seleccionar archivos para la amenidad actual
+  // Al seleccionar archivos:
   const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files)
+    const files = Array.from(e.target.files);
     setSelectedFiles(prev => ({
       ...prev,
-      [selectedAmenity]: [...prev[selectedAmenity], ...files]
-    }))
-  }
+      [selectedAmenity]: [
+        ...prev[selectedAmenity],
+        ...files.map(file => ({ file, isPublic: true })) // Por defecto públicas
+      ]
+    }));
+  };
 
   // Remover archivo seleccionado
   const handleRemoveSelectedFile = (amenity, idx) => {
@@ -61,37 +67,43 @@ const OutdoorAmenitiesModal = ({
 
   // Subir todas las imágenes seleccionadas para todas las amenidades
 const handleUpload = async () => {
-  setUploading(true)
+  console.log('[OutdoorAmenitiesModal] handleUpload called');
+  console.log('selectedFiles:', selectedFiles);
+  setUploading(true);
   try {
-    const uploadPromises = []
+    const uploadPromises = [];
     EXTERIOR_AMENITIES.forEach(name => {
       if (selectedFiles[name].length > 0) {
-        // Buscar si ya existe la amenidad por nombre
-        const existing = amenitiesList.find(a => a.name === name)
+        const existing = amenitiesList.find(a => a.name === name);
+        // Subir todas las imágenes de la amenidad con su isPublic
         uploadPromises.push(
           uploadService.uploadOutdoorAmenityImages(selectedFiles[name], name)
-            .then(urls => {
-              // Si existe, actualiza (manda id, name, images)
+            .then(uploadedImages => {
+              // Filtrar solo imágenes que tengan url
+              const filteredImages = (uploadedImages || []).filter(img => img.url);
+              if (filteredImages.length === 0) return null; // No guardar si no hay imágenes válidas
+
+              console.log('✅ Images to save:', filteredImages);
+
               if (existing) {
-                return uploadService.saveOutdoorAmenityImages({ id: existing.id, name, images: urls })
+                return uploadService.saveOutdoorAmenityImages({ id: existing.id, name, images: filteredImages });
               } else {
-                // Si no existe, crea (manda name, images)
-                return uploadService.saveOutdoorAmenityImages({ name, images: urls })
+                return uploadService.saveOutdoorAmenityImages({ name, images: filteredImages });
               }
             })
-        )
+        );
       }
-    })
-    await Promise.all(uploadPromises)
-    setSelectedFiles(EXTERIOR_AMENITIES.reduce((acc, name) => ({ ...acc, [name]: [] }), {}))
-    if (onUploaded) onUploaded()
-    onClose()
+    });
+    await Promise.all(uploadPromises);
+    setSelectedFiles(EXTERIOR_AMENITIES.reduce((acc, name) => ({ ...acc, [name]: [] }), {}));
+    if (onUploaded) onUploaded();
+    onClose();
   } catch (err) {
-    // Manejo de error
+    console.error('[OutdoorAmenitiesModal] Error uploading:', err);
   } finally {
-    setUploading(false)
+    setUploading(false);
   }
-}
+};
 
   // Imágenes existentes para la amenidad seleccionada
   const currentImages = amenitiesList.find(a => a.name === selectedAmenity)?.images || []
@@ -174,15 +186,34 @@ const handleUpload = async () => {
           </Button>
         </Box>
         <Grid container spacing={2}>
-          {currentSelectedFiles.map((file, idx) => (
+          {currentSelectedFiles.map((item, idx) => (
             <Grid item xs={6} key={idx}>
               <Paper sx={{ position: 'relative', borderRadius: 2 }}>
+                {/* Switch isPublic en la esquina superior derecha */}
+                <Box sx={{ position: 'absolute', top: 8, right: 40, zIndex: 2 }}>
+                  <Switch
+                    checked={!!item.isPublic}
+                    onChange={e => {
+                      setSelectedFiles(prev => ({
+                        ...prev,
+                        [selectedAmenity]: prev[selectedAmenity].map((f, i) =>
+                          i === idx ? { ...f, isPublic: e.target.checked } : f
+                        )
+                      }));
+                      console.log(`[OutdoorAmenitiesModal] Amenity "${selectedAmenity}" file ${idx} isPublic:`, e.target.checked);
+                    }}
+                    color="success"
+                    size="small"
+                  />
+                </Box>
+                {/* Imagen preview */}
                 <Box
                   component="img"
-                  src={URL.createObjectURL(file)}
+                  src={URL.createObjectURL(item.file)}
                   alt={`Preview ${idx + 1}`}
                   sx={{ width: '100%', height: 120, objectFit: 'cover' }}
                 />
+                {/* Botón eliminar */}
                 <IconButton
                   size="small"
                   onClick={() => handleRemoveSelectedFile(selectedAmenity, idx)}

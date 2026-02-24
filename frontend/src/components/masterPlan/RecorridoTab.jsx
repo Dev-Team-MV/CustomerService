@@ -165,14 +165,16 @@ const fetchRecorridoImages = async () => {
   }
 
   // --- UPLOAD ---
-  const handleUpload = async (id, file) => {
-    setUploading(true)
-    const ext = file.name.substring(file.name.lastIndexOf('.'))
-    const filename = `recorrido.${id}${ext}` // Usa el id del punto
-    await uploadService.uploadImage(file, 'recorrido', filename)
-    setUploading(false)
-    fetchRecorridoImages()
-  }
+  const handleUpload = async (id, file, isPublic = true) => {
+      console.log(`[RecorridoTab] Subiendo imagen para punto ${id} con isPublic:`, isPublic);
+
+    setUploading(true);
+    const ext = file.name.substring(file.name.lastIndexOf('.'));
+    const filename = `recorrido.${id}${ext}`;
+    await uploadService.uploadImage(file, 'recorrido', filename, isPublic);
+    setUploading(false);
+    fetchRecorridoImages();
+  };
 
   return (
     <>

@@ -207,7 +207,8 @@ const TimeLine = () => {
         type: 'image',
         url: img.url,
         name: img.name,
-        order: img.order
+        order: img.order,
+        isPublic: img.isPublic ?? true
       })),
       ...videos.map(vid => ({
         type: 'video',
@@ -222,6 +223,7 @@ const TimeLine = () => {
       description: form.description,
       media
     };
+    console.log('[TimeLine] Payload enviado:', payload);
 
     try {
       if (editingStep) {

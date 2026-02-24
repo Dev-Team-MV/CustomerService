@@ -1,28 +1,28 @@
 import api from './api'
 
 const uploadService = {
-  uploadImage: async (file, folder = '', fileName = '') => {
-  try {
-    const formData = new FormData()
-    formData.append('image', file)
-    if (folder) formData.append('folder', folder)
-    if (fileName) formData.append('fileName', fileName)
-      
-      console.log(`📤 Uploading image to folder: ${folder || 'root'}`)
-    const response = await api.post('/upload/image', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-    return response.data.data.url
-  } catch (error) {
-    throw new Error(error.response?.data?.message || 'Failed to upload image')
-  }
-},
+  uploadImage: async (file, folder = '', fileName = '', isPublic = true) => {
+    try {
+      const formData = new FormData()
+      formData.append('image', file)
+      if (folder) formData.append('folder', folder)
+      if (fileName) formData.append('fileName', fileName)
+      formData.append('isPublic', isPublic) // <-- Nuevo
+  
+      const response = await api.post('/upload/image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      return response.data.data.url
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to upload image')
+    }
+  },
 
-  uploadMultipleImages: async (files, folder = '') => {
+  uploadMultipleImages: async (files, folder = '', isPublic = true) => {
     try {
       console.log(`📤 Uploading ${files.length} images to folder: ${folder || 'root'}`)
       
-      const uploadPromises = files.map(file => uploadService.uploadImage(file, folder))
+      const uploadPromises = files.map(file => uploadService.uploadImage(file, folder, '', isPublic))
       const urls = await Promise.all(uploadPromises)
       
       console.log('✅ All images uploaded:', urls)
@@ -155,10 +155,17 @@ uploadClubhouseImages: async (files, section, interiorKey = null) => {
     return res.data // { amenities: [...] }
   },
   
-  // Subir imágenes a storage y retorna URLs
-  uploadOutdoorAmenityImages: async (files, amenityName) => {
-    // Sube a storage, folder: outdoor-amenities/{amenityName}
-    return await uploadService.uploadMultipleImages(files, `outdoor-amenities/${amenityName}`)
+  // // Subir imágenes a storage y retorna URLs
+  // uploadOutdoorAmenityImages: async (files, amenityName) => {
+  //   // Sube a storage, folder: outdoor-amenities/{amenityName}
+  //   return await uploadService.uploadMultipleImages(files, `outdoor-amenities/${amenityName}`)
+  // },
+    uploadOutdoorAmenityImages: async (filesWithVisibility, amenityName) => {
+    const uploadPromises = filesWithVisibility.map(async ({ file, isPublic }) => {
+      const url = await uploadService.uploadImage(file, `outdoor-amenities/${amenityName}`, '', isPublic);
+      return { url, isPublic };
+    });
+    return await Promise.all(uploadPromises);
   },
   
   // Recibe un objeto { id?, name, images }
