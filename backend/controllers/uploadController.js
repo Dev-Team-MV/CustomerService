@@ -238,8 +238,9 @@ export const deleteImage = async (req, res) => {
 }
 
 /**
- * Build a map: filename (e.g. "abc123.jpg") -> { section, interiorKey? } from ClubHouse doc.
+ * Build a map: filename (e.g. "abc123.jpg") -> { section, interiorKey?, isPublic, imageIndex } from ClubHouse doc.
  * URLs in DB can be full signed URLs; we match by filename (last path segment).
+ * imageIndex = index inside that section's array (for PATCH /clubhouse/images/visibility).
  */
 function mapClubHouseFilesToSections (clubHouseDoc) {
   const byFilename = {}
@@ -247,10 +248,18 @@ function mapClubHouseFilesToSections (clubHouseDoc) {
 
   const add = (section, interiorKey, items) => {
     if (!Array.isArray(items)) return
-    items.forEach((item) => {
+    items.forEach((item, index) => {
       const url = typeof item === 'string' ? item : item?.url
       const filename = typeof url === 'string' && url.includes('/') ? url.split('/').pop().split('?')[0] : null
-      if (filename) byFilename[filename] = { section, ...(interiorKey && { interiorKey }) }
+      if (filename) {
+        const isPublic = typeof item === 'object' && item !== null && 'isPublic' in item ? item.isPublic !== false : true
+        byFilename[filename] = {
+          section,
+          ...(interiorKey && { interiorKey }),
+          isPublic,
+          imageIndex: index
+        }
+      }
     })
   }
 
@@ -301,8 +310,26 @@ export const getFolderFiles = async (req, res) => {
       const sectionByFilename = mapClubHouseFilesToSections(clubHouse)
       filesOut = files.map(f => {
         const filename = f.name.includes('/') ? f.name.split('/').pop().split('?')[0] : f.name
-        const meta = sectionByFilename[filename] || { section: null, interiorKey: null }
-        return { ...f, section: meta.section, interiorKey: meta.interiorKey || undefined }
+        const meta = sectionByFilename[filename] || { section: null, interiorKey: null, isPublic: true, imageIndex: null }
+        return {
+          ...f,
+          section: meta.section,
+          interiorKey: meta.interiorKey || undefined,
+          isPublic: meta.isPublic !== false,
+          imageIndex: meta.imageIndex
+        }
+      })
+    }
+
+    if (folder.toLowerCase() === 'recorrido' && enrich) {
+      const clubHouse = await ClubHouse.findOne()
+      const recorridoVisibility = (clubHouse?.recorridoVisibility && typeof clubHouse.recorridoVisibility === 'object')
+        ? clubHouse.recorridoVisibility
+        : {}
+      filesOut = files.map(f => {
+        const filename = f.name.includes('/') ? f.name.split('/').pop().split('?')[0] : f.name
+        const isPublic = filename in recorridoVisibility ? recorridoVisibility[filename] !== false : true
+        return { ...f, isPublic }
       })
     }
 
@@ -317,6 +344,43 @@ export const getFolderFiles = async (req, res) => {
       success: false,
       message: error.message || 'Error listing folder'
     })
+  }
+}
+
+/**
+ * PATCH Update visibility (isPublic) of a single recorrido file.
+ * Body: { filename, isPublic }. filename = e.g. "recorrido.1.jpg"
+ */
+export const updateRecorridoVisibility = async (req, res) => {
+  try {
+    const { filename, isPublic } = req.body
+    if (!filename || typeof filename !== 'string') {
+      return res.status(400).json({ success: false, message: 'filename is required' })
+    }
+    const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '')
+    if (!safeName) {
+      return res.status(400).json({ success: false, message: 'Invalid filename' })
+    }
+    const wantPublic = isPublic === true || isPublic === 'true'
+
+    let doc = await ClubHouse.findOne()
+    if (!doc) doc = await ClubHouse.create({})
+    if (!doc.recorridoVisibility || typeof doc.recorridoVisibility !== 'object') {
+      doc.recorridoVisibility = {}
+    }
+    doc.recorridoVisibility[safeName] = wantPublic
+    doc.markModified('recorridoVisibility')
+    await doc.save()
+
+    res.status(200).json({
+      success: true,
+      message: 'Recorrido image visibility updated',
+      filename: safeName,
+      isPublic: wantPublic
+    })
+  } catch (error) {
+    console.error('Recorrido visibility error:', error)
+    res.status(500).json({ success: false, message: error.message || 'Error updating recorrido visibility' })
   }
 }
 

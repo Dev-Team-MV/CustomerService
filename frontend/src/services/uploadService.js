@@ -149,6 +149,18 @@ uploadClubhouseImages: async (files, section, interiorKey = null) => {
     }
   },
 
+  /** PATCH clubhouse image visibility. Body: { section, index, isPublic } or { section, interiorKey, index, isPublic } for interior. */
+  updateClubhouseImageVisibility: async (payload) => {
+    const response = await api.patch('/clubhouse/images/visibility', payload)
+    return response.data
+  },
+
+  /** PATCH recorrido file visibility. Body: { filename, isPublic }. filename e.g. "recorrido.1.jpg" */
+  updateRecorridoVisibility: async (filename, isPublic) => {
+    const response = await api.patch('/upload/recorrido/visibility', { filename, isPublic })
+    return response.data
+  },
+
     // Obtener todas las amenities exteriores
   getOutdoorAmenities: async () => {
     const res = await api.get('/outdoor-amenities')

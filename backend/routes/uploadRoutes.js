@@ -1,5 +1,5 @@
 import express from 'express'
-import { uploadImage, uploadMultipleImages, updateImage, deleteImage, testGCSConnection, getFolderFiles, upload } from '../controllers/uploadController.js'
+import { uploadImage, uploadMultipleImages, updateImage, deleteImage, testGCSConnection, getFolderFiles, updateRecorridoVisibility, upload } from '../controllers/uploadController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -87,6 +87,11 @@ router.get('/test-connection', testGCSConnection)
  */
 router.get('/files', protect, getFolderFiles)
 router.get('/folder/:folder', protect, getFolderFiles)
+
+/**
+ * PATCH /api/upload/recorrido/visibility — Body: { filename, isPublic }. Admin only.
+ */
+router.patch('/recorrido/visibility', protect, admin, updateRecorridoVisibility)
 
 /**
  * @swagger

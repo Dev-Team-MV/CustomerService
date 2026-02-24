@@ -51,6 +51,11 @@ const clubHouseSchema = new mongoose.Schema(
     interior: {
       type: mongoose.Schema.Types.Mixed,
       default: defaultInterior
+    },
+    /** Visibilidad por archivo en carpeta recorrido: { "recorrido.1.jpg": true, "recorrido.2.jpg": false } */
+    recorridoVisibility: {
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({})
     }
   },
   {
