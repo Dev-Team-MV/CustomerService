@@ -106,16 +106,17 @@ const loadExistingImages = async () => {
       });
 
       response.files.forEach(file => {
-        const { section, interiorKey, url, publicUrl } = file;
+        const { section, interiorKey, url, publicUrl, isPublic, imageIndex } = file;
         const imageUrl = url || publicUrl;
+        const item = { url: imageUrl, isPublic: isPublic !== false, imageIndex, interiorKey: interiorKey || undefined };
 
         if (section === 'exterior') {
-          organized.exterior.push(imageUrl);
+          organized.exterior.push(item);
         } else if (section === 'blueprints') {
-          organized.blueprints.push(imageUrl);
+          organized.blueprints.push(item);
         } else if (section === 'interior' && interiorKey) {
           if (organized.interior[interiorKey]) {
-            organized.interior[interiorKey].push(imageUrl);
+            organized.interior[interiorKey].push(item);
           }
         }
       });
@@ -242,6 +243,19 @@ const handleFileSelect = (event, section) => {
   const handleDeleteExistingImage = async (section, imageUrl, interiorKey = null) => {
     console.log('🗑️ Delete image:', { section, imageUrl, interiorKey });
     // TODO: Implementar endpoint de eliminación
+  };
+
+  const handleToggleVisibility = async (section, imageIndex, interiorKey, currentIsPublic) => {
+    try {
+      const payload = { section, index: imageIndex, isPublic: !currentIsPublic };
+      if (section === 'interior' && interiorKey) payload.interiorKey = interiorKey;
+      await uploadService.updateClubhouseImageVisibility(payload);
+      await loadExistingImages();
+      if (onImagesUploaded) onImagesUploaded();
+    } catch (err) {
+      console.error('Error updating visibility:', err);
+      setError(err.message || 'Failed to update visibility');
+    }
   };
 
   const getCurrentExistingImages = () => {
@@ -591,54 +605,77 @@ const handleFileSelect = (event, section) => {
                 </Typography>
                 <Grid container spacing={2}>
                   <AnimatePresence>
-                    {getCurrentExistingImages().map((img, idx) => (
-                      <Grid item xs={6} sm={4} key={idx}>
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              position: 'relative',
-                              borderRadius: 3,
-                              overflow: 'hidden',
-                              border: '1px solid #e0e0e0',
-                              '&:hover .delete-btn': { opacity: 1 }
-                            }}
+                    {getCurrentExistingImages().map((img, idx) => {
+                      const url = typeof img === 'string' ? img : img?.url;
+                      const isPublic = typeof img === 'object' && img != null && 'isPublic' in img ? img.isPublic : true;
+                      const imageIndex = typeof img === 'object' && img != null && img.imageIndex != null ? img.imageIndex : idx;
+                      const interiorKey = typeof img === 'object' && img != null ? img.interiorKey : (tab === 2 ? selectedInteriorSection : null);
+                      return (
+                        <Grid item xs={6} sm={4} key={idx}>
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.3 }}
                           >
-                            <Box
-                              component="img"
-                              src={img}
-                              alt={`Image ${idx + 1}`}
+                            <Paper
+                              elevation={0}
                               sx={{
-                                width: '100%',
-                                height: 160,
-                                objectFit: 'cover'
-                              }}
-                            />
-                            <IconButton
-                              className="delete-btn"
-                              size="small"
-                              onClick={() => handleDeleteExistingImage(getCurrentSection(), img, tab === 2 ? selectedInteriorSection : null)}
-                              sx={{
-                                position: 'absolute',
-                                top: 8,
-                                right: 8,
-                                bgcolor: 'rgba(255, 255, 255, 0.9)',
-                                opacity: 0,
-                                transition: 'opacity 0.3s',
-                                '&:hover': { bgcolor: '#ff5252', color: 'white' }
+                                position: 'relative',
+                                borderRadius: 3,
+                                overflow: 'hidden',
+                                border: '1px solid #e0e0e0',
+                                '&:hover .action-btn': { opacity: 1 }
                               }}
                             >
-                              <Delete fontSize="small" />
-                            </IconButton>
-                          </Paper>
-                        </motion.div>
-                      </Grid>
-                    ))}
+                              <Box
+                                component="img"
+                                src={url}
+                                alt={`Image ${idx + 1}`}
+                                sx={{
+                                  width: '100%',
+                                  height: 160,
+                                  objectFit: 'cover'
+                                }}
+                              />
+                              <IconButton
+                                className="action-btn"
+                                size="small"
+                                onClick={() => handleToggleVisibility(getCurrentSection(), imageIndex, interiorKey, isPublic)}
+                                title={isPublic ? 'Pública (clic para ocultar sin token)' : 'Privada (clic para hacer pública)'}
+                                sx={{
+                                  position: 'absolute',
+                                  bottom: 8,
+                                  left: 8,
+                                  bgcolor: 'rgba(255, 255, 255, 0.9)',
+                                  opacity: 0,
+                                  transition: 'opacity 0.3s',
+                                  '&:hover': { bgcolor: isPublic ? '#8CA551' : '#666', color: 'white' }
+                                }}
+                              >
+                                {isPublic ? <LockOpen fontSize="small" /> : <Lock fontSize="small" />}
+                              </IconButton>
+                              <IconButton
+                                className="action-btn"
+                                size="small"
+                                onClick={() => handleDeleteExistingImage(getCurrentSection(), url, tab === 2 ? selectedInteriorSection : null)}
+                                sx={{
+                                  position: 'absolute',
+                                  top: 8,
+                                  right: 8,
+                                  bgcolor: 'rgba(255, 255, 255, 0.9)',
+                                  opacity: 0,
+                                  transition: 'opacity 0.3s',
+                                  '&:hover': { bgcolor: '#ff5252', color: 'white' }
+                                }}
+                              >
+                                <Delete fontSize="small" />
+                              </IconButton>
+                            </Paper>
+                          </motion.div>
+                        </Grid>
+                      );
+                    })}
                   </AnimatePresence>
                 </Grid>
               </Box>
