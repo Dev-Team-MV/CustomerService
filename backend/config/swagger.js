@@ -144,12 +144,41 @@ const options = {
           type: 'object',
           properties: {
             _id: { type: 'string' },
-            exterior: { type: 'array', items: { type: 'string' }, description: 'Exterior image URLs' },
-            blueprints: { type: 'array', items: { type: 'string' }, description: 'Blueprint image URLs' },
+            exterior: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  url: { type: 'string', description: 'Image URL' },
+                  isPublic: { type: 'boolean', description: 'true = mostrar sin token (pública), false = requiere token' }
+                }
+              },
+              description: 'Exterior images (cada una con url e isPublic)'
+            },
+            blueprints: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  url: { type: 'string' },
+                  isPublic: { type: 'boolean' }
+                }
+              },
+              description: 'Blueprint images (url, isPublic)'
+            },
             interior: {
               type: 'object',
-              additionalProperties: { type: 'array', items: { type: 'string' } },
-              description: 'Amenity name -> array of image URLs (e.g. Reception, Managers Office, Conference Room)'
+              additionalProperties: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    url: { type: 'string' },
+                    isPublic: { type: 'boolean' }
+                  }
+                }
+              },
+              description: 'Amenity name -> array of { url, isPublic } (e.g. Reception, Managers Office, Conference Room)'
             },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }

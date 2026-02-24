@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Typography,
@@ -42,6 +43,7 @@ const ModelCard = ({
   onEditFacade,
   onDeleteFacade
 }) => {
+  const { t } = useTranslation(['models', 'common']);
   const [imageIndex, setImageIndex] = useState(0);
 
   // ========================================
@@ -104,6 +106,13 @@ const ModelCard = ({
   const currentImage = allImages[imageIndex];
   const modelFacades = facades || [];
 
+  // Traducción de estados
+  const statusLabels = {
+    active: t('models:status.active'),
+    draft: t('models:status.draft'),
+    inactive: t('models:status.inactive')
+  };
+
   return (
     <Grid item xs={12} lg={6}>
       <motion.div
@@ -132,7 +141,7 @@ const ModelCard = ({
         >
           {/* STATUS CHIP */}
           <Chip
-            label={model.status}
+            label={statusLabels[model.status] || model.status}
             size="small"
             sx={{
               position: 'absolute',
@@ -432,7 +441,7 @@ const ModelCard = ({
                   }
                 }}
               >
-                Gallery
+                {t('models:actions.gallery')}
               </Button>
               <Button
                 variant="contained"
@@ -450,7 +459,7 @@ const ModelCard = ({
                   }
                 }}
               >
-                Details
+                {t('models:actions.details')}
               </Button>
               <IconButton
                 size="small"
@@ -502,7 +511,7 @@ const ModelCard = ({
                     fontSize: '0.7rem'
                   }}
                 >
-                  Facades ({modelFacades.length})
+                  {t('models:facades')} ({modelFacades.length})
                 </Typography>
                 <IconButton
                   size="small"
@@ -641,7 +650,7 @@ const ModelCard = ({
                       fontFamily: '"Poppins", sans-serif'
                     }}
                   >
-                    No facades yet
+                    {t('models:noFacades')}
                   </Typography>
                 </Paper>
               )}

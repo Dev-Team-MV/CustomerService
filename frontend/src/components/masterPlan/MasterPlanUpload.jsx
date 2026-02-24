@@ -14,8 +14,10 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import uploadService from '../../services/uploadService';
+import { useTranslation } from 'react-i18next';
 
 const MasterPlanUploadModal = ({ open, onClose, onUploaded }) => {
+  const { t } = useTranslation(['masterPlan']);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -143,7 +145,7 @@ const MasterPlanUploadModal = ({ open, onClose, onUploaded }) => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              Update Master Plan
+              {t('updateMasterPlan')}
             </Typography>
             <Typography
               variant="caption"
@@ -152,7 +154,7 @@ const MasterPlanUploadModal = ({ open, onClose, onUploaded }) => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              Upload a new master plan image
+              {t('uploadMasterPlanImage')}
             </Typography>
           </Box>
         </Box>
@@ -225,7 +227,7 @@ const MasterPlanUploadModal = ({ open, onClose, onUploaded }) => {
                     mb: 0.5
                   }}
                 >
-                  Click to select image
+                  {t('clickToSelectImage')}
                 </Typography>
                 <Typography
                   variant="caption"
@@ -234,7 +236,7 @@ const MasterPlanUploadModal = ({ open, onClose, onUploaded }) => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  Supports: JPG, PNG, WEBP (Max 10MB)
+                  {t('supportedFormats')}
                 </Typography>
               </Box>
             </label>
@@ -367,7 +369,8 @@ const MasterPlanUploadModal = ({ open, onClose, onUploaded }) => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  Uploading to cloud storage...
+                {t('uploadingToCloud')}
+
                 </Typography>
                 <Typography
                   variant="caption"
@@ -420,7 +423,7 @@ const MasterPlanUploadModal = ({ open, onClose, onUploaded }) => {
             }
           }}
         >
-          Cancel
+          {t('common:cancel')}
         </Button>
 
         <Button
@@ -478,7 +481,7 @@ const MasterPlanUploadModal = ({ open, onClose, onUploaded }) => {
           }}
         >
           <span>
-            {uploading ? 'Uploading...' : 'Upload to Cloud'}
+            {uploading ? t('uploading') : t('uploadToCloud')}
           </span>
         </Button>
       </DialogActions>

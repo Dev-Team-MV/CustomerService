@@ -7,6 +7,7 @@ import SendIcon from '@mui/icons-material/Send'
 import HomeIcon from '@mui/icons-material/Home'
 import LoginIcon from '@mui/icons-material/Login'
 import CalculateIcon from '@mui/icons-material/Calculate'
+import { useTranslation } from 'react-i18next';
 
 const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
   const { 
@@ -19,6 +20,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
     selectedPricingOption,
     getModelPricingInfo
   } = useProperty()
+    const { t } = useTranslation('models');
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const [initialPaymentDate, setInitialPaymentDate] = useState('')
@@ -110,7 +112,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
             fontFamily: '"Poppins", sans-serif'
           }}
         >
-          Price Calculator
+          {t('priceCalculator', 'Price Calculator')}
         </Typography>
       </Box>
 
@@ -131,7 +133,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
             }
           }}
         >
-          Browsing as guest. <strong>Sign in</strong> to save your selections.
+          {t('browsingAsGuest', 'Browsing as guest.')} <strong>{t('signIn', 'Sign in')}</strong> {t('toSaveSelections', 'to save your selections.')}
         </Alert>
       )}
 
@@ -162,7 +164,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               mb: 0.5
             }}
           >
-            <strong style={{ color: '#333F1F' }}>Lot:</strong> {selectedLot ? `#${selectedLot.number} - $${selectedLot.price?.toLocaleString()}` : 'Not selected'}
+            <strong style={{ color: '#333F1F' }}>{t('lot', 'Lot')}:</strong> {selectedLot ? `#${selectedLot.number} - $${selectedLot.price?.toLocaleString()}` : t('notSelected', 'Not selected')}
           </Typography>
           <Typography 
             variant="body2" 
@@ -173,7 +175,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               mb: 0.5
             }}
           >
-            <strong style={{ color: '#333F1F' }}>Model:</strong> {selectedModel ? `${selectedModel.model} - $${selectedModel.price?.toLocaleString()}` : 'Not selected'}
+            <strong style={{ color: '#333F1F' }}>{t('model', 'Model')}:</strong> {selectedModel ? `${selectedModel.model} - $${selectedModel.price?.toLocaleString()}` : t('notSelected', 'Not selected')}
           </Typography>
           
           {/* ✅ OPTIONS CHIPS - Brandbook */}
@@ -181,7 +183,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
             <Box display="flex" gap={0.5} mt={1.5} flexWrap="wrap">
               {options.upgrade && pricingInfo.hasUpgrade && (
                 <Chip 
-                  label={`Upgrade +$${pricingInfo.upgradePrice.toLocaleString()}`}
+                  label={t('upgradeChip', { price: pricingInfo.upgradePrice.toLocaleString() }, 'Upgrade +${{price}}')}
                   size="small"
                   sx={{ 
                     height: 20, 
@@ -196,7 +198,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               )}
               {options.balcony && pricingInfo.hasBalcony && (
                 <Chip 
-                  label={`Balcony +$${pricingInfo.balconyPrice.toLocaleString()}`}
+                  label={t('balconyChip', { price: pricingInfo.balconyPrice.toLocaleString() }, 'Balcony +${{price}}')}
                   size="small"
                   sx={{ 
                     height: 20, 
@@ -211,7 +213,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               )}
               {options.storage && pricingInfo.hasStorage && (
                 <Chip 
-                  label={`Storage +$${pricingInfo.storagePrice.toLocaleString()}`}
+                  label={t('storageChip', { price: pricingInfo.storagePrice.toLocaleString() }, 'Storage +${{price}}')}
                   size="small"
                   sx={{ 
                     height: 20, 
@@ -236,9 +238,9 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               mt: 1.5
             }}
           >
-            <strong style={{ color: '#333F1F' }}>Facade:</strong> {selectedFacade 
-              ? `${selectedFacade.title} - ${selectedFacade.price > 0 ? `+$${selectedFacade.price?.toLocaleString()}` : 'Included'}`
-              : 'Not selected'}
+            <strong style={{ color: '#333F1F' }}>{t('facade', 'Facade')}:</strong> {selectedFacade 
+              ? `${selectedFacade.title} - ${selectedFacade.price > 0 ? `+$${selectedFacade.price?.toLocaleString()}` : t('included', 'Included')}`
+              : t('notSelected', 'Not selected')}
           </Typography>
           
           {/* ✅ PRICING OPTION - Brandbook */}
@@ -270,7 +272,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ flex: 1 }}>
             <CalcField 
-              label="Discount" 
+              label={t('discount', 'Discount')}
               value={financials.discountPercent} 
               onChange={handleDiscountPercentChange}
               suffix="%"
@@ -280,7 +282,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
           </Box>
           <Box sx={{ flex: 1.5 }}>
             <CalcField 
-              label="Amount" 
+              label={t('amount', 'Amount')}
               value={financials.discount.toFixed(2)} 
               disabled
               prefix="$"
@@ -309,7 +311,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               fontSize: '0.75rem'
             }}
           >
-            PRESALE PRICE TODAY
+            {t('presalePriceToday', 'PRESALE PRICE TODAY')}
           </Typography>
           <Typography 
             variant="h3" 
@@ -330,7 +332,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               fontFamily: '"Poppins", sans-serif'
             }}
           >
-            Limited time offer
+            {t('limitedTimeOffer', 'Limited time offer')}
           </Typography>
         </Box>
 
@@ -346,13 +348,13 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
             letterSpacing: '0.5px'
           }}
         >
-          Down Payment Details
+          {t('downPaymentDetails', 'Down Payment Details')}
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ flex: 1 }}>
             <CalcField 
-              label="Down Payment %" 
+              label={t('downPaymentPercent', 'Down Payment %')}
               value={financials.downPaymentPercent} 
               onChange={handleDownPaymentPercentChange}
               suffix="%"
@@ -362,7 +364,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
           </Box>
           <Box sx={{ flex: 1.5 }}>
             <CalcField 
-              label="Total DP" 
+              label={t('totalDP', 'Total DP')}
               value={financials.totalDownPayment.toFixed(2)} 
               disabled
               prefix="$"
@@ -374,7 +376,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ flex: 1 }}>
             <CalcField 
-              label="Initial DP %" 
+              label={t('initialDPPercent', 'Initial DP %')}
               value={financials.initialDownPaymentPercent} 
               onChange={handleInitialDownPaymentPercentChange}
               suffix="%"
@@ -393,7 +395,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              Payment Date
+              {t('paymentDate', 'Payment Date')}
             </Typography>
             <TextField
               fullWidth
@@ -419,7 +421,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
         </Box>
 
         <CalcField 
-          label="Initial Amount" 
+          label={t('initialAmount', 'Initial Amount')}
           value={financials.initialDownPayment.toFixed(2)} 
           disabled
           prefix="$"
@@ -438,13 +440,13 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
             letterSpacing: '0.5px'
           }}
         >
-          Monthly Payment Plan
+          {t('monthlyPaymentPlan', 'Monthly Payment Plan')}
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ flex: 1 }}>
             <CalcField 
-              label="Monthly %" 
+              label={t('monthlyPercent', 'Monthly %')} 
               value={financials.monthlyPaymentPercent} 
               onChange={handleMonthlyPaymentPercentChange}
               suffix="%"
@@ -454,7 +456,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
           </Box>
           <Box sx={{ flex: 1.5 }}>
             <CalcField 
-              label="Monthly Amount" 
+              label={t('monthlyAmount', 'Monthly Amount')}
               value={financials.monthlyPayment.toFixed(2)} 
               disabled
               prefix="$"
@@ -463,7 +465,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
         </Box>
 
         <CalcField 
-          label="Mortgage Remaining" 
+          label={t('mortgageRemaining', 'Mortgage Remaining')}
           value={financials.mortgage.toFixed(2)} 
           disabled
           prefix="$"
@@ -487,7 +489,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               fontFamily: '"Poppins", sans-serif'
             }}
           >
-            Payment Breakdown
+            {t('paymentBreakdown', 'Payment Breakdown')}
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography 
@@ -497,7 +499,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              Initial Down Payment:
+              {t('initialDownPayment', 'Initial Down Payment:')}
             </Typography>
             <Typography 
               variant="body2" 
@@ -518,7 +520,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              Remaining Down Payment:
+              {t('remainingDownPayment', 'Remaining Down Payment:')}
             </Typography>
             <Typography 
               variant="body2" 
@@ -539,7 +541,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              Monthly Payment:
+              {t('remainingDownPayment', 'Remaining Down Payment:')}
             </Typography>
             <Typography 
               variant="body2" 
@@ -562,7 +564,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              Mortgage to Finance:
+              {t('mortgageToFinance', 'Mortgage to Finance:')}
             </Typography>
             <Typography 
               variant="body2" 
@@ -594,7 +596,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
           }}
         >
           <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
-            <strong>Important:</strong> Every 10 houses sold, the discount is reduced by 2%
+            <strong>{t('important', 'Important')}:</strong> {t('discountNote', 'Every 10 houses sold, the discount is reduced by 2%')}
           </Typography>
         </Alert>
 
@@ -629,7 +631,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               }
             }}
           >
-            {isPublic ? 'Sign In to Create Property' : 'Create Property'}
+            {isPublic ? t('signInToCreateProperty', 'Sign In to Create Property') : t('createProperty', 'Create Property')}
           </Button>
 
           <Button
@@ -681,7 +683,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
             }}
           >
             <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-              {isPublic ? 'Sign In to Send Quote' : 'Generate & Send Quote'}
+              {isPublic ? t('signInToSendQuote', 'Sign In to Send Quote') : t('generateAndSendQuote', 'Generate & Send Quote')}
             </Box>
           </Button>
         </Box>

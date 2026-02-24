@@ -26,19 +26,36 @@ function defaultInterior () {
   return obj
 }
 
+/**
+ * Cada imagen puede ser pública (visible sin token) o solo con token.
+ * isPublic: true = se puede mostrar sin token; false = requiere autenticación.
+ */
+const clubHouseImageSchema = new mongoose.Schema(
+  {
+    url: { type: String, required: true },
+    isPublic: { type: Boolean, default: true }
+  },
+  { _id: false }
+)
+
 const clubHouseSchema = new mongoose.Schema(
   {
     exterior: {
-      type: [String],
+      type: [clubHouseImageSchema],
       default: () => []
     },
     blueprints: {
-      type: [String],
+      type: [clubHouseImageSchema],
       default: () => []
     },
     interior: {
       type: mongoose.Schema.Types.Mixed,
       default: defaultInterior
+    },
+    /** Visibilidad por archivo en carpeta recorrido: { "recorrido.1.jpg": true, "recorrido.2.jpg": false } */
+    recorridoVisibility: {
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({})
     }
   },
   {

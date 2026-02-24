@@ -2,6 +2,8 @@ import React from 'react';
 import { Card, CardContent, Box, Typography } from '@mui/material';
 import { CheckCircle } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+
 
 const FacadeCard = ({
   facade,
@@ -10,6 +12,8 @@ const FacadeCard = ({
   displayImage,
   onSelect
 }) => {
+    const { t } = useTranslation('models');
+
   const cardWidth = {
     mobile: { min: 220, max: 220 },
     desktop: {
@@ -136,7 +140,7 @@ const FacadeCard = ({
               letterSpacing: '0.5px'
             }}
           >
-            {facade.title}
+            {t(`facadeNames.${facade.title}`, facade.title)}
           </Typography>
           
           {facade.price > 0 && (

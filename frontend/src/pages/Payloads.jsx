@@ -33,7 +33,11 @@ import StatsCards from '../components/statscard'
 import DataTable from '../components/table/DataTable'
 import EmptyState from '../components/table/EmptyState'
 import PayloadDialog from '../components/payloads/createPayload'
+import { useTranslation } from 'react-i18next'
+
 const Payloads = () => {
+  const { t } = useTranslation(['payloads', 'common']);
+
   const [payloads, setPayloads] = useState([])
   const [properties, setProperties] = useState([])
   const [stats, setStats] = useState({
@@ -207,7 +211,7 @@ const Payloads = () => {
   // ✅ STATS
   const payloadsStats = useMemo(() => [
     {
-      title: 'Total Collected (YTD)',
+      title: t('payloads:totalCollected'),
       value: `$${(stats.totalCollected / 1000000).toFixed(1)}M`,
       icon: AccountBalance,
       gradient: 'linear-gradient(135deg, #8CA551 0%, #a8bf6f 100%)',
@@ -217,40 +221,40 @@ const Payloads = () => {
       trend: 'up'
     },
     {
-      title: 'Pending Review',
+      title: t('payloads:pendingReview'),
       value: stats.pendingPayloads,
       icon: Schedule,
       gradient: 'linear-gradient(135deg, #E5863C 0%, #f59c5a 100%)',
       color: '#E5863C',
       delay: 0.1,
-      subtitle: 'Needs Action'
+      subtitle: t('payloads:needsAction')
     },
     {
-      title: 'Recent Failures',
+      title: t('payloads:recentFailures'),
       value: `$${stats.recentFailures?.toLocaleString() || 0}`,
       icon: ErrorOutline,
       gradient: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
       color: '#d32f2f',
       delay: 0.2,
-      subtitle: 'Last 30 days',
+      subtitle: t('payloads:last30Days'),
       trend: 'down'
     },
     {
-      title: 'Rejected',
+      title: t('payloads:rejected'),
       value: stats.rejectedPayloads,
       icon: Cancel,
       gradient: 'linear-gradient(135deg, #706f6f 0%, #8a8989 100%)',
       color: '#706f6f',
       delay: 0.3,
-      subtitle: 'Total'
+      subtitle: t('payloads:total')
     }
-  ], [stats])
+  ], [stats, t])
 
   // ✅ DEFINIR COLUMNAS
   const columns = useMemo(() => [
     {
       field: 'property',
-      headerName: 'PROPERTY',
+      headerName: t('payloads:property'),
       minWidth: 150,
       renderCell: ({ row }) => (
         <Box>
@@ -279,7 +283,7 @@ const Payloads = () => {
     },
     {
       field: 'payer',
-      headerName: 'PAYER',
+      headerName: t('payloads:payer'),
       minWidth: 180,
       renderCell: ({ row }) => (
         <Box display="flex" alignItems="center" gap={1}>
@@ -316,7 +320,7 @@ const Payloads = () => {
     },
     {
       field: 'date',
-      headerName: 'DATE',
+      headerName: t('payloads:date'),
       minWidth: 120,
       renderCell: ({ value }) => (
         <Typography
@@ -332,7 +336,7 @@ const Payloads = () => {
     },
     {
       field: 'amount',
-      headerName: 'AMOUNT',
+      headerName: t('payloads:amount'),
       minWidth: 120,
       renderCell: ({ value }) => (
         <Typography
@@ -349,11 +353,11 @@ const Payloads = () => {
     },
     {
       field: 'type',
-      headerName: 'TYPE',
+      headerName: t('payloads:type'),
       minWidth: 140,
       renderCell: ({ value }) => (
         <Chip
-          label={value || 'N/A'}
+          label={value || t('payloads:noFile')}
           size="small"
           sx={{
             fontWeight: 600,
@@ -373,7 +377,7 @@ const Payloads = () => {
     },
     {
       field: 'status',
-      headerName: 'STATUS',
+      headerName: t('payloads:status'),
       minWidth: 120,
       renderCell: ({ row }) => {
         const statusColors = getStatusColor(row.status)
@@ -404,7 +408,7 @@ const Payloads = () => {
     },
     {
       field: 'docs',
-      headerName: 'DOCS',
+      headerName: t('payloads:docs'),
       align: 'center',
       width: 80,
       renderCell: ({ row }) => (
@@ -548,17 +552,17 @@ const Payloads = () => {
       }}
     >
       <Container maxWidth="xl">
-        <PageHeader
-          icon={AccountBalance}
-          title="Payment Records"
-          subtitle="Manage and track property payment transactions"
-          actionButton={{
-            label: 'Add New Payment',
-            onClick: () => handleOpenDialog(),
-            icon: <Add />,
-            tooltip: 'New Payment'
-          }}
-        />
+      <PageHeader
+        icon={AccountBalance}
+        title={t('payloads:title')}
+        subtitle={t('payloads:subtitle')}
+        actionButton={{
+          label: t('payloads:add'),
+          onClick: () => handleOpenDialog(),
+          icon: <Add />,
+          tooltip: t('payloads:new')
+        }}
+      />
 
         {/* Stats Cards */}
         <StatsCards stats={payloadsStats} loading={loading} />
@@ -569,13 +573,13 @@ const Payloads = () => {
           data={payloads}
           loading={loading}
           emptyState={
-            <EmptyState
-              icon={AccountBalance}
-              title="No payment records found"
-              description="Start by adding your first payment"
-              actionLabel="New Payment"
-              onAction={() => handleOpenDialog()}
-            />
+<EmptyState
+  icon={AccountBalance}
+  title={t('payloads:noRecords')}
+  description={t('payloads:startByAdding')}
+  actionLabel={t('payloads:new')}
+  onAction={() => handleOpenDialog()}
+/>
           }
           onRowClick={(row) => console.log('Payment clicked:', row)}
           stickyHeader

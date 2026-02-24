@@ -5,6 +5,7 @@ import {
 } from '@mui/material'
 import { CloudUpload, Close, Delete, Check } from '@mui/icons-material'
 import uploadService from '../../services/uploadService'
+import { useTranslation } from 'react-i18next'
 
 const EXTERIOR_AMENITIES = [
   "Dock, Boats & Jet Ski",
@@ -26,6 +27,7 @@ const OutdoorAmenitiesModal = ({
   amenitiesList = [], // [{ name, images }]
   onUploaded
 }) => {
+  const { t } = useTranslation(['masterPlan'])
   // Estado para amenidad seleccionada
   const [selectedAmenity, setSelectedAmenity] = useState('')
   // Estado para archivos seleccionados por amenidad
@@ -100,13 +102,13 @@ const handleUpload = async () => {
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
         <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography fontWeight={700}>Manage Outdoor Amenity Images</Typography>
+          <Typography fontWeight={700}>{t('manageOutdoorAmenities')}</Typography>
           <IconButton onClick={onClose}><Close /></IconButton>
         </Box>
       </DialogTitle>
       <DialogContent>
         <Typography variant="subtitle2" fontWeight={700} mb={1.5} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
-          Select Amenity
+          {t('selectAmenity')}
         </Typography>
         <Box display="flex" flexWrap="wrap" gap={1} mb={2}>
           {EXTERIOR_AMENITIES.map(name => {
@@ -118,7 +120,7 @@ const handleUpload = async () => {
                 key={name}
                 label={
                   <Box display="flex" alignItems="center" gap={0.5}>
-                    {name}
+                    {t(`exteriorAmenities.${name}`, name)}
                     {count > 0 && (
                       <Box
                         component="span"
@@ -160,7 +162,8 @@ const handleUpload = async () => {
             startIcon={<CloudUpload />}
             disabled={uploading}
           >
-            Select Images
+                        {t('selectImages')}
+
             <input
               type="file"
               hidden
@@ -212,7 +215,7 @@ const handleUpload = async () => {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button onClick={onClose}>{t('common:close')}</Button>
         <Button
           variant="contained"
           onClick={handleUpload}
@@ -221,7 +224,7 @@ const handleUpload = async () => {
           }
           startIcon={uploading ? <CircularProgress size={20} /> : <Check />}
         >
-          {uploading ? 'Uploading...' : 'Upload All'}
+          {uploading ? t('uploading') : t('uploadAll')}
         </Button>
       </DialogActions>
     </Dialog>
