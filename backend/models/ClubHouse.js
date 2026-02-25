@@ -33,11 +33,13 @@ function defaultInterior () {
 /**
  * Cada imagen puede ser pública (visible sin token) o solo con token.
  * isPublic: true = se puede mostrar sin token; false = requiere autenticación.
+ * name: opcional, nombre custom para mostrar/gestionar en UI.
  */
 const clubHouseImageSchema = new mongoose.Schema(
   {
     url: { type: String, required: true },
-    isPublic: { type: Boolean, default: true }
+    isPublic: { type: Boolean, default: true },
+    name: { type: String, default: null }
   },
   { _id: false }
 )

@@ -1,12 +1,19 @@
 import ClubHouse, { DEFAULT_INTERIOR_KEYS } from '../models/ClubHouse.js'
-import { uploadFile } from '../services/storageService.js'
+import { uploadFile, deleteFile } from '../services/storageService.js'
 import { processImageForUpload } from '../services/imageProcessingService.js'
 import crypto from 'crypto'
 import path from 'path'
 
 const GCS_FOLDER = 'clubhouse'
 
-/** Normaliza un ítem de imagen (legacy string o { url, isPublic }) a { url, isPublic }. Filtra ítems sin url válido. */
+/** Extrae el nombre de archivo de una URL (último segmento del path, sin query). */
+function getFilenameFromUrl (url) {
+  if (typeof url !== 'string' || !url) return null
+  const pathPart = url.split('?')[0].trim()
+  return pathPart.includes('/') ? pathPart.split('/').pop() : pathPart
+}
+
+/** Normaliza un ítem de imagen (legacy string o { url, isPublic, name? }) a { url, isPublic, name? }. Filtra ítems sin url válido. */
 function normalizeImageItem (item) {
   if (item == null) return null
   if (typeof item === 'string') {
@@ -15,7 +22,13 @@ function normalizeImageItem (item) {
   }
   if (typeof item === 'object' && typeof item.url === 'string') {
     const url = item.url.trim()
-    return url ? { url, isPublic: item.isPublic !== false } : null
+    if (!url) return null
+    const name = typeof item.name === 'string' ? item.name.trim() || undefined : undefined
+    return {
+      url,
+      isPublic: item.isPublic !== false,
+      ...(name !== undefined && { name })
+    }
   }
   return null
 }
@@ -34,7 +47,7 @@ async function migrateAndNormalize (doc) {
     const normalized = normalizeImageArray(doc.exterior)
     const same = normalized.length === doc.exterior.length && normalized.every((n, i) => {
       const o = doc.exterior[i]
-      return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic
+      return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic && (o?.name ?? null) === (n.name ?? null)
     })
     if (!same) {
       doc.exterior = normalized
@@ -46,7 +59,7 @@ async function migrateAndNormalize (doc) {
     const normalized = normalizeImageArray(doc.blueprints)
     const same = normalized.length === doc.blueprints.length && normalized.every((n, i) => {
       const o = doc.blueprints[i]
-      return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic
+      return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic && (o?.name ?? null) === (n.name ?? null)
     })
     if (!same) {
       doc.blueprints = normalized
@@ -58,7 +71,7 @@ async function migrateAndNormalize (doc) {
     const normalized = normalizeImageArray(doc.deck)
     const same = normalized.length === doc.deck.length && normalized.every((n, i) => {
       const o = doc.deck[i]
-      return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic
+      return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic && (o?.name ?? null) === (n.name ?? null)
     })
     if (!same) {
       doc.deck = normalized
@@ -73,7 +86,7 @@ async function migrateAndNormalize (doc) {
       const normalized = normalizeImageArray(arr)
       const same = normalized.length === arr.length && normalized.every((n, i) => {
         const o = arr[i]
-        return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic
+        return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic && (o?.name ?? null) === (n.name ?? null)
       })
       if (!same) {
         doc.interior[key] = normalized
@@ -324,4 +337,87 @@ export const updateClubHouseImageVisibility = async (req, res) => {
  */
 export const getClubHouseInteriorKeys = (req, res) => {
   res.json({ interiorKeys: DEFAULT_INTERIOR_KEYS })
+}
+
+/**
+ * DELETE Club House images by filename and/or custom name.
+ * Body: { filenames?: string[], names?: string[], deleteFromStorage?: boolean }
+ * - filenames: nombres de archivo (ej. "abc123.jpg") extraídos de la URL; se matchea con el último segmento del path.
+ * - names: nombres custom (item.name) que quieras borrar.
+ * - deleteFromStorage: si true, además borra el archivo en GCS (carpeta clubhouse). Default false.
+ * Elimina de exterior, blueprints, deck e interior las que coincidan. Devuelve cuántas se quitaron y desde qué secciones.
+ */
+export const deleteClubHouseImages = async (req, res) => {
+  try {
+    const { filenames = [], names = [], deleteFromStorage = false } = req.body
+    const filenameSet = new Set(Array.isArray(filenames) ? filenames.map((f) => String(f).trim()).filter(Boolean) : [])
+    const nameSet = new Set(Array.isArray(names) ? names.map((n) => String(n).trim()).filter(Boolean) : [])
+    if (filenameSet.size === 0 && nameSet.size === 0) {
+      return res.status(400).json({
+        message: 'Send at least one of: filenames (array) or names (array)'
+      })
+    }
+
+    const matches = (item) => {
+      const url = typeof item === 'string' ? item : item?.url
+      const fn = getFilenameFromUrl(url)
+      const customName = typeof item === 'object' && item !== null && typeof item.name === 'string' ? item.name.trim() : null
+      return (fn && filenameSet.has(fn)) || (customName && nameSet.has(customName))
+    }
+
+    let doc = await ClubHouse.findOne()
+    if (!doc) {
+      doc = await ClubHouse.create({})
+    }
+    doc = await migrateAndNormalize(doc)
+
+    const removedFilenames = new Set()
+    let removedCount = 0
+
+    const filterAndCollect = (arr) => {
+      if (!Array.isArray(arr)) return []
+      const kept = []
+      for (const item of arr) {
+        if (matches(item)) {
+          removedCount++
+          const url = typeof item === 'string' ? item : item?.url
+          const fn = getFilenameFromUrl(url)
+          if (fn) removedFilenames.add(fn)
+        } else {
+          kept.push(item)
+        }
+      }
+      return kept
+    }
+
+    doc.exterior = filterAndCollect(doc.exterior || [])
+    doc.blueprints = filterAndCollect(doc.blueprints || [])
+    doc.deck = filterAndCollect(doc.deck || [])
+    if (doc.interior && typeof doc.interior === 'object') {
+      for (const key of Object.keys(doc.interior)) {
+        doc.interior[key] = filterAndCollect(doc.interior[key] || [])
+      }
+      doc.markModified('interior')
+    }
+
+    await doc.save()
+
+    if (deleteFromStorage && removedFilenames.size > 0) {
+      for (const fn of removedFilenames) {
+        const fullPath = `${GCS_FOLDER}/${fn}`
+        await deleteFile(fullPath).catch((err) => console.warn('GCS delete failed for', fullPath, err.message))
+      }
+    }
+
+    res.status(200).json({
+      message: `${removedCount} image(s) removed from Club House`,
+      removedCount,
+      removedFilenames: [...removedFilenames],
+      deleteFromStorage: deleteFromStorage && removedFilenames.size > 0,
+      clubHouse: doc
+    })
+  } catch (error) {
+    console.error('ClubHouse delete images error:', error)
+    res.status(500).json({ message: error.message || 'Error deleting images' })
+  }
 }
