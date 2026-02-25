@@ -106,6 +106,9 @@ const ModelCard = ({
   const currentImage = allImages[imageIndex];
   const modelFacades = facades || [];
 
+  const currentImageSrc = typeof currentImage === 'string' ? currentImage : (currentImage?.url || '');
+
+
   // Traducción de estados
   const statusLabels = {
     active: t('models:status.active'),
@@ -180,7 +183,7 @@ const ModelCard = ({
                   <>
                     <Box
                       component="img"
-                      src={currentImage}
+                      src={currentImageSrc}
                       alt={model.model}
                       sx={{
                         width: '100%',
@@ -674,9 +677,33 @@ ModelCard.propTypes = {
     stories: PropTypes.number,
     status: PropTypes.string,
     images: PropTypes.shape({
-      exterior: PropTypes.arrayOf(PropTypes.string),
-      interior: PropTypes.arrayOf(PropTypes.string),
-      blueprints: PropTypes.arrayOf(PropTypes.string)
+      exterior: PropTypes.arrayOf(
+        PropTypes.oneOfType([
+          PropTypes.string,
+          PropTypes.shape({
+            url: PropTypes.string,
+            isPublic: PropTypes.bool
+          })
+        ])
+      ),
+      interior: PropTypes.arrayOf(
+        PropTypes.oneOfType([
+          PropTypes.string,
+          PropTypes.shape({
+            url: PropTypes.string,
+            isPublic: PropTypes.bool
+          })
+        ])
+      ),
+      blueprints: PropTypes.arrayOf(
+        PropTypes.oneOfType([
+          PropTypes.string,
+          PropTypes.shape({
+            url: PropTypes.string,
+            isPublic: PropTypes.bool
+          })
+        ])
+      )
     }),
     balconies: PropTypes.array,
     upgrades: PropTypes.array,

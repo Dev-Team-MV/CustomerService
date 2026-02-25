@@ -18,89 +18,170 @@ const ClubhouseManager = () => {
   const [interiorKeys, setInteriorKeys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-const [tab, setTab] = useState(0)
+  const [tab, setTab] = useState(0);
 
   useEffect(() => {
     loadData();
   }, []);
 
-// ...existing code...
+
+  // const loadData = async () => {
+  //   setLoading(true);
+  //   setError(null);
+    
+  //   try {
+  //     // Load interior keys
+  //     const keysResponse = await uploadService.getClubhouseInteriorKeys();
+  //     const keys = keysResponse.interiorKeys || [];
+      
+  //     console.log('📋 Interior keys loaded:', keys);
+  //     setInteriorKeys(keys);
+
+  //     // Load all clubhouse images
+  //     const filesResponse = await uploadService.getFilesByFolder('clubhouse', true);
+      
+  //     console.log('📦 Files response:', filesResponse);
+
+  //     // ✅ NUEVO: Organizar usando section e interiorKey directamente
+  //     const organized = {
+  //       exterior: [],
+  //       blueprints: [],
+  //       interior: {},
+  //       deck: []
+  //     };
+
+  //     // Initialize interior object
+  //     keys.forEach(key => {
+  //       organized.interior[key] = [];
+  //     });
+
+  //     // ✅ CORREGIDO: Usar matching case-insensitive para interior keys
+  //     if (filesResponse.files && filesResponse.files.length > 0) {
+  //       filesResponse.files.forEach(file => {
+  //         const { section, interiorKey, url, publicUrl } = file;
+  //         const imageUrl = url || publicUrl;
+
+  //         console.log('📁 Processing file:', { section, interiorKey, url: imageUrl });
+
+  //         // Categorizar por section
+  //         if (section === 'exterior') {
+  //           organized.exterior.push(imageUrl);
+  //         } else if (section === 'blueprints') {
+  //           organized.blueprints.push(imageUrl);
+  //         } else if (section === 'interior' && interiorKey) {
+  //           // ✅ NUEVO: Buscar la key correcta (case-insensitive)
+  //           const matchingKey = keys.find(
+  //             key => key.toLowerCase() === interiorKey.toLowerCase()
+  //           );
+
+  //           if (matchingKey) {
+  //             organized.interior[matchingKey].push(imageUrl);
+  //             console.log(`✅ Matched interior key: ${interiorKey} → ${matchingKey}`);
+  //           } else {
+  //             console.warn(`⚠️ Unknown interior key: ${interiorKey} (available keys: ${keys.join(', ')})`);
+  //           }
+  //         } 
+  //         else if (section === 'deck') {
+  //           organized.deck.push(imageUrl);
+  //         } 
+  //         else {
+  //           console.warn(`⚠️ File without proper categorization:`, file.name);
+  //         }
+  //       });
+  //     }
+
+  //     console.log('✅ Organized images:', organized);
+  //     setImages(organized);
+  //   } catch (err) {
+  //     console.error('❌ Error loading clubhouse data:', err);
+  //     setError(err.message || 'Failed to load clubhouse images');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const loadData = async () => {
-    setLoading(true);
-    setError(null);
-    
+  setLoading(true);
+  setError(null);
+
+  try {
+    // interior keys
+    const keysResponse = await uploadService.getClubhouseInteriorKeys();
+    const keys = keysResponse?.interiorKeys || [];
+    setInteriorKeys(keys);
+    console.log('📋 Interior keys loaded:', keys);
+
+    // listado general y deck específico
+    const filesResponse = await uploadService.getFilesByFolder('clubhouse', true);
+    let deckResponse = { files: [] };
     try {
-      // Load interior keys
-      const keysResponse = await uploadService.getClubhouseInteriorKeys();
-      const keys = keysResponse.interiorKeys || [];
-      
-      console.log('📋 Interior keys loaded:', keys);
-      setInteriorKeys(keys);
-
-      // Load all clubhouse images
-      const filesResponse = await uploadService.getFilesByFolder('clubhouse', true);
-      
-      console.log('📦 Files response:', filesResponse);
-
-      // ✅ NUEVO: Organizar usando section e interiorKey directamente
-      const organized = {
-        exterior: [],
-        blueprints: [],
-        interior: {}
-      };
-
-      // Initialize interior object
-      keys.forEach(key => {
-        organized.interior[key] = [];
-      });
-
-      // ✅ CORREGIDO: Usar matching case-insensitive para interior keys
-      if (filesResponse.files && filesResponse.files.length > 0) {
-        filesResponse.files.forEach(file => {
-          const { section, interiorKey, url, publicUrl } = file;
-          const imageUrl = url || publicUrl;
-
-          console.log('📁 Processing file:', { section, interiorKey, url: imageUrl });
-
-          // Categorizar por section
-          if (section === 'exterior') {
-            organized.exterior.push(imageUrl);
-          } else if (section === 'blueprints') {
-            organized.blueprints.push(imageUrl);
-          } else if (section === 'interior' && interiorKey) {
-            // ✅ NUEVO: Buscar la key correcta (case-insensitive)
-            const matchingKey = keys.find(
-              key => key.toLowerCase() === interiorKey.toLowerCase()
-            );
-
-            if (matchingKey) {
-              organized.interior[matchingKey].push(imageUrl);
-              console.log(`✅ Matched interior key: ${interiorKey} → ${matchingKey}`);
-            } else {
-              console.warn(`⚠️ Unknown interior key: ${interiorKey} (available keys: ${keys.join(', ')})`);
-            }
-          } else {
-            console.warn(`⚠️ File without proper categorization:`, file.name);
-          }
-        });
+      deckResponse = await uploadService.getDeckFiles(true);
+    } catch (e) {
+      try {
+        deckResponse = await uploadService.getClubhouseDeckFiles(true);
+      } catch (e2) {
+        console.warn('No deck specific listing available:', e2?.message || e2);
       }
-
-      console.log('✅ Organized images:', organized);
-      setImages(organized);
-    } catch (err) {
-      console.error('❌ Error loading clubhouse data:', err);
-      setError(err.message || 'Failed to load clubhouse images');
-    } finally {
-      setLoading(false);
     }
-  };
+
+    const organized = {
+      exterior: [],
+      blueprints: [],
+      interior: {},
+      deck: []
+    };
+    keys.forEach(k => (organized.interior[k] = []));
+
+    // normalizador simple de url
+    const getUrl = (file) => file?.url || file?.publicUrl || file?.path || file || '';
+
+    if (filesResponse?.files && filesResponse.files.length > 0) {
+      filesResponse.files.forEach(file => {
+        const section = file.section || file.folder || '';
+        const interiorKey = file.interiorKey || file.key || '';
+        const imageUrl = getUrl(file);
+        console.log('📁 Processing file:', { section, interiorKey, imageUrl });
+
+        if (section === 'exterior') organized.exterior.push(imageUrl);
+        else if (section === 'blueprints') organized.blueprints.push(imageUrl);
+        else if (section === 'interior' && interiorKey) {
+          const matchingKey = keys.find(k => k.toLowerCase() === String(interiorKey).toLowerCase());
+          if (matchingKey) organized.interior[matchingKey].push(imageUrl);
+          else {
+            // fallback: create key if missing
+            if (!organized.interior[interiorKey]) organized.interior[interiorKey] = [];
+            organized.interior[interiorKey].push(imageUrl);
+            console.warn('Unknown interior key while loading data:', interiorKey);
+          }
+        } else if (section === 'deck') organized.deck.push(imageUrl);
+        else {
+          // fallback -> exterior
+          organized.exterior.push(imageUrl);
+          console.warn('Uncategorized clubhouse file added to exterior by fallback:', file);
+        }
+      });
+    }
+
+    // merge deckResponse.files
+    if (deckResponse?.files && deckResponse.files.length > 0) {
+      deckResponse.files.forEach(file => {
+        const imageUrl = getUrl(file);
+        if (!organized.deck.includes(imageUrl)) organized.deck.push(imageUrl);
+      });
+    }
+
+    console.log('✅ Organized images:', organized);
+    setImages(organized);
+  } catch (err) {
+    console.error('❌ Error loading clubhouse data:', err);
+    setError(err?.message || 'Failed to load clubhouse images');
+  } finally {
+    setLoading(false);
+  }
+};
 
 // ...existing code...
 
-  const getTotalInteriorImages = () => {
-    return Object.values(images.interior).reduce((acc, imgs) => acc + imgs.length, 0);
-  };
 
   const handleModalClose = () => {
     setModalOpen(false);
@@ -213,6 +294,7 @@ return (
           <Tab label={t('clubHouse:tabs.exterior')} />
           <Tab label={t('clubHouse:tabs.plans')} />
           <Tab label={t('clubHouse:tabs.interior')} />
+          <Tab label={t('clubHouse:tabs.deck')}/>
         </Tabs>
       </Paper>
 

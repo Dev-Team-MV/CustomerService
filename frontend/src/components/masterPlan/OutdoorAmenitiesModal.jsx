@@ -52,7 +52,7 @@ const OutdoorAmenitiesModal = ({
       ...prev,
       [selectedAmenity]: [
         ...prev[selectedAmenity],
-        ...files.map(file => ({ file, isPublic: true })) // Por defecto públicas
+        ...files.map(file => ({ file, isPublic: false })) // Por defecto públicas
       ]
     }));
   };
@@ -67,26 +67,27 @@ const OutdoorAmenitiesModal = ({
 
   // Subir todas las imágenes seleccionadas para todas las amenidades
 const handleUpload = async () => {
-  console.log('[OutdoorAmenitiesModal] handleUpload called');
-  console.log('selectedFiles:', selectedFiles);
   setUploading(true);
   try {
     const uploadPromises = [];
     EXTERIOR_AMENITIES.forEach(name => {
       if (selectedFiles[name].length > 0) {
         const existing = amenitiesList.find(a => a.name === name);
-        // Subir todas las imágenes de la amenidad con su isPublic
         uploadPromises.push(
           uploadService.uploadOutdoorAmenityImages(selectedFiles[name], name)
             .then(uploadedImages => {
-              // Filtrar solo imágenes que tengan url
               const filteredImages = (uploadedImages || []).filter(img => img.url);
-              if (filteredImages.length === 0) return null; // No guardar si no hay imágenes válidas
+              if (filteredImages.length === 0) return null;
 
-              console.log('✅ Images to save:', filteredImages);
-
+              // IMPORTANT: merge with existing images instead of replacing them
               if (existing) {
-                return uploadService.saveOutdoorAmenityImages({ id: existing.id, name, images: filteredImages });
+                const merged = [
+                  // keep existing items (ensure they are objects with url/isPublic)
+                  ...(Array.isArray(existing.images) ? existing.images : []),
+                  // append newly uploaded images
+                  ...filteredImages
+                ];
+                return uploadService.saveOutdoorAmenityImages({ id: existing.id, name, images: merged });
               } else {
                 return uploadService.saveOutdoorAmenityImages({ name, images: filteredImages });
               }
@@ -104,11 +105,39 @@ const handleUpload = async () => {
     setUploading(false);
   }
 };
-
   // Imágenes existentes para la amenidad seleccionada
   const currentImages = amenitiesList.find(a => a.name === selectedAmenity)?.images || []
   // Archivos seleccionados para la amenidad seleccionada
   const currentSelectedFiles = selectedFiles[selectedAmenity] || []
+
+    const handleToggleUploadedImageVisibility = async (imgIdx, newValue) => {
+    const amenity = amenitiesList.find(a => a.name === selectedAmenity);
+    if (!amenity) return;
+    try {
+      // Actualiza solo el campo isPublic de la imagen en el array
+      const updatedImages = amenity.images.map((img, idx) =>
+        idx === imgIdx ? { ...img, isPublic: newValue } : img
+      );
+      await uploadService.updateOutdoorAmenityImages(amenity.id, { images: updatedImages });
+      if (onUploaded) onUploaded();
+    } catch (err) {
+      console.error('Error updating image visibility:', err);
+    }
+  };
+
+  // Eliminar una imagen ya subida (solo esa imagen) y persistir en backend
+  const handleDeleteUploadedImage = async (imgIdx) => {
+    const amenity = amenitiesList.find(a => a.name === selectedAmenity);
+    if (!amenity) return;
+    try {
+      const updatedImages = (amenity.images || []).filter((_, i) => i !== imgIdx);
+      // Ajusta la llamada si tu uploadService espera otro payload / método
+      await uploadService.updateOutdoorAmenityImages(amenity.id, { images: updatedImages });
+      if (typeof onUploaded === 'function') onUploaded(); // refrescar en el padre
+    } catch (err) {
+      console.error('[OutdoorAmenitiesModal] Error deleting uploaded image:', err);
+    }
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -230,15 +259,39 @@ const handleUpload = async () => {
         <Box mt={2}>
           <Typography variant="subtitle2" fontWeight={700}>Uploaded Images</Typography>
           <Grid container spacing={2}>
-            {currentImages.map((url, idx) => (
+            {currentImages.map((img, idx) => (
               <Grid item xs={6} key={idx}>
-                <Paper sx={{ borderRadius: 2 }}>
+                <Paper sx={{ borderRadius: 2, position: 'relative' }}>
                   <Box
                     component="img"
-                    src={url}
+                    src={typeof img === 'string' ? img : img.url}
                     alt={`Amenity ${idx + 1}`}
                     sx={{ width: '100%', height: 120, objectFit: 'cover' }}
                   />
+                  {/* Switch para editar visibilidad */}
+                  <Box sx={{ position: 'absolute', top: 8, right: 40, zIndex: 2, pointerEvents: 'auto' }}>
+                    <Switch
+                      checked={!!img.isPublic}
+                      onChange={e => handleToggleUploadedImageVisibility(idx, e.target.checked)}
+                      color="success"
+                      size="small"
+                    />
+                  </Box>
+                  {/* Delete botón para imagen subida */}
+                  <IconButton
+                    size="small"
+                    onClick={() => handleDeleteUploadedImage(idx)}
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      zIndex: 3,
+                      bgcolor: 'rgba(255,255,255,0.9)',
+                      '&:hover': { bgcolor: '#ff5252', color: 'white' }
+                    }}
+                  >
+                    <Delete fontSize="small" />
+                  </IconButton>
                 </Paper>
               </Grid>
             ))}

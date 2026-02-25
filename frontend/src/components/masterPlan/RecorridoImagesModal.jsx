@@ -1,8 +1,8 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, Grid, CircularProgress } from '@mui/material'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Switch, FormControlLabel } from '@mui/material';
-
+import uploadService from '../../services/uploadService'
 
 const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, loading }) => {
   const { t } = useTranslation(['masterPlan']);
@@ -17,14 +17,76 @@ const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, load
 
   };
 
+    const getImageSrc = (id) => {
+    // previews tienen prioridad (archivo local seleccionado)
+    const p = previews && previews[String(id)];
+    if (p) return p;
+    // imagesMap puede ser string (url) o objeto { url, isPublic, filename }
+    const img = imagesMap && imagesMap[String(id)];
+    if (!img) return null;
+    return typeof img === 'string' ? img : (img.url || null);
+  };
+
+    // NEW: toggle handler that persists visibility (optimistic)
+  const handleToggleIsPublic = async (id, checked) => {
+    const prev = { ...isPublicMap };
+    setIsPublicMap(prevMap => ({ ...prevMap, [id]: checked })); // optimistic
+
+    const identifier = imagesMap && imagesMap[String(id)]
+      ? (typeof imagesMap[String(id)] === 'string' ? imagesMap[String(id)] : imagesMap[String(id)].url || null)
+      : null;
+
+    const payload = {
+      // backend expects filename in body; uploadService will extract filename from identifier if needed
+      identifier,
+      isPublic: checked
+    };
+    console.log('[RecorridoImagesModal] toggle visibility ->', { id, payload });
+
+    try {
+      const res = await uploadService.updateRecorridoImageVisibility(payload);
+      // If backend returns explicit isPublic, use it; otherwise keep optimistic value
+      const serverIsPublic = res?.isPublic ?? res?.data?.isPublic ?? null;
+      if (serverIsPublic !== null && serverIsPublic !== undefined) {
+        setIsPublicMap(prevMap => ({ ...prevMap, [id]: !!serverIsPublic }));
+      } else {
+        // keep optimistic checked value
+        setIsPublicMap(prevMap => ({ ...prevMap, [id]: checked }));
+      }
+      console.log('[RecorridoImagesModal] visibility updated on server', res);
+    } catch (err) {
+      console.error('[RecorridoImagesModal] error updating visibility, revert local', err);
+      setIsPublicMap(prev); // revert
+    }
+  };
+
 
   const handleFileChange = (id, e) => {
     const file = e.target.files[0]
     setFiles(prev => ({ ...prev, [id]: file }))
     setPreviews(prev => ({ ...prev, [id]: file ? URL.createObjectURL(file) : null }));
-    setIsPublicMap(prev => ({ ...prev, [id]: true }));
+    setIsPublicMap(prev => ({ ...prev, [id]: false }));
 
   }
+
+    // Sync isPublicMap from imagesMap when modal opens or imagesMap changes.
+  // imagesMap can be either { pointId: url } or { pointId: { url, isPublic } }
+  useEffect(() => {
+    if (!open) return;
+    const init = {};
+    (puntos || []).forEach(p => {
+      const key = String(p.id);
+      const img = imagesMap && imagesMap[key];
+      if (img && typeof img === 'object' && ('isPublic' in img)) {
+        init[p.id] = !!img.isPublic;
+      } else {
+        // default to false (private) if we don't have explicit isPublic info
+        init[p.id] = false;
+      }
+    });
+    setIsPublicMap(init);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, imagesMap, puntos]);
   
 
   return (
@@ -40,7 +102,15 @@ const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, load
   control={
     <Switch
       checked={!!isPublicMap[point.id]}
-      onChange={e => handleIsPublicChange(point.id, e.target.checked)}
+                      onChange={e => {
+                        const v = e.target.checked;
+                        // if there's already an uploaded image, persist toggle; otherwise just set local
+                        if (imagesMap && imagesMap[String(point.id)]) {
+                          handleToggleIsPublic(point.id, v);
+                        } else {
+                          handleIsPublicChange(point.id, v);
+                        }
+                      }}      
       color="success"
       size="small"
     />
@@ -50,18 +120,10 @@ const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, load
 />
 
                 <Typography fontWeight={600}>{t(`tourPoints.${point.name}`, point.name)}</Typography>
-                {previews[String(point.id)] ? (
+                {getImageSrc(point.id) ? (
                   <Box
                     component="img"
-                    src={previews[String(point.id)]}
-                    alt={point.name}
-                    sx={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 2, my: 1 }}
-                  />
-                ) : imagesMap[String(point.id)] ? (
-
-                  <Box
-                    component="img"
-                    src={imagesMap[String(point.id)]}
+                    src={getImageSrc(point.id)}
                     alt={point.name}
                     sx={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 2, my: 1 }}
                   />

@@ -36,7 +36,7 @@ import {
 } from '@mui/icons-material';
 import uploadService from '../../services/uploadService';
 import { useTranslation } from 'react-i18next';
-
+import { Switch as MuiSwitch } from '@mui/material'
 
 const CreateModelModal = ({ 
   open, 
@@ -236,7 +236,65 @@ const CreateModelModal = ({
     }));
   };
 
-  const handleFileImageUpload = async (e) => {
+  // const handleFileImageUpload = async (e) => {
+  //   const files = Array.from(e.target.files);
+  //   if (!files.length) return;
+  //   setUploadingImage(true);
+  //   try {
+  //     const urls = [];
+  //     for (const file of files) {
+  //       const url = await uploadService.uploadModelImage(file);
+  //       urls.push(url);
+  //     }
+  //     const section = currentImageSection;
+  //     const type = currentImageType;
+  //     const imagesData =
+  //       type === "interior" && currentRoomType !== "general"
+  //         ? urls.map((url) => ({ url, roomType: currentRoomType }))
+  //         : urls;
+
+  //     if (section === "base") {
+  //       setFormData((prev) => ({
+  //         ...prev,
+  //         images: {
+  //           ...prev.images,
+  //           [type]: [...prev.images[type], ...imagesData],
+  //         },
+  //       }));
+  //     } else if (section === "balcony") {
+  //       setFormData((prev) => ({
+  //         ...prev,
+  //         balconyImages: {
+  //           ...prev.balconyImages,
+  //           [type]: [...prev.balconyImages[type], ...imagesData],
+  //         },
+  //       }));
+  //     } else if (section === "upgrade") {
+  //       setFormData((prev) => ({
+  //         ...prev,
+  //         upgradeImages: {
+  //           ...prev.upgradeImages,
+  //           [type]: [...prev.upgradeImages[type], ...imagesData],
+  //         },
+  //       }));
+  //     } else if (section === "storage") {
+  //       setFormData((prev) => ({
+  //         ...prev,
+  //         storageImages: {
+  //           ...prev.storageImages,
+  //           [type]: [...prev.storageImages[type], ...imagesData],
+  //         },
+  //       }));
+  //     }
+  //   } catch (err) {
+  //     alert("Error uploading image(s)");
+  //   } finally {
+  //     setUploadingImage(false);
+  //     e.target.value = "";
+  //   }
+  // };
+
+    const handleFileImageUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
     setUploadingImage(true);
@@ -244,13 +302,16 @@ const CreateModelModal = ({
       const urls = [];
       for (const file of files) {
         const url = await uploadService.uploadModelImage(file);
-        urls.push(url);
+        // build object with isPublic default false and try to extract filename
+        const lastSegment = String(url).split('/').pop() || url;
+        const filename = decodeURIComponent(String(lastSegment).split('?')[0]);
+        urls.push({ url, isPublic: false, filename });
       }
       const section = currentImageSection;
       const type = currentImageType;
       const imagesData =
         type === "interior" && currentRoomType !== "general"
-          ? urls.map((url) => ({ url, roomType: currentRoomType }))
+          ? urls.map(u => ({ ...u, roomType: currentRoomType }))
           : urls;
 
       if (section === "base") {
@@ -294,6 +355,38 @@ const CreateModelModal = ({
     }
   };
 
+  // NEW: toggle handler to change isPublic for a given image (optimistic + persist)
+  const handleToggleImageIsPublic = async (section, type, index, checked) => {
+    // keep prev to revert if needed
+    const prev = JSON.parse(JSON.stringify(formData));
+    const keyMap = {
+      base: 'images',
+      balcony: 'balconyImages',
+      upgrade: 'upgradeImages',
+      storage: 'storageImages'
+    };
+    const rootKey = keyMap[section] || 'images';
+
+    setFormData(fd => {
+      const arr = Array.isArray(fd[rootKey][type]) ? [...fd[rootKey][type]] : [];
+      const item = arr[index];
+      arr[index] = (typeof item === 'string') ? { url: item, isPublic: !!checked } : { ...item, isPublic: !!checked };
+      return { ...fd, [rootKey]: { ...fd[rootKey], [type]: arr } };
+    });
+
+    // try persist using uploadService.updateFileVisibility if available
+    try {
+      const item = formData[rootKey][type][index];
+      const filename = item?.filename || (typeof item === 'string' ? String(item).split('/').pop().split('?')[0] : item?.url?.split('/').pop()?.split('?')[0]);
+      if (uploadService.updateFileVisibility && filename) {
+        await uploadService.updateFileVisibility({ filename, isPublic: !!checked });
+      }
+    } catch (err) {
+      console.error('Failed to persist isPublic change, reverting', err);
+      setFormData(prev);
+    }
+  };
+
   const groupImagesByRoomType = (images) => {
     const grouped = {
       general: [],
@@ -311,12 +404,14 @@ const CreateModelModal = ({
       closet: [],
     };
 
-    images.forEach((img, originalIndex) => {
+    (images || []).forEach((img, originalIndex) => {
+      if (!img) return;
       if (typeof img === "string") {
-        grouped.general.push({ url: img, originalIndex });
+        grouped.general.push({ url: img, originalIndex, isPublic: false, raw: img });
       } else if (img && typeof img === "object" && img.url) {
         const roomType = img.roomType || "general";
-        grouped[roomType].push({ url: img.url, originalIndex, roomType });
+        grouped[roomType] = grouped[roomType] || [];
+        grouped[roomType].push({ url: img.url, originalIndex, roomType, isPublic: !!img.isPublic, raw: img });
       }
     });
 
@@ -372,12 +467,16 @@ const CreateModelModal = ({
   };
 
   // ✅ Render helper para imágenes (evita duplicación de código)
+ // ✅ Render helper para imágenes (evita duplicación de código)
   const renderImageGrid = (images, section, type) => {
+    images = images || [];
+
+    // INTERIOR grouped rendering (uses url & isPublic and correct originalIndex)
     if (type === "interior" && images.length > 0) {
-      // Agrupar por tipo de habitación
+      const grouped = groupImagesByRoomType(images);
       return (
         <Stack spacing={1.5}>
-          {Object.entries(groupImagesByRoomType(images))
+          {Object.entries(grouped)
             .filter(([_, roomImages]) => roomImages.length > 0)
             .map(([roomType, roomImages]) => (
               <Box key={roomType}>
@@ -404,8 +503,8 @@ const CreateModelModal = ({
                   </Typography>
                 </Box>
                 <Grid container spacing={1}>
-                  {roomImages.map(({ url, originalIndex }) => (
-                    <Grid item xs={6} key={originalIndex}>
+                  {roomImages.map(({ url, originalIndex, isPublic }) => (
+                    <Grid item xs={6} key={`${type}-${originalIndex}`}>
                       <Box
                         sx={{
                           position: "relative",
@@ -443,6 +542,16 @@ const CreateModelModal = ({
                         >
                           <Close fontSize="small" />
                         </IconButton>
+
+                        {/* Switch para isPublic */}
+                        <Box sx={{ position: "absolute", top: 6, left: 6 }}>
+                          <MuiSwitch
+                            checked={!!isPublic}
+                            onChange={(e) => handleToggleImageIsPublic(section, type, originalIndex, e.target.checked)}
+                            size="small"
+                            color="success"
+                          />
+                        </Box>
                       </Box>
                     </Grid>
                   ))}
@@ -453,66 +562,81 @@ const CreateModelModal = ({
       );
     }
 
-    // Exterior o Blueprints
+    // EXTERIOR / BLUEPRINTS rendering (handles strings or objects)
     if (images.length > 0) {
       return (
         <Grid container spacing={1}>
-          {images.map((url, index) => (
-            <Grid item xs={6} key={index}>
-              <Box
-                sx={{
-                  position: "relative",
-                  pt: "75%",
-                  borderRadius: 1,
-                  overflow: "hidden",
-                  border: "1px solid #e0e0e0",
-                }}
-              >
+          {images.map((item, index) => {
+            const src = typeof item === "string" ? item : (item?.url || "");
+            const isPublic = typeof item === "object" ? !!item.isPublic : false;
+            return (
+              <Grid item xs={6} key={`${type}-${index}`}>
                 <Box
-                  component="img"
-                  src={url}
-                  alt={`${type} ${index + 1}`}
                   sx={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-                <IconButton
-                  size="small"
-                  onClick={() => handleRemoveImage(section, type, index)}
-                  sx={{
-                    position: "absolute",
-                    top: 4,
-                    right: 4,
-                    bgcolor: "rgba(255,255,255,0.9)",
-                    width: 24,
-                    height: 24,
-                    "&:hover": { bgcolor: "rgba(255,255,255,1)" },
+                    position: "relative",
+                    pt: "75%",
+                    borderRadius: 1,
+                    overflow: "hidden",
+                    border: "1px solid #e0e0e0",
                   }}
                 >
-                  <Close fontSize="small" />
-                </IconButton>
-                {type === "exterior" && index === 0 && (
-                  <Chip
-                    label="Primary"
-                    size="small"
-                    color="primary"
+                  <Box
+                    component="img"
+                    src={src}
+                    alt={`${type} ${index + 1}`}
                     sx={{
                       position: "absolute",
-                      bottom: 4,
-                      left: 4,
-                      height: 18,
-                      fontSize: "0.65rem",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
                     }}
                   />
-                )}
-              </Box>
-            </Grid>
-          ))}
+                  <IconButton
+                    size="small"
+                    onClick={() => handleRemoveImage(section, type, index)}
+                    sx={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      bgcolor: "rgba(255,255,255,0.9)",
+                      width: 24,
+                      height: 24,
+                      "&:hover": { bgcolor: "rgba(255,255,255,1)" },
+                    }}
+                  >
+                    <Close fontSize="small" />
+                  </IconButton>
+
+                  {/* Switch para isPublic */}
+                  <Box sx={{ position: "absolute", top: 6, left: 6 }}>
+                    <MuiSwitch
+                      checked={isPublic}
+                      onChange={(e) => handleToggleImageIsPublic(section, type, index, e.target.checked)}
+                      size="small"
+                      color="success"
+                    />
+                  </Box>
+
+                  {type === "exterior" && index === 0 && (
+                    <Chip
+                      label="Primary"
+                      size="small"
+                      color="primary"
+                      sx={{
+                        position: "absolute",
+                        bottom: 4,
+                        left: 4,
+                        height: 18,
+                        fontSize: "0.65rem",
+                      }}
+                    />
+                  )}
+                </Box>
+              </Grid>
+            );
+          })}
         </Grid>
       );
     }

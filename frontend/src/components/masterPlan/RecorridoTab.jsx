@@ -79,27 +79,41 @@ const RecorridoTab = () => {
       setMapUrl(defaultMap)
     }
   }
+// ...existing code...
 const fetchRecorridoImages = async () => {
   try {
     const response = await uploadService.getFilesByFolder('recorrido', true);
     const map = {};
     (response.files || []).forEach(file => {
-      const match = file.name.match(/recorrido\.(\d+)\./);
+      // file.name expected like "recorrido.3.jpg"
+      const name = file.name || file.filename || '';
+      const match = name.match(/recorrido\.(\d+)\./);
       if (match) {
-        map[String(match[1])] = file.url; // <-- Aquí, usa String
+        const pointId = String(match[1]); // usa el índice/número del filename como key
+        map[pointId] = {
+          url: file.url || file.publicUrl || null,
+          isPublic: !!file.isPublic,
+          filename: name
+        };
       }
     });
-    setImagesMap(map);
-  } catch (error) {
+    setImagesMap(map); // pasar este imagesMap al modal
+  } catch (err) {
+    console.error('Error fetching recorrido files:', err);
     setImagesMap({});
   }
 };
+// ...existing code...
 
   // Asocia cada imagen al punto por id
-  const recorridoPoints = puntosBase.map((p) => ({
-    ...p,
-    image: imagesMap[p.id] || null
-  }))
+  const recorridoPoints = puntosBase.map((p) => {
+    const img = imagesMap && imagesMap[String(p.id)];
+    const imageUrl = img ? (typeof img === 'string' ? img : (img.url || null)) : null;
+    return {
+      ...p,
+      image: imageUrl
+    };
+  });
 
   // --- ZOOM & PAN ---
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.3, 3))

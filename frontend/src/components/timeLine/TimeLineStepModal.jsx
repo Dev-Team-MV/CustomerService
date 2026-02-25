@@ -8,6 +8,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useTranslation } from 'react-i18next';
 import { Switch, FormControlLabel } from '@mui/material';
+import TimeLineService from '../../services/TimeLineService';
 
 const getItemStyle = (isDragging, draggableStyle) => ({
   userSelect: 'none',
@@ -64,15 +65,71 @@ const handleToggleAllImages = (isPublic) => {
   }));
 };
 
-const handleToggleIsPublic = (idx, type) => {
-  setForm(prev => {
-    const arr = [...prev[type]];
-    arr[idx] = { ...arr[idx], isPublic: !arr[idx].isPublic };
-        console.log(`[TimeLineStepModal] Imagen ${arr[idx].name} isPublic:`, arr[idx].isPublic);
+// ...existing // ...existing code...
+const handleToggleIsPublic = async (idx, type) => {
+  console.log('[TimeLineStepModal] handleToggleIsPublic called', { idx, type, current: form[type][idx] });
 
-    return { ...prev, [type]: arr };
-  });
+  const prevForm = JSON.parse(JSON.stringify(form));
+  const arr = [...form[type]];
+  const target = arr[idx];
+  const newIsPublic = !target.isPublic;
+
+  // Optimistic UI
+  arr[idx] = { ...arr[idx], isPublic: newIsPublic };
+  setForm(prev => ({ ...prev, [type]: arr }));
+
+  // intenta obtener id de varias fuentes
+  let underConstructionId = form._id || form.id || (editingStep && (editingStep._id || editingStep.id));
+  const mediaIdentifier = target._id || target.id || target.url;
+
+  console.log('[TimeLineStepModal] prepared payload', { underConstructionId, mediaIdentifier, newIsPublic });
+
+  // Si no hay id, intenta guardar el step (si onSave está disponible)
+  if (!underConstructionId) {
+    if (typeof onSave === 'function') {
+      console.log('[TimeLineStepModal] no underConstructionId, calling onSave to create/persist step first');
+      try {
+        // espera a que onSave complete; asume que onSave actualizará `form` con el id
+        await onSave();
+        // intenta leer id otra vez después de guardar
+        underConstructionId = form._id || form.id || (editingStep && (editingStep._id || editingStep.id));
+        console.log('[TimeLineStepModal] after onSave, underConstructionId =', underConstructionId);
+      } catch (err) {
+        console.error('[TimeLineStepModal] onSave failed, aborting persist', err);
+      }
+    }
+  }
+
+  if (!underConstructionId || !mediaIdentifier) {
+    console.warn('[TimeLineStepModal] skipping persist (missing id/identifier)', { underConstructionId, mediaIdentifier });
+    return;
+  }
+
+  try {
+    const payload = { media: { identifier: mediaIdentifier, isPublic: newIsPublic } };
+    console.log('[TimeLineStepModal] sending update request', { underConstructionId, payload });
+    const res = await TimeLineService.update(underConstructionId, payload);
+    console.log('[TimeLineStepModal] update response', res);
+
+    const updated = res?.underConstruction || res?.data || res;
+    if (updated) {
+      if (Array.isArray(updated.media) || Array.isArray(updated.images) || Array.isArray(updated.videos)) {
+        // Ajusta según la forma real de la respuesta
+        setForm(prev => ({
+          ...prev,
+          images: Array.isArray(updated.images) ? updated.images : prev.images,
+          videos: Array.isArray(updated.videos) ? updated.videos : prev.videos,
+          // si backend devuelve media genérico:
+          ...(Array.isArray(updated.media) ? { images: updated.media.filter(m=>m.type==='image'), videos: updated.media.filter(m=>m.type==='video') } : {})
+        }));
+      }
+    }
+  } catch (err) {
+    console.error('[TimeLineStepModal] Error updating timeline media visibility, reverting', err);
+    setForm(prevForm); // revertir UI
+  }
 };
+// ...existing code...
 
   return (
     <Dialog

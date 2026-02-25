@@ -23,140 +23,259 @@ import {
   Map,
   Layers,
   MeetingRoom,
-  Check
+  Check,
+  Deck
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import uploadService from '../../services/uploadService';
 import { useTranslation } from 'react-i18next';
+import { Switch } from '@mui/material';
 
 const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
   const { t } = useTranslation(['clubHouse', 'common']);
   const [tab, setTab] = useState(0);
   const [selectedInteriorSection, setSelectedInteriorSection] = useState('Reception');
   const [interiorKeys, setInteriorKeys] = useState([]);
-  
-  // ✅ Estado para imágenes existentes (desde GCS)
+  // ...existing code...
   const [existingImages, setExistingImages] = useState({
     exterior: [],
     blueprints: [],
-    interior: {}
+    interior: {},
+    deck: [] // NEW
   });
-
-  // ✅ Estado para nuevas imágenes seleccionadas (preview antes de subir)
   const [selectedFiles, setSelectedFiles] = useState({
     exterior: [],
     blueprints: [],
-    interior: {}
+    interior: {},
+    deck: [] // NEW
   });
-
+  // ...existing code...
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-useEffect(() => {
-  if (open) {
-    loadInteriorKeys();
-  }
-}, [open]);
 
-useEffect(() => {
-  if (open && interiorKeys.length > 0) {
-    loadExistingImages();
-    setSelectedInteriorSection(interiorKeys[0]);
-  }
-}, [open, interiorKeys]);
+  useEffect(() => {
+    if (open) {
+      loadInteriorKeys();
+    }
+  }, [open]);
 
-const loadInteriorKeys = async () => {
-  try {
-    const response = await uploadService.getClubhouseInteriorKeys();
-    const keys = response.interiorKeys || [];
-    setInteriorKeys(keys);
+  useEffect(() => {
+    if (open && interiorKeys.length > 0) {
+      loadExistingImages();
+      setSelectedInteriorSection(interiorKeys[0]);
+    }
+  }, [open, interiorKeys]);
 
-    // Inicializa los objetos para interior
-    setExistingImages(prev => ({
-      ...prev,
-      interior: keys.reduce((acc, key) => ({ ...acc, [key]: [] }), {})
-    }));
-    setSelectedFiles(prev => ({
-      ...prev,
-      interior: keys.reduce((acc, key) => ({ ...acc, [key]: [] }), {})
-    }));
-    setError(null);
-  } catch (err) {
-    setError('Failed to load interior sections');
-  }
-};
+  const loadInteriorKeys = async () => {
+    try {
+      const response = await uploadService.getClubhouseInteriorKeys();
+      const keys = response.interiorKeys || [];
+      setInteriorKeys(keys);
+      setExistingImages(prev => ({
+        ...prev,
+        interior: keys.reduce((acc, key) => ({ ...acc, [key]: [] }), {})
+      }));
+      setSelectedFiles(prev => ({
+        ...prev,
+        interior: keys.reduce((acc, key) => ({ ...acc, [key]: [] }), {})
+      }));
+      setError(null);
+    } catch (err) {
+      setError('Failed to load interior sections');
+    }
+  };
 
-const loadExistingImages = async () => {
-  setLoading(true);
-  try {
-    const response = await uploadService.getFilesByFolder('clubhouse', true);
 
-    if (response.files) {
+  const loadExistingImages = async () => {
+    setLoading(true);
+    try {
+      const response = await uploadService.getFilesByFolder('clubhouse', true);
+      if (response.files) {
+        const organized = {
+          exterior: [],
+          blueprints: [],
+          interior: {},
+          deck: [] // NEW
+        };
+        interiorKeys.forEach(key => {
+          organized.interior[key] = [];
+        });
+  
+        response.files.forEach(file => {
+          const { _id, section, interiorKey, url, publicUrl, isPublic } = file;
+          const imageUrl = url || publicUrl;
+          // guardamos _id y raw (file) para debug/identificación
+          const imageObj = { _id, url: imageUrl, isPublic: isPublic ?? true, raw: file };
+  
+          if (section === 'exterior') {
+            organized.exterior.push(imageObj);
+          } else if (section === 'blueprints') {
+            organized.blueprints.push(imageObj);
+          } else if (section === 'interior' && interiorKey) {
+            if (organized.interior[interiorKey]) {
+              organized.interior[interiorKey].push(imageObj);
+            }
+          } else if (section === 'deck') {
+            organized.deck.push(imageObj);
+          }
+        });
+  
+        setExistingImages(organized);
+      }
+    } catch (err) {
+      console.error('Error loading clubhouse images:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+    const mapClubHouseToOrganized = (clubHouse) => {
       const organized = {
         exterior: [],
         blueprints: [],
-        interior: {}
+        interior: {},
+        deck: [] // NEW
       };
-
-      // Inicializa interior con las keys actuales
+      // asegúrate de tener las keys de interior
       interiorKeys.forEach(key => {
         organized.interior[key] = [];
       });
-
-      response.files.forEach(file => {
-        const { section, interiorKey, url, publicUrl } = file;
-        const imageUrl = url || publicUrl;
-
-        if (section === 'exterior') {
-          organized.exterior.push(imageUrl);
-        } else if (section === 'blueprints') {
-          organized.blueprints.push(imageUrl);
-        } else if (section === 'interior' && interiorKey) {
-          if (organized.interior[interiorKey]) {
-            organized.interior[interiorKey].push(imageUrl);
-          }
-        }
+    
+      if (!clubHouse) return organized;
+    
+      (clubHouse.exterior || []).forEach(item => {
+        organized.exterior.push({
+          _id: item._id,
+          url: item.url || item.publicUrl,
+          isPublic: item.isPublic ?? true,
+          raw: item
+        });
+      });
+    
+      (clubHouse.blueprints || []).forEach(item => {
+        organized.blueprints.push({
+          _id: item._id,
+          url: item.url || item.publicUrl,
+          isPublic: item.isPublic ?? true,
+          raw: item
+        });
       });
 
-      setExistingImages(organized);
-    }
-  } catch (err) {
-    console.error('Error loading clubhouse images:', err);
-  } finally {
-    setLoading(false);
-  }
-};
+      (clubHouse.deck || []).forEach(item => {
+        organized.deck.push({
+          _id: item._id,
+          url: item.url || item.publicUrl,
+          isPublic: item.isPublic ?? true,
+          raw: item
+        });
+      });
 
-  // ✅ NUEVO: Solo selecciona archivos, NO los sube
-const handleFileSelect = (event, section) => {
-  const files = Array.from(event.target.files);
-  if (files.length === 0) return;
-
-  setSelectedFiles(prev => {
-    if (section === 'interior') {
-      return {
-        ...prev,
-        interior: {
-          ...prev.interior,
-          [selectedInteriorSection]: [
-            ...(Array.isArray(prev.interior[selectedInteriorSection]) ? prev.interior[selectedInteriorSection] : []),
-            ...files
-          ]
+      const interiorObj = clubHouse.interior || {};
+      Object.keys(interiorObj).forEach(key => {
+        organized.interior[key] = (interiorObj[key] || []).map(item => ({
+          _id: item._id,
+          url: item.url || item.publicUrl,
+          isPublic: item.isPublic ?? true,
+          raw: item
+        }));
+      });
+    
+      return organized;
+    };
+    
+    const handleToggleImageVisibility = async (section, index, isPublic, interiorKey = null) => {
+      const prevState = JSON.parse(JSON.stringify(existingImages));
+      // optimistic UI
+      setExistingImages(prev => {
+        const next = { ...prev };
+        if (section === 'exterior' || section === 'blueprints') {
+          next[section] = (next[section] || []).map((it, i) => i === index ? { ...it, isPublic } : it);
+        } else if (section === 'interior' && interiorKey) {
+          next.interior = { ...(next.interior || {}) };
+          next.interior[interiorKey] = (next.interior[interiorKey] || []).map((it, i) => i === index ? { ...it, isPublic } : it);
         }
-      };
-    } else {
-      return {
-        ...prev,
-        [section]: [
-          ...(Array.isArray(prev[section]) ? prev[section] : []),
-          ...files
-        ]
-      };
-    }
-  });
-};
+        return next;
+      });
+    
+      try {
+        const payload = { section, index, isPublic, ...(section === 'interior' && { interiorKey }) };
+    
+        // if we can find an identifier, attach it (optional)
+        const target = section === 'interior'
+          ? (existingImages.interior?.[interiorKey] || [])[index]
+          : (existingImages[section] || [])[index];
+        if (target?._id) payload.identifier = target._id;
+        else if (target?.url) payload.identifier = target.url;
+              console.log('Toggle visibility request', { section, index, isPublic, interiorKey, target });
 
-  // ✅ NUEVO: Remover archivo seleccionado (antes de subir)
+    
+        const res = await uploadService.updateClubhouseImageVisibility(payload);
+    
+        // if backend returns clubHouse, map it to existingImages and use it (source of truth)
+        if (res?.data?.clubHouse) {
+          const organized = mapClubHouseToOrganized(res.data.clubHouse);
+          setExistingImages(organized);
+        } else {
+          // fallback: recarga (puede venir de GCS y no reflejar DB; preferible que backend exponga clubHouse)
+          await loadExistingImages();
+        }
+      } catch (err) {
+        console.error('Error updating visibility:', err);
+        setExistingImages(prevState); // revert on failure
+      }
+    };
+    // ...existing code...
+
+  const handleToggleIsPublicSelected = (section, idx, interiorKey = null) => e => {
+    setSelectedFiles(prev => {
+      const update = arr => arr.map((f, i) =>
+        i === idx ? { ...f, isPublic: e.target.checked } : f
+      );
+      if (section === 'interior' && interiorKey) {
+        return {
+          ...prev,
+          interior: {
+            ...prev.interior,
+            [interiorKey]: update(prev.interior[interiorKey])
+          }
+        };
+      } else {
+        return {
+          ...prev,
+          [section]: update(prev[section])
+        };
+      }
+    });
+  };
+
+  const handleFileSelect = (event, section) => {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+    setSelectedFiles(prev => {
+      if (section === 'interior') {
+        return {
+          ...prev,
+          interior: {
+            ...prev.interior,
+            [selectedInteriorSection]: [
+              ...(Array.isArray(prev.interior[selectedInteriorSection]) ? prev.interior[selectedInteriorSection] : []),
+              ...files.map(file => ({ file, isPublic: false }))
+            ]
+          }
+        };
+      } else {
+        return {
+          ...prev,
+          [section]: [
+            ...(Array.isArray(prev[section]) ? prev[section] : []),
+            ...files.map(file => ({ file, isPublic: false }))
+          ]
+        };
+      }
+    });
+  };
+
   const handleRemoveSelectedFile = (section, index, interiorKey = null) => {
     setSelectedFiles(prev => {
       if (section === 'interior' && interiorKey) {
@@ -172,62 +291,60 @@ const handleFileSelect = (event, section) => {
     });
   };
 
-  // ✅ NUEVO: Confirmar y subir TODAS las imágenes seleccionadas
+  // ✅ Confirmar y subir TODAS las imágenes seleccionadas
   const handleConfirmUpload = async () => {
     setUploading(true);
     setError(null);
-
     try {
       const uploadPromises = [];
+      // Prepara los arrays para subir: solo archivos y visibilidad
+      const prepareFiles = arr => arr.map(item => ({
+        file: item.file,
+        isPublic: item.isPublic
+      }));
 
       // Upload exterior
       if (selectedFiles.exterior.length > 0) {
         uploadPromises.push(
-          uploadService.uploadClubhouseImages(selectedFiles.exterior, 'exterior')
+          uploadService.uploadClubhouseImages(prepareFiles(selectedFiles.exterior), 'exterior')
         );
       }
-
       // Upload blueprints
       if (selectedFiles.blueprints.length > 0) {
         uploadPromises.push(
-          uploadService.uploadClubhouseImages(selectedFiles.blueprints, 'blueprints')
+          uploadService.uploadClubhouseImages(prepareFiles(selectedFiles.blueprints), 'blueprints')
         );
       }
-
+      // Upload deck
+      if (selectedFiles.deck.length > 0) {
+        uploadPromises.push(
+          uploadService.uploadClubhouseImages(prepareFiles(selectedFiles.deck), 'deck')
+        );
+      }
       // Upload interior sections
       for (const [key, files] of Object.entries(selectedFiles.interior)) {
         if (files.length > 0) {
           uploadPromises.push(
-            uploadService.uploadClubhouseImages(files, 'interior', key)
+            uploadService.uploadClubhouseImages(prepareFiles(files), 'interior', key)
           );
         }
       }
-
       if (uploadPromises.length === 0) {
         setError('No files selected to upload');
         setUploading(false);
         return;
       }
-
-      console.log(`🚀 Uploading ${uploadPromises.length} batches...`);
-
       await Promise.all(uploadPromises);
-
-      // ✅ Limpiar archivos seleccionados
       setSelectedFiles({
         exterior: [],
         blueprints: [],
-        interior: interiorKeys.reduce((acc, key) => ({ ...acc, [key]: [] }), {})
+        interior: interiorKeys.reduce((acc, key) => ({ ...acc, [key]: [] }), {}),
+        deck: []
       });
-
-      // ✅ Recargar imágenes existentes
       await loadExistingImages();
-
-      // ✅ Notificar al componente padre
       if (onImagesUploaded) {
         onImagesUploaded();
       }
-
       setError(null);
     } catch (err) {
       console.error('Error uploading images:', err);
@@ -238,7 +355,6 @@ const handleFileSelect = (event, section) => {
   };
 
   const handleDeleteExistingImage = async (section, imageUrl, interiorKey = null) => {
-    console.log('🗑️ Delete image:', { section, imageUrl, interiorKey });
     // TODO: Implementar endpoint de eliminación
   };
 
@@ -246,6 +362,8 @@ const handleFileSelect = (event, section) => {
     if (tab === 0) return existingImages.exterior;
     if (tab === 1) return existingImages.blueprints;
     if (tab === 2) return existingImages.interior[selectedInteriorSection] || [];
+    if (tab === 3) return existingImages.deck || [];
+
     return [];
   };
 
@@ -253,22 +371,25 @@ const handleFileSelect = (event, section) => {
     if (tab === 0) return selectedFiles.exterior;
     if (tab === 1) return selectedFiles.blueprints;
     if (tab === 2) return selectedFiles.interior[selectedInteriorSection] || [];
+    if (tab === 3) return selectedFiles.deck || [];
     return [];
   };
 
   const getCurrentSection = () => {
     if (tab === 0) return 'exterior';
     if (tab === 1) return 'blueprints';
+    if (tab === 2) return 'interior';
+    if (tab === 3) return 'deck';
     return 'interior';
   };
 
-  const getTotalSelectedFiles = () => {
-    let total = selectedFiles.exterior.length + selectedFiles.blueprints.length;
-    Object.values(selectedFiles.interior).forEach(files => {
-      total += files.length;
-    });
-    return total;
-  };
+const getTotalSelectedFiles = () => {
+  let total = selectedFiles.exterior.length + selectedFiles.blueprints.length + (selectedFiles.deck?.length || 0);
+  Object.values(selectedFiles.interior).forEach(files => {
+    total += files.length;
+  });
+  return total;
+};
 
   return (
     <Dialog
@@ -319,8 +440,7 @@ const handleFileSelect = (event, section) => {
                     fontWeight: 600
                   }}
                 >
-                        {t('clubHouse:readyToUpload', { count: getTotalSelectedFiles() })}
-
+                  {t('clubHouse:readyToUpload', { count: getTotalSelectedFiles() })}
                 </Typography>
               )}
             </Box>
@@ -330,18 +450,16 @@ const handleFileSelect = (event, section) => {
           </IconButton>
         </Box>
       </DialogTitle>
-
       <DialogContent>
         {error && (
-          <Alert 
-            severity="error" 
-            sx={{ mb: 2 }} 
+          <Alert
+            severity="error"
+            sx={{ mb: 2 }}
             onClose={() => setError(null)}
           >
             {error}
           </Alert>
         )}
-
         <Tabs
           value={tab}
           onChange={(e, v) => setTab(v)}
@@ -356,45 +474,49 @@ const handleFileSelect = (event, section) => {
             }
           }}
         >
-          <Tab 
-            icon={<Map />} 
+          <Tab
+            icon={<Map />}
             label={
               <Box display="flex" alignItems="center" gap={1}>
                 {t('clubHouse:tabs.exterior')}
                 {(existingImages.exterior.length + selectedFiles.exterior.length) > 0 && (
-                  <Chip 
-                    label={existingImages.exterior.length + selectedFiles.exterior.length} 
-                    size="small" 
-                    sx={{ height: 20, fontSize: '0.7rem' }} 
+                  <Chip
+                    label={existingImages.exterior.length + selectedFiles.exterior.length}
+                    size="small"
+                    sx={{ height: 20, fontSize: '0.7rem' }}
                   />
                 )}
               </Box>
             }
-            iconPosition="start" 
+            iconPosition="start"
           />
-          <Tab 
-            icon={<Layers />} 
+          <Tab
+            icon={<Layers />}
             label={
               <Box display="flex" alignItems="center" gap={1}>
                 {t('clubHouse:tabs.plans')}
                 {(existingImages.blueprints.length + selectedFiles.blueprints.length) > 0 && (
-                  <Chip 
-                    label={existingImages.blueprints.length + selectedFiles.blueprints.length} 
-                    size="small" 
-                    sx={{ height: 20, fontSize: '0.7rem' }} 
+                  <Chip
+                    label={existingImages.blueprints.length + selectedFiles.blueprints.length}
+                    size="small"
+                    sx={{ height: 20, fontSize: '0.7rem' }}
                   />
                 )}
               </Box>
             }
-            iconPosition="start" 
+            iconPosition="start"
           />
-          <Tab 
-            icon={<MeetingRoom />} 
+          <Tab
+            icon={<MeetingRoom />}
             label={t('clubHouse:tabs.interior')}
-            iconPosition="start" 
+            iconPosition="start"
           />
+            <Tab
+            icon={<Deck />}
+            label={t('clubHouse:tabs.deck')}
+            iconPosition="start"
+          />  
         </Tabs>
-
         {tab === 2 && (
           <Box mb={3}>
             <Typography
@@ -407,8 +529,8 @@ const handleFileSelect = (event, section) => {
             </Typography>
             <Box display="flex" flexWrap="wrap" gap={1}>
               {interiorKeys.map(key => {
-                const count = (existingImages.interior[key]?.length || 0) + 
-                             (selectedFiles.interior[key]?.length || 0);
+                const count = (existingImages.interior[key]?.length || 0) +
+                  (selectedFiles.interior[key]?.length || 0);
                 return (
                   <Chip
                     key={key}
@@ -452,6 +574,37 @@ const handleFileSelect = (event, section) => {
           </Box>
         )}
 
+        {/* replace the tab === 3 block that used `images` with existingImages */ }
+        {tab === 3 && (
+          // Deck images
+          <Grid container spacing={2}>
+            {(existingImages.deck || []).length === 0 ? (
+              <Grid item xs={12}>
+                <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100', borderRadius: 2 }}>
+                  <Typography variant="caption" color="text.secondary">{t('clubHouse:noImagesUploaded')}</Typography>
+                </Paper>
+              </Grid>
+
+           ) : (
+              (existingImages.deck || []).map((img, idx) => (
+                <Grid item xs={6} md={4} key={idx}>
+                  <Box
+                    component="img"
+                    src={typeof img === 'string' ? img : img.url}
+                    alt={`Deck ${idx + 1}`}
+                    sx={{
+                      width: '100%',
+                       height: '250px',
+                       objectFit: 'contain',
+                       borderRadius: 2,
+                       boxShadow: '0 2px 8px rgba(140, 165, 81, 0.08)'
+                     }}
+                   />
+                 </Grid>
+               ))
+             )}
+           </Grid>
+         )}
         <Box mb={3}>
           <Button
             variant="contained"
@@ -476,13 +629,12 @@ const handleFileSelect = (event, section) => {
               onChange={(e) => handleFileSelect(e, getCurrentSection())}
             />
           </Button>
-  <Typography variant="caption" display="block" mt={1} sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
-    {tab === 2
-      ? t('clubHouse:selectingFor', { section: selectedInteriorSection })
-      : t('clubHouse:selectingFor', { section: getCurrentSection() })}
-  </Typography>
+          <Typography variant="caption" display="block" mt={1} sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+            {tab === 2
+              ? t('clubHouse:selectingFor', { section: selectedInteriorSection })
+              : t('clubHouse:selectingFor', { section: getCurrentSection() })}
+          </Typography>
         </Box>
-
         {loading ? (
           <Box display="flex" justifyContent="center" py={6}>
             <CircularProgress sx={{ color: '#8CA551' }} />
@@ -496,8 +648,8 @@ const handleFileSelect = (event, section) => {
                   variant="subtitle2"
                   fontWeight={700}
                   mb={1.5}
-                  sx={{ 
-                    color: '#8CA551', 
+                  sx={{
+                    color: '#8CA551',
                     fontFamily: '"Poppins", sans-serif',
                     display: 'flex',
                     alignItems: 'center',
@@ -505,7 +657,7 @@ const handleFileSelect = (event, section) => {
                   }}
                 >
                   <CloudUpload fontSize="small" />
-          {t('clubHouse:readyToUpload', { count: getCurrentSelectedFiles().length })}
+                  {t('clubHouse:readyToUpload', { count: getCurrentSelectedFiles().length })}
                 </Typography>
                 <Grid container spacing={2}>
                   {getCurrentSelectedFiles().map((file, idx) => (
@@ -527,7 +679,13 @@ const handleFileSelect = (event, section) => {
                         >
                           <Box
                             component="img"
-                            src={URL.createObjectURL(file)}
+                            src={
+                              file.file instanceof File
+                                ? URL.createObjectURL(file.file)
+                                : typeof file.file === 'string'
+                                  ? file.file
+                                  : ''
+                            }
                             alt={`Preview ${idx + 1}`}
                             sx={{
                               width: '100%',
@@ -535,39 +693,16 @@ const handleFileSelect = (event, section) => {
                               objectFit: 'cover'
                             }}
                           />
-                          <Box
-                            sx={{
-                              position: 'absolute',
-                              top: 4,
-                              left: 4,
-                              bgcolor: '#8CA551',
-                              color: 'white',
-                              px: 1,
-                              py: 0.5,
-                              borderRadius: 1,
-                              fontSize: '0.7rem',
-                              fontWeight: 700,
-                              fontFamily: '"Poppins", sans-serif'
-                            }}
-                          >
-                            NEW
-                          </Box>
-                          <IconButton
-                            className="delete-btn"
-                            size="small"
-                            onClick={() => handleRemoveSelectedFile(getCurrentSection(), idx, tab === 2 ? selectedInteriorSection : null)}
-                            sx={{
-                              position: 'absolute',
-                              top: 8,
-                              right: 8,
-                              bgcolor: 'rgba(255, 255, 255, 0.9)',
-                              opacity: 0,
-                              transition: 'opacity 0.3s',
-                              '&:hover': { bgcolor: '#ff5252', color: 'white' }
-                            }}
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
+                          {/* Toggle isPublic */}
+        <Box sx={{ position: 'absolute', top: 8, right: 40, zIndex: 2, pointerEvents: 'auto' }}>
+          <Switch checked={!!file.isPublic} onChange={handleToggleIsPublicSelected(getCurrentSection(), idx, tab === 2 ? selectedInteriorSection : null)} color="success" size="small" />
+        </Box>
+        <Box sx={{ position: 'absolute', top: 4, left: 4, bgcolor: '#8CA551', color: 'white', px: 1, py: 0.5, borderRadius: 1, fontSize: '0.7rem', fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+          NEW
+        </Box>
+        <IconButton className="delete-btn" size="small" onClick={() => handleRemoveSelectedFile(getCurrentSection(), idx, tab === 2 ? selectedInteriorSection : null)} sx={{ position: 'absolute', top: 8, right: 8, zIndex: 3, bgcolor: 'rgba(255, 255, 255, 0.9)', opacity: 0, transition: 'opacity 0.3s', '&:hover': { bgcolor: '#ff5252', color: 'white' } }}>
+          <Delete fontSize="small" />
+        </IconButton>
                         </Paper>
                       </motion.div>
                     </Grid>
@@ -575,7 +710,6 @@ const handleFileSelect = (event, section) => {
                 </Grid>
               </Box>
             )}
-
             {/* ✅ IMÁGENES EXISTENTES EN GCS */}
             {getCurrentExistingImages().length > 0 && (
               <Box>
@@ -585,7 +719,7 @@ const handleFileSelect = (event, section) => {
                   mb={1.5}
                   sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}
                 >
-          {t('clubHouse:uploadedImages', { count: getCurrentExistingImages().length })}
+                  {t('clubHouse:uploadedImages', { count: getCurrentExistingImages().length })}
                 </Typography>
                 <Grid container spacing={2}>
                   <AnimatePresence>
@@ -609,7 +743,7 @@ const handleFileSelect = (event, section) => {
                           >
                             <Box
                               component="img"
-                              src={img}
+                              src={typeof img === 'string' ? img : img.url}
                               alt={`Image ${idx + 1}`}
                               sx={{
                                 width: '100%',
@@ -617,22 +751,13 @@ const handleFileSelect = (event, section) => {
                                 objectFit: 'cover'
                               }}
                             />
-                            <IconButton
-                              className="delete-btn"
-                              size="small"
-                              onClick={() => handleDeleteExistingImage(getCurrentSection(), img, tab === 2 ? selectedInteriorSection : null)}
-                              sx={{
-                                position: 'absolute',
-                                top: 8,
-                                right: 8,
-                                bgcolor: 'rgba(255, 255, 255, 0.9)',
-                                opacity: 0,
-                                transition: 'opacity 0.3s',
-                                '&:hover': { bgcolor: '#ff5252', color: 'white' }
-                              }}
-                            >
-                              <Delete fontSize="small" />
-                            </IconButton>
+                            {/* Switch para editar visibilidad */}
+        <Box sx={{ position: 'absolute', top: 8, right: 40, zIndex: 2, pointerEvents: 'auto' }}>
+          <Switch checked={!!(img.isPublic ?? true)} onChange={e => handleToggleImageVisibility(getCurrentSection(), idx, e.target.checked, tab === 2 ? selectedInteriorSection : null)} color="success" size="small" />
+        </Box>
+        <IconButton className="delete-btn" size="small" onClick={() => handleDeleteExistingImage(getCurrentSection(), img, tab === 2 ? selectedInteriorSection : null)} sx={{ position: 'absolute', top: 8, right: 8, zIndex: 3, bgcolor: 'rgba(255, 255, 255, 0.9)', opacity: 0, transition: 'opacity 0.3s', '&:hover': { bgcolor: '#ff5252', color: 'white' } }}>
+          <Delete fontSize="small" />
+        </IconButton>
                           </Paper>
                         </motion.div>
                       </Grid>
@@ -641,7 +766,6 @@ const handleFileSelect = (event, section) => {
                 </Grid>
               </Box>
             )}
-
             {/* ✅ MENSAJE CUANDO NO HAY NADA */}
             {getCurrentExistingImages().length === 0 && getCurrentSelectedFiles().length === 0 && (
               <Paper
@@ -654,15 +778,13 @@ const handleFileSelect = (event, section) => {
                 }}
               >
                 <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
-                {t('clubHouse:noImagesYet')}               
+                  {t('clubHouse:noImagesYet')}
                 </Typography>
               </Paper>
             )}
           </>
         )}
       </DialogContent>
-
-      {/* ✅ BOTONES DE ACCIÓN */}
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button
           onClick={onClose}
