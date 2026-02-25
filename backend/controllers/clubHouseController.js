@@ -342,6 +342,17 @@ export const getClubHouseInteriorKeys = (req, res) => {
 /**
  * DELETE Club House images by filename and/or custom name.
  * Body: { filenames?: string[], names?: string[], deleteFromStorage?: boolean }
+ *
+ * Uso con filenames (nombres de archivo del listado GCS):
+ *   1. GET /api/upload/files?folder=clubhouse → cada item tiene "name" (ej. "clubhouse/abc123.jpg" o solo "abc123.jpg").
+ *   2. Extraé el nombre de archivo (ej. "abc123.jpg") y pasalo en filenames.
+ *   Ejemplo: { "filenames": ["abc123.jpg", "def456.png"], "deleteFromStorage": true }
+ *
+ * Uso con names (nombres custom de cada imagen en el doc ClubHouse):
+ *   1. GET /api/clubhouse → cada imagen puede tener "name" (ej. "Recepción", "Vista deck").
+ *   2. Pasá esos nombres en el array names.
+ *   Ejemplo: { "names": ["Recepción principal", "Vista deck"], "deleteFromStorage": true }
+ *
  * - filenames: nombres de archivo (ej. "abc123.jpg") extraídos de la URL; se matchea con el último segmento del path.
  * - names: nombres custom (item.name) que quieras borrar.
  * - deleteFromStorage: si true, además borra el archivo en GCS (carpeta clubhouse). Default false.
