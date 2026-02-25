@@ -270,37 +270,67 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
    * - identifier: url completa o identificador; si se pasa, se extrae filename automáticamente
    * - isPublic: boolean
    */
-  updateRecorridoImageVisibility: async (payload) => {
-    try {
-      const { filename, identifier, isPublic } = payload || {};
-      let fileToSend = filename;
+  // updateRecorridoImageVisibility: async (payload) => {
+  //   try {
+  //     const { filename, identifier, isPublic } = payload || {};
+  //     let fileToSend = filename;
 
-      if (!fileToSend && identifier) {
-        // si identifier es una URL, extraer el último segmento antes de los query params
-        try {
-          const url = String(identifier);
-          const lastSegment = url.split('/').pop() || url;
-          fileToSend = decodeURIComponent(lastSegment.split('?')[0]);
-        } catch (e) {
-          // fallback a identifier bruto
-          fileToSend = identifier;
+  //     if (!fileToSend && identifier) {
+  //       // si identifier es una URL, extraer el último segmento antes de los query params
+  //       try {
+  //         const url = String(identifier);
+  //         const lastSegment = url.split('/').pop() || url;
+  //         fileToSend = decodeURIComponent(lastSegment.split('?')[0]);
+  //       } catch (e) {
+  //         // fallback a identifier bruto
+  //         fileToSend = identifier;
+  //       }
+  //     }
+
+  //     if (!fileToSend) {
+  //       throw new Error('updateRecorridoImageVisibility: missing filename or identifier');
+  //     }
+
+  //     const body = { filename: fileToSend, isPublic: !!isPublic };
+  //     // PATCH a la ruta indicada
+  //     const res = await api.patch('/upload/recorrido/visibility', body);
+  //     return res.data;
+  //   } catch (err) {
+  //     // eslint-disable-next-line no-console
+  //     console.error('updateRecorridoImageVisibility error:', err.response?.data || err.message);
+  //     throw err;
+  //   }
+  // },
+    // ...existing code...
+    updateRecorridoVisibility: async (filenameOrPayload, isPublic) => {
+      try {
+        // Normalize input: accept (filename, isPublic) OR ({ filename, isPublic })
+        let payload;
+        if (typeof filenameOrPayload === 'string') {
+          payload = { filename: filenameOrPayload, isPublic: !!isPublic };
+        } else if (filenameOrPayload && typeof filenameOrPayload === 'object') {
+          payload = {
+            filename: filenameOrPayload.filename || filenameOrPayload.name || null,
+            isPublic: !!filenameOrPayload.isPublic
+          };
+        } else {
+          throw new Error('Invalid arguments for updateRecorridoVisibility');
         }
+  
+        if (!payload.filename) {
+          throw new Error('Filename is required for updateRecorridoVisibility');
+        }
+  
+        console.log('uploadService.updateRecorridoVisibility -> sending payload:', payload);
+        const res = await api.patch('/upload/recorrido/visibility', payload);
+        console.log('uploadService.updateRecorridoVisibility response:', res?.data || res);
+        return res.data || res;
+      } catch (err) {
+        console.error('uploadService.updateRecorridoVisibility error:', err.response?.data || err.message || err);
+        throw err;
       }
-
-      if (!fileToSend) {
-        throw new Error('updateRecorridoImageVisibility: missing filename or identifier');
-      }
-
-      const body = { filename: fileToSend, isPublic: !!isPublic };
-      // PATCH a la ruta indicada
-      const res = await api.patch('/upload/recorrido/visibility', body);
-      return res.data;
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('updateRecorridoImageVisibility error:', err.response?.data || err.message);
-      throw err;
-    }
-  },
+    },
+  // ...existing code...
 
 }
 

@@ -85,50 +85,140 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
       setError('Failed to load interior sections');
     }
   };
+  // Normaliza los arrays de imágenes a objetos con url/isPublic/_id/raw
+  const normalizeOrganized = (organized) => {
+    const normItem = (it) => {
+      if (!it) return null;
+      // it puede ser string, o { url, publicUrl, isPublic, _id, ... }
+      if (typeof it === 'string') return { url: it, isPublic: true, _id: null, raw: it };
+      const url = it.url || it.publicUrl || it.path || (typeof it === 'object' && Object.values(it).find(v => typeof v === 'string' && v.startsWith('http'))) || '';
+      return { url, isPublic: typeof it.isPublic === 'boolean' ? it.isPublic : true, _id: it._id || it.id || null, raw: it };
+    };
 
+    const out = { exterior: [], blueprints: [], interior: {}, deck: [] };
+    out.exterior = (organized.exterior || []).map(normItem).filter(Boolean);
+    out.blueprints = (organized.blueprints || []).map(normItem).filter(Boolean);
+    out.deck = (organized.deck || []).map(normItem).filter(Boolean);
+    // interior puede ser objeto con keys
+    const intObj = organized.interior || {};
+    Object.keys(intObj).forEach(k => {
+      out.interior[k] = (intObj[k] || []).map(normItem).filter(Boolean);
+    });
+    return out;
+  };
+  
+  // Debug: cada vez que existingImages cambie, imprime su resumen
+  useEffect(() => {
+    console.log('🔔 existingImages updated:', {
+      exterior: existingImages.exterior.length,
+      blueprints: existingImages.blueprints.length,
+      deck: existingImages.deck.length,
+      interiorKeys: Object.keys(existingImages.interior || {}).reduce((acc, k) => ({ ...acc, [k]: (existingImages.interior[k] || []).length }), {})
+    });
+    // show a sample item for deck if exists
+    if ((existingImages.deck || []).length > 0) {
+      console.log('🔔 existingImages.deck[0]:', existingImages.deck[0]);
+    }
+  }, [existingImages]);
 
+// ...existing code...
   const loadExistingImages = async () => {
     setLoading(true);
     try {
+      console.log('🔎 loadExistingImages: requesting /upload/files?folder=clubhouse');
       const response = await uploadService.getFilesByFolder('clubhouse', true);
+      console.log('🔎 loadExistingImages: response:', response);
+
+      // Si el backend devuelve clubHouse dentro de la respuesta del POST
+      const maybeClubHouse = response?.clubHouse || response?.data?.clubHouse || null;
+      if (maybeClubHouse) {
+        const organizedFromClub = mapClubHouseToOrganized(maybeClubHouse);
+        const normalized = normalizeOrganized(organizedFromClub);
+        console.log('🔁 loadExistingImages: organizedFromClub (normalized):', normalized);
+        setExistingImages(normalized);
+        return;
+      }
+
       if (response.files) {
         const organized = {
           exterior: [],
           blueprints: [],
           interior: {},
-          deck: [] // NEW
+          deck: []
         };
         interiorKeys.forEach(key => {
           organized.interior[key] = [];
         });
-  
+
         response.files.forEach(file => {
           const { _id, section, interiorKey, url, publicUrl, isPublic } = file;
           const imageUrl = url || publicUrl;
-          // guardamos _id y raw (file) para debug/identificación
           const imageObj = { _id, url: imageUrl, isPublic: isPublic ?? true, raw: file };
-          
-          if (section === 'exterior') {
-            organized.exterior.push(imageObj);
-          } else if (section === 'blueprints') {
-            organized.blueprints.push(imageObj);
-          } else if (section === 'interior' && interiorKey) {
-            if (organized.interior[interiorKey]) {
-              organized.interior[interiorKey].push(imageObj);
-            }
-          } else if (section === 'deck') {
-            organized.deck.push(imageObj);
-          }
+
+          if (section === 'exterior') organized.exterior.push(imageObj);
+          else if (section === 'blueprints') organized.blueprints.push(imageObj);
+          else if (section === 'interior' && interiorKey) {
+            if (!organized.interior[interiorKey]) organized.interior[interiorKey] = [];
+            organized.interior[interiorKey].push(imageObj);
+          } else if (section === 'deck') organized.deck.push(imageObj);
+          else organized.exterior.push(imageObj); // fallback
         });
-  
-        setExistingImages(organized);
+
+        const normalized = normalizeOrganized(organized);
+        console.log('🔁 loadExistingImages: organized from files (normalized):', normalized);
+        setExistingImages(normalized);
+      } else {
+        console.warn('🔎 loadExistingImages: no response.files found');
       }
     } catch (err) {
-      console.error('Error loading clubhouse images:', err);
+      console.error('❌ loadExistingImages error:', err);
     } finally {
       setLoading(false);
     }
   };
+
+  // const loadExistingImages = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await uploadService.getFilesByFolder('clubhouse', true);
+  //     if (response.files) {
+  //       const organized = {
+  //         exterior: [],
+  //         blueprints: [],
+  //         interior: {},
+  //         deck: [] // NEW
+  //       };
+  //       interiorKeys.forEach(key => {
+  //         organized.interior[key] = [];
+  //       });
+  
+  //       response.files.forEach(file => {
+  //         const { _id, section, interiorKey, url, publicUrl, isPublic } = file;
+  //         const imageUrl = url || publicUrl;
+  //         // guardamos _id y raw (file) para debug/identificación
+  //         const imageObj = { _id, url: imageUrl, isPublic: isPublic ?? true, raw: file };
+          
+  //         if (section === 'exterior') {
+  //           organized.exterior.push(imageObj);
+  //         } else if (section === 'blueprints') {
+  //           organized.blueprints.push(imageObj);
+  //         } else if (section === 'interior' && interiorKey) {
+  //           if (organized.interior[interiorKey]) {
+  //             organized.interior[interiorKey].push(imageObj);
+  //           }
+  //         } else if (section === 'deck') {
+  //           organized.deck.push(imageObj);
+  //         }
+  //       });
+  
+  //       setExistingImages(organized);
+  //     }
+  //   } catch (err) {
+  //     console.error('Error loading clubhouse images:', err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
     const mapClubHouseToOrganized = (clubHouse) => {
       const organized = {
@@ -292,67 +382,192 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
   };
 
   // ✅ Confirmar y subir TODAS las imágenes seleccionadas
-  const handleConfirmUpload = async () => {
-    setUploading(true);
-    setError(null);
-    try {
-      const uploadPromises = [];
-      // Prepara los arrays para subir: solo archivos y visibilidad
-      const prepareFiles = arr => arr.map(item => ({
-        file: item.file,
-        isPublic: item.isPublic
-      }));
+  // const handleConfirmUpload = async () => {
+  //   setUploading(true);
+  //   setError(null);
+  //   try {
+  //     const uploadPromises = [];
+  //     // Prepara los arrays para subir: solo archivos y visibilidad
+  //     const prepareFiles = arr => arr.map(item => ({
+  //       file: item.file,
+  //       isPublic: item.isPublic
+  //     }));
+  //           console.log('📤 handleConfirmUpload: preparing uploads', {
+  //       exterior: selectedFiles.exterior.length,
+  //       blueprints: selectedFiles.blueprints.length,
+  //       deck: selectedFiles.deck?.length || 0,
+  //       interior: Object.fromEntries(Object.entries(selectedFiles.interior).map(([k, v]) => [k, v.length]))
+  //     });
 
-      // Upload exterior
-      if (selectedFiles.exterior.length > 0) {
-        uploadPromises.push(
-          uploadService.uploadClubhouseImages(prepareFiles(selectedFiles.exterior), 'exterior')
-        );
-      }
-      // Upload blueprints
-      if (selectedFiles.blueprints.length > 0) {
-        uploadPromises.push(
-          uploadService.uploadClubhouseImages(prepareFiles(selectedFiles.blueprints), 'blueprints')
-        );
-      }
-      // Upload deck
-      if (selectedFiles.deck.length > 0) {
-        uploadPromises.push(
-          uploadService.uploadClubhouseImages(prepareFiles(selectedFiles.deck), 'deck')
-        );
-      }
-      // Upload interior sections
-      for (const [key, files] of Object.entries(selectedFiles.interior)) {
-        if (files.length > 0) {
+  //     // Upload exterior
+  //     if (selectedFiles.exterior.length > 0) {
+  //       uploadPromises.push(
+  //         uploadService.uploadClubhouseImages(prepareFiles(selectedFiles.exterior), 'exterior')
+  //       );
+  //     }
+  //     // Upload blueprints
+  //     if (selectedFiles.blueprints.length > 0) {
+  //       uploadPromises.push(
+  //         uploadService.uploadClubhouseImages(prepareFiles(selectedFiles.blueprints), 'blueprints')
+  //       );
+  //     }
+  //     // Upload deck
+  //     if (selectedFiles.deck.length > 0) {
+  //       uploadPromises.push(
+  //         uploadService.uploadClubhouseImages(prepareFiles(selectedFiles.deck), 'deck')
+  //       );
+  //     }
+  //     // Upload interior sections
+  //     for (const [key, files] of Object.entries(selectedFiles.interior)) {
+  //       if (files.length > 0) {
+  //         uploadPromises.push(
+  //           uploadService.uploadClubhouseImages(prepareFiles(files), 'interior', key)
+  //         );
+  //       }
+  //     }
+  //     if (uploadPromises.length === 0) {
+  //       setError('No files selected to upload');
+  //       setUploading(false);
+  //       return;
+  //     }
+  //     console.log('📤 handleConfirmUpload: starting Promise.all for uploads');
+  //     const results = await Promise.all(uploadPromises);
+  //     console.log('📤 handleConfirmUpload: upload results:', results);
+  //     setSelectedFiles({
+  //       exterior: [],
+  //       blueprints: [],
+  //       interior: interiorKeys.reduce((acc, key) => ({ ...acc, [key]: [] }), {}),
+  //       deck: []
+  //     });
+  //     await loadExistingImages();
+  //     if (onImagesUploaded) {
+  //       onImagesUploaded();
+  //     }
+  //     setError(null);
+  //   } catch (err) {
+  //     console.error('Error uploading images:', err);
+  //     setError(err.message || 'Failed to upload images');
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
+
+    // ...existing code...
+    const handleConfirmUpload = async () => {
+      setUploading(true);
+      setError(null);
+      try {
+        const uploadPromises = [];
+        // Prepara los arrays para subir: solo archivos y visibilidad
+        const prepareFiles = arr => arr.map(item => ({
+          file: item.file,
+          isPublic: item.isPublic
+        }));
+        console.log('📤 handleConfirmUpload: preparing uploads', {
+          exterior: selectedFiles.exterior.length,
+          blueprints: selectedFiles.blueprints.length,
+          deck: selectedFiles.deck?.length || 0,
+          interior: Object.fromEntries(Object.entries(selectedFiles.interior).map(([k, v]) => [k, v.length]))
+        });
+  
+        // Upload exterior
+        if (selectedFiles.exterior.length > 0) {
           uploadPromises.push(
-            uploadService.uploadClubhouseImages(prepareFiles(files), 'interior', key)
+            uploadService.uploadClubhouseImages(prepareFiles(selectedFiles.exterior), 'exterior')
           );
         }
-      }
-      if (uploadPromises.length === 0) {
-        setError('No files selected to upload');
+        // Upload blueprints
+        if (selectedFiles.blueprints.length > 0) {
+          uploadPromises.push(
+            uploadService.uploadClubhouseImages(prepareFiles(selectedFiles.blueprints), 'blueprints')
+          );
+        }
+        // Upload deck
+        if (selectedFiles.deck.length > 0) {
+          const deckPayload = prepareFiles(selectedFiles.deck);
+          console.log('📤 handleConfirmUpload: uploading deck payload preview', {
+            section: 'deck',
+            count: deckPayload.length,
+            sample: deckPayload.slice(0, 5).map(p => ({ name: p.file?.name, size: p.file?.size, isPublic: p.isPublic }))
+          });
+          uploadPromises.push(
+            uploadService.uploadClubhouseImages(deckPayload, 'deck')
+          );
+        }
+        // Upload interior sections
+        for (const [key, files] of Object.entries(selectedFiles.interior)) {
+          if (files.length > 0) {
+            uploadPromises.push(
+              uploadService.uploadClubhouseImages(prepareFiles(files), 'interior', key)
+            );
+          }
+        }
+        if (uploadPromises.length === 0) {
+          setError('No files selected to upload');
+          setUploading(false);
+          return;
+        }
+        console.log('📤 handleConfirmUpload: starting Promise.all for uploads');
+        const results = await Promise.all(uploadPromises);
+        console.log('📤 handleConfirmUpload: upload results raw:', results);
+  
+        // intentar extraer clubHouse desde cualquier estructura anidada en `results`
+        const extractClubHouse = (obj) => {
+          if (!obj) return null;
+          if (obj.clubHouse) return obj.clubHouse;
+          if (obj.data && obj.data.clubHouse) return obj.data.clubHouse;
+          if (Array.isArray(obj)) {
+            for (const item of obj) {
+              const found = extractClubHouse(item);
+              if (found) return found;
+            }
+          }
+          if (typeof obj === 'object') {
+            for (const val of Object.values(obj)) {
+              const found = extractClubHouse(val);
+              if (found) return found;
+            }
+          }
+          return null;
+        };
+  
+        let clubHouseFromResponse = null;
+        for (const res of results) {
+          clubHouseFromResponse = extractClubHouse(res);
+          if (clubHouseFromResponse) break;
+        }
+  
+        if (clubHouseFromResponse) {
+          console.log('✅ handleConfirmUpload: clubHouse found in upload response — updating existingImages from clubHouse', clubHouseFromResponse);
+          const organized = mapClubHouseToOrganized(clubHouseFromResponse);
+        const normalized = normalizeOrganized(organized);
+          console.log('✅ handleConfirmUpload: organized (from response) normalized:', normalized);
+          setExistingImages(normalized);
+        } else {
+          console.log('ℹ️ handleConfirmUpload: no clubHouse found in responses, reloading via GET');
+          await loadExistingImages();
+        }
+  
+        // clear selected files
+        setSelectedFiles({
+          exterior: [],
+          blueprints: [],
+          interior: interiorKeys.reduce((acc, key) => ({ ...acc, [key]: [] }), {}),
+          deck: []
+        });
+  
+        if (onImagesUploaded) {
+          onImagesUploaded();
+        }
+        setError(null);
+      } catch (err) {
+        console.error('Error uploading images:', err);
+        setError(err.message || 'Failed to upload images');
+      } finally {
         setUploading(false);
-        return;
       }
-      await Promise.all(uploadPromises);
-      setSelectedFiles({
-        exterior: [],
-        blueprints: [],
-        interior: interiorKeys.reduce((acc, key) => ({ ...acc, [key]: [] }), {}),
-        deck: []
-      });
-      await loadExistingImages();
-      if (onImagesUploaded) {
-        onImagesUploaded();
-      }
-      setError(null);
-    } catch (err) {
-      console.error('Error uploading images:', err);
-      setError(err.message || 'Failed to upload images');
-    } finally {
-      setUploading(false);
-    }
-  };
+    };
+  // ...existing code...
 
   const handleDeleteExistingImage = async (section, imageUrl, interiorKey = null) => {
     // TODO: Implementar endpoint de eliminación

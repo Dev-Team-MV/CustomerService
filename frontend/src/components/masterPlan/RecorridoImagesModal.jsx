@@ -28,37 +28,57 @@ const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, onVi
   };
 
     // NEW: toggle handler that persists visibility (optimistic)
-  const handleToggleIsPublic = async (id, checked) => {
-    const prev = { ...isPublicMap };
-    setIsPublicMap(prevMap => ({ ...prevMap, [id]: checked })); // optimistic
-
-    const identifier = imagesMap && imagesMap[String(id)]
-      ? (typeof imagesMap[String(id)] === 'string' ? imagesMap[String(id)] : imagesMap[String(id)].url || null)
-      : null;
-
-    const payload = {
-      // backend expects filename in body; uploadService will extract filename from identifier if needed
-      identifier,
-      isPublic: checked
-    };
-    console.log('[RecorridoImagesModal] toggle visibility ->', { id, payload });
-
-    try {
-      const res = await uploadService.updateRecorridoImageVisibility(payload);
-      // If backend returns explicit isPublic, use it; otherwise keep optimistic value
-      const serverIsPublic = res?.isPublic ?? res?.data?.isPublic ?? null;
-      if (serverIsPublic !== null && serverIsPublic !== undefined) {
-        setIsPublicMap(prevMap => ({ ...prevMap, [id]: !!serverIsPublic }));
-      } else {
-        // keep optimistic checked value
-        setIsPublicMap(prevMap => ({ ...prevMap, [id]: checked }));
+  // ...existing code...
+    const handleToggleIsPublic = async (id, checked) => {
+      const prev = { ...isPublicMap };
+      setIsPublicMap(prevMap => ({ ...prevMap, [id]: checked })); // optimistic
+  
+      // Obtener el identificador (url o obj) y extraer filename
+      const stored = imagesMap && imagesMap[String(id)];
+      const identifier = stored ? (typeof stored === 'string' ? stored : (stored.url || stored.filename || null)) : null;
+  
+      const getFilenameFromIdentifier = (ident) => {
+        if (!ident) return null;
+        if (typeof ident !== 'string') return null;
+        try {
+          // try URL parse (removes query params)
+          const u = new URL(ident);
+          return u.pathname.split('/').pop();
+        } catch (e) {
+          // fallback: strip query string if present
+          return ident.split('/').pop().split('?')[0];
+        }
+      };
+  
+      const filename = getFilenameFromIdentifier(identifier);
+      if (!filename) {
+        console.warn('[RecorridoImagesModal] No filename could be derived for point', id, { identifier, stored });
+        // revert optimistic if we can't target backend
+        setIsPublicMap(prev);
+        return;
       }
-      console.log('[RecorridoImagesModal] visibility updated on server', res);
-    } catch (err) {
-      console.error('[RecorridoImagesModal] error updating visibility, revert local', err);
-      setIsPublicMap(prev); // revert
-    }
-  };
+  
+      const payload = { filename, isPublic: checked };
+      console.log('[RecorridoImagesModal] toggle visibility -> payload prepared:', payload);
+
+      try {
+        // Send object payload (service accepts both forms now)
+        const res = await uploadService.updateRecorridoVisibility(payload);
+        console.log('[RecorridoImagesModal] updateRecorridoVisibility server response:', res);
+
+        const serverIsPublic = res?.isPublic ?? res?.data?.isPublic ?? null;
+        if (serverIsPublic !== null && serverIsPublic !== undefined) {
+          setIsPublicMap(prevMap => ({ ...prevMap, [id]: !!serverIsPublic }));
+        } else {
+          setIsPublicMap(prevMap => ({ ...prevMap, [id]: checked }));
+        }
+        if (onVisibilityChange) onVisibilityChange(id, { filename, isPublic: !!checked });
+      } catch (err) {
+        console.error('[RecorridoImagesModal] error updating visibility, revert local', err);
+        setIsPublicMap(prev); // revert
+      }
+    };
+  // ...existing code...
 
 
   const handleFileChange = (id, e) => {

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, Button, Paper, Grid, Container, Chip, Tooltip, CircularProgress, Alert, Tab, Tabs } from '@mui/material';
+import { Box, Typography, Button, Paper, Grid, Container, Chip, Tooltip, CircularProgress, Alert, Tab, Tabs, Dialog, DialogContent, DialogActions, IconButton } from '@mui/material';
 import { motion } from 'framer-motion';
 import { PhotoLibrary, Map, Layers, MeetingRoom } from '@mui/icons-material';
 import ClubhouseImagesModal from '../components/ClubHouse/ClubImagesModal';
 import uploadService from '../services/uploadService';
 import PageHeader from '../components/PageHeader';
 import { useTranslation } from 'react-i18next';
+
 
 const ClubhouseManager = () => {
   const { t } = useTranslation(['clubhouse', 'common']);
@@ -19,6 +20,25 @@ const ClubhouseManager = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tab, setTab] = useState(0);
+
+  // ...existing code...
+const [lightboxOpen, setLightboxOpen] = useState(false);
+const [lightboxImages, setLightboxImages] = useState([]);
+const [lightboxIndex, setLightboxIndex] = useState(0);
+
+const openLightbox = (images, index = 0) => {
+  setLightboxImages(images || []);
+  setLightboxIndex(index || 0);
+  setLightboxOpen(true);
+};
+const closeLightbox = () => {
+  setLightboxOpen(false);
+  setLightboxImages([]);
+  setLightboxIndex(0);
+};
+const showPrev = () => setLightboxIndex(i => Math.max(0, i - 1));
+const showNext = () => setLightboxIndex(i => Math.min(lightboxImages.length - 1, i + 1));
+
 
   useEffect(() => {
     loadData();
@@ -370,7 +390,7 @@ return (
           </Grid>
         )}
 
-        {tab === 2 && (
+        {/* {tab === 2 && (
           // Interior by Section
           <Grid container spacing={2}>
             {interiorKeys.length === 0 ? (
@@ -417,7 +437,163 @@ return (
               ))
             )}
           </Grid>
-        )}
+        )} */}
+
+        {tab === 2 && (
+  // Interior by Section (preview per section + lightbox)
+  <Grid container spacing={2}>
+    {interiorKeys.length === 0 ? (
+      <Grid item xs={12}>
+        <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100', borderRadius: 2 }}>
+          <Typography variant="caption" color="text.secondary">{t('clubHouse:noSectionsConfigured')}</Typography>
+        </Paper>
+      </Grid>
+    ) : (
+      interiorKeys.map((section) => {
+        const imgs = images.interior?.[section] || [];
+        const total = imgs.length;
+        const preview = imgs.slice(0, 3);
+        return (
+          <Grid item xs={12} md={6} lg={4} key={section}>
+            <Paper sx={{ p: 2, borderRadius: 2, height: '100%', bgcolor: '#f8fafc' }}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                <Typography variant="subtitle2" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', fontWeight: 600 }}>
+                  {section}
+                </Typography>
+                {total > 0 && (
+                  <Button size="small" onClick={() => openLightbox(imgs, 0)} sx={{ textTransform: 'none' }}>
+                    {t('clubHouse:viewAll')} ({total})
+                  </Button>
+                )}
+              </Box>
+
+              {total === 0 ? (
+                <Paper sx={{ p: 1, textAlign: 'center', bgcolor: 'grey.100', borderRadius: 2 }}>
+                  <Typography variant="caption" color="text.secondary">{t('clubHouse:noImages')}</Typography>
+                </Paper>
+              ) : (
+                <Grid container spacing={1}>
+                  {preview.map((img, idx) => (
+                    <Grid item xs={4} key={idx}>
+                      <Box
+                        onClick={() => openLightbox(imgs, idx)}
+                        component="img"
+                        src={typeof img === 'string' ? img : img.url || img}
+                        alt={`${section} ${idx + 1}`}
+                        sx={{
+                          width: '100%',
+                          height: 120,
+                          objectFit: 'cover',
+                          borderRadius: 1,
+                          cursor: 'pointer',
+                          display: 'block'
+                        }}
+                      />
+                    </Grid>
+                  ))}
+
+                  {total > 3 && (
+                    <Grid item xs={12}>
+                      <Box
+                        onClick={() => openLightbox(imgs, 3)}
+                        sx={{
+                          position: 'relative',
+                          width: '100%',
+                          height: 120,
+                          borderRadius: 1,
+                          overflow: 'hidden',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Box
+                          component="img"
+                          src={typeof imgs[3] === 'string' ? imgs[3] : imgs[3]?.url || imgs[3]}
+                          alt={`${section} more`}
+                          sx={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(2px) brightness(0.6)' }}
+                        />
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            inset: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontWeight: 700,
+                            fontSize: '1rem'
+                          }}
+                        >
+                          +{total - 3} more
+                        </Box>
+                      </Box>
+                    </Grid>
+                  )}
+                </Grid>
+              )}
+            </Paper>
+          </Grid>
+        );
+      })
+    )}
+  </Grid>
+)}
+
+{tab === 3 && (
+  // Deck images tab
+  <Grid container spacing={2}>
+    {(images.deck || []).length === 0 ? (
+      <Grid item xs={12}>
+        <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100', borderRadius: 2 }}>
+          <Typography variant="caption" color="text.secondary">{t('clubHouse:noImagesUploaded')}</Typography>
+        </Paper>
+      </Grid>
+    ) : (
+      (images.deck || []).map((img, idx) => (
+        <Grid item xs={6} md={4} key={idx}>
+          <Box
+            onClick={() => openLightbox(images.deck, idx)}
+            component="img"
+            src={typeof img === 'string' ? img : img.url || img}
+            alt={`Deck ${idx + 1}`}
+            sx={{
+              width: '100%',
+              height: '250px',
+              objectFit: 'contain',
+              borderRadius: 2,
+              boxShadow: '0 2px 8px rgba(140, 165, 81, 0.08)',
+              cursor: 'pointer'
+            }}
+          />
+        </Grid>
+      ))
+    )}
+  </Grid>
+)}
+
+{/* Lightbox Dialog (simple) */}
+<Dialog open={lightboxOpen} onClose={closeLightbox} maxWidth="xl" fullWidth>
+  <DialogContent sx={{ bgcolor: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 400 }}>
+    {lightboxImages.length > 0 ? (
+      <Box sx={{ width: '100%', textAlign: 'center', position: 'relative' }}>
+        <IconButton onClick={showPrev} disabled={lightboxIndex <= 0} sx={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: 'white' }}>
+          ‹
+        </IconButton>
+        <Box component="img" src={typeof lightboxImages[lightboxIndex] === 'string' ? lightboxImages[lightboxIndex] : lightboxImages[lightboxIndex]?.url || lightboxImages[lightboxIndex]} alt={`Image ${lightboxIndex + 1}`} sx={{ maxHeight: '70vh', maxWidth: '100%', objectFit: 'contain' }} />
+        <IconButton onClick={showNext} disabled={lightboxIndex >= lightboxImages.length - 1} sx={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', color: 'white' }}>
+          ›
+        </IconButton>
+        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', display: 'block', mt: 1 }}>{`${lightboxIndex + 1} / ${lightboxImages.length}`}</Typography>
+      </Box>
+    ) : (
+      <Typography sx={{ color: 'white' }}>No images</Typography>
+    )}
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={closeLightbox}>{t('common:close') || 'Close'}</Button>
+  </DialogActions>
+</Dialog>
+
+
       </Paper>
 
     <ClubhouseImagesModal 
