@@ -9,13 +9,13 @@ const router = express.Router()
  * @swagger
  * /api/clubhouse:
  *   get:
- *     summary: Get Club House content (exterior, blueprints, interior images)
+ *     summary: Get Club House content (exterior, blueprints, deck, interior images)
  *     tags: [ClubHouse]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Club House document with exterior[], blueprints[], interior{ amenityName: [urls] }
+ *         description: Club House document with exterior[], blueprints[], deck[], interior{ amenityName: [urls] }
  *         content:
  *           application/json:
  *             schema:
@@ -32,7 +32,7 @@ router.get('/', protect, getClubHouse)
  *     tags: [ClubHouse]
  *     responses:
  *       200:
- *         description: Club house with exterior[], blueprints[], interior{} and optional recorridoVisibility (only public images included)
+ *         description: Club house with exterior[], blueprints[], deck[], interior{} and optional recorridoVisibility (only public images included)
  *         content:
  *           application/json:
  *             schema:
@@ -42,6 +42,9 @@ router.get('/', protect, getClubHouse)
  *                   type: array
  *                   items: { type: object, properties: { url: { type: string }, isPublic: { type: boolean } } }
  *                 blueprints:
+ *                   type: array
+ *                   items: { type: object, properties: { url: { type: string }, isPublic: { type: boolean } } }
+ *                 deck:
  *                   type: array
  *                   items: { type: object, properties: { url: { type: string }, isPublic: { type: boolean } } }
  *                 interior:
@@ -87,7 +90,7 @@ router.get('/interior-keys', protect, getClubHouseInteriorKeys)
  *             properties:
  *               section:
  *                 type: string
- *                 enum: [exterior, blueprints, interior]
+ *                 enum: [exterior, blueprints, deck, interior]
  *               interiorKey:
  *                 type: string
  *                 description: Required when section=interior. Use one of GET /api/clubhouse/interior-keys (e.g. Reception, Managers Office, Conference Room)
@@ -130,7 +133,7 @@ router.post('/images', protect, admin, upload.array('images', 20), uploadClubHou
  *             properties:
  *               section:
  *                 type: string
- *                 enum: [exterior, blueprints, interior]
+ *                 enum: [exterior, blueprints, deck, interior]
  *               interiorKey:
  *                 type: string
  *                 description: Required when section=interior

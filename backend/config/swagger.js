@@ -166,6 +166,17 @@ const options = {
               },
               description: 'Blueprint images (url, isPublic)'
             },
+            deck: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  url: { type: 'string' },
+                  isPublic: { type: 'boolean' }
+                }
+              },
+              description: 'Deck images (url, isPublic)'
+            },
             interior: {
               type: 'object',
               additionalProperties: {
