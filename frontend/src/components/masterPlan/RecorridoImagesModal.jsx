@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Switch, FormControlLabel } from '@mui/material';
 import uploadService from '../../services/uploadService'
 
-const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, loading }) => {
+const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, onVisibilityChange, loading }) => {
   const { t } = useTranslation(['masterPlan']);
   const [files, setFiles] = useState({})
   const [previews, setPreviews] = useState({})

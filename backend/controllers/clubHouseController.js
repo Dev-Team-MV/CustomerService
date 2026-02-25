@@ -6,12 +6,16 @@ import path from 'path'
 
 const GCS_FOLDER = 'clubhouse'
 
-/** Normaliza un ítem de imagen (legacy string o { url, isPublic }) a { url, isPublic }. */
+/** Normaliza un ítem de imagen (legacy string o { url, isPublic }) a { url, isPublic }. Filtra ítems sin url válido. */
 function normalizeImageItem (item) {
   if (item == null) return null
-  if (typeof item === 'string') return { url: item, isPublic: true }
+  if (typeof item === 'string') {
+    const url = (item || '').trim()
+    return url ? { url, isPublic: true } : null
+  }
   if (typeof item === 'object' && typeof item.url === 'string') {
-    return { url: item.url, isPublic: item.isPublic !== false }
+    const url = item.url.trim()
+    return url ? { url, isPublic: item.isPublic !== false } : null
   }
   return null
 }
@@ -22,14 +26,17 @@ function normalizeImageArray (arr) {
   return arr.map(normalizeImageItem).filter(Boolean)
 }
 
-/** Migra y normaliza el documento: strings -> { url, isPublic: true }. Guarda si hubo cambios. */
+/** Migra y normaliza el documento: strings -> { url, isPublic: true }. Elimina ítems sin url válido. Guarda si hubo cambios. */
 async function migrateAndNormalize (doc) {
   let changed = false
 
   if (Array.isArray(doc.exterior)) {
     const normalized = normalizeImageArray(doc.exterior)
-    const hasLegacy = doc.exterior.some((x) => typeof x === 'string')
-    if (hasLegacy || (normalized.length > 0 && typeof doc.exterior[0] === 'string')) {
+    const same = normalized.length === doc.exterior.length && normalized.every((n, i) => {
+      const o = doc.exterior[i]
+      return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic
+    })
+    if (!same) {
       doc.exterior = normalized
       changed = true
     }
@@ -37,9 +44,24 @@ async function migrateAndNormalize (doc) {
 
   if (Array.isArray(doc.blueprints)) {
     const normalized = normalizeImageArray(doc.blueprints)
-    const hasLegacy = doc.blueprints.some((x) => typeof x === 'string')
-    if (hasLegacy || (normalized.length > 0 && typeof doc.blueprints[0] === 'string')) {
+    const same = normalized.length === doc.blueprints.length && normalized.every((n, i) => {
+      const o = doc.blueprints[i]
+      return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic
+    })
+    if (!same) {
       doc.blueprints = normalized
+      changed = true
+    }
+  }
+
+  if (Array.isArray(doc.deck)) {
+    const normalized = normalizeImageArray(doc.deck)
+    const same = normalized.length === doc.deck.length && normalized.every((n, i) => {
+      const o = doc.deck[i]
+      return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic
+    })
+    if (!same) {
+      doc.deck = normalized
       changed = true
     }
   }
@@ -49,8 +71,11 @@ async function migrateAndNormalize (doc) {
       const arr = doc.interior[key]
       if (!Array.isArray(arr)) continue
       const normalized = normalizeImageArray(arr)
-      const hasLegacy = arr.some((x) => typeof x === 'string')
-      if (hasLegacy || (normalized.length > 0 && typeof arr[0] === 'string')) {
+      const same = normalized.length === arr.length && normalized.every((n, i) => {
+        const o = arr[i]
+        return (typeof o === 'string' ? o === n.url : o?.url === n.url) && o?.isPublic === n.isPublic
+      })
+      if (!same) {
         doc.interior[key] = normalized
         changed = true
       }
@@ -63,7 +88,7 @@ async function migrateAndNormalize (doc) {
 }
 
 /**
- * GET Club House (singleton). Returns the single document with exterior, blueprints, interior.
+ * GET Club House (singleton). Returns the single document with exterior, blueprints, interior, deck.
  * Cada imagen es { url, isPublic }. isPublic = true si se puede mostrar sin token.
  */
 export const getClubHouse = async (req, res) => {
@@ -79,9 +104,48 @@ export const getClubHouse = async (req, res) => {
   }
 }
 
+/** Filtra un array de imágenes dejando solo las que tienen isPublic === true. */
+function filterPublicImages (arr) {
+  if (!Array.isArray(arr)) return []
+  return arr.map(normalizeImageItem).filter(Boolean).filter((item) => item.isPublic === true)
+}
+
+/**
+ * GET Club House (public). Returns clubhouse with only public images (isPublic: true).
+ * No authentication required. For public site, landing, etc.
+ */
+export const getClubHousePublic = async (req, res) => {
+  try {
+    let doc = await ClubHouse.findOne()
+    if (!doc) {
+      doc = await ClubHouse.create({})
+    }
+    doc = await migrateAndNormalize(doc)
+
+    const publicPayload = {
+      exterior: filterPublicImages(doc.exterior),
+      blueprints: filterPublicImages(doc.blueprints),
+      deck: filterPublicImages(doc.deck),
+      interior: {}
+    }
+    if (doc.interior && typeof doc.interior === 'object') {
+      for (const key of Object.keys(doc.interior)) {
+        publicPayload.interior[key] = filterPublicImages(doc.interior[key])
+      }
+    }
+    if (doc.recorridoVisibility && typeof doc.recorridoVisibility === 'object') {
+      publicPayload.recorridoVisibility = doc.recorridoVisibility
+    }
+
+    res.json(publicPayload)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 /**
  * POST Upload images to Club House.
- * Body (form-data): section = 'exterior' | 'blueprints' | 'interior'
+ * Body (form-data): section = 'exterior' | 'blueprints' | 'deck' | 'interior'
  *   - If section = 'interior', required: interiorKey (e.g. 'Reception', 'Managers Office', ...)
  *   - isPublic = 'true' | 'false' (opcional): si la(s) imagen(es) se pueden mostrar sin token. Por defecto true.
  * Files: 'images' (array of files) or 'image' (single file)
@@ -100,9 +164,9 @@ export const uploadClubHouseImages = async (req, res) => {
     }
 
     const section = (req.body.section || '').toLowerCase()
-    if (!['exterior', 'blueprints', 'interior'].includes(section)) {
+    if (!['exterior', 'blueprints', 'deck', 'interior'].includes(section)) {
       return res.status(400).json({
-        message: "section is required and must be one of: exterior, blueprints, interior"
+        message: "section is required and must be one of: exterior, blueprints, deck, interior"
       })
     }
 
@@ -127,6 +191,17 @@ export const uploadClubHouseImages = async (req, res) => {
 
     doc = await migrateAndNormalize(doc)
 
+    // Asegurar arrays válidos por si la DB tenía ítems sin url (evitar fallo de validación al guardar)
+    doc.exterior = normalizeImageArray(doc.exterior || [])
+    doc.blueprints = normalizeImageArray(doc.blueprints || [])
+    doc.deck = normalizeImageArray(doc.deck || [])
+    if (doc.interior && typeof doc.interior === 'object') {
+      for (const k of Object.keys(doc.interior)) {
+        if (Array.isArray(doc.interior[k])) doc.interior[k] = normalizeImageArray(doc.interior[k])
+      }
+      doc.markModified('interior')
+    }
+
     const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
     const uploadedItems = []
 
@@ -150,6 +225,9 @@ export const uploadClubHouseImages = async (req, res) => {
     } else if (section === 'blueprints') {
       doc.blueprints = doc.blueprints || []
       doc.blueprints.push(...uploadedItems)
+    } else if (section === 'deck') {
+      doc.deck = doc.deck || []
+      doc.deck.push(...uploadedItems)
     } else {
       const key = req._clubHouseInteriorKey
       if (!doc.interior) doc.interior = {}
@@ -183,9 +261,9 @@ export const updateClubHouseImageVisibility = async (req, res) => {
   try {
     const { section, interiorKey, index, isPublic } = req.body
     const sec = (section || '').toLowerCase()
-    if (!['exterior', 'blueprints', 'interior'].includes(sec)) {
+    if (!['exterior', 'blueprints', 'deck', 'interior'].includes(sec)) {
       return res.status(400).json({
-        message: "section is required and must be one of: exterior, blueprints, interior"
+        message: "section is required and must be one of: exterior, blueprints, deck, interior"
       })
     }
     const idx = index !== undefined && index !== '' ? parseInt(index, 10) : -1
@@ -203,6 +281,7 @@ export const updateClubHouseImageVisibility = async (req, res) => {
     let arr = null
     if (sec === 'exterior') arr = doc.exterior || []
     else if (sec === 'blueprints') arr = doc.blueprints || []
+    else if (sec === 'deck') arr = doc.deck || []
     else {
       const key = (interiorKey || req.body.interior_key || '').trim()
       if (!key) {

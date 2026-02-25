@@ -17,7 +17,11 @@ const DEFAULT_INTERIOR_KEYS = [
   'Laundry',
   'Counter',
   'Catering',
-  'Mural'
+  'Mural',
+  'Lakeside',
+  'Machines',
+  'Counter Hallway',
+  'Bathroom Hallway'
 ]
 
 function defaultInterior () {
@@ -51,6 +55,15 @@ const clubHouseSchema = new mongoose.Schema(
     interior: {
       type: mongoose.Schema.Types.Mixed,
       default: defaultInterior
+    },
+    deck: {
+      type: [clubHouseImageSchema],
+      default: () => []
+    },
+    /** Visibilidad por archivo en carpeta recorrido: { "recorrido.1.jpg": true, "recorrido.2.jpg": false } */
+    recorridoVisibility: {
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({})
     }
   },
   {

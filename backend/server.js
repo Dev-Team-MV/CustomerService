@@ -21,6 +21,7 @@ import contractRoutes from './routes/contractRoutes.js'
 import clubHouseRoutes from './routes/clubHouseRoutes.js'
 import outdoorAmenitiesRoutes from './routes/outdoorAmenitiesRoutes.js'
 import underConstructionRoutes from './routes/underConstructionRoutes.js'
+import familyGroupRoutes from './routes/familyGroupRoutes.js'
 
 const app = express()
 
@@ -45,6 +46,7 @@ app.use('/api/contracts', contractRoutes)
 app.use('/api/clubhouse', clubHouseRoutes)
 app.use('/api/outdoor-amenities', outdoorAmenitiesRoutes)
 app.use('/api/under-construction', underConstructionRoutes)
+app.use('/api/family-groups', familyGroupRoutes)
 
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))

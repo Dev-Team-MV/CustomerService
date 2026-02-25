@@ -9,7 +9,8 @@ const mediaItemSchema = new mongoose.Schema(
     },
     url: { type: String, required: true, trim: true },
     name: { type: String, trim: true, default: '' },
-    order: { type: Number, required: true, min: 1 }
+    order: { type: Number, required: true, min: 1 },
+    isPublic: { type: Boolean, default: true }
   },
   { _id: false }
 )

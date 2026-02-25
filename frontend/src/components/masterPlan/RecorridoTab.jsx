@@ -105,15 +105,11 @@ const fetchRecorridoImages = async () => {
 };
 // ...existing code...
 
-  // Asocia cada imagen al punto por id
-  const recorridoPoints = puntosBase.map((p) => {
-    const img = imagesMap && imagesMap[String(p.id)];
-    const imageUrl = img ? (typeof img === 'string' ? img : (img.url || null)) : null;
-    return {
-      ...p,
-      image: imageUrl
-    };
-  });
+  // Asocia cada imagen al punto por id (image puede ser { url, isPublic, filename } o null)
+  const recorridoPoints = puntosBase.map((p) => ({
+    ...p,
+    image: imagesMap[p.id] || null
+  }))
 
   // --- ZOOM & PAN ---
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.3, 3))
@@ -189,6 +185,11 @@ const fetchRecorridoImages = async () => {
     setUploading(false);
     fetchRecorridoImages();
   };
+
+  const handleRecorridoVisibility = async (filename, isPublic) => {
+    await uploadService.updateRecorridoVisibility(filename, isPublic)
+    fetchRecorridoImages()
+  }
 
   return (
     <>
@@ -368,7 +369,7 @@ const fetchRecorridoImages = async () => {
               {recorridoPoints[selectedIdx].image ? (
                 <Box
                   component="img"
-                  src={recorridoPoints[selectedIdx].image}
+                  src={typeof recorridoPoints[selectedIdx].image === 'object' ? recorridoPoints[selectedIdx].image.url : recorridoPoints[selectedIdx].image}
                   alt={recorridoPoints[selectedIdx].name}
                   sx={{
                     width: '100%',
@@ -451,6 +452,7 @@ const fetchRecorridoImages = async () => {
         puntos={puntosBase}
         imagesMap={imagesMap}
         onUpload={handleUpload}
+        onVisibilityChange={handleRecorridoVisibility}
         loading={uploading}
       />
     </>

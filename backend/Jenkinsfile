@@ -22,7 +22,29 @@ pipeline {
             }
         }
 
+        // Solo seguir si hubo cambios en backend/ (evita construir backend cuando el commit solo toca frontend)
+        stage('Check changes') {
+            steps {
+                script {
+                    def changed = sh(script: """
+                        if [ -n \"${env.GIT_PREVIOUS_COMMIT ?: ''}\" ] && [ \"${env.GIT_PREVIOUS_COMMIT}\" != \"${env.GIT_COMMIT ?: ''}\" ]; then
+                            git diff --name-only \"${env.GIT_PREVIOUS_COMMIT}\" \"${env.GIT_COMMIT}\" 2>/dev/null || true
+                        else
+                            (git rev-parse --quiet --verify HEAD~1 >/dev/null 2>&1 && git diff --name-only HEAD~1 HEAD) || echo 'backend/'
+                        fi
+                    """, returnStdout: true).trim()
+                    env.SHOULD_RUN = (changed != '' && changed.split('\n').any { it.startsWith('backend/') }) ? 'true' : 'false'
+                    echo "Changed files: ${changed.replace('\n', ', ')}"
+                    echo "SHOULD_RUN (backend): ${env.SHOULD_RUN}"
+                    if (env.SHOULD_RUN == 'false') {
+                        currentBuild.description = 'Skipped (no backend changes)'
+                    }
+                }
+            }
+        }
+
         stage('Set environment') {
+            when { expression { env.SHOULD_RUN == 'true' } }
             steps {
                 script {
                     def branch = env.BRANCH_NAME ?: env.GIT_BRANCH?.replaceFirst('^origin/', '') ?: 'develop'
@@ -68,6 +90,7 @@ pipeline {
         }
 
         stage('Install') {
+            when { expression { env.SHOULD_RUN == 'true' } }
             steps {
                 dir(env.APP_DIR) {
                     sh '''#!/bin/bash
@@ -85,6 +108,7 @@ pipeline {
         }
 
         stage('Build Docker') {
+            when { expression { env.SHOULD_RUN == 'true' } }
             steps {
                 dir(env.APP_DIR) {
                     sh "docker build -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} ."
@@ -93,6 +117,7 @@ pipeline {
         }
 
         stage('Deploy') {
+            when { expression { env.SHOULD_RUN == 'true' } }
             steps {
                 script {
                     withCredentials([

@@ -107,7 +107,7 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
           const imageUrl = url || publicUrl;
           // guardamos _id y raw (file) para debug/identificación
           const imageObj = { _id, url: imageUrl, isPublic: isPublic ?? true, raw: file };
-  
+          
           if (section === 'exterior') {
             organized.exterior.push(imageObj);
           } else if (section === 'blueprints') {

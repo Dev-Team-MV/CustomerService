@@ -7,6 +7,11 @@ import {
   deleteProperty,
   getPropertyStats
 } from '../controllers/propertyController.js'
+import {
+  shareProperty,
+  revokePropertyShare,
+  getPropertyShares
+} from '../controllers/propertyShareController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -92,6 +97,11 @@ router.route('/')
  *         description: Property statistics
  */
 router.get('/stats', protect, getPropertyStats)
+
+// Share routes (must be before /:id)
+router.get('/:id/shares', protect, getPropertyShares)
+router.post('/:id/share', protect, shareProperty)
+router.delete('/:id/share/:userId', protect, revokePropertyShare)
 
 /**
  * @swagger
