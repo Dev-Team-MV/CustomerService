@@ -265,6 +265,7 @@ function mapClubHouseFilesToSections (clubHouseDoc) {
 
   add('exterior', null, clubHouseDoc.exterior)
   add('blueprints', null, clubHouseDoc.blueprints)
+  add('deck', null, clubHouseDoc.deck)
   if (clubHouseDoc.interior && typeof clubHouseDoc.interior === 'object') {
     Object.entries(clubHouseDoc.interior).forEach(([key, urls]) => {
       add('interior', key, urls)
@@ -275,7 +276,7 @@ function mapClubHouseFilesToSections (clubHouseDoc) {
 
 /**
  * List files in a GCS folder (prefix). Returns file names and URLs (public or signed).
- * For folder=clubhouse, enriches each file with section (exterior|blueprints|interior) and interiorKey when applicable.
+ * For folder=clubhouse, enriches each file with section (exterior|blueprints|deck|interior) and interiorKey when applicable.
  * GET /api/upload/files?folder=clubhouse
  * GET /api/upload/files?folder=clubhouse&enrich=false to skip ClubHouse enrichment
  */
