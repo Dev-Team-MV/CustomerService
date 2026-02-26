@@ -10,10 +10,10 @@ const AmenitiesGalleryModal = ({
   onClose,
   amenity,
   amenities = [],
+  images: imagesProp, // <--- NUEVO: recibe images como prop opcional
   isPublicView
 }) => {
   const { t } = useTranslation(['amenities']);  
-  // Siempre busca el index por name para evitar problemas de id
   const amenityIndex = amenity && amenities.length
     ? amenities.findIndex(a => a.name === amenity.name)
     : 0
@@ -21,7 +21,6 @@ const AmenitiesGalleryModal = ({
   const [currentAmenityIndex, setCurrentAmenityIndex] = useState(amenityIndex)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-  // Sincroniza el index cuando cambian las props
   useEffect(() => {
     if (open && amenity && amenities.length) {
       const idx = amenities.findIndex(a => a.name === amenity.name)
@@ -29,9 +28,22 @@ const AmenitiesGalleryModal = ({
       setCurrentImageIndex(0)
     }
   }, [open, amenity, amenities])
-
   const currentAmenity = amenities[currentAmenityIndex] || amenity
-  const images = currentAmenity?.images || []
+
+  // --- ADAPTACIÓN AQUÍ ---
+  // Si imagesProp está presente, úsalo; si no, usa las del amenity
+  const imagesRaw = imagesProp !== undefined
+    ? imagesProp
+    : (currentAmenity?.images || []);
+
+  // Normaliza a array de URLs
+  const images = imagesRaw.map(img =>
+    typeof img === 'string'
+      ? img
+      : img?.url || ''
+  );
+  // -----------------------
+
   const displayImages = isPublicView ? images.slice(0, 3) : images
   const hasImages = displayImages.length > 0
   const totalImages = images.length

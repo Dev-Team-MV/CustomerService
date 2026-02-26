@@ -85,24 +85,69 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
       setError('Failed to load interior sections');
     }
   };
+    const extractPathFromUrl = (url) => {
+    if (!url) return null;
+    try {
+      const u = new URL(url);
+      let p = decodeURIComponent(u.pathname || '');
+      p = p.replace(/^\/+/, ''); // remove leading slash
+      const idx = p.indexOf('clubhouse/');
+      if (idx !== -1) return p.slice(idx);
+      // fallback: return decoded pathname
+      return p;
+    } catch (e) {
+      const idx = typeof url === 'string' ? url.indexOf('clubhouse/') : -1;
+      if (idx !== -1) return url.slice(idx);
+      const qIdx = typeof url === 'string' ? url.indexOf('?') : -1;
+      return qIdx === -1 ? url : url.slice(0, qIdx);
+    }
+  };
+
+    const stableKeyForImage = (img, idx) => {
+    if (!img) return idx;
+    if (img._id) return img._id;
+    if (img.storagePath) return img.storagePath;
+    if (typeof img.url === 'string') return img.url.split('?')[0];
+    return idx;
+  };
+
+    const sortImagesByKey = (arr = []) => {
+      return (arr || []).slice().sort((a, b) => {
+        // Usa name, storagePath, o createdAt si existe
+        const ka = a?.storagePath || a?.name || a?.createdAt || '';
+        const kb = b?.storagePath || b?.name || b?.createdAt || '';
+        return ka.localeCompare(kb);
+      });
+    };
+
   // Normaliza los arrays de imágenes a objetos con url/isPublic/_id/raw
   const normalizeOrganized = (organized) => {
     const normItem = (it) => {
       if (!it) return null;
-      // it puede ser string, o { url, publicUrl, isPublic, _id, ... }
-      if (typeof it === 'string') return { url: it, isPublic: true, _id: null, raw: it };
+      if (typeof it === 'string') {
+        const storagePath = extractPathFromUrl(it) || it;
+        return { url: it, isPublic: true, _id: null, raw: it, storagePath };
+      }
       const url = it.url || it.publicUrl || it.path || (typeof it === 'object' && Object.values(it).find(v => typeof v === 'string' && v.startsWith('http'))) || '';
-      return { url, isPublic: typeof it.isPublic === 'boolean' ? it.isPublic : true, _id: it._id || it.id || null, raw: it };
+      const storagePath = it.name || it.path || extractPathFromUrl(url) || null;
+      return { url, isPublic: typeof it.isPublic === 'boolean' ? it.isPublic : true, _id: it._id || it.id || null, raw: it, storagePath };
     };
 
     const out = { exterior: [], blueprints: [], interior: {}, deck: [] };
     out.exterior = (organized.exterior || []).map(normItem).filter(Boolean);
     out.blueprints = (organized.blueprints || []).map(normItem).filter(Boolean);
     out.deck = (organized.deck || []).map(normItem).filter(Boolean);
-    // interior puede ser objeto con keys
     const intObj = organized.interior || {};
     Object.keys(intObj).forEach(k => {
       out.interior[k] = (intObj[k] || []).map(normItem).filter(Boolean);
+    });
+
+        // sort each section deterministically to keep stable order across updates
+    out.exterior = sortImagesByKey(out.exterior);
+    out.blueprints = sortImagesByKey(out.blueprints);
+    out.deck = sortImagesByKey(out.deck);
+    Object.keys(out.interior).forEach(k => {
+      out.interior[k] = sortImagesByKey(out.interior[k]);
     });
     return out;
   };
@@ -121,7 +166,6 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
     }
   }, [existingImages]);
 
-// ...existing code...
   const loadExistingImages = async () => {
     setLoading(true);
     try {
@@ -163,6 +207,32 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
           } else if (section === 'deck') organized.deck.push(imageObj);
           else organized.exterior.push(imageObj); // fallback
         });
+
+              // --- NUEVO: intentar traer archivos específicos de "deck" si no llegaron como section
+      try {
+        let deckResponse = null;
+        try {
+          deckResponse = await uploadService.getDeckFiles(true);
+        } catch (err) {
+          // fallback a otro endpoint si existe
+          try {
+            deckResponse = await uploadService.getClubhouseDeckFiles(true);
+          } catch (err2) {
+            deckResponse = null;
+          }
+        }
+        if (deckResponse?.files && deckResponse.files.length) {
+          deckResponse.files.forEach(f => {
+            const imageUrl = f.url || f.publicUrl || f.path || f;
+            // evitar duplicados por URL
+            if (!organized.deck.some(i => (i.url || i) === imageUrl)) {
+              organized.deck.push({ _id: f._id, url: imageUrl, isPublic: f.isPublic ?? true, raw: f });
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Could not load deck-specific files:', err);
+      }
 
         const normalized = normalizeOrganized(organized);
         console.log('🔁 loadExistingImages: organized from files (normalized):', normalized);
@@ -220,14 +290,67 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
   //   }
   // };
 
-    const mapClubHouseToOrganized = (clubHouse) => {
+    // const mapClubHouseToOrganized = (clubHouse) => {
+    //   const organized = {
+    //     exterior: [],
+    //     blueprints: [],
+    //     interior: {},
+    //     deck: [] // NEW
+    //   };
+    //   // asegúrate de tener las keys de interior
+    //   interiorKeys.forEach(key => {
+    //     organized.interior[key] = [];
+    //   });
+    
+    //   if (!clubHouse) return organized;
+    
+    //   (clubHouse.exterior || []).forEach(item => {
+    //     organized.exterior.push({
+    //       _id: item._id,
+    //       url: item.url || item.publicUrl,
+    //       isPublic: item.isPublic ?? true,
+    //       raw: item
+    //     });
+    //   });
+    
+    //   (clubHouse.blueprints || []).forEach(item => {
+    //     organized.blueprints.push({
+    //       _id: item._id,
+    //       url: item.url || item.publicUrl,
+    //       isPublic: item.isPublic ?? true,
+    //       raw: item
+    //     });
+    //   });
+
+    //   (clubHouse.deck || []).forEach(item => {
+    //     organized.deck.push({
+    //       _id: item._id,
+    //       url: item.url || item.publicUrl,
+    //       isPublic: item.isPublic ?? true,
+    //       raw: item
+    //     });
+    //   });
+
+    //   const interiorObj = clubHouse.interior || {};
+    //   Object.keys(interiorObj).forEach(key => {
+    //     organized.interior[key] = (interiorObj[key] || []).map(item => ({
+    //       _id: item._id,
+    //       url: item.url || item.publicUrl,
+    //       isPublic: item.isPublic ?? true,
+    //       raw: item
+    //     }));
+    //   });
+    
+    //   return organized;
+    // };
+
+        const mapClubHouseToOrganized = (clubHouse) => {
       const organized = {
         exterior: [],
         blueprints: [],
         interior: {},
         deck: [] // NEW
       };
-      // asegúrate de tener las keys de interior
       interiorKeys.forEach(key => {
         organized.interior[key] = [];
       });
@@ -235,40 +358,50 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
       if (!clubHouse) return organized;
     
       (clubHouse.exterior || []).forEach(item => {
+        const url = item.url || item.publicUrl || '';
         organized.exterior.push({
           _id: item._id,
-          url: item.url || item.publicUrl,
+          url,
           isPublic: item.isPublic ?? true,
-          raw: item
+          raw: item,
+          storagePath: item.name || item.path || extractPathFromUrl(url) || null
         });
       });
     
       (clubHouse.blueprints || []).forEach(item => {
+        const url = item.url || item.publicUrl || '';
         organized.blueprints.push({
           _id: item._id,
-          url: item.url || item.publicUrl,
+          url,
           isPublic: item.isPublic ?? true,
-          raw: item
+          raw: item,
+          storagePath: item.name || item.path || extractPathFromUrl(url) || null
         });
       });
 
       (clubHouse.deck || []).forEach(item => {
+        const url = item.url || item.publicUrl || '';
         organized.deck.push({
           _id: item._id,
-          url: item.url || item.publicUrl,
+          url,
           isPublic: item.isPublic ?? true,
-          raw: item
+          raw: item,
+          storagePath: item.name || item.path || extractPathFromUrl(url) || null
         });
       });
 
       const interiorObj = clubHouse.interior || {};
       Object.keys(interiorObj).forEach(key => {
-        organized.interior[key] = (interiorObj[key] || []).map(item => ({
-          _id: item._id,
-          url: item.url || item.publicUrl,
-          isPublic: item.isPublic ?? true,
-          raw: item
-        }));
+        organized.interior[key] = (interiorObj[key] || []).map(item => {
+          const url = item.url || item.publicUrl || '';
+          return {
+            _id: item._id,
+            url,
+            isPublic: item.isPublic ?? true,
+            raw: item,
+            storagePath: item.name || item.path || extractPathFromUrl(url) || null
+          };
+        });
       });
     
       return organized;
@@ -315,7 +448,24 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
         setExistingImages(prevState); // revert on failure
       }
     };
-    // ...existing code...
+
+        const getNextFileName = (section, interiorKey, ext) => {
+      // Busca cuántas imágenes ya existen en esa sección
+      let count = 0;
+      if (section === 'interior' && interiorKey) {
+        count = (existingImages.interior[interiorKey] || []).length;
+      } else {
+        count = (existingImages[section] || []).length;
+      }
+      // Siguiente número
+      const nextNum = count + 1;
+      // Nombre base
+      const base = section === 'interior' && interiorKey
+        ? `${section}_${interiorKey.replace(/\s+/g, '_')}_${nextNum}.${ext}`
+        : `${section}_${nextNum}.${ext}`;
+      return base;
+    };
+
 
   const handleToggleIsPublicSelected = (section, idx, interiorKey = null) => e => {
     setSelectedFiles(prev => {
@@ -459,10 +609,16 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
       try {
         const uploadPromises = [];
         // Prepara los arrays para subir: solo archivos y visibilidad
-        const prepareFiles = arr => arr.map(item => ({
-          file: item.file,
-          isPublic: item.isPublic
-        }));
+        const prepareFiles = (arr, section, interiorKey = null) =>
+          arr.map((item, idx) => {
+            const ext = item.file.name.split('.').pop();
+            const customName = getNextFileName(section, interiorKey, ext);
+            return {
+              file: item.file,
+              isPublic: item.isPublic,
+              fileName: customName
+            };
+          });
         console.log('📤 handleConfirmUpload: preparing uploads', {
           exterior: selectedFiles.exterior.length,
           blueprints: selectedFiles.blueprints.length,
@@ -470,29 +626,52 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
           interior: Object.fromEntries(Object.entries(selectedFiles.interior).map(([k, v]) => [k, v.length]))
         });
   
+        // ...dentro de handleConfirmUpload...
+        
         // Upload exterior
         if (selectedFiles.exterior.length > 0) {
           uploadPromises.push(
-            uploadService.uploadClubhouseImages(prepareFiles(selectedFiles.exterior), 'exterior')
+            uploadService.uploadClubhouseImages(
+              prepareFiles(selectedFiles.exterior, 'exterior'), // <-- pasa la sección
+              'exterior'
+            )
           );
         }
+        
         // Upload blueprints
         if (selectedFiles.blueprints.length > 0) {
           uploadPromises.push(
-            uploadService.uploadClubhouseImages(prepareFiles(selectedFiles.blueprints), 'blueprints')
+            uploadService.uploadClubhouseImages(
+              prepareFiles(selectedFiles.blueprints, 'blueprints'), // <-- pasa la sección
+              'blueprints'
+            )
           );
         }
+        
         // Upload deck
         if (selectedFiles.deck.length > 0) {
-          const deckPayload = prepareFiles(selectedFiles.deck);
+          const deckPayload = prepareFiles(selectedFiles.deck, 'deck'); // <-- pasa la sección
           console.log('📤 handleConfirmUpload: uploading deck payload preview', {
             section: 'deck',
             count: deckPayload.length,
-            sample: deckPayload.slice(0, 5).map(p => ({ name: p.file?.name, size: p.file?.size, isPublic: p.isPublic }))
+            sample: deckPayload.slice(0, 5).map(p => ({ name: p.fileName, size: p.file?.size, isPublic: p.isPublic }))
           });
           uploadPromises.push(
             uploadService.uploadClubhouseImages(deckPayload, 'deck')
           );
+        }
+        
+        // Upload interior sections
+        for (const [key, files] of Object.entries(selectedFiles.interior)) {
+          if (files.length > 0) {
+            uploadPromises.push(
+              uploadService.uploadClubhouseImages(
+                prepareFiles(files, 'interior', key), // <-- pasa sección e interiorKey
+                'interior',
+                key
+              )
+            );
+          }
         }
         // Upload interior sections
         for (const [key, files] of Object.entries(selectedFiles.interior)) {
@@ -569,9 +748,9 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
     };
   // ...existing code...
 
-  const handleDeleteExistingImage = async (section, imageUrl, interiorKey = null) => {
-    // TODO: Implementar endpoint de eliminación
-  };
+  // const handleDeleteExistingImage = async (section, imageUrl, interiorKey = null) => {
+  //   // TODO: Implementar endpoint de eliminación
+  // };
 
   const getCurrentExistingImages = () => {
     if (tab === 0) return existingImages.exterior;
@@ -605,6 +784,80 @@ const getTotalSelectedFiles = () => {
   });
   return total;
 };
+
+// ...existing code...
+  const handleDeleteExistingImage = async (section, image, interiorKey = null) => {
+    const prevState = JSON.parse(JSON.stringify(existingImages));
+
+    // determine fileName (full path expected by backend e.g. 'clubhouse/xxx.jpg' or 'images/2025/01/abc.jpg')
+    const determineFileName = (img) => {
+      if (!img) return null;
+      if (typeof img === 'string') return extractPathFromUrl(img) || img;
+      if (img.raw) {
+        if (img.raw.name) return img.raw.name;
+        if (img.raw.path) return img.raw.path;
+        if (img.raw.filename) return img.raw.filename;
+      }
+      if (img.url) return extractPathFromUrl(img.url);
+      if (img.publicUrl) return extractPathFromUrl(img.publicUrl);
+      return null;
+    };
+
+    const identifier = image?._id || image?.url || image;
+    // optimistic UI update
+    setExistingImages(prev => {
+      const next = JSON.parse(JSON.stringify(prev));
+      if (section === 'interior' && interiorKey) {
+        next.interior = { ...(next.interior || {}) };
+        next.interior[interiorKey] = (next.interior[interiorKey] || []).filter(it => (it._id || it.url) !== (identifier));
+      } else {
+        next[section] = (next[section] || []).filter(it => (it._id || it.url) !== (identifier));
+      }
+      return next;
+    });
+
+    try {
+      setError(null);
+      const fileName = determineFileName(image);
+      if (!fileName) throw new Error('Could not determine file path to delete');
+
+      let res = null;
+
+      // prefer service helper if available
+      if (uploadService.deleteImage) {
+        res = await uploadService.deleteImage(fileName);
+      } else {
+        // fallback: call API directly
+        const resp = await fetch(`/api/upload/image/${encodeURI(fileName)}`, {
+          method: 'DELETE',
+          credentials: 'same-origin',
+          headers: { 'Accept': 'application/json' }
+        });
+        const text = await resp.text().catch(() => '');
+        let json;
+        try { json = text ? JSON.parse(text) : {}; } catch (e) { json = { raw: text }; }
+        console.error('Delete /api/upload/image response:', resp.status, json);
+        if (!resp.ok) throw new Error(json?.message || `Delete failed (${resp.status})`);
+        res = json;
+      }
+
+      // if backend returns clubHouse doc, use it as source of truth
+      const clubHouse = res?.clubHouse || res?.data?.clubHouse || null;
+      if (clubHouse) {
+        const organized = mapClubHouseToOrganized(clubHouse);
+        const normalized = normalizeOrganized(organized);
+        setExistingImages(normalized);
+      } else {
+        // otherwise reload listing to reflect actual storage state
+        await loadExistingImages();
+      }
+    } catch (err) {
+      console.error('Error deleting clubhouse image:', err);
+      setError(err?.message || 'Failed to delete image');
+      setExistingImages(prevState); // revert optimistic change
+    }
+  };
+// ...existing code...
 
   return (
     <Dialog
@@ -790,36 +1043,7 @@ const getTotalSelectedFiles = () => {
         )}
 
         {/* replace the tab === 3 block that used `images` with existingImages */ }
-        {tab === 3 && (
-          // Deck images
-          <Grid container spacing={2}>
-            {(existingImages.deck || []).length === 0 ? (
-              <Grid item xs={12}>
-                <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.100', borderRadius: 2 }}>
-                  <Typography variant="caption" color="text.secondary">{t('clubHouse:noImagesUploaded')}</Typography>
-                </Paper>
-              </Grid>
 
-           ) : (
-              (existingImages.deck || []).map((img, idx) => (
-                <Grid item xs={6} md={4} key={idx}>
-                  <Box
-                    component="img"
-                    src={typeof img === 'string' ? img : img.url}
-                    alt={`Deck ${idx + 1}`}
-                    sx={{
-                      width: '100%',
-                       height: '250px',
-                       objectFit: 'contain',
-                       borderRadius: 2,
-                       boxShadow: '0 2px 8px rgba(140, 165, 81, 0.08)'
-                     }}
-                   />
-                 </Grid>
-               ))
-             )}
-           </Grid>
-         )}
         <Box mb={3}>
           <Button
             variant="contained"
@@ -939,7 +1163,7 @@ const getTotalSelectedFiles = () => {
                 <Grid container spacing={2}>
                   <AnimatePresence>
                     {getCurrentExistingImages().map((img, idx) => (
-                      <Grid item xs={6} sm={4} key={idx}>
+                     <Grid item xs={6} sm={4} key={stableKeyForImage(img, idx)}>
                         <motion.div
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}

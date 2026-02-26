@@ -230,6 +230,17 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
       throw new Error(error.response?.data?.message || 'Failed to get files from clubhouse/deck')
     }
   },
+
+    getPublicClubhouse: async () => {
+    try {
+      const res = await api.get('/clubhouse/public');
+      console.log('📡 /clubhouse/public response:', res.data);
+      return res.data;
+    } catch (err) {
+      console.error('❌ Error fetching public clubhouse:', err.response?.data || err.message);
+      throw err;
+    }
+  },
   
   // // Subir imágenes a storage y retorna URLs
   // uploadOutdoorAmenityImages: async (files, amenityName) => {
