@@ -150,10 +150,11 @@ const options = {
                 type: 'object',
                 properties: {
                   url: { type: 'string', description: 'Image URL' },
-                  isPublic: { type: 'boolean', description: 'true = mostrar sin token (pública), false = requiere token' }
+                  isPublic: { type: 'boolean', description: 'true = mostrar sin token (pública), false = requiere token' },
+                  name: { type: 'string', description: 'Optional custom name for UI' }
                 }
               },
-              description: 'Exterior images (cada una con url e isPublic)'
+              description: 'Exterior images (cada una con url, isPublic, name opcional)'
             },
             blueprints: {
               type: 'array',
@@ -161,10 +162,23 @@ const options = {
                 type: 'object',
                 properties: {
                   url: { type: 'string' },
-                  isPublic: { type: 'boolean' }
+                  isPublic: { type: 'boolean' },
+                  name: { type: 'string' }
                 }
               },
-              description: 'Blueprint images (url, isPublic)'
+              description: 'Blueprint images (url, isPublic, name opcional)'
+            },
+            deck: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  url: { type: 'string' },
+                  isPublic: { type: 'boolean' },
+                  name: { type: 'string' }
+                }
+              },
+              description: 'Deck images (url, isPublic, name opcional)'
             },
             interior: {
               type: 'object',
@@ -174,7 +188,8 @@ const options = {
                   type: 'object',
                   properties: {
                     url: { type: 'string' },
-                    isPublic: { type: 'boolean' }
+                    isPublic: { type: 'boolean' },
+                    name: { type: 'string' }
                   }
                 }
               },
