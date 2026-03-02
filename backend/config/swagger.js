@@ -266,6 +266,28 @@ const options = {
             },
             total: { type: 'number' }
           }
+        },
+        FamilyGroupMember: {
+          type: 'object',
+          properties: {
+            user: { $ref: '#/components/schemas/User' },
+            role: { type: 'string', enum: ['admin', 'member'], description: 'admin = puede gestionar el grupo y compartir propiedades con el grupo' }
+          }
+        },
+        FamilyGroup: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', description: 'Family group ID' },
+            name: { type: 'string', description: 'Nombre del grupo' },
+            createdBy: { $ref: '#/components/schemas/User', description: 'Usuario que creó el grupo (siempre es miembro implícito)' },
+            members: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/FamilyGroupMember' },
+              description: 'Miembros añadidos al grupo (el creador no está aquí, está en createdBy)'
+            },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
         }
       }
     }
