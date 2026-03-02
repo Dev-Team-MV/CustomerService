@@ -10,6 +10,7 @@ import {
 import {
   shareProperty,
   revokePropertyShare,
+  revokePropertyShareByGroup,
   getPropertyShares
 } from '../controllers/propertyShareController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
@@ -117,9 +118,130 @@ router.route('/')
  */
 router.get('/stats', protect, getPropertyStats)
 
+/**
+ * @swagger
+ * /api/properties/{id}/shares:
+ *   get:
+ *     summary: List shares for a property
+ *     description: Property owners, superadmin, or (if the property is shared with you via a family group) group admins can list all shares.
+ *     tags: [Properties]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *         description: Property ID
+ *     responses:
+ *       200:
+ *         description: List of shares (sharedWith, sharedBy, familyGroup)
+ *       403:
+ *         description: Not allowed to list shares for this property
+ */
+/**
+ * @swagger
+ * /api/properties/{id}/share:
+ *   post:
+ *     summary: Share property with a user or with a family group
+ *     description: |
+ *       Two modes:
+ *       1) Share with one user (optional group tag): send sharedWithUserId; optionally familyGroupId to tag the share.
+ *       2) Share with entire group: send only familyGroupId. Creates one share per group member (except owners). Idempotent for already-shared members.
+ *     tags: [Properties]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *         description: Property ID
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sharedWithUserId:
+ *                 type: string
+ *                 description: User ID to share with (use this for single-user share)
+ *               familyGroupId:
+ *                 type: string
+ *                 description: Family group ID; if sent alone, shares with all group members
+ *     responses:
+ *       201:
+ *         description: Share(s) created (single share object, or { message, count, shares } for group share)
+ *       400:
+ *         description: sharedWithUserId or familyGroupId required / already shared
+ *       403:
+ *         description: Only property owners or group admins can share
+ *       404:
+ *         description: Property / family group not found
+ */
+/**
+ * @swagger
+ * /api/properties/{id}/share/group/{familyGroupId}:
+ *   delete:
+ *     summary: Revoke all shares for this property for a family group
+ *     description: Removes access for every group member in one call. Allowed for property owner, group admin, or superadmin.
+ *     tags: [Properties]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: familyGroupId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Revoked N share(s) for this group
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string }
+ *                 deletedCount: { type: number }
+ *       403:
+ *         description: Only property owners or group admins can revoke
+ *       404:
+ *         description: Property or family group not found
+ */
+/**
+ * @swagger
+ * /api/properties/{id}/share/{userId}:
+ *   delete:
+ *     summary: Revoke share for one user
+ *     tags: [Properties]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema: { type: string }
+ *         description: sharedWith user ID
+ *     responses:
+ *       200:
+ *         description: Share revoked successfully
+ *       403:
+ *         description: Not allowed to revoke this share
+ *       404:
+ *         description: Share not found
+ */
 // Share routes (must be before /:id)
 router.get('/:id/shares', protect, getPropertyShares)
 router.post('/:id/share', protect, shareProperty)
+router.delete('/:id/share/group/:familyGroupId', protect, revokePropertyShareByGroup)
 router.delete('/:id/share/:userId', protect, revokePropertyShare)
 
 /**
