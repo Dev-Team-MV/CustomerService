@@ -157,7 +157,8 @@ export const getPropertyById = async (req, res) => {
       return res.status(404).json({ message: 'Property not found' })
     }
 
-    const canAccess = await canUserAccessProperty(req.user._id, property._id)
+    const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
+    const canAccess = isAdmin || (await canUserAccessProperty(req.user._id, property._id))
     if (!canAccess) {
       return res.status(403).json({ message: 'You do not have access to this property' })
     }
