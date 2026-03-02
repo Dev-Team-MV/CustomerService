@@ -8,6 +8,7 @@ import swaggerSpec from './config/swagger.js'
 import connectDB from './config/db.js'
 import authRoutes from './routes/authRoutes.js'
 import userRoutes from './routes/userRoutes.js'
+import projectRoutes from './routes/projectRoutes.js'
 import lotRoutes from './routes/lotRoutes.js'
 import modelRoutes from './routes/modelRoutes.js'
 import facadeRoutes from './routes/facadeRoutes.js'
@@ -22,6 +23,7 @@ import clubHouseRoutes from './routes/clubHouseRoutes.js'
 import outdoorAmenitiesRoutes from './routes/outdoorAmenitiesRoutes.js'
 import underConstructionRoutes from './routes/underConstructionRoutes.js'
 import familyGroupRoutes from './routes/familyGroupRoutes.js'
+import crmRoutes from './routes/crmRoutes.js'
 
 const app = express()
 
@@ -33,6 +35,7 @@ app.use(express.urlencoded({ extended: true, limit: '100mb' })) // Increase URL-
 
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
+app.use('/api/projects', projectRoutes)
 app.use('/api/lots', lotRoutes)
 app.use('/api/models', modelRoutes)
 app.use('/api/facades', facadeRoutes)
@@ -47,6 +50,7 @@ app.use('/api/clubhouse', clubHouseRoutes)
 app.use('/api/outdoor-amenities', outdoorAmenitiesRoutes)
 app.use('/api/under-construction', underConstructionRoutes)
 app.use('/api/family-groups', familyGroupRoutes)
+app.use('/api/crm', crmRoutes)
 
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))

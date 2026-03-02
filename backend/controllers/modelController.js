@@ -149,9 +149,11 @@ function normalizeModelForResponse (model) {
 
 export const getAllModels = async (req, res) => {
   try {
-    const { status } = req.query
-    const filter = status ? { status } : {}
-    
+    const { status, projectId } = req.query
+    const filter = {}
+    if (projectId) filter.project = projectId
+    if (status) filter.status = status
+
     const models = await Model.find(filter).sort({ model: 1 })
     res.json(models.map(normalizeModelForResponse))
   } catch (error) {
@@ -303,34 +305,41 @@ export const getModelPricingOptions = async (req, res) => {
 
 export const createModel = async (req, res) => {
   try {
-    const { 
-      model, 
-      modelNumber, 
-      price, 
-      bedrooms, 
-      bathrooms, 
+    const {
+      projectId,
+      project,
+      model,
+      modelNumber,
+      price,
+      bedrooms,
+      bathrooms,
       sqft,
       stories,
       images,
       blueprints,
-      description, 
+      description,
       status,
       balconies,
       upgrades,
       storages
     } = req.body
-    
+
+    const projId = projectId || project
+    if (!projId) {
+      return res.status(400).json({ message: 'projectId (or project) is required' })
+    }
+
     // Validar campos requeridos del modelo
     if (!model || !price || bedrooms === undefined || bathrooms === undefined || sqft === undefined) {
-      return res.status(400).json({ 
-        message: 'Missing required fields: model, price, bedrooms, bathrooms, and sqft are required' 
+      return res.status(400).json({
+        message: 'Missing required fields: model, price, bedrooms, bathrooms, and sqft are required'
       })
     }
-    
-    // Verificar si el modelo ya existe
-    const modelExists = await Model.findOne({ model })
+
+    // Verificar si el modelo ya existe en este proyecto
+    const modelExists = await Model.findOne({ project: projId, model })
     if (modelExists) {
-      return res.status(400).json({ message: 'Model already exists' })
+      return res.status(400).json({ message: 'Model already exists in this project' })
     }
     
     // Validar y preparar balcones
@@ -395,6 +404,7 @@ export const createModel = async (req, res) => {
     
     // Crear el modelo con todas las opciones validadas
     const newModel = await Model.create({
+      project: projId,
       model,
       modelNumber,
       price,

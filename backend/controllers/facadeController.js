@@ -3,17 +3,17 @@ import Model from '../models/Model.js'
 
 export const getAllFacades = async (req, res) => {
   try {
-    const { model } = req.query
+    const { model, projectId } = req.query
     const filter = {}
-    
-    if (model) {
-      filter.model = model
-    }
-    
+
+    if (projectId) filter.project = projectId
+    if (model) filter.model = model
+
     const facades = await Facade.find(filter)
+      .populate('project', 'name slug')
       .populate('model', 'model modelNumber price')
       .sort({ title: 1 })
-    
+
     res.json(facades)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -55,20 +55,27 @@ export const getFacadesByModel = async (req, res) => {
 
 export const createFacade = async (req, res) => {
   try {
-    const { model, title, url, price, decks } = req.body
-    
+    const { projectId, project, model, title, url, price, decks } = req.body
+    const projId = projectId || project
+    if (!projId) {
+      return res.status(400).json({ message: 'projectId (or project) is required' })
+    }
+
     const modelExists = await Model.findById(model)
     if (!modelExists) {
       return res.status(404).json({ message: 'Model not found' })
     }
-    
+    if (modelExists.project.toString() !== projId.toString()) {
+      return res.status(400).json({ message: 'Model does not belong to this project' })
+    }
+
     // Validar y preparar decks si se proporcionan
     const validatedDecks = []
     if (decks && Array.isArray(decks)) {
       for (const deck of decks) {
         if (!deck.name || deck.price === undefined) {
-          return res.status(400).json({ 
-            message: 'Each deck must have name and price' 
+          return res.status(400).json({
+            message: 'Each deck must have name and price'
           })
         }
         validatedDecks.push({
@@ -80,8 +87,9 @@ export const createFacade = async (req, res) => {
         })
       }
     }
-    
+
     const facade = await Facade.create({
+      project: projId,
       model,
       title,
       url,

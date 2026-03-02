@@ -20,11 +20,16 @@ const router = express.Router()
  * @swagger
  * /api/properties:
  *   get:
- *     summary: Get all properties
+ *     summary: Get all properties (optionally filter by project)
  *     tags: [Properties]
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         schema:
+ *           type: string
+ *         description: Filter properties by project ID (multi-tenant)
  *       - in: query
  *         name: status
  *         schema:
@@ -34,6 +39,7 @@ const router = express.Router()
  *         name: user
  *         schema:
  *           type: string
+ *         description: Filter by owner user ID (admin only)
  *     responses:
  *       200:
  *         description: List of properties
@@ -55,10 +61,17 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             required:
+ *               - projectId
  *               - lot
  *               - model
  *               - facade
  *             properties:
+ *               projectId:
+ *                 type: string
+ *                 description: Project ID (or use "project"). Lot, model and facade must belong to this project.
+ *               project:
+ *                 type: string
+ *                 description: Project ID (alternative to projectId)
  *               lot:
  *                 type: string
  *               model:
@@ -88,13 +101,19 @@ router.route('/')
  * @swagger
  * /api/properties/stats:
  *   get:
- *     summary: Get property statistics
+ *     summary: Get property statistics (optionally by project)
  *     tags: [Properties]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         schema:
+ *           type: string
+ *         description: Filter stats by project ID
  *     responses:
  *       200:
- *         description: Property statistics
+ *         description: Property statistics (total, active, pending, sold, totalRevenue, pendingPayments)
  */
 router.get('/stats', protect, getPropertyStats)
 

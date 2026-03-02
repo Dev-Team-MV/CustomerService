@@ -2,28 +2,33 @@ import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import Lot from './models/Lot.js'
 import Model from './models/Model.js'
+import Project from './models/Project.js'
 
 dotenv.config()
+
+const LAKEWOOD_SLUG = 'lakewood'
+const LAKEWOOD_NAME = 'Lakewood'
 
 // Función para generar precio aleatorio en un rango
 const randomPrice = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-// Generar lotes del 1 al 71 (sin el 13)
-const generateLots = () => {
+// Generar lotes del 1 al 71 (sin el 13) — projectId se añade después
+const generateLots = (projectId) => {
   const lots = []
-  
+
   for (let i = 1; i <= 71; i++) {
     if (i === 13) continue // Saltar el número 13
-    
+
     lots.push({
+      project: projectId,
       number: i.toString(),
       price: randomPrice(200000, 400000),
       status: 'available'
     })
   }
-  
+
   return lots
 }
 
@@ -66,22 +71,37 @@ const seedData = async () => {
     await mongoose.connect(process.env.MONGODB_URI)
     console.log('✅ Conectado a MongoDB Atlas\n')
 
-    // Limpiar datos existentes
-    await Lot.deleteMany({})
-    console.log('🗑️  Lotes anteriores eliminados')
-    
-    await Model.deleteMany({})
-    console.log('🗑️  Modelos anteriores eliminados\n')
+    let project = await Project.findOne({ slug: LAKEWOOD_SLUG })
+    if (!project) {
+      project = await Project.create({
+        name: LAKEWOOD_NAME,
+        slug: LAKEWOOD_SLUG,
+        type: 'residential_lots',
+        isActive: true
+      })
+      console.log('✅ Proyecto creado:', project.name)
+    } else {
+      console.log('✅ Proyecto existente:', project.name)
+    }
+    const projectId = project._id
+
+    // Limpiar datos existentes (solo de este proyecto para no borrar otros)
+    await Lot.deleteMany({ project: projectId })
+    console.log('🗑️  Lotes anteriores de Lakewood eliminados')
+
+    await Model.deleteMany({ project: projectId })
+    console.log('🗑️  Modelos anteriores de Lakewood eliminados\n')
 
     // Crear lotes
-    const lots = generateLots()
+    const lots = generateLots(projectId)
     await Lot.insertMany(lots)
     console.log(`✅ ${lots.length} lotes creados (del 1 al 71, sin el 13)`)
     console.log(`   Precios: $200,000 - $400,000 USD`)
     console.log(`   Estado: Todos disponibles\n`)
 
     // Crear modelos
-    await Model.insertMany(models)
+    const modelsWithProject = models.map(m => ({ ...m, project: projectId }))
+    await Model.insertMany(modelsWithProject)
     console.log('✅ 3 modelos creados:')
     models.forEach(model => {
       console.log(`   - Modelo ${model.modelNumber}: ${model.model}`)

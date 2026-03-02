@@ -42,10 +42,24 @@ const options = {
             updatedAt: { type: 'string', format: 'date-time' }
           }
         },
+        Project: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', description: 'Project ID' },
+            name: { type: 'string', description: 'Display name' },
+            slug: { type: 'string', description: 'Unique slug (e.g. lakewood, isq)' },
+            type: { type: 'string', enum: ['residential_lots', 'apartments', 'other'] },
+            isActive: { type: 'boolean' },
+            description: { type: 'string' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
         Lot: {
           type: 'object',
           properties: {
             _id: { type: 'string' },
+            project: { type: 'string', description: 'Project ID (ref)' },
             number: { type: 'string' },
             price: { type: 'number' },
             status: { type: 'string', enum: ['available', 'pending', 'sold'] },
@@ -58,6 +72,7 @@ const options = {
           type: 'object',
           properties: {
             _id: { type: 'string' },
+            project: { type: 'string', description: 'Project ID (ref)' },
             model: { type: 'string' },
             modelNumber: { type: 'string' },
             price: { type: 'number' },
@@ -75,6 +90,7 @@ const options = {
           type: 'object',
           properties: {
             _id: { type: 'string' },
+            project: { type: 'string', description: 'Project ID (ref)' },
             model: { type: 'string' },
             title: { type: 'string' },
             url: { type: 'string' },
@@ -87,6 +103,7 @@ const options = {
           type: 'object',
           properties: {
             _id: { type: 'string' },
+            project: { type: 'string', description: 'Project ID (ref)' },
             lot: { type: 'string' },
             model: { type: 'string' },
             facade: { type: 'string' },
@@ -203,6 +220,51 @@ const options = {
           type: 'object',
           properties: {
             message: { type: 'string' }
+          }
+        },
+        CrmBalance: {
+          type: 'object',
+          properties: {
+            byProject: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  projectId: { type: 'string' },
+                  name: { type: 'string' },
+                  slug: { type: 'string' },
+                  totalCollected: { type: 'number' },
+                  totalPending: { type: 'number' }
+                }
+              }
+            },
+            global: {
+              type: 'object',
+              properties: {
+                totalCollected: { type: 'number' },
+                totalPending: { type: 'number' }
+              }
+            }
+          }
+        },
+        CrmClients: {
+          type: 'object',
+          properties: {
+            clients: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  _id: { type: 'string' },
+                  firstName: { type: 'string' },
+                  lastName: { type: 'string' },
+                  email: { type: 'string' },
+                  phoneNumber: { type: 'string' },
+                  propertyCount: { type: 'number' }
+                }
+              }
+            },
+            total: { type: 'number' }
           }
         }
       }
