@@ -1,5 +1,35 @@
 import User from '../models/User.js'
 
+/**
+ * Search users by email, firstName or lastName. Available to any authenticated user
+ * (e.g. for adding members to family groups). Returns minimal fields.
+ * Use q= for search (min 2 chars), or omit q to get a limited list for dropdowns.
+ */
+export const searchUsers = async (req, res) => {
+  try {
+    const { q } = req.query
+    const query = typeof q === 'string' ? q.trim() : ''
+    let filter = {}
+    if (query.length >= 2) {
+      const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
+      filter = {
+        $or: [
+          { email: regex },
+          { firstName: regex },
+          { lastName: regex }
+        ]
+      }
+    }
+    const users = await User.find(filter)
+      .select('_id firstName lastName email')
+      .limit(query.length >= 2 ? 50 : 100)
+      .sort({ lastName: 1, firstName: 1 })
+    res.json(users)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 export const getAllUsers = async (req, res) => {
   try {
     const { role } = req.query
