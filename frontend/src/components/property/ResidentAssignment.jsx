@@ -27,11 +27,6 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
   const [smsStatus, setSmsStatus] = useState(null)
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  // ✅ Proyectos
-  const [projects, setProjects] = useState([])
-  const [selectedProject, setSelectedProject] = useState('')
-  const [loadingProjects, setLoadingProjects] = useState(false)
-
   const [newUserData, setNewUserData] = useState({
     firstName: '', lastName: '', email: '',
     phoneNumber: '', birthday: '', role: 'user'
@@ -62,6 +57,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
     try {
       setLoadingProjects(true)
       const data = await projectService.getAll()
+      console.log('Fetched projects:', data)
       setProjects(data)
       // Auto-seleccionar si solo hay uno
       if (data.length === 1) setSelectedProject(data[0]._id)
@@ -107,17 +103,20 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
         ? String(selectedPricingOption.modelType)
         : (options?.upgrade ? 'upgrade' : 'basic')
 
+      // ✅ Obtener el nombre del proyecto desde el array de projects
+      const projectData = projects.find(p => p._id === selectedProject)
+      console.log('data proyecto', projectData);
+      
+      const projectName = projectData?.name || projectData?.slug || 'Unknown'
+
       const propertyPayload = {
-        // ✅ Proyecto
-        project: String(selectedProject),
-        projectId: String(selectedProject),
-        // Propiedad
+        project: String(projectName),           // ✅ Nombre del proyecto
+        projectId: String(selectedProject),     // ✅ ID del proyecto
         lot: String(lotId),
         model: String(modelId),
-        facade: facadeId ? String(facadeId) : null,
+        facade: facadeId ? String(facadeId) : undefined,
         user: String(selectedUser),
         users: [String(selectedUser)],
-        // Financials
         listPrice: Number(financials.listPrice || 0),
         presalePrice: Number(financials.presalePrice || 0),
         discount: Number(financials.discount || 0),

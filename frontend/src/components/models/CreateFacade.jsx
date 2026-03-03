@@ -94,37 +94,54 @@ const CreateFacade = ({
   }
 
   // ==================== EFFECTS ====================
-  useEffect(() => {
-    if (selectedFacade) {
-      const urls = Array.isArray(selectedFacade.url)
-        ? selectedFacade.url
-        : selectedFacade.url ? [selectedFacade.url] : [];
-
-      const existingDecks = Array.isArray(selectedFacade.decks) ? selectedFacade.decks : [];
-      const projectId = typeof selectedFacade.project === 'object'
-        ? selectedFacade.project?._id
-        : selectedFacade.project || selectedFacade.projectId || ""
-
-      setFacadeFormData({
-        model: selectedFacade.model._id || selectedFacade.model,
-        title: selectedFacade.title,
-        url: urls,
-        price: selectedFacade.price || 0,
-        decks: existingDecks,
-        project: projectId,
-        projectId: projectId,
-      });
-    } else if (selectedModel) {
-      setFacadeFormData(prev => ({
-        ...prev,
-        model: selectedModel._id,
-        title: "",
-        url: [],
-        price: 0,
-        decks: [],
-      }));
-    }
-  }, [selectedFacade, selectedModel, open]);
+  // ...existing code...
+  
+    useEffect(() => {
+      if (selectedFacade) {
+        const urls = Array.isArray(selectedFacade.url)
+          ? selectedFacade.url
+          : selectedFacade.url ? [selectedFacade.url] : [];
+  
+        const existingDecks = Array.isArray(selectedFacade.decks) ? selectedFacade.decks : [];
+  
+        // ✅ Extraer projectId correctamente de cualquier forma que venga
+        let projectId = ''
+        if (selectedFacade.projectId) {
+          projectId = typeof selectedFacade.projectId === 'object'
+            ? selectedFacade.projectId._id
+            : selectedFacade.projectId
+        } else if (selectedFacade.project) {
+          projectId = typeof selectedFacade.project === 'object'
+            ? selectedFacade.project._id
+            : selectedFacade.project
+        }
+  
+        console.log('🏗️ Editing facade, projectId resolved:', projectId)
+  
+        setFacadeFormData({
+          model: typeof selectedFacade.model === 'object'
+            ? selectedFacade.model._id
+            : selectedFacade.model,
+          title: selectedFacade.title,
+          url: urls,
+          price: selectedFacade.price || 0,
+          decks: existingDecks,
+          project: projectId,
+          projectId: projectId,
+        });
+      } else if (selectedModel) {
+        setFacadeFormData(prev => ({
+          ...prev,
+          model: selectedModel._id,
+          title: "",
+          url: [],
+          price: 0,
+          decks: [],
+        }));
+      }
+    }, [selectedFacade, selectedModel, open]);
+  
+  // ...existing code...
 
   // ==================== FACADE HANDLERS ====================
   const handleClose = () => {
@@ -145,8 +162,28 @@ const CreateFacade = ({
       alert("Please select a project");
       return;
     }
+
+    // ✅ Construir payload limpio
+    const payload = {
+      model: typeof facadeFormData.model === 'object' 
+        ? facadeFormData.model._id 
+        : facadeFormData.model,
+      title: facadeFormData.title.trim(),
+      url: Array.isArray(facadeFormData.url) ? facadeFormData.url : [facadeFormData.url],
+      price: Number(facadeFormData.price) || 0,
+      decks: Array.isArray(facadeFormData.decks) ? facadeFormData.decks : [],
+      project: typeof facadeFormData.project === 'object'
+        ? facadeFormData.project._id
+        : facadeFormData.project,
+      projectId: typeof facadeFormData.projectId === 'object'
+        ? facadeFormData.projectId._id
+        : facadeFormData.projectId || facadeFormData.project
+    }
+
+    console.log('📤 Facade payload before submit:', JSON.stringify(payload, null, 2))
+
     try {
-      await onSubmit(facadeFormData, selectedFacade);
+      await onSubmit(payload, selectedFacade);
       handleClose();
     } catch (error) {
       console.error("Error saving facade:", error);
@@ -738,7 +775,7 @@ const CreateFacade = ({
 
                               {/* ✅ SELECT PROJECT */}
                       </Grid>
-
+                <Grid item xs={12}>
                   <TextField
                     fullWidth
                     select

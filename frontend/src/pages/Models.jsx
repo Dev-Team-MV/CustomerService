@@ -217,26 +217,25 @@ const Models = () => {
 
   // ...existing code...
   
-    const handleSubmitFacade = async (facadeFormData, selectedFacade) => {
-      try {
-        // ✅ Asegurar que project y projectId se envían
-        const payload = {
-          ...facadeFormData,
-          project: facadeFormData.project || facadeFormData.projectId,
-          projectId: facadeFormData.projectId || facadeFormData.project,
+    // ...existing code...
+    
+      const handleSubmitFacade = async (facadeFormData, selectedFacade) => {
+        try {
+          console.log('📥 Received in Models.jsx:', JSON.stringify(facadeFormData, null, 2))
+    
+          if (selectedFacade) {
+            await api.put(`/facades/${selectedFacade._id}`, facadeFormData);
+          } else {
+            await api.post("/facades", facadeFormData);
+          }
+          fetchFacades();
+        } catch (error) {
+          console.error("Error saving facade:", error);
+          alert(error.response?.data?.message || "Error saving facade");
         }
-  
-        if (selectedFacade) {
-          await api.put(`/facades/${selectedFacade._id}`, payload);
-        } else {
-          await api.post("/facades", payload);
-        }
-        fetchFacades();
-      } catch (error) {
-        console.error("Error saving facade:", error);
-        alert(error.response?.data?.message || "Error saving facade");
-      }
-    };
+      };
+    
+    // ...existing code...
   
   // ...existing code...
 
