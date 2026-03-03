@@ -7,6 +7,7 @@ import { CloudUpload, Close, Delete, Check } from '@mui/icons-material'
 import uploadService from '../../services/uploadService'
 import { useTranslation } from 'react-i18next'
 import { Switch, FormControlLabel } from '@mui/material';
+import ImagePreview from '../../components/ImgPreview'; // Ajusta el path si es necesario
 
 
 const EXTERIOR_AMENITIES = [
@@ -217,42 +218,27 @@ const handleUpload = async () => {
         <Grid container spacing={2}>
           {currentSelectedFiles.map((item, idx) => (
             <Grid item xs={6} key={idx}>
-              <Paper sx={{ position: 'relative', borderRadius: 2 }}>
-                {/* Switch isPublic en la esquina superior derecha */}
-                <Box sx={{ position: 'absolute', top: 8, right: 40, zIndex: 2 }}>
-                  <Switch
-                    checked={!!item.isPublic}
-                    onChange={e => {
-                      setSelectedFiles(prev => ({
-                        ...prev,
-                        [selectedAmenity]: prev[selectedAmenity].map((f, i) =>
-                          i === idx ? { ...f, isPublic: e.target.checked } : f
-                        )
-                      }));
-                      console.log(`[OutdoorAmenitiesModal] Amenity "${selectedAmenity}" file ${idx} isPublic:`, e.target.checked);
-                    }}
-                    color="success"
-                    size="small"
-                  />
-                </Box>
-                {/* Imagen preview */}
-                <Box
-                  component="img"
-                  src={URL.createObjectURL(item.file)}
-                  alt={`Preview ${idx + 1}`}
-                  sx={{ width: '100%', height: 120, objectFit: 'cover' }}
-                />
-                {/* Botón eliminar */}
-                <IconButton
-                  size="small"
-                  onClick={() => handleRemoveSelectedFile(selectedAmenity, idx)}
-                  sx={{
-                    position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(255,255,255,0.8)'
-                  }}
-                >
-                  <Delete fontSize="small" />
-                </IconButton>
-              </Paper>
+              <ImagePreview
+                src={URL.createObjectURL(item.file)}
+                alt={`Preview ${idx + 1}`}
+                isPublic={!!item.isPublic}
+                onTogglePublic={checked => {
+                  setSelectedFiles(prev => ({
+                    ...prev,
+                    [selectedAmenity]: prev[selectedAmenity].map((f, i) =>
+                      i === idx ? { ...f, isPublic: checked } : f
+                    )
+                  }));
+                console.log(`[OutdoorAmenitiesModal] Amenity "${selectedAmenity}" file ${idx} isPublic:`, checked);
+
+                }}
+                onDelete={() => handleRemoveSelectedFile(selectedAmenity, idx)}
+                showSwitch={true}
+                switchPosition="top-right"
+                label="NEW"
+                sx={{ borderRadius: 2 }}
+                imgSx={{ height: 120 }}
+              />
             </Grid>
           ))}
         </Grid>
@@ -261,38 +247,16 @@ const handleUpload = async () => {
           <Grid container spacing={2}>
             {currentImages.map((img, idx) => (
               <Grid item xs={6} key={idx}>
-                <Paper sx={{ borderRadius: 2, position: 'relative' }}>
-                  <Box
-                    component="img"
-                    src={typeof img === 'string' ? img : img.url}
-                    alt={`Amenity ${idx + 1}`}
-                    sx={{ width: '100%', height: 120, objectFit: 'cover' }}
-                  />
-                  {/* Switch para editar visibilidad */}
-                  <Box sx={{ position: 'absolute', top: 8, right: 40, zIndex: 2, pointerEvents: 'auto' }}>
-                    <Switch
-                      checked={!!img.isPublic}
-                      onChange={e => handleToggleUploadedImageVisibility(idx, e.target.checked)}
-                      color="success"
-                      size="small"
-                    />
-                  </Box>
-                  {/* Delete botón para imagen subida */}
-                  <IconButton
-                    size="small"
-                    onClick={() => handleDeleteUploadedImage(idx)}
-                    sx={{
-                      position: 'absolute',
-                      top: 8,
-                      right: 8,
-                      zIndex: 3,
-                      bgcolor: 'rgba(255,255,255,0.9)',
-                      '&:hover': { bgcolor: '#ff5252', color: 'white' }
-                    }}
-                  >
-                    <Delete fontSize="small" />
-                  </IconButton>
-                </Paper>
+                <ImagePreview
+                  src={typeof img === 'string' ? img : img.url}
+                  alt={`Amenity ${idx + 1}`}
+                  isPublic={!!img.isPublic}
+                  onTogglePublic={checked => handleToggleUploadedImageVisibility(idx, checked)}                  onDelete={() => handleDeleteUploadedImage(idx)}
+                  showSwitch={true}
+                  switchPosition="top-right"
+                  sx={{ borderRadius: 2 }}
+                  imgSx={{ height: 120 }}
+                />
               </Grid>
             ))}
           </Grid>

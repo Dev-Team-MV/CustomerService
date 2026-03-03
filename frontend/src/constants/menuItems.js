@@ -90,6 +90,18 @@ export const privateMenuItems = [
     icon: TimelineIcon,
     path: "/timeline",
     roles: ["superadmin", "admin", "user"],
+  },
+  {
+    textKey: "navigation:menu.configuration",
+    icon: DashboardIcon,
+    path: "/configurations",
+    roles: ["superadmin", "admin"],
+  },
+  {
+    textKey: "navigation:menu.familyGroup",
+    icon: PeopleIcon,
+    path: "/family-group",
+    roles: ["superadmin", "admin", "user"],
   }
 ];
 

@@ -56,6 +56,10 @@ const uploadService = {
     return uploadService.uploadMultipleImages(files, 'construction-phases')
   },
 
+  uploadPhaseVideos: async (files) => {
+    return uploadService.uploadMultipleImages(files, 'construction-phases/videos');
+  },
+  
   uploadFacadeImage: async (file) => {
     return uploadService.uploadImage(file, 'facades')
   },
@@ -271,6 +275,17 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
     index,
     isPublic,
     ...(section === 'interior' && { interiorKey })
+  });
+},
+
+deleteClubhouseImages: async ({ filenames = [], names = [], deleteFromStorage = true }) => {
+  // Log para debug
+  console.log('🗑️ deleteClubhouseImages payload:', { filenames, names, deleteFromStorage });
+  return await api({
+    url: '/clubhouse/images',
+    method: 'delete',
+    data: { filenames, names, deleteFromStorage },
+    headers: filenames.length > 0 ? { 'X-Filename': filenames[0] } : {}
   });
 },
 

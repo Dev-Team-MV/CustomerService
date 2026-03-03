@@ -179,7 +179,8 @@ const Models = () => {
         await api.post("/models", dataToSend);
       }
 
-      fetchModels();
+          await fetchModels(); // Espera a que termine el fetch
+    handleCloseDialog(); // Ahora sí, cierra el modal
     } catch (error) {
       console.error("❌ Error saving model:", error);
       alert(error.response?.data?.message || t('models:errorSaving'));
@@ -373,11 +374,7 @@ const Models = () => {
         </AnimatePresence>
 
         {/* MODALS */}
-        <GalleryModal
-          open={openGalleryDialog}
-          onClose={handleCloseGallery}
-          model={selectedModelForGallery}
-        />
+
 
         <CreateModelModal
           open={openDialog}

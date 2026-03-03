@@ -14,8 +14,10 @@ const ModelCard = ({
   onPrevImage,
   onNextImage
 }) => {
-  const currentImage = modelImages[currentImageIndex];
-
+  const currentImageObj = modelImages[currentImageIndex];
+  const currentImage = typeof currentImageObj === 'string'
+    ? currentImageObj
+    : (currentImageObj?.url || '');
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -70,7 +72,7 @@ const ModelCard = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundImage: currentImage ? `url(${currentImage})` : 'none',
+            backgroundImage: currentImage ? `url(${currentImage})` : 'none',            
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             position: 'relative',

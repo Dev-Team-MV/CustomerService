@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Switch, FormControlLabel } from '@mui/material';
 import uploadService from '../../services/uploadService'
+import ImagePreview from '../../components/ImgPreview'; // Ajusta el path si es necesario
 
 const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, onVisibilityChange, loading }) => {
   const { t } = useTranslation(['masterPlan']);
@@ -118,40 +119,27 @@ const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, onVi
             <Grid item xs={12} sm={6} md={4} key={point.id}>
               <Box sx={{ border: '1px solid #eee', borderRadius: 2, p: 2 }}>
 
-                <FormControlLabel
-  control={
-    <Switch
-      checked={!!isPublicMap[point.id]}
-                      onChange={e => {
-                        const v = e.target.checked;
-                        // if there's already an uploaded image, persist toggle; otherwise just set local
-                        if (imagesMap && imagesMap[String(point.id)]) {
-                          handleToggleIsPublic(point.id, v);
-                        } else {
-                          handleIsPublicChange(point.id, v);
-                        }
-                      }}      
-      color="success"
-      size="small"
-    />
-  }
-  label={isPublicMap[point.id] ? t('public', 'Public') : t('private', 'Private')}
-  sx={{ mb: 1, fontFamily: '"Poppins", sans-serif' }}
-/>
-
-                <Typography fontWeight={600}>{t(`tourPoints.${point.name}`, point.name)}</Typography>
-                {getImageSrc(point.id) ? (
-                  <Box
-                    component="img"
-                    src={getImageSrc(point.id)}
-                    alt={point.name}
-                    sx={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 2, my: 1 }}
-                  />
-                ) : (
-                  <Box sx={{ width: '100%', height: 120, bgcolor: '#f5f5f5', borderRadius: 2, my: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa' }}>
-                    No image
-                  </Box>
-                )}
+                                <Typography fontWeight={600}>{t(`tourPoints.${point.name}`, point.name)}</Typography>
+                <ImagePreview
+                  src={getImageSrc(point.id)}
+                  alt={point.name}
+                  isPublic={!!isPublicMap[point.id]}
+                  onTogglePublic={checked => {
+                    if (imagesMap && imagesMap[String(point.id)]) {
+                      handleToggleIsPublic(point.id, checked);
+                    } else {
+                      handleIsPublicChange(point.id, checked);
+                    }
+                  }}
+                  onDelete={files[point.id]
+                    ? () => setFiles(prev => ({ ...prev, [point.id]: undefined }))
+                    : undefined // Si tienes lógica para borrar del backend, ponla aquí
+                  }
+                  showSwitch={!!getImageSrc(point.id)}
+                  switchPosition="top-right"
+                  sx={{ my: 1, borderRadius: 2 }}
+                  imgSx={{ height: 120 }}
+                />
                 <input
                   type="file"
                   accept="image/*"

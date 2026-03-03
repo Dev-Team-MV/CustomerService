@@ -9,6 +9,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useTranslation } from 'react-i18next';
 import { Switch, FormControlLabel } from '@mui/material';
 import TimeLineService from '../../services/TimeLineService';
+import ImagePreview from '../../components/ImgPreview'; // Ajusta el path si es necesario
 
 const getItemStyle = (isDragging, draggableStyle) => ({
   userSelect: 'none',
@@ -263,7 +264,7 @@ const handleToggleIsPublic = async (idx, type) => {
                       gap: 2,
                       overflowX: 'auto',
                       minHeight: 220,
-                      pb: 1,
+                      p: 1,
                       maxWidth: '100%',
                       // Opcional: oculta el scrollbar en Chrome
                       '&::-webkit-scrollbar': { height: 8 },
@@ -277,86 +278,114 @@ const handleToggleIsPublic = async (idx, type) => {
   ref={provided.innerRef}
   {...provided.draggableProps}
   {...provided.dragHandleProps}
-  elevation={snapshot.isDragging ? 8 : 2}
+  elevation={snapshot.isDragging ? 12 : 4}
   sx={{
     ...getItemStyle(snapshot.isDragging, provided.draggableProps.style),
-    minWidth: 170,
-    maxWidth: 200,
+    minWidth: 210,
+    maxWidth: 240,
     mb: 2,
-    borderRadius: 3,
-    p: 2,
+    borderRadius: 5,
+    p: 0,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    bgcolor: 'background.paper',
-    position: 'relative' // Necesario para posicionar el switch
+    bgcolor: 'linear-gradient(135deg, #f7faef 0%, #fff 100%)',
+    border: snapshot.isDragging
+      ? '2.5px solid #8CA551'
+      : '1.5px solid #e0e0e0',
+    boxShadow: snapshot.isDragging
+      ? '0 8px 32px rgba(140, 165, 81, 0.25)'
+      : '0 2px 12px rgba(140, 165, 81, 0.10)',
+    position: 'relative',
+    transition: 'box-shadow 0.2s, border 0.2s, background 0.2s',
+    '&:hover': {
+      boxShadow: '0 8px 24px rgba(140, 165, 81, 0.18)',
+      border: '2px solid #8CA551',
+      bgcolor: 'linear-gradient(135deg, #f7faef 0%, #f0f7e1 100%)',
+      transform: 'translateY(-2px) scale(1.01)',
+    },
   }}
 >
-  {/* Switch en la esquina superior derecha */}
-  {media.type === 'image' && customVisibility && (
-    <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }}>
-      <Switch
-        checked={!!media.isPublic}
-        onChange={() => {
+  {/* Imagen o video */}
+  <Box
+    sx={{
+      width: '100%',
+      display: 'flex',
+      justifyContent: 'center',
+      mt: 2,
+      mb: 1,
+    }}
+  >
+    {media.type === 'image' ? (
+      <ImagePreview
+        src={media.url}
+        alt={media.name}
+        isPublic={!!media.isPublic}
+        onTogglePublic={checked => {
           const idxInArr = form.images.findIndex(i => i.url === media.url);
           handleToggleIsPublic(idxInArr, 'images');
         }}
-        color="success"
-        size="small"
-      />
-    </Box>
-  )}
-  {/* Imagen o video */}
-  <Box sx={{ width: 120, height: 120, mb: 1, borderRadius: 2, overflow: 'hidden', bgcolor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-    {media.type === 'image' ? (
-      <img
-        src={media.url}
-        alt={media.name}
-        width={120}
-        height={120}
-        style={{ objectFit: 'cover', borderRadius: 12 }}
+        onDelete={() => removeImage(form.images.findIndex(i => i.url === media.url))}
+        showSwitch={customVisibility}
+        switchPosition="top-right"
+        sx={{
+          width: 150,
+          height: 110,
+          borderRadius: 3,
+          boxShadow: '0 2px 12px rgba(140, 165, 81, 0.10)',
+          border: '1.5px solid #e0e0e0',
+          background: '#fff',
+        }}
+        imgSx={{ height: 110 }}
       />
     ) : (
-      <video
-        src={media.url}
-        width={120}
-        height={120}
-        style={{ borderRadius: 12, objectFit: 'cover', background: '#eee' }}
-        controls
-      />
+      <Box sx={{ width: 150, height: 110, borderRadius: 3, overflow: 'hidden', bgcolor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <video
+          src={media.url}
+          width={150}
+          height={110}
+          style={{ borderRadius: 12, objectFit: 'cover', background: '#eee' }}
+          controls
+        />
+      </Box>
     )}
   </Box>
-                            <Typography variant="caption" sx={{ mb: 0.5, fontWeight: 600, fontFamily: '"Poppins", sans-serif', color: '#333F1F' }}>
-                              {media.name}
-                            </Typography>
-                            <Stack direction="row" spacing={0.5} alignItems="center" justifyContent="center" sx={{ mb: 1 }}>
-            <Tooltip title={t('delete', 'Delete')}>
-                                <IconButton
-                                  size="small"
-                                  color="error"
-                                  onClick={() => {
-                                    if (media.type === 'image') removeImage(form.images.findIndex(i => i.url === media.url));
-                                    else removeVideo(form.videos.findIndex(v => v.url === media.url));
-                                  }}
-                                >
-                                  <DeleteIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            </Stack>
-                            <TextField
-              label={t('order', 'Order')}
-                              type="number"
-                              size="small"
-                              value={media.order}
-                              inputProps={{ min: 1, max: arr.length, style: { width: 40, textAlign: 'center' } }}
-                              sx={{ mt: 1, width: 70, fontFamily: '"Poppins", sans-serif' }}
-                              onChange={e => {
-                                let newOrder = parseInt(e.target.value, 10);
-                                if (isNaN(newOrder) || newOrder < 1 || newOrder > arr.length) return;
-                                moveMedia(idx, newOrder - (idx + 1));
-                              }}
-                            />
-                          </Paper>
+  {/* Nombre y eliminar */}
+  <Box sx={{ width: '100%', textAlign: 'center', mt: 1, mb: 0.5 }}>
+    <Typography
+      variant="subtitle2"
+      sx={{
+        fontWeight: 700,
+        fontFamily: '"Poppins", sans-serif',
+        color: '#3a4d1a',
+        letterSpacing: 0.2,
+        mb: 0.5,
+      }}
+    >
+      {media.name}
+    </Typography>
+  </Box>
+  {/* Orden */}
+  <TextField
+    label={t('order', 'Order')}
+    type="number"
+    size="small"
+    value={media.order}
+    inputProps={{ min: 1, max: arr.length, style: { width: 40, textAlign: 'center' } }}
+    sx={{
+      mt: 0.5,
+      mb: 2,
+      width: 80,
+      fontFamily: '"Poppins", sans-serif',
+      '& .MuiInputBase-root': { borderRadius: 2 },
+    }}
+    onChange={e => {
+      let newOrder = parseInt(e.target.value, 10);
+      if (isNaN(newOrder) || newOrder < 1 || newOrder > arr.length) return;
+      moveMedia(idx, newOrder - (idx + 1));
+    }}
+  />
+</Paper>
                         )}
                       </Draggable>
                     ))}

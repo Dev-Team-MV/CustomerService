@@ -45,7 +45,7 @@ const GalleryCarrousel = ({
   const instanceId = useRef(Math.random().toString(36).slice(2))
   const receivingSync = useRef(false)
 
-  const safeImages = useMemo(
+  const safeMedia = useMemo(
     () => (Array.isArray(images) ? images.filter(Boolean) : []),
     [images]
   )
@@ -74,20 +74,19 @@ const GalleryCarrousel = ({
     },
     [syncGroup, onIndexChange]
   )
-
   const openLightbox = (index) => {
     setLightboxStart(index)
     setLightboxOpen(true)
   }
 
   // ---- Empty state -------------------------------------------------------
-  if (safeImages.length === 0) {
+  if (safeMedia.length === 0) {
     return (
       <div
         className={`flex items-center justify-center bg-gray-100 text-gray-400 text-sm ${className}`}
         style={{ width: '100%', height: '100%', borderRadius, minHeight: 120 }}
       >
-        No images available
+        No media available
       </div>
     )
   }
@@ -118,23 +117,38 @@ const GalleryCarrousel = ({
           grabCursor
           style={{ width: '100%', height: '100%', '--swiper-navigation-color': '#fff', '--swiper-pagination-color': '#fff' }}
         >
-          {safeImages.map((url, i) => (
+          {safeMedia.map((media, i) => (
             <SwiperSlide key={i} style={{ position: 'relative' }}>
-              <img
-                src={url}
-                alt={`slide-${i}`}
-                loading="lazy"
-                draggable={false}
-                onClick={() => openLightbox(i)}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit,
-                  cursor: 'pointer',
-                  display: 'block'
-                }}
-              />
-              {watermark && (
+              {media.type === 'video' ? (
+                <video
+                  controls
+                  src={media.url}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit,
+                    cursor: 'pointer',
+                    display: 'block',
+                    borderRadius
+                  }}
+                />
+              ) : (
+                <img
+                  src={media.url}
+                  alt={`slide-${i}`}
+                  loading="lazy"
+                  draggable={false}
+                  onClick={() => openLightbox(i)}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit,
+                    cursor: 'pointer',
+                    display: 'block'
+                  }}
+                />
+              )}
+              {watermark && media.type !== 'video' && (
                 <img
                   src={watermark}
                   alt=""
@@ -156,36 +170,7 @@ const GalleryCarrousel = ({
             </SwiperSlide>
           ))}
         </Swiper>
-
-        {/* Counter badge */}
-        <span
-          style={{
-            position: 'absolute',
-            top: 10,
-            right: 10,
-            zIndex: 10,
-            background: 'rgba(0,0,0,0.55)',
-            color: '#fff',
-            fontSize: 12,
-            fontWeight: 600,
-            padding: '2px 8px',
-            borderRadius: 12,
-            pointerEvents: 'none',
-            backdropFilter: 'blur(4px)'
-          }}
-        >
-          {safeImages.length} fotos
-        </span>
       </div>
-
-      {/* Lightbox */}
-      {lightboxOpen && (
-        <Lightbox
-          images={safeImages}
-          startIndex={lightboxStart}
-          onClose={() => setLightboxOpen(false)}
-        />
-      )}
     </>
   )
 }

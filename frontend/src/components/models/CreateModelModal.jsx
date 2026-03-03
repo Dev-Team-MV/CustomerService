@@ -37,6 +37,7 @@ import {
 import uploadService from '../../services/uploadService';
 import { useTranslation } from 'react-i18next';
 import { Switch as MuiSwitch } from '@mui/material'
+import ModelImageGrid from './ModelImageGrid';
 
 const CreateModelModal = ({ 
   open, 
@@ -190,7 +191,7 @@ const CreateModelModal = ({
 
   const handleSubmit = () => {
     onSubmit(formData);
-    handleClose();
+    // handleClose();
   };
 
   const handleRemoveImage = (section, type, index) => {
@@ -466,190 +467,6 @@ const CreateModelModal = ({
     return price + (hasBalcony ? balconyPrice : 0) + (hasUpgrade ? upgradePrice : 0) + (hasStorage ? storagePrice : 0);
   };
 
-  // ✅ Render helper para imágenes (evita duplicación de código)
- // ✅ Render helper para imágenes (evita duplicación de código)
-  const renderImageGrid = (images, section, type) => {
-    images = images || [];
-
-    // INTERIOR grouped rendering (uses url & isPublic and correct originalIndex)
-    if (type === "interior" && images.length > 0) {
-      const grouped = groupImagesByRoomType(images);
-      return (
-        <Stack spacing={1.5}>
-          {Object.entries(grouped)
-            .filter(([_, roomImages]) => roomImages.length > 0)
-            .map(([roomType, roomImages]) => (
-              <Box key={roomType}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    mb: 0.5,
-                    pb: 0.5,
-                    borderBottom: "1px solid #e0e0e0",
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    fontWeight="600"
-                    color="text.secondary"
-                    sx={{
-                      textTransform: "uppercase",
-                      letterSpacing: 0.5,
-                      fontSize: "0.7rem",
-                    }}
-                  >
-                    {getRoomTypeName(roomType)} ({roomImages.length})
-                  </Typography>
-                </Box>
-                <Grid container spacing={1}>
-                  {roomImages.map(({ url, originalIndex, isPublic }) => (
-                    <Grid item xs={6} key={`${type}-${originalIndex}`}>
-                      <Box
-                        sx={{
-                          position: "relative",
-                          pt: "75%",
-                          borderRadius: 1,
-                          overflow: "hidden",
-                          border: "1px solid #e0e0e0",
-                        }}
-                      >
-                        <Box
-                          component="img"
-                          src={url}
-                          alt={`${type} ${originalIndex + 1}`}
-                          sx={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
-                        <IconButton
-                          size="small"
-                          onClick={() => handleRemoveImage(section, type, originalIndex)}
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            bgcolor: "rgba(255,255,255,0.9)",
-                            width: 24,
-                            height: 24,
-                            "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-                          }}
-                        >
-                          <Close fontSize="small" />
-                        </IconButton>
-
-                        {/* Switch para isPublic */}
-                        <Box sx={{ position: "absolute", top: 6, left: 6 }}>
-                          <MuiSwitch
-                            checked={!!isPublic}
-                            onChange={(e) => handleToggleImageIsPublic(section, type, originalIndex, e.target.checked)}
-                            size="small"
-                            color="success"
-                          />
-                        </Box>
-                      </Box>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Box>
-            ))}
-        </Stack>
-      );
-    }
-
-    // EXTERIOR / BLUEPRINTS rendering (handles strings or objects)
-    if (images.length > 0) {
-      return (
-        <Grid container spacing={1}>
-          {images.map((item, index) => {
-            const src = typeof item === "string" ? item : (item?.url || "");
-            const isPublic = typeof item === "object" ? !!item.isPublic : false;
-            return (
-              <Grid item xs={6} key={`${type}-${index}`}>
-                <Box
-                  sx={{
-                    position: "relative",
-                    pt: "75%",
-                    borderRadius: 1,
-                    overflow: "hidden",
-                    border: "1px solid #e0e0e0",
-                  }}
-                >
-                  <Box
-                    component="img"
-                    src={src}
-                    alt={`${type} ${index + 1}`}
-                    sx={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                  <IconButton
-                    size="small"
-                    onClick={() => handleRemoveImage(section, type, index)}
-                    sx={{
-                      position: "absolute",
-                      top: 4,
-                      right: 4,
-                      bgcolor: "rgba(255,255,255,0.9)",
-                      width: 24,
-                      height: 24,
-                      "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-                    }}
-                  >
-                    <Close fontSize="small" />
-                  </IconButton>
-
-                  {/* Switch para isPublic */}
-                  <Box sx={{ position: "absolute", top: 6, left: 6 }}>
-                    <MuiSwitch
-                      checked={isPublic}
-                      onChange={(e) => handleToggleImageIsPublic(section, type, index, e.target.checked)}
-                      size="small"
-                      color="success"
-                    />
-                  </Box>
-
-                  {type === "exterior" && index === 0 && (
-                    <Chip
-                      label="Primary"
-                      size="small"
-                      color="primary"
-                      sx={{
-                        position: "absolute",
-                        bottom: 4,
-                        left: 4,
-                        height: 18,
-                        fontSize: "0.65rem",
-                      }}
-                    />
-                  )}
-                </Box>
-              </Grid>
-            );
-          })}
-        </Grid>
-      );
-    }
-
-    // Sin imágenes
-    return (
-      <Paper sx={{ p: 1.5, textAlign: "center", bgcolor: "grey.100" }}>
-        <Typography variant="caption" color="text.secondary">
-          No {type} images
-        </Typography>
-      </Paper>
-    );
-  };
 
   return (
     <Dialog
@@ -1618,28 +1435,54 @@ const CreateModelModal = ({
                     />
                   </Box>
                 </AccordionSummary>
+
                 <AccordionDetails sx={{ p: { xs: 1, md: 2 } }}>
                   <Stack spacing={1.5}>
                     <Box>
                       <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                         Exterior ({formData.images.exterior.length})
                       </Typography>
-                      {renderImageGrid(formData.images.exterior, "base", "exterior")}
+                      <ModelImageGrid
+                        images={formData.images.exterior}
+                        section="base"
+                        type="exterior"
+                        groupImagesByRoomType={groupImagesByRoomType}
+                        getRoomTypeName={getRoomTypeName}
+                        handleRemoveImage={handleRemoveImage}
+                        handleToggleImageIsPublic={handleToggleImageIsPublic}
+                      />
                     </Box>
                     <Box>
                       <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                         Interior ({formData.images.interior.length})
                       </Typography>
-                      {renderImageGrid(formData.images.interior, "base", "interior")}
+                      <ModelImageGrid
+                        images={formData.images.interior}
+                        section="base"
+                        type="interior"
+                        groupImagesByRoomType={groupImagesByRoomType}
+                        getRoomTypeName={getRoomTypeName}
+                        handleRemoveImage={handleRemoveImage}
+                        handleToggleImageIsPublic={handleToggleImageIsPublic}
+                      />
                     </Box>
                     <Box>
                       <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                         Blueprints ({formData.images.blueprints.length})
                       </Typography>
-                      {renderImageGrid(formData.images.blueprints, "base", "blueprints")}
+                      <ModelImageGrid
+                        images={formData.images.blueprints}
+                        section="base"
+                        type="blueprints"
+                        groupImagesByRoomType={groupImagesByRoomType}
+                        getRoomTypeName={getRoomTypeName}
+                        handleRemoveImage={handleRemoveImage}
+                        handleToggleImageIsPublic={handleToggleImageIsPublic}
+                      />
                     </Box>
                   </Stack>
                 </AccordionDetails>
+
               </Accordion>
 
               {/* BALCONY ACCORDION */}
@@ -1672,25 +1515,49 @@ const CreateModelModal = ({
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Exterior ({formData.balconyImages.exterior.length})
                         </Typography>
-                        {renderImageGrid(formData.balconyImages.exterior, "balcony", "exterior")}
+                        <ModelImageGrid
+                          images={formData.balconyImages.exterior}
+                          section="balcony"
+                          type="exterior"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                       <Box>
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Interior ({formData.balconyImages.interior.length})
                         </Typography>
-                        {renderImageGrid(formData.balconyImages.interior, "balcony", "interior")}
+                        <ModelImageGrid
+                          images={formData.balconyImages.interior}
+                          section="balcony"
+                          type="interior"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                       <Box>
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Blueprints ({formData.balconyImages.blueprints.length})
                         </Typography>
-                        {renderImageGrid(formData.balconyImages.blueprints, "balcony", "blueprints")}
+                        <ModelImageGrid
+                          images={formData.balconyImages.blueprints}
+                          section="balcony"
+                          type="blueprints"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                     </Stack>
                   </AccordionDetails>
                 </Accordion>
               )}
-
+              
               {/* UPGRADE ACCORDION */}
               {formData.hasUpgrade && (
                 <Accordion
@@ -1721,25 +1588,49 @@ const CreateModelModal = ({
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Exterior ({formData.upgradeImages.exterior.length})
                         </Typography>
-                        {renderImageGrid(formData.upgradeImages.exterior, "upgrade", "exterior")}
+                        <ModelImageGrid
+                          images={formData.upgradeImages.exterior}
+                          section="upgrade"
+                          type="exterior"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                       <Box>
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Interior ({formData.upgradeImages.interior.length})
                         </Typography>
-                        {renderImageGrid(formData.upgradeImages.interior, "upgrade", "interior")}
+                        <ModelImageGrid
+                          images={formData.upgradeImages.interior}
+                          section="upgrade"
+                          type="interior"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                       <Box>
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Blueprints ({formData.upgradeImages.blueprints.length})
                         </Typography>
-                        {renderImageGrid(formData.upgradeImages.blueprints, "upgrade", "blueprints")}
+                        <ModelImageGrid
+                          images={formData.upgradeImages.blueprints}
+                          section="upgrade"
+                          type="blueprints"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                     </Stack>
                   </AccordionDetails>
                 </Accordion>
               )}
-
+              
               {/* STORAGE ACCORDION */}
               {formData.hasStorage && (
                 <Accordion
@@ -1770,19 +1661,43 @@ const CreateModelModal = ({
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Exterior ({formData.storageImages.exterior.length})
                         </Typography>
-                        {renderImageGrid(formData.storageImages.exterior, "storage", "exterior")}
+                        <ModelImageGrid
+                          images={formData.storageImages.exterior}
+                          section="storage"
+                          type="exterior"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                       <Box>
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Interior ({formData.storageImages.interior.length})
                         </Typography>
-                        {renderImageGrid(formData.storageImages.interior, "storage", "interior")}
+                        <ModelImageGrid
+                          images={formData.storageImages.interior}
+                          section="storage"
+                          type="interior"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                       <Box>
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Blueprints ({formData.storageImages.blueprints.length})
                         </Typography>
-                        {renderImageGrid(formData.storageImages.blueprints, "storage", "blueprints")}
+                        <ModelImageGrid
+                          images={formData.storageImages.blueprints}
+                          section="storage"
+                          type="blueprints"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                     </Stack>
                   </AccordionDetails>

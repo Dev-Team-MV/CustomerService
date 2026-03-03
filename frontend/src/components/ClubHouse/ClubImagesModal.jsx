@@ -30,6 +30,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import uploadService from '../../services/uploadService';
 import { useTranslation } from 'react-i18next';
 import { Switch } from '@mui/material';
+import ImagePreview from '../../components/ImgPreview';
 
 const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
   const { t } = useTranslation(['clubHouse', 'common']);
@@ -785,79 +786,55 @@ const getTotalSelectedFiles = () => {
   return total;
 };
 
-// ...existing code...
-  const handleDeleteExistingImage = async (section, image, interiorKey = null) => {
-    const prevState = JSON.parse(JSON.stringify(existingImages));
+const handleDeleteExistingImage = async (section, image, interiorKey = null) => {
+  const prevState = JSON.parse(JSON.stringify(existingImages));
 
-    // determine fileName (full path expected by backend e.g. 'clubhouse/xxx.jpg' or 'images/2025/01/abc.jpg')
-    const determineFileName = (img) => {
-      if (!img) return null;
-      if (typeof img === 'string') return extractPathFromUrl(img) || img;
-      if (img.raw) {
-        if (img.raw.name) return img.raw.name;
-        if (img.raw.path) return img.raw.path;
-        if (img.raw.filename) return img.raw.filename;
-      }
-      if (img.url) return extractPathFromUrl(img.url);
-      if (img.publicUrl) return extractPathFromUrl(img.publicUrl);
-      return null;
-    };
+  // Determina el nombre de archivo para eliminar
+  const determineFileName = (img) => {
+    if (!img) return null;
+    if (img.storagePath) return img.storagePath;
+    if (img.raw?.name) return img.raw.name;
+    if (img.raw?.path) return img.raw.path;
+    if (img.url) {
+      const url = img.url.split('?')[0];
+      const idx = url.indexOf('clubhouse/');
+      if (idx !== -1) return url.slice(idx);
+      return url.split('/').pop();
+    }
+    return null;
+  };
 
-    const identifier = image?._id || image?.url || image;
-    // optimistic UI update
-    setExistingImages(prev => {
-      const next = JSON.parse(JSON.stringify(prev));
-      if (section === 'interior' && interiorKey) {
-        next.interior = { ...(next.interior || {}) };
-        next.interior[interiorKey] = (next.interior[interiorKey] || []).filter(it => (it._id || it.url) !== (identifier));
-      } else {
-        next[section] = (next[section] || []).filter(it => (it._id || it.url) !== (identifier));
-      }
-      return next;
+  const fileName = determineFileName(image);
+
+    console.log('🗑️ handleDeleteExistingImage: deleting', fileName);
+
+
+  setExistingImages(prev => {
+    const next = JSON.parse(JSON.stringify(prev));
+    if (section === 'interior' && interiorKey) {
+      next.interior[interiorKey] = (next.interior[interiorKey] || []).filter(it => (it._id || it.url) !== (image._id || image.url));
+    } else {
+      next[section] = (next[section] || []).filter(it => (it._id || it.url) !== (image._id || image.url));
+    }
+    return next;
+  });
+
+  try {
+    setError(null);
+    if (!fileName) throw new Error('Could not determine file path to delete');
+
+    // Llama al endpoint correcto con payload
+    await uploadService.deleteClubhouseImages({
+      filenames: [fileName],
+      deleteFromStorage: true
     });
 
-    try {
-      setError(null);
-      const fileName = determineFileName(image);
-      if (!fileName) throw new Error('Could not determine file path to delete');
-
-      let res = null;
-
-      // prefer service helper if available
-      if (uploadService.deleteImage) {
-        res = await uploadService.deleteImage(fileName);
-      } else {
-        // fallback: call API directly
-        const resp = await fetch(`/api/upload/image/${encodeURI(fileName)}`, {
-          method: 'DELETE',
-          credentials: 'same-origin',
-          headers: { 'Accept': 'application/json' }
-        });
-        const text = await resp.text().catch(() => '');
-        let json;
-        try { json = text ? JSON.parse(text) : {}; } catch (e) { json = { raw: text }; }
-        console.error('Delete /api/upload/image response:', resp.status, json);
-        if (!resp.ok) throw new Error(json?.message || `Delete failed (${resp.status})`);
-        res = json;
-      }
-
-      // if backend returns clubHouse doc, use it as source of truth
-      const clubHouse = res?.clubHouse || res?.data?.clubHouse || null;
-      if (clubHouse) {
-        const organized = mapClubHouseToOrganized(clubHouse);
-        const normalized = normalizeOrganized(organized);
-        setExistingImages(normalized);
-      } else {
-        // otherwise reload listing to reflect actual storage state
-        await loadExistingImages();
-      }
-    } catch (err) {
-      console.error('Error deleting clubhouse image:', err);
-      setError(err?.message || 'Failed to delete image');
-      setExistingImages(prevState); // revert optimistic change
-    }
-  };
-// ...existing code...
+    await loadExistingImages();
+  } catch (err) {
+    setError(err?.message || 'Failed to delete image');
+    setExistingImages(prevState);
+  }
+};
 
   return (
     <Dialog
@@ -1081,7 +1058,7 @@ const getTotalSelectedFiles = () => {
         ) : (
           <>
             {/* ✅ NUEVAS IMÁGENES SELECCIONADAS (PREVIEW) */}
-            {getCurrentSelectedFiles().length > 0 && (
+            {/* {getCurrentSelectedFiles().length > 0 && (
               <Box mb={3}>
                 <Typography
                   variant="subtitle2"
@@ -1132,7 +1109,6 @@ const getTotalSelectedFiles = () => {
                               objectFit: 'cover'
                             }}
                           />
-                          {/* Toggle isPublic */}
         <Box sx={{ position: 'absolute', top: 8, right: 40, zIndex: 2, pointerEvents: 'auto' }}>
           <Switch checked={!!file.isPublic} onChange={handleToggleIsPublicSelected(getCurrentSection(), idx, tab === 2 ? selectedInteriorSection : null)} color="success" size="small" />
         </Box>
@@ -1149,7 +1125,6 @@ const getTotalSelectedFiles = () => {
                 </Grid>
               </Box>
             )}
-            {/* ✅ IMÁGENES EXISTENTES EN GCS */}
             {getCurrentExistingImages().length > 0 && (
               <Box>
                 <Typography
@@ -1190,7 +1165,6 @@ const getTotalSelectedFiles = () => {
                                 objectFit: 'cover'
                               }}
                             />
-                            {/* Switch para editar visibilidad */}
         <Box sx={{ position: 'absolute', top: 8, right: 40, zIndex: 2, pointerEvents: 'auto' }}>
           <Switch checked={!!(img.isPublic ?? true)} onChange={e => handleToggleImageVisibility(getCurrentSection(), idx, e.target.checked, tab === 2 ? selectedInteriorSection : null)} color="success" size="small" />
         </Box>
@@ -1204,7 +1178,132 @@ const getTotalSelectedFiles = () => {
                   </AnimatePresence>
                 </Grid>
               </Box>
-            )}
+            )} */}
+
+
+            {/* ✅ NUEVAS IMÁGENES SELECCIONADAS (PREVIEW) */}
+{getCurrentSelectedFiles().length > 0 && (
+  <Box mb={3}>
+    <Typography
+      variant="subtitle2"
+      fontWeight={700}
+      mb={1.5}
+      sx={{
+        color: '#8CA551',
+        fontFamily: '"Poppins", sans-serif',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1
+      }}
+    >
+      <CloudUpload fontSize="small" />
+      {t('clubHouse:readyToUpload', { count: getCurrentSelectedFiles().length })}
+    </Typography>
+    <Grid container spacing={2}>
+      {getCurrentSelectedFiles().map((file, idx) => (
+        <Grid item xs={6} sm={4} key={idx}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ImagePreview
+              src={
+                file.file instanceof File
+                  ? URL.createObjectURL(file.file)
+                  : typeof file.file === 'string'
+                    ? file.file
+                    : ''
+              }
+              alt={`Preview ${idx + 1}`}
+              isPublic={!!file.isPublic}
+              onTogglePublic={handleToggleIsPublicSelected(
+                getCurrentSection(),
+                idx,
+                tab === 2 ? selectedInteriorSection : null
+              )}
+              onDelete={() =>
+                handleRemoveSelectedFile(
+                  getCurrentSection(),
+                  idx,
+                  tab === 2 ? selectedInteriorSection : null
+                )
+              }
+              showSwitch={true}
+              switchPosition="top-right"
+              label="NEW"
+              sx={{
+                border: '2px solid #8CA551',
+                '&:hover .delete-btn': { opacity: 1 }
+              }}
+              imgSx={{
+                height: 160
+              }}
+            />
+          </motion.div>
+        </Grid>
+      ))}
+    </Grid>
+  </Box>
+)}
+
+{/* ✅ IMÁGENES EXISTENTES EN GCS */}
+{getCurrentExistingImages().length > 0 && (
+  <Box>
+    <Typography
+      variant="subtitle2"
+      fontWeight={700}
+      mb={1.5}
+      sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}
+    >
+      {t('clubHouse:uploadedImages', { count: getCurrentExistingImages().length })}
+    </Typography>
+    <Grid container spacing={2}>
+      <AnimatePresence>
+        {getCurrentExistingImages().map((img, idx) => (
+          <Grid item xs={6} sm={4} key={stableKeyForImage(img, idx)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ImagePreview
+                src={typeof img === 'string' ? img : img.url}
+                alt={`Image ${idx + 1}`}
+                isPublic={!!(img.isPublic ?? true)}
+                onTogglePublic={e =>
+                  handleToggleImageVisibility(
+                    getCurrentSection(),
+                    idx,
+                    e,
+                    tab === 2 ? selectedInteriorSection : null
+                  )
+                }
+                onDelete={() =>
+                  handleDeleteExistingImage(
+                    getCurrentSection(),
+                    img,
+                    tab === 2 ? selectedInteriorSection : null
+                  )
+                }
+                showSwitch={true}
+                switchPosition="top-right"
+                sx={{
+                  border: '1px solid #e0e0e0',
+                  '&:hover .delete-btn': { opacity: 1 }
+                }}
+                imgSx={{
+                  height: 160
+                }}
+              />
+            </motion.div>
+          </Grid>
+        ))}
+      </AnimatePresence>
+    </Grid>
+  </Box>
+)}
             {/* ✅ MENSAJE CUANDO NO HAY NADA */}
             {getCurrentExistingImages().length === 0 && getCurrentSelectedFiles().length === 0 && (
               <Paper
