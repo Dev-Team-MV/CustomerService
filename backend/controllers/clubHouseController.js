@@ -358,10 +358,20 @@ export const getClubHouseInteriorKeys = (req, res) => {
  * - deleteFromStorage: si true, además borra el archivo en GCS (carpeta clubhouse). Default false.
  * Elimina de exterior, blueprints, deck e interior las que coincidan. Devuelve cuántas se quitaron y desde qué secciones.
  */
+/** Normalize to last path segment so "clubhouse/abc.jpg" and "abc.jpg" both match. */
+function toLastSegment (p) {
+  const s = String(p).trim()
+  return s.includes('/') ? s.split('/').pop() : s
+}
+
 export const deleteClubHouseImages = async (req, res) => {
   try {
     const { filenames = [], names = [], deleteFromStorage = false } = req.body
-    const filenameSet = new Set(Array.isArray(filenames) ? filenames.map((f) => String(f).trim()).filter(Boolean) : [])
+    const filenameSet = new Set(
+      Array.isArray(filenames)
+        ? filenames.map((f) => toLastSegment(f)).filter(Boolean)
+        : []
+    )
     const nameSet = new Set(Array.isArray(names) ? names.map((n) => String(n).trim()).filter(Boolean) : [])
     if (filenameSet.size === 0 && nameSet.size === 0) {
       return res.status(400).json({

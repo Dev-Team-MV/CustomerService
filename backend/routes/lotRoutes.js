@@ -15,8 +15,19 @@ const router = express.Router()
  * @swagger
  * /api/lots:
  *   get:
- *     summary: Get all lots
+ *     summary: Get all lots (optionally filter by project)
  *     tags: [Lots]
+ *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         schema:
+ *           type: string
+ *         description: Filter lots by project ID (multi-tenant)
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [available, pending, sold]
  *     responses:
  *       200:
  *         description: List of lots
@@ -38,9 +49,16 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             required:
+ *               - projectId
  *               - number
  *               - price
  *             properties:
+ *               projectId:
+ *                 type: string
+ *                 description: Project ID (or use "project")
+ *               project:
+ *                 type: string
+ *                 description: Project ID (alternative to projectId)
  *               number:
  *                 type: string
  *               price:
@@ -60,13 +78,19 @@ router.route('/')
  * @swagger
  * /api/lots/stats:
  *   get:
- *     summary: Get lot statistics
+ *     summary: Get lot statistics (optionally by project)
  *     tags: [Lots]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         schema:
+ *           type: string
+ *         description: Filter stats by project ID
  *     responses:
  *       200:
- *         description: Lot statistics
+ *         description: Lot statistics (total, available, pending, sold)
  */
 router.get('/stats', protect, getLotStats)
 

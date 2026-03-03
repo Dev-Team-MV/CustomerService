@@ -94,10 +94,11 @@ function getPropertyBlueprints(property) {
 
 export const getAllProperties = async (req, res) => {
   try {
-    const { status, user } = req.query
+    const { status, user, projectId } = req.query
     const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
     const filter = {}
 
+    if (projectId) filter.project = projectId
     if (status) filter.status = status
 
     if (user && isAdmin) {
@@ -109,6 +110,7 @@ export const getAllProperties = async (req, res) => {
     }
 
     const properties = await Property.find(filter)
+      .populate('project', 'name slug')
       .populate('lot', 'number price')
       .populate('model', 'model price bedrooms bathrooms sqft images blueprints balconies upgrades')
       .populate('facade', 'title url price')
@@ -137,6 +139,7 @@ export const getAllProperties = async (req, res) => {
 export const getPropertyById = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id)
+      .populate('project', 'name slug')
       .populate('lot', 'number price')
       .populate('model', 'model price bedrooms bathrooms sqft images blueprints description balconies upgrades')
       .populate('facade', 'title url price')
@@ -154,7 +157,8 @@ export const getPropertyById = async (req, res) => {
       return res.status(404).json({ message: 'Property not found' })
     }
 
-    const canAccess = await canUserAccessProperty(req.user._id, property._id)
+    const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
+    const canAccess = isAdmin || (await canUserAccessProperty(req.user._id, property._id))
     if (!canAccess) {
       return res.status(403).json({ message: 'You do not have access to this property' })
     }
@@ -171,8 +175,12 @@ export const getPropertyById = async (req, res) => {
 
 export const createProperty = async (req, res) => {
   try {
-    const { lot, model, facade, user, users, initialPayment, hasBalcony, modelType, hasStorage } = req.body
-    
+    const { projectId, project, lot, model, facade, user, users, initialPayment, hasBalcony, modelType, hasStorage } = req.body
+    const projId = projectId || project
+    if (!projId) {
+      return res.status(400).json({ message: 'projectId (or project) is required' })
+    }
+
     // Normalize owners: accept single user or users array
     const ownerIds = users && Array.isArray(users) && users.length > 0
       ? users
@@ -182,11 +190,14 @@ export const createProperty = async (req, res) => {
     if (ownerIds.length === 0) {
       return res.status(400).json({ message: 'At least one owner (user or users) is required' })
     }
-    
+
     // Validate lot
     const lotExists = await Lot.findById(lot)
     if (!lotExists) {
       return res.status(404).json({ message: 'Lot not found' })
+    }
+    if (lotExists.project.toString() !== projId.toString()) {
+      return res.status(400).json({ message: 'Lot does not belong to this project' })
     }
     
     if (lotExists.status === 'sold') {
@@ -211,11 +222,17 @@ export const createProperty = async (req, res) => {
     if (!modelExists) {
       return res.status(404).json({ message: 'Model not found' })
     }
-    
+    if (modelExists.project.toString() !== projId.toString()) {
+      return res.status(400).json({ message: 'Model does not belong to this project' })
+    }
+
     // Validate facade
     const facadeExists = await Facade.findById(facade)
     if (!facadeExists) {
       return res.status(404).json({ message: 'Facade not found' })
+    }
+    if (facadeExists.project.toString() !== projId.toString()) {
+      return res.status(400).json({ message: 'Facade does not belong to this project' })
     }
     
     // Validate that facade belongs to the selected model
@@ -249,6 +266,7 @@ export const createProperty = async (req, res) => {
     const pendingAmount = totalPrice - initialPaymentAmount
     
     const property = await Property.create({
+      project: projId,
       lot,
       model,
       facade,
@@ -456,21 +474,31 @@ export const deleteProperty = async (req, res) => {
 
 export const getPropertyStats = async (req, res) => {
   try {
-    const totalProperties = await Property.countDocuments()
-    const activeProperties = await Property.countDocuments({ status: 'active' })
-    const pendingProperties = await Property.countDocuments({ status: 'pending' })
-    const soldProperties = await Property.countDocuments({ status: 'sold' })
-    
+    const { projectId } = req.query
+    const filter = {}
+    if (projectId) {
+      try {
+        filter.project = new mongoose.Types.ObjectId(projectId)
+      } catch {
+        return res.status(400).json({ message: 'Invalid projectId' })
+      }
+    }
+
+    const totalProperties = await Property.countDocuments(filter)
+    const activeProperties = await Property.countDocuments({ ...filter, status: 'active' })
+    const pendingProperties = await Property.countDocuments({ ...filter, status: 'pending' })
+    const soldProperties = await Property.countDocuments({ ...filter, status: 'sold' })
+
     const totalRevenue = await Property.aggregate([
-      { $match: { status: { $in: ['active', 'sold'] } } },
+      { $match: { ...filter, status: { $in: ['active', 'sold'] } } },
       { $group: { _id: null, total: { $sum: '$price' } } }
     ])
-    
+
     const pendingPayments = await Property.aggregate([
-      { $match: { status: { $in: ['active', 'pending'] } } },
+      { $match: { ...filter, status: { $in: ['active', 'pending'] } } },
       { $group: { _id: null, total: { $sum: '$pending' } } }
     ])
-    
+
     res.json({
       total: totalProperties,
       active: activeProperties,

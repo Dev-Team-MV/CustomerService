@@ -6,10 +6,14 @@ import imageItemSchema from './schemas/imageItemSchema.js'
 
 const modelSchema = new mongoose.Schema(
   {
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
+      required: [true, 'Project is required']
+    },
     model: {
       type: String,
       required: [true, 'Model name is required'],
-      unique: true,
       trim: true
     },
     modelNumber: {
@@ -69,6 +73,9 @@ const modelSchema = new mongoose.Schema(
     timestamps: true
   }
 )
+
+modelSchema.index({ project: 1, model: 1 }, { unique: true })
+modelSchema.index({ project: 1 })
 
 const Model = mongoose.model('Model', modelSchema)
 
