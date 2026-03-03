@@ -16,6 +16,11 @@ function toIdStr(val) {
   return String(val)
 }
 
+/** Compare two ids (ObjectId or string) in a case-insensitive way for MongoDB hex ids. */
+function sameId(a, b) {
+  return toIdStr(a).toLowerCase() === toIdStr(b).toLowerCase()
+}
+
 /**
  * Calcula las imágenes (exterior e interior) de la propiedad según:
  * - modelType: 'basic' | 'upgrade'
@@ -208,8 +213,9 @@ export const createProperty = async (req, res) => {
     if (!projId) {
       return res.status(400).json({ message: 'projectId (or project) is required, or use a lot that belongs to a project' })
     }
-    if (toIdStr(lotExists.project) !== toIdStr(projId)) {
-      return res.status(400).json({ message: 'Lot does not belong to this project' })
+    // Use lot's project as canonical so we accept even if frontend sent a different projectId (e.g. stale state)
+    if (lotExists.project) {
+      projId = lotExists.project
     }
     
     if (lotExists.status === 'sold') {
@@ -225,7 +231,7 @@ export const createProperty = async (req, res) => {
     }
     
     const firstOwner = ownerIds[0]
-    if (lotExists.assignedUser && toIdStr(lotExists.assignedUser) !== toIdStr(firstOwner)) {
+    if (lotExists.assignedUser && !sameId(lotExists.assignedUser, firstOwner)) {
       return res.status(400).json({ message: 'Lot is already assigned to another user' })
     }
     
@@ -234,7 +240,7 @@ export const createProperty = async (req, res) => {
     if (!modelExists) {
       return res.status(404).json({ message: 'Model not found' })
     }
-    if (modelExists.project == null || toIdStr(modelExists.project) !== toIdStr(projId)) {
+    if (!modelExists.project || !sameId(modelExists.project, projId)) {
       return res.status(400).json({ message: 'Model does not belong to this project' })
     }
 
@@ -243,12 +249,12 @@ export const createProperty = async (req, res) => {
     if (!facadeExists) {
       return res.status(404).json({ message: 'Facade not found' })
     }
-    if (facadeExists.project == null || toIdStr(facadeExists.project) !== toIdStr(projId)) {
+    if (!facadeExists.project || !sameId(facadeExists.project, projId)) {
       return res.status(400).json({ message: 'Facade does not belong to this project' })
     }
 
     // Validate that facade belongs to the selected model
-    if (toIdStr(facadeExists.model) !== toIdStr(model)) {
+    if (!sameId(facadeExists.model, model)) {
       return res.status(400).json({ message: 'Facade does not belong to the selected model' })
     }
     
