@@ -14,6 +14,7 @@ import {
   Stack,
   Card,
   Chip,
+  MenuItem,
 } from '@mui/material';
 import {
   CloudUpload,
@@ -26,6 +27,8 @@ import {
   CheckCircle,
 } from '@mui/icons-material';
 import uploadService from '../../services/uploadService';
+import projectService from '../../services/projectService';
+
 import { useTranslation } from 'react-i18next';
 
 const CreateFacade = ({ 
@@ -42,7 +45,14 @@ const CreateFacade = ({
     url: [],
     price: 0,
     decks: [],
+    project: "",
+    projectId: "",
   });
+
+    // ✅ Proyectos
+  const [projects, setProjects] = useState([])
+  const [loadingProjects, setLoadingProjects] = useState(false)
+
 
   const [uploadingFacadeImage, setUploadingFacadeImage] = useState(false);
   const [uploadingDeckImages, setUploadingDeckImages] = useState(false);
@@ -58,16 +68,42 @@ const CreateFacade = ({
     status: "active",
   });
 
+    // ✅ Cargar proyectos al abrir
+  useEffect(() => {
+    if (open) fetchProjects()
+  }, [open])
+
+  const fetchProjects = async () => {
+    try {
+      setLoadingProjects(true)
+      const data = await projectService.getAll()
+      setProjects(data)
+      // Auto-seleccionar si solo hay uno
+      if (data.length === 1) {
+        setFacadeFormData(prev => ({
+          ...prev,
+          project: data[0]._id,
+          projectId: data[0]._id,
+        }))
+      }
+    } catch (error) {
+      console.error('Error fetching projects:', error)
+    } finally {
+      setLoadingProjects(false)
+    }
+  }
+
   // ==================== EFFECTS ====================
   useEffect(() => {
     if (selectedFacade) {
       const urls = Array.isArray(selectedFacade.url)
         ? selectedFacade.url
-        : selectedFacade.url
-          ? [selectedFacade.url]
-          : [];
+        : selectedFacade.url ? [selectedFacade.url] : [];
 
       const existingDecks = Array.isArray(selectedFacade.decks) ? selectedFacade.decks : [];
+      const projectId = typeof selectedFacade.project === 'object'
+        ? selectedFacade.project?._id
+        : selectedFacade.project || selectedFacade.projectId || ""
 
       setFacadeFormData({
         model: selectedFacade.model._id || selectedFacade.model,
@@ -75,27 +111,24 @@ const CreateFacade = ({
         url: urls,
         price: selectedFacade.price || 0,
         decks: existingDecks,
+        project: projectId,
+        projectId: projectId,
       });
     } else if (selectedModel) {
-      setFacadeFormData({
+      setFacadeFormData(prev => ({
+        ...prev,
         model: selectedModel._id,
         title: "",
         url: [],
         price: 0,
         decks: [],
-      });
+      }));
     }
   }, [selectedFacade, selectedModel, open]);
 
   // ==================== FACADE HANDLERS ====================
   const handleClose = () => {
-    setFacadeFormData({
-      model: "",
-      title: "",
-      url: [],
-      price: 0,
-      decks: [],
-    });
+    setFacadeFormData({ model: "", title: "", url: [], price: 0, decks: [], project: "", projectId: "" });
     onClose();
   };
 
@@ -104,17 +137,14 @@ const CreateFacade = ({
       alert("Please enter a facade title");
       return;
     }
-
     if (facadeFormData.url.length === 0) {
       alert("Please add at least one image URL");
       return;
     }
-
-    if (facadeFormData.price < 0) {
-      alert("Price cannot be negative");
+    if (!facadeFormData.project) {
+      alert("Please select a project");
       return;
     }
-
     try {
       await onSubmit(facadeFormData, selectedFacade);
       handleClose();
@@ -702,8 +732,57 @@ const CreateFacade = ({
                       />
                     </Button>
                   </Paper>
-                </Grid>
+                
               </Grid>
+
+
+                              {/* ✅ SELECT PROJECT */}
+                      </Grid>
+
+                  <TextField
+                    fullWidth
+                    select
+                    label="Project *"
+                    value={facadeFormData.project}
+                    onChange={(e) => setFacadeFormData(prev => ({
+                      ...prev,
+                      project: e.target.value,
+                      projectId: e.target.value,
+                    }))}
+                    disabled={loadingProjects}
+                    helperText="Select the project this facade belongs to"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        fontFamily: '"Poppins", sans-serif',
+                        "& fieldset": { borderColor: 'rgba(140, 165, 81, 0.3)', borderWidth: '2px' },
+                        "&:hover fieldset": { borderColor: "#8CA551" },
+                        "&.Mui-focused fieldset": { borderColor: "#333F1F", borderWidth: "2px" }
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontFamily: '"Poppins", sans-serif',
+                        "&.Mui-focused": { color: "#333F1F" }
+                      },
+                      "& .MuiFormHelperText-root": { fontFamily: '"Poppins", sans-serif' }
+                    }}
+                  >
+                    {loadingProjects ? (
+                      <MenuItem disabled>Loading projects...</MenuItem>
+                    ) : projects.length === 0 ? (
+                      <MenuItem disabled>No projects available</MenuItem>
+                    ) : (
+                      projects.map(project => (
+                        <MenuItem
+                          key={project._id}
+                          value={project._id}
+                          sx={{ fontFamily: '"Poppins", sans-serif', '&:hover': { bgcolor: 'rgba(140, 165, 81, 0.08)' } }}
+                        >
+                          {project.name} {project.slug ? `(${project.slug})` : ''}
+                        </MenuItem>
+                      ))
+                    )}
+                  </TextField>
+                </Grid>
             </Box>
       
             {/* RIGHT SIDE - Image Preview */}

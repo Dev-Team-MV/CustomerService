@@ -109,18 +109,22 @@ const ModelCustomizationCore = ({
       .replace(/balcony/gi, 'study')
   }
 
-  const processImages = (cat) => [
-    ...(cat?.exteriorImages || []).map(img =>
-      typeof img === 'string'
-        ? { url: img, type: 'exterior', roomType: 'general' }
-        : { url: img.url || img, type: 'exterior', roomType: img.roomType || 'general' }
-    ),
-    ...(cat?.interiorImages || []).map(img =>
-      typeof img === 'string'
-        ? { url: img, type: 'interior', roomType: 'general' }
-        : { url: img.url || img, type: 'interior', roomType: img.roomType || 'general' }
-    )
-  ]
+  // ...existing code...
+  
+    const processImages = (cat) => {
+      return [
+        ...(cat?.exteriorImages || []).map(img => {
+          const url = typeof img === 'string' ? img : (img?.url || '')
+          return { url, type: 'exterior', roomType: img?.roomType || 'general', isPublic: img?.isPublic }
+        }),
+        ...(cat?.interiorImages || []).map(img => {
+          const url = typeof img === 'string' ? img : (img?.url || '')
+          return { url, type: 'interior', roomType: img?.roomType || 'general', isPublic: img?.isPublic }
+        })
+      ].filter(img => img.url)
+    }
+  
+  // ...existing code...
 
   const filterImages = (images) => {
     let filtered = [...images]
@@ -645,7 +649,7 @@ const ModelCustomizationCore = ({
             {/* ✅ Altura fija calculada: 95vh del dialog - header (~110px) - chip header (~56px) */}
             <Box sx={{ width: '100%', height: 'calc(95vh - 166px)', position: 'relative' }}>
               <GalleryCarrousel
-                images={leftData.images.map((img) => img.url)}
+                images={leftData.images.map((img) => img.url).filter(Boolean)}
                 onIndexChange={(newIndex) => {
                   setLeftImageIndex(newIndex)
                   if (isSynced) setRightImageIndex(newIndex)

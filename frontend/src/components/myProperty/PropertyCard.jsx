@@ -1,5 +1,5 @@
 import { Card, CardContent, Box, Typography, Avatar, Chip, Button } from "@mui/material"
-import { Home, LocationOn, Bed, Bathtub, SquareFoot } from "@mui/icons-material"
+import { Home, LocationOn, Bed, Bathtub, SquareFoot, Share} from "@mui/icons-material"
 import { motion } from "framer-motion"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -12,6 +12,7 @@ const PropertyCard = ({
   onClick
 }) => {
   const { t } = useTranslation(['myProperty', 'common'])
+console.log('propiedad', property);
 
   return (
     <motion.div
@@ -46,6 +47,23 @@ const PropertyCard = ({
           flexDirection: "column",
         }}
       >
+                {property.isShared && (
+          <Box sx={{ position: 'absolute', top: 12, right: 12, zIndex: 1 }}>
+            <Chip
+              icon={<Share sx={{ fontSize: 14 }} />}
+              label="Shared with you"
+              size="small"
+              sx={{
+                bgcolor: '#e3f2fd',
+                color: '#1565c0',
+                fontWeight: 700,
+                fontSize: '0.7rem',
+                height: 26,
+                border: '1px solid #90caf9'
+              }}
+            />
+          </Box>
+        )}
         {/* Barra superior decorativa */}
         <Box
           sx={{

@@ -215,19 +215,30 @@ const Models = () => {
     setSelectedModelForFacades(null);
   };
 
-  const handleSubmitFacade = async (facadeFormData, selectedFacade) => {
-    try {
-      if (selectedFacade) {
-        await api.put(`/facades/${selectedFacade._id}`, facadeFormData);
-      } else {
-        await api.post("/facades", facadeFormData);
+  // ...existing code...
+  
+    const handleSubmitFacade = async (facadeFormData, selectedFacade) => {
+      try {
+        // ✅ Asegurar que project y projectId se envían
+        const payload = {
+          ...facadeFormData,
+          project: facadeFormData.project || facadeFormData.projectId,
+          projectId: facadeFormData.projectId || facadeFormData.project,
+        }
+  
+        if (selectedFacade) {
+          await api.put(`/facades/${selectedFacade._id}`, payload);
+        } else {
+          await api.post("/facades", payload);
+        }
+        fetchFacades();
+      } catch (error) {
+        console.error("Error saving facade:", error);
+        alert(error.response?.data?.message || "Error saving facade");
       }
-      fetchFacades();
-    } catch (error) {
-      console.error("Error saving facade:", error);
-      alert(error.response?.data?.message || "Error saving facade");
-    }
-  };
+    };
+  
+  // ...existing code...
 
 
   const handleDeleteFacade = async (id) => {

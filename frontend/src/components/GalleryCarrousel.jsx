@@ -45,10 +45,27 @@ const GalleryCarrousel = ({
   const instanceId = useRef(Math.random().toString(36).slice(2))
   const receivingSync = useRef(false)
 
-  const safeMedia = useMemo(
-    () => (Array.isArray(images) ? images.filter(Boolean) : []),
-    [images]
-  )
+  // ...existing code...
+  
+    const safeMedia = useMemo(() => {
+      if (!Array.isArray(images)) return []
+      return images
+        .filter(Boolean)
+        .map((item) => {
+          // Si ya es un objeto con url, usarlo directamente
+          if (typeof item === 'object' && item !== null && item.url) {
+            return { url: item.url, type: item.type || 'image' }
+          }
+          // Si es un string, convertirlo a objeto
+          if (typeof item === 'string') {
+            return { url: item, type: 'image' }
+          }
+          return null
+        })
+        .filter(Boolean)
+    }, [images])
+  
+  // ...existing code...
 
   // ---- Sync listener -----------------------------------------------------
   useEffect(() => {
@@ -138,6 +155,7 @@ const GalleryCarrousel = ({
                   alt={`slide-${i}`}
                   loading="lazy"
                   draggable={false}
+                  
                   onClick={() => openLightbox(i)}
                   style={{
                     width: '100%',

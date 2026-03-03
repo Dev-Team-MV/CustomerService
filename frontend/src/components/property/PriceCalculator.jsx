@@ -18,7 +18,8 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
     selectedFacade,
     options,
     selectedPricingOption,
-    getModelPricingInfo
+    getModelPricingInfo,
+    selectedProject, setSelectedProject, projects, loadingProjects
   } = useProperty()
     const { t } = useTranslation('models');
   const { isAuthenticated } = useAuth()

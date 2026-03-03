@@ -162,9 +162,9 @@ const PropertyDetailsTab = ({ propertyDetails, isModel10, balconyLabels }) => {
                 overflow: "hidden",
               }}
             >
-              {carouselUrls.length > 0 ? (
+              {carouselImages.length > 0 ? (
                 <GalleryCarrousel
-                  images={carouselUrls}
+                  images={carouselImages}
                   showPagination={true}
                   showArrows={true}
                   autoPlay={false}

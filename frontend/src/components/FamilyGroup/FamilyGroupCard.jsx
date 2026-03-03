@@ -43,11 +43,10 @@ const FamilyGroupCard = ({
   const currentUserId = currentUser?._id || currentUser?.id
 
   const isGroupOwner = group.createdBy._id === currentUserId
-  const isSuperAdmin = currentUser?.role === 'superadmin'
   const isMemberAdmin = group.members.some(
     (m) => m.user._id === currentUserId && m.role === 'admin'
   )
-  const canManage = isGroupOwner || isSuperAdmin || isMemberAdmin
+  const canManage = isGroupOwner || isMemberAdmin
 
   // DEBUG — quitar después de verificar
   console.log('🔍 canManage debug:', {
@@ -56,7 +55,6 @@ const FamilyGroupCard = ({
     currentUserId,
     currentUserRaw: currentUser,
     isGroupOwner,
-    isSuperAdmin,
     isMemberAdmin,
     canManage
   })
@@ -246,75 +244,87 @@ const FamilyGroupCard = ({
         </CardContent>
 
         {/* Actions */}
-        <CardActions sx={{ p: 2, pt: 0, bgcolor: '#fafafa' }}>
-          <Stack direction="column" spacing={1} width="100%">
-            {/* Fila 1: Add Member + Delete */}
-            <Stack direction="row" spacing={1} width="100%">
-              <Button
-                size="small"
-                startIcon={<PersonAddIcon />}
-                onClick={() => onAddMember(group)}
-                fullWidth
-                variant="contained"
-                sx={{
-                  borderRadius: 2,
-                  bgcolor: '#8CA551',
-                  color: 'white',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  '&:hover': { bgcolor: '#333F1F' },
-                }}
-              >
-                Add Member
-              </Button>
-              <Button
-                size="small"
-                color="error"
-                startIcon={<DeleteIcon />}
-                onClick={() => onDeleteGroup(group._id)}
-                fullWidth
-                variant="outlined"
-                sx={{
-                  borderRadius: 2,
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  borderColor: '#d32f2f',
-                  color: '#d32f2f',
-                  '&:hover': {
-                    borderColor: '#c62828',
-                    bgcolor: 'rgba(211, 47, 47, 0.04)',
-                  },
-                }}
-              >
-                Delete
-              </Button>
-            </Stack>
-
-            {/* Fila 2: Share Property — solo si puede gestionar */}
-            {canManage && (
-              <Button
-                size="small"
-                startIcon={<ShareIcon />}
-                onClick={() => setShareDialogOpen(true)}
-                fullWidth
-                variant="outlined"
-                sx={{
-                  borderRadius: 2,
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  borderColor: '#8CA551',
-                  color: '#333F1F',
-                  '&:hover': {
-                    borderColor: '#333F1F',
-                    bgcolor: 'rgba(140, 165, 81, 0.08)',
-                  },
-                }}
-              >
-                Share a Property with this Group
-              </Button>
-            )}
-          </Stack>
-        </CardActions>
+        
+        
+                {/* Actions */}
+                <CardActions sx={{ p: 2, pt: 0, bgcolor: '#fafafa' }}>
+                  {canManage ? (
+                    <Stack direction="column" spacing={1} width="100%">
+                      {/* Fila 1: Add Member + Delete */}
+                      <Stack direction="row" spacing={1} width="100%">
+                        <Button
+                          size="small"
+                          startIcon={<PersonAddIcon />}
+                          onClick={() => onAddMember(group)}
+                          fullWidth
+                          variant="contained"
+                          sx={{
+                            borderRadius: 2,
+                            bgcolor: '#8CA551',
+                            color: 'white',
+                            fontWeight: 600,
+                            textTransform: 'none',
+                            '&:hover': { bgcolor: '#333F1F' },
+                          }}
+                        >
+                          Add Member
+                        </Button>
+                        <Button
+                          size="small"
+                          color="error"
+                          startIcon={<DeleteIcon />}
+                          onClick={() => onDeleteGroup(group._id)}
+                          fullWidth
+                          variant="outlined"
+                          sx={{
+                            borderRadius: 2,
+                            fontWeight: 600,
+                            textTransform: 'none',
+                            borderColor: '#d32f2f',
+                            color: '#d32f2f',
+                            '&:hover': {
+                              borderColor: '#c62828',
+                              bgcolor: 'rgba(211, 47, 47, 0.04)',
+                            },
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </Stack>
+        
+                      {/* Fila 2: Share Property */}
+                      <Button
+                        size="small"
+                        startIcon={<ShareIcon />}
+                        onClick={() => setShareDialogOpen(true)}
+                        fullWidth
+                        variant="outlined"
+                        sx={{
+                          borderRadius: 2,
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          borderColor: '#8CA551',
+                          color: '#333F1F',
+                          '&:hover': {
+                            borderColor: '#333F1F',
+                            bgcolor: 'rgba(140, 165, 81, 0.08)',
+                          },
+                        }}
+                      >
+                        Share a Property with this Group
+                      </Button>
+                    </Stack>
+                  ) : (
+                    <Typography
+                      variant="caption"
+                      sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', px: 1 }}
+                    >
+                      You are a member of this group
+                    </Typography>
+                  )}
+                </CardActions>
+        
+        
       </Card>
 
       {/* Property Share Dialog */}
