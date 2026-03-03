@@ -39,7 +39,9 @@
   "form": {
     "number": "Lot Number",
     "price": "Price",
-    "status": "Status"
+    "status": "Status",
+    "project":"Project",
+    "projectHelp": "Select the project this lot belongs to"
   },
   "confirmDelete": "Are you sure you want to delete this lot?"
 }

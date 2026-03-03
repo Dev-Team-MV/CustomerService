@@ -163,6 +163,8 @@ const Models = () => {
         stories: formData.stories,
         description: formData.description,
         status: formData.status,
+        project: String(formData.project),  // ✅
+        projectId: String(formData.projectId),  // ✅
         images: {
           exterior: Array.isArray(formData.images?.exterior) ? formData.images.exterior : [],
           interior: Array.isArray(formData.images?.interior) ? formData.images.interior : [],
@@ -173,20 +175,21 @@ const Models = () => {
         storages,
       };
 
+      console.log('📦 Model payload:', JSON.stringify(dataToSend, null, 2))
+
       if (selectedModel) {
         await api.put(`/models/${selectedModel._id}`, dataToSend);
       } else {
         await api.post("/models", dataToSend);
       }
 
-          await fetchModels(); // Espera a que termine el fetch
-    handleCloseDialog(); // Ahora sí, cierra el modal
+      await fetchModels();
+      handleCloseDialog();
     } catch (error) {
       console.error("❌ Error saving model:", error);
       alert(error.response?.data?.message || t('models:errorSaving'));
     }
   };
-
   const handleDelete = async (id) => {
     if (window.confirm(t('models:confirmDelete'))) {
       try {

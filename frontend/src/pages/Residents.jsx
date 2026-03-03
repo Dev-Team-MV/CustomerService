@@ -4,18 +4,11 @@ import {
   Box,
   Typography,
   Container,
-  Grid,
   IconButton,
   Tooltip,
   Chip,
   Snackbar,
   Alert,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
   Avatar,
   CircularProgress
 } from '@mui/material'
@@ -35,6 +28,7 @@ import PageHeader from '../components/PageHeader'
 import StatsCards from '../components/statscard'
 import DataTable from '../components/table/DataTable'
 import EmptyState from '../components/table/EmptyState'
+import ResidentDialog from '../components/ResidentDialog'
 
 const Residents = () => {
   const { t } = useTranslation(['residents', 'common'])
@@ -48,7 +42,9 @@ const Residents = () => {
     lastName: '',
     email: '',
     phoneNumber: '',
-    role: 'user'
+    birthday: '',
+    role: 'user',
+    password: ''
   })
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' })
   const [sendingSMS, setSendingSMS] = useState(false)
@@ -83,7 +79,9 @@ const Residents = () => {
         lastName: user.lastName || '',
         email: user.email || '',
         phoneNumber: user.phoneNumber || '',
-        role: user.role || 'user'
+        birthday: user.birthday ? new Date(user.birthday).toISOString().split('T')[0] : '',
+        role: user.role || 'user',
+        password: ''
       })
     } else {
       setSelectedUser(null)
@@ -92,7 +90,9 @@ const Residents = () => {
         lastName: '',
         email: '',
         phoneNumber: '',
-        role: 'user'
+        birthday: '',
+        role: 'user',
+        password: ''
       })
     }
     setOpenDialog(true)
@@ -103,18 +103,36 @@ const Residents = () => {
     setSelectedUser(null)
   }
 
-  const handleSubmit = async () => {
+   const handleSubmit = async () => {
     try {
+      // Preparar payload
+      const payload = { ...formData }
+      
       if (selectedUser) {
-        await api.put(`/users/${selectedUser._id}`, formData)
+        // ✅ PUT para actualizar usuario existente
+        if (!payload.password) {
+          delete payload.password
+        }
+        await api.put(`/users/${selectedUser._id}`, payload)
+        setSnackbar({ open: true, message: t('residents:snackbar.updated'), severity: 'success' })
       } else {
-        await api.post('/users', formData)
+        // ✅ POST a /auth/register para crear nuevo usuario (igual que Dashboard)
+        await api.post('/auth/register', {
+          ...payload,
+          skipPasswordSetup: true // Opcional: si quieres que el usuario configure su password después
+        })
+        setSnackbar({ open: true, message: t('residents:snackbar.created'), severity: 'success' })
       }
+      
       handleCloseDialog()
       fetchData()
-      setSnackbar({ open: true, message: t('common:actions.saved'), severity: 'success' })
     } catch (error) {
-      setSnackbar({ open: true, message: error.message, severity: 'error' })
+      console.error('Error saving user:', error)
+      setSnackbar({ 
+        open: true, 
+        message: error.response?.data?.message || error.message, 
+        severity: 'error' 
+      })
     }
   }
 
@@ -137,13 +155,21 @@ const Residents = () => {
     }
     setSendingSMS(true)
     try {
-      // Simulación de envío de SMS
       await api.post(`/users/${user._id}/send-password-sms`)
-      setSnackbar({ open: true, message: t('residents:snackbar.smsSent', { phone: user.phoneNumber }), severity: 'success' })
+      setSnackbar({ 
+        open: true, 
+        message: t('residents:snackbar.smsSent', { phone: user.phoneNumber }), 
+        severity: 'success' 
+      })
     } catch (error) {
-      setSnackbar({ open: true, message: t('residents:snackbar.smsError'), severity: 'error' })
+      setSnackbar({ 
+        open: true, 
+        message: error.response?.data?.message || t('residents:snackbar.smsError'), 
+        severity: 'error' 
+      })
+    } finally {
+      setSendingSMS(false)
     }
-    setSendingSMS(false)
   }
 
   const getRoleColor = (role) => {
@@ -197,7 +223,7 @@ const Residents = () => {
       renderCell: ({ row }) => (
         <Box display="flex" alignItems="center" gap={1.5}>
           <Avatar             
-          sx={{
+            sx={{
               width: 48,
               height: 48,
               bgcolor: 'transparent',
@@ -208,7 +234,8 @@ const Residents = () => {
               fontFamily: '"Poppins", sans-serif',
               border: '2px solid rgba(255, 255, 255, 0.9)',
               boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
-            }}>
+            }}
+          >
             {row.firstName?.charAt(0)}
           </Avatar>
           <Box>
@@ -287,7 +314,10 @@ const Residents = () => {
             <span>
               <IconButton
                 size="small"
-                onClick={() => handleSendPasswordSMS(row)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleSendPasswordSMS(row)
+                }}
                 disabled={sendingSMS}
                 sx={{
                   bgcolor: 'rgba(140, 165, 81, 0.08)',
@@ -299,6 +329,9 @@ const Residents = () => {
                     borderColor: '#8CA551',
                     transform: 'scale(1.1)',
                     '& .MuiSvgIcon-root': { color: 'white' }
+                  },
+                  '&:disabled': {
+                    opacity: 0.5
                   }
                 }}
               >
@@ -309,7 +342,10 @@ const Residents = () => {
           <Tooltip title={t('residents:actions.edit')} placement="top">
             <IconButton
               size="small"
-              onClick={() => handleOpenDialog(row)}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleOpenDialog(row)
+              }}
               sx={{
                 bgcolor: 'rgba(140, 165, 81, 0.08)',
                 border: '1px solid rgba(140, 165, 81, 0.2)',
@@ -329,7 +365,10 @@ const Residents = () => {
           <Tooltip title={t('residents:actions.delete')} placement="top">
             <IconButton
               size="small"
-              onClick={() => handleDelete(row._id)}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleDelete(row._id)
+              }}
               sx={{
                 bgcolor: 'rgba(229, 134, 60, 0.08)',
                 border: '1px solid rgba(229, 134, 60, 0.2)',
@@ -387,173 +426,17 @@ const Residents = () => {
               onAction={() => handleOpenDialog()}
             />
           }
-          onRowClick={(row) => console.log('User clicked:', row)}
+          onRowClick={(row) => handleOpenDialog(row)}
         />
 
-        {/* Dialog */}
-        <Dialog
+        <ResidentDialog
           open={openDialog}
           onClose={handleCloseDialog}
-          maxWidth="sm"
-          fullWidth
-          PaperProps={{
-            sx: {
-              borderRadius: 4,
-              boxShadow: '0 20px 60px rgba(51, 63, 31, 0.15)'
-            }
-          }}
-        >
-          <DialogTitle>
-            <Box display="flex" alignItems="center" gap={2}>
-              <Box
-                sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 3,
-                  bgcolor: '#333F1F',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
-                }}
-              >
-                <People sx={{ color: 'white', fontSize: 24 }} />
-              </Box>
-              <Box>
-                <Typography
-                  variant="h6"
-                  fontWeight={700}
-                  sx={{
-                    color: '#333F1F',
-                    fontFamily: '"Poppins", sans-serif'
-                  }}
-                >
-                  {selectedUser ? t('residents:actions.edit') : t('residents:actions.add')}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: '#706f6f',
-                    fontFamily: '"Poppins", sans-serif'
-                  }}
-                >
-                  {t('residents:subtitle')}
-                </Typography>
-              </Box>
-            </Box>
-          </DialogTitle>
-
-          <DialogContent sx={{ pt: 3 }}>
-            <Grid container spacing={2.5}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label={t('common:form.firstName')}
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  required
-                  sx={{ borderRadius: 3 }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label={t('common:form.lastName')}
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  required
-                  sx={{ borderRadius: 3 }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label={t('residents:table.email')}
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                  sx={{ borderRadius: 3 }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label={t('residents:table.phone')}
-                  value={formData.phoneNumber}
-                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                  sx={{ borderRadius: 3 }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  select
-                  label={t('residents:table.role')}
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  SelectProps={{ native: true }}
-                  sx={{ borderRadius: 3 }}
-                >
-                  <option value="superadmin">{t('residents:role.superadmin')}</option>
-                  <option value="admin">{t('residents:role.admin')}</option>
-                  <option value="user">{t('residents:role.user')}</option>
-                </TextField>
-              </Grid>
-            </Grid>
-          </DialogContent>
-
-          <DialogActions sx={{ p: 3, gap: 2 }}>
-            <Button
-              onClick={handleCloseDialog}
-              sx={{
-                borderRadius: 3,
-                textTransform: 'none',
-                fontWeight: 600,
-                px: 3,
-                py: 1.2,
-                color: '#706f6f',
-                fontFamily: '"Poppins", sans-serif',
-                border: '2px solid #e0e0e0',
-                '&:hover': {
-                  bgcolor: 'rgba(112, 111, 111, 0.05)',
-                  borderColor: '#706f6f'
-                }
-              }}
-            >
-              {t('common:actions.cancel')}
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              variant="contained"
-              disabled={!formData.firstName || !formData.lastName || !formData.email}
-              sx={{
-                borderRadius: 3,
-                bgcolor: '#333F1F',
-                color: 'white',
-                fontWeight: 600,
-                textTransform: 'none',
-                letterSpacing: '1px',
-                fontFamily: '"Poppins", sans-serif',
-                px: 4,
-                py: 1.5,
-                boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
-                position: 'relative',
-                overflow: 'hidden',
-                '&:hover': {
-                  bgcolor: '#333F1F',
-                  boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)'
-                },
-                '&:disabled': {
-                  bgcolor: '#e0e0e0',
-                  color: '#9e9e9e',
-                  boxShadow: 'none'
-                }
-              }}
-            >
-              <span>{selectedUser ? t('common:actions.update') : t('common:actions.create')}</span>
-            </Button>
-          </DialogActions>
-        </Dialog>
+          onSubmit={handleSubmit}
+          formData={formData}
+          setFormData={setFormData}
+          selectedUser={selectedUser}
+        />
 
         <Snackbar
           open={snackbar.open}
@@ -564,7 +447,11 @@ const Residents = () => {
           <Alert
             onClose={() => setSnackbar({ ...snackbar, open: false })}
             severity={snackbar.severity}
-            sx={{ width: '100%' }}
+            sx={{ 
+              width: '100%',
+              fontFamily: '"Poppins", sans-serif',
+              borderRadius: 3
+            }}
           >
             {snackbar.message}
           </Alert>
