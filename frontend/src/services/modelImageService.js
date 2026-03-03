@@ -37,6 +37,13 @@ export function getModelImagesForCombination(model, options = {}) {
   return { exterior, interior }
 }
 
+  const handleImageError = (e) => {
+    console.warn('⚠️ Image failed to load:', e.target.src)
+    e.target.style.display = 'none'
+    // Mostrar placeholder
+    e.target.parentElement.style.background = '#f0f0f0'
+  }
+
 export const getGalleryCategories = (model) => {
   if (!model) return []
 

@@ -79,6 +79,13 @@ const DeckPanel = ({ selectedFacade, selectedDeck, onSelectDeck }) => {
           <Box display="flex" flexDirection="column" gap={1.5}>
             {decks.map((deck, index) => {
               const isDeckSelected = selectedDeck?.name === deck.name;
+
+              const deckThumbnail = deck.images?.[0]
+                ? typeof deck.images[0] === 'string'
+                  ? deck.images[0]
+                  : deck.images[0]?.url || null
+                : null
+
               
               return (
                 <motion.div
@@ -116,8 +123,8 @@ const DeckPanel = ({ selectedFacade, selectedDeck, onSelectDeck }) => {
                           height: 64, 
                           borderRadius: 2, 
                           bgcolor: '#f5f5f5',
-                          backgroundImage: deck.images?.[0] 
-                            ? `url(${deck.images[0]})` 
+                          backgroundImage: deckThumbnail
+                            ? `url(${deckThumbnail})` 
                             : 'none',
                           backgroundSize: 'cover',
                           backgroundPosition: 'center',

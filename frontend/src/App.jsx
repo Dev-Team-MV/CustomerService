@@ -29,6 +29,8 @@ import TermsAndCondition from './pages/TermsAndCondition'
 import ClubhouseManager from './pages/ClubhouseManager'
 import MasterPlanManager from './pages/MasterPlanManager'
 import TimeLine from './pages/TimeLine'
+import ConfigurationManager from './pages/ConfigurationManager'
+import FamilyGroup from './pages/FamilyGroup'
 
 const theme = createTheme({
   palette: {
@@ -83,6 +85,8 @@ function App() {
                 <Route path="/amenities" element={<AmenitiesPrivate />} />
                 <Route path="/view-models" element={<ViewModels />} />
                 <Route path="/master-plan/inventory" element={<MasterPlanManager />} />
+                <Route path="/configurations" element={<ConfigurationManager />} />
+                <Route path="/family-group" element={<FamilyGroup />} />
                 
                 {/* ✅ Admin-only News Management */}
                 <Route path="/news" element={<NewsTable />} />

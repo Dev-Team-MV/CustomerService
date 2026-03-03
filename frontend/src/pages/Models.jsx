@@ -179,7 +179,8 @@ const Models = () => {
         await api.post("/models", dataToSend);
       }
 
-      fetchModels();
+          await fetchModels(); // Espera a que termine el fetch
+    handleCloseDialog(); // Ahora sí, cierra el modal
     } catch (error) {
       console.error("❌ Error saving model:", error);
       alert(error.response?.data?.message || t('models:errorSaving'));
@@ -214,19 +215,29 @@ const Models = () => {
     setSelectedModelForFacades(null);
   };
 
-  const handleSubmitFacade = async (facadeFormData, selectedFacade) => {
-    try {
-      if (selectedFacade) {
-        await api.put(`/facades/${selectedFacade._id}`, facadeFormData);
-      } else {
-        await api.post("/facades", facadeFormData);
-      }
-      fetchFacades();
-    } catch (error) {
-      console.error("Error saving facade:", error);
-      alert(error.response?.data?.message || "Error saving facade");
-    }
-  };
+  // ...existing code...
+  
+    // ...existing code...
+    
+      const handleSubmitFacade = async (facadeFormData, selectedFacade) => {
+        try {
+          console.log('📥 Received in Models.jsx:', JSON.stringify(facadeFormData, null, 2))
+    
+          if (selectedFacade) {
+            await api.put(`/facades/${selectedFacade._id}`, facadeFormData);
+          } else {
+            await api.post("/facades", facadeFormData);
+          }
+          fetchFacades();
+        } catch (error) {
+          console.error("Error saving facade:", error);
+          alert(error.response?.data?.message || "Error saving facade");
+        }
+      };
+    
+    // ...existing code...
+  
+  // ...existing code...
 
 
   const handleDeleteFacade = async (id) => {
@@ -373,11 +384,7 @@ const Models = () => {
         </AnimatePresence>
 
         {/* MODALS */}
-        <GalleryModal
-          open={openGalleryDialog}
-          onClose={handleCloseGallery}
-          model={selectedModelForGallery}
-        />
+
 
         <CreateModelModal
           open={openDialog}

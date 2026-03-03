@@ -34,10 +34,12 @@ import PageHeader from '../components/PageHeader';
 import StatsCards from '../components/statscard';
 import DataTable from '../components/table/DataTable';
 import EmptyState from '../components/table/EmptyState';
+import { useTranslation } from 'react-i18next';
 
 const NewsTable = () => {
   const navigate = useNavigate();
-  
+  const { t } = useTranslation(['news', 'common']);
+
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -57,13 +59,12 @@ const NewsTable = () => {
       setNews(data);
     } catch (err) {
       console.error('❌ Error fetching news:', err);
-      showSnackbar(err.message || 'Error loading news', 'error');
+      showSnackbar(t('news:errorLoadingNews'), 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ HANDLERS CON useCallback
   const handleCreateNew = useCallback(() => {
     setEditingNews(null);
     setModalOpen(true);
@@ -86,32 +87,31 @@ const NewsTable = () => {
   const handleDelete = useCallback(async () => {
     try {
       await newsService.deleteNews(selectedNews._id);
-      showSnackbar('News deleted successfully', 'success');
+      showSnackbar(t('news:newsDeleted'), 'success');
       fetchNews();
       setDeleteDialogOpen(false);
       setSelectedNews(null);
     } catch (err) {
-      showSnackbar(err.message || 'Error deleting news', 'error');
+      showSnackbar(t('news:errorDeletingNews'), 'error');
     }
-  }, [selectedNews]);
+  }, [selectedNews, t]);
 
   const handleSubmit = useCallback(async (newsData) => {
     try {
       if (editingNews) {
         await newsService.updateNews(editingNews._id, newsData);
-        showSnackbar('News updated successfully', 'success');
+        showSnackbar(t('news:newsUpdated'), 'success');
       } else {
         await newsService.createNews(newsData);
-        showSnackbar('News created successfully', 'success');
+        showSnackbar(t('news:newsCreated'), 'success');
       }
-      
       fetchNews();
       setModalOpen(false);
       setEditingNews(null);
     } catch (err) {
-      showSnackbar(err.message || 'Error saving news', 'error');
+      showSnackbar(t('news:errorSavingNews'), 'error');
     }
-  }, [editingNews]);
+  }, [editingNews, t]);
 
   const showSnackbar = useCallback((message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });
@@ -139,7 +139,6 @@ const NewsTable = () => {
     return { bg: 'rgba(229, 134, 60, 0.12)', color: '#E5863C', border: 'rgba(229, 134, 60, 0.3)' }
   }, []);
 
-  // ✅ STATS
   const stats = useMemo(() => ({
     total: news.length,
     published: news.filter(n => n.status === 'published').length,
@@ -149,7 +148,7 @@ const NewsTable = () => {
 
   const newsStats = useMemo(() => [
     {
-      title: 'Total Articles',
+      title: t('news:totalArticles'),
       value: stats.total,
       icon: Article,
       gradient: 'linear-gradient(135deg, #333F1F 0%, #4a5d3a 100%)',
@@ -157,7 +156,7 @@ const NewsTable = () => {
       delay: 0
     },
     {
-      title: 'Published',
+      title: t('news:published'),
       value: stats.published,
       icon: CheckCircle,
       gradient: 'linear-gradient(135deg, #8CA551 0%, #a8bf6f 100%)',
@@ -165,7 +164,7 @@ const NewsTable = () => {
       delay: 0.1
     },
     {
-      title: 'Drafts',
+      title: t('news:drafts'),
       value: stats.draft,
       icon: Schedule,
       gradient: 'linear-gradient(135deg, #E5863C 0%, #f59c5a 100%)',
@@ -173,20 +172,19 @@ const NewsTable = () => {
       delay: 0.2
     },
     {
-      title: 'Construction',
+      title: t('news:construction'),
       value: stats.construction,
       icon: Announcement,
       gradient: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
       color: '#1976d2',
       delay: 0.3
     }
-  ], [stats]);
+  ], [stats, t]);
 
-  // ✅ DEFINIR COLUMNAS
   const columns = useMemo(() => [
     {
       field: 'title',
-      headerName: 'NEWS',
+      headerName: t('news:news'),
       minWidth: 300,
       renderCell: ({ row }) => (
         <Box display="flex" alignItems="center" gap={1.5}>
@@ -246,11 +244,11 @@ const NewsTable = () => {
                 overflow: 'hidden'
               }}
             >
-              {row.description || 'No description'}
+              {row.description || t('news:noDescription')}
             </Typography>
             {row.videos && row.videos.length > 0 && (
               <Chip
-                label="📹 Video"
+                label={`📹 ${t('news:video')}`}
                 size="small"
                 sx={{
                   mt: 0.5,
@@ -270,13 +268,13 @@ const NewsTable = () => {
     },
     {
       field: 'category',
-      headerName: 'CATEGORY',
+      headerName: t('news:category'),
       minWidth: 130,
       renderCell: ({ row }) => {
         const categoryColors = getCategoryColor(row.category);
         return (
           <Chip
-            label={row.category}
+            label={t(`news:${row.category}`, row.category)}
             size="small"
             sx={{
               fontWeight: 600,
@@ -297,13 +295,13 @@ const NewsTable = () => {
     },
     {
       field: 'status',
-      headerName: 'STATUS',
+      headerName: t('news:status'),
       minWidth: 120,
       renderCell: ({ row }) => {
         const statusColors = getStatusColor(row.status);
         return (
           <Chip
-            label={row.status}
+            label={t(`news:${row.status}`, row.status)}
             size="small"
             sx={{
               fontWeight: 600,
@@ -324,7 +322,7 @@ const NewsTable = () => {
     },
     {
       field: 'createdAt',
-      headerName: 'DATE',
+      headerName: t('news:date'),
       minWidth: 120,
       renderCell: ({ value }) => (
         <Typography
@@ -341,7 +339,7 @@ const NewsTable = () => {
     },
     {
       field: 'tags',
-      headerName: 'TAGS',
+      headerName: t('news:tags'),
       minWidth: 200,
       renderCell: ({ row }) => (
         <Box display="flex" gap={0.5} flexWrap="wrap">
@@ -380,12 +378,12 @@ const NewsTable = () => {
     },
     {
       field: 'actions',
-      headerName: 'ACTIONS',
+      headerName: t('news:actions'),
       align: 'center',
       minWidth: 150,
       renderCell: ({ row }) => (
         <Box sx={{ display: 'flex', gap: 0.5 }}>
-          <Tooltip title="View" placement="top">
+          <Tooltip title={t('news:view')} placement="top">
             <IconButton
               size="small"
               onClick={(e) => {
@@ -411,7 +409,7 @@ const NewsTable = () => {
             </IconButton>
           </Tooltip>
           
-          <Tooltip title="Edit" placement="top">
+          <Tooltip title={t('news:edit')} placement="top">
             <IconButton
               size="small"
               onClick={(e) => {
@@ -437,7 +435,7 @@ const NewsTable = () => {
             </IconButton>
           </Tooltip>
           
-          <Tooltip title="Delete" placement="top">
+          <Tooltip title={t('news:deleteAction')} placement="top">
             <IconButton
               size="small"
               onClick={(e) => {
@@ -465,7 +463,7 @@ const NewsTable = () => {
         </Box>
       )
     }
-  ], [getCategoryColor, getStatusColor, handleView, handleEdit, handleDeleteClick]);
+  ], [getCategoryColor, getStatusColor, handleView, handleEdit, handleDeleteClick, t]);
 
   return (
     <Box
@@ -479,20 +477,20 @@ const NewsTable = () => {
         {/* Header */}
         <PageHeader
           icon={Newspaper}
-          title="News & Updates"
-          subtitle="Manage project updates and announcements"
+          title={t('news:newsAndUpdates')}
+          subtitle={t('news:manageUpdates')}
           actionButton={{
-            label: 'Create News',
+            label: t('news:createNews'),
             onClick: handleCreateNew,
             icon: <Add />,
-            tooltip: 'Create News'
+            tooltip: t('news:createNews')
           }}
         />
 
         {/* Stats Cards */}
         <StatsCards stats={newsStats} loading={loading} />
 
-        {/* ✅ TABLA REUTILIZABLE */}
+        {/* Table */}
         <DataTable
           columns={columns}
           data={news}
@@ -500,9 +498,9 @@ const NewsTable = () => {
           emptyState={
             <EmptyState
               icon={Article}
-              title="No news articles yet"
-              description="Create your first news article to get started"
-              actionLabel="Create News"
+              title={t('news:noNewsArticlesYet')}
+              description={t('news:createFirstNews')}
+              actionLabel={t('news:createNews')}
               onAction={handleCreateNew}
             />
           }
@@ -558,7 +556,7 @@ const NewsTable = () => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  Delete News Article?
+                  {t('news:deleteNewsTitle')}
                 </Typography>
                 <Typography
                   variant="caption"
@@ -567,7 +565,7 @@ const NewsTable = () => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  This action cannot be undone
+                  {t('news:deleteNewsSubtitle')}
                 </Typography>
               </Box>
             </Box>
@@ -580,7 +578,7 @@ const NewsTable = () => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              Are you sure you want to delete <strong>"{selectedNews?.title}"</strong>? This will permanently remove the article and all its associated data.
+              {t('news:deleteNewsConfirm', { title: selectedNews?.title })}
             </Typography>
           </DialogContent>
           <DialogActions sx={{ p: 3, gap: 2 }}>
@@ -601,7 +599,7 @@ const NewsTable = () => {
                 }
               }}
             >
-              Cancel
+              {t('news:cancel')}
             </Button>
             <Button
               onClick={handleDelete}
@@ -622,7 +620,7 @@ const NewsTable = () => {
                 }
               }}
             >
-              Delete
+              {t('news:delete')}
             </Button>
           </DialogActions>
         </Dialog>

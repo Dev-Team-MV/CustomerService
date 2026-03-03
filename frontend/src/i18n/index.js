@@ -20,6 +20,8 @@ import enPayloads from './locales/en/payloads.json'
 import enClubHouse from './locales/en/clubHouse.json'
 import enMasterPlan from './locales/en/masterPlan.json'
 import enTimeLine from './locales/en/timeline.json'
+import enConfiguration from './locales/en/configuration.json'
+import enMyProperty from './locales/en/myProperty.json'
 
 // ES
 import esCommon from './locales/es/common.json'
@@ -39,6 +41,8 @@ import esPayloads from './locales/es/payloads.json'
 import esClubHouse from './locales/es/clubHouse.json'
 import esMasterPlan from './locales/es/masterPlan.json'
 import esTimeLine from './locales/es/timeline.json'
+import esConfiguration from './locales/es/configuration.json'
+import esMyProperty from './locales/es/myProperty.json'
 
 i18n
     .use(LanguageDetector)
@@ -64,6 +68,8 @@ i18n
                 clubHouse: enClubHouse,
                 masterPlan: enMasterPlan,
                 timeLine: enTimeLine,
+                configuration: enConfiguration,
+                myProperty: enMyProperty
             },
             es: {
                 common: esCommon,
@@ -74,7 +80,7 @@ i18n
                 amenities: esAmenities,
                 news: esNews,
                 profile: esProfile,
-                propertys: esProperty,
+                properties: esProperty,
                 analytics: esAnalytics,
                 lots: esLots,
                 propertySelection: esPropertySelection,
@@ -84,13 +90,15 @@ i18n
                 clubHouse: esClubHouse,
                 masterPlan: esMasterPlan,
                 timeLine: esTimeLine,
+                configuration: esConfiguration,
+                myProperty: esMyProperty
             },
         },
         fallbackLng: 'en',
         defaultNS: 'common',
-        ns: ['common', 'auth', 'navigation', 'dashboard', 'property', 'amenities', 'news', 'profile', 'analytics', 'lots', 'propertySelection', 'residents', 'models', 'payloads', 'clubHouse', 'masterPlan', 'timeLine'],
+        ns: ['common', 'auth', 'navigation', 'dashboard', 'property', 'amenities', 'news', 'profile', 'analytics', 'lots', 'propertySelection', 'residents', 'models', 'payloads', 'clubHouse', 'masterPlan', 'timeLine', 'configuration', 'myProperty'],
         interpolation: {
-            escapeValue: false, // React already escapes
+            escapeValue: false,
         },
         detection: {
             order: ['localStorage', 'navigator', 'htmlTag'],

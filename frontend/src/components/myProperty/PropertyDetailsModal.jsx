@@ -155,6 +155,28 @@ const getFileUrl = (row) => {
   return null
 }
 
+const handleApprove = async (payload) => {
+  if (!payload) return
+  if (!window.confirm('Approve this payment and mark as signed?')) return
+  try {
+    await api.put(`/payloads/${payload._id}`, { status: 'signed' })
+    fetchPayloads()
+  } catch (err) {
+    alert('Error approving payload')
+  }
+}
+
+const handleReject = async (payload) => {
+  if (!payload) return
+  if (!window.confirm('Reject this payment? This will set status to rejected.')) return
+  try {
+    await api.put(`/payloads/${payload._id}`, { status: 'rejected' })
+    fetchPayloads()
+  } catch (err) {
+    alert('Error rejecting payload')
+  }
+}
+
 
   const handleDownload = useCallback((payload) => {
     const url = getFileUrl(payload)
@@ -330,6 +352,74 @@ const paymentColumns = [
         </span>
       </Tooltip>
     )
+  },
+    {
+    field: 'actions',
+    headerName: 'ACTIONS',
+    align: 'center',
+    minWidth: 160,
+    renderCell: ({ row }) => (
+      <Box sx={{ display: 'flex', gap: 0.5 }}>
+        <Tooltip title="Approve">
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => handleApprove(row)}
+              disabled={row.status === 'signed'}
+              sx={{
+                bgcolor: 'rgba(76, 175, 80, 0.08)',
+                border: '1px solid rgba(76, 175, 80, 0.2)',
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  bgcolor: '#4caf50',
+                  borderColor: '#4caf50',
+                  transform: 'scale(1.1)',
+                  '& .MuiSvgIcon-root': {
+                    color: 'white'
+                  }
+                },
+                '&:disabled': {
+                  opacity: 0.3,
+                  bgcolor: 'rgba(112, 111, 111, 0.08)'
+                }
+              }}
+            >
+              <CheckCircle sx={{ fontSize: 18, color: '#4caf50' }} />
+            </IconButton>
+          </span>
+        </Tooltip>
+        <Tooltip title="Reject">
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => handleReject(row)}
+              disabled={row.status === 'rejected'}
+              sx={{
+                bgcolor: 'rgba(211, 47, 47, 0.08)',
+                border: '1px solid rgba(211, 47, 47, 0.2)',
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  bgcolor: '#d32f2f',
+                  borderColor: '#d32f2f',
+                  transform: 'scale(1.1)',
+                  '& .MuiSvgIcon-root': {
+                    color: 'white'
+                  }
+                },
+                '&:disabled': {
+                  opacity: 0.3,
+                  bgcolor: 'rgba(112, 111, 111, 0.08)'
+                }
+              }}
+            >
+              <Cancel sx={{ fontSize: 18, color: '#d32f2f' }} />
+            </IconButton>
+          </span>
+        </Tooltip>
+      </Box>
+    )
   }
 ]
 
@@ -433,8 +523,10 @@ const propertyImages = React.useMemo(() => {
                   textTransform: "none"
                 }
               }}
-            >              <Tab icon={<Payment />} label="Payment Status" iconPosition="start" />
-              <Tab icon={<Visibility />} label="Property Details" iconPosition="start" />
+            > 
+            <Tab icon={<Payment />} label="Payment Status" iconPosition="start" />
+            <Tab icon={<Visibility />} label="Property Details" iconPosition="start" />
+            <Tab icon={<Construction />} label="Construction Phases" iconPosition="start" />
             </Tabs>
 
             {activeTab === 0 && (
@@ -495,7 +587,7 @@ const propertyImages = React.useMemo(() => {
     />
   </Box>
             )}
-{activeTab === 1 && (
+{/* {activeTab === 1 && (
   <>
     {console.log(propertyDetails)}
     <AdminPropertyDetails
@@ -504,7 +596,29 @@ const propertyImages = React.useMemo(() => {
     balconyLabels={balconyLabels}
     />
   </>
+)} */}
+
+{activeTab === 1 && propertyDetails && (
+  <AdminPropertyDetails
+    propertyDetails={propertyDetails}
+    isModel10={isModel10}
+    balconyLabels={balconyLabels}
+  />
 )}
+{activeTab === 1 && !propertyDetails && (
+  <Box py={6} textAlign="center">
+    <Typography color="error" fontWeight={700}>
+      No tienes acceso a los detalles de esta propiedad.
+    </Typography>
+  </Box>
+)}
+
+            {activeTab === 2 && (
+              <ConstructionTab
+                phases={phases}
+                loadingPhases={loadingPhases}
+              />
+            )}
           </>
         )}
       </DialogContent>

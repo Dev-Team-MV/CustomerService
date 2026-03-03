@@ -1059,8 +1059,8 @@ const dashboardStats = [
                       </Button>
                     </Box>
                     <Box>
-                      {recentPayloads.length > 0 ? (
-                        recentPayloads.map((payload) => (
+  {recentPayloads.length > 0 ? (
+    recentPayloads.slice(0, 3).map((payload) => (
                           <Box
                             key={payload._id}
                             sx={{

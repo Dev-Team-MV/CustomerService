@@ -20,32 +20,82 @@ const userPropertyService = {
   /**
    * Obtener todas las propiedades del usuario usando los lotes
    */
-  getMyProperties: async () => {
-    try {
-      // 1. Obtener perfil con lotes
-      const profile = await userPropertyService.getProfile()
-      const lotIds = profile.lots.map(lot => lot._id)
+  // getMyProperties: async () => {
+  //   try {
+  //     // 1. Obtener perfil con lotes
+  //     const profile = await userPropertyService.getProfile()
+  //     const lotIds = profile.lots.map(lot => lot._id)
       
-      if (lotIds.length === 0) {
-        return []
-      }
+  //     if (lotIds.length === 0) {
+  //       return []
+  //     }
 
-      // 2. Buscar propiedades que tengan esos lotes
-      const response = await api.get('/properties')
-      const allProperties = response.data
+  //     // 2. Buscar propiedades que tengan esos lotes
+  //     const response = await api.get('/properties')
+  //     const allProperties = response.data
       
-      // ✅ FILTRAR solo las propiedades que pertenecen a los lotes del usuario
-      const userProperties = allProperties.filter(property => {
-        // Verificar si el lot de la propiedad está en los lotIds del usuario
-        const propertyLotId = typeof property.lot === 'object' ? property.lot._id : property.lot
-        return lotIds.includes(propertyLotId)
-      })
+  //     // ✅ FILTRAR solo las propiedades que pertenecen a los lotes del usuario
+  //     const userProperties = allProperties.filter(property => {
+  //       // Verificar si el lot de la propiedad está en los lotIds del usuario
+  //       const propertyLotId = typeof property.lot === 'object' ? property.lot._id : property.lot
+  //       return lotIds.includes(propertyLotId)
+  //     })
       
-      return userProperties
-    } catch (error) {
-      throw error.response?.data || { message: 'Failed to fetch properties' }
-    }
-  },
+  //     return userProperties
+  //   } catch (error) {
+  //     throw error.response?.data || { message: 'Failed to fetch properties' }
+  //   }
+  // },
+
+    // ...existing code...
+  
+    // ...existing code...
+    
+      getMyProperties: async () => {
+        try {
+          const [propertiesRes, profileRes] = await Promise.all([
+            api.get('/properties'),
+            api.get('/auth/profile')
+          ])
+    
+          const allProperties = propertiesRes.data
+          const profile = profileRes.data
+    
+          // Admins y superadmins ven todo por rol — nunca marcar como shared
+          if (profile.role === 'superadmin' || profile.role === 'admin') {
+            return allProperties.map(property => ({
+              ...property,
+              isOwned: true,
+              isShared: false
+            }))
+          }
+    
+          // Para usuarios normales: comparar por lotes
+          const lotIds = new Set(
+            (profile.lots || []).map(lot =>
+              typeof lot === 'object' ? lot._id : lot
+            )
+          )
+    
+          return allProperties.map(property => {
+            const propertyLotId = typeof property.lot === 'object'
+              ? property.lot?._id
+              : property.lot
+            const isOwned = lotIds.has(propertyLotId)
+            return {
+              ...property,
+              isOwned,
+              isShared: !isOwned  // solo usuarios normales pueden tener shared
+            }
+          })
+        } catch (error) {
+          throw error.response?.data || { message: 'Failed to fetch properties' }
+        }
+      },
+    
+    // ...existing code...
+  
+  // ...existing code...
 
   /**
    * Obtener una propiedad específica por ID de lote

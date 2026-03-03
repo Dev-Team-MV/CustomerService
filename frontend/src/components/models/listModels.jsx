@@ -30,6 +30,8 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
+import GalleryCarrousel from '../GalleryCarrousel'  // ✅ añadir import
+
 
 const ModelCard = ({
   model,
@@ -45,6 +47,8 @@ const ModelCard = ({
 }) => {
   const { t } = useTranslation(['models', 'common']);
   const [imageIndex, setImageIndex] = useState(0);
+    const [galleryOpen, setGalleryOpen] = useState(false)  // ✅ nuevo estado
+
 
   // ========================================
   // HELPERS
@@ -63,10 +67,13 @@ const ModelCard = ({
   };
 
   const getAllModelImages = (model) => {
+    const flatten = arr => (arr || []).map(img =>
+      typeof img === 'string' ? img : (img?.url || '')
+    );
     return [
-      ...(model.images?.exterior || []),
-      ...(model.images?.interior || []),
-      ...(model.images?.blueprints || [])
+      ...flatten(model.images?.exterior),
+      ...flatten(model.images?.interior),
+      ...flatten(model.images?.blueprints)
     ];
   };
 
@@ -105,6 +112,9 @@ const ModelCard = ({
   const allImages = getAllModelImages(model);
   const currentImage = allImages[imageIndex];
   const modelFacades = facades || [];
+
+  const currentImageSrc = typeof currentImage === 'string' ? currentImage : (currentImage?.url || '');
+
 
   // Traducción de estados
   const statusLabels = {
@@ -180,7 +190,7 @@ const ModelCard = ({
                   <>
                     <Box
                       component="img"
-                      src={currentImage}
+                      src={currentImageSrc}
                       alt={model.model}
                       sx={{
                         width: '100%',
@@ -426,7 +436,7 @@ const ModelCard = ({
                 size="small"
                 variant="outlined"
                 startIcon={<PhotoLibrary sx={{ fontSize: 16 }} />}
-                onClick={() => onOpenGallery(model)}
+                onClick={() => setGalleryOpen(true)}  // ✅ abrir gallery local
                 sx={{
                   flex: 1,
                   fontSize: '0.75rem',
@@ -658,6 +668,65 @@ const ModelCard = ({
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* ✅ GalleryCarrousel como lightbox — se renderiza fuera del Card */}
+      {galleryOpen && (
+        <Box
+          onClick={() => setGalleryOpen(false)}
+          sx={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1300,
+            bgcolor: 'rgba(0,0,0,0.92)',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          {/* Header */}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              px: 3,
+              py: 1.5,
+              flexShrink: 0
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Typography
+              fontWeight={700}
+              sx={{ color: 'white', fontFamily: '"Poppins", sans-serif' }}
+            >
+              {model.model} — Gallery
+            </Typography>
+            <IconButton
+              onClick={() => setGalleryOpen(false)}
+              sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.1)' }}
+            >
+              ✕
+            </IconButton>
+          </Box>
+
+          {/* ✅ Carrusel con altura fija */}
+          <Box
+            sx={{ flex: 1, minHeight: 0, px: 4, pb: 4 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GalleryCarrousel
+              images={allImages.map(img =>
+                typeof img === 'string' ? img : (img?.url || '')
+              ).filter(Boolean)}
+              showPagination={true}
+              showArrows={true}
+              objectFit="contain"
+              borderRadius={8}
+              autoPlay={false}
+              watermark={null}
+            />
+          </Box>
+        </Box>
+      )}
     </Grid>
   );
 };
@@ -674,9 +743,33 @@ ModelCard.propTypes = {
     stories: PropTypes.number,
     status: PropTypes.string,
     images: PropTypes.shape({
-      exterior: PropTypes.arrayOf(PropTypes.string),
-      interior: PropTypes.arrayOf(PropTypes.string),
-      blueprints: PropTypes.arrayOf(PropTypes.string)
+      exterior: PropTypes.arrayOf(
+        PropTypes.oneOfType([
+          PropTypes.string,
+          PropTypes.shape({
+            url: PropTypes.string,
+            isPublic: PropTypes.bool
+          })
+        ])
+      ),
+      interior: PropTypes.arrayOf(
+        PropTypes.oneOfType([
+          PropTypes.string,
+          PropTypes.shape({
+            url: PropTypes.string,
+            isPublic: PropTypes.bool
+          })
+        ])
+      ),
+      blueprints: PropTypes.arrayOf(
+        PropTypes.oneOfType([
+          PropTypes.string,
+          PropTypes.shape({
+            url: PropTypes.string,
+            isPublic: PropTypes.bool
+          })
+        ])
+      )
     }),
     balconies: PropTypes.array,
     upgrades: PropTypes.array,

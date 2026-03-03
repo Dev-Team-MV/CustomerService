@@ -31,6 +31,8 @@ import {
 import api from '../services/api'
 import uploadService from '../services/uploadService'
 import {motion, AnimatePresence} from 'framer-motion'
+import GalleryCarrousel from './GalleryCarrousel'
+
 
 const PHASE_TITLES = [
   'Site Preparation',
@@ -48,12 +50,15 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
   const [phases, setPhases] = useState([])
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [selectedPhase, setSelectedPhase] = useState(null)
-  const [uploadForm, setUploadForm] = useState({
-    title: '',
-    percentage: 0,
-    images: []
-  })
+const [uploadForm, setUploadForm] = useState({
+  title: '',
+  percentage: 0,
+  images: [],
+  videos: []
+});
+// ...existing code...
+const [selectedPhase, setSelectedPhase] = useState(null);
+// ...existing code...
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0)
   const [imageIdx, setImageIdx] = useState(0)
   const [phaseLightboxOpen, setPhaseLightboxOpen] = useState(false)
@@ -111,94 +116,90 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
     setUploadForm({
       title: '',
       percentage: 0,
-      images: []
+      images: [],
+      videos: [] // <-- agrega esto
     })
   }
 
-  const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files)
-    setUploadForm(prev => ({
-      ...prev,
-      images: [...prev.images, ...files]
-    }))
-  }
+const handleFileSelect = (e) => {
+  const files = Array.from(e.target.files);
+  const isVideo = e.target.accept && e.target.accept.includes('video');
+  setUploadForm(prev => ({
+    ...prev,
+    [isVideo ? 'videos' : 'images']: [...prev[isVideo ? 'videos' : 'images'], ...files]
+  }));
+};
 
-  const handleRemoveImage = (index) => {
-    setUploadForm(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index)
-    }))
-  }
+const handleRemoveMedia = (type, index) => {
+  setUploadForm(prev => ({
+    ...prev,
+    [type]: prev[type].filter((_, i) => i !== index)
+  }));
+};
 
-  const handleUploadImages = async () => {
-    if (!uploadForm.images.length) {
-      alert('Please select at least one image')
-      return
+
+const handleUploadMedia = async () => {
+  if (!uploadForm.images.length && !uploadForm.videos.length) {
+    alert('Please select at least one image or video');
+    return;
+  }
+  try {
+    setUploading(true);
+    let urls = [];
+    let videoUrls = [];
+    if (uploadForm.images.length) {
+      urls = await uploadService.uploadPhaseImages(uploadForm.images);
     }
-
-    try {
-      setUploading(true)
-
-      console.log(`📤 Uploading ${uploadForm.images.length} images for Phase ${selectedPhase.phaseNumber}...`)
-      const urls = await uploadService.uploadPhaseImages(uploadForm.images)
-      console.log('✅ Images uploaded to GCS:', urls)
-
-      const currentPercentage = selectedPhase.constructionPercentage || 0
-      const addedPercentage = parseFloat(uploadForm.percentage) || 0
-      const newPercentage = Math.min(100, currentPercentage + addedPercentage)
-
-      let phaseId = selectedPhase._id
-
-      if (!phaseId) {
-        console.log('➕ Creating new phase')
-        
-        const createResponse = await api.post('/phases', {
-          property: property._id,
-          phaseNumber: selectedPhase.phaseNumber,
-          title: selectedPhase.title,
-          constructionPercentage: newPercentage
-        })
-
-        phaseId = createResponse.data._id
-        console.log('✅ Phase created with ID:', phaseId)
-      } else {
-        console.log('🔄 Updating phase percentage')
-        
-        await api.put(`/phases/${phaseId}`, {
-          constructionPercentage: newPercentage
-        })
-        
-        console.log('✅ Phase percentage updated')
-      }
-
-      console.log(`📤 Adding ${urls.length} media items to phase ${phaseId}`)
-      
-      for (let i = 0; i < urls.length; i++) {
-        const url = urls[i]
-        const mediaItemData = {
-          url,
-          title: uploadForm.title || `Phase ${selectedPhase.phaseNumber} - Image ${i + 1}`,
-          percentage: addedPercentage / urls.length,
-          mediaType: 'image'
-        }
-
-        await api.post(`/phases/${phaseId}/media`, mediaItemData)
-        console.log(`✅ Media item ${i + 1} added`)
-      }
-
-      alert('✅ Images uploaded successfully!')
-      
-      setSelectedPhase(null)
-      setUploadForm({ title: '', percentage: 0, images: [] })
-      fetchPhases()
-      
-    } catch (error) {
-      console.error('❌ Error uploading images:', error)
-      alert(`❌ Error: ${error.response?.data?.message || error.message}`)
-    } finally {
-      setUploading(false)
+    if (uploadForm.videos.length) {
+      videoUrls = await uploadService.uploadPhaseVideos(uploadForm.videos);
     }
+    const currentPercentage = selectedPhase.constructionPercentage || 0;
+    const addedPercentage = parseFloat(uploadForm.percentage) || 0;
+    const newPercentage = Math.min(100, currentPercentage + addedPercentage);
+    let phaseId = selectedPhase._id;
+    if (!phaseId) {
+      const createResponse = await api.post('/phases', {
+        property: property._id,
+        phaseNumber: selectedPhase.phaseNumber,
+        title: selectedPhase.title,
+        constructionPercentage: newPercentage
+      });
+      phaseId = createResponse.data._id;
+    } else {
+      await api.put(`/phases/${phaseId}`, {
+        constructionPercentage: newPercentage
+      });
+    }
+    for (let i = 0; i < urls.length; i++) {
+      const url = urls[i];
+      const mediaItemData = {
+        url,
+        title: uploadForm.title || `Phase ${selectedPhase.phaseNumber} - Image ${i + 1}`,
+        percentage: addedPercentage / (urls.length + videoUrls.length),
+        mediaType: 'image'
+      };
+      await api.post(`/phases/${phaseId}/media`, mediaItemData);
+    }
+    for (let i = 0; i < videoUrls.length; i++) {
+      const url = videoUrls[i];
+      const mediaItemData = {
+        url,
+        title: uploadForm.title || `Phase ${selectedPhase.phaseNumber} - Video ${i + 1}`,
+        percentage: addedPercentage / (urls.length + videoUrls.length),
+        mediaType: 'video'
+      };
+      await api.post(`/phases/${phaseId}/media`, mediaItemData);
+    }
+    alert('✅ Media uploaded successfully!');
+    setSelectedPhase(null);
+    setUploadForm({ title: '', percentage: 0, images: [], videos: [] });
+    fetchPhases();
+  } catch (error) {
+    alert(`❌ Error: ${error.response?.data?.message || error.message}`);
+  } finally {
+    setUploading(false);
   }
+};
 
   const handleDeleteMedia = async (phaseId, mediaId) => {
     if (!window.confirm('Are you sure you want to delete this image?')) return
@@ -218,6 +219,18 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
       alert('❌ Error deleting image')
     }
   }
+
+    // Helper para extraer URLs robustamente
+  const extractUrl = (item) => {
+    if (!item) return null;
+    if (typeof item === 'string') return { url: item, type: 'image' }; // Asumimos que es imagen si es string
+    if (item.url) {
+      const type = item.mediaType || 'image'; // Determina si es imagen o video
+      return { url: item.url, type };
+    }
+    return null;
+  };
+
 
   return (
     <>
@@ -513,186 +526,47 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
                   </Box>
 
                   {/* ✅ GALERÍA DE IMÁGENES */}
-                  {phases[currentPhaseIndex].mediaItems && phases[currentPhaseIndex].mediaItems.length > 0 ? (
-                    <Box>
-                      {/* Carrusel principal */}
-                      <Box
-                        sx={{
-                          bgcolor: '#000',
-                          borderRadius: 3,
-                          p: 2,
-                          minHeight: 280,
-                          height: 400,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          position: 'relative',
-                          overflow: 'hidden'
-                        }}
-                      >
-                        <AnimatePresence mode="wait">
-                          <motion.img
-                            key={`phase-carousel-${currentPhaseIndex}-${imageIdx}`}
-                            src={phases[currentPhaseIndex].mediaItems[imageIdx].url}
-                            alt={phases[currentPhaseIndex].mediaItems[imageIdx].title}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ duration: 0.3 }}
-                            style={{
-                              maxWidth: '90%',
-                              maxHeight: '100%',
-                              objectFit: 'contain',
-                              borderRadius: 8,
-                              cursor: 'pointer'
-                            }}
-                            onClick={() => setPhaseLightboxOpen(true)}
-                          />
-                        </AnimatePresence>
-                        
-                        {phases[currentPhaseIndex].mediaItems.length > 1 && (
-                          <>
-                            <IconButton
-                              onClick={() => setImageIdx(idx => Math.max(idx - 1, 0))}
-                              disabled={imageIdx === 0}
-                              sx={{
-                                position: 'absolute',
-                                left: 12,
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                bgcolor: 'rgba(255,255,255,0.95)',
-                                '&:hover': {
-                                  bgcolor: 'white',
-                                  transform: 'scale(1.1) translateY(-50%)',
-                                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                                },
-                                '&:disabled': {
-                                  bgcolor: 'rgba(255,255,255,0.5)'
-                                }
-                              }}
-                            >
-                              <ChevronLeft sx={{ color: '#333F1F' }} />
-                            </IconButton>
-                            <IconButton
-                              onClick={() => setImageIdx(idx => Math.min(idx + 1, phases[currentPhaseIndex].mediaItems.length - 1))}
-                              disabled={imageIdx === phases[currentPhaseIndex].mediaItems.length - 1}
-                              sx={{
-                                position: 'absolute',
-                                right: 12,
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                bgcolor: 'rgba(255,255,255,0.95)',
-                                '&:hover': {
-                                  bgcolor: 'white',
-                                  transform: 'scale(1.1) translateY(-50%)',
-                                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                                },
-                                '&:disabled': {
-                                  bgcolor: 'rgba(255,255,255,0.5)'
-                                }
-                              }}
-                            >
-                              <ChevronRight sx={{ color: '#333F1F' }} />
-                            </IconButton>
-                          </>
-                        )}
-                        
-                        <Box 
-                          sx={{ 
-                            position: 'absolute', 
-                            bottom: 12, 
-                            left: 12, 
-                            bgcolor: 'rgba(51, 63, 31, 0.9)', 
-                            color: 'white', 
-                            px: 2, 
-                            py: 0.5, 
-                            borderRadius: 2 
-                          }}
-                        >
-                          <Typography 
-                            variant="caption" 
-                            fontWeight={600}
-                            sx={{ fontFamily: '"Poppins", sans-serif' }}
-                          >
-                            {imageIdx + 1} / {phases[currentPhaseIndex].mediaItems.length}
-                          </Typography>
-                        </Box>
-                        
-                        {isAdmin && (
-                          <IconButton
-                            onClick={() => handleDeleteMedia(
-                              phases[currentPhaseIndex]._id,
-                              phases[currentPhaseIndex].mediaItems[imageIdx]._id
-                            )}
-                            sx={{
-                              position: 'absolute',
-                              top: 16,
-                              right: 16,
-                              color: 'white',
-                              bgcolor: 'rgba(229, 134, 60, 0.9)',
-                              '&:hover': { 
-                                bgcolor: '#E5863C',
-                                transform: 'scale(1.1)'
-                              }
-                            }}
-                          >
-                            <Delete />
-                          </IconButton>
-                        )}
-                      </Box>
-
-                      {/* Miniaturas */}
-                      <Box sx={{ display: 'flex', gap: 1, mt: 2, overflowX: 'auto', pb: 1 }}>
-                        {phases[currentPhaseIndex].mediaItems.map((media, idx) => (
-                          <Box
-                            key={idx}
-                            onClick={() => setImageIdx(idx)}
-                            sx={{
-                              width: 80,
-                              height: 80,
-                              borderRadius: 2,
-                              overflow: 'hidden',
-                              cursor: 'pointer',
-                              border: idx === imageIdx ? '3px solid #8CA551' : '1px solid #e0e0e0',
-                              boxShadow: idx === imageIdx ? '0 4px 12px rgba(140, 165, 81, 0.25)' : 'none',
-                              transition: 'all 0.3s ease',
-                              flexShrink: 0,
-                              '&:hover': {
-                                transform: 'scale(1.05)',
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                              }
-                            }}
-                          >
-                            <img 
-                              src={media.url} 
-                              alt={media.title} 
-                              style={{ 
-                                width: '100%', 
-                                height: '100%', 
-                                objectFit: 'cover' 
-                              }} 
-                            />
-                          </Box>
-                        ))}
-                      </Box>
-                    </Box>
-                  ) : (
-                    <Alert
-                      severity="info"
-                      icon="ℹ️"
-                      sx={{
-                        borderRadius: 2,
-                        bgcolor: 'rgba(140, 165, 81, 0.08)',
-                        border: '1px solid rgba(140, 165, 81, 0.2)',
-                        '& .MuiAlert-message': {
-                          fontFamily: '"Poppins", sans-serif',
-                          color: '#333F1F'
-                        }
-                      }}
-                    >
-                      No images uploaded yet for this phase
-                    </Alert>
-                  )}
+                {phases[currentPhaseIndex].mediaItems && phases[currentPhaseIndex].mediaItems.length > 0 ? (
+                  <Box sx={{
+                    bgcolor: '#000',
+                    borderRadius: 3,
+                    p: 2,
+                    minHeight: 280,
+                    height: 400,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}>
+                    <GalleryCarrousel
+                      images={phases[currentPhaseIndex]?.mediaItems.map(extractUrl).filter(Boolean)}
+                      showPagination={true}
+                      showArrows={true}
+                      autoPlay={false}
+                      borderRadius={8}
+                      objectFit="contain"
+                      startIndex={0}
+                      watermark="/images/logos/Logo_LakewoodOaks-08.png"
+                    />
+                  </Box>
+                ) : (
+                  <Alert
+                    severity="info"
+                    icon="ℹ️"
+                    sx={{
+                      borderRadius: 2,
+                      bgcolor: 'rgba(140, 165, 81, 0.08)',
+                      border: '1px solid rgba(140, 165, 81, 0.2)',
+                      '& .MuiAlert-message': {
+                        fontFamily: '"Poppins", sans-serif',
+                        color: '#333F1F'
+                      }
+                    }}
+                  >
+                    No images uploaded yet for this phase
+                  </Alert>
+                )}
                 </Paper>
               )}
             </>
@@ -776,12 +650,13 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
           </Box>
         </DialogTitle>
 
+        
         <DialogContent sx={{ pt: 3 }}>
           <Grid container spacing={2.5}>
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Image Title/Description"
+                label="Media Title/Description"
                 value={uploadForm.title}
                 onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
                 sx={{
@@ -886,7 +761,6 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
                 />
               </Button>
             </Grid>
-            
             {uploadForm.images.length > 0 && (
               <Grid item xs={12}>
                 <Typography 
@@ -899,7 +773,7 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
                     mb: 1
                   }}
                 >
-                  Selected files: {uploadForm.images.length}
+                  Selected images: {uploadForm.images.length}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {uploadForm.images.map((file, index) => (
@@ -929,7 +803,98 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
                       </Typography>
                       <IconButton 
                         size="small" 
-                        onClick={() => handleRemoveImage(index)}
+                        onClick={() => handleRemoveMedia('images', index)}
+                        sx={{
+                          color: '#E5863C',
+                          '&:hover': {
+                            bgcolor: 'rgba(229, 134, 60, 0.08)'
+                          }
+                        }}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Paper>
+                  ))}
+                </Box>
+              </Grid>
+            )}
+        
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                component="label"
+                fullWidth
+                startIcon={<CloudUpload />}
+                sx={{
+                  py: 1.5,
+                  borderRadius: 3,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontFamily: '"Poppins", sans-serif',
+                  borderColor: 'rgba(140, 165, 81, 0.3)',
+                  borderWidth: '2px',
+                  color: '#333F1F',
+                  mt: 1,
+                  '&:hover': {
+                    borderColor: '#8CA551',
+                    borderWidth: '2px',
+                    bgcolor: 'rgba(140, 165, 81, 0.08)'
+                  }
+                }}
+              >
+                Select Videos
+                <input
+                  type="file"
+                  hidden
+                  multiple
+                  accept="video/*"
+                  onChange={handleFileSelect}
+                />
+              </Button>
+            </Grid>
+            {uploadForm.videos.length > 0 && (
+              <Grid item xs={12}>
+                <Typography 
+                  variant="caption" 
+                  sx={{
+                    color: '#706f6f',
+                    fontWeight: 600,
+                    fontFamily: '"Poppins", sans-serif',
+                    display: 'block',
+                    mb: 1
+                  }}
+                >
+                  Selected videos: {uploadForm.videos.length}
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  {uploadForm.videos.map((file, index) => (
+                    <Paper 
+                      key={index} 
+                      elevation={0}
+                      sx={{ 
+                        p: 1.5, 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        bgcolor: '#fafafa',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: 2
+                      }}
+                    >
+                      <Typography 
+                        variant="body2" 
+                        noWrap
+                        sx={{ 
+                          fontFamily: '"Poppins", sans-serif',
+                          flex: 1,
+                          mr: 1
+                        }}
+                      >
+                        {file.name}
+                      </Typography>
+                      <IconButton 
+                        size="small" 
+                        onClick={() => handleRemoveMedia('videos', index)}
                         sx={{
                           color: '#E5863C',
                           '&:hover': {
@@ -946,6 +911,7 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
             )}
           </Grid>
         </DialogContent>
+        
 
         <DialogActions sx={{ p: 3, gap: 2 }}>
           <Button
@@ -968,57 +934,57 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
             Cancel
           </Button>
           
-          <Button
-            variant="contained"
-            onClick={handleUploadImages}
-            disabled={uploading || !uploadForm.images.length}
-            startIcon={uploading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <CloudUpload />}
-            sx={{
-              borderRadius: 3,
-              bgcolor: '#333F1F',
-              color: 'white',
-              fontWeight: 600,
-              textTransform: 'none',
-              letterSpacing: '1px',
-              fontFamily: '"Poppins", sans-serif',
-              px: 4,
-              py: 1.5,
-              boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
-              position: 'relative',
-              overflow: 'hidden',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: '-100%',
-                width: '100%',
-                height: '100%',
-                bgcolor: '#8CA551',
-                transition: 'left 0.4s ease',
-                zIndex: 0,
-              },
-              '&:hover': {
-                bgcolor: '#333F1F',
-                boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
-                '&::before': {
-                  left: 0,
-                },
-              },
-              '&:disabled': {
-                bgcolor: '#e0e0e0',
-                color: '#706f6f',
-                boxShadow: 'none'
-              },
-              '& .MuiButton-startIcon': {
-                position: 'relative',
-                zIndex: 1,
-              }
-            }}
-          >
-            <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-              {uploading ? 'Uploading...' : 'Upload'}
-            </Box>
-          </Button>
+<Button
+  variant="contained"
+  onClick={handleUploadMedia}
+  disabled={uploading || (!uploadForm.images.length && !uploadForm.videos.length)}
+  startIcon={uploading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <CloudUpload />}
+  sx={{
+    borderRadius: 3,
+    bgcolor: '#333F1F',
+    color: 'white',
+    fontWeight: 600,
+    textTransform: 'none',
+    letterSpacing: '1px',
+    fontFamily: '"Poppins", sans-serif',
+    px: 4,
+    py: 1.5,
+    boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+    position: 'relative',
+    overflow: 'hidden',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: '-100%',
+      width: '100%',
+      height: '100%',
+      bgcolor: '#8CA551',
+      transition: 'left 0.4s ease',
+      zIndex: 0,
+    },
+    '&:hover': {
+      bgcolor: '#333F1F',
+      boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+      '&::before': {
+        left: 0,
+      },
+    },
+    '&:disabled': {
+      bgcolor: '#e0e0e0',
+      color: '#706f6f',
+      boxShadow: 'none'
+    },
+    '& .MuiButton-startIcon': {
+      position: 'relative',
+      zIndex: 1,
+    }
+  }}
+>
+  <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
+    {uploading ? 'Uploading...' : 'Upload'}
+  </Box>
+</Button>
         </DialogActions>
       </Dialog>
 
