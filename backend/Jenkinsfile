@@ -71,6 +71,7 @@ pipeline {
                     env.APP_PORT = (env.IS_PRODUCTION == 'true') ? '5000' : '5001'
                     env.IMAGE_NAME = 'customerservice-backend'
                     env.IMAGE_TAG = "${env.ENVIRONMENT}-${env.BUILD_NUMBER}"
+                    env.PUBLIC_URL = (env.IS_PRODUCTION == 'true') ? 'https://apics.michelangelodelvalle.com' : 'https://apicsdev.michelangelodelvalle.com'
                     def uriPdn = 'mongodb://mongo_customerservice:WmSld1ZrUWzWcaDZ6QBKl7QDKQsMnPfp@72.61.6.13:27017/customerservice?authSource=admin'
                     def uriDev = 'mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice'
                     env.MONGODB_URI = (env.IS_PRODUCTION == 'true') ? uriPdn : uriDev
@@ -135,6 +136,7 @@ pipeline {
                               -p ''' + env.APP_PORT + ''':5000 \
                               -e NODE_ENV=''' + (env.IS_PRODUCTION == 'true' ? 'production' : 'development') + ''' \
                               -e PORT=5000 \
+                              -e PUBLIC_URL=''' + env.PUBLIC_URL + ''' \
                               -e MONGODB_URI="$MONGODB_URI" \
                               -e JWT_SECRET=''' + env.JWT_SECRET + ''' \
                               -e TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID \

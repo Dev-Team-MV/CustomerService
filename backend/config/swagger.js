@@ -1,5 +1,11 @@
 import swaggerJsdoc from 'swagger-jsdoc'
 
+// Server URL for Swagger "Try it out": use PUBLIC_URL when set (deployed), else localhost with dev port 5001
+const serverPort = process.env.PORT || 5001
+const serverUrl = process.env.PUBLIC_URL
+  ? process.env.PUBLIC_URL.replace(/\/$/, '') // trim trailing slash
+  : `http://localhost:${serverPort}`
+
 const options = {
   definition: {
     openapi: '3.0.0',
@@ -13,8 +19,10 @@ const options = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 5001}`,
-        description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server (port 5001)'
+        url: serverUrl,
+        description: process.env.PUBLIC_URL
+          ? (process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server')
+          : `Local (port ${serverPort})`
       }
     ],
     components: {
