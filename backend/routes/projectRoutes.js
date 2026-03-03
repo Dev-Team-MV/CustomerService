@@ -11,6 +11,9 @@ import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
+// Debug: confirm router is mounted (GET /api/projects/ping)
+router.get('/ping', (req, res) => res.json({ ok: true, message: 'projects router mounted' }))
+
 /**
  * @swagger
  * /api/projects:
@@ -72,6 +75,9 @@ const router = express.Router()
 router.route('/')
   .get(getAllProjects)
   .post(protect, admin, createProject)
+
+// Also handle base path when Express passes '' (no leading slash) to the router
+router.post('', protect, admin, createProject)
 
 /**
  * @swagger

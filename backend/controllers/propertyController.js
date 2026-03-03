@@ -176,10 +176,7 @@ export const getPropertyById = async (req, res) => {
 export const createProperty = async (req, res) => {
   try {
     const { projectId, project, lot, model, facade, user, users, initialPayment, hasBalcony, modelType, hasStorage } = req.body
-    const projId = projectId || project
-    if (!projId) {
-      return res.status(400).json({ message: 'projectId (or project) is required' })
-    }
+    let projId = projectId || project
 
     // Normalize owners: accept single user or users array
     const ownerIds = users && Array.isArray(users) && users.length > 0
@@ -191,10 +188,17 @@ export const createProperty = async (req, res) => {
       return res.status(400).json({ message: 'At least one owner (user or users) is required' })
     }
 
-    // Validate lot
+    // Validate lot (load first so we can infer project from it if needed)
     const lotExists = await Lot.findById(lot)
     if (!lotExists) {
       return res.status(404).json({ message: 'Lot not found' })
+    }
+    // If no projectId was sent, use the lot's project (allows creating without sending projectId for testing)
+    if (!projId && lotExists.project) {
+      projId = lotExists.project
+    }
+    if (!projId) {
+      return res.status(400).json({ message: 'projectId (or project) is required, or use a lot that belongs to a project' })
     }
     if (lotExists.project.toString() !== projId.toString()) {
       return res.status(400).json({ message: 'Lot does not belong to this project' })
