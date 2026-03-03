@@ -1,6 +1,14 @@
 import Facade from '../models/Facade.js'
 import Model from '../models/Model.js'
 
+/** Normalize ref/id to string; safe when value is undefined. */
+function toIdStr(val) {
+  if (val == null) return ''
+  if (typeof val === 'string') return val
+  if (val._id != null) return val._id.toString()
+  return String(val)
+}
+
 export const getAllFacades = async (req, res) => {
   try {
     const { model, projectId } = req.query
@@ -65,7 +73,7 @@ export const createFacade = async (req, res) => {
     if (!modelExists) {
       return res.status(404).json({ message: 'Model not found' })
     }
-    if (modelExists.project.toString() !== projId.toString()) {
+    if (modelExists.project == null || toIdStr(modelExists.project) !== toIdStr(projId)) {
       return res.status(400).json({ message: 'Model does not belong to this project' })
     }
 
