@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useCallback } from 'react';
-
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -13,7 +11,6 @@ import {
   CircularProgress,
   Alert,
   IconButton,
-  Fade,
   Stack
 } from '@mui/material';
 import {
@@ -22,14 +19,15 @@ import {
   Share,
   Bookmark,
   BookmarkBorder,
-  AccessTime,
-  ChevronRight
+  AccessTime
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import newsService from '../../services/newsService';
+import { useTranslation } from 'react-i18next';
 
 const NewsDetail = () => {
+  const { t } = useTranslation(['news', 'common']);
   const navigate = useNavigate();
   const { id } = useParams();
   const [bookmarked, setBookmarked] = useState(false);
@@ -38,7 +36,6 @@ const NewsDetail = () => {
   const [error, setError] = useState(null);
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  // ✅ Scroll progress indicator
   useEffect(() => {
     const handleScroll = () => {
       const windowHeight = window.innerHeight;
@@ -46,12 +43,10 @@ const NewsDetail = () => {
       const scrolled = (window.scrollY / documentHeight) * 100;
       setScrollProgress(scrolled);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // ✅ Fetch news on mount
   useEffect(() => {
     fetchNewsDetail();
   }, [id]);
@@ -63,7 +58,6 @@ const NewsDetail = () => {
       setNews(data);
       setError(null);
     } catch (err) {
-      console.error('❌ Error loading news:', err);
       setError(err);
     } finally {
       setLoading(false);
@@ -71,28 +65,27 @@ const NewsDetail = () => {
   };
 
   const [relatedNews, setRelatedNews] = useState([]);
-const [loadingRelated, setLoadingRelated] = useState(false);
+  const [loadingRelated, setLoadingRelated] = useState(false);
 
-const fetchRelatedNews = useCallback(async () => {
-  if (!news?.category) return;
-  setLoadingRelated(true);
-  try {
-    const allNews = await newsService.getAllNews();
-    // Filtra por categoría, excluyendo la noticia actual
-    const filtered = allNews.filter(
-      n => n.category === news.category && n._id !== news._id
-    );
-    setRelatedNews(filtered.slice(0, 4)); // Muestra máximo 4
-  } catch (err) {
-    setRelatedNews([]);
-  } finally {
-    setLoadingRelated(false);
-  }
-}, [news]);
+  const fetchRelatedNews = useCallback(async () => {
+    if (!news?.category) return;
+    setLoadingRelated(true);
+    try {
+      const allNews = await newsService.getAllNews();
+      const filtered = allNews.filter(
+        n => n.category === news.category && n._id !== news._id
+      );
+      setRelatedNews(filtered.slice(0, 4));
+    } catch (err) {
+      setRelatedNews([]);
+    } finally {
+      setLoadingRelated(false);
+    }
+  }, [news]);
 
-useEffect(() => {
-  fetchRelatedNews();
-}, [news, fetchRelatedNews]);
+  useEffect(() => {
+    fetchRelatedNews();
+  }, [news, fetchRelatedNews]);
 
   const getCategoryColor = (category) => {
     switch (category) {
@@ -113,11 +106,10 @@ useEffect(() => {
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
+      alert(t('news:linkCopied', 'Link copied to clipboard!'));
     }
   };
 
-  // ✅ Renderizar bloques de contenido con estilo premium
   const renderContentBlock = (block, index) => {
     switch (block.type) {
       case 'heading':
@@ -151,7 +143,6 @@ useEffect(() => {
             {block.text}
           </Typography>
         );
-      
       case 'paragraph':
         return (
           <Typography
@@ -176,7 +167,6 @@ useEffect(() => {
             dangerouslySetInnerHTML={{ __html: block.text }}
           />
         );
-      
       case 'list':
         const ListTag = block.ordered ? 'ol' : 'ul';
         return (
@@ -205,7 +195,6 @@ useEffect(() => {
             ))}
           </Box>
         );
-      
       case 'quote':
         return (
           <Paper
@@ -262,27 +251,24 @@ useEffect(() => {
             )}
           </Paper>
         );
-      
       default:
         return null;
     }
   };
 
-  // ✅ Loading state
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" bgcolor="#fafafa">
         <Box textAlign="center">
           <CircularProgress size={60} sx={{ color: '#8CA551', mb: 2 }} />
           <Typography sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
-            Loading article...
+            {t('news:loadingArticle', 'Loading article...')}
           </Typography>
         </Box>
       </Box>
     );
   }
 
-  // ✅ Error state
   if (error || !news) {
     return (
       <Container maxWidth="md" sx={{ py: 8 }}>
@@ -294,7 +280,7 @@ useEffect(() => {
             fontFamily: '"Poppins", sans-serif'
           }}
         >
-          {error || 'News article not found'}
+          {t('news:articleNotFound', 'News article not found')}
         </Alert>
         <Button
           startIcon={<ArrowBack />}
@@ -311,7 +297,7 @@ useEffect(() => {
             }
           }}
         >
-          Back to News
+          {t('news:backToNews', 'Back to News')}
         </Button>
       </Container>
     );
@@ -319,7 +305,6 @@ useEffect(() => {
 
   return (
     <Box sx={{ bgcolor: '#ffffff', minHeight: '100vh' }}>
-      {/* ✅ SCROLL PROGRESS BAR */}
       <Box
         sx={{
           position: 'fixed',
@@ -341,7 +326,6 @@ useEffect(() => {
         />
       </Box>
 
-      {/* ✅ HERO SECTION - Full width parallax */}
       <Box
         sx={{
           position: 'relative',
@@ -350,26 +334,25 @@ useEffect(() => {
           overflow: 'hidden'
         }}
       >
-  <motion.div
-    initial={{ scale: 1.1 }}
-    animate={{ scale: 1 }}
-    transition={{ duration: 1.5, ease: 'easeOut' }}
-    style={{ width: '100%', height: '100%' }}
-  >
-<Box
-  sx={{
-    width: '100%',
-    height: '100%',
-    backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(51, 63, 31, 0.7) 100%), url(${news.heroImage})`,
-    backgroundSize: '100% auto', // Fuerza ancho completo, altura proporcional
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'center top',
-    backgroundAttachment: { xs: 'scroll', md: 'fixed' }
-  }}
-/>
-  </motion.div>
+        <motion.div
+          initial={{ scale: 1.1 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 1.5, ease: 'easeOut' }}
+          style={{ width: '100%', height: '100%' }}
+        >
+          <Box
+            sx={{
+              width: '100%',
+              height: '100%',
+              backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(51, 63, 31, 0.7) 100%), url(${news.heroImage})`,
+              backgroundSize: '100% auto',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center top',
+              backgroundAttachment: { xs: 'scroll', md: 'fixed' }
+            }}
+          />
+        </motion.div>
 
-        {/* Overlay Content */}
         <Container 
           maxWidth="lg" 
           sx={{
@@ -387,7 +370,7 @@ useEffect(() => {
             transition={{ duration: 0.8, delay: 0.3 }}
           >
             <Chip
-              label={news.category}
+              label={t(`news:category${news.category.charAt(0).toUpperCase() + news.category.slice(1)}`, news.category)}
               sx={{
                 bgcolor: getCategoryColor(news.category),
                 color: 'white',
@@ -436,7 +419,6 @@ useEffect(() => {
           </motion.div>
         </Container>
 
-        {/* Back Button */}
         <IconButton
           onClick={() => navigate('/explore/news')}
           sx={{
@@ -458,10 +440,8 @@ useEffect(() => {
         </IconButton>
       </Box>
 
-      {/* ✅ CONTENT AREA - Más espaciado y ancho optimizado */}
       <Container maxWidth="xl" sx={{ mt: { xs: 6, md: 10 }, position: 'relative', zIndex: 10 }}>
         <Grid container spacing={{ xs: 4, md: 8 }}>
-          {/* MAIN CONTENT - Ahora más ancho (70%) */}
           <Grid item xs={12} md={8.5}>
             <motion.div
               initial={{ opacity: 0, y: 40 }}
@@ -479,7 +459,6 @@ useEffect(() => {
                 }}
               >
                 <Box sx={{ p: { xs: 3, sm: 4, md: 6 } }}>
-                  {/* META INFO */}
                   <Box
                     display="flex"
                     alignItems="center"
@@ -517,7 +496,7 @@ useEffect(() => {
                             fontSize: '0.65rem'
                           }}
                         >
-                          Published
+                          {t('news:published', 'Published')}
                         </Typography>
                         <Typography 
                           variant="body2" 
@@ -537,7 +516,6 @@ useEffect(() => {
                     </Box>
                   </Box>
 
-                  {/* DROP CAP FIRST PARAGRAPH */}
                   <Typography
                     sx={{
                       fontSize: { xs: '1.05rem', md: '1.15rem' },
@@ -559,15 +537,13 @@ useEffect(() => {
                   >
                     {news.contentBlocks?.[0]?.type === 'paragraph' 
                       ? news.contentBlocks[0].text 
-                      : 'This article begins with an elegant introduction to set the tone.'}
+                      : t('news:articleIntro', 'This article begins with an elegant introduction to set the tone.')}
                   </Typography>
 
-                  {/* CONTENT BLOCKS */}
                   <Box>
                     {news.contentBlocks?.slice(1).map((block, idx) => renderContentBlock(block, idx))}
                   </Box>
 
-                  {/* IMAGE GALLERY - Masonry style */}
                   {news.images && news.images.length > 0 && (
                     <Box sx={{ mt: { xs: 6, md: 8 } }}>
                       <Box mb={4}>
@@ -580,11 +556,10 @@ useEffect(() => {
                             mb: 1
                           }}
                         >
-                          Visual Gallery
+                          {t('news:visualGallery', 'Visual Gallery')}
                         </Typography>
                         <Box width={60} height={4} bgcolor="#8CA551" borderRadius={2} />
                       </Box>
-                      
                       <Grid container spacing={2}>
                         {news.images.map((image, idx) => (
                           <Grid item xs={12} sm={news.images.length === 1 ? 12 : 6} key={idx}>
@@ -620,7 +595,6 @@ useEffect(() => {
                     </Box>
                   )}
 
-                  {/* VIDEOS */}
                   {news.videos && news.videos.length > 0 && (
                     <Box sx={{ mt: { xs: 6, md: 8 } }}>
                       <Box mb={4}>
@@ -633,11 +607,10 @@ useEffect(() => {
                             mb: 1
                           }}
                         >
-                          Video Coverage
+                          {t('news:videoCoverage', 'Video Coverage')}
                         </Typography>
                         <Box width={60} height={4} bgcolor="#8CA551" borderRadius={2} />
                       </Box>
-                      
                       <Grid container spacing={3}>
                         {news.videos.map((videoUrl, idx) => (
                           <Grid item xs={12} key={idx}>
@@ -666,7 +639,6 @@ useEffect(() => {
                     </Box>
                   )}
 
-                  {/* TAGS */}
                   {news.tags && news.tags.length > 0 && (
                     <Box 
                       sx={{ 
@@ -687,7 +659,7 @@ useEffect(() => {
                           fontSize: '0.75rem'
                         }}
                       >
-                        Related Topics
+                        {t('news:relatedTopics', 'Related Topics')}
                       </Typography>
                       <Box display="flex" gap={1.5} flexWrap="wrap">
                         {news.tags.map((tag, idx) => (
@@ -717,7 +689,6 @@ useEffect(() => {
             </motion.div>
           </Grid>
 
-          {/* SIDEBAR */}
           <Grid item xs={12} md={3.5}>
             <Box sx={{ position: 'sticky', top: 120 }}>
               <motion.div
@@ -725,9 +696,7 @@ useEffect(() => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.6 }}
               >
-                {/* Article Info & Related News in 2 columns on mobile, stacked on desktop */}
                 <Grid container spacing={3}>
-                  {/* Article Info */}
                   <Grid item xs={12} md={12}>
                     <Paper
                       elevation={0}
@@ -748,9 +717,8 @@ useEffect(() => {
                           fontFamily: '"Poppins", sans-serif'
                         }}
                       >
-                        Article Info
+                        {t('news:articleInfo', 'Article Info')}
                       </Typography>
-          
                       <Stack spacing={2}>
                         <Box display="flex" alignItems="center" gap={1.5}>
                           <Box
@@ -769,14 +737,13 @@ useEffect(() => {
                           </Box>
                           <Box>
                             <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', display: 'block' }}>
-                              Published
+                              {t('news:published', 'Published')}
                             </Typography>
                             <Typography variant="body2" fontWeight={600} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
                               {new Date(news.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </Typography>
                           </Box>
                         </Box>
-          
                         <Box display="flex" alignItems="center" gap={1.5}>
                           <Box
                             sx={{
@@ -794,18 +761,16 @@ useEffect(() => {
                           </Box>
                           <Box>
                             <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', display: 'block' }}>
-                              Reading Time
+                              {t('news:readingTime', 'Reading Time')}
                             </Typography>
                             <Typography variant="body2" fontWeight={600} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
-                              {Math.ceil((news.contentBlocks?.length || 3) * 0.5)} min read
+                              {t('news:minRead', { minutes: Math.ceil((news.contentBlocks?.length || 3) * 0.5) })}
                             </Typography>
                           </Box>
                         </Box>
                       </Stack>
                     </Paper>
                   </Grid>
-          
-                  {/* Related News */}
                   <Grid item xs={12} md={12}>
                     <Paper
                       elevation={0}
@@ -826,9 +791,8 @@ useEffect(() => {
                           fontFamily: '"Poppins", sans-serif'
                         }}
                       >
-                        Related News
+                        {t('news:relatedNews', 'Related News')}
                       </Typography>
-          
                       {loadingRelated ? (
                         <Box display="flex" justifyContent="center" py={3}>
                           <CircularProgress size={30} sx={{ color: '#8CA551' }} />
@@ -844,7 +808,7 @@ useEffect(() => {
                             py: 2
                           }}
                         >
-                          No related articles found
+                          {t('news:noRelatedArticles', 'No related articles found')}
                         </Typography>
                       ) : (
                         <Stack spacing={2}>
@@ -893,7 +857,7 @@ useEffect(() => {
                               </Box>
                               <Box flex={1}>
                                 <Chip
-                                  label={item.category}
+                                  label={t(`news:category${item.category.charAt(0).toUpperCase() + item.category.slice(1)}`, item.category)}
                                   size="small"
                                   sx={{
                                     bgcolor: getCategoryColor(item.category),
@@ -948,8 +912,6 @@ useEffect(() => {
           </Grid>
         </Grid>
       </Container>
-
-      {/* SPACER */}
       <Box sx={{ height: { xs: 60, md: 100 } }} />
     </Box>
   );

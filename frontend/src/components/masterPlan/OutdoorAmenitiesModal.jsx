@@ -6,6 +6,9 @@ import {
 import { CloudUpload, Close, Delete, Check } from '@mui/icons-material'
 import uploadService from '../../services/uploadService'
 import { useTranslation } from 'react-i18next'
+import { Switch, FormControlLabel } from '@mui/material';
+import ImagePreview from '../../components/ImgPreview'; // Ajusta el path si es necesario
+
 
 const EXTERIOR_AMENITIES = [
   "Dock, Boats & Jet Ski",
@@ -43,13 +46,17 @@ const OutdoorAmenitiesModal = ({
   }, [open])
 
   // Seleccionar archivos para la amenidad actual
+  // Al seleccionar archivos:
   const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files)
+    const files = Array.from(e.target.files);
     setSelectedFiles(prev => ({
       ...prev,
-      [selectedAmenity]: [...prev[selectedAmenity], ...files]
-    }))
-  }
+      [selectedAmenity]: [
+        ...prev[selectedAmenity],
+        ...files.map(file => ({ file, isPublic: false })) // Por defecto públicas
+      ]
+    }));
+  };
 
   // Remover archivo seleccionado
   const handleRemoveSelectedFile = (amenity, idx) => {
@@ -61,42 +68,77 @@ const OutdoorAmenitiesModal = ({
 
   // Subir todas las imágenes seleccionadas para todas las amenidades
 const handleUpload = async () => {
-  setUploading(true)
+  setUploading(true);
   try {
-    const uploadPromises = []
+    const uploadPromises = [];
     EXTERIOR_AMENITIES.forEach(name => {
       if (selectedFiles[name].length > 0) {
-        // Buscar si ya existe la amenidad por nombre
-        const existing = amenitiesList.find(a => a.name === name)
+        const existing = amenitiesList.find(a => a.name === name);
         uploadPromises.push(
           uploadService.uploadOutdoorAmenityImages(selectedFiles[name], name)
-            .then(urls => {
-              // Si existe, actualiza (manda id, name, images)
+            .then(uploadedImages => {
+              const filteredImages = (uploadedImages || []).filter(img => img.url);
+              if (filteredImages.length === 0) return null;
+
+              // IMPORTANT: merge with existing images instead of replacing them
               if (existing) {
-                return uploadService.saveOutdoorAmenityImages({ id: existing.id, name, images: urls })
+                const merged = [
+                  // keep existing items (ensure they are objects with url/isPublic)
+                  ...(Array.isArray(existing.images) ? existing.images : []),
+                  // append newly uploaded images
+                  ...filteredImages
+                ];
+                return uploadService.saveOutdoorAmenityImages({ id: existing.id, name, images: merged });
               } else {
-                // Si no existe, crea (manda name, images)
-                return uploadService.saveOutdoorAmenityImages({ name, images: urls })
+                return uploadService.saveOutdoorAmenityImages({ name, images: filteredImages });
               }
             })
-        )
+        );
       }
-    })
-    await Promise.all(uploadPromises)
-    setSelectedFiles(EXTERIOR_AMENITIES.reduce((acc, name) => ({ ...acc, [name]: [] }), {}))
-    if (onUploaded) onUploaded()
-    onClose()
+    });
+    await Promise.all(uploadPromises);
+    setSelectedFiles(EXTERIOR_AMENITIES.reduce((acc, name) => ({ ...acc, [name]: [] }), {}));
+    if (onUploaded) onUploaded();
+    onClose();
   } catch (err) {
-    // Manejo de error
+    console.error('[OutdoorAmenitiesModal] Error uploading:', err);
   } finally {
-    setUploading(false)
+    setUploading(false);
   }
-}
-
+};
   // Imágenes existentes para la amenidad seleccionada
   const currentImages = amenitiesList.find(a => a.name === selectedAmenity)?.images || []
   // Archivos seleccionados para la amenidad seleccionada
   const currentSelectedFiles = selectedFiles[selectedAmenity] || []
+
+    const handleToggleUploadedImageVisibility = async (imgIdx, newValue) => {
+    const amenity = amenitiesList.find(a => a.name === selectedAmenity);
+    if (!amenity) return;
+    try {
+      // Actualiza solo el campo isPublic de la imagen en el array
+      const updatedImages = amenity.images.map((img, idx) =>
+        idx === imgIdx ? { ...img, isPublic: newValue } : img
+      );
+      await uploadService.updateOutdoorAmenityImages(amenity.id, { images: updatedImages });
+      if (onUploaded) onUploaded();
+    } catch (err) {
+      console.error('Error updating image visibility:', err);
+    }
+  };
+
+  // Eliminar una imagen ya subida (solo esa imagen) y persistir en backend
+  const handleDeleteUploadedImage = async (imgIdx) => {
+    const amenity = amenitiesList.find(a => a.name === selectedAmenity);
+    if (!amenity) return;
+    try {
+      const updatedImages = (amenity.images || []).filter((_, i) => i !== imgIdx);
+      // Ajusta la llamada si tu uploadService espera otro payload / método
+      await uploadService.updateOutdoorAmenityImages(amenity.id, { images: updatedImages });
+      if (typeof onUploaded === 'function') onUploaded(); // refrescar en el padre
+    } catch (err) {
+      console.error('[OutdoorAmenitiesModal] Error deleting uploaded image:', err);
+    }
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -174,41 +216,47 @@ const handleUpload = async () => {
           </Button>
         </Box>
         <Grid container spacing={2}>
-          {currentSelectedFiles.map((file, idx) => (
+          {currentSelectedFiles.map((item, idx) => (
             <Grid item xs={6} key={idx}>
-              <Paper sx={{ position: 'relative', borderRadius: 2 }}>
-                <Box
-                  component="img"
-                  src={URL.createObjectURL(file)}
-                  alt={`Preview ${idx + 1}`}
-                  sx={{ width: '100%', height: 120, objectFit: 'cover' }}
-                />
-                <IconButton
-                  size="small"
-                  onClick={() => handleRemoveSelectedFile(selectedAmenity, idx)}
-                  sx={{
-                    position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(255,255,255,0.8)'
-                  }}
-                >
-                  <Delete fontSize="small" />
-                </IconButton>
-              </Paper>
+              <ImagePreview
+                src={URL.createObjectURL(item.file)}
+                alt={`Preview ${idx + 1}`}
+                isPublic={!!item.isPublic}
+                onTogglePublic={checked => {
+                  setSelectedFiles(prev => ({
+                    ...prev,
+                    [selectedAmenity]: prev[selectedAmenity].map((f, i) =>
+                      i === idx ? { ...f, isPublic: checked } : f
+                    )
+                  }));
+                console.log(`[OutdoorAmenitiesModal] Amenity "${selectedAmenity}" file ${idx} isPublic:`, checked);
+
+                }}
+                onDelete={() => handleRemoveSelectedFile(selectedAmenity, idx)}
+                showSwitch={true}
+                switchPosition="top-right"
+                label="NEW"
+                sx={{ borderRadius: 2 }}
+                imgSx={{ height: 120 }}
+              />
             </Grid>
           ))}
         </Grid>
         <Box mt={2}>
           <Typography variant="subtitle2" fontWeight={700}>Uploaded Images</Typography>
           <Grid container spacing={2}>
-            {currentImages.map((url, idx) => (
+            {currentImages.map((img, idx) => (
               <Grid item xs={6} key={idx}>
-                <Paper sx={{ borderRadius: 2 }}>
-                  <Box
-                    component="img"
-                    src={url}
-                    alt={`Amenity ${idx + 1}`}
-                    sx={{ width: '100%', height: 120, objectFit: 'cover' }}
-                  />
-                </Paper>
+                <ImagePreview
+                  src={typeof img === 'string' ? img : img.url}
+                  alt={`Amenity ${idx + 1}`}
+                  isPublic={!!img.isPublic}
+                  onTogglePublic={checked => handleToggleUploadedImageVisibility(idx, checked)}                  onDelete={() => handleDeleteUploadedImage(idx)}
+                  showSwitch={true}
+                  switchPosition="top-right"
+                  sx={{ borderRadius: 2 }}
+                  imgSx={{ height: 120 }}
+                />
               </Grid>
             ))}
           </Grid>

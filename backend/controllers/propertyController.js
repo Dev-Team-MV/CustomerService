@@ -6,6 +6,20 @@ import Facade from '../models/Facade.js'
 import User from '../models/User.js'
 import Phase from '../models/Phase.js'
 import { normalizeImageArray } from '../utils/imageUtils.js'
+import { getVisiblePropertyIdsForUser, canUserAccessProperty } from '../utils/propertyVisibility.js'
+
+/** Normalize ref/id to string; safe when value is undefined. */
+function toIdStr(val) {
+  if (val == null) return ''
+  if (typeof val === 'string') return val
+  if (val._id != null) return val._id.toString()
+  return String(val)
+}
+
+/** Compare two ids (ObjectId or string) in a case-insensitive way for MongoDB hex ids. */
+function sameId(a, b) {
+  return toIdStr(a).toLowerCase() === toIdStr(b).toLowerCase()
+}
 
 /**
  * Calcula las imágenes (exterior e interior) de la propiedad según:
@@ -93,13 +107,23 @@ function getPropertyBlueprints(property) {
 
 export const getAllProperties = async (req, res) => {
   try {
-    const { status, user } = req.query
+    const { status, user, projectId } = req.query
+    const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
     const filter = {}
-    
+
+    if (projectId) filter.project = projectId
     if (status) filter.status = status
-    if (user) filter.users = user
-    
+
+    if (user && isAdmin) {
+      filter.users = user
+    } else if (!isAdmin) {
+      // Non-admin: only properties they own or that are shared with them (ignore user query)
+      const visibleIds = await getVisiblePropertyIdsForUser(req.user._id)
+      filter._id = { $in: visibleIds }
+    }
+
     const properties = await Property.find(filter)
+      .populate('project', 'name slug')
       .populate('lot', 'number price')
       .populate('model', 'model price bedrooms bathrooms sqft images blueprints balconies upgrades')
       .populate('facade', 'title url price')
@@ -128,6 +152,7 @@ export const getAllProperties = async (req, res) => {
 export const getPropertyById = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id)
+      .populate('project', 'name slug')
       .populate('lot', 'number price')
       .populate('model', 'model price bedrooms bathrooms sqft images blueprints description balconies upgrades')
       .populate('facade', 'title url price')
@@ -140,16 +165,22 @@ export const getPropertyById = async (req, res) => {
         path: 'phases',
         options: { sort: { phaseNumber: 1 } }
       })
-    
-    if (property) {
-      const propertyObj = property.toObject()
-      propertyObj.totalConstructionPercentage = property.totalConstructionPercentage || 0
-      propertyObj.images = getPropertyImages(property)
-      propertyObj.blueprints = getPropertyBlueprints(property)
-      res.json(propertyObj)
-    } else {
-      res.status(404).json({ message: 'Property not found' })
+
+    if (!property) {
+      return res.status(404).json({ message: 'Property not found' })
     }
+
+    const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
+    const canAccess = isAdmin || (await canUserAccessProperty(req.user._id, property._id))
+    if (!canAccess) {
+      return res.status(403).json({ message: 'You do not have access to this property' })
+    }
+
+    const propertyObj = property.toObject()
+    propertyObj.totalConstructionPercentage = property.totalConstructionPercentage || 0
+    propertyObj.images = getPropertyImages(property)
+    propertyObj.blueprints = getPropertyBlueprints(property)
+    res.json(propertyObj)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -157,8 +188,9 @@ export const getPropertyById = async (req, res) => {
 
 export const createProperty = async (req, res) => {
   try {
-    const { lot, model, facade, user, users, initialPayment, hasBalcony, modelType, hasStorage } = req.body
-    
+    const { projectId, project, lot, model, facade, user, users, initialPayment, hasBalcony, modelType, hasStorage } = req.body
+    let projId = projectId || project
+
     // Normalize owners: accept single user or users array
     const ownerIds = users && Array.isArray(users) && users.length > 0
       ? users
@@ -168,11 +200,22 @@ export const createProperty = async (req, res) => {
     if (ownerIds.length === 0) {
       return res.status(400).json({ message: 'At least one owner (user or users) is required' })
     }
-    
-    // Validate lot
+
+    // Validate lot (load first so we can infer project from it if needed)
     const lotExists = await Lot.findById(lot)
     if (!lotExists) {
       return res.status(404).json({ message: 'Lot not found' })
+    }
+    // If no projectId was sent, use the lot's project (allows creating without sending projectId for testing)
+    if (!projId && lotExists.project) {
+      projId = lotExists.project
+    }
+    if (!projId) {
+      return res.status(400).json({ message: 'projectId (or project) is required, or use a lot that belongs to a project' })
+    }
+    // Use lot's project as canonical so we accept even if frontend sent a different projectId (e.g. stale state)
+    if (lotExists.project) {
+      projId = lotExists.project
     }
     
     if (lotExists.status === 'sold') {
@@ -188,7 +231,7 @@ export const createProperty = async (req, res) => {
     }
     
     const firstOwner = ownerIds[0]
-    if (lotExists.assignedUser && lotExists.assignedUser.toString() !== firstOwner) {
+    if (lotExists.assignedUser && !sameId(lotExists.assignedUser, firstOwner)) {
       return res.status(400).json({ message: 'Lot is already assigned to another user' })
     }
     
@@ -197,15 +240,21 @@ export const createProperty = async (req, res) => {
     if (!modelExists) {
       return res.status(404).json({ message: 'Model not found' })
     }
-    
+    if (!modelExists.project || !sameId(modelExists.project, projId)) {
+      return res.status(400).json({ message: 'Model does not belong to this project' })
+    }
+
     // Validate facade
     const facadeExists = await Facade.findById(facade)
     if (!facadeExists) {
       return res.status(404).json({ message: 'Facade not found' })
     }
-    
+    if (!facadeExists.project || !sameId(facadeExists.project, projId)) {
+      return res.status(400).json({ message: 'Facade does not belong to this project' })
+    }
+
     // Validate that facade belongs to the selected model
-    if (facadeExists.model.toString() !== model) {
+    if (!sameId(facadeExists.model, model)) {
       return res.status(400).json({ message: 'Facade does not belong to the selected model' })
     }
     
@@ -235,6 +284,7 @@ export const createProperty = async (req, res) => {
     const pendingAmount = totalPrice - initialPaymentAmount
     
     const property = await Property.create({
+      project: projId,
       lot,
       model,
       facade,
@@ -255,7 +305,7 @@ export const createProperty = async (req, res) => {
     
     for (const userId of ownerIds) {
       const userDoc = await User.findById(userId)
-      if (userDoc && !userDoc.lots.some(id => id.toString() === lot)) {
+      if (userDoc && !userDoc.lots.some(id => toIdStr(id) === toIdStr(lot))) {
         userDoc.lots.push(lot)
         await userDoc.save()
       }
@@ -293,7 +343,7 @@ export const updateProperty = async (req, res) => {
     const property = await Property.findById(req.params.id)
     
     if (property) {
-      const previousLotId = property.lot ? property.lot.toString() : null
+      const previousLotId = property.lot ? toIdStr(property.lot) : null
 
       // Apply any allowed field present in the request body (price is only calculated on create; updates use the sent values)
       for (const key of ALLOWED_PROPERTY_UPDATES) {
@@ -324,13 +374,13 @@ export const updateProperty = async (req, res) => {
           } else if (key === 'users') {
             const newUsers = req.body.users
             if (Array.isArray(newUsers) && newUsers.length > 0) {
-              const previousIds = (property.users || []).map(id => id.toString())
-              const newIds = newUsers.map(id => (id && (id._id || id).toString?.()) || String(id))
+              const previousIds = (property.users || []).map(id => toIdStr(id))
+              const newIds = newUsers.map(id => toIdStr(id))
               property.users = newIds
               property.markModified('users')
               for (const userId of newIds) {
                 const userDoc = await User.findById(userId)
-                if (userDoc && !userDoc.lots.some(lid => lid.toString() === property.lot.toString())) {
+                if (userDoc && !userDoc.lots.some(lid => toIdStr(lid) === toIdStr(property.lot))) {
                   userDoc.lots.push(property.lot)
                   await userDoc.save()
                 }
@@ -353,7 +403,7 @@ export const updateProperty = async (req, res) => {
       }
 
       // When lot is changed: free old lot (so it appears available again) and assign new lot
-      const newLotId = property.lot ? property.lot.toString() : null
+      const newLotId = property.lot ? toIdStr(property.lot) : null
       if (req.body.lot !== undefined && previousLotId && newLotId && previousLotId !== newLotId) {
         await Lot.findByIdAndUpdate(previousLotId, {
           status: 'available',
@@ -371,14 +421,14 @@ export const updateProperty = async (req, res) => {
         }, { runValidators: false })
         if (firstOwner) {
           const userDoc = await User.findById(firstOwner)
-          if (userDoc && !userDoc.lots.some(id => id.toString() === newLotId)) {
+          if (userDoc && !userDoc.lots.some(id => toIdStr(id) === newLotId)) {
             userDoc.lots.push(property.lot)
             await userDoc.save()
           }
           for (let i = 1; i < (property.users?.length || 0); i++) {
             const uid = property.users[i]
             const u = await User.findById(uid)
-            if (u && !u.lots.some(id => id.toString() === newLotId)) {
+            if (u && !u.lots.some(id => toIdStr(id) === newLotId)) {
               u.lots.push(property.lot)
               await u.save()
             }
@@ -442,21 +492,31 @@ export const deleteProperty = async (req, res) => {
 
 export const getPropertyStats = async (req, res) => {
   try {
-    const totalProperties = await Property.countDocuments()
-    const activeProperties = await Property.countDocuments({ status: 'active' })
-    const pendingProperties = await Property.countDocuments({ status: 'pending' })
-    const soldProperties = await Property.countDocuments({ status: 'sold' })
-    
+    const { projectId } = req.query
+    const filter = {}
+    if (projectId) {
+      try {
+        filter.project = new mongoose.Types.ObjectId(projectId)
+      } catch {
+        return res.status(400).json({ message: 'Invalid projectId' })
+      }
+    }
+
+    const totalProperties = await Property.countDocuments(filter)
+    const activeProperties = await Property.countDocuments({ ...filter, status: 'active' })
+    const pendingProperties = await Property.countDocuments({ ...filter, status: 'pending' })
+    const soldProperties = await Property.countDocuments({ ...filter, status: 'sold' })
+
     const totalRevenue = await Property.aggregate([
-      { $match: { status: { $in: ['active', 'sold'] } } },
+      { $match: { ...filter, status: { $in: ['active', 'sold'] } } },
       { $group: { _id: null, total: { $sum: '$price' } } }
     ])
-    
+
     const pendingPayments = await Property.aggregate([
-      { $match: { status: { $in: ['active', 'pending'] } } },
+      { $match: { ...filter, status: { $in: ['active', 'pending'] } } },
       { $group: { _id: null, total: { $sum: '$pending' } } }
     ])
-    
+
     res.json({
       total: totalProperties,
       active: activeProperties,

@@ -36,9 +36,11 @@ import {
 } from '@mui/icons-material';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import uploadService from '../../services/uploadService';
+import { useTranslation } from 'react-i18next';
 
 const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
-  // ✅ Estados iniciales
+  const { t } = useTranslation(['news', 'common']);
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -52,13 +54,10 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
   const [images, setImages] = useState([]);
   const [videos, setVideos] = useState([]);
   const [tagInput, setTagInput] = useState('');
-  
-  // ✅ Loading states
   const [uploadingHeroImage, setUploadingHeroImage] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [uploadingVideos, setUploadingVideos] = useState(false);
 
-  // ✅ Efecto para setear data cuando se abre en modo edición
   useEffect(() => {
     if (open && newsData) {
       setFormData({
@@ -77,7 +76,6 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
     }
   }, [open, newsData]);
 
-  // ✅ Función para resetear el formulario
   const resetForm = () => {
     setFormData({
       title: '',
@@ -93,7 +91,6 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
     setTagInput('');
   };
 
-  // ✅ Drag & Drop handler
   const onDragEnd = (result) => {
     if (!result.destination) return;
     const items = Array.from(contentBlocks);
@@ -102,7 +99,6 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
     setContentBlocks(items);
   };
 
-  // ✅ Agregar nuevo bloque de contenido
   const addContentBlock = (type) => {
     const newBlock = {
       id: `block-${Date.now()}`,
@@ -115,19 +111,16 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
     setContentBlocks([...contentBlocks, newBlock]);
   };
 
-  // ✅ Actualizar bloque
   const updateBlock = (id, updates) => {
     setContentBlocks(contentBlocks.map(block => 
       block.id === id ? { ...block, ...updates } : block
     ));
   };
 
-  // ✅ Eliminar bloque
   const deleteBlock = (id) => {
     setContentBlocks(contentBlocks.filter(block => block.id !== id));
   };
 
-  // ✅ Agregar item a lista
   const addListItem = (blockId) => {
     setContentBlocks(contentBlocks.map(block => {
       if (block.id === blockId && block.type === 'list') {
@@ -137,7 +130,6 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
     }));
   };
 
-  // ✅ Actualizar item de lista
   const updateListItem = (blockId, itemIndex, value) => {
     setContentBlocks(contentBlocks.map(block => {
       if (block.id === blockId && block.type === 'list') {
@@ -149,7 +141,6 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
     }));
   };
 
-  // ✅ Eliminar item de lista
   const deleteListItem = (blockId, itemIndex) => {
     setContentBlocks(contentBlocks.map(block => {
       if (block.id === blockId && block.type === 'list') {
@@ -159,7 +150,6 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
     }));
   };
 
-  // ✅ Upload handlers
   const handleHeroImageUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -168,8 +158,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
       const url = await uploadService.uploadImage(file, 'news/hero-images');
       setFormData({ ...formData, heroImage: url });
     } catch (error) {
-      console.error('❌ Error uploading hero image:', error);
-      alert('Error uploading hero image. Please try again.');
+      alert(t('news:errorUploadingHeroImage', 'Error uploading hero image. Please try again.'));
     } finally {
       setUploadingHeroImage(false);
     }
@@ -183,8 +172,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
       const urls = await uploadService.uploadMultipleImages(files, 'news/gallery');
       setImages([...images, ...urls]);
     } catch (error) {
-      console.error('❌ Error uploading images:', error);
-      alert('Error uploading images. Please try again.');
+      alert(t('news:errorUploadingImages', 'Error uploading images. Please try again.'));
     } finally {
       setUploadingImages(false);
     }
@@ -199,8 +187,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
       const urls = await Promise.all(uploadPromises);
       setVideos([...videos, ...urls]);
     } catch (error) {
-      console.error('❌ Error uploading videos:', error);
-      alert('Error uploading videos. Please try again.');
+      alert(t('news:errorUploadingVideos', 'Error uploading videos. Please try again.'));
     } finally {
       setUploadingVideos(false);
     }
@@ -214,7 +201,6 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
     setVideos(videos.filter((_, idx) => idx !== indexToDelete));
   };
 
-  // ✅ Tag handlers
   const addTag = () => {
     if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
       setFormData({ ...formData, tags: [...formData.tags, tagInput.trim()] });
@@ -226,22 +212,21 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
     setFormData({ ...formData, tags: formData.tags.filter(tag => tag !== tagToDelete) });
   };
 
-  // ✅ Submit con validaciones
   const handleSubmit = async () => {
     if (!formData.title.trim()) {
-      alert('Title is required');
+      alert(t('news:requiredTitle', 'Title is required'));
       return;
     }
     if (!formData.description.trim()) {
-      alert('Description is required');
+      alert(t('news:requiredDescription', 'Description is required'));
       return;
     }
     if (!formData.heroImage) {
-      alert('Hero image is required');
+      alert(t('news:requiredHeroImage', 'Hero image is required'));
       return;
     }
     if (contentBlocks.length === 0) {
-      alert('Please add at least one content block');
+      alert(t('news:requiredBlock', 'Please add at least one content block'));
       return;
     }
 
@@ -265,7 +250,6 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
     onClose();
   };
 
-  // ✅ Renderizar editor de bloques
   const renderBlockEditor = (block) => {
     const textFieldStyle = {
       '& .MuiOutlinedInput-root': {
@@ -318,7 +302,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
               <TextField
                 fullWidth
                 size="small"
-                placeholder="Heading text..."
+                placeholder={t('news:heading', 'Heading text...')}
                 value={block.text}
                 onChange={(e) => updateBlock(block.id, { text: e.target.value })}
                 sx={textFieldStyle}
@@ -333,7 +317,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
             fullWidth
             multiline
             rows={3}
-            placeholder="Paragraph text..."
+            placeholder={t('news:paragraph', 'Paragraph text...')}
             value={block.text}
             onChange={(e) => updateBlock(block.id, { text: e.target.value })}
             sx={textFieldStyle}
@@ -364,8 +348,8 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                     }
                   }}
                 >
-                  <MenuItem value="unordered">• Bullets</MenuItem>
-                  <MenuItem value="ordered">1. Numbered</MenuItem>
+                  <MenuItem value="unordered">{t('news:list', '• Bullets')}</MenuItem>
+                  <MenuItem value="ordered">{t('news:list', '1. Numbered')}</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -374,7 +358,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                 <TextField
                   fullWidth
                   size="small"
-                  placeholder={`Item ${idx + 1}...`}
+                  placeholder={`${t('news:addItem', 'Item')} ${idx + 1}...`}
                   value={item}
                   onChange={(e) => updateListItem(block.id, idx, e.target.value)}
                   sx={textFieldStyle}
@@ -407,7 +391,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                 }
               }}
             >
-              Add Item
+              {t('news:addItem', 'Add Item')}
             </Button>
           </Box>
         );
@@ -419,7 +403,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
               fullWidth
               multiline
               rows={2}
-              placeholder="Quote text..."
+              placeholder={t('news:quote', 'Quote text...')}
               value={block.text}
               onChange={(e) => updateBlock(block.id, { text: e.target.value })}
               sx={{ ...textFieldStyle, mb: 1 }}
@@ -427,7 +411,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
             <TextField
               fullWidth
               size="small"
-              placeholder="Author (optional)..."
+              placeholder={t('news:quote', 'Author (optional)...')}
               value={block.author || ''}
               onChange={(e) => updateBlock(block.id, { author: e.target.value })}
               sx={textFieldStyle}
@@ -454,7 +438,6 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
         }
       }}
     >
-      {/* ✅ DIALOG TITLE - Brandbook */}
       <DialogTitle sx={{ borderBottom: '1px solid #e0e0e0' }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box display="flex" alignItems="center" gap={2}>
@@ -481,7 +464,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                {newsData ? 'Edit News Article' : 'Create News Article'}
+                {newsData ? t('news:editNewsArticle') : t('news:createNewsArticle')}
               </Typography>
               <Typography 
                 variant="caption" 
@@ -490,7 +473,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                Build your article with content blocks
+                {t('news:buildArticleBlocks')}
               </Typography>
             </Box>
           </Box>
@@ -509,12 +492,9 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
         </Box>
       </DialogTitle>
 
-      {/* ✅ CONTENT */}
       <DialogContent sx={{ pt: 3 }}>
         <Grid container spacing={3}>
-          {/* LEFT COLUMN - Basic Info */}
           <Grid item xs={12} md={8}>
-            {/* HERO IMAGE */}
             <Box mb={3}>
               <Typography 
                 variant="body2" 
@@ -525,7 +505,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                Hero Image *
+                {t('news:heroImage')} *
               </Typography>
               <Button
                 variant="outlined"
@@ -549,7 +529,11 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                   }
                 }}
               >
-                {uploadingHeroImage ? 'Uploading...' : (formData.heroImage ? 'Change Hero Image' : 'Upload Hero Image')}
+                {uploadingHeroImage
+                  ? t('news:uploading')
+                  : (formData.heroImage
+                    ? t('news:changeHeroImage')
+                    : t('news:uploadHeroImage'))}
                 <input
                   type="file"
                   hidden
@@ -592,11 +576,10 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
               )}
             </Box>
 
-            {/* TITLE */}
             <TextField
               fullWidth
-              label="Article Title"
-              placeholder="e.g., Club House Construction Begins"
+              label={t('news:articleTitle')}
+              placeholder={t('news:articleTitlePlaceholder')}
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
@@ -629,17 +612,16 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
               }}
             />
 
-            {/* DESCRIPTION */}
             <TextField
               fullWidth
-              label="Short Description"
-              placeholder="Brief summary for preview (max 200 characters)..."
+              label={t('news:shortDescription')}
+              placeholder={t('news:shortDescriptionPlaceholder')}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               multiline
               rows={2}
               inputProps={{ maxLength: 200 }}
-              helperText={`${formData.description.length}/200 characters`}
+              helperText={`${formData.description.length}/200 ${t('news:characters')}`}
               sx={{
                 mb: 3,
                 '& .MuiOutlinedInput-root': {
@@ -674,7 +656,6 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
 
             <Divider sx={{ my: 3 }} />
 
-            {/* CONTENT BLOCKS */}
             <Box>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography 
@@ -685,7 +666,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  Article Content
+                  {t('news:articleContent')}
                 </Typography>
                 <Typography 
                   variant="caption" 
@@ -694,11 +675,10 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  {contentBlocks.length} blocks
+                  {contentBlocks.length} {t('news:blocks')}
                 </Typography>
               </Box>
 
-              {/* BLOCK TOOLBAR */}
               <Box
                 display="flex"
                 gap={1}
@@ -726,7 +706,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                     }
                   }}
                 >
-                  Heading
+                  {t('news:heading')}
                 </Button>
                 <Button
                   size="small"
@@ -743,7 +723,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                     }
                   }}
                 >
-                  Paragraph
+                  {t('news:paragraph')}
                 </Button>
                 <Button
                   size="small"
@@ -760,7 +740,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                     }
                   }}
                 >
-                  List
+                  {t('news:list')}
                 </Button>
                 <Button
                   size="small"
@@ -777,11 +757,10 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                     }
                   }}
                 >
-                  Quote
+                  {t('news:quote')}
                 </Button>
               </Box>
 
-              {/* DRAG & DROP CONTENT BLOCKS */}
               <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="contentBlocks">
                   {(provided, snapshot) => (
@@ -832,7 +811,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                                       <DragIndicator sx={{ color: '#706f6f', fontSize: 24 }} />
                                     </div>
                                     <Chip
-                                      label={block.type}
+                                      label={t(`news:${block.type}`, block.type)}
                                       size="small"
                                       sx={{
                                         bgcolor: 'rgba(140, 165, 81, 0.12)',
@@ -882,7 +861,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                               fontFamily: '"Poppins", sans-serif'
                             }}
                           >
-                            Click buttons above to add content blocks
+                            {t('news:addContentBlocks')}
                           </Typography>
                         </Box>
                       )}
@@ -893,7 +872,6 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
             </Box>
           </Grid>
 
-          {/* RIGHT COLUMN - Metadata */}
           <Grid item xs={12} md={4}>
             <Paper
               elevation={0}
@@ -915,14 +893,13 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                Article Settings
+                {t('news:articleSettings')}
               </Typography>
 
-              {/* CATEGORY */}
               <TextField
                 fullWidth
                 select
-                label="Category"
+                label={t('news:category')}
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 sx={{
@@ -954,17 +931,16 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                   }
                 }}
               >
-                <MenuItem value="announcement">📢 Announcement</MenuItem>
-                <MenuItem value="construction">🏗️ Construction</MenuItem>
-                <MenuItem value="report">📊 Report</MenuItem>
-                <MenuItem value="event">🎉 Event</MenuItem>
+                <MenuItem value="announcement">📢 {t('news:announcement')}</MenuItem>
+                <MenuItem value="construction">🏗️ {t('news:construction')}</MenuItem>
+                <MenuItem value="report">📊 {t('news:report')}</MenuItem>
+                <MenuItem value="event">🎉 {t('news:event')}</MenuItem>
               </TextField>
 
-              {/* STATUS */}
               <TextField
                 fullWidth
                 select
-                label="Status"
+                label={t('news:status')}
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 sx={{
@@ -996,13 +972,12 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                   }
                 }}
               >
-                <MenuItem value="draft">📝 Draft</MenuItem>
-                <MenuItem value="published">✅ Published</MenuItem>
+                <MenuItem value="draft">📝 {t('news:draft')}</MenuItem>
+                <MenuItem value="published">✅ {t('news:published')}</MenuItem>
               </TextField>
 
               <Divider sx={{ my: 3 }} />
 
-              {/* TAGS */}
               <Box mb={3}>
                 <Typography 
                   variant="body2" 
@@ -1013,12 +988,12 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  Tags
+                  {t('news:tags')}
                 </Typography>
                 <Box display="flex" gap={1} mb={1}>
                   <TextField
                     size="small"
-                    placeholder="Add tag..."
+                    placeholder={t('news:addTag')}
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && addTag()}
@@ -1059,7 +1034,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                       }
                     }}
                   >
-                    Add
+                    {t('news:addTag')}
                   </Button>
                 </Box>
                 <Box display="flex" gap={1} flexWrap="wrap">
@@ -1083,7 +1058,6 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
 
               <Divider sx={{ my: 3 }} />
 
-              {/* ADDITIONAL IMAGES */}
               <Box mb={3}>
                 <Typography 
                   variant="body2" 
@@ -1094,7 +1068,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  Gallery Images
+                  {t('news:galleryImages')}
                 </Typography>
                 <Button
                   variant="outlined"
@@ -1118,7 +1092,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                     }
                   }}
                 >
-                  {uploadingImages ? 'Uploading...' : 'Upload Images'}
+                  {uploadingImages ? t('news:uploading') : t('news:uploadImages')}
                   <input
                     type="file"
                     hidden
@@ -1162,7 +1136,6 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                 )}
               </Box>
 
-              {/* VIDEOS */}
               <Box>
                 <Typography 
                   variant="body2" 
@@ -1173,7 +1146,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  Videos
+                  {t('news:videos')}
                 </Typography>
                 <Button
                   variant="outlined"
@@ -1197,7 +1170,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                     }
                   }}
                 >
-                  {uploadingVideos ? 'Uploading...' : 'Upload Videos'}
+                  {uploadingVideos ? t('news:uploading') : t('news:uploadVideos')}
                   <input
                     type="file"
                     hidden
@@ -1212,7 +1185,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
                     {videos.map((video, idx) => (
                       <Chip
                         key={idx}
-                        label={`Video ${idx + 1}`}
+                        label={`${t('news:video')} ${idx + 1}`}
                         icon={<VideoLibrary />}
                         onDelete={() => handleDeleteVideo(idx)}
                         size="small"
@@ -1235,7 +1208,6 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
         </Grid>
       </DialogContent>
 
-      {/* ✅ ACTIONS - Brandbook */}
       <DialogActions sx={{ p: 3, borderTop: '1px solid #e0e0e0', gap: 2 }}>
         <Button
           onClick={handleClose}
@@ -1254,7 +1226,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
             }
           }}
         >
-          Cancel
+          {t('news:cancel')}
         </Button>
 
         <Button
@@ -1305,7 +1277,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
           }}
         >
           <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-            {newsData ? 'Update Article' : 'Publish Article'}
+            {newsData ? t('news:updateArticle') : t('news:publishArticle')}
           </Box>
         </Button>
       </DialogActions>

@@ -17,7 +17,11 @@ const DEFAULT_INTERIOR_KEYS = [
   'Laundry',
   'Counter',
   'Catering',
-  'Mural'
+  'Mural',
+  'Lakeside',
+  'Machines',
+  'Counter Hallway',
+  'Bathroom Hallway'
 ]
 
 function defaultInterior () {
@@ -29,11 +33,13 @@ function defaultInterior () {
 /**
  * Cada imagen puede ser pública (visible sin token) o solo con token.
  * isPublic: true = se puede mostrar sin token; false = requiere autenticación.
+ * name: opcional, nombre custom para mostrar/gestionar en UI.
  */
 const clubHouseImageSchema = new mongoose.Schema(
   {
     url: { type: String, required: true },
-    isPublic: { type: Boolean, default: true }
+    isPublic: { type: Boolean, default: true },
+    name: { type: String, default: null }
   },
   { _id: false }
 )
@@ -51,6 +57,10 @@ const clubHouseSchema = new mongoose.Schema(
     interior: {
       type: mongoose.Schema.Types.Mixed,
       default: defaultInterior
+    },
+    deck: {
+      type: [clubHouseImageSchema],
+      default: () => []
     },
     /** Visibilidad por archivo en carpeta recorrido: { "recorrido.1.jpg": true, "recorrido.2.jpg": false } */
     recorridoVisibility: {

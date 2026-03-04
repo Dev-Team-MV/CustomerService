@@ -6,7 +6,8 @@
   "tabs": {
     "exterior": "Exterior",
     "plans": "Plans",
-    "interior": "Interior"
+    "interior": "Interior",
+    "deck": "Deck"
   },
   "noImagesUploaded": "No images uploaded",
   "noPlansUploaded": "No plans uploaded",

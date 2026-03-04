@@ -3,6 +3,11 @@ import deckOptionSchema from './Deck.js'
 
 const facadeSchema = new mongoose.Schema(
   {
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
+      required: [true, 'Project is required']
+    },
     model: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Model',
@@ -34,6 +39,9 @@ const facadeSchema = new mongoose.Schema(
     timestamps: true
   }
 )
+
+facadeSchema.index({ project: 1 })
+facadeSchema.index({ model: 1 })
 
 const Facade = mongoose.model('Facade', facadeSchema)
 

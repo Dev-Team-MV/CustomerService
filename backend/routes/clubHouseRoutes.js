@@ -1,5 +1,5 @@
 import express from 'express'
-import { getClubHouse, uploadClubHouseImages, getClubHouseInteriorKeys, updateClubHouseImageVisibility } from '../controllers/clubHouseController.js'
+import { getClubHouse, getClubHousePublic, uploadClubHouseImages, getClubHouseInteriorKeys, updateClubHouseImageVisibility, deleteClubHouseImages } from '../controllers/clubHouseController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 import { upload } from '../controllers/uploadController.js'
 
@@ -9,19 +9,54 @@ const router = express.Router()
  * @swagger
  * /api/clubhouse:
  *   get:
- *     summary: Get Club House content (exterior, blueprints, interior images)
+ *     summary: Get Club House content (exterior, blueprints, deck, interior images)
  *     tags: [ClubHouse]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Club House document with exterior[], blueprints[], interior{ amenityName: [urls] }
+ *         description: Club House document with exterior[], blueprints[], deck[], interior{ amenityName: [urls] }
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ClubHouse'
  */
 router.get('/', protect, getClubHouse)
+
+/**
+ * @swagger
+ * /api/clubhouse/public:
+ *   get:
+ *     summary: Get Club House (public)
+ *     description: Returns clubhouse content with only public images (isPublic true). No authentication required.
+ *     tags: [ClubHouse]
+ *     responses:
+ *       200:
+ *         description: Club house with exterior[], blueprints[], deck[], interior{} and optional recorridoVisibility (only public images included)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 exterior:
+ *                   type: array
+ *                   items: { type: object, properties: { url: { type: string }, isPublic: { type: boolean } } }
+ *                 blueprints:
+ *                   type: array
+ *                   items: { type: object, properties: { url: { type: string }, isPublic: { type: boolean } } }
+ *                 deck:
+ *                   type: array
+ *                   items: { type: object, properties: { url: { type: string }, isPublic: { type: boolean } } }
+ *                 interior:
+ *                   type: object
+ *                   additionalProperties:
+ *                     type: array
+ *                     items: { type: object, properties: { url: { type: string }, isPublic: { type: boolean } } }
+ *                 recorridoVisibility:
+ *                   type: object
+ *                   description: Optional. Map of filename -> boolean for recorrido folder images.
+ */
+router.get('/public', getClubHousePublic)
 
 /**
  * @swagger
@@ -55,7 +90,7 @@ router.get('/interior-keys', protect, getClubHouseInteriorKeys)
  *             properties:
  *               section:
  *                 type: string
- *                 enum: [exterior, blueprints, interior]
+ *                 enum: [exterior, blueprints, deck, interior]
  *               interiorKey:
  *                 type: string
  *                 description: Required when section=interior. Use one of GET /api/clubhouse/interior-keys (e.g. Reception, Managers Office, Conference Room)
@@ -98,7 +133,7 @@ router.post('/images', protect, admin, upload.array('images', 20), uploadClubHou
  *             properties:
  *               section:
  *                 type: string
- *                 enum: [exterior, blueprints, interior]
+ *                 enum: [exterior, blueprints, deck, interior]
  *               interiorKey:
  *                 type: string
  *                 description: Required when section=interior
@@ -118,5 +153,39 @@ router.post('/images', protect, admin, upload.array('images', 20), uploadClubHou
  *         description: No image at index
  */
 router.patch('/images/visibility', protect, admin, updateClubHouseImageVisibility)
+
+/**
+ * @swagger
+ * /api/clubhouse/images:
+ *   delete:
+ *     summary: Delete Club House images by filename and/or custom name (Admin only)
+ *     tags: [ClubHouse]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               filenames:
+ *                 type: array
+ *                 items: { type: string }
+ *                 description: File names (e.g. "abc123.jpg") — last segment of image URL. Images with matching url are removed.
+ *               names:
+ *                 type: array
+ *                 items: { type: string }
+ *                 description: Custom names (item.name). Images with matching name are removed.
+ *               deleteFromStorage:
+ *                 type: boolean
+ *                 default: false
+ *                 description: If true, also deletes the file from GCS (clubhouse folder).
+ *     responses:
+ *       200:
+ *         description: Images removed from document (and optionally from GCS). Returns removedCount, removedFilenames, clubHouse.
+ *       400:
+ *         description: Missing both filenames and names
+ */
+router.delete('/images', protect, admin, deleteClubHouseImages)
 
 export default router
