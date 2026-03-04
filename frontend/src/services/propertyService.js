@@ -94,7 +94,11 @@ export const propertyService = {
 
     // Create property (quote/reservation)
     createProperty: async (propertyData) => {
-        const response = await api.post('/properties', propertyData)
+        const response = await api.post('/properties', {
+            ...propertyData,
+            project: propertyData.projectId || propertyData.project || undefined,
+            projectId: propertyData.projectId || undefined,
+        })
         return response.data
     },
 

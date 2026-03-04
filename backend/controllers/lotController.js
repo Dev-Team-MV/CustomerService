@@ -2,12 +2,16 @@ import Lot from '../models/Lot.js'
 
 export const getAllLots = async (req, res) => {
   try {
-    const { status } = req.query
+    const { status, projectId } = req.query
     const filter = {}
-    
+
+    if (projectId) filter.project = projectId
     if (status) filter.status = status
-    
-    const lots = await Lot.find(filter).populate('assignedUser', 'firstName lastName email').sort({ number: 1 })
+
+    const lots = await Lot.find(filter)
+      .populate('project', 'name slug')
+      .populate('assignedUser', 'firstName lastName email')
+      .sort({ number: 1 })
     res.json(lots)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -16,8 +20,10 @@ export const getAllLots = async (req, res) => {
 
 export const getLotById = async (req, res) => {
   try {
-    const lot = await Lot.findById(req.params.id).populate('assignedUser', 'firstName lastName email')
-    
+    const lot = await Lot.findById(req.params.id)
+      .populate('project', 'name slug')
+      .populate('assignedUser', 'firstName lastName email')
+
     if (lot) {
       res.json(lot)
     } else {
@@ -30,19 +36,24 @@ export const getLotById = async (req, res) => {
 
 export const createLot = async (req, res) => {
   try {
-    const { number, price, status } = req.body
-    
-    const lotExists = await Lot.findOne({ number })
-    if (lotExists) {
-      return res.status(400).json({ message: 'Lot number already exists' })
+    const { projectId, project, number, price, status } = req.body
+    const projId = projectId || project
+    if (!projId) {
+      return res.status(400).json({ message: 'projectId (or project) is required' })
     }
-    
+
+    const lotExists = await Lot.findOne({ project: projId, number })
+    if (lotExists) {
+      return res.status(400).json({ message: 'Lot number already exists in this project' })
+    }
+
     const lot = await Lot.create({
+      project: projId,
       number,
       price,
       status: status || 'available'
     })
-    
+
     res.status(201).json(lot)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -86,11 +97,15 @@ export const deleteLot = async (req, res) => {
 
 export const getLotStats = async (req, res) => {
   try {
-    const totalLots = await Lot.countDocuments()
-    const availableLots = await Lot.countDocuments({ status: 'available' })
-    const pendingLots = await Lot.countDocuments({ status: 'pending' })
-    const soldLots = await Lot.countDocuments({ status: 'sold' })
-    
+    const { projectId } = req.query
+    const filter = {}
+    if (projectId) filter.project = projectId
+
+    const totalLots = await Lot.countDocuments(filter)
+    const availableLots = await Lot.countDocuments({ ...filter, status: 'available' })
+    const pendingLots = await Lot.countDocuments({ ...filter, status: 'pending' })
+    const soldLots = await Lot.countDocuments({ ...filter, status: 'sold' })
+
     res.json({
       total: totalLots,
       available: availableLots,

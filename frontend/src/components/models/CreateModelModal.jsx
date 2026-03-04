@@ -36,7 +36,9 @@ import {
 } from '@mui/icons-material';
 import uploadService from '../../services/uploadService';
 import { useTranslation } from 'react-i18next';
-
+import { Switch as MuiSwitch } from '@mui/material'
+import ModelImageGrid from './ModelImageGrid';
+import projectService from '../../services/projectService';
 
 const CreateModelModal = ({ 
   open, 
@@ -46,6 +48,9 @@ const CreateModelModal = ({
 }) => {
     const { t } = useTranslation(['models', 'common']);
 
+
+  const [projects, setProjects] = useState([])
+  const [loadingProjects, setLoadingProjects] = useState(false)
 
   const [formData, setFormData] = useState({
     model: "",
@@ -57,6 +62,8 @@ const CreateModelModal = ({
     stories: 1,
     description: "",
     status: "active",
+    project: "",  // ✅ Agregar project
+    projectId: "",  // ✅ Agregar projectId
     images: { exterior: [], interior: [], blueprints: [] },
     hasBalcony: false,
     balconyPrice: 0,
@@ -80,6 +87,32 @@ const CreateModelModal = ({
     storage: false,
   });
 
+
+  // ✅ Cargar proyectos al abrir
+  useEffect(() => {
+    if (open) fetchProjects()
+  }, [open])
+
+  const fetchProjects = async () => {
+    try {
+      setLoadingProjects(true)
+      const data = await projectService.getAll()
+      setProjects(data)
+      // Auto-seleccionar si solo hay uno
+      if (data.length === 1) {
+        setFormData(prev => ({
+          ...prev,
+          project: data[0]._id,
+          projectId: data[0]._id,
+        }))
+      }
+    } catch (error) {
+      console.error('Error fetching projects:', error)
+    } finally {
+      setLoadingProjects(false)
+    }
+  }
+
   // ✅ Cargar datos del modelo seleccionado
   useEffect(() => {
     if (selectedModel) {
@@ -101,6 +134,11 @@ const CreateModelModal = ({
       const withBalconyBlueprints = Array.isArray(blueprintsObj.withBalcony) ? blueprintsObj.withBalcony : [];
       const withStorageBlueprints = Array.isArray(blueprintsObj.withStorage) ? blueprintsObj.withStorage : [];
 
+      // ✅ Extraer projectId del modelo
+      const projectId = typeof selectedModel.project === 'object'
+        ? selectedModel.project?._id
+        : selectedModel.project || selectedModel.projectId || ''
+
       setFormData({
         model: selectedModel.model,
         modelNumber: selectedModel.modelNumber || "",
@@ -111,6 +149,8 @@ const CreateModelModal = ({
         stories: selectedModel.stories || 1,
         description: selectedModel.description || "",
         status: selectedModel.status,
+        project: projectId,  // ✅
+        projectId: projectId,  // ✅
         images: {
           ...normalizeImages(selectedModel.images),
           blueprints: defaultBlueprints,
@@ -156,6 +196,8 @@ const CreateModelModal = ({
         stories: 1,
         description: "",
         status: "active",
+        project: "",
+        projectId: "",
         images: { exterior: [], interior: [], blueprints: [] },
         hasBalcony: false,
         balconyPrice: 0,
@@ -188,9 +230,12 @@ const CreateModelModal = ({
     onClose();
   };
 
-  const handleSubmit = () => {
+ const handleSubmit = () => {
+    if (!formData.project) {
+      alert("Please select a project");
+      return;
+    }
     onSubmit(formData);
-    handleClose();
   };
 
   const handleRemoveImage = (section, type, index) => {
@@ -236,7 +281,7 @@ const CreateModelModal = ({
     }));
   };
 
-  const handleFileImageUpload = async (e) => {
+    const handleFileImageUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
     setUploadingImage(true);
@@ -244,13 +289,16 @@ const CreateModelModal = ({
       const urls = [];
       for (const file of files) {
         const url = await uploadService.uploadModelImage(file);
-        urls.push(url);
+        // build object with isPublic default false and try to extract filename
+        const lastSegment = String(url).split('/').pop() || url;
+        const filename = decodeURIComponent(String(lastSegment).split('?')[0]);
+        urls.push({ url, isPublic: false, filename });
       }
       const section = currentImageSection;
       const type = currentImageType;
       const imagesData =
         type === "interior" && currentRoomType !== "general"
-          ? urls.map((url) => ({ url, roomType: currentRoomType }))
+          ? urls.map(u => ({ ...u, roomType: currentRoomType }))
           : urls;
 
       if (section === "base") {
@@ -294,6 +342,38 @@ const CreateModelModal = ({
     }
   };
 
+  // NEW: toggle handler to change isPublic for a given image (optimistic + persist)
+  const handleToggleImageIsPublic = async (section, type, index, checked) => {
+    // keep prev to revert if needed
+    const prev = JSON.parse(JSON.stringify(formData));
+    const keyMap = {
+      base: 'images',
+      balcony: 'balconyImages',
+      upgrade: 'upgradeImages',
+      storage: 'storageImages'
+    };
+    const rootKey = keyMap[section] || 'images';
+
+    setFormData(fd => {
+      const arr = Array.isArray(fd[rootKey][type]) ? [...fd[rootKey][type]] : [];
+      const item = arr[index];
+      arr[index] = (typeof item === 'string') ? { url: item, isPublic: !!checked } : { ...item, isPublic: !!checked };
+      return { ...fd, [rootKey]: { ...fd[rootKey], [type]: arr } };
+    });
+
+    // try persist using uploadService.updateFileVisibility if available
+    try {
+      const item = formData[rootKey][type][index];
+      const filename = item?.filename || (typeof item === 'string' ? String(item).split('/').pop().split('?')[0] : item?.url?.split('/').pop()?.split('?')[0]);
+      if (uploadService.updateFileVisibility && filename) {
+        await uploadService.updateFileVisibility({ filename, isPublic: !!checked });
+      }
+    } catch (err) {
+      console.error('Failed to persist isPublic change, reverting', err);
+      setFormData(prev);
+    }
+  };
+
   const groupImagesByRoomType = (images) => {
     const grouped = {
       general: [],
@@ -311,12 +391,14 @@ const CreateModelModal = ({
       closet: [],
     };
 
-    images.forEach((img, originalIndex) => {
+    (images || []).forEach((img, originalIndex) => {
+      if (!img) return;
       if (typeof img === "string") {
-        grouped.general.push({ url: img, originalIndex });
+        grouped.general.push({ url: img, originalIndex, isPublic: false, raw: img });
       } else if (img && typeof img === "object" && img.url) {
         const roomType = img.roomType || "general";
-        grouped[roomType].push({ url: img.url, originalIndex, roomType });
+        grouped[roomType] = grouped[roomType] || [];
+        grouped[roomType].push({ url: img.url, originalIndex, roomType, isPublic: !!img.isPublic, raw: img });
       }
     });
 
@@ -371,161 +453,6 @@ const CreateModelModal = ({
     return price + (hasBalcony ? balconyPrice : 0) + (hasUpgrade ? upgradePrice : 0) + (hasStorage ? storagePrice : 0);
   };
 
-  // ✅ Render helper para imágenes (evita duplicación de código)
-  const renderImageGrid = (images, section, type) => {
-    if (type === "interior" && images.length > 0) {
-      // Agrupar por tipo de habitación
-      return (
-        <Stack spacing={1.5}>
-          {Object.entries(groupImagesByRoomType(images))
-            .filter(([_, roomImages]) => roomImages.length > 0)
-            .map(([roomType, roomImages]) => (
-              <Box key={roomType}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    mb: 0.5,
-                    pb: 0.5,
-                    borderBottom: "1px solid #e0e0e0",
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    fontWeight="600"
-                    color="text.secondary"
-                    sx={{
-                      textTransform: "uppercase",
-                      letterSpacing: 0.5,
-                      fontSize: "0.7rem",
-                    }}
-                  >
-                    {getRoomTypeName(roomType)} ({roomImages.length})
-                  </Typography>
-                </Box>
-                <Grid container spacing={1}>
-                  {roomImages.map(({ url, originalIndex }) => (
-                    <Grid item xs={6} key={originalIndex}>
-                      <Box
-                        sx={{
-                          position: "relative",
-                          pt: "75%",
-                          borderRadius: 1,
-                          overflow: "hidden",
-                          border: "1px solid #e0e0e0",
-                        }}
-                      >
-                        <Box
-                          component="img"
-                          src={url}
-                          alt={`${type} ${originalIndex + 1}`}
-                          sx={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
-                        <IconButton
-                          size="small"
-                          onClick={() => handleRemoveImage(section, type, originalIndex)}
-                          sx={{
-                            position: "absolute",
-                            top: 4,
-                            right: 4,
-                            bgcolor: "rgba(255,255,255,0.9)",
-                            width: 24,
-                            height: 24,
-                            "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-                          }}
-                        >
-                          <Close fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Box>
-            ))}
-        </Stack>
-      );
-    }
-
-    // Exterior o Blueprints
-    if (images.length > 0) {
-      return (
-        <Grid container spacing={1}>
-          {images.map((url, index) => (
-            <Grid item xs={6} key={index}>
-              <Box
-                sx={{
-                  position: "relative",
-                  pt: "75%",
-                  borderRadius: 1,
-                  overflow: "hidden",
-                  border: "1px solid #e0e0e0",
-                }}
-              >
-                <Box
-                  component="img"
-                  src={url}
-                  alt={`${type} ${index + 1}`}
-                  sx={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-                <IconButton
-                  size="small"
-                  onClick={() => handleRemoveImage(section, type, index)}
-                  sx={{
-                    position: "absolute",
-                    top: 4,
-                    right: 4,
-                    bgcolor: "rgba(255,255,255,0.9)",
-                    width: 24,
-                    height: 24,
-                    "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-                  }}
-                >
-                  <Close fontSize="small" />
-                </IconButton>
-                {type === "exterior" && index === 0 && (
-                  <Chip
-                    label="Primary"
-                    size="small"
-                    color="primary"
-                    sx={{
-                      position: "absolute",
-                      bottom: 4,
-                      left: 4,
-                      height: 18,
-                      fontSize: "0.65rem",
-                    }}
-                  />
-                )}
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
-      );
-    }
-
-    // Sin imágenes
-    return (
-      <Paper sx={{ p: 1.5, textAlign: "center", bgcolor: "grey.100" }}>
-        <Typography variant="caption" color="text.secondary">
-          No {type} images
-        </Typography>
-      </Paper>
-    );
-  };
 
   return (
     <Dialog
@@ -614,6 +541,52 @@ const CreateModelModal = ({
             }}
           >
             <Grid container spacing={{ xs: 1.5, md: 2.5 }}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  select
+                  label="Project *"
+                  value={formData.project}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    project: e.target.value,
+                    projectId: e.target.value,
+                  }))}
+                  disabled={loadingProjects}
+                  helperText="Select the project this model belongs to"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                      fontFamily: '"Poppins", sans-serif',
+                      bgcolor: 'white',
+                      "& fieldset": { borderColor: 'rgba(140, 165, 81, 0.3)', borderWidth: '2px' },
+                      "&:hover fieldset": { borderColor: "#8CA551" },
+                      "&.Mui-focused fieldset": { borderColor: "#333F1F", borderWidth: "2px" }
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontFamily: '"Poppins", sans-serif',
+                      "&.Mui-focused": { color: "#333F1F" }
+                    },
+                    "& .MuiFormHelperText-root": { fontFamily: '"Poppins", sans-serif' }
+                  }}
+                >
+                  {loadingProjects ? (
+                    <MenuItem disabled>Loading projects...</MenuItem>
+                  ) : projects.length === 0 ? (
+                    <MenuItem disabled>No projects available</MenuItem>
+                  ) : (
+                    projects.map(project => (
+                      <MenuItem
+                        key={project._id}
+                        value={project._id}
+                        sx={{ fontFamily: '"Poppins", sans-serif', '&:hover': { bgcolor: 'rgba(140, 165, 81, 0.08)' } }}
+                      >
+                        {project.name} {project.slug ? `(${project.slug})` : ''}
+                      </MenuItem>
+                    ))
+                  )}
+                </TextField>
+              </Grid>
               {/* ✅ BASIC INFO SECTION */}
               <Grid item xs={12}>
                 <Box
@@ -1494,28 +1467,54 @@ const CreateModelModal = ({
                     />
                   </Box>
                 </AccordionSummary>
+
                 <AccordionDetails sx={{ p: { xs: 1, md: 2 } }}>
                   <Stack spacing={1.5}>
                     <Box>
                       <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                         Exterior ({formData.images.exterior.length})
                       </Typography>
-                      {renderImageGrid(formData.images.exterior, "base", "exterior")}
+                      <ModelImageGrid
+                        images={formData.images.exterior}
+                        section="base"
+                        type="exterior"
+                        groupImagesByRoomType={groupImagesByRoomType}
+                        getRoomTypeName={getRoomTypeName}
+                        handleRemoveImage={handleRemoveImage}
+                        handleToggleImageIsPublic={handleToggleImageIsPublic}
+                      />
                     </Box>
                     <Box>
                       <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                         Interior ({formData.images.interior.length})
                       </Typography>
-                      {renderImageGrid(formData.images.interior, "base", "interior")}
+                      <ModelImageGrid
+                        images={formData.images.interior}
+                        section="base"
+                        type="interior"
+                        groupImagesByRoomType={groupImagesByRoomType}
+                        getRoomTypeName={getRoomTypeName}
+                        handleRemoveImage={handleRemoveImage}
+                        handleToggleImageIsPublic={handleToggleImageIsPublic}
+                      />
                     </Box>
                     <Box>
                       <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                         Blueprints ({formData.images.blueprints.length})
                       </Typography>
-                      {renderImageGrid(formData.images.blueprints, "base", "blueprints")}
+                      <ModelImageGrid
+                        images={formData.images.blueprints}
+                        section="base"
+                        type="blueprints"
+                        groupImagesByRoomType={groupImagesByRoomType}
+                        getRoomTypeName={getRoomTypeName}
+                        handleRemoveImage={handleRemoveImage}
+                        handleToggleImageIsPublic={handleToggleImageIsPublic}
+                      />
                     </Box>
                   </Stack>
                 </AccordionDetails>
+
               </Accordion>
 
               {/* BALCONY ACCORDION */}
@@ -1548,25 +1547,49 @@ const CreateModelModal = ({
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Exterior ({formData.balconyImages.exterior.length})
                         </Typography>
-                        {renderImageGrid(formData.balconyImages.exterior, "balcony", "exterior")}
+                        <ModelImageGrid
+                          images={formData.balconyImages.exterior}
+                          section="balcony"
+                          type="exterior"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                       <Box>
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Interior ({formData.balconyImages.interior.length})
                         </Typography>
-                        {renderImageGrid(formData.balconyImages.interior, "balcony", "interior")}
+                        <ModelImageGrid
+                          images={formData.balconyImages.interior}
+                          section="balcony"
+                          type="interior"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                       <Box>
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Blueprints ({formData.balconyImages.blueprints.length})
                         </Typography>
-                        {renderImageGrid(formData.balconyImages.blueprints, "balcony", "blueprints")}
+                        <ModelImageGrid
+                          images={formData.balconyImages.blueprints}
+                          section="balcony"
+                          type="blueprints"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                     </Stack>
                   </AccordionDetails>
                 </Accordion>
               )}
-
+              
               {/* UPGRADE ACCORDION */}
               {formData.hasUpgrade && (
                 <Accordion
@@ -1597,25 +1620,49 @@ const CreateModelModal = ({
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Exterior ({formData.upgradeImages.exterior.length})
                         </Typography>
-                        {renderImageGrid(formData.upgradeImages.exterior, "upgrade", "exterior")}
+                        <ModelImageGrid
+                          images={formData.upgradeImages.exterior}
+                          section="upgrade"
+                          type="exterior"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                       <Box>
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Interior ({formData.upgradeImages.interior.length})
                         </Typography>
-                        {renderImageGrid(formData.upgradeImages.interior, "upgrade", "interior")}
+                        <ModelImageGrid
+                          images={formData.upgradeImages.interior}
+                          section="upgrade"
+                          type="interior"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                       <Box>
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Blueprints ({formData.upgradeImages.blueprints.length})
                         </Typography>
-                        {renderImageGrid(formData.upgradeImages.blueprints, "upgrade", "blueprints")}
+                        <ModelImageGrid
+                          images={formData.upgradeImages.blueprints}
+                          section="upgrade"
+                          type="blueprints"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                     </Stack>
                   </AccordionDetails>
                 </Accordion>
               )}
-
+              
               {/* STORAGE ACCORDION */}
               {formData.hasStorage && (
                 <Accordion
@@ -1646,19 +1693,43 @@ const CreateModelModal = ({
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Exterior ({formData.storageImages.exterior.length})
                         </Typography>
-                        {renderImageGrid(formData.storageImages.exterior, "storage", "exterior")}
+                        <ModelImageGrid
+                          images={formData.storageImages.exterior}
+                          section="storage"
+                          type="exterior"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                       <Box>
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Interior ({formData.storageImages.interior.length})
                         </Typography>
-                        {renderImageGrid(formData.storageImages.interior, "storage", "interior")}
+                        <ModelImageGrid
+                          images={formData.storageImages.interior}
+                          section="storage"
+                          type="interior"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                       <Box>
                         <Typography variant="caption" fontWeight="600" gutterBottom display="block">
                           Blueprints ({formData.storageImages.blueprints.length})
                         </Typography>
-                        {renderImageGrid(formData.storageImages.blueprints, "storage", "blueprints")}
+                        <ModelImageGrid
+                          images={formData.storageImages.blueprints}
+                          section="storage"
+                          type="blueprints"
+                          groupImagesByRoomType={groupImagesByRoomType}
+                          getRoomTypeName={getRoomTypeName}
+                          handleRemoveImage={handleRemoveImage}
+                          handleToggleImageIsPublic={handleToggleImageIsPublic}
+                        />
                       </Box>
                     </Stack>
                   </AccordionDetails>

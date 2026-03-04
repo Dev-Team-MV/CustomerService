@@ -51,6 +51,16 @@ const ExteriorAmenitiesTab = () => {
     fetchOutdoorAmenities()
   }, [])
 
+    useEffect(() => {
+    // Solo mapea si hay datos del backend
+    if (amenitiesData.length > 0) {
+      exteriorAmenities.forEach(point => {
+        const found = amenitiesData.find(a => a.name === point.name);
+        point.images = found?.images || [];
+      });
+    }
+  }, [amenitiesData]);
+
     const fetchOutdoorAmenities = async () => {
     try {
       const res = await uploadService.getOutdoorAmenities()
@@ -297,11 +307,15 @@ const ExteriorAmenitiesTab = () => {
       amenity={selectedAmenity}
       images={
         selectedAmenity
-          ? (amenitiesData.find(a => a.name === selectedAmenity.name)?.images || [])
+          ? (selectedAmenity.images || []).map(img =>
+              typeof img === 'string'
+                ? img
+                : img.url
+            )
           : []
       }
-      amenityIndex={selectedAmenity ? amenitiesData.findIndex(a => a.name === selectedAmenity.name) : -1}
-      amenities={amenitiesData} // <--- usa el array del backend, no el quemado
+      amenityIndex={selectedAmenity ? exteriorAmenities.findIndex(a => a.name === selectedAmenity.name) : -1}
+      amenities={exteriorAmenities}
       isPublicView={false}
     />
     </>

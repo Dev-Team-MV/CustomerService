@@ -3,7 +3,8 @@ import {
   getAllUsers,
   getUserById,
   updateUser,
-  deleteUser
+  deleteUser,
+  searchUsers
 } from '../controllers/userController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
@@ -28,6 +29,26 @@ const router = express.Router()
  *                 $ref: '#/components/schemas/User'
  */
 router.route('/').get(protect, admin, getAllUsers)
+
+/**
+ * @swagger
+ * /api/users/search:
+ *   get:
+ *     summary: Search users (for adding to family groups, etc.)
+ *     description: Any authenticated user. With q (min 2 chars) searches by email/name; without q returns up to 100 users for dropdowns.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema: { type: string }
+ *         description: Search term (optional; if provided, min 2 chars for search)
+ *     responses:
+ *       200:
+ *         description: Array of users { _id, firstName, lastName, email }
+ */
+router.get('/search', protect, searchUsers)
 
 /**
  * @swagger

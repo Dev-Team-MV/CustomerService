@@ -16,7 +16,9 @@
         "getYourQuote": "Obtén Tu Cotización",
         "exploreAmenities": "Explorar Amenidades",
         "clubhouseManager": "Administrar Clubhouse",
-        "timeline": "Línea de Tiempo"
+        "timeline": "Línea de Tiempo",
+        "configuration": "Configuración",
+        "familyGroup": "Grupo Familiar"    
     },
     "tooltips": {
         "openMenu": "Abrir menú",

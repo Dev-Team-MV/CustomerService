@@ -2,10 +2,14 @@ import mongoose from 'mongoose'
 
 const lotSchema = new mongoose.Schema(
   {
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
+      required: [true, 'Project is required']
+    },
     number: {
       type: String,
       required: [true, 'Lot number is required'],
-      unique: true,
       trim: true
     },
     price: {
@@ -27,6 +31,9 @@ const lotSchema = new mongoose.Schema(
     timestamps: true
   }
 )
+
+lotSchema.index({ project: 1, number: 1 }, { unique: true })
+lotSchema.index({ project: 1 })
 
 const Lot = mongoose.model('Lot', lotSchema)
 

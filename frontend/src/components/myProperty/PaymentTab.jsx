@@ -9,19 +9,7 @@ import {
   CardContent,
   Chip,
   CircularProgress,
-  Alert,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem
+  Alert
 } from '@mui/material'
 import {
   Payment,
@@ -31,7 +19,6 @@ import {
   TrendingUp,
   Description,
   Info,
-  CloudUpload,
   CheckCircleOutline,
   Pending,
   Cancel,
@@ -42,7 +29,7 @@ import api from '../../services/api'
 import uploadService from '../../services/uploadService'
 import UserCreatePayload from '../payloads/UserCreatePayload'
 import DataTable from '../table/DataTable'
-import EmptyState from '../table/EmptyState'
+import { useTranslation } from 'react-i18next'
 
 const PaymentTab = ({
   propertyDetails,
@@ -51,9 +38,12 @@ const PaymentTab = ({
   onPaymentUploaded,
   user
 }) => {
-      if (!propertyDetails) {
-    return <Box p={3}>Loading...</Box>
+  const { t } = useTranslation(['myProperty', 'common'])
+
+  if (!propertyDetails) {
+    return <Box p={3}>{t('myProperty:loading', 'Loading...')}</Box>
   }
+
   const [uploadPaymentDialog, setUploadPaymentDialog] = useState(false)
   const [uploadingPayment, setUploadingPayment] = useState(false)
   const [paymentForm, setPaymentForm] = useState({
@@ -110,178 +100,177 @@ const PaymentTab = ({
     setPaymentForm((prev) => ({ ...prev, [field]: value }))
   }
 
-const handleSubmitPayment = async () => {
-  if (!paymentForm.amount || !paymentForm.type) {
-    alert('Please fill in amount and payment type')
-    return
-  }
-
-  setUploadingPayment(true)
-  try {
-    let urls = []
-    // Solo usuarios normales pueden subir archivo
-    if (
-      user && user.role !== 'admin' &&
-      user.role !== 'superadmin' &&
-      paymentForm.support
-    ) {
-      const url = await uploadService.uploadPaymentImage(paymentForm.support)
-      urls = [url]
+  const handleSubmitPayment = async () => {
+    if (!paymentForm.amount || !paymentForm.type) {
+      alert(t('myProperty:pleaseFillAmountType', 'Please fill in amount and payment type'))
+      return
     }
 
-    await api.post('/payloads', {
-      property: propertyDetails.property?._id || propertyDetails._id,
-      amount: paymentForm.amount,
-      date: paymentForm.date,
-      type: paymentForm.type,
-      status: 'pending',
-      urls,
-      notes: paymentForm.notes
-    })
+    setUploadingPayment(true)
+    try {
+      let urls = []
+      if (
+        user && user.role !== 'admin' &&
+        user.role !== 'superadmin' &&
+        paymentForm.support
+      ) {
+        const url = await uploadService.uploadPaymentImage(paymentForm.support)
+        urls = [url]
+      }
 
-    handleCloseUploadPayment()
-    onPaymentUploaded && onPaymentUploaded()
-    alert('Payment submitted successfully!')
-  } catch (err) {
-    console.error('Error submitting payment:', err)
-    alert('Error submitting payment')
-  } finally {
-    setUploadingPayment(false)
+      await api.post('/payloads', {
+        property: propertyDetails.property?._id || propertyDetails._id,
+        amount: paymentForm.amount,
+        date: paymentForm.date,
+        type: paymentForm.type,
+        status: 'pending',
+        urls,
+        notes: paymentForm.notes
+      })
+
+      handleCloseUploadPayment()
+      onPaymentUploaded && onPaymentUploaded()
+      alert(t('myProperty:paymentSubmitted', 'Payment submitted successfully!'))
+    } catch (err) {
+      console.error('Error submitting payment:', err)
+      alert(t('myProperty:paymentError', 'Error submitting payment'))
+    } finally {
+      setUploadingPayment(false)
+    }
   }
-}
-const totalPaid = propertyDetails?.totalPaid ?? 0;
-const columns = [
-  {
-    field: 'date',
-    headerName: 'DATE',
-    minWidth: 120,
-    renderCell: ({ row }) => (
-      <Typography
-        variant="body2"
-        sx={{
-          fontWeight: 600,
-          fontFamily: '"Poppins", sans-serif',
-          color: '#333F1F'
-        }}
-      >
-        {new Date(row.date).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })}
-      </Typography>
-    )
-  },
-  {
-    field: 'amount',
-    headerName: 'AMOUNT',
-    minWidth: 100,
-    renderCell: ({ row }) => (
-      <Typography
-        variant="h6"
-        sx={{
-          color: "#8CA551",
-          fontWeight: 700,
-          fontFamily: '"Poppins", sans-serif',
-          fontSize: "1.1rem"
-        }}
-      >
-        ${row.amount.toLocaleString()}
-      </Typography>
-    )
-  },
-  {
-    field: 'type',
-    headerName: 'TYPE',
-    minWidth: 120,
-    renderCell: ({ row }) => (
-      <Chip
-        label={row.type || "N/A"}
-        size="small"
-        sx={{
-          bgcolor: "rgba(140, 165, 81, 0.08)",
-          color: "#333F1F",
-          fontWeight: 600,
-          textTransform: "capitalize",
-          fontSize: "0.75rem",
-          fontFamily: '"Poppins", sans-serif',
-          border: '1px solid rgba(140, 165, 81, 0.2)'
-        }}
-      />
-    )
-  },
-  {
-    field: 'status',
-    headerName: 'STATUS',
-    minWidth: 100,
-    renderCell: ({ row }) => (
-      <Chip
-        icon={getStatusIcon(row.status)}
-        label={row.status?.toUpperCase()}
-        color={getStatusColor(row.status)}
-        sx={{
-          fontWeight: 700,
-          fontFamily: '"Poppins", sans-serif',
-          fontSize: "0.7rem"
-        }}
-      />
-    )
-  },
-  {
-    field: 'urls',
-    headerName: 'SUPPORT',
-    minWidth: 120,
-    renderCell: ({ row }) =>
-      row.urls && row.urls.length > 0 ? (
-        <Button
-          size="small"
-          variant="outlined"
-          href={row.urls[0]}
-          target="_blank"
-          rel="noopener noreferrer"
-          startIcon={<Description />}
+
+  const columns = [
+    {
+      field: 'date',
+      headerName: t('myProperty:date', 'Date'),
+      minWidth: 120,
+      renderCell: ({ row }) => (
+        <Typography
+          variant="body2"
           sx={{
-            borderRadius: 2,
-            textTransform: "none",
             fontWeight: 600,
             fontFamily: '"Poppins", sans-serif',
-            borderColor: '#e0e0e0',
-            color: '#706f6f',
-            '&:hover': {
-              borderColor: '#333F1F',
-              bgcolor: 'rgba(51, 63, 31, 0.05)'
-            }
+            color: '#333F1F'
           }}
         >
-          View Receipt
-        </Button>
-      ) : (
-        <Typography
-          variant="caption"
-          sx={{ color: "#999", fontFamily: '"Poppins", sans-serif' }}
-        >
-          No document
+          {new Date(row.date).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })}
         </Typography>
       )
-  },
-  {
-    field: 'notes',
-    headerName: 'NOTES',
-    minWidth: 120,
-    renderCell: ({ row }) => (
-      <Typography
-        variant="body2"
-        sx={{
-          color: "#706f6f",
-          fontFamily: '"Poppins", sans-serif',
-          fontSize: "0.85rem"
-        }}
-      >
-        {row.notes || "No notes"}
-      </Typography>
-    )
-  }
-]
+    },
+    {
+      field: 'amount',
+      headerName: t('myProperty:amount', 'Amount'),
+      minWidth: 100,
+      renderCell: ({ row }) => (
+        <Typography
+          variant="h6"
+          sx={{
+            color: "#8CA551",
+            fontWeight: 700,
+            fontFamily: '"Poppins", sans-serif',
+            fontSize: "1.1rem"
+          }}
+        >
+          ${row.amount.toLocaleString()}
+        </Typography>
+      )
+    },
+    {
+      field: 'type',
+      headerName: t('myProperty:type', 'Type'),
+      minWidth: 120,
+      renderCell: ({ row }) => (
+        <Chip
+          label={row.type || t('myProperty:modelNA', 'N/A')}
+          size="small"
+          sx={{
+            bgcolor: "rgba(140, 165, 81, 0.08)",
+            color: "#333F1F",
+            fontWeight: 600,
+            textTransform: "capitalize",
+            fontSize: "0.75rem",
+            fontFamily: '"Poppins", sans-serif',
+            border: '1px solid rgba(140, 165, 81, 0.2)'
+          }}
+        />
+      )
+    },
+    {
+      field: 'status',
+      headerName: t('myProperty:status', 'Status'),
+      minWidth: 100,
+      renderCell: ({ row }) => (
+<Chip
+  icon={getStatusIcon(row.status)}
+  label={t(`myProperty:status${row.status.charAt(0).toUpperCase() + row.status.slice(1)}`, row.status)}
+  color={getStatusColor(row.status)}
+  sx={{
+    fontWeight: 700,
+    fontFamily: '"Poppins", sans-serif',
+    fontSize: "0.7rem"
+  }}
+/>
+      )
+    },
+    {
+      field: 'urls',
+      headerName: t('myProperty:support', 'Support'),
+      minWidth: 120,
+      renderCell: ({ row }) =>
+        row.urls && row.urls.length > 0 ? (
+          <Button
+            size="small"
+            variant="outlined"
+            href={row.urls[0]}
+            target="_blank"
+            rel="noopener noreferrer"
+            startIcon={<Description />}
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 600,
+              fontFamily: '"Poppins", sans-serif',
+              borderColor: '#e0e0e0',
+              color: '#706f6f',
+              '&:hover': {
+                borderColor: '#333F1F',
+                bgcolor: 'rgba(51, 63, 31, 0.05)'
+              }
+            }}
+          >
+            {t('myProperty:viewReceipt', 'View Receipt')}
+          </Button>
+        ) : (
+          <Typography
+            variant="caption"
+            sx={{ color: "#999", fontFamily: '"Poppins", sans-serif' }}
+          >
+            {t('myProperty:noDocument', 'No document')}
+          </Typography>
+        )
+    },
+    {
+      field: 'notes',
+      headerName: t('myProperty:notes', 'Notes'),
+      minWidth: 120,
+      renderCell: ({ row }) => (
+        <Typography
+          variant="body2"
+          sx={{
+            color: "#706f6f",
+            fontFamily: '"Poppins", sans-serif',
+            fontSize: "0.85rem"
+          }}
+        >
+          {row.notes || t('myProperty:noNotes', 'No notes')}
+        </Typography>
+      )
+    }
+  ]
 
   return (
     <>
@@ -335,7 +324,7 @@ const columns = [
                   letterSpacing: '0.5px'
                 }}
               >
-                Payment Status
+                {t('myProperty:paymentTab', 'Payment Status')}
               </Typography>
               <Typography
                 variant="body2"
@@ -346,7 +335,7 @@ const columns = [
                   display: { xs: "none", sm: "block" },
                 }}
               >
-                Manage and track your payment history
+                {t('myProperty:managePayments', 'Manage and track your payment history')}
               </Typography>
             </Box>
           </Box>
@@ -405,7 +394,7 @@ const columns = [
                 },
               }}
             >
-              <span className="button-text">Upload Payment</span>
+              <span className="button-text">{t('myProperty:uploadPayment', 'Upload Payment')}</span>
             </Button>
           </motion.div>
         </Box>
@@ -414,19 +403,19 @@ const columns = [
         <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }} sx={{ mb: { xs: 3, md: 4 } }}>
           {[
             {
-              label: "Total Paid",
+              label: t('myProperty:totalPaid', 'Total Paid'),
               value: `$${propertyDetails.payment.totalPaid.toLocaleString()}`,
               color: "#8CA551",
               icon: <CheckCircle />,
             },
             {
-              label: "Pending Amount",
+              label: t('myProperty:pendingAmount', 'Pending Amount'),
               value: `$${propertyDetails.payment.totalPending.toLocaleString()}`,
               color: "#E5863C",
               icon: <Schedule />,
             },
             {
-              label: "Payment Progress",
+              label: t('myProperty:paymentProgress', 'Payment Progress'),
               value: `${Math.round(propertyDetails.payment.progress)}%`,
               color: "#333F1F",
               icon: <TrendingUp />,
@@ -539,7 +528,7 @@ const columns = [
                   letterSpacing: '0.5px'
                 }}
               >
-                Payment History
+                {t('myProperty:paymentHistory', 'Payment History')}
               </Typography>
               <Typography
                 variant="caption"
@@ -549,46 +538,46 @@ const columns = [
                   fontSize: { xs: "0.7rem", sm: "0.75rem" }
                 }}
               >
-                {payloads.length} transaction{payloads.length !== 1 ? "s" : ""}
+                {t('myProperty:transactions', { count: payloads.length })}
+                {payloads.length !== 1 ? t('myProperty:transactions_plural', { count: payloads.length }) : ""}
               </Typography>
             </Box>
           </Box>
 
-        <DataTable
-          columns={columns}
-          data={payloads}
-          loading={loadingPayloads}
-          emptyState={
-            <Alert
-              severity="info"
-              icon={<Info />}
-              sx={{
-                borderRadius: 3,
-                bgcolor: "rgba(140, 165, 81, 0.08)",
-                border: "1px solid rgba(140, 165, 81, 0.3)",
-                fontSize: { xs: "0.85rem", md: "1rem" },
-                fontFamily: '"Poppins", sans-serif',
-                "& .MuiAlert-icon": { color: "#8CA551" }
-              }}
-            >
-              No payment transactions yet. Click "Upload Payment" to add your first payment.
-            </Alert>
-          }
-          stickyHeader
-          maxHeight={400}
-        />
+          <DataTable
+            columns={columns}
+            data={payloads}
+            loading={loadingPayloads}
+            emptyState={
+              <Alert
+                severity="info"
+                icon={<Info />}
+                sx={{
+                  borderRadius: 3,
+                  bgcolor: "rgba(140, 165, 81, 0.08)",
+                  border: "1px solid rgba(140, 165, 81, 0.3)",
+                  fontSize: { xs: "0.85rem", md: "1rem" },
+                  fontFamily: '"Poppins", sans-serif',
+                  "& .MuiAlert-icon": { color: "#8CA551" }
+                }}
+              >
+                {t('myProperty:noPayments', 'No payment transactions yet. Click "Upload Payment" to add your first payment.')}
+              </Alert>
+            }
+            stickyHeader
+            maxHeight={400}
+          />
         </Box>
       </Paper>
 
-
       <UserCreatePayload
-  open={uploadPaymentDialog}
-  onClose={handleCloseUploadPayment}
-  onSubmit={handleSubmitPayment}
-  paymentForm={paymentForm}
-  handlePaymentFormChange={handlePaymentFormChange}
-  uploadingPayment={uploadingPayment}
-/>
+        open={uploadPaymentDialog}
+        onClose={handleCloseUploadPayment}
+        onSubmit={handleSubmitPayment}
+        paymentForm={paymentForm}
+        handlePaymentFormChange={handlePaymentFormChange}
+        uploadingPayment={uploadingPayment}
+      />
     </>
   )
 }

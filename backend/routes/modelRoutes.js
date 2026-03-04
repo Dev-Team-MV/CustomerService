@@ -33,8 +33,19 @@ const router = express.Router()
  * @swagger
  * /api/models:
  *   get:
- *     summary: Get all models
+ *     summary: Get all models (optionally filter by project)
  *     tags: [Models]
+ *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         schema:
+ *           type: string
+ *         description: Filter models by project ID (multi-tenant)
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, draft, inactive]
  *     responses:
  *       200:
  *         description: List of models
@@ -56,12 +67,19 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             required:
+ *               - projectId
  *               - model
  *               - price
  *               - bedrooms
  *               - bathrooms
  *               - sqft
  *             properties:
+ *               projectId:
+ *                 type: string
+ *                 description: Project ID (or use "project")
+ *               project:
+ *                 type: string
+ *                 description: Project ID (alternative to projectId)
  *               model:
  *                 type: string
  *               modelNumber:

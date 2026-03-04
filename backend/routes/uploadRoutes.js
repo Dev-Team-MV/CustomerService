@@ -89,7 +89,45 @@ router.get('/files', protect, getFolderFiles)
 router.get('/folder/:folder', protect, getFolderFiles)
 
 /**
- * PATCH /api/upload/recorrido/visibility — Body: { filename, isPublic }. Admin only.
+ * @swagger
+ * /api/upload/recorrido/visibility:
+ *   patch:
+ *     summary: Update visibility (isPublic) of a recorrido image (Admin only)
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [filename]
+ *             properties:
+ *               filename:
+ *                 type: string
+ *                 description: File name in folder recorrido (e.g. recorrido.1.jpg, recorrido.2.jpg)
+ *                 example: "recorrido.1.jpg"
+ *               isPublic:
+ *                 type: boolean
+ *                 description: true = visible without token, false = requires auth
+ *                 default: true
+ *     responses:
+ *       200:
+ *         description: Recorrido image visibility updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 message: { type: string }
+ *                 filename: { type: string }
+ *                 isPublic: { type: boolean }
+ *       400:
+ *         description: filename required or invalid
+ *       500:
+ *         description: Error updating visibility
  */
 router.patch('/recorrido/visibility', protect, admin, updateRecorridoVisibility)
 

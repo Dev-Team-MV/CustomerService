@@ -28,6 +28,7 @@ import OptionChips from './OptionChips'
 import PriceSummary from './PriceSummary'
 import { getGalleryCategories } from '../../../services/modelImageService'
 import { useTheme, useMediaQuery } from '@mui/material'
+import GalleryCarrousel from '../../GalleryCarrousel'
 
 const ROOM_TYPES = [
   { id: 'bedroom_closet', label: 'Bed w/ Closet', icon: '🛏️' },
@@ -108,14 +109,22 @@ const ModelCustomizationCore = ({
       .replace(/balcony/gi, 'study')
   }
 
-  const processImages = (cat) => [
-    ...(cat?.exteriorImages || []).map(url => ({ url, type: 'exterior', roomType: 'general' })),
-    ...(cat?.interiorImages || []).map(img =>
-      typeof img === 'string'
-        ? { url: img, type: 'interior', roomType: 'general' }
-        : { url: img.url || img, type: 'interior', roomType: img.roomType || 'general' }
-    )
-  ]
+  // ...existing code...
+  
+    const processImages = (cat) => {
+      return [
+        ...(cat?.exteriorImages || []).map(img => {
+          const url = typeof img === 'string' ? img : (img?.url || '')
+          return { url, type: 'exterior', roomType: img?.roomType || 'general', isPublic: img?.isPublic }
+        }),
+        ...(cat?.interiorImages || []).map(img => {
+          const url = typeof img === 'string' ? img : (img?.url || '')
+          return { url, type: 'interior', roomType: img?.roomType || 'general', isPublic: img?.isPublic }
+        })
+      ].filter(img => img.url)
+    }
+  
+  // ...existing code...
 
   const filterImages = (images) => {
     let filtered = [...images]
@@ -543,242 +552,88 @@ const ModelCustomizationCore = ({
               </Box>
             </Button>
           </Box>
-          {/* Mobile Carousels */}
-          <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', gap: 2, px: 2, pb: 2 }}>
-            {/* Left Carousel */}
-            <Box sx={{ flex: 1, bgcolor: '#fafafa', borderRadius: 3, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
-              <Chip
-                label={leftData.label}
-                size="small"
-                sx={{
-                  bgcolor: '#333F1F',
-                  color: 'white',
-                  fontWeight: 600,
-                  m: 1,
-                  fontFamily: '"Poppins", sans-serif'
-                }}
-              />
-              <Box
-                sx={{
-                  bgcolor: '#000',
-                  borderRadius: 2,
-                  overflow: 'hidden',
-                  position: 'relative',
-                  width: '100%',
-                  height: 220,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <AnimatePresence mode="wait">
-                  {leftData.images[leftImageIndex] ? (
-                    <motion.img
-                      key={`left-${leftImageIndex}-${viewType}-${selectedRoomType}`}
-                      src={leftData.images[leftImageIndex].url}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.3 }}
-                      style={{
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                        width: 'auto',
-                        height: 'auto',
-                        objectFit: 'contain',
-                        position: 'absolute'
-                      }}
-                    />
-                  ) : (
-                    <Typography color="white" sx={{ fontFamily: '"Poppins", sans-serif' }}>
-                      No images available
-                    </Typography>
-                  )}
-                </AnimatePresence>
-                {leftData.images.length > 1 && (
-                  <>
-                    <IconButton
-                      onClick={handleLeftPrev}
-                      sx={{
-                        position: 'absolute',
-                        left: 8,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        bgcolor: 'rgba(255,255,255,0.95)',
-                        '&:hover': {
-                          bgcolor: 'white',
-                          transform: 'scale(1.1) translateY(-50%)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                        },
-                        boxShadow: 2,
-                        zIndex: 2
-                      }}
-                    >
-                      <KeyboardArrowLeft sx={{ color: '#333F1F' }} />
-                    </IconButton>
-                    <IconButton
-                      onClick={handleLeftNext}
-                      sx={{
-                        position: 'absolute',
-                        right: 8,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        bgcolor: 'rgba(255,255,255,0.95)',
-                        '&:hover': {
-                          bgcolor: 'white',
-                          transform: 'scale(1.1) translateY(-50%)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                        },
-                        boxShadow: 2,
-                        zIndex: 2
-                      }}
-                    >
-                      <KeyboardArrowRight sx={{ color: '#333F1F' }} />
-                    </IconButton>
-                    <Box sx={{
-                      position: 'absolute',
-                      bottom: 8,
-                      left: 8,
-                      bgcolor: 'rgba(51, 63, 31, 0.9)',
-                      color: 'white',
-                      px: 2,
-                      py: 0.5,
-                      borderRadius: 2
-                    }}>
-                      <Typography variant="caption" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
-                        {leftImageIndex + 1} / {leftData.images.length}
-                      </Typography>
+          
+                    {/* Mobile Carousels */}
+                    <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', gap: 2, px: 2, pb: 2 }}>
+                      {/* Left Carousel */}
+                      <Box sx={{ flex: 1, bgcolor: '#fafafa', borderRadius: 3, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
+                        <Chip
+                          label={leftData.label}
+                          size="small"
+                          sx={{
+                            bgcolor: '#333F1F',
+                            color: 'white',
+                            fontWeight: 600,
+                            m: 1,
+                            fontFamily: '"Poppins", sans-serif'
+                          }}
+                        />
+                        {/* ✅ height fijo en px para que GalleryCarrousel pueda calcular su tamaño */}
+                        <Box sx={{ width: '100%', height: 220, position: 'relative' }}>
+                          <GalleryCarrousel
+                            images={leftData.images.map((img) => img.url)}
+                            onIndexChange={(newIndex) => {
+                              setLeftImageIndex(newIndex)
+                              if (isSynced) setRightImageIndex(newIndex)
+                            }}
+                            showPagination={true}
+                            showArrows={true}
+                            borderRadius={0}
+                            objectFit="contain"
+                            syncGroup={isSynced ? 'carousel-sync-mobile' : null}
+                            watermark={null}
+                          />
+                        </Box>
+                      </Box>
+                      {/* Right Carousel */}
+                      <Box sx={{ flex: 1, bgcolor: '#fafafa', borderRadius: 3, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
+                        <Chip
+                          label={rightData.label}
+                          size="small"
+                          sx={{
+                            bgcolor: compareModel ? '#8CA551' : (options.upgrade || options.balcony || options.storage ? '#8CA551' : '#333F1F'),
+                            color: 'white',
+                            fontWeight: 600,
+                            m: 1,
+                            fontFamily: '"Poppins", sans-serif'
+                          }}
+                        />
+                        {/* ✅ Misma altura fija */}
+                        <Box sx={{ width: '100%', height: 220, position: 'relative' }}>
+                          <GalleryCarrousel
+                            images={rightData.images.map((img) => img.url)}
+                            onIndexChange={(newIndex) => setRightImageIndex(newIndex)}
+                            showPagination={true}
+                            showArrows={true}
+                            borderRadius={0}
+                            objectFit="contain"
+                            syncGroup={isSynced ? 'carousel-sync-mobile' : null}
+                            watermark={null}
+                          />
+                        </Box>
+                      </Box>
                     </Box>
-                  </>
-                )}
-              </Box>
-            </Box>
-            {/* Right Carousel */}
-            <Box sx={{ flex: 1, bgcolor: '#fafafa', borderRadius: 3, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
-              <Chip
-                label={rightData.label}
-                size="small"
-                sx={{
-                  bgcolor: compareModel ? '#8CA551' : (options.upgrade || options.balcony || options.storage ? '#8CA551' : '#333F1F'),
-                  color: 'white',
-                  fontWeight: 600,
-                  m: 1,
-                  fontFamily: '"Poppins", sans-serif'
-                }}
-              />
-              <Box
-                sx={{
-                  bgcolor: '#000',
-                  borderRadius: 2,
-                  overflow: 'hidden',
-                  position: 'relative',
-                  width: '100%',
-                  height: 220,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <AnimatePresence mode="wait">
-                  {rightData.images[rightImageIndex] ? (
-                    <motion.img
-                      key={`right-${rightImageIndex}-${viewType}-${selectedRoomType}-${compareModel ? compareOptions.upgrade : options.upgrade}-${compareModel ? compareOptions.balcony : options.balcony}-${compareModel ? compareOptions.storage : options.storage}`}
-                      src={rightData.images[rightImageIndex].url}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.3 }}
-                      style={{
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                        width: 'auto',
-                        height: 'auto',
-                        objectFit: 'contain',
-                        position: 'absolute'
-                      }}
-                    />
-                  ) : (
-                    <Typography color="white" sx={{ fontFamily: '"Poppins", sans-serif' }}>
-                      No images available
-                    </Typography>
-                  )}
-                </AnimatePresence>
-                {rightData.images.length > 1 && (
-                  <>
-                    <IconButton
-                      onClick={handleRightPrev}
-                      sx={{
-                        position: 'absolute',
-                        left: 8,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        bgcolor: 'rgba(255,255,255,0.95)',
-                        '&:hover': {
-                          bgcolor: 'white',
-                          transform: 'scale(1.1) translateY(-50%)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                        },
-                        boxShadow: 2,
-                        zIndex: 2
-                      }}
-                    >
-                      <KeyboardArrowLeft sx={{ color: '#333F1F' }} />
-                    </IconButton>
-                    <IconButton
-                      onClick={handleRightNext}
-                      sx={{
-                        position: 'absolute',
-                        right: 8,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        bgcolor: 'rgba(255,255,255,0.95)',
-                        '&:hover': {
-                          bgcolor: 'white',
-                          transform: 'scale(1.1) translateY(-50%)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                        },
-                        boxShadow: 2,
-                        zIndex: 2
-                      }}
-                    >
-                      <KeyboardArrowRight sx={{ color: '#333F1F' }} />
-                    </IconButton>
-                    <Box sx={{
-                      position: 'absolute',
-                      bottom: 8,
-                      left: 8,
-                      bgcolor: 'rgba(140, 165, 81, 0.9)',
-                      color: 'white',
-                      px: 2,
-                      py: 0.5,
-                      borderRadius: 2
-                    }}>
-                      <Typography variant="caption" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
-                        {rightImageIndex + 1} / {rightData.images.length}
-                      </Typography>
-                    </Box>
-                  </>
-                )}
-              </Box>
-            </Box>
-          </Box>
+          
         </>
       ) : (
         // Desktop Layout
-        <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
           {/* LEFT COLUMN */}
           <Box sx={{
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
             borderRight: '1px solid #e0e0e0',
-            bgcolor: '#fafafa'
+            bgcolor: '#fafafa',
+            minHeight: 0,
+            overflow: 'hidden'
           }}>
             <Box sx={{
               p: 2,
               bgcolor: '#f5f5f5',
               borderBottom: '1px solid #e0e0e0',
-              textAlign: 'center'
+              textAlign: 'center',
+              flexShrink: 0
             }}>
               <Chip
                 label={leftData.label}
@@ -791,101 +646,27 @@ const ModelCustomizationCore = ({
                 }}
               />
             </Box>
-            <Box
-              sx={{
-                flex: 1,
-                bgcolor: '#000',
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <AnimatePresence mode="wait">
-                {leftData.images[leftImageIndex] ? (
-                  <motion.img
-                    key={`left-${leftImageIndex}-${viewType}-${selectedRoomType}`}
-                    src={leftData.images[leftImageIndex].url}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.3 }}
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '100%',
-                      width: 'auto',
-                      height: 'auto',
-                      objectFit: 'contain',
-                      position: 'absolute'
-                    }}
-                  />
-                ) : (
-                  <Typography color="white" sx={{ fontFamily: '"Poppins", sans-serif' }}>
-                    No images available
-                  </Typography>
-                )}
-              </AnimatePresence>
-              {leftData.images.length > 1 && (
-                <>
-                  <IconButton
-                    onClick={handleLeftPrev}
-                    sx={{
-                      position: 'absolute',
-                      left: 16,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      bgcolor: 'rgba(255,255,255,0.95)',
-                      '&:hover': {
-                        bgcolor: 'white',
-                        transform: 'scale(1.1) translateY(-50%)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                      },
-                      boxShadow: 3,
-                      zIndex: 2
-                    }}
-                  >
-                    <KeyboardArrowLeft sx={{ color: '#333F1F' }} />
-                  </IconButton>
-                  <IconButton
-                    onClick={handleLeftNext}
-                    sx={{
-                      position: 'absolute',
-                      right: 16,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      bgcolor: 'rgba(255,255,255,0.95)',
-                      '&:hover': {
-                        bgcolor: 'white',
-                        transform: 'scale(1.1) translateY(-50%)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                      },
-                      boxShadow: 3,
-                      zIndex: 2
-                    }}
-                  >
-                    <KeyboardArrowRight sx={{ color: '#333F1F' }} />
-                  </IconButton>
-                  <Box sx={{
-                    position: 'absolute',
-                    bottom: 16,
-                    left: 16,
-                    bgcolor: 'rgba(51, 63, 31, 0.9)',
-                    color: 'white',
-                    px: 2,
-                    py: 0.5,
-                    borderRadius: 2
-                  }}>
-                    <Typography variant="caption" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
-                      {leftImageIndex + 1} / {leftData.images.length}
-                    </Typography>
-                  </Box>
-                </>
-              )}
+            {/* ✅ Altura fija calculada: 95vh del dialog - header (~110px) - chip header (~56px) */}
+            <Box sx={{ width: '100%', height: 'calc(95vh - 166px)', position: 'relative' }}>
+              <GalleryCarrousel
+                images={leftData.images.map((img) => img.url).filter(Boolean)}
+                onIndexChange={(newIndex) => {
+                  setLeftImageIndex(newIndex)
+                  if (isSynced) setRightImageIndex(newIndex)
+                }}
+                showPagination={true}
+                showArrows={true}
+                borderRadius={0}
+                objectFit="contain"
+                syncGroup={isSynced ? 'carousel-sync' : null}
+                watermark={null}
+              />
             </Box>
           </Box>
           {/* MIDDLE COLUMN - CONTROLS */}
           <Box sx={{
             width: 400,
+            flexShrink: 0,
             display: 'flex',
             flexDirection: 'column',
             borderRight: '1px solid #e0e0e0',
@@ -1099,13 +880,16 @@ const ModelCustomizationCore = ({
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            bgcolor: '#fafafa'
+            bgcolor: '#fafafa',
+            minHeight: 0,
+            overflow: 'hidden'
           }}>
             <Box sx={{
               p: 2,
               bgcolor: '#f5f5f5',
               borderBottom: '1px solid #e0e0e0',
-              textAlign: 'center'
+              textAlign: 'center',
+              flexShrink: 0
             }}>
               <Chip
                 label={rightData.label}
@@ -1118,96 +902,18 @@ const ModelCustomizationCore = ({
                 }}
               />
             </Box>
-            <Box
-              sx={{
-                flex: 1,
-                bgcolor: '#000',
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <AnimatePresence mode="wait">
-                {rightData.images[rightImageIndex] ? (
-                  <motion.img
-                    key={`right-${rightImageIndex}-${viewType}-${selectedRoomType}-${compareModel ? compareOptions.upgrade : options.upgrade}-${compareModel ? compareOptions.balcony : options.balcony}-${compareModel ? compareOptions.storage : options.storage}`}
-                    src={rightData.images[rightImageIndex].url}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.3 }}
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '100%',
-                      width: 'auto',
-                      height: 'auto',
-                      objectFit: 'contain',
-                      position: 'absolute'
-                    }}
-                  />
-                ) : (
-                  <Typography color="white" sx={{ fontFamily: '"Poppins", sans-serif' }}>
-                    No images available
-                  </Typography>
-                )}
-              </AnimatePresence>
-              {rightData.images.length > 1 && (
-                <>
-                  <IconButton
-                    onClick={handleRightPrev}
-                    sx={{
-                      position: 'absolute',
-                      left: 16,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      bgcolor: 'rgba(255,255,255,0.95)',
-                      '&:hover': {
-                        bgcolor: 'white',
-                        transform: 'scale(1.1) translateY(-50%)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                      },
-                      boxShadow: 3,
-                      zIndex: 2
-                    }}
-                  >
-                    <KeyboardArrowLeft sx={{ color: '#333F1F' }} />
-                  </IconButton>
-                  <IconButton
-                    onClick={handleRightNext}
-                    sx={{
-                      position: 'absolute',
-                      right: 16,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      bgcolor: 'rgba(255,255,255,0.95)',
-                      '&:hover': {
-                        bgcolor: 'white',
-                        transform: 'scale(1.1) translateY(-50%)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                      },
-                      boxShadow: 3,
-                      zIndex: 2
-                    }}
-                  >
-                    <KeyboardArrowRight sx={{ color: '#333F1F' }} />
-                  </IconButton>
-                  <Box sx={{
-                    position: 'absolute',
-                    bottom: 16,
-                    left: 16,
-                    bgcolor: 'rgba(140, 165, 81, 0.9)',
-                    color: 'white',
-                    px: 2,
-                    py: 0.5,
-                    borderRadius: 2
-                  }}>
-                    <Typography variant="caption" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
-                      {rightImageIndex + 1} / {rightData.images.length}
-                    </Typography>
-                  </Box>
-                </>
-              )}
+            {/* ✅ Misma altura fija calculada */}
+            <Box sx={{ width: '100%', height: 'calc(95vh - 166px)', position: 'relative' }}>
+              <GalleryCarrousel
+                images={rightData.images.map((img) => img.url)}
+                onIndexChange={(newIndex) => setRightImageIndex(newIndex)}
+                showPagination={true}
+                showArrows={true}
+                borderRadius={0}
+                objectFit="contain"
+                syncGroup={isSynced ? 'carousel-sync' : null}
+                watermark={null}
+              />
             </Box>
           </Box>
         </Box>

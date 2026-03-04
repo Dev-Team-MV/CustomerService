@@ -21,13 +21,19 @@ const router = express.Router()
  * @swagger
  * /api/facades:
  *   get:
- *     summary: Get all facades
+ *     summary: Get all facades (optionally filter by project or model)
  *     tags: [Facades]
  *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         schema:
+ *           type: string
+ *         description: Filter facades by project ID (multi-tenant)
  *       - in: query
  *         name: model
  *         schema:
  *           type: string
+ *         description: Filter by model ID
  *     responses:
  *       200:
  *         description: List of facades
@@ -49,11 +55,18 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             required:
+ *               - projectId
  *               - model
  *               - title
  *               - url
  *               - price
  *             properties:
+ *               projectId:
+ *                 type: string
+ *                 description: Project ID (or use "project")
+ *               project:
+ *                 type: string
+ *                 description: Project ID (alternative to projectId)
  *               model:
  *                 type: string
  *               title:

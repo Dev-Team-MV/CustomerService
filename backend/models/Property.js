@@ -3,6 +3,11 @@ import Phase from './Phase.js'
 
 const propertySchema = new mongoose.Schema(
   {
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
+      required: [true, 'Project is required']
+    },
     lot: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Lot',
@@ -69,6 +74,10 @@ const propertySchema = new mongoose.Schema(
     timestamps: true
   }
 )
+
+propertySchema.index({ project: 1 })
+propertySchema.index({ lot: 1 })
+propertySchema.index({ users: 1 })
 
 propertySchema.virtual('payloads', {
   ref: 'Payload',

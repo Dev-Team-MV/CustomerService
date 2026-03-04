@@ -79,27 +79,31 @@ const RecorridoTab = () => {
       setMapUrl(defaultMap)
     }
   }
+// ...existing code...
 const fetchRecorridoImages = async () => {
   try {
     const response = await uploadService.getFilesByFolder('recorrido', true);
     const map = {};
     (response.files || []).forEach(file => {
-      const match = file.name.match(/recorrido\.(\d+)\./);
+      // file.name expected like "recorrido.3.jpg"
+      const name = file.name || file.filename || '';
+      const match = name.match(/recorrido\.(\d+)\./);
       if (match) {
-        const id = String(match[1]);
-        const filename = file.name.includes('/') ? file.name.split('/').pop() : file.name;
-        map[id] = {
-          url: file.url,
-          isPublic: file.isPublic !== false,
-          filename: filename || `recorrido.${id}.jpg`
+        const pointId = String(match[1]); // usa el índice/número del filename como key
+        map[pointId] = {
+          url: file.url || file.publicUrl || null,
+          isPublic: !!file.isPublic,
+          filename: name
         };
       }
     });
-    setImagesMap(map);
-  } catch (error) {
+    setImagesMap(map); // pasar este imagesMap al modal
+  } catch (err) {
+    console.error('Error fetching recorrido files:', err);
     setImagesMap({});
   }
 };
+// ...existing code...
 
   // Asocia cada imagen al punto por id (image puede ser { url, isPublic, filename } o null)
   const recorridoPoints = puntosBase.map((p) => ({
@@ -171,14 +175,16 @@ const fetchRecorridoImages = async () => {
   }
 
   // --- UPLOAD ---
-  const handleUpload = async (id, file) => {
-    setUploading(true)
-    const ext = file.name.substring(file.name.lastIndexOf('.'))
-    const filename = `recorrido.${id}${ext}` // Usa el id del punto
-    await uploadService.uploadImage(file, 'recorrido', filename)
-    setUploading(false)
-    fetchRecorridoImages()
-  }
+  const handleUpload = async (id, file, isPublic = true) => {
+      console.log(`[RecorridoTab] Subiendo imagen para punto ${id} con isPublic:`, isPublic);
+
+    setUploading(true);
+    const ext = file.name.substring(file.name.lastIndexOf('.'));
+    const filename = `recorrido.${id}${ext}`;
+    await uploadService.uploadImage(file, 'recorrido', filename, isPublic);
+    setUploading(false);
+    fetchRecorridoImages();
+  };
 
   const handleRecorridoVisibility = async (filename, isPublic) => {
     await uploadService.updateRecorridoVisibility(filename, isPublic)

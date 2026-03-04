@@ -3,30 +3,37 @@ import {
   Box,
   Paper,
   Typography,
-  Grid,
   Chip,
   Alert,
-  Dialog,
-  DialogContent,
   IconButton
 } from '@mui/material'
 import {
   Home,
   CheckCircle,
-  KeyboardArrowLeft,
-  KeyboardArrowRight,
   ZoomIn,
-  Cancel,
   Image as ImageIcon,
   Info
 } from '@mui/icons-material'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
+import GalleryCarrousel from '../GalleryCarrousel'
 import PropertySpecsGrid from './PropertySpecsGrid'
 
 const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => {
   const [carouselIndex, setCarouselIndex] = useState(0)
-  const [lightboxOpen, setLightboxOpen] = useState(false)
   const [galleryFilter, setGalleryFilter] = useState("all")
+
+  // Helper para extraer URLs
+  const extractUrl = (item) => {
+    if (!item) return null
+    if (typeof item === 'string') return item
+    if (item.url) {
+      if (Array.isArray(item.url) && item.url.length > 0) {
+        return typeof item.url[0] === 'string' ? item.url[0] : null
+      }
+      if (typeof item.url === 'string') return item.url
+    }
+    return null
+  }
 
   // Imágenes y blueprints directamente de propertyDetails
   const exterior = propertyDetails?.images?.exterior || []
@@ -45,12 +52,32 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
     }
   }
 
-  // Construye el array de imágenes con tipo
+  // Construye el array de imágenes con tipo, extrayendo URLs correctamente
   const allImages = [
-    ...exterior.map((url) => ({ url, type: "exterior" })),
-    ...interior.map((url) => ({ url, type: "interior" })),
-    ...facade.map((url) => ({ url, type: "facade" })),
-    ...blueprints.map((url) => ({ url, type: "blueprint" })),
+    ...(Array.isArray(exterior)
+      ? exterior
+          .map(item => ({ url: extractUrl(item), type: "exterior" }))
+          .filter(img => img.url)
+      : []
+    ),
+    ...(Array.isArray(interior)
+      ? interior
+          .map(item => ({ url: extractUrl(item), type: "interior" }))
+          .filter(img => img.url)
+      : []
+    ),
+    ...(Array.isArray(facade)
+      ? facade
+          .map(item => ({ url: extractUrl(item), type: "facade" }))
+          .filter(img => img.url)
+      : []
+    ),
+    ...(Array.isArray(blueprints)
+      ? blueprints
+          .map(item => ({ url: extractUrl(item), type: "blueprint" }))
+          .filter(img => img.url)
+      : []
+    ),
   ]
 
   // Filtra según el tipo seleccionado
@@ -67,30 +94,13 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
   }
 
   const carouselImages = filterImages(allImages)
+  const carouselUrls = carouselImages.map(img => img.url)
 
   useEffect(() => {
     setCarouselIndex(0)
   }, [galleryFilter])
 
-  // Handlers
-  const handleCarouselPrev = () => {
-    if (!carouselImages.length) return
-    setCarouselIndex((i) => (i - 1 + carouselImages.length) % carouselImages.length)
-  }
-
-  const handleCarouselNext = () => {
-    if (!carouselImages.length) return
-    setCarouselIndex((i) => (i + 1) % carouselImages.length)
-  }
-
   const handleThumbSelect = (idx) => setCarouselIndex(idx)
-
-  const openLightbox = () => {
-    if (!carouselImages.length) return
-    setLightboxOpen(true)
-  }
-
-  const closeLightbox = () => setLightboxOpen(false)
 
   return (
     <>
@@ -150,99 +160,51 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
         )}
 
         {/* Carrusel y miniaturas */}
-        <Box
-          display="flex"
-          gap={2}
-          alignItems="flex-start"
-          flexDirection={{ xs: "column", md: "row" }}
-        >
-          {/* MAIN CAROUSEL */}
+        <Box sx={{ mb: 3 }}>
           <Box
-            sx={{
-              flex: 1,
-              bgcolor: "#000",
-              borderRadius: 2,
-              p: 2,
-              minHeight: 320,
-              height: { xs: 300, sm: 360, md: 420 },
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              position: "relative",
-              overflow: "hidden",
-            }}
+            display="flex"
+            gap={2}
+            alignItems="flex-start"
+            flexDirection={{ xs: "column", md: "row" }}
           >
-            <AnimatePresence mode="wait">
-              {carouselImages && carouselImages[carouselIndex] ? (
-                <motion.img
-                  key={`carousel-${carouselIndex}-${carouselImages.length}`}
-                  src={carouselImages[carouselIndex].url}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.3 }}
-                  style={{
-                    maxWidth: "90%",
-                    maxHeight: "100%",
-                    objectFit: "contain",
-                    borderRadius: 8,
-                    cursor: "pointer"
-                  }}
-                  onClick={openLightbox}
+            {/* MAIN CAROUSEL */}
+            <Box
+              sx={{
+                flex: 1,
+                bgcolor: "#000",
+                borderRadius: 2,
+                minHeight: 320,
+                height: { xs: 300, sm: 360, md: 420 },
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              {carouselImages.length > 0 ? (
+                <GalleryCarrousel
+                  images={carouselImages}
+                  showPagination={true}
+                  showArrows={true}
+                  autoPlay={false}
+                  borderRadius={8}
+                  objectFit="contain"
+                  startIndex={carouselIndex}
+                  onIndexChange={setCarouselIndex}
+                  watermark="/images/logos/Logo_LakewoodOaks-08.png"
                 />
               ) : (
-                <Box textAlign="center">
+                <Box textAlign="center" width="100%">
                   <Home sx={{ fontSize: 60, color: "#666", mb: 2 }} />
                   <Typography color="white">
                     No property images available
                   </Typography>
                 </Box>
               )}
-            </AnimatePresence>
-
-            {carouselImages.length > 1 && (
-              <>
+              {carouselImages.length > 0 && (
                 <IconButton
-                  onClick={handleCarouselPrev}
-                  sx={{
-                    position: "absolute",
-                    left: 12,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    bgcolor: "rgba(255,255,255,0.95)",
-                    boxShadow: 3,
-                    "&:hover": {
-                      bgcolor: "white",
-                      transform: "scale(1.1) translateY(-50%)"
-                    }
-                  }}
-                >
-                  <KeyboardArrowLeft />
-                </IconButton>
-                <IconButton
-                  onClick={handleCarouselNext}
-                  sx={{
-                    position: "absolute",
-                    right: 12,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    bgcolor: "rgba(255,255,255,0.95)",
-                    boxShadow: 3,
-                    "&:hover": {
-                      bgcolor: "white",
-                      transform: "scale(1.1) translateY(-50%)"
-                    }
-                  }}
-                >
-                  <KeyboardArrowRight />
-                </IconButton>
-              </>
-            )}
-
-            {carouselImages.length > 0 && (
-              <>
-                <IconButton
-                  onClick={openLightbox}
+                  onClick={() => setCarouselIndex(carouselIndex)}
                   sx={{
                     position: "absolute",
                     top: 12,
@@ -256,194 +218,174 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
                 >
                   <ZoomIn />
                 </IconButton>
-
-                <Box
-                  sx={{
-                    position: "absolute",
-                    bottom: 12,
-                    left: 12,
-                    bgcolor: "rgba(0,0,0,0.7)",
-                    color: "white",
-                    px: 2,
-                    py: 0.5,
-                    borderRadius: 2,
-                    backdropFilter: "blur(4px)"
-                  }}
-                >
-                  <Typography variant="caption" fontWeight="600">
-                    {carouselIndex + 1} / {carouselImages.length}
-                  </Typography>
-                </Box>
-              </>
-            )}
-          </Box>
-
-          {/* THUMBNAILS */}
-          <Box
-            sx={{
-              width: { xs: "100%", md: 300 },
-              mt: { xs: 1, md: 0 },
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                gap: 1,
-                flexWrap: "wrap",
-                mb: 1,
-              }}
-            >
-              <Chip
-                label={`All (${allImages.length})`}
-                size="small"
-                onClick={() => setGalleryFilter("all")}
-                variant={galleryFilter === "all" ? "filled" : "outlined"}
-                color={galleryFilter === "all" ? "primary" : "default"}
-                sx={{
-                  fontWeight: galleryFilter === "all" ? 700 : 500,
-                  cursor: "pointer"
-                }}
-              />
-              <Chip
-                label={`Exterior (${exterior.length})`}
-                size="small"
-                onClick={() => setGalleryFilter("exterior")}
-                variant={galleryFilter === "exterior" ? "filled" : "outlined"}
-                color={galleryFilter === "exterior" ? "primary" : "default"}
-                sx={{
-                  fontWeight: galleryFilter === "exterior" ? 700 : 500,
-                  cursor: "pointer"
-                }}
-              />
-              <Chip
-                label={`Interior (${interior.length})`}
-                size="small"
-                onClick={() => setGalleryFilter("interior")}
-                variant={galleryFilter === "interior" ? "filled" : "outlined"}
-                color={galleryFilter === "interior" ? "primary" : "default"}
-                sx={{
-                  fontWeight: galleryFilter === "interior" ? 700 : 500,
-                  cursor: "pointer"
-                }}
-              />
-              <Chip
-                label={`Facade (${facade.length})`}
-                size="small"
-                onClick={() => setGalleryFilter("facade")}
-                variant={galleryFilter === "facade" ? "filled" : "outlined"}
-                color={galleryFilter === "facade" ? "primary" : "default"}
-                sx={{
-                  fontWeight: galleryFilter === "facade" ? 700 : 500,
-                  cursor: "pointer"
-                }}
-              />
-              <Chip
-                label={`Blueprints (${blueprints.length})`}
-                size="small"
-                onClick={() => setGalleryFilter("blueprint")}
-                variant={galleryFilter === "blueprint" ? "filled" : "outlined"}
-                color={galleryFilter === "blueprint" ? "primary" : "default"}
-                sx={{
-                  fontWeight: galleryFilter === "blueprint" ? 700 : 500,
-                  cursor: "pointer"
-                }}
-              />
+              )}
             </Box>
 
+            {/* THUMBNAILS */}
             <Box
               sx={{
-                maxHeight: { xs: 240, md: 420 },
-                overflowY: "auto",
-                pr: 1,
-                "&::-webkit-scrollbar": {
-                  width: 6
-                },
-                "&::-webkit-scrollbar-thumb": {
-                  bgcolor: "grey.400",
-                  borderRadius: 3
-                }
+                width: { xs: "100%", md: 300 },
+                mt: { xs: 1, md: 0 },
               }}
             >
               <Box
                 sx={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, 1fr)",
+                  display: "flex",
                   gap: 1,
+                  flexWrap: "wrap",
+                  mb: 1,
                 }}
               >
-                {carouselImages.length === 0 ? (
-                  <Box
-                    sx={{
-                      gridColumn: "1 / -1",
-                      textAlign: "center",
-                      py: 4
-                    }}
-                  >
-                    <ImageIcon sx={{ fontSize: 40, color: "#ccc", mb: 1 }} />
-                    <Typography variant="caption" color="text.secondary">
-                      No images available
-                    </Typography>
-                  </Box>
-                ) : (
-                  carouselImages.map((img, i) => (
-                    <motion.div
-                      key={i}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                <Chip
+                  label={`All (${allImages.length})`}
+                  size="small"
+                  onClick={() => setGalleryFilter("all")}
+                  variant={galleryFilter === "all" ? "filled" : "outlined"}
+                  color={galleryFilter === "all" ? "primary" : "default"}
+                  sx={{
+                    fontWeight: galleryFilter === "all" ? 700 : 500,
+                    cursor: "pointer"
+                  }}
+                />
+                <Chip
+                  label={`Exterior (${allImages.filter((img) => img.type === "exterior").length})`}
+                  size="small"
+                  onClick={() => setGalleryFilter("exterior")}
+                  variant={galleryFilter === "exterior" ? "filled" : "outlined"}
+                  color={galleryFilter === "exterior" ? "primary" : "default"}
+                  sx={{
+                    fontWeight: galleryFilter === "exterior" ? 700 : 500,
+                    cursor: "pointer"
+                  }}
+                />
+                <Chip
+                  label={`Interior (${allImages.filter((img) => img.type === "interior").length})`}
+                  size="small"
+                  onClick={() => setGalleryFilter("interior")}
+                  variant={galleryFilter === "interior" ? "filled" : "outlined"}
+                  color={galleryFilter === "interior" ? "primary" : "default"}
+                  sx={{
+                    fontWeight: galleryFilter === "interior" ? 700 : 500,
+                    cursor: "pointer"
+                  }}
+                />
+                <Chip
+                  label={`Facade (${allImages.filter((img) => img.type === "facade").length})`}
+                  size="small"
+                  onClick={() => setGalleryFilter("facade")}
+                  variant={galleryFilter === "facade" ? "filled" : "outlined"}
+                  color={galleryFilter === "facade" ? "primary" : "default"}
+                  sx={{
+                    fontWeight: galleryFilter === "facade" ? 700 : 500,
+                    cursor: "pointer"
+                  }}
+                />
+                <Chip
+                  label={`Blueprints (${allImages.filter((img) => img.type === "blueprint").length})`}
+                  size="small"
+                  onClick={() => setGalleryFilter("blueprint")}
+                  variant={galleryFilter === "blueprint" ? "filled" : "outlined"}
+                  color={galleryFilter === "blueprint" ? "primary" : "default"}
+                  sx={{
+                    fontWeight: galleryFilter === "blueprint" ? 700 : 500,
+                    cursor: "pointer"
+                  }}
+                />
+              </Box>
+
+              <Box
+                sx={{
+                  maxHeight: { xs: 240, md: 420 },
+                  overflowY: "auto",
+                  pr: 1,
+                  "&::-webkit-scrollbar": { width: 6 },
+                  "&::-webkit-scrollbar-thumb": {
+                    bgcolor: "grey.400",
+                    borderRadius: 3
+                  }
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, 1fr)",
+                    gap: 1,
+                  }}
+                >
+                  {carouselImages.length === 0 ? (
+                    <Box
+                      sx={{
+                        gridColumn: "1 / -1",
+                        textAlign: "center",
+                        py: 4
+                      }}
                     >
-                      <Box
-                        onClick={() => handleThumbSelect(i)}
-                        sx={{
-                          width: "100%",
-                          height: { xs: 70, md: 80 },
-                          borderRadius: 1.5,
-                          overflow: "hidden",
-                          cursor: "pointer",
-                          border: i === carouselIndex
-                            ? "3px solid #4a7c59"
-                            : "1px solid rgba(0,0,0,0.06)",
-                          boxShadow: i === carouselIndex
-                            ? "0 8px 24px rgba(74,124,89,0.2)"
-                            : "none",
-                          transition: "all 0.3s ease",
-                          position: "relative",
-                          "&:hover": {
-                            boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
-                          }
-                        }}
+                      <ImageIcon sx={{ fontSize: 40, color: "#ccc", mb: 1 }} />
+                      <Typography variant="caption" color="text.secondary">
+                        No images available
+                      </Typography>
+                    </Box>
+                  ) : (
+                    carouselImages.map((img, i) => (
+                      <motion.div
+                        key={`thumb-${i}-${galleryFilter}`}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                       >
-                        <img
-                          src={img.url}
-                          alt={`thumb-${i}`}
-                          loading="lazy"
-                          style={{
+                        <Box
+                          onClick={() => handleThumbSelect(i)}
+                          sx={{
                             width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
+                            height: { xs: 70, md: 80 },
+                            borderRadius: 1.5,
+                            overflow: "hidden",
+                            cursor: "pointer",
+                            border: i === carouselIndex
+                              ? "3px solid #4a7c59"
+                              : "1px solid rgba(0,0,0,0.06)",
+                            boxShadow: i === carouselIndex
+                              ? "0 8px 24px rgba(74,124,89,0.2)"
+                              : "none",
+                            transition: "all 0.3s ease",
+                            position: "relative",
+                            "&:hover": {
+                              boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+                            }
                           }}
-                        />
-                        {i === carouselIndex && (
-                          <Box
-                            sx={{
-                              position: "absolute",
-                              top: 4,
-                              right: 4,
-                              bgcolor: "#4a7c59",
-                              borderRadius: "50%",
-                              width: 20,
-                              height: 20,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center"
+                        >
+                          <img
+                            src={img.url}
+                            alt={`thumb-${i}`}
+                            loading="lazy"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
                             }}
-                          >
-                            <CheckCircle sx={{ fontSize: 14, color: "white" }} />
-                          </Box>
-                        )}
-                      </Box>
-                    </motion.div>
-                  ))
-                )}
+                          />
+                          {i === carouselIndex && (
+                            <Box
+                              sx={{
+                                position: "absolute",
+                                top: 4,
+                                right: 4,
+                                bgcolor: "#4a7c59",
+                                borderRadius: "50%",
+                                width: 20,
+                                height: 20,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center"
+                              }}
+                            >
+                              <CheckCircle sx={{ fontSize: 14, color: "white" }} />
+                            </Box>
+                          )}
+                        </Box>
+                      </motion.div>
+                    ))
+                  )}
+                </Box>
               </Box>
             </Box>
           </Box>
@@ -505,67 +447,6 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
           />
         </Box>
       </Paper>
-
-      {/* LIGHTBOX DIALOG */}
-      <Dialog
-        open={lightboxOpen}
-        onClose={closeLightbox}
-        maxWidth="lg"
-        fullWidth
-        PaperProps={{
-          sx: {
-            bgcolor: "transparent",
-            boxShadow: "none",
-            overflow: "visible"
-          }
-        }}
-      >
-        <DialogContent
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            bgcolor: "transparent",
-            p: 0
-          }}
-        >
-          <Box sx={{ position: "relative" }}>
-            <IconButton
-              onClick={closeLightbox}
-              sx={{
-                position: "absolute",
-                top: -50,
-                right: 0,
-                color: "white",
-                bgcolor: "rgba(0, 0, 0, 0.6)",
-                zIndex: 10,
-                "&:hover": {
-                  bgcolor: "rgba(0, 0, 0, 0.8)",
-                  transform: "scale(1.1)"
-                },
-              }}
-            >
-              <Cancel />
-            </IconButton>
-            {carouselImages.length > 0 && (
-              <motion.img
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                src={carouselImages[carouselIndex].url}
-                alt="lightbox"
-                style={{
-                  width: "100%",
-                  maxHeight: "85vh",
-                  objectFit: "contain",
-                  borderRadius: 12,
-                  boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)"
-                }}
-              />
-            )}
-          </Box>
-        </DialogContent>
-      </Dialog>
     </>
   )
 }

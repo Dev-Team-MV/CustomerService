@@ -27,8 +27,10 @@ import {
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import newsService from '../services/newsService';
+import { useTranslation } from 'react-i18next';
 
 const NewsFeed = () => {
+  const { t } = useTranslation(['news', 'common']);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -36,14 +38,13 @@ const NewsFeed = () => {
   const [loading, setLoading] = useState(true);
 
   const categories = [
-    { value: 'all', label: 'All News', icon: '📰' },
-    { value: 'construction', label: 'Construction', icon: '🏗️' },
-    { value: 'announcement', label: 'Announcements', icon: '📢' },
-    { value: 'report', label: 'Reports', icon: '📊' },
-    { value: 'event', label: 'Events', icon: '🎉' }
+    { value: 'all', label: t('news:categoryAll', 'All News'), icon: '📰' },
+    { value: 'construction', label: t('news:categoryConstruction', 'Construction'), icon: '🏗️' },
+    { value: 'announcement', label: t('news:categoryAnnouncement', 'Announcements'), icon: '📢' },
+    { value: 'report', label: t('news:categoryReport', 'Reports'), icon: '📊' },
+    { value: 'event', label: t('news:categoryEvent', 'Events'), icon: '🎉' }
   ];
 
-  // ✅ Cargar noticias publicadas al montar
   useEffect(() => {
     fetchPublishedNews();
   }, []);
@@ -60,7 +61,6 @@ const NewsFeed = () => {
     }
   };
 
-  // ✅ Colores - Brandbook
   const getCategoryColor = (category) => {
     switch (category) {
       case 'construction': return '#E5863C';
@@ -78,10 +78,9 @@ const NewsFeed = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const featuredNews = filteredNews[0]; // Primera noticia como destacada
+  const featuredNews = filteredNews[0];
   const regularNews = filteredNews.slice(1);
 
-  // ✅ Loading state - Brandbook
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -93,7 +92,7 @@ const NewsFeed = () => {
   return (
     <Box sx={{ bgcolor: '#fafafa', minHeight: '100vh', py: 6 }}>
       <Container maxWidth="xl">
-        {/* ✅ HEADER - Brandbook */}
+        {/* HEADER */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -111,7 +110,7 @@ const NewsFeed = () => {
                 letterSpacing: '-1px'
               }}
             >
-              Community News & Updates
+              {t('news:feedTitle', 'Community News & Updates')}
             </Typography>
             <Typography
               variant="h6"
@@ -123,12 +122,12 @@ const NewsFeed = () => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              Stay informed with the latest developments, events, and announcements from your community
+              {t('news:feedSubtitle', 'Stay informed with the latest developments, events, and announcements from your community')}
             </Typography>
           </Box>
         </motion.div>
 
-        {/* ✅ SEARCH & FILTERS - Brandbook */}
+        {/* SEARCH & FILTERS */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -149,7 +148,7 @@ const NewsFeed = () => {
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  placeholder="Search news articles..."
+                  placeholder={t('news:searchPlaceholder', 'Search news articles...')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   InputProps={{
@@ -235,7 +234,7 @@ const NewsFeed = () => {
           </Paper>
         </motion.div>
 
-        {/* ✅ FEATURED NEWS - Brandbook */}
+        {/* FEATURED NEWS */}
         {featuredNews && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -274,7 +273,7 @@ const NewsFeed = () => {
                     }}
                   >
                     <Chip
-                      label={featuredNews.category}
+                      label={t(`news:category${featuredNews.category.charAt(0).toUpperCase() + featuredNews.category.slice(1)}`, featuredNews.category)}
                       sx={{
                         position: 'absolute',
                         top: 20,
@@ -293,7 +292,7 @@ const NewsFeed = () => {
                     {featuredNews.videos && featuredNews.videos.length > 0 && (
                       <Chip
                         icon={<VideoLibrary sx={{ color: 'white !important' }} />}
-                        label="Video"
+                        label={t('news:video', 'Video')}
                         sx={{
                           position: 'absolute',
                           bottom: 20,
@@ -396,7 +395,7 @@ const NewsFeed = () => {
                       }}
                     >
                       <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-                        Read Full Article
+                        {t('news:readFullArticle', 'Read Full Article')}
                       </Box>
                     </Button>
                   </CardContent>
@@ -406,7 +405,7 @@ const NewsFeed = () => {
           </motion.div>
         )}
 
-        {/* ✅ REGULAR NEWS GRID - Brandbook */}
+        {/* REGULAR NEWS GRID */}
         <Grid container spacing={4}>
           {regularNews.map((newsItem, index) => (
             <Grid item xs={12} sm={6} lg={4} key={newsItem._id}>
@@ -448,7 +447,7 @@ const NewsFeed = () => {
                     />
         
                     <Chip
-                      label={newsItem.category}
+                      label={t(`news:category${newsItem.category.charAt(0).toUpperCase() + newsItem.category.slice(1)}`, newsItem.category)}
                       size="small"
                       sx={{
                         position: 'absolute',
@@ -468,7 +467,7 @@ const NewsFeed = () => {
                     {newsItem.videos && newsItem.videos.length > 0 && (
                       <Chip
                         icon={<VideoLibrary sx={{ color: 'white !important', fontSize: 16 }} />}
-                        label="Video"
+                        label={t('news:video', 'Video')}
                         size="small"
                         sx={{
                           position: 'absolute',
@@ -554,7 +553,7 @@ const NewsFeed = () => {
           ))}
         </Grid>
 
-        {/* ✅ EMPTY STATE - Brandbook */}
+        {/* EMPTY STATE */}
         {filteredNews.length === 0 && (
           <Box textAlign="center" py={10}>
             <Box
@@ -582,7 +581,7 @@ const NewsFeed = () => {
                 mb: 1
               }}
             >
-              No news found
+              {t('news:noNewsFound', 'No news found')}
             </Typography>
             <Typography 
               variant="body2" 
@@ -591,7 +590,7 @@ const NewsFeed = () => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              Try adjusting your search or filters
+              {t('news:tryAdjustingSearch', 'Try adjusting your search or filters')}
             </Typography>
           </Box>
         )}
