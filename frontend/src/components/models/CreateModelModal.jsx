@@ -38,6 +38,7 @@ import uploadService from '../../services/uploadService';
 import { useTranslation } from 'react-i18next';
 import { Switch as MuiSwitch } from '@mui/material'
 import ModelImageGrid from './ModelImageGrid';
+import projectService from '../../services/projectService';
 
 const CreateModelModal = ({ 
   open, 
@@ -47,6 +48,9 @@ const CreateModelModal = ({
 }) => {
     const { t } = useTranslation(['models', 'common']);
 
+
+  const [projects, setProjects] = useState([])
+  const [loadingProjects, setLoadingProjects] = useState(false)
 
   const [formData, setFormData] = useState({
     model: "",
@@ -58,6 +62,8 @@ const CreateModelModal = ({
     stories: 1,
     description: "",
     status: "active",
+    project: "",  // ✅ Agregar project
+    projectId: "",  // ✅ Agregar projectId
     images: { exterior: [], interior: [], blueprints: [] },
     hasBalcony: false,
     balconyPrice: 0,
@@ -81,6 +87,32 @@ const CreateModelModal = ({
     storage: false,
   });
 
+
+  // ✅ Cargar proyectos al abrir
+  useEffect(() => {
+    if (open) fetchProjects()
+  }, [open])
+
+  const fetchProjects = async () => {
+    try {
+      setLoadingProjects(true)
+      const data = await projectService.getAll()
+      setProjects(data)
+      // Auto-seleccionar si solo hay uno
+      if (data.length === 1) {
+        setFormData(prev => ({
+          ...prev,
+          project: data[0]._id,
+          projectId: data[0]._id,
+        }))
+      }
+    } catch (error) {
+      console.error('Error fetching projects:', error)
+    } finally {
+      setLoadingProjects(false)
+    }
+  }
+
   // ✅ Cargar datos del modelo seleccionado
   useEffect(() => {
     if (selectedModel) {
@@ -102,6 +134,11 @@ const CreateModelModal = ({
       const withBalconyBlueprints = Array.isArray(blueprintsObj.withBalcony) ? blueprintsObj.withBalcony : [];
       const withStorageBlueprints = Array.isArray(blueprintsObj.withStorage) ? blueprintsObj.withStorage : [];
 
+      // ✅ Extraer projectId del modelo
+      const projectId = typeof selectedModel.project === 'object'
+        ? selectedModel.project?._id
+        : selectedModel.project || selectedModel.projectId || ''
+
       setFormData({
         model: selectedModel.model,
         modelNumber: selectedModel.modelNumber || "",
@@ -112,6 +149,8 @@ const CreateModelModal = ({
         stories: selectedModel.stories || 1,
         description: selectedModel.description || "",
         status: selectedModel.status,
+        project: projectId,  // ✅
+        projectId: projectId,  // ✅
         images: {
           ...normalizeImages(selectedModel.images),
           blueprints: defaultBlueprints,
@@ -157,6 +196,8 @@ const CreateModelModal = ({
         stories: 1,
         description: "",
         status: "active",
+        project: "",
+        projectId: "",
         images: { exterior: [], interior: [], blueprints: [] },
         hasBalcony: false,
         balconyPrice: 0,
@@ -189,9 +230,12 @@ const CreateModelModal = ({
     onClose();
   };
 
-  const handleSubmit = () => {
+ const handleSubmit = () => {
+    if (!formData.project) {
+      alert("Please select a project");
+      return;
+    }
     onSubmit(formData);
-    // handleClose();
   };
 
   const handleRemoveImage = (section, type, index) => {
@@ -236,64 +280,6 @@ const CreateModelModal = ({
       [panel]: isExpanded,
     }));
   };
-
-  // const handleFileImageUpload = async (e) => {
-  //   const files = Array.from(e.target.files);
-  //   if (!files.length) return;
-  //   setUploadingImage(true);
-  //   try {
-  //     const urls = [];
-  //     for (const file of files) {
-  //       const url = await uploadService.uploadModelImage(file);
-  //       urls.push(url);
-  //     }
-  //     const section = currentImageSection;
-  //     const type = currentImageType;
-  //     const imagesData =
-  //       type === "interior" && currentRoomType !== "general"
-  //         ? urls.map((url) => ({ url, roomType: currentRoomType }))
-  //         : urls;
-
-  //     if (section === "base") {
-  //       setFormData((prev) => ({
-  //         ...prev,
-  //         images: {
-  //           ...prev.images,
-  //           [type]: [...prev.images[type], ...imagesData],
-  //         },
-  //       }));
-  //     } else if (section === "balcony") {
-  //       setFormData((prev) => ({
-  //         ...prev,
-  //         balconyImages: {
-  //           ...prev.balconyImages,
-  //           [type]: [...prev.balconyImages[type], ...imagesData],
-  //         },
-  //       }));
-  //     } else if (section === "upgrade") {
-  //       setFormData((prev) => ({
-  //         ...prev,
-  //         upgradeImages: {
-  //           ...prev.upgradeImages,
-  //           [type]: [...prev.upgradeImages[type], ...imagesData],
-  //         },
-  //       }));
-  //     } else if (section === "storage") {
-  //       setFormData((prev) => ({
-  //         ...prev,
-  //         storageImages: {
-  //           ...prev.storageImages,
-  //           [type]: [...prev.storageImages[type], ...imagesData],
-  //         },
-  //       }));
-  //     }
-  //   } catch (err) {
-  //     alert("Error uploading image(s)");
-  //   } finally {
-  //     setUploadingImage(false);
-  //     e.target.value = "";
-  //   }
-  // };
 
     const handleFileImageUpload = async (e) => {
     const files = Array.from(e.target.files);
@@ -555,6 +541,52 @@ const CreateModelModal = ({
             }}
           >
             <Grid container spacing={{ xs: 1.5, md: 2.5 }}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  select
+                  label="Project *"
+                  value={formData.project}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    project: e.target.value,
+                    projectId: e.target.value,
+                  }))}
+                  disabled={loadingProjects}
+                  helperText="Select the project this model belongs to"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                      fontFamily: '"Poppins", sans-serif',
+                      bgcolor: 'white',
+                      "& fieldset": { borderColor: 'rgba(140, 165, 81, 0.3)', borderWidth: '2px' },
+                      "&:hover fieldset": { borderColor: "#8CA551" },
+                      "&.Mui-focused fieldset": { borderColor: "#333F1F", borderWidth: "2px" }
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontFamily: '"Poppins", sans-serif',
+                      "&.Mui-focused": { color: "#333F1F" }
+                    },
+                    "& .MuiFormHelperText-root": { fontFamily: '"Poppins", sans-serif' }
+                  }}
+                >
+                  {loadingProjects ? (
+                    <MenuItem disabled>Loading projects...</MenuItem>
+                  ) : projects.length === 0 ? (
+                    <MenuItem disabled>No projects available</MenuItem>
+                  ) : (
+                    projects.map(project => (
+                      <MenuItem
+                        key={project._id}
+                        value={project._id}
+                        sx={{ fontFamily: '"Poppins", sans-serif', '&:hover': { bgcolor: 'rgba(140, 165, 81, 0.08)' } }}
+                      >
+                        {project.name} {project.slug ? `(${project.slug})` : ''}
+                      </MenuItem>
+                    ))
+                  )}
+                </TextField>
+              </Grid>
               {/* ✅ BASIC INFO SECTION */}
               <Grid item xs={12}>
                 <Box

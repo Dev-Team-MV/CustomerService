@@ -39,7 +39,9 @@
   "form": {
     "number": "Número de Lote",
     "price": "Precio",
-    "status": "Estado"
+    "status": "Estado",
+    "project":"Proyecto",
+    "projectHelp": "Selecciona el proyecto al que pertenece este lote"
   },
   "confirmDelete": "¿Seguro que deseas eliminar este lote?"
 }
