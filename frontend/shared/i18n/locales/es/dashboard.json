@@ -1,0 +1,42 @@
+{
+    "welcomeUser": "Bienvenido, {{name}}",
+    "overviewSubtitle": "Resumen de Tu Panel",
+    "propertyMap": "Mapa de Propiedades",
+    "quickActions": {
+        "title": "Acciones Rápidas",
+        "subtitle": "Atajos a tareas comunes",
+        "addProperty": "Agregar Propiedad",
+        "addPropertyDesc": "Crear nueva propiedad",
+        "inviteUser": "Invitar Usuario",
+        "inviteUserDesc": "Enviar invitación",
+        "analytics": "Analíticas",
+        "analyticsDesc": "Ver reportes",
+        "models": "Modelos",
+        "modelsDesc": "Explorar diseños",
+        "amenities": "Amenidades",
+        "amenitiesDesc": "Ver instalaciones",
+        "manageNews": "Gestionar Noticias",
+        "manageNewsDesc": "Últimas novedades",
+        "clubHouse": "Club House",
+        "clubHouseDesc": "Ver club house",
+        "newsFeed": "Noticias",
+        "newsFeedDesc": "Últimas novedades"
+    },
+    "stats": {
+        "lotsListedSold": "Lotes Listados / Vendidos",
+        "monthlyRevenue": "Ingresos Mensuales",
+        "lotsOnHold": "Lotes en Espera",
+        "occupancyRate": "Tasa de Ocupación",
+        "thisMonth": "este mes",
+        "noChangeThisMonth": "Sin cambios este mes",
+        "vsLastMonth": "vs mes anterior",
+        "noChangeVsLastMonth": "Sin cambios vs mes anterior",
+        "ofTotalInventory": "del inventario total",
+        "ofSold": "{{sold}} de {{total}} vendidos"
+    },
+    "recentPayloads": {
+        "title": "Pagos Recientes",
+        "noPayloads": "No se encontraron pagos recientes",
+        "lot": "Lote {{number}}"
+    }
+}

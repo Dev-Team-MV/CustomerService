@@ -1,0 +1,42 @@
+{
+    "welcomeUser": "Welcome, {{name}}",
+    "overviewSubtitle": "Your Dashboard Overview",
+    "propertyMap": "Property Map",
+    "quickActions": {
+        "title": "Quick Actions",
+        "subtitle": "Shortcuts to common tasks",
+        "addProperty": "Add Property",
+        "addPropertyDesc": "Create new property",
+        "inviteUser": "Invite User",
+        "inviteUserDesc": "Send invitation",
+        "analytics": "Analytics",
+        "analyticsDesc": "View reports",
+        "models": "Models",
+        "modelsDesc": "Browse designs",
+        "amenities": "Amenities",
+        "amenitiesDesc": "View facilities",
+        "manageNews": "Manage News",
+        "manageNewsDesc": "Latest updates",
+        "clubHouse": "Club House",
+        "clubHouseDesc": "View club house",
+        "newsFeed": "News Feed",
+        "newsFeedDesc": "Latest updates"
+    },
+    "stats": {
+        "lotsListedSold": "Lots Listed / Sold",
+        "monthlyRevenue": "Monthly Revenue",
+        "lotsOnHold": "Lots on Hold",
+        "occupancyRate": "Occupancy Rate",
+        "thisMonth": "this month",
+        "noChangeThisMonth": "No change this month",
+        "vsLastMonth": "vs last month",
+        "noChangeVsLastMonth": "No change vs last month",
+        "ofTotalInventory": "of total inventory",
+        "ofSold": "{{sold}} of {{total}} sold"
+    },
+    "recentPayloads": {
+        "title": "Recent Payloads",
+        "noPayloads": "No recent payloads found",
+        "lot": "Lot {{number}}"
+    }
+}

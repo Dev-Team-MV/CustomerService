@@ -84,7 +84,7 @@ pipeline {
     stage('Install') {
       when { expression { env.SHOULD_RUN == 'true' } }
       steps {
-        dir('frontend') {
+        dir('frontend/apps/lakewood-p1') {
           sh '''#!/bin/bash
             set -e
             mkdir -p "${WORKSPACE}/.nvm"

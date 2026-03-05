@@ -1,0 +1,26 @@
+{
+  "title": "Gestor de Imágenes del Clubhouse",
+  "subtitle": "Gestiona y sube imágenes del Clubhouse. Puedes subir imágenes de exterior, interior (por sección) y planos.",
+  "manageImages": "Gestionar Imágenes",
+  "manageImagesTooltip": "Gestionar Imágenes del Clubhouse",
+  "tabs": {
+    "exterior": "Exterior",
+    "plans": "Planos",
+    "interior": "Interior",
+    "deck": "Deck"
+  },
+  "noImagesUploaded": "No se han subido imágenes",
+  "noPlansUploaded": "No se han subido planos",
+  "noSectionsConfigured": "No hay secciones configuradas",
+  "noImages": "Sin imágenes",
+  "selectSection": "Selecciona la Sección Interior",
+  "selectImages": "Seleccionar Imágenes",
+  "selectingFor": "Seleccionando para: {{section}}",
+  "readyToUpload": "Listo para Subir ({{count}})",
+  "uploadedImages": "Imágenes Subidas ({{count}})",
+  "noImagesYet": "Aún no hay imágenes. Selecciona archivos para subir.",
+  "close": "Cerrar",
+  "upload": "Subir {{count}} Imagen(es)",
+  "uploading": "Subiendo...",
+  "new": "NUEVO"
+}
