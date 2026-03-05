@@ -6,6 +6,8 @@
 //
 // URLs: devcustomerservice / customerservice (lakewood) | mvcrmdev / mvcrm (mv-crm)
 // Backend: apicsdev / apics
+//
+// IMPORTANTE: Solo se ejecuta si hay cambios en frontend/ (apps o shared). Si el commit solo toca backend/, se omite.
 pipeline {
   agent any
 
@@ -85,10 +87,11 @@ pipeline {
       }
     }
 
-    // Solo seguir si hubo cambios en frontend/ (shared o la app correspondiente)
+    // Solo seguir si hubo cambios en frontend/ — si el commit solo toca backend/, se omite todo el pipeline
     stage('Check changes') {
       steps {
         script {
+          env.SHOULD_RUN = 'false'
           def changed = sh(script: """
             if [ -n \"${env.GIT_PREVIOUS_COMMIT ?: ''}\" ] && [ \"${env.GIT_PREVIOUS_COMMIT}\" != \"${env.GIT_COMMIT ?: ''}\" ]; then
               git diff --name-only \"${env.GIT_PREVIOUS_COMMIT}\" \"${env.GIT_COMMIT}\" 2>/dev/null || true
@@ -99,10 +102,10 @@ pipeline {
 
           def appPath = "frontend/apps/${env.APP_NAME}/"
           def sharedPath = "frontend/shared/"
-          def relevant = changed.split('\n').any { f ->
+          def hasFrontendChanges = changed.split('\n').findAll { it.trim() }.any { f ->
             f.startsWith('frontend/') && (f.startsWith(appPath) || f.startsWith(sharedPath))
           }
-          env.SHOULD_RUN = (changed != '' && relevant) ? 'true' : 'false'
+          env.SHOULD_RUN = hasFrontendChanges ? 'true' : 'false'
 
           echo "Changed files: ${changed.replace('\n', ', ')}"
           echo "SHOULD_RUN (${env.APP_NAME} o shared): ${env.SHOULD_RUN}"
