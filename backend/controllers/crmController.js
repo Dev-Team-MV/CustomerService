@@ -11,8 +11,11 @@ import Project from '../models/Project.js'
  */
 export const getCrmBalance = async (req, res) => {
   try {
-    const projectIds = await Project.find({ isActive: true }).select('_id name slug').lean()
-    const projectMap = new Map(projectIds.map(p => [p._id.toString(), { name: p.name, slug: p.slug }]))
+    const projectIds = await Project.find({ isActive: true }).select('_id name slug title').lean()
+    const projectMap = new Map(projectIds.map(p => {
+      const name = p.title?.en || p.name || p.slug || 'Project'
+      return [p._id.toString(), { name, slug: p.slug }]
+    }))
 
     const properties = await Property.find({
       status: { $in: ['active', 'pending', 'sold'] },
@@ -56,11 +59,12 @@ export const getCrmBalance = async (req, res) => {
       globalCollected += sum
     }
 
-    const byProject = projectIds.map(({ _id, name, slug }) => {
+    const byProject = projectIds.map(({ _id, name, slug, title }) => {
       const id = _id.toString()
+      const displayName = title?.en || name || slug || 'Project'
       return {
         projectId: id,
-        name,
+        name: displayName,
         slug,
         totalCollected: collectedByProject.get(id) || 0,
         totalPending: pendingByProject.get(id) || 0
