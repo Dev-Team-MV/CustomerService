@@ -13,6 +13,8 @@ COPY apps/lakewood-p1/ ./apps/lakewood-p1/
 
 WORKDIR /app/apps/lakewood-p1
 RUN npm ci
+# Symlink node_modules al root para que shared/ pueda resolver sus imports
+RUN ln -s /app/apps/lakewood-p1/node_modules /app/node_modules
 RUN npm run build
 
 # Stage 2: serve with nginx
