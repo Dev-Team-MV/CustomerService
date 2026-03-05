@@ -12,6 +12,8 @@ COPY apps/mv-crm/ ./apps/mv-crm/
 
 WORKDIR /app/apps/mv-crm
 RUN npm ci
+# Symlink node_modules al root para que shared/ pueda resolver sus imports
+RUN ln -s /app/apps/mv-crm/node_modules /app/node_modules
 RUN npm run build
 
 # Stage 2: serve with nginx
