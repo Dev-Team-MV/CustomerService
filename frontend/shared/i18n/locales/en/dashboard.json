@@ -38,5 +38,37 @@
         "title": "Recent Payloads",
         "noPayloads": "No recent payloads found",
         "lot": "Lot {{number}}"
-    }
+    },
+
+      "title": "All",
+  "titleBold": "Projects",
+  "topbarLabel": "All Projects — Real-time monitoring",
+  "subtitle": "{{count}} Projects tracked — {{date}}",
+  "sidebarStats": {
+    "projects": "Projects",
+    "users": "Users",
+    "clients": "Clients"
+  },
+  "createProject": "Create Project",
+  "selectProject": "Select Project",
+  "openDashboard": "Open Project Dashboard",
+  "metrics": {
+    "users": "Users",
+    "revenue": "Revenue",
+    "growth": "Growth",
+    "tasks": "Tasks",
+    "performance": "Performance",
+    "totalUsers": "Total Users",
+    "monthlyRecurring": "Monthly recurring",
+    "thisMonth": "+{{growth}}% this month",
+    "complete": "{{percent}}% Complete",
+
+    "totalClients": "Total Clients",
+    "registeredOwners": "Registered owners",
+    "totalCollected": "Collected",
+    "totalPending": "Pending",
+    "phase": "Phase",
+    "clients": "clients"
+  },
+  "empty": "Select a project to view details"
 }

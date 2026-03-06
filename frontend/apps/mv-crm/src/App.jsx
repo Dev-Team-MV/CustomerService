@@ -9,7 +9,9 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Clients from './pages/Clients'
 import Projects from './pages/Projects'
+import ProjectsDetails from './pages/ProjectDetails'
 import Sales from './pages/Sales'
+import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
 
 // Shared components
@@ -48,9 +50,19 @@ export default function App() {
                 <Projects />
               </ProtectedRoute>
             } />
+            <Route path="/projects/:id" element={
+              <ProtectedRoute requiredRole="admin">
+                <ProjectsDetails />
+              </ProtectedRoute>
+            } />
             <Route path="/sales" element={
               <ProtectedRoute requiredRole="admin">
                 <Sales />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute requiredRole="admin">
+                <Profile />
               </ProtectedRoute>
             } />
 

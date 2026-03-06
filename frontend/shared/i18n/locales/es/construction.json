@@ -1,0 +1,40 @@
+{
+  "title": "Fases de Construcción",
+  "subtitle": "Seguimiento del progreso de construcción - Lote {{lot}}",
+  "phaseCounter": "Fase {{current}} de {{total}}",
+  "percentComplete": "{{percent}}% Completo",
+  "upload": "Subir",
+  "close": "Cerrar",
+  "cancel": "Cancelar",
+  "uploading": "Subiendo...",
+  "uploadImages": "Subir Imágenes",
+  "phaseInfo": "Fase {{number}} - {{title}}",
+  "mediaTitle": "Título/Descripción del Medio",
+  "progressAdded": "Progreso de Construcción Agregado (%)",
+  "progressHelper": "¿Cuánto progreso representa esta actualización?",
+  "selectImages": "Seleccionar Imágenes",
+  "selectVideos": "Seleccionar Videos",
+  "selectedImages": "Imágenes seleccionadas: {{count}}",
+  "selectedVideos": "Videos seleccionados: {{count}}",
+  "noMediaYet": "Aún no se han subido imágenes para esta fase",
+  "defaultMediaTitle": "Fase {{phase}} - {{type}} {{index}}",
+  "phases": {
+    "sitePreparation": "Preparación del Sitio",
+    "foundation": "Cimentación",
+    "framing": "Estructura",
+    "roofing": "Techado",
+    "mepInstallation": "Instalación MEP",
+    "insulationDrywall": "Aislamiento y Drywall",
+    "interiorFinishes": "Acabados Interiores",
+    "exteriorFinishes": "Acabados Exteriores",
+    "finalInspection": "Inspección Final"
+  },
+  "alerts": {
+    "selectMedia": "Por favor selecciona al menos una imagen o video",
+    "uploadSuccess": "✅ ¡Medios subidos exitosamente!",
+    "uploadError": "❌ Error: {{message}}",
+    "confirmDelete": "¿Estás seguro de que quieres eliminar esta imagen?",
+    "deleteSuccess": "✅ Imagen eliminada",
+    "deleteError": "❌ Error al eliminar imagen"
+  }
+}
