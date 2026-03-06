@@ -91,6 +91,25 @@ projectSchema.index({ slug: 1 })
 projectSchema.index({ isActive: 1 })
 projectSchema.index({ status: 1 })
 
+/** Ensure localized fields always return full { en, es } structure (not just _id) */
+const normalizeLocalized = (val) => {
+  if (!val || typeof val !== 'object') return { en: '', es: '' }
+  return {
+    en: val.en != null ? String(val.en) : '',
+    es: val.es != null ? String(val.es) : ''
+  }
+}
+
+projectSchema.set('toJSON', {
+  transform: (doc, ret) => {
+    ret.title = normalizeLocalized(ret.title)
+    ret.subtitle = normalizeLocalized(ret.subtitle)
+    ret.description = normalizeLocalized(ret.description)
+    ret.fullDescription = normalizeLocalized(ret.fullDescription)
+    return ret
+  }
+})
+
 const Project = mongoose.model('Project', projectSchema)
 
 export default Project
