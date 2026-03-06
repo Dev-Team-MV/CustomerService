@@ -28,7 +28,7 @@ import {
   Deck,
 } from "@mui/icons-material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { useProperty } from "../../context/PropertyContext";
+import { useProperty } from "@shared/context/PropertyContext";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import ModelCustomizationModal from "./ModelCustomizationModal";

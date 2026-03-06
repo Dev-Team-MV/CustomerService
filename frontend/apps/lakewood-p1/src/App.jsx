@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
-import { AuthProvider, useAuth } from '@shared/context/AuthContext'
-import ProtectedRoute from '@shared/components/ProtectedRoute'
-import Layout from '@shared/components/LayoutComponents/Layout'
+import { AuthProvider, useAuth } from './context/AuthContext'
+import ProtectedRoute from './components/ProtectedRoute'
+import Layout from './components/LayoutComponents/Layout'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
@@ -12,7 +12,7 @@ import Properties from './pages/Properties'
 import PropertySelection from './pages/PropertySelection'
 import Lots from './pages/Lots'
 import Models from './pages/Models'
-import ModelDetail from './pages/ModelDetail'
+
 import Payloads from './pages/Payloads'
 import Residents from './pages/Residents'
 import Analytics from './pages/Analytics'
@@ -20,8 +20,7 @@ import MyProperty from './pages/MyProperty'
 import AmenitiesPublic from './pages/AmenitiesPublic'
 import AmenitiesPrivate from './pages/AmenitiesPrivate'
 import NotFound from './pages/NotFound'
-import ViewModels from './pages/ViewModels'
-import ClubHouseDetail from './pages/ClubHouseDetail'
+
 import NewsTable from './pages/NewsTable'
 import NewsDetails from './components/news/NewsDetails'
 import NewsFeed from './pages/NewsFeed'
@@ -58,6 +57,7 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
+
             {/* Auth Routes - Sin Layout */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -83,7 +83,7 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/my-property" element={<MyProperty />} />
                 <Route path="/amenities" element={<AmenitiesPrivate />} />
-                <Route path="/view-models" element={<ViewModels />} />
+
                 <Route path="/master-plan/inventory" element={<MasterPlanManager />} />
                 <Route path="/configurations" element={<ConfigurationManager />} />
                 <Route path="/family-group" element={<FamilyGroup />} />
@@ -97,13 +97,13 @@ function App() {
                 
                 <Route path="/lots" element={<Lots />} />
                 <Route path="/models" element={<Models />} />
-                <Route path="/models/:id" element={<ModelDetail />} />
+
                 <Route path="/payloads" element={<Payloads />} />
                 <Route path="/residents" element={<Residents />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/timeline" element={<TimeLine />} />
-                <Route path="/club-house-detail" element={<ClubHouseDetail />} />
+
                 <Route path="/clubhouse-manager" element={<ClubhouseManager />} />
               </Route>
             </Route>

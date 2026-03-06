@@ -37,5 +37,48 @@
     "noPhone": "User does not have a phone number registered",
     "smsError": "Failed to send password setup SMS"
   },
-  "confirmDelete": "Are you sure you want to delete this user?"
+  "confirmDelete": "Are you sure you want to delete this user?",
+
+    "clients": {
+    "title": "Clients",
+    "titleBold": "Management",
+    "topbarLabel": "All Clients — Management",
+    "subtitle": "Manage all your clients here.",
+    "addClient": "Add Client",
+    "searchPlaceholder": "Search by name, email or phone...",
+    "total": "Total Clients",
+    "active": "Active",
+    "admins": "Admins",
+    "withLots": "With Lots",
+    "client": "Client",
+    "phone": "Phone",
+    "role": "Role",
+    "lots": "Lots",
+    "status": "Status",
+    "joined": "Joined",
+    "actions": "Actions",
+    "edit": "Edit client",
+    "delete": "Delete client",
+    "assigned": "assigned",
+    "activeStatus": "Active",
+    "inactiveStatus": "Inactive",
+    "confirmDelete": "Delete {{name}}?"
+  },
+
+    "dialog": {
+    "editUser": "Edit Resident",
+    "inviteNewUser": "Invite New Resident",
+    "invitationMessage": "Invite a new resident by filling out the form below. They will receive an email/SMS to set up their password.",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phoneNumber": "Phone Number",
+    "birthday": "Birthday",
+    "role": "Role",
+    "roles": {
+      "user": "Resident",
+      "admin": "Admin",
+      "superadmin": "Super Admin"
+    }
+    }
 }

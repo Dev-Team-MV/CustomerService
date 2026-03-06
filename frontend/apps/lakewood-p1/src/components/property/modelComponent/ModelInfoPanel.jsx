@@ -552,7 +552,7 @@ const ModelInfoPanel = ({
           </Button>
         )}
 
-        <Button
+        {/* <Button
           variant="outlined"
           size="small"
           fullWidth
@@ -578,7 +578,7 @@ const ModelInfoPanel = ({
           }}
         >
           {t("fullDetails", "Full Details")}
-        </Button>
+        </Button> */}
       </Box>
 
       {/* ✅ INFO MESSAGE - Sin opciones */}

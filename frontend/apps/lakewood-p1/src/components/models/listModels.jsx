@@ -453,24 +453,6 @@ const ModelCard = ({
               >
                 {t('models:actions.gallery')}
               </Button>
-              <Button
-                variant="contained"
-                size="small"
-                onClick={() => onGoToDetail(model._id)}
-                sx={{
-                  flex: 1,
-                  fontSize: '0.75rem',
-                  borderRadius: 2,
-                  bgcolor: '#333F1F',
-                  fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif',
-                  '&:hover': {
-                    bgcolor: '#4a5d3a'
-                  }
-                }}
-              >
-                {t('models:actions.details')}
-              </Button>
               <IconButton
                 size="small"
                 onClick={() => onEdit(model)}

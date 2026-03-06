@@ -1,56 +1,57 @@
 import React from "react"
 import { Grid, Paper, Box, Typography } from "@mui/material"
 import { motion } from "framer-motion"
-import { Bed, Bathtub, SquareFoot, Layers, Home, LocationOn, AttachMoney } from "@mui/icons-material"
+import { Bed, Bathtub, SquareFoot, Layers, Home, AttachMoney } from "@mui/icons-material"
+import { useTranslation } from 'react-i18next'
 
 const PropertySpecsGrid = ({ propertyDetails, isModel10, balconyLabels, gridProps }) => {
+  const { t } = useTranslation('myProperty')
+
   const specs = [
     {
       icon: <Bed sx={{ fontSize: { xs: 20, sm: 22 } }} />,
-      label: "BEDROOMS",
+      label: t('specs.bedrooms'),
       value: propertyDetails.model?.bedrooms,
     },
     {
       icon: <Bathtub sx={{ fontSize: { xs: 20, sm: 22 } }} />,
-      label: "BATHROOMS",
+      label: t('specs.bathrooms'),
       value: propertyDetails.model?.bathrooms,
     },
     {
       icon: <SquareFoot sx={{ fontSize: { xs: 20, sm: 22 } }} />,
-      label: "SQUARE FEET",
+      label: t('specs.squareFeet'),
       value: propertyDetails.model?.sqft,
     },
     propertyDetails.model?.stories && {
       icon: <Layers sx={{ fontSize: { xs: 20, sm: 22 } }} />,
-      label: "STORIES",
+      label: t('specs.stories'),
       value: propertyDetails.model?.stories,
     },
-    // ...existing code...
     {
       icon: <Home sx={{ fontSize: { xs: 20, sm: 22 } }} />,
-      label: "LOT NUMBER",
+      label: t('specs.lotNumber'),
       value: propertyDetails.lot?.number
         ? `#${propertyDetails.lot.number}`
         : propertyDetails.model?.lot?.number
           ? `#${propertyDetails.model.lot.number}`
-          : "N/A",
+          : t('specs.notAvailable'),
     },
     {
       icon: <AttachMoney sx={{ fontSize: { xs: 20, sm: 22 } }} />,
-      label: "PROPERTY VALUE",
+      label: t('specs.propertyValue'),
       value: propertyDetails.price
         ? `$${propertyDetails.price.toLocaleString()}`
         : propertyDetails.model?.price
           ? `$${propertyDetails.model.price.toLocaleString()}`
-          : "N/A",
+          : t('specs.notAvailable'),
     },
-    // ...existing code...
     isModel10 && propertyDetails.property?.hasBalcony && {
       icon: React.createElement(balconyLabels.icon, {
         sx: { fontSize: { xs: 20, sm: 22 } }
       }),
       label: balconyLabels.chipLabel.toUpperCase(),
-      value: "Included",
+      value: t('specs.included'),
     },
   ]
 

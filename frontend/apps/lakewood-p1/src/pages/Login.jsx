@@ -18,17 +18,17 @@ import {
   Visibility, 
   VisibilityOff, 
   KeyboardArrowRight, 
-  Home,
   Email,
   Phone,
   Gavel
 } from '@mui/icons-material'
-import { useAuth } from '@shared/context/AuthContext'
+import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
-import TypingFooter from '@shared/components/Footer'
+import TypingFooter from '../components/Footer'
+import LanguageSwitcher from '../components/LanguageSwitcher'
 
 const Login = () => {
   const [loginMethod, setLoginMethod] = useState('email')
@@ -252,6 +252,21 @@ const Login = () => {
           p: 4
         }}
       >
+        {/* ✅ LANGUAGE SWITCHER - Top Right */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          style={{
+            position: 'absolute',
+            top: 24,
+            right: 24,
+            zIndex: 10
+          }}
+        >
+          <LanguageSwitcher variant="default" />
+        </motion.div>
+
         <Box sx={{ width: '100%', maxWidth: '400px' }}>
           <motion.div
             initial={{ x: 50, opacity: 0 }}

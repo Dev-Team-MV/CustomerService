@@ -22,6 +22,7 @@ import enMasterPlan from './locales/en/masterPlan.json'
 import enTimeLine from './locales/en/timeline.json'
 import enConfiguration from './locales/en/configuration.json'
 import enMyProperty from './locales/en/myProperty.json'
+import enProject from './locales/en/project.json'
 
 // ES
 import esCommon from './locales/es/common.json'
@@ -43,6 +44,7 @@ import esMasterPlan from './locales/es/masterPlan.json'
 import esTimeLine from './locales/es/timeline.json'
 import esConfiguration from './locales/es/configuration.json'
 import esMyProperty from './locales/es/myProperty.json'
+import esProject from './locales/es/project.json'
 
 i18n
     .use(LanguageDetector)
@@ -69,7 +71,8 @@ i18n
                 masterPlan: enMasterPlan,
                 timeLine: enTimeLine,
                 configuration: enConfiguration,
-                myProperty: enMyProperty
+                myProperty: enMyProperty,
+                project: enProject
             },
             es: {
                 common: esCommon,
@@ -91,12 +94,13 @@ i18n
                 masterPlan: esMasterPlan,
                 timeLine: esTimeLine,
                 configuration: esConfiguration,
-                myProperty: esMyProperty
+                myProperty: esMyProperty,
+                project: esProject
             },
         },
         fallbackLng: 'en',
         defaultNS: 'common',
-        ns: ['common', 'auth', 'navigation', 'dashboard', 'property', 'amenities', 'news', 'profile', 'analytics', 'lots', 'propertySelection', 'residents', 'models', 'payloads', 'clubHouse', 'masterPlan', 'timeLine', 'configuration', 'myProperty'],
+        ns: ['common', 'auth', 'navigation', 'dashboard', 'property', 'amenities', 'news', 'profile', 'analytics', 'lots', 'propertySelection', 'residents', 'models', 'payloads', 'clubHouse', 'masterPlan', 'timeLine', 'configuration', 'myProperty', 'project'],
         interpolation: {
             escapeValue: false,
         },
