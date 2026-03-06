@@ -1,8 +1,8 @@
 // Jobs: 4 pipelines (2 apps × 2 ambientes)
-// - CustomerService-Frontend-Lakewood-Develop  → lakewood-p1 dev  (rama develop)
-// - CustomerService-Frontend-Lakewood-Production → lakewood-p1 pdn (rama main)
-// - CustomerService-Frontend-MVCRM-Develop     → mv-crm dev  (rama develop)
-// - CustomerService-Frontend-MVCRM-Production   → mv-crm pdn  (rama main)
+// - CustomerService-Frontend-Lakewood-Develop  → frontend-dev:5174 (rama develop)
+// - CustomerService-Frontend-Lakewood-Production → frontend:5173 (rama main)
+// - CustomerService-Frontend-MVCRM-Develop     → frontend-mvcrm-dev:5179 (rama develop)
+// - CustomerService-Frontend-MVCRM-Production   → frontend-mvcrm-pdn:5180 (rama main)
 //
 // URLs: devcustomerservice / customerservice (lakewood) | mvcrmdev / mvcrm (mv-crm)
 // Backend: apicsdev / apics
@@ -59,14 +59,19 @@ pipeline {
           env.ENVIRONMENT = (env.IS_PRODUCTION == 'true') ? 'production' : 'development'
 
           // Contenedores y puertos por app + ambiente
-          def appKey = env.APP_NAME == 'lakewood-p1' ? 'lakewood' : 'mvcrm'
-          env.CONTAINER_NAME = "frontend-${appKey}-${env.ENVIRONMENT == 'production' ? 'pdn' : 'dev'}"
-          env.IMAGE_NAME = "customer-service-${appKey}-frontend"
+          // Lakewood (app principal): frontend/frontend-dev, customer-service-frontend, 5173/5174
+          // MVCRM: frontend-mvcrm-dev/pdn, customer-service-mvcrm-frontend, 5179/5180
+          if (env.APP_NAME == 'lakewood-p1') {
+            env.CONTAINER_NAME = env.ENVIRONMENT == 'production' ? 'frontend' : 'frontend-dev'
+            env.IMAGE_NAME = 'customer-service-frontend'
+          } else {
+            env.CONTAINER_NAME = "frontend-mvcrm-${env.ENVIRONMENT == 'production' ? 'pdn' : 'dev'}"
+            env.IMAGE_NAME = 'customer-service-mvcrm-frontend'
+          }
           env.IMAGE_TAG = "${env.ENVIRONMENT}-${env.BUILD_NUMBER}"
 
-          // Puertos: lakewood dev=5173 pdn=5174 | mv-crm dev=5179 pdn=5180
           def ports = [
-            'lakewood-p1': [dev: '5173', prod: '5174'],
+            'lakewood-p1': [dev: '5174', prod: '5173'],
             'mv-crm': [dev: '5179', prod: '5180']
           ]
           env.APP_PORT = env.IS_PRODUCTION == 'true' ? ports[env.APP_NAME].prod : ports[env.APP_NAME].dev
