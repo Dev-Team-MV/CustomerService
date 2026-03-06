@@ -132,7 +132,6 @@ router.post('/:id/send-password-sms', protect, admin, (req, res, next) => {
   req.body = { ...req.body, userId: req.params.id }
   return sendSetupPasswordLink(req, res, next)
 })
-
 router.route('/:id')
   .get(protect, getUserById)
   .put(protect, updateUser)
