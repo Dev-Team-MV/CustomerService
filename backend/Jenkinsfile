@@ -2,6 +2,8 @@
 // Jobs en Jenkins: CustomerService-Backend-Develop (BD Atlas dev) | CustomerService-Backend-Production (BD VPS pdn)
 // Develop → apicsdev.michelangelodelvalle.com:5001 | Production → apics.michelangelodelvalle.com:5000
 // Tag de imagen: solo un ":" (ej. customerservice-backend:development-1)
+//
+// IMPORTANTE: Solo se ejecuta si hay cambios en backend/. Si el commit solo toca frontend/, se omite.
 
 pipeline {
     agent any
@@ -22,10 +24,11 @@ pipeline {
             }
         }
 
-        // Solo seguir si hubo cambios en backend/ (evita construir backend cuando el commit solo toca frontend)
+        // Solo seguir si hubo cambios en backend/ — si el commit solo toca frontend/, se omite todo el pipeline
         stage('Check changes') {
             steps {
                 script {
+                    env.SHOULD_RUN = 'false'
                     def changed = sh(script: """
                         if [ -n \"${env.GIT_PREVIOUS_COMMIT ?: ''}\" ] && [ \"${env.GIT_PREVIOUS_COMMIT}\" != \"${env.GIT_COMMIT ?: ''}\" ]; then
                             git diff --name-only \"${env.GIT_PREVIOUS_COMMIT}\" \"${env.GIT_COMMIT}\" 2>/dev/null || true
@@ -33,7 +36,8 @@ pipeline {
                             (git rev-parse --quiet --verify HEAD~1 >/dev/null 2>&1 && git diff --name-only HEAD~1 HEAD) || echo 'backend/'
                         fi
                     """, returnStdout: true).trim()
-                    env.SHOULD_RUN = (changed != '' && changed.split('\n').any { it.startsWith('backend/') }) ? 'true' : 'false'
+                    def hasBackendChanges = changed.split('\n').findAll { it.trim() }.any { it.startsWith('backend/') }
+                    env.SHOULD_RUN = hasBackendChanges ? 'true' : 'false'
                     echo "Changed files: ${changed.replace('\n', ', ')}"
                     echo "SHOULD_RUN (backend): ${env.SHOULD_RUN}"
                     if (env.SHOULD_RUN == 'false') {

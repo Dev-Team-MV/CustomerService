@@ -54,11 +54,43 @@ const options = {
           type: 'object',
           properties: {
             _id: { type: 'string', description: 'Project ID' },
-            name: { type: 'string', description: 'Display name' },
-            slug: { type: 'string', description: 'Unique slug (e.g. lakewood, isq)' },
+            name: { type: 'string', description: 'Legacy display name (optional)' },
+            slug: { type: 'string', description: 'Unique slug (e.g. lakewood-oaks-on-lake-conroe-phase-I)' },
+            phase: { type: 'string', description: 'Phase identifier (e.g. I, II)' },
+            title: {
+              type: 'object',
+              description: 'Localized title',
+              properties: { en: { type: 'string' }, es: { type: 'string' } }
+            },
+            subtitle: {
+              type: 'object',
+              properties: { en: { type: 'string' }, es: { type: 'string' } }
+            },
+            description: {
+              type: 'object',
+              properties: { en: { type: 'string' }, es: { type: 'string' } }
+            },
+            fullDescription: {
+              type: 'object',
+              properties: { en: { type: 'string' }, es: { type: 'string' } }
+            },
+            image: { type: 'string', description: 'Main image URL' },
+            gallery: { type: 'array', items: { type: 'string' }, description: 'Gallery image URLs' },
+            features: {
+              type: 'object',
+              description: 'Localized feature lists',
+              properties: {
+                en: { type: 'array', items: { type: 'string' } },
+                es: { type: 'array', items: { type: 'string' } }
+              }
+            },
             type: { type: 'string', enum: ['residential_lots', 'apartments', 'other'] },
+            status: { type: 'string', enum: ['active', 'inactive', 'coming_soon', 'sold_out'] },
             isActive: { type: 'boolean' },
-            description: { type: 'string' },
+            externalUrl: { type: 'string', description: 'External project URL' },
+            location: { type: 'string' },
+            area: { type: 'string', description: 'e.g. 250,000 sq ft' },
+            videos: { type: 'array', items: { type: 'string' }, description: 'Video URLs' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
           }

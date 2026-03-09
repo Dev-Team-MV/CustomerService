@@ -6,6 +6,7 @@ import {
   deleteUser,
   searchUsers
 } from '../controllers/userController.js'
+import { sendSetupPasswordLink } from '../controllers/authController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -123,6 +124,14 @@ router.get('/search', protect, searchUsers)
  *       404:
  *         description: User not found
  */
+/**
+ * POST /api/users/:id/send-password-sms
+ * Admin only. Resends SMS to user with link to set password.
+ */
+router.post('/:id/send-password-sms', protect, admin, (req, res, next) => {
+  req.body = { ...req.body, userId: req.params.id }
+  return sendSetupPasswordLink(req, res, next)
+})
 router.route('/:id')
   .get(protect, getUserById)
   .put(protect, updateUser)
