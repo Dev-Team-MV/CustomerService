@@ -1,0 +1,84 @@
+{
+  "title": "Residentes",
+  "subtitle": "Gestiona las cuentas e información de los residentes",
+  "stats": {
+    "total": "Usuarios Totales",
+    "superadmins": "Super Administradores",
+    "admins": "Administradores",
+    "residents": "Residentes"
+  },
+  "table": {
+    "name": "NOMBRE",
+    "email": "CORREO",
+    "phone": "TELÉFONO",
+    "role": "ROL",
+    "properties": "PROPIEDADES",
+    "actions": "ACCIONES"
+  },
+  "role": {
+    "superadmin": "Super Administrador",
+    "admin": "Administrador",
+    "user": "Residente"
+  },
+  "actions": {
+    "add": "Agregar Usuario",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "sendSMS": "Enviar SMS para configurar contraseña"
+  },
+  "empty": {
+    "title": "Aún no hay residentes",
+    "description": "Comienza invitando a tu primer residente",
+    "action": "Agregar Primer Residente"
+  },
+  "snackbar": {
+    "smsSent": "SMS de configuración de contraseña enviado exitosamente a {{phone}}",
+    "smsUnavailable": "Servicio de SMS no disponible. ¡Enlace copiado al portapapeles!",
+    "noPhone": "El usuario no tiene un número de teléfono registrado",
+    "smsError": "No se pudo enviar el SMS de configuración de contraseña"
+  },
+  "confirmDelete": "¿Seguro que deseas eliminar este usuario?",
+
+  "clients": {
+    "title": "Clientes",
+    "titleBold": "Gestión",
+    "topbarLabel": "Todos los Clientes — Gestión",
+    "subtitle": "Gestiona todos tus clientes aquí.",
+    "addClient": "Agregar Cliente",
+    "searchPlaceholder": "Buscar por nombre, correo o teléfono...",
+    "total": "Total de Clientes",
+    "active": "Activos",
+    "admins": "Administradores",
+    "withLots": "Con Lotes",
+    "client": "Cliente",
+    "phone": "Teléfono",
+    "role": "Rol",
+    "lots": "Lotes",
+    "status": "Estado",
+    "joined": "Unido",
+    "actions": "Acciones",
+    "edit": "Editar cliente",
+    "delete": "Eliminar cliente",
+    "assigned": "asignado",
+    "activeStatus": "Activo",
+    "inactiveStatus": "Inactivo",
+    "confirmDelete": "¿Eliminar {{name}}?"
+  },
+
+    "dialog": {
+    "editUser": "Editar Residente",
+    "inviteNewUser": "Invitar Nuevo Residente",
+    "invitationMessage": "Invita a un nuevo residente completando el formulario a continuación. Recibirán un correo electrónico/SMS para configurar su contraseña.",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "email": "Correo Electrónico",
+    "phoneNumber": "Número de Teléfono",
+    "birthday": "Fecha de Nacimiento",
+    "role": "Rol",
+    "roles": {
+      "user": "Residente",
+      "admin": "Administrador",
+      "superadmin": "Super Administrador"
+    }
+  }
+}

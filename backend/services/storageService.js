@@ -43,6 +43,35 @@ const bucketName = process.env.GCS_BUCKET_NAME || 'customer-service-7cc'
 const bucket = storage.bucket(bucketName)
 
 /**
+ * Environment prefix for folder separation (dev vs pdn).
+ * Use GCS_ENV_PREFIX to override, otherwise: production -> 'pdn', other -> 'dev'
+ */
+const getEnvPrefix = () => {
+  const explicit = process.env.GCS_ENV_PREFIX
+  if (explicit && typeof explicit === 'string' && explicit.trim()) {
+    return explicit.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'dev'
+  }
+  return process.env.NODE_ENV === 'production' ? 'pdn' : 'dev'
+}
+
+const KNOWN_PREFIXES = ['dev', 'pdn']
+
+/**
+ * Resolve full path in bucket, prepending env prefix if not already present.
+ * @param {string} pathOrName - Path or file name (e.g. 'clubhouse/abc.jpg' or 'dev/clubhouse/abc.jpg')
+ * @returns {string} Full path with env prefix
+ */
+const resolvePath = (pathOrName) => {
+  const prefix = getEnvPrefix()
+  const normalized = (pathOrName || '').replace(/^\/+/, '').trim()
+  if (!normalized) return prefix
+  // If path already has a known env prefix (dev/ or pdn/), use as-is
+  const lower = normalized.toLowerCase()
+  if (KNOWN_PREFIXES.some((p) => lower.startsWith(`${p}/`))) return normalized
+  return `${prefix}/${normalized}`
+}
+
+/**
  * Upload file to Google Cloud Storage
  * @param {Buffer} fileBuffer - File buffer
  * @param {string} fileName - Name for the file in storage
@@ -59,6 +88,7 @@ export const uploadFile = async (fileBuffer, fileName, mimeType, makePublic = fa
     const cleanFolder = folder.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()
     fullPath = `${cleanFolder}/${fileName}`
   }
+  fullPath = resolvePath(fullPath)
   try {
     const file = bucket.file(fullPath)
 
@@ -106,7 +136,8 @@ export const uploadFile = async (fileBuffer, fileName, mimeType, makePublic = fa
  */
 export const deleteFile = async (fileName) => {
   try {
-    const file = bucket.file(fileName)
+    const fullPath = resolvePath(fileName)
+    const file = bucket.file(fullPath)
     await file.delete()
     return true
   } catch (error) {
@@ -123,7 +154,8 @@ export const deleteFile = async (fileName) => {
  */
 export const getSignedUrl = async (fileName, expiresIn = 60 * 60 * 1000) => {
   try {
-    const file = bucket.file(fileName)
+    const fullPath = resolvePath(fileName)
+    const file = bucket.file(fullPath)
     const [signedUrl] = await file.getSignedUrl({
       action: 'read',
       expires: Date.now() + expiresIn
@@ -146,7 +178,8 @@ export const listFilesInFolder = async (folderPrefix, options = {}) => {
   try {
     const prefix = (folderPrefix || '').replace(/^\/|\/$/g, '').trim()
     if (!prefix) return []
-    const prefixWithSlash = `${prefix}/`
+    const resolvedPrefix = resolvePath(`${prefix}/`)
+    const prefixWithSlash = resolvedPrefix.endsWith('/') ? resolvedPrefix : `${resolvedPrefix}/`
     const [files] = await bucket.getFiles({ prefix: prefixWithSlash })
     const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
     const result = []
@@ -203,6 +236,7 @@ export const testConnection = async () => {
       success: true,
       message: 'Successfully connected to Google Cloud Storage',
       bucketName,
+      envPrefix: getEnvPrefix(),
       location: metadata.location,
       storageClass: metadata.storageClass,
       projectId: metadata.projectNumber,
