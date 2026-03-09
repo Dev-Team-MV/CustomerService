@@ -924,11 +924,16 @@ const Properties = () => {
           maxHeight={600}
         />
 
-        <PropertyDetailsModal
-          open={detailsOpen}
-          onClose={() => setDetailsOpen(false)}
-          property={detailsProperty}
-        />
+        
+        
+                <PropertyDetailsModal
+                  open={detailsOpen}
+                  onClose={() => setDetailsOpen(false)}
+                  property={detailsProperty}
+                  isAdmin={isAdmin}
+                />
+        
+        
 
         {selectedProperty && (
           <ConstructionPhasesModal

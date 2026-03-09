@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Box, Typography, Divider, List, ListItem, ListItemIcon, ListItemText } from '@mui/material'
-import { Logout, GridView, FolderOpen, People, Settings, Person } from '@mui/icons-material'
+import { Logout, GridView, FolderOpen, People, Settings, Person, BarChart } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import { useAuth } from '../../context/AuthContext'
 import LanguageSwitcher from '@shared/components/LanguageSwitcher'
@@ -13,6 +13,7 @@ const NAV = [
   { key: 'clients',  labelKey: 'clients',  icon: People,     path: '/clients'   },
   { key: 'projects', labelKey: 'projects', icon: FolderOpen, path: '/projects'  },
   { key: 'settings', labelKey: 'settings', icon: Settings,   path: '/settings'  },
+  {key: 'analytics', labelKey: 'analytics', icon: BarChart, path: '/analytics' }
 ]
 
 

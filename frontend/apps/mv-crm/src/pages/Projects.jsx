@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Box, Typography, Avatar, IconButton, Tooltip, TextField, InputAdornment, Button } from '@mui/material'
-import { Search, Delete, Edit, Visibility } from '@mui/icons-material'
+import { Search, Delete, Edit, Visibility, BarChart } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import DataTable from '@shared/components/table/DataTable'
 import projectService from '@shared/services/projectService'
@@ -9,6 +9,9 @@ import StatsStrip from '@shared/components/LayoutComponents/StatsStrip'
 import CreateProjectDialog from '../components/CreateProjectDialog'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
+import ProjectStatsModal from '../components/stats/ProjectStatsModal'
+import crmService from '../services/crmService'
 
 export default function Projects() {
   const { t } = useTranslation('project')
@@ -20,6 +23,25 @@ export default function Projects() {
   const [search, setSearch] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
   const [editProject, setEditProject] = useState(null)
+
+
+  // ── Stats modal ──────────────────────────────────────────────────────────
+  const [statsOpen, setStatsOpen]       = useState(false)
+  const [statsProject, setStatsProject] = useState(null)
+  const [allBalance, setAllBalance]     = useState(null)
+
+  useEffect(() => {
+    crmService.getBalance()
+      .then(d => setAllBalance(d))
+      .catch(() => {})
+  }, [])
+
+  const openStats = (project) => {
+    setStatsProject(project)
+    setStatsOpen(true)
+  }
+  // ────────────────────────────────────────────────────────────────────────
+
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -113,6 +135,20 @@ export default function Projects() {
       field: 'actions', headerName: t('table.actions'), minWidth: 90, align: 'center',
       renderCell: ({ row }) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
+          {/* Stats — nuevo */}
+          <Tooltip title="Statistics">
+            <IconButton
+              size="small"
+              onClick={(e) => { e.stopPropagation(); openStats(row) }}
+              sx={{
+                color: '#aaa', borderRadius: 0,
+                '&:hover': { color: '#000', background: '#f5f5f5' }
+              }}
+            >
+              <BarChart sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Tooltip>
+
           <Tooltip title={t('table.view')}>
             <IconButton
               size="small"
@@ -225,6 +261,14 @@ export default function Projects() {
           }}
         />
       </motion.div>
+
+      {/* Stats Modal */}
+      <ProjectStatsModal
+        open={statsOpen}
+        onClose={() => { setStatsOpen(false); setStatsProject(null) }}
+        project={statsProject}
+        allBalance={allBalance}
+      />
     </PageLayout>
   )
 }

@@ -73,6 +73,8 @@
     "lastName": "Last Name",
     "email": "Email",
     "phoneNumber": "Phone Number",
+    "newPassword": "New Password",
+    "passwordHelper": "Leave blank to keep current password",
     "birthday": "Birthday",
     "role": "Role",
     "roles": {

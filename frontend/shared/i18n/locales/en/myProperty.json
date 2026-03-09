@@ -37,7 +37,7 @@
   "complete": "Complete",
     "trackPhases": "Track each phase of your property construction",
 
-
+"paymentHistorySubtitle": "Review your payment history and status",
 
   "phaseDescription1": "Clearing and grading the land, setting up utilities and access",
   "phaseDescription2": "Pouring concrete foundation and slab work",
@@ -80,5 +80,20 @@
   "galleryInterior": "Interior",
   "galleryBlueprints": "Blueprints",
   "noPropertyImages": "No property images available",
-  "noImagesAvailable": "No images available"
+  "noImagesAvailable": "No images available",
+
+  "paymentStatus": "Payment Status",
+"propertyDetailsTab": "Property Details",
+"constructionPhases": "Construction Phases",
+
+"specs": {
+  "bedrooms": "Bedrooms",
+  "bathrooms": "Bathrooms",
+  "squareFeet": "Square Feet",
+  "stories": "Stories",
+  "lotNumber": "Lot Number",
+  "propertyValue": "Property Value",
+  "included": "Included",
+  "notAvailable": "Not available"
+}
 }
