@@ -206,7 +206,7 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
             if (!organized.interior[interiorKey]) organized.interior[interiorKey] = [];
             organized.interior[interiorKey].push(imageObj);
           } else if (section === 'deck') organized.deck.push(imageObj);
-          else organized.exterior.push(imageObj); // fallback
+          // No agregar a exterior cuando section es null/undefined (evita que imágenes de interior aparezcan en exterior)
         });
 
               // --- NUEVO: intentar traer archivos específicos de "deck" si no llegaron como section
@@ -662,23 +662,15 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
           );
         }
         
-        // Upload interior sections
+        // Upload interior sections (solo una vez por sección)
         for (const [key, files] of Object.entries(selectedFiles.interior)) {
           if (files.length > 0) {
             uploadPromises.push(
               uploadService.uploadClubhouseImages(
-                prepareFiles(files, 'interior', key), // <-- pasa sección e interiorKey
+                prepareFiles(files, 'interior', key),
                 'interior',
                 key
               )
-            );
-          }
-        }
-        // Upload interior sections
-        for (const [key, files] of Object.entries(selectedFiles.interior)) {
-          if (files.length > 0) {
-            uploadPromises.push(
-              uploadService.uploadClubhouseImages(prepareFiles(files), 'interior', key)
             );
           }
         }
