@@ -468,28 +468,80 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
     };
 
 
+  // const handleToggleIsPublicSelected = (section, idx, interiorKey = null) => e => {
+  //   setSelectedFiles(prev => {
+  //     const update = arr => arr.map((f, i) =>
+  //       i === idx ? { ...f, isPublic: e.target.checked } : f
+  //     );
+  //     if (section === 'interior' && interiorKey) {
+  //       return {
+  //         ...prev,
+  //         interior: {
+  //           ...prev.interior,
+  //           [interiorKey]: update(prev.interior[interiorKey])
+  //         }
+  //       };
+  //     } else {
+  //       return {
+  //         ...prev,
+  //         [section]: update(prev[section])
+  //       };
+  //     }
+  //   });
+  // };
   const handleToggleIsPublicSelected = (section, idx, interiorKey = null) => e => {
-    setSelectedFiles(prev => {
-      const update = arr => arr.map((f, i) =>
-        i === idx ? { ...f, isPublic: e.target.checked } : f
-      );
-      if (section === 'interior' && interiorKey) {
-        return {
-          ...prev,
-          interior: {
-            ...prev.interior,
-            [interiorKey]: update(prev.interior[interiorKey])
-          }
-        };
-      } else {
-        return {
-          ...prev,
-          [section]: update(prev[section])
-        };
-      }
-    });
-  };
+  const checked = e?.target?.checked ?? false;
+  setSelectedFiles(prev => {
+    const update = arr => arr.map((f, i) =>
+      f && typeof f === 'object'
+        ? (i === idx ? { ...f, isPublic: checked } : f)
+        : f
+    );
+    if (section === 'interior' && interiorKey) {
+      return {
+        ...prev,
+        interior: {
+          ...prev.interior,
+          [interiorKey]: update(prev.interior[interiorKey])
+        }
+      };
+    } else {
+      return {
+        ...prev,
+        [section]: update(prev[section])
+      };
+    }
+  });
+};
 
+  // const handleFileSelect = (event, section) => {
+  //   const files = Array.from(event.target.files);
+  //   if (files.length === 0) return;
+  //   setSelectedFiles(prev => {
+  //     if (section === 'interior') {
+  //       return {
+  //         ...prev,
+  //         interior: {
+  //           ...prev.interior,
+  //           [selectedInteriorSection]: [
+  //             ...(Array.isArray(prev.interior[selectedInteriorSection]) ? prev.interior[selectedInteriorSection] : []),
+  //             ...files.map(file => ({ file, isPublic: false }))
+  //           ]
+  //         }
+  //       };
+  //     } else {
+  //       return {
+  //         ...prev,
+  //         [section]: [
+  //           ...(Array.isArray(prev[section]) ? prev[section] : []),
+  //           ...files.map(file => ({ file, isPublic: false }))
+  //         ]
+  //       };
+  //     }
+  //   });
+  // };
+
+    // ...existing code...
   const handleFileSelect = (event, section) => {
     const files = Array.from(event.target.files);
     if (files.length === 0) return;
@@ -516,6 +568,7 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
       }
     });
   };
+  // ...existing code...
 
   const handleRemoveSelectedFile = (section, index, interiorKey = null) => {
     setSelectedFiles(prev => {
@@ -1199,6 +1252,7 @@ const handleDeleteExistingImage = async (section, image, interiorKey = null) => 
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
           >
+            
             <ImagePreview
               src={
                 file.file instanceof File
@@ -1209,11 +1263,13 @@ const handleDeleteExistingImage = async (section, image, interiorKey = null) => 
               }
               alt={`Preview ${idx + 1}`}
               isPublic={!!file.isPublic}
-              onTogglePublic={handleToggleIsPublicSelected(
-                getCurrentSection(),
-                idx,
-                tab === 2 ? selectedInteriorSection : null
-              )}
+              onTogglePublic={checked =>
+                handleToggleIsPublicSelected(
+                  getCurrentSection(),
+                  idx,
+                  tab === 2 ? selectedInteriorSection : null
+                )({ target: { checked } })
+              }
               onDelete={() =>
                 handleRemoveSelectedFile(
                   getCurrentSection(),
@@ -1232,6 +1288,7 @@ const handleDeleteExistingImage = async (section, image, interiorKey = null) => 
                 height: 160
               }}
             />
+            
           </motion.div>
         </Grid>
       ))}
@@ -1260,15 +1317,16 @@ const handleDeleteExistingImage = async (section, image, interiorKey = null) => 
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3 }}
             >
+              
               <ImagePreview
                 src={typeof img === 'string' ? img : img.url}
                 alt={`Image ${idx + 1}`}
                 isPublic={!!(img.isPublic ?? true)}
-                onTogglePublic={e =>
+                onTogglePublic={checked =>
                   handleToggleImageVisibility(
                     getCurrentSection(),
                     idx,
-                    e,
+                    checked,
                     tab === 2 ? selectedInteriorSection : null
                   )
                 }
@@ -1289,6 +1347,7 @@ const handleDeleteExistingImage = async (section, image, interiorKey = null) => 
                   height: 160
                 }}
               />
+              
             </motion.div>
           </Grid>
         ))}
