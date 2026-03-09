@@ -161,8 +161,8 @@ const handleToggleIsPublic = async (idx, type) => {
       >
         {editingStep ? t('editStep', 'Edit Step') : t('newStep', 'New Step')}
       </DialogTitle>
-      <DialogContent sx={{ pt: 3, px: 4 }}>
-        <Stack spacing={3}>
+      <DialogContent sx={{ pt: 3, px: 4, mt: 2 }}>
+        <Stack spacing={3} sx={{ mt: 1 }}>
           <TextField
             label={t('title', 'Title')}
             value={form.title}

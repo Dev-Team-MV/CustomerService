@@ -1,0 +1,98 @@
+{
+  "title": "Projects",
+  "titleBold": "Management",
+  "topbarLabel": "All Projects — Management",
+  "subtitle": "{{count}} projects registered",
+  "stats": {
+    "total": "Total Projects",
+    "active": "Active",
+    "types": "Types"
+  },
+  "table": {
+    "name": "Project",
+    "type": "Type",
+    "status": "Status",
+    "phase": "Phase",
+    "actions": "Actions",
+    "view": "View",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "searchPlaceholder": "Search by name, slug, type or status...",
+
+    "modal": {
+    "generalInfo": "General Information",
+    "editTitle": "Edit Project",
+    "createTitle": "Create New Project",
+    "lang": {
+      "en": "English",
+      "es": "Spanish"
+    },
+  "title": "Title ({{lang}})",
+  "subtitle": "Subtitle ({{lang}})",
+  "shortDescription": "Short Description ({{lang}})",
+  "fullDescription": "Full Description ({{lang}})",
+  "features": "Features ({{lang}})",
+    "addFeature": "Add feature",
+    "projectName": "Project Name",
+    "slug": "Slug",
+    "slugHelper": "Unique identifier, e.g. lakewood-p1",
+    "phase": "Phase",
+    "status": "Status",
+    "type": "Type",
+    "externalUrl": "External URL",
+    "location": "Location",
+    "area": "Area",
+    "mediaAssets": "Media Assets",
+    "mainImage": "Main Image",
+    "gallery": "Gallery",
+    "videos": "Videos",
+    "upload": "Upload",
+    "uploadVideo": "Upload Video",
+    "cancel": "Cancel",
+    "save": "Save",
+    "create": "Create",
+      "propertyDetails": "Property Details",
+  "projectTypes": {
+    "residential_lots": "Residential Lots",
+    "commercial": "Commercial",
+    "mixed_use": "Mixed Use"
+  }
+  },
+
+
+    "details": {
+    "title": "Project Details",
+    "topbar": "Project Details",
+    "loading": "Loading project...",
+    "notFound": "Project not found",
+    "back": "Back",
+    "description": "Description",
+    "features": "Features",
+    "noFeatures": "No features available",
+    "gallery": "Gallery",
+    "noGallery": "No images available",
+    "videos": "Videos",
+    "noVideos": "No videos available",
+    "media": "Media",
+    "mainImage": "Main Image",
+    "phase": "Phase",
+    "location": "Location",
+    "area": "Area",
+    "type": "Type",
+    "status": "Status",
+    "slug": "Slug",
+    "externalUrl": "External URL",
+    "createdAt": "Created",
+    "updatedAt": "Updated"
+  },
+  "create": {
+    "title": "New Project",
+    "name": "Project Name",
+    "slug": "Slug",
+    "type": "Type",
+    "submit": "Create",
+    "cancel": "Cancel"
+  }
+}

@@ -43,5 +43,12 @@
     "noNotificationsDesc": "Te notificaremos cuando ocurra algo importante",
     "markAllAsRead": "Marcar todo como leído",
     "unread": "{{count}} sin leer",
-    "hoursAgo": "hace {{count}} horas"
+    "hoursAgo": "hace {{count}} horas",
+
+      "overview": "Resumen",
+  "clients": "Clientes",
+  "projects": "Proyectos",
+  "settings": "Configuración",
+  "quickStats": "Estadísticas rápidas",
+  "signOut": "Cerrar sesión"
 }

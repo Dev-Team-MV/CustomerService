@@ -23,6 +23,7 @@ import {
   SyncDisabled,
   Home as HomeIcon
 } from '@mui/icons-material'
+import {useTranslation} from 'react-i18next'
 
 import OptionChips from './OptionChips'
 import PriceSummary from './PriceSummary'
@@ -59,7 +60,7 @@ const ModelCustomizationCore = ({
   const isModel10 = model?._id === MODEL_10_ID || compareModel?._id === MODEL_10_ID
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-
+  const { t } = useTranslation('models')
   // Estado principal
   const [options, setOptions] = useState({
     upgrade: initialOptions.upgrade || false,
@@ -285,8 +286,11 @@ const ModelCustomizationCore = ({
     }
   }
 
+    const finalConfirmLabel = confirmLabel || t('createProperty')
+
+
   // --- RENDER ---
-  return (
+   return (
     <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <Box sx={{
@@ -305,7 +309,7 @@ const ModelCustomizationCore = ({
           {model.model}
           {isModel10 && (
             <Chip
-              label="Special Configuration"
+              label={t('customization.specialConfiguration')}
               size="small"
               sx={{
                 ml: 2,
@@ -319,7 +323,7 @@ const ModelCustomizationCore = ({
           )}
           {compareModel && (
             <Chip
-              label={`vs ${compareModel.model}`}
+              label={t('customization.vsModel', { model: compareModel.model })}
               size="small"
               sx={{
                 ml: 2,
@@ -340,10 +344,10 @@ const ModelCustomizationCore = ({
           }}
         >
           {compareModel
-            ? "Compare two models side by side"
+            ? t('customization.compareTwoModels')
             : isModel10
-            ? "Customize your dream home - Compare Comedor vs Study configurations"
-            : "Customize your dream home - Compare configurations side by side"
+            ? t('customization.customizeYourDreamHome')
+            : t('customization.customizeClassic')
           }
         </Typography>
       </Box>
@@ -386,7 +390,7 @@ const ModelCustomizationCore = ({
                       fontWeight={600}
                       sx={{ fontFamily: '"Poppins", sans-serif', color: '#333F1F' }}
                     >
-                      {isSynced ? 'Synced' : 'Independent'}
+                      {isSynced ? t('customization.synced') : t('customization.independent')}
                     </Typography>
                   </Box>
                 }
@@ -426,13 +430,13 @@ const ModelCustomizationCore = ({
               >
                 <ToggleButton value="all">
                   <HomeIcon sx={{ mr: 0.5 }} fontSize="small" />
-                  All
+                  {t('customization.all')}
                 </ToggleButton>
                 <ToggleButton value="exterior">
-                  Exterior
+                  {t('customization.exterior')}
                 </ToggleButton>
                 <ToggleButton value="interior">
-                  Interior
+                  {t('customization.interior')}
                 </ToggleButton>
               </ToggleButtonGroup>
             </Box>
@@ -463,7 +467,7 @@ const ModelCustomizationCore = ({
                   }
                 }}
               >
-                <Tab label="All Rooms" value="all" />
+                <Tab label={t('customization.allRooms')} value="all" />
                 {ROOM_TYPES.map(room => (
                   <Tab
                     key={room.id}
@@ -495,8 +499,8 @@ const ModelCustomizationCore = ({
               compareOptions={compareOptions}
               calculatePrice={calculatePrice}
               calculateComparePrice={calculateComparePrice}
-              title={compareModel ? model.model : (labels.baseTitle || (isModel10 ? "With Comedor" : "Base Model"))}
-              compareTitle={compareModel ? compareModel.model : (labels.compareTitle || (isModel10 ? "With Study" : "Customized"))}
+              title={compareModel ? model.model : (labels.baseTitle || (isModel10 ? t('customization.withComedor') : t('customization.baseModel')))}
+              compareTitle={compareModel ? compareModel.model : (labels.compareTitle || (isModel10 ? t('customization.withStudy') : t('customization.customized')))}
             />
             <Button
               variant="contained"
@@ -548,72 +552,69 @@ const ModelCustomizationCore = ({
               }}
             >
               <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-                {confirmLabel}
+                {finalConfirmLabel}
               </Box>
             </Button>
           </Box>
           
-                    {/* Mobile Carousels */}
-                    <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', gap: 2, px: 2, pb: 2 }}>
-                      {/* Left Carousel */}
-                      <Box sx={{ flex: 1, bgcolor: '#fafafa', borderRadius: 3, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
-                        <Chip
-                          label={leftData.label}
-                          size="small"
-                          sx={{
-                            bgcolor: '#333F1F',
-                            color: 'white',
-                            fontWeight: 600,
-                            m: 1,
-                            fontFamily: '"Poppins", sans-serif'
-                          }}
-                        />
-                        {/* ✅ height fijo en px para que GalleryCarrousel pueda calcular su tamaño */}
-                        <Box sx={{ width: '100%', height: 220, position: 'relative' }}>
-                          <GalleryCarrousel
-                            images={leftData.images.map((img) => img.url)}
-                            onIndexChange={(newIndex) => {
-                              setLeftImageIndex(newIndex)
-                              if (isSynced) setRightImageIndex(newIndex)
-                            }}
-                            showPagination={true}
-                            showArrows={true}
-                            borderRadius={0}
-                            objectFit="contain"
-                            syncGroup={isSynced ? 'carousel-sync-mobile' : null}
-                            watermark={null}
-                          />
-                        </Box>
-                      </Box>
-                      {/* Right Carousel */}
-                      <Box sx={{ flex: 1, bgcolor: '#fafafa', borderRadius: 3, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
-                        <Chip
-                          label={rightData.label}
-                          size="small"
-                          sx={{
-                            bgcolor: compareModel ? '#8CA551' : (options.upgrade || options.balcony || options.storage ? '#8CA551' : '#333F1F'),
-                            color: 'white',
-                            fontWeight: 600,
-                            m: 1,
-                            fontFamily: '"Poppins", sans-serif'
-                          }}
-                        />
-                        {/* ✅ Misma altura fija */}
-                        <Box sx={{ width: '100%', height: 220, position: 'relative' }}>
-                          <GalleryCarrousel
-                            images={rightData.images.map((img) => img.url)}
-                            onIndexChange={(newIndex) => setRightImageIndex(newIndex)}
-                            showPagination={true}
-                            showArrows={true}
-                            borderRadius={0}
-                            objectFit="contain"
-                            syncGroup={isSynced ? 'carousel-sync-mobile' : null}
-                            watermark={null}
-                          />
-                        </Box>
-                      </Box>
-                    </Box>
-          
+          {/* Mobile Carousels */}
+          <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%', gap: 2, px: 2, pb: 2 }}>
+            {/* Left Carousel */}
+            <Box sx={{ flex: 1, bgcolor: '#fafafa', borderRadius: 3, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
+              <Chip
+                label={leftData.label}
+                size="small"
+                sx={{
+                  bgcolor: '#333F1F',
+                  color: 'white',
+                  fontWeight: 600,
+                  m: 1,
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              />
+              <Box sx={{ width: '100%', height: 220, position: 'relative' }}>
+                <GalleryCarrousel
+                  images={leftData.images.map((img) => img.url)}
+                  onIndexChange={(newIndex) => {
+                    setLeftImageIndex(newIndex)
+                    if (isSynced) setRightImageIndex(newIndex)
+                  }}
+                  showPagination={true}
+                  showArrows={true}
+                  borderRadius={0}
+                  objectFit="contain"
+                  syncGroup={isSynced ? 'carousel-sync-mobile' : null}
+                  watermark={null}
+                />
+              </Box>
+            </Box>
+            {/* Right Carousel */}
+            <Box sx={{ flex: 1, bgcolor: '#fafafa', borderRadius: 3, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
+              <Chip
+                label={rightData.label}
+                size="small"
+                sx={{
+                  bgcolor: compareModel ? '#8CA551' : (options.upgrade || options.balcony || options.storage ? '#8CA551' : '#333F1F'),
+                  color: 'white',
+                  fontWeight: 600,
+                  m: 1,
+                  fontFamily: '"Poppins", sans-serif'
+                }}
+              />
+              <Box sx={{ width: '100%', height: 220, position: 'relative' }}>
+                <GalleryCarrousel
+                  images={rightData.images.map((img) => img.url)}
+                  onIndexChange={(newIndex) => setRightImageIndex(newIndex)}
+                  showPagination={true}
+                  showArrows={true}
+                  borderRadius={0}
+                  objectFit="contain"
+                  syncGroup={isSynced ? 'carousel-sync-mobile' : null}
+                  watermark={null}
+                />
+              </Box>
+            </Box>
+          </Box>
         </>
       ) : (
         // Desktop Layout
@@ -646,7 +647,6 @@ const ModelCustomizationCore = ({
                 }}
               />
             </Box>
-            {/* ✅ Altura fija calculada: 95vh del dialog - header (~110px) - chip header (~56px) */}
             <Box sx={{ width: '100%', height: 'calc(95vh - 166px)', position: 'relative' }}>
               <GalleryCarrousel
                 images={leftData.images.map((img) => img.url).filter(Boolean)}
@@ -686,7 +686,7 @@ const ModelCustomizationCore = ({
               />
               <Divider sx={{ mb: 3, borderColor: 'rgba(140, 165, 81, 0.2)' }}>
                 <Chip
-                  label="Customization Options"
+                  label={t('customization.customizationOptions')}
                   size="small"
                   sx={{
                     fontFamily: '"Poppins", sans-serif',
@@ -718,7 +718,7 @@ const ModelCustomizationCore = ({
                         fontWeight={600}
                         sx={{ fontFamily: '"Poppins", sans-serif', color: '#333F1F' }}
                       >
-                        {isSynced ? 'Synced' : 'Independent'}
+                        {isSynced ? t('customization.synced') : t('customization.independent')}
                       </Typography>
                     </Box>
                   }
@@ -758,13 +758,13 @@ const ModelCustomizationCore = ({
                 >
                   <ToggleButton value="all">
                     <HomeIcon sx={{ mr: 0.5 }} fontSize="small" />
-                    All
+                    {t('customization.all')}
                   </ToggleButton>
                   <ToggleButton value="exterior">
-                    Exterior
+                    {t('customization.exterior')}
                   </ToggleButton>
                   <ToggleButton value="interior">
-                    Interior
+                    {t('customization.interior')}
                   </ToggleButton>
                 </ToggleButtonGroup>
               </Box>
@@ -795,7 +795,7 @@ const ModelCustomizationCore = ({
                     }
                   }}
                 >
-                  <Tab label="All Rooms" value="all" />
+                  <Tab label={t('customization.allRooms')} value="all" />
                   {ROOM_TYPES.map(room => (
                     <Tab
                       key={room.id}
@@ -870,7 +870,7 @@ const ModelCustomizationCore = ({
                 }}
               >
                 <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-                  {confirmLabel}
+                  {finalConfirmLabel}
                 </Box>
               </Button>
             </Box>
@@ -902,7 +902,6 @@ const ModelCustomizationCore = ({
                 }}
               />
             </Box>
-            {/* ✅ Misma altura fija calculada */}
             <Box sx={{ width: '100%', height: 'calc(95vh - 166px)', position: 'relative' }}>
               <GalleryCarrousel
                 images={rightData.images.map((img) => img.url)}

@@ -39,9 +39,9 @@ const puntosBase = [
   { id: 24, name: "Point 24", x: 32.7, y: 50 },
   { id: 25, name: "Point 25",x: 37, y: 59 },
   { id: 26, name: "Point 26", x: 46, y: 63  },
-  { id: 27, name: "Point 27", x: 49, y: 63 },
-  { id: 28, name: "Point 28", x: 52, y: 63 },
-  { id: 29, name: "Point 29", x: 43, y: 78.5 },
+  { id: 27, name: "Point 27", x: 52, y: 63 },
+  { id: 28, name: "Point 28", x: 36, y: 78.5 },
+  { id: 29, name: "Point 29", x: 53, y: 78.5 },
   { id: 30, name: "Point 30", x: 65, y: 75 },
 ]
 

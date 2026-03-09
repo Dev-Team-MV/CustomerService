@@ -62,13 +62,13 @@ const userPropertyService = {
           const profile = profileRes.data
     
           // Admins y superadmins ven todo por rol — nunca marcar como shared
-          if (profile.role === 'superadmin' || profile.role === 'admin') {
-            return allProperties.map(property => ({
-              ...property,
-              isOwned: true,
-              isShared: false
-            }))
-          }
+          // if (profile.role === 'superadmin' || profile.role === 'admin') {
+          //   return allProperties.map(property => ({
+          //     ...property,
+          //     isOwned: true,
+          //     isShared: false
+          //   }))
+          // }
     
           // Para usuarios normales: comparar por lotes
           const lotIds = new Set(

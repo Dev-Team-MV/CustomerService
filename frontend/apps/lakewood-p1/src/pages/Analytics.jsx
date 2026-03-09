@@ -19,11 +19,12 @@ import {
   Analytics as AnalyticsIcon
 } from '@mui/icons-material'
 import { motion, AnimatePresence } from 'framer-motion'
-import api from '@shared/services/api'
+import api from '../services/api'
 import StatCard from '../components/analitycs/StatCard'
 import AnimatedProgressBar from '../components/analitycs/AnimatedProgressBar'
 import ModelProgressBar from '../components/analitycs/ModelProgressBar'
-import PageHeader from '@shared/components/PageHeader'
+import PageHeader from '../components/PageHeader'
+import Loader from '../components/Loader'
 
 const Analytics = () => {
   const { t } = useTranslation(['analytics', 'common'])
@@ -170,16 +171,11 @@ const Analytics = () => {
 
         <AnimatePresence mode="wait">
           {loading && !stats.totalLots ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-                <CircularProgress size={60} sx={{ color: '#333F1F' }} />
-              </Box>
-            </motion.div>
+            <Loader 
+              size="large" 
+              message={t('analytics:loading', 'Loading analytics...')} 
+              fullHeight={false}
+            />
           ) : (
             <motion.div
               key="content"

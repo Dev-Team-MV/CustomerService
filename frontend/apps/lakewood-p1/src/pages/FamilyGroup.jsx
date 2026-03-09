@@ -15,13 +15,13 @@ import {
 } from '@mui/icons-material'
 import { motion, AnimatePresence } from 'framer-motion'
 import familyGroupService from '../services/familyGroup'
-import api from '@shared/services/api'
-import { useAuth } from '@shared/context/AuthContext'
-import PageHeader from '@shared/components/PageHeader'
+import api from '../services/api'
+import { useAuth } from '../context/AuthContext'
+import PageHeader from '../components/PageHeader'
 import FamilyGroupCard from '../components/FamilyGroup/FamilyGroupCard'
 import CreateGroupDialog from '../components/FamilyGroup/CreateGroup'
 import AddMemberDialog from '../components/FamilyGroup/AddMemberFamily'
-
+import Loader from '../components/Loader'
 const FamilyGroup = () => {
   const { user } = useAuth()
   const [groups, setGroups] = useState([])
@@ -151,12 +151,18 @@ const FamilyGroup = () => {
   if (loading) {
     return (
       <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="60vh"
+        sx={{
+          minHeight: "60vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }}
       >
-        <CircularProgress />
+        <Loader
+          size="large"
+          message="Loading family groups..."
+          fullHeight={false}
+        />
       </Box>
     )
   }
