@@ -59,5 +59,11 @@
     "passwordMinLength": "La nueva contraseña debe tener al menos 6 caracteres.",
     "passwordChanged": "¡Contraseña cambiada exitosamente!",
     "passwordChangeError": "Error al cambiar contraseña. Inténtalo de nuevo.",
-    "profileUpdated": "¡Perfil actualizado exitosamente!"
+    "profileUpdated": "¡Perfil actualizado exitosamente!",
+
+        
+      "footer": {
+        "copyright": "© {{year}} — MV Plataforma"
+      }
+    
 }

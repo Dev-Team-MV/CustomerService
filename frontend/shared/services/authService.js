@@ -14,9 +14,15 @@ export const authService = {
   },
 
 
-  register: async (firstName, lastName, email, password, phoneNumber) => {
-    const response = await api.post('/auth/register', { firstName, lastName, email, password, phoneNumber })
-    return response.data
+  register: async (firstName, lastName, email, password, phoneNumber, skipPasswordSetup = false) => {
+    return await api.post('/auth/register', {
+      firstName,
+      lastName,
+      email,
+      password,
+      phoneNumber,
+      skipPasswordSetup
+    })
   },
 
   logout: () => {
@@ -31,5 +37,11 @@ export const authService = {
       newPassword
     })
     return response.data
-  }
+  },
+
+
+  getProfile: async () => {
+    const response = await api.get('/auth/profile')
+    return response.data
+  },
 }

@@ -8,7 +8,7 @@ import api from '@shared/services/api'
 import map from '../../public/images/mapLakewood.png'
 import MasterPlanUploadModal from '../components/masterPlan/MasterPlanUpload'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
-import { useAuth } from '@shared/context/AuthContext'
+import { useAuth } from '../context/AuthContext'
 import uploadService from '../services/uploadService' // ✅ NUEVO IMPORT
 import { useTranslation } from 'react-i18next'
 

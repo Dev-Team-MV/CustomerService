@@ -1,0 +1,40 @@
+{
+  "title": "Construction Phases",
+  "subtitle": "Track property construction progress - Lot {{lot}}",
+  "phaseCounter": "Phase {{current}} of {{total}}",
+  "percentComplete": "{{percent}}% Complete",
+  "upload": "Upload",
+  "close": "Close",
+  "cancel": "Cancel",
+  "uploading": "Uploading...",
+  "uploadImages": "Upload Images",
+  "phaseInfo": "Phase {{number}} - {{title}}",
+  "mediaTitle": "Media Title/Description",
+  "progressAdded": "Construction Progress Added (%)",
+  "progressHelper": "How much progress does this update represent?",
+  "selectImages": "Select Images",
+  "selectVideos": "Select Videos",
+  "selectedImages": "Selected images: {{count}}",
+  "selectedVideos": "Selected videos: {{count}}",
+  "noMediaYet": "No images uploaded yet for this phase",
+  "defaultMediaTitle": "Phase {{phase}} - {{type}} {{index}}",
+  "phases": {
+    "sitePreparation": "Site Preparation",
+    "foundation": "Foundation",
+    "framing": "Framing",
+    "roofing": "Roofing",
+    "mepInstallation": "MEP Installation",
+    "insulationDrywall": "Insulation & Drywall",
+    "interiorFinishes": "Interior Finishes",
+    "exteriorFinishes": "Exterior Finishes",
+    "finalInspection": "Final Inspection"
+  },
+  "alerts": {
+    "selectMedia": "Please select at least one image or video",
+    "uploadSuccess": "✅ Media uploaded successfully!",
+    "uploadError": "❌ Error: {{message}}",
+    "confirmDelete": "Are you sure you want to delete this image?",
+    "deleteSuccess": "✅ Image deleted",
+    "deleteError": "❌ Error deleting image"
+  }
+}

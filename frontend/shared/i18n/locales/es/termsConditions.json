@@ -1,0 +1,53 @@
+{
+  "title": "Términos y Condiciones",
+  "subtitle": "Por favor lee estos términos cuidadosamente antes de usar nuestros servicios",
+  "back": "Volver",
+  "sectionLabel": "Sección {{number}}",
+  "highlights": {
+    "lastUpdated": "Última Actualización",
+    "lastUpdatedValue": "12 de Febrero, 2026",
+    "effectiveDate": "Fecha Efectiva",
+    "effectiveDateValue": "1 de Enero, 2026",
+    "version": "Versión",
+    "versionValue": "2.1"
+  },
+  "acceptance": {
+    "message": "Al acceder o usar nuestros servicios, aceptas estar sujeto a estos términos.",
+    "disclaimer": "Si no estás de acuerdo con alguna parte de estos términos, por favor discontinúa su uso inmediatamente."
+  },
+  "sections": {
+    "generalTerms": {
+      "title": "Términos Generales",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n\nSed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo."
+    },
+    "userResponsibilities": {
+      "title": "Responsabilidades del Usuario",
+      "content": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.\n\nSed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.\n\nQuis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur."
+    },
+    "privacyData": {
+      "title": "Privacidad y Protección de Datos",
+      "content": "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.\n\nSimilique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.\n\nOmnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae."
+    },
+    "paymentTerms": {
+      "title": "Términos de Pago",
+      "content": "Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.\n\nDoloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.\n\nSed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit."
+    },
+    "intellectualProperty": {
+      "title": "Propiedad Intelectual",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse ultrices gravida. Risus commodo viverra maecenas accumsan lacus vel facilisis.\n\nConsectetur adipiscing elit duis tristique sollicitudin nibh sit amet. Massa tincidunt dui ut ornare lectus sit amet est placerat. Urna neque viverra justo nec ultrices dui sapien eget mi. Sed risus ultricies tristique nulla aliquet enim tortor at auctor.\n\nViverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Fermentum et sollicitudin ac orci phasellus egestas tellus rutrum tellus. Mattis enim ut tellus elementum sagittis vitae et leo duis."
+    },
+    "liability": {
+      "title": "Responsabilidad y Exenciones",
+      "content": "Facilisis mauris sit amet massa vitae tortor condimentum lacinia. Morbi tristique senectus et netus et malesuada fames ac turpis. Elementum pulvinar etiam non quam lacus suspendisse faucibus interdum posuere.\n\nAmet commodo nulla facilisi nullam vehicula ipsum a arcu. Dignissim enim sit amet venenatis urna cursus eget. Ullamcorper malesuada proin libero nunc consequat interdum varius sit amet. Nisi porta lorem mollis aliquam ut porttitor.\n\nLeo vel fringilla est ullamcorper eget nulla facilisi etiam dignissim. Facilisis volutpat est velit egestas dui id ornare arcu odio. Consectetur a erat nam at lectus urna duis convallis convallis."
+    }
+  },
+  "chips": {
+    "mandatory": "Obligatorio",
+    "updated": "Actualizado 2026"
+  },
+  "footer": {
+    "title": "¿Necesitas Asistencia?",
+    "description": "Si tienes alguna pregunta sobre estos Términos y Condiciones, por favor contacta a nuestro equipo de soporte.",
+    "button": "Contactar Soporte"
+  }
+}

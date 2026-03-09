@@ -6,7 +6,7 @@ import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import PageHeader from '@shared/components/PageHeader';
+import PageHeader from '../components/PageHeader';
 import DataTable from '../components/table/DataTable';
 import EmptyState from '../components/table/EmptyState';
 import TimeLineService from '../services/TimeLineService';
@@ -396,16 +396,11 @@ const columns = [
   }}
 />
 
-        {loading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight={300}>
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Box color="error.main" textAlign="center" py={4}>{error}</Box>
-        ) : (
+
 <DataTable
   columns={columns}
   data={steps}
+  loading={loading}
   emptyState={
     <EmptyState
       icon={AddIcon}
@@ -416,7 +411,7 @@ const columns = [
     />
   }
 />
-        )}
+ 
 
         {/* MODAL CREAR/EDITAR STEP */}
 

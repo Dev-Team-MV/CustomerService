@@ -28,37 +28,37 @@ import {
   Cancel,
   Construction
 } from '@mui/icons-material'
-import api from '@shared/services/api'
+import { useTranslation } from 'react-i18next'
+import api from '../services/api'
 import uploadService from '../services/uploadService'
 import {motion, AnimatePresence} from 'framer-motion'
 import GalleryCarrousel from './GalleryCarrousel'
 
-
-const PHASE_TITLES = [
-  'Site Preparation',
-  'Foundation',
-  'Framing',
-  'Roofing',
-  'MEP Installation',
-  'Insulation & Drywall',
-  'Interior Finishes',
-  'Exterior Finishes',
-  'Final Inspection'
-]
-
 const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
+  const { t } = useTranslation('construction')
+  
+  const PHASE_TITLES = [
+    t('phases.sitePreparation'),
+    t('phases.foundation'),
+    t('phases.framing'),
+    t('phases.roofing'),
+    t('phases.mepInstallation'),
+    t('phases.insulationDrywall'),
+    t('phases.interiorFinishes'),
+    t('phases.exteriorFinishes'),
+    t('phases.finalInspection')
+  ]
+
   const [phases, setPhases] = useState([])
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
-const [uploadForm, setUploadForm] = useState({
-  title: '',
-  percentage: 0,
-  images: [],
-  videos: []
-});
-// ...existing code...
-const [selectedPhase, setSelectedPhase] = useState(null);
-// ...existing code...
+  const [uploadForm, setUploadForm] = useState({
+    title: '',
+    percentage: 0,
+    images: [],
+    videos: []
+  })
+  const [selectedPhase, setSelectedPhase] = useState(null)
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0)
   const [imageIdx, setImageIdx] = useState(0)
   const [phaseLightboxOpen, setPhaseLightboxOpen] = useState(false)
@@ -117,92 +117,91 @@ const [selectedPhase, setSelectedPhase] = useState(null);
       title: '',
       percentage: 0,
       images: [],
-      videos: [] // <-- agrega esto
+      videos: []
     })
   }
 
-const handleFileSelect = (e) => {
-  const files = Array.from(e.target.files);
-  const isVideo = e.target.accept && e.target.accept.includes('video');
-  setUploadForm(prev => ({
-    ...prev,
-    [isVideo ? 'videos' : 'images']: [...prev[isVideo ? 'videos' : 'images'], ...files]
-  }));
-};
-
-const handleRemoveMedia = (type, index) => {
-  setUploadForm(prev => ({
-    ...prev,
-    [type]: prev[type].filter((_, i) => i !== index)
-  }));
-};
-
-
-const handleUploadMedia = async () => {
-  if (!uploadForm.images.length && !uploadForm.videos.length) {
-    alert('Please select at least one image or video');
-    return;
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files)
+    const isVideo = e.target.accept && e.target.accept.includes('video')
+    setUploadForm(prev => ({
+      ...prev,
+      [isVideo ? 'videos' : 'images']: [...prev[isVideo ? 'videos' : 'images'], ...files]
+    }))
   }
-  try {
-    setUploading(true);
-    let urls = [];
-    let videoUrls = [];
-    if (uploadForm.images.length) {
-      urls = await uploadService.uploadPhaseImages(uploadForm.images);
-    }
-    if (uploadForm.videos.length) {
-      videoUrls = await uploadService.uploadPhaseVideos(uploadForm.videos);
-    }
-    const currentPercentage = selectedPhase.constructionPercentage || 0;
-    const addedPercentage = parseFloat(uploadForm.percentage) || 0;
-    const newPercentage = Math.min(100, currentPercentage + addedPercentage);
-    let phaseId = selectedPhase._id;
-    if (!phaseId) {
-      const createResponse = await api.post('/phases', {
-        property: property._id,
-        phaseNumber: selectedPhase.phaseNumber,
-        title: selectedPhase.title,
-        constructionPercentage: newPercentage
-      });
-      phaseId = createResponse.data._id;
-    } else {
-      await api.put(`/phases/${phaseId}`, {
-        constructionPercentage: newPercentage
-      });
-    }
-    for (let i = 0; i < urls.length; i++) {
-      const url = urls[i];
-      const mediaItemData = {
-        url,
-        title: uploadForm.title || `Phase ${selectedPhase.phaseNumber} - Image ${i + 1}`,
-        percentage: addedPercentage / (urls.length + videoUrls.length),
-        mediaType: 'image'
-      };
-      await api.post(`/phases/${phaseId}/media`, mediaItemData);
-    }
-    for (let i = 0; i < videoUrls.length; i++) {
-      const url = videoUrls[i];
-      const mediaItemData = {
-        url,
-        title: uploadForm.title || `Phase ${selectedPhase.phaseNumber} - Video ${i + 1}`,
-        percentage: addedPercentage / (urls.length + videoUrls.length),
-        mediaType: 'video'
-      };
-      await api.post(`/phases/${phaseId}/media`, mediaItemData);
-    }
-    alert('✅ Media uploaded successfully!');
-    setSelectedPhase(null);
-    setUploadForm({ title: '', percentage: 0, images: [], videos: [] });
-    fetchPhases();
-  } catch (error) {
-    alert(`❌ Error: ${error.response?.data?.message || error.message}`);
-  } finally {
-    setUploading(false);
+
+  const handleRemoveMedia = (type, index) => {
+    setUploadForm(prev => ({
+      ...prev,
+      [type]: prev[type].filter((_, i) => i !== index)
+    }))
   }
-};
+
+  const handleUploadMedia = async () => {
+    if (!uploadForm.images.length && !uploadForm.videos.length) {
+      alert(t('alerts.selectMedia'))
+      return
+    }
+    try {
+      setUploading(true)
+      let urls = []
+      let videoUrls = []
+      if (uploadForm.images.length) {
+        urls = await uploadService.uploadPhaseImages(uploadForm.images)
+      }
+      if (uploadForm.videos.length) {
+        videoUrls = await uploadService.uploadPhaseVideos(uploadForm.videos)
+      }
+      const currentPercentage = selectedPhase.constructionPercentage || 0
+      const addedPercentage = parseFloat(uploadForm.percentage) || 0
+      const newPercentage = Math.min(100, currentPercentage + addedPercentage)
+      let phaseId = selectedPhase._id
+      if (!phaseId) {
+        const createResponse = await api.post('/phases', {
+          property: property._id,
+          phaseNumber: selectedPhase.phaseNumber,
+          title: selectedPhase.title,
+          constructionPercentage: newPercentage
+        })
+        phaseId = createResponse.data._id
+      } else {
+        await api.put(`/phases/${phaseId}`, {
+          constructionPercentage: newPercentage
+        })
+      }
+      for (let i = 0; i < urls.length; i++) {
+        const url = urls[i]
+        const mediaItemData = {
+          url,
+          title: uploadForm.title || t('defaultMediaTitle', { phase: selectedPhase.phaseNumber, type: 'Image', index: i + 1 }),
+          percentage: addedPercentage / (urls.length + videoUrls.length),
+          mediaType: 'image'
+        }
+        await api.post(`/phases/${phaseId}/media`, mediaItemData)
+      }
+      for (let i = 0; i < videoUrls.length; i++) {
+        const url = videoUrls[i]
+        const mediaItemData = {
+          url,
+          title: uploadForm.title || t('defaultMediaTitle', { phase: selectedPhase.phaseNumber, type: 'Video', index: i + 1 }),
+          percentage: addedPercentage / (urls.length + videoUrls.length),
+          mediaType: 'video'
+        }
+        await api.post(`/phases/${phaseId}/media`, mediaItemData)
+      }
+      alert(t('alerts.uploadSuccess'))
+      setSelectedPhase(null)
+      setUploadForm({ title: '', percentage: 0, images: [], videos: [] })
+      fetchPhases()
+    } catch (error) {
+      alert(t('alerts.uploadError', { message: error.response?.data?.message || error.message }))
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const handleDeleteMedia = async (phaseId, mediaId) => {
-    if (!window.confirm('Are you sure you want to delete this image?')) return
+    if (!window.confirm(t('alerts.confirmDelete'))) return
 
     try {
       const phase = phases.find(p => p._id === phaseId)
@@ -212,29 +211,33 @@ const handleUploadMedia = async () => {
         mediaItems: updatedMediaItems
       })
 
-      alert('✅ Image deleted')
+      alert(t('alerts.deleteSuccess'))
       fetchPhases()
     } catch (error) {
       console.error('Error deleting media:', error)
-      alert('❌ Error deleting image')
+      alert(t('alerts.deleteError'))
     }
   }
 
-    // Helper para extraer URLs robustamente
   const extractUrl = (item) => {
-    if (!item) return null;
-    if (typeof item === 'string') return { url: item, type: 'image' }; // Asumimos que es imagen si es string
+    if (!item) return null
+    if (typeof item === 'string') return { url: item, type: 'image' }
     if (item.url) {
-      const type = item.mediaType || 'image'; // Determina si es imagen o video
-      return { url: item.url, type };
+      const type = item.mediaType || 'image'
+      return { url: item.url, type }
     }
-    return null;
-  };
+    return null
+  }
 
+    // ✅ Agregar función helper para obtener el título traducido
+  const getPhaseTitle = (phase) => {
+    if (!phase) return ''
+    return PHASE_TITLES[phase.phaseNumber - 1] || phase.title
+  }
 
   return (
     <>
-      {/* ✅ MODAL PRINCIPAL - Brandbook exacto como Payloads */}
+      {/* MODAL PRINCIPAL */}
       <Dialog 
         open={open} 
         onClose={onClose} 
@@ -247,7 +250,6 @@ const handleUploadMedia = async () => {
           }
         }}
       >
-        {/* ✅ DIALOG TITLE - Mismo estilo que Payloads */}
         <DialogTitle>
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Box display="flex" alignItems="center" gap={2}>
@@ -274,7 +276,7 @@ const handleUploadMedia = async () => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  Construction Phases
+                  {t('title')}
                 </Typography>
                 <Typography 
                   variant="caption"
@@ -283,7 +285,7 @@ const handleUploadMedia = async () => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  Track property construction progress - Lot {property?.lot?.number}
+                  {t('subtitle', { lot: property?.lot?.number })}
                 </Typography>
               </Box>
             </Box>
@@ -309,7 +311,7 @@ const handleUploadMedia = async () => {
             </Box>
           ) : (
             <>
-              {/* ✅ SLIDER DE FASES - Brandbook */}
+              {/* SLIDER DE FASES */}
               <Box 
                 display="flex" 
                 alignItems="center" 
@@ -351,7 +353,7 @@ const handleUploadMedia = async () => {
                       fontFamily: '"Poppins", sans-serif'
                     }}
                   >
-                    Phase {phases[currentPhaseIndex]?.phaseNumber} of {phases.length}
+                    {t('phaseCounter', { current: phases[currentPhaseIndex]?.phaseNumber, total: phases.length })}
                   </Typography>
                   <Typography 
                     variant="caption"
@@ -360,7 +362,7 @@ const handleUploadMedia = async () => {
                       fontFamily: '"Poppins", sans-serif'
                     }}
                   >
-                    {phases[currentPhaseIndex]?.title}
+                    {getPhaseTitle(phases[currentPhaseIndex])}
                   </Typography>
                 </Box>
 
@@ -393,7 +395,7 @@ const handleUploadMedia = async () => {
                 </IconButton>
               </Box>
 
-              {/* ✅ CONTENIDO DE LA FASE */}
+              {/* CONTENIDO DE LA FASE */}
               {phases[currentPhaseIndex] && (
                 <Paper
                   elevation={0}
@@ -405,7 +407,6 @@ const handleUploadMedia = async () => {
                     border: '1px solid #e0e0e0'
                   }}
                 >
-                  {/* Header de la fase */}
                   <Box display="flex" alignItems="center" gap={2} mb={3}>
                     <Box
                       sx={{
@@ -440,10 +441,10 @@ const handleUploadMedia = async () => {
                           fontFamily: '"Poppins", sans-serif'
                         }}
                       >
-                        {phases[currentPhaseIndex].title}
+                        {getPhaseTitle(phases[currentPhaseIndex])}
                       </Typography>
                       <Chip
-                        label={`${phases[currentPhaseIndex].constructionPercentage}% Complete`}
+                        label={t('percentComplete', { percent: phases[currentPhaseIndex].constructionPercentage })}
                         size="small"
                         sx={{
                           mt: 0.5,
@@ -500,13 +501,12 @@ const handleUploadMedia = async () => {
                         }}
                       >
                         <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-                          Upload
+                          {t('upload')}
                         </Box>
                       </Button>
                     )}
                   </Box>
 
-                  {/* Progress bar */}
                   <Box mb={3}>
                     <LinearProgress
                       variant="determinate"
@@ -525,55 +525,53 @@ const handleUploadMedia = async () => {
                     />
                   </Box>
 
-                  {/* ✅ GALERÍA DE IMÁGENES */}
-                {phases[currentPhaseIndex].mediaItems && phases[currentPhaseIndex].mediaItems.length > 0 ? (
-                  <Box sx={{
-                    bgcolor: '#000',
-                    borderRadius: 3,
-                    p: 2,
-                    minHeight: 280,
-                    height: 400,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}>
-                    <GalleryCarrousel
-                      images={phases[currentPhaseIndex]?.mediaItems.map(extractUrl).filter(Boolean)}
-                      showPagination={true}
-                      showArrows={true}
-                      autoPlay={false}
-                      borderRadius={8}
-                      objectFit="contain"
-                      startIndex={0}
-                      watermark="/images/logos/Logo_LakewoodOaks-08.png"
-                    />
-                  </Box>
-                ) : (
-                  <Alert
-                    severity="info"
-                    icon="ℹ️"
-                    sx={{
-                      borderRadius: 2,
-                      bgcolor: 'rgba(140, 165, 81, 0.08)',
-                      border: '1px solid rgba(140, 165, 81, 0.2)',
-                      '& .MuiAlert-message': {
-                        fontFamily: '"Poppins", sans-serif',
-                        color: '#333F1F'
-                      }
-                    }}
-                  >
-                    No images uploaded yet for this phase
-                  </Alert>
-                )}
+                  {phases[currentPhaseIndex].mediaItems && phases[currentPhaseIndex].mediaItems.length > 0 ? (
+                    <Box sx={{
+                      bgcolor: '#000',
+                      borderRadius: 3,
+                      p: 2,
+                      minHeight: 280,
+                      height: 400,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}>
+                      <GalleryCarrousel
+                        images={phases[currentPhaseIndex]?.mediaItems.map(extractUrl).filter(Boolean)}
+                        showPagination={true}
+                        showArrows={true}
+                        autoPlay={false}
+                        borderRadius={8}
+                        objectFit="contain"
+                        startIndex={0}
+                        watermark="/images/logos/Logo_LakewoodOaks-08.png"
+                      />
+                    </Box>
+                  ) : (
+                    <Alert
+                      severity="info"
+                      icon="ℹ️"
+                      sx={{
+                        borderRadius: 2,
+                        bgcolor: 'rgba(140, 165, 81, 0.08)',
+                        border: '1px solid rgba(140, 165, 81, 0.2)',
+                        '& .MuiAlert-message': {
+                          fontFamily: '"Poppins", sans-serif',
+                          color: '#333F1F'
+                        }
+                      }}
+                    >
+                      {t('noMediaYet')}
+                    </Alert>
+                  )}
                 </Paper>
               )}
             </>
           )}
         </DialogContent>
 
-        {/* ✅ DIALOG ACTIONS - Mismo estilo que Payloads */}
         <DialogActions sx={{ p: 3, gap: 2 }}>
           <Button
             onClick={onClose}
@@ -592,12 +590,12 @@ const handleUploadMedia = async () => {
               }
             }}
           >
-            Close
+            {t('close')}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* ✅ DIALOG PARA SUBIR IMÁGENES - Mismo estilo que Payloads */}
+      {/* DIALOG PARA SUBIR IMÁGENES */}
       <Dialog 
         open={!!selectedPhase} 
         onClose={() => setSelectedPhase(null)}
@@ -635,7 +633,7 @@ const handleUploadMedia = async () => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                Upload Images
+                {t('uploadImages')}
               </Typography>
               <Typography 
                 variant="caption"
@@ -644,19 +642,18 @@ const handleUploadMedia = async () => {
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
-                Phase {selectedPhase?.phaseNumber} - {selectedPhase?.title}
+                {t('phaseInfo', { number: selectedPhase?.phaseNumber, title: selectedPhase?.title })}
               </Typography>
             </Box>
           </Box>
         </DialogTitle>
 
-        
         <DialogContent sx={{ pt: 3 }}>
           <Grid container spacing={2.5}>
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Media Title/Description"
+                label={t('mediaTitle')}
                 value={uploadForm.title}
                 onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
                 sx={{
@@ -692,11 +689,11 @@ const handleUploadMedia = async () => {
               <TextField
                 fullWidth
                 type="number"
-                label="Construction Progress Added (%)"
+                label={t('progressAdded')}
                 value={uploadForm.percentage}
                 onChange={(e) => setUploadForm(prev => ({ ...prev, percentage: e.target.value }))}
                 inputProps={{ min: 0, max: 100 }}
-                helperText="How much progress does this update represent?"
+                helperText={t('progressHelper')}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 3,
@@ -751,7 +748,7 @@ const handleUploadMedia = async () => {
                   }
                 }}
               >
-                Select Images
+                {t('selectImages')}
                 <input
                   type="file"
                   hidden
@@ -773,7 +770,7 @@ const handleUploadMedia = async () => {
                     mb: 1
                   }}
                 >
-                  Selected images: {uploadForm.images.length}
+                  {t('selectedImages', { count: uploadForm.images.length })}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {uploadForm.images.map((file, index) => (
@@ -842,7 +839,7 @@ const handleUploadMedia = async () => {
                   }
                 }}
               >
-                Select Videos
+                {t('selectVideos')}
                 <input
                   type="file"
                   hidden
@@ -864,7 +861,7 @@ const handleUploadMedia = async () => {
                     mb: 1
                   }}
                 >
-                  Selected videos: {uploadForm.videos.length}
+                  {t('selectedVideos', { count: uploadForm.videos.length })}
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {uploadForm.videos.map((file, index) => (
@@ -911,7 +908,6 @@ const handleUploadMedia = async () => {
             )}
           </Grid>
         </DialogContent>
-        
 
         <DialogActions sx={{ p: 3, gap: 2 }}>
           <Button
@@ -931,64 +927,64 @@ const handleUploadMedia = async () => {
               }
             }}
           >
-            Cancel
+            {t('cancel')}
           </Button>
           
-<Button
-  variant="contained"
-  onClick={handleUploadMedia}
-  disabled={uploading || (!uploadForm.images.length && !uploadForm.videos.length)}
-  startIcon={uploading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <CloudUpload />}
-  sx={{
-    borderRadius: 3,
-    bgcolor: '#333F1F',
-    color: 'white',
-    fontWeight: 600,
-    textTransform: 'none',
-    letterSpacing: '1px',
-    fontFamily: '"Poppins", sans-serif',
-    px: 4,
-    py: 1.5,
-    boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
-    position: 'relative',
-    overflow: 'hidden',
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: '-100%',
-      width: '100%',
-      height: '100%',
-      bgcolor: '#8CA551',
-      transition: 'left 0.4s ease',
-      zIndex: 0,
-    },
-    '&:hover': {
-      bgcolor: '#333F1F',
-      boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
-      '&::before': {
-        left: 0,
-      },
-    },
-    '&:disabled': {
-      bgcolor: '#e0e0e0',
-      color: '#706f6f',
-      boxShadow: 'none'
-    },
-    '& .MuiButton-startIcon': {
-      position: 'relative',
-      zIndex: 1,
-    }
-  }}
->
-  <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-    {uploading ? 'Uploading...' : 'Upload'}
-  </Box>
-</Button>
+          <Button
+            variant="contained"
+            onClick={handleUploadMedia}
+            disabled={uploading || (!uploadForm.images.length && !uploadForm.videos.length)}
+            startIcon={uploading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <CloudUpload />}
+            sx={{
+              borderRadius: 3,
+              bgcolor: '#333F1F',
+              color: 'white',
+              fontWeight: 600,
+              textTransform: 'none',
+              letterSpacing: '1px',
+              fontFamily: '"Poppins", sans-serif',
+              px: 4,
+              py: 1.5,
+              boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: '-100%',
+                width: '100%',
+                height: '100%',
+                bgcolor: '#8CA551',
+                transition: 'left 0.4s ease',
+                zIndex: 0,
+              },
+              '&:hover': {
+                bgcolor: '#333F1F',
+                boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+                '&::before': {
+                  left: 0,
+                },
+              },
+              '&:disabled': {
+                bgcolor: '#e0e0e0',
+                color: '#706f6f',
+                boxShadow: 'none'
+              },
+              '& .MuiButton-startIcon': {
+                position: 'relative',
+                zIndex: 1,
+              }
+            }}
+          >
+            <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
+              {uploading ? t('uploading') : t('upload')}
+            </Box>
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* ✅ LIGHTBOX */}
+      {/* LIGHTBOX */}
       <Dialog 
         open={phaseLightboxOpen} 
         onClose={() => setPhaseLightboxOpen(false)} 

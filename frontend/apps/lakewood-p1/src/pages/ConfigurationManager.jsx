@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box, Chip, Container, Paper, Typography, Button, Tabs, Tab, Divider, Grid, TextField, IconButton, Stack
 } from '@mui/material';
@@ -9,6 +9,8 @@ import PageHeader from '@shared/components/PageHeader';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useTranslation } from 'react-i18next';
 import ImagePreview from '../components/ImgPreview';
+import projectService from '../services/projectService';
+import uploadService from '@shared/services/uploadService';
 
 const LANGS = [
   { code: 'en', label: 'English' },
@@ -31,7 +33,6 @@ const initialConfig = {
   area: '',
   videos: [],
 };
-
 
 const GalleryThumb = ({ url, onRemove }) => (
   <Box sx={{
@@ -59,6 +60,22 @@ const GalleryThumb = ({ url, onRemove }) => (
   </Box>
 );
 
+function normalizeLangField(field) {
+  if (typeof field === 'object' && field !== null && field._id) {
+    return { en: '', es: '' }
+  }
+  if (typeof field === 'object' && field !== null && ('en' in field || 'es' in field)) {
+    return {
+      en: field.en || '',
+      es: field.es || ''
+    }
+  }
+  if (typeof field === 'string') {
+    return { en: field, es: field }
+  }
+  return { en: '', es: '' }
+}
+
 const ConfigurationManager = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState(initialConfig);
@@ -69,6 +86,42 @@ const ConfigurationManager = () => {
   const [featureInput, setFeatureInput] = useState('');
   const [videoInput, setVideoInput] = useState('');
   const { t } = useTranslation(['configuration', 'common']);
+  const [loading, setLoading] = useState(false);
+
+  const PROJECT_ID = '69a73ce5b20401b061da6451';
+  
+  useEffect(() => {
+    const fetchProject = async () => {
+      setLoading(true);
+      const projects = await projectService.getAll();
+      const project = Array.isArray(projects)
+        ? projects.find(p => p._id === PROJECT_ID)
+        : null;
+      if (project) {
+        setForm({
+          slug: project.slug || '',
+          phase: project.phase || '',
+          title: normalizeLangField(project.title),
+          subtitle: normalizeLangField(project.subtitle),
+          description: normalizeLangField(project.description),
+          fullDescription: normalizeLangField(project.fullDescription),
+          image: project.image || '',
+          gallery: Array.isArray(project.gallery) ? project.gallery : [],
+          features: project.features || { en: [], es: [] },
+          status: project.status || '',
+          externalUrl: project.externalUrl || '',
+          location: project.location || '',
+          area: project.area || '',
+          videos: Array.isArray(project.videos) ? project.videos : [],
+        });
+        setMainImage(project.image || '');
+        setGallery(Array.isArray(project.gallery) ? project.gallery : []);
+        setVideos(Array.isArray(project.videos) ? project.videos : []);
+      }
+      setLoading(false);
+    };
+    fetchProject();
+  }, []);
 
   // Feature handlers
   const handleAddFeature = () => {
@@ -108,13 +161,6 @@ const ConfigurationManager = () => {
     handleChange('videos', newArr);
   };
 
-  // Simula upload, reemplaza por tu lógica real
-  const fakeUpload = async (file) => {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(URL.createObjectURL(file)), 500);
-    });
-  };
-
   const handleChange = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
   const handleLangChange = (field, lang, value) => setForm(prev => ({
     ...prev,
@@ -124,22 +170,28 @@ const ConfigurationManager = () => {
   // Main image
   const handleImageUpload = async (e) => {
     if (e.target.files?.[0]) {
-      const url = await fakeUpload(e.target.files[0]);
-      setMainImage(url);
-      handleChange('image', url);
+      const file = e.target.files[0];
+      try {
+        const url = await uploadService.uploadImage(file, 'projects', '', true);
+        setMainImage(url);
+        handleChange('image', url);
+      } catch (error) {
+        console.error('Error uploading main image:', error);
+      }
     }
-  };
-  const handleMainImageRemove = () => {
-    setMainImage('');
-    handleChange('image', '');
   };
 
   // Gallery
   const handleGalleryUpload = async (e) => {
     if (e.target.files?.[0]) {
-      const url = await fakeUpload(e.target.files[0]);
-      setGallery(prev => [...prev, url]);
-      handleChange('gallery', [...gallery, url]);
+      const file = e.target.files[0];
+      try {
+        const url = await uploadService.uploadImage(file, 'projects/gallery', '', true);
+        setGallery(prev => [...prev, url]);
+        handleChange('gallery', [...gallery, url]);
+      } catch (error) {
+        console.error('Error uploading gallery image:', error);
+      }
     }
   };
   const handleGalleryRemove = idx => {
@@ -148,23 +200,48 @@ const ConfigurationManager = () => {
     handleChange('gallery', newGallery);
   };
 
+  // Videos
+  const handleVideoUpload = async (e) => {
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      try {
+        const url = await uploadService.uploadImage(file, 'projects/videos', '', true);
+        setVideos(prev => [...prev, url]);
+        handleChange('videos', [...videos, url]);
+      } catch (error) {
+        console.error('Error uploading video:', error);
+      }
+    }
+  };
+
+    // ← ESTE FALTABA
+  const handleMainImageRemove = () => {
+    setMainImage('');
+    handleChange('image', '');
+  };
+
   // Save/Cancel
-  const handleSave = () => {
-    setIsEditing(false);
-    // Aquí puedes hacer el submit real
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      await projectService.update({
+        ...form,
+        image: mainImage,
+        gallery,
+        videos,
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving configuration:', error);
+    }
+    setLoading(false);
   };
   const handleCancel = () => {
     setIsEditing(false);
-    // Si quieres resetear, puedes volver a initialConfig aquí
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '90vh',
-        p: { xs: 2, sm: 3 }
-      }}
-    >
+    <Box sx={{ minHeight: '90vh', p: { xs: 2, sm: 3 } }}>
       <Container maxWidth="xl">
         <PageHeader
           icon={SettingsIcon}
@@ -177,6 +254,7 @@ const ConfigurationManager = () => {
                   onClick: handleSave,
                   icon: <Save />,
                   tooltip: t('common:actions.save'),
+                  loading,
                   secondary: {
                     label: t('common:actions.cancel'),
                     onClick: handleCancel,
@@ -248,7 +326,7 @@ const ConfigurationManager = () => {
                     </IconButton>
                   </Stack>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {form.features[langTab].map((f, idx) => (
+                    {form.features[langTab]?.map((f, idx) => (
                       <Chip
                         key={idx}
                         label={f}
@@ -304,7 +382,8 @@ const ConfigurationManager = () => {
                     showSwitch={false}
                     imgSx={{ height: 140 }}
                     sx={{ mb: 1 }}
-                  />                ) : (
+                  />
+                ) : (
                   isEditing && (
                     <Box sx={{
                       border: '1.5px dashed #bfcab3',
@@ -361,14 +440,7 @@ const ConfigurationManager = () => {
                         type="file"
                         accept="video/*"
                         hidden
-                        onChange={async (e) => {
-                          if (e.target.files?.[0]) {
-                            const file = e.target.files[0];
-                            const url = await fakeUpload(file); // Simula la subida del archivo
-                            setVideos((prev) => [...prev, url]);
-                            handleChange('videos', [...videos, url]);
-                          }
-                        }}
+                        onChange={handleVideoUpload}
                       />
                     </Button>
                   )}

@@ -23,6 +23,7 @@ import ClubhouseImagesModal from "../components/ClubHouse/ClubImagesModal";
 import uploadService from "../services/uploadService";
 import PageHeader from "../components/PageHeader";
 import { useTranslation } from "react-i18next";
+import Loader from "../components/Loader";
 
 const ClubhouseManager = () => {
   const { t } = useTranslation(["clubhouse", "common"]);
@@ -171,30 +172,14 @@ const ClubhouseManager = () => {
 
   if (loading) {
     return (
-      <Box
-        sx={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)",
-        }}
-      >
-        <Box textAlign="center">
-          <CircularProgress sx={{ color: "#8CA551", mb: 2 }} size={60} />
-          <Typography
-            variant="h6"
-            sx={{
-              color: "#333F1F",
-              fontFamily: '"Poppins", sans-serif',
-              fontWeight: 600,
-            }}
-          >
-            Loading Clubhouse Images...
-          </Typography>
-        </Box>
+      <Box sx={{ minHeight: '60vh' }}>
+        <Loader 
+          size="large" 
+          message={t('loading')} 
+          fullHeight 
+        />
       </Box>
-    );
+    )
   }
 
   return (

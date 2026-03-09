@@ -11,7 +11,7 @@ import {
 import {
   Home,
 } from "@mui/icons-material";
-import { PropertyProvider, useProperty } from "../context/PropertyContext";
+import { PropertyProvider, useProperty } from "@shared/context/PropertyContext";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import InteractiveMap from "../components/property/InteractiveMap";
@@ -22,6 +22,7 @@ import ResidentAssignment from "../components/property/ResidentAssignment";
 import PriceCalculator from "../components/property/PriceCalculator";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import Loader from "../components/Loader";
 
 const PropertySelectionContent = () => {
   const { t } = useTranslation(['propertySelection', 'common']);
@@ -47,15 +48,19 @@ const PropertySelectionContent = () => {
     return (
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
           minHeight: "60vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
         }}
       >
-        <CircularProgress sx={{ color: "#4a7c59" }} />
+        <Loader
+          size="large"
+          message="Loading..."
+          fullHeight={false}
+        />
       </Box>
-    );
+    )
   }
 
   if (error) {

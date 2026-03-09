@@ -774,7 +774,6 @@ const CreateFacade = ({
 
 
                               {/* ✅ SELECT PROJECT */}
-                      </Grid>
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
@@ -820,6 +819,7 @@ const CreateFacade = ({
                     )}
                   </TextField>
                 </Grid>
+                      </Grid>
             </Box>
       
             {/* RIGHT SIDE - Image Preview */}

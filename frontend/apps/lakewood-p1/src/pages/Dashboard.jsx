@@ -36,14 +36,16 @@ import {
   Deck,
   Article
 } from '@mui/icons-material'
-import { useAuth } from '@shared/context/AuthContext'
-import api from '@shared/services/api'
+import { useAuth } from '../context/AuthContext'
+import api from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import DashboardMap from '../components/DashboardMap'
 import { motion, AnimatePresence } from 'framer-motion'
 import StatsCards from '../components/statscard'
 import ResidentDialog from '../components/ResidentDialog'
 import { useTranslation } from 'react-i18next'
+import Loader from '../components/Loader'  // ✅ IMPORTAR LOADER
+
 
 const Dashboard = () => {
   const { user } = useAuth()
@@ -239,13 +241,6 @@ const quickActions = [
     onClick: () => navigate('/analytics')
   },
   { 
-    icon: <HomeWork />, 
-    label: t('quickActions.models'), 
-    color: '#333F1F', 
-    bgColor: '#e8f5ee',
-    onClick: () => navigate('/view-models') 
-  },
-  { 
     icon: <Deck />, 
     label: t('quickActions.amenities'), 
     color: '#8CA551', 
@@ -259,24 +254,10 @@ const quickActions = [
     bgColor: '#fff5e6',
     onClick: () => navigate('/news')
   },
-  { 
-    icon: <Business />, 
-    label: t('quickActions.clubHouse'), 
-    color: '#333F1F', 
-    bgColor: '#e8f5ee',
-    onClick: () => navigate('/club-house-detail')
-  }
 ]
 
 // ✅ QUICK ACTIONS PARA USER
 const userQuickActions = [
-  { 
-    icon: <HomeWork />, 
-    label: t('quickActions.models'), 
-    color: '#333F1F', 
-    bgColor: '#e8f5ee',
-    onClick: () => navigate('/view-models') 
-  },
   { 
     icon: <Deck />, 
     label: t('quickActions.amenities'), 
@@ -291,13 +272,6 @@ const userQuickActions = [
     bgColor: '#fff5e6',
     onClick: () => navigate('/explore/news')
   },
-  { 
-    icon: <Business />, 
-    label: t('quickActions.clubHouse'), 
-    color: '#333F1F', 
-    bgColor: '#e8f5ee',
-    onClick: () => navigate('/club-house-detail')
-  }
 ]
 
 // ✅ REEMPLAZAR el array de stats por:
@@ -365,11 +339,15 @@ const dashboardStats = [
 
 
 
-  // ✅ REEMPLAZAR CON ESTE LOADING STATE SIMPLE
+  // ✅ REEMPLAZAR LOADING STATE CON LOADER COMPONENT
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-        <CircularProgress sx={{ color: '#333F1F' }} />
+      <Box sx={{ minHeight: '60vh' }}>
+        <Loader 
+          size="large" 
+          message={t('loading')} 
+          fullHeight 
+        />
       </Box>
     )
   }

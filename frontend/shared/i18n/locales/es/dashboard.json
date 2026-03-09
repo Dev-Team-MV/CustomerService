@@ -38,5 +38,38 @@
         "title": "Pagos Recientes",
         "noPayloads": "No se encontraron pagos recientes",
         "lot": "Lote {{number}}"
-    }
+    },
+
+      "title": "Todos",
+  "titleBold": "Los Proyectos",
+  "topbarLabel": "Todos los Proyectos — Monitoreo en tiempo real",
+  "subtitle": "{{count}} Proyectos monitoreados — {{date}}",
+  "sidebarStats": {
+    "projects": "Proyectos",
+    "users": "Usuarios",
+    "clients": "Clientes"
+    
+  },
+  "createProject": "Crear Proyecto",
+  "selectProject": "Selecciona un proyecto",
+  "openDashboard": "Abrir Dashboard del Proyecto",
+  "metrics": {
+    "users": "Usuarios",
+    "revenue": "Ingresos",
+    "growth": "Crecimiento",
+    "tasks": "Tareas",
+    "performance": "Desempeño",
+    "totalUsers": "Usuarios Totales",
+    "monthlyRecurring": "Ingresos mensuales",
+    "thisMonth": "+{{growth}}% este mes",
+    "complete": "{{percent}}% Completado",
+    
+        "totalClients": "Total Clientes",
+    "registeredOwners": "Propietarios registrados",
+    "totalCollected": "Recaudado",
+    "totalPending": "Pendiente",
+    "phase": "Fase",
+    "clients": "clientes"
+  },
+  "empty": "Selecciona un proyecto para ver detalles"
 }
