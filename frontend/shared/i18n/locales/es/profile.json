@@ -3,5 +3,22 @@
     "changePassword": "Cambiar Contraseña",
     "currentPassword": "Contraseña Actual",
     "newPassword": "Nueva Contraseña",
-    "confirmPassword": "Confirmar Contraseña"
+    "confirmPassword": "Confirmar Contraseña",
+    "my": "Mi",
+    "profile": "Perfil",
+    "managePersonalInfo": "Administra tu información personal y configuración de seguridad",
+    "activeUser": "Usuario Activo",
+    "accountDetails": "Detalles de Cuenta",
+    "editProfile": "Editar Perfil",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "emailAddress": "Correo Electrónico",
+    "phoneNumber": "Número de Teléfono",
+    "enableEditMode": "Activa el modo de edición para cambiar tu contraseña",
+    "passwordFillAll": "Por favor completa todos los campos de contraseña",
+    "passwordsNoMatch": "Las contraseñas no coinciden",
+    "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
+    "profileUpdated": "Perfil actualizado exitosamente",
+    "passwordChanged": "Contraseña cambiada exitosamente",
+    "passwordChangeError": "Error al cambiar contraseña. Inténtalo de nuevo"
 }

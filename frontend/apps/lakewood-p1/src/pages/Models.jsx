@@ -22,7 +22,7 @@ import CreateFacade from "../components/models/CreateFacade";
 import ModelCard from "../components/models/listModels"; // ✅ NUEVO IMPORT
 import PageHeader from "../components/PageHeader";
 import { useTranslation } from "react-i18next";
-
+import Loader from "../components/Loader";
 
 const Models = () => {
     const { t } = useTranslation(['models', 'common']);
@@ -290,10 +290,12 @@ const Models = () => {
         {/* MODELS GRID */}
         <AnimatePresence mode="wait">
           {loading ? (
-            <Box display="flex" justifyContent="center" p={6}>
-              <CircularProgress sx={{ color: '#333F1F' }} />
-            </Box>
-          ) : models.length === 0 ? (
+            <Loader 
+              size="large" 
+              message={t('common:loading')} 
+              fullHeight={true}
+            />
+          ): models.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}

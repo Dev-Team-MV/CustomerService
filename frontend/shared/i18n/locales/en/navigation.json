@@ -43,5 +43,12 @@
     "noNotificationsDesc": "We'll notify you when something important happens",
     "markAllAsRead": "Mark all as read",
     "unread": "{{count}} unread",
-    "hoursAgo": "{{count}} hours ago"
+    "hoursAgo": "{{count}} hours ago",
+
+      "overview": "Overview",
+  "clients": "Clients",
+  "projects": "Projects",
+  "settings": "Settings",
+  "quickStats": "Quick Stats",
+  "signOut": "Sign Out"
 }

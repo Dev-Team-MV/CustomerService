@@ -1,0 +1,99 @@
+{
+  "title": "Proyectos",
+  "titleBold": "Gestión",
+  "topbarLabel": "Todos los Proyectos — Gestión",
+  "subtitle": "{{count}} proyectos registrados",
+  "stats": {
+    "total": "Total de Proyectos",
+    "active": "Activos",
+    "types": "Tipos"
+  },
+  "table": {
+    "name": "Proyecto",
+    "type": "Tipo",
+    "status": "Estado",
+    "phase": "Fase",
+    "actions": "Acciones",
+    "view": "Ver",
+    "edit": "Editar",
+    "create": "Crear",
+    "delete": "Eliminar"
+  },
+  "searchPlaceholder": "Buscar por nombre, slug, tipo o estado...",
+
+    "modal": {
+    "generalInfo": "Información General",
+    "editTitle": "Editar Proyecto",
+    "createTitle": "Crear Nuevo Proyecto",
+    "lang": {
+      "en": "Inglés",
+      "es": "Español"
+    },
+  "title": "Title ({{lang}})",
+  "subtitle": "Subtitle ({{lang}})",
+  "shortDescription": "Short Description ({{lang}})",
+  "fullDescription": "Full Description ({{lang}})",
+  "features": "Features ({{lang}})",
+    "addFeature": "Agregar característica",
+    "projectName": "Nombre del Proyecto",
+    "slug": "Slug",
+    "slugHelper": "Identificador único, ej: lakewood-p1",
+    "phase": "Fase",
+    "status": "Estado",
+    "type": "Tipo",
+    "externalUrl": "URL externa",
+    "location": "Ubicación",
+    "area": "Área",
+    "mediaAssets": "Recursos multimedia",
+    "mainImage": "Imagen principal",
+    "gallery": "Galería",
+    "videos": "Videos",
+    "upload": "Subir",
+    "uploadVideo": "Subir video",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "create": "Crear",
+      "propertyDetails": "Detalles de la propiedad",
+  "projectTypes": {
+    "residential_lots": "Lotes Residenciales",
+    "commercial": "Comercial",
+    "mixed_use": "Uso Mixto"
+  }
+  },
+
+
+    "details": {
+    "title": "Detalles del Proyecto",
+    "topbar": "Detalles del Proyecto",
+    "loading": "Cargando proyecto...",
+    "notFound": "Proyecto no encontrado",
+    "back": "Volver",
+    "description": "Descripción",
+    "features": "Características",
+    "noFeatures": "Sin características disponibles",
+    "gallery": "Galería",
+    "noGallery": "Sin imágenes disponibles",
+    "videos": "Videos",
+    "noVideos": "Sin videos disponibles",
+    "media": "Multimedia",
+    "mainImage": "Imagen Principal",
+    "phase": "Fase",
+    "location": "Ubicación",
+    "area": "Área",
+    "type": "Tipo",
+    "status": "Estado",
+    "slug": "Slug",
+    "externalUrl": "URL Externa",
+    "createdAt": "Creado",
+    "updatedAt": "Actualizado"
+  },
+
+  "create": {
+    "title": "Nuevo Proyecto",
+    "name": "Nombre del Proyecto",
+    "slug": "Slug",
+    "type": "Tipo",
+    "submit": "Crear",
+    "cancel": "Cancelar"
+  }
+}

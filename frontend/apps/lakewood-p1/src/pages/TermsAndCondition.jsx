@@ -24,9 +24,11 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const TermsAndCondition = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation('termsConditions');
   const [expanded, setExpanded] = useState('panel1');
 
   const handleChange = (panel) => (event, isExpanded) => {
@@ -36,76 +38,52 @@ const TermsAndCondition = () => {
   const sections = [
     {
       id: 'panel1',
-      title: 'General Terms',
+      title: t('sections.generalTerms.title'),
       icon: <Description sx={{ color: '#333F1F' }} />,
       color: '#333F1F',
-      content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-
-      Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-      Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.`
+      content: t('sections.generalTerms.content')
     },
     {
       id: 'panel2',
-      title: 'User Responsibilities',
+      title: t('sections.userResponsibilities.title'),
       icon: <AccountBalance sx={{ color: '#8CA551' }} />,
       color: '#8CA551',
-      content: `Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.
-
-      Sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.
-
-      Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur.`
+      content: t('sections.userResponsibilities.content')
     },
     {
       id: 'panel3',
-      title: 'Privacy & Data Protection',
+      title: t('sections.privacyData.title'),
       icon: <Security sx={{ color: '#E5863C' }} />,
       color: '#E5863C',
-      content: `At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.
-
-      Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.
-
-      Omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.`
+      content: t('sections.privacyData.content')
     },
     {
       id: 'panel4',
-      title: 'Payment Terms',
+      title: t('sections.paymentTerms.title'),
       icon: <Gavel sx={{ color: '#706f6f' }} />,
       color: '#706f6f',
-      content: `Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.
-
-      Doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.
-
-      Sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.`
+      content: t('sections.paymentTerms.content')
     },
     {
       id: 'panel5',
-      title: 'Intellectual Property',
+      title: t('sections.intellectualProperty.title'),
       icon: <Info sx={{ color: '#333F1F' }} />,
       color: '#333F1F',
-      content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse ultrices gravida. Risus commodo viverra maecenas accumsan lacus vel facilisis.
-
-      Consectetur adipiscing elit duis tristique sollicitudin nibh sit amet. Massa tincidunt dui ut ornare lectus sit amet est placerat. Urna neque viverra justo nec ultrices dui sapien eget mi. Sed risus ultricies tristique nulla aliquet enim tortor at auctor.
-
-      Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Fermentum et sollicitudin ac orci phasellus egestas tellus rutrum tellus. Mattis enim ut tellus elementum sagittis vitae et leo duis.`
+      content: t('sections.intellectualProperty.content')
     },
     {
       id: 'panel6',
-      title: 'Liability & Disclaimers',
+      title: t('sections.liability.title'),
       icon: <Security sx={{ color: '#8CA551' }} />,
       color: '#8CA551',
-      content: `Facilisis mauris sit amet massa vitae tortor condimentum lacinia. Morbi tristique senectus et netus et malesuada fames ac turpis. Elementum pulvinar etiam non quam lacus suspendisse faucibus interdum posuere.
-
-      Amet commodo nulla facilisi nullam vehicula ipsum a arcu. Dignissim enim sit amet venenatis urna cursus eget. Ullamcorper malesuada proin libero nunc consequat interdum varius sit amet. Nisi porta lorem mollis aliquam ut porttitor.
-
-      Leo vel fringilla est ullamcorper eget nulla facilisi etiam dignissim. Facilisis volutpat est velit egestas dui id ornare arcu odio. Consectetur a erat nam at lectus urna duis convallis convallis.`
+      content: t('sections.liability.content')
     }
   ];
 
   const highlights = [
-    { label: 'Last Updated', value: 'February 12, 2026', color: '#333F1F' },
-    { label: 'Effective Date', value: 'January 1, 2026', color: '#8CA551' },
-    { label: 'Version', value: '2.1', color: '#E5863C' }
+    { label: t('highlights.lastUpdated'), value: t('highlights.lastUpdatedValue'), color: '#333F1F' },
+    { label: t('highlights.effectiveDate'), value: t('highlights.effectiveDateValue'), color: '#8CA551' },
+    { label: t('highlights.version'), value: t('highlights.versionValue'), color: '#E5863C' }
   ];
 
   return (
@@ -129,7 +107,7 @@ const TermsAndCondition = () => {
               '&:hover': { bgcolor: 'transparent', color: '#333F1F' }
             }}
           >
-            Back
+            {t('back')}
           </Button>
         </motion.div>
 
@@ -191,7 +169,7 @@ const TermsAndCondition = () => {
                     textTransform: 'uppercase'
                   }}
                 >
-                  Terms & Conditions
+                  {t('title')}
                 </Typography>
                 <Typography
                   variant="body1"
@@ -201,7 +179,7 @@ const TermsAndCondition = () => {
                     fontWeight: 400
                   }}
                 >
-                  Please read these terms carefully before using our services
+                  {t('subtitle')}
                 </Typography>
               </Box>
             </Box>
@@ -288,13 +266,13 @@ const TermsAndCondition = () => {
                 fontWeight={600}
                 sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif', mb: 0.5 }}
               >
-                By accessing or using our services, you agree to be bound by these terms.
+                {t('acceptance.message')}
               </Typography>
               <Typography
                 variant="body2"
                 sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}
               >
-                If you do not agree with any part of these terms, please discontinue use immediately.
+                {t('acceptance.disclaimer')}
               </Typography>
             </Box>
           </Paper>
@@ -365,7 +343,7 @@ const TermsAndCondition = () => {
                       {section.title}
                     </Typography>
                     <Chip
-                      label={`Section ${idx + 1}`}
+                      label={t('sectionLabel', { number: idx + 1 })}
                       size="small"
                       sx={{
                         bgcolor: 'transparent',
@@ -399,7 +377,7 @@ const TermsAndCondition = () => {
 
                 <Box display="flex" gap={1} flexWrap="wrap">
                   <Chip
-                    label="Mandatory"
+                    label={t('chips.mandatory')}
                     size="small"
                     sx={{
                       bgcolor: `${section.color}15`,
@@ -409,7 +387,7 @@ const TermsAndCondition = () => {
                     }}
                   />
                   <Chip
-                    label="Updated 2026"
+                    label={t('chips.updated')}
                     size="small"
                     sx={{
                       bgcolor: '#f8f9fa',
@@ -450,7 +428,7 @@ const TermsAndCondition = () => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              Need Assistance?
+              {t('footer.title')}
             </Typography>
             <Typography
               variant="body2"
@@ -460,7 +438,7 @@ const TermsAndCondition = () => {
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
-              If you have any questions about these Terms & Conditions, please contact our support team.
+              {t('footer.description')}
             </Typography>
             <Button
               variant="contained"
@@ -479,7 +457,7 @@ const TermsAndCondition = () => {
                 }
               }}
             >
-              Contact Support
+              {t('footer.button')}
             </Button>
           </Paper>
         </motion.div>

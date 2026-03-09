@@ -29,7 +29,25 @@ const projectService = {
       console.error('Error fetching project by ID:', error)
       return null
     }
-  }
+  },
+  create: async (data) => {
+    try {
+      const response = await api.post('/projects', data)
+      return response.data
+    } catch (error) {
+      console.error('Error creating project:', error)
+      throw error
+    }
+  },
+  update: async (id, data) => {
+    try {
+      const response = await api.put(`/projects/${id}`, data)
+      return response.data
+    } catch (error) {
+      console.error('Error updating project:', error)
+      throw error
+    }
+  },
 }
 
 export default projectService
