@@ -21,6 +21,21 @@ export const protect = async (req, res, next) => {
   }
 }
 
+/** Same as protect but does not return 401: if token is valid sets req.user, otherwise continues without user. */
+export const optionalProtect = async (req, res, next) => {
+  if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer')) {
+    return next()
+  }
+  try {
+    const token = req.headers.authorization.split(' ')[1]
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    req.user = await User.findById(decoded.id).select('-password')
+  } catch (error) {
+    // Token missing/invalid: continue without req.user, do not send 401
+  }
+  next()
+}
+
 export const admin = (req, res, next) => {
   if (req.user && (req.user.role === 'admin' || req.user.role === 'superadmin')) {
     next()
