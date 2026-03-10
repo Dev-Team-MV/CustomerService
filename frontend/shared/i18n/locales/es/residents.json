@@ -74,6 +74,8 @@
     "email": "Correo Electrónico",
     "phoneNumber": "Número de Teléfono",
     "birthday": "Fecha de Nacimiento",
+    "newPassword": "Nueva Contraseña",
+    "passwordHelper": "Dejar en blanco para mantener la contraseña actual",
     "role": "Rol",
     "roles": {
       "user": "Residente",

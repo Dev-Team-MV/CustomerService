@@ -13,6 +13,7 @@ import ProjectsDetails from './pages/ProjectDetails'
 import Sales from './pages/Sales'
 import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
+import Analytics from './pages/Analytics'
 
 // Shared components
 import { ProtectedRoute } from '@shared/components/ProtectedRoute'
@@ -63,6 +64,11 @@ export default function App() {
             <Route path="/profile" element={
               <ProtectedRoute requiredRole="admin">
                 <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/analytics" element={
+              <ProtectedRoute requiredRole="user">
+                <Analytics />
               </ProtectedRoute>
             } />
 
