@@ -96,6 +96,22 @@ export default function Clients() {
     }
   }, [t])
 
+  // Utilidad para mostrar el teléfono en formato visual
+const formatPhoneDisplay = (e164) => {
+  if (!e164) return ''
+  const digits = e164.replace(/\D/g, '')
+  // USA/Canada: +1 (XXX) XXX-XXXX
+  if (digits.startsWith('1') && digits.length === 11)
+    return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`
+  // México: +52 (XXX) XXX-XXXX
+  if (digits.startsWith('52') && digits.length === 12)
+    return `+52 (${digits.slice(2, 5)}) ${digits.slice(5, 8)}-${digits.slice(8)}`
+  // Colombia: +57 (XXX) XXX-XXXX
+  if (digits.startsWith('57') && digits.length === 12)
+    return `+57 (${digits.slice(2, 5)}) ${digits.slice(5, 8)}-${digits.slice(8)}`
+  return `+${digits}`
+}
+
   const columns = useMemo(() => [
     {
       field: 'name', headerName: t('clients.client'), minWidth: 220,
@@ -119,7 +135,8 @@ export default function Clients() {
       field: 'phoneNumber', headerName: t('clients.phone'), minWidth: 160,
       renderCell: ({ row }) => (
         <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.78rem', color: row.phoneNumber ? '#444' : '#ccc', letterSpacing: '0.5px' }}>
-          {row.phoneNumber || '—'}
+          {/* {row.phoneNumber || '—'} */}
+          {formatPhoneDisplay(row.phoneNumber) || '—'}  
         </Typography>
       )
     },

@@ -28,7 +28,8 @@ import PageHeader from '@shared/components/PageHeader'
 import StatsCards from '../components/statscard'
 import DataTable from '../components/table/DataTable'
 import EmptyState from '../components/table/EmptyState'
-import ResidentDialog from '../components/ResidentDialog'
+// import ResidentDialog from '../components/ResidentDialog'
+import ResidentDialog from '../../../../shared/components/Modals/ResidentDialog'
 
 const Residents = () => {
   const { t } = useTranslation(['residents', 'common'])
@@ -71,6 +72,22 @@ const Residents = () => {
     }
   }
 
+  // Utilidad para mostrar el teléfono en formato visual
+const formatPhoneDisplay = (e164) => {
+  if (!e164) return ''
+  const digits = e164.replace(/\D/g, '')
+  // USA/Canada: +1 (XXX) XXX-XXXX
+  if (digits.startsWith('1') && digits.length === 11)
+    return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`
+  // México: +52 (XXX) XXX-XXXX
+  if (digits.startsWith('52') && digits.length === 12)
+    return `+52 (${digits.slice(2, 5)}) ${digits.slice(5, 8)}-${digits.slice(8)}`
+  // Colombia: +57 (XXX) XXX-XXXX
+  if (digits.startsWith('57') && digits.length === 12)
+    return `+57 (${digits.slice(2, 5)}) ${digits.slice(5, 8)}-${digits.slice(8)}`
+  return `+${digits}`
+}
+
   const handleOpenDialog = (user = null) => {
     if (user) {
       setSelectedUser(user)
@@ -103,38 +120,39 @@ const Residents = () => {
     setSelectedUser(null)
   }
 
-   const handleSubmit = async () => {
-    try {
-      // Preparar payload
-      const payload = { ...formData }
-      
-      if (selectedUser) {
-        // ✅ PUT para actualizar usuario existente
-        if (!payload.password) {
-          delete payload.password
+  // ...existing code...
+  
+    const handleSubmit = async (formattedData) => {   // ← recibe el objeto ya formateado
+      try {
+        const payload = { ...formattedData }           // ← usa formattedData, no formData
+        
+        if (selectedUser) {
+          if (!payload.password) {
+            delete payload.password
+          }
+          await api.put(`/users/${selectedUser._id}`, payload)
+          setSnackbar({ open: true, message: t('residents:snackbar.updated'), severity: 'success' })
+        } else {
+          await api.post('/auth/register', {
+            ...payload,
+            skipPasswordSetup: true
+          })
+          setSnackbar({ open: true, message: t('residents:snackbar.created'), severity: 'success' })
         }
-        await api.put(`/users/${selectedUser._id}`, payload)
-        setSnackbar({ open: true, message: t('residents:snackbar.updated'), severity: 'success' })
-      } else {
-        // ✅ POST a /auth/register para crear nuevo usuario (igual que Dashboard)
-        await api.post('/auth/register', {
-          ...payload,
-          skipPasswordSetup: true // Opcional: si quieres que el usuario configure su password después
+        
+        handleCloseDialog()
+        fetchData()
+      } catch (error) {
+        console.error('Error saving user:', error)
+        setSnackbar({ 
+          open: true, 
+          message: error.response?.data?.message || error.message, 
+          severity: 'error' 
         })
-        setSnackbar({ open: true, message: t('residents:snackbar.created'), severity: 'success' })
       }
-      
-      handleCloseDialog()
-      fetchData()
-    } catch (error) {
-      console.error('Error saving user:', error)
-      setSnackbar({ 
-        open: true, 
-        message: error.response?.data?.message || error.message, 
-        severity: 'error' 
-      })
     }
-  }
+  
+  // ...existing code...
 
   const handleDelete = async (id) => {
     if (window.confirm(t('residents:confirmDelete'))) {
@@ -259,7 +277,7 @@ const Residents = () => {
       field: 'phoneNumber',
       headerName: t('residents:table.phone'),
       minWidth: 140,
-      renderCell: ({ row }) => row.phoneNumber || '-'
+      renderCell: ({ row }) => formatPhoneDisplay(row.phoneNumber) || '-'
     },
     {
       field: 'role',

@@ -146,11 +146,11 @@ router.patch('/recorrido/visibility', protect, admin, updateRecorridoVisibility)
  *         name: image
  *         type: file
  *         required: true
- *         description: Image file to upload (max 50MB, formats: jpeg, jpg, png, gif, webp)
+ *         description: Image file to upload
  *       - in: formData
  *         name: folder
  *         type: string
- *         description: Folder name in GCS where image will be stored (e.g., 'payments', 'receipts', 'documents'). Optional, defaults to root.
+ *         description: Folder name in GCS where image will be stored. Optional.
  *     responses:
  *       200:
  *         description: Image uploaded successfully
@@ -203,11 +203,11 @@ router.post('/image', protect, upload.single('image'), uploadImage)
  *         name: images
  *         type: file
  *         required: true
- *         description: Image files to upload (max 50MB each, formats: jpeg, jpg, png, gif, webp)
+ *         description: Image files to upload
  *       - in: formData
  *         name: folder
  *         type: string
- *         description: Folder name in GCS where images will be stored (e.g., 'payments', 'receipts', 'documents'). Optional, defaults to root.
+ *         description: Folder name in GCS where images will be stored. Optional.
  *     responses:
  *       200:
  *         description: Images uploaded successfully
