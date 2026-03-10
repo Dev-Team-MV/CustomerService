@@ -4,7 +4,7 @@ import RemoveIcon from '@mui/icons-material/Remove'
 import MyLocationIcon from '@mui/icons-material/MyLocation'
 import { useProperty } from '@shared/context/PropertyContext'
 import { useState, useRef } from 'react'
-import map from '../../../public/images/mapLakewood.png'
+const map = '/images/mapLakewood.png'
 import { useTranslation } from 'react-i18next'
 
 
