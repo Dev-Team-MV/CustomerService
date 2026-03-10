@@ -74,16 +74,8 @@ const router = express.Router()
  *                 type: string
  *               folder:
  *                 type: string
- *                 description: Folder name in GCS where images will be stored (e.g., 'payloads', 'payments', 'receipts')
+ *                 description: Folder name in GCS where images will be stored
  *                 default: 'payloads'
- *     consumes:
- *       - multipart/form-data
- *       - application/json
- *     parameters:
- *       - in: formData
- *         name: images
- *         type: file
- *         description: Image files to upload (optional, max 50MB each, formats: jpeg, jpg, png, gif, webp)
  *     responses:
  *       201:
  *         description: Payload created

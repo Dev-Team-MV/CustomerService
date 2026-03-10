@@ -4,7 +4,7 @@ import RemoveIcon from '@mui/icons-material/Remove'
 import MyLocationIcon from '@mui/icons-material/MyLocation'
 import { useState, useRef, useEffect } from 'react'
 import AmenitiesGalleryModal from './AmenitiesGalleryModal'
-import aerialMap from '../../../public/images/amenities/250114_001_100_PLANTA-CASA-CLUB-2-scaled.png'
+const aerialMap = '/images/amenities/250114_001_100_PLANTA-CASA-CLUB-2-scaled.png'
 import { useTranslation } from 'react-i18next'
 import uploadService from '../../services/uploadService'
 

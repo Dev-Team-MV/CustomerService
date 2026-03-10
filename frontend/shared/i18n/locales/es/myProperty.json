@@ -37,6 +37,7 @@
   "complete": "Completado",
     "trackPhases": "Sigue cada fase de la construcción de tu propiedad",
 
+    "paymentHistorySubtitle": "Revisa tu historial y estado de pagos",
 
   "phaseDescription1": "Despeje y nivelación del terreno, instalación de servicios y accesos",
   "phaseDescription2": "Colado de cimientos y losa de concreto",
@@ -79,5 +80,20 @@
   "galleryInterior": "Interior",
   "galleryBlueprints": "Planos",
   "noPropertyImages": "No hay imágenes de la propiedad disponibles",
-  "noImagesAvailable": "No hay imágenes disponibles"
+  "noImagesAvailable": "No hay imágenes disponibles",
+
+  "paymentStatus": "Pagos",
+"propertyDetailsTab": "Detalles",
+"constructionPhases": "Fases de Construcción",
+
+"specs": {
+  "bedrooms": "Recámaras",
+  "bathrooms": "Baños",
+  "squareFeet": "Metros cuadrados",
+  "stories": "Niveles",
+  "lotNumber": "Número de lote",
+  "propertyValue": "Valor de la propiedad",
+  "included": "Incluido",
+  "notAvailable": "No disponible"
+}
 }

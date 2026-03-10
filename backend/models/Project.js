@@ -87,7 +87,6 @@ const projectSchema = new mongoose.Schema(
   }
 )
 
-projectSchema.index({ slug: 1 })
 projectSchema.index({ isActive: 1 })
 projectSchema.index({ status: 1 })
 

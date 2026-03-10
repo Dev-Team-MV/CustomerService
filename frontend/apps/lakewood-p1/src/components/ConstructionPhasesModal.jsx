@@ -33,21 +33,11 @@ import api from '../services/api'
 import uploadService from '../services/uploadService'
 import {motion, AnimatePresence} from 'framer-motion'
 import GalleryCarrousel from './GalleryCarrousel'
+import UploadPhaseDialog from './UploadPhaseDialog'
 
 const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
   const { t } = useTranslation('construction')
   
-  const PHASE_TITLES = [
-    t('phases.sitePreparation'),
-    t('phases.foundation'),
-    t('phases.framing'),
-    t('phases.roofing'),
-    t('phases.mepInstallation'),
-    t('phases.insulationDrywall'),
-    t('phases.interiorFinishes'),
-    t('phases.exteriorFinishes'),
-    t('phases.finalInspection')
-  ]
 
   const [phases, setPhases] = useState([])
   const [loading, setLoading] = useState(false)
@@ -232,7 +222,22 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
     // ✅ Agregar función helper para obtener el título traducido
   const getPhaseTitle = (phase) => {
     if (!phase) return ''
-    return PHASE_TITLES[phase.phaseNumber - 1] || phase.title
+    // Si tienes el key, úsalo
+    if (phase.phaseKey) return t(`phases.${phase.phaseKey}`)
+    // Si solo tienes el número, mapea manualmente
+    const phaseKeys = [
+      'sitePreparation',
+      'foundation',
+      'framing',
+      'roofing',
+      'mepInstallation',
+      'insulationDrywall',
+      'interiorFinishes',
+      'exteriorFinishes',
+      'finalInspection'
+    ]
+    const key = phaseKeys[phase.phaseNumber - 1]
+    return key ? t(`phases.${key}`) : phase.title
   }
 
   return (
@@ -595,394 +600,16 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
         </DialogActions>
       </Dialog>
 
-      {/* DIALOG PARA SUBIR IMÁGENES */}
-      <Dialog 
-        open={!!selectedPhase} 
+      <UploadPhaseDialog
+        open={!!selectedPhase}
         onClose={() => setSelectedPhase(null)}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 4,
-            boxShadow: '0 20px 60px rgba(51, 63, 31, 0.15)'
-          }
-        }}
-      >
-        <DialogTitle>
-          <Box display="flex" alignItems="center" gap={2}>
-            <Box
-              sx={{
-                width: 48,
-                height: 48,
-                borderRadius: 3,
-                bgcolor: '#333F1F',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)',
-              }}
-            >
-              <CloudUpload sx={{ color: 'white', fontSize: 24 }} />
-            </Box>
-            <Box>
-              <Typography 
-                variant="h6" 
-                fontWeight={700}
-                sx={{ 
-                  color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif'
-                }}
-              >
-                {t('uploadImages')}
-              </Typography>
-              <Typography 
-                variant="caption"
-                sx={{ 
-                  color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif'
-                }}
-              >
-                {t('phaseInfo', { number: selectedPhase?.phaseNumber, title: selectedPhase?.title })}
-              </Typography>
-            </Box>
-          </Box>
-        </DialogTitle>
-
-        <DialogContent sx={{ pt: 3 }}>
-          <Grid container spacing={2.5}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label={t('mediaTitle')}
-                value={uploadForm.title}
-                onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 3,
-                    fontFamily: '"Poppins", sans-serif',
-                    '& fieldset': {
-                      borderColor: 'rgba(140, 165, 81, 0.3)',
-                      borderWidth: '2px'
-                    },
-                    '&:hover fieldset': {
-                      borderColor: '#8CA551'
-                    },
-                    '&.Mui-focused fieldset': { 
-                      borderColor: '#333F1F',
-                      borderWidth: '2px'
-                    }
-                  },
-                  '& .MuiInputLabel-root': {
-                    fontFamily: '"Poppins", sans-serif',
-                    fontWeight: 500,
-                    color: '#706f6f',
-                    '&.Mui-focused': {
-                      color: '#333F1F',
-                      fontWeight: 600
-                    }
-                  }
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                type="number"
-                label={t('progressAdded')}
-                value={uploadForm.percentage}
-                onChange={(e) => setUploadForm(prev => ({ ...prev, percentage: e.target.value }))}
-                inputProps={{ min: 0, max: 100 }}
-                helperText={t('progressHelper')}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 3,
-                    fontFamily: '"Poppins", sans-serif',
-                    '& fieldset': {
-                      borderColor: 'rgba(140, 165, 81, 0.3)',
-                      borderWidth: '2px'
-                    },
-                    '&:hover fieldset': {
-                      borderColor: '#8CA551'
-                    },
-                    '&.Mui-focused fieldset': { 
-                      borderColor: '#333F1F',
-                      borderWidth: '2px'
-                    }
-                  },
-                  '& .MuiInputLabel-root': {
-                    fontFamily: '"Poppins", sans-serif',
-                    fontWeight: 500,
-                    color: '#706f6f',
-                    '&.Mui-focused': {
-                      color: '#333F1F',
-                      fontWeight: 600
-                    }
-                  },
-                  '& .MuiFormHelperText-root': {
-                    fontFamily: '"Poppins", sans-serif'
-                  }
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
-              <Button
-                variant="outlined"
-                component="label"
-                fullWidth
-                startIcon={<CloudUpload />}
-                sx={{
-                  py: 1.5,
-                  borderRadius: 3,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif',
-                  borderColor: 'rgba(140, 165, 81, 0.3)',
-                  borderWidth: '2px',
-                  color: '#333F1F',
-                  '&:hover': {
-                    borderColor: '#8CA551',
-                    borderWidth: '2px',
-                    bgcolor: 'rgba(140, 165, 81, 0.08)'
-                  }
-                }}
-              >
-                {t('selectImages')}
-                <input
-                  type="file"
-                  hidden
-                  multiple
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                />
-              </Button>
-            </Grid>
-            {uploadForm.images.length > 0 && (
-              <Grid item xs={12}>
-                <Typography 
-                  variant="caption" 
-                  sx={{
-                    color: '#706f6f',
-                    fontWeight: 600,
-                    fontFamily: '"Poppins", sans-serif',
-                    display: 'block',
-                    mb: 1
-                  }}
-                >
-                  {t('selectedImages', { count: uploadForm.images.length })}
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {uploadForm.images.map((file, index) => (
-                    <Paper 
-                      key={index} 
-                      elevation={0}
-                      sx={{ 
-                        p: 1.5, 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        bgcolor: '#fafafa',
-                        border: '1px solid #e0e0e0',
-                        borderRadius: 2
-                      }}
-                    >
-                      <Typography 
-                        variant="body2" 
-                        noWrap
-                        sx={{ 
-                          fontFamily: '"Poppins", sans-serif',
-                          flex: 1,
-                          mr: 1
-                        }}
-                      >
-                        {file.name}
-                      </Typography>
-                      <IconButton 
-                        size="small" 
-                        onClick={() => handleRemoveMedia('images', index)}
-                        sx={{
-                          color: '#E5863C',
-                          '&:hover': {
-                            bgcolor: 'rgba(229, 134, 60, 0.08)'
-                          }
-                        }}
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    </Paper>
-                  ))}
-                </Box>
-              </Grid>
-            )}
-        
-            <Grid item xs={12}>
-              <Button
-                variant="outlined"
-                component="label"
-                fullWidth
-                startIcon={<CloudUpload />}
-                sx={{
-                  py: 1.5,
-                  borderRadius: 3,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif',
-                  borderColor: 'rgba(140, 165, 81, 0.3)',
-                  borderWidth: '2px',
-                  color: '#333F1F',
-                  mt: 1,
-                  '&:hover': {
-                    borderColor: '#8CA551',
-                    borderWidth: '2px',
-                    bgcolor: 'rgba(140, 165, 81, 0.08)'
-                  }
-                }}
-              >
-                {t('selectVideos')}
-                <input
-                  type="file"
-                  hidden
-                  multiple
-                  accept="video/*"
-                  onChange={handleFileSelect}
-                />
-              </Button>
-            </Grid>
-            {uploadForm.videos.length > 0 && (
-              <Grid item xs={12}>
-                <Typography 
-                  variant="caption" 
-                  sx={{
-                    color: '#706f6f',
-                    fontWeight: 600,
-                    fontFamily: '"Poppins", sans-serif',
-                    display: 'block',
-                    mb: 1
-                  }}
-                >
-                  {t('selectedVideos', { count: uploadForm.videos.length })}
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {uploadForm.videos.map((file, index) => (
-                    <Paper 
-                      key={index} 
-                      elevation={0}
-                      sx={{ 
-                        p: 1.5, 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        bgcolor: '#fafafa',
-                        border: '1px solid #e0e0e0',
-                        borderRadius: 2
-                      }}
-                    >
-                      <Typography 
-                        variant="body2" 
-                        noWrap
-                        sx={{ 
-                          fontFamily: '"Poppins", sans-serif',
-                          flex: 1,
-                          mr: 1
-                        }}
-                      >
-                        {file.name}
-                      </Typography>
-                      <IconButton 
-                        size="small" 
-                        onClick={() => handleRemoveMedia('videos', index)}
-                        sx={{
-                          color: '#E5863C',
-                          '&:hover': {
-                            bgcolor: 'rgba(229, 134, 60, 0.08)'
-                          }
-                        }}
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    </Paper>
-                  ))}
-                </Box>
-              </Grid>
-            )}
-          </Grid>
-        </DialogContent>
-
-        <DialogActions sx={{ p: 3, gap: 2 }}>
-          <Button
-            onClick={() => setSelectedPhase(null)}
-            sx={{
-              borderRadius: 3,
-              textTransform: 'none',
-              fontWeight: 600,
-              px: 3,
-              py: 1.2,
-              color: '#706f6f',
-              fontFamily: '"Poppins", sans-serif',
-              border: '2px solid #e0e0e0',
-              '&:hover': {
-                bgcolor: 'rgba(112, 111, 111, 0.05)',
-                borderColor: '#706f6f'
-              }
-            }}
-          >
-            {t('cancel')}
-          </Button>
-          
-          <Button
-            variant="contained"
-            onClick={handleUploadMedia}
-            disabled={uploading || (!uploadForm.images.length && !uploadForm.videos.length)}
-            startIcon={uploading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <CloudUpload />}
-            sx={{
-              borderRadius: 3,
-              bgcolor: '#333F1F',
-              color: 'white',
-              fontWeight: 600,
-              textTransform: 'none',
-              letterSpacing: '1px',
-              fontFamily: '"Poppins", sans-serif',
-              px: 4,
-              py: 1.5,
-              boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
-              position: 'relative',
-              overflow: 'hidden',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: '-100%',
-                width: '100%',
-                height: '100%',
-                bgcolor: '#8CA551',
-                transition: 'left 0.4s ease',
-                zIndex: 0,
-              },
-              '&:hover': {
-                bgcolor: '#333F1F',
-                boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
-                '&::before': {
-                  left: 0,
-                },
-              },
-              '&:disabled': {
-                bgcolor: '#e0e0e0',
-                color: '#706f6f',
-                boxShadow: 'none'
-              },
-              '& .MuiButton-startIcon': {
-                position: 'relative',
-                zIndex: 1,
-              }
-            }}
-          >
-            <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-              {uploading ? t('uploading') : t('upload')}
-            </Box>
-          </Button>
-        </DialogActions>
-      </Dialog>
+        selectedPhase={selectedPhase}
+        uploadForm={uploadForm}
+        setUploadForm={setUploadForm}
+        uploading={uploading}
+        onUpload={handleUploadMedia}
+        getPhaseTitle={getPhaseTitle}
+      />
 
       {/* LIGHTBOX */}
       <Dialog 

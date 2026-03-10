@@ -1,4 +1,6 @@
 {
+        "actionsTitle": "Acciones",
+
     "actions": {
         "save": "Guardar",
         "cancel": "Cancelar",
@@ -19,6 +21,7 @@
         "send": "Enviar",
         "retry": "Reintentar"
     },
+    "statusTitle": "Estado",
     "status": {
         "loading": "Cargando...",
         "error": "Ocurrió un error",
@@ -48,6 +51,7 @@
         "description": "Lo sentimos, la página que buscas no existe.",
         "goHome": "Ir al Inicio"
     },
+    "addPayment": "Agregar Pago",
     "activeUser": "Usuario Activo",
     "accountDetails": "Detalles de Cuenta",
     "enableEditMode": "Activa el modo de edición para cambiar tu contraseña",

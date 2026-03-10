@@ -114,7 +114,7 @@ router.route('/')
  *                 type: string
  *               members:
  *                 type: array
- *                 description: Full list of members (each { user: userId, role: 'admin'|'member' }). Creator must remain.
+ *                 description: Full list of members with user and role. Creator must remain.
  *                 items:
  *                   type: object
  *                   properties:
