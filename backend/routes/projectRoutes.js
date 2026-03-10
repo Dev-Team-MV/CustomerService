@@ -27,6 +27,12 @@ router.get('/ping', (req, res) => res.json({ ok: true, message: 'projects router
  *           type: string
  *           enum: ['true', '1']
  *         description: If set, only active projects are returned
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, inactive, coming_soon, sold_out]
+ *         description: Filter by project status
  *     responses:
  *       200:
  *         description: List of projects
@@ -48,22 +54,65 @@ router.get('/ping', (req, res) => res.json({ ok: true, message: 'projects router
  *           schema:
  *             type: object
  *             required:
- *               - name
  *               - slug
  *             properties:
- *               name:
- *                 type: string
  *               slug:
  *                 type: string
- *                 description: Unique slug (e.g. lakewood, isq). Lowercase alphanumeric and hyphens.
+ *                 description: Unique slug (e.g. lakewood-oaks-on-lake-conroe-phase-I)
+ *               name:
+ *                 type: string
+ *               phase:
+ *                 type: string
+ *                 example: 'I'
+ *               title:
+ *                 type: object
+ *                 properties:
+ *                   en: { type: string }
+ *                   es: { type: string }
+ *               subtitle:
+ *                 type: object
+ *                 properties:
+ *                   en: { type: string }
+ *                   es: { type: string }
+ *               description:
+ *                 type: object
+ *                 properties:
+ *                   en: { type: string }
+ *                   es: { type: string }
+ *               fullDescription:
+ *                 type: object
+ *                 properties:
+ *                   en: { type: string }
+ *                   es: { type: string }
+ *               image:
+ *                 type: string
+ *                 description: Main image URL
+ *               gallery:
+ *                 type: array
+ *                 items: { type: string }
+ *                 description: Gallery image URLs
+ *               features:
+ *                 type: object
+ *                 properties:
+ *                   en: { type: array, items: { type: string } }
+ *                   es: { type: array, items: { type: string } }
  *               type:
  *                 type: string
  *                 enum: [residential_lots, apartments, other]
+ *               status:
+ *                 type: string
+ *                 enum: [active, inactive, coming_soon, sold_out]
  *               isActive:
  *                 type: boolean
- *                 default: true
- *               description:
+ *               externalUrl:
  *                 type: string
+ *               location:
+ *                 type: string
+ *               area:
+ *                 type: string
+ *               videos:
+ *                 type: array
+ *                 items: { type: string }
  *     responses:
  *       201:
  *         description: Project created
@@ -143,9 +192,21 @@ router.get('/slug/:slug', getProjectBySlug)
  *             properties:
  *               name: { type: string }
  *               slug: { type: string }
+ *               phase: { type: string }
+ *               title: { type: object, properties: { en: { type: string }, es: { type: string } } }
+ *               subtitle: { type: object, properties: { en: { type: string }, es: { type: string } } }
+ *               description: { type: object, properties: { en: { type: string }, es: { type: string } } }
+ *               fullDescription: { type: object, properties: { en: { type: string }, es: { type: string } } }
+ *               image: { type: string }
+ *               gallery: { type: array, items: { type: string } }
+ *               features: { type: object, properties: { en: { type: array }, es: { type: array } } }
  *               type: { type: string, enum: [residential_lots, apartments, other] }
+ *               status: { type: string, enum: [active, inactive, coming_soon, sold_out] }
  *               isActive: { type: boolean }
- *               description: { type: string }
+ *               externalUrl: { type: string }
+ *               location: { type: string }
+ *               area: { type: string }
+ *               videos: { type: array, items: { type: string } }
  *     responses:
  *       200:
  *         description: Project updated

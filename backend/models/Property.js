@@ -184,52 +184,52 @@ propertySchema.post('save', async function (doc) {
       
       // Only create phases if they don't exist yet
       if (existingPhases === 0) {
-        // Define the 9 phases with their titles and construction percentages
+        // Define the 9 phases with their titles (default construction percentage: 0%)
         const phasesData = [
           {
             phaseNumber: 1,
             title: 'Site Preparation and Groundbreaking',
-            constructionPercentage: 10.00
+            constructionPercentage: 0
           },
           {
             phaseNumber: 2,
             title: 'Foundation, Framing & Windows',
-            constructionPercentage: 15.00
+            constructionPercentage: 0
           },
           {
             phaseNumber: 3,
             title: 'Exterior Cladding and Roofing Installation',
-            constructionPercentage: 15.00
+            constructionPercentage: 0
           },
           {
             phaseNumber: 4,
             title: "All MEP's starts rough in work",
-            constructionPercentage: 15.00
+            constructionPercentage: 0
           },
           {
             phaseNumber: 5,
             title: 'Drywall Work and Paint',
-            constructionPercentage: 10.00
+            constructionPercentage: 0
           },
           {
             phaseNumber: 6,
             title: 'Flooring and Millwork',
-            constructionPercentage: 10.00
+            constructionPercentage: 0
           },
           {
             phaseNumber: 7,
             title: 'Kitchen and Bathrooms',
-            constructionPercentage: 10.00
+            constructionPercentage: 0
           },
           {
             phaseNumber: 8,
             title: 'Interior Finishes, Driveway Applainces & Landscaping',
-            constructionPercentage: 10.00
+            constructionPercentage: 0
           },
           {
             phaseNumber: 9,
             title: 'Inspections (Delays)',
-            constructionPercentage: 5.00
+            constructionPercentage: 0
           }
         ]
         
