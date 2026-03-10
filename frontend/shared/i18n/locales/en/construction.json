@@ -1,10 +1,7 @@
 {
   "title": "Construction Phases",
   "subtitle": "Track property construction progress - Lot {{lot}}",
-  "phaseCounter": "Phase {{current}} of {{total}}",
-  "percentComplete": "{{percent}}% Complete",
-  "upload": "Upload",
-  "close": "Close",
+
   "cancel": "Cancel",
   "uploading": "Uploading...",
   "uploadImages": "Upload Images",
@@ -18,17 +15,21 @@
   "selectedVideos": "Selected videos: {{count}}",
   "noMediaYet": "No images uploaded yet for this phase",
   "defaultMediaTitle": "Phase {{phase}} - {{type}} {{index}}",
-  "phases": {
-    "sitePreparation": "Site Preparation",
-    "foundation": "Foundation",
-    "framing": "Framing",
-    "roofing": "Roofing",
-    "mepInstallation": "MEP Installation",
-    "insulationDrywall": "Insulation & Drywall",
-    "interiorFinishes": "Interior Finishes",
-    "exteriorFinishes": "Exterior Finishes",
-    "finalInspection": "Final Inspection"
-  },
+"phases": {
+  "sitePreparation": "Site Preparation",
+  "foundation": "Foundation",
+  "framing": "Framing",
+  "roofing": "Roofing",
+  "mepInstallation": "MEP Installation",
+  "insulationDrywall": "Insulation & Drywall",
+  "interiorFinishes": "Interior Finishes",
+  "exteriorFinishes": "Exterior Finishes",
+  "finalInspection": "Final Inspection"
+},
+"phaseCounter": "Phase {{current}} of {{total}}",
+"percentComplete": "{{percent}}% complete",
+"upload": "Upload progress",
+"close": "Close",
   "alerts": {
     "selectMedia": "Please select at least one image or video",
     "uploadSuccess": "✅ Media uploaded successfully!",

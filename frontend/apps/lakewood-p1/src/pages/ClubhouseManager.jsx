@@ -132,13 +132,7 @@ const ClubhouseManager = () => {
               );
             }
           } else if (section === "deck") organized.deck.push(imageObj);
-          else {
-            organized.exterior.push(imageObj);
-            console.warn(
-              "Uncategorized clubhouse file added to exterior by fallback:",
-              file,
-            );
-          }
+          // No agregar a exterior cuando section es null (evita que imágenes de interior aparezcan en exterior)
         });
       }
 
