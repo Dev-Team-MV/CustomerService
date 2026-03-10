@@ -12,7 +12,7 @@ export const protect = async (req, res, next) => {
       next()
     } catch (error) {
       console.error(error)
-      res.status(401).json({ message: 'No autorizado, token inválido' })
+      res.status(401).json({ message: 'Unauthorized, invalid token' })
     }
   }
 
