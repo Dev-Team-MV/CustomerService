@@ -43,8 +43,8 @@ router.get('/test-connection', testGCSConnection)
  *   get:
  *     summary: List files in a GCS folder (images/directory by prefix)
  *     tags: [Upload]
- *     security:
- *       - bearerAuth: []
+ *     security: []
+ *     description: Auth optional. With Bearer token the user is set; without token returns same list (public access).
  *     parameters:
  *       - in: query
  *         name: folder
