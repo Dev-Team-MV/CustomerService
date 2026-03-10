@@ -1,14 +1,28 @@
-// Jobs: CustomerService-Frontend-Develop → apicsdev | CustomerService-Frontend-Production → apics
-// Front dev = devcustomerservice.michelangelodelvalle.com → backend apicsdev.michelangelodelvalle.com
-// Front pdn = customerservice.michelangelodelvalle.com → backend apics.michelangelodelvalle.com
+// Jobs: 4 pipelines (2 apps × 2 ambientes)
+// - CustomerService-Frontend-Lakewood-Develop  → frontend-dev:5174 (rama develop)
+// - CustomerService-Frontend-Lakewood-Production → frontend:5173 (rama main)
+// - CustomerService-Frontend-MVCRM-Develop     → frontend-mvcrm-dev:5179 (rama develop)
+// - CustomerService-Frontend-MVCRM-Production   → frontend-mvcrm-pdn:5180 (rama main)
+//
+// URLs: devcustomerservice / customerservice (lakewood) | mvcrmdev / mvcrm (mv-crm)
+// Backend: apicsdev / apics
+//
+// IMPORTANTE: Solo se ejecuta si hay cambios en frontend/ (apps o shared). Si el commit solo toca backend/, se omite.
 pipeline {
   agent any
+
+  parameters {
+    choice(
+      name: 'APP_NAME',
+      choices: ['lakewood-p1', 'mv-crm'],
+      description: 'App a construir (se puede sobrescribir por nombre del Job)'
+    )
+  }
 
   options {
     timeout(time: 15, unit: 'MINUTES')
   }
 
-  // No definir VITE_API_URL aquí: se fija en "Set environment" según el Job (Develop → apicsdev, Production → apics)
   stages {
     stage('Checkout') {
       steps {
@@ -16,10 +30,73 @@ pipeline {
       }
     }
 
-    // Solo seguir si hubo cambios en frontend/ (evita construir frontend cuando el commit solo toca backend)
+    // Detectar app y ambiente por nombre del Job (prioridad) o por parámetro
+    stage('Set environment') {
+      steps {
+        script {
+          def branch = env.BRANCH_NAME ?: env.GIT_BRANCH?.replaceFirst('^origin/', '') ?: 'develop'
+          def jobName = (env.JOB_NAME ?: '').toLowerCase()
+          def isProdJob = jobName.contains('production') || jobName.contains('prod') || jobName.contains('pdn')
+          def isDevJob = jobName.contains('development') || jobName.contains('dev') || jobName.contains('develop')
+
+          // Detectar app por nombre del Job
+          if (jobName.contains('lakewood') || jobName.contains('lakewood-p1')) {
+            env.APP_NAME = 'lakewood-p1'
+          } else if (jobName.contains('mvcrm') || jobName.contains('mv-crm') || jobName.contains('mv_crm')) {
+            env.APP_NAME = 'mv-crm'
+          } else {
+            env.APP_NAME = params.APP_NAME ?: 'lakewood-p1'
+          }
+
+          if (isDevJob && branch != 'develop') {
+            error "Job Develop solo debe ejecutarse con rama 'develop'. Rama actual: ${branch}."
+          }
+          if (isProdJob && branch != 'main' && branch != 'master') {
+            error "Job Production solo debe ejecutarse con rama 'main' (o 'master'). Rama actual: ${branch}."
+          }
+
+          env.IS_PRODUCTION = isProdJob ? 'true' : (isDevJob ? 'false' : (branch == 'main' ? 'true' : 'false'))
+          env.ENVIRONMENT = (env.IS_PRODUCTION == 'true') ? 'production' : 'development'
+
+          // Contenedores y puertos por app + ambiente
+          // Lakewood (app principal): frontend/frontend-dev, customer-service-frontend, 5173/5174
+          // MVCRM: frontend-mvcrm-dev/pdn, customer-service-mvcrm-frontend, 5179/5180
+          if (env.APP_NAME == 'lakewood-p1') {
+            env.CONTAINER_NAME = env.ENVIRONMENT == 'production' ? 'frontend' : 'frontend-dev'
+            env.IMAGE_NAME = 'customer-service-frontend'
+          } else {
+            env.CONTAINER_NAME = "frontend-mvcrm-${env.ENVIRONMENT == 'production' ? 'pdn' : 'dev'}"
+            env.IMAGE_NAME = 'customer-service-mvcrm-frontend'
+          }
+          env.IMAGE_TAG = "${env.ENVIRONMENT}-${env.BUILD_NUMBER}"
+
+          def ports = [
+            'lakewood-p1': [dev: '5174', prod: '5173'],
+            'mv-crm': [dev: '5179', prod: '5180']
+          ]
+          env.APP_PORT = env.IS_PRODUCTION == 'true' ? ports[env.APP_NAME].prod : ports[env.APP_NAME].dev
+
+          env.VITE_API_URL = env.IS_PRODUCTION == 'true'
+            ? 'https://apics.michelangelodelvalle.com/api'
+            : 'https://apicsdev.michelangelodelvalle.com/api'
+
+          env.SHOULD_RUN = 'true'
+
+          echo "========== CONFIGURACIÓN FRONTEND =========="
+          echo "Job: ${env.JOB_NAME} | Rama: ${branch}"
+          echo "App: ${env.APP_NAME} | Ambiente: ${env.ENVIRONMENT}"
+          echo "Contenedor: ${env.CONTAINER_NAME} | Puerto: ${env.APP_PORT}"
+          echo "API: ${env.VITE_API_URL}"
+          echo "============================================="
+        }
+      }
+    }
+
+    // Solo seguir si hubo cambios en frontend/ — si el commit solo toca backend/, se omite todo el pipeline
     stage('Check changes') {
       steps {
         script {
+          env.SHOULD_RUN = 'false'
           def changed = sh(script: """
             if [ -n \"${env.GIT_PREVIOUS_COMMIT ?: ''}\" ] && [ \"${env.GIT_PREVIOUS_COMMIT}\" != \"${env.GIT_COMMIT ?: ''}\" ]; then
               git diff --name-only \"${env.GIT_PREVIOUS_COMMIT}\" \"${env.GIT_COMMIT}\" 2>/dev/null || true
@@ -27,56 +104,19 @@ pipeline {
               (git rev-parse --quiet --verify HEAD~1 >/dev/null 2>&1 && git diff --name-only HEAD~1 HEAD) || echo 'frontend/'
             fi
           """, returnStdout: true).trim()
-          env.SHOULD_RUN = (changed != '' && changed.split('\n').any { it.startsWith('frontend/') }) ? 'true' : 'false'
-          echo "Changed files: ${changed.replace('\n', ', ')}"
-          echo "SHOULD_RUN (frontend): ${env.SHOULD_RUN}"
-          if (env.SHOULD_RUN == 'false') {
-            currentBuild.description = 'Skipped (no frontend changes)'
-          }
-        }
-      }
-    }
 
-    stage('Set environment') {
-      when { expression { env.SHOULD_RUN == 'true' } }
-      steps {
-        script {
-          def branch = env.BRANCH_NAME ?: env.GIT_BRANCH?.replaceFirst('^origin/', '') ?: 'develop'
-          def jobName = (env.JOB_NAME ?: '').toLowerCase()
-          // Ambiente por nombre del Job: Develop job → siempre API dev (apicsdev); Production job → API pdn (apics)
-          def isProdJob = jobName.contains('production') || jobName.contains('prod') || jobName.contains('pdn')
-          def isDevJob = jobName.contains('development') || jobName.contains('dev') || jobName.contains('develop')
-          // Solo disparar el ambiente correcto según la rama (evitar deploy equivocado si el job se configuró mal)
-          if (isDevJob && branch != 'develop') {
-            error "Job Develop solo debe ejecutarse con rama 'develop'. Rama actual: ${branch}. Revisa Branch Specifier del job (debe ser */develop)."
+          def appPath = "frontend/apps/${env.APP_NAME}/"
+          def sharedPath = "frontend/shared/"
+          def hasFrontendChanges = changed.split('\n').findAll { it.trim() }.any { f ->
+            f.startsWith('frontend/') && (f.startsWith(appPath) || f.startsWith(sharedPath))
           }
-          if (isProdJob && branch != 'main' && branch != 'master') {
-            error "Job Production solo debe ejecutarse con rama 'main' (o 'master'). Rama actual: ${branch}. Revisa Branch Specifier del job (debe ser */main)."
+          env.SHOULD_RUN = hasFrontendChanges ? 'true' : 'false'
+
+          echo "Changed files: ${changed.replace('\n', ', ')}"
+          echo "SHOULD_RUN (${env.APP_NAME} o shared): ${env.SHOULD_RUN}"
+          if (env.SHOULD_RUN == 'false') {
+            currentBuild.description = "Skipped (no changes in ${env.APP_NAME} or shared)"
           }
-          if (isDevJob) {
-            env.IS_PRODUCTION = 'false'
-          } else if (isProdJob) {
-            env.IS_PRODUCTION = 'true'
-          } else {
-            env.IS_PRODUCTION = (env.DEPLOY_ENV == 'production' || branch == 'main').toString()
-          }
-          env.ENVIRONMENT = (env.IS_PRODUCTION == 'true') ? 'production' : 'development'
-          env.CONTAINER_NAME = (env.IS_PRODUCTION == 'true') ? 'frontend' : 'frontend-dev'
-          env.APP_PORT = (env.IS_PRODUCTION == 'true') ? '5173' : '5174'
-          env.IMAGE_NAME = 'customer-service-frontend'
-          env.IMAGE_TAG = "${env.ENVIRONMENT}-${env.BUILD_NUMBER}"
-          // Fijar API por Job: Develop → siempre apicsdev; Production → siempre apics (no depender de env previo)
-          if (isDevJob) {
-            env.VITE_API_URL = 'https://apicsdev.michelangelodelvalle.com/api'
-          } else if (isProdJob) {
-            env.VITE_API_URL = 'https://apics.michelangelodelvalle.com/api'
-          } else {
-            env.VITE_API_URL = (branch == 'main') ? 'https://apics.michelangelodelvalle.com/api' : (env.VITE_API_URL_DEV ?: 'https://apicsdev.michelangelodelvalle.com/api')
-          }
-          echo "========== CONFIGURACIÓN FRONTEND =========="
-          echo "Job: ${env.JOB_NAME} | Rama: ${branch}"
-          echo "Ambiente: ${env.ENVIRONMENT} | API: ${env.VITE_API_URL}"
-          echo "============================================="
         }
       }
     }
@@ -84,7 +124,7 @@ pipeline {
     stage('Install') {
       when { expression { env.SHOULD_RUN == 'true' } }
       steps {
-        dir('frontend') {
+        dir("frontend/apps/${env.APP_NAME}") {
           sh '''#!/bin/bash
             set -e
             mkdir -p "${WORKSPACE}/.nvm"
@@ -104,10 +144,10 @@ pipeline {
       steps {
         dir('frontend') {
           script {
-            echo "Build Docker con VITE_API_URL=${env.VITE_API_URL}"
-            // Construir comando en Groovy para que el build-arg llegue bien a Docker (evitar que el shell pierda la URL)
             def buildArg = "VITE_API_URL=${env.VITE_API_URL}"
-            sh "docker build --no-cache -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} --build-arg \"${buildArg}\" ."
+            def dockerfile = env.APP_NAME == 'lakewood-p1' ? 'Dockerfile' : 'apps/mv-crm/Dockerfile'
+            echo "Build Docker: ${env.IMAGE_NAME}:${env.IMAGE_TAG} (${env.APP_NAME})"
+            sh "docker build --no-cache -f ${dockerfile} -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} --build-arg \"${buildArg}\" ."
           }
         }
       }
@@ -133,7 +173,7 @@ pipeline {
 
   post {
     success {
-      echo "Frontend desplegado (${env.ENVIRONMENT}) en http://localhost:${env.APP_PORT}"
+      echo "Frontend ${env.APP_NAME} (${env.ENVIRONMENT}) desplegado en http://localhost:${env.APP_PORT}"
     }
     always {
       cleanWs()

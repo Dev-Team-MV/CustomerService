@@ -1,0 +1,112 @@
+{
+  "title": "Analytics Dashboard",
+  "subtitle": "Real-time project statistics and sales insights",
+  "refreshData": "Refresh Data",
+  "stats": {
+    "totalInventory": "Total Inventory",
+    "availableLots": "Available lots",
+    "propertiesSold": "Properties Sold",
+    "occupancy": "occupancy",
+    "pendingSales": "Pending Sales",
+    "actionRequired": "Action required",
+    "allClear": "All clear",
+    "avgLotPrice": "Avg. Lot Price"
+  },
+  "progress": {
+    "title": "Project Sales Progress",
+    "totalLotsSold": "Total Lots Sold",
+    "occupancyRate": "Occupancy Rate",
+    "lots": "lots"
+  },
+  "summary": {
+    "title": "Quick Summary",
+    "totalProperties": "Total Properties",
+    "sold": "Sold",
+    "pending": "Pending",
+    "available": "Available"
+  },
+  "models": {
+    "title": "Property Sales by Model",
+    "subtitle": "Detailed distribution of properties by type",
+    "noData": "No model data available"
+  },
+  "mv": {
+    "page": {
+      "title": "Analytics",
+      "titleBold": "Overview",
+      "topbarLabel": "ANALYTICS",
+      "subtitle": "{{active}} of {{total}} projects · {{amount}} total portfolio",
+      "multiProject": "Multi-project · Global View",
+      "refresh": "Refresh",
+      "noProjectsSelected": "NO PROJECTS SELECTED"
+    },
+    "filter": {
+      "title": "Filter Projects",
+      "all": "All"
+    },
+    "kpis": {
+      "title": "Global KPIs",
+      "collected": "Collected",
+      "collectedSub": "Total received",
+      "pending": "Pending",
+      "pendingSub": "Outstanding",
+      "collectionRate": "Collection Rate",
+      "collectionRateSub": "of {{total}} total",
+      "totalClients": "Total Clients",
+      "totalClientsSub": "Across projects"
+    },
+    "balance": {
+      "title": "Balance Comparativa",
+      "collected": "Collected",
+      "pending": "Pending"
+    },
+    "share": {
+      "title": "Revenue Share",
+      "noData": "NO COLLECTED DATA"
+    },
+    "clients": {
+      "title": "Clients Comparativa",
+      "clients": "Clients",
+      "properties": "Properties",
+      "noData": "NO CLIENT DATA"
+    },
+        "modal": {
+      "header": {
+        "statistics": "STATISTICS"
+      },
+      "tabs": {
+        "balance": "Balance",
+        "clients": "Clients"
+      },
+      "balanceOverview": {
+        "title": "Financial Overview",
+        "collected": "Collected",
+        "collectedSub": "Total payments received",
+        "pending": "Pending",
+        "pendingSub": "Outstanding balance",
+        "collectionRate": "Collection Rate",
+        "collectionRateSub": "of {{total}} total",
+        "collectedLabel": "COLLECTED",
+        "pendingLabel": "PENDING"
+      },
+      "donut": {
+        "title": "Distribution",
+        "noData": "NO DATA AVAILABLE"
+      },
+      "clientsOverview": {
+        "title": "Client Overview",
+        "totalClients": "Total Clients",
+        "totalClientsSub": "Registered owners",
+        "avgProperties": "Avg Properties",
+        "avgPropertiesSub": "{{total}} properties total",
+        "topClient": "Top Client",
+        "clientList": "Client List"
+      },
+      "propertyChart": {
+        "title": "Properties per Client",
+        "noData": "NO CLIENT DATA",
+        "series": "Properties"
+      }
+    }
+  }
+}

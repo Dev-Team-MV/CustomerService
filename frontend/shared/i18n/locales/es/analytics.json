@@ -1,0 +1,112 @@
+{
+  "title": "Panel de Análisis",
+  "subtitle": "Estadísticas del proyecto e información de ventas en tiempo real",
+  "refreshData": "Actualizar Datos",
+  "stats": {
+    "totalInventory": "Inventario Total",
+    "availableLots": "Lotes disponibles",
+    "propertiesSold": "Propiedades Vendidas",
+    "occupancy": "ocupación",
+    "pendingSales": "Ventas Pendientes",
+    "actionRequired": "Requiere atención",
+    "allClear": "Todo al día",
+    "avgLotPrice": "Precio Promedio"
+  },
+  "progress": {
+    "title": "Progreso de Ventas del Proyecto",
+    "totalLotsSold": "Total de Lotes Vendidos",
+    "occupancyRate": "Tasa de Ocupación",
+    "lots": "lotes"
+  },
+  "summary": {
+    "title": "Resumen Rápido",
+    "totalProperties": "Propiedades Totales",
+    "sold": "Vendidas",
+    "pending": "Pendientes",
+    "available": "Disponibles"
+  },
+  "models": {
+    "title": "Ventas de Propiedades por Modelo",
+    "subtitle": "Distribución detallada de propiedades por tipo",
+    "noData": "No hay datos de modelos disponibles"
+  },
+  "mv": {
+    "page": {
+      "title": "Analíticas",
+      "titleBold": "Resumen",
+      "topbarLabel": "ANALÍTICAS",
+      "subtitle": "{{active}} de {{total}} proyectos · {{amount}} portafolio total",
+      "multiProject": "Multi-proyecto · Vista Global",
+      "refresh": "Actualizar",
+      "noProjectsSelected": "SIN PROYECTOS SELECCIONADOS"
+    },
+    "filter": {
+      "title": "Filtrar Proyectos",
+      "all": "Todos"
+    },
+    "kpis": {
+      "title": "KPIs Globales",
+      "collected": "Recaudado",
+      "collectedSub": "Total recibido",
+      "pending": "Pendiente",
+      "pendingSub": "Por cobrar",
+      "collectionRate": "Tasa de Cobro",
+      "collectionRateSub": "de {{total}} total",
+      "totalClients": "Total Clientes",
+      "totalClientsSub": "Entre proyectos"
+    },
+    "balance": {
+      "title": "Comparativa de Balance",
+      "collected": "Recaudado",
+      "pending": "Pendiente"
+    },
+    "share": {
+      "title": "Participación de Ingresos",
+      "noData": "SIN DATOS DE RECAUDO"
+    },
+    "clients": {
+      "title": "Comparativa de Clientes",
+      "clients": "Clientes",
+      "properties": "Propiedades",
+      "noData": "SIN DATOS DE CLIENTES"
+    },
+        "modal": {
+      "header": {
+        "statistics": "ESTADÍSTICAS"
+      },
+      "tabs": {
+        "balance": "Balance",
+        "clients": "Clientes"
+      },
+      "balanceOverview": {
+        "title": "Resumen Financiero",
+        "collected": "Recaudado",
+        "collectedSub": "Total de pagos recibidos",
+        "pending": "Pendiente",
+        "pendingSub": "Saldo por cobrar",
+        "collectionRate": "Tasa de Cobro",
+        "collectionRateSub": "de {{total}} total",
+        "collectedLabel": "RECAUDADO",
+        "pendingLabel": "PENDIENTE"
+      },
+      "donut": {
+        "title": "Distribución",
+        "noData": "SIN DATOS DISPONIBLES"
+      },
+      "clientsOverview": {
+        "title": "Resumen de Clientes",
+        "totalClients": "Total Clientes",
+        "totalClientsSub": "Propietarios registrados",
+        "avgProperties": "Prop. Promedio",
+        "avgPropertiesSub": "{{total}} propiedades en total",
+        "topClient": "Top Cliente",
+        "clientList": "Lista de Clientes"
+      },
+      "propertyChart": {
+        "title": "Propiedades por Cliente",
+        "noData": "SIN DATOS DE CLIENTES",
+        "series": "Propiedades"
+      }
+    }
+  }
+}

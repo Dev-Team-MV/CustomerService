@@ -15,7 +15,7 @@ const router = express.Router()
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Club House document with exterior[], blueprints[], deck[], interior{ amenityName: [urls] }
+ *         description: Club House document with exterior, blueprints, deck, and interior images
  *         content:
  *           application/json:
  *             schema:

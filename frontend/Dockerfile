@@ -7,16 +7,20 @@ ENV VITE_API_URL=$VITE_API_URL
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm ci
+# Copiar shared/ y lakewood-p1/ (vite.config.js resuelve @shared como ../../shared)
+COPY shared/ ./shared/
+COPY apps/lakewood-p1/ ./apps/lakewood-p1/
 
-COPY . .
+WORKDIR /app/apps/lakewood-p1
+RUN npm ci
+# Symlink node_modules al root para que shared/ pueda resolver sus imports
+RUN ln -s /app/apps/lakewood-p1/node_modules /app/node_modules
 RUN npm run build
 
 # Stage 2: serve with nginx
 FROM nginx:alpine
 
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/apps/lakewood-p1/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80

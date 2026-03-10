@@ -2,12 +2,15 @@ import Project from '../models/Project.js'
 
 export const getAllProjects = async (req, res) => {
   try {
-    const { activeOnly } = req.query
+    const { activeOnly, status } = req.query
     const filter = {}
     if (activeOnly === 'true' || activeOnly === '1') {
       filter.isActive = true
     }
-    const projects = await Project.find(filter).sort({ name: 1 })
+    if (status) {
+      filter.status = status
+    }
+    const projects = await Project.find(filter).sort({ slug: 1 })
     res.json(projects)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -40,23 +43,36 @@ export const getProjectBySlug = async (req, res) => {
   }
 }
 
+const pickProjectFields = (body) => {
+  const allowed = [
+    'name', 'slug', 'phase', 'title', 'subtitle', 'description', 'fullDescription',
+    'image', 'gallery', 'features', 'type', 'status', 'isActive',
+    'externalUrl', 'location', 'area', 'videos'
+  ]
+  const data = {}
+  for (const key of allowed) {
+    if (body[key] !== undefined) data[key] = body[key]
+  }
+  return data
+}
+
 export const createProject = async (req, res) => {
   try {
-    const { name, slug, type, isActive, description } = req.body
-    if (!name || !slug) {
-      return res.status(400).json({ message: 'name and slug are required' })
+    const { slug } = req.body
+    if (!slug) {
+      return res.status(400).json({ message: 'slug is required' })
     }
-    const existing = await Project.findOne({ slug: slug.toLowerCase().trim() })
+    const normalizedSlug = slug.toLowerCase().trim()
+    const existing = await Project.findOne({ slug: normalizedSlug })
     if (existing) {
       return res.status(400).json({ message: 'Project with this slug already exists' })
     }
-    const project = await Project.create({
-      name,
-      slug: slug.toLowerCase().trim(),
-      type: type || 'residential_lots',
-      isActive: isActive !== false,
-      description: description || ''
-    })
+    const data = pickProjectFields(req.body)
+    data.slug = normalizedSlug
+    data.type = data.type || 'residential_lots'
+    data.isActive = data.isActive !== false
+    data.status = data.status || 'active'
+    const project = await Project.create(data)
     res.status(201).json(project)
   } catch (error) {
     if (error.name === 'ValidationError') {
@@ -73,18 +89,16 @@ export const updateProject = async (req, res) => {
     if (!project) {
       return res.status(404).json({ message: 'Project not found' })
     }
-    if (req.body.name !== undefined) project.name = req.body.name
-    if (req.body.slug !== undefined) {
-      const newSlug = req.body.slug.toLowerCase().trim()
+    const data = pickProjectFields(req.body)
+    if (data.slug !== undefined) {
+      const newSlug = data.slug.toLowerCase().trim()
       const existing = await Project.findOne({ slug: newSlug, _id: { $ne: project._id } })
       if (existing) {
         return res.status(400).json({ message: 'Another project with this slug already exists' })
       }
-      project.slug = newSlug
+      data.slug = newSlug
     }
-    if (req.body.type !== undefined) project.type = req.body.type
-    if (req.body.isActive !== undefined) project.isActive = req.body.isActive
-    if (req.body.description !== undefined) project.description = req.body.description
+    Object.assign(project, data)
     await project.save()
     res.json(project)
   } catch (error) {
