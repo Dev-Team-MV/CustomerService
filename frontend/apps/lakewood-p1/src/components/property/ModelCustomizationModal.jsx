@@ -1,6 +1,6 @@
 import { Dialog, DialogContent } from '@mui/material'
 import ModelCustomizationCore from '../models/Customization/ModelCustomizationCore'
-
+import { useTranslation } from 'react-i18next'
 const MODEL_10_ID = "6977c7bbd1f24768968719de"
 
 const ModelCustomizationModal = ({
@@ -11,6 +11,8 @@ const ModelCustomizationModal = ({
   initialOptions = {}
 }) => {
   if (!model) return null
+
+  const { t } = useTranslation('models')
 
   // Detecta si es Modelo 10 y define los labels dinámicos
   const isModel10 = model._id === MODEL_10_ID
@@ -45,7 +47,7 @@ const ModelCustomizationModal = ({
           initialOptions={initialOptions}
           onConfirm={onConfirm}
           labels={labels}
-          confirmLabel="Confirm Selection"
+          confirmLabel={t('createProperty')}
         />
       </DialogContent>
     </Dialog>

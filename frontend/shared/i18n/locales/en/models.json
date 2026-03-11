@@ -214,7 +214,24 @@
   "signInToCreateProperty": "Sign In to Create Property",
   "createProperty": "Create Property",
   "signInToSendQuote": "Sign In to Send Quote",
-  "generateAndSendQuote": "Generate & Send Quote"
+  "generateAndSendQuote": "Generate & Send Quote",
+
+    "specialConfiguration": "Special configuration",
+  "vsModel": "vs {{model}}",
+  "compareTwoModels": "Compare two models",
+  "customizeYourDreamHome": "Customize your dream home",
+  "customizeClassic": "Customize the classic model",
+  "synced": "Synced",
+  "independent": "Independent",
+  "all": "All",
+
+  "allRooms": "All rooms",
+  "customizationOptions": "Customization options",
+  "withComedor": "With dining room",
+  "withStudy": "With study",
+  "customized": "Customized"
+
+
 }
 
 
