@@ -1,6 +1,6 @@
 import express from 'express'
 import { uploadImage, uploadMultipleImages, updateImage, deleteImage, testGCSConnection, getFolderFiles, updateRecorridoVisibility, upload } from '../controllers/uploadController.js'
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { protect, admin, optionalProtect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -43,8 +43,8 @@ router.get('/test-connection', testGCSConnection)
  *   get:
  *     summary: List files in a GCS folder (images/directory by prefix)
  *     tags: [Upload]
- *     security:
- *       - bearerAuth: []
+ *     security: []
+ *     description: Auth optional. With Bearer token the user is set; without token returns same list (public access).
  *     parameters:
  *       - in: query
  *         name: folder
@@ -85,8 +85,8 @@ router.get('/test-connection', testGCSConnection)
  *       500:
  *         description: Error listing folder
  */
-router.get('/files', protect, getFolderFiles)
-router.get('/folder/:folder', protect, getFolderFiles)
+router.get('/files', optionalProtect, getFolderFiles)
+router.get('/folder/:folder', optionalProtect, getFolderFiles)
 
 /**
  * @swagger
