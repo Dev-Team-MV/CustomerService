@@ -75,9 +75,9 @@ export const register = async (req, res) => {
       // Enviar SMS con el link de setup
       if (phoneNumber) {
         try {
-          const frontendUrl = process.env.FRONTEND_URL || 'https://customerservice.michelangelodelvalle.com'
+          const frontendUrl = process.env.FRONTEND_URL || 'https://lakewoodp1.michelangelodelvalle.com'
           const setupLink = `${frontendUrl}/setup-password/${setupToken}`
-          const message = `Hola ${firstName}, tu cuenta ha sido creada. Por favor establece tu contraseña ingresando a este enlace: ${setupLink}`
+          const message = `Hi ${firstName}, your account has been created. Please set your password by visiting this link: ${setupLink}`
           
           console.log('Sending SMS to:', phoneNumber)
           // await sendSMSWithValidation(phoneNumber, message)
@@ -415,9 +415,9 @@ export const sendSetupPasswordLink = async (req, res) => {
     const setupToken = user.generateSetupToken()
     await user.save()
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://customerservice.michelangelodelvalle.com'
+    const frontendUrl = process.env.FRONTEND_URL || 'https://lakewoodp1.michelangelodelvalle.com'
     const setupLink = `${frontendUrl}/setup-password/${setupToken}`
-    const message = `Hola ${user.firstName}, puedes establecer tu contraseña ingresando a este enlace: ${setupLink}`
+    const message = `Hi ${user.firstName}, you can set your password by visiting this link: ${setupLink}`
 
     try {
       await sendSMSWithValidation(user.phoneNumber, message)
