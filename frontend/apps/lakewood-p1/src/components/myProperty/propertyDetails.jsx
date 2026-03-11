@@ -85,378 +85,308 @@ const PropertyDetailsTab = ({ propertyDetails, isModel10, balconyLabels }) => {
 
   const handleThumbSelect = (idx) => setCarouselIndex(idx)
 
-  return (
-    <Paper 
-      elevation={0} 
-      sx={{ 
-        p: { xs: 2, sm: 3, md: 4 }, 
-        mt: 3,
-        borderRadius: 3,
-        bgcolor: 'white'
-      }}
-    >
-      {/* Alert informativo para Model 10 */}
-      {isModel10 && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Alert
-            severity="info"
-            icon={<Info />}
-            sx={{
-              mb: 3,
-              borderRadius: 3,
-              bgcolor: 'rgba(140, 165, 81, 0.05)',
-              border: '1px solid rgba(140, 165, 81, 0.2)',
-              '& .MuiAlert-message': { width: '100%' },
-              '& .MuiAlert-icon': { color: '#8CA551' },
-            }}
-          >
-            <Box>
-              <Typography
-                variant="body2"
-                fontWeight="600"
-                sx={{
-                  mb: 0.5,
-                  color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif',
-                  fontSize: { xs: '0.85rem', sm: '0.9rem' },
-                }}
-              >
-                {t('model10Features')}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif',
-                  fontSize: { xs: '0.75rem', sm: '0.8rem' },
-                  lineHeight: 1.6,
-                }}
-              >
-                {propertyDetails.property?.hasBalcony
-                  ? t('model10Study')
-                  : t('model10Config')}
-              </Typography>
-            </Box>
-          </Alert>
-        </motion.div>
-      )}
-
-      {/* ✅ FILTROS DE GALERÍA - Responsive */}
-      <Box
+  
+    return (
+      <Paper
+        elevation={0}
         sx={{
-          display: "flex",
-          gap: 1,
-          flexWrap: "wrap",
-          mb: 2,
-        }}
-      >
-        <Chip
-          label={`${t('galleryAll')} (${allImages.length})`}
-          size="small"
-          onClick={() => setGalleryFilter("all")}
-          variant={galleryFilter === "all" ? "filled" : "outlined"}
-          sx={{
-            fontWeight: galleryFilter === "all" ? 700 : 500,
-            cursor: "pointer",
-            bgcolor: galleryFilter === "all" ? '#333F1F' : 'transparent',
-            color: galleryFilter === "all" ? 'white' : '#706f6f',
-            borderColor: galleryFilter === "all" ? '#333F1F' : '#e0e0e0',
-            fontFamily: '"Poppins", sans-serif',
-            fontSize: { xs: '0.7rem', sm: '0.75rem' },
-            '&:hover': {
-              bgcolor: galleryFilter === "all" ? '#4a5d3a' : 'rgba(51, 63, 31, 0.08)',
-            }
-          }}
-        />
-        <Chip
-          label={`${t('galleryExterior')} (${allImages.filter((img) => img.type === "exterior").length})`}
-          size="small"
-          onClick={() => setGalleryFilter("exterior")}
-          variant={galleryFilter === "exterior" ? "filled" : "outlined"}
-          sx={{
-            fontWeight: galleryFilter === "exterior" ? 700 : 500,
-            cursor: "pointer",
-            bgcolor: galleryFilter === "exterior" ? '#333F1F' : 'transparent',
-            color: galleryFilter === "exterior" ? 'white' : '#706f6f',
-            borderColor: galleryFilter === "exterior" ? '#333F1F' : '#e0e0e0',
-            fontFamily: '"Poppins", sans-serif',
-            fontSize: { xs: '0.7rem', sm: '0.75rem' },
-            '&:hover': {
-              bgcolor: galleryFilter === "exterior" ? '#4a5d3a' : 'rgba(51, 63, 31, 0.08)',
-            }
-          }}
-        />
-        <Chip
-          label={`${t('galleryInterior')} (${allImages.filter((img) => img.type === "interior").length})`}
-          size="small"
-          onClick={() => setGalleryFilter("interior")}
-          variant={galleryFilter === "interior" ? "filled" : "outlined"}
-          sx={{
-            fontWeight: galleryFilter === "interior" ? 700 : 500,
-            cursor: "pointer",
-            bgcolor: galleryFilter === "interior" ? '#333F1F' : 'transparent',
-            color: galleryFilter === "interior" ? 'white' : '#706f6f',
-            borderColor: galleryFilter === "interior" ? '#333F1F' : '#e0e0e0',
-            fontFamily: '"Poppins", sans-serif',
-            fontSize: { xs: '0.7rem', sm: '0.75rem' },
-            '&:hover': {
-              bgcolor: galleryFilter === "interior" ? '#4a5d3a' : 'rgba(51, 63, 31, 0.08)',
-            }
-          }}
-        />
-        <Chip
-          label={`${t('galleryBlueprints')} (${allImages.filter((img) => img.type === "blueprint").length})`}
-          size="small"
-          onClick={() => setGalleryFilter("blueprint")}
-          variant={galleryFilter === "blueprint" ? "filled" : "outlined"}
-          sx={{
-            fontWeight: galleryFilter === "blueprint" ? 700 : 500,
-            cursor: "pointer",
-            bgcolor: galleryFilter === "blueprint" ? '#333F1F' : 'transparent',
-            color: galleryFilter === "blueprint" ? 'white' : '#706f6f',
-            borderColor: galleryFilter === "blueprint" ? '#333F1F' : '#e0e0e0',
-            fontFamily: '"Poppins", sans-serif',
-            fontSize: { xs: '0.7rem', sm: '0.75rem' },
-            '&:hover': {
-              bgcolor: galleryFilter === "blueprint" ? '#4a5d3a' : 'rgba(51, 63, 31, 0.08)',
-            }
-          }}
-        />
-      </Box>
-
-      {/* ✅ CARRUSEL PRINCIPAL - Responsive Mejorado */}
-      <Box
-        sx={{
-          width: '100%',
-          bgcolor: "#000",
+          p: { xs: 2, sm: 3, md: 4 },
+          mt: 3,
           borderRadius: 3,
-          height: { xs: 280, sm: 360, md: 450, lg: 520 },
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          overflow: "hidden",
-          mb: 2
+          bgcolor: 'white'
         }}
       >
-        {carouselImages.length > 0 ? (
-          <GalleryCarrousel
-            images={carouselImages.map(img => img.url)}
-            showPagination={true}
-            showArrows={true}
-            autoPlay={false}
-            borderRadius={8}
-            objectFit="contain"
-            startIndex={carouselIndex}
-            onIndexChange={setCarouselIndex}
-            watermark="/images/logos/Logo_LakewoodOaks-08.png"
-          />
-        ) : (
-          <Box textAlign="center" width="100%" px={2}>
-            <Home sx={{ fontSize: { xs: 40, sm: 60 }, color: "#666", mb: 2 }} />
-            <Typography 
-              color="white"
-              sx={{
-                fontFamily: '"Poppins", sans-serif',
-                fontSize: { xs: '0.85rem', sm: '1rem' }
-              }}
-            >
-              {t('noPropertyImages')}
-            </Typography>
-          </Box>
-        )}
-        {carouselImages.length > 0 && (
-          <IconButton
-            onClick={() => setCarouselIndex(carouselIndex)}
-            sx={{
-              position: "absolute",
-              top: { xs: 8, sm: 12 },
-              right: { xs: 8, sm: 12 },
-              bgcolor: "rgba(255,255,255,0.95)",
-              width: { xs: 36, sm: 40 },
-              height: { xs: 36, sm: 40 },
-              "&:hover": {
-                bgcolor: "white",
-                transform: "scale(1.1)"
-              }
-            }}
+        {/* Alert informativo para Model 10 */}
+        {isModel10 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
           >
-            <ZoomIn sx={{ fontSize: { xs: 20, sm: 24 } }} />
-          </IconButton>
-        )}
-      </Box>
-
-      {/* ✅ THUMBNAILS - Grid Responsive Mejorado */}
-      <Box
-        sx={{
-          width: '100%',
-          mb: 4
-        }}
-      >
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "repeat(3, 1fr)",
-              sm: "repeat(4, 1fr)",
-              md: "repeat(5, 1fr)",
-              lg: "repeat(6, 1fr)"
-            },
-            gap: { xs: 1, sm: 1.5 },
-            maxHeight: { xs: 200, sm: 'none' },
-            overflowY: { xs: 'auto', sm: 'visible' },
-            pr: { xs: 1, sm: 0 },
-            "&::-webkit-scrollbar": { width: 4 },
-            "&::-webkit-scrollbar-thumb": {
-              bgcolor: "grey.400",
-              borderRadius: 2
-            }
-          }}
-        >
-          {carouselImages.length === 0 ? (
-            <Box
+            <Alert
+              severity="info"
+              icon={<Info />}
               sx={{
-                gridColumn: "1 / -1",
-                textAlign: "center",
-                py: { xs: 3, sm: 4 }
+                mb: 3,
+                borderRadius: 3,
+                bgcolor: 'rgba(140, 165, 81, 0.05)',
+                border: '1px solid rgba(140, 165, 81, 0.2)',
+                '& .MuiAlert-message': { width: '100%' },
+                '& .MuiAlert-icon': { color: '#8CA551' },
               }}
             >
-              <ImageIcon sx={{ fontSize: { xs: 32, sm: 40 }, color: "#ccc", mb: 1 }} />
-              <Typography 
-                variant="caption" 
-                color="text.secondary"
-                sx={{
-                  fontFamily: '"Poppins", sans-serif',
-                  fontSize: { xs: '0.75rem', sm: '0.8rem' }
-                }}
-              >
-                {t('noImagesAvailable')}
-              </Typography>
-            </Box>
-          ) : (
-            carouselImages.map((img, i) => (
-              <motion.div
-                key={`thumb-${i}-${galleryFilter}`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Box
-                  onClick={() => handleThumbSelect(i)}
+              <Box>
+                <Typography
+                  variant="body2"
+                  fontWeight="600"
                   sx={{
-                    width: "100%",
-                    height: { xs: 60, sm: 70, md: 80 },
-                    borderRadius: 2,
-                    overflow: "hidden",
-                    cursor: "pointer",
-                    border: i === carouselIndex
-                      ? "3px solid #333F1F"
-                      : "2px solid rgba(0,0,0,0.08)",
-                    boxShadow: i === carouselIndex
-                      ? "0 8px 24px rgba(51, 63, 31, 0.25)"
-                      : "none",
-                    transition: "all 0.3s ease",
-                    position: "relative",
-                    "&:hover": {
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                      borderColor: i === carouselIndex ? '#333F1F' : '#8CA551'
-                    }
+                    mb: 0.5,
+                    color: '#333F1F',
+                    fontFamily: '"Poppins", sans-serif',
+                    fontSize: { xs: '0.85rem', sm: '0.9rem' },
                   }}
                 >
-                  <img
-                    src={img.url}
-                    alt={`thumb-${i}`}
-                    loading="lazy"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                  {i === carouselIndex && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 4,
-                        right: 4,
-                        bgcolor: "#333F1F",
-                        borderRadius: "50%",
-                        width: { xs: 18, sm: 20 },
-                        height: { xs: 18, sm: 20 },
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        boxShadow: '0 2px 8px rgba(51, 63, 31, 0.4)'
-                      }}
-                    >
-                      <CheckCircle sx={{ fontSize: { xs: 12, sm: 14 }, color: "white" }} />
-                    </Box>
-                  )}
-                </Box>
-              </motion.div>
-            ))
-          )}
-        </Box>
-      </Box>
-
-      {/* ✅ SPECIFICATIONS GRID */}
-      <Box sx={{ mt: 4 }}>
-        <Box mb={3}>
-          <Box display="flex" alignItems="center" gap={2} mb={1.5} flexWrap="wrap">
-            <Typography
-              variant="h6"
+                  {t('model10Features')}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: '#706f6f',
+                    fontFamily: '"Poppins", sans-serif',
+                    fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {propertyDetails.property?.hasBalcony
+                    ? t('model10Study')
+                    : t('model10Config')}
+                </Typography>
+              </Box>
+            </Alert>
+          </motion.div>
+        )}
+  
+        {/* ── Filtros de galería ─────────────────────────────── */}
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+          {[
+            { key: 'all',       label: t('galleryAll'),        count: allImages.length },
+            { key: 'exterior',  label: t('galleryExterior'),   count: allImages.filter(i => i.type === 'exterior').length },
+            { key: 'interior',  label: t('galleryInterior'),   count: allImages.filter(i => i.type === 'interior').length },
+            { key: 'blueprint', label: t('galleryBlueprints'), count: allImages.filter(i => i.type === 'blueprint').length },
+          ].map(({ key, label, count }) => (
+            <Chip
+              key={key}
+              label={`${label} (${count})`}
+              size="small"
+              onClick={() => setGalleryFilter(key)}
               sx={{
+                cursor: 'pointer',
                 fontFamily: '"Poppins", sans-serif',
-                color: "#1a1a1a",
-                fontWeight: 700,
-                fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.5rem" },
-                letterSpacing: "0.5px",
+                fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                fontWeight: galleryFilter === key ? 700 : 500,
+                bgcolor: galleryFilter === key ? '#333F1F' : 'transparent',
+                color: galleryFilter === key ? 'white' : '#706f6f',
+                border: `1px solid ${galleryFilter === key ? '#333F1F' : '#e0e0e0'}`,
+                '&:hover': {
+                  bgcolor: galleryFilter === key ? '#4a5d3a' : 'rgba(51, 63, 31, 0.08)',
+                }
               }}
-            >
-              {t('propertySpecs')}
-            </Typography>
-            {isModel10 && (
-              <Chip
-                label={t('model10')}
-                size="small"
-                sx={{
-                  bgcolor: "transparent",
-                  border: "1.5px solid #E5863C",
-                  color: "#E5863C",
-                  fontWeight: 700,
-                  fontSize: { xs: "0.65rem", sm: "0.7rem" },
-                  height: { xs: 24, sm: 28 },
-                  px: { xs: 1, sm: 1.5 },
-                  fontFamily: '"Poppins", sans-serif',
-                  letterSpacing: "0.5px",
-                  textTransform: "uppercase",
-                  "&:hover": {
-                    bgcolor: "rgba(229, 134, 60, 0.08)",
-                  },
-                }}
-              />
-            )}
-          </Box>
+            />
+          ))}
+        </Box>
+  
+        {/* ── Carrusel 3/4 + Thumbnails 1/4 ─────────────────── */}
+        <Box
+          sx={{
+            display: 'flex',
+            gap: { xs: 1.5, sm: 2 },
+            mb: 4,
+            height: { xs: 280, sm: 380, md: 460, lg: 520 },
+          }}
+        >
+          {/* Imagen principal */}
           <Box
             sx={{
-              width: 60,
-              height: 2,
-              bgcolor: "#8CA551",
-              opacity: 0.8,
+              flex: 3,
+              bgcolor: '#000',
+              borderRadius: 3,
+              position: 'relative',
+              overflow: 'hidden',
+              minWidth: 0,
             }}
+          >
+            {carouselImages.length > 0 ? (
+              <GalleryCarrousel
+                images={carouselImages.map(img => img.url)}
+                showPagination={true}
+                showArrows={true}
+                autoPlay={false}
+                borderRadius={8}
+                objectFit="contain"
+                startIndex={carouselIndex}
+                onIndexChange={setCarouselIndex}
+                watermark="/images/logos/Logo_LakewoodOaks-08.png"
+              />
+            ) : (
+              <Box
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                justifyContent="center"
+                height="100%"
+                px={2}
+              >
+                <Home sx={{ fontSize: { xs: 40, sm: 60 }, color: '#666', mb: 2 }} />
+                <Typography
+                  color="white"
+                  sx={{ fontFamily: '"Poppins", sans-serif', fontSize: { xs: '0.85rem', sm: '1rem' } }}
+                >
+                  {t('noPropertyImages')}
+                </Typography>
+              </Box>
+            )}
+  
+            {carouselImages.length > 0 && (
+              <IconButton
+                sx={{
+                  position: 'absolute',
+                  top: { xs: 8, sm: 12 },
+                  right: { xs: 8, sm: 12 },
+                  bgcolor: 'rgba(255,255,255,0.95)',
+                  width: { xs: 32, sm: 38 },
+                  height: { xs: 32, sm: 38 },
+                  '&:hover': { bgcolor: 'white', transform: 'scale(1.1)' }
+                }}
+              >
+                <ZoomIn sx={{ fontSize: { xs: 18, sm: 22 } }} />
+              </IconButton>
+            )}
+          </Box>
+  
+          {/* Thumbnails verticales */}
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: { xs: 0.8, sm: 1 },
+              overflowY: 'auto',
+              minWidth: 0,
+              pr: 0.5,
+              '&::-webkit-scrollbar': { width: 4 },
+              '&::-webkit-scrollbar-track': { bgcolor: 'transparent' },
+              '&::-webkit-scrollbar-thumb': {
+                bgcolor: 'rgba(51, 63, 31, 0.2)',
+                borderRadius: 2,
+              },
+            }}
+          >
+            {carouselImages.length === 0 ? (
+              <Box
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                justifyContent="center"
+                height="100%"
+              >
+                <ImageIcon sx={{ fontSize: 32, color: '#ccc', mb: 1 }} />
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem', textAlign: 'center' }}
+                >
+                  {t('noImagesAvailable')}
+                </Typography>
+              </Box>
+            ) : (
+              carouselImages.map((img, i) => (
+                <motion.div
+                  key={`thumb-${i}-${galleryFilter}`}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  style={{ flexShrink: 0 }}
+                >
+                  <Box
+                    onClick={() => handleThumbSelect(i)}
+                    sx={{
+                      width: '100%',
+                      aspectRatio: '16/9',
+                      borderRadius: 1.5,
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      border: i === carouselIndex
+                        ? '2.5px solid #333F1F'
+                        : '1.5px solid rgba(0,0,0,0.08)',
+                      boxShadow: i === carouselIndex
+                        ? '0 4px 16px rgba(51, 63, 31, 0.3)'
+                        : 'none',
+                      transition: 'all 0.25s ease',
+                      position: 'relative',
+                      '&:hover': {
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        borderColor: i === carouselIndex ? '#333F1F' : '#8CA551',
+                      }
+                    }}
+                  >
+                    <img
+                      src={img.url}
+                      alt={`thumb-${i}`}
+                      loading="lazy"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                    {i === carouselIndex && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 4,
+                          right: 4,
+                          bgcolor: '#333F1F',
+                          borderRadius: '50%',
+                          width: 18,
+                          height: 18,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 2px 8px rgba(51, 63, 31, 0.4)'
+                        }}
+                      >
+                        <CheckCircle sx={{ fontSize: 12, color: 'white' }} />
+                      </Box>
+                    )}
+                  </Box>
+                </motion.div>
+              ))
+            )}
+          </Box>
+        </Box>
+  
+        {/* ── Specifications Grid ────────────────────────────── */}
+        <Box sx={{ mt: 4 }}>
+          <Box mb={3}>
+            <Box display="flex" alignItems="center" gap={2} mb={1.5} flexWrap="wrap">
+              <Typography
+                variant="h6"
+                sx={{
+                  fontFamily: '"Poppins", sans-serif',
+                  color: '#1a1a1a',
+                  fontWeight: 700,
+                  fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' },
+                  letterSpacing: '0.5px',
+                }}
+              >
+                {t('propertySpecs')}
+              </Typography>
+              {isModel10 && (
+                <Chip
+                  label={t('model10')}
+                  size="small"
+                  sx={{
+                    bgcolor: 'transparent',
+                    border: '1.5px solid #E5863C',
+                    color: '#E5863C',
+                    fontWeight: 700,
+                    fontSize: { xs: '0.65rem', sm: '0.7rem' },
+                    height: { xs: 24, sm: 28 },
+                    px: { xs: 1, sm: 1.5 },
+                    fontFamily: '"Poppins", sans-serif',
+                    letterSpacing: '0.5px',
+                    textTransform: 'uppercase',
+                    '&:hover': { bgcolor: 'rgba(229, 134, 60, 0.08)' },
+                  }}
+                />
+              )}
+            </Box>
+            <Box sx={{ width: 60, height: 2, bgcolor: '#8CA551', opacity: 0.8 }} />
+          </Box>
+  
+          <PropertySpecsGrid
+            propertyDetails={propertyDetails}
+            isModel10={isModel10}
+            balconyLabels={balconyLabels}
           />
         </Box>
-        <PropertySpecsGrid
-          propertyDetails={propertyDetails}
-          isModel10={isModel10}
-          balconyLabels={balconyLabels}
-        />
-      </Box>
-    </Paper>
-  )
+      </Paper>
+    )
 }
 
 export default PropertyDetailsTab

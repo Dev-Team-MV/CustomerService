@@ -9,7 +9,8 @@ const defaultMap = '/images/mapLakewood.png'
 import { CloudUpload } from '@mui/icons-material'
 import OutdoorAmenitiesModal from '../masterPlan/OutdoorAmenitiesModal'
 import { useTranslation } from 'react-i18next'
-// ...otros imports...
+import PrimaryButton from '../../constants/PrimaryButton'
+import { markerSx, mapContainerSx } from '../../theme'
 
 // Amenidades exteriores (ajusta x, y, id, name, images según tu plano)
 const exteriorAmenities = [
@@ -157,29 +158,14 @@ const ExteriorAmenitiesTab = () => {
           boxSizing: 'border-box'
         }}
       >
-                <Button
-                  variant="contained"
-                  startIcon={<CloudUpload />} // Usa el ícono que prefieras, por ejemplo CloudUpload
-                  sx={{
-                    mb: 2,
-                    borderRadius: 3,
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    fontFamily: '"Poppins", sans-serif',
-                    bgcolor: '#333F1F',
-                    color: 'white',
-                    px: 3,
-                    py: 1.2,
-                    boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
-                    '&:hover': {
-                      bgcolor: '#8CA551',
-                      boxShadow: '0 6px 16px rgba(140, 165, 81, 0.35)'
-                    }
-                  }}
-                  onClick={handleOpenModal}
-                >
+       <PrimaryButton
+          variant="contained"
+          color="primary"
+          startIcon={<CloudUpload />}
+          onClick={handleOpenModal}
+        >
           {t('manageOutdoorAmenities')}
-                </Button>
+        </PrimaryButton>
         {/* Map Container */}
         <Box
           ref={mapRef}
@@ -190,17 +176,7 @@ const ExteriorAmenitiesTab = () => {
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          sx={{
-            width: '100%',
-            maxWidth: '100%',
-            paddingTop: '56.25%',
-            bgcolor: '#f0f0f0',
-            position: 'relative',
-            cursor: isDragging ? 'grabbing' : 'grab',
-            overflow: 'hidden',
-            touchAction: 'none',
-            boxSizing: 'border-box'
-          }}
+          sx={mapContainerSx}
         >
           <Box
             sx={{

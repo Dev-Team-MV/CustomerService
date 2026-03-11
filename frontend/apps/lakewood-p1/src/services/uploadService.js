@@ -87,10 +87,7 @@ const uploadService = {
   uploadTimeLineImage: async (file) => {
     return uploadService.uploadImage(file, 'timeline')
   },
-  
-  uploadDeckClubHouse: async (file) => {
-    return uploadService.uploadImage(file, 'deck')
-  },
+
 
   // ========================================
   // ✅ CLUBHOUSE FUNCTIONS - ENDPOINTS CORREGIDOS
@@ -148,6 +145,7 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
   }
 },
 
+
   uploadDeckClubHouse: async (file, isPublic = true) => {
     try {
       // subir directamente al folder clubhouse/deck
@@ -158,6 +156,9 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
       throw err;
     }
   },
+
+
+
   getFilesByFolder: async (folder, urls = true) => {
     try {
       console.log(`📂 Getting files from folder: ${folder}`)
@@ -189,10 +190,10 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
   },
 
   /** PATCH clubhouse image visibility. Body: { section, index, isPublic } or { section, interiorKey, index, isPublic } for interior. */
-  updateClubhouseImageVisibility: async (payload) => {
-    const response = await api.patch('/clubhouse/images/visibility', payload)
-    return response.data
-  },
+  // updateClubhouseImageVisibility: async (payload) => {
+  //   const response = await api.patch('/clubhouse/images/visibility', payload)
+  //   return response.data
+  // },
 
   /** PATCH recorrido file visibility. Body: { filename, isPublic }. filename e.g. "recorrido.1.jpg" */
   updateRecorridoVisibility: async (filename, isPublic) => {
@@ -269,14 +270,16 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
     return api.put(`/outdoor-amenities/${id}`, data);
   },
 
+
   updateClubhouseImageVisibility: async ({ section, index, isPublic, interiorKey }) => {
-  return api.patch('/clubhouse/images/visibility', {
-    section,
-    index,
-    isPublic,
-    ...(section === 'interior' && { interiorKey })
-  });
-},
+    return api.patch('/clubhouse/images/visibility', {
+      section,
+      index,
+      isPublic,
+      ...(section === 'interior' && { interiorKey })
+    });
+  },
+
 
 deleteClubhouseImages: async ({ filenames = [], names = [], deleteFromStorage = true }) => {
   // Log para debug

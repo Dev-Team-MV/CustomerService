@@ -31,7 +31,7 @@ import {
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import GalleryCarrousel from '../GalleryCarrousel'  // ✅ añadir import
-
+import PrimaryButton from '../../constants/PrimaryButton';
 
 const ModelCard = ({
   model,
@@ -124,592 +124,571 @@ const ModelCard = ({
   };
 
   return (
-    <Grid item xs={12} lg={6}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.1 }}
+  <Grid item xs={12} lg={6}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.1 }}
+    >
+      <Card
+        sx={{
+          borderRadius: 4,
+          boxShadow: '0 4px 16px rgba(51, 63, 31, 0.08)',
+          transition: 'all 0.3s',
+          border: '1px solid rgba(140, 165, 81, 0.15)',
+          bgcolor: 'white',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          '&:hover': {
+            boxShadow: '0 12px 32px rgba(51, 63, 31, 0.12)',
+            borderColor: '#8CA551',
+            transform: 'translateY(-4px)'
+          },
+          position: 'relative',
+          overflow: 'visible'
+        }}
       >
-        <Card
+        {/* STATUS CHIP */}
+        <Chip
+          label={statusLabels[model.status] || model.status}
+          size="small"
           sx={{
-            borderRadius: 4,
-            boxShadow: '0 4px 16px rgba(51, 63, 31, 0.08)',
-            transition: 'all 0.3s',
-            border: '1px solid rgba(140, 165, 81, 0.15)',
-            bgcolor: 'white',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            '&:hover': {
-              boxShadow: '0 12px 32px rgba(51, 63, 31, 0.12)',
-              borderColor: '#8CA551',
-              transform: 'translateY(-4px)'
-            },
-            position: 'relative',
-            overflow: 'visible'
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            fontWeight: 700,
+            zIndex: 2,
+            textTransform: 'capitalize',
+            fontFamily: '"Poppins", sans-serif',
+            letterSpacing: '0.5px',
+            fontSize: '0.7rem',
+            height: 26,
+            bgcolor: statusColors.bg,
+            color: statusColors.color,
+            border: `1px solid ${statusColors.border}`,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
           }}
-        >
-          {/* STATUS CHIP */}
-          <Chip
-            label={statusLabels[model.status] || model.status}
-            size="small"
-            sx={{
-              position: 'absolute',
-              top: 16,
-              right: 16,
-              fontWeight: 700,
-              zIndex: 2,
-              textTransform: 'capitalize',
-              fontFamily: '"Poppins", sans-serif',
-              letterSpacing: '0.5px',
-              fontSize: '0.7rem',
-              height: 26,
-              bgcolor: statusColors.bg,
-              color: statusColors.color,
-              border: `1px solid ${statusColors.border}`,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }}
-          />
+        />
 
-          <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
-            {/* IMAGEN + INFO BÁSICA */}
-            <Box display="flex" gap={2} mb={2.5}>
+        <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
+          {/* IMAGEN + INFO BÁSICA */}
+          <Box display="flex" gap={2} mb={2.5}>
+            <Box
+              sx={{
+                width: 120,
+                height: 120,
+                borderRadius: 3,
+                overflow: 'hidden',
+                position: 'relative',
+                bgcolor: 'rgba(112, 111, 111, 0.05)',
+                flexShrink: 0,
+                border: '2px solid rgba(140, 165, 81, 0.15)'
+              }}
+            >
+              {currentImage ? (
+                <>
+                  <Box
+                    component="img"
+                    src={currentImageSrc}
+                    alt={model.model}
+                    sx={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                  <Chip
+                    label={`${imageIndex + 1}/${allImages.length}`}
+                    size="small"
+                    sx={{
+                      position: 'absolute',
+                      bottom: 6,
+                      right: 6,
+                      bgcolor: 'rgba(51, 63, 31, 0.9)',
+                      backdropFilter: 'blur(8px)',
+                      color: 'white',
+                      height: 22,
+                      fontSize: '0.65rem',
+                      fontWeight: 600,
+                      fontFamily: '"Poppins", sans-serif'
+                    }}
+                  />
+                  {allImages.length > 1 && (
+                    <>
+                      <IconButton
+                        size="small"
+                        onClick={handlePrevImage}
+                        sx={{
+                          position: 'absolute',
+                          left: 4,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          bgcolor: 'rgba(255,255,255,0.9)',
+                          width: 24,
+                          height: 24,
+                          '&:hover': { bgcolor: 'white' }
+                        }}
+                      >
+                        <ChevronLeft sx={{ fontSize: 16 }} />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={handleNextImage}
+                        sx={{
+                          position: 'absolute',
+                          right: 4,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          bgcolor: 'rgba(255,255,255,0.9)',
+                          width: 24,
+                          height: 24,
+                          '&:hover': { bgcolor: 'white' }
+                        }}
+                      >
+                        <ChevronRight sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </>
+                  )}
+                </>
+              ) : (
+                <Home sx={{ fontSize: 40, color: '#706f6f', opacity: 0.4 }} />
+              )}
+            </Box>
+
+            <Box flex={1} minWidth={0}>
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                noWrap
+                sx={{
+                  fontFamily: '"Poppins", sans-serif',
+                  color: '#333F1F',
+                  letterSpacing: '0.5px',
+                  mb: 0.5
+                }}
+              >
+                {model.model}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: '#706f6f',
+                  fontFamily: '"Poppins", sans-serif',
+                  display: 'block',
+                  mb: 1.5
+                }}
+              >
+                #{model.modelNumber}
+              </Typography>
               <Box
                 sx={{
-                  width: 120,
-                  height: 120,
-                  borderRadius: 3,
-                  overflow: 'hidden',
-                  position: 'relative',
-                  bgcolor: 'rgba(112, 111, 111, 0.05)',
-                  flexShrink: 0,
-                  border: '2px solid rgba(140, 165, 81, 0.15)'
-                }}
-              >
-                {currentImage ? (
-                  <>
-                    <Box
-                      component="img"
-                      src={currentImageSrc}
-                      alt={model.model}
-                      sx={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
-                      }}
-                    />
-                    <Chip
-                      label={`${imageIndex + 1}/${allImages.length}`}
-                      size="small"
-                      sx={{
-                        position: 'absolute',
-                        bottom: 6,
-                        right: 6,
-                        bgcolor: 'rgba(51, 63, 31, 0.9)',
-                        backdropFilter: 'blur(8px)',
-                        color: 'white',
-                        height: 22,
-                        fontSize: '0.65rem',
-                        fontWeight: 600,
-                        fontFamily: '"Poppins", sans-serif'
-                      }}
-                    />
-                    {allImages.length > 1 && (
-                      <>
-                        <IconButton
-                          size="small"
-                          onClick={handlePrevImage}
-                          sx={{
-                            position: 'absolute',
-                            left: 4,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            bgcolor: 'rgba(255,255,255,0.9)',
-                            width: 24,
-                            height: 24,
-                            '&:hover': { bgcolor: 'white' }
-                          }}
-                        >
-                          <ChevronLeft sx={{ fontSize: 16 }} />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={handleNextImage}
-                          sx={{
-                            position: 'absolute',
-                            right: 4,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            bgcolor: 'rgba(255,255,255,0.9)',
-                            width: 24,
-                            height: 24,
-                            '&:hover': { bgcolor: 'white' }
-                          }}
-                        >
-                          <ChevronRight sx={{ fontSize: 16 }} />
-                        </IconButton>
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <Home sx={{ fontSize: 40, color: '#706f6f', opacity: 0.4 }} />
-                )}
-              </Box>
-
-              <Box flex={1} minWidth={0}>
-                <Typography
-                  variant="h6"
-                  fontWeight={700}
-                  noWrap
-                  sx={{
-                    fontFamily: '"Poppins", sans-serif',
-                    color: '#333F1F',
-                    letterSpacing: '0.5px',
-                    mb: 0.5
-                  }}
-                >
-                  {model.model}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: '#706f6f',
-                    fontFamily: '"Poppins", sans-serif',
-                    display: 'block',
-                    mb: 1.5
-                  }}
-                >
-                  #{model.modelNumber}
-                </Typography>
-                <Box
-                  sx={{
-                    bgcolor: 'rgba(140, 165, 81, 0.08)',
-                    border: '2px solid rgba(140, 165, 81, 0.25)',
-                    borderRadius: 2,
-                    px: 2,
-                    py: 0.8,
-                    display: 'inline-block'
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    fontWeight={700}
-                    sx={{
-                      color: '#333F1F',
-                      fontFamily: '"Poppins", sans-serif',
-                      letterSpacing: '0.5px'
-                    }}
-                  >
-                    ${model.price?.toLocaleString()}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-
-            {/* SPECS */}
-            <Box
-              display="flex"
-              gap={2}
-              mb={2}
-              flexWrap="wrap"
-              sx={{
-                p: 1.5,
-                bgcolor: 'rgba(140, 165, 81, 0.03)',
-                borderRadius: 2,
-                border: '1px solid rgba(140, 165, 81, 0.1)'
-              }}
-            >
-              <Box display="flex" alignItems="center" gap={0.8}>
-                <Bed sx={{ fontSize: 18, color: '#333F1F' }} />
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontFamily: '"Poppins", sans-serif',
-                    fontWeight: 600,
-                    color: '#706f6f'
-                  }}
-                >
-                  {model.bedrooms}
-                </Typography>
-              </Box>
-              <Box display="flex" alignItems="center" gap={0.8}>
-                <Bathtub sx={{ fontSize: 18, color: '#8CA551' }} />
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontFamily: '"Poppins", sans-serif',
-                    fontWeight: 600,
-                    color: '#706f6f'
-                  }}
-                >
-                  {model.bathrooms}
-                </Typography>
-              </Box>
-              <Box display="flex" alignItems="center" gap={0.8}>
-                <SquareFoot sx={{ fontSize: 18, color: '#E5863C' }} />
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontFamily: '"Poppins", sans-serif',
-                    fontWeight: 600,
-                    color: '#706f6f'
-                  }}
-                >
-                  {model.sqft?.toLocaleString()}
-                </Typography>
-              </Box>
-              <Box display="flex" alignItems="center" gap={0.8}>
-                <Layers sx={{ fontSize: 18, color: '#706f6f' }} />
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontFamily: '"Poppins", sans-serif',
-                    fontWeight: 600,
-                    color: '#706f6f'
-                  }}
-                >
-                  {model.stories || 1}
-                </Typography>
-              </Box>
-            </Box>
-
-            {/* PRICING OPTIONS */}
-            {hasPricingOptions(model) && (
-              <Box display="flex" gap={0.8} mb={2} flexWrap="wrap">
-                {model.balconies?.length > 0 && (
-                  <Chip
-                    icon={<Balcony sx={{ fontSize: 14 }} />}
-                    label={`+$${(model.balconies[0].price / 1000).toFixed(0)}K`}
-                    size="small"
-                    sx={{
-                      height: 24,
-                      bgcolor: 'rgba(140, 165, 81, 0.12)',
-                      color: '#333F1F',
-                      fontWeight: 600,
-                      border: '1px solid rgba(140, 165, 81, 0.3)',
-                      fontFamily: '"Poppins", sans-serif',
-                      fontSize: '0.7rem',
-                      '& .MuiChip-icon': { color: '#8CA551' }
-                    }}
-                  />
-                )}
-                {model.upgrades?.length > 0 && (
-                  <Chip
-                    icon={<UpgradeIcon sx={{ fontSize: 14 }} />}
-                    label={`+$${(model.upgrades[0].price / 1000).toFixed(0)}K`}
-                    size="small"
-                    sx={{
-                      height: 24,
-                      bgcolor: 'rgba(229, 134, 60, 0.12)',
-                      color: '#E5863C',
-                      fontWeight: 600,
-                      border: '1px solid rgba(229, 134, 60, 0.3)',
-                      fontFamily: '"Poppins", sans-serif',
-                      fontSize: '0.7rem',
-                      '& .MuiChip-icon': { color: '#E5863C' }
-                    }}
-                  />
-                )}
-                {model.storages?.length > 0 && (
-                  <Chip
-                    icon={<StorageIcon sx={{ fontSize: 14 }} />}
-                    label={`+$${(model.storages[0].price / 1000).toFixed(0)}K`}
-                    size="small"
-                    sx={{
-                      height: 24,
-                      bgcolor: 'rgba(112, 111, 111, 0.12)',
-                      color: '#706f6f',
-                      fontWeight: 600,
-                      border: '1px solid rgba(112, 111, 111, 0.3)',
-                      fontFamily: '"Poppins", sans-serif',
-                      fontSize: '0.7rem',
-                      '& .MuiChip-icon': { color: '#706f6f' }
-                    }}
-                  />
-                )}
-              </Box>
-            )}
-
-            {/* ACTIONS */}
-            <Box display="flex" gap={1} mb={2.5}>
-              <Button
-                size="small"
-                variant="outlined"
-                startIcon={<PhotoLibrary sx={{ fontSize: 16 }} />}
-                onClick={() => setGalleryOpen(true)}  // ✅ abrir gallery local
-                sx={{
-                  flex: 1,
-                  fontSize: '0.75rem',
+                  bgcolor: 'rgba(140, 165, 81, 0.08)',
+                  border: '2px solid rgba(140, 165, 81, 0.25)',
                   borderRadius: 2,
-                  borderColor: '#8CA551',
-                  color: '#333F1F',
-                  fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif',
-                  '&:hover': {
-                    borderColor: '#333F1F',
-                    bgcolor: 'rgba(51, 63, 31, 0.04)'
-                  }
+                  px: 2,
+                  py: 0.8,
+                  display: 'inline-block'
                 }}
               >
-                {t('models:actions.gallery')}
-              </Button>
-              <IconButton
-                size="small"
-                onClick={() => onEdit(model)}
-                sx={{
-                  border: '1px solid rgba(140, 165, 81, 0.3)',
-                  color: '#8CA551',
-                  '&:hover': {
-                    bgcolor: 'rgba(140, 165, 81, 0.08)',
-                    borderColor: '#8CA551'
-                  }
-                }}
-              >
-                <Edit fontSize="small" />
-              </IconButton>
-              <IconButton
-                size="small"
-                onClick={() => onDelete(model._id)}
-                sx={{
-                  border: '1px solid rgba(229, 134, 60, 0.3)',
-                  color: '#E5863C',
-                  '&:hover': {
-                    bgcolor: 'rgba(229, 134, 60, 0.08)',
-                    borderColor: '#E5863C'
-                  }
-                }}
-              >
-                <Delete fontSize="small" />
-              </IconButton>
-            </Box>
-
-            {/* FACADES */}
-            <Box
-              sx={{
-                borderTop: '2px solid rgba(140, 165, 81, 0.15)',
-                pt: 2,
-                mt: 'auto'
-              }}
-            >
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
                 <Typography
-                  variant="caption"
+                  variant="body2"
                   fontWeight={700}
                   sx={{
                     color: '#333F1F',
                     fontFamily: '"Poppins", sans-serif',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px',
-                    fontSize: '0.7rem'
+                    letterSpacing: '0.5px'
                   }}
                 >
-                  {t('models:facades')} ({modelFacades.length})
+                  ${model.price?.toLocaleString()}
                 </Typography>
-                <IconButton
-                  size="small"
-                  onClick={() => onOpenFacadeDialog(model)}
-                  sx={{
-                    bgcolor: '#333F1F',
-                    color: 'white',
-                    width: 28,
-                    height: 28,
-                    '&:hover': { bgcolor: '#4a5d3a' }
-                  }}
-                >
-                  <Add sx={{ fontSize: 16 }} />
-                </IconButton>
               </Box>
+            </Box>
+          </Box>
 
-              {modelFacades.length > 0 ? (
-                <Box display="flex" gap={1.5} overflowX="auto" pb={1}>
-                  {modelFacades.map((facade) => {
-                    const facadeImages = getFacadeImages(facade);
-                    const currentFacadeImage = facadeImages[0];
+          {/* SPECS */}
+          <Box
+            display="flex"
+            gap={2}
+            mb={2}
+            flexWrap="wrap"
+            sx={{
+              p: 1.5,
+              bgcolor: 'rgba(140, 165, 81, 0.03)',
+              borderRadius: 2,
+              border: '1px solid rgba(140, 165, 81, 0.1)'
+            }}
+          >
+            <Box display="flex" alignItems="center" gap={0.8}>
+              <Bed sx={{ fontSize: 18, color: '#333F1F' }} />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontFamily: '"Poppins", sans-serif',
+                  fontWeight: 600,
+                  color: '#706f6f'
+                }}
+              >
+                {model.bedrooms}
+              </Typography>
+            </Box>
+            <Box display="flex" alignItems="center" gap={0.8}>
+              <Bathtub sx={{ fontSize: 18, color: '#8CA551' }} />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontFamily: '"Poppins", sans-serif',
+                  fontWeight: 600,
+                  color: '#706f6f'
+                }}
+              >
+                {model.bathrooms}
+              </Typography>
+            </Box>
+            <Box display="flex" alignItems="center" gap={0.8}>
+              <SquareFoot sx={{ fontSize: 18, color: '#E5863C' }} />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontFamily: '"Poppins", sans-serif',
+                  fontWeight: 600,
+                  color: '#706f6f'
+                }}
+              >
+                {model.sqft?.toLocaleString()}
+              </Typography>
+            </Box>
+            <Box display="flex" alignItems="center" gap={0.8}>
+              <Layers sx={{ fontSize: 18, color: '#706f6f' }} />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontFamily: '"Poppins", sans-serif',
+                  fontWeight: 600,
+                  color: '#706f6f'
+                }}
+              >
+                {model.stories || 1}
+              </Typography>
+            </Box>
+          </Box>
 
-                    return (
+          {/* PRICING OPTIONS */}
+          {hasPricingOptions(model) && (
+            <Box display="flex" gap={0.8} mb={2} flexWrap="wrap">
+              {model.balconies?.length > 0 && (
+                <Chip
+                  icon={<Balcony sx={{ fontSize: 14 }} />}
+                  label={`+$${(model.balconies[0].price / 1000).toFixed(0)}K`}
+                  size="small"
+                  sx={{
+                    height: 24,
+                    bgcolor: 'rgba(140, 165, 81, 0.12)',
+                    color: '#333F1F',
+                    fontWeight: 600,
+                    border: '1px solid rgba(140, 165, 81, 0.3)',
+                    fontFamily: '"Poppins", sans-serif',
+                    fontSize: '0.7rem',
+                    '& .MuiChip-icon': { color: '#8CA551' }
+                  }}
+                />
+              )}
+              {model.upgrades?.length > 0 && (
+                <Chip
+                  icon={<UpgradeIcon sx={{ fontSize: 14 }} />}
+                  label={`+$${(model.upgrades[0].price / 1000).toFixed(0)}K`}
+                  size="small"
+                  sx={{
+                    height: 24,
+                    bgcolor: 'rgba(229, 134, 60, 0.12)',
+                    color: '#E5863C',
+                    fontWeight: 600,
+                    border: '1px solid rgba(229, 134, 60, 0.3)',
+                    fontFamily: '"Poppins", sans-serif',
+                    fontSize: '0.7rem',
+                    '& .MuiChip-icon': { color: '#E5863C' }
+                  }}
+                />
+              )}
+              {model.storages?.length > 0 && (
+                <Chip
+                  icon={<StorageIcon sx={{ fontSize: 14 }} />}
+                  label={`+$${(model.storages[0].price / 1000).toFixed(0)}K`}
+                  size="small"
+                  sx={{
+                    height: 24,
+                    bgcolor: 'rgba(112, 111, 111, 0.12)',
+                    color: '#706f6f',
+                    fontWeight: 600,
+                    border: '1px solid rgba(112, 111, 111, 0.3)',
+                    fontFamily: '"Poppins", sans-serif',
+                    fontSize: '0.7rem',
+                    '& .MuiChip-icon': { color: '#706f6f' }
+                  }}
+                />
+              )}
+            </Box>
+          )}
+
+          {/* ACTIONS */}
+          <Box display="flex" gap={1} mb={2.5}>
+            <PrimaryButton
+              size="small"
+              variant="outlined"
+              color="secondary"
+              startIcon={<PhotoLibrary sx={{ fontSize: 16 }} />}
+              onClick={() => setGalleryOpen(true)}
+              sx={{
+                flex: 1,
+                fontSize: '0.75rem'
+              }}
+            >
+              {t('models:actions.gallery')}
+            </PrimaryButton>
+            <PrimaryButton
+              size="small"
+              variant="outlined"
+              color="primary"
+              startIcon={<Edit fontSize="small" />}
+              onClick={() => onEdit(model)}
+            >
+              {t('common:actions.edit')}
+            </PrimaryButton>
+            <PrimaryButton
+              size="small"
+              variant="outlined"
+              color="error"
+              startIcon={<Delete fontSize="small" />}
+              onClick={() => onDelete(model._id)}
+            >
+              {t('common:actions.delete')}
+            </PrimaryButton>
+          </Box>
+
+          {/* FACADES */}
+          <Box
+            sx={{
+              borderTop: '2px solid rgba(140, 165, 81, 0.15)',
+              pt: 2,
+              mt: 'auto'
+            }}
+          >
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+              <Typography
+                variant="caption"
+                fontWeight={700}
+                sx={{
+                  color: '#333F1F',
+                  fontFamily: '"Poppins", sans-serif',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  fontSize: '0.7rem'
+                }}
+              >
+                {t('models:facades')} ({modelFacades.length})
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={() => onOpenFacadeDialog(model)}
+                sx={{
+                  bgcolor: '#333F1F',
+                  color: 'white',
+                  width: 28,
+                  height: 28,
+                  '&:hover': { bgcolor: '#4a5d3a' }
+                }}
+              >
+                <Add sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Box>
+
+            {modelFacades.length > 0 ? (
+              <Box display="flex" gap={1.5} overflowX="auto" pb={1}>
+                {modelFacades.map((facade) => {
+                  const facadeImages = getFacadeImages(facade);
+                  const currentFacadeImage = facadeImages[0];
+
+                  return (
+                    <Box
+                      key={facade._id}
+                      sx={{
+                        minWidth: 100,
+                        maxWidth: 100,
+                        flexShrink: 0,
+                        position: 'relative'
+                      }}
+                    >
                       <Box
-                        key={facade._id}
                         sx={{
-                          minWidth: 100,
-                          maxWidth: 100,
-                          flexShrink: 0,
-                          position: 'relative'
+                          width: 100,
+                          height: 75,
+                          borderRadius: 2,
+                          overflow: 'hidden',
+                          bgcolor: 'rgba(112, 111, 111, 0.05)',
+                          backgroundImage: currentFacadeImage ? `url(${currentFacadeImage})` : 'none',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          mb: 0.8,
+                          position: 'relative',
+                          border: '2px solid rgba(140, 165, 81, 0.15)',
+                          transition: 'all 0.3s',
+                          '&:hover': {
+                            borderColor: '#8CA551',
+                            transform: 'scale(1.02)'
+                          }
                         }}
                       >
                         <Box
                           sx={{
-                            width: 100,
-                            height: 75,
-                            borderRadius: 2,
-                            overflow: 'hidden',
-                            bgcolor: 'rgba(112, 111, 111, 0.05)',
-                            backgroundImage: currentFacadeImage ? `url(${currentFacadeImage})` : 'none',
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                            mb: 0.8,
-                            position: 'relative',
-                            border: '2px solid rgba(140, 165, 81, 0.15)',
-                            transition: 'all 0.3s',
-                            '&:hover': {
-                              borderColor: '#8CA551',
-                              transform: 'scale(1.02)'
-                            }
+                            position: 'absolute',
+                            top: 4,
+                            right: 4,
+                            display: 'flex',
+                            gap: 0.5
                           }}
                         >
-                          <Box
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEditFacade(model, facade);
+                            }}
                             sx={{
-                              position: 'absolute',
-                              top: 4,
-                              right: 4,
-                              display: 'flex',
-                              gap: 0.5
+                              bgcolor: 'rgba(255,255,255,0.95)',
+                              width: 20,
+                              height: 20,
+                              '&:hover': { bgcolor: 'white' }
                             }}
                           >
-                            <IconButton
-                              size="small"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onEditFacade(model, facade);
-                              }}
-                              sx={{
-                                bgcolor: 'rgba(255,255,255,0.95)',
-                                width: 20,
-                                height: 20,
-                                '&:hover': { bgcolor: 'white' }
-                              }}
-                            >
-                              <Edit sx={{ fontSize: 12, color: '#8CA551' }} />
-                            </IconButton>
-                            <IconButton
-                              size="small"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onDeleteFacade(facade._id);
-                              }}
-                              sx={{
-                                bgcolor: 'rgba(255,255,255,0.95)',
-                                width: 20,
-                                height: 20,
-                                '&:hover': { bgcolor: 'white' }
-                              }}
-                            >
-                              <Delete sx={{ fontSize: 12, color: '#E5863C' }} />
-                            </IconButton>
-                          </Box>
+                            <Edit sx={{ fontSize: 12, color: '#8CA551' }} />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteFacade(facade._id);
+                            }}
+                            sx={{
+                              bgcolor: 'rgba(255,255,255,0.95)',
+                              width: 20,
+                              height: 20,
+                              '&:hover': { bgcolor: 'white' }
+                            }}
+                          >
+                            <Delete sx={{ fontSize: 12, color: '#E5863C' }} />
+                          </IconButton>
                         </Box>
-                        <Typography
-                          variant="caption"
-                          noWrap
-                          fontWeight={700}
-                          display="block"
-                          sx={{
-                            fontFamily: '"Poppins", sans-serif',
-                            color: '#333F1F',
-                            mb: 0.3
-                          }}
-                        >
-                          {facade.title}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          fontWeight={600}
-                          sx={{
-                            color: '#8CA551',
-                            fontFamily: '"Poppins", sans-serif'
-                          }}
-                        >
-                          +${facade.price?.toLocaleString()}
-                        </Typography>
                       </Box>
-                    );
-                  })}
-                </Box>
-              ) : (
-                <Paper
+                      <Typography
+                        variant="caption"
+                        noWrap
+                        fontWeight={700}
+                        display="block"
+                        sx={{
+                          fontFamily: '"Poppins", sans-serif',
+                          color: '#333F1F',
+                          mb: 0.3
+                        }}
+                      >
+                        {facade.title}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        fontWeight={600}
+                        sx={{
+                          color: '#8CA551',
+                          fontFamily: '"Poppins", sans-serif'
+                        }}
+                      >
+                        +${facade.price?.toLocaleString()}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Box>
+            ) : (
+              <Paper
+                sx={{
+                  p: 2,
+                  textAlign: 'center',
+                  bgcolor: 'rgba(112, 111, 111, 0.03)',
+                  border: '1px dashed rgba(112, 111, 111, 0.2)',
+                  borderRadius: 2
+                }}
+              >
+                <ImageIcon sx={{ fontSize: 32, color: '#706f6f', opacity: 0.3, mb: 0.5 }} />
+                <Typography
+                  variant="caption"
                   sx={{
-                    p: 2,
-                    textAlign: 'center',
-                    bgcolor: 'rgba(112, 111, 111, 0.03)',
-                    border: '1px dashed rgba(112, 111, 111, 0.2)',
-                    borderRadius: 2
+                    color: '#706f6f',
+                    fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  <ImageIcon sx={{ fontSize: 32, color: '#706f6f', opacity: 0.3, mb: 0.5 }} />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: '#706f6f',
-                      fontFamily: '"Poppins", sans-serif'
-                    }}
-                  >
-                    {t('models:noFacades')}
-                  </Typography>
-                </Paper>
-              )}
-            </Box>
-          </CardContent>
-        </Card>
-      </motion.div>
+                  {t('models:noFacades')}
+                </Typography>
+              </Paper>
+            )}
+          </Box>
+        </CardContent>
+      </Card>
+    </motion.div>
 
-      {/* ✅ GalleryCarrousel como lightbox — se renderiza fuera del Card */}
-      {galleryOpen && (
+    {/* GalleryCarrousel como lightbox */}
+    {galleryOpen && (
+      <Box
+        onClick={() => setGalleryOpen(false)}
+        sx={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 1300,
+          bgcolor: 'rgba(0,0,0,0.92)',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
         <Box
-          onClick={() => setGalleryOpen(false)}
           sx={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 1300,
-            bgcolor: 'rgba(0,0,0,0.92)',
             display: 'flex',
-            flexDirection: 'column'
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            px: 3,
+            py: 1.5,
+            flexShrink: 0
           }}
+          onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              px: 3,
-              py: 1.5,
-              flexShrink: 0
-            }}
-            onClick={(e) => e.stopPropagation()}
+          <Typography
+            fontWeight={700}
+            sx={{ color: 'white', fontFamily: '"Poppins", sans-serif' }}
           >
-            <Typography
-              fontWeight={700}
-              sx={{ color: 'white', fontFamily: '"Poppins", sans-serif' }}
-            >
-              {model.model} — Gallery
-            </Typography>
-            <IconButton
-              onClick={() => setGalleryOpen(false)}
-              sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.1)' }}
-            >
-              ✕
-            </IconButton>
-          </Box>
-
-          {/* ✅ Carrusel con altura fija */}
-          <Box
-            sx={{ flex: 1, minHeight: 0, px: 4, pb: 4 }}
-            onClick={(e) => e.stopPropagation()}
+            {model.model} — Gallery
+          </Typography>
+          <IconButton
+            onClick={() => setGalleryOpen(false)}
+            sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.1)' }}
           >
-            <GalleryCarrousel
-              images={allImages.map(img =>
-                typeof img === 'string' ? img : (img?.url || '')
-              ).filter(Boolean)}
-              showPagination={true}
-              showArrows={true}
-              objectFit="contain"
-              borderRadius={8}
-              autoPlay={false}
-              watermark={null}
-            />
-          </Box>
+            ✕
+          </IconButton>
         </Box>
-      )}
-    </Grid>
+        <Box
+          sx={{ flex: 1, minHeight: 0, px: 4, pb: 4 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GalleryCarrousel
+            images={allImages.map(img =>
+              typeof img === 'string' ? img : (img?.url || '')
+            ).filter(Boolean)}
+            showPagination={true}
+            showArrows={true}
+            objectFit="contain"
+            borderRadius={8}
+            autoPlay={false}
+            watermark={null}
+          />
+        </Box>
+      </Box>
+    )}
+  </Grid>
   );
 };
 

@@ -88,8 +88,8 @@ const ConfigurationManager = () => {
   const { t } = useTranslation(['configuration', 'common']);
   const [loading, setLoading] = useState(false);
 
-  const PROJECT_ID = '69a73ce5b20401b061da6451';
-  
+  const PROJECT_ID = import.meta.env.VITE_PROJECT_ID;
+
   useEffect(() => {
     const fetchProject = async () => {
       setLoading(true);

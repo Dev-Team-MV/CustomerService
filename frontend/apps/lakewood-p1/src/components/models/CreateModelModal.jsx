@@ -39,6 +39,8 @@ import { useTranslation } from 'react-i18next';
 import { Switch as MuiSwitch } from '@mui/material'
 import ModelImageGrid from './ModelImageGrid';
 import projectService from '../../services/projectService';
+import PrimaryButton from '../../constants/PrimaryButton'
+import ModalWrapper from '../../constants/ModalWrapper'
 
 const CreateModelModal = ({ 
   open, 
@@ -455,91 +457,55 @@ const CreateModelModal = ({
 
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="xl"
-      fullWidth
-      fullScreen={window.innerWidth < 960}
-      PaperProps={{
-        sx: {
-          height: { xs: "100vh", md: "90vh" },
-          maxHeight: { xs: "100vh", md: "90vh" },
-          m: { xs: 0, md: 2 },
-        },
-      }}
-    >
-      {/* ✅ DIALOG TITLE - Brandbook colors */}
-  {/* ✅ DIALOG TITLE - Mismo estilo que Residents */}
-  <DialogTitle sx={{ pb: 2, px: { xs: 2, md: 3 } }}>
-    <Box display="flex" alignItems="center" gap={2}>
+  <ModalWrapper
+    open={open}
+    onClose={handleClose}
+    icon={Home}
+    title={selectedModel ? t('models:editModel') : t('models:addModel')}
+    subtitle={t('models:manageModelSubtitle')}
+    actions={
+      <>
+        <PrimaryButton
+          onClick={handleClose}
+          size="small"
+          variant="outlined"
+          color="secondary"
+        >
+          {t('common:actions.cancel')}
+        </PrimaryButton>
+        <PrimaryButton
+          onClick={handleSubmit}
+          variant="contained"
+          size="small"
+          startIcon={selectedModel ? <Edit fontSize="small" /> : <Add fontSize="small" />}
+        >
+          {selectedModel ? t('common:actions.update') : t('common:actions.create')}
+        </PrimaryButton>
+      </>
+    }
+    maxWidth="xl"
+    fullWidth
+  >
+    <Box display="flex" height="100%" flexDirection={{ xs: "column", md: "row" }}>
+      {/* LEFT SIDE - Form */}
       <Box
         sx={{
-          width: { xs: 44, md: 52 },
-          height: { xs: 44, md: 52 },
-          borderRadius: 3,
-          bgcolor: "#333F1F",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 4px 12px rgba(51, 63, 31, 0.2)",
+          width: { xs: "100%", md: "50%" },
+          p: { xs: 2, md: 3 },
+          overflowY: "auto",
+          borderRight: { xs: "none", md: "1px solid #e0e0e0" },
+          borderBottom: { xs: "1px solid #e0e0e0", md: "none" },
+          maxHeight: { xs: "45vh", md: "100%" },
+          bgcolor: '#fafafa',
+          "&::-webkit-scrollbar": {
+            width: "8px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "rgba(51, 63, 31, 0.2)",
+            borderRadius: "4px",
+          },
         }}
       >
-        <Home sx={{ color: "white", fontSize: { xs: 24, md: 28 } }} />
-      </Box>
-      <Box flex={1} minWidth={0}>
-        <Typography 
-          variant="h6" 
-          fontWeight={700} 
-          fontSize={{ xs: "1.1rem", md: "1.35rem" }}
-          noWrap
-          sx={{ 
-            color: "#333F1F",
-            fontFamily: '"Poppins", sans-serif',
-            letterSpacing: '0.5px'
-          }}
-        >
-          {selectedModel ? t('models:editModel') : t('models:addModel')}
-        </Typography>
-        <Typography 
-          variant="caption" 
-          sx={{ 
-            color: "#706f6f",
-            fontFamily: '"Poppins", sans-serif',
-            fontSize: '0.85rem'
-          }}
-        >
-          Total Images: <strong>{getTotalImagesCount()}</strong>
-        </Typography>
-      </Box>
-    </Box>
-  </DialogTitle>
-    
-      <DialogContent sx={{ p: 0, overflow: "hidden" }}>
-        <Box 
-          display="flex" 
-          height="100%"
-          flexDirection={{ xs: "column", md: "row" }}
-        >
-          {/* LEFT SIDE - Form */}
-<Box
-            sx={{
-              width: { xs: "100%", md: "50%" },
-              p: { xs: 2, md: 3 },
-              overflowY: "auto",
-              borderRight: { xs: "none", md: "1px solid #e0e0e0" },
-              borderBottom: { xs: "1px solid #e0e0e0", md: "none" },
-              maxHeight: { xs: "45vh", md: "100%" },
-              bgcolor: '#fafafa',
-              "&::-webkit-scrollbar": {
-                width: "8px",
-              },
-              "&::-webkit-scrollbar-thumb": {
-                backgroundColor: "rgba(51, 63, 31, 0.2)",
-                borderRadius: "4px",
-              },
-            }}
-          >
             <Grid container spacing={{ xs: 1.5, md: 2.5 }}>
               <Grid item xs={12}>
                 <TextField
@@ -1300,16 +1266,16 @@ const CreateModelModal = ({
             </Grid>
           </Box>
     
-          {/* RIGHT SIDE - Images */}
-          <Box
-            sx={{
-              width: { xs: "100%", md: "50%" },
-              display: "flex",
-              flexDirection: "column",
-              bgcolor: "#fafafa",
-              maxHeight: { xs: "55vh", md: "100%" },
-            }}
-          >
+      {/* RIGHT SIDE - Images */}
+      <Box
+        sx={{
+          width: { xs: "100%", md: "50%" },
+          display: "flex",
+          flexDirection: "column",
+          bgcolor: "#fafafa",
+          maxHeight: { xs: "55vh", md: "100%" },
+        }}
+      >
             {/* Add Image Control */}
             {/* Upload Controls */}
             <Box
@@ -1736,89 +1702,11 @@ const CreateModelModal = ({
                 </Accordion>
               )}
             </Box>
+
           </Box>
         </Box>
-      </DialogContent>
-    
-      {/* ✅ DIALOG ACTIONS - Brandbook */}
-  <DialogActions 
-    sx={{ 
-      px: { xs: 2, md: 3 }, 
-      py: 2, 
-      borderTop: "1px solid #e0e0e0",
-      bgcolor: '#fafafa',
-      gap: 2
-    }}
-  >
-    <Button
-      onClick={handleClose}
-      size="small"
-      variant="outlined"
-      sx={{
-        borderRadius: 3,
-        textTransform: 'none',
-        fontWeight: 600,
-        px: 3,
-        py: 1.2,
-        fontSize: "0.875rem",
-        color: '#706f6f',
-        border: '2px solid #e0e0e0',
-        fontFamily: '"Poppins", sans-serif',
-        '&:hover': {
-          bgcolor: 'rgba(112, 111, 111, 0.05)',
-          borderColor: '#706f6f'
-        }
-      }}
-    >
-      {t('common:actions.cancel')}
-    </Button>
-    <Button
-      onClick={handleSubmit}
-      variant="contained"
-      size="small"
-      startIcon={selectedModel ? <Edit fontSize="small" /> : <Add fontSize="small" />}
-            sx={{
-              borderRadius: 3,
-              bgcolor: "#333F1F",
-              color: "white",
-              fontWeight: 600,
-              textTransform: "none",
-              letterSpacing: "1px",
-              fontFamily: '"Poppins", sans-serif',
-              px: 4,
-              py: 1.5,
-              boxShadow: "0 4px 12px rgba(51, 63, 31, 0.25)",
-              position: "relative",
-              overflow: "hidden",
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: "-100%",
-                width: "100%",
-                height: "100%",
-                bgcolor: "#8CA551",
-                transition: "left 0.4s ease",
-                zIndex: 0,
-              },
-              "&:hover": {
-                bgcolor: "#333F1F",
-                boxShadow: "0 8px 20px rgba(51, 63, 31, 0.35)",
-                "&::before": {
-                  left: 0,
-                },
-              },
-              "& span": {
-                position: "relative",
-                zIndex: 1,
-              }
-            }}
-    >
-            {selectedModel ? t('common:actions.update') : t('common:actions.create')}
-    </Button>
-  </DialogActions>
-    </Dialog>
-  );
+
+  </ModalWrapper>  );
 };
 
 export default CreateModelModal;
