@@ -24,7 +24,7 @@ import enConfiguration from './locales/en/configuration.json'
 import enMyProperty from './locales/en/myProperty.json'
 import enProject from './locales/en/project.json'
 import enConstruction from './locales/en/construction.json'
-import enFamilyGroup from './locales/en/familyGroup.json'
+import enFamilyGroup from './locales/en/FamilyGroup.json'
 
 // ES
 import esCommon from './locales/es/common.json'
@@ -48,7 +48,7 @@ import esConfiguration from './locales/es/configuration.json'
 import esMyProperty from './locales/es/myProperty.json'
 import esProject from './locales/es/project.json'
 import esConstruction from './locales/es/construction.json'
-import esFamilyGroup from './locales/es/familyGroup.json'
+import esFamilyGroup from './locales/es/FamilyGroup.json'
 
 i18n
     .use(LanguageDetector)
