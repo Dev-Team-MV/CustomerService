@@ -37,7 +37,7 @@ const uploadService = {
     try {
       console.log(`📤 Uploading ${files.length} contract file(s) to GCS...`)
       
-      const uploadPromises = files.map(file => uploadService.uploadImage(file, 'contracts', file.name))
+      const uploadPromises = files.map(file => uploadService.uploadImage(file, 'contracts', file.fileName))
       const urls = await Promise.all(uploadPromises)
       
       console.log('✅ All contract files uploaded:', urls)
