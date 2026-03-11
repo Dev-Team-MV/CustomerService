@@ -15,8 +15,11 @@ import {
 } from '@mui/icons-material'
 import familyGroupService from '../../services/familyGroup'
 import api from '@shared/services/api'
+import { useTranslation } from 'react-i18next'
+
 
 const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
+  const { t } = useTranslation('propertyShare')
   const [myProperties, setMyProperties] = useState([])
   const [shares, setShares] = useState([])
   const [selectedPropertyId, setSelectedPropertyId] = useState('')
@@ -170,7 +173,7 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
               variant="h6"
               sx={{ fontWeight: 700, color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}
             >
-              Share Property
+        {t('shareProperty')}
             </Typography>
           </Box>
           <IconButton onClick={handleClose} size="small">
@@ -184,7 +187,7 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
             variant="caption"
             sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}
           >
-            Sharing with group: <strong>{group?.name}</strong>
+      {t('sharingWithGroup', { group: group?.name })}
           </Typography>
         </Box>
       </DialogTitle>
@@ -192,8 +195,8 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
       <DialogContent>
         <Stack spacing={2.5} sx={{ mt: 1 }}>
           {/* Alerts */}
-          {error && <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>}
-          {success && <Alert severity="success" onClose={() => setSuccess(null)}>{success}</Alert>}
+{error && <Alert severity="error" onClose={() => setError(null)}>{t(error)}</Alert>}
+{success && <Alert severity="success" onClose={() => setSuccess(null)}>{t(success)}</Alert>}
 
           {/* Step 1: Seleccionar propiedad */}
           <Box
@@ -208,22 +211,22 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
               variant="subtitle2"
               sx={{ fontWeight: 600, color: '#333F1F', mb: 1.5, fontFamily: '"Poppins", sans-serif' }}
             >
-              Select a Property to Share
+  {t('selectPropertyToShare')}
             </Typography>
 
             <FormControl size="small" fullWidth disabled={loadingProperties}>
               <InputLabel>
-                {loadingProperties ? 'Loading properties...' : 'Choose a property'}
+  {loadingProperties ? t('loadingProperties') : t('chooseProperty')}
               </InputLabel>
               <Select
                 value={selectedPropertyId}
                 onChange={(e) => setSelectedPropertyId(e.target.value)}
-                label={loadingProperties ? 'Loading properties...' : 'Choose a property'}
+                label={loadingProperties ? t('loadingProperties') : t('chooseProperty')}
                 sx={{ borderRadius: 2 }}
               >
                 {myProperties.length === 0 ? (
                   <MenuItem disabled value="">
-                    No properties found
+                    {t('noPropertiesFound')}
                   </MenuItem>
                 ) : (
                   myProperties.map((p) => (
@@ -254,7 +257,7 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Chip
                       icon={<GroupIcon />}
-                      label={`Already shared with "${group?.name}"`}
+  label={t('alreadySharedWithGroup', { group: group?.name })}
                       sx={{ bgcolor: '#e8f5e9', color: '#2e7d32', fontWeight: 600 }}
                     />
                     <Button
@@ -269,7 +272,7 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
                         fontWeight: 600,
                       }}
                     >
-                      Revoke Group
+                        {t('revokeGroup')}
                     </Button>
                   </Stack>
                 ) : (
@@ -287,10 +290,10 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
                       '&:hover': { bgcolor: '#8CA551' },
                     }}
                   >
-                    {sharing
-                      ? <CircularProgress size={18} color="inherit" />
-                      : `Share with all members of "${group?.name}"`
-                    }
+                      {sharing
+    ? <CircularProgress size={18} color="inherit" />
+    : t('shareWithAllMembers', { group: group?.name })
+  }
                   </Button>
                 )}
               </Box>
@@ -303,8 +306,8 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
                     variant="subtitle2"
                     sx={{ fontWeight: 600, color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}
                   >
-                    Members with access ({groupMembers.length})
-                  </Typography>
+                    {t('membersWithAccess', { count: groupMembers.length })}
+                    </Typography>
 
                   {loadingShares ? (
                     <Box display="flex" justifyContent="center" py={1}>
@@ -372,7 +375,8 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
           onClick={handleClose}
           sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
         >
-          Close
+            {t('close')}
+
         </Button>
       </DialogActions>
     </Dialog>
