@@ -55,7 +55,7 @@ const ModelCustomizationCore = ({
   compareInitialOptions = {},
   onConfirm,
   labels = {},
-  confirmLabel = "Confirm Selection",
+  confirmLabel = t('createProperty'),
 }) => {
   const isModel10 = model?._id === MODEL_10_ID || compareModel?._id === MODEL_10_ID
   const theme = useTheme()
@@ -309,7 +309,7 @@ const ModelCustomizationCore = ({
           {model.model}
           {isModel10 && (
             <Chip
-              label={t('customization.specialConfiguration')}
+              label={t('specialConfiguration')}
               size="small"
               sx={{
                 ml: 2,
@@ -323,7 +323,7 @@ const ModelCustomizationCore = ({
           )}
           {compareModel && (
             <Chip
-              label={t('customization.vsModel', { model: compareModel.model })}
+              label={t('vsModel', { model: compareModel.model })}
               size="small"
               sx={{
                 ml: 2,
@@ -344,10 +344,10 @@ const ModelCustomizationCore = ({
           }}
         >
           {compareModel
-            ? t('customization.compareTwoModels')
+            ? t('compareTwoModels')
             : isModel10
-            ? t('customization.customizeYourDreamHome')
-            : t('customization.customizeClassic')
+            ? t('customizeYourDreamHome')
+            : t('customizeClassic')
           }
         </Typography>
       </Box>
@@ -390,55 +390,59 @@ const ModelCustomizationCore = ({
                       fontWeight={600}
                       sx={{ fontFamily: '"Poppins", sans-serif', color: '#333F1F' }}
                     >
-                      {isSynced ? t('customization.synced') : t('customization.independent')}
+                      {isSynced ? t('synced') : t('independent')}
                     </Typography>
                   </Box>
                 }
               />
-              <ToggleButtonGroup
-                value={viewType}
-                exclusive
-                onChange={(e, newValue) => {
-                  if (newValue !== null) {
-                    setViewType(newValue)
-                    if (newValue !== 'interior') {
-                      setSelectedRoomType('all')
-                    }
-                  }
-                }}
-                size="small"
-                sx={{
-                  '& .MuiToggleButton-root': {
-                    fontFamily: '"Poppins", sans-serif',
-                    fontWeight: 600,
-                    fontSize: '0.75rem',
-                    color: '#706f6f',
-                    border: '1px solid #e0e0e0',
-                    '&.Mui-selected': {
-                      bgcolor: 'rgba(140, 165, 81, 0.12)',
-                      color: '#333F1F',
-                      borderColor: '#8CA551',
-                      '&:hover': {
-                        bgcolor: 'rgba(140, 165, 81, 0.18)',
-                      }
-                    },
-                    '&:hover': {
-                      bgcolor: 'rgba(140, 165, 81, 0.05)',
-                    }
-                  }
-                }}
-              >
-                <ToggleButton value="all">
-                  <HomeIcon sx={{ mr: 0.5 }} fontSize="small" />
-                  {t('customization.all')}
-                </ToggleButton>
-                <ToggleButton value="exterior">
-                  {t('customization.exterior')}
-                </ToggleButton>
-                <ToggleButton value="interior">
-                  {t('customization.interior')}
-                </ToggleButton>
-              </ToggleButtonGroup>
+<ToggleButtonGroup
+  value={viewType}
+  exclusive
+  onChange={(e, newValue) => {
+    if (newValue !== null) {
+      setViewType(newValue)
+      if (newValue !== 'interior') {
+        setSelectedRoomType('all')
+      }
+    }
+  }}
+  size="small"
+  sx={{
+    display: 'flex',
+    flexWrap: 'wrap', // <-- Añade esto
+    maxWidth: '100%', // <-- Añade esto
+    '& .MuiToggleButton-root': {
+      fontFamily: '"Poppins", sans-serif',
+      fontWeight: 600,
+      fontSize: '0.75rem',
+      color: '#706f6f',
+      border: '1px solid #e0e0e0',
+      minWidth: 110, // <-- Ajusta el ancho mínimo
+      '&.Mui-selected': {
+        bgcolor: 'rgba(140, 165, 81, 0.12)',
+        color: '#333F1F',
+        borderColor: '#8CA551',
+        '&:hover': {
+          bgcolor: 'rgba(140, 165, 81, 0.18)',
+        }
+      },
+      '&:hover': {
+        bgcolor: 'rgba(140, 165, 81, 0.05)',
+      }
+    }
+  }}
+>
+  <ToggleButton value="all">
+    <HomeIcon sx={{ mr: 0.5 }} fontSize="small" />
+    {t('all')}
+  </ToggleButton>
+  <ToggleButton value="exterior">
+    {t('exterior')}
+  </ToggleButton>
+  <ToggleButton value="interior">
+    {t('interior')}
+  </ToggleButton>
+</ToggleButtonGroup>
             </Box>
             {viewType === 'interior' && (
               <Tabs
@@ -467,7 +471,7 @@ const ModelCustomizationCore = ({
                   }
                 }}
               >
-                <Tab label={t('customization.allRooms')} value="all" />
+                <Tab label={t('allRooms')} value="all" />
                 {ROOM_TYPES.map(room => (
                   <Tab
                     key={room.id}
@@ -499,8 +503,8 @@ const ModelCustomizationCore = ({
               compareOptions={compareOptions}
               calculatePrice={calculatePrice}
               calculateComparePrice={calculateComparePrice}
-              title={compareModel ? model.model : (labels.baseTitle || (isModel10 ? t('customization.withComedor') : t('customization.baseModel')))}
-              compareTitle={compareModel ? compareModel.model : (labels.compareTitle || (isModel10 ? t('customization.withStudy') : t('customization.customized')))}
+              title={compareModel ? model.model : (labels.baseTitle || (isModel10 ? t('withComedor') : t('baseModel')))}
+              compareTitle={compareModel ? compareModel.model : (labels.compareTitle || (isModel10 ? t('withStudy') : t('customized')))}
             />
             <Button
               variant="contained"
@@ -686,7 +690,7 @@ const ModelCustomizationCore = ({
               />
               <Divider sx={{ mb: 3, borderColor: 'rgba(140, 165, 81, 0.2)' }}>
                 <Chip
-                  label={t('customization.customizationOptions')}
+                  label={t('customizationOptions')}
                   size="small"
                   sx={{
                     fontFamily: '"Poppins", sans-serif',
@@ -718,55 +722,59 @@ const ModelCustomizationCore = ({
                         fontWeight={600}
                         sx={{ fontFamily: '"Poppins", sans-serif', color: '#333F1F' }}
                       >
-                        {isSynced ? t('customization.synced') : t('customization.independent')}
+                        {isSynced ? t('synced') : t('independent')}
                       </Typography>
                     </Box>
                   }
                 />
-                <ToggleButtonGroup
-                  value={viewType}
-                  exclusive
-                  onChange={(e, newValue) => {
-                    if (newValue !== null) {
-                      setViewType(newValue)
-                      if (newValue !== 'interior') {
-                        setSelectedRoomType('all')
-                      }
-                    }
-                  }}
-                  size="small"
-                  sx={{
-                    '& .MuiToggleButton-root': {
-                      fontFamily: '"Poppins", sans-serif',
-                      fontWeight: 600,
-                      fontSize: '0.75rem',
-                      color: '#706f6f',
-                      border: '1px solid #e0e0e0',
-                      '&.Mui-selected': {
-                        bgcolor: 'rgba(140, 165, 81, 0.12)',
-                        color: '#333F1F',
-                        borderColor: '#8CA551',
-                        '&:hover': {
-                          bgcolor: 'rgba(140, 165, 81, 0.18)',
-                        }
-                      },
-                      '&:hover': {
-                        bgcolor: 'rgba(140, 165, 81, 0.05)',
-                      }
-                    }
-                  }}
-                >
-                  <ToggleButton value="all">
-                    <HomeIcon sx={{ mr: 0.5 }} fontSize="small" />
-                    {t('customization.all')}
-                  </ToggleButton>
-                  <ToggleButton value="exterior">
-                    {t('customization.exterior')}
-                  </ToggleButton>
-                  <ToggleButton value="interior">
-                    {t('customization.interior')}
-                  </ToggleButton>
-                </ToggleButtonGroup>
+<ToggleButtonGroup
+  value={viewType}
+  exclusive
+  onChange={(e, newValue) => {
+    if (newValue !== null) {
+      setViewType(newValue)
+      if (newValue !== 'interior') {
+        setSelectedRoomType('all')
+      }
+    }
+  }}
+  size="small"
+  sx={{
+    display: 'flex',
+    flexWrap: 'wrap', // <-- Añade esto
+    maxWidth: '100%', // <-- Añade esto
+    '& .MuiToggleButton-root': {
+      fontFamily: '"Poppins", sans-serif',
+      fontWeight: 600,
+      fontSize: '0.75rem',
+      color: '#706f6f',
+      border: '1px solid #e0e0e0',
+      minWidth: 110, // <-- Ajusta el ancho mínimo
+      '&.Mui-selected': {
+        bgcolor: 'rgba(140, 165, 81, 0.12)',
+        color: '#333F1F',
+        borderColor: '#8CA551',
+        '&:hover': {
+          bgcolor: 'rgba(140, 165, 81, 0.18)',
+        }
+      },
+      '&:hover': {
+        bgcolor: 'rgba(140, 165, 81, 0.05)',
+      }
+    }
+  }}
+>
+  <ToggleButton value="all">
+    <HomeIcon sx={{ mr: 0.5 }} fontSize="small" />
+    {t('all')}
+  </ToggleButton>
+  <ToggleButton value="exterior">
+    {t('exterior')}
+  </ToggleButton>
+  <ToggleButton value="interior">
+    {t('interior')}
+  </ToggleButton>
+</ToggleButtonGroup>
               </Box>
               {viewType === 'interior' && (
                 <Tabs
@@ -795,7 +803,7 @@ const ModelCustomizationCore = ({
                     }
                   }}
                 >
-                  <Tab label={t('customization.allRooms')} value="all" />
+                  <Tab label={t('allRooms')} value="all" />
                   {ROOM_TYPES.map(room => (
                     <Tab
                       key={room.id}
