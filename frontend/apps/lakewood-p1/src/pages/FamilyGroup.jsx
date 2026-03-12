@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import {
   Box,
   Container,
-  Button,
   Grid,
   Alert,
-  CircularProgress,
   Paper,
   Typography
 } from '@mui/material'
@@ -14,142 +12,35 @@ import {
   Group as GroupIcon
 } from '@mui/icons-material'
 import { motion, AnimatePresence } from 'framer-motion'
-import familyGroupService from '../services/familyGroup'
-import api from '../services/api'
-import { useAuth } from '../context/AuthContext'
 import PageHeader from '../components/PageHeader'
 import FamilyGroupCard from '../components/FamilyGroup/FamilyGroupCard'
 import CreateGroupDialog from '../components/FamilyGroup/CreateGroup'
 import AddMemberDialog from '../components/FamilyGroup/AddMemberFamily'
 import Loader from '../components/Loader'
 import { useTranslation } from 'react-i18next'
+import useModalState from '@shared/hooks/useModalState'
+import { useResidents } from '@shared/hooks/useResidents'
+import { useFamilyGroup } from '../hooks/useFamilyGroup'
 
 const FamilyGroup = () => {
-    const { t } = useTranslation('familyGroup')
-  const { user } = useAuth()
-  const [groups, setGroups] = useState([])
-  const [users, setUsers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(null)
+  const { t } = useTranslation('familyGroup')
+  const createGroupModal = useModalState('')
+  const addMemberModal = useModalState({ group: null, user: null, role: 'member' })
+  
+  const {
+    groups,
+    loading,
+    error,
+    success,
+    handleCreateGroup,
+    handleAddMember,
+    handleRemoveMember,
+    handleDeleteGroup,
+    isGroupAdmin,
+    clearAlerts,
+  } = useFamilyGroup()
 
-  // Dialog states
-  const [createDialogOpen, setCreateDialogOpen] = useState(false)
-  const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false)
-  const [selectedGroup, setSelectedGroup] = useState(null)
-
-  // Form states
-  const [newGroupName, setNewGroupName] = useState('')
-  const [selectedUser, setSelectedUser] = useState(null)
-  const [memberRole, setMemberRole] = useState('member')
-
-  useEffect(() => {
-    loadGroups()
-  }, [])
-
-  const loadGroups = async () => {
-    try {
-      setLoading(true)
-      const data = await familyGroupService.getFamilyGroups()
-      setGroups(data)
-      setError(null)
-    } catch (err) {
-      setError(err.message || 'Failed to load family groups')
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const loadUsers = async () => {
-    try {
-      const response = await api.get('/users')
-      setUsers(response.data)
-    } catch (err) {
-      console.error('Failed to load users:', err)
-    }
-  }
-
-  const handleCreateGroup = async () => {
-    if (!newGroupName.trim()) {
-      setError('Group name is required')
-      return
-    }
-
-    try {
-      await familyGroupService.createFamilyGroup(newGroupName)
-      setSuccess('Family group created successfully')
-      setNewGroupName('')
-      setCreateDialogOpen(false)
-      loadGroups()
-    } catch (err) {
-      setError(err.message || 'Failed to create group')
-    }
-  }
-
-  const handleAddMemberClick = (group) => {
-    setSelectedGroup(group)
-    setAddMemberDialogOpen(true)
-  }
-
-  const handleAddMember = async () => {
-    if (!selectedUser) {
-      setError('Please select a user')
-      return
-    }
-
-    try {
-      await familyGroupService.addMemberToGroup(
-        selectedGroup._id,
-        selectedUser._id,
-        memberRole
-      )
-      setSuccess('Member added successfully')
-      setSelectedUser(null)
-      setMemberRole('member')
-      setAddMemberDialogOpen(false)
-      loadGroups()
-    } catch (err) {
-      setError(err.message || 'Failed to add member')
-    }
-  }
-
-  const handleRemoveMember = async (groupId, userId) => {
-    if (!window.confirm('Are you sure you want to remove this member?')) return
-
-    try {
-      await familyGroupService.removeMemberFromGroup(groupId, userId)
-      setSuccess('Member removed successfully')
-      loadGroups()
-    } catch (err) {
-      setError(err.message || 'Failed to remove member')
-    }
-  }
-
-  const handleDeleteGroup = async (groupId) => {
-    if (
-      !window.confirm(
-        'Are you sure you want to delete this group? This will remove all shared properties.'
-      )
-    )
-      return
-
-    try {
-      await familyGroupService.deleteFamilyGroup(groupId)
-      setSuccess('Family group deleted successfully')
-      loadGroups()
-    } catch (err) {
-      setError(err.message || 'Failed to delete group')
-    }
-  }
-
-  const isGroupAdmin = (group) => {
-    if (user?.role === 'superadmin') return true
-    if (group.createdBy._id === user?._id) return true
-    return group.members.some(
-      (m) => m.user._id === user?._id && m.role === 'admin'
-    )
-  }
+  const { users, loading: usersLoading, getAvailableUsers } = useResidents()
 
   if (loading) {
     return (
@@ -177,20 +68,18 @@ const FamilyGroup = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Page Header */}
-<PageHeader
-  icon={GroupIcon}
-  title={t('title')}
-  subtitle={t('subtitle')}
-  actionButton={{
-    label: t('createGroup'),
-    onClick: () => setCreateDialogOpen(true),
-    icon: <AddIcon />,
-    tooltip: t('createGroupTooltip')
-  }}
-/>
+        <PageHeader
+          icon={GroupIcon}
+          title={t('title')}
+          subtitle={t('subtitle')}
+          actionButton={{
+            label: t('createGroup'),
+            onClick: () => createGroupModal.openModal(),
+            icon: <AddIcon />,
+            tooltip: t('createGroupTooltip')
+          }}
+        />
 
-        {/* Alerts */}
         <AnimatePresence>
           {error && (
             <motion.div
@@ -200,7 +89,7 @@ const FamilyGroup = () => {
             >
               <Alert
                 severity="error"
-                onClose={() => setError(null)}
+                onClose={clearAlerts}
                 sx={{ mb: 3 }}
               >
                 {t(error)}
@@ -215,16 +104,15 @@ const FamilyGroup = () => {
             >
               <Alert
                 severity="success"
-                onClose={() => setSuccess(null)}
+                onClose={clearAlerts}
                 sx={{ mb: 3 }}
               >
-               {t(success)}
+                {t(success)}
               </Alert>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Groups Grid */}
         {groups.length === 0 ? (
           <Paper
             elevation={0}
@@ -253,7 +141,7 @@ const FamilyGroup = () => {
                   fontFamily: '"Poppins", sans-serif',
                 }}
               >
-                 {t('noGroups')}
+                {t('noGroups')}
               </Typography>
               <Typography
                 variant="body2"
@@ -265,24 +153,24 @@ const FamilyGroup = () => {
               >
                 {t('noGroupsDescription')}
               </Typography>
-              <Button
+              <button
                 variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => setCreateDialogOpen(true)}
-                sx={{
-                  borderRadius: 3,
-                  bgcolor: '#333F1F',
+                starticon={<AddIcon />}
+                onClick={() => createGroupModal.openModal()}
+                style={{
+                  borderRadius: 12,
+                  background: '#333F1F',
+                  color: '#fff',
                   fontWeight: 600,
                   textTransform: 'none',
-                  px: 3,
-                  py: 1.5,
-                  '&:hover': {
-                    bgcolor: '#8CA551',
-                  },
+                  padding: '12px 24px',
+                  marginTop: '16px',
+                  border: 'none',
+                  cursor: 'pointer'
                 }}
               >
                 {t('createFirstGroup')}
-              </Button>
+              </button>
             </motion.div>
           </Paper>
         ) : (
@@ -291,9 +179,9 @@ const FamilyGroup = () => {
               <Grid item xs={12} md={6} lg={4} key={group._id}>
                 <FamilyGroupCard
                   group={group}
-                  currentUser={user}
+                  currentUser={group.createdBy}
                   isAdmin={isGroupAdmin(group)}
-                  onAddMember={handleAddMemberClick}
+                  onAddMember={g => addMemberModal.openModal({ group: g, user: null, role: 'member' })}
                   onRemoveMember={handleRemoveMember}
                   onDeleteGroup={handleDeleteGroup}
                   index={index}
@@ -303,37 +191,38 @@ const FamilyGroup = () => {
           </Grid>
         )}
 
-        {/* Dialogs */}
         <CreateGroupDialog
-          open={createDialogOpen}
-          onClose={() => {
-            setCreateDialogOpen(false)
-            setNewGroupName('')
-          }}
-          groupName={newGroupName}
-          onGroupNameChange={(e) => setNewGroupName(e.target.value)}
-          onSubmit={handleCreateGroup}
-            title={t('createGroupDialogTitle')}
-  submitLabel={t('createGroupDialogSubmit')}
+          open={createGroupModal.open}
+          onClose={createGroupModal.closeModal}
+          groupName={createGroupModal.data}
+          onGroupNameChange={e => createGroupModal.setData(e.target.value)}
+          onSubmit={() => handleCreateGroup(createGroupModal.data, createGroupModal.closeModal)}
+          title={t('createGroupDialogTitle')}
+          submitLabel={t('createGroupDialogSubmit')}
         />
 
-    <AddMemberDialog
-      open={addMemberDialogOpen}
-      onClose={() => {
-        setAddMemberDialogOpen(false)
-        setSelectedUser(null)
-        setMemberRole('member')
-      }}
-      groupName={selectedGroup?.name}
-      existingMembers={selectedGroup?.members || []}
-      selectedUser={selectedUser}
-      onUserChange={(e, newValue) => setSelectedUser(newValue)}
-      memberRole={memberRole}
-      onRoleChange={(e) => setMemberRole(e.target.value)}
-      onSubmit={handleAddMember}
-        title={t('addMemberDialogTitle')}
-  submitLabel={t('addMemberDialogSubmit')}
-    />
+        <AddMemberDialog
+          open={addMemberModal.open}
+          onClose={addMemberModal.closeModal}
+          groupName={addMemberModal.data.group?.name}
+          existingMembers={addMemberModal.data.group?.members || []}
+          selectedUser={addMemberModal.data.user}
+          onUserChange={(e, newValue) => addMemberModal.setData({ ...addMemberModal.data, user: newValue })}
+          memberRole={addMemberModal.data.role}
+          onRoleChange={e => addMemberModal.setData({ ...addMemberModal.data, role: e.target.value })}
+          onSubmit={() =>
+            handleAddMember(
+              addMemberModal.data.group,
+              addMemberModal.data.user,
+              addMemberModal.data.role,
+              addMemberModal.closeModal
+            )
+          }
+          title={t('addMemberDialogTitle')}
+          submitLabel={t('addMemberDialogSubmit')}
+          users={getAvailableUsers(addMemberModal.data.group)}
+          usersLoading={usersLoading}
+        />
       </motion.div>
     </Container>
   )

@@ -1,25 +1,29 @@
 import { useCallback, useMemo }  from 'react'
-import { useNavigate }           from 'react-router-dom'
-import { useTranslation }        from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Grid, Paper, Box, Typography, Chip } from '@mui/material'
 import {
   HomeWork, TrendingUp, AttachMoney, Inbox,
   Business, PersonAdd, BarChart, Deck, Article
 } from '@mui/icons-material'
-import { motion }                from 'framer-motion'
+import { motion } from 'framer-motion'
+import { useAuth } from '../context/AuthContext'
+// import api from '../services/api'
+import api from '@shared/services/api'
 
-import { useAuth }               from '../context/AuthContext'
-import api                       from '../services/api'
-import useFetch                  from '../hooks/useFetch'
-import useModalState             from '../hooks/useModalState'
-import useDashboardStats         from '../hooks/useDashboardStats'
+import useFetch from '../hooks/useFetch'
+import useDashboardStats from '../hooks/useDashboardStats'
 
-import DashboardMap              from '../components/DashboardMap'
-import StatsCards                from '../components/statscard'
-import Loader                    from '../components/Loader'
-import ResidentDialog            from '../components/ResidentDialog'
-import QuickActionsPanel         from '../components/QuickActionsPanel'
-import RecentPayloadsPanel       from '../components/RecentPayloadsPanel'
+// ✅ Mismo import que Residents.jsx
+// import { useResidents } from '../hooks/useResidents'
+import { useResidents } from '@shared/hooks/useResidents'
+import ResidentDialog from '../../../../shared/components/Modals/ResidentDialog'
+
+import DashboardMap from '../components/DashboardMap'
+import StatsCards from '../components/statscard'
+import Loader from '../components/Loader'
+import QuickActionsPanel from '../components/QuickActionsPanel'
+import RecentPayloadsPanel from '../components/RecentPayloadsPanel'
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 const MapPanel = ({ t }) => (
@@ -38,7 +42,7 @@ const MapPanel = ({ t }) => (
         border: '1px solid #e5e7eb',
         position: 'relative', overflow: 'hidden',
         '&::before': {
-          content: '""', position: 'absolute',
+        content: '""', position: 'absolute',
           top: 0, left: 0, right: 0, height: 3,
           background: 'linear-gradient(90deg, #333F1F 0%, #8CA551 100%)'
         }
@@ -72,44 +76,34 @@ const Dashboard = () => {
 
   const loading = lotsLoading || payloadsLoading
 
-  // ── stats (pure calculation, no side-effects) ───────────────
+  // ── stats ───────────────────────────────────────────────────
   const stats = useDashboardStats(lots)
 
-  // ── user invite modal ───────────────────────────────────────
-  const INVITE_INITIAL = {
-    firstName: '', lastName: '', email: '',
-    password: '', phoneNumber: '', birthday: '', role: 'user'
-  }
-
-  const inviteModal = useModalState(INVITE_INITIAL)
-
-  const handleCloseInviteModal = useCallback(() => {
-    inviteModal.closeModal()
-    // pequeño delay para que la animación de cierre termine antes de limpiar data
-    setTimeout(() => inviteModal.openModal && null, 300)
-  }, [inviteModal])
-
-  const handleSubmitUser = useCallback(async () => {
-    try {
-      await api.post('/auth/register', {
-        ...inviteModal.data,
-        phoneNumber: `+${inviteModal.data.phoneNumber}`,
-        skipPasswordSetup: true
-      })
-      inviteModal.closeModal()
-    } catch (err) {
-      alert(err.response?.data?.message || t('common:errors.generic'))
-    }
-  }, [inviteModal, t])
+  // ✅ Mismo hook que Residents.jsx
+  const {
+    openDialog,
+    selectedUser,
+    formData,
+    setFormData,
+    handleOpenDialog,
+    handleCloseDialog,
+    handleSubmit,
+    handleFieldChange,
+    handlePhoneChange,
+    isFormValid,
+    e164Value,
+    displayVal,
+    isPhoneValid,
+  } = useResidents()
 
   // ── quick actions ───────────────────────────────────────────
   const adminActions = useMemo(() => [
     { icon: <Business />,  label: t('quickActions.addProperty'), description: t('quickActions.addPropertyDesc'), color: '#333F1F', bgColor: '#e8f5ee', onClick: () => navigate('/properties/select') },
-    { icon: <PersonAdd />, label: t('quickActions.inviteUser'),  description: t('quickActions.inviteUserDesc'),  color: '#8CA551', bgColor: '#f0f7e8', onClick: inviteModal.openModal },
+    { icon: <PersonAdd />, label: t('quickActions.inviteUser'),  description: t('quickActions.inviteUserDesc'),  color: '#8CA551', bgColor: '#f0f7e8', onClick: () => handleOpenDialog() },
     { icon: <BarChart />,  label: t('quickActions.analytics'),   description: t('quickActions.analyticsDesc'),   color: '#E5863C', bgColor: '#fff5e6', onClick: () => navigate('/analytics') },
     { icon: <Deck />,      label: t('quickActions.amenities'),   description: t('quickActions.amenitiesDesc'),   color: '#8CA551', bgColor: '#f0f7e8', onClick: () => navigate('/amenities') },
     { icon: <Article />,   label: t('quickActions.manageNews'),  description: t('quickActions.manageNewsDesc'),  color: '#E5863C', bgColor: '#fff5e6', onClick: () => navigate('/news') },
-  ], [t, navigate, inviteModal.openModal])
+  ], [t, navigate, handleOpenDialog])
 
   const userActions = useMemo(() => [
     { icon: <Deck />,    label: t('quickActions.amenities'), description: t('quickActions.amenitiesDesc'), color: '#8CA551', bgColor: '#f0f7e8', onClick: () => navigate('/amenities') },
@@ -226,23 +220,20 @@ const Dashboard = () => {
         </Paper>
       </motion.div>
 
-      {/* CONTENT — user vs admin */}
+      {/* CONTENT */}
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.6 }}>
         <Grid container spacing={3}>
 
-          {/* Stats sólo admin */}
           {isAdmin && (
             <Grid item xs={12}>
               <StatsCards stats={statsCards} loading={loading} />
             </Grid>
           )}
 
-          {/* Mapa */}
           <Grid item xs={12} md={8}>
             <MapPanel t={t} />
           </Grid>
 
-          {/* Quick actions */}
           <Grid item xs={12} md={4}>
             <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.6 }} whileHover={{ y: -4 }}>
               <QuickActionsPanel
@@ -252,7 +243,6 @@ const Dashboard = () => {
             </motion.div>
           </Grid>
 
-          {/* Recent payloads sólo admin */}
           {isAdmin && (
             <Grid item xs={12}>
               <RecentPayloadsPanel payloads={payloads} t={t} />
@@ -262,14 +252,20 @@ const Dashboard = () => {
         </Grid>
       </motion.div>
 
-      {/* INVITE USER MODAL */}
+      {/* ✅ Mismo uso que Residents.jsx */}
       <ResidentDialog
-        open={inviteModal.open}
-        onClose={inviteModal.closeModal}
-        onSubmit={handleSubmitUser}
-        formData={inviteModal.data ?? INVITE_INITIAL}
-        setFormData={(data) => inviteModal.openModal(data)}
-        selectedUser={null}
+        open={openDialog}
+        onClose={handleCloseDialog}
+        onSubmit={handleSubmit}
+        formData={formData}
+        setFormData={setFormData}
+        selectedUser={selectedUser}
+        handleFieldChange={handleFieldChange}
+        handlePhoneChange={handlePhoneChange}
+        isFormValid={isFormValid}
+        e164Value={e164Value}
+        displayVal={displayVal}
+        isPhoneValid={isPhoneValid}
       />
     </Box>
   )

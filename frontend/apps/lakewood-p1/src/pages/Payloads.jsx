@@ -109,7 +109,6 @@ const Payloads = () => {
               onAction={() => handleOpenDialog()}
             />
           }
-          onRowClick={(row) => console.log('Payment clicked:', row)}
           stickyHeader
           maxHeight={600}
         />

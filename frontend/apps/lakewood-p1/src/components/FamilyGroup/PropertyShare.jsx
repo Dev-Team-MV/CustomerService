@@ -45,7 +45,6 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
     try {
       setLoadingProperties(true)
       const response = await api.get('/properties')
-      console.log('🏠 Properties raw:', response.data)
       // El backend ya devuelve solo las visibles para el usuario — las mostramos todas
       setMyProperties(response.data)
     } catch (err) {
@@ -60,7 +59,6 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
     try {
       setLoadingShares(true)
       const data = await familyGroupService.getPropertyShares(propertyId)
-      console.log('🔗 Shares for property:', data)
       setShares(data)
     } catch (err) {
       console.error('Failed to load shares:', err)

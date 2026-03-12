@@ -50,6 +50,7 @@ const FamilyGroupCard = ({
     (m) => m.user._id === currentUserId && m.role === 'admin'
   )
   const canManage = isGroupOwner || isMemberAdmin
+  const creatorName = group.createdBy?.firstName || group.createdBy?.name || '';
 
   // DEBUG — quitar después de verificar
 
@@ -102,7 +103,7 @@ const FamilyGroupCard = ({
 
           {/* Created By */}
           <Typography variant="caption" sx={{ color: '#706f6f', display: 'block', mb: 2 }}>
-            {t('createdBy')} {group.createdBy.firstName} {group.createdBy.lastName}
+            {t('createdBy', { name: creatorName })}
           </Typography>
 
           <Divider sx={{ my: 2 }} />

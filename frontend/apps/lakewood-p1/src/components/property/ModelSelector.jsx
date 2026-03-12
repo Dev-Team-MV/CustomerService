@@ -108,7 +108,6 @@ const ModelSelector = () => {
   };
 
   const handleSelectModel = (model) => {
-    console.log("Selecting model:", model);
     selectModel(model);
     if (isMobile) setDrawerOpen(true);
   };
@@ -130,12 +129,6 @@ const ModelSelector = () => {
   }) => {
     setOptions(selectedOptions);
     setOpenCustomizationModal(false);
-
-    console.log("✅ Customization confirmed:", {
-      model: model.model,
-      options: selectedOptions,
-      totalPrice,
-    });
   };
 
   const handleViewDetails = (e, modelId) => {

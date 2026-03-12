@@ -171,8 +171,6 @@ const fetchRecorridoImages = async () => {
 
   // --- UPLOAD ---
   const handleUpload = async (id, file, isPublic = true) => {
-      console.log(`[RecorridoTab] Subiendo imagen para punto ${id} con isPublic:`, isPublic);
-
     setUploading(true);
     const ext = file.name.substring(file.name.lastIndexOf('.'));
     const filename = `recorrido.${id}${ext}`;

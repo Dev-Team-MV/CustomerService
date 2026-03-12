@@ -160,33 +160,29 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
   };
 
   // Debug: cada vez que existingImages cambie, imprime su resumen
-  useEffect(() => {
-    console.log("🔔 existingImages updated:", {
-      exterior: existingImages.exterior.length,
-      blueprints: existingImages.blueprints.length,
-      deck: existingImages.deck.length,
-      interiorKeys: Object.keys(existingImages.interior || {}).reduce(
-        (acc, k) => ({
-          ...acc,
-          [k]: (existingImages.interior[k] || []).length,
-        }),
-        {},
-      ),
-    });
-    // show a sample item for deck if exists
-    if ((existingImages.deck || []).length > 0) {
-      console.log("🔔 existingImages.deck[0]:", existingImages.deck[0]);
-    }
-  }, [existingImages]);
+  // useEffect(() => {
+  //   console.log("🔔 existingImages updated:", {
+  //     exterior: existingImages.exterior.length,
+  //     blueprints: existingImages.blueprints.length,
+  //     deck: existingImages.deck.length,
+  //     interiorKeys: Object.keys(existingImages.interior || {}).reduce(
+  //       (acc, k) => ({
+  //         ...acc,
+  //         [k]: (existingImages.interior[k] || []).length,
+  //       }),
+  //       {},
+  //     ),
+  //   });
+  //   // show a sample item for deck if exists
+  //   if ((existingImages.deck || []).length > 0) {
+  //     console.log("🔔 existingImages.deck[0]:", existingImages.deck[0]);
+  //   }
+  // }, [existingImages]);
 
   const loadExistingImages = async () => {
     setLoading(true);
     try {
-      console.log(
-        "🔎 loadExistingImages: requesting /upload/files?folder=clubhouse",
-      );
       const response = await uploadService.getFilesByFolder("clubhouse", true);
-      console.log("🔎 loadExistingImages: response:", response);
 
       // Si el backend devuelve clubHouse dentro de la respuesta del POST
       const maybeClubHouse =
@@ -194,10 +190,6 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
       if (maybeClubHouse) {
         const organizedFromClub = mapClubHouseToOrganized(maybeClubHouse);
         const normalized = normalizeOrganized(organizedFromClub);
-        console.log(
-          "🔁 loadExistingImages: organizedFromClub (normalized):",
-          normalized,
-        );
         setExistingImages(normalized);
         return;
       }
@@ -266,10 +258,7 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
         }
 
         const normalized = normalizeOrganized(organized);
-        console.log(
-          "🔁 loadExistingImages: organized from files (normalized):",
-          normalized,
-        );
+
         setExistingImages(normalized);
       } else {
         console.warn("🔎 loadExistingImages: no response.files found");
@@ -498,17 +487,6 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
             fileName: customName,
           };
         });
-      console.log("📤 handleConfirmUpload: preparing uploads", {
-        exterior: selectedFiles.exterior.length,
-        blueprints: selectedFiles.blueprints.length,
-        deck: selectedFiles.deck?.length || 0,
-        interior: Object.fromEntries(
-          Object.entries(selectedFiles.interior).map(([k, v]) => [k, v.length]),
-        ),
-      });
-
-      // ...dentro de handleConfirmUpload...
-
       // Upload exterior
       if (selectedFiles.exterior.length > 0) {
         uploadPromises.push(
@@ -532,17 +510,6 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
       // Upload deck
       if (selectedFiles.deck.length > 0) {
         const deckPayload = prepareFiles(selectedFiles.deck, "deck"); // <-- pasa la sección
-        console.log("📤 handleConfirmUpload: uploading deck payload preview", {
-          section: "deck",
-          count: deckPayload.length,
-          sample: deckPayload
-            .slice(0, 5)
-            .map((p) => ({
-              name: p.fileName,
-              size: p.file?.size,
-              isPublic: p.isPublic,
-            })),
-        });
         uploadPromises.push(
           uploadService.uploadClubhouseImages(deckPayload, "deck"),
         );
@@ -565,9 +532,7 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
         setUploading(false);
         return;
       }
-      console.log("📤 handleConfirmUpload: starting Promise.all for uploads");
       const results = await Promise.all(uploadPromises);
-      console.log("📤 handleConfirmUpload: upload results raw:", results);
 
       // intentar extraer clubHouse desde cualquier estructura anidada en `results`
       const extractClubHouse = (obj) => {
@@ -596,21 +561,12 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
       }
 
       if (clubHouseFromResponse) {
-        console.log(
-          "✅ handleConfirmUpload: clubHouse found in upload response — updating existingImages from clubHouse",
-          clubHouseFromResponse,
-        );
         const organized = mapClubHouseToOrganized(clubHouseFromResponse);
         const normalized = normalizeOrganized(organized);
-        console.log(
-          "✅ handleConfirmUpload: organized (from response) normalized:",
-          normalized,
-        );
+
         setExistingImages(normalized);
       } else {
-        console.log(
-          "ℹ️ handleConfirmUpload: no clubHouse found in responses, reloading via GET",
-        );
+
         await loadExistingImages();
       }
 
@@ -636,11 +592,6 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
       setUploading(false);
     }
   };
-  // ...existing code...
-
-  // const handleDeleteExistingImage = async (section, imageUrl, interiorKey = null) => {
-  //   // TODO: Implementar endpoint de eliminación
-  // };
 
   const getCurrentExistingImages = () => {
     if (tab === 0) return existingImages.exterior;
@@ -703,7 +654,6 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
 
     const fileName = determineFileName(image);
 
-    console.log("🗑️ handleDeleteExistingImage: deleting", fileName);
 
     setExistingImages((prev) => {
       const next = JSON.parse(JSON.stringify(prev));

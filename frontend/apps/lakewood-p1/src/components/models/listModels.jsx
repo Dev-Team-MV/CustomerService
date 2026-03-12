@@ -613,7 +613,12 @@ const ModelCard = ({
                   textAlign: 'center',
                   bgcolor: 'rgba(112, 111, 111, 0.03)',
                   border: '1px dashed rgba(112, 111, 111, 0.2)',
-                  borderRadius: 2
+                  borderRadius: 2,
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 1,
                 }}
               >
                 <ImageIcon sx={{ fontSize: 32, color: '#706f6f', opacity: 0.3, mb: 0.5 }} />

@@ -9,7 +9,8 @@ import DataTable     from '../components/table/DataTable'
 import EmptyState    from '../components/table/EmptyState'
 import ResidentDialog from '../../../../shared/components/Modals/ResidentDialog'
 
-import { useResidents }      from '../hooks/useResidents'
+// import { useResidents }      from '../hooks/useResidents'
+import { useResidents } from '@shared/hooks/useResidents'
 import { useResidentColumns } from '../constants/Columns/residents'
 
 const Residents = () => {
@@ -22,6 +23,12 @@ const Residents = () => {
     handleOpenDialog, handleCloseDialog, handleSubmit,
     handleDelete, handleSendPasswordSMS, sendingSMS,
     snackbar, handleCloseSnackbar,
+    handleFieldChange,
+    handlePhoneChange,
+    isFormValid,
+    e164Value,
+    displayVal,
+    isPhoneValid,
   } = useResidents()
 
   // ── Columns ───────────────────────────────────────────────
@@ -76,13 +83,28 @@ const Residents = () => {
           onRowClick={(row) => handleOpenDialog(row)}
         />
 
-        <ResidentDialog
+
+                {/* <ResidentDialog
           open={openDialog}
           onClose={handleCloseDialog}
           onSubmit={handleSubmit}
           formData={formData}
           setFormData={setFormData}
           selectedUser={selectedUser}
+        /> */}
+                <ResidentDialog
+          open={openDialog}
+          onClose={handleCloseDialog}
+          onSubmit={handleSubmit}
+          formData={formData}
+          setFormData={setFormData}
+          selectedUser={selectedUser}
+          handleFieldChange={handleFieldChange}
+          handlePhoneChange={handlePhoneChange}
+          isFormValid={isFormValid}
+          e164Value={e164Value}
+          displayVal={displayVal}
+          isPhoneValid={isPhoneValid}
         />
 
         <Snackbar
