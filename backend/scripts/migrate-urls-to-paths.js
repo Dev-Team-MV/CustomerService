@@ -232,13 +232,14 @@ async function migrateOutdoorAmenities () {
 }
 
 async function main () {
-  const uri = process.env.MONGODB_URI
+  const usePdn = process.env.MIGRATE_TARGET === 'pdn'
+  const uri = usePdn ? process.env.MONGODB_URI_PDN : process.env.MONGODB_URI
   if (!uri) {
-    console.error('MONGODB_URI is required')
+    console.error(usePdn ? 'MONGODB_URI_PDN is required for production' : 'MONGODB_URI is required')
     process.exit(1)
   }
   await mongoose.connect(uri)
-  console.log('Connected to MongoDB. Migrating URLs to paths...')
+  console.log(`Connected to MongoDB (${usePdn ? 'production' : 'dev'}). Migrating URLs to paths...`)
 
   const results = {
     payloads: await migratePayloads(),
