@@ -1,5 +1,6 @@
 import Phase from '../models/Phase.js'
 import Property from '../models/Property.js'
+import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
 
 // Get all phases for a specific property
 export const getPhasesByProperty = async (req, res) => {
@@ -15,8 +16,10 @@ export const getPhasesByProperty = async (req, res) => {
     const phases = await Phase.find({ property: propertyId })
       .sort({ phaseNumber: 1 })
       .populate('property', 'lot model users price status')
-    
-    res.json(phases)
+
+    const data = phases.map((p) => p.toObject())
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -29,7 +32,9 @@ export const getPhaseById = async (req, res) => {
       .populate('property', 'lot model users price status')
     
     if (phase) {
-      res.json(phase)
+      const data = phase.toObject()
+      await hydrateUrlsInObject(data)
+      res.json(data)
     } else {
       res.status(404).json({ message: 'Phase not found' })
     }
@@ -49,7 +54,9 @@ export const getPhaseByNumber = async (req, res) => {
     }).populate('property', 'lot model users price status')
     
     if (phase) {
-      res.json(phase)
+      const data = phase.toObject()
+      await hydrateUrlsInObject(data)
+      res.json(data)
     } else {
       res.status(404).json({ message: 'Phase not found' })
     }
@@ -78,8 +85,10 @@ export const updatePhase = async (req, res) => {
     const updatedPhase = await phase.save()
     const populatedPhase = await Phase.findById(updatedPhase._id)
       .populate('property', 'lot model users price status')
-    
-    res.json(populatedPhase)
+
+    const data = populatedPhase.toObject()
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -109,7 +118,7 @@ export const addMediaItem = async (req, res) => {
     }
     
     phase.mediaItems.push({
-      url,
+      url: normalizePathForStorage(url),
       title,
       percentage,
       mediaType: mediaType || 'image'
@@ -119,7 +128,9 @@ export const addMediaItem = async (req, res) => {
     const populatedPhase = await Phase.findById(updatedPhase._id)
       .populate('property', 'lot model users price status')
     
-    res.status(201).json(populatedPhase)
+    const data = populatedPhase.toObject()
+    await hydrateUrlsInObject(data)
+    res.status(201).json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -141,7 +152,7 @@ export const updateMediaItem = async (req, res) => {
     }
     
     if (req.body.url !== undefined) {
-      mediaItem.url = req.body.url
+      mediaItem.url = normalizePathForStorage(req.body.url)
     }
     if (req.body.title !== undefined) {
       mediaItem.title = req.body.title
@@ -161,8 +172,10 @@ export const updateMediaItem = async (req, res) => {
     const updatedPhase = await phase.save()
     const populatedPhase = await Phase.findById(updatedPhase._id)
       .populate('property', 'lot model users price status')
-    
-    res.json(populatedPhase)
+
+    const data = populatedPhase.toObject()
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -187,8 +200,10 @@ export const deleteMediaItem = async (req, res) => {
     const updatedPhase = await phase.save()
     const populatedPhase = await Phase.findById(updatedPhase._id)
       .populate('property', 'lot model users price status')
-    
-    res.json(populatedPhase)
+
+    const data = populatedPhase.toObject()
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -207,8 +222,10 @@ export const getAllPhases = async (req, res) => {
     const phases = await Phase.find(filter)
       .populate('property', 'lot model users price status')
       .sort({ property: 1, phaseNumber: 1 })
-    
-    res.json(phases)
+
+    const data = phases.map((p) => p.toObject())
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }

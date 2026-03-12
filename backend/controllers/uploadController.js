@@ -1,5 +1,6 @@
 import multer from 'multer'
 import { uploadFile, deleteFile, testConnection, listFilesInFolder } from '../services/storageService.js'
+import { resolveToSignedUrl } from '../services/urlResolverService.js'
 import { processImageForUpload } from '../services/imageProcessingService.js'
 import Model from '../models/Model.js'
 import ClubHouse from '../models/ClubHouse.js'
@@ -570,6 +571,28 @@ export const updateImage = async (req, res) => {
       success: false,
       message: error.message || 'Error updating image'
     })
+  }
+}
+
+/**
+ * GET signed URL for a GCS path.
+ * Query: path (required) - e.g. "pdn/models/xxx.jpg"
+ * Use when frontend has path and needs a fresh URL for display.
+ */
+export const getSignedUrlForPath = async (req, res) => {
+  try {
+    const path = req.query.path || req.params.path
+    if (!path || typeof path !== 'string') {
+      return res.status(400).json({ success: false, message: 'path query parameter is required' })
+    }
+    const url = await resolveToSignedUrl(path)
+    if (!url) {
+      return res.status(404).json({ success: false, message: 'Could not generate signed URL' })
+    }
+    res.json({ url })
+  } catch (error) {
+    console.error('getSignedUrl error:', error)
+    res.status(500).json({ success: false, message: error.message })
   }
 }
 

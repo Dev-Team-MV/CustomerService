@@ -1,12 +1,14 @@
 import Contract from '../models/Contract.js'
 import Property from '../models/Property.js'
+import { hydrateUrlsInObject, normalizePathForStorage, resolveToSignedUrl } from '../services/urlResolverService.js'
 
 const VALID_TYPES = ['promissoryNote', 'purchaseContract', 'agreement']
 
-function normalizeContractItem(c) {
+function normalizeContractItem (c) {
+  const path = normalizePathForStorage(c.fileUrl)
   return {
     type: c.type,
-    fileUrl: c.fileUrl,
+    fileUrl: path || c.fileUrl,
     uploadedAt: c.uploadedAt ? new Date(c.uploadedAt) : new Date()
   }
 }
@@ -37,7 +39,9 @@ export const getAllContracts = async (req, res) => {
       })
       .sort({ updatedAt: -1 })
 
-    res.json(contracts)
+    const data = contracts.map((c) => c.toObject())
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -56,7 +60,9 @@ export const getContractsByPropertyId = async (req, res) => {
       })
 
     if (contract) {
-      res.json(contract)
+      const data = contract.toObject()
+      await hydrateUrlsInObject(data)
+      res.json(data)
     } else {
       res.status(404).json({ message: 'No contracts found for this property' })
     }
@@ -78,7 +84,9 @@ export const getContractById = async (req, res) => {
     })
 
     if (contract) {
-      res.json(contract)
+      const data = contract.toObject()
+      await hydrateUrlsInObject(data)
+      res.json(data)
     } else {
       res.status(404).json({ message: 'Contract not found' })
     }
@@ -118,7 +126,9 @@ export const createContract = async (req, res) => {
           { path: 'users' }
         ]
       })
-      return res.json(updated)
+      const data = updated.toObject()
+      await hydrateUrlsInObject(data)
+      return res.json(data)
     }
 
     contract = await Contract.create({
@@ -135,7 +145,9 @@ export const createContract = async (req, res) => {
       ]
     })
 
-    res.status(201).json(populated)
+    const data = populated.toObject()
+    await hydrateUrlsInObject(data)
+    res.status(201).json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -172,7 +184,9 @@ export const updateContract = async (req, res) => {
         { path: 'users' }
       ]
     })
-    res.json(populated)
+    const data = populated.toObject()
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -211,7 +225,9 @@ export const updateContractByPropertyId = async (req, res) => {
         { path: 'users' }
       ]
     })
-    res.json(populated)
+    const data = populated.toObject()
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -253,7 +269,10 @@ export const downloadContractByPropertyAndType = async (req, res) => {
       return res.status(404).json({ message: `No contract of type "${type}" found for this property` })
     }
 
-    const fileUrl = contractItem.fileUrl
+    const fileUrl = await resolveToSignedUrl(contractItem.fileUrl)
+    if (!fileUrl) {
+      return res.status(502).json({ message: 'Failed to generate signed URL for file' })
+    }
     const response = await fetch(fileUrl, { method: 'GET' })
     if (!response.ok) {
       return res.status(502).json({ message: 'Failed to fetch file from storage' })

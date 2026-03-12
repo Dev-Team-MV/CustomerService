@@ -1,5 +1,5 @@
 import express from 'express'
-import { uploadImage, uploadMultipleImages, updateImage, deleteImage, testGCSConnection, getFolderFiles, updateRecorridoVisibility, upload } from '../controllers/uploadController.js'
+import { uploadImage, uploadMultipleImages, updateImage, deleteImage, testGCSConnection, getFolderFiles, getSignedUrlForPath, updateRecorridoVisibility, upload } from '../controllers/uploadController.js'
 import { protect, admin, optionalProtect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -87,6 +87,7 @@ router.get('/test-connection', testGCSConnection)
  */
 router.get('/files', optionalProtect, getFolderFiles)
 router.get('/folder/:folder', optionalProtect, getFolderFiles)
+router.get('/signed-url', protect, getSignedUrlForPath)
 
 /**
  * @swagger

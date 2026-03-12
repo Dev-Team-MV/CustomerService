@@ -1,4 +1,5 @@
 import UnderConstruction from '../models/UnderConstruction.js'
+import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
 
 /**
  * Ordena por `order` y asigna nombre: base-1, base-2, ...
@@ -20,7 +21,7 @@ function normalizeMedia (items, title) {
   const base = firstBase || fallback
   return sorted.map((item, index) => ({
     type: item.type,
-    url: item.url || '',
+    url: normalizePathForStorage(item.url) || '',
     name: `${base}-${index + 1}`,
     order: index + 1,
     isPublic: item.isPublic !== false
@@ -30,7 +31,9 @@ function normalizeMedia (items, title) {
 export const getAllUnderConstruction = async (req, res) => {
   try {
     const items = await UnderConstruction.find().sort({ createdAt: -1 })
-    res.json(items)
+    const data = items.map((i) => i.toObject())
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -40,7 +43,9 @@ export const getUnderConstructionById = async (req, res) => {
   try {
     const item = await UnderConstruction.findById(req.params.id)
     if (item) {
-      res.json(item)
+      const data = item.toObject()
+      await hydrateUrlsInObject(data)
+      res.json(data)
     } else {
       res.status(404).json({ message: 'UnderConstruction not found' })
     }
@@ -61,7 +66,9 @@ export const createUnderConstruction = async (req, res) => {
       media: normalizedMedia
     })
 
-    res.status(201).json(doc)
+    const data = doc.toObject()
+    await hydrateUrlsInObject(data)
+    res.status(201).json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -81,7 +88,9 @@ export const updateUnderConstruction = async (req, res) => {
     if (media !== undefined) doc.media = normalizeMedia(media, doc.title)
 
     const updated = await doc.save()
-    res.json(updated)
+    const data = updated.toObject()
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -108,7 +117,9 @@ export const updateUnderConstructionMediaVisibility = async (req, res) => {
     doc.media[index].isPublic = wantPublic
     doc.markModified('media')
     const updated = await doc.save()
-    res.json(updated)
+    const data = updated.toObject()
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
