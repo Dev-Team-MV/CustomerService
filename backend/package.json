@@ -9,7 +9,8 @@
     "start": "node server.js",
     "backup": "node scripts/run-backup.js",
     "enable-versioning": "node scripts/enable-gcs-versioning.js",
-    "migrate:urls-to-paths": "node scripts/migrate-urls-to-paths.js"
+    "migrate:urls-to-paths": "node scripts/migrate-urls-to-paths.js",
+    "fix:paths-pdn-to-dev": "node scripts/fix-paths-pdn-to-dev.js"
   },
   "keywords": [],
   "author": "",
