@@ -15,6 +15,7 @@ import {
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import api from '@shared/services/api'
+import { useTranslation } from 'react-i18next'
 
 const AddMemberDialog = ({
   open,
@@ -27,6 +28,7 @@ const AddMemberDialog = ({
   onRoleChange,
   onSubmit
 }) => {
+  const { t } = useTranslation('familyGroup')
   const [searchResults, setSearchResults] = useState([])
   const [searching, setSearching] = useState(false)
   const [inputValue, setInputValue] = useState('')
@@ -83,7 +85,7 @@ const AddMemberDialog = ({
               fontFamily: '"Poppins", sans-serif',
             }}
           >
-            Add Member to {groupName}
+      {t('addMemberToGroup', { group: groupName })}
           </Typography>
           <IconButton onClick={handleClose} size="small">
             <CloseIcon />
@@ -103,17 +105,17 @@ const AddMemberDialog = ({
             inputValue={inputValue}
             onInputChange={handleInputChange}
             loading={searching}
-            noOptionsText={
-              inputValue.length < 2
-                ? 'Type at least 2 characters to search'
-                : 'No users found'
-            }
+    noOptionsText={
+      inputValue.length < 2
+        ? t('typeAtLeast2Chars')
+        : t('noUsersFound')
+    }
             filterOptions={(x) => x} // desactivar filtrado local, el backend ya filtra
             renderInput={(params) => (
               <TextField
                 {...params}
-                label="Search User"
-                placeholder="Search by name or email..."
+                label={t('searchUser')}
+                placeholder={t('searchUserPlaceholder')}
                 sx={{
                   '& .MuiOutlinedInput-root': { borderRadius: 2 },
                 }}
@@ -140,8 +142,8 @@ const AddMemberDialog = ({
               '& .MuiOutlinedInput-root': { borderRadius: 2 },
             }}
           >
-            <option value="member">Member</option>
-            <option value="admin">Admin</option>
+    <option value="member">{t('member')}</option>
+    <option value="admin">{t('admin')}</option>
           </TextField>
         </Stack>
       </DialogContent>
@@ -155,7 +157,7 @@ const AddMemberDialog = ({
             fontWeight: 600,
           }}
         >
-          Cancel
+              {t('cancel')}
         </Button>
         <Button
           onClick={onSubmit}
@@ -169,7 +171,7 @@ const AddMemberDialog = ({
             '&:hover': { bgcolor: '#8CA551' },
           }}
         >
-          Add Member
+          {t('addMember')}
         </Button>
       </DialogActions>
     </Dialog>

@@ -220,7 +220,22 @@
   "signInToCreateProperty": "Inicia sesión para crear propiedad",
   "createProperty": "Crear Propiedad",
   "signInToSendQuote": "Inicia sesión para enviar cotización",
-  "generateAndSendQuote": "Generar y Enviar Cotización"
+  "generateAndSendQuote": "Generar y Enviar Cotización",
+
+    "specialConfiguration": "Configuración especial",
+  "vsModel": "vs {{model}}",
+  "compareTwoModels": "Comparar dos modelos",
+  "customizeYourDreamHome": "Personaliza tu casa ideal",
+  "customizeClassic": "Personaliza el modelo clásico",
+  "synced": "Sincronizados",
+  "independent": "Independientes",
+  "all": "Todos",
+
+  "allRooms": "Todas las habitaciones",
+  "customizationOptions": "Opciones de personalización",
+  "withComedor": "Con comedor",
+  "withStudy": "Con estudio",
+  "customized": "Personalizado"
 }
 
 

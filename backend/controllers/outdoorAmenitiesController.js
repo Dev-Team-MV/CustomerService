@@ -1,5 +1,6 @@
 import OutdoorAmenities from '../models/OutdoorAmenities.js'
 import { normalizeImageArray } from '../utils/imageUtils.js'
+import { hydrateUrlsInObject } from '../services/urlResolverService.js'
 
 /**
  * @param {object} a - amenity object (may have id, name, images as strings or [{ url, isPublic }])
@@ -52,6 +53,7 @@ export const getOutdoorAmenities = async (req, res) => {
         images: normalizeImageArray(a.images)
       }))
     }
+    await hydrateUrlsInObject(payload)
     res.json(payload)
   } catch (error) {
     console.error('OutdoorAmenities get error:', error)
@@ -79,6 +81,7 @@ export const getOutdoorAmenityById = async (req, res) => {
     }
     const payload = amenity.toObject ? amenity.toObject() : { ...amenity }
     payload.images = normalizeImageArray(amenity.images)
+    await hydrateUrlsInObject(payload)
     res.json(payload)
   } catch (error) {
     console.error('OutdoorAmenities getById error:', error)
@@ -107,9 +110,11 @@ export const createOrUpdateOutdoorAmenities = async (req, res) => {
       doc.markModified('amenities')
       normalizeAmenitiesBeforeSave(doc)
       await doc.save()
+      const data = doc.toObject()
+      await hydrateUrlsInObject(data)
       return res.status(200).json({
         message: 'Amenities list updated',
-        data: doc
+        data
       })
     }
 
@@ -125,9 +130,11 @@ export const createOrUpdateOutdoorAmenities = async (req, res) => {
       doc.markModified('amenities')
       normalizeAmenitiesBeforeSave(doc)
       await doc.save()
+      const data = doc.toObject()
+      await hydrateUrlsInObject(data)
       return res.status(201).json({
         message: `Amenity created with id ${newId}`,
-        data: doc,
+        data,
         amenity: newAmenity
       })
     }
@@ -151,9 +158,11 @@ export const createOrUpdateOutdoorAmenities = async (req, res) => {
     normalizeAmenitiesBeforeSave(doc)
     await doc.save()
 
+    const data = doc.toObject()
+    await hydrateUrlsInObject(data)
     res.status(200).json({
       message: `Amenity id ${numId} updated`,
-      data: doc
+      data
     })
   } catch (error) {
     console.error('OutdoorAmenities post error:', error)
@@ -193,9 +202,11 @@ export const updateOutdoorAmenity = async (req, res) => {
     normalizeAmenitiesBeforeSave(doc)
     await doc.save()
 
+    const data = doc.toObject()
+    await hydrateUrlsInObject(data)
     res.status(200).json({
       message: `Amenity id ${id} updated`,
-      data: doc,
+      data,
       amenity: updated
     })
   } catch (error) {
@@ -228,9 +239,11 @@ export const deleteOutdoorAmenity = async (req, res) => {
     normalizeAmenitiesBeforeSave(doc)
     await doc.save()
 
+    const data = doc.toObject()
+    await hydrateUrlsInObject(data)
     res.status(200).json({
       message: `Amenity id ${id} deleted`,
-      data: doc,
+      data,
       removed
     })
   } catch (error) {
