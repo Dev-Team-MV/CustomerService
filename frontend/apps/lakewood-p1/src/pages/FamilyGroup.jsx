@@ -22,7 +22,10 @@ import FamilyGroupCard from '../components/FamilyGroup/FamilyGroupCard'
 import CreateGroupDialog from '../components/FamilyGroup/CreateGroup'
 import AddMemberDialog from '../components/FamilyGroup/AddMemberFamily'
 import Loader from '../components/Loader'
+import { useTranslation } from 'react-i18next'
+
 const FamilyGroup = () => {
+    const { t } = useTranslation('familyGroup')
   const { user } = useAuth()
   const [groups, setGroups] = useState([])
   const [users, setUsers] = useState([])
@@ -160,7 +163,7 @@ const FamilyGroup = () => {
       >
         <Loader
           size="large"
-          message="Loading family groups..."
+          message={t('loading')}
           fullHeight={false}
         />
       </Box>
@@ -175,17 +178,17 @@ const FamilyGroup = () => {
         transition={{ duration: 0.5 }}
       >
         {/* Page Header */}
-        <PageHeader
-          icon={GroupIcon}
-          title="Family Groups"
-          subtitle="Manage your family groups and share properties"
-          actionButton={{
-            label: 'Create Group',
-            onClick: () => setCreateDialogOpen(true),
-            icon: <AddIcon />,
-            tooltip: 'Create a new family group'
-          }}
-        />
+<PageHeader
+  icon={GroupIcon}
+  title={t('title')}
+  subtitle={t('subtitle')}
+  actionButton={{
+    label: t('createGroup'),
+    onClick: () => setCreateDialogOpen(true),
+    icon: <AddIcon />,
+    tooltip: t('createGroupTooltip')
+  }}
+/>
 
         {/* Alerts */}
         <AnimatePresence>
@@ -200,7 +203,7 @@ const FamilyGroup = () => {
                 onClose={() => setError(null)}
                 sx={{ mb: 3 }}
               >
-                {error}
+                {t(error)}
               </Alert>
             </motion.div>
           )}
@@ -215,7 +218,7 @@ const FamilyGroup = () => {
                 onClose={() => setSuccess(null)}
                 sx={{ mb: 3 }}
               >
-                {success}
+               {t(success)}
               </Alert>
             </motion.div>
           )}
@@ -250,7 +253,7 @@ const FamilyGroup = () => {
                   fontFamily: '"Poppins", sans-serif',
                 }}
               >
-                No family groups yet
+                 {t('noGroups')}
               </Typography>
               <Typography
                 variant="body2"
@@ -260,7 +263,7 @@ const FamilyGroup = () => {
                   fontFamily: '"Poppins", sans-serif',
                 }}
               >
-                Create your first family group to start sharing properties
+                {t('noGroupsDescription')}
               </Typography>
               <Button
                 variant="contained"
@@ -278,7 +281,7 @@ const FamilyGroup = () => {
                   },
                 }}
               >
-                Create Your First Group
+                {t('createFirstGroup')}
               </Button>
             </motion.div>
           </Paper>
@@ -310,6 +313,8 @@ const FamilyGroup = () => {
           groupName={newGroupName}
           onGroupNameChange={(e) => setNewGroupName(e.target.value)}
           onSubmit={handleCreateGroup}
+            title={t('createGroupDialogTitle')}
+  submitLabel={t('createGroupDialogSubmit')}
         />
 
     <AddMemberDialog
@@ -326,6 +331,8 @@ const FamilyGroup = () => {
       memberRole={memberRole}
       onRoleChange={(e) => setMemberRole(e.target.value)}
       onSubmit={handleAddMember}
+        title={t('addMemberDialogTitle')}
+  submitLabel={t('addMemberDialogSubmit')}
     />
       </motion.div>
     </Container>

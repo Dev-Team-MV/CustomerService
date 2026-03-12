@@ -11,6 +11,7 @@ import {
   Typography
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 
 const CreateGroupDialog = ({
   open,
@@ -19,6 +20,7 @@ const CreateGroupDialog = ({
   onGroupNameChange,
   onSubmit
 }) => {
+  const { t } = useTranslation('familyGroup')
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && groupName.trim()) {
       onSubmit()
@@ -51,7 +53,7 @@ const CreateGroupDialog = ({
               fontFamily: '"Poppins", sans-serif',
             }}
           >
-            Create Family Group
+            {t('createFamilyGroup')}
           </Typography>
           <IconButton onClick={onClose} size="small">
             <CloseIcon />
@@ -62,12 +64,12 @@ const CreateGroupDialog = ({
         <TextField
           autoFocus
           margin="dense"
-          label="Group Name"
+          label={t('groupName')}
           fullWidth
           value={groupName}
           onChange={onGroupNameChange}
           onKeyPress={handleKeyPress}
-          placeholder="e.g., Smith Family"
+          placeholder={t('groupNamePlaceholder')}
           sx={{
             '& .MuiOutlinedInput-root': {
               borderRadius: 2,
@@ -84,7 +86,7 @@ const CreateGroupDialog = ({
             fontWeight: 600,
           }}
         >
-          Cancel
+          {t('cancel')}
         </Button>
         <Button
           onClick={onSubmit}
@@ -100,7 +102,7 @@ const CreateGroupDialog = ({
             },
           }}
         >
-          Create
+          {t('create')}
         </Button>
       </DialogActions>
     </Dialog>
