@@ -1,5 +1,6 @@
 import Model from '../models/Model.js'
 import { normalizeImageArray } from '../utils/imageUtils.js'
+import { hydrateUrlsInObject } from '../services/urlResolverService.js'
 
 // Helper: format images to { exterior: [{ url, isPublic }], interior: [...] }
 const formatImages = (images) => {
@@ -155,7 +156,9 @@ export const getAllModels = async (req, res) => {
     if (status) filter.status = status
 
     const models = await Model.find(filter).sort({ model: 1 })
-    res.json(models.map(normalizeModelForResponse))
+    const data = models.map(normalizeModelForResponse)
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -166,7 +169,9 @@ export const getModelById = async (req, res) => {
     const model = await Model.findById(req.params.id)
     
     if (model) {
-      res.json(normalizeModelForResponse(model))
+      const data = normalizeModelForResponse(model)
+      await hydrateUrlsInObject(data)
+      res.json(data)
     } else {
       res.status(404).json({ message: 'Model not found' })
     }
@@ -285,7 +290,7 @@ export const getModelPricingOptions = async (req, res) => {
       })
     }
     
-    res.json({
+    const response = {
       modelId: model._id,
       modelName: model.model,
       basePrice: basePrice,
@@ -297,7 +302,9 @@ export const getModelPricingOptions = async (req, res) => {
       allOptions: allOptions,
       minPrice: allOptions.length > 0 ? Math.min(...allOptions.map(opt => opt.price)) : basePrice,
       maxPrice: allOptions.length > 0 ? Math.max(...allOptions.map(opt => opt.price)) : basePrice
-    })
+    }
+    await hydrateUrlsInObject(response)
+    res.json(response)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -421,9 +428,11 @@ export const createModel = async (req, res) => {
       storages: validatedStorages
     })
     
+    const modelData = normalizeModelForResponse(newModel)
+    await hydrateUrlsInObject(modelData)
     res.status(201).json({
       message: 'Model created successfully',
-      model: newModel
+      model: modelData
     })
   } catch (error) {
     // Manejar errores de validación de Mongoose
@@ -545,9 +554,11 @@ export const updateModel = async (req, res) => {
     normalizeModelBeforeSave(model)
 
     const updatedModel = await model.save()
+    const modelData = normalizeModelForResponse(updatedModel)
+    await hydrateUrlsInObject(modelData)
     res.json({
       message: 'Model updated successfully',
-      model: updatedModel
+      model: modelData
     })
   } catch (error) {
     // Manejar errores de validación de Mongoose

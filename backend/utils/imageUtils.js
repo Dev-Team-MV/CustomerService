@@ -1,15 +1,24 @@
+import { normalizePathForStorage } from '../services/urlResolverService.js'
+
 /**
  * Normaliza un ítem de imagen (legacy string o { url, isPublic }) a { url, isPublic }.
+ * Guarda path en lugar de URL completa para evitar caducidad de signed URLs.
  * @param {string|{ url: string, isPublic?: boolean }|null} item
  * @returns {{ url: string, isPublic: boolean }|null}
  */
 export function normalizeImageItem (item) {
   if (item == null) return null
-  if (typeof item === 'string') return { url: item, isPublic: true }
-  if (typeof item === 'object' && typeof item.url === 'string') {
-    return { url: item.url, isPublic: item.isPublic !== false }
+  let url
+  let isPublic = true
+  if (typeof item === 'string') {
+    url = normalizePathForStorage(item)
+  } else if (typeof item === 'object' && typeof item.url === 'string') {
+    url = normalizePathForStorage(item.url)
+    isPublic = item.isPublic !== false
+  } else {
+    return null
   }
-  return null
+  return url ? { url, isPublic } : null
 }
 
 /**
