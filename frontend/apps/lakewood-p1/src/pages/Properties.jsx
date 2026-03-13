@@ -1,38 +1,11 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useEffect, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
-  Box,
-  Typography,
-  Avatar,
-  IconButton,
-  LinearProgress,
-  Tooltip,
-  Container,
-  Chip,
-  Button,
-  TextField,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel
+  Box, Container, Button, FormControl,
+  InputLabel, Select, MenuItem, Tooltip
 } from '@mui/material'
-import { 
-  Add, 
-  Visibility, 
-  Construction,
-  PhotoLibrary,
-  Home,
-  CheckCircle,
-  Schedule,
-  TrendingUp,
-  AttachMoney,
-  Edit as EditIcon,
-  Description as DescriptionIcon,
-  SortByAlpha,
-  FilterList,
-  Delete as DeleteIcon
-} from '@mui/icons-material'
+import { Add, SortByAlpha, FilterList, Home } from '@mui/icons-material'
 import api from '@shared/services/api'
 import { useAuth } from '@shared/context/AuthContext'
 import ConstructionPhasesModal from '../components/ConstructionPhasesModal'
@@ -42,789 +15,123 @@ import PageHeader from '@shared/components/PageHeader'
 import StatsCards from '../components/statscard'
 import DataTable from '../components/table/DataTable'
 import EmptyState from '../components/table/EmptyState'
-import propertyService from '../services/propertyService'
 import PropertyDetailsModal from '../components/myProperty/PropertyDetailsModal'
+import propertyService from '../services/propertyService'
+import useFetch from '../hooks/useFetch'
+import usePropertyFilters from '../hooks/usePropertyFilters'
+import usePropertyModals from '../hooks/usePropertyModals'
+import { usePropertyColumns } from '../constants/Columns/properties'
 
 const Properties = () => {
-  const { t } = useTranslation(['property', 'common'])
-  const navigate = useNavigate()
-  const { user } = useAuth()
-  const [properties, setProperties] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [selectedProperty, setSelectedProperty] = useState(null)
-  const [phasesModalOpen, setPhasesModalOpen] = useState(false)
-  const [contractsModalOpen, setContractsModalOpen] = useState(false)
-  const [contractsProperty, setContractsProperty] = useState(null)
-  const [editModalOpen, setEditModalOpen] = useState(false)
-  const [propertyToEdit, setPropertyToEdit] = useState(null)
-  const [editingPriceValue, setEditingPriceValue] = useState('')
-  const [savingPrice, setSavingPrice] = useState(false)
-  const [modelFilter, setModelFilter] = useState('')
-  const [residentSortOrder, setResidentSortOrder] = useState('none')
-  const [editValues, setEditValues] = useState({})
-  const [savingEdit, setSavingEdit] = useState(false)
+  const { t }        = useTranslation(['property', 'common'])
+  const navigate     = useNavigate()
+  const { user }     = useAuth()
+  const isAdmin      = user?.role === 'admin' || user?.role === 'superadmin'
 
-  const [lotsArray, setLotsArray] = useState([])
-  const [modelsArray, setModelsArray] = useState([])
-  const [usersArray, setUsersArray] = useState([])
-  const [facades, setFacades] = useState([])
+  // ── Data fetching ─────────────────────────────────────────
+  const { data: properties, loading, refetch } = useFetch(
+    useCallback(() => api.get('/properties').then(r => r.data), [])
+  )
+  const { data: lotsArray }  = useFetch(useCallback(() => api.get('/lots').then(r => r.data), []))
+  const { data: modelsArray } = useFetch(useCallback(() => api.get('/models').then(r => r.data), []))
+  const { data: usersArray }  = useFetch(useCallback(() => api.get('/users').then(r => r.data), []))
 
-  const [detailsOpen, setDetailsOpen] = useState(false)
-  const [detailsProperty, setDetailsProperty] = useState(null)
+  // ── Filters ───────────────────────────────────────────────
+  const {
+    modelFilter, setModelFilter,
+    residentSortOrder, toggleResidentSort,
+    modelOptions, processedData
+  } = usePropertyFilters(properties)
 
-  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
+  // ── Modals ────────────────────────────────────────────────
+  const {
+    phases, contracts, details,
+    editModal, editValues, setEditValues,
+    savingEdit, setSavingEdit,
+    openEdit, closeEdit
+  } = usePropertyModals()
 
-  const modelOptions = useMemo(() => {
-    const models = properties
-      .map(p => p.model?.model)
-      .filter(Boolean)
-    return [...new Set(models)].sort()
-  }, [properties])
+  // Facades dependientes del modelo seleccionado en edición
+  const { data: facades } = useFetch(
+    useCallback(() => {
+      if (!editValues.model) return Promise.resolve([])
+      return propertyService.getFacades(editValues.model)
+    }, [editValues.model])
+  )
 
-  const processedData = useMemo(() => {
-    let result = [...properties]
-
-    if (modelFilter) {
-      result = result.filter(p => p.model?.model === modelFilter)
-    }
-
-    if (residentSortOrder !== 'none') {
-      result.sort((a, b) => {
-        const nameA = (a.users?.[0]?.firstName || a.client?.firstName || '').toLowerCase()
-        const nameB = (b.users?.[0]?.firstName || b.client?.firstName || '').toLowerCase()
-        if (nameA < nameB) return residentSortOrder === 'asc' ? -1 : 1
-        if (nameA > nameB) return residentSortOrder === 'asc' ? 1 : -1
-        return 0
-      })
-    } else {
-      result.sort((a, b) => (a.lot?.number || 0) - (b.lot?.number || 0))
-    }
-
-    return result
-  }, [properties, modelFilter, residentSortOrder])
-
-  useEffect(() => {
-    fetchData()
-    fetchLots()
-    fetchModels()
-    fetchUsers()
-  }, [])
-  
-  const fetchLots = async () => {
-    try {
-      const res = await api.get('/lots')
-      setLotsArray(res.data)
-    } catch (error) {
-      console.error('Error fetching lots:', error)
-    }
-  }
-  
-  const fetchModels = async () => {
-    try {
-      const res = await api.get('/models')
-      setModelsArray(res.data)
-    } catch (error) {
-      console.error('Error fetching models:', error)
-    }
-  }
-
-  const fetchFacades = async (modelId) => {
-    if (!modelId) {
-      setFacades([])
-      return
-    }
-    try {
-      const res = await api.get(`/models/${modelId}/facades`)
-      setFacades(res.data)
-    } catch (err) {
-      setFacades([])
-    }
-  }
-
-  useEffect(() => {
-    if (editValues.model) {
-      propertyService.getFacades(editValues.model).then(setFacades)
-    } else {
-      setFacades([])
-    }
-  }, [editValues.model])
-
-  const fetchUsers = async () => {
-    try {
-      const res = await api.get('/users')
-      setUsersArray(res.data)
-    } catch (error) {
-      console.error('Error fetching users:', error)
-    }
-  }
-
-  const fetchData = async () => {
-    setLoading(true)
-    try {
-      const propertiesRes = await api.get('/properties')
-      setProperties(propertiesRes.data)
-    } catch (error) {
-      console.error('Error fetching data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleAddProperty = useCallback(() => {
-    navigate('/properties/select')
-  }, [navigate])
-
-  const handleViewProperty = useCallback((property) => {
-    setDetailsProperty(property)
-    setDetailsOpen(true)
-  }, [])
-
-  const handleOpenPhases = useCallback((property) => {
-    setSelectedProperty(property)
-    setPhasesModalOpen(true)
-  }, [])
-
-  const handleClosePhases = useCallback(() => {
-    setPhasesModalOpen(false)
-    setSelectedProperty(null)
-    fetchData()
-  }, [])
-
-  const handleOpenContracts = useCallback((property) => {
-    setContractsProperty(property)
-    setContractsModalOpen(true)
-  }, [])
-
-  const handleCloseContracts = useCallback(() => {
-    setContractsModalOpen(false)
-    setContractsProperty(null)
-  }, [])
-
-  const handleEditProperty = useCallback((property) => {
-    setPropertyToEdit(property)
-    setEditValues({
-      lot: property.lot?._id || '',
-      model: property.model?._id || '',
-      facade: property.facade?._id || '',
-      users: property.users?.map(u => u._id) || [],
-      price: property.price ?? '',
-      pending: property.pending ?? '',
-      initialPayment: property.initialPayment ?? '',
-      status: property.status ?? '',
-      saleDate: property.saleDate ? property.saleDate.slice(0, 10) : '',
-      hasBalcony: property.hasBalcony ?? false,
-      modelType: property.modelType ?? 'basic',
-      hasStorage: property.hasStorage ?? false,
-    })
-    setEditModalOpen(true)
-  }, [])
-
-  const handleEditValuesChange = (newValues) => {
-    setEditValues(newValues)
-  }
-
+  // ── Handlers ──────────────────────────────────────────────
   const handleSaveEdit = useCallback(async () => {
-    if (!propertyToEdit) return
+    if (!editModal.property) return
     setSavingEdit(true)
     try {
-      await api.put(`/properties/${propertyToEdit._id}`, editValues)
-      setEditModalOpen(false)
-      setPropertyToEdit(null)
-      setEditValues({})
-      fetchData()
-    } catch (err) {
+      await api.put(`/properties/${editModal.property._id}`, editValues)
+      closeEdit()
+      refetch()
+    } catch {
       alert(t('common:errors.updateFailed'))
+    } finally {
+      setSavingEdit(false)
     }
-    setSavingEdit(false)
-  }, [propertyToEdit, editValues, t])
+  }, [editModal.property, editValues, closeEdit, refetch, t])
 
-  const handleCloseEditModal = useCallback(() => {
-    setEditModalOpen(false)
-    setPropertyToEdit(null)
-    setEditValues({})
-  }, [])
-
-    const handleDeleteProperty = async (property) => {
-    if (window.confirm(t('property:actions.confirmDelete'))) {
-      try {
-        await propertyService.deleteProperty(property._id)
-        fetchData() // Actualiza la lista
-      } catch (error) {
-        alert(t('property:actions.deleteFailed'))
-      }
+  const handleDeleteProperty = useCallback(async (property) => {
+    if (!window.confirm(t('property:actions.confirmDelete'))) return
+    try {
+      await propertyService.deleteProperty(property._id)
+      refetch()
+    } catch {
+      alert(t('property:actions.deleteFailed'))
     }
-  }
+  }, [refetch, t])
 
-  const getStatusColor = useCallback((status) => {
-    switch (status) {
-      case 'sold': 
-        return { 
-          bg: 'rgba(140, 165, 81, 0.12)', 
-          color: '#333F1F', 
-          border: 'rgba(140, 165, 81, 0.3)' 
-        }
-      case 'active': 
-        return { 
-          bg: 'rgba(33, 150, 243, 0.12)', 
-          color: '#1976d2', 
-          border: 'rgba(33, 150, 243, 0.3)' 
-        }
-      case 'pending': 
-        return { 
-          bg: 'rgba(229, 134, 60, 0.12)', 
-          color: '#E5863C', 
-          border: 'rgba(229, 134, 60, 0.3)' 
-        }
-      default: 
-        return { 
-          bg: 'rgba(112, 111, 111, 0.12)', 
-          color: '#706f6f', 
-          border: 'rgba(112, 111, 111, 0.3)' 
-        }
-    }
-  }, [])
-
-  const getPhaseProgress = useCallback((property) => {
-    if (!property.phases || property.phases.length === 0) {
-      return { current: 1, total: 9, percentage: 0, completed: 0 }
-    }
-
-    const totalPhases = property.phases.length
-    const completedPhases = property.phases.filter(p => p.constructionPercentage === 100).length
-    const totalProgress = property.phases.reduce((sum, phase) => sum + (phase.constructionPercentage || 0), 0)
-    const avgProgress = totalProgress / totalPhases
-    const firstIncompleteIndex = property.phases.findIndex(p => p.constructionPercentage < 100)
-    const current = firstIncompleteIndex === -1 ? totalPhases : firstIncompleteIndex + 1
-
-    return {
-      current,
-      completed: completedPhases,
-      total: totalPhases,
-      percentage: Math.round(avgProgress)
-    }
-  }, [])
-
+  // ── Stats ─────────────────────────────────────────────────
   const stats = useMemo(() => ({
-    total: properties.length,
-    sold: properties.filter(p => p.status === 'sold').length,
-    active: properties.filter(p => p.status === 'active').length,
+    total:   properties.length,
+    sold:    properties.filter(p => p.status === 'sold').length,
+    active:  properties.filter(p => p.status === 'active').length,
     pending: properties.filter(p => p.status === 'pending').length
   }), [properties])
 
   const propertiesStats = useMemo(() => [
-    {
-      title: t('property:stats.totalProperties'),
-      value: stats.total,
-      icon: Home,
-      gradient: 'linear-gradient(135deg, #333F1F 0%, #4a5d3a 100%)',
-      color: '#333F1F',
-      delay: 0
-    },
-    {
-      title: t('property:stats.sold'),
-      value: stats.sold,
-      icon: CheckCircle,
-      gradient: 'linear-gradient(135deg, #8CA551 0%, #a8bf6f 100%)',
-      color: '#8CA551',
-      delay: 0.1
-    },
-    {
-      title: t('property:stats.active'),
-      value: stats.active,
-      icon: TrendingUp,
-      gradient: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
-      color: '#1976d2',
-      delay: 0.2
-    },
-    {
-      title: t('property:stats.pending'),
-      value: stats.pending,
-      icon: Schedule,
-      gradient: 'linear-gradient(135deg, #E5863C 0%, #f59c5a 100%)',
-      color: '#E5863C',
-      delay: 0.3
-    }
+    { title: t('property:stats.totalProperties'), value: stats.total,   icon: Home,         gradient: 'linear-gradient(135deg, #333F1F 0%, #4a5d3a 100%)',   color: '#333F1F', delay: 0   },
+    { title: t('property:stats.sold'),            value: stats.sold,    icon: Home,         gradient: 'linear-gradient(135deg, #8CA551 0%, #a8bf6f 100%)',   color: '#8CA551', delay: 0.1 },
+    { title: t('property:stats.active'),          value: stats.active,  icon: Home,         gradient: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',   color: '#1976d2', delay: 0.2 },
+    { title: t('property:stats.pending'),         value: stats.pending, icon: Home,         gradient: 'linear-gradient(135deg, #E5863C 0%, #f59c5a 100%)',   color: '#E5863C', delay: 0.3 },
   ], [stats, t])
 
-  const columns = useMemo(() => {
-    const baseColumns = [
-      {
-        field: 'lot',
-        headerName: t('property:table.lotInfo'),
-        minWidth: 150,
-        renderCell: ({ row }) => (
-          <Box display="flex" alignItems="center" gap={1.5}>
-            <Avatar
-              sx={{
-                width: 40,
-                height: 40,
-                bgcolor: 'transparent',
-                background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                fontFamily: '"Poppins", sans-serif',
-                border: '2px solid rgba(255, 255, 255, 0.9)',
-                boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
-              }}
-            >
-              {row.lot?.number}
-            </Avatar>
-            <Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 600,
-                  color: '#1a1a1a',
-                  fontFamily: '"Poppins", sans-serif'
-                }}
-              >
-                {t('property:table.lot')} {row.lot?.number}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif',
-                  fontSize: '0.7rem'
-                }}
-              >
-                {t('property:table.section')} {row.lot?.section || 'N/A'}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      },
-      {
-        field: 'model',
-        headerName: t('property:table.model'),
-        minWidth: 120,
-        renderCell: ({ row }) => (
-          <Box>
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 600,
-                color: '#1a1a1a',
-                fontFamily: '"Poppins", sans-serif'
-              }}
-            >
-              {row.model?.model || 'N/A'}
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                color: '#706f6f',
-                fontFamily: '"Poppins", sans-serif',
-                fontSize: '0.7rem'
-              }}
-            >
-              {row.model?.bedrooms}BR / {row.model?.bathrooms}BA
-            </Typography>
-          </Box>
-        )
-      },
-      {
-        field: 'facade',
-        headerName: t('property:table.facade'),
-        minWidth: 120,
-        renderCell: ({ row }) => (
-          <Box>
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 500,
-                color: '#1a1a1a',
-                fontFamily: '"Poppins", sans-serif'
-              }}
-            >
-              {row.facade?.title || t('property:table.notSelected')}
-            </Typography>
-            {row.facade?.price > 0 && (
-              <Typography
-                variant="caption"
-                sx={{
-                  color: '#8CA551',
-                  fontFamily: '"Poppins", sans-serif',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}
-              >
-                +${row.facade.price.toLocaleString()}
-              </Typography>
-            )}
-          </Box>
-        )
-      },
-      {
-        field: 'user',
-        headerName: t('property:table.residentOwner'),
-        minWidth: 180,
-        renderCell: ({ row }) => (
-          <Box display="flex" alignItems="center" gap={1}>
-            <Avatar
-              sx={{
-                width: 40,
-                height: 40,
-                bgcolor: 'transparent',
-                background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                fontFamily: '"Poppins", sans-serif',
-                border: '2px solid rgba(255, 255, 255, 0.9)',
-                boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
-              }}
-            >
-              {row.users?.[0]?.firstName?.charAt(0) || row.client?.firstName?.charAt(0) || '?'}
-            </Avatar>
-            <Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 500,
-                  color: '#1a1a1a',
-                  fontFamily: '"Poppins", sans-serif'
-                }}
-              >
-                {row.users?.[0]?.firstName || row.client?.firstName || 'N/A'}{' '}
-                {row.users?.[0]?.lastName || row.client?.lastName || ''}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif',
-                  fontSize: '0.7rem'
-                }}
-              >
-                {row.users?.[0]?.email || row.client?.email || t('property:table.noEmail')}
-              </Typography>
-            </Box>
-          </Box>
-        )
-      },
-      {
-        field: 'status',
-        headerName: t('property:table.status'),
-        minWidth: 100,
-        renderCell: ({ row }) => {
-          const statusColors = getStatusColor(row.status)
-          return (
-            <Chip
-              label={t(`property:status.${row.status || 'pending'}`)}
-              size="small"
-              sx={{
-                fontWeight: 600,
-                fontFamily: '"Poppins", sans-serif',
-                height: 28,
-                px: 1.5,
-                fontSize: '0.75rem',
-                letterSpacing: '0.5px',
-                borderRadius: 2,
-                textTransform: 'capitalize',
-                bgcolor: statusColors.bg,
-                color: statusColors.color,
-                border: `1px solid ${statusColors.border}`
-              }}
-            />
-          )
-        }
-      },
-      {
-        field: 'phases',
-        headerName: t('property:table.constructionPhase'),
-        minWidth: 200,
-        renderCell: ({ row }) => {
-          const phaseProgress = getPhaseProgress(row)
-          return (
-            <Box sx={{ minWidth: 140 }}>
-              <Box display="flex" alignItems="center" gap={1} mb={0.5}>
-                <Construction sx={{ fontSize: 16, color: '#8CA551' }} />
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 700,
-                    color: '#333F1F',
-                    fontFamily: '"Poppins", sans-serif',
-                    fontSize: '0.8rem'
-                  }}
-                >
-                  {t('property:table.phase')} {phaseProgress.current} / {phaseProgress.total}
-                </Typography>
-              </Box>
-              <Tooltip title={t('property:table.phasesCompleted', { count: phaseProgress.completed })}>
-                <LinearProgress
-                  variant="determinate"
-                  value={phaseProgress.percentage}
-                  sx={{
-                    height: 6,
-                    borderRadius: 1,
-                    bgcolor: 'rgba(140, 165, 81, 0.12)',
-                    '& .MuiLinearProgress-bar': {
-                      bgcolor: phaseProgress.percentage === 100 ? '#8CA551' : '#333F1F',
-                      borderRadius: 1
-                    }
-                  }}
-                />
-              </Tooltip>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif',
-                  fontSize: '0.7rem',
-                  display: 'block',
-                  mt: 0.5
-                }}
-              >
-                {phaseProgress.completed} {t('property:table.completed')} • {phaseProgress.percentage}%
-              </Typography>
-              <Button
-                size="small"
-                startIcon={<PhotoLibrary sx={{ fontSize: 14 }} />}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleOpenPhases(row)
-                }}
-                sx={{
-                  mt: 1,
-                  fontSize: '0.7rem',
-                  textTransform: 'none',
-                  fontFamily: '"Poppins", sans-serif',
-                  fontWeight: 600,
-                  color: '#333F1F',
-                  borderColor: 'rgba(51, 63, 31, 0.3)',
-                  '&:hover': {
-                    borderColor: '#333F1F',
-                    bgcolor: 'rgba(51, 63, 31, 0.04)'
-                  }
-                }}
-                variant="outlined"
-              >
-                {isAdmin ? t('property:actions.managePhases') : t('property:actions.viewProgress')}
-              </Button>
-            </Box>
-          )
-        }
-      },
-      {
-        field: 'price',
-        headerName: t('property:table.price'),
-        minWidth: 140,
-        renderCell: ({ row }) => (
-          <Box>
-            <Box display="flex" alignItems="center" gap={0.5} mb={0.5}>
-              <AttachMoney sx={{ fontSize: 16, color: '#8CA551' }} />
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 700,
-                  color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif'
-                }}
-              >
-                {(row.presalePrice || row.price)?.toLocaleString()}
-              </Typography>
-            </Box>
-            {row.pending > 0 && (
-              <Typography
-                variant="caption"
-                sx={{
-                  color: '#E5863C',
-                  fontFamily: '"Poppins", sans-serif',
-                  fontWeight: 600,
-                  fontSize: '0.7rem',
-                  display: 'block'
-                }}
-              >
-                {t('property:table.pending')}: ${row.pending?.toLocaleString()}
-              </Typography>
-            )}
-            {row.initialPayment > 0 && (
-              <Typography
-                variant="caption"
-                sx={{
-                  color: '#8CA551',
-                  fontFamily: '"Poppins", sans-serif',
-                  fontWeight: 600,
-                  fontSize: '0.7rem',
-                  display: 'block'
-                }}
-              >
-                {t('property:table.paid')}: ${row.initialPayment?.toLocaleString()}
-              </Typography>
-            )}
-          </Box>
-        )
-      }
-    ]
+  // ── Columns (extraídas a su propio archivo) ───────────────
+  const columns = usePropertyColumns({
+    isAdmin,
+    t,
+    onViewDetails:    details.openModal,
+    onEdit:           openEdit,
+    onDelete:         handleDeleteProperty,
+    onOpenPhases:     phases.openModal,
+    onOpenContracts:  contracts.openModal,
+  })
 
-    if (isAdmin) {
-      baseColumns.push({
-        field: 'contracts',
-        headerName: t('property:table.contracts'),
-        align: 'center',
-        width: 100,
-        renderCell: ({ row }) => (
-          <Tooltip title={t('property:actions.manageContracts')} placement="top">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleOpenContracts(row)
-              }}
-              sx={{
-                bgcolor: 'rgba(140, 165, 81, 0.08)',
-                border: '1px solid rgba(140, 165, 81, 0.2)',
-                borderRadius: 2,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  bgcolor: '#8CA551',
-                  borderColor: '#8CA551',
-                  transform: 'scale(1.1)',
-                  '& .MuiSvgIcon-root': {
-                    color: 'white'
-                  }
-                }
-              }}
-            >
-              <DescriptionIcon sx={{ fontSize: 18, color: '#8CA551' }} />
-            </IconButton>
-          </Tooltip>
-        )
-      })
-    }
-
-    baseColumns.push({
-      field: 'actions',
-      headerName: t('property:table.actions'),
-      align: 'center',
-      width: 160, // aumenta el ancho para el nuevo botón
-      renderCell: ({ row }) => (
-        <Box display="flex" alignItems="center" gap={1}>
-          <Tooltip title={t('property:actions.viewDetails')} placement="top">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleViewProperty(row)
-              }}
-              sx={{
-                bgcolor: 'rgba(140, 165, 81, 0.08)',
-                border: '1px solid rgba(140, 165, 81, 0.2)',
-                borderRadius: 2,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  bgcolor: '#8CA551',
-                  borderColor: '#8CA551',
-                  transform: 'scale(1.1)',
-                  '& .MuiSvgIcon-root': {
-                    color: 'white'
-                  }
-                }
-              }}
-            >
-              <Visibility sx={{ fontSize: 18, color: '#8CA551' }} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={t('property:actions.editPrice')} placement="top">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleEditProperty(row)
-              }}
-              sx={{
-                bgcolor: 'rgba(140, 165, 81, 0.08)',
-                border: '1px solid rgba(140, 165, 81, 0.2)',
-                borderRadius: 2,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  bgcolor: '#333F1F',
-                  borderColor: '#8CA551',
-                  transform: 'scale(1.1)',
-                  '& .MuiSvgIcon-root': {
-                    color: 'white'
-                  }
-                }
-              }}
-            >
-              <EditIcon sx={{ fontSize: 18, color: '#8CA551' }} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={t('property:actions.deleteProperty')} placement="top">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleDeleteProperty(row)
-              }}
-              sx={{
-                bgcolor: 'rgba(229, 134, 60, 0.08)',
-                border: '1px solid rgba(229, 134, 60, 0.2)',
-                borderRadius: 2,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  bgcolor: '#E5863C',
-                  borderColor: '#E5863C',
-                  transform: 'scale(1.1)',
-                  '& .MuiSvgIcon-root': {
-                    color: 'white'
-                  }
-                }
-              }}
-            >
-              <DeleteIcon sx={{ fontSize: 18, color: '#E5863C' }} />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      )
-    })
-
-    return baseColumns
-  }, [isAdmin, getStatusColor, getPhaseProgress, handleOpenPhases, handleOpenContracts, handleViewProperty, handleEditProperty, t])
-
+  // ── Render ────────────────────────────────────────────────
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)',
-        p: { xs: 2, sm: 3 }
-      }}
-    >
+    <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)', p: { xs: 2, sm: 3 } }}>
       <Container maxWidth="xl">
         <PageHeader
           icon={Home}
           title={t('property:title')}
           subtitle={t('property:subtitle')}
           actionButton={{
-            label: t('property:actions.addProperty'),
-            onClick: handleAddProperty,
-            icon: <Add />,
+            label:   t('property:actions.addProperty'),
+            onClick: () => navigate('/properties/select'),
+            icon:    <Add />,
             tooltip: t('property:actions.addProperty')
           }}
         />
 
         <StatsCards stats={propertiesStats} loading={loading} />
 
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            mb: 2,
-            flexWrap: 'wrap'
-          }}
-        >
+        {/* FILTERS */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
           <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel
-              sx={{
-                fontFamily: '"Poppins", sans-serif',
-                fontSize: '0.85rem',
-                '&.Mui-focused': { color: '#333F1F' }
-              }}
-            >
+            <InputLabel sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.85rem', '&.Mui-focused': { color: '#333F1F' } }}>
               {t('property:filters.filterByModel')}
             </InputLabel>
             <Select
@@ -836,47 +143,28 @@ const Properties = () => {
                 fontFamily: '"Poppins", sans-serif',
                 fontSize: '0.85rem',
                 borderRadius: 2,
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'rgba(140, 165, 81, 0.3)'
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#8CA551'
-                },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#333F1F'
-                }
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(140, 165, 81, 0.3)' },
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#8CA551' },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#333F1F' }
               }}
             >
-              <MenuItem value="">
-                <em>{t('property:filters.allModels')}</em>
-              </MenuItem>
-              {modelOptions.map((model) => (
-                <MenuItem key={model} value={model}>
-                  {model}
-                </MenuItem>
-              ))}
+              <MenuItem value=""><em>{t('property:filters.allModels')}</em></MenuItem>
+              {modelOptions.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}
             </Select>
           </FormControl>
 
           <Tooltip
             title={
-              residentSortOrder === 'none'
-                ? t('property:filters.sortResidentAZ')
-                : residentSortOrder === 'asc'
-                ? t('property:filters.sortResidentZA')
-                : t('property:filters.removeResidentSort')
+              residentSortOrder === 'none' ? t('property:filters.sortResidentAZ')
+              : residentSortOrder === 'asc' ? t('property:filters.sortResidentZA')
+              : t('property:filters.removeResidentSort')
             }
-            placement="top"
           >
             <Button
               variant={residentSortOrder !== 'none' ? 'contained' : 'outlined'}
               size="small"
               startIcon={<SortByAlpha />}
-              onClick={() => {
-                setResidentSortOrder(prev =>
-                  prev === 'none' ? 'asc' : prev === 'asc' ? 'desc' : 'none'
-                )
-              }}
+              onClick={toggleResidentSort}
               sx={{
                 fontFamily: '"Poppins", sans-serif',
                 fontWeight: 600,
@@ -886,19 +174,9 @@ const Properties = () => {
                 px: 2,
                 height: 40,
                 ...(residentSortOrder !== 'none'
-                  ? {
-                      bgcolor: '#333F1F',
-                      color: 'white',
-                      '&:hover': { bgcolor: '#4a5d3a' }
-                    }
-                  : {
-                      color: '#333F1F',
-                      borderColor: 'rgba(140, 165, 81, 0.3)',
-                      '&:hover': {
-                        borderColor: '#333F1F',
-                        bgcolor: 'rgba(51, 63, 31, 0.04)'
-                      }
-                    })
+                  ? { bgcolor: '#333F1F', color: 'white', '&:hover': { bgcolor: '#4a5d3a' } }
+                  : { color: '#333F1F', borderColor: 'rgba(140, 165, 81, 0.3)', '&:hover': { borderColor: '#333F1F', bgcolor: 'rgba(51, 63, 31, 0.04)' } }
+                )
               }}
             >
               {t('property:filters.resident')} {residentSortOrder === 'asc' ? 'A → Z' : residentSortOrder === 'desc' ? 'Z → A' : 'A-Z'}
@@ -916,48 +194,40 @@ const Properties = () => {
               title={t('property:empty.title')}
               description={t('property:empty.description')}
               actionLabel={t('property:empty.action')}
-              onAction={handleAddProperty}
+              onAction={() => navigate('/properties/select')}
             />
           }
-          onRowClick={(row) => console.log('Property clicked:', row)}
           stickyHeader
           maxHeight={600}
         />
 
-        
-        
-                <PropertyDetailsModal
-                  open={detailsOpen}
-                  onClose={() => setDetailsOpen(false)}
-                  property={detailsProperty}
-                  isAdmin={isAdmin}
-                />
-        
-        
+        {/* MODALS */}
+        <PropertyDetailsModal
+          open={details.open}
+          onClose={details.closeModal}
+          property={details.data}
+          isAdmin={isAdmin}
+        />
 
-        {selectedProperty && (
-          <ConstructionPhasesModal
-            open={phasesModalOpen}
-            property={selectedProperty}
-            onClose={handleClosePhases}
-            isAdmin={isAdmin}
-          />
-        )}
+        <ConstructionPhasesModal
+          open={phases.open}
+          property={phases.data}
+          onClose={() => { phases.closeModal(); refetch() }}
+          isAdmin={isAdmin}
+        />
 
-        {contractsProperty && (
-          <ContractsModal
-            open={contractsModalOpen}
-            onClose={handleCloseContracts}
-            property={contractsProperty}
-          />
-        )}
+        <ContractsModal
+          open={contracts.open}
+          onClose={contracts.closeModal}
+          property={contracts.data}
+        />
 
         <EditPropertyModal
-          open={editModalOpen}
-          onClose={handleCloseEditModal}
-          property={propertyToEdit}
+          open={editModal.open}
+          onClose={closeEdit}
+          property={editModal.property}
           values={editValues}
-          onChange={handleEditValuesChange}
+          onChange={setEditValues}
           onSave={handleSaveEdit}
           saving={savingEdit}
           lots={lotsArray}

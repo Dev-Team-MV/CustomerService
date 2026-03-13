@@ -63,30 +63,6 @@ export const ConstructionPhasesContent = ({ property, isAdmin }) => {
 
   useEffect(() => { setImageIdx(0) }, [currentPhaseIndex])
 
-  // const fetchPhases = async () => {
-  //   try {
-  //     setLoading(true)
-  //     const response = await api.get(`/phases/property/${property._id}`)
-  //     const existingPhases = response.data
-  //     const allPhases = []
-  //     for (let i = 1; i <= 9; i++) {
-  //       const existingPhase = existingPhases.find(p => p.phaseNumber === i)
-  //       allPhases.push(existingPhase || {
-  //         phaseNumber: i,
-  //         title: PHASE_TITLES[i - 1],
-  //         constructionPercentage: 0,
-  //         mediaItems: [],
-  //         property: property._id
-  //       })
-  //     }
-  //     setPhases(allPhases)
-  //   } catch (error) {
-  //     console.error('Error fetching phases:', error)
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
-
     const fetchPhases = async () => {
     try {
       setLoading(true)

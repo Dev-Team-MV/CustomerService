@@ -38,7 +38,6 @@ const newsService = {
   createNews: async (newsData) => {
     try {
       const response = await api.post('/news', newsData);
-      console.log('✅ News created successfully:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error creating news:', error);
@@ -50,7 +49,6 @@ const newsService = {
   updateNews: async (id, newsData) => {
     try {
       const response = await api.put(`/news/${id}`, newsData);
-      console.log('✅ News updated successfully:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error updating news:', error);
@@ -62,7 +60,6 @@ const newsService = {
   deleteNews: async (id) => {
     try {
       const response = await api.delete(`/news/${id}`);
-      console.log('✅ News deleted successfully:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error deleting news:', error);

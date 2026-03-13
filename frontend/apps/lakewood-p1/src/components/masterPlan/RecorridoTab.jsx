@@ -11,6 +11,8 @@ const defaultMap = '/images/mapLakewood.png'
 import RecorridoImageUploadModal from '../masterPlan/RecorridoImagesModal'
 import { CloudUpload } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
+import PrimaryButton from '../../constants/PrimaryButton'
+import { markerSx,mapContainerSx } from '../../theme'
 // 20 puntos de recorrido, ajusta x/y según tu plano
 const puntosBase = [
   { id: 1, name: "Point 1", x: 77, y: 78 },
@@ -169,8 +171,6 @@ const fetchRecorridoImages = async () => {
 
   // --- UPLOAD ---
   const handleUpload = async (id, file, isPublic = true) => {
-      console.log(`[RecorridoTab] Subiendo imagen para punto ${id} con isPublic:`, isPublic);
-
     setUploading(true);
     const ext = file.name.substring(file.name.lastIndexOf('.'));
     const filename = `recorrido.${id}${ext}`;
@@ -186,131 +186,66 @@ const fetchRecorridoImages = async () => {
 
   return (
     <>
-      <Box 
-        sx={{ 
-          p: 0, 
-          borderRadius: 2,
-          overflow: 'hidden',
+<Box sx={{ p: 0, borderRadius: 2, overflow: 'hidden', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+  <PrimaryButton
+    variant="contained"
+    color="primary"
+    startIcon={<CloudUpload />}
+    onClick={() => setUploadModalOpen(true)}
+  >
+    {t('manageTourImages')}
+  </PrimaryButton>
+
+  {/* Map Container */}
+  <Box
+    ref={mapRef}
+    onMouseDown={handleMouseDown}
+    onMouseMove={handleMouseMove}
+    onMouseUp={handleMouseUp}
+    onMouseLeave={handleMouseLeave}
+    onTouchStart={handleTouchStart}
+    onTouchMove={handleTouchMove}
+    onTouchEnd={handleTouchEnd}
+    sx={mapContainerSx}
+  >
+    <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', overflow: 'hidden' }}>
+      {/* Map Background */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
           width: '100%',
-          maxWidth: '100%',
-          boxSizing: 'border-box'
+          height: '100%',
+          transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+          transition: isDragging ? 'none' : 'transform 0.3s ease',
+          backgroundImage: `url(${mapUrl})`,
+          backgroundSize: 'contain',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          willChange: 'transform'
         }}
       >
-        <Button
-          variant="contained"
-          startIcon={<CloudUpload />} // Usa el mismo ícono para consistencia
-          sx={{
-            mb: 2,
-            borderRadius: 3,
-            fontWeight: 600,
-            textTransform: 'none',
-            fontFamily: '"Poppins", sans-serif',
-            bgcolor: '#333F1F',
-            color: 'white',
-            px: 3,
-            py: 1.2,
-            boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
-            '&:hover': {
-              bgcolor: '#8CA551',
-              boxShadow: '0 6px 16px rgba(140, 165, 81, 0.35)'
-            }
-          }}
-          onClick={() => setUploadModalOpen(true)}
-        >
-          {t('manageTourImages')}
-        </Button>
-
-        {/* Map Container */}
-        <Box
-          ref={mapRef}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseLeave}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          sx={{
-            width: '100%',
-            maxWidth: '100%',
-            paddingTop: '56.25%',
-            bgcolor: '#f0f0f0',
-            position: 'relative',
-            cursor: isDragging ? 'grabbing' : 'grab',
-            overflow: 'hidden',
-            touchAction: 'none',
-            boxSizing: 'border-box'
-          }}
-        >
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              overflow: 'hidden'
-            }}
+        {/* Recorrido Markers */}
+        {recorridoPoints.map((point, idx) => (
+          <Tooltip 
+            key={point.id} 
+            title={t(`tourPoints.${point.name}`, point.name)} 
+            arrow
           >
-            {/* Map Background */}
             <Box
+              onClick={() => handlePointClick(idx)}
               sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                width: '100%',
-                height: '100%',
-                transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                transition: isDragging ? 'none' : 'transform 0.3s ease',
-                backgroundImage: `url(${mapUrl})`,
-                backgroundSize: 'contain',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                willChange: 'transform'
+                ...markerSx,
+                left: `${point.x}%`,
+                top: `${point.y}%`
               }}
             >
-              {/* Recorrido Markers */}
-              {recorridoPoints.map((point, idx) => (
-                <Tooltip 
-                  key={point.id} 
-              title={t(`tourPoints.${point.name}`, point.name)} 
-                  arrow
-                >
-                  <Box
-                    onClick={() => handlePointClick(idx)}
-                    sx={{
-                      position: 'absolute',
-                      left: `${point.x}%`,
-                      top: `${point.y}%`,
-                      transform: 'translate(-50%, -50%)',
-                      width: { xs: 24, sm: 32, md: 32 },
-                      height: { xs: 24, sm: 32, md: 32 },
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      bgcolor: '#1976d2',
-                      color: '#fff',
-                      fontSize: { xs: '0.7rem', sm: '0.9rem', md: '1rem' },
-                      fontWeight: 'bold',
-                      boxShadow: '0 4px 12px rgba(25, 118, 210, 0.25)',
-                      border: '3px solid rgba(255,255,255,0.9)',
-                      transition: 'all 0.3s ease',
-                      zIndex: 1,
-                      '&:hover': {
-                        transform: 'translate(-50%, -50%) scale(1.2)',
-                        zIndex: 11,
-                        boxShadow: '0 6px 20px rgba(25, 118, 210, 0.4)',
-                        bgcolor: '#1565c0'
-                      }
-                    }}
-                  >
-                    {point.id}
-                  </Box>
-                </Tooltip>
-              ))}
+              {point.id}
             </Box>
+          </Tooltip>
+        ))}
+      </Box>
 
             {/* Zoom Controls */}
             <Box sx={{ 

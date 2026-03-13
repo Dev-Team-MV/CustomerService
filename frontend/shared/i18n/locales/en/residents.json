@@ -81,6 +81,9 @@
       "user": "Resident",
       "admin": "Admin",
       "superadmin": "Super Admin"
-    }
+    },
+    "cancel": "Cancel",
+    "save": "Save",
+    "sendInvitation": "Send Invitation"
     }
 }

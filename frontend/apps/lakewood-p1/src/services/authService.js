@@ -6,9 +6,7 @@ export const authService = {
     const payload = isPhone 
       ? { phoneNumber: emailOrPhone, password }
       : { email: emailOrPhone, password }
-    
-    console.log('📤 Login payload:', payload)
-    
+        
     const response = await api.post('/auth/login', payload)
     return response.data
   },

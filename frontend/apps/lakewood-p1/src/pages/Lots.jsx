@@ -323,7 +323,6 @@ const Lots = () => {
               onAction={() => setOpenDialog(true)}
             />
           }
-          onRowClick={(row) => console.log('Row clicked:', row)}
         />
 
         <LotDialog

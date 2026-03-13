@@ -1,5 +1,5 @@
 import api from './api'
-const PROJECT_ID = '69a73ce5b20401b061da6451'
+const PROJECT_ID = import.meta.env.VITE_PROJECT_ID
 
 const projectService = {
   getByIdLakewood: async () => {
