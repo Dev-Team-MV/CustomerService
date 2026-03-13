@@ -9,9 +9,10 @@ import {
   Box,
   Typography
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
-import Loader from '../Loader';  // ✅ IMPORTAR LOADER
+import Loader from '../Loader';
 
 const DataTable = ({
   columns = [],
@@ -23,7 +24,8 @@ const DataTable = ({
   stickyHeader = false,
   maxHeight = null
 }) => {
-  // Validar que columns tenga al menos un elemento
+  const theme = useTheme();
+
   if (!columns || columns.length === 0) {
     return (
       <Paper sx={{ p: 3, textAlign: 'center' }}>
@@ -43,9 +45,11 @@ const DataTable = ({
         sx={{
           borderRadius: 4,
           overflow: 'hidden',
-          boxShadow: '0 4px 20px rgba(51, 63, 31, 0.08)',
-          border: '1px solid rgba(140, 165, 81, 0.12)',
-          background: 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)'
+          boxShadow: theme.palette.avatarShadow || '0 4px 20px rgba(51, 63, 31, 0.08)',
+          border: `1px solid ${theme.palette.cardBorder || 'rgba(140, 165, 81, 0.12)'}`,
+          background: theme.palette.cardBg
+            ? `linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.cardBg} 100%)`
+            : 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)'
         }}
       >
         <TableContainer sx={{ maxHeight: maxHeight }}>
@@ -54,8 +58,9 @@ const DataTable = ({
             <TableHead>
               <TableRow
                 sx={{
-                  background: 'linear-gradient(135deg, rgba(51, 63, 31, 0.03) 0%, rgba(140, 165, 81, 0.03) 100%)',
-                  borderBottom: '2px solid rgba(140, 165, 81, 0.2)'
+                  background: theme.palette.gradientSection ||
+                    `linear-gradient(135deg, ${theme.palette.primary?.main || '#333F1F'}10 0%, ${theme.palette.secondary?.main || '#8CA551'}10 100%)`,
+                  borderBottom: `2px solid ${theme.palette.cardBorder || 'rgba(140, 165, 81, 0.2)'}`
                 }}
               >
                 {columns.map((column, idx) => (
@@ -64,7 +69,7 @@ const DataTable = ({
                     align={column.align || 'left'}
                     sx={{
                       fontWeight: 700,
-                      color: '#333F1F',
+                      color: theme.palette.primary?.main || '#333F1F',
                       fontFamily: '"Poppins", sans-serif',
                       fontSize: '0.75rem',
                       letterSpacing: '1.5px',
@@ -74,7 +79,7 @@ const DataTable = ({
                       width: column.width || 'auto',
                       minWidth: column.minWidth || 'auto',
                       ...(stickyHeader && {
-                        bgcolor: 'rgba(250, 250, 250, 0.95)',
+                        bgcolor: theme.palette.background?.default || 'rgba(250, 250, 250, 0.95)',
                         backdropFilter: 'blur(10px)'
                       }),
                       ...column.headerSx
@@ -89,19 +94,17 @@ const DataTable = ({
             {/* TABLE BODY */}
             <TableBody>
               <AnimatePresence>
-                {/* ✅ LOADING STATE CON LOADER */}
                 {loading ? (
                   <TableRow>
                     <TableCell colSpan={columns.length}>
-                      <Loader 
-                        size="medium" 
-                        message="Loading data..." 
-                        fullHeight={false}  // ✅ NO usar fullHeight en tablas
+                      <Loader
+                        size="medium"
+                        message="Loading data..."
+                        fullHeight={false}
                       />
                     </TableCell>
                   </TableRow>
                 ) : data.length === 0 ? (
-                  /* EMPTY STATE */
                   <TableRow>
                     <TableCell colSpan={columns.length}>
                       {emptyState || (
@@ -118,7 +121,7 @@ const DataTable = ({
                           <Typography
                             variant="h6"
                             sx={{
-                              color: '#333F1F',
+                              color: theme.palette.primary?.main || '#333F1F',
                               fontWeight: 600,
                               fontFamily: '"Poppins", sans-serif'
                             }}
@@ -128,7 +131,7 @@ const DataTable = ({
                           <Typography
                             variant="body2"
                             sx={{
-                              color: '#706f6f',
+                              color: theme.palette.text?.secondary || '#706f6f',
                               fontFamily: '"Poppins", sans-serif'
                             }}
                           >
@@ -139,7 +142,6 @@ const DataTable = ({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  /* DATA ROWS */
                   data.map((row, rowIndex) => {
                     const rowId = row._id || row.id || rowIndex;
 
@@ -157,10 +159,10 @@ const DataTable = ({
                           cursor: onRowClick ? 'pointer' : 'default',
                           ...(rowHoverEffect && {
                             '&:hover': {
-                              bgcolor: 'rgba(140, 165, 81, 0.04)',
+                              bgcolor: theme.palette.secondary?.main + '08' || 'rgba(140, 165, 81, 0.04)',
                               transform: 'translateX(4px)',
-                              boxShadow: '0 2px 8px rgba(51, 63, 31, 0.08)',
-                              borderLeftColor: '#8CA551'
+                              boxShadow: theme.palette.avatarShadow || '0 2px 8px rgba(51, 63, 31, 0.08)',
+                              borderLeftColor: theme.palette.secondary?.main || '#8CA551'
                             }
                           }),
                           '&:last-child td': {
@@ -180,7 +182,6 @@ const DataTable = ({
                                 ...column.cellSx
                               }}
                             >
-                              {/* Custom render function */}
                               {column.renderCell
                                 ? column.renderCell({ row, value: cellValue })
                                 : cellValue}

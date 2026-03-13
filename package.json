@@ -3,15 +3,17 @@
   "version": "1.0.0",
   "description": "MV Platform - Multi-project property management",
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:lakewood-p1\" \"npm run dev:crm\"",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:lakewood-p1\" \"npm run dev:crm\" \"npm run dev:phase-2\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:lakewood-p1": "cd frontend/apps/lakewood-p1 && npm run dev",
     "dev:crm": "cd frontend/apps/mv-crm && npm run dev",
+    "dev:phase-2": "cd frontend/apps/phase-2 && npm run dev",
     "dev:lakewood-p1+backend": "concurrently \"npm run dev:backend\" \"npm run dev:lakewood-p1\"",
     "dev:crm+backend": "concurrently \"npm run dev:backend\" \"npm run dev:crm\"",
-    "install:all": "cd backend && npm install && cd ../frontend/apps/lakewood-p1 && npm install && cd ../mv-crm && npm install",
+    "install:all": "cd backend && npm install && cd ../frontend/apps/lakewood-p1 && npm install && cd ../mv-crm && npm install && cd ../phase-2 && npm install",
     "build:lakewood-p1": "cd frontend/apps/lakewood-p1 && npm run build",
-    "build:crm": "cd frontend/apps/mv-crm && npm run build"
+    "build:crm": "cd frontend/apps/mv-crm && npm run build",
+    "build:phase-2": "cd frontend/apps/phase-2 && npm run build"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +28,7 @@
     "@mui/material": "^7.3.9",
     "@mui/x-charts": "^8.27.4",
     "axios": "^1.13.6",
+    "framer-motion": "^12.36.0",
     "i18next": "^25.8.14",
     "i18next-browser-languagedetector": "^8.2.1",
     "prop-types": "^15.8.1",

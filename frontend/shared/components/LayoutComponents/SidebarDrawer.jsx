@@ -16,6 +16,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
 
 const SidebarDrawer = ({
   open,
@@ -27,10 +28,12 @@ const SidebarDrawer = ({
   publicView,
   setExpanded,
   drawerWidth = 280,
+  logoSrc = "/images/logos/Logo_LakewoodOaks-05.png", // logo dinámico
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const theme = useTheme();
 
   const handleNavigate = (path) => {
     navigate(path);
@@ -55,6 +58,7 @@ const SidebarDrawer = ({
           width: drawerWidth,
           boxSizing: "border-box",
           border: "none",
+          bgcolor: theme.palette.cardBg, 
           transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         },
       }}
@@ -63,24 +67,23 @@ const SidebarDrawer = ({
         sx={{
           height: "100%",
           width: drawerWidth,
-          background: "linear-gradient(180deg, #ffffff 0%, #fafafa 100%)",
-          borderRight: "1px solid rgba(140, 165, 81, 0.15)",
+          bgcolor: theme.palette.background.default,
+          borderRight: `1px solid ${theme.palette.divider}`,
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          boxShadow: "4px 0 24px rgba(51, 63, 31, 0.08)",
+          boxShadow: theme.shadows[2],
         }}
       >
         {/* LOGO */}
         <Box
-          sx={{
-            p: 3,
-            textAlign: "center",
-            position: "relative",
-            borderBottom: "2px solid rgba(140, 165, 81, 0.1)",
-            background:
-              "linear-gradient(135deg, rgba(51, 63, 31, 0.03) 0%, rgba(140, 165, 81, 0.03) 100%)",
-          }}
+      sx={{
+        p: 3,
+        textAlign: "center",
+        position: "relative",
+        borderBottom: `2px solid ${theme.palette.cardBorder}`,
+        background: theme.palette.gradientSection, // Gradiente principal para el header del Drawer
+      }}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -89,14 +92,14 @@ const SidebarDrawer = ({
           >
             <Box
               component="img"
-              src="/images/logos/Logo_LakewoodOaks-05.png"
-              alt="Lakewood Oaks"
+              src={logoSrc}
+              alt="App Logo"
               sx={{
                 width: "100%",
                 maxWidth: "220px",
                 height: "auto",
                 objectFit: "contain",
-                filter: "drop-shadow(0 2px 8px rgba(51, 63, 31, 0.15))",
+                filter: theme.shadows[1],
               }}
             />
           </motion.div>
@@ -104,8 +107,6 @@ const SidebarDrawer = ({
 
         {/* NAVIGATION */}
         <List sx={{ flex: 1, px: 2, py: 3, overflowY: "auto" }}>
-
-          {/* Items del menú */}
           {menuItems.map((item, index) => {
             const isActive = location.pathname === item.path;
             return (
@@ -128,9 +129,9 @@ const SidebarDrawer = ({
                       py: 1.8,
                       position: "relative",
                       bgcolor: isActive
-                        ? "rgba(140, 165, 81, 0.08)"
+                        ? theme.palette.action.selected
                         : "transparent",
-                      border: `2px solid ${isActive ? "rgba(140, 165, 81, 0.2)" : "transparent"}`,
+                      border: `2px solid ${isActive ? theme.palette.secondary.light : "transparent"}`,
                       transition: "all 0.3s ease",
                       overflow: "hidden",
                       "&::before": {
@@ -141,7 +142,7 @@ const SidebarDrawer = ({
                         width: "100%",
                         height: "100%",
                         background:
-                          "linear-gradient(90deg, transparent, rgba(140, 165, 81, 0.08), transparent)",
+                          `linear-gradient(90deg, transparent, ${theme.palette.secondary.light}, transparent)`,
                         transition: "left 0.5s ease",
                       },
                       "&::after": isActive
@@ -153,18 +154,18 @@ const SidebarDrawer = ({
                             transform: "translateY(-50%)",
                             width: 4,
                             height: "60%",
-                            bgcolor: "#8CA551",
+                            bgcolor: theme.palette.secondary.main,
                             borderRadius: "4px 0 0 4px",
-                            boxShadow: "-2px 0 8px rgba(140, 165, 81, 0.3)",
+                            boxShadow: `-2px 0 8px ${theme.palette.secondary.light}`,
                           }
                         : {},
                       "&:hover": {
                         bgcolor: isActive
-                          ? "rgba(140, 165, 81, 0.12)"
-                          : "rgba(140, 165, 81, 0.06)",
-                        borderColor: "rgba(140, 165, 81, 0.25)",
+                          ? theme.palette.action.selected
+                          : theme.palette.action.hover,
+                        borderColor: theme.palette.secondary.light,
                         transform: "translateX(4px)",
-                        boxShadow: "0 4px 12px rgba(140, 165, 81, 0.12)",
+                        boxShadow: theme.shadows[2],
                         "&::before": {
                           left: "100%",
                         },
@@ -178,14 +179,14 @@ const SidebarDrawer = ({
                           height: 40,
                           borderRadius: 2.5,
                           bgcolor: isActive
-                            ? "rgba(140, 165, 81, 0.15)"
-                            : "rgba(112, 111, 111, 0.05)",
-                          border: `1px solid ${isActive ? "rgba(140, 165, 81, 0.3)" : "rgba(112, 111, 111, 0.1)"}`,
+                            ? theme.palette.secondary.light
+                            : theme.palette.action.hover,
+                          border: `1px solid ${isActive ? theme.palette.secondary.main : theme.palette.divider}`,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           transition: "all 0.3s ease",
-                          color: isActive ? "#333F1F" : "#706f6f",
+                          color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
                         }}
                       >
                         {item.icon && React.createElement(item.icon)}
@@ -196,7 +197,7 @@ const SidebarDrawer = ({
                       primaryTypographyProps={{
                         fontSize: "0.95rem",
                         fontWeight: isActive ? 700 : 600,
-                        color: isActive ? "#333F1F" : "#706f6f",
+                        color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
                         fontFamily: '"Poppins", sans-serif',
                         letterSpacing: "0.3px",
                       }}
@@ -213,27 +214,26 @@ const SidebarDrawer = ({
           sx={{
             p: 2.5,
             textAlign: "center",
-            borderTop: "2px solid rgba(140, 165, 81, 0.1)",
-            background:
-              "linear-gradient(180deg, rgba(140, 165, 81, 0.03) 0%, transparent 100%)",
+            borderTop: `2px solid ${theme.palette.divider}`,
+background: theme.palette.gradientSection,
           }}
         >
           <Tooltip title={t('navigation:tooltips.closeMenu')} placement="right">
             <IconButton
               onClick={onClose}
               sx={{
-                bgcolor: "rgba(51, 63, 31, 0.08)",
-                color: "#333F1F",
+                bgcolor: theme.palette.action.hover,
+                color: theme.palette.primary.main,
                 width: 44,
                 height: 44,
-                border: "2px solid rgba(140, 165, 81, 0.2)",
+                border: `2px solid ${theme.palette.secondary.light}`,
                 transition: "all 0.3s ease",
                 "&:hover": {
-                  bgcolor: "#333F1F",
-                  color: "white",
-                  borderColor: "#333F1F",
+                  bgcolor: theme.palette.primary.main,
+                  color: theme.palette.primary.contrastText,
+                  borderColor: theme.palette.primary.main,
                   transform: "rotate(180deg)",
-                  boxShadow: "0 4px 12px rgba(51, 63, 31, 0.25)",
+                  boxShadow: theme.shadows[4],
                 },
               }}
             >

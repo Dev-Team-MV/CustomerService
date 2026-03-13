@@ -1,23 +1,19 @@
-import { useMemo }            from 'react'
-import { useTranslation }     from 'react-i18next'
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Container, Snackbar, Alert } from '@mui/material'
 import { People, Add, AdminPanelSettings, VerifiedUser, Home, PersonAdd } from '@mui/icons-material'
-
-import PageHeader    from '@shared/components/PageHeader'
-import StatsCards    from '../components/statscard'
-// import DataTable     from '../components/table/DataTable'
-import DataTable     from '@shared/components/table/DataTable'
-import EmptyState    from '../components/table/EmptyState'
-import ResidentDialog from '../../../../shared/components/Modals/ResidentDialog'
-
-// import { useResidents }      from '../hooks/useResidents'
+import PageHeader from '@shared/components/PageHeader'
+import StatsCards from '@shared/components/statscard'
+import DataTable from '@shared/components/table/DataTable'
+import EmptyState from '@shared/components/table/EmptyState'
+import ResidentDialog from '@shared/components/Modals/ResidentDialog'
 import { useResidents } from '@shared/hooks/useResidents'
-import { useResidentColumns } from '../constants/Columns/residents'
+import { useResidentColumns } from '../Constants/Columns/residents'
+import { useTheme } from '@mui/material/styles'
 
 const Residents = () => {
   const { t } = useTranslation(['residents', 'common'])
-
-  // ── Hook con toda la lógica ───────────────────────────────
+ const theme = useTheme()
   const {
     users, loading, stats,
     openDialog, selectedUser, formData, setFormData,
@@ -32,36 +28,62 @@ const Residents = () => {
     isPhoneValid,
   } = useResidents()
 
-  // ── Columns ───────────────────────────────────────────────
   const columns = useResidentColumns({
     t,
     sendingSMS,
-    onEdit:    handleOpenDialog,
-    onDelete:  handleDelete,
+    onEdit: handleOpenDialog,
+    onDelete: handleDelete,
     onSendSMS: handleSendPasswordSMS,
   })
 
-  // ── Stats cards ───────────────────────────────────────────
-  const residentsStats = useMemo(() => [
-    { title: t('residents:stats.total'),       value: stats.total,       icon: People,             gradient: 'linear-gradient(135deg, #333F1F 0%, #4a5d3a 100%)', color: '#333F1F', delay: 0   },
-    { title: t('residents:stats.superadmins'), value: stats.superadmins, icon: AdminPanelSettings, gradient: 'linear-gradient(135deg, #E5863C 0%, #f59c5a 100%)', color: '#E5863C', delay: 0.1 },
-    { title: t('residents:stats.admins'),      value: stats.admins,      icon: VerifiedUser,       gradient: 'linear-gradient(135deg, #8CA551 0%, #a8bf6f 100%)', color: '#8CA551', delay: 0.2 },
-    { title: t('residents:stats.residents'),   value: stats.residents,   icon: Home,               gradient: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)', color: '#1976d2', delay: 0.3 },
-  ], [stats, t])
+const residentsStats = useMemo(() => [
+  {
+    title: t('residents:stats.total'),
+    value: stats.total,
+    icon: People,
+    gradient: theme.palette.gradient
+      ? theme.palette.gradient
+      : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+    color: theme.palette.primary.main,
+    delay: 0
+  },
+  {
+    title: t('residents:stats.superadmins'),
+    value: stats.superadmins,
+    icon: AdminPanelSettings,
+    gradient: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.light} 100%)`,
+    color: theme.palette.warning.main,
+    delay: 0.1
+  },
+  {
+    title: t('residents:stats.admins'),
+    value: stats.admins,
+    icon: VerifiedUser,
+    gradient: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${theme.palette.secondary.light} 100%)`,
+    color: theme.palette.secondary.main,
+    delay: 0.2
+  },
+  {
+    title: t('residents:stats.residents'),
+    value: stats.residents,
+    icon: Home,
+    gradient: `linear-gradient(135deg, ${theme.palette.info.main} 0%, ${theme.palette.info.light} 100%)`,
+    color: theme.palette.info.main,
+    delay: 0.3
+  },
+], [stats, t, theme])
 
-  // ── Render ────────────────────────────────────────────────
   return (
     <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)', p: { xs: 2, sm: 3 } }}>
       <Container maxWidth="xl">
-
         <PageHeader
           icon={People}
           title={t('residents:title')}
           subtitle={t('residents:subtitle')}
           actionButton={{
-            label:   t('residents:actions.add'),
+            label: t('residents:actions.add'),
             onClick: () => handleOpenDialog(),
-            icon:    <Add />,
+            icon: <Add />,
             tooltip: t('residents:actions.add')
           }}
         />
@@ -84,16 +106,7 @@ const Residents = () => {
           onRowClick={(row) => handleOpenDialog(row)}
         />
 
-
-                {/* <ResidentDialog
-          open={openDialog}
-          onClose={handleCloseDialog}
-          onSubmit={handleSubmit}
-          formData={formData}
-          setFormData={setFormData}
-          selectedUser={selectedUser}
-        /> */}
-                <ResidentDialog
+        <ResidentDialog
           open={openDialog}
           onClose={handleCloseDialog}
           onSubmit={handleSubmit}
@@ -122,7 +135,6 @@ const Residents = () => {
             {snackbar.message}
           </Alert>
         </Snackbar>
-
       </Container>
     </Box>
   )
