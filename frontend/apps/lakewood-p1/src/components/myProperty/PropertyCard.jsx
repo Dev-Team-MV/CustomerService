@@ -12,7 +12,6 @@ const PropertyCard = ({
   onClick
 }) => {
   const { t } = useTranslation(['myProperty', 'common'])
-console.log('propiedad', property);
 
   return (
     <motion.div

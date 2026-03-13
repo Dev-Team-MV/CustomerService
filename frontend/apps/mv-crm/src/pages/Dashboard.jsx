@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, Button, Typography, Divider, LinearProgress, Avatar, Skeleton } from '@mui/material'
-import { TrendingUp, ChevronRight, AccountBalanceWallet, HourglassEmpty } from '@mui/icons-material'
+import { Box, Typography, Divider, Avatar, Skeleton, Snackbar, Alert } from '@mui/material'
+import { ChevronRight } from '@mui/icons-material'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@shared/context/AuthContext'
-import api from '@shared/services/api'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
 import StatsStrip from '@shared/components/LayoutComponents/StatsStrip'
 import CreateProjectDialog from '../components/CreateProjectDialog'
 import ProjectCard, { Counter } from '../components/dashboard/ProjectCard'
 import { useTranslation } from 'react-i18next'
-import crmService from '../services/crmService'
+import QuickActionsPanel from '../components/QuickActionsPanel'
+import ResidentDialog from '@shared/components/Modals/ResidentDialog'
+import { useResidents } from '@shared/hooks/useResidents'
+import { useProjects } from '@shared/hooks/useProjects'
+import useModalState from '@shared/hooks/useModalState'
 
 const formatCurrency = (val) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val ?? 0)
@@ -18,55 +21,61 @@ const formatCurrency = (val) =>
 export default function Dashboard() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
-  const [projects, setProjects] = useState([])
-  const [loading, setLoading] = useState(true)
   const [currentTime, setCurrentTime] = useState(new Date())
-  const [selectedProject, setSelectedProject] = useState(null)
-  const [createOpen, setCreateOpen] = useState(false)
-  const [balance, setBalance] = useState(null)
-  const [balanceLoading, setBalanceLoading] = useState(true)
-  const [clientCounts, setClientCounts] = useState({}) // { [projectId]: total }
   const { t } = useTranslation('dashboard')
+
+  // ── Resident hook for quick user creation ──
+  const {
+    openDialog,
+    handleOpenDialog,
+    handleCloseDialog,
+    handleSubmit,
+    formData,
+    setFormData,
+    selectedUser,
+    handleFieldChange,
+    handlePhoneChange,
+    isFormValid,
+    e164Value,
+    displayVal,
+    isPhoneValid,
+    snackbar,
+    handleCloseSnackbar,
+  } = useResidents()
+
+  // ── Projects hook ──
+  const {
+    projects,
+    filtered,
+    loading,
+    search,
+    setSearch,
+    allBalance,
+    handleProjectCreated,
+    handleDelete,
+  } = useProjects()
+
+  // ── Modal state for project creation/edit ──
+  const projectModal = useModalState()
+
+  // ── Selected project for detail panel ──
+  const [selectedProject, setSelectedProject] = useState(null)
+
+  // ── Client counts for each project ──
+  const [clientCounts, setClientCounts] = useState({})
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
 
-  // ── Fetch projects ──────────────────────────────────────────────────────────
-  useEffect(() => {
-    api.get('/projects')
-      .then(r => {
-        const raw = r.data?.projects || r.data || []
-        setProjects(raw)
-        if (raw.length > 0) setSelectedProject(raw[0])
-      })
-      .catch(() => setProjects([]))
-      .finally(() => setLoading(false))
-  }, [])
-
-  // ── Fetch balance ───────────────────────────────────────────────────────────
-  useEffect(() => {
-    const fetchBalance = async () => {
-      setBalanceLoading(true)
-      try {
-        const data = await crmService.getBalance()
-        setBalance(data)
-      } catch (e) {
-        console.error('Balance error:', e)
-      } finally {
-        setBalanceLoading(false)
-      }
-    }
-    fetchBalance()
-  }, [])
-
-  // ── Fetch clients por proyecto ──────────────────────────────────────────────
+  // ── Fetch clients per project ──
   useEffect(() => {
     if (!projects.length) return
     const fetchAllClients = async () => {
+      const crmService = await import('../services/crmService')
       const results = await Promise.allSettled(
-        projects.map(p => crmService.getClients(p._id))
+        projects.map(p => crmService.default.getClients(p._id))
       )
       const counts = {}
       results.forEach((r, i) => {
@@ -77,18 +86,13 @@ export default function Dashboard() {
     fetchAllClients()
   }, [projects])
 
-  // ── Helpers ─────────────────────────────────────────────────────────────────
+  // ── Helpers ──
   const getProjectBalance = (projectId) =>
-    balance?.byProject?.find(b => b.projectId === projectId) ?? null
+    allBalance?.byProject?.find(b => b.projectId === projectId) ?? null
 
   const handleOpenProject = () => {
     const lakewoodUrl = import.meta.env.VITE_LAKEWOOD_URL || 'http://localhost:5173'
     window.open(`${lakewoodUrl}/dashboard`, '_blank')
-  }
-
-  const handleProjectCreated = (newProject) => {
-    setProjects(prev => [newProject, ...prev])
-    setSelectedProject(newProject)
   }
 
   const formatDate = (d) =>
@@ -110,29 +114,62 @@ export default function Dashboard() {
         { label: t('sidebarStats.clients'), value: totalClients }
       ]}
     >
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
-        <Button variant="contained" color="primary" onClick={() => setCreateOpen(true)}>
-          + {t('createProject')}
-        </Button>
-      </Box>
-
-      <CreateProjectDialog
-        open={createOpen}
-        onClose={() => setCreateOpen(false)}
-        onCreated={handleProjectCreated}
+      {/* ── Quick Actions Panel ── */}
+      <QuickActionsPanel
+        onCreateProject={() => projectModal.openModal()}
+        onCreateUser={() => handleOpenDialog()}
       />
+
+      {/* ── Modal para crear/editar proyecto ── */}
+      <CreateProjectDialog
+        open={projectModal.open}
+        onClose={projectModal.closeModal}
+        onCreated={handleProjectCreated}
+        initialData={projectModal.data}
+        editMode={!!projectModal.data}
+      />
+
+      {/* ── Modal para crear usuario (cliente) ── */}
+      <ResidentDialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        onSubmit={handleSubmit}
+        formData={formData}
+        setFormData={setFormData}
+        selectedUser={selectedUser}
+        handleFieldChange={handleFieldChange}
+        handlePhoneChange={handlePhoneChange}
+        isFormValid={isFormValid}
+        e164Value={e164Value}
+        displayVal={displayVal}
+        isPhoneValid={isPhoneValid}
+      />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ fontFamily: '"Helvetica Neue", sans-serif', borderRadius: 2 }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
 
       {/* ── Stats strip — datos reales ── */}
       <StatsStrip stats={[
         { label: t('sidebarStats.projects'), value: projects.length },
         { label: t('metrics.totalClients'), value: totalClients },
-        { label: t('metrics.totalCollected'), value: balance?.global?.totalCollected ?? 0, prefix: '$', format: 'currency' },
-        { label: t('metrics.totalPending'), value: balance?.global?.totalPending ?? 0, prefix: '$', format: 'currency' },
+        { label: t('metrics.totalCollected'), value: allBalance?.global?.totalCollected ?? 0, prefix: '$', format: 'currency' },
+        { label: t('metrics.totalPending'), value: allBalance?.global?.totalPending ?? 0, prefix: '$', format: 'currency' },
       ]} />
 
       {/* ── Split view ── */}
       <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start', flexWrap: { xs: 'wrap', lg: 'nowrap' } }}>
-
         {/* Left: project list */}
         <Box sx={{
           flex: '0 0 320px', minWidth: 0,
@@ -141,7 +178,7 @@ export default function Dashboard() {
           '&::-webkit-scrollbar-track': { background: '#f5f5f5' },
           '&::-webkit-scrollbar-thumb': { background: '#ddd', borderRadius: 3 },
         }}>
-          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#aaa', letterSpacing: '2px', textTransform: 'uppercase', mb: 2 }}>
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 2 }}>
             {t('selectProject')}
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -152,7 +189,7 @@ export default function Dashboard() {
                     <Box sx={{ width: '30%', height: 10, bgcolor: '#fafafa' }} />
                   </Box>
                 ))
-              : projects.map((p, i) => (
+              : filtered.map((p, i) => (
                   <ProjectCard
                     key={p._id}
                     project={p}
@@ -187,7 +224,7 @@ export default function Dashboard() {
                       <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 600, fontSize: '1.4rem', color: '#000', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
                         {selectedProject.name}
                       </Typography>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.62rem', color: '#aaa', letterSpacing: '1px' }}>
+                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.62rem', color: '#000000ff', letterSpacing: '1px' }}>
                         /{selectedProject.slug}
                       </Typography>
                     </Box>
@@ -197,81 +234,70 @@ export default function Dashboard() {
 
                   {/* Metrics grid — datos reales */}
                   <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1px solid #f0f0f0' }}>
-
                     {/* Clients */}
                     <Box sx={{ p: '24px 28px', borderRight: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0' }}>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#bbb', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
+                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
                         {t('metrics.totalClients')}
                       </Typography>
-                      {balanceLoading
-                        ? <Skeleton width={80} height={44} />
-                        : <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: '#000', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>
-                            <Counter to={selectedClients} duration={1.1} />
-                          </Typography>
-                      }
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#bbb' }}>
+                      <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: '#000', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>
+                        <Counter to={selectedClients} duration={1.1} />
+                      </Typography>
+                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff' }}>
                         {t('metrics.registeredOwners')}
                       </Typography>
                     </Box>
 
                     {/* Collected */}
                     <Box sx={{ p: '24px 28px', borderBottom: '1px solid #f0f0f0' }}>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#bbb', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
+                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
                         {t('metrics.totalCollected')}
                       </Typography>
-                      {balanceLoading
-                        ? <Skeleton width={100} height={44} />
-                        : <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: '#4a7c59', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>
-                            <Counter
-                              to={Math.round((selectedBalance?.totalCollected ?? 0) / 1000)}
-                              prefix="$"
-                              suffix="K"
-                              duration={1.1}
-                            />
-                          </Typography>
-                      }
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#bbb' }}>
+                      <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: '#4a7c59', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>
+                        <Counter
+                          to={Math.round((selectedBalance?.totalCollected ?? 0) / 1000)}
+                          prefix="$"
+                          suffix="K"
+                          duration={1.1}
+                        />
+                      </Typography>
+                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff' }}>
                         {formatCurrency(selectedBalance?.totalCollected ?? 0)}
                       </Typography>
                     </Box>
 
                     {/* Pending */}
                     <Box sx={{ p: '24px 28px', borderRight: '1px solid #f0f0f0' }}>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#bbb', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
+                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
                         {t('metrics.totalPending')}
                       </Typography>
-                      {balanceLoading
-                        ? <Skeleton width={100} height={44} />
-                        : <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: '#c0842a', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>
-                            <Counter
-                              to={Math.round((selectedBalance?.totalPending ?? 0) / 1000)}
-                              prefix="$"
-                              suffix="K"
-                              duration={1.1}
-                            />
-                          </Typography>
-                      }
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#bbb' }}>
+                      <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: '#c0842a', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>
+                        <Counter
+                          to={Math.round((selectedBalance?.totalPending ?? 0) / 1000)}
+                          prefix="$"
+                          suffix="K"
+                          duration={1.1}
+                        />
+                      </Typography>
+                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff' }}>
                         {formatCurrency(selectedBalance?.totalPending ?? 0)}
                       </Typography>
                     </Box>
 
                     {/* Phase / Status */}
                     <Box sx={{ p: '24px 28px' }}>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#bbb', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
+                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
                         {t('metrics.phase')}
                       </Typography>
                       <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: '#000', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>
                         {selectedProject.phase ?? '—'}
                       </Typography>
                       <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, px: 1, py: 0.3, border: '1px solid #e0e0e0' }}>
-                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: selectedProject.isActive ? '#4a7c59' : '#aaa' }} />
+                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: selectedProject.isActive ? '#4a7c59' : '#000000ff' }} />
                         <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#555', letterSpacing: '1px' }}>
                           {selectedProject.status?.toUpperCase() ?? 'N/A'}
                         </Typography>
                       </Box>
                     </Box>
-
                   </Box>
 
                   {/* Open button */}

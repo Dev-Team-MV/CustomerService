@@ -53,13 +53,9 @@ const Register = () => {
 
   const verifyTokenAndLoadUserData = async () => {
     try {
-      setVerifying(true)
-      console.log('🔍 Verifying setup token:', token)
-      
+      setVerifying(true)      
       const response = await api.get(`/auth/verify-setup-token/${token}`)
-      
-      console.log('✅ Token verified, user data:', response.data)
-      
+            
       if (response.data.valid && response.data.user) {
         const userData = response.data.user
         
@@ -71,12 +67,9 @@ const Register = () => {
         if (cleanPhone) {
           cleanPhone = cleanPhone.replace(/^\+/, '')
           cleanPhone = cleanPhone.replace(/[\s\-\(\)]/g, '')
-          console.log('📱 Original phone:', userData.phoneNumber)
-          console.log('📱 Cleaned phone:', cleanPhone)
         }
         
         setPhoneNumber(cleanPhone)
-        console.log('📝 User data loaded into form')
       } else {
         setError(t('invalidOrExpiredLink'))
       }
@@ -105,15 +98,11 @@ const Register = () => {
     setLoading(true)
 
     try {
-      if (isPasswordSetup) {
-        console.log('🔐 Setting up password for token:', token)
-        
+      if (isPasswordSetup) {        
         const response = await api.post(`/auth/setup-password/${token}`, {
           password
         })
-        
-        console.log('✅ Password setup successful:', response.data)
-        
+                
         const { token: authToken, user } = response.data
         
         loginWithToken(authToken, user)
@@ -630,7 +619,6 @@ const Register = () => {
                       country={'us'}
                       value={phoneNumber}
                       onChange={(value) => {
-                        console.log('📱 Phone changed to:', value)
                         setPhoneNumber(value)
                       }}
                       disabled={isPasswordSetup}

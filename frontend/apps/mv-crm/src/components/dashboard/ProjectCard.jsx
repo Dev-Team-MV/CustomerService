@@ -64,8 +64,8 @@ export default function ProjectCard({ project, index = 0, onClick, selected = fa
               {project.name}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <People sx={{ fontSize: 10, color: selected ? 'rgba(255,255,255,0.5)' : '#ccc' }} />
-              <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: selected ? 'rgba(255,255,255,0.5)' : '#aaa' }}>
+              <People sx={{ fontSize: 10, color: selected ? 'rgba(255,255,255,0.5)' : '#000000ff' }} />
+              <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: selected ? 'rgba(255,255,255,0.5)' : '#000000ff' }}>
                 {/* ← clientCount real en vez de mock */}
                 <Counter to={clientCount} duration={1.2} /> {t('metrics.clients')}
               </Typography>
