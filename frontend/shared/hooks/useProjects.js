@@ -1,8 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import projectService from '@shared/services/projectService'
-import crmService from '../../apps/mv-crm/src/services/crmService'
-import uploadService from '../../apps/lakewood-p1/src/services/uploadService'
+import uploadService from '@shared/services/uploadService'
+import crmService from '@shared/services/crmService'
 
 export function useProjects() {
   const [projects, setProjects] = useState([])

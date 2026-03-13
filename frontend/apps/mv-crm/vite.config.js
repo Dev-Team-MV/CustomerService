@@ -8,6 +8,8 @@ export default defineConfig({
     alias: {
       '@shared': path.resolve(__dirname, '../../shared'),
       '@': path.resolve(__dirname, './src'),
+      // Sobrescribir el stub de crmService con la implementación real de mv-crm
+      '@shared/services/crmService': path.resolve(__dirname, './src/services/crmService'),
     },
   },
   server: {
