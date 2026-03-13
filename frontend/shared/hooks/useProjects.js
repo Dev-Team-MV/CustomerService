@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import projectService from '@shared/services/projectService'
 import uploadService from '@shared/services/uploadService'
+import crmService from '@shared/services/crmService'
 
 export function useProjects() {
   const [projects, setProjects] = useState([])
@@ -21,14 +22,11 @@ export function useProjects() {
       .catch(() => setLoading(false))
   }, [])
 
-  // Fetch global balance (solo disponible en mv-crm)
+  // Fetch global balance
   useEffect(() => {
-    import('../../apps/mv-crm/src/services/crmService')
-      .then(module => module.default.getBalance())
+    crmService.getBalance()
       .then(d => setAllBalance(d))
-      .catch(() => {
-        // crmService no disponible en este contexto
-      })
+      .catch(() => {})
   }, [])
 
   // Filter projects by search
