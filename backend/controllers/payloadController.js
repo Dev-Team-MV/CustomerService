@@ -2,6 +2,7 @@ import Payload from '../models/Payload.js'
 import Property from '../models/Property.js'
 import { uploadFile } from '../services/storageService.js'
 import { processImageForUpload } from '../services/imageProcessingService.js'
+import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
 import crypto from 'crypto'
 import path from 'path'
 
@@ -25,8 +26,10 @@ export const getAllPayloads = async (req, res) => {
       })
       .populate('processedBy', 'firstName lastName')
       .sort({ date: -1 })
-    
-    res.json(payloads)
+
+    const data = payloads.map((p) => p.toObject())
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -47,7 +50,9 @@ export const getPayloadById = async (req, res) => {
       .populate('processedBy', 'firstName lastName')
     
     if (payload) {
-      res.json(payload)
+      const data = payload.toObject()
+      await hydrateUrlsInObject(data)
+      res.json(data)
     } else {
       res.status(404).json({ message: 'Payload not found' })
     }
@@ -95,19 +100,21 @@ export const createPayload = async (req, res) => {
           folderPath
         )
 
-        return result.publicUrl || result.signedUrl
+        return result.fileName
       })
 
-      const newUrls = await Promise.all(uploadPromises)
-      uploadedUrls = [...uploadedUrls, ...newUrls]
+      const newPaths = await Promise.all(uploadPromises)
+      uploadedUrls = [...uploadedUrls, ...newPaths]
     }
-    
+
+    const pathsToSave = uploadedUrls.map((u) => normalizePathForStorage(u)).filter(Boolean)
+
     const payload = await Payload.create({
       property,
       date: date || Date.now(),
       amount,
       support,
-      urls: uploadedUrls,
+      urls: pathsToSave,
       status: finalStatus,
       type: type || undefined,
       notes,
@@ -135,8 +142,10 @@ export const createPayload = async (req, res) => {
         ]
       })
       .populate('processedBy')
-    
-    res.status(201).json(populatedPayload)
+
+    const data = populatedPayload.toObject()
+    await hydrateUrlsInObject(data)
+    res.status(201).json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -164,15 +173,15 @@ export const updatePayload = async (req, res) => {
       
       // Procesar nuevas imágenes si se subieron
       let updatedUrls = req.body.urls !== undefined ? req.body.urls : payload.urls
-      
+
       if (req.files && req.files.length > 0) {
         const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
         const folderPath = folder || 'payloads'
-        
+
         const uploadPromises = req.files.map(async (file) => {
           const processed = await processImageForUpload(file.buffer, file.originalname, file.mimetype)
           const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${processed.extension}`
-          
+
           const result = await uploadFile(
             processed.buffer,
             fileName,
@@ -181,17 +190,19 @@ export const updatePayload = async (req, res) => {
             folderPath
           )
 
-          return result.publicUrl || result.signedUrl
+          return result.fileName
         })
 
-        const newUrls = await Promise.all(uploadPromises)
-        updatedUrls = [...updatedUrls, ...newUrls]
+        const newPaths = await Promise.all(uploadPromises)
+        updatedUrls = [...updatedUrls, ...newPaths]
       }
+
+      const pathsToSave = updatedUrls.map((u) => normalizePathForStorage(u)).filter(Boolean)
       
       payload.date = req.body.date || payload.date
       payload.amount = req.body.amount !== undefined ? req.body.amount : payload.amount
       payload.support = req.body.support || payload.support
-      payload.urls = updatedUrls
+      payload.urls = pathsToSave
       payload.status = newStatus
       if (req.body.type !== undefined) payload.type = req.body.type
       payload.notes = req.body.notes || payload.notes
@@ -316,10 +327,12 @@ export const getApprovedPayloadsThisMonth = async (req, res) => {
     // Calcular el total de pagos aprobados este mes
     const totalAmount = payloads.reduce((sum, payload) => sum + payload.amount, 0)
     
+    const payloadsData = payloads.map((p) => p.toObject())
+    await hydrateUrlsInObject(payloadsData)
     res.json({
       count: payloads.length,
       totalAmount,
-      payloads
+      payloads: payloadsData
     })
   } catch (error) {
     res.status(500).json({ message: error.message })

@@ -16,7 +16,7 @@ export default function StatsStrip({ stats = [] }) {
           }}>
             <Typography sx={{
               fontFamily: '"Courier New", monospace', fontSize: '0.58rem',
-              color: '#bbb', letterSpacing: '2px', textTransform: 'uppercase', mb: 0.5
+              color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 0.5
             }}>
               {s.label}
             </Typography>

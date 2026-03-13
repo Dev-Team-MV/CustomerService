@@ -1,5 +1,6 @@
 import Facade from '../models/Facade.js'
 import Model from '../models/Model.js'
+import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
 
 /** Normalize ref/id to string; safe when value is undefined. */
 function toIdStr(val) {
@@ -22,7 +23,9 @@ export const getAllFacades = async (req, res) => {
       .populate('model', 'model modelNumber price')
       .sort({ title: 1 })
 
-    res.json(facades)
+    const data = facades.map((f) => f.toObject())
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -34,7 +37,9 @@ export const getFacadeById = async (req, res) => {
       .populate('model', 'model modelNumber price bedrooms bathrooms sqft images description')
     
     if (facade) {
-      res.json(facade)
+      const data = facade.toObject()
+      await hydrateUrlsInObject(data)
+      res.json(data)
     } else {
       res.status(404).json({ message: 'Facade not found' })
     }
@@ -55,7 +60,9 @@ export const getFacadesByModel = async (req, res) => {
     const facades = await Facade.find({ model: modelId })
       .sort({ title: 1 })
     
-    res.json(facades)
+    const data = facades.map((f) => f.toObject())
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -90,17 +97,18 @@ export const createFacade = async (req, res) => {
           name: deck.name,
           price: deck.price,
           description: deck.description || '',
-          images: Array.isArray(deck.images) ? deck.images : [],
+          images: Array.isArray(deck.images) ? deck.images.map((u) => normalizePathForStorage(u)).filter(Boolean) : [],
           status: deck.status || 'active'
         })
       }
     }
 
+    const urlPaths = Array.isArray(url) ? url.map((u) => normalizePathForStorage(u)).filter(Boolean) : (url ? [normalizePathForStorage(url)] : [])
     const facade = await Facade.create({
       project: projId,
       model,
       title,
-      url,
+      url: urlPaths.length ? urlPaths : url,
       price,
       decks: validatedDecks
     })
@@ -108,7 +116,9 @@ export const createFacade = async (req, res) => {
     const populatedFacade = await Facade.findById(facade._id)
       .populate('model', 'model modelNumber price')
     
-    res.status(201).json(populatedFacade)
+    const data = populatedFacade.toObject()
+    await hydrateUrlsInObject(data)
+    res.status(201).json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -135,7 +145,8 @@ export const updateFacade = async (req, res) => {
     }
     
     if (req.body.url !== undefined) {
-      facade.url = req.body.url
+      const arr = Array.isArray(req.body.url) ? req.body.url : [req.body.url]
+      facade.url = arr.map((u) => normalizePathForStorage(u)).filter(Boolean)
     }
     
     if (req.body.price !== undefined) {
@@ -159,7 +170,7 @@ export const updateFacade = async (req, res) => {
           name: deck.name,
           price: deck.price,
           description: deck.description || '',
-          images: Array.isArray(deck.images) ? deck.images : [],
+          images: Array.isArray(deck.images) ? deck.images.map((u) => normalizePathForStorage(u)).filter(Boolean) : [],
           status: deck.status || 'active'
         })
       }
@@ -170,7 +181,9 @@ export const updateFacade = async (req, res) => {
     const populatedFacade = await Facade.findById(updatedFacade._id)
       .populate('model', 'model modelNumber price')
     
-    res.json(populatedFacade)
+    const data = populatedFacade.toObject()
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }

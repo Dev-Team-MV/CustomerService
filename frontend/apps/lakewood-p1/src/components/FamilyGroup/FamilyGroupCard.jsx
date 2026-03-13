@@ -25,6 +25,8 @@ import {
 } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import PropertyShareDialog from './PropertyShare'
+import PrimaryButton from '../../constants/PrimaryButton'
+import { useTranslation } from 'react-i18next'
 
 const FamilyGroupCard = ({
   group,
@@ -35,6 +37,7 @@ const FamilyGroupCard = ({
   onDeleteGroup,
   index = 0
 }) => {
+  const { t } = useTranslation('familyGroup')
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
 
   // El admin del grupo es quien lo creó (createdBy) o quien tiene rol admin en members
@@ -47,17 +50,10 @@ const FamilyGroupCard = ({
     (m) => m.user._id === currentUserId && m.role === 'admin'
   )
   const canManage = isGroupOwner || isMemberAdmin
+  const creatorName = group.createdBy?.firstName || group.createdBy?.name || '';
 
   // DEBUG — quitar después de verificar
-  console.log('🔍 canManage debug:', {
-    groupName: group.name,
-    createdById: group.createdBy._id,
-    currentUserId,
-    currentUserRaw: currentUser,
-    isGroupOwner,
-    isMemberAdmin,
-    canManage
-  })
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -81,12 +77,7 @@ const FamilyGroupCard = ({
       >
         <CardContent sx={{ flexGrow: 1, p: 3 }}>
           {/* Header */}
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="start"
-            mb={2}
-          >
+          <Box display="flex" justifyContent="space-between" alignItems="start" mb={2}>
             <Box display="flex" alignItems="center" gap={1.5}>
               <Box
                 sx={{
@@ -101,57 +92,25 @@ const FamilyGroupCard = ({
               >
                 <GroupIcon sx={{ color: 'white', fontSize: 24 }} />
               </Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 700,
-                  color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif',
-                }}
-              >
+              <Typography variant="h6">
                 {group.name}
               </Typography>
             </Box>
             {isGroupOwner && (
-              <Chip
-                label="Owner"
-                size="small"
-                sx={{
-                  bgcolor: '#333F1F',
-                  color: 'white',
-                  fontWeight: 600,
-                  height: 24,
-                }}
-              />
+              <Chip label={t('owner')} size="small" color="primary" sx={{ height: 24 }} />
             )}
           </Box>
 
           {/* Created By */}
-          <Typography
-            variant="caption"
-            sx={{
-              color: '#706f6f',
-              display: 'block',
-              mb: 2,
-              fontFamily: '"Poppins", sans-serif',
-            }}
-          >
-            Created by {group.createdBy.firstName} {group.createdBy.lastName}
+          <Typography variant="caption" sx={{ color: '#706f6f', display: 'block', mb: 2 }}>
+            {t('createdBy', { name: creatorName })}
           </Typography>
 
           <Divider sx={{ my: 2 }} />
 
           {/* Members Section */}
-          <Typography
-            variant="subtitle2"
-            sx={{
-              fontWeight: 600,
-              mb: 1.5,
-              color: '#333F1F',
-              fontFamily: '"Poppins", sans-serif',
-            }}
-          >
-            Members ({group.members.length})
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>
+            {t('members', { count: group.members.length })}
           </Typography>
 
           <List
@@ -160,16 +119,13 @@ const FamilyGroupCard = ({
               maxHeight: 200,
               overflow: 'auto',
               '&::-webkit-scrollbar': { width: 6 },
-              '&::-webkit-scrollbar-thumb': {
-                bgcolor: '#8CA551',
-                borderRadius: 3,
-              },
+              '&::-webkit-scrollbar-thumb': { bgcolor: '#8CA551', borderRadius: 3 },
             }}
           >
             {group.members.length === 0 ? (
               <Box sx={{ textAlign: 'center', py: 3, color: '#706f6f' }}>
                 <Typography variant="caption">
-                  No members yet. Add your first member!
+                  {t('noMembers')}
                 </Typography>
               </Box>
             ) : (
@@ -184,54 +140,29 @@ const FamilyGroupCard = ({
                     py: 1,
                   }}
                 >
-                  <Avatar
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      mr: 1.5,
-                      bgcolor: '#8CA551',
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                    }}
-                  >
+                  <Avatar sx={{ width: 32, height: 32, mr: 1.5, bgcolor: '#8CA551', fontSize: '0.875rem', fontWeight: 600 }}>
                     {member.user.firstName[0]}
                   </Avatar>
                   <ListItemText
                     primary={`${member.user.firstName} ${member.user.lastName}`}
                     secondary={member.user.email}
-                    primaryTypographyProps={{
-                      variant: 'body2',
-                      fontWeight: 600,
-                      fontFamily: '"Poppins", sans-serif',
-                    }}
-                    secondaryTypographyProps={{
-                      variant: 'caption',
-                      fontFamily: '"Poppins", sans-serif',
-                    }}
+                    primaryTypographyProps={{ variant: 'body2', fontWeight: 600 }}
+                    secondaryTypographyProps={{ variant: 'caption' }}
                   />
                   <Stack direction="row" spacing={0.5} alignItems="center">
                     <Chip
                       icon={member.role === 'admin' ? <AdminIcon /> : <PersonIcon />}
-                      label={member.role}
+                      label={t(member.role)}
                       size="small"
-                      sx={{
-                        height: 24,
-                        bgcolor: member.role === 'admin' ? '#333F1F' : '#e0e0e0',
-                        color: member.role === 'admin' ? 'white' : '#666',
-                        fontWeight: 600,
-                        '& .MuiChip-icon': {
-                          color: member.role === 'admin' ? 'white' : '#666',
-                        },
-                      }}
+                      color={member.role === 'admin' ? "primary" : "default"}
+                      sx={{ height: 24 }}
                     />
                     {canManage && member.user._id !== group.createdBy._id && (
                       <IconButton
                         size="small"
                         onClick={() => onRemoveMember(group._id, member.user._id)}
-                        sx={{
-                          ml: 1,
-                          '&:hover': { bgcolor: 'rgba(211, 47, 47, 0.08)' },
-                        }}
+                        sx={{ ml: 1, '&:hover': { bgcolor: 'rgba(211, 47, 47, 0.08)' } }}
+                        aria-label={t('removeMember')}
                       >
                         <DeleteIcon fontSize="small" sx={{ color: '#d32f2f' }} />
                       </IconButton>
@@ -244,87 +175,52 @@ const FamilyGroupCard = ({
         </CardContent>
 
         {/* Actions */}
-        
-        
-                {/* Actions */}
-                <CardActions sx={{ p: 2, pt: 0, bgcolor: '#fafafa' }}>
-                  {canManage ? (
-                    <Stack direction="column" spacing={1} width="100%">
-                      {/* Fila 1: Add Member + Delete */}
-                      <Stack direction="row" spacing={1} width="100%">
-                        <Button
-                          size="small"
-                          startIcon={<PersonAddIcon />}
-                          onClick={() => onAddMember(group)}
-                          fullWidth
-                          variant="contained"
-                          sx={{
-                            borderRadius: 2,
-                            bgcolor: '#8CA551',
-                            color: 'white',
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            '&:hover': { bgcolor: '#333F1F' },
-                          }}
-                        >
-                          Add Member
-                        </Button>
-                        <Button
-                          size="small"
-                          color="error"
-                          startIcon={<DeleteIcon />}
-                          onClick={() => onDeleteGroup(group._id)}
-                          fullWidth
-                          variant="outlined"
-                          sx={{
-                            borderRadius: 2,
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            borderColor: '#d32f2f',
-                            color: '#d32f2f',
-                            '&:hover': {
-                              borderColor: '#c62828',
-                              bgcolor: 'rgba(211, 47, 47, 0.04)',
-                            },
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </Stack>
-        
-                      {/* Fila 2: Share Property */}
-                      <Button
-                        size="small"
-                        startIcon={<ShareIcon />}
-                        onClick={() => setShareDialogOpen(true)}
-                        fullWidth
-                        variant="outlined"
-                        sx={{
-                          borderRadius: 2,
-                          fontWeight: 600,
-                          textTransform: 'none',
-                          borderColor: '#8CA551',
-                          color: '#333F1F',
-                          '&:hover': {
-                            borderColor: '#333F1F',
-                            bgcolor: 'rgba(140, 165, 81, 0.08)',
-                          },
-                        }}
-                      >
-                        Share a Property with this Group
-                      </Button>
-                    </Stack>
-                  ) : (
-                    <Typography
-                      variant="caption"
-                      sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', px: 1 }}
-                    >
-                      You are a member of this group
-                    </Typography>
-                  )}
-                </CardActions>
-        
-        
+        <CardActions sx={{ p: 2, pt: 0, bgcolor: '#fafafa' }}>
+          {canManage ? (
+            <Stack direction="column" spacing={1} width="100%">
+              <Stack direction="row" spacing={1} width="100%">
+                {/* Agregar Miembro: fondo verde */}
+                <PrimaryButton
+                  size="small"
+                  startIcon={<PersonAddIcon />}
+                  onClick={() => onAddMember(group)}
+                  fullWidth
+                  color="primary"
+                  variant="contained"
+                >
+                  {t('addMember')}
+                </PrimaryButton>
+                {/* Delete: fondo blanco, borde rojo, texto rojo */}
+                <PrimaryButton
+                  size="small"
+                  color="error"
+                  variant="outlined"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => onDeleteGroup(group._id)}
+                  fullWidth
+                >
+                  {t('delete')}
+                </PrimaryButton>
+              </Stack>
+              {/* Compartir: fondo blanco, borde verde, texto verde */}
+              <PrimaryButton
+                size="small"
+                variant="outlined"
+                color="secondary"
+                startIcon={<ShareIcon />}
+                onClick={() => setShareDialogOpen(true)}
+                fullWidth
+              >
+                {t('shareProperty')}
+              </PrimaryButton>
+            </Stack>
+          ) : (
+            <Typography variant="caption" sx={{ color: '#706f6f', px: 1 }}>
+              {t('memberOfGroup')}
+            </Typography>
+          )}
+        </CardActions>
+
       </Card>
 
       {/* Property Share Dialog */}
@@ -337,5 +233,6 @@ const FamilyGroupCard = ({
     </motion.div>
   )
 }
+
 
 export default FamilyGroupCard

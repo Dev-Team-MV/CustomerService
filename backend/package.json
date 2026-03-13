@@ -6,7 +6,12 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "backup": "node scripts/run-backup.js",
+    "enable-versioning": "node scripts/enable-gcs-versioning.js",
+    "migrate:urls-to-paths": "node scripts/migrate-urls-to-paths.js",
+    "migrate:urls-to-paths:pdn": "node scripts/migrate-urls-to-paths-pdn.js",
+    "fix:paths-pdn-to-dev": "node scripts/fix-paths-pdn-to-dev.js"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +25,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.3",
     "multer": "^2.0.2",
+    "node-cron": "^4.2.1",
     "sharp": "^0.33.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",

@@ -6,8 +6,8 @@ export const propertyService = {
         try {
             const response = await api.get('/lots')
             return Array.isArray(response.data) ? response.data : []
-        } catch (error) {
-            console.error('Error fetching lots:', error)
+        } catch (err) {
+            console.error('Error fetching lots:', err)
             return []
         }
     },
@@ -17,8 +17,8 @@ export const propertyService = {
         try {
             const response = await api.get('/models')
             return Array.isArray(response.data) ? response.data : []
-        } catch (error) {
-            console.error('Error fetching models:', error)
+        } catch (err) {
+            console.error('Error fetching models:', err)
             return []
         }
     },
@@ -28,19 +28,19 @@ export const propertyService = {
         try {
             const response = await api.get(`/facades/model/${modelId}`)
             return Array.isArray(response.data) ? response.data : []
-        } catch (error) {
-            console.error('Error fetching facades:', error)
+        } catch (err) {
+            console.error('Error fetching facades:', err)
             return []
         }
     },
 
-      // ✅ NUEVO: Obtener opciones de pricing de un modelo
+    // ✅ NUEVO: Obtener opciones de pricing de un modelo
     getModelPricingOptions: async (modelId) => {
         try {
             const response = await api.get(`/models/${modelId}/pricing-options`)
             return response.data
-        } catch (error) {
-            console.error('Error fetching pricing options:', error)
+        } catch (err) {
+            console.error('Error fetching pricing options:', err)
             return null
         }
     },
@@ -51,8 +51,8 @@ export const propertyService = {
             const url = modelId ? `/facades?model=${modelId}` : '/facades'
             const response = await api.get(url)
             return Array.isArray(response.data) ? response.data : []
-        } catch (error) {
-            console.error('Error fetching facades:', error)
+        } catch (err) {
+            console.error('Error fetching facades:', err)
             return []
         }
     },
@@ -62,74 +62,124 @@ export const propertyService = {
         try {
             const response = await api.get(`/lots/${id}`)
             return response.data
-        } catch (error) {
-            console.error('Error fetching lot by ID:', error)
+        } catch (err) {
+            console.error('Error fetching lot by ID:', err)
             return null
         }
     },
 
     // Get model by ID
     getModelById: async (id) => {
-        const response = await api.get(`/models/${id}`)
-        return response.data
+        try {
+            const response = await api.get(`/models/${id}`)
+            return response.data
+        } catch (err) {
+            console.error('Error fetching model by ID:', err)
+            return null
+        }
     },
 
     // Get facade by ID
     getFacadeById: async (id) => {
-        const response = await api.get(`/facades/${id}`)
-        return response.data
+        try {
+            const response = await api.get(`/facades/${id}`)
+            return response.data
+        } catch (err) {
+            console.error('Error fetching facade by ID:', err)
+            return null
+        }
     },
 
     // Get lot statistics
     getLotStats: async () => {
-        const response = await api.get('/lots/stats')
-        return response.data
+        try {
+            const response = await api.get('/lots/stats')
+            return response.data
+        } catch (err) {
+            console.error('Error fetching lot stats:', err)
+            return null
+        }
     },
 
     // Get property statistics
     getPropertyStats: async () => {
-        const response = await api.get('/properties/stats')
-        return response.data
+        try {
+            const response = await api.get('/properties/stats')
+            return response.data
+        } catch (err) {
+            console.error('Error fetching property stats:', err)
+            return null
+        }
     },
 
     // Create property (quote/reservation)
     createProperty: async (propertyData) => {
-        const response = await api.post('/properties', {
-            ...propertyData,
-            project: propertyData.projectId || propertyData.project || undefined,
-            projectId: propertyData.projectId || undefined,
-        })
-        return response.data
+        try {
+            const response = await api.post('/properties', {
+                ...propertyData,
+                project: propertyData.projectId || propertyData.project || undefined,
+                projectId: propertyData.projectId || undefined,
+            })
+            return response.data
+        } catch (err) {
+            console.error('Error creating property:', err)
+            return null
+        }
     },
 
     // Get property by ID (includes phases)
     getPropertyById: async (id) => {
-        const response = await api.get(`/properties/${id}`)
-        return response.data
+        try {
+            const response = await api.get(`/properties/${id}`)
+            return response.data
+        } catch (err) {
+            console.error('Error fetching property by ID:', err)
+            return null
+        }
     },
 
     // Update property
     updateProperty: async (id, propertyData) => {
-        const response = await api.put(`/properties/${id}`, propertyData)
-        return response.data
+        try {
+            const response = await api.put(`/properties/${id}`, propertyData)
+            return response.data
+        } catch (err) {
+            console.error('Error updating property:', err)
+            return null
+        }
     },
 
     // Delete property
     deleteProperty: async (id) => {
-        const response = await api.delete(`/properties/${id}`)
-        return response.data
+        try {
+            const response = await api.delete(`/properties/${id}`)
+            return response.data
+        } catch (err) {
+            console.error('Error deleting property:', err)
+            return null
+        }
     },
 
     // Get phases for a property
     getPhasesByProperty: async (propertyId) => {
-        const response = await api.get(`/phases/property/${propertyId}`)
-        return response.data
+        try {
+            const response = await api.get(`/phases/property/${propertyId}`)
+            return response.data
+        } catch (err) {
+            console.error('Error fetching phases by property:', err)
+            return null
+        }
     },
 
     // Get specific phase by property and phase number
     getPhaseByNumber: async (propertyId, phaseNumber) => {
-        const response = await api.get(`/phases/property/${propertyId}/phase/${phaseNumber}`)
-        return response.data
+        try {
+            const response = await api.get(`/phases/property/${propertyId}/phase/${phaseNumber}`)
+            return response.data
+        } catch (err) {
+            console.error('Error fetching phase by number:', err)
+            return null
+        }
     },
 
     // Calculate progressive discount

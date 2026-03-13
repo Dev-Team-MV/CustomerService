@@ -1,6 +1,7 @@
 import ClubHouse, { DEFAULT_INTERIOR_KEYS } from '../models/ClubHouse.js'
 import { uploadFile, deleteFile } from '../services/storageService.js'
 import { processImageForUpload } from '../services/imageProcessingService.js'
+import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
 import crypto from 'crypto'
 import path from 'path'
 
@@ -13,24 +14,23 @@ function getFilenameFromUrl (url) {
   return pathPart.includes('/') ? pathPart.split('/').pop() : pathPart
 }
 
-/** Normaliza un ítem de imagen (legacy string o { url, isPublic, name? }) a { url, isPublic, name? }. Filtra ítems sin url válido. */
+/** Normaliza un ítem de imagen (legacy string o { url, isPublic, name? }) a { url, isPublic, name? }. Guarda path en lugar de URL. */
 function normalizeImageItem (item) {
   if (item == null) return null
+  let url
+  let isPublic = true
+  let name
   if (typeof item === 'string') {
-    const url = (item || '').trim()
-    return url ? { url, isPublic: true } : null
+    url = normalizePathForStorage(item)
+  } else if (typeof item === 'object' && typeof item.url === 'string') {
+    url = normalizePathForStorage(item.url)
+    isPublic = item.isPublic !== false
+    name = typeof item.name === 'string' ? item.name.trim() || undefined : undefined
+  } else {
+    return null
   }
-  if (typeof item === 'object' && typeof item.url === 'string') {
-    const url = item.url.trim()
-    if (!url) return null
-    const name = typeof item.name === 'string' ? item.name.trim() || undefined : undefined
-    return {
-      url,
-      isPublic: item.isPublic !== false,
-      ...(name !== undefined && { name })
-    }
-  }
-  return null
+  if (!url) return null
+  return { url, isPublic, ...(name !== undefined && { name }) }
 }
 
 /** Normaliza un array de imágenes (exterior/blueprints o cada array de interior). */
@@ -111,7 +111,9 @@ export const getClubHouse = async (req, res) => {
       doc = await ClubHouse.create({})
     }
     doc = await migrateAndNormalize(doc)
-    res.json(doc)
+    const data = doc.toObject ? doc.toObject() : doc
+    await hydrateUrlsInObject(data)
+    res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -150,6 +152,7 @@ export const getClubHousePublic = async (req, res) => {
       publicPayload.recorridoVisibility = doc.recorridoVisibility
     }
 
+    await hydrateUrlsInObject(publicPayload)
     res.json(publicPayload)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -228,8 +231,7 @@ export const uploadClubHouseImages = async (req, res) => {
         makePublic,
         GCS_FOLDER
       )
-      const url = result.publicUrl || result.signedUrl
-      uploadedItems.push({ url, isPublic })
+      uploadedItems.push({ url: result.fileName, isPublic })
     }
 
     if (section === 'exterior') {
