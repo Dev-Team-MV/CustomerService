@@ -24,6 +24,8 @@ import outdoorAmenitiesRoutes from './routes/outdoorAmenitiesRoutes.js'
 import underConstructionRoutes from './routes/underConstructionRoutes.js'
 import familyGroupRoutes from './routes/familyGroupRoutes.js'
 import crmRoutes from './routes/crmRoutes.js'
+import backupRoutes from './routes/backupRoutes.js'
+import { startBackupScheduler } from './services/backupScheduler.js'
 
 const app = express()
 
@@ -51,6 +53,10 @@ app.use('/api/outdoor-amenities', outdoorAmenitiesRoutes)
 app.use('/api/under-construction', underConstructionRoutes)
 app.use('/api/family-groups', familyGroupRoutes)
 app.use('/api/crm', crmRoutes)
+app.use('/api/backup', backupRoutes)
+
+// Start automatic GCS backup scheduler (if enabled)
+startBackupScheduler()
 
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
