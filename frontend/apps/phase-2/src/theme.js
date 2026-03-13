@@ -1,43 +1,46 @@
 import { createTheme } from '@mui/material/styles'
 
+// --- Brand Colors & Gradients ---
 export const BRAND = {
-  PRIMARY: '#333F1F',
-  SECONDARY: '#8CA551',
-  ACCENT: '#E5863C',
+  PRIMARY: '#1A237E',
+  SECONDARY: '#00ACC1',
+  ACCENT: '#FFB300',
   INFO: '#1976d2',
-  WARNING: '#E5863C',
-  SUCCESS: '#4a7c59',
+  WARNING: '#FF7043',
+  SUCCESS: '#43A047',
 
   // Gradientes principales
-  GRADIENT: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
-  GRADIENT_SECONDARY: 'linear-gradient(135deg, #8CA551 0%, #a8bf6f 100%)',
-  GRADIENT_ACCENT: 'linear-gradient(135deg, #E5863C 0%, #f59c5a 100%)',
+  GRADIENT: 'linear-gradient(135deg, #1A237E 0%, #00ACC1 100%)',
+    GRADIENT_SECTION: 'linear-gradient(90deg, hsla(212, 100%, 88%, 1) 0%, hsla(205, 100%, 97%, 1) 50%, hsla(0, 0%, 96%, 1) 100%)',
+
+  GRADIENT_SECONDARY: 'linear-gradient(135deg, #00ACC1 0%, #4DD0E1 100%)',
+  GRADIENT_ACCENT: 'linear-gradient(135deg, #FFB300 0%, #FFE082 100%)',
   GRADIENT_INFO: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
 
   // Chips y badges
   CHIP_SUPERADMIN: {
-    bg: 'rgba(229,134,60,0.08)',
-    border: 'rgba(229,134,60,0.3)',
-    color: '#E5863C'
+    bg: 'rgba(255,112,67,0.08)',
+    border: 'rgba(255,112,67,0.3)',
+    color: '#FF7043'
   },
   CHIP_ADMIN: {
-    bg: 'rgba(140,165,81,0.08)',
-    border: 'rgba(140,165,81,0.3)',
-    color: '#8CA551'
+    bg: 'rgba(0,172,193,0.08)',
+    border: 'rgba(0,172,193,0.3)',
+    color: '#00ACC1'
   },
   CHIP_RESIDENT: {
-    bg: 'rgba(51,63,31,0.08)',
-    border: 'rgba(51,63,31,0.3)',
-    color: '#333F1F'
+    bg: 'rgba(26,35,126,0.08)',
+    border: 'rgba(26,35,126,0.3)',
+    color: '#1A237E'
   },
 
   // Otros estilos reutilizables
-  CARD_BG: '#fafcf9',
+  CARD_BG: '#f5f7fa',
   CARD_BORDER: '#e0e0e0',
-  AVATAR_SHADOW: '0 8px 24px rgba(51, 63, 31, 0.3)',
-  // ...agrega más según tus necesidades
+  AVATAR_SHADOW: '0 8px 24px rgba(26, 35, 126, 0.18)',
 }
-// Estilo global para marcadores/puntos en mapas
+
+// --- Global Styles for Maps ---
 export const markerSx = {
   position: 'absolute',
   transform: 'translate(-50%, -50%)',
@@ -64,7 +67,6 @@ export const markerSx = {
   }
 }
 
-// Estilo global para la Box contenedora de mapas/planos
 export const mapContainerSx = {
   mt: 2,
   width: '100%',
@@ -79,6 +81,7 @@ export const mapContainerSx = {
   borderRadius: 2
 }
 
+// --- MUI Theme ---
 const theme = createTheme({
   palette: {
     primary: { main: BRAND.PRIMARY },
@@ -89,6 +92,7 @@ const theme = createTheme({
     success: { main: BRAND.SUCCESS },
     // Gradientes y colores extendidos
     gradient: BRAND.GRADIENT,
+    gradientSection:BRAND.GRADIENT_SECTION,
     gradientSecondary: BRAND.GRADIENT_SECONDARY,
     gradientAccent: BRAND.GRADIENT_ACCENT,
     gradientInfo: BRAND.GRADIENT_INFO,
@@ -114,29 +118,29 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: '#fff',
-          borderColor: '#dbe7c9 !important',
+          borderColor: '#e0e0e0 !important',
           '& .MuiOutlinedInput-root': {
             borderRadius: 8,
             backgroundColor: '#fff',
             fontFamily: '"Poppins", sans-serif',
             '& fieldset': {
-              borderColor: '#dbe7c9',
+              borderColor: '#e0e0e0',
               borderWidth: '1.5px'
             },
             '&:hover fieldset': {
-              borderColor: '#dbe7c9 !important'
+              borderColor: '#e0e0e0 !important'
             },
             '&.Mui-focused fieldset': {
-              borderColor: '#dbe7c9',
+              borderColor: BRAND.SECONDARY,
               borderWidth: '2px'
             }
           },
           '& .MuiInputLabel-root': {
             fontFamily: '"Poppins", sans-serif',
             fontWeight: 500,
-            color: '#706f6f',
+            color: '#6c757d',
             '&.Mui-focused': {
-              color: '#333F1F',
+              color: BRAND.PRIMARY,
               fontWeight: 600
             }
           },
@@ -152,8 +156,8 @@ const theme = createTheme({
           props: { variant: 'outlined', color: 'error' },
           style: {
             backgroundColor: '#fff',
-            borderColor: '#d32f2f',
-            color: '#d32f2f',
+            borderColor: BRAND.WARNING,
+            color: BRAND.WARNING,
             '&:hover': {
               backgroundColor: '#fff',
               borderColor: '#b71c1c',
@@ -165,12 +169,12 @@ const theme = createTheme({
           props: { variant: 'outlined', color: 'primary' },
           style: {
             backgroundColor: '#fff',
-            borderColor: '#333F1F',
-            color: '#333F1F',
+            borderColor: BRAND.PRIMARY,
+            color: BRAND.PRIMARY,
             '&:hover': {
               backgroundColor: '#fff',
-              borderColor: '#8CA551',
-              color: '#8CA551'
+              borderColor: BRAND.SECONDARY,
+              color: BRAND.SECONDARY
             }
           }
         },
@@ -178,18 +182,18 @@ const theme = createTheme({
           props: { variant: 'outlined', color: 'secondary' },
           style: {
             backgroundColor: '#fff',
-            borderColor: '#8CA551',
-            color: '#8CA551',
+            borderColor: BRAND.SECONDARY,
+            color: BRAND.SECONDARY,
             '&:hover': {
               backgroundColor: '#fff',
-              borderColor: '#333F1F',
-              color: '#333F1F'
+              borderColor: BRAND.PRIMARY,
+              color: BRAND.PRIMARY
             }
           }
         }
       ]
     },
-        MuiTabs: {
+    MuiTabs: {
       styleOverrides: {
         root: {
           minHeight: 48
@@ -197,7 +201,7 @@ const theme = createTheme({
         indicator: {
           height: 3,
           borderRadius: '4px 4px 0 0',
-          backgroundColor: '#4a7c59'
+          backgroundColor: BRAND.SECONDARY
         }
       }
     },
@@ -210,10 +214,10 @@ const theme = createTheme({
           color: '#6c757d',
           minHeight: 48,
           '&.Mui-selected': {
-            color: '#4a7c59'
+            color: BRAND.SECONDARY
           },
           '&:hover': {
-            backgroundColor: 'rgba(74, 124, 89, 0.05)'
+            backgroundColor: 'rgba(0,172,193,0.05)'
           }
         }
       }
