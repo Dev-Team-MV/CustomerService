@@ -1,54 +1,58 @@
-import { useState } from 'react';
+import { useState } from 'react'
 import {
   Box, Chip, Container, Paper, Typography, Button, Tabs, Tab, Divider, Grid, TextField, IconButton, Stack
-} from '@mui/material';
+} from '@mui/material'
 import {
   Settings, AddPhotoAlternate, Delete, LocationOn, CropSquare, Add, Save, Edit, Cancel,
-} from '@mui/icons-material';
-import PageHeader from '@shared/components/PageHeader';
-import SettingsIcon from '@mui/icons-material/Settings';
-import { useTranslation } from 'react-i18next';
-import ImagePreview from '../components/ImgPreview';
-import { useProjectConfig } from '@shared/hooks/useProjects';
+} from '@mui/icons-material'
+import PageHeader from '@shared/components/PageHeader'
+import { useTranslation } from 'react-i18next'
+import ImagePreview from '@shared/components/ImgPreview'
+import { useProjectConfig } from '@shared/hooks/useProjects'
+import { useTheme } from '@mui/material/styles' // <--- IMPORTANTE
 
 const LANGS = [
   { code: 'en', label: 'English' },
   { code: 'es', label: 'Español' }
-];
+]
 
-const GalleryThumb = ({ url, onRemove }) => (
-  <Box sx={{
-    position: 'relative',
-    width: 90,
-    height: 90,
-    borderRadius: 2,
-    overflow: 'hidden',
-    border: '1.5px dashed #bfcab3',
-    bgcolor: '#f6f8f3',
-    mr: 2,
-    mb: 1,
-    display: 'inline-block'
-  }}>
-    <img src={url} alt="gallery" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-    {onRemove && (
-      <IconButton
-        size="small"
-        onClick={onRemove}
-        sx={{ position: 'absolute', top: 4, right: 4, bgcolor: 'rgba(255,255,255,0.8)' }}
-      >
-        <Delete fontSize="small" />
-      </IconButton>
-    )}
-  </Box>
-);
+const GalleryThumb = ({ url, onRemove }) => {
+  const theme = useTheme()
+  return (
+    <Box sx={{
+      position: 'relative',
+      width: 90,
+      height: 90,
+      borderRadius: 2,
+      overflow: 'hidden',
+      border: `1.5px dashed ${theme.palette.cardBorder}`,
+      bgcolor: theme.palette.cardBg,
+      mr: 2,
+      mb: 1,
+      display: 'inline-block'
+    }}>
+      <img src={url} alt="gallery" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      {onRemove && (
+        <IconButton
+          size="small"
+          onClick={onRemove}
+          sx={{ position: 'absolute', top: 4, right: 4, bgcolor: 'rgba(255,255,255,0.8)' }}
+        >
+          <Delete fontSize="small" />
+        </IconButton>
+      )}
+    </Box>
+  )
+}
 
-const ConfigurationManager = () => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [langTab, setLangTab] = useState('en');
-  const [featureInput, setFeatureInput] = useState('');
-  const [videoInput, setVideoInput] = useState('');
-  const { t } = useTranslation(['configuration', 'common']);
-  const PROJECT_ID = import.meta.env.VITE_PROJECT_ID;
+const ConfigurationManagerP2 = () => {
+  const theme = useTheme() // <--- IMPORTANTE
+  const [isEditing, setIsEditing] = useState(false)
+  const [langTab, setLangTab] = useState('en')
+  const [featureInput, setFeatureInput] = useState('')
+  const [videoInput, setVideoInput] = useState('')
+  const { t } = useTranslation(['configuration', 'common'])
+  const PROJECT_ID = import.meta.env.VITE_PROJECT_ID
 
   const {
     form,
@@ -69,49 +73,49 @@ const ConfigurationManager = () => {
     handleRemoveVideo,
     handleMainImageRemove,
     handleSave,
-  } = useProjectConfig(PROJECT_ID);
+  } = useProjectConfig(PROJECT_ID)
 
   // Feature handlers
   const handleAddFeature = () => {
     if (featureInput.trim()) {
-      handleLangChange('features', langTab, [...form.features[langTab], featureInput.trim()]);
-      setFeatureInput('');
+      handleLangChange('features', langTab, [...form.features[langTab], featureInput.trim()])
+      setFeatureInput('')
     }
-  };
+  }
   const handleFeatureKeyDown = (e) => {
     if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddFeature();
+      e.preventDefault()
+      handleAddFeature()
     }
-  };
+  }
   const handleRemoveFeature = idx => {
-    const newArr = form.features[langTab].filter((_, i) => i !== idx);
-    handleLangChange('features', langTab, newArr);
-  };
+    const newArr = form.features[langTab].filter((_, i) => i !== idx)
+    handleLangChange('features', langTab, newArr)
+  }
 
   // Video handlers
   const handleAddVideo = () => {
     if (videoInput.trim()) {
-      handleChange('videos', [...videos, videoInput.trim()]);
-      setVideoInput('');
+      handleChange('videos', [...videos, videoInput.trim()])
+      setVideoInput('')
     }
-  };
+  }
   const handleVideoKeyDown = (e) => {
     if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddVideo();
+      e.preventDefault()
+      handleAddVideo()
     }
-  };
+  }
 
   const handleCancel = () => {
-    setIsEditing(false);
-  };
+    setIsEditing(false)
+  }
 
   return (
     <Box sx={{ minHeight: '90vh', p: { xs: 2, sm: 3 } }}>
       <Container maxWidth="xl">
         <PageHeader
-          icon={SettingsIcon}
+          icon={Settings}
           title={t('configuration:managerTitle')}
           subtitle={t('configuration:managerSubtitle')}
           actionButton={
@@ -159,8 +163,19 @@ const ConfigurationManager = () => {
         <Grid container spacing={3}>
           {/* Columna izquierda: Información general y detalles */}
           <Grid item xs={12} md={7}>
-            <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 3, border: '1px solid #e0e0e0', background: '#fafcf9' }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#4a7c59', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Paper elevation={0} sx={{
+              p: 3, mb: 3, borderRadius: 3,
+              border: `1px solid ${theme.palette.cardBorder}`,
+              background: theme.palette.cardBg
+            }}>
+              <Typography variant="subtitle1" sx={{
+                fontWeight: 700,
+                color: theme.palette.secondary.main,
+                mb: 2,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}>
                 <Settings fontSize="small" /> {t('configuration:generalInfo')}
               </Typography>
               <Grid container spacing={2}>
@@ -198,8 +213,11 @@ const ConfigurationManager = () => {
                         key={idx}
                         label={f}
                         onDelete={isEditing ? () => handleRemoveFeature(idx) : undefined}
-                        sx={{ bgcolor: '#e0e8df', color: '#333F1F', fontWeight: 600 }}
-                      />
+                        sx={{
+                          bgcolor: theme.palette.chipAdmin.bg,
+                          color: theme.palette.chipAdmin.color,
+                          fontWeight: 600
+                        }}                      />
                     ))}
                   </Box>
                 </Grid>
@@ -209,8 +227,19 @@ const ConfigurationManager = () => {
               </Grid>
             </Paper>
 
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #e0e0e0', background: '#fafcf9' }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#4a7c59', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Paper elevation={0} sx={{
+              p: 3, borderRadius: 3,
+              border: `1px solid ${theme.palette.cardBorder}`,
+              background: theme.palette.cardBg
+            }}>
+              <Typography variant="subtitle1" sx={{
+                fontWeight: 700,
+                color: theme.palette.secondary.main,
+                mb: 2,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}>
                 <CropSquare fontSize="small" /> {t('configuration:propertyDetails')}
               </Typography>
               <Grid container spacing={2}>
@@ -235,12 +264,25 @@ const ConfigurationManager = () => {
 
           {/* Columna derecha: Media */}
           <Grid item xs={12} md={5}>
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #e0e0e0', background: '#fafcf9' }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#4a7c59', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Paper elevation={0} sx={{
+              p: 3, borderRadius: 3,
+              border: `1px solid ${theme.palette.cardBorder}`,
+              background: theme.palette.cardBg
+            }}>
+              <Typography variant="subtitle1" sx={{
+                fontWeight: 700,
+                color: theme.palette.secondary.main,
+                mb: 2,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}>
                 <AddPhotoAlternate fontSize="small" /> {t('configuration:mediaAssets')}
               </Typography>
               <Box mb={2}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{t('configuration:mainImage')}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  {t('configuration:mainImage')}
+                </Typography>
                 {mainImage ? (
                   <ImagePreview
                     src={mainImage}
@@ -253,16 +295,19 @@ const ConfigurationManager = () => {
                 ) : (
                   isEditing && (
                     <Box sx={{
-                      border: '1.5px dashed #bfcab3',
+                      border: `1.5px dashed ${theme.palette.cardBorder}`,
                       borderRadius: 2,
-                      bgcolor: '#f6f8f3',
+                      bgcolor: theme.palette.cardBg,
                       height: 120,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       mb: 1
                     }}>
-                      <Button component="label" variant="text" sx={{ color: '#4a7c59', fontWeight: 600 }}>
+                      <Button component="label" variant="text" sx={{
+                        color: theme.palette.secondary.main,
+                        fontWeight: 600
+                      }}>
                         <AddPhotoAlternate sx={{ mr: 1 }} /> {t('configuration:upload')}
                         <input type="file" accept="image/*" hidden onChange={handleImageUpload} />
                       </Button>
@@ -271,17 +316,30 @@ const ConfigurationManager = () => {
                 )}
               </Box>
               <Box mb={2}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{t('configuration:gallery')}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  {t('configuration:gallery')}
+                </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
                   {gallery.map((url, idx) => (
                     <GalleryThumb key={url} url={url} onRemove={isEditing ? () => handleGalleryRemove(idx) : undefined} />
                   ))}
                   {isEditing && (
                     <Box sx={{
-                      width: 90, height: 90, border: '1.5px dashed #bfcab3', borderRadius: 2, bgcolor: '#f6f8f3',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1
+                      width: 90, height: 90,
+                      border: `1.5px dashed ${theme.palette.cardBorder}`,
+                      borderRadius: 2,
+                      bgcolor: theme.palette.cardBg,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mb: 1
                     }}>
-                      <Button component="label" variant="text" sx={{ color: '#4a7c59', fontWeight: 600, minWidth: 0, p: 0 }}>
+                      <Button component="label" variant="text" sx={{
+                        color: theme.palette.secondary.main,
+                        fontWeight: 600,
+                        minWidth: 0,
+                        p: 0
+                      }}>
                         <AddPhotoAlternate />
                         <input type="file" accept="image/*" hidden onChange={handleGalleryUpload} />
                       </Button>
@@ -349,7 +407,7 @@ const ConfigurationManager = () => {
         </Grid>
       </Container>
     </Box>
-  );
-};
+  )
+}
 
-export default ConfigurationManager;
+export default ConfigurationManagerP2

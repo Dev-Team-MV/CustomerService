@@ -1,15 +1,162 @@
-import { useState } from "react";
+// import { useState } from "react";
+// import { Outlet, useNavigate, useLocation } from "react-router-dom";
+// import { Box, useMediaQuery, useTheme, Backdrop } from "@mui/material";
+// import { useAuth } from "../../context/AuthContext";
+// import { motion, AnimatePresence } from "framer-motion";
+// import NotificationsDrawer from "./NotificationsDrawer";
+// import SidebarDrawer from "./SidebarDrawer";
+// import { publicMenuItems, privateMenuItems } from "../../constants/menuItems";
+// import AppBarBrandbook from "./AppBar";
+// const drawerWidthExpanded = 280;
+
+// const Layout = ({ publicView = false }) => {
+//   const [anchorElUser, setAnchorElUser] = useState(null);
+//   const [expanded, setExpanded] = useState(false);
+//   const [notificationsOpen, setNotificationsOpen] = useState(false);
+//   const [notifications, setNotifications] = useState([
+//     {
+//       id: 1,
+//       title: "Payment received",
+//       description: "Your payment has been processed.",
+//       read: false,
+//     },
+//     {
+//       id: 2,
+//       title: "New message",
+//       description: "You have a new message from admin.",
+//       read: false,
+//     },
+//     {
+//       id: 3,
+//       title: "Document approved",
+//       description: "Your document was approved.",
+//       read: true,
+//     },
+//   ]);
+
+//   const { user, logout } = useAuth();
+//   const navigate = useNavigate();
+//   const location = useLocation();
+//   const theme = useTheme();
+//   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+//   const handleOpenUserMenu = (event) => setAnchorElUser(event.currentTarget);
+//   const handleCloseUserMenu = () => setAnchorElUser(null);
+//   const handleLogout = () => {
+//     logout();
+//     navigate("/login");
+//     handleCloseUserMenu();
+//   };
+
+//   const menuItems = publicView
+//     ? publicMenuItems
+//     : privateMenuItems.filter((item) => item.roles.includes(user?.role));
+
+//   const handleNavigate = (path) => {
+//     navigate(path);
+//     setExpanded(false);
+//   };
+
+//   return (
+//     <Box sx={{ display: "flex", position: "relative" }}>
+//       {/* ✅ APPBAR - BRANDBOOK */}
+//       <AppBarBrandbook
+//         publicView={publicView}
+//         user={user}
+//         notifications={notifications}
+//         onMenuClick={() => setExpanded(true)}
+//         onLogoClick={() => navigate(publicView ? "/" : "/dashboard")}
+//         onNotificationsClick={() => setNotificationsOpen(true)}
+//         onLoginClick={() => navigate("/login")}
+//         onProfileClick={() => {
+//           navigate("/profile");
+//           handleCloseUserMenu();
+//         }}
+//         onLogoutClick={handleLogout}
+//         anchorElUser={anchorElUser}
+//         onOpenUserMenu={handleOpenUserMenu}
+//         onCloseUserMenu={handleCloseUserMenu}
+//       />
+
+//       {/* ✅ BACKDROP - Mejorado */}
+//       <Backdrop
+//         open={expanded}
+//         onClick={() => setExpanded(false)}
+//         sx={{
+//           zIndex: 1200,
+//           backdropFilter: "blur(12px) saturate(180%)",
+//           WebkitBackdropFilter: "blur(12px) saturate(180%)",
+//           bgcolor: "rgba(51, 63, 31, 0.25)",
+//           transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+//         }}
+//       />
+
+//       {/* SIDEBAR DRAWER REUTILIZABLE */}
+//       <SidebarDrawer
+//         open={expanded}
+//         onClose={() => setExpanded(false)}
+//         menuItems={menuItems}
+//         notifications={notifications}
+//         setNotificationsOpen={setNotificationsOpen}
+//         user={user}
+//         drawerWidth={drawerWidthExpanded}
+//       />
+
+//       <NotificationsDrawer
+//         open={notificationsOpen}
+//         onClose={() => setNotificationsOpen(false)}
+//         notifications={notifications}
+//         setNotifications={setNotifications}
+//       />
+
+//       {/* ✅ MAIN CONTENT */}
+//       <Box
+//         component="main"
+//         sx={{
+//           flexGrow: 1,
+//           width: "100%",
+//           minHeight: "100vh",
+//           bgcolor: "#f7fafc",
+//           pt: "64px",
+//         }}
+//       >
+//         <AnimatePresence mode="wait">
+//           <motion.div
+//             key={location.pathname}
+//             initial={{ opacity: 0, y: 20 }}
+//             animate={{ opacity: 1, y: 0 }}
+//             exit={{ opacity: 0, y: -20 }}
+//             transition={{ duration: 0.3 }}
+//           >
+//             <Outlet />
+//           </motion.div>
+//         </AnimatePresence>
+//       </Box>
+//     </Box>
+//   );
+// };
+
+// export default Layout;
+
+
+import { useState, useMemo } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { Box, useMediaQuery, useTheme, Backdrop } from "@mui/material";
 import { useAuth } from "../../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import NotificationsDrawer from "./NotificationsDrawer";
 import SidebarDrawer from "./SidebarDrawer";
-import { publicMenuItems, privateMenuItems } from "../../constants/menuItems";
+import { publicMenuItems as defaultPublicMenuItems, privateMenuItems as defaultPrivateMenuItems } from "../../constants/menuItems";
 import AppBarBrandbook from "./AppBar";
 const drawerWidthExpanded = 280;
 
-const Layout = ({ publicView = false }) => {
+const Layout = ({
+  publicView = false,
+  menuItems: customMenuItems, // menú privado custom
+  publicMenuItems: customPublicMenuItems, // menú público custom
+  logoSrc, // logo personalizado
+  ...props
+}) => {
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [expanded, setExpanded] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -48,9 +195,16 @@ const Layout = ({ publicView = false }) => {
     handleCloseUserMenu();
   };
 
-  const menuItems = publicView
-    ? publicMenuItems
-    : privateMenuItems.filter((item) => item.roles.includes(user?.role));
+  // Selección dinámica de menuItems
+  const menuItems = useMemo(() => {
+    if (publicView) {
+      return customPublicMenuItems || customMenuItems || defaultPublicMenuItems;
+    }
+    if (customMenuItems) {
+      return customMenuItems.filter((item) => item.roles.includes(user?.role));
+    }
+    return defaultPrivateMenuItems.filter((item) => item.roles.includes(user?.role));
+  }, [customMenuItems, customPublicMenuItems, publicView, user?.role]);
 
   const handleNavigate = (path) => {
     navigate(path);
@@ -59,7 +213,7 @@ const Layout = ({ publicView = false }) => {
 
   return (
     <Box sx={{ display: "flex", position: "relative" }}>
-      {/* ✅ APPBAR - BRANDBOOK */}
+      {/* AppBar */}
       <AppBarBrandbook
         publicView={publicView}
         user={user}
@@ -76,9 +230,14 @@ const Layout = ({ publicView = false }) => {
         anchorElUser={anchorElUser}
         onOpenUserMenu={handleOpenUserMenu}
         onCloseUserMenu={handleCloseUserMenu}
+        sx={{
+          bgcolor: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText,
+        }}
+        logoSrc={logoSrc}
       />
 
-      {/* ✅ BACKDROP - Mejorado */}
+      {/* Backdrop */}
       <Backdrop
         open={expanded}
         onClick={() => setExpanded(false)}
@@ -86,12 +245,12 @@ const Layout = ({ publicView = false }) => {
           zIndex: 1200,
           backdropFilter: "blur(12px) saturate(180%)",
           WebkitBackdropFilter: "blur(12px) saturate(180%)",
-          bgcolor: "rgba(51, 63, 31, 0.25)",
+          bgcolor: theme.palette.action.disabledBackground,
           transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         }}
       />
 
-      {/* SIDEBAR DRAWER REUTILIZABLE */}
+      {/* Sidebar Drawer */}
       <SidebarDrawer
         open={expanded}
         onClose={() => setExpanded(false)}
@@ -100,23 +259,31 @@ const Layout = ({ publicView = false }) => {
         setNotificationsOpen={setNotificationsOpen}
         user={user}
         drawerWidth={drawerWidthExpanded}
+        sx={{
+          bgcolor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+        }}
       />
 
+      {/* Notifications Drawer */}
       <NotificationsDrawer
         open={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
         notifications={notifications}
         setNotifications={setNotifications}
+        sx={{
+          bgcolor: theme.palette.background.paper,
+        }}
       />
 
-      {/* ✅ MAIN CONTENT */}
+      {/* Main Content */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           width: "100%",
           minHeight: "100vh",
-          bgcolor: "#f7fafc",
+          bgcolor: theme.palette.background.default,
           pt: "64px",
         }}
       >
