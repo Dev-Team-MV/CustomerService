@@ -23,11 +23,11 @@ const amenitiesData = [
   { id: 11, name: 'Gym', x: 55, y: 80, images: [] },
   { id: 12, name: 'Lakeside', x: 27, y: 27, images: [] },
   { id: 13, name: 'Laundry', x: 68, y: 81, images: [] },
-  { id: 14, name: 'Lounge', x: 68, y: 81, images: [] },
+  { id: 14, name: 'Lounge', x: 60, y: 58, images: [] },
   { id: 15, name: 'Machines', x: 36, y: 84.5, images: [] },
   { id: 16, name: 'Managers Office', x: 63, y: 25, images: [] },
   { id: 17, name: 'Multi-Purpose Room', x: 55, y: 22.5, images: [] },
-  { id: 18, name: 'Mural', x: 60, y: 58, images: [] },
+  { id: 18, name: 'Mural', x: 62, y: 19, images: [] },
   { id: 19, name: 'Reception',  x: 64, y: 34.7, images: [] },
   { id: 20, name: 'Terrace', x: 51, y: 52, images: [] },
   // Puedes agregar más puntos aquí

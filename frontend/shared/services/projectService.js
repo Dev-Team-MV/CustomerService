@@ -48,6 +48,15 @@ const projectService = {
       throw error
     }
   },
+    delete: async (id) => {
+    try {
+      const response = await api.delete(`/projects/${id}`)
+      return response.data
+    } catch (error) {
+      console.error('Error deleting project:', error)
+      throw error
+    }
+  },
 }
 
 export default projectService

@@ -30,70 +30,59 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@shared/context/AuthContext'
-import { authService } from '@shared/services/authService'
-import userService from '@shared/services/userService'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
+import { useProfile } from '@shared/hooks/useProfile'
 
 export default function Profile() {
-  const { user, setUser } = useAuth()
   const { t: tCommon } = useTranslation('common')
   const { t } = useTranslation('profile')
+  const { setUser } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [userId, setUserId] = useState(null)
   const [showPassword, setShowPassword] = useState({
     current: false,
     new: false,
     confirm: false
   })
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  })
-
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phoneNumber: ''
   })
-
   const [passwordData, setPasswordData] = useState({
     current: '',
     new: '',
     confirm: ''
   })
 
-  // Cargar perfil del usuario al montar
-  useEffect(() => {
-    loadProfile()
-  }, [])
+  // Hook centralizado
+  const {
+    profile,
+    loading,
+    snackbar,
+    fetchProfile,
+    updateProfile,
+    changePassword,
+    handleCloseSnackbar,
+  } = useProfile()
 
-  const loadProfile = async () => {
-    try {
-      const profile = await authService.getProfile()
-      console.log('✅ Profile loaded:', profile)
-      
-      setUserId(profile._id)
+  // Cargar perfil al montar
+  useEffect(() => {
+    fetchProfile()
+  }, [fetchProfile])
+
+  // Actualizar formData cuando cambia el perfil
+  useEffect(() => {
+    if (profile) {
       setFormData({
         firstName: profile.firstName || '',
         lastName: profile.lastName || '',
         email: profile.email || '',
         phoneNumber: profile.phoneNumber || ''
       })
-      
-      // Actualizar el contexto con el perfil completo
       setUser(profile)
-    } catch (error) {
-      console.error('Error loading profile:', error)
-      setSnackbar({
-        open: true,
-        message: tCommon('status.error'),
-        severity: 'error'
-      })
     }
-  }
+  }, [profile, setUser])
 
   const handleChange = (e) => {
     setFormData({
@@ -110,90 +99,36 @@ export default function Profile() {
   }
 
   const handleSave = async () => {
-    if (!userId) {
-      setSnackbar({
-        open: true,
-        message: 'User ID not found',
-        severity: 'error'
-      })
-      return
-    }
-
-    setLoading(true)
-    try {
-      console.log('📤 Updating profile for user:', userId)
-      
-      // Actualizar información personal usando userService
-      await userService.updateProfile(userId, {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phoneNumber: formData.phoneNumber
-      })
-
-      // Cambiar contraseña si se proporcionó usando authService
-      if (passwordData.new || passwordData.confirm || passwordData.current) {
-        if (!passwordData.current || !passwordData.new || !passwordData.confirm) {
-          setSnackbar({
-            open: true,
-            message: t('passwordFillAll'),
-            severity: 'error'
-          })
-          setLoading(false)
-          return
-        }
-        if (passwordData.new !== passwordData.confirm) {
-          setSnackbar({
-            open: true,
-            message: t('passwordsNoMatch'),
-            severity: 'error'
-          })
-          setLoading(false)
-          return
-        }
-        if (passwordData.new.length < 6) {
-          setSnackbar({
-            open: true,
-            message: t('passwordMinLength'),
-            severity: 'error'
-          })
-          setLoading(false)
-          return
-        }
-
-        await authService.changePassword(passwordData.current, passwordData.new)
+    // Validaciones de contraseña
+    if (passwordData.new || passwordData.confirm || passwordData.current) {
+      if (!passwordData.current || !passwordData.new || !passwordData.confirm) {
+        handleShowSnackbar(t('passwordFillAll'), 'error')
+        return
       }
-
-      // Actualizar el contexto de usuario
-      const updatedProfile = await authService.getProfile()
-      setUser(updatedProfile)
-
-      setIsEditing(false)
-      setSnackbar({
-        open: true,
-        message: t('profileUpdated'),
-        severity: 'success'
-      })
+      if (passwordData.new !== passwordData.confirm) {
+        handleShowSnackbar(t('passwordsNoMatch'), 'error')
+        return
+      }
+      if (passwordData.new.length < 6) {
+        handleShowSnackbar(t('passwordMinLength'), 'error')
+        return
+      }
+      await changePassword(passwordData.current, passwordData.new)
       setPasswordData({ current: '', new: '', confirm: '' })
-    } catch (error) {
-      console.error('Error updating profile:', error)
-      setSnackbar({
-        open: true,
-        message: error.response?.data?.message || t('passwordChangeError'),
-        severity: 'error'
-      })
-    } finally {
-      setLoading(false)
     }
+
+    // Actualizar perfil
+    await updateProfile(formData)
+    setIsEditing(false)
   }
 
   const handleCancel = () => {
     setIsEditing(false)
     setFormData({
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      email: user?.email || '',
-      phoneNumber: user?.phoneNumber || ''
+      firstName: profile?.firstName || '',
+      lastName: profile?.lastName || '',
+      email: profile?.email || '',
+      phoneNumber: profile?.phoneNumber || ''
     })
     setPasswordData({
       current: '',
@@ -207,6 +142,14 @@ export default function Profile() {
       ...prev,
       [field]: !prev[field]
     }))
+  }
+
+  // Mostrar snackbar custom
+  const handleShowSnackbar = (message, severity = 'success') => {
+    handleCloseSnackbar()
+    setTimeout(() => {
+      handleCloseSnackbar()
+    }, 100)
   }
 
   return (
@@ -838,11 +781,11 @@ export default function Profile() {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          onClose={handleCloseSnackbar}
           severity={snackbar.severity}
           variant="filled"
           sx={{

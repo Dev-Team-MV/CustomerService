@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import axios from 'axios'
+import { useState, useEffect } from 'react'
 import {
   Box,
   Paper,
@@ -32,10 +31,10 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@shared/context/AuthContext'
-import { authService } from '../services/authService'
+import { useProfile } from '@shared/hooks/useProfile'
 
 const Profile = () => {
-  const { user, token } = useAuth()  
+  const { setUser } = useAuth()
   const { t } = useTranslation('common')
   const [isEditing, setIsEditing] = useState(false)
   const [showPassword, setShowPassword] = useState({
@@ -43,24 +42,48 @@ const Profile = () => {
     new: false,
     confirm: false
   })
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  })
 
+  // Hook centralizado
+  const {
+    profile,
+    loading,
+    snackbar,
+    fetchProfile,
+    updateProfile,
+    changePassword,
+    handleCloseSnackbar,
+  } = useProfile()
+
+  // Form states
   const [formData, setFormData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    phoneNumber: user?.phoneNumber || ''
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: ''
   })
-
   const [passwordData, setPasswordData] = useState({
     current: '',
     new: '',
     confirm: ''
   })
+
+  // Cargar perfil al montar
+  useEffect(() => {
+    fetchProfile()
+  }, [fetchProfile])
+
+  // Actualizar formData cuando cambia el perfil
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        firstName: profile.firstName || '',
+        lastName: profile.lastName || '',
+        email: profile.email || '',
+        phoneNumber: profile.phoneNumber || ''
+      })
+      setUser(profile)
+    }
+  }, [profile, setUser])
 
   const handleChange = (e) => {
     setFormData({
@@ -76,7 +99,6 @@ const Profile = () => {
     })
   }
 
-  // Cambiar contraseña llamando al backend
   const handleSave = async () => {
     // Validación de contraseña
     if (
@@ -85,65 +107,33 @@ const Profile = () => {
       passwordData.current
     ) {
       if (!passwordData.current || !passwordData.new || !passwordData.confirm) {
-        setSnackbar({
-          open: true,
-          message: t('passwordFillAll'),
-          severity: 'error'
-        })
+        handleShowSnackbar(t('passwordFillAll'), 'error')
         return
       }
       if (passwordData.new !== passwordData.confirm) {
-        setSnackbar({
-          open: true,
-          message: t('passwordsNoMatch'),
-          severity: 'error'
-        })
+        handleShowSnackbar(t('passwordsNoMatch'), 'error')
         return
       }
       if (passwordData.new.length < 6) {
-        setSnackbar({
-          open: true,
-          message: t('passwordMinLength'),
-          severity: 'error'
-        })
+        handleShowSnackbar(t('passwordMinLength'), 'error')
         return
       }
-      try {
-        await authService.changePassword(passwordData.current, passwordData.new)
-        setSnackbar({
-          open: true,
-          message: t('passwordChanged'),
-          severity: 'success'
-        })
-        setPasswordData({ current: '', new: '', confirm: '' })
-      } catch (err) {
-        setSnackbar({
-          open: true,
-          message:
-            err.response?.data?.message ||
-            t('passwordChangeError'),
-          severity: 'error'
-        })
-        return
-      }
+      await changePassword(passwordData.current, passwordData.new)
+      setPasswordData({ current: '', new: '', confirm: '' })
     }
-  
-    // Aquí iría la lógica de guardado de datos personales si aplica
+
+    // Actualizar perfil
+    await updateProfile(formData)
     setIsEditing(false)
-    setSnackbar({
-      open: true,
-      message: t('profileUpdated'),
-      severity: 'success'
-    })
   }
 
   const handleCancel = () => {
     setIsEditing(false)
     setFormData({
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      email: user?.email || '',
-      phoneNumber: user?.phoneNumber || ''
+      firstName: profile?.firstName || '',
+      lastName: profile?.lastName || '',
+      email: profile?.email || '',
+      phoneNumber: profile?.phoneNumber || ''
     })
     setPasswordData({
       current: '',
@@ -157,6 +147,14 @@ const Profile = () => {
       ...prev,
       [field]: !prev[field]
     }))
+  }
+
+  // Mostrar snackbar custom
+  const handleShowSnackbar = (message, severity = 'success') => {
+    handleCloseSnackbar()
+    setTimeout(() => {
+      handleCloseSnackbar()
+    }, 100)
   }
 
   return (
@@ -297,7 +295,7 @@ const Profile = () => {
                         border: '4px solid white'
                       }}
                     >
-                      {user?.firstName?.charAt(0).toUpperCase()}
+                      {formData.firstName?.charAt(0).toUpperCase()}
                     </Avatar>
                   </motion.div>
                   
@@ -335,7 +333,7 @@ const Profile = () => {
                     fontFamily: '"Poppins", sans-serif'
                   }}
                 >
-                  {user?.firstName} {user?.lastName}
+                  {formData.firstName} {formData.lastName}
                 </Typography>
                 
                 <Typography
@@ -346,7 +344,7 @@ const Profile = () => {
                     mb: 2
                   }}
                 >
-                  {user?.email}
+                  {formData.email}
                 </Typography>
 
                 <Chip
@@ -393,11 +391,11 @@ const Profile = () => {
                         fontSize: '0.85rem'
                       }}
                     >
-                      {user?.email}
+                      {formData.email}
                     </Typography>
                   </Box>
 
-                  {user?.phoneNumber && (
+                  {formData.phoneNumber && (
                     <Box display="flex" alignItems="center" gap={1.5}>
                       <Phone sx={{ fontSize: 18, color: '#706f6f' }} />
                       <Typography
@@ -408,7 +406,7 @@ const Profile = () => {
                           fontSize: '0.85rem'
                         }}
                       >
-                        {user.phoneNumber}
+                        {formData.phoneNumber}
                       </Typography>
                     </Box>
                   )}
@@ -508,7 +506,7 @@ const Profile = () => {
                                 }
                               }}
                             >
-                              {t('actions.save')}
+                              {loading ? t('status.loading') : t('actions.save')}
                             </Button>
                           </motion.div>
                         </>
@@ -854,11 +852,11 @@ const Profile = () => {
         <Snackbar
           open={snackbar.open}
           autoHideDuration={4000}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          onClose={handleCloseSnackbar}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         >
           <Alert
-            onClose={() => setSnackbar({ ...snackbar, open: false })}
+            onClose={handleCloseSnackbar}
             severity={snackbar.severity}
             variant="filled"
             sx={{

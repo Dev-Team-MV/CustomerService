@@ -223,7 +223,6 @@ const TimeLine = () => {
       description: form.description,
       media
     };
-    console.log('[TimeLine] Payload enviado:', payload);
 
     try {
       if (editingStep) {

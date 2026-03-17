@@ -13,6 +13,7 @@ import ChatIcon from "@mui/icons-material/Chat"
 import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
+import { useTheme } from "@mui/material/styles"
 
 const NotificationsDrawer = ({
   open,
@@ -22,6 +23,7 @@ const NotificationsDrawer = ({
   width = { xs: "100%", sm: 400 },
 }) => {
   const { t } = useTranslation('navigation')
+  const theme = useTheme()
 
   return (
   <Drawer
@@ -33,7 +35,7 @@ const NotificationsDrawer = ({
       keepMounted: true,
       BackdropProps: {
         sx: {
-          bgcolor: "rgba(51, 63, 31, 0.25)",
+          bgcolor: theme.palette.action.disabledBackground,
           backdropFilter: "blur(8px)",
         },
       },
@@ -44,13 +46,14 @@ const NotificationsDrawer = ({
         width,
         boxSizing: "border-box",
         border: "none",
+        bgcolor: theme.palette.background.paper,
       },
     }}
   >
     <Box
       sx={{
         height: "100%",
-        bgcolor: "#fafafa",
+        bgcolor: theme.palette.background.default,
         display: "flex",
         flexDirection: "column",
       }}
@@ -59,9 +62,9 @@ const NotificationsDrawer = ({
       <Box
         sx={{
           p: 3,
-          background: "linear-gradient(135deg, #333F1F 0%, #4a5d3a 100%)",
-          color: "white",
-          boxShadow: "0 4px 12px rgba(51, 63, 31, 0.2)",
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+          color: theme.palette.primary.contrastText,
+          boxShadow: theme.shadows[2],
           position: "relative",
           overflow: "hidden",
         }}
@@ -73,7 +76,8 @@ const NotificationsDrawer = ({
             right: -30,
             width: 120,
             height: 120,
-            bgcolor: "rgba(140, 165, 81, 0.15)",
+            bgcolor: theme.palette.secondary.light,
+            opacity: 0.15,
             borderRadius: "50%",
             filter: "blur(40px)",
           }}
@@ -100,7 +104,7 @@ const NotificationsDrawer = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                boxShadow: theme.shadows[1],
               }}
             >
               <NotificationsIcon sx={{ fontSize: 24 }} />
@@ -132,7 +136,7 @@ const NotificationsDrawer = ({
             onClick={onClose}
             size="small"
             sx={{
-              color: "white",
+              color: theme.palette.primary.contrastText,
               bgcolor: "rgba(255,255,255,0.15)",
               backdropFilter: "blur(10px)",
               border: "1px solid rgba(255,255,255,0.2)",
@@ -140,7 +144,7 @@ const NotificationsDrawer = ({
               "&:hover": {
                 bgcolor: "rgba(255,255,255,0.25)",
                 transform: "rotate(90deg)",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                boxShadow: theme.shadows[2],
               },
             }}
           >
@@ -167,20 +171,20 @@ const NotificationsDrawer = ({
                 width: 80,
                 height: 80,
                 borderRadius: 3,
-                bgcolor: "rgba(112, 111, 111, 0.08)",
+                bgcolor: theme.palette.action.hover,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
               <NotificationsIcon
-                sx={{ fontSize: 48, color: "#706f6f", opacity: 0.4 }}
+                sx={{ fontSize: 48, color: theme.palette.text.secondary, opacity: 0.4 }}
               />
             </Box>
             <Typography
               variant="body1"
               sx={{
-                color: "#706f6f",
+                color: theme.palette.text.secondary,
                 fontFamily: '"Poppins", sans-serif',
                 fontWeight: 500,
               }}
@@ -190,7 +194,7 @@ const NotificationsDrawer = ({
             <Typography
               variant="caption"
               sx={{
-                color: "#9e9e9e",
+                color: theme.palette.text.disabled,
                 fontFamily: '"Poppins", sans-serif',
                 textAlign: "center",
                 maxWidth: 240,
@@ -212,21 +216,21 @@ const NotificationsDrawer = ({
                   mb: 2,
                   p: 2.5,
                   borderRadius: 3,
-                  bgcolor: n.read ? "white" : "rgba(140, 165, 81, 0.06)",
+                  bgcolor: n.read ? theme.palette.background.paper : theme.palette.action.hover,
                   border: n.read
-                    ? "1px solid #e0e0e0"
-                    : "2px solid rgba(140, 165, 81, 0.2)",
+                    ? `1px solid ${theme.palette.divider}`
+                    : `2px solid ${theme.palette.secondary.light}`,
                   boxShadow: n.read
-                    ? "0 2px 8px rgba(0,0,0,0.04)"
-                    : "0 4px 12px rgba(140, 165, 81, 0.12)",
+                    ? theme.shadows[1]
+                    : theme.shadows[3],
                   cursor: "pointer",
                   transition: "all 0.3s",
                   "&:hover": {
                     boxShadow: n.read
-                      ? "0 4px 16px rgba(0,0,0,0.08)"
-                      : "0 6px 20px rgba(140, 165, 81, 0.18)",
+                      ? theme.shadows[2]
+                      : theme.shadows[4],
                     transform: "translateX(-4px)",
-                    borderColor: n.read ? "#706f6f" : "#8CA551",
+                    borderColor: n.read ? theme.palette.text.secondary : theme.palette.secondary.main,
                   },
                 }}
                 onClick={() => {
@@ -249,9 +253,9 @@ const NotificationsDrawer = ({
                       alignItems: "center",
                       justifyContent: "center",
                       bgcolor: n.read
-                        ? "rgba(112, 111, 111, 0.08)"
-                        : "rgba(140, 165, 81, 0.15)",
-                      border: `1px solid ${n.read ? "rgba(112, 111, 111, 0.2)" : "rgba(140, 165, 81, 0.3)"}`,
+                        ? theme.palette.action.hover
+                        : theme.palette.secondary.light,
+                      border: `1px solid ${n.read ? theme.palette.text.disabled : theme.palette.secondary.main}`,
                       flexShrink: 0,
                       transition: "all 0.3s",
                     }}
@@ -259,7 +263,7 @@ const NotificationsDrawer = ({
                     {n.title.includes("Payment") && (
                       <PaymentIcon
                         sx={{
-                          color: n.read ? "#706f6f" : "#333F1F",
+                          color: n.read ? theme.palette.text.secondary : theme.palette.primary.main,
                           fontSize: 22,
                         }}
                       />
@@ -267,7 +271,7 @@ const NotificationsDrawer = ({
                     {n.title.includes("message") && (
                       <ChatIcon
                         sx={{
-                          color: n.read ? "#706f6f" : "#8CA551",
+                          color: n.read ? theme.palette.text.secondary : theme.palette.secondary.main,
                           fontSize: 22,
                         }}
                       />
@@ -275,7 +279,7 @@ const NotificationsDrawer = ({
                     {n.title.includes("Document") && (
                       <CheckCircleIcon
                         sx={{
-                          color: n.read ? "#706f6f" : "#8CA551",
+                          color: n.read ? theme.palette.text.secondary : theme.palette.secondary.main,
                           fontSize: 22,
                         }}
                       />
@@ -287,7 +291,7 @@ const NotificationsDrawer = ({
                       variant="subtitle2"
                       fontWeight={n.read ? 600 : 700}
                       sx={{
-                        color: n.read ? "#706f6f" : "#333F1F",
+                        color: n.read ? theme.palette.text.secondary : theme.palette.primary.main,
                         mb: 0.5,
                         fontFamily: '"Poppins", sans-serif',
                         fontSize: "0.9rem",
@@ -299,7 +303,7 @@ const NotificationsDrawer = ({
                     <Typography
                       variant="caption"
                       sx={{
-                        color: "#9e9e9e",
+                        color: theme.palette.text.disabled,
                         display: "block",
                         mb: 1,
                         fontFamily: '"Poppins", sans-serif',
@@ -320,13 +324,13 @@ const NotificationsDrawer = ({
                           width: 4,
                           height: 4,
                           borderRadius: "50%",
-                          bgcolor: "#9e9e9e",
+                          bgcolor: theme.palette.text.disabled,
                         }}
                       />
                       <Typography
                         variant="caption"
                         sx={{
-                          color: "#9e9e9e",
+                          color: theme.palette.text.disabled,
                           fontSize: "0.7rem",
                           fontFamily: '"Poppins", sans-serif',
                         }}
@@ -342,10 +346,10 @@ const NotificationsDrawer = ({
                         width: 10,
                         height: 10,
                         borderRadius: "50%",
-                        bgcolor: "#8CA551",
+                        bgcolor: theme.palette.secondary.main,
                         flexShrink: 0,
                         mt: 0.5,
-                        boxShadow: "0 0 0 3px rgba(140, 165, 81, 0.2)",
+                        boxShadow: `0 0 0 3px ${theme.palette.secondary.light}`,
                         animation: "pulse 2s infinite",
                         "@keyframes pulse": {
                           "0%, 100%": {
@@ -372,9 +376,9 @@ const NotificationsDrawer = ({
         <Box
           sx={{
             p: 2.5,
-            borderTop: "1px solid #e0e0e0",
-            bgcolor: "white",
-            boxShadow: "0 -4px 12px rgba(0,0,0,0.04)",
+            borderTop: `1px solid ${theme.palette.divider}`,
+            bgcolor: theme.palette.background.paper,
+            boxShadow: theme.shadows[1],
           }}
         >
           <Button
@@ -388,8 +392,8 @@ const NotificationsDrawer = ({
             }}
             sx={{
               borderRadius: 3,
-              border: "2px solid #333F1F",
-              color: "#333F1F",
+              border: `2px solid ${theme.palette.primary.main}`,
+              color: theme.palette.primary.main,
               fontWeight: 600,
               py: 1.2,
               fontFamily: '"Poppins", sans-serif',
@@ -405,18 +409,18 @@ const NotificationsDrawer = ({
                 left: "-100%",
                 width: "100%",
                 height: "100%",
-                bgcolor: "#333F1F",
+                bgcolor: theme.palette.primary.main,
                 transition: "left 0.4s ease",
                 zIndex: 0,
               },
               "&:hover": {
-                borderColor: "#333F1F",
+                borderColor: theme.palette.primary.main,
                 bgcolor: "transparent",
                 "&::before": {
                   left: 0,
                 },
                 "& span": {
-                  color: "white",
+                  color: theme.palette.primary.contrastText,
                 },
               },
               "& span": {

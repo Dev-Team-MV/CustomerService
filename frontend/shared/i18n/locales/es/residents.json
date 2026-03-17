@@ -81,6 +81,9 @@
       "user": "Residente",
       "admin": "Administrador",
       "superadmin": "Super Administrador"
-    }
+    },
+        "cancel": "Cancelar",
+    "save": "Guardar",
+    "sendInvitation": "Enviar Invitación"
   }
 }
