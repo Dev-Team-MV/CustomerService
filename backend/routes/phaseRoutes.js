@@ -2,8 +2,10 @@ import express from 'express'
 import {
   getAllPhases,
   getPhasesByProperty,
+  getPhasesByApartment,
   getPhaseById,
   getPhaseByNumber,
+  getPhaseByApartmentAndNumber,
   updatePhase,
   addMediaItem,
   updateMediaItem,
@@ -65,6 +67,7 @@ router.get('/', protect, admin, getAllPhases)
  *         description: Property not found
  */
 router.get('/property/:propertyId', protect, getPhasesByProperty)
+router.get('/apartment/:apartmentId', protect, getPhasesByApartment)
 
 /**
  * @swagger
@@ -98,6 +101,7 @@ router.get('/property/:propertyId', protect, getPhasesByProperty)
  *         description: Phase not found
  */
 router.get('/property/:propertyId/phase/:phaseNumber', protect, getPhaseByNumber)
+router.get('/apartment/:apartmentId/phase/:phaseNumber', protect, getPhaseByApartmentAndNumber)
 
 /**
  * @swagger

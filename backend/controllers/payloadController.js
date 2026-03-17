@@ -1,6 +1,8 @@
 import Payload from '../models/Payload.js'
 import Property from '../models/Property.js'
+import Apartment from '../models/Apartment.js'
 import Lot from '../models/Lot.js'
+import { canUserAccessProperty, canUserAccessApartment } from '../utils/propertyVisibility.js'
 import { uploadFile } from '../services/storageService.js'
 import { processImageForUpload } from '../services/imageProcessingService.js'
 import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
@@ -9,11 +11,12 @@ import path from 'path'
 
 export const getAllPayloads = async (req, res) => {
   try {
-    const { status, property } = req.query
+    const { status, property, apartment } = req.query
     const filter = {}
     
     if (status) filter.status = status
     if (property) filter.property = property
+    if (apartment) filter.apartment = apartment
     
     const payloads = await Payload.find(filter)
       .populate({
@@ -22,6 +25,13 @@ export const getAllPayloads = async (req, res) => {
           { path: 'lot', select: 'number' },
           { path: 'model', select: 'model' },
           { path: 'facade', select: 'title' },
+          { path: 'users', select: 'firstName lastName email' }
+        ]
+      })
+      .populate({
+        path: 'apartment',
+        populate: [
+          { path: 'apartmentModel', select: 'name apartmentNumber' },
           { path: 'users', select: 'firstName lastName email' }
         ]
       })
@@ -48,6 +58,13 @@ export const getPayloadById = async (req, res) => {
           { path: 'users' }
         ]
       })
+      .populate({
+        path: 'apartment',
+        populate: [
+          { path: 'apartmentModel' },
+          { path: 'users' }
+        ]
+      })
       .populate('processedBy', 'firstName lastName')
     
     if (payload) {
@@ -64,54 +81,50 @@ export const getPayloadById = async (req, res) => {
 
 export const createPayload = async (req, res) => {
   try {
-    const { property, date, amount, support, urls, status, type, notes, folder } = req.body
+    const { property, apartment, date, amount, support, urls, status, type, notes, folder } = req.body
     
-    const propertyExists = await Property.findById(property)
-    if (!propertyExists) {
-      return res.status(404).json({ message: 'Property not found' })
+    if ((property && apartment) || (!property && !apartment)) {
+      return res.status(400).json({ message: 'Exactly one of property or apartment is required' })
     }
 
-    // Verificar si el usuario es admin o superadmin
+    let unitDoc = null
+    if (property) {
+      unitDoc = await Property.findById(property)
+      if (!unitDoc) return res.status(404).json({ message: 'Property not found' })
+      const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
+      if (!isAdmin && !(await canUserAccessProperty(req.user._id, property))) {
+        return res.status(403).json({ message: 'You do not have access to this property' })
+      }
+    } else {
+      unitDoc = await Apartment.findById(apartment)
+      if (!unitDoc) return res.status(404).json({ message: 'Apartment not found' })
+      const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
+      if (!isAdmin && !(await canUserAccessApartment(req.user._id, apartment))) {
+        return res.status(403).json({ message: 'You do not have access to this apartment' })
+      }
+    }
+
     const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
-    
-    // Solo los administradores pueden crear payloads con status 'signed'
-    // Los usuarios normales siempre crearán con status 'pending'
     let finalStatus = status || 'pending'
-    if (!isAdmin && finalStatus === 'signed') {
-      finalStatus = 'pending'
-    }
+    if (!isAdmin && finalStatus === 'signed') finalStatus = 'pending'
 
-    // Procesar imágenes si se subieron
     let uploadedUrls = urls || []
-    
-    // Si hay archivos subidos (multipart/form-data)
     if (req.files && req.files.length > 0) {
       const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
-      const folderPath = folder || 'payloads' // Carpeta por defecto: 'payloads'
-      
+      const folderPath = folder || 'payloads'
       const uploadPromises = req.files.map(async (file) => {
         const processed = await processImageForUpload(file.buffer, file.originalname, file.mimetype)
         const fileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${processed.extension}`
-        
-        const result = await uploadFile(
-          processed.buffer,
-          fileName,
-          processed.mimeType,
-          makePublic,
-          folderPath
-        )
-
+        const result = await uploadFile(processed.buffer, fileName, processed.mimeType, makePublic, folderPath)
         return result.fileName
       })
-
       const newPaths = await Promise.all(uploadPromises)
       uploadedUrls = [...uploadedUrls, ...newPaths]
     }
 
     const pathsToSave = uploadedUrls.map((u) => normalizePathForStorage(u)).filter(Boolean)
 
-    const payload = await Payload.create({
-      property,
+    const payloadData = {
       date: date || Date.now(),
       amount,
       support,
@@ -120,19 +133,21 @@ export const createPayload = async (req, res) => {
       type: type || undefined,
       notes,
       processedBy: req.user._id
-    })
+    }
+    if (property) payloadData.property = property
+    else payloadData.apartment = apartment
+
+    const payload = await Payload.create(payloadData)
     
     if (finalStatus === 'signed') {
-      propertyExists.pending = Math.max(0, propertyExists.pending - amount)
-      
-      if (propertyExists.pending === 0) {
-        propertyExists.status = 'sold'
-        if (propertyExists.lot) {
-          await Lot.findByIdAndUpdate(propertyExists.lot, { status: 'sold' })
+      unitDoc.pending = Math.max(0, unitDoc.pending - amount)
+      if (unitDoc.pending === 0) {
+        unitDoc.status = 'sold'
+        if (unitDoc.lot) {
+          await Lot.findByIdAndUpdate(unitDoc.lot, { status: 'sold' })
         }
       }
-      
-      await propertyExists.save()
+      await unitDoc.save()
     }
     
     const populatedPayload = await Payload.findById(payload._id)
@@ -142,6 +157,13 @@ export const createPayload = async (req, res) => {
           { path: 'lot' },
           { path: 'model' },
           { path: 'facade' },
+          { path: 'users' }
+        ]
+      })
+      .populate({
+        path: 'apartment',
+        populate: [
+          { path: 'apartmentModel' },
           { path: 'users' }
         ]
       })
@@ -215,24 +237,26 @@ export const updatePayload = async (req, res) => {
       const updatedPayload = await payload.save()
       
       if (oldStatus !== updatedPayload.status || oldAmount !== updatedPayload.amount) {
-        const property = await Property.findById(payload.property)
+        const unitId = payload.property || payload.apartment
+        const unit = payload.property
+          ? await Property.findById(unitId)
+          : await Apartment.findById(unitId)
         
-        if (oldStatus === 'signed') {
-          property.pending += oldAmount
-        }
-        
-        if (updatedPayload.status === 'signed') {
-          property.pending = Math.max(0, property.pending - updatedPayload.amount)
-          
-          if (property.pending === 0) {
-            property.status = 'sold'
-            if (property.lot) {
-              await Lot.findByIdAndUpdate(property.lot, { status: 'sold' })
+        if (unit) {
+          if (oldStatus === 'signed') {
+            unit.pending += oldAmount
+          }
+          if (updatedPayload.status === 'signed') {
+            unit.pending = Math.max(0, unit.pending - updatedPayload.amount)
+            if (unit.pending === 0) {
+              unit.status = 'sold'
+              if (unit.lot) {
+                await Lot.findByIdAndUpdate(unit.lot, { status: 'sold' })
+              }
             }
           }
+          await unit.save()
         }
-        
-        await property.save()
       }
       
       const populatedPayload = await Payload.findById(updatedPayload._id)
@@ -241,6 +265,13 @@ export const updatePayload = async (req, res) => {
           populate: [
             { path: 'lot' },
             { path: 'model' },
+            { path: 'users' }
+          ]
+        })
+        .populate({
+          path: 'apartment',
+          populate: [
+            { path: 'apartmentModel' },
             { path: 'users' }
           ]
         })
@@ -261,10 +292,13 @@ export const deletePayload = async (req, res) => {
     
     if (payload) {
       if (payload.status === 'signed') {
-        const property = await Property.findById(payload.property)
-        if (property) {
-          property.pending += payload.amount
-          await property.save()
+        const unitId = payload.property || payload.apartment
+        const unit = payload.property
+          ? await Property.findById(unitId)
+          : await Apartment.findById(unitId)
+        if (unit) {
+          unit.pending += payload.amount
+          await unit.save()
         }
       }
       
@@ -325,6 +359,13 @@ export const getApprovedPayloadsThisMonth = async (req, res) => {
           { path: 'lot', select: 'number' },
           { path: 'model', select: 'model modelNumber price' },
           { path: 'facade', select: 'title url price' },
+          { path: 'users', select: 'firstName lastName email phoneNumber' }
+        ]
+      })
+      .populate({
+        path: 'apartment',
+        populate: [
+          { path: 'apartmentModel', select: 'name apartmentNumber' },
           { path: 'users', select: 'firstName lastName email phoneNumber' }
         ]
       })

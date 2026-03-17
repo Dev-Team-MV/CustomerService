@@ -10,6 +10,9 @@ import authRoutes from './routes/authRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import projectRoutes from './routes/projectRoutes.js'
 import lotRoutes from './routes/lotRoutes.js'
+import buildingRoutes from './routes/buildingRoutes.js'
+import apartmentModelRoutes from './routes/apartmentModelRoutes.js'
+import apartmentRoutes from './routes/apartmentRoutes.js'
 import modelRoutes from './routes/modelRoutes.js'
 import facadeRoutes from './routes/facadeRoutes.js'
 import propertyRoutes from './routes/propertyRoutes.js'
@@ -39,6 +42,9 @@ app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/projects', projectRoutes)
 app.use('/api/lots', lotRoutes)
+app.use('/api/buildings', buildingRoutes)
+app.use('/api/apartment-models', apartmentModelRoutes)
+app.use('/api/apartments', apartmentRoutes)
 app.use('/api/models', modelRoutes)
 app.use('/api/facades', facadeRoutes)
 app.use('/api/properties', propertyRoutes)

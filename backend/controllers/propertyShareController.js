@@ -1,9 +1,14 @@
 import Property from '../models/Property.js'
+import Apartment from '../models/Apartment.js'
 import PropertyShare from '../models/PropertyShare.js'
 import FamilyGroup from '../models/FamilyGroup.js'
 
 function isPropertyOwner(property, userId) {
-  return property.users?.some(id => id.toString() === userId.toString())
+  return property?.users?.some(id => id.toString() === userId.toString())
+}
+
+function isApartmentOwner(apartment, userId) {
+  return apartment?.users?.some(id => id.toString() === userId.toString())
 }
 
 /** Get all user IDs that are members of the group (createdBy + members) */
@@ -198,6 +203,152 @@ export const getPropertyShares = async (req, res) => {
       }
     }
     const shares = await PropertyShare.find({ property: propertyId })
+      .populate('sharedWith', 'firstName lastName email')
+      .populate('sharedBy', 'firstName lastName email')
+      .populate('familyGroup', 'name')
+    res.json(shares)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+// Apartment share (same logic, different model)
+export const shareApartment = async (req, res) => {
+  try {
+    const { id: apartmentId } = req.params
+    const { sharedWithUserId, familyGroupId } = req.body
+    const shareWithUser = !!sharedWithUserId
+    const shareWithGroup = !!familyGroupId
+    if (!shareWithUser && !shareWithGroup) {
+      return res.status(400).json({ message: 'sharedWithUserId or familyGroupId is required' })
+    }
+    if (shareWithGroup) {
+      const apartment = await Apartment.findById(apartmentId)
+      if (!apartment) return res.status(404).json({ message: 'Apartment not found' })
+      const group = await FamilyGroup.findById(familyGroupId).populate('members.user')
+      if (!group) return res.status(404).json({ message: 'Family group not found' })
+      const isAdmin = req.user.role === 'superadmin'
+      const isOwner = isApartmentOwner(apartment, req.user._id)
+      const isGroupAdmin = group.createdBy?.toString() === req.user._id.toString() ||
+        group.members?.some(m => m.user && m.user.toString() === req.user._id.toString() && m.role === 'admin')
+      if (!isAdmin && !isOwner && !isGroupAdmin) {
+        return res.status(403).json({ message: 'Only apartment owners or group admins can share this apartment' })
+      }
+      const memberIds = getFamilyGroupMemberIds(group)
+      const ownerIds = new Set((apartment.users || []).map(id => id.toString()))
+      const toShare = memberIds.filter(id => !ownerIds.has(id))
+      const existing = await PropertyShare.find({
+        apartment: apartmentId,
+        sharedWith: { $in: toShare },
+        familyGroup: familyGroupId
+      }).distinct('sharedWith')
+      const existingSet = new Set(existing.map(id => id.toString()))
+      const toCreate = toShare.filter(id => !existingSet.has(id))
+      const created = []
+      for (const userId of toCreate) {
+        const share = await PropertyShare.create({
+          apartment: apartmentId,
+          sharedWith: userId,
+          sharedBy: req.user._id,
+          familyGroup: familyGroupId
+        })
+        created.push(share)
+      }
+      await PropertyShare.populate(created, [
+        { path: 'sharedWith', select: 'firstName lastName email' },
+        { path: 'sharedBy', select: 'firstName lastName email' },
+        { path: 'familyGroup', select: 'name' }
+      ])
+      return res.status(201).json({
+        message: toCreate.length ? `Shared with ${toCreate.length} group member(s)` : 'All group members already have access or are owners',
+        count: created.length,
+        shares: created
+      })
+    }
+    if (!sharedWithUserId) return res.status(400).json({ message: 'sharedWithUserId is required' })
+    const apartment = await Apartment.findById(apartmentId)
+    if (!apartment) return res.status(404).json({ message: 'Apartment not found' })
+    const isAdmin = req.user.role === 'superadmin'
+    const isOwner = isApartmentOwner(apartment, req.user._id)
+    let canShare = isAdmin || isOwner
+    if (!canShare && familyGroupId) {
+      const group = await FamilyGroup.findById(familyGroupId)
+      canShare = group && (group.createdBy?.toString() === req.user._id.toString() || group.members?.some(m => m.user?.toString() === req.user._id.toString() && m.role === 'admin'))
+    }
+    if (!canShare) return res.status(403).json({ message: 'Only apartment owners or group admins can share this apartment' })
+    const existing = await PropertyShare.findOne({ apartment: apartmentId, sharedWith: sharedWithUserId })
+    if (existing) return res.status(400).json({ message: 'Apartment is already shared with this user' })
+    const share = await PropertyShare.create({
+      apartment: apartmentId,
+      sharedWith: sharedWithUserId,
+      sharedBy: req.user._id,
+      familyGroup: familyGroupId || undefined
+    })
+    await share.populate('sharedWith', 'firstName lastName email')
+    await share.populate('sharedBy', 'firstName lastName email')
+    if (share.familyGroup) await share.populate('familyGroup', 'name')
+    res.status(201).json(share)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const revokeApartmentShare = async (req, res) => {
+  try {
+    const { id: apartmentId, userId: sharedWithUserId } = req.params
+    const apartment = await Apartment.findById(apartmentId)
+    if (!apartment) return res.status(404).json({ message: 'Apartment not found' })
+    const isOwner = isApartmentOwner(apartment, req.user._id)
+    const isAdmin = req.user.role === 'superadmin'
+    const share = await PropertyShare.findOne({ apartment: apartmentId, sharedWith: sharedWithUserId })
+    if (!share) return res.status(404).json({ message: 'Share not found' })
+    let canRevoke = isAdmin || isOwner || share.sharedBy.toString() === req.user._id.toString()
+    if (!canRevoke && share.familyGroup) {
+      const group = await FamilyGroup.findById(share.familyGroup)
+      canRevoke = group && (group.createdBy?.toString() === req.user._id.toString() || group.members?.some(m => m.user?.toString() === req.user._id.toString() && m.role === 'admin'))
+    }
+    if (!canRevoke) return res.status(403).json({ message: 'Not allowed to revoke this share' })
+    await share.deleteOne()
+    res.json({ message: 'Share revoked successfully' })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const revokeApartmentShareByGroup = async (req, res) => {
+  try {
+    const { id: apartmentId, familyGroupId } = req.params
+    const apartment = await Apartment.findById(apartmentId)
+    if (!apartment) return res.status(404).json({ message: 'Apartment not found' })
+    const group = await FamilyGroup.findById(familyGroupId)
+    if (!group) return res.status(404).json({ message: 'Family group not found' })
+    const isOwner = isApartmentOwner(apartment, req.user._id)
+    const isAdmin = req.user.role === 'superadmin'
+    const isGroupAdmin = group.createdBy?.toString() === req.user._id.toString() ||
+      group.members?.some(m => m.user && m.user.toString() === req.user._id.toString() && m.role === 'admin')
+    if (!isAdmin && !isOwner && !isGroupAdmin) return res.status(403).json({ message: 'Only apartment owners or group admins can revoke group shares' })
+    const result = await PropertyShare.deleteMany({ apartment: apartmentId, familyGroup: familyGroupId })
+    res.json({ message: `Revoked ${result.deletedCount} share(s) for this group`, deletedCount: result.deletedCount })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const getApartmentShares = async (req, res) => {
+  try {
+    const { id: apartmentId } = req.params
+    const apartment = await Apartment.findById(apartmentId)
+    if (!apartment) return res.status(404).json({ message: 'Apartment not found' })
+    const isOwner = isApartmentOwner(apartment, req.user._id)
+    const isAdmin = req.user.role === 'superadmin'
+    if (!isOwner && !isAdmin) {
+      const share = await PropertyShare.findOne({ apartment: apartmentId, sharedWith: req.user._id })
+      if (!share) return res.status(403).json({ message: 'Not allowed to list shares for this apartment' })
+      const group = share.familyGroup ? await FamilyGroup.findById(share.familyGroup) : null
+      const isGroupAdmin = group && (group.createdBy?.toString() === req.user._id.toString() || group.members?.some(m => m.user?.toString() === req.user._id.toString() && m.role === 'admin'))
+      if (!isGroupAdmin) return res.status(403).json({ message: 'Only apartment owners or group admins can list shares' })
+    }
+    const shares = await PropertyShare.find({ apartment: apartmentId })
       .populate('sharedWith', 'firstName lastName email')
       .populate('sharedBy', 'firstName lastName email')
       .populate('familyGroup', 'name')
