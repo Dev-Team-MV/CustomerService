@@ -1,5 +1,6 @@
 import Payload from '../models/Payload.js'
 import Property from '../models/Property.js'
+import Lot from '../models/Lot.js'
 import { uploadFile } from '../services/storageService.js'
 import { processImageForUpload } from '../services/imageProcessingService.js'
 import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
@@ -126,6 +127,9 @@ export const createPayload = async (req, res) => {
       
       if (propertyExists.pending === 0) {
         propertyExists.status = 'sold'
+        if (propertyExists.lot) {
+          await Lot.findByIdAndUpdate(propertyExists.lot, { status: 'sold' })
+        }
       }
       
       await propertyExists.save()
@@ -222,6 +226,9 @@ export const updatePayload = async (req, res) => {
           
           if (property.pending === 0) {
             property.status = 'sold'
+            if (property.lot) {
+              await Lot.findByIdAndUpdate(property.lot, { status: 'sold' })
+            }
           }
         }
         
