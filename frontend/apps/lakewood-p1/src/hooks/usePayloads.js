@@ -37,7 +37,8 @@ export const usePayloads = () => {
 
   const {
     data: properties,
-    loading: loadingProperties
+    loading: loadingProperties,
+    refetch: refetchProperties
   } = useFetch(useCallback(() => api.get('/properties').then(r => r.data), []))
 
   const {
@@ -60,10 +61,9 @@ export const usePayloads = () => {
   const [formData,        setFormData]        = useState(EMPTY_FORM)
 
   // ── Refetch all ───────────────────────────────────────────
-  const refetch = useCallback(() => {
-    refetchPayloads()
-    refetchStats()
-  }, [refetchPayloads, refetchStats])
+  const refetch = useCallback(async () => {
+    await Promise.all([refetchPayloads(), refetchStats(), refetchProperties()])
+  }, [refetchPayloads, refetchStats, refetchProperties])
 
   // ── Dialog handlers ───────────────────────────────────────
   const handleOpenDialog = useCallback((payload = null) => {
@@ -98,7 +98,7 @@ export const usePayloads = () => {
         await api.post('/payloads', formData)
       }
       handleCloseDialog()
-      refetch()
+      await refetch()
     } catch (error) {
       console.error('Error saving payload:', error)
     }
@@ -111,7 +111,7 @@ export const usePayloads = () => {
     if (!window.confirm(t('payloads:approve'))) return
     try {
       await api.put(`/payloads/${payload._id}`, { status: 'signed' })
-      refetch()
+      await refetch()
     } catch (err) {
       console.error('Error approving payload:', err)
     }
@@ -124,7 +124,7 @@ export const usePayloads = () => {
     if (!window.confirm(t('payloads:reject'))) return
     try {
       await api.put(`/payloads/${payload._id}`, { status: 'rejected' })
-      refetch()
+      await refetch()
     } catch (err) {
       console.error('Error rejecting payload:', err)
     }
