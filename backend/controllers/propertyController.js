@@ -108,16 +108,16 @@ function getPropertyBlueprints(property) {
 export const getAllProperties = async (req, res) => {
   try {
     const { status, user, projectId } = req.query
-    const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
+    const isSuperadmin = req.user.role === 'superadmin'
     const filter = {}
 
     if (projectId) filter.project = projectId
     if (status) filter.status = status
 
-    if (user && isAdmin) {
+    if (user && isSuperadmin) {
       filter.users = user
-    } else if (!isAdmin) {
-      // Non-admin: only properties they own or that are shared with them (ignore user query)
+    } else if (!isSuperadmin) {
+      // For admin and normal users: only properties they own or that are shared with them.
       const visibleIds = await getVisiblePropertyIdsForUser(req.user._id)
       filter._id = { $in: visibleIds }
     }
@@ -170,8 +170,8 @@ export const getPropertyById = async (req, res) => {
       return res.status(404).json({ message: 'Property not found' })
     }
 
-    const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
-    const canAccess = isAdmin || (await canUserAccessProperty(req.user._id, property._id))
+    const isSuperadmin = req.user.role === 'superadmin'
+    const canAccess = isSuperadmin || (await canUserAccessProperty(req.user._id, property._id))
     if (!canAccess) {
       return res.status(403).json({ message: 'You do not have access to this property' })
     }
