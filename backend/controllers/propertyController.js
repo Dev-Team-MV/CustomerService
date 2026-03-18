@@ -119,7 +119,10 @@ export const getAllProperties = async (req, res) => {
     filter._id = { $in: visibleIds }
 
     // Optional extra filter by owner user id; still constrained by visibility.
-    if (user) filter.users = user
+    // Swagger's UI sometimes sends the literal placeholder "user" => ignore invalid ObjectId.
+    if (user && mongoose.Types.ObjectId.isValid(user)) {
+      filter.users = user
+    }
 
     const properties = await Property.find(filter)
       .populate('project', 'name slug')
