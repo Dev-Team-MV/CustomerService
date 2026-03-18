@@ -20,7 +20,6 @@ function sameId(a, b) {
 export const getAllApartments = async (req, res) => {
   try {
     const { status, user, projectId, buildingId, apartmentModelId } = req.query
-    const isSuperadmin = req.user.role === 'superadmin'
     const filter = {}
 
     if (apartmentModelId) filter.apartmentModel = apartmentModelId
@@ -36,13 +35,13 @@ export const getAllApartments = async (req, res) => {
     }
     if (status) filter.status = status
 
-    if (user && isSuperadmin) {
-      filter.users = user
-    } else if (!isSuperadmin) {
-      // For admin and normal users: only apartments they own or that are shared with them.
-      const visibleIds = await getVisibleApartmentIdsForUser(req.user._id)
-      filter._id = { $in: visibleIds }
-    }
+    // Visible apartments are only those where the requester is an owner
+    // (Apartment.users) or where there's an explicit PropertyShare.
+    const visibleIds = await getVisibleApartmentIdsForUser(req.user._id)
+    filter._id = { $in: visibleIds }
+
+    // Optional extra filter by owner user id; still constrained by visibility.
+    if (user) filter.users = user
 
     const apartments = await Apartment.find(filter)
       .populate('apartmentModel', 'name modelNumber floorPlan sqft bedrooms bathrooms')
@@ -90,8 +89,7 @@ export const getApartmentById = async (req, res) => {
       return res.status(404).json({ message: 'Apartment not found' })
     }
 
-    const isSuperadmin = req.user.role === 'superadmin'
-    const canAccess = isSuperadmin || (await canUserAccessApartment(req.user._id, apartment._id))
+    const canAccess = await canUserAccessApartment(req.user._id, apartment._id)
     if (!canAccess) {
       return res.status(403).json({ message: 'You do not have access to this apartment' })
     }
