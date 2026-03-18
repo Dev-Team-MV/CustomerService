@@ -37,7 +37,8 @@ export const usePayloads = () => {
 
   const {
     data: properties,
-    loading: loadingProperties
+    loading: loadingProperties,
+    refetch: refetchProperties
   } = useFetch(useCallback(() => api.get('/properties').then(r => r.data), []))
 
   const {
@@ -63,7 +64,8 @@ export const usePayloads = () => {
   const refetch = useCallback(() => {
     refetchPayloads()
     refetchStats()
-  }, [refetchPayloads, refetchStats])
+    refetchProperties()
+  }, [refetchPayloads, refetchStats, refetchProperties])
 
   // ── Dialog handlers ───────────────────────────────────────
   const handleOpenDialog = useCallback((payload = null) => {
