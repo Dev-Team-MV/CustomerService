@@ -205,7 +205,7 @@ const Properties = () => {
         {/* MODALS */}
         <PropertyDetailsModal
           open={details.open}
-          onClose={details.closeModal}
+          onClose={() => { details.closeModal(); refetch() }}
           property={details.data}
           isAdmin={isAdmin}
         />
