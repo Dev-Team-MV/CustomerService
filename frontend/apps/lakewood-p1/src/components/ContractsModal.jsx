@@ -8,8 +8,8 @@ import {
   CloudUpload, Send, AttachFile, Download
 } from '@mui/icons-material'
 
-import ModalWrapper from '../constants/ModalWrapper'
-import PrimaryButton from '../constants/PrimaryButton'
+import ModalWrapper from '@shared/constants/ModalWrapper'
+import PrimaryButton from '@shared/constants/PrimaryButton'
 import { useContracts } from '../hooks/useContracts'
 
 const ContractsModal = ({ open, onClose, property, onContractUpdated }) => {

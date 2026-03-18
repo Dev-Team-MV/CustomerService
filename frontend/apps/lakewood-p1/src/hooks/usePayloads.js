@@ -108,7 +108,7 @@ export const usePayloads = () => {
   const handleApprove = useCallback(async (payload, e) => {
     e.stopPropagation()
     if (!payload) return
-    if (!window.confirm(t('payloads:confirmApprove'))) return
+    if (!window.confirm(t('payloads:approve'))) return
     try {
       await api.put(`/payloads/${payload._id}`, { status: 'signed' })
       refetch()
@@ -121,7 +121,7 @@ export const usePayloads = () => {
   const handleReject = useCallback(async (payload, e) => {
     e.stopPropagation()
     if (!payload) return
-    if (!window.confirm(t('payloads:confirmReject'))) return
+    if (!window.confirm(t('payloads:reject'))) return
     try {
       await api.put(`/payloads/${payload._id}`, { status: 'rejected' })
       refetch()

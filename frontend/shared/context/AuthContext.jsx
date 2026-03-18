@@ -25,6 +25,13 @@ export const AuthProvider = ({ children }) => {
     setLoading(false)
   }, [])
 
+  // Sincroniza user con localStorage en cada cambio
+useEffect(() => {
+  if (user) {
+    localStorage.setItem('user', JSON.stringify(user))
+  }
+}, [user])
+
   // ✅ Login actualizado para manejar email o teléfono
   const login = async (emailOrPhone, password) => {
     try {
@@ -37,6 +44,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', data.token)
       localStorage.setItem('user', JSON.stringify(data.user))
       
+          setUser(JSON.parse(localStorage.getItem('user')))
+
       return { success: true }
     } catch (error) {
       console.error('❌ Login error:', error.response?.data)

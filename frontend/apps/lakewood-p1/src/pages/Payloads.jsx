@@ -8,8 +8,8 @@ import {
 
 import PageHeader    from '@shared/components/PageHeader'
 import StatsCards    from '../components/statscard'
-import DataTable     from '../components/table/DataTable'
-import EmptyState    from '../components/table/EmptyState'
+import DataTable from '@shared/components/table/DataTable';
+import EmptyState from '@shared/components/table/EmptyState';
 import PayloadDialog from '../components/payloads/createPayload'
 
 import { usePayloads }       from '../hooks/usePayloads'

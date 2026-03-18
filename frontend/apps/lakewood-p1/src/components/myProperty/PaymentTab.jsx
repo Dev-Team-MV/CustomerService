@@ -12,7 +12,8 @@ import {
 } from '@mui/icons-material'
 import { motion }           from 'framer-motion'
 
-import DataTable         from '../table/DataTable'
+import DataTable from '@shared/components/table/DataTable';
+import EmptyState from '@shared/components/table/EmptyState';
 import UserCreatePayload from '../payloads/UserCreatePayload'
 import PrimaryButton     from '../../constants/PrimaryButton'
 

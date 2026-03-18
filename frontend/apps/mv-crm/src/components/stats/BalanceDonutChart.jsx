@@ -19,13 +19,13 @@ export default function BalanceDonutChart({ balance, projectName }) {
 
   return (
     <Box>
-      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#aaa', letterSpacing: '2px', textTransform: 'uppercase', mb: 3 }}>
+      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 3 }}>
         {t('mv.modal.donut.title')}
       </Typography>
 
       {isEmpty ? (
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, border: '1px dashed #e0e0e0' }}>
-          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#ccc', letterSpacing: '2px' }}>
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000000ff', letterSpacing: '2px' }}>
             {t('mv.modal.donut.noData')}
           </Typography>
         </Box>
@@ -48,7 +48,7 @@ export default function BalanceDonutChart({ balance, projectName }) {
               <Box key={d.id} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
                 <Box sx={{ width: 3, height: 40, bgcolor: d.color, flexShrink: 0, mt: 0.2 }} />
                 <Box>
-                  <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#aaa', letterSpacing: '2px', textTransform: 'uppercase', mb: 0.3 }}>
+                  <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 0.3 }}>
                     {d.label}
                   </Typography>
                   <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 300, fontSize: '1.1rem', color: d.color, letterSpacing: '-0.02em' }}>

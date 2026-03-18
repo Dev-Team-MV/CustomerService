@@ -4,11 +4,15 @@ import App from './App'
 import '@shared/i18n'
 import './index.css'
 import { AuthProvider } from '../../../shared/context/AuthContext.jsx'
+import { ThemeProvider } from '@mui/material/styles'
+import theme from './theme'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <ThemeProvider theme={theme}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </ThemeProvider>
   </React.StrictMode>
 )

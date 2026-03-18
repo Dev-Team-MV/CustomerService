@@ -24,15 +24,23 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
 
   const current = languages.find(l => l.code === currentLang) || languages[0]
 
-  // Elegir colores del theme según el variant
-  const bgSidebar = theme.palette.chipAdmin?.bg || 'rgba(140, 165, 81, 0.08)'
-  const borderSidebar = theme.palette.chipAdmin?.border || 'rgba(140, 165, 81, 0.2)'
-  const bgDefault = theme.palette.chipResident?.bg || 'rgba(51, 63, 31, 0.06)'
-  const borderDefault = theme.palette.chipAdmin?.border || 'rgba(140, 165, 81, 0.15)'
-  const hoverBg = theme.palette.primary?.main || '#333F1F'
-  const hoverBorder = theme.palette.primary?.main || '#333F1F'
-  const hoverShadow = theme.palette.avatarShadow || '0 4px 12px rgba(51, 63, 31, 0.2)'
-  const labelColor = theme.palette.primary?.main || '#333F1F'
+  // Colores personalizados para el chip del language switcher
+  const chipTheme = theme.palette.chipLanguageSwitcher || {}
+  const bgDefault = chipTheme.bg || 'rgba(229,134,60,0.10)'
+  const borderDefault = chipTheme.border || 'rgba(229,134,60,0.35)'
+  const labelColorDefault = chipTheme.color || '#E5863C'
+  const hoverBg = chipTheme.hoverBg || theme.palette.primary?.main || '#333F1F'
+  const hoverBorder = chipTheme.hoverBorder || borderDefault
+  const hoverShadow = chipTheme.hoverShadow || '0 4px 12px rgba(51, 63, 31, 0.2)'
+
+  // Sidebar variant (puedes personalizar diferente si quieres)
+  const bgSidebar = chipTheme.bgSidebar || bgDefault
+  const borderSidebar = chipTheme.borderSidebar || borderDefault
+  const labelColorSidebar = chipTheme.colorSidebar || labelColorDefault
+
+  const bg = variant === 'sidebar' ? bgSidebar : bgDefault
+  const border = variant === 'sidebar' ? borderSidebar : borderDefault
+  const labelColor = variant === 'sidebar' ? labelColorSidebar : labelColorDefault
 
   return (
     <Tooltip title={`Language: ${current.label}`} placement="bottom">
@@ -42,9 +50,9 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
           width: 40,
           height: 40,
           borderRadius: 2.5,
-          bgcolor: variant === 'sidebar' ? bgSidebar : bgDefault,
+          bgcolor: bg,
           border: '2px solid',
-          borderColor: variant === 'sidebar' ? borderSidebar : borderDefault,
+          borderColor: border,
           transition: 'all 0.3s ease',
           overflow: 'hidden',
           '&:hover': {

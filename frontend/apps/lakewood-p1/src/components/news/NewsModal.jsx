@@ -11,8 +11,8 @@ import {
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import { useTranslation } from 'react-i18next'
 
-import ModalWrapper  from '../../constants/ModalWrapper'
-import PrimaryButton from '../../constants/PrimaryButton'
+import ModalWrapper  from '@shared/constants/ModalWrapper'
+import PrimaryButton from '@shared/constants/PrimaryButton'
 import { useNewsModal } from '../../hooks/useNews'
 import NewsBlockEditor from './NewsBlockEditor' // Nuevo componente
 

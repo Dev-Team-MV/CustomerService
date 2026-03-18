@@ -11,7 +11,9 @@ import {
 } from '@mui/icons-material'
 import { motion, AnimatePresence } from 'framer-motion'
 
-import { useAuth } from '../context/AuthContext'
+// import { useAuth } from '../context/AuthContext'
+import { useAuth } from '@shared/context/AuthContext'
+
 import useMyProperty from '../hooks/useMyProperty'
 
 import Loader from '../components/Loader'

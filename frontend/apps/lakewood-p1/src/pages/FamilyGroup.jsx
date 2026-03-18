@@ -12,7 +12,7 @@ import {
   Group as GroupIcon
 } from '@mui/icons-material'
 import { motion, AnimatePresence } from 'framer-motion'
-import PageHeader from '../components/PageHeader'
+import PageHeader from '@shared/components/PageHeader'
 import FamilyGroupCard from '../components/FamilyGroup/FamilyGroupCard'
 import CreateGroupDialog from '../components/FamilyGroup/CreateGroup'
 import AddMemberDialog from '../components/FamilyGroup/AddMemberFamily'

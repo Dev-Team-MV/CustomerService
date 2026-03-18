@@ -8,10 +8,12 @@ import api from '@shared/services/api'
 const map = '/images/mapLakewood.png'
 import MasterPlanUploadModal from '../components/masterPlan/MasterPlanUpload'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
-import { useAuth } from '../context/AuthContext'
+// import { useAuth } from '../context/AuthContext'
+import { useAuth } from '@shared/context/AuthContext'
+
 import uploadService from '../services/uploadService' // ✅ NUEVO IMPORT
 import { useTranslation } from 'react-i18next'
-
+import DashboardMapPopup from './DashboardMapPopUP'
 const lotPositions = {
   1: { x: 23, y: 25 },
   2: { x: 26.3, y: 25 },
@@ -131,7 +133,7 @@ const DashboardMap = () => {
       
       if (response.files && response.files.length > 0) {
         // ✅ Usar la imagen más reciente (última en el array)
-        const latestImage = response.files[response.files.length - 1]
+        const latestImage = response.files[0]
         setMapUrl(latestImage.url)
       } else {
         setMapUrl(map) // Fallback a imagen local
@@ -447,86 +449,12 @@ const DashboardMap = () => {
 
       {/* Custom Popup - Sin cambios */}
       {showPopup && selectedProperty && (
-        <Paper
-          onMouseEnter={handlePopupEnter}
-          onMouseLeave={handlePopupLeave}
-          sx={{
-            position: 'fixed',
-            left: `${popupPosition.x}px`,
-            top: `${popupPosition.y}px`,
-            transform: 'translate(-50%, calc(-100% - 10px))',
-            p: 2,
-            width: 280,
-            boxShadow: 3,
-            zIndex: 10000,
-            pointerEvents: 'auto'
-          }}
-        >
-          <Box sx={{ mb: 1.5 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-              <Typography variant="subtitle1" fontWeight="bold">
-                Lot {selectedProperty.lot?.number}
-              </Typography>
-              <Chip 
-                label={selectedProperty.lot?.status === 'sold' ? 'SOLD' : 'HOLD'} 
-                color={selectedProperty.lot?.status === 'sold' ? 'error' : 'primary'}
-                size="small"
-              />
-            </Box>
-            <Typography variant="caption" color="text.secondary">
-              Phase II - North Creek
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Home sx={{ fontSize: 18, color: '#666' }} />
-              <Box>
-                <Typography variant="caption" color="text.secondary" display="block">
-                  Model
-                </Typography>
-                <Typography variant="body2" fontWeight="500">
-                  {selectedProperty.model?.model || 'N/A'}
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <SquareFoot sx={{ fontSize: 18, color: '#666' }} />
-              <Box>
-                <Typography variant="caption" color="text.secondary" display="block">
-                  Square Feet
-                </Typography>
-                <Typography variant="body2" fontWeight="500">
-                  {selectedProperty.model?.sqft?.toLocaleString() || 'N/A'} sqft
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <AttachMoney sx={{ fontSize: 18, color: '#666' }} />
-              <Box>
-                <Typography variant="caption" color="text.secondary" display="block">
-                  Sale Price
-                </Typography>
-                <Typography variant="body2" fontWeight="bold" color="primary">
-                  ${(selectedProperty.presalePrice || selectedProperty.listPrice || 0).toLocaleString()}
-                </Typography>
-              </Box>
-            </Box>
-
-            {selectedProperty.client && (
-              <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid #eee' }}>
-                <Typography variant="caption" color="text.secondary" display="block">
-                  Owner
-                </Typography>
-                <Typography variant="body2" fontWeight="500">
-                  {selectedProperty.client.firstName} {selectedProperty.client.lastName}
-                </Typography>
-              </Box>
-            )}
-          </Box>
-        </Paper>
+          <DashboardMapPopup
+    popupPosition={popupPosition}
+    selectedProperty={selectedProperty}
+    onMouseEnter={handlePopupEnter}
+    onMouseLeave={handlePopupLeave}
+  />
       )}
     </Box>
   )

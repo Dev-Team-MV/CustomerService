@@ -22,8 +22,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import uploadService from "../../services/uploadService";
 import { useTranslation } from "react-i18next";
 import ImagePreview from "../../components/ImgPreview";
-import ModalWrapper from "../../constants/ModalWrapper";
-import PrimaryButton from "../../constants/PrimaryButton";
+import ModalWrapper from "@shared/constants/ModalWrapper";
+import PrimaryButton from "@shared/constants/PrimaryButton";
 
 const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
   const { t } = useTranslation(["clubHouse", "common"]);

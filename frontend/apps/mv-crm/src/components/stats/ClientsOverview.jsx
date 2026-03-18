@@ -10,14 +10,14 @@ const KPICard = ({ icon, label, value, sub, color = '#000' }) => (
   }}>
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
       <Box sx={{ color, display: 'flex' }}>{icon}</Box>
-      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#aaa', letterSpacing: '2px', textTransform: 'uppercase' }}>
+      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase' }}>
         {label}
       </Typography>
     </Box>
     <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: '1.9rem', color, letterSpacing: '-0.04em', lineHeight: 1, mb: 0.5 }}>
       {value}
     </Typography>
-    {sub && <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#bbb' }}>{sub}</Typography>}
+    {sub && <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#000000ff' }}>{sub}</Typography>}
   </Box>
 )
 
@@ -32,7 +32,7 @@ export default function ClientsOverview({ clientsData }) {
 
   return (
     <Box>
-      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#aaa', letterSpacing: '2px', textTransform: 'uppercase', mb: 2 }}>
+      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 2 }}>
         {t('mv.modal.clientsOverview.title')}
       </Typography>
 
@@ -64,7 +64,7 @@ export default function ClientsOverview({ clientsData }) {
 
       {clients.length > 0 && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#bbb', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
             {t('mv.modal.clientsOverview.clientList')}
           </Typography>
           {clients.map((c, i) => (
@@ -83,7 +83,7 @@ export default function ClientsOverview({ clientsData }) {
                   <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontSize: '0.82rem', fontWeight: 500, color: '#000' }}>
                     {c.firstName} {c.lastName}
                   </Typography>
-                  <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#bbb' }}>
+                  <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff' }}>
                     {c.email}
                   </Typography>
                 </Box>

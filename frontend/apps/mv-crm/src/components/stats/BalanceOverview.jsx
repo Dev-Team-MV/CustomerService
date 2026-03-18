@@ -17,7 +17,7 @@ const KPICard = ({ icon, label, value, sub, color = '#000' }) => (
   }}>
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <Box sx={{ color, display: 'flex' }}>{icon}</Box>
-      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#aaa', letterSpacing: '2px', textTransform: 'uppercase' }}>
+      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase' }}>
         {label}
       </Typography>
     </Box>
@@ -25,7 +25,7 @@ const KPICard = ({ icon, label, value, sub, color = '#000' }) => (
       {value}
     </Typography>
     {sub && (
-      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#bbb' }}>
+      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#000000ff' }}>
         {sub}
       </Typography>
     )}
@@ -42,7 +42,7 @@ export default function BalanceOverview({ balance }) {
 
   return (
     <Box>
-      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#aaa', letterSpacing: '2px', textTransform: 'uppercase', mb: 2 }}>
+      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 2 }}>
         {t('mv.modal.balanceOverview.title')}
       </Typography>
 

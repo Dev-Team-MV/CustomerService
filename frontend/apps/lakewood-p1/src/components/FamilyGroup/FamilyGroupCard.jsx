@@ -25,7 +25,7 @@ import {
 } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import PropertyShareDialog from './PropertyShare'
-import PrimaryButton from '../../constants/PrimaryButton'
+import PrimaryButton from '@shared/constants/PrimaryButton'
 import { useTranslation } from 'react-i18next'
 
 const FamilyGroupCard = ({

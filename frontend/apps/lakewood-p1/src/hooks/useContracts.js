@@ -247,6 +247,7 @@ export const useContracts = ({ property, open, onContractUpdated }) => {
       }
 
       setPendingFiles({})
+      await new Promise(resolve => setTimeout(resolve, 1000))
       await fetchContracts()
 
       alert(`✅ ${contractsToUpload.length} contract(s) uploaded successfully!`)

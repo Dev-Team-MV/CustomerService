@@ -1,82 +1,37 @@
 import { createTheme } from '@mui/material/styles'
 
 export const BRAND = {
-  PRIMARY: '#333F1F',
-  SECONDARY: '#8CA551',
-  ACCENT: '#E5863C',
+  PRIMARY: '#000000',
+  SECONDARY: '#ffffff',
+  ACCENT: '#555555',
   INFO: '#1976d2',
-  WARNING: '#E5863C',
-  SUCCESS: '#4a7c59',
+  WARNING: '#FF7043',
+  SUCCESS: '#43A047',
 
-  // Gradientes principales
-  GRADIENT: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
-  GRADIENT_SECONDARY: 'linear-gradient(135deg, #8CA551 0%, #a8bf6f 100%)',
-  GRADIENT_ACCENT: 'linear-gradient(135deg, #E5863C 0%, #f59c5a 100%)',
+  GRADIENT: 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)',
+  GRADIENT_SECONDARY: 'linear-gradient(135deg, #e0e0e0 0%, #ffffff 100%)',
+  GRADIENT_ACCENT: 'linear-gradient(135deg, #555555 0%, #aaaaaa 100%)',
   GRADIENT_INFO: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
 
-  // Chips y badges
   CHIP_SUPERADMIN: {
-    bg: 'rgba(229,134,60,0.08)',
-    border: 'rgba(229,134,60,0.3)',
-    color: '#E5863C'
+    bg: 'rgba(255,112,67,0.08)',
+    border: 'rgba(255,112,67,0.3)',
+    color: '#FF7043'
   },
   CHIP_ADMIN: {
-    bg: 'rgba(140,165,81,0.08)',
-    border: 'rgba(140,165,81,0.3)',
-    color: '#8CA551'
+    bg: 'rgba(85,85,85,0.08)',
+    border: 'rgba(85,85,85,0.3)',
+    color: '#555555'
   },
   CHIP_RESIDENT: {
-    bg: 'rgba(51,63,31,0.08)',
-    border: 'rgba(51,63,31,0.3)',
-    color: '#333F1F'
+    bg: 'rgba(0,0,0,0.08)',
+    border: 'rgba(0,0,0,0.3)',
+    color: '#000000'
   },
 
-  // Otros estilos reutilizables
-  CARD_BG: '#fafcf9',
+  CARD_BG: '#ffffff',
   CARD_BORDER: '#e0e0e0',
-  AVATAR_SHADOW: '0 8px 24px rgba(51, 63, 31, 0.3)',
-  // ...agrega más según tus necesidades
-}
-// Estilo global para marcadores/puntos en mapas
-export const markerSx = {
-  position: 'absolute',
-  transform: 'translate(-50%, -50%)',
-  width: { xs: 24, sm: 32, md: 32 },
-  height: { xs: 24, sm: 32, md: 32 },
-  borderRadius: '50%',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  cursor: 'pointer',
-  bgcolor: BRAND.SECONDARY,
-  color: '#fff',
-  fontSize: { xs: '0.7rem', sm: '0.9rem', md: '1rem' },
-  fontWeight: 'bold',
-  boxShadow: '0 4px 12px rgba(140, 165, 81, 0.25)',
-  border: '3px solid rgba(255,255,255,0.9)',
-  transition: 'all 0.3s ease',
-  zIndex: 1,
-  '&:hover': {
-    transform: 'translate(-50%, -50%) scale(1.2)',
-    zIndex: 11,
-    boxShadow: '0 6px 20px rgba(140, 165, 81, 0.4)',
-    bgcolor: '#4a7c59'
-  }
-}
-
-// Estilo global para la Box contenedora de mapas/planos
-export const mapContainerSx = {
-  mt: 2,
-  width: '100%',
-  maxWidth: '100%',
-  paddingTop: '56.25%',
-  bgcolor: '#f0f0f0',
-  position: 'relative',
-  cursor: 'grab',
-  overflow: 'hidden',
-  touchAction: 'none',
-  boxSizing: 'border-box',
-  borderRadius: 2
+  AVATAR_SHADOW: '0 8px 24px rgba(0,0,0,0.12)',
 }
 
 const theme = createTheme({
@@ -103,14 +58,13 @@ const theme = createTheme({
       paper: '#fff'
     },
     chipLanguageSwitcher: {
-      bg: 'rgba(229,134,60,0.10)',
-      border: 'rgba(229,134,60,0.35)',
-      color: '#E5863C',
-      hoverBg: '#E5863C',
-      hoverBorder: '#E5863C',
-      hoverShadow: '0 4px 12px rgba(229,134,60,0.18)',
-      // Puedes agregar bgSidebar, borderSidebar, colorSidebar si quieres diferenciar el modo sidebar
-    },
+        bg: 'rgba(255, 255, 255, 0.08)',          // Gris translúcido
+        border: 'rgba(85,85,85,0.3)',       // Gris más fuerte
+        color: '#ffffffff',                   // Gris principal
+        hoverBg: '#555555',                 // Gris sólido al hover
+        hoverBorder: '#555555',
+        hoverShadow: '0 4px 12px rgba(85,85,85,0.18)'
+      },
   },
   typography: {
     fontFamily: '"Poppins", sans-serif',
@@ -123,29 +77,29 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: '#fff',
-          borderColor: '#dbe7c9 !important',
+          borderColor: '#e0e0e0 !important',
           '& .MuiOutlinedInput-root': {
             borderRadius: 8,
             backgroundColor: '#fff',
             fontFamily: '"Poppins", sans-serif',
             '& fieldset': {
-              borderColor: '#dbe7c9',
+              borderColor: '#e0e0e0',
               borderWidth: '1.5px'
             },
             '&:hover fieldset': {
-              borderColor: '#dbe7c9 !important'
+              borderColor: '#e0e0e0 !important'
             },
             '&.Mui-focused fieldset': {
-              borderColor: '#dbe7c9',
+              borderColor: BRAND.ACCENT,
               borderWidth: '2px'
             }
           },
           '& .MuiInputLabel-root': {
             fontFamily: '"Poppins", sans-serif',
             fontWeight: 500,
-            color: '#706f6f',
+            color: '#555',
             '&.Mui-focused': {
-              color: '#333F1F',
+              color: BRAND.PRIMARY,
               fontWeight: 600
             }
           },
@@ -161,8 +115,8 @@ const theme = createTheme({
           props: { variant: 'outlined', color: 'error' },
           style: {
             backgroundColor: '#fff',
-            borderColor: '#d32f2f',
-            color: '#d32f2f',
+            borderColor: BRAND.WARNING,
+            color: BRAND.WARNING,
             '&:hover': {
               backgroundColor: '#fff',
               borderColor: '#b71c1c',
@@ -174,12 +128,12 @@ const theme = createTheme({
           props: { variant: 'outlined', color: 'primary' },
           style: {
             backgroundColor: '#fff',
-            borderColor: '#333F1F',
-            color: '#333F1F',
+            borderColor: BRAND.PRIMARY,
+            color: BRAND.PRIMARY,
             '&:hover': {
               backgroundColor: '#fff',
-              borderColor: '#8CA551',
-              color: '#8CA551'
+              borderColor: BRAND.ACCENT,
+              color: BRAND.ACCENT
             }
           }
         },
@@ -187,18 +141,18 @@ const theme = createTheme({
           props: { variant: 'outlined', color: 'secondary' },
           style: {
             backgroundColor: '#fff',
-            borderColor: '#8CA551',
-            color: '#8CA551',
+            borderColor: BRAND.ACCENT,
+            color: BRAND.ACCENT,
             '&:hover': {
               backgroundColor: '#fff',
-              borderColor: '#333F1F',
-              color: '#333F1F'
+              borderColor: BRAND.PRIMARY,
+              color: BRAND.PRIMARY
             }
           }
         }
       ]
     },
-        MuiTabs: {
+    MuiTabs: {
       styleOverrides: {
         root: {
           minHeight: 48
@@ -206,7 +160,7 @@ const theme = createTheme({
         indicator: {
           height: 3,
           borderRadius: '4px 4px 0 0',
-          backgroundColor: '#4a7c59'
+          backgroundColor: BRAND.ACCENT
         }
       }
     },
@@ -216,13 +170,13 @@ const theme = createTheme({
           fontWeight: 700,
           fontSize: '1rem',
           textTransform: 'none',
-          color: '#6c757d',
+          color: '#555',
           minHeight: 48,
           '&.Mui-selected': {
-            color: '#4a7c59'
+            color: BRAND.ACCENT
           },
           '&:hover': {
-            backgroundColor: 'rgba(74, 124, 89, 0.05)'
+            backgroundColor: 'rgba(85, 85, 85, 0.05)'
           }
         }
       }

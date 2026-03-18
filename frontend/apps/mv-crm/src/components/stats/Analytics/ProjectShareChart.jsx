@@ -36,7 +36,7 @@ export default function ProjectShareChart({ filteredBalance }) {
         }}>
           <Typography sx={{
             fontFamily: '"Courier New", monospace', fontSize: '0.65rem',
-            color: '#ccc', letterSpacing: '2px'
+            color: '#000000ff', letterSpacing: '2px'
           }}>
             {t('mv.share.noData')}
           </Typography>
@@ -53,7 +53,7 @@ export default function ProjectShareChart({ filteredBalance }) {
               paddingAngle: 2,
               cornerRadius: 0,
               highlightScope: { faded: 'global', highlighted: 'item' },
-              faded: { innerRadius: 50, additionalRadius: -4, color: '#eee' },
+              faded: { innerRadius: 50, additionalRadius: -4, color: '#000000ff' },
             }]}
             width={240}
             height={240}

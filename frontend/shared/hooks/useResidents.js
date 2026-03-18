@@ -245,6 +245,7 @@ export const useResidents = () => {
     stats,
     openDialog,
     selectedUser,
+    setSelectedUser,
     formData,
     setFormData,
     handleOpenDialog,
