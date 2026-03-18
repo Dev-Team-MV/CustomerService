@@ -33,7 +33,7 @@ const PaymentTab = ({ propertyDetails, payloads, loadingPayloads, onPaymentUploa
     uploadingPayment,
     handleSubmitPayment,
   } = usePaymentTab({ propertyDetails, user, onPaymentUploaded })
-
+  console.log('PaymentTab render - propertyDetails:', propertyDetails)
   // ── Columns ───────────────────────────────────────────────
   const columns = usePaymentTabColumns({ t })
 
@@ -50,12 +50,12 @@ const PaymentTab = ({ propertyDetails, payloads, loadingPayloads, onPaymentUploa
       color: '#8CA551',
       icon:  <CheckCircle />,
     },
-    {
-      label: t('myProperty:pendingAmount',   'Pending Amount'),
-      value: `$${propertyDetails.payment.totalPending.toLocaleString()}`,
-      color: '#E5863C',
-      icon:  <Schedule />,
-    },
+{
+  label: t('myProperty:pendingAmount',   'Pending Amount'),
+  value: `$${propertyDetails.property.pending?.toLocaleString() ?? '0'}`,
+  color: '#E5863C',
+  icon:  <Schedule />,
+},
     {
       label: t('myProperty:paymentProgress', 'Payment Progress'),
       value: `${Math.round(propertyDetails.payment.progress)}%`,

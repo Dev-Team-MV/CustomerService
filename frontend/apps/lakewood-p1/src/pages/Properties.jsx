@@ -33,6 +33,7 @@ const Properties = () => {
   const { data: properties, loading, refetch } = useFetch(
     useCallback(() => api.get('/properties').then(r => r.data), [])
   )
+  
   const { data: lotsArray }  = useFetch(useCallback(() => api.get('/lots').then(r => r.data), []))
   const { data: modelsArray } = useFetch(useCallback(() => api.get('/models').then(r => r.data), []))
   const { data: usersArray }  = useFetch(useCallback(() => api.get('/users').then(r => r.data), []))
