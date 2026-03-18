@@ -21,6 +21,8 @@ export const getAllApartments = async (req, res) => {
   try {
     const { status, user, projectId, buildingId, apartmentModelId } = req.query
     const filter = {}
+    const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
+    const isSuperadmin = req.user.role === 'superadmin'
 
     if (apartmentModelId) filter.apartmentModel = apartmentModelId
     if (buildingId) {
@@ -35,15 +37,19 @@ export const getAllApartments = async (req, res) => {
     }
     if (status) filter.status = status
 
-    // Visible apartments are only those where the requester is an owner
-    // (Apartment.users) or where there's an explicit PropertyShare.
-    const visibleIds = await getVisibleApartmentIdsForUser(req.user._id)
-    filter._id = { $in: visibleIds }
+    if (!visibleOnly && isSuperadmin) {
+      // Superadmin "management" view: return all apartments (optionally filtered by owner user).
+      if (user && mongoose.Types.ObjectId.isValid(user)) {
+        filter.users = user
+      }
+    } else {
+      // User/admin view (and MyApartments visible-only view):
+      const visibleIds = await getVisibleApartmentIdsForUser(req.user._id)
+      filter._id = { $in: visibleIds }
 
-    // Optional extra filter by owner user id; still constrained by visibility.
-    // Swagger's UI sometimes sends the literal placeholder "user" => ignore invalid ObjectId.
-    if (user && mongoose.Types.ObjectId.isValid(user)) {
-      filter.users = user
+      if (user && mongoose.Types.ObjectId.isValid(user)) {
+        filter.users = user
+      }
     }
 
     const apartments = await Apartment.find(filter)
@@ -92,7 +98,14 @@ export const getApartmentById = async (req, res) => {
       return res.status(404).json({ message: 'Apartment not found' })
     }
 
-    const canAccess = await canUserAccessApartment(req.user._id, apartment._id)
+    const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
+    const isSuperadmin = req.user.role === 'superadmin'
+
+    const canAccess = visibleOnly
+      ? await canUserAccessApartment(req.user._id, apartment._id)
+      : isSuperadmin
+        ? true
+        : await canUserAccessApartment(req.user._id, apartment._id)
     if (!canAccess) {
       return res.status(403).json({ message: 'You do not have access to this apartment' })
     }

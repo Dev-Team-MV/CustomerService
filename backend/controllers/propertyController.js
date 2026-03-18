@@ -109,19 +109,28 @@ export const getAllProperties = async (req, res) => {
   try {
     const { status, user, projectId } = req.query
     const filter = {}
+    const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
+    const isSuperadmin = req.user.role === 'superadmin'
 
     if (projectId) filter.project = projectId
     if (status) filter.status = status
 
-    // Visible properties are only those where the requester is an owner
-    // (Property.users includes them) or where there's an explicit PropertyShare.
-    const visibleIds = await getVisiblePropertyIdsForUser(req.user._id)
-    filter._id = { $in: visibleIds }
+    if (!visibleOnly && isSuperadmin) {
+      // Superadmin "management" view: return all properties (optionally filtered by owner user).
+      // Ignore `visibleOnly` in this mode.
+      if (user && mongoose.Types.ObjectId.isValid(user)) {
+        filter.users = user
+      }
+    } else {
+      // User/admin view (and MyProperty visible-only view):
+      // Only properties where requester is an owner or has access via PropertyShare/familyGroup.
+      const visibleIds = await getVisiblePropertyIdsForUser(req.user._id)
+      filter._id = { $in: visibleIds }
 
-    // Optional extra filter by owner user id; still constrained by visibility.
-    // Swagger's UI sometimes sends the literal placeholder "user" => ignore invalid ObjectId.
-    if (user && mongoose.Types.ObjectId.isValid(user)) {
-      filter.users = user
+      // Optional extra filter by owner user id; still constrained by visibility.
+      if (user && mongoose.Types.ObjectId.isValid(user)) {
+        filter.users = user
+      }
     }
 
     const properties = await Property.find(filter)
@@ -172,7 +181,14 @@ export const getPropertyById = async (req, res) => {
       return res.status(404).json({ message: 'Property not found' })
     }
 
-    const canAccess = await canUserAccessProperty(req.user._id, property._id)
+    const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
+    const isSuperadmin = req.user.role === 'superadmin'
+
+    const canAccess = visibleOnly
+      ? await canUserAccessProperty(req.user._id, property._id)
+      : isSuperadmin
+        ? true
+        : await canUserAccessProperty(req.user._id, property._id)
     if (!canAccess) {
       return res.status(403).json({ message: 'You do not have access to this property' })
     }
