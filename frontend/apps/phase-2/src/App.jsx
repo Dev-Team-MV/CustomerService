@@ -15,6 +15,8 @@ import logoPhase2 from '../src/assets/react.svg' // <-- para que no se desborde,
 import Properties from './Pages/Properties'
 import ConfigurationManagerP2 from './Pages/ConfigurationManagerP2'
 import Profile from './Pages/ProfileP2'
+import Buildings from './Pages/Buildings'
+import BuildingDetails from './Pages/BuildingDetails'
 
 function App() {
   return (
@@ -41,6 +43,8 @@ function App() {
                 <Route path="/configuration" element={<ConfigurationManagerP2 />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/properties" element={<Properties />} />
+                <Route path="/buildings" element={<Buildings />} />
+                <Route path="/buildings/:id" element={<BuildingDetails />} />
                 {/* ...otras rutas */}
               </Route>
             </Route>
