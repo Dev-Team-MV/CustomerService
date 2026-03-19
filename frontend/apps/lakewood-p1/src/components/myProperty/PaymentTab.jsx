@@ -1,326 +1,109 @@
-import React, { useState } from 'react'
+import React                from 'react'
+import { useTranslation }   from 'react-i18next'
 import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
+  Box, Paper, Typography,
+  Grid, Card, CardContent,
   Alert
 } from '@mui/material'
 import {
-  Payment,
-  Upload,
-  CheckCircle,
-  Schedule,
-  TrendingUp,
-  Description,
-  Info,
-  CheckCircleOutline,
-  Pending,
-  Cancel,
-  Receipt
+  Payment, Upload,
+  CheckCircle, Schedule, TrendingUp,
+  Description, Info
 } from '@mui/icons-material'
-import { motion } from 'framer-motion'
-import api from '@shared/services/api'
-import uploadService from '../../services/uploadService'
-import UserCreatePayload from '../payloads/UserCreatePayload'
-import DataTable from '../table/DataTable'
-import { useTranslation } from 'react-i18next'
+import { motion }           from 'framer-motion'
 
-const PaymentTab = ({
-  propertyDetails,
-  payloads,
-  loadingPayloads,
-  onPaymentUploaded,
-  user
-}) => {
+import DataTable         from '../table/DataTable'
+import UserCreatePayload from '../payloads/UserCreatePayload'
+import PrimaryButton     from '../../constants/PrimaryButton'
+
+import { usePaymentTab } from '../../hooks/usePayloads'  // ← mismo archivo
+import { usePaymentTabColumns } from '../../constants/Columns/paymentTab'
+
+const PaymentTab = ({ propertyDetails, payloads, loadingPayloads, onPaymentUploaded, user }) => {
   const { t } = useTranslation(['myProperty', 'common'])
 
+  // ── Hook con toda la lógica ───────────────────────────────
+  const {
+    uploadPaymentDialog,
+    handleOpenUploadPayment,
+    handleCloseUploadPayment,
+    paymentForm,
+    handlePaymentFormChange,
+    uploadingPayment,
+    handleSubmitPayment,
+  } = usePaymentTab({ propertyDetails, user, onPaymentUploaded })
+
+  // ── Columns ───────────────────────────────────────────────
+  const columns = usePaymentTabColumns({ t })
+
+  // ── Guard ─────────────────────────────────────────────────
   if (!propertyDetails) {
     return <Box p={3}>{t('myProperty:loading', 'Loading...')}</Box>
   }
 
-  const [uploadPaymentDialog, setUploadPaymentDialog] = useState(false)
-  const [uploadingPayment, setUploadingPayment] = useState(false)
-  const [paymentForm, setPaymentForm] = useState({
-    amount: "",
-    date: new Date().toISOString().split("T")[0],
-    type: "",
-    support: null,
-    notes: "",
-  })
-
-  // Helper functions
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "signed": return "success"
-      case "pending": return "warning"
-      case "rejected": return "error"
-      default: return "default"
-    }
-  }
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "signed": return <CheckCircleOutline />
-      case "pending": return <Pending />
-      case "rejected": return <Cancel />
-      default: return <Receipt />
-    }
-  }
-
-  // Handlers
-  const handleOpenUploadPayment = () => {
-    setPaymentForm({
-      amount: "",
-      date: new Date().toISOString().split("T")[0],
-      type: "",
-      support: null,
-      notes: "",
-    })
-    setUploadPaymentDialog(true)
-  }
-
-  const handleCloseUploadPayment = () => {
-    setUploadPaymentDialog(false)
-    setPaymentForm({
-      amount: "",
-      date: new Date().toISOString().split("T")[0],
-      type: "",
-      support: null,
-      notes: "",
-    })
-  }
-
-  const handlePaymentFormChange = (field, value) => {
-    setPaymentForm((prev) => ({ ...prev, [field]: value }))
-  }
-
-  const handleSubmitPayment = async () => {
-    if (!paymentForm.amount || !paymentForm.type) {
-      alert(t('myProperty:pleaseFillAmountType', 'Please fill in amount and payment type'))
-      return
-    }
-
-    setUploadingPayment(true)
-    try {
-      let urls = []
-      if (
-        user && user.role !== 'admin' &&
-        user.role !== 'superadmin' &&
-        paymentForm.support
-      ) {
-        const url = await uploadService.uploadPaymentImage(paymentForm.support)
-        urls = [url]
-      }
-
-      await api.post('/payloads', {
-        property: propertyDetails.property?._id || propertyDetails._id,
-        amount: paymentForm.amount,
-        date: paymentForm.date,
-        type: paymentForm.type,
-        status: 'pending',
-        urls,
-        notes: paymentForm.notes
-      })
-
-      handleCloseUploadPayment()
-      onPaymentUploaded && onPaymentUploaded()
-      alert(t('myProperty:paymentSubmitted', 'Payment submitted successfully!'))
-    } catch (err) {
-      console.error('Error submitting payment:', err)
-      alert(t('myProperty:paymentError', 'Error submitting payment'))
-    } finally {
-      setUploadingPayment(false)
-    }
-  }
-
-  const columns = [
+  // ── Stats cards ───────────────────────────────────────────
+  const summaryCards = [
     {
-      field: 'date',
-      headerName: t('myProperty:date', 'Date'),
-      minWidth: 120,
-      renderCell: ({ row }) => (
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 600,
-            fontFamily: '"Poppins", sans-serif',
-            color: '#333F1F'
-          }}
-        >
-          {new Date(row.date).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })}
-        </Typography>
-      )
+      label: t('myProperty:totalPaid',       'Total Paid'),
+      value: `$${propertyDetails.payment.totalPaid.toLocaleString()}`,
+      color: '#8CA551',
+      icon:  <CheckCircle />,
     },
     {
-      field: 'amount',
-      headerName: t('myProperty:amount', 'Amount'),
-      minWidth: 100,
-      renderCell: ({ row }) => (
-        <Typography
-          variant="h6"
-          sx={{
-            color: "#8CA551",
-            fontWeight: 700,
-            fontFamily: '"Poppins", sans-serif',
-            fontSize: "1.1rem"
-          }}
-        >
-          ${row.amount.toLocaleString()}
-        </Typography>
-      )
+      label: t('myProperty:pendingAmount',   'Pending Amount'),
+      value: `$${propertyDetails.payment.totalPending.toLocaleString()}`,
+      color: '#E5863C',
+      icon:  <Schedule />,
     },
     {
-      field: 'type',
-      headerName: t('myProperty:type', 'Type'),
-      minWidth: 120,
-      renderCell: ({ row }) => (
-        <Chip
-          label={row.type || t('myProperty:modelNA', 'N/A')}
-          size="small"
-          sx={{
-            bgcolor: "rgba(140, 165, 81, 0.08)",
-            color: "#333F1F",
-            fontWeight: 600,
-            textTransform: "capitalize",
-            fontSize: "0.75rem",
-            fontFamily: '"Poppins", sans-serif',
-            border: '1px solid rgba(140, 165, 81, 0.2)'
-          }}
-        />
-      )
+      label: t('myProperty:paymentProgress', 'Payment Progress'),
+      value: `${Math.round(propertyDetails.payment.progress)}%`,
+      color: '#333F1F',
+      icon:  <TrendingUp />,
     },
-    {
-      field: 'status',
-      headerName: t('myProperty:status', 'Status'),
-      minWidth: 100,
-      renderCell: ({ row }) => (
-<Chip
-  icon={getStatusIcon(row.status)}
-  label={t(`myProperty:status${row.status.charAt(0).toUpperCase() + row.status.slice(1)}`, row.status)}
-  color={getStatusColor(row.status)}
-  sx={{
-    fontWeight: 700,
-    fontFamily: '"Poppins", sans-serif',
-    fontSize: "0.7rem"
-  }}
-/>
-      )
-    },
-    {
-      field: 'urls',
-      headerName: t('myProperty:support', 'Support'),
-      minWidth: 120,
-      renderCell: ({ row }) =>
-        row.urls && row.urls.length > 0 ? (
-          <Button
-            size="small"
-            variant="outlined"
-            href={row.urls[0]}
-            target="_blank"
-            rel="noopener noreferrer"
-            startIcon={<Description />}
-            sx={{
-              borderRadius: 2,
-              textTransform: "none",
-              fontWeight: 600,
-              fontFamily: '"Poppins", sans-serif',
-              borderColor: '#e0e0e0',
-              color: '#706f6f',
-              '&:hover': {
-                borderColor: '#333F1F',
-                bgcolor: 'rgba(51, 63, 31, 0.05)'
-              }
-            }}
-          >
-            {t('myProperty:viewReceipt', 'View Receipt')}
-          </Button>
-        ) : (
-          <Typography
-            variant="caption"
-            sx={{ color: "#999", fontFamily: '"Poppins", sans-serif' }}
-          >
-            {t('myProperty:noDocument', 'No document')}
-          </Typography>
-        )
-    },
-    {
-      field: 'notes',
-      headerName: t('myProperty:notes', 'Notes'),
-      minWidth: 120,
-      renderCell: ({ row }) => (
-        <Typography
-          variant="body2"
-          sx={{
-            color: "#706f6f",
-            fontFamily: '"Poppins", sans-serif',
-            fontSize: "0.85rem"
-          }}
-        >
-          {row.notes || t('myProperty:noNotes', 'No notes')}
-        </Typography>
-      )
-    }
   ]
 
+  // ── Render ────────────────────────────────────────────────
   return (
     <>
       <Paper
         elevation={0}
         sx={{
           p: { xs: 2, sm: 3, md: 4 },
-          background: "white",
-          borderRadius: 4,
-          border: "1px solid #e0e0e0",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+          background: 'white', borderRadius: 4,
+          border: '1px solid #e0e0e0',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
         }}
       >
-        {/* HEADER */}
+        {/* ── Header ─────────────────────────────────────── */}
         <Box
           display="flex"
-          flexDirection={{ xs: "column", sm: "row" }}
+          flexDirection={{ xs: 'column', sm: 'row' }}
           justifyContent="space-between"
-          alignItems={{ xs: "stretch", sm: "center" }}
+          alignItems={{ xs: 'stretch', sm: 'center' }}
           gap={{ xs: 2, sm: 2, md: 3 }}
           mb={{ xs: 3, md: 4 }}
           pb={3}
-          sx={{
-            borderBottom: '2px solid rgba(140, 165, 81, 0.2)'
-          }}
+          sx={{ borderBottom: '2px solid rgba(140, 165, 81, 0.2)' }}
         >
           <Box display="flex" alignItems="center" gap={{ xs: 1.5, sm: 2 }}>
             <Box
               sx={{
                 width: { xs: 48, sm: 52, md: 56 },
                 height: { xs: 48, sm: 52, md: 56 },
-                borderRadius: 3,
-                bgcolor: "#333F1F",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 4px 12px rgba(51, 63, 31, 0.2)",
-                flexShrink: 0,
+                borderRadius: 3, bgcolor: '#333F1F',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)', flexShrink: 0,
               }}
             >
-              <Payment sx={{ fontSize: { xs: 24, sm: 26, md: 28 }, color: "white" }} />
+              <Payment sx={{ fontSize: { xs: 24, sm: 26, md: 28 }, color: 'white' }} />
             </Box>
             <Box>
               <Typography
-                variant="h5"
-                fontWeight={700}
+                variant="h5" fontWeight={700}
                 sx={{
-                  color: "#333F1F",
-                  fontFamily: '"Poppins", sans-serif',
-                  fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.5rem" },
+                  color: '#333F1F', fontFamily: '"Poppins", sans-serif',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' },
                   letterSpacing: '0.5px'
                 }}
               >
@@ -329,10 +112,9 @@ const PaymentTab = ({
               <Typography
                 variant="body2"
                 sx={{
-                  color: "#706f6f",
-                  fontFamily: '"Poppins", sans-serif',
-                  fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                  display: { xs: "none", sm: "block" },
+                  color: '#706f6f', fontFamily: '"Poppins", sans-serif',
+                  fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                  display: { xs: 'none', sm: 'block' },
                 }}
               >
                 {t('myProperty:managePayments', 'Manage and track your payment history')}
@@ -341,86 +123,18 @@ const PaymentTab = ({
           </Box>
 
           <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-            <Button
+            <PrimaryButton
               startIcon={<Upload sx={{ fontSize: { xs: 18, sm: 20 } }} />}
               onClick={handleOpenUploadPayment}
-              fullWidth={false}
-              sx={{
-                py: { xs: 1.2, sm: 1.5 },
-                px: { xs: 2, sm: 3 },
-                borderRadius: 3,
-                bgcolor: "#333F1F",
-                color: "white",
-                fontWeight: 600,
-                fontSize: { xs: "0.85rem", sm: "0.9rem", md: "1rem" },
-                letterSpacing: "1.5px",
-                textTransform: "uppercase",
-                fontFamily: '"Poppins", sans-serif',
-                border: "none",
-                position: "relative",
-                overflow: "hidden",
-                boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)',
-                transition: 'all 0.3s ease',
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  top: 0,
-                  left: "-100%",
-                  width: "100%",
-                  height: "100%",
-                  bgcolor: "#8CA551",
-                  transition: "left 0.4s ease",
-                  zIndex: 0,
-                },
-                "&:hover": {
-                  bgcolor: "#333F1F",
-                  boxShadow: '0 8px 20px rgba(51, 63, 31, 0.3)',
-                  transform: 'translateY(-2px)',
-                  "&::before": { left: 0 },
-                  "& .button-text, & .MuiButton-startIcon": {
-                    color: "white",
-                    position: "relative",
-                    zIndex: 1,
-                  },
-                },
-                "&:active": {
-                  transform: 'translateY(0px)',
-                  boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
-                },
-                "& .button-text, & .MuiButton-startIcon": {
-                  position: "relative",
-                  zIndex: 1,
-                  transition: "color 0.3s ease",
-                },
-              }}
             >
-              <span className="button-text">{t('myProperty:uploadPayment', 'Upload Payment')}</span>
-            </Button>
+              {t('myProperty:uploadPayment', 'Upload Payment')}
+            </PrimaryButton>
           </motion.div>
         </Box>
 
-        {/* PAYMENT SUMMARY CARDS */}
+        {/* ── Summary cards ──────────────────────────────── */}
         <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }} sx={{ mb: { xs: 3, md: 4 } }}>
-          {[
-            {
-              label: t('myProperty:totalPaid', 'Total Paid'),
-              value: `$${propertyDetails.payment.totalPaid.toLocaleString()}`,
-              color: "#8CA551",
-              icon: <CheckCircle />,
-            },
-            {
-              label: t('myProperty:pendingAmount', 'Pending Amount'),
-              value: `$${propertyDetails.payment.totalPending.toLocaleString()}`,
-              color: "#E5863C",
-              icon: <Schedule />,
-            },
-            {
-              label: t('myProperty:paymentProgress', 'Payment Progress'),
-              value: `${Math.round(propertyDetails.payment.progress)}%`,
-              color: "#333F1F",
-              icon: <TrendingUp />,
-            },
-          ].map((stat, index) => (
+          {summaryCards.map((stat, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -430,12 +144,10 @@ const PaymentTab = ({
               >
                 <Card
                   sx={{
-                    borderRadius: 3,
-                    border: `1px solid #e0e0e0`,
-                    bgcolor: '#fafafa',
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
+                    borderRadius: 3, border: '1px solid #e0e0e0',
+                    bgcolor: '#fafafa', boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
                       borderColor: stat.color,
                       boxShadow: `0 8px 24px ${stat.color}20`,
                       bgcolor: 'white'
@@ -444,22 +156,17 @@ const PaymentTab = ({
                 >
                   <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
                     <Box
-                      display="flex"
-                      alignItems="center"
+                      display="flex" alignItems="center"
                       justifyContent="space-between"
-                      mb={{ xs: 1.5, md: 2 }}
-                      flexWrap="wrap"
-                      gap={1}
+                      mb={{ xs: 1.5, md: 2 }} flexWrap="wrap" gap={1}
                     >
                       <Typography
                         variant="caption"
                         sx={{
-                          color: "#999999",
-                          fontWeight: 500,
-                          textTransform: "uppercase",
-                          letterSpacing: "1px",
+                          color: '#999999', fontWeight: 500,
+                          textTransform: 'uppercase', letterSpacing: '1px',
                           fontFamily: '"Poppins", sans-serif',
-                          fontSize: { xs: "0.65rem", sm: "0.7rem" },
+                          fontSize: { xs: '0.65rem', sm: '0.7rem' },
                         }}
                       >
                         {stat.label}
@@ -468,28 +175,22 @@ const PaymentTab = ({
                         sx={{
                           width: { xs: 40, sm: 44, md: 48 },
                           height: { xs: 40, sm: 44, md: 48 },
-                          borderRadius: "50%",
-                          bgcolor: `${stat.color}10`,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: stat.color,
-                          transition: 'all 0.3s ease'
+                          borderRadius: '50%', bgcolor: `${stat.color}10`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          color: stat.color, transition: 'all 0.3s ease'
                         }}
                       >
                         {React.cloneElement(stat.icon, {
-                          sx: { fontSize: { xs: 20, sm: 22, md: 24 } },
+                          sx: { fontSize: { xs: 20, sm: 22, md: 24 } }
                         })}
                       </Box>
                     </Box>
                     <Typography
-                      variant="h3"
-                      fontWeight={700}
+                      variant="h3" fontWeight={700}
                       sx={{
-                        color: stat.color,
-                        letterSpacing: "-0.5px",
+                        color: stat.color, letterSpacing: '-0.5px',
                         fontFamily: '"Poppins", sans-serif',
-                        fontSize: { xs: "1.75rem", sm: "2rem", md: "2.5rem" },
+                        fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' },
                       }}
                     >
                       {stat.value}
@@ -501,18 +202,14 @@ const PaymentTab = ({
           ))}
         </Grid>
 
-        {/* PAYMENT HISTORY SECTION */}
+        {/* ── Payment history ─────────────────────────────── */}
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
             <Box
               sx={{
-                width: 40,
-                height: 40,
-                borderRadius: 2,
+                width: 40, height: 40, borderRadius: 2,
                 bgcolor: 'rgba(51, 63, 31, 0.08)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}
             >
               <Description sx={{ fontSize: 22, color: '#333F1F' }} />
@@ -521,10 +218,9 @@ const PaymentTab = ({
               <Typography
                 variant="h6"
                 sx={{
-                  color: "#333F1F",
-                  fontWeight: 700,
+                  color: '#333F1F', fontWeight: 700,
                   fontFamily: '"Poppins", sans-serif',
-                  fontSize: { xs: "1rem", sm: "1.15rem", md: "1.25rem" },
+                  fontSize: { xs: '1rem', sm: '1.15rem', md: '1.25rem' },
                   letterSpacing: '0.5px'
                 }}
               >
@@ -533,13 +229,11 @@ const PaymentTab = ({
               <Typography
                 variant="caption"
                 sx={{
-                  color: "#706f6f",
-                  fontFamily: '"Poppins", sans-serif',
-                  fontSize: { xs: "0.7rem", sm: "0.75rem" }
+                  color: '#706f6f', fontFamily: '"Poppins", sans-serif',
+                  fontSize: { xs: '0.7rem', sm: '0.75rem' }
                 }}
               >
                 {t('myProperty:transactions', { count: payloads.length })}
-                {payloads.length !== 1 ? t('myProperty:transactions_plural', { count: payloads.length }) : ""}
               </Typography>
             </Box>
           </Box>
@@ -554,11 +248,11 @@ const PaymentTab = ({
                 icon={<Info />}
                 sx={{
                   borderRadius: 3,
-                  bgcolor: "rgba(140, 165, 81, 0.08)",
-                  border: "1px solid rgba(140, 165, 81, 0.3)",
-                  fontSize: { xs: "0.85rem", md: "1rem" },
+                  bgcolor: 'rgba(140, 165, 81, 0.08)',
+                  border: '1px solid rgba(140, 165, 81, 0.3)',
+                  fontSize: { xs: '0.85rem', md: '1rem' },
                   fontFamily: '"Poppins", sans-serif',
-                  "& .MuiAlert-icon": { color: "#8CA551" }
+                  '& .MuiAlert-icon': { color: '#8CA551' }
                 }}
               >
                 {t('myProperty:noPayments', 'No payment transactions yet. Click "Upload Payment" to add your first payment.')}
@@ -570,6 +264,7 @@ const PaymentTab = ({
         </Box>
       </Paper>
 
+      {/* ── Upload dialog ────────────────────────────────── */}
       <UserCreatePayload
         open={uploadPaymentDialog}
         onClose={handleCloseUploadPayment}

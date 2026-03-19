@@ -28,8 +28,11 @@ const phaseSchema = new mongoose.Schema(
   {
     property: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Property',
-      required: [true, 'Property is required']
+      ref: 'Property'
+    },
+    apartment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Apartment'
     },
     phaseNumber: {
       type: Number,
@@ -54,8 +57,18 @@ const phaseSchema = new mongoose.Schema(
   }
 )
 
-// Ensure unique phase number per property
-phaseSchema.index({ property: 1, phaseNumber: 1 }, { unique: true })
+phaseSchema.index({ property: 1, phaseNumber: 1 }, { unique: true, sparse: true })
+phaseSchema.index({ apartment: 1, phaseNumber: 1 }, { unique: true, sparse: true })
+
+phaseSchema.pre('validate', function (next) {
+  const hasProperty = this.property != null
+  const hasApartment = this.apartment != null
+  if (hasProperty === hasApartment) {
+    next(new Error('Exactly one of property or apartment is required'))
+  } else {
+    next()
+  }
+})
 
 const Phase = mongoose.model('Phase', phaseSchema)
 

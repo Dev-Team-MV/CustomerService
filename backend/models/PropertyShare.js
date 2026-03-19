@@ -4,8 +4,11 @@ const propertyShareSchema = new mongoose.Schema(
   {
     property: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Property',
-      required: true
+      ref: 'Property'
+    },
+    apartment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Apartment'
     },
     sharedWith: {
       type: mongoose.Schema.Types.ObjectId,
@@ -28,10 +31,21 @@ const propertyShareSchema = new mongoose.Schema(
   }
 )
 
-// Un usuario no puede tener la misma propiedad compartida dos veces (por el mismo sharedBy no tiene sentido duplicar)
-propertyShareSchema.index({ property: 1, sharedWith: 1 }, { unique: true })
+propertyShareSchema.pre('validate', function (next) {
+  const hasProperty = this.property != null
+  const hasApartment = this.apartment != null
+  if (hasProperty === hasApartment) {
+    next(new Error('Exactly one of property or apartment is required'))
+  } else {
+    next()
+  }
+})
+
+propertyShareSchema.index({ property: 1, sharedWith: 1 }, { unique: true, sparse: true })
+propertyShareSchema.index({ apartment: 1, sharedWith: 1 }, { unique: true, sparse: true })
 propertyShareSchema.index({ sharedWith: 1 })
-propertyShareSchema.index({ property: 1 })
+propertyShareSchema.index({ property: 1 }, { sparse: true })
+propertyShareSchema.index({ apartment: 1 }, { sparse: true })
 propertyShareSchema.index({ familyGroup: 1 })
 
 const PropertyShare = mongoose.model('PropertyShare', propertyShareSchema)

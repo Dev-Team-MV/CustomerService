@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Box, IconButton, Tooltip } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const languages = [
@@ -12,6 +13,7 @@ const languages = [
 
 const LanguageSwitcher = ({ variant = 'default' }) => {
   const { i18n } = useTranslation()
+  const theme = useTheme()
   const currentLang = i18n.language?.split('-')[0] || 'en'
 
   const handleToggle = () => {
@@ -22,6 +24,16 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
 
   const current = languages.find(l => l.code === currentLang) || languages[0]
 
+  // Elegir colores del theme según el variant
+  const bgSidebar = theme.palette.chipAdmin?.bg || 'rgba(140, 165, 81, 0.08)'
+  const borderSidebar = theme.palette.chipAdmin?.border || 'rgba(140, 165, 81, 0.2)'
+  const bgDefault = theme.palette.chipResident?.bg || 'rgba(51, 63, 31, 0.06)'
+  const borderDefault = theme.palette.chipAdmin?.border || 'rgba(140, 165, 81, 0.15)'
+  const hoverBg = theme.palette.primary?.main || '#333F1F'
+  const hoverBorder = theme.palette.primary?.main || '#333F1F'
+  const hoverShadow = theme.palette.avatarShadow || '0 4px 12px rgba(51, 63, 31, 0.2)'
+  const labelColor = theme.palette.primary?.main || '#333F1F'
+
   return (
     <Tooltip title={`Language: ${current.label}`} placement="bottom">
       <IconButton
@@ -30,22 +42,18 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
           width: 40,
           height: 40,
           borderRadius: 2.5,
-          bgcolor: variant === 'sidebar'
-            ? 'rgba(140, 165, 81, 0.08)'
-            : 'rgba(51, 63, 31, 0.06)',
+          bgcolor: variant === 'sidebar' ? bgSidebar : bgDefault,
           border: '2px solid',
-          borderColor: variant === 'sidebar'
-            ? 'rgba(140, 165, 81, 0.2)'
-            : 'rgba(140, 165, 81, 0.15)',
+          borderColor: variant === 'sidebar' ? borderSidebar : borderDefault,
           transition: 'all 0.3s ease',
           overflow: 'hidden',
           '&:hover': {
-            bgcolor: '#333F1F',
-            borderColor: '#333F1F',
+            bgcolor: hoverBg,
+            borderColor: hoverBorder,
             transform: 'scale(1.08)',
-            boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)',
+            boxShadow: hoverShadow,
             '& .lang-label': {
-              color: 'white',
+              color: theme.palette.primary?.contrastText || 'white',
             },
           },
         }}
@@ -64,7 +72,7 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
                 fontSize: '0.75rem',
                 fontWeight: 800,
                 fontFamily: '"Poppins", sans-serif',
-                color: '#333F1F',
+                color: labelColor,
                 letterSpacing: '0.5px',
                 lineHeight: 1,
                 transition: 'color 0.3s',

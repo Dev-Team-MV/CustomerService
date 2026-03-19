@@ -19,42 +19,12 @@ const userPropertyService = {
 
   /**
    * Obtener todas las propiedades del usuario usando los lotes
-   */
-  // getMyProperties: async () => {
-  //   try {
-  //     // 1. Obtener perfil con lotes
-  //     const profile = await userPropertyService.getProfile()
-  //     const lotIds = profile.lots.map(lot => lot._id)
-      
-  //     if (lotIds.length === 0) {
-  //       return []
-  //     }
-
-  //     // 2. Buscar propiedades que tengan esos lotes
-  //     const response = await api.get('/properties')
-  //     const allProperties = response.data
-      
-  //     // ✅ FILTRAR solo las propiedades que pertenecen a los lotes del usuario
-  //     const userProperties = allProperties.filter(property => {
-  //       // Verificar si el lot de la propiedad está en los lotIds del usuario
-  //       const propertyLotId = typeof property.lot === 'object' ? property.lot._id : property.lot
-  //       return lotIds.includes(propertyLotId)
-  //     })
-      
-  //     return userProperties
-  //   } catch (error) {
-  //     throw error.response?.data || { message: 'Failed to fetch properties' }
-  //   }
-  // },
-
-    // ...existing code...
-  
-    // ...existing code...
-    
+   */    
       getMyProperties: async () => {
         try {
           const [propertiesRes, profileRes] = await Promise.all([
-            api.get('/properties'),
+            // For "MyProperty" view we only want visible properties (owner or shared via PropertyShare/familyGroup).
+            api.get('/properties?visible=true'),
             api.get('/auth/profile')
           ])
     
@@ -229,9 +199,7 @@ const userPropertyService = {
   getPropertyDetails: async (propertyId) => {
     try {
       // Obtener propiedad
-      const propResponse = await api.get(`/properties/${propertyId}`)
-      console.log('a ver', propResponse);
-      
+      const propResponse = await api.get(`/properties/${propertyId}?visible=true`)
       const property = propResponse.data
 
       // Obtener modelo

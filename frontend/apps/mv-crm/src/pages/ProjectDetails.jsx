@@ -1,242 +1,10 @@
-// import { useEffect, useState } from 'react'
-// import { Box, Typography, Chip, Grid, Paper, Divider, Stack, Button } from '@mui/material'
-// import { LocationOn, CropSquare, PlayCircleOutline, Image, ArrowBack } from '@mui/icons-material'
-// import { useParams, useNavigate } from 'react-router-dom'
-// import projectService from '@shared/services/projectService'
-// import PageLayout from '@shared/components/LayoutComponents/PageLayout'
-// import { useTranslation } from 'react-i18next'
-
-// function normalizeLangField(field) {
-//   if (typeof field === 'object' && field !== null && field._id) return { en: '', es: '' }
-//   if (typeof field === 'object' && field !== null && ('en' in field || 'es' in field)) return { en: field.en || '', es: field.es || '' }
-//   if (typeof field === 'string') return { en: field, es: field }
-//   return { en: '', es: '' }
-// }
-
-// export default function ProjectDetails() {
-//   const { t } = useTranslation('project')
-//   const { id } = useParams()
-//   const navigate = useNavigate()
-//   const [project, setProject] = useState(null)
-//   const [loading, setLoading] = useState(true)
-
-//   useEffect(() => {
-//     const fetch = async () => {
-//       setLoading(true)
-//       const data = await projectService.getById(id)
-//       setProject(data)
-//       setLoading(false)
-//     }
-//     fetch()
-//   }, [id])
-
-//   if (loading) return (
-//     <PageLayout title={t('details.title')}>
-//       <Box sx={{ py: 8, textAlign: 'center', color: '#aaa' }}>
-//         <Typography variant="h6">{t('details.loading')}</Typography>
-//       </Box>
-//     </PageLayout>
-//   )
-
-//   if (!project) return (
-//     <PageLayout title={t('details.title')}>
-//       <Box sx={{ py: 8, textAlign: 'center', color: '#aaa' }}>
-//         <Typography variant="h6">{t('details.notFound')}</Typography>
-//         <Button variant="outlined" sx={{ mt: 2 }} onClick={() => navigate(-1)}>
-//           <ArrowBack sx={{ mr: 1 }} /> {t('details.back')}
-//         </Button>
-//       </Box>
-//     </PageLayout>
-//   )
-
-//   const title = normalizeLangField(project.title)
-//   const subtitle = normalizeLangField(project.subtitle)
-//   const description = normalizeLangField(project.description)
-//   const fullDescription = normalizeLangField(project.fullDescription)
-//   const features = project.features || { en: [], es: [] }
-//   const gallery = Array.isArray(project.gallery) ? project.gallery : []
-//   const mainImage = project.image || ''
-//   const videos = Array.isArray(project.videos) ? project.videos : []
-//   const lang = 'en' // Puedes cambiar por el idioma actual
-
-//   return (
-//     <PageLayout
-//       title={project.name}
-//       subtitle={subtitle[lang] || project.slug}
-//       topbarLabel={t('details.topbar')}
-//       actionButton={{
-//         label: t('details.back'),
-//         icon: <ArrowBack />,
-//         onClick: () => navigate(-1),
-//         variant: 'outlined'
-//       }}
-//     >
-//       <Grid container spacing={4} sx={{ mt: 2 }}>
-//         {/* Main Info */}
-//         <Grid item xs={12} md={7}>
-//           <Paper elevation={0} sx={{
-//             p: 4,
-//             borderRadius: 3,
-//             border: '1px solid #e0e0e0',
-//             background: '#fff',
-//             minHeight: 420,
-//             display: 'flex',
-//             flexDirection: 'column',
-//             justifyContent: 'space-between'
-//           }}>
-//             <Box>
-//               <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#0a0a0a', wordBreak: 'break-word' }}>
-//                 {title[lang] || project.name}
-//               </Typography>
-//               <Typography variant="subtitle1" sx={{ color: '#4a7c59', mb: 2, wordBreak: 'break-word' }}>
-//                 {subtitle[lang]}
-//               </Typography>
-//               <Divider sx={{ mb: 2 }} />
-//               <Typography variant="body1" sx={{ color: '#222', mb: 2, wordBreak: 'break-word' }}>
-//                 {description[lang]}
-//               </Typography>
-//               <Typography variant="body2" sx={{ color: '#888', mb: 2, wordBreak: 'break-word' }}>
-//                 {fullDescription[lang]}
-//               </Typography>
-//               <Stack direction="row" spacing={2} sx={{ mb: 2, flexWrap: 'wrap' }}>
-//                 <Chip icon={<CropSquare />} label={`${t('details.phase')}: ${project.phase || '-'}`} sx={{ fontWeight: 600 }} />
-//                 <Chip icon={<LocationOn />} label={`${t('details.location')}: ${project.location || '-'}`} sx={{ fontWeight: 600 }} />
-//                 <Chip label={`${t('details.area')}: ${project.area || '-'}`} sx={{ fontWeight: 600 }} />
-//                 <Chip label={`${t('details.type')}: ${project.type || '-'}`} sx={{ fontWeight: 600 }} />
-//                 <Chip label={`${t('details.status')}: ${project.status || '-'}`} sx={{ fontWeight: 600, color: project.isActive ? '#4a7c59' : '#bbb' }} />
-//               </Stack>
-//               <Box sx={{ mb: 2 }}>
-//                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#4a7c59', mb: 1 }}>
-//                   {t('details.features')}
-//                 </Typography>
-//                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-//                   {features[lang]?.length
-//                     ? features[lang].map((f, idx) => (
-//                         <Chip key={idx} label={f} sx={{ bgcolor: '#e0e8df', color: '#333F1F', fontWeight: 600 }} />
-//                       ))
-//                     : <Typography variant="body2" sx={{ color: '#bbb' }}>{t('details.noFeatures')}</Typography>
-//                   }
-//                 </Box>
-//               </Box>
-//             </Box>
-//             <Divider sx={{ my: 2 }} />
-//             <Typography variant="caption" sx={{ color: '#aaa' }}>
-//               {t('details.createdAt')}: {new Date(project.createdAt).toLocaleString()}
-//             </Typography>
-//           </Paper>
-//         </Grid>
-//         {/* Media */}
-//         <Grid item xs={12} md={5}>
-//           <Paper elevation={0} sx={{
-//             p: 4,
-//             borderRadius: 3,
-//             border: '1px solid #e0e0e0',
-//             background: '#fafcf9',
-//             minHeight: 420,
-//             display: 'flex',
-//             flexDirection: 'column',
-//             gap: 2
-//           }}>
-//             <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#4a7c59', mb: 2 }}>
-//               {t('details.media')}
-//             </Typography>
-//             {/* Main Image */}
-//             <Box sx={{ mb: 2 }}>
-//               <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{t('details.mainImage')}</Typography>
-//               {mainImage ? (
-//                 <Box sx={{
-//                   borderRadius: 2,
-//                   overflow: 'hidden',
-//                   border: '1.5px solid #bfcab3',
-//                   bgcolor: '#f6f8f3',
-//                   height: 180,
-//                   mb: 1,
-//                   display: 'flex',
-//                   alignItems: 'center',
-//                   justifyContent: 'center'
-//                 }}>
-//                   <img src={mainImage} alt="Main" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-//                 </Box>
-//               ) : (
-//                 <Box sx={{
-//                   border: '1.5px dashed #bfcab3',
-//                   borderRadius: 2,
-//                   bgcolor: '#f6f8f3',
-//                   height: 180,
-//                   display: 'flex',
-//                   alignItems: 'center',
-//                   justifyContent: 'center',
-//                   mb: 1
-//                 }}>
-//                   <Image sx={{ color: '#bfcab3', fontSize: 48 }} />
-//                 </Box>
-//               )}
-//             </Box>
-//             {/* Gallery */}
-//             <Box mb={2}>
-//               <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{t('details.gallery')}</Typography>
-//               <Box sx={{
-//                 display: 'flex',
-//                 flexWrap: 'wrap',
-//                 gap: 2,
-//                 minHeight: 90
-//               }}>
-//                 {gallery.length
-//                   ? gallery.map((url, idx) => (
-//                       <Box key={idx} sx={{
-//                         width: 90, height: 90, borderRadius: 2, overflow: 'hidden',
-//                         border: '1.5px solid #bfcab3', bgcolor: '#f6f8f3',
-//                         display: 'flex', alignItems: 'center', justifyContent: 'center'
-//                       }}>
-//                         <img src={url} alt={`Gallery ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-//                       </Box>
-//                     ))
-//                   : <Typography variant="body2" sx={{ color: '#bbb' }}>{t('details.noGallery')}</Typography>
-//                 }
-//               </Box>
-//             </Box>
-//             {/* Videos */}
-//             <Box>
-//               <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{t('details.videos')}</Typography>
-//               <Box sx={{
-//                 display: 'flex',
-//                 flexWrap: 'wrap',
-//                 gap: 2,
-//                 minHeight: 120
-//               }}>
-//                 {videos.length
-//                   ? videos.map((v, idx) => (
-//                       <Box key={idx} sx={{
-//                         width: 120, height: 120, borderRadius: 2, overflow: 'hidden',
-//                         border: '1.5px solid #bfcab3', bgcolor: '#f6f8f3',
-//                         display: 'flex', alignItems: 'center', justifyContent: 'center'
-//                       }}>
-//                         <video src={v} controls style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }} />
-//                       </Box>
-//                     ))
-//                   : <Typography variant="body2" sx={{ color: '#bbb' }}>{t('details.noVideos')}</Typography>
-//                 }
-//               </Box>
-//             </Box>
-//           </Paper>
-//         </Grid>
-//       </Grid>
-//     </PageLayout>
-//   )
-// }
-
-
-import { useEffect, useState } from 'react'
-import {
-  Box, Typography, Chip, Grid, Paper, Divider, Stack, Button, Skeleton, Tabs, Tab
-} from '@mui/material'
-import {
-  LocationOn, CropSquare, ArrowBack, Image, CalendarToday, Tag, CheckCircleOutline, LinkOutlined
-} from '@mui/icons-material'
+import { useState } from 'react'
+import { Box, Typography, Chip, Grid, Paper, Divider, Stack, Button, Skeleton, Tabs, Tab } from '@mui/material'
+import { LocationOn, CropSquare, ArrowBack, Image, CalendarToday, Tag, CheckCircleOutline, LinkOutlined } from '@mui/icons-material'
 import { useParams, useNavigate } from 'react-router-dom'
-import projectService from '@shared/services/projectService'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
 import { useTranslation } from 'react-i18next'
+import { useProjects } from '@shared/hooks/useProjects'
 
 function normalizeLangField(field) {
   if (typeof field === 'object' && field !== null && field._id) return { en: '', es: '' }
@@ -270,20 +38,12 @@ export default function ProjectDetails() {
   const { t } = useTranslation('project')
   const { id } = useParams()
   const navigate = useNavigate()
-  const [project, setProject] = useState(null)
-  const [loading, setLoading] = useState(true)
   const [selectedImg, setSelectedImg] = useState(null)
   const [lang, setLang] = useState('en')
 
-  useEffect(() => {
-    const fetchProject = async () => {
-      setLoading(true)
-      const data = await projectService.getById(id)
-      setProject(data)
-      setLoading(false)
-    }
-    fetchProject()
-  }, [id])
+  // Usar el hook centralizado
+  const { projects, loading } = useProjects()
+  const project = projects.find(p => p._id === id)
 
   if (loading) return (
     <PageLayout title={t('details.title')}>
@@ -314,6 +74,7 @@ export default function ProjectDetails() {
       </Box>
     </PageLayout>
   )
+
 
   const title = normalizeLangField(project.title)
   const subtitle = normalizeLangField(project.subtitle)

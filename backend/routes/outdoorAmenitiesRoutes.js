@@ -16,13 +16,11 @@ const router = express.Router()
  *   get:
  *     summary: Get all outdoor amenities (singleton document)
  *     tags: [Outdoor Amenities]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Document with amenities array
  */
-router.get('/', protect, getOutdoorAmenities)
+router.get('/', getOutdoorAmenities)
 
 /**
  * @swagger
@@ -30,8 +28,6 @@ router.get('/', protect, getOutdoorAmenities)
  *   get:
  *     summary: Get one outdoor amenity by id
  *     tags: [Outdoor Amenities]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -43,7 +39,7 @@ router.get('/', protect, getOutdoorAmenities)
  *       404:
  *         description: Amenity not found
  */
-router.get('/:id', protect, getOutdoorAmenityById)
+router.get('/:id', getOutdoorAmenityById)
 
 /**
  * @swagger

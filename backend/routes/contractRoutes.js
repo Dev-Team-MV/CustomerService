@@ -2,12 +2,15 @@ import express from 'express'
 import {
   getAllContracts,
   getContractsByPropertyId,
+  getContractsByApartmentId,
   getContractById,
   createContract,
   updateContract,
   updateContractByPropertyId,
+  updateContractByApartmentId,
   deleteContract,
-  downloadContractByPropertyAndType
+  downloadContractByPropertyAndType,
+  downloadContractByApartmentAndType
 } from '../controllers/contractController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
@@ -93,6 +96,7 @@ router
  *         description: No contracts found for this property
  */
 router.get('/property/:propertyId', protect, getContractsByPropertyId)
+router.get('/apartment/:apartmentId', protect, getContractsByApartmentId)
 
 /**
  * @swagger
@@ -137,6 +141,7 @@ router.get('/property/:propertyId', protect, getContractsByPropertyId)
  *         description: No contracts for this property; use POST to create first
  */
 router.put('/property/:propertyId', protect, admin, updateContractByPropertyId)
+router.put('/apartment/:apartmentId', protect, admin, updateContractByApartmentId)
 
 /**
  * @swagger
@@ -165,6 +170,7 @@ router.put('/property/:propertyId', protect, admin, updateContractByPropertyId)
  *         description: No contract found for this property/type
  */
 router.get('/property/:propertyId/download/:type', protect, downloadContractByPropertyAndType)
+router.get('/apartment/:apartmentId/download/:type', protect, downloadContractByApartmentAndType)
 
 /**
  * @swagger

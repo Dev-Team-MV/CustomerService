@@ -24,7 +24,7 @@
   "confirmRemoveMember": "¿Estás seguro de que quieres eliminar este miembro?",
   "confirmDeleteGroup": "¿Estás seguro de que quieres eliminar este grupo? Esto eliminará todas las propiedades compartidas.",
   "pleaseSelectUser": "Por favor, selecciona un usuario",
-
+  "createdBy": "Creado por {{name}}",
 
     "shareProperty": "Compartir Propiedad",
   "sharingWithGroup": "Compartiendo con el grupo: {{group}}",

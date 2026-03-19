@@ -79,7 +79,6 @@ const ClubhouseManager = () => {
       const keysResponse = await uploadService.getClubhouseInteriorKeys();
       const keys = keysResponse?.interiorKeys || [];
       setInteriorKeys(keys);
-      console.log("📋 Interior keys loaded:", keys);
 
       // listado general y deck específico
       const filesResponse = await uploadService.getFilesByFolder(
@@ -145,7 +144,6 @@ const ClubhouseManager = () => {
         });
       }
 
-      console.log("✅ Organized images:", organized);
       setImages(organized);
     } catch (err) {
       console.error("❌ Error loading clubhouse data:", err);
@@ -160,7 +158,6 @@ const ClubhouseManager = () => {
   };
 
   const handleImagesUploaded = () => {
-    console.log("🔄 Images uploaded, reloading data...");
     loadData();
   };
 

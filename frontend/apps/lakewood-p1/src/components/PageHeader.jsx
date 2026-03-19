@@ -1,6 +1,7 @@
 import { Box, Typography, Paper, Button, Tooltip } from '@mui/material';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
+import PrimaryButton from '../constants/PrimaryButton'
 
 const PageHeader = ({
   icon: Icon,
@@ -117,55 +118,13 @@ const PageHeader = ({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Button
-                  variant="contained"
+                <PrimaryButton
                   onClick={actionButton.onClick}
                   startIcon={actionButton.icon}
-                  sx={{
-                    borderRadius: 3,
-                    bgcolor: '#333F1F',
-                    color: 'white',
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    letterSpacing: '1px',
-                    fontFamily: '"Poppins", sans-serif',
-                    px: 3,
-                    py: 1.5,
-                    boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: 0,
-                      left: '-100%',
-                      width: '100%',
-                      height: '100%',
-                      bgcolor: '#8CA551',
-                      transition: 'left 0.4s ease',
-                      zIndex: 0
-                    },
-                    '&:hover': {
-                      bgcolor: '#333F1F',
-                      boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
-                      '&::before': {
-                        left: 0
-                      },
-                      '& .MuiButton-startIcon': {
-                        color: 'white'
-                      }
-                    },
-                    '& .MuiButton-startIcon': {
-                      position: 'relative',
-                      zIndex: 1,
-                      color: 'white'
-                    }
-                  }}
+                  disabled={actionButton.disabled}
                 >
-                  <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-                    {actionButton.label}
-                  </Box>
-                </Button>
+                  {actionButton.label}
+                </PrimaryButton>
               </motion.div>
             </Tooltip>
           )}

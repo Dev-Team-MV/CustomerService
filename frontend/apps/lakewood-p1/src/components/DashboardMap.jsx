@@ -126,18 +126,14 @@ const DashboardMap = () => {
 
   // ✅ NUEVA FUNCIÓN: Cargar imagen desde carpeta 'masterplan' en GCS
   const fetchMasterPlanImages = async () => {
-    try {
-      console.log('📂 Loading master plan images from GCS...')
-      
+    try {      
       const response = await uploadService.getFilesByFolder('masterplan', true)
       
       if (response.files && response.files.length > 0) {
         // ✅ Usar la imagen más reciente (última en el array)
         const latestImage = response.files[response.files.length - 1]
-        console.log('✅ Master plan loaded:', latestImage.url)
         setMapUrl(latestImage.url)
       } else {
-        console.log('⚠️ No master plan found, using default image')
         setMapUrl(map) // Fallback a imagen local
       }
     } catch (error) {
@@ -148,7 +144,6 @@ const DashboardMap = () => {
 
   // ✅ CALLBACK cuando se sube nueva imagen
   const handleImageUploaded = (imageUrl) => {
-    console.log('✅ New master plan uploaded, updating map:', imageUrl)
     setMapUrl(imageUrl) // Actualizar mapa inmediatamente
     setModalOpen(false) // Cerrar modal
   }
