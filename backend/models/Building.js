@@ -1,5 +1,33 @@
 import mongoose from 'mongoose'
 
+const floorPlanPolygonSchema = new mongoose.Schema(
+  {
+    id: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    points: [{
+      type: Number
+    }],
+    apartmentModel: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ApartmentModel',
+      default: null
+    },
+    color: {
+      type: String,
+      trim: true,
+      default: '#8CA551'
+    },
+    name: {
+      type: String,
+      trim: true
+    }
+  },
+  { _id: false }
+)
+
 const floorPlanSchema = new mongoose.Schema(
   {
     floorNumber: {
@@ -11,6 +39,10 @@ const floorPlanSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true
+    },
+    polygons: {
+      type: [floorPlanPolygonSchema],
+      default: []
     }
   },
   { _id: true }
