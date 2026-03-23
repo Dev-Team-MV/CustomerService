@@ -30,14 +30,14 @@ const ApartmentModelDialog = ({
   const theme = useTheme()
   const [form, setForm] = useState(DEFAULT_FORM)
 
-  // Calcular apartamentos ya asignados
+  // Apartamentos ya asignados
   const assignedApartments = useMemo(() => {
     return existingModels
-      .filter(m => m._id !== selectedModel?._id) // Excluir el modelo actual si estamos editando
+      .filter(m => m._id !== selectedModel?._id)
       .reduce((sum, model) => sum + (model.apartmentCount || 0), 0)
   }, [existingModels, selectedModel])
 
-  // Calcular apartamentos disponibles
+  // Apartamentos disponibles
   const availableApartments = useMemo(() => {
     return buildingTotalApartments - assignedApartments
   }, [buildingTotalApartments, assignedApartments])
@@ -72,6 +72,7 @@ const ApartmentModelDialog = ({
     Number(form.apartmentCount) > 0 &&
     Number(form.apartmentCount) <= availableApartments
 
+  // --- ESTA ES LA FUNCIÓN CLAVE ---
   const handleSubmit = () => {
     if (!form.building) {
       alert('Building is required')
@@ -82,19 +83,23 @@ const ApartmentModelDialog = ({
       alert(`Cannot assign ${form.apartmentCount} apartments. Only ${availableApartments} available.`)
       return
     }
-    
+
+    // Solo incluye _id si es edición
     const payload = {
-      ...selectedModel,
-      _id: selectedModel?._id || `am_${Date.now()}`,
-      ...form,
+      building: form.building,
+      name: form.name,
+      modelNumber: form.modelNumber,
       sqft: Number(form.sqft),
       bedrooms: Number(form.bedrooms),
       bathrooms: Number(form.bathrooms),
       apartmentCount: Number(form.apartmentCount),
+      status: form.status,
+    }
+    if (selectedModel?._id) {
+      payload._id = selectedModel._id
     }
 
     console.log('🏢 ApartmentModel Payload:', payload)
-
     onSaved(payload)
   }
 

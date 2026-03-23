@@ -50,11 +50,22 @@ const Login = () => {
 
   const from = location.state?.from || '/dashboard'
 
+    // --- LOGIN AUTOMÁTICO SI HAY TOKEN EN LA URL ---
   useEffect(() => {
-  if (isAuthenticated && user && user.role) {
-    navigate(from, { replace: true })
-  }
-}, [isAuthenticated, user, user?.role, from, navigate])
+    const params = new URLSearchParams(location.search)
+    const token = params.get('token')
+    if (token) {
+      localStorage.setItem('token', token)
+      window.location.href = '/dashboard' // Fuerza recarga, el AuthContext sí lo detecta
+    }
+  }, [location])
+  // ------------------------------------------------
+
+  useEffect(() => {
+    if (isAuthenticated && user && user.role) {
+      navigate(from, { replace: true })
+    }
+  }, [isAuthenticated, user, user?.role, from, navigate])
 
   const handleLoginMethodChange = (event, newMethod) => {
     if (newMethod !== null) {

@@ -4,11 +4,11 @@ import useImage from 'use-image'
 import {
   Dialog, Box, Typography, Button, IconButton, ToggleButtonGroup, ToggleButton,
   Paper, List, ListItem, ListItemText, ListItemSecondaryAction,
-  TextField, MenuItem, Divider, Alert, Tooltip, Chip
+  TextField, Divider, Alert, Tooltip, Chip
 } from '@mui/material'
 import {
   Close, CropSquare, Timeline, Edit, Delete, ZoomIn, ZoomOut,
-  Undo, Redo, Save, CheckCircle, NavigateBefore, NavigateNext, Palette
+  Undo, Redo, Save, CheckCircle, Palette
 } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
 
@@ -17,129 +17,89 @@ const COLORS = [
   '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'
 ]
 
-const FloorPlanEditor = ({ 
-  open, 
-  onClose, 
-  floorPlans = [],
-  apartmentModels = [],
-  onSave 
-}) => {
+export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, polygons = [], onSave }) {
   const theme = useTheme()
   const stageRef = useRef(null)
-  
-  const [currentFloorIndex, setCurrentFloorIndex] = useState(0)
-  const currentFloorPlan = floorPlans[currentFloorIndex]
-  const [image] = useImage(currentFloorPlan?.url || '')
-  
-  const [floorPolygons, setFloorPolygons] = useState({})
+  const [image] = useImage(exteriorUrl || '')
+  const [dimensions, setDimensions] = useState({ width: 1000, height: 700 })
+
+  // Polygons state
+  const [allPolygons, setAllPolygons] = useState(polygons)
   const [drawMode, setDrawMode] = useState('select')
   const [selectedPolygonId, setSelectedPolygonId] = useState(null)
   const [currentPoints, setCurrentPoints] = useState([])
   const [isDrawing, setIsDrawing] = useState(false)
   const [scale, setScale] = useState(1)
-  const [history, setHistory] = useState({})
-  const [historyStep, setHistoryStep] = useState({})
-  const [dimensions, setDimensions] = useState({ width: 1000, height: 700 })
+  const [history, setHistory] = useState([polygons])
+  const [historyStep, setHistoryStep] = useState(0)
 
-  // Initialize polygons from floor plans
-  useEffect(() => {
-    if (floorPlans.length > 0) {
-      const initialPolygons = {}
-      const initialHistory = {}
-      const initialHistoryStep = {}
-      
-      floorPlans.forEach(fp => {
-        const floorKey = `floor_${fp.floorNumber}`
-        const polygonsData = fp.polygons || []
-        initialPolygons[floorKey] = polygonsData
-        initialHistory[floorKey] = [polygonsData]
-        initialHistoryStep[floorKey] = 0
-      })
-      
-      setFloorPolygons(initialPolygons)
-      setHistory(initialHistory)
-      setHistoryStep(initialHistoryStep)
-    }
-  }, [floorPlans])
-
-  const currentFloorKey = `floor_${currentFloorPlan?.floorNumber}`
-  const polygons = floorPolygons[currentFloorKey] || []
-  const currentHistory = history[currentFloorKey] || [[]]
-  const currentHistoryStep = historyStep[currentFloorKey] || 0
-
-  // Calculate image dimensions to fit canvas
+  // Responsive image dimensions
   useEffect(() => {
     if (image) {
       const maxWidth = 1000
       const maxHeight = 700
       const imgRatio = image.width / image.height
-      
       let width = maxWidth
       let height = maxWidth / imgRatio
-      
       if (height > maxHeight) {
         height = maxHeight
         width = maxHeight * imgRatio
       }
-      
       setDimensions({ width, height })
     }
   }, [image])
 
-  const updateCurrentFloorPolygons = (newPolygons) => {
-    setFloorPolygons(prev => ({
-      ...prev,
-      [currentFloorKey]: newPolygons
-    }))
-  }
+  // Reset polygons when dialog opens
+  useEffect(() => {
+    if (open) {
+      setAllPolygons(polygons)
+      setHistory([polygons])
+      setHistoryStep(0)
+      setDrawMode('select')
+      setSelectedPolygonId(null)
+      setCurrentPoints([])
+      setIsDrawing(false)
+      setScale(1)
+    }
+  }, [open, polygons])
 
+  // Undo/Redo
   const addToHistory = (newPolygons) => {
-    const newHistory = currentHistory.slice(0, currentHistoryStep + 1)
+    const newHistory = history.slice(0, historyStep + 1)
     newHistory.push(newPolygons)
-    
-    setHistory(prev => ({
-      ...prev,
-      [currentFloorKey]: newHistory
-    }))
-    
-    setHistoryStep(prev => ({
-      ...prev,
-      [currentFloorKey]: newHistory.length - 1
-    }))
+    setHistory(newHistory)
+    setHistoryStep(newHistory.length - 1)
   }
-
   const handleUndo = () => {
-    if (currentHistoryStep > 0) {
-      const newStep = currentHistoryStep - 1
-      setHistoryStep(prev => ({ ...prev, [currentFloorKey]: newStep }))
-      updateCurrentFloorPolygons(currentHistory[newStep])
+    if (historyStep > 0) {
+      setHistoryStep(historyStep - 1)
+      setAllPolygons(history[historyStep - 1])
+      setSelectedPolygonId(null)
     }
   }
-
   const handleRedo = () => {
-    if (currentHistoryStep < currentHistory.length - 1) {
-      const newStep = currentHistoryStep + 1
-      setHistoryStep(prev => ({ ...prev, [currentFloorKey]: newStep }))
-      updateCurrentFloorPolygons(currentHistory[newStep])
+    if (historyStep < history.length - 1) {
+      setHistoryStep(historyStep + 1)
+      setAllPolygons(history[historyStep + 1])
+      setSelectedPolygonId(null)
     }
   }
 
+  // Drawing logic
   const handleStageClick = (e) => {
     const clickedOnEmpty = e.target === e.target.getStage()
     if (!clickedOnEmpty) return
-  
+
     if (drawMode === 'select') {
       setSelectedPolygonId(null)
       return
     }
-  
+
     const stage = e.target.getStage()
     const pointerPosition = stage.getPointerPosition()
     const x = (pointerPosition.x - stage.x()) / scale
     const y = (pointerPosition.y - stage.y()) / scale
-  
-    console.log('Stage click:', { x, y, drawMode, isDrawing, currentPoints })
-  
+
     if (drawMode === 'rectangle') {
       if (!isDrawing) {
         setCurrentPoints([x, y])
@@ -152,7 +112,6 @@ const FloorPlanEditor = ({
         }
         const width = x - startX
         const height = y - startY
-  
         const newPolygon = {
           id: `poly_${Date.now()}`,
           points: [
@@ -161,13 +120,11 @@ const FloorPlanEditor = ({
             startX + width, startY + height,
             startX, startY + height
           ],
-          apartmentModel: null,
-          color: COLORS[polygons.length % COLORS.length],
-          name: `Polygon ${polygons.length + 1}`
+          color: COLORS[allPolygons.length % COLORS.length],
+          name: `Polygon ${allPolygons.length + 1}`
         }
-  
-        const newPolygons = [...polygons, newPolygon]
-        updateCurrentFloorPolygons(newPolygons)
+        const newPolygons = [...allPolygons, newPolygon]
+        setAllPolygons(newPolygons)
         addToHistory(newPolygons)
         setCurrentPoints([])
         setIsDrawing(false)
@@ -182,13 +139,11 @@ const FloorPlanEditor = ({
       const newPolygon = {
         id: `poly_${Date.now()}`,
         points: currentPoints,
-        apartmentModel: null,
-        color: COLORS[polygons.length % COLORS.length],
-        name: `Polygon ${polygons.length + 1}`
+        color: COLORS[allPolygons.length % COLORS.length],
+        name: `Polygon ${allPolygons.length + 1}`
       }
-      
-      const newPolygons = [...polygons, newPolygon]
-      updateCurrentFloorPolygons(newPolygons)
+      const newPolygons = [...allPolygons, newPolygon]
+      setAllPolygons(newPolygons)
       addToHistory(newPolygons)
     }
     setCurrentPoints([])
@@ -196,95 +151,29 @@ const FloorPlanEditor = ({
   }
 
   const handleDeletePolygon = (id) => {
-    const newPolygons = polygons.filter(p => p.id !== id)
-    updateCurrentFloorPolygons(newPolygons)
+    const newPolygons = allPolygons.filter(p => p.id !== id)
+    setAllPolygons(newPolygons)
     addToHistory(newPolygons)
     setSelectedPolygonId(null)
   }
 
   const handleUpdatePolygon = (id, updates) => {
-    const newPolygons = polygons.map(p => 
+    const newPolygons = allPolygons.map(p =>
       p.id === id ? { ...p, ...updates } : p
     )
-    updateCurrentFloorPolygons(newPolygons)
+    setAllPolygons(newPolygons)
     addToHistory(newPolygons)
-  }
-
-  const handleDragEnd = (id, e) => {
-    const newPolygons = polygons.map(p => {
-      if (p.id === id) {
-        return {
-          ...p,
-          points: p.points.map((coord, i) => 
-            i % 2 === 0 
-              ? coord + e.target.x() 
-              : coord + e.target.y()
-          )
-        }
-      }
-      return p
-    })
-    updateCurrentFloorPolygons(newPolygons)
-    addToHistory(newPolygons)
-    e.target.position({ x: 0, y: 0 })
-  }
-
-  const handlePreviousFloor = () => {
-    if (currentFloorIndex > 0) {
-      setCurrentFloorIndex(currentFloorIndex - 1)
-      setSelectedPolygonId(null)
-      setCurrentPoints([])
-      setIsDrawing(false)
-      setScale(1)
-    }
-  }
-
-  const handleNextFloor = () => {
-    if (currentFloorIndex < floorPlans.length - 1) {
-      setCurrentFloorIndex(currentFloorIndex + 1)
-      setSelectedPolygonId(null)
-      setCurrentPoints([])
-      setIsDrawing(false)
-      setScale(1)
-    }
   }
 
   const handleZoomIn = () => setScale(Math.min(scale + 0.1, 3))
   const handleZoomOut = () => setScale(Math.max(scale - 0.1, 0.5))
 
   const handleSave = () => {
-    const allFloorData = floorPlans.map(fp => {
-      const floorKey = `floor_${fp.floorNumber}`
-      const floorPolygonsData = floorPolygons[floorKey] || []
-      
-      // Clean polygon data for API
-      const cleanedPolygons = floorPolygonsData.map(poly => ({
-        id: poly.id,
-        points: poly.points,
-        apartmentModel: poly.apartmentModel || null,
-        color: poly.color,
-        name: poly.name
-      }))
-      
-      return {
-        floorNumber: fp.floorNumber,
-        url: fp.url,
-        polygons: cleanedPolygons
-      }
-    })
-    
-    console.log('💾 Saving floor plans with polygons:', allFloorData)
-    onSave(allFloorData)
+    onSave(allPolygons)
+    onClose()
   }
 
-  const totalPolygons = Object.values(floorPolygons).reduce((sum, polys) => sum + polys.length, 0)
-  const totalAssigned = Object.values(floorPolygons).reduce((sum, polys) => 
-    sum + polys.filter(p => p.apartmentModel).length, 0
-  )
-
-  const selectedPolygon = polygons.find(p => p.id === selectedPolygonId)
-
-  if (!currentFloorPlan) return null
+  const selectedPolygon = allPolygons.find(p => p.id === selectedPolygonId)
 
   return (
     <Dialog
@@ -302,61 +191,22 @@ const FloorPlanEditor = ({
       }}
     >
       {/* Header */}
-      <Box sx={{ 
-        p: 2, 
+      <Box sx={{
+        p: 2,
         borderBottom: `1px solid ${theme.palette.divider}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between'
       }}>
-        <Box sx={{ flex: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
-              Floor Plan Polygon Editor
-            </Typography>
-            <Chip 
-              label={`${currentFloorIndex + 1} of ${floorPlans.length}`}
-              size="small"
-              sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
-            />
-          </Box>
-          
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton 
-              size="small" 
-              onClick={handlePreviousFloor}
-              disabled={currentFloorIndex === 0}
-              sx={{
-                bgcolor: currentFloorIndex === 0 ? 'transparent' : theme.palette.chipAdmin.bg,
-                '&:hover': { bgcolor: theme.palette.secondary.main, color: '#fff' }
-              }}
-            >
-              <NavigateBefore />
-            </IconButton>
-            
-            <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif', minWidth: 120, textAlign: 'center' }}>
-              Floor {currentFloorPlan.floorNumber}
-              {currentFloorPlan.floorNumber === 1 && ' (Commercial)'}
-            </Typography>
-            
-            <IconButton 
-              size="small" 
-              onClick={handleNextFloor}
-              disabled={currentFloorIndex === floorPlans.length - 1}
-              sx={{
-                bgcolor: currentFloorIndex === floorPlans.length - 1 ? 'transparent' : theme.palette.chipAdmin.bg,
-                '&:hover': { bgcolor: theme.palette.secondary.main, color: '#fff' }
-              }}
-            >
-              <NavigateNext />
-            </IconButton>
-            
-            <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-            
-            <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
-              {polygons.length} polygons | {polygons.filter(p => p.apartmentModel).length} assigned
-            </Typography>
-          </Box>
+        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+            Exterior Polygon Editor
+          </Typography>
+          <Chip
+            label={`${allPolygons.length} polygons`}
+            size="small"
+            sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+          />
         </Box>
         <IconButton onClick={onClose}>
           <Close />
@@ -425,10 +275,10 @@ const FloorPlanEditor = ({
 
           <Tooltip title="Undo" placement="right">
             <span>
-              <IconButton 
-                onClick={handleUndo} 
+              <IconButton
+                onClick={handleUndo}
                 size="small"
-                disabled={currentHistoryStep === 0}
+                disabled={historyStep === 0}
               >
                 <Undo />
               </IconButton>
@@ -436,10 +286,10 @@ const FloorPlanEditor = ({
           </Tooltip>
           <Tooltip title="Redo" placement="right">
             <span>
-              <IconButton 
-                onClick={handleRedo} 
+              <IconButton
+                onClick={handleRedo}
                 size="small"
-                disabled={currentHistoryStep === currentHistory.length - 1}
+                disabled={historyStep === history.length - 1}
               >
                 <Redo />
               </IconButton>
@@ -461,9 +311,9 @@ const FloorPlanEditor = ({
                 fontFamily: '"Poppins", sans-serif'
               }}
               action={
-                <Button 
-                  color="inherit" 
-                  size="small" 
+                <Button
+                  color="inherit"
+                  size="small"
                   onClick={handleCompletePolygon}
                   startIcon={<CheckCircle />}
                 >
@@ -506,11 +356,11 @@ const FloorPlanEditor = ({
                   image={image}
                   width={dimensions.width}
                   height={dimensions.height}
-                  listening={false} // <-- Esto permite que los clicks pasen al Stage
+                  listening={false}
                 />
               )}
 
-              {polygons.map((polygon) => (
+              {allPolygons.map((polygon) => (
                 <Line
                   key={polygon.id}
                   points={polygon.points}
@@ -526,7 +376,24 @@ const FloorPlanEditor = ({
                       setSelectedPolygonId(polygon.id)
                     }
                   }}
-                  onDragEnd={(e) => handleDragEnd(polygon.id, e)}
+                  onDragEnd={(e) => {
+                    const newPolygons = allPolygons.map(p => {
+                      if (p.id === polygon.id) {
+                        return {
+                          ...p,
+                          points: p.points.map((coord, i) =>
+                            i % 2 === 0
+                              ? coord + e.target.x()
+                              : coord + e.target.y()
+                          )
+                        }
+                      }
+                      return p
+                    })
+                    setAllPolygons(newPolygons)
+                    addToHistory(newPolygons)
+                    e.target.position({ x: 0, y: 0 })
+                  }}
                 />
               ))}
 
@@ -571,7 +438,7 @@ const FloorPlanEditor = ({
         >
           <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
-              Polygons ({polygons.length})
+              Polygons ({allPolygons.length})
             </Typography>
             <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
               Click to select, drag to move
@@ -579,7 +446,7 @@ const FloorPlanEditor = ({
           </Box>
 
           <List sx={{ flex: 1, overflow: 'auto', p: 1 }}>
-            {polygons.length === 0 ? (
+            {allPolygons.length === 0 ? (
               <Box sx={{ p: 3, textAlign: 'center' }}>
                 <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', mb: 1 }}>
                   No polygons yet
@@ -589,7 +456,7 @@ const FloorPlanEditor = ({
                 </Typography>
               </Box>
             ) : (
-              polygons.map((polygon) => (
+              allPolygons.map((polygon) => (
                 <ListItem
                   key={polygon.id}
                   sx={{
@@ -616,11 +483,7 @@ const FloorPlanEditor = ({
                   />
                   <ListItemText
                     primary={polygon.name}
-                    secondary={
-                      polygon.apartmentModel 
-                        ? apartmentModels.find(m => m._id === polygon.apartmentModel)?.name || 'Unknown Model'
-                        : 'Not assigned'
-                    }
+                    secondary="Exterior"
                     primaryTypographyProps={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.9rem', fontWeight: 600 }}
                     secondaryTypographyProps={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.75rem' }}
                   />
@@ -654,21 +517,33 @@ const FloorPlanEditor = ({
                 <Palette fontSize="small" />
                 Polygon Settings
               </Typography>
-              
               <TextField
                 fullWidth
                 size="small"
                 label="Name"
                 value={selectedPolygon.name}
                 onChange={(e) => handleUpdatePolygon(selectedPolygon.id, { name: e.target.value })}
-                sx={{ 
+                sx={{
                   mb: 2,
                   '& .MuiOutlinedInput-root': {
                     fontFamily: '"Poppins", sans-serif'
                   }
                 }}
               />
-              
+                  <TextField
+      fullWidth
+      size="small"
+      label="Floor Number"
+      type="number"
+      inputProps={{ min: 1 }}
+      value={selectedPolygon.floorNumber || ''}
+      onChange={e => {
+        let value = parseInt(e.target.value, 10)
+        if (isNaN(value) || value < 1) value = 1
+        handleUpdatePolygon(selectedPolygon.id, { floorNumber: value })
+      }}
+      sx={{ mb: 2 }}
+    />
               <Box sx={{ mb: 2 }}>
                 <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', mb: 1, display: 'block', fontWeight: 600 }}>
                   Color
@@ -693,7 +568,6 @@ const FloorPlanEditor = ({
                     />
                   ))}
                 </Box>
-                
                 <TextField
                   fullWidth
                   size="small"
@@ -708,37 +582,14 @@ const FloorPlanEditor = ({
                   }}
                 />
               </Box>
-              
-              <TextField
-                fullWidth
-                size="small"
-                select
-                label="Apartment Model"
-                value={selectedPolygon.apartmentModel || ''}
-                onChange={(e) => handleUpdatePolygon(selectedPolygon.id, { apartmentModel: e.target.value })}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    fontFamily: '"Poppins", sans-serif'
-                  }
-                }}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                {apartmentModels.map((model) => (
-                  <MenuItem key={model._id} value={model._id}>
-                    {model.name} ({model.bedrooms}BR/{model.bathrooms}BA - {model.sqft}m²)
-                  </MenuItem>
-                ))}
-              </TextField>
             </Box>
           )}
         </Paper>
       </Box>
 
       {/* Footer */}
-      <Box sx={{ 
-        p: 2, 
+      <Box sx={{
+        p: 2,
         borderTop: `1px solid ${theme.palette.divider}`,
         display: 'flex',
         justifyContent: 'space-between',
@@ -746,7 +597,7 @@ const FloorPlanEditor = ({
         bgcolor: theme.palette.background.paper
       }}>
         <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
-          Zoom: {Math.round(scale * 100)}% | Total Polygons: {totalPolygons} | Assigned: {totalAssigned}/{totalPolygons}
+          Zoom: {Math.round(scale * 100)}% | Total Polygons: {allPolygons.length}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
@@ -772,13 +623,12 @@ const FloorPlanEditor = ({
               fontWeight: 600,
               bgcolor: theme.palette.primary.main
             }}
+            disabled={allPolygons.length === 0}
           >
-            Save All Floors
+            Save Polygons
           </Button>
         </Box>
       </Box>
     </Dialog>
   )
 }
-
-export default FloorPlanEditor

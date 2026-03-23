@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Grid, TextField, MenuItem, Button, Alert } from '@mui/material'
+import { Grid, TextField, MenuItem, Button, Alert, Typography } from '@mui/material'
 import { Home } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
 import ModalWrapper from '@shared/constants/ModalWrapper'
 import PrimaryButton from '@shared/constants/PrimaryButton'
+import FloorPlanPolygonSelectorModal from '../FloorPlanPolygonSelectorModal'
 
 const DEFAULT_FORM = {
   apartmentModel: '',
@@ -21,47 +22,90 @@ const ApartmentDialog = ({
   selectedApartment,
   apartmentModels = [],
   buildingFloors = 1,
+  floorPlans = [],
 }) => {
   const theme = useTheme()
   const [form, setForm] = useState(DEFAULT_FORM)
+  const [polygonSelectorOpen, setPolygonSelectorOpen] = useState(false)
+  const [selectedPolygonId, setSelectedPolygonId] = useState(null)
+
+
+  // --- CORRECCIÓN: floorPlans puede venir como objeto con .data ---
+  const floorPlansArray = Array.isArray(floorPlans)
+    ? floorPlans
+    : Array.isArray(floorPlans?.data)
+      ? floorPlans.data
+      : []
+
+  console.log('floor', floorPlansArray);
+  
+
+  // Encuentra el floorPlan correspondiente al piso seleccionado
+  const selectedFloorPlan = floorPlansArray.find(
+    fp => Number(fp.floorNumber) === Number(form.floorNumber)
+  )
 
   useEffect(() => {
     if (open) {
       if (selectedApartment) {
         setForm({
-          apartmentModel: selectedApartment.apartmentModel || '',
+          apartmentModel: typeof selectedApartment.apartmentModel === 'object'
+            ? selectedApartment.apartmentModel._id
+            : selectedApartment.apartmentModel || '',
           floorNumber: selectedApartment.floorNumber || '',
           apartmentNumber: selectedApartment.apartmentNumber || '',
           price: selectedApartment.price ?? '',
           pending: selectedApartment.pending ?? '',
           status: selectedApartment.status || 'available',
         })
+        setSelectedPolygonId(selectedApartment.floorPlanPolygonId || null)
       } else {
         setForm(DEFAULT_FORM)
+        setSelectedPolygonId(null)
       }
     }
   }, [selectedApartment, open])
 
-  const handleChange = (field, value) => setForm(prev => ({ ...prev, [field]: value }))
+  // Cuando cambia el piso:
+  const handleChange = (field, value) => {
+    if (field === 'floorNumber') {
+      setForm(prev => ({
+        ...prev,
+        [field]: value ? Number(value) : '' // Si es vacío, deja vacío
+      }))
+      setSelectedPolygonId(null)
+    } else {
+      setForm(prev => ({
+        ...prev,
+        [field]: value
+      }))
+    }
+  }
 
   const isValid =
     form.apartmentModel &&
     form.floorNumber &&
     form.apartmentNumber &&
     Number(form.price) >= 0 &&
-    Number(form.pending) >= 0
+    Number(form.pending) >= 0 &&
+    selectedPolygonId // Ahora es obligatorio seleccionar polígono
 
   const handleSubmit = () => {
     if (!isValid) return
+
     const payload = {
-      ...selectedApartment,
-      _id: selectedApartment?._id || `apt_${Date.now()}`,
-      ...form,
+      apartmentModel: form.apartmentModel,
+      floorNumber: Number(form.floorNumber),
+      apartmentNumber: form.apartmentNumber,
       price: Number(form.price),
       pending: Number(form.pending),
-      floorNumber: Number(form.floorNumber),
+      status: form.status,
+      floorPlanPolygonId: selectedPolygonId, // <--- CLAVE
     }
-    console.log('🏠 Apartment Payload:', payload)
+    if (selectedApartment?._id) {
+      payload._id = selectedApartment._id
+    }
+
     onSaved(payload)
   }
 
@@ -148,15 +192,20 @@ const ApartmentDialog = ({
         </Grid>
         <Grid item xs={12} sm={3}>
           <TextField
+            select
             required
             fullWidth
-            type="number"
             label="Floor Number"
-            inputProps={{ min: 1, max: buildingFloors }}
             value={form.floorNumber}
             onChange={e => handleChange('floorNumber', e.target.value)}
             sx={fieldSx}
-          />
+          >
+            {floorPlansArray.map(fp => (
+              <MenuItem key={fp.floorNumber} value={fp.floorNumber}>
+                {fp.floorNumber}
+              </MenuItem>
+            ))}
+          </TextField>
         </Grid>
         <Grid item xs={12} sm={3}>
           <TextField
@@ -206,7 +255,33 @@ const ApartmentDialog = ({
             <MenuItem value="pending">Pending</MenuItem>
           </TextField>
         </Grid>
+        <Grid item xs={12}>
+          <Button
+            variant="outlined"
+            fullWidth
+            disabled={!selectedFloorPlan}
+            onClick={() => setPolygonSelectorOpen(true)}
+            sx={{ mb: 1, borderRadius: 3, fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+          >
+            {selectedPolygonId ? `Polígono seleccionado: ${selectedPolygonId}` : 'Seleccionar polígono en plano'}
+          </Button>
+          {!selectedPolygonId && (
+            <Typography variant="caption" color="error">
+              Debes seleccionar un polígono del plano del piso.
+            </Typography>
+          )}
+        </Grid>
       </Grid>
+      <FloorPlanPolygonSelectorModal
+        open={polygonSelectorOpen}
+        onClose={() => setPolygonSelectorOpen(false)}
+        floorPlan={selectedFloorPlan}
+        selectedPolygonId={selectedPolygonId}
+        onSelectPolygon={id => {
+          setSelectedPolygonId(id)
+          setPolygonSelectorOpen(false)
+        }}
+      />
     </ModalWrapper>
   )
 }
