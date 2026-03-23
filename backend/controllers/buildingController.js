@@ -43,10 +43,94 @@ const parseExteriorRendersInput = (exteriorRenders) => {
   return []
 }
 
+const normalizeBuildingFloorPolygon = (polygon, index = 0) => {
+  const points = Array.isArray(polygon?.points)
+    ? polygon.points.map(toFiniteNumber).filter((n) => n !== null)
+    : []
+
+  const rawFloorNumber = Number(polygon?.floorNumber)
+  const floorNumber = Number.isFinite(rawFloorNumber) && rawFloorNumber >= 1
+    ? rawFloorNumber
+    : index + 1
+
+  return {
+    id: polygon?.id || `floor_poly_${Date.now()}_${index}`,
+    floorNumber,
+    points,
+    color: polygon?.color || '#8CA551',
+    name: polygon?.name || `Floor ${floorNumber}`,
+    isCommercial: Boolean(polygon?.isCommercial)
+  }
+}
+
+const parseLegacyPolygonToFloorPolygons = (legacyPolygon) => {
+  if (!Array.isArray(legacyPolygon) || legacyPolygon.length === 0) return []
+  const points = legacyPolygon
+    .flatMap((point) => [toFiniteNumber(point?.x), toFiniteNumber(point?.y)])
+    .filter((n) => n !== null)
+  if (points.length < 6) return []
+
+  return [{
+    id: 'legacy_floor_poly_1',
+    floorNumber: 1,
+    points,
+    color: '#8CA551',
+    name: 'Floor 1',
+    isCommercial: false
+  }]
+}
+
+const parseBuildingFloorPolygonsInput = (buildingFloorPolygons, legacyPolygon) => {
+  if (Array.isArray(buildingFloorPolygons)) {
+    return buildingFloorPolygons.map((poly, idx) => normalizeBuildingFloorPolygon(poly, idx))
+  }
+  if (buildingFloorPolygons && Array.isArray(buildingFloorPolygons.data)) {
+    return buildingFloorPolygons.data.map((poly, idx) => normalizeBuildingFloorPolygon(poly, idx))
+  }
+  return parseLegacyPolygonToFloorPolygons(legacyPolygon)
+}
+
+const validateBuildingFloorPolygons = (buildingFloorPolygons) => {
+  if (!Array.isArray(buildingFloorPolygons)) return { ok: true }
+
+  const floorNumbers = new Set()
+  const polygonIds = new Set()
+
+  for (const poly of buildingFloorPolygons) {
+    const floorNumber = Number(poly?.floorNumber)
+    if (!Number.isFinite(floorNumber) || floorNumber < 1) {
+      return { ok: false, message: 'Each buildingFloorPolygon requires a valid floorNumber >= 1' }
+    }
+    if (floorNumbers.has(floorNumber)) {
+      return { ok: false, message: `Duplicate floorNumber ${floorNumber} in buildingFloorPolygons` }
+    }
+    floorNumbers.add(floorNumber)
+
+    const polygonId = String(poly?.id || '').trim()
+    if (!polygonId) {
+      return { ok: false, message: 'Each buildingFloorPolygon requires a non-empty id' }
+    }
+    if (polygonIds.has(polygonId)) {
+      return { ok: false, message: `Duplicate polygon id ${polygonId} in buildingFloorPolygons` }
+    }
+    polygonIds.add(polygonId)
+
+    if (!Array.isArray(poly?.points) || poly.points.length < 6) {
+      return { ok: false, message: `Polygon ${polygonId} must have at least 3 points (6 numeric values)` }
+    }
+  }
+
+  return { ok: true }
+}
+
 const toBuildingPayload = (buildingDoc) => {
   const building = buildingDoc?.toObject ? buildingDoc.toObject() : buildingDoc
   const floorPlans = Array.isArray(building.floorPlans) ? building.floorPlans : []
   const exteriorRenders = Array.isArray(building.exteriorRenders) ? building.exteriorRenders : []
+  const buildingFloorPolygons = parseBuildingFloorPolygonsInput(
+    building.buildingFloorPolygons,
+    building.polygon
+  )
 
   return {
     ...building,
@@ -63,7 +147,8 @@ const toBuildingPayload = (buildingDoc) => {
     exteriorRenders: {
       count: exteriorRenders.length,
       urls: exteriorRenders
-    }
+    },
+    buildingFloorPolygons
   }
 }
 
@@ -114,10 +199,19 @@ export const getBuildingById = async (req, res) => {
 
 export const createBuilding = async (req, res) => {
   try {
-    const { projectId, project, name, section, floors, floorPlans, exteriorRenders, polygon, totalApartments } = req.body
+    const {
+      projectId, project, name, section, floors, floorPlans,
+      exteriorRenders, polygon, buildingFloorPolygons, totalApartments
+    } = req.body
     const projId = projectId || project
     if (!projId) {
       return res.status(400).json({ message: 'projectId (or project) is required' })
+    }
+
+    const normalizedBuildingFloorPolygons = parseBuildingFloorPolygonsInput(buildingFloorPolygons, polygon)
+    const polygonsValidation = validateBuildingFloorPolygons(normalizedBuildingFloorPolygons)
+    if (!polygonsValidation.ok) {
+      return res.status(400).json({ message: polygonsValidation.message })
     }
 
     const building = await Building.create({
@@ -128,6 +222,7 @@ export const createBuilding = async (req, res) => {
       floorPlans: parseFloorPlansInput(floorPlans),
       exteriorRenders: parseExteriorRendersInput(exteriorRenders),
       polygon: polygon || [],
+      buildingFloorPolygons: normalizedBuildingFloorPolygons,
       totalApartments: totalApartments || 0
     })
 
@@ -144,13 +239,27 @@ export const updateBuilding = async (req, res) => {
       return res.status(404).json({ message: 'Building not found' })
     }
 
-    const { name, section, floors, floorPlans, exteriorRenders, polygon, totalApartments, status } = req.body
+    const {
+      name, section, floors, floorPlans, exteriorRenders, polygon,
+      buildingFloorPolygons, totalApartments, status
+    } = req.body
     if (name != null) building.name = name
     if (section != null) building.section = section
     if (floors != null) building.floors = floors
     if (floorPlans != null) building.floorPlans = parseFloorPlansInput(floorPlans)
     if (exteriorRenders != null) building.exteriorRenders = parseExteriorRendersInput(exteriorRenders)
     if (polygon != null) building.polygon = polygon
+    if (buildingFloorPolygons != null || polygon != null) {
+      const normalizedBuildingFloorPolygons = parseBuildingFloorPolygonsInput(
+        buildingFloorPolygons,
+        polygon != null ? polygon : building.polygon
+      )
+      const polygonsValidation = validateBuildingFloorPolygons(normalizedBuildingFloorPolygons)
+      if (!polygonsValidation.ok) {
+        return res.status(400).json({ message: polygonsValidation.message })
+      }
+      building.buildingFloorPolygons = normalizedBuildingFloorPolygons
+    }
     if (totalApartments != null) building.totalApartments = totalApartments
     if (status != null) building.status = status
 
