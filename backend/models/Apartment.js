@@ -3,6 +3,11 @@ import Phase from './Phase.js'
 
 const apartmentSchema = new mongoose.Schema(
   {
+    building: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Building',
+      default: null
+    },
     apartmentModel: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'ApartmentModel',
@@ -17,6 +22,11 @@ const apartmentSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Apartment number is required'],
       trim: true
+    },
+    floorPlanPolygonId: {
+      type: String,
+      trim: true,
+      default: null
     },
     interiorRendersBasic: [{
       type: String,
@@ -72,6 +82,12 @@ const apartmentSchema = new mongoose.Schema(
 apartmentSchema.index({ apartmentModel: 1 })
 apartmentSchema.index({ apartmentModel: 1, apartmentNumber: 1 }, { unique: true })
 apartmentSchema.index({ users: 1 })
+apartmentSchema.index({ building: 1, floorNumber: 1, floorPlanPolygonId: 1 }, {
+  unique: true,
+  partialFilterExpression: {
+    floorPlanPolygonId: { $exists: true, $ne: null, $type: 'string' }
+  }
+})
 
 apartmentSchema.virtual('payloads', {
   ref: 'Payload',
