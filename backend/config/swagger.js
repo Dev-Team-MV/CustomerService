@@ -12,7 +12,10 @@ const options = {
     info: {
       title: 'Customer Service API',
       version: '1.0.0',
-      description: 'API documentation for Customer Service Backend',
+      description:
+        'API documentation for Customer Service Backend.\n\n' +
+        'Acceso por proyecto: los residentes obtienen la lista en GET /api/users/me/projects. ' +
+        'El campo opcional projectMemberships en User complementa el acceso derivado de propiedades/apartamentos.',
       contact: {
         name: 'API Support'
       }
@@ -34,6 +37,21 @@ const options = {
         }
       },
       schemas: {
+        ProjectMembership: {
+          type: 'object',
+          description: 'Acceso explícito a un proyecto (opcional). Se combina con el acceso derivado de Property / Apartment.',
+          properties: {
+            project: {
+              type: 'string',
+              description: 'Project ID (ref)'
+            },
+            role: {
+              type: 'string',
+              enum: ['resident', 'viewer'],
+              description: 'resident = mismo nivel que dueño para UI; viewer = solo lectura (según implementes en front)'
+            }
+          }
+        },
         User: {
           type: 'object',
           properties: {
@@ -45,9 +63,28 @@ const options = {
             birthday: { type: 'string', format: 'date' },
             role: { type: 'string', enum: ['superadmin', 'admin', 'user'] },
             lots: { type: 'array', items: { type: 'string' } },
+            projectMemberships: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/ProjectMembership' },
+              description: 'Membresías opcionales por proyecto (además de casas/apartamentos asignados)'
+            },
             isActive: { type: 'boolean' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        MyProjectsResponse: {
+          type: 'array',
+          description: 'Lista de proyectos accesibles para el usuario actual',
+          items: {
+            type: 'object',
+            properties: {
+              _id: { type: 'string' },
+              name: { type: 'string' },
+              slug: { type: 'string' },
+              phase: { type: 'string', description: 'Ej. I, II' },
+              type: { type: 'string', enum: ['residential_lots', 'apartments', 'other'] }
+            }
           }
         },
         Project: {
@@ -184,13 +221,26 @@ const options = {
         },
         Payload: {
           type: 'object',
+          description: 'Pago/comprobante. Exactamente uno de property o apartment.',
           properties: {
             _id: { type: 'string' },
-            property: { type: 'string' },
+            property: { type: 'string', description: 'Property ID (lotes/casas). Mutually exclusive with apartment.' },
+            apartment: { type: 'string', description: 'Apartment ID (phase 2). Mutually exclusive with property.' },
             amount: { type: 'number' },
             date: { type: 'string', format: 'date' },
             support: { type: 'string' },
+            urls: { type: 'array', items: { type: 'string' }, description: 'Paths or URLs de comprobantes' },
             status: { type: 'string', enum: ['pending', 'signed', 'rejected'] },
+            type: {
+              type: 'string',
+              enum: [
+                'initial down payment',
+                'complementary down payment',
+                'monthly payment',
+                'additional payment',
+                'closing payment'
+              ]
+            },
             notes: { type: 'string' },
             processedBy: { type: 'string' },
             createdAt: { type: 'string', format: 'date-time' },

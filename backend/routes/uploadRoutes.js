@@ -1,5 +1,5 @@
 import express from 'express'
-import { uploadImage, uploadMultipleImages, updateImage, deleteImage, testGCSConnection, getFolderFiles, getSignedUrlForPath, updateRecorridoVisibility, upload } from '../controllers/uploadController.js'
+import { uploadImage, uploadMultipleImages, updateImage, updateApartmentRenderImage, deleteImage, testGCSConnection, getFolderFiles, getSignedUrlForPath, updateRecorridoVisibility, upload } from '../controllers/uploadController.js'
 import { protect, admin, optionalProtect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -313,6 +313,73 @@ router.post('/images', protect, upload.array('images', 20), uploadMultipleImages
  *         description: Error updating image
  */
 router.post('/image/update', protect, admin, upload.single('image'), updateImage)
+
+/**
+ * @swagger
+ * /api/upload/apartment-render/update:
+ *   post:
+ *     summary: Upload image and update apartment interior renders (Admin only)
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: formData
+ *         name: image
+ *         type: file
+ *         required: true
+ *         description: Render image file to upload
+ *       - in: formData
+ *         name: apartmentId
+ *         type: string
+ *         required: true
+ *         description: Apartment _id
+ *       - in: formData
+ *         name: renderType
+ *         type: string
+ *         required: true
+ *         enum: [basic, upgrade]
+ *         description: Target render collection in apartment
+ *       - in: formData
+ *         name: imageIndex
+ *         type: integer
+ *         description: Optional. Replace image at this index; if omitted, appends
+ *       - in: formData
+ *         name: folder
+ *         type: string
+ *         description: GCS folder (default apartments)
+ *       - in: formData
+ *         name: fileName
+ *         type: string
+ *         description: Optional custom file name. If provided, it replaces files with same base name in folder.
+ *     responses:
+ *       200:
+ *         description: Apartment render image updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 message: { type: string }
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     apartmentId: { type: string }
+ *                     renderType: { type: string, enum: [basic, upgrade] }
+ *                     field: { type: string, enum: [interiorRendersBasic, interiorRendersUpgrade] }
+ *                     url: { type: string }
+ *                     fileName: { type: string }
+ *                     index: { type: number }
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Apartment not found
+ *       500:
+ *         description: Error updating apartment render image
+ */
+router.post('/apartment-render/update', protect, admin, upload.single('image'), updateApartmentRenderImage)
 
 /**
  * @swagger

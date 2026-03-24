@@ -20,7 +20,7 @@ const router = express.Router()
  * @swagger
  * /api/contracts:
  *   get:
- *     summary: Get all contracts (optional filter by propertyId)
+ *     summary: Get all contracts (optional filter by propertyId or apartmentId)
  *     tags: [Contracts]
  *     security:
  *       - bearerAuth: []
@@ -29,11 +29,18 @@ const router = express.Router()
  *         name: propertyId
  *         schema:
  *           type: string
+ *         description: Filter by Property (lotes/casas)
+ *       - in: query
+ *         name: apartmentId
+ *         schema:
+ *           type: string
+ *         description: Filter by Apartment (phase 2)
  *     responses:
  *       200:
  *         description: List of contract documents
  *   post:
- *     summary: Create or update contracts for a property (Admin only)
+ *     summary: Create or merge contracts for a property OR an apartment (Admin only)
+ *     description: Send exactly one of propertyId or apartmentId (not both).
  *     tags: [Contracts]
  *     security:
  *       - bearerAuth: []
@@ -43,11 +50,13 @@ const router = express.Router()
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - propertyId
  *             properties:
  *               propertyId:
  *                 type: string
+ *                 description: Property _id (lotes/casas). Mutually exclusive with apartmentId.
+ *               apartmentId:
+ *                 type: string
+ *                 description: Apartment _id. Mutually exclusive with propertyId.
  *               contracts:
  *                 type: array
  *                 items:
@@ -64,11 +73,28 @@ const router = express.Router()
  *                     uploadedAt:
  *                       type: string
  *                       format: date-time
+ *           examples:
+ *             forProperty:
+ *               summary: Contratos para una Property
+ *               value:
+ *                 propertyId: 65f1a2b3c4d5e6f7890a1111
+ *                 contracts:
+ *                   - type: purchaseContract
+ *                     fileUrl: contracts/property-abc.pdf
+ *             forApartment:
+ *               summary: Contratos para un Apartment
+ *               value:
+ *                 apartmentId: 65f1a2b3c4d5e6f7890a2222
+ *                 contracts:
+ *                   - type: promissoryNote
+ *                     fileUrl: contracts/apt-301.pdf
  *     responses:
  *       201:
  *         description: Contracts created or updated
+ *       400:
+ *         description: Exactly one of propertyId or apartmentId required
  *       404:
- *         description: Property not found
+ *         description: Property or Apartment not found
  */
 router
   .route('/')
@@ -96,6 +122,27 @@ router
  *         description: No contracts found for this property
  */
 router.get('/property/:propertyId', protect, getContractsByPropertyId)
+
+/**
+ * @swagger
+ * /api/contracts/apartment/{apartmentId}:
+ *   get:
+ *     summary: Get contracts by apartment ID
+ *     tags: [Contracts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: apartmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Contract document for the apartment
+ *       404:
+ *         description: No contracts found for this apartment
+ */
 router.get('/apartment/:apartmentId', protect, getContractsByApartmentId)
 
 /**
@@ -141,6 +188,49 @@ router.get('/apartment/:apartmentId', protect, getContractsByApartmentId)
  *         description: No contracts for this property; use POST to create first
  */
 router.put('/property/:propertyId', protect, admin, updateContractByPropertyId)
+
+/**
+ * @swagger
+ * /api/contracts/apartment/{apartmentId}:
+ *   put:
+ *     summary: Add or update contract types for an apartment (Admin only). Merges by type.
+ *     tags: [Contracts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: apartmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               contracts:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - type
+ *                     - fileUrl
+ *                   properties:
+ *                     type:
+ *                       type: string
+ *                       enum: [promissoryNote, purchaseContract, agreement]
+ *                     fileUrl:
+ *                       type: string
+ *                     uploadedAt:
+ *                       type: string
+ *                       format: date-time
+ *     responses:
+ *       200:
+ *         description: Contracts merged (added/updated by type)
+ *       404:
+ *         description: No contracts for this apartment; use POST to create first
+ */
 router.put('/apartment/:apartmentId', protect, admin, updateContractByApartmentId)
 
 /**
@@ -170,6 +260,33 @@ router.put('/apartment/:apartmentId', protect, admin, updateContractByApartmentI
  *         description: No contract found for this property/type
  */
 router.get('/property/:propertyId/download/:type', protect, downloadContractByPropertyAndType)
+
+/**
+ * @swagger
+ * /api/contracts/apartment/{apartmentId}/download/{type}:
+ *   get:
+ *     summary: Download contract file by apartment and type (proxy; avoids CORS)
+ *     tags: [Contracts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: apartmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: type
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [promissoryNote, purchaseContract, agreement]
+ *     responses:
+ *       200:
+ *         description: File stream (attachment)
+ *       404:
+ *         description: No contract found for this apartment/type
+ */
 router.get('/apartment/:apartmentId/download/:type', protect, downloadContractByApartmentAndType)
 
 /**

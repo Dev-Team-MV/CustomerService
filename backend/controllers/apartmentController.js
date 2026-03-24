@@ -17,6 +17,13 @@ function sameId(a, b) {
   return toIdStr(a).toLowerCase() === toIdStr(b).toLowerCase()
 }
 
+function getSelectedApartmentRenders(apartmentLike) {
+  const selectedType = apartmentLike?.selectedRenderType === 'upgrade' ? 'upgrade' : 'basic'
+  const basic = Array.isArray(apartmentLike?.interiorRendersBasic) ? apartmentLike.interiorRendersBasic : []
+  const upgrade = Array.isArray(apartmentLike?.interiorRendersUpgrade) ? apartmentLike.interiorRendersUpgrade : []
+  return selectedType === 'upgrade' ? upgrade : basic
+}
+
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value)
 
 const normalizePolygonId = (value) => {
@@ -115,6 +122,7 @@ export const getAllApartments = async (req, res) => {
     const result = apartments.map(a => {
       const obj = a.toObject()
       obj.totalConstructionPercentage = a.totalConstructionPercentage || 0
+      obj.selectedRenders = getSelectedApartmentRenders(obj)
       return obj
     })
     res.json(result)
@@ -159,6 +167,7 @@ export const getApartmentById = async (req, res) => {
 
     const obj = apartment.toObject()
     obj.totalConstructionPercentage = apartment.totalConstructionPercentage || 0
+    obj.selectedRenders = getSelectedApartmentRenders(obj)
     res.json(obj)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -177,6 +186,7 @@ export const createApartment = async (req, res) => {
       interiorRendersBasic,
       interiorRendersUpgrade,
       polygon,
+      selectedRenderType,
       user,
       users,
       price,
@@ -231,6 +241,7 @@ export const createApartment = async (req, res) => {
       floorPlanPolygonId: normalizePolygonId(floorPlanPolygonId),
       interiorRendersBasic: interiorRendersBasic || [],
       interiorRendersUpgrade: interiorRendersUpgrade || [],
+      selectedRenderType: selectedRenderType || 'basic',
       polygon: polygon || [],
       users: ownerIds,
       price: priceVal,
@@ -253,6 +264,7 @@ export const createApartment = async (req, res) => {
 
     const obj = populated.toObject()
     obj.totalConstructionPercentage = populated.totalConstructionPercentage || 0
+    obj.selectedRenders = getSelectedApartmentRenders(obj)
     res.status(201).json(obj)
   } catch (error) {
     if (error?.code === 11000 && error?.keyPattern?.floorPlanPolygonId) {
@@ -264,7 +276,7 @@ export const createApartment = async (req, res) => {
 
 const ALLOWED_APARTMENT_UPDATES = [
   'floorNumber', 'apartmentNumber', 'interiorRendersBasic', 'interiorRendersUpgrade',
-  'polygon', 'users', 'price', 'pending', 'initialPayment', 'status', 'saleDate',
+  'selectedRenderType', 'polygon', 'users', 'price', 'pending', 'initialPayment', 'status', 'saleDate',
   'floorPlanPolygonId'
 ]
 
@@ -321,6 +333,7 @@ export const updateApartment = async (req, res) => {
 
     const obj = populated.toObject()
     obj.totalConstructionPercentage = populated.totalConstructionPercentage || 0
+    obj.selectedRenders = getSelectedApartmentRenders(obj)
     res.json(obj)
   } catch (error) {
     if (error?.code === 11000 && error?.keyPattern?.floorPlanPolygonId) {

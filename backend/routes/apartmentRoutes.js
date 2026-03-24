@@ -68,7 +68,7 @@ const router = express.Router()
  *         description: Restrict to apartments visible to current user
  *     responses:
  *       200:
- *         description: List of apartments
+ *         description: List of apartments (includes selectedRenders based on selectedRenderType)
  *   post:
  *     summary: Create a new apartment (Admin only)
  *     tags: [Apartments]
@@ -111,6 +111,10 @@ const router = express.Router()
  *                 type: array
  *                 items:
  *                   type: string
+ *               selectedRenderType:
+ *                 type: string
+ *                 enum: [basic, upgrade]
+ *                 description: Render type selected for this apartment (used when assigning/selling)
  *               polygon:
  *                 type: array
  *                 description: Polygon points [{x,y}, ...]
@@ -142,6 +146,7 @@ const router = express.Router()
  *                 floorNumber: 3
  *                 apartmentNumber: "301"
  *                 floorPlanPolygonId: poly-3-07
+ *                 selectedRenderType: basic
  *                 user: 65f1a2b3c4d5e6f7890a3001
  *                 price: 250000
  *                 initialPayment: 20000
@@ -305,7 +310,7 @@ router.delete('/:id/share/:userId', protect, revokeApartmentShare)
  *           type: string
  *     responses:
  *       200:
- *         description: Apartment details (includes phases)
+ *         description: Apartment details (includes phases and selectedRenders)
  *       404:
  *         description: Apartment not found
  *   put:
@@ -339,6 +344,9 @@ router.delete('/:id/share/:userId', protect, revokeApartmentShare)
  *                 type: array
  *                 items:
  *                   type: string
+ *               selectedRenderType:
+ *                 type: string
+ *                 enum: [basic, upgrade]
  *               polygon:
  *                 type: array
  *                 items:
@@ -365,6 +373,7 @@ router.delete('/:id/share/:userId', protect, revokeApartmentShare)
  *               value:
  *                 users:
  *                   - 65f1a2b3c4d5e6f7890a3001
+ *                 selectedRenderType: upgrade
  *                 status: pending
  *             updateFinancialsAndPolygon:
  *               summary: Update pricing and floor polygon assignment

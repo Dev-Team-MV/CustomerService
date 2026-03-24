@@ -62,7 +62,23 @@ const userSchema = new mongoose.Schema(
     passwordSet: {
       type: Boolean,
       default: false
-    }
+    },
+    /**
+     * Acceso explícito a proyectos (opcional). Se combina con el que ya deriva de
+     * Property / Apartment (dueño o share). Útil para permisos sin duplicar usuarios.
+     */
+    projectMemberships: [{
+      project: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Project',
+        required: true
+      },
+      role: {
+        type: String,
+        enum: ['resident', 'viewer'],
+        default: 'resident'
+      }
+    }]
   },
   {
     timestamps: true

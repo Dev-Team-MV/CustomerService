@@ -4,7 +4,8 @@ import {
   getUserById,
   updateUser,
   deleteUser,
-  searchUsers
+  searchUsers,
+  getMyProjects
 } from '../controllers/userController.js'
 import { sendSetupPasswordLink } from '../controllers/authController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
@@ -50,6 +51,29 @@ router.route('/').get(protect, admin, getAllUsers)
  *         description: Array of users { _id, firstName, lastName, email }
  */
 router.get('/search', protect, searchUsers)
+
+/**
+ * @swagger
+ * /api/users/me/projects:
+ *   get:
+ *     summary: Proyectos accesibles para el usuario actual
+ *     description: |
+ *       - **user (residente):** proyectos donde tiene Property o Apartment visible (dueño/share) o entradas en `projectMemberships`.
+ *       - **admin / superadmin:** todos los proyectos (selector de gestión).
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de proyectos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MyProjectsResponse'
+ *       401:
+ *         description: No autorizado
+ */
+router.get('/me/projects', protect, getMyProjects)
 
 /**
  * @swagger

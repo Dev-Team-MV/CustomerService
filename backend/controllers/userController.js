@@ -1,4 +1,6 @@
 import User from '../models/User.js'
+import Project from '../models/Project.js'
+import { getProjectIdsForUser } from '../utils/projectAccess.js'
 
 /**
  * Search users by email, firstName or lastName. Available to any authenticated user
@@ -25,6 +27,31 @@ export const searchUsers = async (req, res) => {
       .limit(query.length >= 2 ? 50 : 100)
       .sort({ lastName: 1, firstName: 1 })
     res.json(users)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+/**
+ * Proyectos en los que el usuario tiene presencia (P1 vía Property, P2 vía Apartment, o projectMemberships).
+ * admin/superadmin: listan todos los proyectos (gestión).
+ */
+export const getMyProjects = async (req, res) => {
+  try {
+    if (req.user.role === 'admin' || req.user.role === 'superadmin') {
+      const all = await Project.find({})
+        .select('name slug phase type')
+        .sort({ name: 1 })
+      return res.json(all)
+    }
+    const ids = await getProjectIdsForUser(req.user._id)
+    if (ids.length === 0) {
+      return res.json([])
+    }
+    const projects = await Project.find({ _id: { $in: ids } })
+      .select('name slug phase type')
+      .sort({ name: 1 })
+    res.json(projects)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
