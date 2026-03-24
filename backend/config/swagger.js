@@ -221,13 +221,26 @@ const options = {
         },
         Payload: {
           type: 'object',
+          description: 'Pago/comprobante. Exactamente uno de property o apartment.',
           properties: {
             _id: { type: 'string' },
-            property: { type: 'string' },
+            property: { type: 'string', description: 'Property ID (lotes/casas). Mutually exclusive with apartment.' },
+            apartment: { type: 'string', description: 'Apartment ID (phase 2). Mutually exclusive with property.' },
             amount: { type: 'number' },
             date: { type: 'string', format: 'date' },
             support: { type: 'string' },
+            urls: { type: 'array', items: { type: 'string' }, description: 'Paths or URLs de comprobantes' },
             status: { type: 'string', enum: ['pending', 'signed', 'rejected'] },
+            type: {
+              type: 'string',
+              enum: [
+                'initial down payment',
+                'complementary down payment',
+                'monthly payment',
+                'additional payment',
+                'closing payment'
+              ]
+            },
             notes: { type: 'string' },
             processedBy: { type: 'string' },
             createdAt: { type: 'string', format: 'date-time' },
