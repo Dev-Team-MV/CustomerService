@@ -194,8 +194,10 @@ const ApartmentSelector = () => {
                       onMouseEnter={() => setHoveredPoly(poly.id)}
                       onMouseLeave={() => setHoveredPoly(null)}
                       perfectDrawEnabled={false}
-                      listening={isAvail}
+                      listening={isAvail} // <--- SOLO escucha eventos si está disponible
                       opacity={0.7}
+                      // Cambia el cursor según disponibilidad
+                      cursor={isAvail ? 'pointer' : 'not-allowed'}
                     />
                     {/* Tooltip-like label */}
                     {isHovered && apt && (

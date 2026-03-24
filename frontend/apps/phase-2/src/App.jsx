@@ -25,18 +25,18 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/quote" element={<GetYourQuote />} />
           <Route element={<ProtectedRoute />}>
             <Route
               element={
                 <Layout
-                  publicView={false}
-                  menuItems={privateMenuItems}
-                  publicMenuItems={publicMenuItems}
-                  logoSrc={logoPhase2}
+                publicView={false}
+                menuItems={privateMenuItems}
+                publicMenuItems={publicMenuItems}
+                logoSrc={logoPhase2}
                 />
               }
             >
+              <Route path="/quote" element={<GetYourQuote />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/residents" element={<Residents />} />

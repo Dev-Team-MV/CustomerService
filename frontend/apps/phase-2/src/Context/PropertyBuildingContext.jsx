@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import buildingService from '../Services/buildingService'
+import userService from '@shared/services/userService'
+import projectService from '@shared/services/projectService' // Asegúrate de tener este servicio
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Context definition
@@ -33,6 +35,8 @@ export const PropertyBuildingProvider = ({ children }) => {
   const [selectedApartment, setSelectedApartment] = useState(null)
   const [apartmentType, setApartmentType]         = useState(null)
 
+  const [selectedRenderType, setSelectedRenderType] = useState(null)
+
   // ── Financials ────────────────────────────────────────────────────────────────
   const [financials, setFinancials] = useState({
     listPrice:                  0,
@@ -51,6 +55,38 @@ export const PropertyBuildingProvider = ({ children }) => {
 
   // ── Stepper manual control ────────────────────────────────────────────────────
   const [stepIndex, setStepIndex] = useState(0)
+
+  // NUEVO: Estado para usuario seleccionado
+  const [selectedUser, setSelectedUser] = useState(null)
+
+  // NUEVO: Estado para usuarios y proyectos
+  const [users, setUsers] = useState([])
+  const [projects, setProjects] = useState([])
+  const [selectedProject, setSelectedProject] = useState('')
+  const [loadingProjects, setLoadingProjects] = useState(false)
+
+  // ── Load users ───────────────────────────────────────────────────────────────
+  const refreshUsers = useCallback(async () => {
+    try {
+      const data = await userService.getAll()
+      setUsers(Array.isArray(data) ? data : [])
+    } catch (err) {
+      setUsers([])
+    }
+  }, [])
+
+  // ── Load projects ────────────────────────────────────────────────────────────
+  const refreshProjects = useCallback(async () => {
+    setLoadingProjects(true)
+    try {
+      const data = await projectService.getAll()
+      setProjects(Array.isArray(data) ? data : [])
+    } catch (err) {
+      setProjects([])
+    } finally {
+      setLoadingProjects(false)
+    }
+  }, [])
 
   // Sincroniza el stepIndex con las selecciones (avanza automáticamente)
   useEffect(() => {
@@ -337,6 +373,25 @@ export const PropertyBuildingProvider = ({ children }) => {
 
     // ── Refresh
     refreshBuildings: loadBuildings,
+
+    // NUEVO: Usuario seleccionado y usuarios
+    selectedUser,
+    setSelectedUser,
+    users,
+    setUsers,
+    refreshUsers,
+
+    // NUEVO: Proyectos
+    projects,
+    setProjects,
+    selectedProject,
+    setSelectedProject,
+    loadingProjects,
+    refreshProjects,
+    
+    // Render type
+    selectedRenderType,
+    setSelectedRenderType,
   }
 
   return (

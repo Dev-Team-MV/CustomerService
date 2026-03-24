@@ -154,6 +154,16 @@ export const usePropertyColumns = ({
         renderCell: ({ row }) => <StatusCell status={row.status} t={t} />
       },
       {
+        field: 'building',
+        headerName: t ? t('property:table.building') : 'Building',
+        minWidth: 140,
+        renderCell: ({ row }) => (
+          <Typography variant="body2" sx={{ fontWeight: 500, color: theme.palette.text.primary, fontFamily: '"Poppins", sans-serif' }}>
+            {row.building}
+          </Typography>
+        )
+      },
+      {
         field: 'model',
         headerName: t ? t('property:table.model') : 'Model',
         minWidth: 120,

@@ -114,6 +114,22 @@ const uploadService = {
       throw new Error(error.response?.data?.message || 'Failed to delete image')
     }
   },
+
+    // Sube una imagen de render interior básico de apartamento
+  uploadApartmentInteriorBasic: async (file, isPublic = true) => {
+    return uploadService.uploadImage(file, 'apartments/interior/basic', '', isPublic)
+  },
+
+  // Sube una imagen de render interior upgrade de apartamento
+  uploadApartmentInteriorUpgrade: async (file, isPublic = true) => {
+    return uploadService.uploadImage(file, 'apartments/interior/upgrade', '', isPublic)
+  },
+
+  // Sube múltiples imágenes de renders interiores (basic o upgrade)
+  uploadApartmentInteriorImages: async (files, type = 'basic', isPublic = true) => {
+    const folder = `apartments/interior/${type}`
+    return uploadService.uploadMultipleImages(files, folder, isPublic)
+  },
 }
 
 export default uploadService

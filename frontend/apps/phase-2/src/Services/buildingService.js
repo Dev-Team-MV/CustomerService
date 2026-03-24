@@ -268,22 +268,46 @@ const buildingService = {
     }
   },
 
-  createApartment: async (apartmentData) => {
-    try {
-    const payload = {
-      apartmentModelId: apartmentData.apartmentModel || apartmentData.apartmentModelId,
-      floorNumber: Number(apartmentData.floorNumber),
-      apartmentNumber: apartmentData.apartmentNumber,
-      price: Number(apartmentData.price) || 0,
-      initialPayment: Number(apartmentData.initialPayment) || 0,
-      interiorRendersBasic: apartmentData.interiorRendersBasic || [],
-      interiorRendersUpgrade: apartmentData.interiorRendersUpgrade || [],
-      polygon: apartmentData.polygon || [],
-      users: apartmentData.users || [],
-      status: apartmentData.status || 'available',
-      floorPlanPolygonId: apartmentData.floorPlanPolygonId || null, // <--- NUEVO
-    }
+  // createApartment: async (apartmentData) => {
+  //   try {
+  //   const payload = {
+  //     apartmentModelId: apartmentData.apartmentModel || apartmentData.apartmentModelId,
+  //     floorNumber: Number(apartmentData.floorNumber),
+  //     apartmentNumber: apartmentData.apartmentNumber,
+  //     price: Number(apartmentData.price) || 0,
+  //     initialPayment: Number(apartmentData.initialPayment) || 0,
+  //     interiorRendersBasic: apartmentData.interiorRendersBasic || [],
+  //     interiorRendersUpgrade: apartmentData.interiorRendersUpgrade || [],
+  //     polygon: apartmentData.polygon || [],
+  //     users: apartmentData.users || [],
+  //     status: apartmentData.status || 'available',
+  //     floorPlanPolygonId: apartmentData.floorPlanPolygonId || null, // <--- NUEVO
+  //   }
 
+  //     const response = await api.post('/apartments', payload)
+  //     return response.data
+  //   } catch (error) {
+  //     console.error('❌ Error creating apartment:', error)
+  //     throw new Error(error.response?.data?.message || 'Failed to create apartment')
+  //   }
+  // },
+    createApartment: async (apartmentData) => {
+    try {
+      const payload = {
+        apartmentModelId: apartmentData.apartmentModel || apartmentData.apartmentModelId,
+        floorNumber: Number(apartmentData.floorNumber),
+        apartmentNumber: apartmentData.apartmentNumber,
+        price: Number(apartmentData.price) || 0,
+        initialPayment: Number(apartmentData.initialPayment) || 0,
+        interiorRendersBasic: apartmentData.interiorRendersBasic || [],
+        interiorRendersUpgrade: apartmentData.interiorRendersUpgrade || [],
+        polygon: apartmentData.polygon || [],
+        users: apartmentData.users || [],
+        status: apartmentData.status || 'available',
+        floorPlanPolygonId: apartmentData.floorPlanPolygonId || null,
+        selectedRenderType: apartmentData.selectedRenderType || null, // <--- AGREGA ESTO
+      }
+  
       const response = await api.post('/apartments', payload)
       return response.data
     } catch (error) {
@@ -292,9 +316,23 @@ const buildingService = {
     }
   },
 
-  updateApartment: async (id, apartmentData) => {
+  // updateApartment: async (id, apartmentData) => {
+  //   try {
+  //     const response = await api.put(`/apartments/${id}`, apartmentData)
+  //     return response.data
+  //   } catch (error) {
+  //     console.error('❌ Error updating apartment:', error)
+  //     throw new Error(error.response?.data?.message || 'Failed to update apartment')
+  //   }
+  // },
+
+    updateApartment: async (id, apartmentData) => {
     try {
-      const response = await api.put(`/apartments/${id}`, apartmentData)
+      const payload = {
+        ...apartmentData,
+        selectedRenderType: apartmentData.selectedRenderType || null // <--- Asegura que se envía
+      }
+      const response = await api.put(`/apartments/${id}`, payload)
       return response.data
     } catch (error) {
       console.error('❌ Error updating apartment:', error)

@@ -168,7 +168,7 @@ const BuildingOverviewTab = ({
       open={exteriorModal.open}
       onClose={handleCloseExteriorEditor}
       exteriorUrl={building.exteriorRenders?.[0] || building.exteriorRenders?.urls?.[0]}
-      polygons={building.buildingFloorPolygons || []}   // <--- CAMBIO AQUÍ
+      polygons={building.buildingFloorPolygons || []}
       onSave={handleSaveExteriorPolygons}
     />
   </Grid>

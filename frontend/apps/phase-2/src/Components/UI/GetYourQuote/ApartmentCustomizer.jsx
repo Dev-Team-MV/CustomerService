@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Box, Paper, Typography, Card, CardActionArea,
   Chip, Divider, Grid, useTheme, useMediaQuery
@@ -25,6 +25,8 @@ const ApartmentCustomizer = () => {
     apartmentType,
     selectApartmentType,
     financials,
+    selectedRenderType,
+    setSelectedRenderType,
   } = usePropertyBuilding()
 
     console.log('[STEP 4] selectedApartment:', selectedApartment)
@@ -36,7 +38,13 @@ const ApartmentCustomizer = () => {
 
   const [previewIdx, setPreviewIdx] = useState(0)
 
-  if (!selectedApartment) return null
+  useEffect(() => {
+    if (!apartmentType && selectedApartment && (selectedApartment.interiorRendersBasic || []).length > 0) {
+      selectApartmentType('basic')
+    }
+    // eslint-disable-next-line
+  }, [selectedApartment, apartmentType, selectApartmentType])
+
 
   const model     = selectedApartment.apartmentModel
   const renders   = apartmentType === 'upgrade'
@@ -49,6 +57,7 @@ const ApartmentCustomizer = () => {
   const handleTypeSelect = (type) => {
     setPreviewIdx(0)
     selectApartmentType(type)
+    setSelectedRenderType(type) // <--- NUEVO
   }
 
   return (

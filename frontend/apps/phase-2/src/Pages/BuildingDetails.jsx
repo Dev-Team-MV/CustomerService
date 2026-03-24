@@ -14,7 +14,7 @@ import StatsCards from '@shared/components/statscard'
 import ApartmentDialog from '../Components/UI/buildingsComponents/ApartmentDialog'
 import { useBuildingDetail } from '../Constants/hooks/useBuildings'
 import useModalState from '@shared/hooks/useModalState'
-
+import buildingService from '../Services/buildingService'
 import BuildingOverviewTab from '../Components/UI/buildingsComponents/DETAILS/BuildingOverviewTab'
 import BuildingFloorPlansTab from '../Components/UI/buildingsComponents/DETAILS/BuildingFloorTabs'
 import BuildingModelsTab from '../Components/UI/buildingsComponents/DETAILS/BuildingModelsTab'
@@ -132,7 +132,7 @@ const BuildingDetail = () => {
   }
 
   const handleSaveExteriorPolygons = async (newPolygons) => {
-    await buildingService.update(building._id, { buildingFloorPolygons: newPolygons }) // <-- CORRECTO
+    await buildingService.update(building._id, { buildingFloorPolygons: newPolygons })
     refreshBuildingData()
     setSnackbar({ open: true, message: 'Exterior polygons saved', severity: 'success' })
     handleCloseExteriorEditor()
