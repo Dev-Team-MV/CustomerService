@@ -3,6 +3,7 @@ import { uploadFile, deleteFile, testConnection, listFilesInFolder } from '../se
 import { resolveToSignedUrl } from '../services/urlResolverService.js'
 import { processImageForUpload } from '../services/imageProcessingService.js'
 import Model from '../models/Model.js'
+import Apartment from '../models/Apartment.js'
 import ClubHouse from '../models/ClubHouse.js'
 import crypto from 'crypto'
 import path from 'path'
@@ -570,6 +571,109 @@ export const updateImage = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Error updating image'
+    })
+  }
+}
+
+/**
+ * Upload a render image and save URL in Apartment.interiorRendersBasic or interiorRendersUpgrade.
+ * POST multipart: image (file), apartmentId, renderType (basic|upgrade), optional imageIndex, folder, fileName.
+ */
+export const updateApartmentRenderImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded'
+      })
+    }
+
+    const { apartmentId, renderType, imageIndex, folder, fileName: customName } = req.body
+    if (!apartmentId || !renderType) {
+      return res.status(400).json({
+        success: false,
+        message: 'apartmentId and renderType are required'
+      })
+    }
+
+    const validRenderTypes = ['basic', 'upgrade']
+    if (!validRenderTypes.includes(renderType)) {
+      return res.status(400).json({
+        success: false,
+        message: 'renderType must be one of: basic, upgrade'
+      })
+    }
+
+    const apartment = await Apartment.findById(apartmentId)
+    if (!apartment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Apartment not found'
+      })
+    }
+
+    const targetField = renderType === 'basic' ? 'interiorRendersBasic' : 'interiorRendersUpgrade'
+    if (!Array.isArray(apartment[targetField])) {
+      apartment[targetField] = []
+    }
+
+    const processed = await processImageForUpload(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype
+    )
+    const fileExtension = processed.extension
+    const sanitizedCustomName = sanitizeCustomFileName(customName, fileExtension)
+    const generatedFileName = `${crypto.randomBytes(16).toString('hex')}${Date.now()}${fileExtension}`
+    const finalFileName = sanitizedCustomName || generatedFileName
+    const gcsFolder = folder || 'apartments'
+
+    // If caller sent custom fileName, replace previous versions sharing same base name.
+    if (sanitizedCustomName) {
+      await deleteFilesWithSameBaseName(gcsFolder, finalFileName)
+    }
+
+    const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
+    const result = await uploadFile(
+      processed.buffer,
+      finalFileName,
+      processed.mimeType,
+      makePublic,
+      gcsFolder
+    )
+
+    const url = result.publicUrl || result.signedUrl
+    const current = Array.isArray(apartment[targetField]) ? [...apartment[targetField]] : []
+    const index = imageIndex !== undefined && imageIndex !== '' ? parseInt(imageIndex, 10) : -1
+    const hasValidIndex = !Number.isNaN(index) && index >= 0 && index < current.length
+
+    if (hasValidIndex) {
+      current[index] = url
+    } else {
+      current.push(url)
+    }
+
+    apartment[targetField] = current
+    apartment.markModified(targetField)
+    await apartment.save()
+
+    res.status(200).json({
+      success: true,
+      message: 'Apartment render image updated successfully',
+      data: {
+        apartmentId: apartment._id,
+        renderType,
+        field: targetField,
+        url,
+        fileName: result.fileName,
+        index: hasValidIndex ? index : current.length - 1
+      }
+    })
+  } catch (error) {
+    console.error('Update apartment render image error:', error)
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error updating apartment render image'
     })
   }
 }

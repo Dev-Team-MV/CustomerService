@@ -36,6 +36,11 @@ const apartmentSchema = new mongoose.Schema(
       type: String,
       trim: true
     }],
+    selectedRenderType: {
+      type: String,
+      enum: ['basic', 'upgrade'],
+      default: 'basic'
+    },
     /** Polygon on floor plan: [{ x, y }, ...] */
     polygon: [{
       x: { type: Number, required: true },
