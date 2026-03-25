@@ -40,7 +40,7 @@ export const getMasterPlan = async (req, res) => {
 
     const buildings = await Building.find(buildingFilter)
       .select(
-        '_id project name section floors status polygon buildingFloorPolygons exteriorRenders totalApartments'
+        '_id project name section floors status polygon polygonColor polygonStrokeColor polygonOpacity buildingFloorPolygons exteriorRenders totalApartments'
       )
       .sort({ name: 1 })
 
@@ -53,6 +53,11 @@ export const getMasterPlan = async (req, res) => {
       status: building.status,
       totalApartments: building.totalApartments || 0,
       polygon: normalizeMasterPolygon(building.polygon),
+      polygonColor: building.polygonColor || '#8CA551',
+      polygonStrokeColor: building.polygonStrokeColor || '#1F2937',
+      polygonOpacity: Number.isFinite(Number(building.polygonOpacity))
+        ? Number(building.polygonOpacity)
+        : 0.35,
       buildingFloorPolygons: Array.isArray(building.buildingFloorPolygons)
         ? building.buildingFloorPolygons
         : [],

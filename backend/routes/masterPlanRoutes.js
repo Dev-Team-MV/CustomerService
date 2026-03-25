@@ -47,6 +47,25 @@ const router = express.Router()
  *                   type: array
  *                   items:
  *                     type: object
+ *                     properties:
+ *                       polygon:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             x: { type: number }
+ *                             y: { type: number }
+ *                       polygonColor:
+ *                         type: string
+ *                         example: '#8CA551'
+ *                       polygonStrokeColor:
+ *                         type: string
+ *                         example: '#1F2937'
+ *                       polygonOpacity:
+ *                         type: number
+ *                         minimum: 0
+ *                         maximum: 1
+ *                         example: 0.35
  *       400:
  *         description: Missing projectId
  *       404:
