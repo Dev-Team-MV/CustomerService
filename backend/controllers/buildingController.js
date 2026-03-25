@@ -201,7 +201,8 @@ export const createBuilding = async (req, res) => {
   try {
     const {
       projectId, project, name, section, floors, floorPlans,
-      exteriorRenders, polygon, buildingFloorPolygons, totalApartments
+      exteriorRenders, polygon, polygonColor, polygonStrokeColor, polygonOpacity,
+      buildingFloorPolygons, totalApartments
     } = req.body
     const projId = projectId || project
     if (!projId) {
@@ -222,6 +223,9 @@ export const createBuilding = async (req, res) => {
       floorPlans: parseFloorPlansInput(floorPlans),
       exteriorRenders: parseExteriorRendersInput(exteriorRenders),
       polygon: polygon || [],
+      polygonColor: polygonColor || '#8CA551',
+      polygonStrokeColor: polygonStrokeColor || '#1F2937',
+      polygonOpacity: polygonOpacity != null ? Number(polygonOpacity) : 0.35,
       buildingFloorPolygons: normalizedBuildingFloorPolygons,
       totalApartments: totalApartments || 0
     })
@@ -241,6 +245,7 @@ export const updateBuilding = async (req, res) => {
 
     const {
       name, section, floors, floorPlans, exteriorRenders, polygon,
+      polygonColor, polygonStrokeColor, polygonOpacity,
       buildingFloorPolygons, totalApartments, status
     } = req.body
     if (name != null) building.name = name
@@ -249,6 +254,9 @@ export const updateBuilding = async (req, res) => {
     if (floorPlans != null) building.floorPlans = parseFloorPlansInput(floorPlans)
     if (exteriorRenders != null) building.exteriorRenders = parseExteriorRendersInput(exteriorRenders)
     if (polygon != null) building.polygon = polygon
+    if (polygonColor != null) building.polygonColor = polygonColor
+    if (polygonStrokeColor != null) building.polygonStrokeColor = polygonStrokeColor
+    if (polygonOpacity != null) building.polygonOpacity = Number(polygonOpacity)
     if (buildingFloorPolygons != null || polygon != null) {
       const normalizedBuildingFloorPolygons = parseBuildingFloorPolygonsInput(
         buildingFloorPolygons,

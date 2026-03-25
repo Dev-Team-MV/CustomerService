@@ -111,6 +111,23 @@ const buildingSchema = new mongoose.Schema(
       x: { type: Number, required: true },
       y: { type: Number, required: true }
     }],
+    /** Master plan polygon visual style */
+    polygonColor: {
+      type: String,
+      trim: true,
+      default: '#8CA551'
+    },
+    polygonStrokeColor: {
+      type: String,
+      trim: true,
+      default: '#1F2937'
+    },
+    polygonOpacity: {
+      type: Number,
+      min: 0,
+      max: 1,
+      default: 0.35
+    },
     /** Exterior building render polygons to select floors */
     buildingFloorPolygons: {
       type: [buildingFloorPolygonSchema],

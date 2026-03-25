@@ -34,6 +34,24 @@ const router = express.Router()
  *     tags: [Buildings]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               polygonColor:
+ *                 type: string
+ *                 example: '#8CA551'
+ *               polygonStrokeColor:
+ *                 type: string
+ *                 example: '#1F2937'
+ *               polygonOpacity:
+ *                 type: number
+ *                 minimum: 0
+ *                 maximum: 1
+ *                 example: 0.35
  *     responses:
  *       201:
  *         description: Building created
@@ -64,6 +82,24 @@ router.route('/')
  *     tags: [Buildings]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               polygonColor:
+ *                 type: string
+ *                 example: '#8CA551'
+ *               polygonStrokeColor:
+ *                 type: string
+ *                 example: '#1F2937'
+ *               polygonOpacity:
+ *                 type: number
+ *                 minimum: 0
+ *                 maximum: 1
+ *                 example: 0.35
  *     responses:
  *       200:
  *         description: Building updated
