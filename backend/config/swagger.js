@@ -68,6 +68,11 @@ const options = {
               items: { $ref: '#/components/schemas/ProjectMembership' },
               description: 'Membresías opcionales por proyecto (además de casas/apartamentos asignados)'
             },
+            projects: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/Project' },
+              description: 'Proyectos derivados para UI/admin (P1/P2) según propiedades, apartamentos y memberships'
+            },
             isActive: { type: 'boolean' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
