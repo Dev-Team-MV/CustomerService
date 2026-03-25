@@ -19,6 +19,7 @@ import BuildingDetails from './Pages/BuildingDetails'
 import GetYourQuote from './Pages/GetYourQuote'
 import Payloads from './Pages/Payloads'
 import MyApartment from './Pages/MyApartment'
+import MasterPlanPage from './Pages/MasterPlanPage'
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
               <Route path="/residents" element={<Residents />} />
               <Route path="/payloads" element={<Payloads />} />
               <Route path="/configuration" element={<ConfigurationManagerP2 />} />
+              <Route path="/master-plan" element={<MasterPlanPage />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/properties" element={<Properties />} />
               <Route path="/my-apartment" element={<MyApartment />} />

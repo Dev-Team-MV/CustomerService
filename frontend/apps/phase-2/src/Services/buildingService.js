@@ -53,26 +53,51 @@ const buildingService = {
     }
   },
 
-  update: async (id, buildingData) => {
-    try {
-      const payload = {}
-      if (buildingData.name !== undefined) payload.name = buildingData.name
-      if (buildingData.section !== undefined) payload.section = buildingData.section
-      if (buildingData.floors !== undefined) payload.floors = Number(buildingData.floors)
-      if (buildingData.totalApartments !== undefined) payload.totalApartments = Number(buildingData.totalApartments)
-      if (buildingData.floorPlans !== undefined) payload.floorPlans = buildingData.floorPlans
-      if (buildingData.exteriorRenders !== undefined) payload.exteriorRenders = buildingData.exteriorRenders
-      if (buildingData.buildingFloorPolygons !== undefined) payload.buildingFloorPolygons = buildingData.buildingFloorPolygons
-      if (buildingData.polygon !== undefined) payload.polygon = buildingData.polygon
-      if (buildingData.status !== undefined) payload.status = buildingData.status
+  // update: async (id, buildingData) => {
+  //   try {
+  //     const payload = {}
+  //     if (buildingData.name !== undefined) payload.name = buildingData.name
+  //     if (buildingData.section !== undefined) payload.section = buildingData.section
+  //     if (buildingData.floors !== undefined) payload.floors = Number(buildingData.floors)
+  //     if (buildingData.totalApartments !== undefined) payload.totalApartments = Number(buildingData.totalApartments)
+  //     if (buildingData.floorPlans !== undefined) payload.floorPlans = buildingData.floorPlans
+  //     if (buildingData.exteriorRenders !== undefined) payload.exteriorRenders = buildingData.exteriorRenders
+  //     if (buildingData.buildingFloorPolygons !== undefined) payload.buildingFloorPolygons = buildingData.buildingFloorPolygons
+  //     if (buildingData.polygon !== undefined) payload.polygon = buildingData.polygon
+  //     if (buildingData.status !== undefined) payload.status = buildingData.status
 
-      const response = await api.put(`/buildings/${id}`, payload)
-      return response.data
-    } catch (error) {
-      console.error('❌ Error updating building:', error)
-      throw new Error(error.response?.data?.message || 'Failed to update building')
-    }
-  },
+  //     const response = await api.put(`/buildings/${id}`, payload)
+  //     return response.data
+  //   } catch (error) {
+  //     console.error('❌ Error updating building:', error)
+  //     throw new Error(error.response?.data?.message || 'Failed to update building')
+  //   }
+  // },
+
+  update: async (id, buildingData) => {
+  try {
+    const payload = {}
+    if (buildingData.name !== undefined) payload.name = buildingData.name
+    if (buildingData.section !== undefined) payload.section = buildingData.section
+    if (buildingData.floors !== undefined) payload.floors = Number(buildingData.floors)
+    if (buildingData.totalApartments !== undefined) payload.totalApartments = Number(buildingData.totalApartments)
+    if (buildingData.floorPlans !== undefined) payload.floorPlans = buildingData.floorPlans
+    if (buildingData.exteriorRenders !== undefined) payload.exteriorRenders = buildingData.exteriorRenders
+    if (buildingData.buildingFloorPolygons !== undefined) payload.buildingFloorPolygons = buildingData.buildingFloorPolygons
+    if (buildingData.polygon !== undefined) payload.polygon = buildingData.polygon
+    // ✅ Agregar campos de color
+    if (buildingData.polygonColor !== undefined) payload.polygonColor = buildingData.polygonColor
+    if (buildingData.polygonStrokeColor !== undefined) payload.polygonStrokeColor = buildingData.polygonStrokeColor
+    if (buildingData.polygonOpacity !== undefined) payload.polygonOpacity = buildingData.polygonOpacity
+    if (buildingData.status !== undefined) payload.status = buildingData.status
+ 
+    const response = await api.put(`/buildings/${id}`, payload)
+    return response.data
+  } catch (error) {
+    console.error('❌ Error updating building:', error)
+    throw new Error(error.response?.data?.message || 'Failed to update building')
+  }
+},
 
   delete: async (id) => {
     try {
@@ -315,16 +340,6 @@ const buildingService = {
       throw new Error(error.response?.data?.message || 'Failed to create apartment')
     }
   },
-
-  // updateApartment: async (id, apartmentData) => {
-  //   try {
-  //     const response = await api.put(`/apartments/${id}`, apartmentData)
-  //     return response.data
-  //   } catch (error) {
-  //     console.error('❌ Error updating apartment:', error)
-  //     throw new Error(error.response?.data?.message || 'Failed to update apartment')
-  //   }
-  // },
 
     updateApartment: async (id, apartmentData) => {
     try {

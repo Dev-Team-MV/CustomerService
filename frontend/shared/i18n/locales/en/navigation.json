@@ -19,7 +19,9 @@
         "timeline": "Timeline",
         "configuration": "Configuration",
         "familyGroup": "Family Group",
-        "buildings": "Buildings"
+        "buildings": "Buildings",
+        "masterPlan": "Master Plan",
+        "myapartment": "My Apartments"
     },
     "tooltips": {
         "openMenu": "Open menu",

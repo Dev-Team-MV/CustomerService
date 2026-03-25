@@ -338,6 +338,8 @@ const APT_COLOR = {
   cancelled: '#9e9e9e',
 }
 
+// @/Users/oficina/MV-CRM/CustomerService/frontend/apps/phase-2/src/Components/UI/GetYourQuote/ApartmentSelector.jsx
+
 const ApartmentSelector = () => {
   const {
     selectedFloor,
@@ -347,23 +349,15 @@ const ApartmentSelector = () => {
     getApartmentsForFloor,
   } = usePropertyBuilding()
 
-  const theme  = useTheme()
-  const isMob  = useMediaQuery(theme.breakpoints.down('sm'))
+  const theme = useTheme()
+  const isMob = useMediaQuery(theme.breakpoints.down('sm'))
 
   if (!selectedFloor) return null
 
-  const polygons     = selectedFloor.polygons || []
-  const floorApts    = getApartmentsForFloor(selectedFloor.floorNumber)
-  const hasImage     = Boolean(selectedFloor.url)
-  const hasPolygons  = polygons.length > 0
-
-  // Encuentra el máximo X/Y de todos los puntos para escalar el canvas
-  const allPoints = polygons.flatMap(poly => poly.points)
-  const maxX = Math.max(...allPoints.filter((_, i) => i % 2 === 0), 100)
-  const maxY = Math.max(...allPoints.filter((_, i) => i % 2 === 1), 100)
-
-  const width = isMob ? 350 : 900
-  const height = isMob ? 220 : 600
+  const polygons = selectedFloor.polygons || []
+  const floorApts = getApartmentsForFloor(selectedFloor.floorNumber)
+  const hasImage = Boolean(selectedFloor.url)
+  const hasPolygons = polygons.length > 0
 
   const [hoveredPoly, setHoveredPoly] = useState(null)
 
@@ -378,25 +372,16 @@ const ApartmentSelector = () => {
     return apt?._id === selectedApartment?._id
   }
 
-  // Normaliza puntos al tamaño del canvas
-  const normPoints = (pts) => {
-    if (!Array.isArray(pts) || pts.length < 6) return []
-    return pts.map((p, i) =>
-      i % 2 === 0
-        ? (p / maxX) * width
-        : (p / maxY) * height
-    )
-  }
-
-  // Prepara los polígonos para el preview
+  // ✅ NO normalizar puntos - usar coordenadas absolutas directamente
   const previewPolygons = polygons.map(poly => {
     const apt = getAptForPoly(poly)
     const isSel = isPolySelected(poly)
     const isHovered = hoveredPoly === poly.id
     const color = getStatusColor(poly, apt)
+    
     return {
       ...poly,
-      points: normPoints(poly.points),
+      points: poly.points, // ✅ Usar puntos directamente sin normalizar
       color,
       id: poly.id,
       fill:
@@ -414,7 +399,6 @@ const ApartmentSelector = () => {
     }
   })
 
-  // Dropdown handler
   const handleDropdownSelect = (e) => {
     const aptId = e.target.value
     const apt = floorApts.find(a => a._id === aptId)
@@ -423,7 +407,6 @@ const ApartmentSelector = () => {
 
   return (
     <Paper elevation={0} sx={paperSx}>
-      {/* Header */}
       <Box sx={headerSx}>
         <Box display="flex" alignItems="center" gap={1}>
           <MeetingRoomIcon sx={{ color: '#8CA551', fontSize: 20 }} />
@@ -431,8 +414,8 @@ const ApartmentSelector = () => {
         </Box>
         <Box display="flex" gap={1} flexWrap="wrap" alignItems="center">
           <LegendDot color={APT_COLOR.available} label="Available" />
-          <LegendDot color={APT_COLOR.pending}   label="Hold"      />
-          <LegendDot color={APT_COLOR.sold}      label="Sold"      />
+          <LegendDot color={APT_COLOR.pending} label="Hold" />
+          <LegendDot color={APT_COLOR.sold} label="Sold" />
           <Chip
             label={`Floor ${selectedFloor.floorNumber}`}
             size="small"
@@ -441,7 +424,6 @@ const ApartmentSelector = () => {
         </Box>
       </Box>
 
-      {/* Floor plan image + polygons preview */}
       {hasImage ? (
         <Box
           sx={{
@@ -450,16 +432,15 @@ const ApartmentSelector = () => {
             position: 'relative',
             bgcolor: '#f5f5f5',
             borderRadius: 3,
-            overflow: 'hidden', // importante para evitar scroll
-            aspectRatio: '16/10', // o la relación de tu imagen, si la sabes
+            overflow: 'hidden',
             minHeight: 200,
           }}
         >
           <PolygonImagePreview
             imageUrl={selectedFloor.url}
             polygons={previewPolygons}
-            maxWidth={1000} // o el máximo que quieras permitir
-            maxHeight={700}
+            maxWidth={1000}  // ✅ Mismo que FloorPlanEditor
+            maxHeight={700}  // ✅ Mismo que FloorPlanEditor
             highlightPolygonId={hoveredPoly}
             showLabels={false}
             onPolygonClick={poly => {
@@ -476,7 +457,6 @@ const ApartmentSelector = () => {
         </Box>
       )}
 
-      {/* Dropdown fallback */}
       <Box sx={{ p: 2, bgcolor: '#fafafa', borderTop: '1px solid #eee' }}>
         <Select
           fullWidth

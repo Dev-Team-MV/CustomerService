@@ -225,16 +225,16 @@ const FloorSelector = () => {
             minHeight: 200,
           }}
         >
-          <PolygonImagePreview
-            imageUrl={exteriorUrl}
-            polygons={polygons}
-            maxWidth={1000} // o el máximo que quieras permitir
-            maxHeight={700}
-            showLabels
-            highlightPolygonId={hovered}
-            onPolygonClick={poly => handlePolygonClick(poly)}
-            onPolygonHover={polyId => setHovered(polyId)}
-          />
+<PolygonImagePreview
+  imageUrl={exteriorUrl}
+  polygons={polygons}
+  maxWidth={1000}  // ✅ Mismo que ExteriorPolygonEditor
+  maxHeight={700}  // ✅ Mismo que ExteriorPolygonEditor
+  showLabels
+  highlightPolygonId={hovered}
+  onPolygonClick={poly => handlePolygonClick(poly)}
+  onPolygonHover={polyId => setHovered(polyId)}
+/>
         </Box>
       </Paper>
     )

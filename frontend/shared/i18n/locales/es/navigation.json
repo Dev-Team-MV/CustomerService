@@ -19,7 +19,9 @@
         "timeline": "Línea de Tiempo",
         "configuration": "Configuración",
         "familyGroup": "Grupo Familiar",
-        "buildings": "Edificios"    
+        "buildings": "Edificios",
+        "masterPlan": "Master Plan",
+        "myapartment": "Mis Apartamentos"
     },
     "tooltips": {
         "openMenu": "Abrir menú",
