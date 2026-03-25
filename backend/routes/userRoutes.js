@@ -17,9 +17,18 @@ const router = express.Router()
  * /api/users:
  *   get:
  *     summary: Get all users (Admin only)
+ *     description: Returns users enriched with `projects` (derived from properties/apartments/memberships). Optional filters by role and projectId.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: role
+ *         schema: { type: string, enum: [superadmin, admin, user] }
+ *       - in: query
+ *         name: projectId
+ *         schema: { type: string }
+ *         description: Only users related to this project (P1/P2) are returned
  *     responses:
  *       200:
  *         description: List of users
