@@ -1,5 +1,5 @@
 // import {
-//   Box, Paper, Typography, useTheme, useMediaQuery
+//   Box, Paper, Typography
 // } from '@mui/material'
 // import LayersIcon from '@mui/icons-material/Layers'
 // import { usePropertyBuilding } from '../../../Context/PropertyBuildingContext'
@@ -8,54 +8,46 @@
 // import { useState, useEffect } from 'react'
 
 // const FloorSelector = () => {
+//   // TODOS LOS HOOKS VAN AQUÍ ARRIBA
 //   const {
 //     selectedBuilding,
 //     selectedFloor,
 //     selectFloor,
 //   } = usePropertyBuilding()
 
-//   const theme = useTheme()
-//   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-
-//   if (!selectedBuilding) return null
-
-//   // --- Selección visual de piso por polígono ---
-//   const exteriorUrl = selectedBuilding.exteriorRenders?.[0] || null
-//   const floorPolygons = selectedBuilding.buildingFloorPolygons || []
+//   const exteriorUrl = selectedBuilding?.exteriorRenders?.[0] || null
+//   const floorPolygons = selectedBuilding?.buildingFloorPolygons || []
 //   const hasFloorPolygons = floorPolygons.length > 0
 
-//   // Konva image hook y dimensiones reales
 //   const [image] = useImage(exteriorUrl || '')
-//   const [imgDims, setImgDims] = useState({ width: 1000, height: 700 })
+//   const [dimensions, setDimensions] = useState({ width: 1000, height: 700 })
 //   useEffect(() => {
-//     if (image) setImgDims({ width: image.width, height: image.height })
+//     if (image) {
+//       const maxWidth = 1000
+//       const maxHeight = 700
+//       const imgRatio = image.width / image.height
+//       let width = maxWidth
+//       let height = maxWidth / imgRatio
+//       if (height > maxHeight) {
+//         height = maxHeight
+//         width = maxHeight * imgRatio
+//       }
+//       setDimensions({ width, height })
+//     }
 //   }, [image])
-
-//   const width = isMobile ? 350 : 700
-//   const height = isMobile ? 250 : 500
-
-//   // Escalado tipo "contain"
-//   const scale = Math.min(
-//     width / imgDims.width,
-//     height / imgDims.height
-//   )
-//   const offsetX = (width - imgDims.width * scale) / 2
-//   const offsetY = (height - imgDims.height * scale) / 2
 
 //   const [hovered, setHovered] = useState(null)
 
-//   // Normaliza puntos al tamaño del canvas (ya están en px)
-//   const normPoints = (pts) => Array.isArray(pts) ? pts : []
-
-//   // Al hacer click en un polígono, selecciona el floorPlan correspondiente
 //   const handlePolygonClick = (poly) => {
-//     const floorPlan = (selectedBuilding.floorPlans || []).find(
+//     const floorPlan = (selectedBuilding?.floorPlans || []).find(
 //       fp => fp.floorNumber === poly.floorNumber
 //     )
 //     if (floorPlan) selectFloor(floorPlan)
 //   }
 
-//   // Si NO hay piso seleccionado, muestra la imagen exterior y polígonos interactivos
+//   // AHORA SÍ puedes retornar si no hay datos
+//   if (!selectedBuilding) return null
+
 //   if (exteriorUrl && hasFloorPolygons && !selectedFloor) {
 //     return (
 //       <Paper elevation={0} sx={paperSx}>
@@ -68,25 +60,31 @@
 //             Click a floor polygon on the building exterior
 //           </Typography>
 //         </Box>
-//         <Box sx={{ width: '100%', maxWidth: width, mx: 'auto', position: 'relative', bgcolor: '#f5f5f5', borderRadius: 3, overflow: 'hidden' }}>
-//           <Stage width={width} height={height}>
+//         <Box
+//           sx={{
+//             width: '100%',
+//             maxWidth: dimensions.width,
+//             mx: 'auto',
+//             position: 'relative',
+//             bgcolor: '#f5f5f5',
+//             borderRadius: 3,
+//             overflow: 'auto'
+//           }}
+//         >
+//           <Stage width={dimensions.width} height={dimensions.height}>
 //             <Layer>
 //               {image && (
 //                 <KonvaImage
 //                   image={image}
-//                   width={imgDims.width * scale}
-//                   height={imgDims.height * scale}
-//                   x={offsetX}
-//                   y={offsetY}
+//                   width={dimensions.width}
+//                   height={dimensions.height}
+//                   x={0}
+//                   y={0}
 //                   listening={false}
 //                 />
 //               )}
 //               {floorPolygons.map((poly) => {
-//                 const points = normPoints(poly.points).map((p, i) =>
-//                   i % 2 === 0
-//                     ? p * scale + offsetX
-//                     : p * scale + offsetY
-//                 )
+//                 const points = Array.isArray(poly.points) ? poly.points : []
 //                 const isHovered = hovered === poly.id
 //                 return (
 //                   <Group key={poly.id}>
@@ -133,7 +131,6 @@
 //     )
 //   }
 
-//   // Si ya hay piso seleccionado, muestra el floorPlan como antes (o tu lógica previa)
 //   return null
 // }
 
@@ -171,12 +168,10 @@ import {
 } from '@mui/material'
 import LayersIcon from '@mui/icons-material/Layers'
 import { usePropertyBuilding } from '../../../Context/PropertyBuildingContext'
-import { Stage, Layer, Image as KonvaImage, Line, Group, Label, Tag, Text } from 'react-konva'
-import useImage from 'use-image'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import PolygonImagePreview from '../PolygonImagePreview'
 
 const FloorSelector = () => {
-  // TODOS LOS HOOKS VAN AQUÍ ARRIBA
   const {
     selectedBuilding,
     selectedFloor,
@@ -187,23 +182,6 @@ const FloorSelector = () => {
   const floorPolygons = selectedBuilding?.buildingFloorPolygons || []
   const hasFloorPolygons = floorPolygons.length > 0
 
-  const [image] = useImage(exteriorUrl || '')
-  const [dimensions, setDimensions] = useState({ width: 1000, height: 700 })
-  useEffect(() => {
-    if (image) {
-      const maxWidth = 1000
-      const maxHeight = 700
-      const imgRatio = image.width / image.height
-      let width = maxWidth
-      let height = maxWidth / imgRatio
-      if (height > maxHeight) {
-        height = maxHeight
-        width = maxHeight * imgRatio
-      }
-      setDimensions({ width, height })
-    }
-  }, [image])
-
   const [hovered, setHovered] = useState(null)
 
   const handlePolygonClick = (poly) => {
@@ -213,10 +191,17 @@ const FloorSelector = () => {
     if (floorPlan) selectFloor(floorPlan)
   }
 
-  // AHORA SÍ puedes retornar si no hay datos
-  if (!selectedBuilding) return null
-
+  // Si NO hay piso seleccionado, muestra la imagen exterior y polígonos interactivos
   if (exteriorUrl && hasFloorPolygons && !selectedFloor) {
+    // Prepara los polígonos para el preview
+    const polygons = floorPolygons.map(poly => ({
+      id: poly.id,
+      points: poly.points,
+      color: poly.color || '#8CA551',
+      name: poly.name || `Floor ${poly.floorNumber}`,
+      floorNumber: poly.floorNumber,
+    }))
+
     return (
       <Paper elevation={0} sx={paperSx}>
         <Box sx={headerSx}>
@@ -231,69 +216,25 @@ const FloorSelector = () => {
         <Box
           sx={{
             width: '100%',
-            maxWidth: dimensions.width,
             mx: 'auto',
             position: 'relative',
             bgcolor: '#f5f5f5',
             borderRadius: 3,
-            overflow: 'auto'
+            overflow: 'hidden', // importante para evitar scroll
+            aspectRatio: '16/10', // o la relación de tu imagen, si la sabes
+            minHeight: 200,
           }}
         >
-          <Stage width={dimensions.width} height={dimensions.height}>
-            <Layer>
-              {image && (
-                <KonvaImage
-                  image={image}
-                  width={dimensions.width}
-                  height={dimensions.height}
-                  x={0}
-                  y={0}
-                  listening={false}
-                />
-              )}
-              {floorPolygons.map((poly) => {
-                const points = Array.isArray(poly.points) ? poly.points : []
-                const isHovered = hovered === poly.id
-                return (
-                  <Group key={poly.id}>
-                    <Line
-                      points={points}
-                      closed
-                      fill={isHovered ? (poly.color || '#8CA551') + '55' : (poly.color || '#8CA551') + '33'}
-                      stroke={poly.color || '#8CA551'}
-                      strokeWidth={isHovered ? 3 : 2}
-                      onClick={() => handlePolygonClick(poly)}
-                      onMouseEnter={() => setHovered(poly.id)}
-                      onMouseLeave={() => setHovered(null)}
-                      opacity={0.7}
-                      perfectDrawEnabled={false}
-                      listening
-                      cursor="pointer"
-                    />
-                    {isHovered && (
-                      <Label x={points[0]} y={points[1] - 30}>
-                        <Tag
-                          fill="#fff"
-                          stroke={poly.color || '#8CA551'}
-                          cornerRadius={4}
-                          shadowColor="#000"
-                          shadowBlur={4}
-                          shadowOpacity={0.08}
-                        />
-                        <Text
-                          text={poly.name || `Floor ${poly.floorNumber}`}
-                          fontFamily="Poppins"
-                          fontSize={14}
-                          fill="#333F1F"
-                          padding={8}
-                        />
-                      </Label>
-                    )}
-                  </Group>
-                )
-              })}
-            </Layer>
-          </Stage>
+          <PolygonImagePreview
+            imageUrl={exteriorUrl}
+            polygons={polygons}
+            maxWidth={1000} // o el máximo que quieras permitir
+            maxHeight={700}
+            showLabels
+            highlightPolygonId={hovered}
+            onPolygonClick={poly => handlePolygonClick(poly)}
+            onPolygonHover={polyId => setHovered(polyId)}
+          />
         </Box>
       </Paper>
     )

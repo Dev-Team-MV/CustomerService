@@ -1,97 +1,4 @@
-// import { useState } from 'react'
-// import { Box, Container } from '@mui/material'
-// import { Add, Home } from '@mui/icons-material'
-// import PageHeader from '@shared/components/PageHeader'
-// import DataTable from '@shared/components/table/DataTable'
-// import EmptyState from '@shared/components/table/EmptyState'
-// import { useTheme } from '@mui/material/styles'
-// import { usePropertyColumns } from '../Constants/Columns/properties'
-
-// const mockProperties = [
-//   {
-//     _id: '1',
-//     name: 'Property One',
-//     status: 'active',
-//     model: 'Model A',
-//     resident: 'John Doe',
-//     price: 120000,
-//     phases: [
-//       { constructionPercentage: 100 },
-//       { constructionPercentage: 80 },
-//       { constructionPercentage: 60 },
-//       { constructionPercentage: 100 },
-//       { constructionPercentage: 100 }
-//     ]
-//   },
-//   {
-//     _id: '2',
-//     name: 'Property Two',
-//     status: 'sold',
-//     model: 'Model B',
-//     resident: 'Jane Smith',
-//     price: 150000,
-//     phases: [
-//       { constructionPercentage: 100 },
-//       { constructionPercentage: 100 },
-//       { constructionPercentage: 100 },
-//       { constructionPercentage: 100 },
-//       { constructionPercentage: 100 }
-//     ]
-//   }
-// ]
-
-// const Properties = () => {
-//   const theme = useTheme()
-//   const [data, setData] = useState(mockProperties)
-
-//   const columns = usePropertyColumns({
-//     isAdmin: true, // <-- Esto activa la columna de contracts
-//     t: null, // Si tienes i18n pásalo aquí
-//     onViewDetails: (row) => alert(`View details for ${row.name}`),
-//     onEdit: null,
-//     onDelete: (row) => alert(`Delete property ${row.name}`),
-//     onOpenContracts: (row) => alert(`Manage contracts for ${row.name}`) // <-- Esta función para el botón de contracts
-//   })
-
-//   return (
-//     <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.background.default, p: { xs: 2, sm: 3 } }}>
-//       <Container maxWidth="xl">
-//         <PageHeader
-//           icon={Home}
-//           title="Properties"
-//           subtitle="Manage and view all properties"
-//           actionButton={{
-//             label: 'Add Property',
-//             onClick: () => alert('Add property'),
-//             icon: <Add />,
-//             tooltip: 'Add new property'
-//           }}
-//         />
-
-//         <DataTable
-//           columns={columns}
-//           data={data}
-//           loading={false}
-//           emptyState={
-//             <EmptyState
-//               icon={Home}
-//               title="No properties"
-//               description="There are no properties yet."
-//               actionLabel="Add Property"
-//               onAction={() => alert('Add property')}
-//             />
-//           }
-//           stickyHeader
-//           maxHeight={600}
-//         />
-//       </Container>
-//     </Box>
-//   )
-// }
-
-// export default Properties
-
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Box, Container } from '@mui/material'
 import { Add, Home } from '@mui/icons-material'
 import PageHeader from '@shared/components/PageHeader'
@@ -102,11 +9,21 @@ import { usePropertyColumns } from '../Constants/Columns/properties'
 import { useApartments } from '../Constants/hooks/useApartments'
 import { useBuildings } from '../Constants/hooks/useBuildings'
 
+import ContractsModal from '@shared/components/Modals/ContractsModal'
+import ApartmentDetailsModal from '../Components/UI/propertyDetails/ApartmentDetailsModal'
+import { useNavigate } from 'react-router-dom'
+
 const Properties = () => {
   const theme = useTheme()
+  const navigate = useNavigate()
   // Puedes pasar un buildingId si quieres filtrar por edificio, o dejarlo null para traer todos
   const { assigned, loading, error, refresh } = useApartments()
 const { buildings, loading: loadingBuildings } = useBuildings()
+
+  const [contractsOpen, setContractsOpen] = useState(false)
+  const [selectedApartment, setSelectedApartment] = useState(null)
+
+const [detailsOpen, setDetailsOpen] = useState(false)
 
 // Crea un mapping de id a nombre
 const buildingMap = useMemo(() => {
@@ -130,14 +47,20 @@ const buildingMap = useMemo(() => {
     raw: apto
   })), [assigned, buildingMap])
 
-  const columns = usePropertyColumns({
-    isAdmin: true,
-    t: null,
-    onViewDetails: (row) => alert(`View details for ${row.name}`),
-    onEdit: null,
-    onDelete: (row) => alert(`Delete property ${row.name}`),
-    onOpenContracts: (row) => alert(`Manage contracts for ${row.name}`)
-  })
+const columns = usePropertyColumns({
+  isAdmin: true,
+  t: null,
+  onViewDetails: (row) => {
+    setSelectedApartment(row.raw)
+    setDetailsOpen(true)
+  },
+  onEdit: null,
+  onDelete: (row) => alert(`Delete property ${row.name}`),
+  onOpenContracts: (row) => {
+    setSelectedApartment(row.raw)
+    setContractsOpen(true)
+  }
+})
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.background.default, p: { xs: 2, sm: 3 } }}>
@@ -148,7 +71,7 @@ const buildingMap = useMemo(() => {
           subtitle="Manage and view all assigned apartments"
           actionButton={{
             label: 'Add Property',
-            onClick: () => alert('Add property'),
+            onClick: () => navigate('/quote'),
             icon: <Add />,
             tooltip: 'Add new property'
           }}
@@ -169,6 +92,20 @@ const buildingMap = useMemo(() => {
           }
           stickyHeader
           maxHeight={600}
+        />
+
+        <ContractsModal
+          open={contractsOpen}
+          onClose={() => setContractsOpen(false)}
+          resource={selectedApartment}
+          resourceType="apartment"
+          onContractUpdated={refresh}
+        />
+
+        <ApartmentDetailsModal
+          open={detailsOpen}
+          onClose={() => setDetailsOpen(false)}
+          apartment={selectedApartment}
         />
       </Container>
     </Box>

@@ -17,6 +17,8 @@ import Profile from './Pages/ProfileP2'
 import Buildings from './Pages/Buildings'
 import BuildingDetails from './Pages/BuildingDetails'
 import GetYourQuote from './Pages/GetYourQuote'
+import Payloads from './Pages/Payloads'
+import MyApartment from './Pages/MyApartment'
 
 function App() {
   return (
@@ -40,9 +42,11 @@ function App() {
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/residents" element={<Residents />} />
+              <Route path="/payloads" element={<Payloads />} />
               <Route path="/configuration" element={<ConfigurationManagerP2 />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/properties" element={<Properties />} />
+              <Route path="/my-apartment" element={<MyApartment />} />
               <Route path="/buildings" element={<Buildings />} />
               <Route path="/buildings/:id" element={<BuildingDetails />} />
             </Route>

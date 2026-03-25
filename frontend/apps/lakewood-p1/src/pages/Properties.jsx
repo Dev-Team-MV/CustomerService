@@ -9,7 +9,8 @@ import { Add, SortByAlpha, FilterList, Home } from '@mui/icons-material'
 import api from '@shared/services/api'
 import { useAuth } from '@shared/context/AuthContext'
 import ConstructionPhasesModal from '../components/ConstructionPhasesModal'
-import ContractsModal from '../components/ContractsModal'
+// import ContractsModal from '../components/ContractsModal'
+import ContractsModal from '@shared/components/Modals/ContractsModal'
 import EditPropertyModal from '../components/property/EditPriceModal'
 import PageHeader from '@shared/components/PageHeader'
 import StatsCards from '../components/statscard'
@@ -218,10 +219,17 @@ const Properties = () => {
           isAdmin={isAdmin}
         />
 
-        <ContractsModal
+        {/* <ContractsModal
           open={contracts.open}
           onClose={contracts.closeModal}
           property={contracts.data}
+        /> */}
+        <ContractsModal
+          open={contracts.open}
+          onClose={contracts.closeModal}
+          resource={contracts.data}
+          resourceType="property"
+          onContractUpdated={refetch}
         />
 
         <EditPropertyModal

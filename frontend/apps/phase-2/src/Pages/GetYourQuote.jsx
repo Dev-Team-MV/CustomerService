@@ -187,6 +187,15 @@ const GetYourQuoteContent = () => {
                 </Box>
               </motion.div>
             </AnimatePresence>
+          
+            {/* Resident Assignment just below the main step content */}
+            <Box mt={4}>
+              <ResidentAsignment
+                expanded={residentAccordionOpen}
+                onToggle={handleAccordionToggle}
+                isQuoteComplete={isQuoteComplete}
+              />
+            </Box>
           </Grid>
 
           {/* RIGHT — Mejor distribución y scroll solo aquí */}
@@ -221,14 +230,6 @@ const GetYourQuoteContent = () => {
           </Grid>
         </Grid>
 
-        {/* Resident Assignment Accordion */}
-        <Box mt={6} maxWidth={600} mx="auto">
-          <ResidentAsignment
-            expanded={residentAccordionOpen}
-            onToggle={handleAccordionToggle}
-            isQuoteComplete={isQuoteComplete}
-          />
-        </Box>
       </Container>
     </Box>
   )

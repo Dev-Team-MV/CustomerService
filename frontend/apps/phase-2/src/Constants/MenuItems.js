@@ -26,10 +26,22 @@ export const privateMenuItems = [
     roles: ["superadmin", "admin"],
   },
   {
+    textKey: "navigation:menu.payloads",
+    icon: HomeIcon,
+    path: "/payloads",
+    roles: ["superadmin", "admin"],
+  },
+  {
     textKey: "navigation:menu.residents",
     icon: PeopleIcon,
     path: "/residents",
     roles: ["superadmin", "admin"],
+  },
+  {
+    textKey: "navigation:menu.myapartment",
+    icon: PeopleIcon,
+    path: "/my-apartment",
+    roles: ["superadmin", "admin", "user"],
   },
   {
     textKey: "navigation:menu.analytics",
