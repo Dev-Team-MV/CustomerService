@@ -90,15 +90,14 @@ const GetYourQuoteContent = () => {
             subtitle="Select your building, floor, apartment and customize your future home"
           />
         </Box>
-
-        {/* Stepper */}
+        
         <Paper
           elevation={0}
           sx={{
             p: { xs: 2, md: 3 },
             mb: 3,
             borderRadius: 4,
-            border: '1px solid #e0e0e0',
+            border: `1px solid ${theme.palette.cardBorder}`,
             boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
           }}
         >
@@ -124,13 +123,13 @@ const GetYourQuoteContent = () => {
                           alignItems: 'center',
                           justifyContent: 'center',
                           bgcolor: isCompleted
-                            ? '#8CA551'
+                            ? theme.palette.secondary.main
                             : isActive
-                              ? '#333F1F'
-                              : '#e0e0e0',
+                              ? theme.palette.primary.main
+                              : theme.palette.cardBorder,
                           color: isCompleted || isActive ? '#fff' : '#9e9e9e',
                           transition: 'all 0.3s ease',
-                          boxShadow: isActive ? '0 4px 12px rgba(51,63,31,0.3)' : 'none',
+                          boxShadow: isActive ? `0 4px 12px ${theme.palette.primary.main}33` : 'none',
                           cursor: isCompleted ? 'pointer' : 'default'
                         }}
                         onClick={() => {
@@ -148,7 +147,11 @@ const GetYourQuoteContent = () => {
                         fontFamily: '"Poppins", sans-serif',
                         fontSize: '0.75rem',
                         fontWeight: isActive ? 700 : isCompleted ? 600 : 400,
-                        color: isActive ? '#333F1F' : isCompleted ? '#8CA551' : '#9e9e9e',
+                        color: isActive
+                          ? theme.palette.primary.main
+                          : isCompleted
+                            ? theme.palette.secondary.main
+                            : '#9e9e9e',
                         letterSpacing: '0.5px',
                         cursor: isCompleted ? 'pointer' : 'default'
                       }}

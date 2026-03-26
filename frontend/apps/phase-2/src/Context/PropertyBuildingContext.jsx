@@ -97,19 +97,39 @@ export const PropertyBuildingProvider = ({ children }) => {
   }, [selectedBuilding, selectedFloor, selectedApartment])
 
   // Permite ir a un step anterior y limpia selecciones posteriores
+  // const setCurrentStep = (idx) => {
+  //   setStepIndex(idx)
+  //   if (idx < 1) {
+  //     setSelectedFloor(null)
+  //     setSelectedApartment(null)
+  //     setApartmentType(null)
+  //   } else if (idx < 2) {
+  //     setSelectedApartment(null)
+  //     setApartmentType(null)
+  //   } else if (idx < 3) {
+  //     setApartmentType(null)
+  //   }
+  // }
   const setCurrentStep = (idx) => {
-    setStepIndex(idx)
-    if (idx < 1) {
-      setSelectedFloor(null)
-      setSelectedApartment(null)
-      setApartmentType(null)
-    } else if (idx < 2) {
-      setSelectedApartment(null)
-      setApartmentType(null)
-    } else if (idx < 3) {
-      setApartmentType(null)
-    }
+  // ✅ Limpiar selecciones ANTES de cambiar el stepIndex
+  if (idx < 1) {
+    setSelectedBuilding(null)
+    setSelectedFloor(null)
+    setSelectedApartment(null)
+    setApartmentType(null)
+  } else if (idx < 2) {
+    setSelectedFloor(null)
+    setSelectedApartment(null)
+    setApartmentType(null)
+  } else if (idx < 3) {
+    setSelectedApartment(null)
+    setApartmentType(null)
+  } else if (idx < 4) {
+    setApartmentType(null)
   }
+  // ✅ Cambiar stepIndex DESPUÉS de limpiar
+  setStepIndex(idx)
+}
 
   // Botón "Back"
   const goToPrevStep = () => setCurrentStep(Math.max(stepIndex - 1, 0))
@@ -388,7 +408,7 @@ export const PropertyBuildingProvider = ({ children }) => {
     setSelectedProject,
     loadingProjects,
     refreshProjects,
-    
+
     // Render type
     selectedRenderType,
     setSelectedRenderType,

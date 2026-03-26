@@ -197,11 +197,26 @@ export const usePropertyColumns = ({
       {
         field: 'price',
         headerName: t ? t('property:table.price') : 'Price',
-        minWidth: 100,
+        minWidth: 140,
         renderCell: ({ row }) => (
-          <Typography variant="body2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontFamily: '"Poppins", sans-serif' }}>
-            ${row.price?.toLocaleString()}
-          </Typography>
+          <Box>
+            <Box display="flex" alignItems="center" gap={0.5} mb={0.5}>
+              <AttachMoney sx={{ fontSize: 16, color: theme.palette.secondary.main }} />
+              <Typography variant="body2" sx={{ fontWeight: 700, color: theme.palette.primary.main, fontFamily: '"Poppins", sans-serif' }}>
+                {(row.presalePrice || row.price)?.toLocaleString()}
+              </Typography>
+            </Box>
+            {row.pending > 0 && (
+              <Typography variant="caption" sx={{ color: theme.palette.warning.main, fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: '0.7rem', display: 'block' }}>
+                {t ? t('property:table.pending') : 'Pending'}: ${row.pending?.toLocaleString()}
+              </Typography>
+            )}
+            {row.initialPayment > 0 && (
+              <Typography variant="caption" sx={{ color: theme.palette.secondary.main, fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: '0.7rem', display: 'block' }}>
+                {t ? t('property:table.paid') : 'Paid'}: ${row.initialPayment?.toLocaleString()}
+              </Typography>
+            )}
+          </Box>
         )
       }
     ]

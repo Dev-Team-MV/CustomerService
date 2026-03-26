@@ -12,6 +12,7 @@ import { useBuildings } from '../Constants/hooks/useBuildings'
 import ContractsModal from '@shared/components/Modals/ContractsModal'
 import ApartmentDetailsModal from '../Components/UI/propertyDetails/ApartmentDetailsModal'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 const Properties = () => {
   const theme = useTheme()
@@ -19,6 +20,8 @@ const Properties = () => {
   // Puedes pasar un buildingId si quieres filtrar por edificio, o dejarlo null para traer todos
   const { assigned, loading, error, refresh } = useApartments()
 const { buildings, loading: loadingBuildings } = useBuildings()
+
+const { t } = useTranslation('property') // Usa el namespace adecuado, por ejemplo 'property'
 
   const [contractsOpen, setContractsOpen] = useState(false)
   const [selectedApartment, setSelectedApartment] = useState(null)
@@ -49,7 +52,7 @@ const buildingMap = useMemo(() => {
 
 const columns = usePropertyColumns({
   isAdmin: true,
-  t: null,
+  t,
   onViewDetails: (row) => {
     setSelectedApartment(row.raw)
     setDetailsOpen(true)
@@ -70,7 +73,7 @@ const columns = usePropertyColumns({
           title="Properties"
           subtitle="Manage and view all assigned apartments"
           actionButton={{
-            label: 'Add Property',
+            label: (t('actions.addProperty')), // Usa la función de traducción
             onClick: () => navigate('/quote'),
             icon: <Add />,
             tooltip: 'Add new property'

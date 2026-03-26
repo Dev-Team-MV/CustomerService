@@ -1,7 +1,9 @@
+// @/Users/oficina/MV-CRM/CustomerService/frontend/apps/phase-2/src/Components/UI/GetYourQuote/ApartmentCustomizer.jsx
+
 import { useState, useEffect } from 'react'
 import {
   Box, Paper, Typography, Card, CardActionArea,
-  Chip, Divider, Grid, useTheme, useMediaQuery
+  Chip, Divider, Grid, useTheme, useMediaQuery, Alert
 } from '@mui/material'
 import BedIcon from '@mui/icons-material/Bed'
 import BathtubIcon from '@mui/icons-material/Bathtub'
@@ -13,12 +15,6 @@ import TuneIcon from '@mui/icons-material/Tune'
 import { motion } from 'framer-motion'
 import { usePropertyBuilding } from '../../../Context/PropertyBuildingContext'
 
-/**
- * ApartmentCustomizer — Step 4
- *
- * Shows the selected apartment info + a Basic/Upgrade type selector
- * with interior render previews. Price summary reflects financials from context.
- */
 const ApartmentCustomizer = () => {
   const {
     selectedApartment,
@@ -29,13 +25,8 @@ const ApartmentCustomizer = () => {
     setSelectedRenderType,
   } = usePropertyBuilding()
 
-    console.log('[STEP 4] selectedApartment:', selectedApartment)
-  console.log('[STEP 4] apartmentType:', apartmentType)
-  console.log('[STEP 4] financials:', financials)
-
   const theme  = useTheme()
   const isMob  = useMediaQuery(theme.breakpoints.down('sm'))
-
   const [previewIdx, setPreviewIdx] = useState(0)
 
   useEffect(() => {
@@ -45,19 +36,82 @@ const ApartmentCustomizer = () => {
     // eslint-disable-next-line
   }, [selectedApartment, apartmentType, selectApartmentType])
 
+  // ✅ Early return si no hay apartamento seleccionado
+  if (!selectedApartment) {
+    return (
+      <Paper elevation={0} sx={{
+        bgcolor: theme.palette.background.paper,
+        borderRadius: 4,
+        border: `1px solid ${theme.palette.cardBorder || '#e0e0e0'}`,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+        overflow: 'hidden',
+        p: 3
+      }}>
+        <Alert severity="info" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+          Please select an apartment to customize
+        </Alert>
+      </Paper>
+    )
+  }
 
-  const model     = selectedApartment.apartmentModel
+  // ✅ Validación segura de apartmentModel
+  const model     = selectedApartment?.apartmentModel || null
   const renders   = apartmentType === 'upgrade'
-    ? (selectedApartment.interiorRendersUpgrade || [])
-    : (selectedApartment.interiorRendersBasic   || [])
+    ? (selectedApartment?.interiorRendersUpgrade || [])
+    : (selectedApartment?.interiorRendersBasic   || [])
 
-  const hasBasic   = (selectedApartment.interiorRendersBasic   || []).length > 0
-  const hasUpgrade = (selectedApartment.interiorRendersUpgrade || []).length > 0
+  const hasBasic   = (selectedApartment?.interiorRendersBasic   || []).length > 0
+  const hasUpgrade = (selectedApartment?.interiorRendersUpgrade || []).length > 0
 
   const handleTypeSelect = (type) => {
     setPreviewIdx(0)
     selectApartmentType(type)
-    setSelectedRenderType(type) // <--- NUEVO
+    setSelectedRenderType(type)
+  }
+
+  // --- SX CONSTANTES USANDO THEME ---
+  const paperSx = {
+    bgcolor: theme.palette.background.paper,
+    borderRadius: 4,
+    border: `1px solid ${theme.palette.cardBorder || '#e0e0e0'}`,
+    boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+    overflow: 'hidden',
+  }
+
+  const headerSx = {
+    p: 2,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 1,
+    borderBottom: `2px solid ${theme.palette.secondary.main}33`,
+  }
+
+  const sectionLabelSx = {
+    fontWeight: 700,
+    fontFamily: '"Poppins", sans-serif',
+    letterSpacing: '1.5px',
+    textTransform: 'uppercase',
+    fontSize: '0.85rem',
+    color: theme.palette.primary.main,
+  }
+
+  const sectionSubLabelSx = {
+    fontWeight: 700,
+    fontFamily: '"Poppins", sans-serif',
+    letterSpacing: '1px',
+    textTransform: 'uppercase',
+    fontSize: '0.7rem',
+    color: theme.palette.text.secondary,
+  }
+
+  const aptChipSx = {
+    bgcolor: theme.palette.secondary.light + '14',
+    color: theme.palette.primary.main,
+    fontWeight: 700,
+    fontSize: '0.65rem',
+    fontFamily: '"Poppins", sans-serif',
   }
 
   return (
@@ -65,239 +119,186 @@ const ApartmentCustomizer = () => {
       {/* Header */}
       <Box sx={headerSx}>
         <Box display="flex" alignItems="center" gap={1}>
-          <TuneIcon sx={{ color: '#8CA551', fontSize: 20 }} />
+          <TuneIcon sx={{ color: theme.palette.secondary.main, fontSize: 20 }} />
           <Typography sx={sectionLabelSx}>04 CUSTOMIZE YOUR APARTMENT</Typography>
         </Box>
         <Chip
-          label={`Apt ${selectedApartment.apartmentNumber} · Floor ${selectedApartment.floorNumber}`}
+          label={`Apt ${selectedApartment?.apartmentNumber || 'N/A'}`}
           size="small"
           sx={aptChipSx}
         />
       </Box>
 
-      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+      {/* Model Info */}
+      {model && (
+        <Box sx={{ p: 2, bgcolor: theme.palette.cardBg || '#fafafa' }}>
+          <Typography sx={sectionSubLabelSx} mb={1}>Apartment Model</Typography>
+          <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
+            <Box display="flex" alignItems="center" gap={0.5}>
+              <BedIcon sx={{ fontSize: 16, color: theme.palette.text.secondary }} />
+              <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>
+                {model.bedrooms || 0} Beds
+              </Typography>
+            </Box>
+            <Box display="flex" alignItems="center" gap={0.5}>
+              <BathtubIcon sx={{ fontSize: 16, color: theme.palette.text.secondary }} />
+              <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>
+                {model.bathrooms || 0} Baths
+              </Typography>
+            </Box>
+            <Box display="flex" alignItems="center" gap={0.5}>
+              <SquareFootIcon sx={{ fontSize: 16, color: theme.palette.text.secondary }} />
+              <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>
+                {model.sqft || 0} sq ft
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      )}
 
-        {/* ── Apartment info card ── */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <Box sx={{
-            p: 2, borderRadius: 3, bgcolor: 'rgba(51,63,31,0.04)',
-            border: '1px solid rgba(140,165,81,0.25)',
-            display: 'flex', flexWrap: 'wrap', gap: 2,
-          }}>
-            <InfoTile icon={<BedIcon sx={{ color: '#8CA551', fontSize: 18 }} />}
-              label="Bedrooms" value={model?.bedrooms ?? '–'} />
-            <InfoTile icon={<BathtubIcon sx={{ color: '#8CA551', fontSize: 18 }} />}
-              label="Bathrooms" value={model?.bathrooms ?? '–'} />
-            <InfoTile icon={<SquareFootIcon sx={{ color: '#8CA551', fontSize: 18 }} />}
-              label="Sq Ft" value={model?.sqft ? `${model.sqft.toLocaleString()} ft²` : '–'} />
-            {model?.name && (
-              <InfoTile icon={null} label="Model" value={model.name} />
+      <Divider />
+
+      {/* Package Selection */}
+      <Box sx={{ p: 2 }}>
+        <Typography sx={sectionSubLabelSx} mb={2}>Select Interior Package</Typography>
+        
+        {!hasBasic && !hasUpgrade ? (
+          <Alert severity="warning" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            No interior render packages available for this apartment
+          </Alert>
+        ) : (
+          <Grid container spacing={2}>
+            {/* Basic Package */}
+            {hasBasic && (
+              <Grid item xs={12} sm={6}>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Card
+                    elevation={apartmentType === 'basic' ? 4 : 0}
+                    sx={{
+                      border: apartmentType === 'basic'
+                        ? `2px solid ${theme.palette.success.main}`
+                        : `2px solid ${theme.palette.cardBorder || '#e0e0e0'}`,
+                      borderRadius: 3,
+                      transition: 'all 0.2s ease',
+                      bgcolor: apartmentType === 'basic' ? theme.palette.success.main + '08' : '#fff',
+                    }}
+                  >
+                    <CardActionArea onClick={() => handleTypeSelect('basic')}>
+                      <Box sx={{ p: 2 }}>
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                          <Box display="flex" alignItems="center" gap={1}>
+                            <StarOutlineIcon sx={{ color: theme.palette.success.main, fontSize: 20 }} />
+                            <Typography fontWeight={700} fontSize="0.9rem" sx={{ fontFamily: '"Poppins", sans-serif', color: theme.palette.primary.main }}>
+                              Basic Package
+                            </Typography>
+                          </Box>
+                          {apartmentType === 'basic' && (
+                            <CheckCircleIcon sx={{ color: theme.palette.success.main, fontSize: 20 }} />
+                          )}
+                        </Box>
+                        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', display: 'block' }}>
+                          {(selectedApartment?.interiorRendersBasic || []).length} render{(selectedApartment?.interiorRendersBasic || []).length !== 1 ? 's' : ''}
+                        </Typography>
+                      </Box>
+                    </CardActionArea>
+                  </Card>
+                </motion.div>
+              </Grid>
+            )}
+
+            {/* Upgrade Package */}
+            {hasUpgrade && (
+              <Grid item xs={12} sm={6}>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Card
+                    elevation={apartmentType === 'upgrade' ? 4 : 0}
+                    sx={{
+                      border: apartmentType === 'upgrade'
+                        ? `2px solid ${theme.palette.warning.main}`
+                        : `2px solid ${theme.palette.cardBorder || '#e0e0e0'}`,
+                      borderRadius: 3,
+                      transition: 'all 0.2s ease',
+                      bgcolor: apartmentType === 'upgrade' ? theme.palette.warning.main + '08' : '#fff',
+                    }}
+                  >
+                    <CardActionArea onClick={() => handleTypeSelect('upgrade')}>
+                      <Box sx={{ p: 2 }}>
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                          <Box display="flex" alignItems="center" gap={1}>
+                            <StarIcon sx={{ color: theme.palette.warning.main, fontSize: 20 }} />
+                            <Typography fontWeight={700} fontSize="0.9rem" sx={{ fontFamily: '"Poppins", sans-serif', color: theme.palette.primary.main }}>
+                              Upgrade Package
+                            </Typography>
+                          </Box>
+                          {apartmentType === 'upgrade' && (
+                            <CheckCircleIcon sx={{ color: theme.palette.warning.main, fontSize: 20 }} />
+                          )}
+                        </Box>
+                        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', display: 'block' }}>
+                          {(selectedApartment?.interiorRendersUpgrade || []).length} render{(selectedApartment?.interiorRendersUpgrade || []).length !== 1 ? 's' : ''}
+                        </Typography>
+                      </Box>
+                    </CardActionArea>
+                  </Card>
+                </motion.div>
+              </Grid>
+            )}
+          </Grid>
+        )}
+      </Box>
+
+      {/* Preview Gallery */}
+      {renders.length > 0 && (
+        <>
+          <Divider />
+          <Box sx={{ p: 2 }}>
+            <Typography sx={sectionSubLabelSx} mb={2}>Preview</Typography>
+            <Box
+              sx={{
+                width: '100%',
+                height: isMob ? 200 : 300,
+                borderRadius: 2,
+                overflow: 'hidden',
+                bgcolor: '#000',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <img
+                src={renders[previewIdx]}
+                alt={`Preview ${previewIdx + 1}`}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
+            </Box>
+            {renders.length > 1 && (
+              <Box sx={{ display: 'flex', gap: 1, mt: 1, overflowX: 'auto' }}>
+                {renders.map((url, i) => (
+                  <Box
+                    key={i}
+                    onClick={() => setPreviewIdx(i)}
+                    sx={{
+                      width: 60,
+                      height: 60,
+                      borderRadius: 1,
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      border: i === previewIdx ? `2px solid ${theme.palette.secondary.main}` : '2px solid transparent',
+                      opacity: i === previewIdx ? 1 : 0.6,
+                      transition: 'all 0.2s',
+                      '&:hover': { opacity: 1 },
+                    }}
+                  >
+                    <img src={url} alt={`Thumb ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </Box>
+                ))}
+              </Box>
             )}
           </Box>
-        </motion.div>
-
-        {/* ── Type selector ── */}
-        <Box>
-          <Typography sx={sectionSubLabelSx} mb={1}>APARTMENT TYPE</Typography>
-          <Grid container spacing={2}>
-            {/* Basic */}
-            <Grid item xs={12} sm={6}>
-              <TypeCard
-                type="basic"
-                label="Basic"
-                icon={<StarOutlineIcon />}
-                selected={apartmentType === 'basic'}
-                disabled={!hasBasic}
-                onSelect={handleTypeSelect}
-                description="Standard finishes and fittings"
-                accentColor="#4caf50"
-              />
-            </Grid>
-            {/* Upgrade */}
-            <Grid item xs={12} sm={6}>
-              <TypeCard
-                type="upgrade"
-                label="Upgrade"
-                icon={<StarIcon />}
-                selected={apartmentType === 'upgrade'}
-                disabled={!hasUpgrade}
-                onSelect={handleTypeSelect}
-                description="Premium finishes, enhanced fixtures"
-                accentColor="#E5863C"
-              />
-            </Grid>
-          </Grid>
-        </Box>
-
-        {/* ── Interior render preview ── */}
-        {apartmentType && renders.length > 0 && (
-          <motion.div
-            key={apartmentType}
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.35 }}
-          >
-            <Box>
-              <Typography sx={sectionSubLabelSx} mb={1}>INTERIOR PREVIEW</Typography>
-              <Box sx={{ position: 'relative', borderRadius: 3, overflow: 'hidden', bgcolor: '#f0f0f0' }}>
-                <Box
-                  component="img"
-                  src={renders[previewIdx]}
-                  alt={`Interior ${previewIdx + 1}`}
-                  sx={{ width: '100%', maxHeight: 260, objectFit: 'cover', display: 'block' }}
-                />
-                {renders.length > 1 && (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5, p: 1, bgcolor: 'rgba(0,0,0,0.35)', position: 'absolute', bottom: 0, width: '100%' }}>
-                    {renders.map((_, i) => (
-                      <Box
-                        key={i}
-                        onClick={() => setPreviewIdx(i)}
-                        sx={{
-                          width: i === previewIdx ? 20 : 8,
-                          height: 8,
-                          borderRadius: 4,
-                          bgcolor: i === previewIdx ? '#8CA551' : 'rgba(255,255,255,0.5)',
-                          cursor: 'pointer',
-                          transition: 'width 0.2s',
-                        }}
-                      />
-                    ))}
-                  </Box>
-                )}
-              </Box>
-            </Box>
-          </motion.div>
-        )}
-
-        <Divider sx={{ borderColor: 'rgba(140,165,81,0.2)' }} />
-
-        {/* ── Price summary ── */}
-        <Box>
-          <Typography sx={sectionSubLabelSx} mb={1.5}>PRICE SUMMARY</Typography>
-          <Box sx={{ p: 2.5, bgcolor: 'rgba(140,165,81,0.06)', borderRadius: 3, border: '2px solid #8CA551', textAlign: 'center', mb: 2 }}>
-            <Typography sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem', letterSpacing: '1.5px', fontWeight: 700, color: '#333F1F' }}>
-              PRESALE PRICE
-            </Typography>
-            <Typography sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '2rem', fontWeight: 700, color: '#333F1F' }}>
-              ${financials.presalePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#706f6f', fontStyle: 'italic', fontFamily: '"Poppins", sans-serif' }}>
-              includes {financials.discountPercent}% discount
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <SummaryRow label="List Price"          value={`$${financials.listPrice.toLocaleString()}`} />
-            <SummaryRow label="Discount"            value={`-$${financials.discount.toLocaleString()}`} valueColor="#E5863C" />
-            <SummaryRow label="Total Down Payment"  value={`$${financials.totalDownPayment.toLocaleString()}`} />
-            <SummaryRow label="Initial Down Payment" value={`$${financials.initialDownPayment.toLocaleString()}`} bold />
-            <SummaryRow label="Monthly Payment"     value={`$${financials.monthlyPayment.toLocaleString()}`} />
-            <Divider sx={{ borderColor: 'rgba(140,165,81,0.2)' }} />
-            <SummaryRow label="Mortgage to Finance" value={`$${financials.mortgage.toLocaleString()}`} bold valueColor="#8CA551" />
-          </Box>
-        </Box>
-      </Box>
+        </>
+      )}
     </Paper>
   )
-}
-
-// ── Sub-components ────────────────────────────────────────────────────────────
-
-const TypeCard = ({ type, label, icon, selected, disabled, onSelect, description, accentColor }) => (
-  <Card
-    elevation={selected ? 4 : 0}
-    sx={{
-      border: selected ? `2px solid ${accentColor}` : '2px solid #e0e0e0',
-      borderRadius: 3,
-      bgcolor: selected ? `${accentColor}0D` : '#fff',
-      opacity: disabled ? 0.45 : 1,
-      transition: 'all 0.2s ease',
-    }}
-  >
-    <CardActionArea onClick={() => !disabled && onSelect(type)} disabled={disabled}>
-      <Box sx={{ p: 2, textAlign: 'center' }}>
-        <Box sx={{ color: selected ? accentColor : '#9e9e9e', mb: 0.5 }}>
-          {icon}
-        </Box>
-        <Box display="flex" justifyContent="center" alignItems="center" gap={0.5} mb={0.5}>
-          <Typography sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif', color: '#333F1F', fontSize: '0.9rem' }}>
-            {label}
-          </Typography>
-          {selected && <CheckCircleIcon sx={{ color: accentColor, fontSize: 16 }} />}
-        </Box>
-        <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
-          {disabled ? 'No renders available' : description}
-        </Typography>
-      </Box>
-    </CardActionArea>
-  </Card>
-)
-
-const InfoTile = ({ icon, label, value }) => (
-  <Box display="flex" alignItems="center" gap={0.75}>
-    {icon}
-    <Box>
-      <Typography sx={{ fontSize: '0.6rem', color: '#9e9e9e', fontFamily: '"Poppins", sans-serif', textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1 }}>
-        {label}
-      </Typography>
-      <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
-        {value}
-      </Typography>
-    </Box>
-  </Box>
-)
-
-const SummaryRow = ({ label, value, bold = false, valueColor = '#333F1F' }) => (
-  <Box display="flex" justifyContent="space-between" alignItems="center">
-    <Typography sx={{ fontSize: '0.8rem', color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>{label}:</Typography>
-    <Typography sx={{ fontSize: '0.8rem', fontWeight: bold ? 700 : 500, color: valueColor, fontFamily: '"Poppins", sans-serif' }}>
-      {value}
-    </Typography>
-  </Box>
-)
-
-const paperSx = {
-  bgcolor: '#fff',
-  borderRadius: 4,
-  border: '1px solid #e0e0e0',
-  boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-  overflow: 'hidden',
-}
-
-const headerSx = {
-  p: 2,
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-  gap: 1,
-  borderBottom: '2px solid rgba(140,165,81,0.2)',
-}
-
-const sectionLabelSx = {
-  fontWeight: 700,
-  fontFamily: '"Poppins", sans-serif',
-  letterSpacing: '1.5px',
-  textTransform: 'uppercase',
-  fontSize: '0.85rem',
-  color: '#333F1F',
-}
-
-const sectionSubLabelSx = {
-  fontWeight: 700,
-  fontFamily: '"Poppins", sans-serif',
-  letterSpacing: '1px',
-  textTransform: 'uppercase',
-  fontSize: '0.7rem',
-  color: '#9e9e9e',
-}
-
-const aptChipSx = {
-  bgcolor: 'rgba(140,165,81,0.12)',
-  color: '#333F1F',
-  fontWeight: 700,
-  fontSize: '0.65rem',
-  fontFamily: '"Poppins", sans-serif',
 }
 
 export default ApartmentCustomizer

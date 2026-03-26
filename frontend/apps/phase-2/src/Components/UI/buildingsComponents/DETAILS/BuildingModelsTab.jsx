@@ -58,19 +58,19 @@ const BuildingModelsTab = ({
       </Typography>
     ) : (
     <Box
-      sx={{
-        mt: 2,
-        display: 'grid',
-        gridTemplateColumns: {
-          xs: '1fr',
-          sm: '1fr 1fr',
-          md: '1fr 1fr 1fr'
-        },
-        gap: 4,
-        alignItems: 'stretch',
-        justifyItems: 'center'
-      }}
-    >
+  sx={{
+    mt: 2,
+    display: 'grid',
+    gridTemplateColumns: {
+      xs: '1fr',
+      sm: 'repeat(auto-fill, minmax(320px, 1fr))',
+      md: 'repeat(auto-fill, minmax(340px, 1fr))',
+      lg: 'repeat(auto-fill, minmax(360px, 1fr))'
+    },
+    gap: { xs: 2.5, sm: 3, md: 4 },
+    alignItems: 'stretch'
+  }}
+>
       {apartmentModels.map(model => (
         <ModelCard key={model._id} model={model} onEdit={handleOpenModelDialog} />
       ))}
