@@ -208,6 +208,59 @@ router.put('/:id', protect, admin, updatePhase)
  *         description: Phase not found
  */
 router.post('/:id/media', protect, admin, addMediaItem)
+
+/**
+ * @swagger
+ * /api/phases/apartment/{apartmentId}/phase/{phaseNumber}/media:
+ *   post:
+ *     summary: Add media item (image/video) to an apartment phase by apartmentId + phaseNumber (Admin only)
+ *     tags: [Phases]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: apartmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: phaseNumber
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 9
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - url
+ *               - title
+ *               - percentage
+ *             properties:
+ *               url:
+ *                 type: string
+ *               title:
+ *                 type: string
+ *               percentage:
+ *                 type: number
+ *                 minimum: 0
+ *                 maximum: 100
+ *               mediaType:
+ *                 type: string
+ *                 enum: [image, video]
+ *                 default: image
+ *     responses:
+ *       201:
+ *         description: Media item added
+ *       400:
+ *         description: Invalid data
+ *       404:
+ *         description: Phase not found
+ */
 router.post('/apartment/:apartmentId/phase/:phaseNumber/media', protect, admin, addMediaItemByApartmentAndNumber)
 
 /**
@@ -275,6 +328,86 @@ router.post('/apartment/:apartmentId/phase/:phaseNumber/media', protect, admin, 
  */
 router.put('/:id/media/:mediaItemId', protect, admin, updateMediaItem)
 router.delete('/:id/media/:mediaItemId', protect, admin, deleteMediaItem)
+
+/**
+ * @swagger
+ * /api/phases/apartment/{apartmentId}/phase/{phaseNumber}/media/{mediaItemId}:
+ *   put:
+ *     summary: Update a media item in an apartment phase by apartmentId + phaseNumber (Admin only)
+ *     tags: [Phases]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: apartmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: phaseNumber
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 9
+ *       - in: path
+ *         name: mediaItemId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               url:
+ *                 type: string
+ *               title:
+ *                 type: string
+ *               percentage:
+ *                 type: number
+ *                 minimum: 0
+ *                 maximum: 100
+ *               mediaType:
+ *                 type: string
+ *                 enum: [image, video]
+ *     responses:
+ *       200:
+ *         description: Media item updated
+ *       400:
+ *         description: Invalid data
+ *       404:
+ *         description: Phase or media item not found
+ *   delete:
+ *     summary: Delete a media item from an apartment phase by apartmentId + phaseNumber (Admin only)
+ *     tags: [Phases]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: apartmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: phaseNumber
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 9
+ *       - in: path
+ *         name: mediaItemId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Media item deleted
+ *       404:
+ *         description: Phase or media item not found
+ */
 router.put('/apartment/:apartmentId/phase/:phaseNumber/media/:mediaItemId', protect, admin, updateMediaItemByApartmentAndNumber)
 router.delete('/apartment/:apartmentId/phase/:phaseNumber/media/:mediaItemId', protect, admin, deleteMediaItemByApartmentAndNumber)
 
