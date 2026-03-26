@@ -26,6 +26,34 @@ function getSelectedApartmentRenders(apartmentLike) {
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value)
 
+const DEFAULT_PHASES = [
+  { phaseNumber: 1, title: 'Site Preparation and Groundbreaking', constructionPercentage: 0 },
+  { phaseNumber: 2, title: 'Foundation, Framing & Windows', constructionPercentage: 0 },
+  { phaseNumber: 3, title: 'Exterior Cladding and Roofing Installation', constructionPercentage: 0 },
+  { phaseNumber: 4, title: "All MEP's starts rough in work", constructionPercentage: 0 },
+  { phaseNumber: 5, title: 'Drywall Work and Paint', constructionPercentage: 0 },
+  { phaseNumber: 6, title: 'Flooring and Millwork', constructionPercentage: 0 },
+  { phaseNumber: 7, title: 'Kitchen and Bathrooms', constructionPercentage: 0 },
+  { phaseNumber: 8, title: 'Interior Finishes, Driveway Applainces & Landscaping', constructionPercentage: 0 },
+  { phaseNumber: 9, title: 'Inspections (Delays)', constructionPercentage: 0 }
+]
+
+const ensureApartmentPhases = async (apartmentId) => {
+  if (!apartmentId) return
+  const existingCount = await Phase.countDocuments({ apartment: apartmentId })
+  if (existingCount > 0) return
+
+  await Phase.insertMany(
+    DEFAULT_PHASES.map(phase => ({
+      apartment: apartmentId,
+      phaseNumber: phase.phaseNumber,
+      title: phase.title,
+      constructionPercentage: phase.constructionPercentage,
+      mediaItems: []
+    }))
+  )
+}
+
 const normalizePolygonId = (value) => {
   if (value == null) return null
   const str = String(value).trim()
@@ -119,6 +147,15 @@ export const getAllApartments = async (req, res) => {
       })
       .sort({ floorNumber: 1, apartmentNumber: 1 })
 
+    // Self-heal legacy apartments assigned to users without phases.
+    const apartmentsMissingPhases = apartments.filter(a =>
+      Array.isArray(a.users) && a.users.length > 0 && (!Array.isArray(a.phases) || a.phases.length === 0)
+    )
+    if (apartmentsMissingPhases.length > 0) {
+      await Promise.all(apartmentsMissingPhases.map(a => ensureApartmentPhases(a._id)))
+      await Promise.all(apartmentsMissingPhases.map(a => a.populate({ path: 'phases', options: { sort: { phaseNumber: 1 } } }))
+    )}
+
     const result = apartments.map(a => {
       const obj = a.toObject()
       obj.totalConstructionPercentage = a.totalConstructionPercentage || 0
@@ -163,6 +200,14 @@ export const getApartmentById = async (req, res) => {
         : await canUserAccessApartment(req.user._id, apartment._id)
     if (!canAccess) {
       return res.status(403).json({ message: 'You do not have access to this apartment' })
+    }
+
+    if (Array.isArray(apartment.users) && apartment.users.length > 0 && (!Array.isArray(apartment.phases) || apartment.phases.length === 0)) {
+      await ensureApartmentPhases(apartment._id)
+      await apartment.populate({
+        path: 'phases',
+        options: { sort: { phaseNumber: 1 } }
+      })
     }
 
     const obj = apartment.toObject()
@@ -250,6 +295,10 @@ export const createApartment = async (req, res) => {
       status: ownerIds.length > 0 ? 'pending' : 'available'
     })
 
+    if (ownerIds.length > 0) {
+      await ensureApartmentPhases(apartment._id)
+    }
+
     const populated = await Apartment.findById(apartment._id)
       .populate('apartmentModel', 'name modelNumber floorPlan sqft bedrooms bathrooms')
       .populate({
@@ -318,6 +367,10 @@ export const updateApartment = async (req, res) => {
     }
 
     await apartment.save()
+
+    if (Array.isArray(apartment.users) && apartment.users.length > 0) {
+      await ensureApartmentPhases(apartment._id)
+    }
 
     const populated = await Apartment.findById(apartment._id)
       .populate('apartmentModel', 'name modelNumber floorPlan sqft bedrooms bathrooms')

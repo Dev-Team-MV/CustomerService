@@ -57,8 +57,20 @@ const phaseSchema = new mongoose.Schema(
   }
 )
 
-phaseSchema.index({ property: 1, phaseNumber: 1 }, { unique: true, sparse: true })
-phaseSchema.index({ apartment: 1, phaseNumber: 1 }, { unique: true, sparse: true })
+phaseSchema.index(
+  { property: 1, phaseNumber: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { property: { $type: 'objectId' } }
+  }
+)
+phaseSchema.index(
+  { apartment: 1, phaseNumber: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { apartment: { $type: 'objectId' } }
+  }
+)
 
 phaseSchema.pre('validate', function (next) {
   const hasProperty = this.property != null
