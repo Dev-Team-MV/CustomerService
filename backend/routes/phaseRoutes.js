@@ -8,8 +8,12 @@ import {
   getPhaseByApartmentAndNumber,
   updatePhase,
   addMediaItem,
+  addMediaItemByApartmentAndNumber,
   updateMediaItem,
+  updateMediaItemByApartmentAndNumber,
   deleteMediaItem
+  ,
+  deleteMediaItemByApartmentAndNumber
 } from '../controllers/phaseController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
@@ -204,6 +208,7 @@ router.put('/:id', protect, admin, updatePhase)
  *         description: Phase not found
  */
 router.post('/:id/media', protect, admin, addMediaItem)
+router.post('/apartment/:apartmentId/phase/:phaseNumber/media', protect, admin, addMediaItemByApartmentAndNumber)
 
 /**
  * @swagger
@@ -270,5 +275,7 @@ router.post('/:id/media', protect, admin, addMediaItem)
  */
 router.put('/:id/media/:mediaItemId', protect, admin, updateMediaItem)
 router.delete('/:id/media/:mediaItemId', protect, admin, deleteMediaItem)
+router.put('/apartment/:apartmentId/phase/:phaseNumber/media/:mediaItemId', protect, admin, updateMediaItemByApartmentAndNumber)
+router.delete('/apartment/:apartmentId/phase/:phaseNumber/media/:mediaItemId', protect, admin, deleteMediaItemByApartmentAndNumber)
 
 export default router
