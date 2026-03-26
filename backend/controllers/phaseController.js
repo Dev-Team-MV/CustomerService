@@ -8,6 +8,19 @@ const populatePhase = (query) =>
     .populate('property', 'lot model users price status')
     .populate('apartment', 'apartmentModel apartmentNumber floorNumber users price status')
 
+const recalcConstructionPercentageFromMedia = (phase) => {
+  // El frontend guarda el progreso como suma de `mediaItems[].percentage`.
+  // Por eso recalculamos `constructionPercentage` cuando cambia la media.
+  const items = Array.isArray(phase.mediaItems) ? phase.mediaItems : []
+  const sum = items.reduce((acc, item) => {
+    const val = Number(item?.percentage)
+    return acc + (Number.isFinite(val) ? val : 0)
+  }, 0)
+
+  // Clamp 0..100 para respetar rango.
+  phase.constructionPercentage = Math.max(0, Math.min(100, sum))
+}
+
 // Get all phases for a specific property
 export const getPhasesByProperty = async (req, res) => {
   try {
@@ -153,6 +166,7 @@ export const addMediaItem = async (req, res) => {
       mediaType: mediaType || 'image'
     })
     
+    recalcConstructionPercentageFromMedia(phase)
     const updatedPhase = await phase.save()
     const populatedPhase = await populatePhase(Phase.findById(updatedPhase._id))
     const data = populatedPhase.toObject()
@@ -197,6 +211,7 @@ export const addMediaItemByApartmentAndNumber = async (req, res) => {
       mediaType: mediaType || 'image'
     })
 
+    recalcConstructionPercentageFromMedia(phase)
     const updatedPhase = await phase.save()
     const populatedPhase = await populatePhase(Phase.findById(updatedPhase._id))
     const data = populatedPhase.toObject()
@@ -240,6 +255,7 @@ export const updateMediaItem = async (req, res) => {
       mediaItem.mediaType = req.body.mediaType
     }
     
+    recalcConstructionPercentageFromMedia(phase)
     const updatedPhase = await phase.save()
     const populatedPhase = await populatePhase(Phase.findById(updatedPhase._id))
     const data = populatedPhase.toObject()
@@ -266,6 +282,7 @@ export const deleteMediaItem = async (req, res) => {
     }
     
     phase.mediaItems.pull(mediaItemId)
+    recalcConstructionPercentageFromMedia(phase)
     const updatedPhase = await phase.save()
     const populatedPhase = await populatePhase(Phase.findById(updatedPhase._id))
     const data = populatedPhase.toObject()
@@ -312,6 +329,7 @@ export const updateMediaItemByApartmentAndNumber = async (req, res) => {
       mediaItem.mediaType = req.body.mediaType
     }
 
+    recalcConstructionPercentageFromMedia(phase)
     const updatedPhase = await phase.save()
     const populatedPhase = await populatePhase(Phase.findById(updatedPhase._id))
     const data = populatedPhase.toObject()
@@ -341,6 +359,7 @@ export const deleteMediaItemByApartmentAndNumber = async (req, res) => {
     }
 
     phase.mediaItems.pull(mediaItemId)
+    recalcConstructionPercentageFromMedia(phase)
     const updatedPhase = await phase.save()
     const populatedPhase = await populatePhase(Phase.findById(updatedPhase._id))
     const data = populatedPhase.toObject()
