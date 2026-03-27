@@ -1,4 +1,4 @@
-// @lakewood-p1/src/pages/FamilyGroup.jsx
+// @phase-2/src/Pages/FamilyGroup.jsx
 import React, { useState } from 'react'
 import {
   Container,
@@ -19,21 +19,19 @@ import { useTranslation } from 'react-i18next'
 
 // Shared components
 import PageHeader from '@shared/components/PageHeader'
-
 import FamilyGroupCard from '@shared/components/FamilyGroup/FamilyGroupCard'
 import CreateGroupDialog from '@shared/components/FamilyGroup/CreateGroupDialog'
 import ManageGroupDialog from '@shared/components/FamilyGroup/ManageGroupDialog'
 import AddMemberDialog from '@shared/components/FamilyGroup/AddMemberDialog'
 import ShareDialog from '@shared/components/ResourceShare/ShareDialog'
-
 // Shared hooks
 import { useFamilyGroups } from '@shared/hooks/useFamilyGroups'
 import { useResidents } from '@shared/hooks/useResidents'
 import { useAuth } from '@shared/context/AuthContext'
 
 /**
- * Family Group Management Page for Lakewood
- * Allows users to create and manage family groups for sharing properties
+ * Family Group Management Page for Phase-2
+ * Allows users to create and manage family groups for sharing apartments
  */
 const FamilyGroup = () => {
   const { t } = useTranslation(['familyGroup', 'common'])
@@ -63,7 +61,7 @@ const FamilyGroup = () => {
   } = useFamilyGroups()
 
   // Residents hook for user selection
-  const { users, loading: loadingUsers, searchUsers } = useResidents()
+  const { users, loading: loadingUsers } = useResidents()
 
   // Handlers
   const handleCreateGroup = async (name) => {
@@ -134,7 +132,7 @@ const FamilyGroup = () => {
         <PageHeader
           icon={GroupIcon}
           title={t('title', 'Family Groups')}
-          subtitle={t('subtitle', 'Manage family groups to share properties with your loved ones')}
+          subtitle={t('subtitle', 'Manage family groups to share apartments with your loved ones')}
           actionButton={{
             label: t('createGroup', 'Create Group'),
             onClick: () => setCreateDialogOpen(true),
@@ -188,7 +186,7 @@ const FamilyGroup = () => {
               <GroupIcon
                 sx={{
                   fontSize: 80,
-                  color: '#8CA551',
+                  color: 'primary.main',
                   opacity: 0.5,
                   mb: 3
                 }}
@@ -197,20 +195,14 @@ const FamilyGroup = () => {
                 {t('noGroups', 'No Family Groups Yet')}
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 500, mx: 'auto' }}>
-                {t('noGroupsDescription', 'Create your first family group to start sharing properties with your family members.')}
+                {t('noGroupsDescription', 'Create your first family group to start sharing apartments with your family members.')}
               </Typography>
               <Button
                 variant="contained"
                 size="large"
                 startIcon={<AddIcon />}
                 onClick={() => setCreateDialogOpen(true)}
-                sx={{ 
-                  borderRadius: 2,
-                  background: '#333F1F',
-                  '&:hover': {
-                    background: '#8CA551'
-                  }
-                }}
+                sx={{ borderRadius: 2 }}
               >
                 {t('createFirstGroup', 'Create Your First Group')}
               </Button>
@@ -220,26 +212,37 @@ const FamilyGroup = () => {
           // Groups Grid
           <Grid container spacing={3}>
             <AnimatePresence>
-              {groups.map((group, index) => (
-                <Grid item xs={12} sm={6} lg={4} key={group._id}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                  >
-                    <FamilyGroupCard
-                      group={group}
-                      isAdmin={isGroupAdmin(group)}
-                      onEdit={() => handleOpenManageDialog(group)}
-                      onDelete={() => handleDeleteGroup(group._id)}
-                      onAddMember={() => handleOpenAddMemberDialog(group)}
-                      onManageMembers={() => handleOpenManageDialog(group)}
-                      onShare={() => handleOpenShareDialog(group)}
-                    />
-                  </motion.div>
-                </Grid>
-              ))}
+{groups.map((group, index) => {
+  const isAdmin = isGroupAdmin(group)
+  
+  // DEBUG - Temporal para verificar
+  console.log('Group:', group.name)
+  console.log('Current user ID:', user?._id)
+  console.log('Group creator ID:', group.createdBy?._id)
+  console.log('Is admin?:', isAdmin)
+  console.log('---')
+  
+  return (
+    <Grid item xs={12} sm={6} lg={4} key={group._id}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.3, delay: index * 0.05 }}
+      >
+        <FamilyGroupCard
+          group={group}
+          isAdmin={isAdmin}
+          onEdit={() => handleOpenManageDialog(group)}
+          onDelete={() => handleDeleteGroup(group._id)}
+          onAddMember={() => handleOpenAddMemberDialog(group)}
+          onManageMembers={() => handleOpenManageDialog(group)}
+          onShare={() => handleOpenShareDialog(group)}
+        />
+      </motion.div>
+    </Grid>
+  )
+})}
             </AnimatePresence>
           </Grid>
         )}
@@ -280,17 +283,16 @@ const FamilyGroup = () => {
           onSubmit={handleAddMember}
           loading={operationLoading}
           loadingUsers={loadingUsers}
-          onSearchUsers={searchUsers}
         />
 
-        {/* Share Property Dialog */}
+        {/* Share Apartment Dialog */}
         <ShareDialog
           open={shareDialogOpen}
           onClose={() => {
             setShareDialogOpen(false)
             setSelectedGroup(null)
           }}
-          resourceType="property"
+          resourceType="apartment"
           preSelectedGroup={selectedGroup}
         />
       </motion.div>

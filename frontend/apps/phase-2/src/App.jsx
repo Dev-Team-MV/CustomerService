@@ -20,6 +20,7 @@ import GetYourQuote from './Pages/GetYourQuote'
 import Payloads from './Pages/Payloads'
 import MyApartment from './Pages/MyApartment'
 import MasterPlanPage from './Pages/MasterPlanPage'
+import FamilyGroup from './Pages/FamilyGroup'
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
               <Route path="/configuration" element={<ConfigurationManagerP2 />} />
               <Route path="/master-plan" element={<MasterPlanPage />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/family-group" element={<FamilyGroup />} />
               <Route path="/properties" element={<Properties />} />
               <Route path="/my-apartment" element={<MyApartment />} />
               <Route path="/buildings" element={<Buildings />} />

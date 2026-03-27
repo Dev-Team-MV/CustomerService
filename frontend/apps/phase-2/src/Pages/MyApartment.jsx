@@ -15,7 +15,7 @@ import useMyApartment from '../Constants/hooks/useMyApartment'
 import Loader from '@shared/components/Loader'
 import ApartmentCard from '../Components/UI/propertyDetails/ApartmentCard'
 import FinancialHeader from '../Components/UI/propertyDetails/FinancialHeader'
-// import ConstructionTab from '../Components/UI/propertyDetails/ConstructionTab'
+import ConstructionTab from '../Components/UI/propertyDetails/ConstructionTab'
 import PaymentTab from '../Components/UI/propertyDetails/PaymentTab'
 import ApartmentDetailsTab from '../Components/UI/propertyDetails/ApartmentDetailsTab'
 
@@ -219,12 +219,18 @@ const MyApartment = () => {
                       exit={{ opacity: 0, y: -30 }}
                       transition={{ duration: 0.4 }}
                     >
-                      {activeTab === 0 && (
-                        // <ConstructionTab phases={phases} loadingPhases={loadingPhases} />
-                        <>
+                      {/* {activeTab === 0 && (
+                          <>
+                          <ConstructionTab phases={phases} loadingPhases={loadingPhases} />
                         
                         </>
-                      )}
+                      )} */}
+                      {activeTab === 0 && (
+  <ConstructionTab 
+    apartmentId={selectedApartment} 
+    isAdmin={false}
+  />
+)}
                       {activeTab === 1 && (
                         <PaymentTab
                           apartmentDetails={apartmentDetails}

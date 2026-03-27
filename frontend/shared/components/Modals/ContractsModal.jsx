@@ -1,7 +1,7 @@
 import {
   Button, Box, Typography, IconButton,
   Stepper, Step, StepLabel, StepContent,
-  CircularProgress, Paper, Chip, Alert
+  CircularProgress, Paper, Chip, Alert, useTheme
 } from '@mui/material'
 import {
   Description, Delete, CheckCircle,
@@ -39,6 +39,7 @@ const ContractsModal = ({
     getExistingCount,
     getTotalProgress,
   } = useContracts({ resource, resourceType, open, onContractUpdated })
+  const theme = useTheme()
 
   // ── Actions ───────────────────────────────────────────────
   const modalActions = (
@@ -54,7 +55,7 @@ const ContractsModal = ({
     </>
   )
 
-  // ── Render ────────────────────────────────────────────────
+ // ── Render ────────────────────────────────────────────────
   return (
     <ModalWrapper
       open={open}
@@ -69,7 +70,7 @@ const ContractsModal = ({
     >
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" p={4}>
-          <CircularProgress sx={{ color: '#8CA551' }} />
+          <CircularProgress sx={{ color: theme.palette.secondary.main }} />
         </Box>
       ) : (
         <>
@@ -94,9 +95,9 @@ const ContractsModal = ({
             sx={{
               p: 2.5,
               mb: 3,
-              bgcolor: '#fafafa',
+              bgcolor: theme.palette.background.default,
               borderRadius: 3,
-              border: '1px solid #e0e0e0',
+              border: `1px solid ${theme.palette.cardBorder || '#e0e0e0'}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between'
@@ -107,7 +108,7 @@ const ContractsModal = ({
                 variant="body2"
                 fontWeight={600}
                 sx={{
-                  color: '#333F1F',
+                  color: theme.palette.primary.main,
                   fontFamily: '"Poppins", sans-serif',
                   mb: 0.5
                 }}
@@ -117,7 +118,7 @@ const ContractsModal = ({
               <Typography
                 variant="caption"
                 sx={{
-                  color: '#706f6f',
+                  color: theme.palette.text.secondary,
                   fontFamily: '"Poppins", sans-serif'
                 }}
               >
@@ -128,10 +129,10 @@ const ContractsModal = ({
               label={`${getTotalProgress()}%`}
               sx={{
                 bgcolor: getTotalProgress() === 100
-                  ? 'rgba(140, 165, 81, 0.12)'
-                  : 'rgba(229, 134, 60, 0.12)',
-                color: '#333F1F',
-                border: `1px solid ${getTotalProgress() === 100 ? '#8CA551' : '#E5863C'}`,
+                  ? theme.palette.secondary.light + '14'
+                  : theme.palette.warning.light + '14',
+                color: theme.palette.primary.main,
+                border: `1px solid ${getTotalProgress() === 100 ? theme.palette.secondary.main : theme.palette.warning.main}`,
                 fontWeight: 700,
                 fontSize: '1rem',
                 fontFamily: '"Poppins", sans-serif',
@@ -148,10 +149,10 @@ const ContractsModal = ({
                 mb: 3,
                 borderRadius: 2,
                 fontFamily: '"Poppins", sans-serif',
-                bgcolor: 'rgba(140, 165, 81, 0.08)',
-                border: '1px solid rgba(140, 165, 81, 0.3)',
+                bgcolor: theme.palette.secondary.light + '14',
+                border: `1px solid ${theme.palette.secondary.main}4D`,
                 '& .MuiAlert-icon': {
-                  color: '#8CA551'
+                  color: theme.palette.secondary.main
                 }
               }}
             >
@@ -173,20 +174,20 @@ const ContractsModal = ({
                 cursor: 'pointer'
               },
               '& .MuiStepConnector-line': {
-                borderColor: 'rgba(140, 165, 81, 0.3)',
+                borderColor: theme.palette.secondary.main + '4D',
                 borderWidth: '2px',
                 minHeight: 24
               },
               '& .MuiStepLabel-label': {
                 fontFamily: '"Poppins", sans-serif',
                 fontWeight: 600,
-                color: '#706f6f',
+                color: theme.palette.text.secondary,
                 '&.Mui-active': {
-                  color: '#333F1F',
+                  color: theme.palette.primary.main,
                   fontWeight: 700
                 },
                 '&.Mui-completed': {
-                  color: '#8CA551',
+                  color: theme.palette.secondary.main,
                   fontWeight: 600
                 }
               }
@@ -207,11 +208,17 @@ const ContractsModal = ({
                           width: 40,
                           height: 40,
                           borderRadius: 2,
-                          bgcolor: isCompleted ? '#8CA551' : (pendingFile ? '#E5863C' : '#e0e0e0'),
+                          bgcolor: isCompleted
+                            ? theme.palette.secondary.main
+                            : (pendingFile
+                              ? theme.palette.warning.main
+                              : theme.palette.cardBorder || '#e0e0e0'),
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          boxShadow: (isCompleted || pendingFile) ? '0 4px 12px rgba(140, 165, 81, 0.25)' : 'none',
+                          boxShadow: (isCompleted || pendingFile)
+                            ? `0 4px 12px ${theme.palette.secondary.main}40`
+                            : 'none',
                           transition: 'all 0.3s ease'
                         }}
                       >
@@ -231,7 +238,13 @@ const ContractsModal = ({
                         variant="body1"
                         fontWeight={activeStep === idx ? 700 : 600}
                         sx={{
-                          color: isCompleted ? '#8CA551' : (pendingFile ? '#E5863C' : (activeStep === idx ? '#333F1F' : '#706f6f')),
+                          color: isCompleted
+                            ? theme.palette.secondary.main
+                            : (pendingFile
+                              ? theme.palette.warning.main
+                              : (activeStep === idx
+                                ? theme.palette.primary.main
+                                : theme.palette.text.secondary)),
                           fontFamily: '"Poppins", sans-serif'
                         }}
                       >
@@ -242,9 +255,9 @@ const ContractsModal = ({
                           label="Uploaded"
                           size="small"
                           sx={{
-                            bgcolor: 'rgba(140, 165, 81, 0.12)',
-                            color: '#8CA551',
-                            border: '1px solid #8CA551',
+                            bgcolor: theme.palette.secondary.light + '14',
+                            color: theme.palette.secondary.main,
+                            border: `1px solid ${theme.palette.secondary.main}`,
                             fontWeight: 600,
                             fontFamily: '"Poppins", sans-serif',
                             height: 22
@@ -256,9 +269,9 @@ const ContractsModal = ({
                           label="Pending"
                           size="small"
                           sx={{
-                            bgcolor: 'rgba(229, 134, 60, 0.12)',
-                            color: '#E5863C',
-                            border: '1px solid #E5863C',
+                            bgcolor: theme.palette.warning.light + '14',
+                            color: theme.palette.warning.main,
+                            border: `1px solid ${theme.palette.warning.main}`,
                             fontWeight: 600,
                             fontFamily: '"Poppins", sans-serif',
                             height: 22
@@ -275,8 +288,8 @@ const ContractsModal = ({
                         p: 2.5,
                         mt: 1.5,
                         mb: 2,
-                        bgcolor: '#fafafa',
-                        border: '1px solid #e0e0e0',
+                        bgcolor: theme.palette.background.default,
+                        border: `1px solid ${theme.palette.cardBorder || '#e0e0e0'}`,
                         borderRadius: 2
                       }}
                     >
@@ -286,7 +299,7 @@ const ContractsModal = ({
                           <Typography
                             variant="body2"
                             sx={{
-                              color: '#8CA551',
+                              color: theme.palette.secondary.main,
                               fontFamily: '"Poppins", sans-serif',
                               fontWeight: 600,
                               mb: 0.5
@@ -297,7 +310,7 @@ const ContractsModal = ({
                           <Typography
                             variant="caption"
                             sx={{
-                              color: '#706f6f',
+                              color: theme.palette.text.secondary,
                               fontFamily: '"Poppins", sans-serif',
                               display: 'block',
                               mb: 2
@@ -322,13 +335,13 @@ const ContractsModal = ({
                                 textTransform: 'none',
                                 fontWeight: 600,
                                 fontFamily: '"Poppins", sans-serif',
-                                borderColor: 'rgba(25, 118, 210, 0.3)',
+                                borderColor: theme.palette.info.light,
                                 borderWidth: '2px',
-                                color: '#1976d2',
+                                color: theme.palette.info.main,
                                 '&:hover': {
-                                  borderColor: '#1976d2',
+                                  borderColor: theme.palette.info.main,
                                   borderWidth: '2px',
-                                  bgcolor: 'rgba(25, 118, 210, 0.08)'
+                                  bgcolor: theme.palette.info.light + '14'
                                 },
                                 '&:disabled': {
                                   opacity: 0.5
@@ -348,13 +361,13 @@ const ContractsModal = ({
                                 textTransform: 'none',
                                 fontWeight: 600,
                                 fontFamily: '"Poppins", sans-serif',
-                                borderColor: 'rgba(140, 165, 81, 0.3)',
+                                borderColor: theme.palette.secondary.light,
                                 borderWidth: '2px',
-                                color: '#333F1F',
+                                color: theme.palette.primary.main,
                                 '&:hover': {
-                                  borderColor: '#8CA551',
+                                  borderColor: theme.palette.secondary.main,
                                   borderWidth: '2px',
-                                  bgcolor: 'rgba(140, 165, 81, 0.08)'
+                                  bgcolor: theme.palette.secondary.light + '14'
                                 },
                                 '&:disabled': {
                                   opacity: 0.5
@@ -375,13 +388,13 @@ const ContractsModal = ({
                                 textTransform: 'none',
                                 fontWeight: 600,
                                 fontFamily: '"Poppins", sans-serif',
-                                borderColor: 'rgba(229, 134, 60, 0.3)',
+                                borderColor: theme.palette.warning.light,
                                 borderWidth: '2px',
-                                color: '#E5863C',
+                                color: theme.palette.warning.main,
                                 '&:hover': {
-                                  borderColor: '#E5863C',
+                                  borderColor: theme.palette.warning.main,
                                   borderWidth: '2px',
-                                  bgcolor: 'rgba(229, 134, 60, 0.08)'
+                                  bgcolor: theme.palette.warning.light + '14'
                                 },
                                 '&:disabled': {
                                   opacity: 0.5
@@ -395,7 +408,7 @@ const ContractsModal = ({
                           <Typography
                             variant="caption"
                             sx={{
-                              color: '#706f6f',
+                              color: theme.palette.text.secondary,
                               fontFamily: '"Poppins", sans-serif',
                               fontStyle: 'italic',
                               display: 'block',
@@ -414,19 +427,19 @@ const ContractsModal = ({
                               alignItems: 'center',
                               gap: 1.5,
                               p: 2,
-                              bgcolor: 'rgba(229, 134, 60, 0.08)',
+                              bgcolor: theme.palette.warning.light + '14',
                               borderRadius: 2,
-                              border: '1px solid rgba(229, 134, 60, 0.2)',
+                              border: `1px solid ${theme.palette.warning.main}33`,
                               mb: 2
                             }}
                           >
-                            <AttachFile sx={{ color: '#E5863C', fontSize: 20 }} />
+                            <AttachFile sx={{ color: theme.palette.warning.main, fontSize: 20 }} />
                             <Box flex={1}>
                               <Typography
                                 variant="body2"
                                 fontWeight={600}
                                 sx={{
-                                  color: '#333F1F',
+                                  color: theme.palette.primary.main,
                                   fontFamily: '"Poppins", sans-serif',
                                   mb: 0.3
                                 }}
@@ -436,7 +449,7 @@ const ContractsModal = ({
                               <Typography
                                 variant="caption"
                                 sx={{
-                                  color: '#706f6f',
+                                  color: theme.palette.text.secondary,
                                   fontFamily: '"Poppins", sans-serif'
                                 }}
                               >
@@ -447,9 +460,9 @@ const ContractsModal = ({
                               size="small"
                               onClick={() => handleRemovePendingFile(docType)}
                               sx={{
-                                color: '#E5863C',
+                                color: theme.palette.warning.main,
                                 '&:hover': {
-                                  bgcolor: 'rgba(229, 134, 60, 0.12)'
+                                  bgcolor: theme.palette.warning.light + '14'
                                 }
                               }}
                             >
@@ -459,7 +472,7 @@ const ContractsModal = ({
                           <Typography
                             variant="caption"
                             sx={{
-                              color: '#706f6f',
+                              color: theme.palette.text.secondary,
                               fontFamily: '"Poppins", sans-serif',
                               fontStyle: 'italic'
                             }}
@@ -473,7 +486,7 @@ const ContractsModal = ({
                           <Typography
                             variant="body2"
                             sx={{
-                              color: '#706f6f',
+                              color: theme.palette.text.secondary,
                               fontFamily: '"Poppins", sans-serif',
                               mb: 2
                             }}
@@ -488,17 +501,17 @@ const ContractsModal = ({
                             disabled={submitting || isDeleting}
                             sx={{
                               borderRadius: 3,
-                              borderColor: 'rgba(140, 165, 81, 0.3)',
+                              borderColor: theme.palette.secondary.light,
                               borderWidth: '2px',
-                              color: '#333F1F',
+                              color: theme.palette.primary.main,
                               fontWeight: 600,
                               textTransform: 'none',
                               fontFamily: '"Poppins", sans-serif',
                               py: 1.5,
                               '&:hover': {
-                                borderColor: '#8CA551',
+                                borderColor: theme.palette.secondary.main,
                                 borderWidth: '2px',
-                                bgcolor: 'rgba(140, 165, 81, 0.08)'
+                                bgcolor: theme.palette.secondary.light + '14'
                               },
                               '&:disabled': {
                                 opacity: 0.5

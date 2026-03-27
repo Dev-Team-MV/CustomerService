@@ -50,6 +50,12 @@ export const privateMenuItems = [
     roles: ["superadmin", "admin", "user"],
   },
   {
+    textKey: "navigation:menu.familyGroup",
+    icon: PeopleIcon,
+    path: "/family-group",
+    roles: ["superadmin", "admin", "user"],
+  },
+  {
     textKey: "navigation:menu.analytics",
     icon: BarChartIcon,
     path: "/analytics",

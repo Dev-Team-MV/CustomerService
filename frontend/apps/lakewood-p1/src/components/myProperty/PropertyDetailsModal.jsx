@@ -28,7 +28,7 @@ import { ConstructionPhasesContent } from '../ConstructionPhasesContent'
 import ModalWrapper from '../../constants/ModalWrapper'
 import PrimaryButton from '../../constants/PrimaryButton'
 
-import { usePayloads } from '../../hooks/usePayloads'
+import { usePayloads } from '@shared/hooks/usePayloads'
 import { usePayloadColumns } from '../../constants/Columns/payloads'
 
 const PropertyDetailsModal = ({ open, onClose, property, isAdmin }) => {

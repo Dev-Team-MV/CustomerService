@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Box, Container } from '@mui/material'
+import { Box, Container, Dialog } from '@mui/material'
 import { Add, Home } from '@mui/icons-material'
 import PageHeader from '@shared/components/PageHeader'
 import DataTable from '@shared/components/table/DataTable'
@@ -13,7 +13,7 @@ import ContractsModal from '@shared/components/Modals/ContractsModal'
 import ApartmentDetailsModal from '../Components/UI/propertyDetails/ApartmentDetailsModal'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-
+import ConstructionTab from '../Components/UI/propertyDetails/ConstructionTab'
 const Properties = () => {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -27,6 +27,9 @@ const { t } = useTranslation('property') // Usa el namespace adecuado, por ejemp
   const [selectedApartment, setSelectedApartment] = useState(null)
 
 const [detailsOpen, setDetailsOpen] = useState(false)
+
+const [constructionOpen, setConstructionOpen] = useState(false)
+const [selectedApartmentId, setSelectedApartmentId] = useState(null)
 
 // Crea un mapping de id a nombre
 const buildingMap = useMemo(() => {
@@ -62,6 +65,10 @@ const columns = usePropertyColumns({
   onOpenContracts: (row) => {
     setSelectedApartment(row.raw)
     setContractsOpen(true)
+  },
+    onOpenPhases: (row) => {
+    setSelectedApartmentId(row.raw._id) // o row._id según tu estructura
+    setConstructionOpen(true)
   }
 })
 
@@ -110,6 +117,20 @@ const columns = usePropertyColumns({
           onClose={() => setDetailsOpen(false)}
           apartment={selectedApartment}
         />
+
+        <Dialog
+  open={constructionOpen}
+  onClose={() => setConstructionOpen(false)}
+  maxWidth="lg"
+  fullWidth
+>
+  <Box p={2}>
+    <ConstructionTab
+      apartmentId={selectedApartmentId}
+      isAdmin={true}
+    />
+  </Box>
+</Dialog>
       </Container>
     </Box>
   )

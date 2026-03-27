@@ -245,7 +245,8 @@ const MyProperty = () => {
                       transition={{ duration: 0.4 }}
                     >
                       {activeTab === 0 && (
-                        <ConstructionTab phases={phases} loadingPhases={loadingPhases} />
+                        // <ConstructionTab phases={phases} loadingPhases={loadingPhases} />
+                        <ConstructionTab propertyId={selectedProperty} />
                       )}
                       {activeTab === 1 && (
                         <PaymentTab

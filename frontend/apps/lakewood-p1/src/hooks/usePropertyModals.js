@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import useModalState from './useModalState'
+import useModalState from '@shared/hooks/useModalState'
 
 const usePropertyModals = () => {
   const phases    = useModalState()
