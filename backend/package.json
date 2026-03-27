@@ -11,6 +11,7 @@
     "enable-versioning": "node scripts/enable-gcs-versioning.js",
     "migrate:urls-to-paths": "node scripts/migrate-urls-to-paths.js",
     "migrate:urls-to-paths:pdn": "node scripts/migrate-urls-to-paths-pdn.js",
+    "migrate:family-groups-project": "node scripts/migrate-family-groups-project.js",
     "fix:paths-pdn-to-dev": "node scripts/fix-paths-pdn-to-dev.js"
   },
   "keywords": [],

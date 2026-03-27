@@ -373,6 +373,7 @@ const options = {
           type: 'object',
           properties: {
             _id: { type: 'string', description: 'Family group ID' },
+            project: { type: 'string', description: 'ID del proyecto (alcance del grupo)' },
             name: { type: 'string', description: 'Nombre del grupo' },
             createdBy: { $ref: '#/components/schemas/User', description: 'Usuario que creó el grupo (siempre es miembro implícito)' },
             members: {

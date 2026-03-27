@@ -17,10 +17,17 @@ const router = express.Router()
  * /api/family-groups:
  *   get:
  *     summary: List my family groups
- *     description: Returns all family groups where the authenticated user is the creator or a member.
+ *     description: Returns family groups where the user is creator or member. Optional query projectId filters to that project.
  *     tags: [Family Groups]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: If set, only groups in this project
  *     responses:
  *       200:
  *         description: List of family groups
@@ -47,6 +54,9 @@ const router = express.Router()
  *               name:
  *                 type: string
  *                 description: Group name
+ *               projectId:
+ *                 type: string
+ *                 description: Optional; if omitted, uses the first project in the database (legacy clients)
  *     responses:
  *       201:
  *         description: Family group created
