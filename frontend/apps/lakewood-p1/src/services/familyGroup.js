@@ -23,6 +23,28 @@ const familyGroupService = {
     }
   },
 
+    // Get a family group by ID
+  getFamilyGroupById: async (groupId) => {
+    try {
+      const response = await api.get(`/family-groups/${groupId}`)
+      return response.data
+    } catch (error) {
+      console.error('❌ Error getting family group by ID:', error.response?.data || error.message)
+      throw new Error(error.response?.data?.message || 'Failed to get family group by ID')
+    }
+  },
+
+  // Update a family group (name and/or members)
+  updateFamilyGroup: async (groupId, data) => {
+    try {
+      const response = await api.put(`/family-groups/${groupId}`, data)
+      return response.data
+    } catch (error) {
+      console.error('❌ Error updating family group:', error.response?.data || error.message)
+      throw new Error(error.response?.data?.message || 'Failed to update family group')
+    }
+  },
+
   // Add a member to a family group
   addMemberToGroup: async (groupId, userId, role = 'member') => {
     try {

@@ -1,63 +1,125 @@
-import React from 'react'
+// @lakewood-p1/src/pages/FamilyGroup.jsx
+import React, { useState } from 'react'
 import {
-  Box,
   Container,
   Grid,
+  Box,
+  Typography,
   Alert,
+  Snackbar,
   Paper,
-  Typography
+  Button
 } from '@mui/material'
 import {
-  Add as AddIcon,
-  Group as GroupIcon
+  Group as GroupIcon,
+  Add as AddIcon
 } from '@mui/icons-material'
 import { motion, AnimatePresence } from 'framer-motion'
-import PageHeader from '../components/PageHeader'
-import FamilyGroupCard from '../components/FamilyGroup/FamilyGroupCard'
-import CreateGroupDialog from '../components/FamilyGroup/CreateGroup'
-import AddMemberDialog from '../components/FamilyGroup/AddMemberFamily'
-import Loader from '../components/Loader'
 import { useTranslation } from 'react-i18next'
-import useModalState from '@shared/hooks/useModalState'
-import { useResidents } from '@shared/hooks/useResidents'
-import { useFamilyGroup } from '../hooks/useFamilyGroup'
 
+// Shared components
+import PageHeader from '@shared/components/PageHeader'
+
+import FamilyGroupCard from '@shared/components/FamilyGroup/FamilyGroupCard'
+import CreateGroupDialog from '@shared/components/FamilyGroup/CreateGroupDialog'
+import ManageGroupDialog from '@shared/components/FamilyGroup/ManageGroupDialog'
+import AddMemberDialog from '@shared/components/FamilyGroup/AddMemberDialog'
+import ShareDialog from '@shared/components/ResourceShare/ShareDialog'
+
+// Shared hooks
+import { useFamilyGroups } from '@shared/hooks/useFamilyGroups'
+import { useResidents } from '@shared/hooks/useResidents'
+import { useAuth } from '@shared/context/AuthContext'
+
+/**
+ * Family Group Management Page for Lakewood
+ * Allows users to create and manage family groups for sharing properties
+ */
 const FamilyGroup = () => {
-  const { t } = useTranslation('familyGroup')
-  const createGroupModal = useModalState('')
-  const addMemberModal = useModalState({ group: null, user: null, role: 'member' })
-  
+  const { t } = useTranslation(['familyGroup', 'common'])
+  const { user } = useAuth()
+
+  // Dialog states
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const [manageDialogOpen, setManageDialogOpen] = useState(false)
+  const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [selectedGroup, setSelectedGroup] = useState(null)
+
+  // Family groups hook
   const {
     groups,
     loading,
     error,
     success,
-    handleCreateGroup,
-    handleAddMember,
-    handleRemoveMember,
-    handleDeleteGroup,
+    operationLoading,
+    createGroup,
+    deleteGroup,
+    addMember,
+    removeMember,
+    updateMemberRole,
     isGroupAdmin,
-    clearAlerts,
-  } = useFamilyGroup()
+    clearAlerts
+  } = useFamilyGroups()
 
-  const { users, loading: usersLoading, getAvailableUsers } = useResidents()
+  // Residents hook for user selection
+  const { users, loading: loadingUsers, searchUsers } = useResidents()
 
+  // Handlers
+  const handleCreateGroup = async (name) => {
+    const newGroup = await createGroup(name)
+    if (newGroup) {
+      setCreateDialogOpen(false)
+      return true
+    }
+    return false
+  }
+
+  const handleDeleteGroup = async (groupId) => {
+    if (window.confirm(t('confirmDeleteGroup', 'Are you sure you want to delete this group?'))) {
+      await deleteGroup(groupId)
+    }
+  }
+
+  const handleOpenManageDialog = (group) => {
+    setSelectedGroup(group)
+    setManageDialogOpen(true)
+  }
+
+  const handleOpenAddMemberDialog = (group) => {
+    setSelectedGroup(group)
+    setAddMemberDialogOpen(true)
+  }
+
+  const handleOpenShareDialog = (group) => {
+    setSelectedGroup(group)
+    setShareDialogOpen(true)
+  }
+
+  const handleAddMember = async (groupId, userId, role) => {
+    const result = await addMember(groupId, userId, role)
+    if (result) {
+      setAddMemberDialogOpen(false)
+      return true
+    }
+    return false
+  }
+
+  // Loading state
   if (loading) {
     return (
-      <Box
-        sx={{
-          minHeight: "60vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center"
-        }}
-      >
-        <Loader
-          size="large"
-          message={t('loading')}
-          fullHeight={false}
-        />
-      </Box>
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="60vh"
+        >
+          <Typography variant="h6" color="text.secondary">
+            {t('common:loading', 'Loading...')}
+          </Typography>
+        </Box>
+      </Container>
     )
   }
 
@@ -68,160 +130,168 @@ const FamilyGroup = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        {/* Page Header */}
         <PageHeader
           icon={GroupIcon}
-          title={t('title')}
-          subtitle={t('subtitle')}
+          title={t('title', 'Family Groups')}
+          subtitle={t('subtitle', 'Manage family groups to share properties with your loved ones')}
           actionButton={{
-            label: t('createGroup'),
-            onClick: () => createGroupModal.openModal(),
+            label: t('createGroup', 'Create Group'),
+            onClick: () => setCreateDialogOpen(true),
             icon: <AddIcon />,
-            tooltip: t('createGroupTooltip')
+            tooltip: t('createGroupTooltip', 'Create a new family group')
           }}
         />
 
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
-              <Alert
-                severity="error"
-                onClose={clearAlerts}
-                sx={{ mb: 3 }}
-              >
-                {t(error)}
-              </Alert>
-            </motion.div>
-          )}
-          {success && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
-              <Alert
-                severity="success"
-                onClose={clearAlerts}
-                sx={{ mb: 3 }}
-              >
-                {t(success)}
-              </Alert>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Alerts */}
+        <Snackbar
+          open={!!error}
+          autoHideDuration={6000}
+          onClose={clearAlerts}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <Alert onClose={clearAlerts} severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        </Snackbar>
 
+        <Snackbar
+          open={!!success}
+          autoHideDuration={4000}
+          onClose={clearAlerts}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <Alert onClose={clearAlerts} severity="success" sx={{ width: '100%' }}>
+            {success}
+          </Alert>
+        </Snackbar>
+
+        {/* Content */}
         {groups.length === 0 ? (
-          <Paper
-            elevation={0}
-            sx={{
-              p: 6,
-              textAlign: 'center',
-              borderRadius: 4,
-              border: '1px solid rgba(0,0,0,0.08)',
-              background: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
-            }}
+          // Empty State
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.3 }}
           >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
+            <Paper
+              elevation={0}
+              sx={{
+                p: 8,
+                textAlign: 'center',
+                borderRadius: 3,
+                border: '1px solid',
+                borderColor: 'divider',
+                background: 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)'
+              }}
             >
               <GroupIcon
-                sx={{ fontSize: 80, color: '#8CA551', mb: 2, opacity: 0.7 }}
+                sx={{
+                  fontSize: 80,
+                  color: '#8CA551',
+                  opacity: 0.5,
+                  mb: 3
+                }}
               />
-              <Typography
-                variant="h6"
-                sx={{
-                  color: '#333F1F',
-                  fontWeight: 600,
-                  mb: 1,
-                  fontFamily: '"Poppins", sans-serif',
-                }}
-              >
-                {t('noGroups')}
+              <Typography variant="h5" fontWeight={600} gutterBottom>
+                {t('noGroups', 'No Family Groups Yet')}
               </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: '#706f6f',
-                  mb: 3,
-                  fontFamily: '"Poppins", sans-serif',
-                }}
-              >
-                {t('noGroupsDescription')}
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 500, mx: 'auto' }}>
+                {t('noGroupsDescription', 'Create your first family group to start sharing properties with your family members.')}
               </Typography>
-              <button
+              <Button
                 variant="contained"
-                starticon={<AddIcon />}
-                onClick={() => createGroupModal.openModal()}
-                style={{
-                  borderRadius: 12,
+                size="large"
+                startIcon={<AddIcon />}
+                onClick={() => setCreateDialogOpen(true)}
+                sx={{ 
+                  borderRadius: 2,
                   background: '#333F1F',
-                  color: '#fff',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  padding: '12px 24px',
-                  marginTop: '16px',
-                  border: 'none',
-                  cursor: 'pointer'
+                  '&:hover': {
+                    background: '#8CA551'
+                  }
                 }}
               >
-                {t('createFirstGroup')}
-              </button>
-            </motion.div>
-          </Paper>
+                {t('createFirstGroup', 'Create Your First Group')}
+              </Button>
+            </Paper>
+          </motion.div>
         ) : (
+          // Groups Grid
           <Grid container spacing={3}>
-            {groups.map((group, index) => (
-              <Grid item xs={12} md={6} lg={4} key={group._id}>
-                <FamilyGroupCard
-                  group={group}
-                  currentUser={group.createdBy}
-                  isAdmin={isGroupAdmin(group)}
-                  onAddMember={g => addMemberModal.openModal({ group: g, user: null, role: 'member' })}
-                  onRemoveMember={handleRemoveMember}
-                  onDeleteGroup={handleDeleteGroup}
-                  index={index}
-                />
-              </Grid>
-            ))}
+            <AnimatePresence>
+              {groups.map((group, index) => (
+                <Grid item xs={12} sm={6} lg={4} key={group._id}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                  >
+                    <FamilyGroupCard
+                      group={group}
+                      isAdmin={isGroupAdmin(group)}
+                      onEdit={() => handleOpenManageDialog(group)}
+                      onDelete={() => handleDeleteGroup(group._id)}
+                      onAddMember={() => handleOpenAddMemberDialog(group)}
+                      onManageMembers={() => handleOpenManageDialog(group)}
+                      onShare={() => handleOpenShareDialog(group)}
+                    />
+                  </motion.div>
+                </Grid>
+              ))}
+            </AnimatePresence>
           </Grid>
         )}
 
+        {/* Dialogs */}
+        
+        {/* Create Group Dialog */}
         <CreateGroupDialog
-          open={createGroupModal.open}
-          onClose={createGroupModal.closeModal}
-          groupName={createGroupModal.data}
-          onGroupNameChange={e => createGroupModal.setData(e.target.value)}
-          onSubmit={() => handleCreateGroup(createGroupModal.data, createGroupModal.closeModal)}
-          title={t('createGroupDialogTitle')}
-          submitLabel={t('createGroupDialogSubmit')}
+          open={createDialogOpen}
+          onClose={() => setCreateDialogOpen(false)}
+          onSubmit={handleCreateGroup}
+          loading={operationLoading}
         />
 
+        {/* Manage Group Dialog */}
+        <ManageGroupDialog
+          open={manageDialogOpen}
+          onClose={() => {
+            setManageDialogOpen(false)
+            setSelectedGroup(null)
+          }}
+          group={selectedGroup}
+          currentUserId={user?._id}
+          onRemoveMember={removeMember}
+          onUpdateRole={updateMemberRole}
+          loading={operationLoading}
+        />
+
+        {/* Add Member Dialog */}
         <AddMemberDialog
-          open={addMemberModal.open}
-          onClose={addMemberModal.closeModal}
-          groupName={addMemberModal.data.group?.name}
-          existingMembers={addMemberModal.data.group?.members || []}
-          selectedUser={addMemberModal.data.user}
-          onUserChange={(e, newValue) => addMemberModal.setData({ ...addMemberModal.data, user: newValue })}
-          memberRole={addMemberModal.data.role}
-          onRoleChange={e => addMemberModal.setData({ ...addMemberModal.data, role: e.target.value })}
-          onSubmit={() =>
-            handleAddMember(
-              addMemberModal.data.group,
-              addMemberModal.data.user,
-              addMemberModal.data.role,
-              addMemberModal.closeModal
-            )
-          }
-          title={t('addMemberDialogTitle')}
-          submitLabel={t('addMemberDialogSubmit')}
-          users={getAvailableUsers(addMemberModal.data.group)}
-          usersLoading={usersLoading}
+          open={addMemberDialogOpen}
+          onClose={() => {
+            setAddMemberDialogOpen(false)
+            setSelectedGroup(null)
+          }}
+          group={selectedGroup}
+          availableUsers={users}
+          onSubmit={handleAddMember}
+          loading={operationLoading}
+          loadingUsers={loadingUsers}
+          onSearchUsers={searchUsers}
+        />
+
+        {/* Share Property Dialog */}
+        <ShareDialog
+          open={shareDialogOpen}
+          onClose={() => {
+            setShareDialogOpen(false)
+            setSelectedGroup(null)
+          }}
+          resourceType="property"
+          preSelectedGroup={selectedGroup}
         />
       </motion.div>
     </Container>

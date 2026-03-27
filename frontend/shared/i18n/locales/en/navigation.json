@@ -18,7 +18,10 @@
         "clubhouseManager": "Clubhouse Manager",
         "timeline": "Timeline",
         "configuration": "Configuration",
-        "familyGroup": "Family Group"
+        "familyGroup": "Family Group",
+        "buildings": "Buildings",
+        "masterPlan": "Master Plan",
+        "myapartment": "My Apartments"
     },
     "tooltips": {
         "openMenu": "Open menu",

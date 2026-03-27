@@ -9,7 +9,7 @@ export default function ClientsPropertyChart({ clientsData }) {
   if (clients.length === 0) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 160, border: '1px dashed #e0e0e0' }}>
-        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#ccc', letterSpacing: '2px' }}>
+        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000000ff', letterSpacing: '2px' }}>
           {t('mv.modal.propertyChart.noData')}
         </Typography>
       </Box>
@@ -21,7 +21,7 @@ export default function ClientsPropertyChart({ clientsData }) {
 
   return (
     <Box>
-      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#aaa', letterSpacing: '2px', textTransform: 'uppercase', mb: 2 }}>
+      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 2 }}>
         {t('mv.modal.propertyChart.title')}
       </Typography>
       <Box sx={{ width: '100%', minWidth: 0, overflowX: 'auto' }}>
@@ -29,10 +29,10 @@ export default function ClientsPropertyChart({ clientsData }) {
           xAxis={[{
             scaleType: 'band',
             data: xLabels,
-            tickLabelStyle: { fontFamily: '"Courier New", monospace', fontSize: 10, fill: '#aaa' }
+            tickLabelStyle: { fontFamily: '"Courier New", monospace', fontSize: 10, fill: '#000000ff' }
           }]}
           yAxis={[{
-            tickLabelStyle: { fontFamily: '"Courier New", monospace', fontSize: 10, fill: '#aaa' }
+            tickLabelStyle: { fontFamily: '"Courier New", monospace', fontSize: 10, fill: '#000000ff' }
           }]}
           series={[{
             data: values,

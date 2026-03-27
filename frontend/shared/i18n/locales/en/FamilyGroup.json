@@ -24,8 +24,8 @@
   "confirmRemoveMember": "Are you sure you want to remove this member?",
   "confirmDeleteGroup": "Are you sure you want to delete this group? This will remove all shared properties.",
   "pleaseSelectUser": "Please select a user",
-    "createdBy": "Created by {{name}}",
-    "shareProperty": "Share Property",
+  "createdBy": "Created by {{name}}",
+  "shareProperty": "Share Property",
   "sharingWithGroup": "Sharing with group: {{group}}",
   "selectPropertyToShare": "Select a Property to Share",
   "loadingProperties": "Loading properties...",
@@ -45,9 +45,13 @@
   "typeAtLeast2Chars": "Type at least 2 characters to search",
   "noUsersFound": "No users found",
   "searchUser": "Search User",
-  "searchByNameOrEmail": "Search by name or email...",
+  "searchUserPlaceholder": "Search by name or email...",
   "role": "Role",
+  "members": "Members",
   "member": "Member",
   "admin": "Admin",
-  "addMember": "Add Member"
+  "addMember": "Add Member",
+  "delete": "Delete",
+  "noMembers": "No members yet",
+  "owner": "Owner"
 }

@@ -3,6 +3,7 @@ import { Grid, Box, Typography, Chip, Paper } from '@mui/material'
 import { Home, Construction, Layers, Star, AutoAwesome } from '@mui/icons-material'
 import { motion }           from 'framer-motion'
 import PropTypes            from 'prop-types'
+import { useTranslation }   from 'react-i18next'
 
 // Chip reutilizable con estilo outline del proyecto
 const OutlineChip = ({ label, icon, borderColor = '#8CA551', color = '#3d5a4d', hoverBg = 'rgba(140,165,81,0.08)' }) => (
@@ -49,6 +50,7 @@ const paperSx = {
 }
 
 const PropertyDetailHeader = ({ propertyDetails, isModel10, balconyLabels }) => {
+  const { t } = useTranslation('myProperty')
   const { property, model, construction } = propertyDetails
 
   return (
@@ -176,7 +178,7 @@ const PropertyDetailHeader = ({ propertyDetails, isModel10, balconyLabels }) => 
                 display: 'block', mb: 0.5,
                 fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1.5px'
               }}>
-                Property Value
+                {t('myProperty:specs.propertyValue')}
               </Typography>
               <Typography variant="h2" sx={{
                 color: '#333F1F', fontWeight: 800,

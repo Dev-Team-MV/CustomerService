@@ -26,11 +26,11 @@ export default function ClientsComparativaChart({ filteredBalance, filteredClien
         <Box sx={{ display: 'flex', gap: 2 }}>
           {[
             { color: '#000',    label: t('mv.clients.clients') },
-            { color: '#d0d0d0', label: t('mv.clients.properties') }
+            { color: '#000000ff', label: t('mv.clients.properties') }
           ].map(l => (
             <Box key={l.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
               <Box sx={{ width: 8, height: 8, bgcolor: l.color }} />
-              <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.55rem', color: '#aaa', letterSpacing: '1px', textTransform: 'uppercase' }}>
+              <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.55rem', color: '#000000ff', letterSpacing: '1px', textTransform: 'uppercase' }}>
                 {l.label}
               </Typography>
             </Box>
@@ -40,7 +40,7 @@ export default function ClientsComparativaChart({ filteredBalance, filteredClien
 
       {isEmpty ? (
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 220, border: '1px dashed #e0e0e0' }}>
-          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#ccc', letterSpacing: '2px' }}>
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000000ff', letterSpacing: '2px' }}>
             {t('mv.clients.noData')}
           </Typography>
         </Box>
@@ -57,7 +57,7 @@ export default function ClientsComparativaChart({ filteredBalance, filteredClien
             }]}
             series={[
               { data: totalClients, label: 'Clients',    color: '#000' },
-              { data: totalProps,   label: 'Properties', color: '#d0d0d0' }
+              { data: totalProps,   label: 'Properties', color: '#000000ff' }
             ]}
             height={260}
             margin={{ top: 10, right: 10, bottom: 40, left: 40 }}

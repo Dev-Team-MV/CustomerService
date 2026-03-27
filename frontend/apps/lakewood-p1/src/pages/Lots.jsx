@@ -24,8 +24,8 @@ import {
 import api from '@shared/services/api'
 import PageHeader from '@shared/components/PageHeader'
 import StatsCards from '../components/statscard'
-import DataTable from '../components/table/DataTable'
-import EmptyState from '../components/table/EmptyState'
+import DataTable from '@shared/components/table/DataTable';
+import EmptyState from '@shared/components/table/EmptyState';
 import LotDialog from '../components/lot/LotDialog'
 
 const Lots = () => {

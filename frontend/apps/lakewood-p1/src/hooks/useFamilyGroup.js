@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import familyGroupService from '../services/familyGroup'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '@shared/context/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 export const useFamilyGroup = () => {
+  const { t } = useTranslation('FamilyGroup')
   const { user } = useAuth()
   const [groups, setGroups] = useState([])
   const [loading, setLoading] = useState(true)
@@ -20,72 +22,72 @@ export const useFamilyGroup = () => {
       setGroups(data)
       setError(null)
     } catch (err) {
-      setError(err.message || 'Failed to load family groups')
+      setError(t('failedToLoadGroups'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   const handleCreateGroup = useCallback(async (groupName, closeModal) => {
     if (!groupName.trim()) {
-      setError('Group name is required')
+      setError(t('groupNameRequired'))
       return
     }
     try {
       await familyGroupService.createFamilyGroup(groupName)
-      setSuccess('Family group created successfully')
+      setSuccess(t('groupCreatedSuccess'))
       closeModal()
       loadGroups()
     } catch (err) {
-      setError(err.message || 'Failed to create group')
+      setError(t('failedToCreateGroup'))
     }
-  }, [loadGroups])
+  }, [loadGroups, t])
 
-  const handleAddMember = useCallback(async (group, user, role, closeModal) => {
-    if (!user) {
-      setError('Please select a user')
+  const handleAddMember = useCallback(async (group, userToAdd, role, closeModal) => {
+    if (!userToAdd) {
+      setError(t('pleaseSelectUser'))
       return
     }
     try {
       await familyGroupService.addMemberToGroup(
         group._id,
-        user._id,
+        userToAdd._id,
         role
       )
-      setSuccess('Member added successfully')
+      setSuccess(t('memberAddedSuccess'))
       closeModal()
       loadGroups()
     } catch (err) {
-      setError(err.message || 'Failed to add member')
+      setError(t('failedToAddMember'))
     }
-  }, [loadGroups])
+  }, [loadGroups, t])
 
   const handleRemoveMember = useCallback(async (groupId, userId) => {
-    if (!window.confirm('Are you sure you want to remove this member?')) return
+    if (!window.confirm(t('confirmRemoveMember'))) return
     try {
       await familyGroupService.removeMemberFromGroup(groupId, userId)
-      setSuccess('Member removed successfully')
+      setSuccess(t('memberRemovedSuccess'))
       loadGroups()
     } catch (err) {
-      setError(err.message || 'Failed to remove member')
+      setError(t('failedToRemoveMember'))
     }
-  }, [loadGroups])
+  }, [loadGroups, t])
 
   const handleDeleteGroup = useCallback(async (groupId) => {
     if (
       !window.confirm(
-        'Are you sure you want to delete this group? This will remove all shared properties.'
+        t('confirmDeleteGroup')
       )
     )
       return
     try {
       await familyGroupService.deleteFamilyGroup(groupId)
-      setSuccess('Family group deleted successfully')
+      setSuccess(t('groupDeletedSuccess'))
       loadGroups()
     } catch (err) {
-      setError(err.message || 'Failed to delete group')
+      setError(t('failedToDeleteGroup'))
     }
-  }, [loadGroups])
+  }, [loadGroups, t])
 
   const isGroupAdmin = useCallback((group) => {
     if (user?.role === 'superadmin') return true

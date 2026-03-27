@@ -28,7 +28,7 @@ export default function ProjectFilter({ projects, activeIds, onToggle, onToggleA
         >
           {allActive
             ? <CheckBox sx={{ fontSize: 14, color: '#000' }} />
-            : <CheckBoxOutlineBlank sx={{ fontSize: 14, color: '#bbb' }} />
+            : <CheckBoxOutlineBlank sx={{ fontSize: 14, color: '#000000ff' }} />
           }
           <Typography component="span" sx={{
             fontFamily: '"Courier New", monospace', fontSize: '0.58rem',

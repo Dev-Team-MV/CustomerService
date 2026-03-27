@@ -178,7 +178,7 @@ export default function Analytics() {
               {lastUpdated && (
                 <Typography sx={{
                   fontFamily: '"Courier New", monospace', fontSize: '0.58rem',
-                  color: '#ccc', letterSpacing: '1px'
+                  color: '#000000ff', letterSpacing: '1px'
                 }}>
                   {lastUpdated.toLocaleTimeString()}
                 </Typography>
@@ -193,10 +193,10 @@ export default function Analytics() {
                   '&:hover': { border: '1px solid #000' }
                 }}
               >
-                <Refresh sx={{ fontSize: 13, color: '#888' }} />
+                <Refresh sx={{ fontSize: 13, color: '#000000ff' }} />
                 <Typography sx={{
                   fontFamily: '"Courier New", monospace', fontSize: '0.58rem',
-                  color: '#888', letterSpacing: '1.5px', textTransform: 'uppercase'
+                  color: '#000000ff', letterSpacing: '1.5px', textTransform: 'uppercase'
                 }}>
               {t('mv.page.refresh')}
                 </Typography>

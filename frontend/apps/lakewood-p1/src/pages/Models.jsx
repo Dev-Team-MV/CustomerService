@@ -16,7 +16,7 @@ import GalleryModal from "../components/models/GalleryModal";
 import CreateModelModal from "../components/models/CreateModelModal";
 import CreateFacade from "../components/models/CreateFacade";
 import ModelCard from "../components/models/listModels";
-import PageHeader from "../components/PageHeader";
+import PageHeader from '@shared/components/PageHeader'
 import { useTranslation } from "react-i18next";
 import Loader from "../components/Loader";
 import useModalState from "@shared/hooks/useModalState";

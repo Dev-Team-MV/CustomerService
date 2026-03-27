@@ -1,4 +1,4 @@
-import { useMemo }        from 'react'
+import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Container } from '@mui/material'
 import {
@@ -8,25 +8,49 @@ import {
 
 import PageHeader    from '@shared/components/PageHeader'
 import StatsCards    from '../components/statscard'
-import DataTable     from '../components/table/DataTable'
-import EmptyState    from '../components/table/EmptyState'
-import PayloadDialog from '../components/payloads/createPayload'
-
-import { usePayloads }       from '../hooks/usePayloads'
+import DataTable     from '@shared/components/table/DataTable'
+import EmptyState    from '@shared/components/table/EmptyState'
+import PayloadDialog from '@shared/components/Modals/PayloadDialog'
+import { usePayloads } from '@shared/hooks/usePayloads'
+import api from '@shared/services/api'
 import { usePayloadColumns } from '../constants/Columns/payloads'
+
+const paymentTypes = [
+  "initial down payment",
+  "complementary down payment",
+  "monthly payment",
+  "additional payment",
+  "closing payment"
+]
+
+const projectId = import.meta.env.VITE_PROJECT_ID
 
 const Payloads = () => {
   const { t } = useTranslation(['payloads', 'common'])
 
-  // ── Hook con toda la lógica ───────────────────────────────
   const {
-    payloads, properties, stats, loading,
+    payloads, resources, stats, loading,
     openDialog, selectedPayload, formData, setFormData,
     handleOpenDialog, handleCloseDialog, handleSubmit,
     handleApprove, handleReject, handleDownload,
-  } = usePayloads()
+    files, setFiles, fetchAll
+  } = usePayloads({
+    resourceType: 'property',
+    fetchResources: async () => {
+      const res = await api.get('/properties', { params: { project: projectId } })
+      return res.data
+    },
+    fetchStats: async () => {
+      const res = await api.get('/payloads/stats', { params: { project: projectId } })
+      return res.data
+    }
+  })
 
-  // ── Columns ───────────────────────────────────────────────
+  useEffect(() => {
+    fetchAll()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const columns = usePayloadColumns({
     t,
     onEdit:     handleOpenDialog,
@@ -35,7 +59,6 @@ const Payloads = () => {
     onDownload: handleDownload,
   })
 
-  // ── Stats cards ───────────────────────────────────────────
   const payloadsStats = useMemo(() => [
     {
       title:    t('payloads:totalCollected'),
@@ -77,7 +100,9 @@ const Payloads = () => {
     }
   ], [stats, t])
 
-  // ── Render ────────────────────────────────────────────────
+  // Solo payloads de property
+  const filteredPayloads = payloads.filter(p => !!p.property)
+
   return (
     <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)', p: { xs: 2, sm: 3 } }}>
       <Container maxWidth="xl">
@@ -98,7 +123,7 @@ const Payloads = () => {
 
         <DataTable
           columns={columns}
-          data={payloads}
+          data={filteredPayloads}
           loading={loading}
           emptyState={
             <EmptyState
@@ -119,8 +144,12 @@ const Payloads = () => {
           onSubmit={handleSubmit}
           formData={formData}
           setFormData={setFormData}
-          properties={properties}
+          resources={resources}
+          resourceType="property"
           selectedPayload={selectedPayload}
+          files={files}
+          setFiles={setFiles}
+          paymentTypes={paymentTypes}
         />
 
       </Container>
