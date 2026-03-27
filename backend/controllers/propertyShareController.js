@@ -2,6 +2,7 @@ import Property from '../models/Property.js'
 import Apartment from '../models/Apartment.js'
 import PropertyShare from '../models/PropertyShare.js'
 import FamilyGroup from '../models/FamilyGroup.js'
+import mongoose from 'mongoose'
 
 function isPropertyOwner(property, userId) {
   return property?.users?.some(id => id.toString() === userId.toString())
@@ -22,11 +23,34 @@ function getFamilyGroupMemberIds(group) {
   return Array.from(ids)
 }
 
+function normalizeUserId(userInput) {
+  if (!userInput) return null
+
+  if (typeof userInput === 'object') {
+    const candidateId = userInput._id ?? userInput.id ?? null
+    return candidateId ? normalizeUserId(candidateId) : null
+  }
+
+  const raw = String(userInput).trim()
+  if (!raw) return null
+
+  if (mongoose.Types.ObjectId.isValid(raw)) return raw
+
+  // Some clients may send a serialized object instead of an ID.
+  const objectIdMatch = raw.match(/[a-fA-F0-9]{24}/)
+  if (objectIdMatch && mongoose.Types.ObjectId.isValid(objectIdMatch[0])) {
+    return objectIdMatch[0]
+  }
+
+  return null
+}
+
 export const shareProperty = async (req, res) => {
   try {
     const { id: propertyId } = req.params
     const { sharedWithUserId, familyGroupId } = req.body
-    const shareWithUser = !!sharedWithUserId
+    const normalizedSharedWithUserId = normalizeUserId(sharedWithUserId)
+    const shareWithUser = !!normalizedSharedWithUserId
     const shareWithGroup = !!familyGroupId
     if (!shareWithUser && !shareWithGroup) {
       return res.status(400).json({ message: 'sharedWithUserId or familyGroupId is required' })
@@ -82,7 +106,7 @@ export const shareProperty = async (req, res) => {
       })
     }
 
-    if (!sharedWithUserId) {
+    if (!normalizedSharedWithUserId) {
       return res.status(400).json({ message: 'sharedWithUserId is required' })
     }
 
@@ -101,14 +125,14 @@ export const shareProperty = async (req, res) => {
       return res.status(403).json({ message: 'Only property owners or group admins can share this property' })
     }
 
-    const existing = await PropertyShare.findOne({ property: propertyId, sharedWith: sharedWithUserId })
+    const existing = await PropertyShare.findOne({ property: propertyId, sharedWith: normalizedSharedWithUserId })
     if (existing) {
       return res.status(400).json({ message: 'Property is already shared with this user' })
     }
 
     const share = await PropertyShare.create({
       property: propertyId,
-      sharedWith: sharedWithUserId,
+      sharedWith: normalizedSharedWithUserId,
       sharedBy: req.user._id,
       familyGroup: familyGroupId || undefined
     })
@@ -217,7 +241,8 @@ export const shareApartment = async (req, res) => {
   try {
     const { id: apartmentId } = req.params
     const { sharedWithUserId, familyGroupId } = req.body
-    const shareWithUser = !!sharedWithUserId
+    const normalizedSharedWithUserId = normalizeUserId(sharedWithUserId)
+    const shareWithUser = !!normalizedSharedWithUserId
     const shareWithGroup = !!familyGroupId
     if (!shareWithUser && !shareWithGroup) {
       return res.status(400).json({ message: 'sharedWithUserId or familyGroupId is required' })
@@ -265,7 +290,7 @@ export const shareApartment = async (req, res) => {
         shares: created
       })
     }
-    if (!sharedWithUserId) return res.status(400).json({ message: 'sharedWithUserId is required' })
+    if (!normalizedSharedWithUserId) return res.status(400).json({ message: 'sharedWithUserId is required' })
     const apartment = await Apartment.findById(apartmentId)
     if (!apartment) return res.status(404).json({ message: 'Apartment not found' })
     const isAdmin = req.user.role === 'superadmin'
@@ -276,11 +301,11 @@ export const shareApartment = async (req, res) => {
       canShare = group && (group.createdBy?.toString() === req.user._id.toString() || group.members?.some(m => m.user?.toString() === req.user._id.toString() && m.role === 'admin'))
     }
     if (!canShare) return res.status(403).json({ message: 'Only apartment owners or group admins can share this apartment' })
-    const existing = await PropertyShare.findOne({ apartment: apartmentId, sharedWith: sharedWithUserId })
+    const existing = await PropertyShare.findOne({ apartment: apartmentId, sharedWith: normalizedSharedWithUserId })
     if (existing) return res.status(400).json({ message: 'Apartment is already shared with this user' })
     const share = await PropertyShare.create({
       apartment: apartmentId,
-      sharedWith: sharedWithUserId,
+      sharedWith: normalizedSharedWithUserId,
       sharedBy: req.user._id,
       familyGroup: familyGroupId || undefined
     })
