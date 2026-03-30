@@ -28,9 +28,19 @@ function getFamilyGroupMemberIds(group) {
 function normalizeUserId(userInput) {
   if (!userInput) return null
 
+  if (userInput instanceof mongoose.Types.ObjectId) {
+    return userInput.toString()
+  }
+
+  if (typeof userInput === 'object' && typeof userInput.toHexString === 'function') {
+    const hex = userInput.toHexString()
+    return mongoose.Types.ObjectId.isValid(hex) ? hex : null
+  }
+
   if (typeof userInput === 'object') {
     const candidateId = userInput._id ?? userInput.id ?? null
-    return candidateId ? normalizeUserId(candidateId) : null
+    if (!candidateId || candidateId === userInput) return null
+    return normalizeUserId(candidateId)
   }
 
   const raw = String(userInput).trim()
