@@ -28,7 +28,8 @@
     "react-konva": "^18.2.10",
     "react-phone-input-2": "^2.15.1",
     "react-router-dom": "^6.30.3",
-    "swiper": "^12.1.2"
+    "swiper": "^12.1.2",
+    "use-image": "^1.1.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
