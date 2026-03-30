@@ -1,5 +1,5 @@
 import { Box, Typography, LinearProgress, Alert } from '@mui/material'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ErrorIcon from '@mui/icons-material/Error'
@@ -15,6 +15,7 @@ const MasterPlanUploadModal = ({ open, onClose, onUploaded }) => {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [error, setError] = useState(null)
+  const fileInputRef = useRef(null)
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0]
@@ -35,6 +36,15 @@ const MasterPlanUploadModal = ({ open, onClose, onUploaded }) => {
     reader.readAsDataURL(selectedFile)
   }
 
+  const resetState = () => {
+    setFile(null)
+    setPreview(null)
+    setError(null)
+    setUploadProgress(0)
+    // Limpia el input de archivo
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
   const handleUpload = async () => {
     if (!file) {
       setError('Please select a file first')
@@ -50,9 +60,7 @@ const MasterPlanUploadModal = ({ open, onClose, onUploaded }) => {
       setTimeout(() => {
         if (onUploaded) onUploaded(imageUrl)
         setUploading(false)
-        setUploadProgress(0)
-        setFile(null)
-        setPreview(null)
+        resetState()
         onClose()
       }, 800)
     } catch (err) {
@@ -64,10 +72,7 @@ const MasterPlanUploadModal = ({ open, onClose, onUploaded }) => {
 
   const handleClose = () => {
     if (!uploading) {
-      setFile(null)
-      setPreview(null)
-      setError(null)
-      setUploadProgress(0)
+      resetState()
       onClose()
     }
   }
@@ -122,6 +127,7 @@ const MasterPlanUploadModal = ({ open, onClose, onUploaded }) => {
           style={{ display: 'none' }}
           id="masterplan-upload-input"
           disabled={uploading}
+          ref={fileInputRef}
         />
 
         {!preview ? (

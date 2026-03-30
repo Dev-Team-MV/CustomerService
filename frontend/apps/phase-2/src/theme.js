@@ -11,7 +11,7 @@ export const BRAND = {
 
   // Gradientes principales
   GRADIENT: 'linear-gradient(135deg, #1A237E 0%, #00ACC1 100%)',
-    GRADIENT_SECTION: 'linear-gradient(90deg, hsla(212, 100%, 88%, 1) 0%, hsla(205, 100%, 97%, 1) 50%, hsla(0, 0%, 96%, 1) 100%)',
+  GRADIENT_SECTION: 'linear-gradient(90deg, hsla(212, 100%, 88%, 1) 0%, hsla(205, 100%, 97%, 1) 50%, hsla(0, 0%, 96%, 1) 100%)',
 
   GRADIENT_SECONDARY: 'linear-gradient(135deg, #00ACC1 0%, #4DD0E1 100%)',
   GRADIENT_ACCENT: 'linear-gradient(135deg, #FFB300 0%, #FFE082 100%)',
@@ -105,7 +105,15 @@ const theme = createTheme({
     background: {
       default: '#fff',
       paper: '#fff'
-    }
+    },
+    chipLanguageSwitcher: {
+    bg: 'rgba(26,35,126,0.08)',         // Azul translúcido
+    border: 'rgba(26,35,126,0.3)',      // Azul más fuerte
+    color: '#1A237E',                   // Azul principal
+    hoverBg: '#1A237E',                 // Azul sólido al hover
+    hoverBorder: '#1A237E',
+    hoverShadow: '0 4px 12px rgba(26,35,126,0.18)'
+  },
   },
   typography: {
     fontFamily: '"Poppins", sans-serif',

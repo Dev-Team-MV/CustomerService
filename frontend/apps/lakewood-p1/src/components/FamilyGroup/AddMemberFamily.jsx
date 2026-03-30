@@ -9,8 +9,8 @@ import {
 import { PersonAdd as PersonAddIcon } from '@mui/icons-material'
 import api from '@shared/services/api'
 import { useTranslation } from 'react-i18next'
-import ModalWrapper from '../../constants/ModalWrapper'
-import PrimaryButton from '../../constants/PrimaryButton'
+import ModalWrapper from '@shared/constants/ModalWrapper'
+import PrimaryButton from '@shared/constants/PrimaryButton'
 
 const AddMemberDialog = ({
   open,

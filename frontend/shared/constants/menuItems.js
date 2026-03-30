@@ -89,7 +89,7 @@ export const privateMenuItems = [
     textKey: "navigation:menu.timeline",
     icon: TimelineIcon,
     path: "/timeline",
-    roles: ["superadmin", "admin", "user"],
+    roles: ["superadmin", "admin"],
   },
   {
     textKey: "navigation:menu.configuration",

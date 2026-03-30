@@ -46,6 +46,33 @@
         "Lakeside": "Junto al Lago",
         "Lounge": "Lounge",
         "Machines": "Máquinas",
-        "Mural": "Mural"
-    }
+        "Mural": "Mural",
+
+
+            "Dock, Boats & Jet Ski": "Muelle, Botes y Jet Ski",
+    "Visitors Parking": "Estacionamiento de Visitantes",
+    "Dog Park": "Parque para Perros",
+    "Pickleball Courts": "Canchas de Pickleball",
+    "Semi-Olimpic Pool": "Alberca Semi-Olímpica",
+    "Grills": "Asadores",
+    "Sunset Place": "Lugar del Atardecer",
+    "Lake Park": "Parque del Lago",
+    "Viewpoint": "Mirador",
+    "Access": "Acceso",
+    "Maintenance Area": "Área de Mantenimiento"
+    },
+
+      "exteriorAmenitiesNames": {
+    "Dock, Boats & Jet Ski": "Muelle, Botes y Jet Ski",
+    "Visitors Parking": "Estacionamiento de Visitantes",
+    "Dog Park": "Parque para Perros",
+    "Pickleball Courts": "Canchas de Pickleball",
+    "Semi-Olimpic Pool": "Alberca Semi-Olímpica",
+    "Grills": "Asadores",
+    "Sunset Place": "Lugar del Atardecer",
+    "Lake Park": "Parque del Lago",
+    "Viewpoint": "Mirador",
+    "Access": "Acceso",
+    "Maintenance Area": "Área de Mantenimiento"
+  }
 }

@@ -17,7 +17,22 @@ const paymentTypes = [
   "additional payment",
   "closing payment"
 ]
-
+const fieldSx = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 3,
+    fontFamily: '"Poppins", sans-serif',
+    '& fieldset': { borderColor: 'rgba(140,165,81,0.3)', borderWidth: '2px' },
+    '&:hover fieldset': { borderColor: '#8CA551' },
+    '&.Mui-focused fieldset': { borderColor: '#333F1F', borderWidth: '2px' }
+  },
+  '& .MuiInputLabel-root': {
+    fontFamily: '"Poppins", sans-serif',
+    fontWeight: 500,
+    color: '#706f6f',
+    '&.Mui-focused': { color: '#333F1F', fontWeight: 600 }
+  },
+  '& .MuiFormHelperText-root': { fontFamily: '"Poppins", sans-serif' }
+}
 const UserCreatePayload = ({
   open,
   onClose,
@@ -65,6 +80,7 @@ const UserCreatePayload = ({
               ),
             }}
             required
+            sx={fieldSx}
           />
         </Grid>
         <Grid item xs={12}>
@@ -75,6 +91,7 @@ const UserCreatePayload = ({
             value={paymentForm.type || ""}
             onChange={e => handlePaymentFormChange("type", e.target.value)}
             required
+            sx={fieldSx}
           >
             {paymentTypes.map((type) => (
               <MenuItem key={type} value={type} sx={{ textTransform: 'capitalize' }}>
@@ -94,6 +111,7 @@ const UserCreatePayload = ({
             onChange={(e) => handlePaymentFormChange("date", e.target.value)}
             InputLabelProps={{ shrink: true }}
             required
+            sx={fieldSx}
           />
         </Grid>
         <Grid item xs={12}>
@@ -128,6 +146,7 @@ const UserCreatePayload = ({
             value={paymentForm.notes}
             onChange={(e) => handlePaymentFormChange("notes", e.target.value)}
             placeholder={t('payloads:notesPlaceholder')}
+            sx={fieldSx}
           />
         </Grid>
       </Grid>

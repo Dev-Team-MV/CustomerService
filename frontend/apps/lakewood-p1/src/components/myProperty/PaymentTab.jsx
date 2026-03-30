@@ -12,27 +12,34 @@ import {
 } from '@mui/icons-material'
 import { motion }           from 'framer-motion'
 
-import DataTable         from '../table/DataTable'
-import UserCreatePayload from '../payloads/UserCreatePayload'
+import DataTable from '@shared/components/table/DataTable';
+import EmptyState from '@shared/components/table/EmptyState';
+import UserCreatePayload from '@shared/components/Modals/UserCreatePayload'
 import PrimaryButton     from '../../constants/PrimaryButton'
 
-import { usePaymentTab } from '../../hooks/usePayloads'  // ← mismo archivo
+import { usePaymentTab } from '@shared/hooks/usePayloads'  // ← mismo archivo
 import { usePaymentTabColumns } from '../../constants/Columns/paymentTab'
 
 const PaymentTab = ({ propertyDetails, payloads, loadingPayloads, onPaymentUploaded, user }) => {
   const { t } = useTranslation(['myProperty', 'common'])
+  const propertyId = propertyDetails?.property?._id ?? propertyDetails?._id
 
   // ── Hook con toda la lógica ───────────────────────────────
-  const {
-    uploadPaymentDialog,
-    handleOpenUploadPayment,
-    handleCloseUploadPayment,
-    paymentForm,
-    handlePaymentFormChange,
-    uploadingPayment,
-    handleSubmitPayment,
-  } = usePaymentTab({ propertyDetails, user, onPaymentUploaded })
-
+const {
+  uploadPaymentDialog,
+  handleOpenUploadPayment,
+  handleCloseUploadPayment,
+  paymentForm,
+  handlePaymentFormChange,
+  uploadingPayment,
+  handlePaymentUpload,  // ← Cambio de nombre
+} = usePaymentTab({ 
+  resourceType: 'property',
+  resourceId: propertyId,
+  user, 
+  onPaymentUploaded 
+})
+  console.log('PaymentTab render - propertyDetails:', propertyDetails)
   // ── Columns ───────────────────────────────────────────────
   const columns = usePaymentTabColumns({ t })
 
@@ -49,12 +56,12 @@ const PaymentTab = ({ propertyDetails, payloads, loadingPayloads, onPaymentUploa
       color: '#8CA551',
       icon:  <CheckCircle />,
     },
-    {
-      label: t('myProperty:pendingAmount',   'Pending Amount'),
-      value: `$${propertyDetails.payment.totalPending.toLocaleString()}`,
-      color: '#E5863C',
-      icon:  <Schedule />,
-    },
+{
+  label: t('myProperty:pendingAmount',   'Pending Amount'),
+  value: `$${propertyDetails.property.pending?.toLocaleString() ?? '0'}`,
+  color: '#E5863C',
+  icon:  <Schedule />,
+},
     {
       label: t('myProperty:paymentProgress', 'Payment Progress'),
       value: `${Math.round(propertyDetails.payment.progress)}%`,
@@ -268,7 +275,7 @@ const PaymentTab = ({ propertyDetails, payloads, loadingPayloads, onPaymentUploa
       <UserCreatePayload
         open={uploadPaymentDialog}
         onClose={handleCloseUploadPayment}
-        onSubmit={handleSubmitPayment}
+        onSubmit={handlePaymentUpload}
         paymentForm={paymentForm}
         handlePaymentFormChange={handlePaymentFormChange}
         uploadingPayment={uploadingPayment}

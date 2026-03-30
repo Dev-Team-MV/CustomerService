@@ -1,4 +1,4 @@
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, useTheme } from '@mui/material';
 import PropTypes from 'prop-types';
 
 const EmptyState = ({
@@ -8,6 +8,8 @@ const EmptyState = ({
   actionLabel,
   onAction
 }) => {
+  const theme = useTheme();
+
   return (
     <Box
       sx={{
@@ -25,21 +27,21 @@ const EmptyState = ({
             width: 80,
             height: 80,
             borderRadius: 4,
-            bgcolor: 'rgba(140, 165, 81, 0.08)',
+            bgcolor: theme.palette.secondary.light + '14',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             mb: 1
           }}
         >
-          <Icon sx={{ fontSize: 40, color: '#8CA551' }} />
+          <Icon sx={{ fontSize: 40, color: theme.palette.secondary.main }} />
         </Box>
       )}
       
       <Typography
         variant="h6"
         sx={{
-          color: '#333F1F',
+          color: theme.palette.primary.main,
           fontWeight: 600,
           fontFamily: '"Poppins", sans-serif',
           mb: 0.5
@@ -51,7 +53,7 @@ const EmptyState = ({
       <Typography
         variant="body2"
         sx={{
-          color: '#706f6f',
+          color: theme.palette.text.secondary,
           fontFamily: '"Poppins", sans-serif',
           mb: 2
         }}
@@ -65,13 +67,13 @@ const EmptyState = ({
           onClick={onAction}
           sx={{
             borderRadius: 3,
-            bgcolor: '#333F1F',
+            bgcolor: theme.palette.primary.main,
             textTransform: 'none',
             fontFamily: '"Poppins", sans-serif',
             fontWeight: 600,
             px: 3,
             '&:hover': {
-              bgcolor: '#8CA551'
+              bgcolor: theme.palette.secondary.main
             }
           }}
         >

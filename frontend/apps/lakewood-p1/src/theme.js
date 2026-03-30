@@ -101,7 +101,16 @@ const theme = createTheme({
     background: {
       default: '#fff',
       paper: '#fff'
-    }
+    },
+    chipLanguageSwitcher: {
+      bg: 'rgba(229,134,60,0.10)',
+      border: 'rgba(229,134,60,0.35)',
+      color: '#E5863C',
+      hoverBg: '#E5863C',
+      hoverBorder: '#E5863C',
+      hoverShadow: '0 4px 12px rgba(229,134,60,0.18)',
+      // Puedes agregar bgSidebar, borderSidebar, colorSidebar si quieres diferenciar el modo sidebar
+    },
   },
   typography: {
     fontFamily: '"Poppins", sans-serif',

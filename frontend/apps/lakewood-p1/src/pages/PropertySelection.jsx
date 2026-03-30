@@ -13,7 +13,9 @@ import {
 } from "@mui/icons-material";
 import { PropertyProvider, useProperty } from "@shared/context/PropertyContext";
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
+// import { useAuth } from "../context/AuthContext";
+import { useAuth } from '@shared/context/AuthContext'
+
 import InteractiveMap from "../components/property/InteractiveMap";
 import PropertyStats from "../components/property/PropertyStats";
 import ModelSelector from "../components/property/ModelSelector";
@@ -23,6 +25,7 @@ import PriceCalculator from "../components/property/PriceCalculator";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import Loader from "../components/Loader";
+import PageHeader from "@shared/components/PageHeader";
 
 const PropertySelectionContent = () => {
   const { t } = useTranslation(['propertySelection', 'common']);
@@ -80,104 +83,13 @@ const PropertySelectionContent = () => {
       >
         {/* Header brandbook minimalista */}
         <Box sx={{ p: 3 }}>
-          <Box sx={{ mb: 2, p: 3 }}>
-            <Box
-              sx={{
-                position: 'relative',
-                borderRadius: { xs: 4, md: 6 },
-                border: '1.5px solid #e8f5ee',
-                boxShadow: '0 12px 32px rgba(74,124,89,0.12)',
-                background: 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)',
-                p: { xs: 3, sm: 3.5, md: 4 },
-                overflow: 'hidden',
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  boxShadow: '0 24px 48px rgba(74,124,89,0.18)',
-                  border: '2px solid rgba(140, 165, 81, 0.3)',
-                },
-              }}
-            >
-              {/* Barra decorativa superior */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 4,
-                  background: 'linear-gradient(90deg, #333F1F, #8CA551, #333F1F)',
-                  opacity: 0.9,
-                }}
-              />
-              <Box display="flex" alignItems="center" gap={3} flexDirection={{ xs: 'column', sm: 'row' }}>
-                <motion.div
-                  animate={{
-                    scale: [1, 1.1, 1],
-                    rotate: [0, 5, -5, 0]
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    repeatDelay: 3
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: { xs: 56, md: 64 },
-                      height: { xs: 56, md: 64 },
-                      borderRadius: 3,
-                      background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 8px 24px rgba(51, 63, 31, 0.3)'
-                    }}
-                  >
-                    <Home sx={{ fontSize: { xs: 28, md: 32 }, color: 'white' }} />
-                  </Box>
-                </motion.div>
-                <Box flex={1}>
-                  <Typography
-                    variant="h3"
-                    sx={{
-                      fontFamily: '"Poppins", sans-serif',
-                      color: '#1a1a1a',
-                      fontWeight: 700,
-                      letterSpacing: '0.5px',
-                      mb: 1,
-                      fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    {t('propertySelection:title')}
-                  </Typography>
-                  <Box
-                    sx={{
-                      width: { xs: 40, sm: 50, md: 60 },
-                      height: 2,
-                      bgcolor: '#8CA551',
-                      mb: 1.5,
-                      opacity: 0.8,
-                      mx: { xs: 'auto', sm: 0 },
-                    }}
-                  />
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      color: '#706f6f',
-                      fontWeight: 400,
-                      fontFamily: '"Poppins", sans-serif',
-                      fontSize: { xs: '0.95rem', sm: '1.1rem', md: '1.2rem' },
-                      letterSpacing: '0.5px',
-                      maxWidth: 600,
-                    }}
-                  >
-                    {t('propertySelection:subtitle')}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
+<Box sx={{ p: 3 }}>
+  <PageHeader
+    icon={Home}
+    title={t('propertySelection:title')}
+    subtitle={t('propertySelection:subtitle')}
+  />
+</Box>
 
           <Container maxWidth={false}>
             <Grid container spacing={3}>
