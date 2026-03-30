@@ -22,6 +22,10 @@ const contentBlockSchema = new mongoose.Schema(
 
 const newsSchema = new mongoose.Schema(
   {
+    projectId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project'
+    },
     title: {
       type: String,
       required: [true, 'Title is required'],

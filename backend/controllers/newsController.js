@@ -2,11 +2,12 @@ import News from '../models/News.js'
 
 export const getAllNews = async (req, res) => {
   try {
-    const { category, status } = req.query
+    const { category, status, projectId } = req.query
     const filter = {}
 
     if (category) filter.category = category
     if (status) filter.status = status
+    if (projectId) filter.projectId = projectId
 
     const news = await News.find(filter).sort({ createdAt: -1 })
     res.json(news)
@@ -17,9 +18,10 @@ export const getAllNews = async (req, res) => {
 
 export const getPublishedNews = async (req, res) => {
   try {
-    const { category } = req.query
+    const { category, projectId } = req.query
     const filter = { status: 'published' }
     if (category) filter.category = category
+    if (projectId) filter.projectId = projectId
 
     const news = await News.find(filter).sort({ createdAt: -1 })
     res.json(news)
@@ -49,6 +51,7 @@ export const createNews = async (req, res) => {
       description,
       category,
       status,
+      projectId,
       heroImage,
       tags,
       contentBlocks,
@@ -61,6 +64,7 @@ export const createNews = async (req, res) => {
       description,
       category: category || 'announcement',
       status: status || 'draft',
+      projectId: projectId || undefined,
       heroImage: heroImage || '',
       tags: tags || [],
       contentBlocks: contentBlocks || [],
@@ -84,6 +88,7 @@ export const updateNews = async (req, res) => {
         description,
         category,
         status,
+        projectId,
         heroImage,
         tags,
         contentBlocks,
@@ -95,6 +100,7 @@ export const updateNews = async (req, res) => {
       if (description !== undefined) news.description = description
       if (category !== undefined) news.category = category
       if (status !== undefined) news.status = status
+      if (projectId !== undefined) news.projectId = projectId || undefined
       if (heroImage !== undefined) news.heroImage = heroImage
       if (tags !== undefined) news.tags = tags
       if (contentBlocks !== undefined) news.contentBlocks = contentBlocks
