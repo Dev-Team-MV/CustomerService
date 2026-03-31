@@ -1,9 +1,18 @@
 import mongoose from 'mongoose'
+import imageItemSchema from './schemas/imageItemSchema.js'
 
 const localizedStringSchema = {
   en: { type: String, trim: true },
   es: { type: String, trim: true }
 }
+
+const outdoorAmenitySectionSchema = new mongoose.Schema(
+  {
+    key: { type: String, required: true, trim: true, lowercase: true },
+    images: { type: [imageItemSchema], default: () => [] }
+  },
+  { _id: false }
+)
 
 const projectSchema = new mongoose.Schema(
   {
@@ -80,7 +89,11 @@ const projectSchema = new mongoose.Schema(
     videos: [{
       type: String,
       trim: true
-    }]
+    }],
+    outdoorAmenitySections: {
+      type: [outdoorAmenitySectionSchema],
+      default: () => []
+    }
   },
   {
     timestamps: true

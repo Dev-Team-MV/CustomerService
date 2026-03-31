@@ -3,6 +3,9 @@ import {
   getAllProjects,
   getProjectById,
   getProjectBySlug,
+  getProjectOutdoorAmenities,
+  getProjectOutdoorAmenitiesBySlug,
+  updateProjectOutdoorAmenities,
   createProject,
   updateProject,
   deleteProject
@@ -151,6 +154,7 @@ router.post('', protect, admin, createProject)
  *         description: Project not found
  */
 router.get('/slug/:slug', getProjectBySlug)
+router.get('/slug/:slug/outdoor-amenities', getProjectOutdoorAmenitiesBySlug)
 
 /**
  * @swagger
@@ -233,5 +237,8 @@ router.route('/:id')
   .get(getProjectById)
   .put(protect, admin, updateProject)
   .delete(protect, admin, deleteProject)
+
+router.get('/:id/outdoor-amenities', getProjectOutdoorAmenities)
+router.put('/:id/outdoor-amenities', protect, admin, updateProjectOutdoorAmenities)
 
 export default router
