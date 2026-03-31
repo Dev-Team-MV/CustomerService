@@ -23,27 +23,22 @@ router.get('/ping', (req, res) => res.json({ ok: true, message: 'projects router
  * @swagger
  * /api/projects/outdoor-amenity-keys:
  *   get:
- *     summary: List allowed outdoor amenity section keys (built-in + persisted extras)
+ *     summary: Listar keys permitidas para outdoorAmenitySections (built-in + extras en BD)
+ *     description: |
+ *       `keys` es la unión ordenada. Las extras se añaden con POST (admin).
+ *       Usar estas keys en `outdoorAmenitySections[].key` al actualizar el proyecto.
  *     tags: [Projects]
  *     responses:
  *       200:
- *         description: keys = full allowlist; builtIn = code defaults; extraKeys = added via POST
+ *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 keys:
- *                   type: array
- *                   items: { type: string }
- *                 builtIn:
- *                   type: array
- *                   items: { type: string }
- *                 extraKeys:
- *                   type: array
- *                   items: { type: string }
+ *               $ref: '#/components/schemas/OutdoorAmenityKeysList'
  *   post:
- *     summary: Add extra outdoor amenity keys (persisted; admin only)
+ *     summary: Añadir keys extra (persistidas; solo admin)
+ *     description: |
+ *       Formato slug: minúsculas, números, guiones (ej. `dog-park`). Duplicados o ya existentes → 200 sin error.
  *     tags: [Projects]
  *     security:
  *       - bearerAuth: []
@@ -52,20 +47,22 @@ router.get('/ping', (req, res) => res.json({ ok: true, message: 'projects router
  *       content:
  *         application/json:
  *           schema:
- *             oneOf:
- *               - type: object
- *                 properties:
- *                   keys:
- *                     type: array
- *                     items: { type: string }
- *               - type: object
- *                 properties:
- *                   key: { type: string }
+ *             $ref: '#/components/schemas/AddOutdoorAmenityKeysRequest'
  *     responses:
  *       201:
- *         description: Keys added
+ *         description: Se añadieron nuevas keys
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AddOutdoorAmenityKeysResponse'
  *       200:
- *         description: No new keys (already allowed)
+ *         description: Nada nuevo que añadir (todas ya estaban permitidas)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AddOutdoorAmenityKeysResponse'
+ *       400:
+ *         description: Formato de key inválido
  */
 router.get('/outdoor-amenity-keys', getOutdoorAmenityKeys)
 router.post('/outdoor-amenity-keys', protect, admin, addOutdoorAmenityKeys)
@@ -207,6 +204,30 @@ router.post('', protect, admin, createProject)
  *         description: Project not found
  */
 router.get('/slug/:slug', getProjectBySlug)
+
+/**
+ * @swagger
+ * /api/projects/slug/{slug}/outdoor-amenities:
+ *   get:
+ *     summary: Amenidades exteriores del proyecto por slug (ej. phase2)
+ *     description: Devuelve secciones con imágenes; URLs pueden venir firmadas (GCS).
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: phase2
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProjectOutdoorAmenitiesPayload'
+ *       404:
+ *         description: Project not found
+ */
 router.get('/slug/:slug/outdoor-amenities', getProjectOutdoorAmenitiesBySlug)
 
 /**
@@ -291,6 +312,64 @@ router.route('/:id')
   .put(protect, admin, updateProject)
   .delete(protect, admin, deleteProject)
 
+/**
+ * @swagger
+ * /api/projects/{id}/outdoor-amenities:
+ *   get:
+ *     summary: Amenidades exteriores del proyecto por ID
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProjectOutdoorAmenitiesPayload'
+ *       404:
+ *         description: Project not found
+ *   put:
+ *     summary: Reemplazar outdoorAmenitySections del proyecto (admin)
+ *     description: |
+ *       Cada `key` debe existir en GET /api/projects/outdoor-amenity-keys.
+ *       Sustituye todo el array de secciones.
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - outdoorAmenitySections
+ *             properties:
+ *               outdoorAmenitySections:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/OutdoorAmenitySection'
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProjectOutdoorAmenitiesPayload'
+ *       400:
+ *         description: Keys no permitidas o body inválido
+ *       404:
+ *         description: Project not found
+ */
 router.get('/:id/outdoor-amenities', getProjectOutdoorAmenities)
 router.put('/:id/outdoor-amenities', protect, admin, updateProjectOutdoorAmenities)
 
