@@ -1,6 +1,7 @@
 import { Box, Typography, Paper, Button, Tooltip } from '@mui/material';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
+import { useTheme } from '@mui/material/styles';
 
 const PageHeader = ({
   icon: Icon,
@@ -8,8 +9,18 @@ const PageHeader = ({
   subtitle,
   actionButton,
   animateIcon = true,
-  gradientColors = ['#333F1F', '#8CA551', '#333F1F']
+  gradientColors, // ahora opcional, si no se pasa usa theme
 }) => {
+  const theme = useTheme();
+
+  // Gradientes y colores por defecto desde el theme
+  const defaultGradient = [
+    theme.palette.primary.main,
+    theme.palette.secondary.main,
+    theme.palette.primary.main,
+  ];
+  const usedGradient = gradientColors || defaultGradient;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -30 }}
@@ -22,8 +33,8 @@ const PageHeader = ({
           p: { xs: 3, md: 4 },
           mb: 4,
           borderRadius: 4,
-          border: '1px solid rgba(0,0,0,0.08)',
-          background: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
+          border: `1px solid ${theme.palette.divider}`,
+          background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
           position: 'relative',
           overflow: 'hidden',
           '&::before': {
@@ -33,7 +44,7 @@ const PageHeader = ({
             left: 0,
             right: 0,
             height: 4,
-            background: `linear-gradient(90deg, ${gradientColors.join(', ')})`
+            background: `linear-gradient(90deg, ${usedGradient.join(', ')})`
           }
         }}
       >
@@ -56,14 +67,14 @@ const PageHeader = ({
                     width: { xs: 56, md: 64 },
                     height: { xs: 56, md: 64 },
                     borderRadius: 3,
-                    background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 8px 24px rgba(51, 63, 31, 0.3)'
+                    boxShadow: `0 8px 24px ${theme.palette.primary.main}33`
                   }}
                 >
-                  <Icon sx={{ fontSize: { xs: 28, md: 32 }, color: 'white' }} />
+                  <Icon sx={{ fontSize: { xs: 28, md: 32 }, color: theme.palette.primary.contrastText }} />
                 </Box>
               </motion.div>
             ) : (
@@ -72,14 +83,14 @@ const PageHeader = ({
                   width: { xs: 56, md: 64 },
                   height: { xs: 56, md: 64 },
                   borderRadius: 3,
-                  background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 8px 24px rgba(51, 63, 31, 0.3)'
+                  boxShadow: `0 8px 24px ${theme.palette.primary.main}33`
                 }}
               >
-                <Icon sx={{ fontSize: { xs: 28, md: 32 }, color: 'white' }} />
+                <Icon sx={{ fontSize: { xs: 28, md: 32 }, color: theme.palette.primary.contrastText }} />
               </Box>
             )}
 
@@ -88,7 +99,7 @@ const PageHeader = ({
                 variant="h4"
                 sx={{
                   fontWeight: 800,
-                  color: '#333F1F',
+                  color: theme.palette.text.primary,
                   fontFamily: '"Poppins", sans-serif',
                   letterSpacing: '0.5px',
                   fontSize: { xs: '1.75rem', md: '2.125rem' }
@@ -100,7 +111,7 @@ const PageHeader = ({
                 <Typography
                   variant="body1"
                   sx={{
-                    color: '#706f6f',
+                    color: theme.palette.text.secondary,
                     fontFamily: '"Poppins", sans-serif',
                     fontSize: { xs: '0.875rem', md: '1rem' }
                   }}
@@ -123,15 +134,15 @@ const PageHeader = ({
                   startIcon={actionButton.icon}
                   sx={{
                     borderRadius: 3,
-                    bgcolor: '#333F1F',
-                    color: 'white',
+                    bgcolor: theme.palette.primary.main,
+                    color: theme.palette.primary.contrastText,
                     fontWeight: 600,
                     textTransform: 'none',
                     letterSpacing: '1px',
                     fontFamily: '"Poppins", sans-serif',
                     px: 3,
                     py: 1.5,
-                    boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
+                    boxShadow: `0 4px 12px ${theme.palette.primary.main}40`,
                     position: 'relative',
                     overflow: 'hidden',
                     '&::before': {
@@ -141,24 +152,24 @@ const PageHeader = ({
                       left: '-100%',
                       width: '100%',
                       height: '100%',
-                      bgcolor: '#8CA551',
+                      bgcolor: theme.palette.secondary.main,
                       transition: 'left 0.4s ease',
                       zIndex: 0
                     },
                     '&:hover': {
-                      bgcolor: '#333F1F',
-                      boxShadow: '0 8px 20px rgba(51, 63, 31, 0.35)',
+                      bgcolor: theme.palette.primary.dark,
+                      boxShadow: `0 8px 20px ${theme.palette.primary.main}55`,
                       '&::before': {
                         left: 0
                       },
                       '& .MuiButton-startIcon': {
-                        color: 'white'
+                        color: theme.palette.primary.contrastText
                       }
                     },
                     '& .MuiButton-startIcon': {
                       position: 'relative',
                       zIndex: 1,
-                      color: 'white'
+                      color: theme.palette.primary.contrastText
                     }
                   }}
                 >

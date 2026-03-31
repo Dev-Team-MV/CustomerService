@@ -4,9 +4,39 @@ export const BRAND = {
   PRIMARY: '#333F1F',
   SECONDARY: '#8CA551',
   ACCENT: '#E5863C',
-  GRADIENT: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)'
-}
+  INFO: '#1976d2',
+  WARNING: '#E5863C',
+  SUCCESS: '#4a7c59',
 
+  // Gradientes principales
+  GRADIENT: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
+  GRADIENT_SECONDARY: 'linear-gradient(135deg, #8CA551 0%, #a8bf6f 100%)',
+  GRADIENT_ACCENT: 'linear-gradient(135deg, #E5863C 0%, #f59c5a 100%)',
+  GRADIENT_INFO: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+
+  // Chips y badges
+  CHIP_SUPERADMIN: {
+    bg: 'rgba(229,134,60,0.08)',
+    border: 'rgba(229,134,60,0.3)',
+    color: '#E5863C'
+  },
+  CHIP_ADMIN: {
+    bg: 'rgba(140,165,81,0.08)',
+    border: 'rgba(140,165,81,0.3)',
+    color: '#8CA551'
+  },
+  CHIP_RESIDENT: {
+    bg: 'rgba(51,63,31,0.08)',
+    border: 'rgba(51,63,31,0.3)',
+    color: '#333F1F'
+  },
+
+  // Otros estilos reutilizables
+  CARD_BG: '#fafcf9',
+  CARD_BORDER: '#e0e0e0',
+  AVATAR_SHADOW: '0 8px 24px rgba(51, 63, 31, 0.3)',
+  // ...agrega más según tus necesidades
+}
 // Estilo global para marcadores/puntos en mapas
 export const markerSx = {
   position: 'absolute',
@@ -54,6 +84,20 @@ const theme = createTheme({
     primary: { main: BRAND.PRIMARY },
     secondary: { main: BRAND.SECONDARY },
     accent: { main: BRAND.ACCENT },
+    info: { main: BRAND.INFO },
+    warning: { main: BRAND.WARNING },
+    success: { main: BRAND.SUCCESS },
+    // Gradientes y colores extendidos
+    gradient: BRAND.GRADIENT,
+    gradientSecondary: BRAND.GRADIENT_SECONDARY,
+    gradientAccent: BRAND.GRADIENT_ACCENT,
+    gradientInfo: BRAND.GRADIENT_INFO,
+    chipSuperadmin: BRAND.CHIP_SUPERADMIN,
+    chipAdmin: BRAND.CHIP_ADMIN,
+    chipResident: BRAND.CHIP_RESIDENT,
+    cardBg: BRAND.CARD_BG,
+    cardBorder: BRAND.CARD_BORDER,
+    avatarShadow: BRAND.AVATAR_SHADOW,
     background: {
       default: '#fff',
       paper: '#fff'
@@ -184,7 +228,8 @@ const theme = createTheme({
         }
       }
     }
-  }
+  },
+  brand: BRAND
 })
 
 export default theme

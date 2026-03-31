@@ -64,15 +64,6 @@ const PropertyDetailsModal = ({ open, onClose, property, isAdmin }) => {
     handleDownload,
   } = usePayloads()
 
-  // ── Columnas reutilizables ────────────────────────────────
-  const paymentColumns = usePayloadColumns({
-    t,
-    onEdit: handleOpenDialog,
-    onApprove: handleApprove,
-    onReject: handleReject,
-    onDownload: handleDownload,
-  })
-
   // ── Fetch data ────────────────────────────────────────────
   useEffect(() => {
     if (open && property?._id) {
@@ -105,10 +96,32 @@ const PropertyDetailsModal = ({ open, onClose, property, isAdmin }) => {
     }
   }
 
+  const handleApproveWithRefresh = async (payload, e) => {
+    await handleApprove(payload, e)
+    await fetchPropertyDetails()
+    await fetchPayloads()
+  }
+
+  const handleRejectWithRefresh = async (payload, e) => {
+    await handleReject(payload, e)
+    await fetchPropertyDetails()
+    await fetchPayloads()
+  }
+
+  // ── Columnas reutilizables ────────────────────────────────
+  const paymentColumns = usePayloadColumns({
+    t,
+    onEdit: handleOpenDialog,
+    onApprove: handleApproveWithRefresh,
+    onReject: handleRejectWithRefresh,
+    onDownload: handleDownload,
+  })
+
   // ── Submit handler ────────────────────────────────────────
   const handlePayloadSubmit = async () => {
     await handleSubmit()
     fetchPayloads()
+    fetchPropertyDetails()
   }
 
   // ── Guard ─────────────────────────────────────────────────

@@ -1,6 +1,8 @@
 import FamilyGroup from '../models/FamilyGroup.js'
 import PropertyShare from '../models/PropertyShare.js'
 import User from '../models/User.js'
+import Property from '../models/Property.js'
+import Apartment from '../models/Apartment.js'
 
 function isGroupAdmin(group, userId) {
   if (!group || !userId) return false
@@ -138,6 +140,82 @@ export const addMemberToFamilyGroup = async (req, res) => {
     group.members.push({ user: userId, role: role === 'admin' ? 'admin' : 'member' })
     group.markModified('members')
     await group.save()
+
+    // Sync shares for the newly added member:
+    // - when a group was already sharing properties/apartments,
+    // - we must grant access to the user who just joined the group.
+    const familyGroupId = group._id
+
+    // Shared targets that already exist for this family group.
+    const [sharedPropertyIds, sharedApartmentIds] = await Promise.all([
+      PropertyShare.distinct('property', {
+        familyGroup: familyGroupId,
+        property: { $exists: true, $ne: null }
+      }),
+      PropertyShare.distinct('apartment', {
+        familyGroup: familyGroupId,
+        apartment: { $exists: true, $ne: null }
+      })
+    ])
+
+    const [ownedPropertyDocs, ownedApartmentDocs] = await Promise.all([
+      Property.find(
+        { _id: { $in: sharedPropertyIds } , users: userId },
+      ).select('_id').lean(),
+      Apartment.find(
+        { _id: { $in: sharedApartmentIds }, users: userId },
+      ).select('_id').lean()
+    ])
+
+    const ownedPropertyIdSet = new Set(ownedPropertyDocs.map(d => d._id.toString()))
+    const ownedApartmentIdSet = new Set(ownedApartmentDocs.map(d => d._id.toString()))
+
+    const propertyIdsToShare = (sharedPropertyIds || []).filter(id => !ownedPropertyIdSet.has(id.toString()))
+    const apartmentIdsToShare = (sharedApartmentIds || []).filter(id => !ownedApartmentIdSet.has(id.toString()))
+
+    const bulkOps = []
+
+    for (const propertyId of propertyIdsToShare) {
+      bulkOps.push({
+        updateOne: {
+          filter: { property: propertyId, sharedWith: userId },
+          update: {
+            $setOnInsert: {
+              property: propertyId,
+              sharedWith: userId,
+              sharedBy: req.user._id,
+              familyGroup: familyGroupId
+            },
+            // If a share existed without familyGroup tag, set it so UI shows it under this group.
+            $set: { familyGroup: familyGroupId }
+          },
+          upsert: true
+        }
+      })
+    }
+
+    for (const apartmentId of apartmentIdsToShare) {
+      bulkOps.push({
+        updateOne: {
+          filter: { apartment: apartmentId, sharedWith: userId },
+          update: {
+            $setOnInsert: {
+              apartment: apartmentId,
+              sharedWith: userId,
+              sharedBy: req.user._id,
+              familyGroup: familyGroupId
+            },
+            $set: { familyGroup: familyGroupId }
+          },
+          upsert: true
+        }
+      })
+    }
+
+    if (bulkOps.length) {
+      await PropertyShare.bulkWrite(bulkOps, { ordered: false })
+    }
+
     await group.populate('createdBy', 'firstName lastName email')
     await group.populate('members.user', 'firstName lastName email')
     res.json(group)
@@ -163,6 +241,14 @@ export const removeMemberFromFamilyGroup = async (req, res) => {
     group.members = (group.members || []).filter(m => m.user && m.user.toString() !== memberUserId)
     group.markModified('members')
     await group.save()
+
+    // Revoke shared access for the removed member (only the shares tagged to this family group).
+    // Ownership access (Property.users / Apartment.users) is still handled by Property/Apartment models.
+    await PropertyShare.deleteMany({
+      familyGroup: group._id,
+      sharedWith: memberUserId
+    })
+
     await group.populate('createdBy', 'firstName lastName email')
     await group.populate('members.user', 'firstName lastName email')
     res.json(group)

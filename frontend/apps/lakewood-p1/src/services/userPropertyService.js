@@ -23,7 +23,8 @@ const userPropertyService = {
       getMyProperties: async () => {
         try {
           const [propertiesRes, profileRes] = await Promise.all([
-            api.get('/properties'),
+            // For "MyProperty" view we only want visible properties (owner or shared via PropertyShare/familyGroup).
+            api.get('/properties?visible=true'),
             api.get('/auth/profile')
           ])
     
@@ -198,7 +199,7 @@ const userPropertyService = {
   getPropertyDetails: async (propertyId) => {
     try {
       // Obtener propiedad
-      const propResponse = await api.get(`/properties/${propertyId}`)      
+      const propResponse = await api.get(`/properties/${propertyId}?visible=true`)
       const property = propResponse.data
 
       // Obtener modelo
