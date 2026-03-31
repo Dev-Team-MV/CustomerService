@@ -16,9 +16,11 @@ function isApartmentOwner(apartment, userId) {
 function getFamilyGroupMemberIds(group) {
   if (!group) return []
   const ids = new Set()
-  if (group.createdBy) ids.add(group.createdBy.toString())
+  const createdById = normalizeUserId(group.createdBy)
+  if (createdById) ids.add(createdById)
   for (const m of group.members || []) {
-    if (m.user) ids.add(m.user.toString())
+    const memberUserId = normalizeUserId(m.user)
+    if (memberUserId) ids.add(memberUserId)
   }
   return Array.from(ids)
 }
@@ -26,9 +28,19 @@ function getFamilyGroupMemberIds(group) {
 function normalizeUserId(userInput) {
   if (!userInput) return null
 
+  if (userInput instanceof mongoose.Types.ObjectId) {
+    return userInput.toString()
+  }
+
+  if (typeof userInput === 'object' && typeof userInput.toHexString === 'function') {
+    const hex = userInput.toHexString()
+    return mongoose.Types.ObjectId.isValid(hex) ? hex : null
+  }
+
   if (typeof userInput === 'object') {
     const candidateId = userInput._id ?? userInput.id ?? null
-    return candidateId ? normalizeUserId(candidateId) : null
+    if (!candidateId || candidateId === userInput) return null
+    return normalizeUserId(candidateId)
   }
 
   const raw = String(userInput).trim()
