@@ -3,6 +3,8 @@ import {
   getAllProjects,
   getProjectById,
   getProjectBySlug,
+  getOutdoorAmenityKeys,
+  addOutdoorAmenityKeys,
   getProjectOutdoorAmenities,
   getProjectOutdoorAmenitiesBySlug,
   updateProjectOutdoorAmenities,
@@ -16,6 +18,57 @@ const router = express.Router()
 
 // Debug: confirm router is mounted (GET /api/projects/ping)
 router.get('/ping', (req, res) => res.json({ ok: true, message: 'projects router mounted' }))
+
+/**
+ * @swagger
+ * /api/projects/outdoor-amenity-keys:
+ *   get:
+ *     summary: List allowed outdoor amenity section keys (built-in + persisted extras)
+ *     tags: [Projects]
+ *     responses:
+ *       200:
+ *         description: keys = full allowlist; builtIn = code defaults; extraKeys = added via POST
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 keys:
+ *                   type: array
+ *                   items: { type: string }
+ *                 builtIn:
+ *                   type: array
+ *                   items: { type: string }
+ *                 extraKeys:
+ *                   type: array
+ *                   items: { type: string }
+ *   post:
+ *     summary: Add extra outdoor amenity keys (persisted; admin only)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             oneOf:
+ *               - type: object
+ *                 properties:
+ *                   keys:
+ *                     type: array
+ *                     items: { type: string }
+ *               - type: object
+ *                 properties:
+ *                   key: { type: string }
+ *     responses:
+ *       201:
+ *         description: Keys added
+ *       200:
+ *         description: No new keys (already allowed)
+ */
+router.get('/outdoor-amenity-keys', getOutdoorAmenityKeys)
+router.post('/outdoor-amenity-keys', protect, admin, addOutdoorAmenityKeys)
 
 /**
  * @swagger
