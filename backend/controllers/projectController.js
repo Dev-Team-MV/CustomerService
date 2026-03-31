@@ -328,10 +328,11 @@ export const updateProjectOutdoorAmenities = async (req, res) => {
     project.outdoorAmenitySections = await normalizeOutdoorAmenitySections(req.body.outdoorAmenitySections)
     await project.save()
 
+    // Plain objects only — Mongoose subdocs + hydrateUrlsInObject() can recurse infinitely (stack overflow).
     const payload = {
       projectId: project._id,
       slug: project.slug,
-      outdoorAmenitySections: project.outdoorAmenitySections
+      outdoorAmenitySections: normalizeOutdoorAmenitySectionsForRead(project.outdoorAmenitySections)
     }
     await hydrateUrlsInObject(payload)
     res.json(payload)
