@@ -139,6 +139,11 @@ const options = {
                 'Amenidades exteriores por sección (keys permitidas vía GET /api/projects/outdoor-amenity-keys). Phase2 / por proyecto.',
               items: { $ref: '#/components/schemas/OutdoorAmenitySection' }
             },
+            communitySpaces: {
+              type: 'array',
+              description: 'Espacio comunitario Ágora (exterior + planos) por proyecto',
+              items: { $ref: '#/components/schemas/CommunitySpace' }
+            },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
           }
@@ -163,6 +168,72 @@ const options = {
               type: 'array',
               items: { $ref: '#/components/schemas/ImageItem' }
             }
+          }
+        },
+        CommunityPlanoItem: {
+          type: 'object',
+          description: 'Plano o PDF (url + visibilidad + nombre opcional)',
+          properties: {
+            url: { type: 'string' },
+            isPublic: { type: 'boolean', default: true },
+            name: { type: 'string', nullable: true }
+          }
+        },
+        CommunitySpaceSections: {
+          type: 'object',
+          properties: {
+            exterior: {
+              type: 'object',
+              properties: {
+                title: {
+                  type: 'object',
+                  properties: { en: { type: 'string' }, es: { type: 'string' } }
+                },
+                images: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } }
+              }
+            },
+            planos: {
+              type: 'object',
+              properties: {
+                items: { type: 'array', items: { $ref: '#/components/schemas/CommunityPlanoItem' } }
+              }
+            }
+          }
+        },
+        CommunitySpace: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', enum: ['agora'] },
+            label: { type: 'string', example: 'Ágora' },
+            sections: { $ref: '#/components/schemas/CommunitySpaceSections' }
+          }
+        },
+        CommunitySpacesListPayload: {
+          type: 'object',
+          properties: {
+            projectId: { type: 'string' },
+            slug: { type: 'string' },
+            spaces: { type: 'array', items: { $ref: '#/components/schemas/CommunitySpace' } }
+          }
+        },
+        CommunitySpacePayload: {
+          type: 'object',
+          properties: {
+            projectId: { type: 'string' },
+            slug: { type: 'string' },
+            space: { $ref: '#/components/schemas/CommunitySpace' }
+          }
+        },
+        CommunitySpaceUpsertBody: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              enum: ['agora'],
+              description: 'Opcional; si se envía debe coincidir con spaceId en la URL (agora)'
+            },
+            label: { type: 'string' },
+            sections: { $ref: '#/components/schemas/CommunitySpaceSections' }
           }
         },
         OutdoorAmenityKeysList: {
