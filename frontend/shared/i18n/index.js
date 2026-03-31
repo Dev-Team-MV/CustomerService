@@ -25,7 +25,7 @@ import enMyProperty from './locales/en/myProperty.json'
 import enProject from './locales/en/project.json'
 import enConstruction from './locales/en/construction.json'
 import enFamilyGroup from './locales/en/FamilyGroup.json'
-
+import enMyApartment from './locales/en/myApartment.json'
 // ES
 import esCommon from './locales/es/common.json'
 import esAuth from './locales/es/auth.json'
@@ -49,6 +49,7 @@ import esMyProperty from './locales/es/myProperty.json'
 import esProject from './locales/es/project.json'
 import esConstruction from './locales/es/construction.json'
 import esFamilyGroup from './locales/es/FamilyGroup.json'
+import esMyApartment from './locales/es/myApartment.json'
 
 i18n
     .use(LanguageDetector)
@@ -78,7 +79,8 @@ i18n
                 myProperty: enMyProperty,
                 project: enProject,
                 construction: enConstruction,
-                familyGroup: enFamilyGroup
+                familyGroup: enFamilyGroup,
+                myApartment: enMyApartment
             },
             es: {
                 common: esCommon,
@@ -103,12 +105,13 @@ i18n
                 myProperty: esMyProperty,
                 project: esProject,
                 construction: esConstruction,
-                familyGroup: esFamilyGroup
+                familyGroup: esFamilyGroup,
+                myApartment: esMyApartment
             },
         },
         fallbackLng: 'en',
         defaultNS: 'common',
-        ns: ['common', 'auth', 'navigation', 'dashboard', 'property', 'amenities', 'news', 'profile', 'analytics', 'lots', 'propertySelection', 'residents', 'models', 'payloads', 'clubHouse', 'masterPlan', 'timeLine', 'configuration', 'myProperty', 'project', 'construction', 'familyGroup'],
+        ns: ['common', 'auth', 'navigation', 'dashboard', 'property', 'amenities', 'news', 'profile', 'analytics', 'lots', 'propertySelection', 'residents', 'models', 'payloads', 'clubHouse', 'masterPlan', 'timeLine', 'configuration', 'myProperty', 'project', 'construction', 'familyGroup', 'myApartment'],
         interpolation: {
             escapeValue: false,
         },

@@ -186,7 +186,7 @@ const GetYourQuoteContent = () => {
               >
                 <Box display="flex" flexDirection="column" gap={3}>
                   {stepComponents[currentStep]}
-                  {currentStep === 3 && isMob && <ApartmentCustomizer />}
+                  {/* {currentStep === 3 && isMob && <ApartmentCustomizer />} */}
                 </Box>
               </motion.div>
             </AnimatePresence>
@@ -217,7 +217,7 @@ const GetYourQuoteContent = () => {
               }}
             >
               {/* 1. Resumen compacto arriba */}
-              <QuoteSummaryCard compact />
+              {/* <QuoteSummaryCard compact /> */}
 
               {/* 2. Calculadora con todos los detalles */}
               <PriceCalculator />

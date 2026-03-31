@@ -4,6 +4,7 @@ import {
   Home as HomeIcon,
   BarChart as BarChartIcon,
     Settings as Settings,
+  Newspaper as NewspaperIcon,
 } from "@mui/icons-material"
 
 export const privateMenuItems = [
@@ -26,10 +27,28 @@ export const privateMenuItems = [
     roles: ["superadmin", "admin"],
   },
   {
+    textKey: "navigation:menu.news",
+    icon: NewspaperIcon,
+    path: "/admin/news",
+    roles: ["superadmin", "admin"],
+  },
+  {
     textKey: "navigation:menu.payloads",
     icon: HomeIcon,
     path: "/payloads",
     roles: ["superadmin", "admin"],
+  },
+  {
+    textKey: "navigation:menu.amenities",
+    icon: HomeIcon,
+    path: "/amenities",
+    roles: ["superadmin", "admin", "user"],
+  },
+  {
+    textKey: "navigation:menu.agora",
+    icon: HomeIcon,
+    path: "/agora",
+    roles: ["superadmin", "admin", "user"],
   },
   {
     textKey: "navigation:menu.residents",
@@ -72,4 +91,6 @@ export const privateMenuItems = [
 
 export const publicMenuItems = [
   { textKey: "navigation:menu.home", icon: HomeIcon, path: "/" },
+  { textKey: "navigation:menu.news", icon: NewspaperIcon, path: "/explore/news" },
+  { textKey: "navigation:menu.amenities", icon: HomeIcon, path: "/explore/amenities" }
 ]

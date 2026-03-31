@@ -10,14 +10,15 @@ const familyGroupService = {
    * Get all family groups for the current user
    * @returns {Promise<Array>} List of family groups
    */
-  async getAll() {
-    try {
-      const { data } = await api.get('/family-groups')
-      return data
-    } catch (error) {
-      throw this._handleError(error, 'Failed to fetch family groups')
-    }
-  },
+async getAll(projectId = null) {
+  try {
+    const params = projectId ? { projectId } : {}
+    const { data } = await api.get('/family-groups', { params })
+    return data
+  } catch (error) {
+    throw this._handleError(error, 'Failed to fetch family groups')
+  }
+},
 
   /**
    * Get a single family group by ID
@@ -38,14 +39,16 @@ const familyGroupService = {
    * @param {string} name - Group name
    * @returns {Promise<Object>} Created group
    */
-  async create(name) {
-    try {
-      const { data } = await api.post('/family-groups', { name })
-      return data
-    } catch (error) {
-      throw this._handleError(error, 'Failed to create group')
-    }
-  },
+async create(name, projectId = null) {
+  try {
+    const payload = { name }
+    if (projectId) payload.projectId = projectId
+    const { data } = await api.post('/family-groups', payload)
+    return data
+  } catch (error) {
+    throw this._handleError(error, 'Failed to create group')
+  }
+},
 
   /**
    * Update family group details

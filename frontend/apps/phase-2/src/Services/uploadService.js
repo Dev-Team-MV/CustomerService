@@ -1,4 +1,8 @@
+// @/Users/oficina/MV-CRM/CustomerService/frontend/apps/phase-2/src/services/uploadService.js
+
 import api from '@shared/services/api'
+
+const PHASE_2_PROJECT_SLUG = 'phase2'
 
 const uploadService = {
   // ========================================
@@ -88,6 +92,77 @@ const uploadService = {
   },
 
   // ========================================
+  // OUTDOOR AMENITIES FUNCTIONS
+  // ========================================
+
+  /**
+   * Get outdoor amenities by project slug (for Phase 2)
+   * GET /api/projects/slug/:slug/outdoor-amenities
+   */
+  getOutdoorAmenitiesBySlug: async (slug = PHASE_2_PROJECT_SLUG) => {
+    try {
+      const response = await api.get(`/projects/slug/${slug}/outdoor-amenities`)
+      return response.data
+    } catch (error) {
+      console.error('❌ Error getting outdoor amenities:', error.response?.data || error.message)
+      return { outdoorAmenitySections: [] }
+    }
+  },
+
+  /**
+   * Get outdoor amenities by project ID (for admin)
+   * GET /api/projects/:id/outdoor-amenities
+   */
+  getOutdoorAmenitiesByProjectId: async (projectId) => {
+    try {
+      const response = await api.get(`/projects/${projectId}/outdoor-amenities`)
+      return response.data
+    } catch (error) {
+      console.error('❌ Error getting outdoor amenities by project ID:', error.response?.data || error.message)
+      return { outdoorAmenitySections: [] }
+    }
+  },
+
+  /**
+   * Upload outdoor amenity images for a specific amenity key
+   * Returns array of { url, isPublic }
+   */
+  uploadOutdoorAmenityImages: async (filesWithVisibility, amenityKey) => {
+    try {
+      const uploadPromises = filesWithVisibility.map(async ({ file, isPublic }) => {
+        const url = await uploadService.uploadImage(
+          file, 
+          `outdoor-amenities/${amenityKey}`, 
+          '', 
+          isPublic
+        )
+        return { url, isPublic }
+      })
+      return await Promise.all(uploadPromises)
+    } catch (error) {
+      console.error('❌ Error uploading outdoor amenity images:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Save/update outdoor amenities for a project
+   * PUT /api/projects/:id/outdoor-amenities
+   * Body: { outdoorAmenitySections: [{ key, images: [{ url, isPublic }] }] }
+   */
+  saveOutdoorAmenities: async (projectId, outdoorAmenitySections) => {
+    try {
+      const response = await api.put(`/projects/${projectId}/outdoor-amenities`, {
+        outdoorAmenitySections
+      })
+      return response.data
+    } catch (error) {
+      console.error('❌ Error saving outdoor amenities:', error.response?.data || error.message)
+      throw error
+    }
+  },
+
+  // ========================================
   // UTILITY FUNCTIONS
   // ========================================
 
@@ -113,22 +188,6 @@ const uploadService = {
       console.error('❌ Error deleting image:', error)
       throw new Error(error.response?.data?.message || 'Failed to delete image')
     }
-  },
-
-    // Sube una imagen de render interior básico de apartamento
-  uploadApartmentInteriorBasic: async (file, isPublic = true) => {
-    return uploadService.uploadImage(file, 'apartments/interior/basic', '', isPublic)
-  },
-
-  // Sube una imagen de render interior upgrade de apartamento
-  uploadApartmentInteriorUpgrade: async (file, isPublic = true) => {
-    return uploadService.uploadImage(file, 'apartments/interior/upgrade', '', isPublic)
-  },
-
-  // Sube múltiples imágenes de renders interiores (basic o upgrade)
-  uploadApartmentInteriorImages: async (files, type = 'basic', isPublic = true) => {
-    const folder = `apartments/interior/${type}`
-    return uploadService.uploadMultipleImages(files, folder, isPublic)
   },
 }
 
