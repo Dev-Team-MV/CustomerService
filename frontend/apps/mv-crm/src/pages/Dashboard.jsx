@@ -91,8 +91,21 @@ export default function Dashboard() {
     allBalance?.byProject?.find(b => b.projectId === projectId) ?? null
 
   const handleOpenProject = () => {
-    const lakewoodUrl = import.meta.env.VITE_LAKEWOOD_URL || 'http://localhost:5173'
-    window.open(`${lakewoodUrl}/dashboard`, '_blank')
+    const token = localStorage.getItem('token')
+    let url = selectedProject?.externalUrl
+  
+    // Si no hay externalUrl, usa una URL local por defecto según el slug
+    if (!url) {
+      if (selectedProject?.slug === 'lakewood') {
+        url = 'http://localhost:5173'
+      } else if (selectedProject?.slug === 'phase2') {
+        url = 'http://localhost:5174'
+      } else {
+        url = 'http://localhost:5173' // fallback
+      }
+    }
+  
+    window.open(`${url}/dashboard?token=${token}`, '_blank')
   }
 
   const formatDate = (d) =>

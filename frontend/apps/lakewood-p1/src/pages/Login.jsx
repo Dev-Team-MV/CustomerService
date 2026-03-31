@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom'
 import {
   Box,
@@ -22,7 +22,7 @@ import {
   Phone,
   Gavel
 } from '@mui/icons-material'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '@shared/context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import PhoneInput from 'react-phone-input-2'
@@ -39,7 +39,9 @@ const Login = () => {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [focusedField, setFocusedField] = useState(null)
-  const { login } = useAuth()
+  // const { login } = useAuth()
+  const { login, isAuthenticated, user } = useAuth()
+
   const navigate = useNavigate()
   const location = useLocation()
   const theme = useTheme()
@@ -47,6 +49,12 @@ const Login = () => {
   const { t } = useTranslation('auth')
 
   const from = location.state?.from || '/dashboard'
+
+  useEffect(() => {
+  if (isAuthenticated && user && user.role) {
+    navigate(from, { replace: true })
+  }
+}, [isAuthenticated, user, user?.role, from, navigate])
 
   const handleLoginMethodChange = (event, newMethod) => {
     if (newMethod !== null) {

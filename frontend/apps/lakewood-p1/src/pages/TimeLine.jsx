@@ -1,14 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Box, Button, Modal, TextField, Typography, IconButton, Paper, Stack, Container, CircularProgress } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import ImageIcon from '@mui/icons-material/Image';
-import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import PageHeader from '../components/PageHeader';
-import DataTable from '../components/table/DataTable';
-import EmptyState from '../components/table/EmptyState';
+import PageHeader from '@shared/components/PageHeader'
+
+import DataTable from '@shared/components/table/DataTable';
+import EmptyState from '@shared/components/table/EmptyState';
 import TimeLineService from '../services/TimeLineService';
 import uploadService from '../services/uploadService';
 import TimeLineStepModal from '../components/timeLine/TimeLineStepModal';

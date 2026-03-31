@@ -17,9 +17,81 @@ function sameId(a, b) {
   return toIdStr(a).toLowerCase() === toIdStr(b).toLowerCase()
 }
 
+function getSelectedApartmentRenders(apartmentLike) {
+  const selectedType = apartmentLike?.selectedRenderType === 'upgrade' ? 'upgrade' : 'basic'
+  const basic = Array.isArray(apartmentLike?.interiorRendersBasic) ? apartmentLike.interiorRendersBasic : []
+  const upgrade = Array.isArray(apartmentLike?.interiorRendersUpgrade) ? apartmentLike.interiorRendersUpgrade : []
+  return selectedType === 'upgrade' ? upgrade : basic
+}
+
+const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value)
+
+const DEFAULT_PHASES = [
+  { phaseNumber: 1, title: 'Site Preparation and Groundbreaking', constructionPercentage: 0 },
+  { phaseNumber: 2, title: 'Foundation, Framing & Windows', constructionPercentage: 0 },
+  { phaseNumber: 3, title: 'Exterior Cladding and Roofing Installation', constructionPercentage: 0 },
+  { phaseNumber: 4, title: "All MEP's starts rough in work", constructionPercentage: 0 },
+  { phaseNumber: 5, title: 'Drywall Work and Paint', constructionPercentage: 0 },
+  { phaseNumber: 6, title: 'Flooring and Millwork', constructionPercentage: 0 },
+  { phaseNumber: 7, title: 'Kitchen and Bathrooms', constructionPercentage: 0 },
+  { phaseNumber: 8, title: 'Interior Finishes, Driveway Applainces & Landscaping', constructionPercentage: 0 },
+  { phaseNumber: 9, title: 'Inspections (Delays)', constructionPercentage: 0 }
+]
+
+const ensureApartmentPhases = async (apartmentId) => {
+  if (!apartmentId) return
+  const existingCount = await Phase.countDocuments({ apartment: apartmentId })
+  if (existingCount > 0) return
+
+  await Phase.insertMany(
+    DEFAULT_PHASES.map(phase => ({
+      apartment: apartmentId,
+      phaseNumber: phase.phaseNumber,
+      title: phase.title,
+      constructionPercentage: phase.constructionPercentage,
+      mediaItems: []
+    }))
+  )
+}
+
+const normalizePolygonId = (value) => {
+  if (value == null) return null
+  const str = String(value).trim()
+  return str.length > 0 ? str : null
+}
+
+const validateApartmentPlacement = async ({ buildingId, floorNumber, floorPlanPolygonId }) => {
+  const normalizedPolygonId = normalizePolygonId(floorPlanPolygonId)
+  if (!normalizedPolygonId) return { ok: true }
+
+  if (!buildingId || !isValidObjectId(buildingId)) {
+    return { ok: false, message: 'building (or valid model->building) is required when floorPlanPolygonId is provided' }
+  }
+
+  const floor = Number(floorNumber)
+  if (!Number.isFinite(floor) || floor < 1) {
+    return { ok: false, message: 'floorNumber must be >= 1 when floorPlanPolygonId is provided' }
+  }
+
+  const building = await Building.findById(buildingId).select('floorPlans')
+  if (!building) return { ok: false, message: 'Building not found' }
+
+  const floorPlan = (building.floorPlans || []).find((fp) => Number(fp.floorNumber) === floor)
+  if (!floorPlan) {
+    return { ok: false, message: `Floor plan not found for floor ${floor}` }
+  }
+
+  const polygonExists = (floorPlan.polygons || []).some((poly) => poly.id === normalizedPolygonId)
+  if (!polygonExists) {
+    return { ok: false, message: `Polygon ${normalizedPolygonId} not found on floor ${floor}` }
+  }
+
+  return { ok: true }
+}
+
 export const getAllApartments = async (req, res) => {
   try {
-    const { status, user, projectId, buildingId, apartmentModelId } = req.query
+    const { status, user, projectId, buildingId, apartmentModelId, floorNumber, floorPlanPolygonId } = req.query
     const filter = {}
     const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
     const isSuperadmin = req.user.role === 'superadmin'
@@ -36,6 +108,16 @@ export const getAllApartments = async (req, res) => {
       filter.apartmentModel = { $in: models.map(m => m._id) }
     }
     if (status) filter.status = status
+    if (floorNumber != null && floorNumber !== '') {
+      const floor = Number(floorNumber)
+      if (!Number.isFinite(floor) || floor < 1) {
+        return res.status(400).json({ message: 'floorNumber must be a number >= 1' })
+      }
+      filter.floorNumber = floor
+    }
+    if (floorPlanPolygonId != null && floorPlanPolygonId !== '') {
+      filter.floorPlanPolygonId = String(floorPlanPolygonId).trim()
+    }
 
     if (!visibleOnly && isSuperadmin) {
       // Superadmin "management" view: return all apartments (optionally filtered by owner user).
@@ -65,9 +147,19 @@ export const getAllApartments = async (req, res) => {
       })
       .sort({ floorNumber: 1, apartmentNumber: 1 })
 
+    // Self-heal legacy apartments assigned to users without phases.
+    const apartmentsMissingPhases = apartments.filter(a =>
+      Array.isArray(a.users) && a.users.length > 0 && (!Array.isArray(a.phases) || a.phases.length === 0)
+    )
+    if (apartmentsMissingPhases.length > 0) {
+      await Promise.all(apartmentsMissingPhases.map(a => ensureApartmentPhases(a._id)))
+      await Promise.all(apartmentsMissingPhases.map(a => a.populate({ path: 'phases', options: { sort: { phaseNumber: 1 } } }))
+    )}
+
     const result = apartments.map(a => {
       const obj = a.toObject()
       obj.totalConstructionPercentage = a.totalConstructionPercentage || 0
+      obj.selectedRenders = getSelectedApartmentRenders(obj)
       return obj
     })
     res.json(result)
@@ -110,8 +202,17 @@ export const getApartmentById = async (req, res) => {
       return res.status(403).json({ message: 'You do not have access to this apartment' })
     }
 
+    if (Array.isArray(apartment.users) && apartment.users.length > 0 && (!Array.isArray(apartment.phases) || apartment.phases.length === 0)) {
+      await ensureApartmentPhases(apartment._id)
+      await apartment.populate({
+        path: 'phases',
+        options: { sort: { phaseNumber: 1 } }
+      })
+    }
+
     const obj = apartment.toObject()
     obj.totalConstructionPercentage = apartment.totalConstructionPercentage || 0
+    obj.selectedRenders = getSelectedApartmentRenders(obj)
     res.json(obj)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -125,9 +226,12 @@ export const createApartment = async (req, res) => {
       apartmentModel,
       floorNumber,
       apartmentNumber,
+      building,
+      floorPlanPolygonId,
       interiorRendersBasic,
       interiorRendersUpgrade,
       polygon,
+      selectedRenderType,
       user,
       users,
       price,
@@ -148,6 +252,23 @@ export const createApartment = async (req, res) => {
       return res.status(404).json({ message: 'Apartment model not found' })
     }
 
+    const buildingId = building || modelExists.building
+    if (!buildingId) {
+      return res.status(400).json({ message: 'building could not be resolved for apartment model' })
+    }
+    if (!sameId(buildingId, modelExists.building)) {
+      return res.status(400).json({ message: 'building must match apartment model building' })
+    }
+
+    const placementValidation = await validateApartmentPlacement({
+      buildingId,
+      floorNumber,
+      floorPlanPolygonId
+    })
+    if (!placementValidation.ok) {
+      return res.status(400).json({ message: placementValidation.message })
+    }
+
     const existing = await Apartment.findOne({ apartmentModel: modelId, apartmentNumber })
     if (existing) {
       return res.status(400).json({ message: 'Apartment number already exists for this model' })
@@ -159,10 +280,13 @@ export const createApartment = async (req, res) => {
 
     const apartment = await Apartment.create({
       apartmentModel: modelId,
+      building: buildingId,
       floorNumber,
       apartmentNumber,
+      floorPlanPolygonId: normalizePolygonId(floorPlanPolygonId),
       interiorRendersBasic: interiorRendersBasic || [],
       interiorRendersUpgrade: interiorRendersUpgrade || [],
+      selectedRenderType: selectedRenderType || 'basic',
       polygon: polygon || [],
       users: ownerIds,
       price: priceVal,
@@ -170,6 +294,10 @@ export const createApartment = async (req, res) => {
       initialPayment: initialVal,
       status: ownerIds.length > 0 ? 'pending' : 'available'
     })
+
+    if (ownerIds.length > 0) {
+      await ensureApartmentPhases(apartment._id)
+    }
 
     const populated = await Apartment.findById(apartment._id)
       .populate('apartmentModel', 'name modelNumber floorPlan sqft bedrooms bathrooms')
@@ -185,15 +313,20 @@ export const createApartment = async (req, res) => {
 
     const obj = populated.toObject()
     obj.totalConstructionPercentage = populated.totalConstructionPercentage || 0
+    obj.selectedRenders = getSelectedApartmentRenders(obj)
     res.status(201).json(obj)
   } catch (error) {
+    if (error?.code === 11000 && error?.keyPattern?.floorPlanPolygonId) {
+      return res.status(400).json({ message: 'floorPlanPolygonId is already assigned to another apartment on this floor/building' })
+    }
     res.status(500).json({ message: error.message })
   }
 }
 
 const ALLOWED_APARTMENT_UPDATES = [
   'floorNumber', 'apartmentNumber', 'interiorRendersBasic', 'interiorRendersUpgrade',
-  'polygon', 'users', 'price', 'pending', 'initialPayment', 'status', 'saleDate'
+  'selectedRenderType', 'polygon', 'users', 'price', 'pending', 'initialPayment', 'status', 'saleDate',
+  'floorPlanPolygonId'
 ]
 
 export const updateApartment = async (req, res) => {
@@ -203,13 +336,41 @@ export const updateApartment = async (req, res) => {
       return res.status(404).json({ message: 'Apartment not found' })
     }
 
+    if (req.body.building !== undefined) {
+      return res.status(400).json({ message: 'building cannot be updated directly; it is derived from apartment model' })
+    }
+
+    if (req.body.floorPlanPolygonId !== undefined) {
+      apartment.floorPlanPolygonId = normalizePolygonId(req.body.floorPlanPolygonId)
+    }
+
     for (const key of ALLOWED_APARTMENT_UPDATES) {
+      if (key === 'floorPlanPolygonId') continue
       if (req.body[key] !== undefined) {
         apartment[key] = req.body[key]
       }
     }
 
+    const modelForUpdate = await ApartmentModel.findById(apartment.apartmentModel).select('building')
+    if (!modelForUpdate) {
+      return res.status(404).json({ message: 'Apartment model not found' })
+    }
+    apartment.building = modelForUpdate.building
+
+    const placementValidation = await validateApartmentPlacement({
+      buildingId: apartment.building,
+      floorNumber: apartment.floorNumber,
+      floorPlanPolygonId: apartment.floorPlanPolygonId
+    })
+    if (!placementValidation.ok) {
+      return res.status(400).json({ message: placementValidation.message })
+    }
+
     await apartment.save()
+
+    if (Array.isArray(apartment.users) && apartment.users.length > 0) {
+      await ensureApartmentPhases(apartment._id)
+    }
 
     const populated = await Apartment.findById(apartment._id)
       .populate('apartmentModel', 'name modelNumber floorPlan sqft bedrooms bathrooms')
@@ -225,8 +386,12 @@ export const updateApartment = async (req, res) => {
 
     const obj = populated.toObject()
     obj.totalConstructionPercentage = populated.totalConstructionPercentage || 0
+    obj.selectedRenders = getSelectedApartmentRenders(obj)
     res.json(obj)
   } catch (error) {
+    if (error?.code === 11000 && error?.keyPattern?.floorPlanPolygonId) {
+      return res.status(400).json({ message: 'floorPlanPolygonId is already assigned to another apartment on this floor/building' })
+    }
     res.status(500).json({ message: error.message })
   }
 }

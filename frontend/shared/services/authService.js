@@ -1,6 +1,14 @@
 import api from './api'
 
 export const authService = {
+    me: async (token) => {
+      const res = await fetch('/auth/profile', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (!res.ok) throw new Error('Not authenticated')
+      return await res.json()
+    },
+
   login: async (emailOrPhone, password, isPhone = false) => {
     // ✅ Determinar si es email o teléfono
     const payload = isPhone 

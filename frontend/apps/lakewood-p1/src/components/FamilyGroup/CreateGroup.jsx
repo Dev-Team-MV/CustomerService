@@ -2,8 +2,8 @@ import React from 'react'
 import { TextField, Typography } from '@mui/material'
 import { Close as CloseIcon, Group as GroupIcon } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
-import ModalWrapper from '../../constants/ModalWrapper'
-import PrimaryButton from '../../constants/PrimaryButton'
+import ModalWrapper from '@shared/constants/ModalWrapper'
+import PrimaryButton from '@shared/constants/PrimaryButton'
 
 const CreateGroupDialog = ({
   open,

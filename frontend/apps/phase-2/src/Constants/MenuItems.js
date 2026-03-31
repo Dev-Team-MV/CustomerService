@@ -14,9 +14,9 @@ export const privateMenuItems = [
     roles: ["superadmin", "admin", "user"],
   },
   {
-    textKey: "navigation:menu.residents",
-    icon: PeopleIcon,
-    path: "/residents",
+    textKey: "navigation:menu.buildings",
+    icon: HomeIcon,
+    path: "/buildings",
     roles: ["superadmin", "admin"],
   },
   {
@@ -24,6 +24,36 @@ export const privateMenuItems = [
     icon: HomeIcon,
     path: "/properties",
     roles: ["superadmin", "admin"],
+  },
+  {
+    textKey: "navigation:menu.payloads",
+    icon: HomeIcon,
+    path: "/payloads",
+    roles: ["superadmin", "admin"],
+  },
+  {
+    textKey: "navigation:menu.residents",
+    icon: PeopleIcon,
+    path: "/residents",
+    roles: ["superadmin", "admin"],
+  },
+  {
+    textKey: "navigation:menu.masterPlan",
+    icon: PeopleIcon,
+    path: "/master-plan",
+    roles: ["superadmin", "admin"],
+  },
+  {
+    textKey: "navigation:menu.myapartment",
+    icon: PeopleIcon,
+    path: "/my-apartment",
+    roles: ["superadmin", "admin", "user"],
+  },
+  {
+    textKey: "navigation:menu.familyGroup",
+    icon: PeopleIcon,
+    path: "/family-group",
+    roles: ["superadmin", "admin", "user"],
   },
   {
     textKey: "navigation:menu.analytics",

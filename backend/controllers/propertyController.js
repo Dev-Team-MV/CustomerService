@@ -384,9 +384,14 @@ export const updateProperty = async (req, res) => {
             const newInitial = Number(req.body.initialPayment)
             if (!Number.isNaN(newInitial) && newInitial >= 0) {
               property.initialPayment = newInitial
-              property.pending = Math.max(0, property.price - newInitial)
               property.markModified('initialPayment')
-              property.markModified('pending')
+              // Si el request trae `pending`, asumimos que el cliente quiere que `pending` sea autoritativo.
+              // En ese caso NO recalculamos para evitar que el valor editado se sobrescriba.
+              // (Recalculamos solo cuando `pending` no viene en el body.)
+              if (req.body.pending === undefined) {
+                property.pending = Math.max(0, property.price - newInitial)
+                property.markModified('pending')
+              }
             }
           } else if (key === 'users') {
             const newUsers = req.body.users

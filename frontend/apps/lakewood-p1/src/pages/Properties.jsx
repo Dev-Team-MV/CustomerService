@@ -8,13 +8,15 @@ import {
 import { Add, SortByAlpha, FilterList, Home } from '@mui/icons-material'
 import api from '@shared/services/api'
 import { useAuth } from '@shared/context/AuthContext'
-import ConstructionPhasesModal from '../components/ConstructionPhasesModal'
-import ContractsModal from '../components/ContractsModal'
+// import ConstructionPhasesModal from '../components/ConstructionPhasesModal'
+import ConstructionPhasesModal from '../components/ConstructionPhasesContent'// import ContractsModal from '../components/ContractsModal'
+import ContractsModal from '@shared/components/Modals/ContractsModal'
 import EditPropertyModal from '../components/property/EditPriceModal'
 import PageHeader from '@shared/components/PageHeader'
 import StatsCards from '../components/statscard'
-import DataTable from '../components/table/DataTable'
-import EmptyState from '../components/table/EmptyState'
+// import DataTable from '../components/table/DataTable'
+import DataTable from '@shared/components/table/DataTable'
+import EmptyState from '@shared/components/table/EmptyState'
 import PropertyDetailsModal from '../components/myProperty/PropertyDetailsModal'
 import propertyService from '../services/propertyService'
 import useFetch from '../hooks/useFetch'
@@ -32,6 +34,7 @@ const Properties = () => {
   const { data: properties, loading, refetch } = useFetch(
     useCallback(() => api.get('/properties').then(r => r.data), [])
   )
+  
   const { data: lotsArray }  = useFetch(useCallback(() => api.get('/lots').then(r => r.data), []))
   const { data: modelsArray } = useFetch(useCallback(() => api.get('/models').then(r => r.data), []))
   const { data: usersArray }  = useFetch(useCallback(() => api.get('/users').then(r => r.data), []))
@@ -204,7 +207,7 @@ const Properties = () => {
         {/* MODALS */}
         <PropertyDetailsModal
           open={details.open}
-          onClose={details.closeModal}
+          onClose={() => { details.closeModal(); refetch() }}
           property={details.data}
           isAdmin={isAdmin}
         />
@@ -216,10 +219,17 @@ const Properties = () => {
           isAdmin={isAdmin}
         />
 
-        <ContractsModal
+        {/* <ContractsModal
           open={contracts.open}
           onClose={contracts.closeModal}
           property={contracts.data}
+        /> */}
+        <ContractsModal
+          open={contracts.open}
+          onClose={contracts.closeModal}
+          resource={contracts.data}
+          resourceType="property"
+          onContractUpdated={refetch}
         />
 
         <EditPropertyModal

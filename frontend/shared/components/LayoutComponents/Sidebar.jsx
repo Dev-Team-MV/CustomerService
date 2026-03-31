@@ -120,7 +120,7 @@ export default function Sidebar({ stats = [] }) {
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)' }} />
 
       <Box sx={{ px: 2, py: 1 }}>
-        <LanguageSwitcher />
+        <LanguageSwitcher variant="sidebar" />
       </Box>
 
       {/* ── User Profile Button ── */}

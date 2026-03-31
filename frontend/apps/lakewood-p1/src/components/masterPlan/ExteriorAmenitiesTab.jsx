@@ -28,8 +28,8 @@ const exteriorAmenities = [
 ]
 
 const ExteriorAmenitiesTab = () => {
-    const { t } = useTranslation(['masterPlan']);
- const [zoom, setZoom] = useState(1)
+    const { t } = useTranslation(['masterPlan', 'amenities']); 
+    const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
@@ -208,7 +208,7 @@ const ExteriorAmenitiesTab = () => {
               {exteriorAmenities.map((amenity) => (
                 <Tooltip 
                   key={amenity.id} 
-              title={t(`exteriorAmenities.${amenity.name}`, amenity.name)} 
+                  title={t(`exteriorAmenitiesNames.${amenity.name}`, { ns: 'amenities', defaultValue: amenity.name })} 
                   arrow
                 >
                   <Box
@@ -278,6 +278,7 @@ const ExteriorAmenitiesTab = () => {
 
       {/* Gallery Modal */}
     <AmenitiesGalleryModal
+      key={selectedAmenity ? selectedAmenity.id || selectedAmenity.name : 'none'}
       open={amenityModalOpen}
       onClose={handleAmenityCloseModal}
       amenity={selectedAmenity}

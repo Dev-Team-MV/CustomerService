@@ -28,6 +28,8 @@ export const getAllApartmentModels = async (req, res) => {
     const models = await ApartmentModel.find(filter)
       .populate('building', 'name section floors project')
       .sort({ name: 1 })
+
+    res.json(models)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }

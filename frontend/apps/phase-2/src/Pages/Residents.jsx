@@ -1,3 +1,4 @@
+// @/Users/oficina/MV-CRM/CustomerService/frontend/apps/phase-2/src/Pages/Residents.jsx
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Container, Snackbar, Alert } from '@mui/material'
@@ -13,7 +14,11 @@ import { useTheme } from '@mui/material/styles'
 
 const Residents = () => {
   const { t } = useTranslation(['residents', 'common'])
- const theme = useTheme()
+  const theme = useTheme()
+
+  // ✅ Pasar PROJECT_ID desde .env para filtrar residentes de phase-2
+  const projectId = import.meta.env.VITE_PROJECT_ID
+
   const {
     users, loading, stats,
     openDialog, selectedUser, formData, setFormData,
@@ -26,7 +31,7 @@ const Residents = () => {
     e164Value,
     displayVal,
     isPhoneValid,
-  } = useResidents()
+  } = useResidents(projectId) // ✅ Pasar projectId al hook
 
   const columns = useResidentColumns({
     t,
@@ -36,42 +41,42 @@ const Residents = () => {
     onSendSMS: handleSendPasswordSMS,
   })
 
-const residentsStats = useMemo(() => [
-  {
-    title: t('residents:stats.total'),
-    value: stats.total,
-    icon: People,
-    gradient: theme.palette.gradient
-      ? theme.palette.gradient
-      : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-    color: theme.palette.primary.main,
-    delay: 0
-  },
-  {
-    title: t('residents:stats.superadmins'),
-    value: stats.superadmins,
-    icon: AdminPanelSettings,
-    gradient: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.light} 100%)`,
-    color: theme.palette.warning.main,
-    delay: 0.1
-  },
-  {
-    title: t('residents:stats.admins'),
-    value: stats.admins,
-    icon: VerifiedUser,
-    gradient: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${theme.palette.secondary.light} 100%)`,
-    color: theme.palette.secondary.main,
-    delay: 0.2
-  },
-  {
-    title: t('residents:stats.residents'),
-    value: stats.residents,
-    icon: Home,
-    gradient: `linear-gradient(135deg, ${theme.palette.info.main} 0%, ${theme.palette.info.light} 100%)`,
-    color: theme.palette.info.main,
-    delay: 0.3
-  },
-], [stats, t, theme])
+  const residentsStats = useMemo(() => [
+    {
+      title: t('residents:stats.total'),
+      value: stats.total,
+      icon: People,
+      gradient: theme.palette.gradient
+        ? theme.palette.gradient
+        : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+      color: theme.palette.primary.main,
+      delay: 0
+    },
+    {
+      title: t('residents:stats.superadmins'),
+      value: stats.superadmins,
+      icon: AdminPanelSettings,
+      gradient: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.light} 100%)`,
+      color: theme.palette.warning.main,
+      delay: 0.1
+    },
+    {
+      title: t('residents:stats.admins'),
+      value: stats.admins,
+      icon: VerifiedUser,
+      gradient: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${theme.palette.secondary.light} 100%)`,
+      color: theme.palette.secondary.main,
+      delay: 0.2
+    },
+    {
+      title: t('residents:stats.residents'),
+      value: stats.residents,
+      icon: Home,
+      gradient: `linear-gradient(135deg, ${theme.palette.info.main} 0%, ${theme.palette.info.light} 100%)`,
+      color: theme.palette.info.main,
+      delay: 0.3
+    },
+  ], [stats, t, theme])
 
   return (
     <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)', p: { xs: 2, sm: 3 } }}>
@@ -121,14 +126,14 @@ const residentsStats = useMemo(() => [
           isPhoneValid={isPhoneValid}
         />
 
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={4000}
+        <Snackbar 
+          open={snackbar.open} 
+          autoHideDuration={4000} 
           onClose={handleCloseSnackbar}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         >
-          <Alert
-            onClose={handleCloseSnackbar}
+          <Alert 
+            onClose={handleCloseSnackbar} 
             severity={snackbar.severity}
             sx={{ width: '100%', fontFamily: '"Poppins", sans-serif', borderRadius: 3 }}
           >

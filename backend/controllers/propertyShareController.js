@@ -2,6 +2,7 @@ import Property from '../models/Property.js'
 import Apartment from '../models/Apartment.js'
 import PropertyShare from '../models/PropertyShare.js'
 import FamilyGroup from '../models/FamilyGroup.js'
+import mongoose from 'mongoose'
 
 function isPropertyOwner(property, userId) {
   return property?.users?.some(id => id.toString() === userId.toString())
@@ -15,18 +16,70 @@ function isApartmentOwner(apartment, userId) {
 function getFamilyGroupMemberIds(group) {
   if (!group) return []
   const ids = new Set()
-  if (group.createdBy) ids.add(group.createdBy.toString())
+  const createdById = normalizeUserId(group.createdBy)
+  if (createdById) ids.add(createdById)
   for (const m of group.members || []) {
-    if (m.user) ids.add(m.user.toString())
+    const memberUserId = normalizeUserId(m.user)
+    if (memberUserId) ids.add(memberUserId)
   }
   return Array.from(ids)
+}
+
+function normalizeUserId(userInput) {
+  if (!userInput) return null
+
+  if (userInput instanceof mongoose.Types.ObjectId) {
+    return userInput.toString()
+  }
+
+  if (typeof userInput === 'object' && typeof userInput.toHexString === 'function') {
+    const hex = userInput.toHexString()
+    return mongoose.Types.ObjectId.isValid(hex) ? hex : null
+  }
+
+  if (typeof userInput === 'object') {
+    const candidateId = userInput._id ?? userInput.id ?? null
+    if (!candidateId || candidateId === userInput) return null
+    return normalizeUserId(candidateId)
+  }
+
+  const raw = String(userInput).trim()
+  if (!raw) return null
+
+  if (mongoose.Types.ObjectId.isValid(raw)) return raw
+
+  // Some clients may send a serialized object instead of an ID.
+  const objectIdMatch = raw.match(/[a-fA-F0-9]{24}/)
+  if (objectIdMatch && mongoose.Types.ObjectId.isValid(objectIdMatch[0])) {
+    return objectIdMatch[0]
+  }
+
+  return null
+}
+
+/** Family groups are scoped per project; resource must belong to the same project. */
+function familyGroupMatchesProject(group, resourceProjectId) {
+  if (!group?.project || resourceProjectId == null) return false
+  return group.project.toString() === resourceProjectId.toString()
+}
+
+function respondFamilyGroupProjectMismatch(res) {
+  return res.status(400).json({ message: 'Family group does not belong to this property project' })
+}
+
+function getApartmentProjectIdFromDoc(apartmentDoc) {
+  if (!apartmentDoc?.building) return null
+  const b = apartmentDoc.building
+  const proj = typeof b === 'object' && b.project != null ? b.project : null
+  return proj ? proj.toString() : null
 }
 
 export const shareProperty = async (req, res) => {
   try {
     const { id: propertyId } = req.params
     const { sharedWithUserId, familyGroupId } = req.body
-    const shareWithUser = !!sharedWithUserId
+    const normalizedSharedWithUserId = normalizeUserId(sharedWithUserId)
+    const shareWithUser = !!normalizedSharedWithUserId
     const shareWithGroup = !!familyGroupId
     if (!shareWithUser && !shareWithGroup) {
       return res.status(400).json({ message: 'sharedWithUserId or familyGroupId is required' })
@@ -42,6 +95,9 @@ export const shareProperty = async (req, res) => {
       const group = await FamilyGroup.findById(familyGroupId).populate('members.user')
       if (!group) {
         return res.status(404).json({ message: 'Family group not found' })
+      }
+      if (!familyGroupMatchesProject(group, property.project)) {
+        return respondFamilyGroupProjectMismatch(res)
       }
       const isAdmin = req.user.role === 'superadmin'
       const isOwner = isPropertyOwner(property, req.user._id)
@@ -82,13 +138,22 @@ export const shareProperty = async (req, res) => {
       })
     }
 
-    if (!sharedWithUserId) {
+    if (!normalizedSharedWithUserId) {
       return res.status(400).json({ message: 'sharedWithUserId is required' })
     }
 
     const property = await Property.findById(propertyId)
     if (!property) {
       return res.status(404).json({ message: 'Property not found' })
+    }
+    if (familyGroupId) {
+      const group = await FamilyGroup.findById(familyGroupId)
+      if (!group) {
+        return res.status(404).json({ message: 'Family group not found' })
+      }
+      if (!familyGroupMatchesProject(group, property.project)) {
+        return respondFamilyGroupProjectMismatch(res)
+      }
     }
     const isAdmin = req.user.role === 'superadmin'
     const isOwner = isPropertyOwner(property, req.user._id)
@@ -101,14 +166,14 @@ export const shareProperty = async (req, res) => {
       return res.status(403).json({ message: 'Only property owners or group admins can share this property' })
     }
 
-    const existing = await PropertyShare.findOne({ property: propertyId, sharedWith: sharedWithUserId })
+    const existing = await PropertyShare.findOne({ property: propertyId, sharedWith: normalizedSharedWithUserId })
     if (existing) {
       return res.status(400).json({ message: 'Property is already shared with this user' })
     }
 
     const share = await PropertyShare.create({
       property: propertyId,
-      sharedWith: sharedWithUserId,
+      sharedWith: normalizedSharedWithUserId,
       sharedBy: req.user._id,
       familyGroup: familyGroupId || undefined
     })
@@ -137,7 +202,8 @@ export const revokePropertyShare = async (req, res) => {
     let canRevoke = isAdmin || isOwner || share.sharedBy.toString() === req.user._id.toString()
     if (!canRevoke && share.familyGroup) {
       const group = await FamilyGroup.findById(share.familyGroup)
-      canRevoke = group && (group.createdBy?.toString() === req.user._id.toString() || group.members?.some(m => m.user?.toString() === req.user._id.toString() && m.role === 'admin'))
+      const projectOk = group && familyGroupMatchesProject(group, property.project)
+      canRevoke = projectOk && (group.createdBy?.toString() === req.user._id.toString() || group.members?.some(m => m.user?.toString() === req.user._id.toString() && m.role === 'admin'))
     }
     if (!canRevoke) {
       return res.status(403).json({ message: 'Not allowed to revoke this share' })
@@ -160,6 +226,9 @@ export const revokePropertyShareByGroup = async (req, res) => {
     const group = await FamilyGroup.findById(familyGroupId)
     if (!group) {
       return res.status(404).json({ message: 'Family group not found' })
+    }
+    if (!familyGroupMatchesProject(group, property.project)) {
+      return respondFamilyGroupProjectMismatch(res)
     }
     const isOwner = isPropertyOwner(property, req.user._id)
     const isAdmin = req.user.role === 'superadmin'
@@ -217,16 +286,24 @@ export const shareApartment = async (req, res) => {
   try {
     const { id: apartmentId } = req.params
     const { sharedWithUserId, familyGroupId } = req.body
-    const shareWithUser = !!sharedWithUserId
+    const normalizedSharedWithUserId = normalizeUserId(sharedWithUserId)
+    const shareWithUser = !!normalizedSharedWithUserId
     const shareWithGroup = !!familyGroupId
     if (!shareWithUser && !shareWithGroup) {
       return res.status(400).json({ message: 'sharedWithUserId or familyGroupId is required' })
     }
     if (shareWithGroup) {
-      const apartment = await Apartment.findById(apartmentId)
+      const apartment = await Apartment.findById(apartmentId).populate({ path: 'building', select: 'project' })
       if (!apartment) return res.status(404).json({ message: 'Apartment not found' })
+      const aptProjectId = getApartmentProjectIdFromDoc(apartment)
+      if (!aptProjectId) {
+        return res.status(400).json({ message: 'Apartment must belong to a building with a project to use a family group' })
+      }
       const group = await FamilyGroup.findById(familyGroupId).populate('members.user')
       if (!group) return res.status(404).json({ message: 'Family group not found' })
+      if (!familyGroupMatchesProject(group, aptProjectId)) {
+        return respondFamilyGroupProjectMismatch(res)
+      }
       const isAdmin = req.user.role === 'superadmin'
       const isOwner = isApartmentOwner(apartment, req.user._id)
       const isGroupAdmin = group.createdBy?.toString() === req.user._id.toString() ||
@@ -265,9 +342,20 @@ export const shareApartment = async (req, res) => {
         shares: created
       })
     }
-    if (!sharedWithUserId) return res.status(400).json({ message: 'sharedWithUserId is required' })
-    const apartment = await Apartment.findById(apartmentId)
+    if (!normalizedSharedWithUserId) return res.status(400).json({ message: 'sharedWithUserId is required' })
+    const apartment = await Apartment.findById(apartmentId).populate({ path: 'building', select: 'project' })
     if (!apartment) return res.status(404).json({ message: 'Apartment not found' })
+    if (familyGroupId) {
+      const aptProjectId = getApartmentProjectIdFromDoc(apartment)
+      if (!aptProjectId) {
+        return res.status(400).json({ message: 'Apartment must belong to a building with a project to use a family group' })
+      }
+      const group = await FamilyGroup.findById(familyGroupId)
+      if (!group) return res.status(404).json({ message: 'Family group not found' })
+      if (!familyGroupMatchesProject(group, aptProjectId)) {
+        return respondFamilyGroupProjectMismatch(res)
+      }
+    }
     const isAdmin = req.user.role === 'superadmin'
     const isOwner = isApartmentOwner(apartment, req.user._id)
     let canShare = isAdmin || isOwner
@@ -276,11 +364,11 @@ export const shareApartment = async (req, res) => {
       canShare = group && (group.createdBy?.toString() === req.user._id.toString() || group.members?.some(m => m.user?.toString() === req.user._id.toString() && m.role === 'admin'))
     }
     if (!canShare) return res.status(403).json({ message: 'Only apartment owners or group admins can share this apartment' })
-    const existing = await PropertyShare.findOne({ apartment: apartmentId, sharedWith: sharedWithUserId })
+    const existing = await PropertyShare.findOne({ apartment: apartmentId, sharedWith: normalizedSharedWithUserId })
     if (existing) return res.status(400).json({ message: 'Apartment is already shared with this user' })
     const share = await PropertyShare.create({
       apartment: apartmentId,
-      sharedWith: sharedWithUserId,
+      sharedWith: normalizedSharedWithUserId,
       sharedBy: req.user._id,
       familyGroup: familyGroupId || undefined
     })
@@ -296,7 +384,7 @@ export const shareApartment = async (req, res) => {
 export const revokeApartmentShare = async (req, res) => {
   try {
     const { id: apartmentId, userId: sharedWithUserId } = req.params
-    const apartment = await Apartment.findById(apartmentId)
+    const apartment = await Apartment.findById(apartmentId).populate({ path: 'building', select: 'project' })
     if (!apartment) return res.status(404).json({ message: 'Apartment not found' })
     const isOwner = isApartmentOwner(apartment, req.user._id)
     const isAdmin = req.user.role === 'superadmin'
@@ -305,7 +393,9 @@ export const revokeApartmentShare = async (req, res) => {
     let canRevoke = isAdmin || isOwner || share.sharedBy.toString() === req.user._id.toString()
     if (!canRevoke && share.familyGroup) {
       const group = await FamilyGroup.findById(share.familyGroup)
-      canRevoke = group && (group.createdBy?.toString() === req.user._id.toString() || group.members?.some(m => m.user?.toString() === req.user._id.toString() && m.role === 'admin'))
+      const aptProjectId = getApartmentProjectIdFromDoc(apartment)
+      const projectOk = group && aptProjectId && familyGroupMatchesProject(group, aptProjectId)
+      canRevoke = projectOk && (group.createdBy?.toString() === req.user._id.toString() || group.members?.some(m => m.user?.toString() === req.user._id.toString() && m.role === 'admin'))
     }
     if (!canRevoke) return res.status(403).json({ message: 'Not allowed to revoke this share' })
     await share.deleteOne()
@@ -318,10 +408,17 @@ export const revokeApartmentShare = async (req, res) => {
 export const revokeApartmentShareByGroup = async (req, res) => {
   try {
     const { id: apartmentId, familyGroupId } = req.params
-    const apartment = await Apartment.findById(apartmentId)
+    const apartment = await Apartment.findById(apartmentId).populate({ path: 'building', select: 'project' })
     if (!apartment) return res.status(404).json({ message: 'Apartment not found' })
+    const aptProjectId = getApartmentProjectIdFromDoc(apartment)
+    if (!aptProjectId) {
+      return res.status(400).json({ message: 'Apartment must belong to a building with a project to use a family group' })
+    }
     const group = await FamilyGroup.findById(familyGroupId)
     if (!group) return res.status(404).json({ message: 'Family group not found' })
+    if (!familyGroupMatchesProject(group, aptProjectId)) {
+      return respondFamilyGroupProjectMismatch(res)
+    }
     const isOwner = isApartmentOwner(apartment, req.user._id)
     const isAdmin = req.user.role === 'superadmin'
     const isGroupAdmin = group.createdBy?.toString() === req.user._id.toString() ||

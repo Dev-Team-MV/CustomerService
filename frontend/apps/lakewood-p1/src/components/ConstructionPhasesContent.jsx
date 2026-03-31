@@ -7,52 +7,40 @@ import {
   Button,
   Box,
   Typography,
-  TextField,
   LinearProgress,
   IconButton,
   Chip,
   Alert,
   CircularProgress,
-  Paper,
-  Grid
+  Paper
 } from '@mui/material'
 import {
   Close,
   CloudUpload,
-  Delete,
   CheckCircle,
   Lock,
   LockOpen,
   ChevronLeft,
   ChevronRight,
-  Cancel,
   Construction
 } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
-import api from '../services/api'
-import uploadService from '../services/uploadService'
-import { motion, AnimatePresence } from 'framer-motion'
 import GalleryCarrousel from './GalleryCarrousel'
-import UploadPhaseDialog from './UploadPhaseDialog'
+import PhaseUploadDialog from '@shared/components/constructionPhases/PhaseUploadDialog'
+import { usePhases } from '@shared/hooks/usePhases'
+import uploadService from '../services/uploadService'
+import api from '../services/api'
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CONTENIDO PURO — sin Dialog wrapper, reutilizable en tab o en modal
-// ─────────────────────────────────────────────────────────────────────────────
 export const ConstructionPhasesContent = ({ property, isAdmin }) => {
   const { t } = useTranslation('construction')
+  const { phases, loading, fetchPhases: refetch } = usePhases({ 
+    entityType: 'property', 
+    entityId: property?._id 
+  })
 
-  const [phases, setPhases]                   = useState([])
-  const [loading, setLoading]                 = useState(false)
-  const [uploading, setUploading]             = useState(false)
-  const [uploadForm, setUploadForm]           = useState({ title: '', percentage: 0, images: [], videos: [] })
-  const [selectedPhase, setSelectedPhase]     = useState(null)
+  const [uploading, setUploading] = useState(false)
+  const [selectedPhase, setSelectedPhase] = useState(null)
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0)
-  const [imageIdx, setImageIdx]               = useState(0)
-  const [phaseLightboxOpen, setPhaseLightboxOpen] = useState(false)
-
-  useEffect(() => {
-    if (property) fetchPhases()
-  }, [property])
 
   useEffect(() => {
     if (phases.length > 0) {
@@ -61,71 +49,37 @@ export const ConstructionPhasesContent = ({ property, isAdmin }) => {
     }
   }, [phases])
 
-  useEffect(() => { setImageIdx(0) }, [currentPhaseIndex])
-
-    const fetchPhases = async () => {
-    try {
-      setLoading(true)
-      const response = await api.get(`/phases/property/${property._id}`)
-      const existingPhases = response.data
-      const allPhases = []
-      for (let i = 1; i <= 9; i++) {
-        const existingPhase = existingPhases.find(p => p.phaseNumber === i)
-        allPhases.push(existingPhase || {
-          phaseNumber: i,
-          // NO guardar title traducido aquí
-          constructionPercentage: 0,
-          mediaItems: [],
-          property: property._id
-        })
-      }
-      setPhases(allPhases)
-    } catch (error) {
-      console.error('Error fetching phases:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleOpenUploadDialog = (phase) => {
     setSelectedPhase(phase)
-    setUploadForm({ title: '', percentage: 0, images: [], videos: [] })
   }
 
-  const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files)
-    const isVideo = e.target.accept && e.target.accept.includes('video')
-    setUploadForm(prev => ({
-      ...prev,
-      [isVideo ? 'videos' : 'images']: [...prev[isVideo ? 'videos' : 'images'], ...files]
-    }))
-  }
-
-  const handleRemoveMedia = (type, index) => {
-    setUploadForm(prev => ({ ...prev, [type]: prev[type].filter((_, i) => i !== index) }))
-  }
-
-  const handleUploadMedia = async () => {
+  const handleUploadMedia = async (phaseNumber, uploadForm) => {
     if (!uploadForm.images.length && !uploadForm.videos.length) {
-      alert(t('alerts.selectMedia')); return
+      alert(t('alerts.selectMedia'))
+      return
     }
+
     try {
       setUploading(true)
       let urls = []
       let videoUrls = []
-      if (uploadForm.images.length) urls = await uploadService.uploadPhaseImages(uploadForm.images)
-      if (uploadForm.videos.length) videoUrls = await uploadService.uploadPhaseVideos(uploadForm.videos)
+
+      if (uploadForm.images.length) {
+        urls = await uploadService.uploadPhaseImages(uploadForm.images)
+      }
+      if (uploadForm.videos.length) {
+        videoUrls = await uploadService.uploadPhaseVideos(uploadForm.videos)
+      }
 
       const currentPercentage = selectedPhase.constructionPercentage || 0
-      const addedPercentage   = parseFloat(uploadForm.percentage) || 0
-      const newPercentage     = Math.min(100, currentPercentage + addedPercentage)
+      const addedPercentage = parseFloat(uploadForm.percentage) || 0
+      const newPercentage = Math.min(100, currentPercentage + addedPercentage)
 
       let phaseId = selectedPhase._id
       if (!phaseId) {
         const createResponse = await api.post('/phases', {
           property: property._id,
           phaseNumber: selectedPhase.phaseNumber,
-          // title: selectedPhase.title,
           constructionPercentage: newPercentage
         })
         phaseId = createResponse.data._id
@@ -152,8 +106,7 @@ export const ConstructionPhasesContent = ({ property, isAdmin }) => {
 
       alert(t('alerts.uploadSuccess'))
       setSelectedPhase(null)
-      setUploadForm({ title: '', percentage: 0, images: [], videos: [] })
-      fetchPhases()
+      refetch()
     } catch (error) {
       alert(t('alerts.uploadError', { message: error.response?.data?.message || error.message }))
     } finally {
@@ -168,26 +121,23 @@ export const ConstructionPhasesContent = ({ property, isAdmin }) => {
     return null
   }
 
-const getPhaseTitle = (phase) => {
-  if (!phase) return ''
-  // Si tienes el key, úsalo
-  if (phase.phaseKey) return t(`phases.${phase.phaseKey}`)
-  // Si solo tienes el número, mapea manualmente
-  const phaseKeys = [
-    'sitePreparation',
-    'foundation',
-    'framing',
-    'roofing',
-    'mepInstallation',
-    'insulationDrywall',
-    'interiorFinishes',
-    'exteriorFinishes',
-    'finalInspection'
-  ]
-  const key = phaseKeys[phase.phaseNumber - 1]
-  return key ? t(`phases.${key}`) : phase.title
-}
-
+  const getPhaseTitle = (phase) => {
+    if (!phase) return ''
+    if (phase.phaseKey) return t(`phases.${phase.phaseKey}`)
+    const phaseKeys = [
+      'sitePreparation',
+      'foundation',
+      'framing',
+      'roofing',
+      'mepInstallation',
+      'insulationDrywall',
+      'interiorFinishes',
+      'exteriorFinishes',
+      'finalInspection'
+    ]
+    const key = phaseKeys[phase.phaseNumber - 1]
+    return key ? t(`phases.${key}`) : phase.title
+  }
 
   if (loading) {
     return (
@@ -199,7 +149,6 @@ const getPhaseTitle = (phase) => {
 
   return (
     <>
-      {/* ── Slider de fases ── */}
       <Box
         display="flex" alignItems="center" justifyContent="center" mb={3} gap={2}
         sx={{ p: 2.5, bgcolor: '#fafafa', borderRadius: 3, border: '1px solid #e0e0e0' }}
@@ -240,7 +189,6 @@ const getPhaseTitle = (phase) => {
         </IconButton>
       </Box>
 
-      {/* ── Contenido de la fase ── */}
       {phases[currentPhaseIndex] && (
         <Paper elevation={0} sx={{ p: 3, mb: 3, bgcolor: 'white', borderRadius: 3, border: '1px solid #e0e0e0' }}>
           <Box display="flex" alignItems="center" gap={2} mb={3}>
@@ -276,7 +224,6 @@ const getPhaseTitle = (phase) => {
               />
             </Box>
 
-            {/* ── Botón Upload — solo si isAdmin ── */}
             {isAdmin && (
               <Button
                 variant="contained"
@@ -326,24 +273,18 @@ const getPhaseTitle = (phase) => {
         </Paper>
       )}
 
-      {/* ── Dialog upload ── */}
-      <UploadPhaseDialog
+      <PhaseUploadDialog
         open={!!selectedPhase}
         onClose={() => setSelectedPhase(null)}
-        selectedPhase={selectedPhase}
-        uploadForm={uploadForm}
-        setUploadForm={setUploadForm}
-        uploading={uploading}
+        phase={selectedPhase}
         onUpload={handleUploadMedia}
-        getPhaseTitle={getPhaseTitle}
+        uploading={uploading}
+        config={{ allowVideo: true, maxPercentage: 100 }}
       />
     </>
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MODAL WRAPPER — para usarlo desde Properties.jsx standalone
-// ─────────────────────────────────────────────────────────────────────────────
 const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
   const { t } = useTranslation('construction')
 

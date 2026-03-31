@@ -18,6 +18,11 @@ const memberSchema = new mongoose.Schema(
 
 const familyGroupSchema = new mongoose.Schema(
   {
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
+      required: [true, 'Project is required']
+    },
     name: {
       type: String,
       required: [true, 'Group name is required'],
@@ -39,6 +44,8 @@ const familyGroupSchema = new mongoose.Schema(
 )
 
 // Índices para consultas frecuentes
+familyGroupSchema.index({ project: 1 })
+familyGroupSchema.index({ project: 1, name: 1 }, { unique: true })
 familyGroupSchema.index({ createdBy: 1 })
 familyGroupSchema.index({ 'members.user': 1 })
 

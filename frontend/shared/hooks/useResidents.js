@@ -1,3 +1,4 @@
+// @/Users/oficina/MV-CRM/CustomerService/frontend/shared/hooks/useResidents.js
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@shared/services/api'
@@ -38,7 +39,11 @@ const DEFAULT_FORM = {
   password: ''
 }
 
-export const useResidents = () => {
+/**
+ * Hook para gestionar residentes con filtrado opcional por proyecto
+ * @param {string} projectId - ID del proyecto para filtrar usuarios (opcional)
+ */
+export const useResidents = (projectId = null) => {
   const { t } = useTranslation(['residents', 'common'])
 
   // --- State ---
@@ -57,10 +62,58 @@ export const useResidents = () => {
   const [isPhoneValid, setIsPhoneValid] = useState(false)
 
   // --- Fetch users ---
+  // const fetchData = useCallback(async () => {
+  //   setLoading(true)
+  //   try {
+  //     // ✅ Construir URL con filtro de proyecto si existe
+  //     const params = {}
+  //     if (projectId) {
+  //       params.projectId = projectId
+  //     }
+      
+  //     const res = await api.get('/users', { params })
+      
+  //     // El backend ya devuelve usuarios filtrados por proyecto con campo 'projects'
+  //     setUsers(res.data)
+  //     setStats({
+  //       total: res.data.length,
+  //       superadmins: res.data.filter(u => u.role === 'superadmin').length,
+  //       admins: res.data.filter(u => u.role === 'admin').length,
+  //       residents: res.data.filter(u => u.role === 'user').length,
+  //     })
+  //   } catch (error) {
+  //     setSnackbar({ open: true, message: error.message, severity: 'error' })
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }, [projectId])
   const fetchData = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await api.get('/users')
+  setLoading(true)
+  try {
+    if (projectId) {
+      // ✅ Si hay projectId, hacer 3 llamadas en paralelo
+      const [residentsRes, adminsRes, superadminsRes] = await Promise.all([
+        api.get('/users', { params: { projectId } }), // Residentes del proyecto
+        api.get('/users', { params: { role: 'admin' } }), // Todos los admins
+        api.get('/users', { params: { role: 'superadmin' } }) // Todos los superadmins
+      ])
+ 
+      // Combinar resultados y eliminar duplicados por _id
+      const allUsers = [...residentsRes.data, ...adminsRes.data, ...superadminsRes.data]
+      const uniqueUsers = Array.from(
+        new Map(allUsers.map(user => [user._id, user])).values()
+      )
+ 
+      setUsers(uniqueUsers)
+      setStats({
+        total: uniqueUsers.length,
+        superadmins: uniqueUsers.filter(u => u.role === 'superadmin').length,
+        admins: uniqueUsers.filter(u => u.role === 'admin').length,
+        residents: uniqueUsers.filter(u => u.role === 'user').length,
+      })
+    } else {
+      // ✅ Sin filtro de proyecto, obtener todos los usuarios
+      const res = await api.get('/users/search')
       setUsers(res.data)
       setStats({
         total: res.data.length,
@@ -68,12 +121,15 @@ export const useResidents = () => {
         admins: res.data.filter(u => u.role === 'admin').length,
         residents: res.data.filter(u => u.role === 'user').length,
       })
-    } catch (error) {
-      setSnackbar({ open: true, message: error.message, severity: 'error' })
-    } finally {
-      setLoading(false)
     }
-  }, [])
+  } catch (error) {
+    setSnackbar({ open: true, message: error.message, severity: 'error' })
+  } finally {
+    setLoading(false)
+  }
+}, [projectId])
+
+
 
   useEffect(() => { fetchData() }, [fetchData])
 
@@ -114,7 +170,6 @@ export const useResidents = () => {
       ...prev,
       [field]: value
     }))
-    // Si el campo es phoneNumber, actualiza E.164 y validación
     if (field === 'phoneNumber') {
       const e164 = toE164(value)
       setE164Value(e164)
@@ -138,7 +193,6 @@ export const useResidents = () => {
   // --- Email validation ---
   const isEmailValid = useMemo(() => {
     if (!formData.email) return false
-    // Simple regex
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
   }, [formData.email])
 
@@ -245,6 +299,7 @@ export const useResidents = () => {
     stats,
     openDialog,
     selectedUser,
+    setSelectedUser,
     formData,
     setFormData,
     handleOpenDialog,

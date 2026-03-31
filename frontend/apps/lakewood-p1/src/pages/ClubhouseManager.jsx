@@ -21,7 +21,8 @@ import { motion } from "framer-motion";
 import { PhotoLibrary, Map, Layers, MeetingRoom } from "@mui/icons-material";
 import ClubhouseImagesModal from "../components/ClubHouse/ClubImagesModal";
 import uploadService from "../services/uploadService";
-import PageHeader from "../components/PageHeader";
+import PageHeader from '@shared/components/PageHeader'
+
 import { useTranslation } from "react-i18next";
 import Loader from "../components/Loader";
 

@@ -15,6 +15,7 @@ import {
 } from '@mui/icons-material'
 import GalleryCarrousel from '../GalleryCarrousel'
 import { useTranslation } from 'react-i18next'
+import { usePhases } from '@shared/hooks/usePhases'
 
 const PHASE_DESCRIPTIONS = [
   "Clearing and grading the land, setting up utilities and access",
@@ -28,26 +29,30 @@ const PHASE_DESCRIPTIONS = [
   "Final walkthrough, quality checks, and project completion",
 ]
 
-// Helper para extraer URLs de cualquier formato
 const extractMedia = (item) => {
   if (!item) return null
-  if (typeof item === 'string') return { url: item, type: 'image' } // Asumimos que es una imagen si es un string
+  if (typeof item === 'string') return { url: item, type: 'image' }
   if (item.url) {
-    const type = item.mediaType || 'image' // Determinamos si es imagen o video
+    const type = item.mediaType || 'image'
     return { url: item.url, type }
   }
   return null
 }
 
-const ConstructionTab = ({ phases, loadingPhases }) => {
+const ConstructionTab = ({ propertyId }) => {
   const { t } = useTranslation(['myProperty', 'common'])
+const { phases, loading, fetchPhases: refetch } = usePhases({ entityType: 'property', entityId: propertyId })
+  
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0)
   const [phaseCarouselIndex, setPhaseCarouselIndex] = useState(0)
   const [galleryKey, setGalleryKey] = useState(0)
-    const [galleryMedia, setGalleryMedia] = useState([])
+  const [galleryMedia, setGalleryMedia] = useState([])
 
-
-  // Auto-select first incomplete phase
+  // Debug logs
+  console.log('ConstructionTab - propertyId:', propertyId)
+  console.log('ConstructionTab - phases:', phases)
+  console.log('ConstructionTab - loading:', loading)
+ 
   useEffect(() => {
     if (phases.length > 0) {
       const firstIncomplete = phases.findIndex(
@@ -57,8 +62,6 @@ const ConstructionTab = ({ phases, loadingPhases }) => {
     }
   }, [phases])
 
-  // Reset carousel when phase changes + force remount + prepare images
-  // Reset carousel when phase changes + force remount + prepare media
   useEffect(() => {
     if (phases[currentPhaseIndex]?.mediaItems) {
       const media = phases[currentPhaseIndex].mediaItems
@@ -80,7 +83,7 @@ const ConstructionTab = ({ phases, loadingPhases }) => {
     setCurrentPhaseIndex((i) => Math.min(i + 1, phases.length - 1))
   }
 
-  if (loadingPhases) {
+  if (loading) {
     return (
       <Paper
         elevation={0}
@@ -268,7 +271,7 @@ const ConstructionTab = ({ phases, loadingPhases }) => {
                     textAlign: "center",
                   }}
                 >
-  {t(`myProperty:phaseDescription${phases[currentPhaseIndex].phaseNumber}`, PHASE_DESCRIPTIONS[phases[currentPhaseIndex].phaseNumber - 1])}
+                  {t(`myProperty:phaseDescription${phases[currentPhaseIndex].phaseNumber}`, PHASE_DESCRIPTIONS[phases[currentPhaseIndex].phaseNumber - 1])}
                 </Typography>
               </Box>
             </Box>
