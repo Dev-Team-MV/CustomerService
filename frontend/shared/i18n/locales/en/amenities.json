@@ -46,6 +46,32 @@
         "Lakeside": "Lakeside",
         "Lounge": "Lounge",
         "Machines": "Machines",
-        "Mural": "Mural"
-    }
+        "Mural": "Mural",
+
+            "Dock, Boats & Jet Ski": "Dock, Boats & Jet Ski",
+    "Visitors Parking": "Visitors Parking",
+    "Dog Park": "Dog Park",
+    "Pickleball Courts": "Pickleball Courts",
+    "Semi-Olimpic Pool": "Semi-Olympic Pool",
+    "Grills": "Grills",
+    "Sunset Place": "Sunset Place",
+    "Lake Park": "Lake Park",
+    "Viewpoint": "Viewpoint",
+    "Access": "Access",
+    "Maintenance Area": "Maintenance Area"
+    },
+
+      "exteriorAmenitiesNames": {
+        "Dock, Boats & Jet Ski": "Dock, Boats & Jet Ski",
+        "Visitors Parking": "Visitors Parking",
+        "Dog Park": "Dog Park",
+        "Pickleball Courts": "Pickleball Courts",
+        "Semi-Olimpic Pool": "Semi-Olympic Pool",
+        "Grills": "Grills",
+        "Sunset Place": "Sunset Place",
+        "Lake Park": "Lake Park",
+        "Viewpoint": "Viewpoint",
+        "Access": "Access",
+        "Maintenance Area": "Maintenance Area"
+  }
 }

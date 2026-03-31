@@ -11,11 +11,11 @@ import {
 
 import PageHeader    from '@shared/components/PageHeader'
 import StatsCards    from '../components/statscard'
-import DataTable     from '../components/table/DataTable'
-import EmptyState    from '../components/table/EmptyState'
+import DataTable from '@shared/components/table/DataTable';
+import EmptyState from '@shared/components/table/EmptyState';
 import NewsModal     from '../components/news/NewsModal'
-import ModalWrapper  from '../constants/ModalWrapper'
-import PrimaryButton from '../constants/PrimaryButton'
+import ModalWrapper  from '@shared/constants/ModalWrapper'
+import PrimaryButton from '@shared/constants/PrimaryButton'
 
 import { useNews }        from '../hooks/useNews'
 import { useNewsColumns } from '../constants/Columns/news'

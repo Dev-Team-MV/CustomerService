@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Box, IconButton, Tooltip } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const languages = [
@@ -12,6 +13,7 @@ const languages = [
 
 const LanguageSwitcher = ({ variant = 'default' }) => {
   const { i18n } = useTranslation()
+  const theme = useTheme()
   const currentLang = i18n.language?.split('-')[0] || 'en'
 
   const handleToggle = () => {
@@ -22,6 +24,24 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
 
   const current = languages.find(l => l.code === currentLang) || languages[0]
 
+  // Colores personalizados para el chip del language switcher
+  const chipTheme = theme.palette.chipLanguageSwitcher || {}
+  const bgDefault = chipTheme.bg || 'rgba(229,134,60,0.10)'
+  const borderDefault = chipTheme.border || 'rgba(229,134,60,0.35)'
+  const labelColorDefault = chipTheme.color || '#E5863C'
+  const hoverBg = chipTheme.hoverBg || theme.palette.primary?.main || '#333F1F'
+  const hoverBorder = chipTheme.hoverBorder || borderDefault
+  const hoverShadow = chipTheme.hoverShadow || '0 4px 12px rgba(51, 63, 31, 0.2)'
+
+  // Sidebar variant (puedes personalizar diferente si quieres)
+  const bgSidebar = chipTheme.bgSidebar || bgDefault
+  const borderSidebar = chipTheme.borderSidebar || borderDefault
+  const labelColorSidebar = chipTheme.colorSidebar || labelColorDefault
+
+  const bg = variant === 'sidebar' ? bgSidebar : bgDefault
+  const border = variant === 'sidebar' ? borderSidebar : borderDefault
+  const labelColor = variant === 'sidebar' ? labelColorSidebar : labelColorDefault
+
   return (
     <Tooltip title={`Language: ${current.label}`} placement="bottom">
       <IconButton
@@ -30,22 +50,18 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
           width: 40,
           height: 40,
           borderRadius: 2.5,
-          bgcolor: variant === 'sidebar'
-            ? 'rgba(140, 165, 81, 0.08)'
-            : 'rgba(51, 63, 31, 0.06)',
+          bgcolor: bg,
           border: '2px solid',
-          borderColor: variant === 'sidebar'
-            ? 'rgba(140, 165, 81, 0.2)'
-            : 'rgba(140, 165, 81, 0.15)',
+          borderColor: border,
           transition: 'all 0.3s ease',
           overflow: 'hidden',
           '&:hover': {
-            bgcolor: '#333F1F',
-            borderColor: '#333F1F',
+            bgcolor: hoverBg,
+            borderColor: hoverBorder,
             transform: 'scale(1.08)',
-            boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)',
+            boxShadow: hoverShadow,
             '& .lang-label': {
-              color: 'white',
+              color: theme.palette.primary?.contrastText || 'white',
             },
           },
         }}
@@ -64,7 +80,7 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
                 fontSize: '0.75rem',
                 fontWeight: 800,
                 fontFamily: '"Poppins", sans-serif',
-                color: '#333F1F',
+                color: labelColor,
                 letterSpacing: '0.5px',
                 lineHeight: 1,
                 transition: 'color 0.3s',

@@ -4,7 +4,8 @@ import {
   getUserById,
   updateUser,
   deleteUser,
-  searchUsers
+  searchUsers,
+  getMyProjects
 } from '../controllers/userController.js'
 import { sendSetupPasswordLink } from '../controllers/authController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
@@ -16,9 +17,18 @@ const router = express.Router()
  * /api/users:
  *   get:
  *     summary: Get all users (Admin only)
+ *     description: Returns users enriched with `projects` (derived from properties/apartments/memberships). Optional filters by role and projectId.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: role
+ *         schema: { type: string, enum: [superadmin, admin, user] }
+ *       - in: query
+ *         name: projectId
+ *         schema: { type: string }
+ *         description: Only users related to this project (P1/P2) are returned
  *     responses:
  *       200:
  *         description: List of users
@@ -50,6 +60,29 @@ router.route('/').get(protect, admin, getAllUsers)
  *         description: Array of users { _id, firstName, lastName, email }
  */
 router.get('/search', protect, searchUsers)
+
+/**
+ * @swagger
+ * /api/users/me/projects:
+ *   get:
+ *     summary: Proyectos accesibles para el usuario actual
+ *     description: |
+ *       - **user (residente):** proyectos donde tiene Property o Apartment visible (dueño/share) o entradas en `projectMemberships`.
+ *       - **admin / superadmin:** todos los proyectos (selector de gestión).
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de proyectos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MyProjectsResponse'
+ *       401:
+ *         description: No autorizado
+ */
+router.get('/me/projects', protect, getMyProjects)
 
 /**
  * @swagger

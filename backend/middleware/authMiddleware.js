@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
+import { canUserAccessProject } from '../utils/projectAccess.js'
 
 export const protect = async (req, res, next) => {
   let token
@@ -49,5 +50,26 @@ export const superadmin = (req, res, next) => {
     next()
   } else {
     res.status(403).json({ message: 'Not authorized as superadmin' })
+  }
+}
+
+/**
+ * Tras `protect`: exige `projectId` en query o params y comprueba acceso al proyecto
+ * (admin/superadmin pasan; user debe tener vínculo vía propiedades/apartamentos o projectMemberships).
+ */
+export const requireProjectAccess = async (req, res, next) => {
+  try {
+    const projectId = req.params.projectId ?? req.query.projectId
+    if (!projectId) {
+      return res.status(400).json({ message: 'projectId is required' })
+    }
+    const ok = await canUserAccessProject(req.user._id, projectId, { role: req.user.role })
+    if (!ok) {
+      return res.status(403).json({ message: 'No access to this project' })
+    }
+    next()
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: error.message })
   }
 }

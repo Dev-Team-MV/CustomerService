@@ -1,6 +1,12 @@
+import mongoose from 'mongoose'
 import FamilyGroup from '../models/FamilyGroup.js'
 import PropertyShare from '../models/PropertyShare.js'
 import User from '../models/User.js'
+import Property from '../models/Property.js'
+import Apartment from '../models/Apartment.js'
+import Project from '../models/Project.js'
+
+const POPULATE_PROJECT = { path: 'project', select: 'name slug' }
 
 function isGroupAdmin(group, userId) {
   if (!group || !userId) return false
@@ -19,33 +25,70 @@ function isGroupMember(group, userId) {
 
 export const createFamilyGroup = async (req, res) => {
   try {
-    const { name } = req.body
+    const { name, projectId } = req.body
     if (!name || !name.trim()) {
       return res.status(400).json({ message: 'Group name is required' })
     }
+    let pid = projectId || req.body.project
+    if (pid && !mongoose.Types.ObjectId.isValid(pid)) {
+      return res.status(400).json({ message: 'Valid projectId is required' })
+    }
+    if (!pid) {
+      const fallback = await Project.findOne().sort({ _id: 1 }).select('_id').lean()
+      if (!fallback) {
+        return res.status(400).json({ message: 'No project exists; create a project or send projectId' })
+      }
+      pid = fallback._id
+    }
+    const projectExists = await Project.exists({ _id: pid })
+    if (!projectExists) {
+      return res.status(404).json({ message: 'Project not found' })
+    }
+    const trimmed = name.trim()
     const group = await FamilyGroup.create({
-      name: name.trim(),
+      project: pid,
+      name: trimmed,
       createdBy: req.user._id,
       members: []
     })
     await group.populate('createdBy', 'firstName lastName email')
+    await group.populate(POPULATE_PROJECT)
     res.status(201).json(group)
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ message: 'A family group with this name already exists in this project' })
+    }
     res.status(500).json({ message: error.message })
   }
 }
 
 export const getMyFamilyGroups = async (req, res) => {
   try {
+    const { projectId } = req.query
     const userId = req.user._id
-    const groups = await FamilyGroup.find({
+
+    const baseFilter = {
       $or: [
         { createdBy: userId },
         { 'members.user': userId }
       ]
-    })
+    }
+
+    if (projectId) {
+      if (!mongoose.Types.ObjectId.isValid(projectId)) {
+        return res.status(400).json({ message: 'Query parameter projectId must be valid' })
+      }
+      const projectExists = await Project.exists({ _id: projectId })
+      if (!projectExists) {
+        return res.status(404).json({ message: 'Project not found' })
+      }
+      baseFilter.project = projectId
+    }
+
+    const groups = await FamilyGroup.find(baseFilter)
       .populate('createdBy', 'firstName lastName email')
       .populate('members.user', 'firstName lastName email')
+      .populate(POPULATE_PROJECT)
       .sort({ updatedAt: -1 })
     res.json(groups)
   } catch (error) {
@@ -58,6 +101,7 @@ export const getFamilyGroupById = async (req, res) => {
     const group = await FamilyGroup.findById(req.params.id)
       .populate('createdBy', 'firstName lastName email')
       .populate('members.user', 'firstName lastName email')
+      .populate(POPULATE_PROJECT)
     if (!group) {
       return res.status(404).json({ message: 'Family group not found' })
     }
@@ -84,7 +128,18 @@ export const updateFamilyGroup = async (req, res) => {
     const { name, members } = req.body
 
     if (name !== undefined && name !== null) {
-      group.name = typeof name === 'string' ? name.trim() : group.name
+      const nextName = typeof name === 'string' ? name.trim() : group.name
+      if (typeof name === 'string' && nextName) {
+        const dup = await FamilyGroup.findOne({
+          _id: { $ne: group._id },
+          project: group.project,
+          name: nextName
+        }).select('_id').lean()
+        if (dup) {
+          return res.status(409).json({ message: 'A family group with this name already exists in this project' })
+        }
+      }
+      group.name = nextName
     }
 
     if (Array.isArray(members)) {
@@ -104,8 +159,12 @@ export const updateFamilyGroup = async (req, res) => {
     await group.save()
     await group.populate('createdBy', 'firstName lastName email')
     await group.populate('members.user', 'firstName lastName email')
+    await group.populate(POPULATE_PROJECT)
     res.json(group)
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ message: 'A family group with this name already exists in this project' })
+    }
     res.status(500).json({ message: error.message })
   }
 }
@@ -138,8 +197,85 @@ export const addMemberToFamilyGroup = async (req, res) => {
     group.members.push({ user: userId, role: role === 'admin' ? 'admin' : 'member' })
     group.markModified('members')
     await group.save()
+
+    // Sync shares for the newly added member:
+    // - when a group was already sharing properties/apartments,
+    // - we must grant access to the user who just joined the group.
+    const familyGroupId = group._id
+
+    // Shared targets that already exist for this family group.
+    const [sharedPropertyIds, sharedApartmentIds] = await Promise.all([
+      PropertyShare.distinct('property', {
+        familyGroup: familyGroupId,
+        property: { $exists: true, $ne: null }
+      }),
+      PropertyShare.distinct('apartment', {
+        familyGroup: familyGroupId,
+        apartment: { $exists: true, $ne: null }
+      })
+    ])
+
+    const [ownedPropertyDocs, ownedApartmentDocs] = await Promise.all([
+      Property.find(
+        { _id: { $in: sharedPropertyIds } , users: userId },
+      ).select('_id').lean(),
+      Apartment.find(
+        { _id: { $in: sharedApartmentIds }, users: userId },
+      ).select('_id').lean()
+    ])
+
+    const ownedPropertyIdSet = new Set(ownedPropertyDocs.map(d => d._id.toString()))
+    const ownedApartmentIdSet = new Set(ownedApartmentDocs.map(d => d._id.toString()))
+
+    const propertyIdsToShare = (sharedPropertyIds || []).filter(id => !ownedPropertyIdSet.has(id.toString()))
+    const apartmentIdsToShare = (sharedApartmentIds || []).filter(id => !ownedApartmentIdSet.has(id.toString()))
+
+    const bulkOps = []
+
+    for (const propertyId of propertyIdsToShare) {
+      bulkOps.push({
+        updateOne: {
+          filter: { property: propertyId, sharedWith: userId },
+          update: {
+            $setOnInsert: {
+              property: propertyId,
+              sharedWith: userId,
+              sharedBy: req.user._id,
+              familyGroup: familyGroupId
+            },
+            // If a share existed without familyGroup tag, set it so UI shows it under this group.
+            $set: { familyGroup: familyGroupId }
+          },
+          upsert: true
+        }
+      })
+    }
+
+    for (const apartmentId of apartmentIdsToShare) {
+      bulkOps.push({
+        updateOne: {
+          filter: { apartment: apartmentId, sharedWith: userId },
+          update: {
+            $setOnInsert: {
+              apartment: apartmentId,
+              sharedWith: userId,
+              sharedBy: req.user._id,
+              familyGroup: familyGroupId
+            },
+            $set: { familyGroup: familyGroupId }
+          },
+          upsert: true
+        }
+      })
+    }
+
+    if (bulkOps.length) {
+      await PropertyShare.bulkWrite(bulkOps, { ordered: false })
+    }
+
     await group.populate('createdBy', 'firstName lastName email')
     await group.populate('members.user', 'firstName lastName email')
+    await group.populate(POPULATE_PROJECT)
     res.json(group)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -163,8 +299,17 @@ export const removeMemberFromFamilyGroup = async (req, res) => {
     group.members = (group.members || []).filter(m => m.user && m.user.toString() !== memberUserId)
     group.markModified('members')
     await group.save()
+
+    // Revoke shared access for the removed member (only the shares tagged to this family group).
+    // Ownership access (Property.users / Apartment.users) is still handled by Property/Apartment models.
+    await PropertyShare.deleteMany({
+      familyGroup: group._id,
+      sharedWith: memberUserId
+    })
+
     await group.populate('createdBy', 'firstName lastName email')
     await group.populate('members.user', 'firstName lastName email')
+    await group.populate(POPULATE_PROJECT)
     res.json(group)
   } catch (error) {
     res.status(500).json({ message: error.message })

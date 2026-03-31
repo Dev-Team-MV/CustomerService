@@ -27,6 +27,10 @@ const router = express.Router()
  *         schema:
  *           type: string
  *           enum: [draft, published, archived]
+ *       - in: query
+ *         name: projectId
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: List of news articles
@@ -53,6 +57,8 @@ const router = express.Router()
  *               status:
  *                 type: string
  *                 enum: [draft, published, archived]
+ *               projectId:
+ *                 type: string
  *               heroImage:
  *                 type: string
  *               tags:
@@ -87,6 +93,10 @@ router
  *     parameters:
  *       - in: query
  *         name: category
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: projectId
  *         schema:
  *           type: string
  *     responses:
@@ -138,6 +148,8 @@ router.get('/published', getPublishedNews)
  *               status:
  *                 type: string
  *                 enum: [draft, published, archived]
+ *               projectId:
+ *                 type: string
  *               heroImage:
  *                 type: string
  *               tags:

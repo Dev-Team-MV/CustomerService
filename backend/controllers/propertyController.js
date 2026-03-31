@@ -108,18 +108,29 @@ function getPropertyBlueprints(property) {
 export const getAllProperties = async (req, res) => {
   try {
     const { status, user, projectId } = req.query
-    const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
     const filter = {}
+    const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
+    const isSuperadmin = req.user.role === 'superadmin'
 
     if (projectId) filter.project = projectId
     if (status) filter.status = status
 
-    if (user && isAdmin) {
-      filter.users = user
-    } else if (!isAdmin) {
-      // Non-admin: only properties they own or that are shared with them (ignore user query)
+    if (!visibleOnly && isSuperadmin) {
+      // Superadmin "management" view: return all properties (optionally filtered by owner user).
+      // Ignore `visibleOnly` in this mode.
+      if (user && mongoose.Types.ObjectId.isValid(user)) {
+        filter.users = user
+      }
+    } else {
+      // User/admin view (and MyProperty visible-only view):
+      // Only properties where requester is an owner or has access via PropertyShare/familyGroup.
       const visibleIds = await getVisiblePropertyIdsForUser(req.user._id)
       filter._id = { $in: visibleIds }
+
+      // Optional extra filter by owner user id; still constrained by visibility.
+      if (user && mongoose.Types.ObjectId.isValid(user)) {
+        filter.users = user
+      }
     }
 
     const properties = await Property.find(filter)
@@ -170,8 +181,14 @@ export const getPropertyById = async (req, res) => {
       return res.status(404).json({ message: 'Property not found' })
     }
 
-    const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
-    const canAccess = isAdmin || (await canUserAccessProperty(req.user._id, property._id))
+    const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
+    const isSuperadmin = req.user.role === 'superadmin'
+
+    const canAccess = visibleOnly
+      ? await canUserAccessProperty(req.user._id, property._id)
+      : isSuperadmin
+        ? true
+        : await canUserAccessProperty(req.user._id, property._id)
     if (!canAccess) {
       return res.status(403).json({ message: 'You do not have access to this property' })
     }
@@ -367,9 +384,14 @@ export const updateProperty = async (req, res) => {
             const newInitial = Number(req.body.initialPayment)
             if (!Number.isNaN(newInitial) && newInitial >= 0) {
               property.initialPayment = newInitial
-              property.pending = Math.max(0, property.price - newInitial)
               property.markModified('initialPayment')
-              property.markModified('pending')
+              // Si el request trae `pending`, asumimos que el cliente quiere que `pending` sea autoritativo.
+              // En ese caso NO recalculamos para evitar que el valor editado se sobrescriba.
+              // (Recalculamos solo cuando `pending` no viene en el body.)
+              if (req.body.pending === undefined) {
+                property.pending = Math.max(0, property.price - newInitial)
+                property.markModified('pending')
+              }
             }
           } else if (key === 'users') {
             const newUsers = req.body.users

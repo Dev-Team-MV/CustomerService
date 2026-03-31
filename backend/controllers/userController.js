@@ -1,4 +1,81 @@
 import User from '../models/User.js'
+import Project from '../models/Project.js'
+import { getProjectIdsForUser } from '../utils/projectAccess.js'
+import Property from '../models/Property.js'
+import Apartment from '../models/Apartment.js'
+
+function toIdStr(val) {
+  if (val == null) return ''
+  if (typeof val === 'string') return val
+  if (val._id != null) return val._id.toString()
+  return String(val)
+}
+
+async function buildUserProjectsMap(userDocs) {
+  const userIds = userDocs.map((u) => u._id)
+  if (userIds.length === 0) return new Map()
+
+  const [properties, apartments] = await Promise.all([
+    Property.find({ users: { $in: userIds } }).select('project users').lean(),
+    Apartment.find({ users: { $in: userIds } })
+      .select('building users')
+      .populate('building', 'project')
+      .lean()
+  ])
+
+  const perUserProjectIds = new Map()
+  for (const u of userDocs) {
+    perUserProjectIds.set(toIdStr(u._id), new Set())
+  }
+
+  for (const p of properties) {
+    if (!p.project) continue
+    const projectId = toIdStr(p.project)
+    for (const uid of p.users || []) {
+      const key = toIdStr(uid)
+      if (perUserProjectIds.has(key)) perUserProjectIds.get(key).add(projectId)
+    }
+  }
+
+  for (const a of apartments) {
+    const projectId = a.building?.project ? toIdStr(a.building.project) : ''
+    if (!projectId) continue
+    for (const uid of a.users || []) {
+      const key = toIdStr(uid)
+      if (perUserProjectIds.has(key)) perUserProjectIds.get(key).add(projectId)
+    }
+  }
+
+  for (const u of userDocs) {
+    const key = toIdStr(u._id)
+    const set = perUserProjectIds.get(key) || new Set()
+    for (const m of u.projectMemberships || []) {
+      if (m?.project) set.add(toIdStr(m.project))
+    }
+    perUserProjectIds.set(key, set)
+  }
+
+  const allProjectIds = Array.from(
+    new Set(
+      Array.from(perUserProjectIds.values()).flatMap((set) => Array.from(set))
+    )
+  )
+
+  const projects = allProjectIds.length
+    ? await Project.find({ _id: { $in: allProjectIds } }).select('name slug phase type').lean()
+    : []
+  const byProjectId = new Map(projects.map((p) => [toIdStr(p._id), p]))
+
+  const result = new Map()
+  for (const [uid, set] of perUserProjectIds.entries()) {
+    const list = Array.from(set)
+      .map((pid) => byProjectId.get(pid))
+      .filter(Boolean)
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+    result.set(uid, list)
+  }
+  return result
+}
 
 /**
  * Search users by email, firstName or lastName. Available to any authenticated user
@@ -30,13 +107,54 @@ export const searchUsers = async (req, res) => {
   }
 }
 
+/**
+ * Proyectos en los que el usuario tiene presencia (P1 vía Property, P2 vía Apartment, o projectMemberships).
+ * admin/superadmin: listan todos los proyectos (gestión).
+ */
+export const getMyProjects = async (req, res) => {
+  try {
+    if (req.user.role === 'admin' || req.user.role === 'superadmin') {
+      const all = await Project.find({})
+        .select('name slug phase type')
+        .sort({ name: 1 })
+      return res.json(all)
+    }
+    const ids = await getProjectIdsForUser(req.user._id)
+    if (ids.length === 0) {
+      return res.json([])
+    }
+    const projects = await Project.find({ _id: { $in: ids } })
+      .select('name slug phase type')
+      .sort({ name: 1 })
+    res.json(projects)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 export const getAllUsers = async (req, res) => {
   try {
-    const { role } = req.query
+    const { role, projectId } = req.query
     const filter = role ? { role } : {}
-    
-    const users = await User.find(filter).select('-password').populate('lots', 'number')
-    res.json(users)
+
+    let users = await User.find(filter)
+      .select('-password')
+      .populate('lots', 'number')
+      .populate('projectMemberships.project', 'name slug phase type')
+
+    const projectsMap = await buildUserProjectsMap(users)
+    const usersWithProjects = users.map((u) => {
+      const obj = u.toObject()
+      obj.projects = projectsMap.get(toIdStr(u._id)) || []
+      return obj
+    })
+
+    if (projectId) {
+      const filtered = usersWithProjects.filter((u) => (u.projects || []).some((p) => toIdStr(p._id) === toIdStr(projectId)))
+      return res.json(filtered)
+    }
+
+    res.json(usersWithProjects)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }

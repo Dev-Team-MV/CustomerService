@@ -84,6 +84,7 @@
     },
     "cancel": "Cancel",
     "save": "Save",
-    "sendInvitation": "Send Invitation"
+    "sendInvitation": "Send Invitation",
+    "update":"Update Resident"
     }
 }

@@ -4,11 +4,18 @@ import App from './App'
 import '@shared/i18n'
 import './index.css'
 import { AuthProvider } from '../../../shared/context/AuthContext.jsx'
+import { ThemeProvider } from '@mui/material/styles'
+import theme from './theme'
+import { BrowserRouter } from 'react-router-dom'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <ThemeProvider theme={theme}>
+      <BrowserRouter>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   </React.StrictMode>
 )

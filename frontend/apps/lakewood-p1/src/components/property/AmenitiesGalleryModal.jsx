@@ -28,25 +28,38 @@ const AmenitiesGalleryModal = ({
       setCurrentImageIndex(0)
     }
   }, [open, amenity, amenities])
-  const currentAmenity = amenities[currentAmenityIndex] || amenity
 
-  // --- ADAPTACIÓN AQUÍ ---
-  // Si imagesProp está presente, úsalo; si no, usa las del amenity
-  const imagesRaw = imagesProp !== undefined
-    ? imagesProp
-    : (currentAmenity?.images || []);
+  // const currentAmenity = amenities[currentAmenityIndex] || amenity
 
-  // Normaliza a array de URLs
+  // // --- ADAPTACIÓN AQUÍ ---
+  // // Si imagesProp está presente, úsalo; si no, usa las del amenity
+  // const imagesRaw = imagesProp !== undefined
+  //   ? imagesProp
+  //   : (currentAmenity?.images || []);
+
+  // // Normaliza a array de URLs
+  // const images = imagesRaw.map(img =>
+  //   typeof img === 'string'
+  //     ? img
+  //     : img?.url || ''
+  // );
+  // // -----------------------
+
+  // const displayImages = isPublicView ? images.slice(0, 3) : images
+  // const hasImages = displayImages.length > 0
+  // const totalImages = images.length
+    const currentAmenity = amenities[currentAmenityIndex] || amenity;
+  
+  // SIEMPRE usa las imágenes del currentAmenity para navegación interna
+  const imagesRaw = currentAmenity?.images || [];
   const images = imagesRaw.map(img =>
     typeof img === 'string'
       ? img
       : img?.url || ''
   );
-  // -----------------------
-
-  const displayImages = isPublicView ? images.slice(0, 3) : images
-  const hasImages = displayImages.length > 0
-  const totalImages = images.length
+  const displayImages = isPublicView ? images.slice(0, 3) : images;
+  const hasImages = displayImages.length > 0;
+  const totalImages = images.length;
 
   // Navegación
   const handleNextImage = () => {

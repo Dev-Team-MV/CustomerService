@@ -4,8 +4,11 @@ const payloadSchema = new mongoose.Schema(
   {
     property: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Property',
-      required: [true, 'Property is required']
+      ref: 'Property'
+    },
+    apartment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Apartment'
     },
     date: {
       type: Date,
@@ -54,6 +57,19 @@ const payloadSchema = new mongoose.Schema(
     timestamps: true
   }
 )
+
+payloadSchema.pre('validate', function (next) {
+  const hasProperty = this.property != null
+  const hasApartment = this.apartment != null
+  if (hasProperty === hasApartment) {
+    next(new Error('Exactly one of property or apartment is required'))
+  } else {
+    next()
+  }
+})
+
+payloadSchema.index({ property: 1 })
+payloadSchema.index({ apartment: 1 })
 
 const Payload = mongoose.model('Payload', payloadSchema)
 

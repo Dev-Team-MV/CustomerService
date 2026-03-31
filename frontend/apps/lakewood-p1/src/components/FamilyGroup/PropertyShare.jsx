@@ -13,11 +13,11 @@ import {
 import familyGroupService from '../../services/familyGroup'
 import api from '@shared/services/api'
 import { useTranslation } from 'react-i18next'
-import ModalWrapper from '../../constants/ModalWrapper'
-import PrimaryButton from '../../constants/PrimaryButton'
+import ModalWrapper from '@shared/constants/ModalWrapper'
+import PrimaryButton from '@shared/constants/PrimaryButton'
 
 const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
-  const { t } = useTranslation('propertyShare')
+  const { t } = useTranslation('familyGroup')
   const [myProperties, setMyProperties] = useState([])
   const [shares, setShares] = useState([])
   const [selectedPropertyId, setSelectedPropertyId] = useState('')
@@ -29,10 +29,28 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
 
   useEffect(() => {
     if (open && group) {
-      loadMyProperties()
+      setLoadingProperties(true)
+      api.get('/properties').then(res => {
+        setMyProperties(res.data)
+        // Buscar shares de todas las propiedades del usuario
+        Promise.all(
+          res.data.map(p => familyGroupService.getPropertyShares(p._id))
+        ).then(allSharesArrays => {
+          // Unifica todos los shares
+          const allShares = allSharesArrays.flat()
+          setShares(allShares)
+          // Busca si ya hay una propiedad compartida con este grupo
+          const alreadySharedProperty = allShares.find(s => s.familyGroup?._id === group._id)
+          if (alreadySharedProperty) {
+            setSelectedPropertyId(alreadySharedProperty.property?._id || alreadySharedProperty.property)
+          } else if (res.data.length > 0) {
+            setSelectedPropertyId(res.data[0]._id)
+          }
+        }).finally(() => setLoadingProperties(false))
+      })
     }
+    // eslint-disable-next-line
   }, [open, group])
-
   useEffect(() => {
     if (selectedPropertyId) {
       loadShares(selectedPropertyId)
@@ -118,7 +136,7 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
 
   const handleClose = () => {
     setShares([])
-    setSelectedPropertyId('')
+    // No resetear selectedPropertyId aquí
     setError(null)
     setSuccess(null)
     onClose()
@@ -143,6 +161,12 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
     // fallback
     return p.title || p.name || p.address || p._id
   }
+    const groupMemberIds = group.members.map(m => m.user?._id || m._id)
+  const sharesForGroup = shares.filter(s => s.familyGroup?._id === group._id)
+  const sharedUserIds = sharesForGroup.map(s => s.sharedWith?._id)
+  
+  const membersWithAccess = group.members.filter(m => sharedUserIds.includes(m.user?._id || m._id))
+  const membersWithoutAccess = group.members.filter(m => !sharedUserIds.includes(m.user?._id || m._id))
   return (
     <ModalWrapper
       open={open}
@@ -241,37 +265,45 @@ const PropertyShareDialog = ({ open, onClose, group, currentUser }) => {
                   </Box>
                 ) : (
                   <List dense disablePadding>
-                    {groupMembers.map((share) => (
-                      <ListItem
-                        key={share._id}
-                        sx={{
-                          bgcolor: '#f8f9fa',
-                          borderRadius: 2,
-                          mb: 0.5,
-                          border: '1px solid rgba(0,0,0,0.05)',
-                        }}
-                        secondaryAction={
-                          <PrimaryButton
-                            color="error"
-                            variant="outlined"
-                            size="small"
-                            startIcon={<DeleteIcon />}
-                            onClick={() => handleRevokeUser(share.sharedWith._id)}
-                          >
-                            {t('revokeUser')}
-                          </PrimaryButton>
-                        }
-                      >
-                        <ListItemAvatar>
-                          <Avatar sx={{ width: 28, height: 28, bgcolor: '#8CA551', fontSize: '0.75rem' }}>
-                            {share.sharedWith?.firstName?.[0]}
-                          </Avatar>
-                        </ListItemAvatar>
-                        <Typography variant="body2" fontWeight={600}>
-                          {`${share.sharedWith?.firstName} ${share.sharedWith?.lastName}`}
-                        </Typography>
-                      </ListItem>
-                    ))}
+                    {group.members.map((member) => {
+                      const hasAccess = sharedUserIds.includes(member.user?._id || member._id)
+                      return (
+                        <ListItem
+                          key={member.user?._id || member._id}
+                          sx={{
+                            bgcolor: '#f8f9fa',
+                            borderRadius: 2,
+                            mb: 0.5,
+                            border: '1px solid rgba(0,0,0,0.05)',
+                            opacity: hasAccess ? 1 : 0.5
+                          }}
+                          secondaryAction={
+                            hasAccess ? (
+                              <PrimaryButton
+                                color="error"
+                                variant="outlined"
+                                size="small"
+                                startIcon={<DeleteIcon />}
+                                onClick={() => handleRevokeUser(member.user?._id || member._id)}
+                              >
+                                {t('revokeUser')}
+                              </PrimaryButton>
+                            ) : (
+                              <Chip label={t('noAccess')} color="warning" size="small" />
+                            )
+                          }
+                        >
+                          <ListItemAvatar>
+                            <Avatar sx={{ width: 28, height: 28, bgcolor: '#8CA551', fontSize: '0.75rem' }}>
+                              {member.user?.firstName?.[0] || member.firstName?.[0]}
+                            </Avatar>
+                          </ListItemAvatar>
+                          <Typography variant="body2" fontWeight={600}>
+                            {`${member.user?.firstName || member.firstName} ${member.user?.lastName || member.lastName}`}
+                          </Typography>
+                        </ListItem>
+                      )
+                    })}
                   </List>
                 )}
               </>

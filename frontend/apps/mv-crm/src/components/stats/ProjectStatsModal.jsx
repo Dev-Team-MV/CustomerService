@@ -71,7 +71,7 @@ export default function ProjectStatsModal({ open, onClose, project, allBalance }
             </Typography>
             <Typography sx={{
               fontFamily: '"Courier New", monospace', fontSize: '0.6rem',
-              color: '#aaa', letterSpacing: '1px'
+              color: '#000000ff', letterSpacing: '1px'
             }}>
               /{project.slug} · STATISTICS
             </Typography>
@@ -92,7 +92,7 @@ export default function ProjectStatsModal({ open, onClose, project, allBalance }
           '& .MuiTab-root': {
             fontFamily: '"Courier New", monospace', fontSize: '0.65rem',
             letterSpacing: '1.5px', textTransform: 'uppercase', minHeight: 44,
-            color: '#aaa', padding: '0 0 0 0', mr: 3,
+            color: '#000000ff', padding: '0 0 0 0', mr: 3,
           },
           '& .Mui-selected': { color: '#000 !important' },
           '& .MuiTabs-indicator': { background: '#000', height: 2 },

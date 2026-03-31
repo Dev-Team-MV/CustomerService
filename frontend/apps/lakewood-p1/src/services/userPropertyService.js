@@ -23,7 +23,8 @@ const userPropertyService = {
       getMyProperties: async () => {
         try {
           const [propertiesRes, profileRes] = await Promise.all([
-            api.get('/properties'),
+            // For "MyProperty" view we only want visible properties (owner or shared via PropertyShare/familyGroup).
+            api.get('/properties?visible=true'),
             api.get('/auth/profile')
           ])
     
@@ -31,13 +32,13 @@ const userPropertyService = {
           const profile = profileRes.data
     
           // Admins y superadmins ven todo por rol — nunca marcar como shared
-          // if (profile.role === 'superadmin' || profile.role === 'admin') {
-          //   return allProperties.map(property => ({
-          //     ...property,
-          //     isOwned: true,
-          //     isShared: false
-          //   }))
-          // }
+          if (profile.role === 'superadmin' || profile.role === 'admin') {
+            return allProperties.map(property => ({
+              ...property,
+              isOwned: true,
+              isShared: true  // aunque no es relevante para admins, lo dejamos true para evitar confusión
+            }))
+          }
     
           // Para usuarios normales: comparar por lotes
           const lotIds = new Set(
@@ -90,28 +91,24 @@ const userPropertyService = {
    */
   getMyPayloads: async () => {
     try {
-      // 1. Obtener propiedades del usuario
       const properties = await userPropertyService.getMyProperties()
+      console.log('MY PROPERTIES:', properties)
       const propertyIds = properties.map(prop => prop._id)
-
       if (propertyIds.length === 0) {
         return []
       }
-
-      // 2. Obtener TODOS los payloads
       const response = await api.get('/payloads')
+      console.log('ALL PAYLOADS:', response.data)
       const allPayloads = response.data
-
-      // ✅ FILTRAR solo los payloads que pertenecen a las propiedades del usuario
       const userPayloads = allPayloads.filter(payload => {
         const payloadPropertyId = typeof payload.property === 'object' 
           ? payload.property._id 
           : payload.property
         return propertyIds.includes(payloadPropertyId)
       })
-      
       return userPayloads
     } catch (error) {
+      console.error('GET MY PAYLOADS ERROR:', error)
       throw error.response?.data || { message: 'Failed to fetch payloads' }
     }
   },
@@ -121,8 +118,10 @@ const userPropertyService = {
    */
   getFinancialSummary: async () => {
     try {
-      const properties = await userPropertyService.getMyProperties()
-      const payloads = await userPropertyService.getMyPayloads()
+    const properties = await userPropertyService.getMyProperties()
+    console.log('PROPERTIES:', properties)
+    const payloads = await userPropertyService.getMyPayloads()
+    console.log('PAYLOADS:', payloads)
 
       // Calcular totales
       const totalInvestment = properties.reduce((sum, prop) => sum + (prop.price || 0), 0)
@@ -150,6 +149,8 @@ const userPropertyService = {
         properties: properties.length
       }
     } catch (error) {
+          console.error('FINANCIAL SUMMARY ERROR:', error)
+
       throw error.response?.data || { message: 'Failed to fetch financial summary' }
     }
   },
@@ -198,7 +199,7 @@ const userPropertyService = {
   getPropertyDetails: async (propertyId) => {
     try {
       // Obtener propiedad
-      const propResponse = await api.get(`/properties/${propertyId}`)      
+      const propResponse = await api.get(`/properties/${propertyId}?visible=true`)
       const property = propResponse.data
 
       // Obtener modelo

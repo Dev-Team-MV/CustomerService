@@ -23,7 +23,8 @@ import api from '../services/api'
 import StatCard from '../components/analitycs/StatCard'
 import AnimatedProgressBar from '../components/analitycs/AnimatedProgressBar'
 import ModelProgressBar from '../components/analitycs/ModelProgressBar'
-import PageHeader from '../components/PageHeader'
+// import PageHeader from '../components/PageHeader'
+import PageHeader from '@shared/components/PageHeader'
 import Loader from '../components/Loader'
 
 const Analytics = () => {

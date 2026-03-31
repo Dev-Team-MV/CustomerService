@@ -11,25 +11,11 @@ import { PersonAdd } from '@mui/icons-material'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import { useTranslation } from 'react-i18next'
+import { useTheme } from '@mui/material/styles'
 
 import ModalWrapper from '../../constants/ModalWrapper'
 import PrimaryButton from '../../constants/PrimaryButton'
 import { ONLY_COUNTRIES, PREFERRED_COUNTRIES } from '../../hooks/useResidents'
-
-// ── Estilos reutilizables ─────────────────────────────────
-const fieldSx = {
-  "& .MuiOutlinedInput-root": {
-    borderRadius: 3,
-    fontFamily: '"Poppins", sans-serif',
-    "&.Mui-focused fieldset": { borderColor: "#333F1F", borderWidth: "2px" },
-    "&:hover fieldset": { borderColor: "#8CA551" }
-  },
-  "& .MuiInputLabel-root": {
-    fontFamily: '"Poppins", sans-serif',
-    "&.Mui-focused": { color: "#333F1F" }
-  },
-  "& .MuiFormHelperText-root": { fontFamily: '"Poppins", sans-serif' }
-}
 
 const ResidentDialog = ({
   open,
@@ -46,6 +32,22 @@ const ResidentDialog = ({
   isPhoneValid
 }) => {
   const { t } = useTranslation('residents')
+  const theme = useTheme()
+
+  // ── Estilos reutilizables con theme ──────────────────────
+  const fieldSx = {
+    "& .MuiOutlinedInput-root": {
+      borderRadius: 3,
+      fontFamily: '"Poppins", sans-serif',
+      "&.Mui-focused fieldset": { borderColor: theme.palette.primary.main, borderWidth: "2px" },
+      "&:hover fieldset": { borderColor: theme.palette.secondary.main }
+    },
+    "& .MuiInputLabel-root": {
+      fontFamily: '"Poppins", sans-serif',
+      "&.Mui-focused": { color: theme.palette.primary.main }
+    },
+    "& .MuiFormHelperText-root": { fontFamily: '"Poppins", sans-serif' }
+  }
 
   // ── Actions ───────────────────────────────────────────────
   const modalActions = (
@@ -58,12 +60,12 @@ const ResidentDialog = ({
           fontWeight: 600,
           px: 3,
           py: 1.2,
-          color: "#706f6f",
+          color: theme.palette.text.secondary,
           fontFamily: '"Poppins", sans-serif',
-          border: "2px solid #e0e0e0",
+          border: `2px solid ${theme.palette.divider}`,
           "&:hover": {
-            bgcolor: "rgba(112, 111, 111, 0.05)",
-            borderColor: "#706f6f"
+            bgcolor: theme.palette.action.hover,
+            borderColor: theme.palette.text.secondary
           }
         }}
       >
@@ -97,10 +99,10 @@ const ResidentDialog = ({
         sx={{
           mb: 2,
           borderRadius: 3,
-          bgcolor: "rgba(140, 165, 81, 0.08)",
-          border: "1px solid rgba(140, 165, 81, 0.3)",
+          bgcolor: theme.palette.secondary.main + "14", // 8% opacity
+          border: `1px solid ${theme.palette.secondary.main}4D`, // 30% opacity
           fontFamily: '"Poppins", sans-serif',
-          "& .MuiAlert-icon": { color: "#8CA551" }
+          "& .MuiAlert-icon": { color: theme.palette.secondary.main }
         }}
       >
         {t('dialog.invitationMessage')}
@@ -154,7 +156,7 @@ const ResidentDialog = ({
               sx={{
                 mb: 0.5,
                 display: "block",
-                color: "#706f6f",
+                color: theme.palette.text.secondary,
                 fontFamily: '"Poppins", sans-serif'
               }}
             >
@@ -172,16 +174,16 @@ const ResidentDialog = ({
                 width: "100%",
                 height: "56px",
                 fontSize: "16px",
-                border: "2px solid #e0e0e0",
+                border: `2px solid ${theme.palette.divider}`,
                 borderRadius: 12,
                 fontFamily: '"Poppins", sans-serif',
                 transition: "all 0.3s"
               }}
               buttonStyle={{
-                border: "2px solid #e0e0e0",
+                border: `2px solid ${theme.palette.divider}`,
                 borderRight: "none",
                 borderRadius: "12px 0 0 12px",
-                backgroundColor: "#fafafa"
+                backgroundColor: theme.palette.background.default
               }}
               dropdownStyle={{
                 borderRadius: 12,
@@ -195,7 +197,7 @@ const ResidentDialog = ({
                   variant="caption"
                   sx={{
                     fontFamily: '"Poppins", sans-serif',
-                    color: '#706f6f'
+                    color: theme.palette.text.secondary
                   }}
                 >
                   {displayVal}
@@ -205,7 +207,7 @@ const ResidentDialog = ({
                   sx={{
                     fontFamily: '"Poppins", sans-serif',
                     fontWeight: 700,
-                    color: isPhoneValid ? '#8CA551' : '#E5863C'
+                    color: isPhoneValid ? theme.palette.secondary.main : theme.palette.error.main
                   }}
                 >
                   E.164: {e164Value}

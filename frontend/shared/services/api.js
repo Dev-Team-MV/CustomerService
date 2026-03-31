@@ -1,3 +1,4 @@
+// @/Users/oficina/MV-CRM/CustomerService/frontend/shared/services/api.js
 import axios from 'axios'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api'
@@ -14,10 +15,8 @@ api.interceptors.request.use(
   (config) => {
     console.log('📡 Making request to:', config.url)
     
-    // Obtener token del localStorage
     const token = localStorage.getItem('token')
     
-    // Si existe token, agregarlo a los headers
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
       console.log('🔐 Token added to request')
@@ -30,7 +29,7 @@ api.interceptors.request.use(
   }
 )
 
-// Interceptor para manejar errores de respuesta
+// ✅ Interceptor mejorado - NO redirige automáticamente en login/register
 api.interceptors.response.use(
   (response) => {
     return response
@@ -38,11 +37,25 @@ api.interceptors.response.use(
   (error) => {
     console.error('❌ API Error:', error.response?.status, error.response?.data)
     
-    // Si el token expiró o es inválido, redirigir al login
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
+    // Solo redirigir a login si:
+    // 1. Es un 401
+    // 2. NO es una petición de login/register/me
+    // 3. El usuario ya estaba autenticado (tiene token)
+    const isAuthEndpoint = error.config?.url?.includes('/auth/login') || 
+                          error.config?.url?.includes('/auth/register') ||
+                          error.config?.url?.includes('/users/me/projects')
+    
+    if (error.response?.status === 401 && !isAuthEndpoint) {
+      const hadToken = localStorage.getItem('token')
+      if (hadToken) {
+        console.warn('🔒 Token expired or invalid, redirecting to login')
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        // Solo redirigir si no estamos ya en login
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login'
+        }
+      }
     }
     
     return Promise.reject(error)

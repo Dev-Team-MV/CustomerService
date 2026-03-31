@@ -65,7 +65,17 @@ const userService = {
       console.error('Error deleting user:', error)
       return { success: false, error: error?.response?.data?.message || 'Delete failed' }
     }
-  }
+  },
+
+    getMyProjects: async () => {
+    try {
+      const response = await api.get('/users/me/projects')
+      return Array.isArray(response.data) ? response.data : []
+    } catch (error) {
+      console.error('Error fetching user projects:', error)
+      return []
+    }
+  },
 }
 
 export default userService

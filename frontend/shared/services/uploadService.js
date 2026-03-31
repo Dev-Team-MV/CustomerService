@@ -19,13 +19,10 @@ const uploadService = {
   },
 
   uploadMultipleImages: async (files, folder = '', isPublic = true) => {
-    try {
-      console.log(`📤 Uploading ${files.length} images to folder: ${folder || 'root'}`)
-      
+    try {      
       const uploadPromises = files.map(file => uploadService.uploadImage(file, folder, '', isPublic))
       const urls = await Promise.all(uploadPromises)
       
-      console.log('✅ All images uploaded:', urls)
       return urls
     } catch (error) {
       console.error('❌ Error uploading images:', error)
@@ -34,18 +31,20 @@ const uploadService = {
   },
 
   uploadContractFiles: async (files) => {
-    try {
-      console.log(`📤 Uploading ${files.length} contract file(s) to GCS...`)
-      
-      const uploadPromises = files.map(file => uploadService.uploadImage(file, 'contracts'))
+    try {      
+      const uploadPromises = files.map(file => uploadService.uploadImage(file, 'contracts', file.name))
       const urls = await Promise.all(uploadPromises)
       
-      console.log('✅ All contract files uploaded:', urls)
       return urls
     } catch (error) {
       console.error('❌ Error uploading contract files:', error)
       throw new Error(error.message || 'Failed to upload contract files')
     }
+  },
+
+    uploadContractFile: async (file) => {
+    // Sube el archivo al folder 'contracts' y retorna la URL
+    return uploadService.uploadImage(file, 'contracts', file.name)
   },
 
   uploadPaymentImage: async (file) => {
@@ -87,10 +86,7 @@ const uploadService = {
   uploadTimeLineImage: async (file) => {
     return uploadService.uploadImage(file, 'timeline')
   },
-  
-  uploadDeckClubHouse: async (file) => {
-    return uploadService.uploadImage(file, 'deck')
-  },
+
 
   // ========================================
   // ✅ CLUBHOUSE FUNCTIONS - ENDPOINTS CORREGIDOS
@@ -125,10 +121,8 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
       // DEBUG: listar entries del FormData (útil en dev)
       try {
         // eslint-disable-next-line no-console
-        console.log('Uploading clubhouse batch:', { section, interiorKey, isPublic, filesCount: files.length });
         for (const entry of formData.entries()) {
           // eslint-disable-next-line no-console
-          console.log('FormData entry:', entry[0], entry[1] instanceof File ? entry[1].name : entry[1]);
         }
       } catch (e) {
         // ignore in prod
@@ -148,6 +142,7 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
   }
 },
 
+
   uploadDeckClubHouse: async (file, isPublic = true) => {
     try {
       // subir directamente al folder clubhouse/deck
@@ -158,15 +153,13 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
       throw err;
     }
   },
+
   getFilesByFolder: async (folder, urls = true) => {
     try {
-      console.log(`📂 Getting files from folder: ${folder}`)
-      
       const response = await api.get('/upload/files', {
         params: { folder, urls }
       })
 
-      console.log(`✅ Found ${response.data.files?.length || 0} files in ${folder}`)
       return response.data
     } catch (error) {
       console.error(`❌ Error getting files from folder ${folder}:`, error.response?.data || error.message)
@@ -175,23 +168,13 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
   },
 
   getClubhouseInteriorKeys: async () => {
-    try {
-      console.log('📋 Getting clubhouse interior keys...')
-      
+    try {      
       const response = await api.get('/clubhouse/interior-keys')
-
-      console.log('✅ Interior keys loaded:', response.data.interiorKeys)
       return response.data
     } catch (error) {
       console.error('❌ Error getting clubhouse interior keys:', error.response?.data || error.message)
       throw new Error(error.response?.data?.message || 'Failed to get clubhouse interior keys')
     }
-  },
-
-  /** PATCH clubhouse image visibility. Body: { section, index, isPublic } or { section, interiorKey, index, isPublic } for interior. */
-  updateClubhouseImageVisibility: async (payload) => {
-    const response = await api.patch('/clubhouse/images/visibility', payload)
-    return response.data
   },
 
   /** PATCH recorrido file visibility. Body: { filename, isPublic }. filename e.g. "recorrido.1.jpg" */
@@ -208,11 +191,9 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
 
     getDeckFiles: async (urls = true) => {
     try {
-      console.log('📂 Getting files from folder: deck')
       const response = await api.get('/upload/files', {
         params: { folder: 'deck', urls }
       })
-      console.log(`✅ Found ${response.data.files?.length || 0} files in deck`)
       return response.data
     } catch (error) {
       console.error('❌ Error getting files from folder deck:', error.response?.data || error.message)
@@ -223,11 +204,9 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
   // Obtener archivos de la carpeta 'clubhouse/deck' (por si el backend usa ese path)
   getClubhouseDeckFiles: async (urls = true) => {
     try {
-      console.log('📂 Getting files from folder: clubhouse/deck')
       const response = await api.get('/upload/files', {
         params: { folder: 'clubhouse/deck', urls }
       })
-      console.log(`✅ Found ${response.data.files?.length || 0} files in clubhouse/deck`)
       return response.data
     } catch (error) {
       console.error('❌ Error getting files from folder clubhouse/deck:', error.response?.data || error.message)
@@ -238,19 +217,13 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
     getPublicClubhouse: async () => {
     try {
       const res = await api.get('/clubhouse/public');
-      console.log('📡 /clubhouse/public response:', res.data);
       return res.data;
     } catch (err) {
       console.error('❌ Error fetching public clubhouse:', err.response?.data || err.message);
       throw err;
     }
   },
-  
-  // // Subir imágenes a storage y retorna URLs
-  // uploadOutdoorAmenityImages: async (files, amenityName) => {
-  //   // Sube a storage, folder: outdoor-amenities/{amenityName}
-  //   return await uploadService.uploadMultipleImages(files, `outdoor-amenities/${amenityName}`)
-  // },
+
     uploadOutdoorAmenityImages: async (filesWithVisibility, amenityName) => {
     const uploadPromises = filesWithVisibility.map(async ({ file, isPublic }) => {
       const url = await uploadService.uploadImage(file, `outdoor-amenities/${amenityName}`, '', isPublic);
@@ -269,18 +242,19 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
     return api.put(`/outdoor-amenities/${id}`, data);
   },
 
+
   updateClubhouseImageVisibility: async ({ section, index, isPublic, interiorKey }) => {
-  return api.patch('/clubhouse/images/visibility', {
-    section,
-    index,
-    isPublic,
-    ...(section === 'interior' && { interiorKey })
-  });
-},
+    return api.patch('/clubhouse/images/visibility', {
+      section,
+      index,
+      isPublic,
+      ...(section === 'interior' && { interiorKey })
+    });
+  },
+
 
 deleteClubhouseImages: async ({ filenames = [], names = [], deleteFromStorage = true }) => {
   // Log para debug
-  console.log('🗑️ deleteClubhouseImages payload:', { filenames, names, deleteFromStorage });
   return await api({
     url: '/clubhouse/images',
     method: 'delete',
@@ -296,38 +270,6 @@ deleteClubhouseImages: async ({ filenames = [], names = [], deleteFromStorage = 
    * - identifier: url completa o identificador; si se pasa, se extrae filename automáticamente
    * - isPublic: boolean
    */
-  // updateRecorridoImageVisibility: async (payload) => {
-  //   try {
-  //     const { filename, identifier, isPublic } = payload || {};
-  //     let fileToSend = filename;
-
-  //     if (!fileToSend && identifier) {
-  //       // si identifier es una URL, extraer el último segmento antes de los query params
-  //       try {
-  //         const url = String(identifier);
-  //         const lastSegment = url.split('/').pop() || url;
-  //         fileToSend = decodeURIComponent(lastSegment.split('?')[0]);
-  //       } catch (e) {
-  //         // fallback a identifier bruto
-  //         fileToSend = identifier;
-  //       }
-  //     }
-
-  //     if (!fileToSend) {
-  //       throw new Error('updateRecorridoImageVisibility: missing filename or identifier');
-  //     }
-
-  //     const body = { filename: fileToSend, isPublic: !!isPublic };
-  //     // PATCH a la ruta indicada
-  //     const res = await api.patch('/upload/recorrido/visibility', body);
-  //     return res.data;
-  //   } catch (err) {
-  //     // eslint-disable-next-line no-console
-  //     console.error('updateRecorridoImageVisibility error:', err.response?.data || err.message);
-  //     throw err;
-  //   }
-  // },
-    // ...existing code...
     updateRecorridoVisibility: async (filenameOrPayload, isPublic) => {
       try {
         // Normalize input: accept (filename, isPublic) OR ({ filename, isPublic })
@@ -347,9 +289,7 @@ deleteClubhouseImages: async ({ filenames = [], names = [], deleteFromStorage = 
           throw new Error('Filename is required for updateRecorridoVisibility');
         }
   
-        console.log('uploadService.updateRecorridoVisibility -> sending payload:', payload);
         const res = await api.patch('/upload/recorrido/visibility', payload);
-        console.log('uploadService.updateRecorridoVisibility response:', res?.data || res);
         return res.data || res;
       } catch (err) {
         console.error('uploadService.updateRecorridoVisibility error:', err.response?.data || err.message || err);
