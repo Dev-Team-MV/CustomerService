@@ -12,6 +12,13 @@ import {
   updateProject,
   deleteProject
 } from '../controllers/projectController.js'
+import {
+  getCommunitySpaces,
+  getCommunitySpacesBySlug,
+  getCommunitySpaceById,
+  getCommunitySpaceBySlug,
+  upsertCommunitySpace
+} from '../controllers/communitySpaceController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -232,6 +239,54 @@ router.get('/slug/:slug/outdoor-amenities', getProjectOutdoorAmenitiesBySlug)
 
 /**
  * @swagger
+ * /api/projects/slug/{slug}/community-spaces:
+ *   get:
+ *     summary: Listar espacios comunitarios del proyecto (Ágora) por slug
+ *     description: Solo secciones exterior y planos. Público.
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/CommunitySpacesListPayload' }
+ *       404:
+ *         description: Project not found
+ */
+router.get('/slug/:slug/community-spaces', getCommunitySpacesBySlug)
+
+/**
+ * @swagger
+ * /api/projects/slug/{slug}/community-spaces/{spaceId}:
+ *   get:
+ *     summary: Espacio Ágora por slug y spaceId (agora)
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: spaceId
+ *         required: true
+ *         schema: { type: string, enum: [agora] }
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/CommunitySpacePayload' }
+ *       404:
+ *         description: Not found
+ */
+router.get('/slug/:slug/community-spaces/:spaceId', getCommunitySpaceBySlug)
+
+/**
+ * @swagger
  * /api/projects/{id}:
  *   get:
  *     summary: Get project by ID
@@ -372,5 +427,78 @@ router.route('/:id')
  */
 router.get('/:id/outdoor-amenities', getProjectOutdoorAmenities)
 router.put('/:id/outdoor-amenities', protect, admin, updateProjectOutdoorAmenities)
+
+/**
+ * @swagger
+ * /api/projects/{id}/community-spaces:
+ *   get:
+ *     summary: Listar espacios comunitarios por projectId
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/CommunitySpacesListPayload' }
+ *       404:
+ *         description: Project not found
+ */
+router.get('/:id/community-spaces', getCommunitySpaces)
+
+/**
+ * @swagger
+ * /api/projects/{id}/community-spaces/{spaceId}:
+ *   get:
+ *     summary: Obtener un espacio comunitario por projectId
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: spaceId
+ *         required: true
+ *         schema: { type: string, enum: [agora] }
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/CommunitySpacePayload' }
+ *       404:
+ *         description: Not found
+ *   put:
+ *     summary: Crear o actualizar Ágora (admin)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: spaceId
+ *         required: true
+ *         schema: { type: string, enum: [agora] }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/CommunitySpaceUpsertBody' }
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/CommunitySpacePayload' }
+ *       400:
+ *         description: Invalid body or id mismatch
+ */
+router.get('/:id/community-spaces/:spaceId', getCommunitySpaceById)
+router.put('/:id/community-spaces/:spaceId', protect, admin, upsertCommunitySpace)
 
 export default router
