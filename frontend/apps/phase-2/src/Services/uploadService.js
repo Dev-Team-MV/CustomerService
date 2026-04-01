@@ -2,7 +2,7 @@
 
 import api from '@shared/services/api'
 
-const PHASE_2_PROJECT_SLUG = 'phase2'
+const PHASE_2_PROJECT_SLUG = 'lakewood-f2'
 
 const uploadService = {
   // ========================================

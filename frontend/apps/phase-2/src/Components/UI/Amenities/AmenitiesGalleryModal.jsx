@@ -1,4 +1,6 @@
-import { Dialog, DialogContent, IconButton, Box, Typography, Button } from '@mui/material'
+// @/Users/oficina/MV-CRM/CustomerService/frontend/apps/phase-2/src/Components/UI/Amenities/AmenitiesGalleryModal.jsx
+
+import { Dialog, DialogContent, IconButton, Box, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
@@ -27,15 +29,55 @@ const AmenitiesGalleryModal = ({
   }, [open, amenity, amenities])
 
   const currentAmenity = amenities[currentAmenityIndex] || amenity
-  const images = currentAmenity?.images || []
+  
+  // Process images to handle both string URLs and {url, isPublic} objects
+  const processImages = (imgs) => {
+    if (!imgs || !Array.isArray(imgs)) return []
+    
+    return imgs
+      .filter(img => {
+        // Filter by visibility if in public view
+        if (isPublicView) {
+          return typeof img === 'string' ? true : img.isPublic
+        }
+        return true
+      })
+      .map(img => {
+        // Convert to URL string
+        const url = typeof img === 'string' ? img : img.url
+        console.log('🖼️ [AmenitiesGalleryModal] Processing image:', { original: img, url })
+        return url
+      })
+  }
+
+  const images = processImages(currentAmenity?.images)
   const hasImages = images.length > 0
+
+  console.log('🎨 [AmenitiesGalleryModal] Current state:', {
+    open,
+    currentAmenity: currentAmenity?.name,
+    rawImages: currentAmenity?.images,
+    processedImages: images,
+    hasImages,
+    currentImageIndex,
+    currentImageUrl: images[currentImageIndex]
+  })
 
   const handleNextImage = () => {
     if (currentImageIndex < images.length - 1) {
       setCurrentImageIndex(currentImageIndex + 1)
     } else if (currentAmenityIndex < amenities.length - 1) {
-      setCurrentAmenityIndex(currentAmenityIndex + 1)
-      setCurrentImageIndex(0)
+      // Move to next amenity
+      let nextIdx = currentAmenityIndex + 1
+      while (nextIdx < amenities.length) {
+        const nextAmenityImages = processImages(amenities[nextIdx]?.images)
+        if (nextAmenityImages.length > 0) {
+          setCurrentAmenityIndex(nextIdx)
+          setCurrentImageIndex(0)
+          break
+        }
+        nextIdx++
+      }
     }
   }
 
@@ -43,9 +85,17 @@ const AmenitiesGalleryModal = ({
     if (currentImageIndex > 0) {
       setCurrentImageIndex(currentImageIndex - 1)
     } else if (currentAmenityIndex > 0) {
-      const prevAmenity = amenities[currentAmenityIndex - 1]
-      setCurrentAmenityIndex(currentAmenityIndex - 1)
-      setCurrentImageIndex((prevAmenity.images || []).length - 1)
+      // Move to previous amenity
+      let prevIdx = currentAmenityIndex - 1
+      while (prevIdx >= 0) {
+        const prevAmenityImages = processImages(amenities[prevIdx]?.images)
+        if (prevAmenityImages.length > 0) {
+          setCurrentAmenityIndex(prevIdx)
+          setCurrentImageIndex(prevAmenityImages.length - 1)
+          break
+        }
+        prevIdx--
+      }
     }
   }
 
@@ -61,6 +111,8 @@ const AmenitiesGalleryModal = ({
   }, [open, currentImageIndex, currentAmenityIndex, amenities])
 
   if (!currentAmenity) return null
+
+  const currentImageUrl = images[currentImageIndex]
 
   return (
     <Dialog
@@ -103,7 +155,7 @@ const AmenitiesGalleryModal = ({
           </Typography>
           {hasImages && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              {currentImageIndex + 1} / {images.length}
+              Imagen {currentImageIndex + 1} de {images.length}
             </Typography>
           )}
         </Box>
@@ -125,20 +177,30 @@ const AmenitiesGalleryModal = ({
                 No hay imágenes disponibles
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Próximamente más información.
+                {isPublicView 
+                  ? 'No hay imágenes públicas para esta amenidad.'
+                  : 'Aún no se han subido imágenes para esta amenidad.'}
               </Typography>
             </Box>
           ) : (
             <Box sx={{ position: 'relative', bgcolor: '#000' }}>
               {/* Current Image */}
               <Box
+                component="img"
+                src={currentImageUrl}
+                alt={`${currentAmenity.name} - Imagen ${currentImageIndex + 1}`}
+                onError={(e) => {
+                  console.error('❌ [AmenitiesGalleryModal] Error loading image:', currentImageUrl)
+                  e.target.style.display = 'none'
+                }}
+                onLoad={() => {
+                  console.log('✅ [AmenitiesGalleryModal] Image loaded successfully:', currentImageUrl)
+                }}
                 sx={{
                   width: '100%',
                   height: 500,
-                  backgroundImage: `url(${images[currentImageIndex]})`,
-                  backgroundSize: 'contain',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat'
+                  objectFit: 'contain',
+                  display: 'block'
                 }}
               />
 
@@ -147,26 +209,39 @@ const AmenitiesGalleryModal = ({
                 <>
                   <IconButton
                     onClick={handlePrevImage}
+                    disabled={currentImageIndex === 0 && currentAmenityIndex === 0}
                     sx={{
                       position: 'absolute',
                       left: 16,
                       top: '50%',
                       transform: 'translateY(-50%)',
                       bgcolor: 'rgba(255, 255, 255, 0.9)',
-                      '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' }
+                      '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' },
+                      '&:disabled': { 
+                        bgcolor: 'rgba(255, 255, 255, 0.5)',
+                        opacity: 0.5
+                      }
                     }}
                   >
                     <ArrowBackIosNewIcon />
                   </IconButton>
                   <IconButton
                     onClick={handleNextImage}
+                    disabled={
+                      currentImageIndex === images.length - 1 && 
+                      currentAmenityIndex === amenities.length - 1
+                    }
                     sx={{
                       position: 'absolute',
                       right: 16,
                       top: '50%',
                       transform: 'translateY(-50%)',
                       bgcolor: 'rgba(255, 255, 255, 0.9)',
-                      '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' }
+                      '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' },
+                      '&:disabled': { 
+                        bgcolor: 'rgba(255, 255, 255, 0.5)',
+                        opacity: 0.5
+                      }
                     }}
                   >
                     <ArrowForwardIosIcon />

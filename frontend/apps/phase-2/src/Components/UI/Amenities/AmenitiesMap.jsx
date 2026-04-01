@@ -1,147 +1,3 @@
-// import { Box, Paper, Typography, IconButton, Tooltip } from '@mui/material'
-// import AddIcon from '@mui/icons-material/Add'
-// import RemoveIcon from '@mui/icons-material/Remove'
-// import MyLocationIcon from '@mui/icons-material/MyLocation'
-// import { useState, useRef } from 'react'
-// import AmenitiesGalleryModal from './AmenitiesGalleryModal'
-
-// const aerialMap = '../../../public/phase2.jpeg' // Usa una imagen mock o deja vacío
-
-// // Mock de amenidades
-// const amenitiesData = [
-//   { id: 1, name: 'Piscina', x: 30, y: 40, images: ['/images/amenities/piscina1.jpg'] },
-//   { id: 2, name: 'Gimnasio', x: 60, y: 50, images: ['/images/amenities/gym1.jpg'] },
-//   { id: 3, name: 'Zona BBQ', x: 45, y: 70, images: ['/images/amenities/bbq1.jpg'] },
-//   { id: 4, name: 'Parque Infantil', x: 80, y: 20, images: ['/images/amenities/playground1.jpg'] }
-// ]
-
-// const AmenitiesMap = ({ isPublicView = false }) => {
-//   const [zoom, setZoom] = useState(1)
-//   const [pan, setPan] = useState({ x: 0, y: 0 })
-//   const [selectedAmenity, setSelectedAmenity] = useState(null)
-//   const [modalOpen, setModalOpen] = useState(false)
-//   const mapRef = useRef(null)
-
-//   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.3, 3))
-//   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.3, 0.5))
-//   const handleResetView = () => {
-//     setZoom(1)
-//     setPan({ x: 0, y: 0 })
-//   }
-
-//   const handleAmenityClick = (amenity) => {
-//     setSelectedAmenity(amenity)
-//     setModalOpen(true)
-//   }
-
-//   const handleCloseModal = () => {
-//     setModalOpen(false)
-//     setTimeout(() => setSelectedAmenity(null), 300)
-//   }
-
-//   return (
-//     <>
-//       <Box sx={{ p: 0, borderRadius: 2, overflow: 'hidden', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
-//         <Box
-//           ref={mapRef}
-//           sx={{
-//             width: '100%',
-//             paddingTop: '56.25%',
-//             bgcolor: '#f0f0f0',
-//             position: 'relative',
-//             overflow: 'hidden',
-//             boxSizing: 'border-box'
-//           }}
-//         >
-//           <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', overflow: 'hidden' }}>
-//             {/* Map Background */}
-//             <Box
-//               sx={{
-//                 position: 'absolute',
-//                 top: '50%',
-//                 left: '50%',
-//                 width: '100%',
-//                 height: '100%',
-//                 transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-//                 backgroundImage: `url(${aerialMap})`,
-//                 backgroundSize: 'cover',
-//                 backgroundPosition: 'center',
-//                 backgroundRepeat: 'no-repeat'
-//               }}
-//             >
-//               {/* Amenity Markers */}
-//               {amenitiesData.map((amenity) => (
-//                 <Tooltip key={amenity.id} title={amenity.name} arrow>
-//                   <Box
-//                     onClick={() => handleAmenityClick(amenity)}
-//                     sx={{
-//                       position: 'absolute',
-//                       left: `${amenity.x}%`,
-//                       top: `${amenity.y}%`,
-//                       transform: 'translate(-50%, -50%)',
-//                       width: 32,
-//                       height: 32,
-//                       borderRadius: '50%',
-//                       display: 'flex',
-//                       alignItems: 'center',
-//                       justifyContent: 'center',
-//                       cursor: 'pointer',
-//                       bgcolor: '#1976d2',
-//                       color: '#fff',
-//                       fontWeight: 'bold',
-//                       boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
-//                       border: '3px solid rgba(255,255,255,0.9)',
-//                       zIndex: 1,
-//                       '&:hover': {
-//                         transform: 'translate(-50%, -50%) scale(1.2)',
-//                         zIndex: 11,
-//                         bgcolor: '#1565c0'
-//                       }
-//                     }}
-//                   >
-//                     {amenity.id}
-//                   </Box>
-//                 </Tooltip>
-//               ))}
-//             </Box>
-//             {/* Zoom Controls */}
-//             <Box sx={{
-//               position: 'absolute',
-//               bottom: 15,
-//               right: 15,
-//               display: 'flex',
-//               flexDirection: 'column',
-//               gap: 1,
-//               zIndex: 100
-//             }}>
-//               <Paper elevation={3} sx={{ display: 'flex', flexDirection: 'column', borderRadius: 1.5, overflow: 'hidden' }}>
-//                 <IconButton size="small" onClick={handleZoomIn}><AddIcon fontSize="small" /></IconButton>
-//                 <IconButton size="small" onClick={handleZoomOut}><RemoveIcon fontSize="small" /></IconButton>
-//               </Paper>
-//               <Paper elevation={3} sx={{ borderRadius: 1.5 }}>
-//                 <IconButton size="small" onClick={handleResetView}><MyLocationIcon fontSize="small" /></IconButton>
-//               </Paper>
-//             </Box>
-//           </Box>
-//         </Box>
-//       </Box>
-//       {/* Gallery Modal */}
-//       <AmenitiesGalleryModal
-//         open={modalOpen}
-//         onClose={handleCloseModal}
-//         amenity={selectedAmenity}
-//         amenities={amenitiesData}
-//         isPublicView={isPublicView}
-//       />
-//     </>
-//   )
-// }
-
-// export default AmenitiesMap
-
-
-// @/Users/oficina/MV-CRM/CustomerService/frontend/apps/phase-2/src/Components/UI/Amenities/AmenitiesMap.jsx
-
 import { Box, Paper, Typography, IconButton, Tooltip, Button } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
@@ -152,11 +8,13 @@ import AmenitiesGalleryModal from './AmenitiesGalleryModal'
 import OutdoorAmenitiesModal from './OutdoorAmenitiesModal'
 import uploadService from '../../../Services/uploadService'
 import { OUTDOOR_AMENITIES } from '../../../Constants/amenities'
+import { useAuth } from '@shared/context/AuthContext'
 
 const aerialMap = '../../../public/phase2.jpeg'
 const PHASE_2_PROJECT_ID = import.meta.env.VITE_PROJECT_ID || '6751c5e6a6f0f0e0e6f0f0e0'
 
 const AmenitiesMap = ({ isPublicView = false }) => {
+  const { user } = useAuth()
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -168,16 +26,35 @@ const AmenitiesMap = ({ isPublicView = false }) => {
   const [amenitySections, setAmenitySections] = useState([])
   const mapRef = useRef(null)
 
+  // Check if user is admin or superadmin
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
+
   useEffect(() => {
     fetchOutdoorAmenities()
   }, [])
 
   const fetchOutdoorAmenities = async () => {
     try {
-      const data = await uploadService.getOutdoorAmenitiesBySlug('phase2')
+      const data = await uploadService.getOutdoorAmenitiesBySlug('lakewood-f2')
+      console.log('🏞️ [AmenitiesMap] Full response from backend:', data)
+      console.log('🏞️ [AmenitiesMap] Outdoor amenity sections:', data.outdoorAmenitySections)
+      console.log('🏞️ [AmenitiesMap] Project ID:', data.projectId)
+      console.log('🏞️ [AmenitiesMap] Slug:', data.slug)
+      
       setAmenitySections(data.outdoorAmenitySections || [])
+      
+      // Log each section with its images
+      if (data.outdoorAmenitySections) {
+        data.outdoorAmenitySections.forEach((section, idx) => {
+          console.log(`🏞️ [AmenitiesMap] Section ${idx}:`, {
+            key: section.key,
+            imagesCount: section.images?.length || 0,
+            images: section.images
+          })
+        })
+      }
     } catch (err) {
-      console.error('Error fetching outdoor amenities:', err)
+      console.error('❌ [AmenitiesMap] Error fetching outdoor amenities:', err)
       setAmenitySections([])
     }
   }
@@ -185,10 +62,18 @@ const AmenitiesMap = ({ isPublicView = false }) => {
   // Merge amenities data with images from backend
   const amenitiesWithImages = OUTDOOR_AMENITIES.map(amenity => {
     const section = amenitySections.find(s => s.key === amenity.key)
-    return {
+    const mergedAmenity = {
       ...amenity,
       images: section?.images || []
     }
+    
+    console.log(`🎯 [AmenitiesMap] Merged amenity "${amenity.name}" (${amenity.key}):`, {
+      hasSection: !!section,
+      imagesCount: mergedAmenity.images.length,
+      images: mergedAmenity.images
+    })
+    
+    return mergedAmenity
   })
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.3, 3))
@@ -239,6 +124,12 @@ const AmenitiesMap = ({ isPublicView = false }) => {
 
   const handleAmenityClick = (amenity) => {
     if (!hasMoved) {
+      console.log('🖱️ [AmenitiesMap] Amenity clicked:', {
+        name: amenity.name,
+        key: amenity.key,
+        imagesCount: amenity.images?.length || 0,
+        images: amenity.images
+      })
       setSelectedAmenity(amenity)
       setModalOpen(true)
     }
@@ -256,7 +147,8 @@ const AmenitiesMap = ({ isPublicView = false }) => {
   return (
     <>
       <Box sx={{ p: 0, borderRadius: 2, overflow: 'hidden', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
-        {!isPublicView && (
+        {/* Admin Button - Only visible for admin/superadmin */}
+        {!isPublicView && isAdmin && (
           <Box sx={{ mb: 2 }}>
             <Button
               variant="contained"
@@ -374,8 +266,8 @@ const AmenitiesMap = ({ isPublicView = false }) => {
         </Box>
       </Box>
 
-      {/* Admin Modal */}
-      {!isPublicView && (
+      {/* Admin Modal - Only for admin/superadmin */}
+      {!isPublicView && isAdmin && (
         <OutdoorAmenitiesModal
           open={adminModalOpen}
           onClose={handleCloseAdminModal}
