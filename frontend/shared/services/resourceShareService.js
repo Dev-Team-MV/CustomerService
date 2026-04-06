@@ -49,33 +49,11 @@ export const createResourceShareService = (resourceType) => {
 
 async shareWithGroup(resourceId, familyGroupId, groupMembers) {
   try {
-    const results = []
-    
-    // Compartir con cada miembro del grupo secuencialmente
-    for (const member of groupMembers) {
-      const memberId = member.user?._id || member.user?.id || member.user
-      
-      try {
-        const response = await api.post(`/${endpoint}/${resourceId}/share`, {
-          sharedWithUserId: memberId,
-          familyGroupId
-        })
-        results.push(response.data)
-      } catch (err) {
-        // Si ya existe el share (400), ignorar y continuar
-        if (err.response?.status === 400) {
-          console.warn(`Share already exists for user ${memberId}`)
-          continue
-        }
-        throw err
-      }
-    }
-    
-    return { 
-      count: results.length, 
-      shares: results,
-      message: `Shared with ${results.length} group member(s)`
-    }
+    // Dejar que el backend maneje la iteración de miembros
+    const response = await api.post(`/${endpoint}/${resourceId}/share`, {
+      familyGroupId  // Solo enviar el ID del grupo, sin sharedWithUserId
+    })
+    return response.data
   } catch (error) {
     throw this._handleError(error, `Failed to share ${resourceLabel.toLowerCase()} with group`)
   }
