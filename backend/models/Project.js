@@ -1,9 +1,57 @@
 import mongoose from 'mongoose'
+import imageItemSchema from './schemas/imageItemSchema.js'
+import { COMMUNITY_SPACE_IDS } from '../constants/communitySpaceIds.js'
 
 const localizedStringSchema = {
   en: { type: String, trim: true },
   es: { type: String, trim: true }
 }
+
+/** Planos / PDFs o imágenes de plano (misma idea que ImageItem + nombre opcional) */
+const communityPlanoItemSchema = new mongoose.Schema(
+  {
+    url: { type: String, required: true, trim: true },
+    isPublic: { type: Boolean, default: true },
+    name: { type: String, trim: true, default: null }
+  },
+  { _id: false }
+)
+
+const communitySpaceSectionsSchema = new mongoose.Schema(
+  {
+    exterior: {
+      title: { type: localizedStringSchema, default: () => ({}) },
+      images: { type: [imageItemSchema], default: () => [] }
+    },
+    planos: {
+      items: { type: [communityPlanoItemSchema], default: () => [] }
+    }
+  },
+  { _id: false }
+)
+
+const communitySpaceSchema = new mongoose.Schema(
+  {
+    id: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      enum: [...COMMUNITY_SPACE_IDS]
+    },
+    label: { type: String, trim: true, default: '' },
+    sections: { type: communitySpaceSectionsSchema, default: () => ({}) }
+  },
+  { _id: false }
+)
+
+const outdoorAmenitySectionSchema = new mongoose.Schema(
+  {
+    key: { type: String, required: true, trim: true, lowercase: true },
+    images: { type: [imageItemSchema], default: () => [] }
+  },
+  { _id: false }
+)
 
 const projectSchema = new mongoose.Schema(
   {
@@ -80,7 +128,16 @@ const projectSchema = new mongoose.Schema(
     videos: [{
       type: String,
       trim: true
-    }]
+    }],
+    outdoorAmenitySections: {
+      type: [outdoorAmenitySectionSchema],
+      default: () => []
+    },
+    /** Espacios tipo Ágora / Teatro / Club House (exterior + planos por proyecto) */
+    communitySpaces: {
+      type: [communitySpaceSchema],
+      default: () => []
+    }
   },
   {
     timestamps: true

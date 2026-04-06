@@ -33,6 +33,7 @@ const BuildingSelector = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const stageRef = useRef(null)
+  const canvasContainerRef = useRef(null)
 
   // Master plan data
   const [masterPlanData, setMasterPlanData] = useState(null)
@@ -43,6 +44,9 @@ const BuildingSelector = () => {
   const [dimensions, setDimensions] = useState({ width: 1200, height: 800 })
   const [hoveredBuilding, setHoveredBuilding] = useState(null)
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 })
+
+  const [scaleFactor, setScaleFactor] = useState(1) // ✅ Nuevo estado
+
 
   // ✅ Fetch master plan on mount
   useEffect(() => {
@@ -70,9 +74,51 @@ const BuildingSelector = () => {
     fetchMasterPlan()
   }, [])
 
-  // ✅ Calculate image dimensions EXACTLY like MasterPlanEditor
-  useEffect(() => {
-    if (image) {
+  // ✅ Calculate dimensions - responsive only for mobile
+// ✅ Calculate dimensions - responsive only for mobile
+useEffect(() => {
+  if (image) {
+    if (isMobile && canvasContainerRef.current) {
+      // Mobile: scale to fit container
+      const updateDimensions = () => {
+        const container = canvasContainerRef.current
+        if (!container) return
+
+        const containerWidth = container.offsetWidth - 32
+        const containerHeight = 500
+        const imgRatio = image.width / image.height
+        
+        let width = containerWidth
+        let height = containerWidth / imgRatio
+        
+        if (height > containerHeight) {
+          height = containerHeight
+          width = containerHeight * imgRatio
+        }
+        
+        // ✅ Calcular factor de escala basado en dimensiones originales
+        const originalMaxWidth = 1200
+        const originalMaxHeight = 800
+        const originalImgRatio = image.width / image.height
+        
+        let originalWidth = originalMaxWidth
+        let originalHeight = originalMaxWidth / originalImgRatio
+        
+        if (originalHeight > originalMaxHeight) {
+          originalHeight = originalMaxHeight
+          originalWidth = originalMaxHeight * originalImgRatio
+        }
+        
+        const factor = width / originalWidth
+        setScaleFactor(factor)
+        setDimensions({ width, height })
+      }
+
+      updateDimensions()
+      window.addEventListener('resize', updateDimensions)
+      return () => window.removeEventListener('resize', updateDimensions)
+    } else {
+      // Desktop: keep original fixed dimensions
       const maxWidth = 1200
       const maxHeight = 800
       const imgRatio = image.width / image.height
@@ -85,10 +131,11 @@ const BuildingSelector = () => {
         width = maxHeight * imgRatio
       }
       
+      setScaleFactor(1) // ✅ Desktop usa factor 1 (sin escala)
       setDimensions({ width, height })
     }
-  }, [image])
-
+  }
+}, [image, isMobile])
   const hasPolygons = buildings.some(b => b.polygon?.length >= 3)
 
   const handleZoomIn = () => setScale(Math.min(scale + 0.2, 3))
@@ -157,7 +204,33 @@ const BuildingSelector = () => {
 
       {/* Konva Canvas with Master Plan */}
       {image && hasPolygons ? (
-        <Box sx={{ position: 'relative', bgcolor: '#f5f5f5', p: 2 }}>
+        <Box 
+          ref={canvasContainerRef}
+          sx={{ 
+            position: 'relative', 
+            bgcolor: '#f5f5f5', 
+            p: 2,
+            ...(isMobile && {
+              overflow: 'auto',
+              maxHeight: '60vh',
+              '&::-webkit-scrollbar': {
+                width: '8px',
+                height: '8px',
+              },
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: '#f1f1f1',
+                borderRadius: '10px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: '#8CA551',
+                borderRadius: '10px',
+                '&:hover': {
+                  backgroundColor: '#7a9447',
+                },
+              },
+            }),
+          }}
+        >
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
             <Stage
               ref={stageRef}
@@ -168,7 +241,8 @@ const BuildingSelector = () => {
               style={{ 
                 border: '2px solid #e0e0e0', 
                 backgroundColor: '#fff',
-                cursor: 'default'
+                cursor: 'default',
+                borderRadius: '8px',
               }}
             >
               <Layer>
@@ -183,21 +257,20 @@ const BuildingSelector = () => {
                 )}
 
                 {/* Building Polygons */}
-                {buildings.map((building) => {
-                  const polygon = building.polygon
-                  if (!polygon || polygon.length < 3) return null
+{buildings.map((building) => {
+  const polygon = building.polygon
+  if (!polygon || polygon.length < 3) return null
+ 
+  // ✅ Escalar coordenadas de polígonos según scaleFactor
+  const points = polygon.flatMap(p => [p.x * scaleFactor, p.y * scaleFactor])
+  const isSelected = selectedBuilding?._id === building._id
+  const isHovered = hoveredBuilding?._id === building._id
+  const isActive = building.status === 'active'
 
-                  const points = polygon.flatMap(p => [p.x, p.y])
-                  const isSelected = selectedBuilding?._id === building._id
-                  const isHovered = hoveredBuilding?._id === building._id
-                  const isActive = building.status === 'active'
-                  
-                  // ✅ Usar colores del backend
                   const fillColor = building.polygonColor || '#22C55E'
                   const strokeColor = building.polygonStrokeColor || '#14532D'
                   const baseOpacity = building.polygonOpacity !== undefined ? building.polygonOpacity : 0.42
 
-                  // ✅ Calcular opacidad con animación
                   let opacity = baseOpacity
                   if (hoveredBuilding) {
                     opacity = isHovered ? Math.min(baseOpacity + 0.3, 1) : baseOpacity * 0.3
@@ -250,11 +323,12 @@ const BuildingSelector = () => {
                 })}
 
                 {/* Konva Label for hovered building */}
-                {hoveredBuilding && hoveredBuilding.polygon && (
-                  <Label
-                    x={hoveredBuilding.polygon[0]?.x || 0}
-                    y={(hoveredBuilding.polygon[0]?.y || 0) - 40}
-                  >
+{/* Konva Label for hovered building */}
+{hoveredBuilding && hoveredBuilding.polygon && (
+  <Label
+    x={(hoveredBuilding.polygon[0]?.x || 0) * scaleFactor}
+    y={((hoveredBuilding.polygon[0]?.y || 0) - 40) * scaleFactor}
+  >
                     <Tag
                       fill="#fff"
                       stroke={hoveredBuilding.polygonStrokeColor || '#14532D'}
@@ -265,14 +339,6 @@ const BuildingSelector = () => {
                       shadowOpacity={0.3}
                       shadowOffsetY={2}
                     />
-                    {/* <Text
-                      text={hoveredBuilding.name}
-                      fontFamily="Poppins"
-                      fontSize={16}
-                      fontStyle="bold"
-                      fill="#333F1F"
-                      padding={12}
-                    /> */}
                   </Label>
                 )}
               </Layer>
@@ -281,10 +347,10 @@ const BuildingSelector = () => {
             {/* Zoom controls */}
             <Box sx={{ position: 'absolute', bottom: 15, right: 15, display: 'flex', flexDirection: 'column', gap: 1, zIndex: 100 }}>
               <Paper elevation={3} sx={{ display: 'flex', flexDirection: 'column', borderRadius: 1.5, overflow: 'hidden' }}>
-                <IconButton size="small" onClick={handleZoomIn}>
+                <IconButton size="small" onClick={handleZoomIn} sx={{ borderRadius: 0 }}>
                   <AddIcon fontSize="small" />
                 </IconButton>
-                <IconButton size="small" onClick={handleZoomOut}>
+                <IconButton size="small" onClick={handleZoomOut} sx={{ borderRadius: 0 }}>
                   <RemoveIcon fontSize="small" />
                 </IconButton>
               </Paper>
@@ -296,7 +362,7 @@ const BuildingSelector = () => {
             </Box>
           </Box>
 
-          {/* ✅ Animated Popup with Framer Motion */}
+          {/* Animated Popup with Framer Motion */}
           <AnimatePresence>
             {hoveredBuilding && (
               <motion.div
@@ -357,7 +423,7 @@ const BuildingSelector = () => {
           </AnimatePresence>
 
           <Typography variant="caption" sx={{ color: '#706f6f', mt: 1, display: 'block', textAlign: 'center', fontFamily: '"Poppins", sans-serif' }}>
-            Click on a building polygon to select it
+            {isMobile ? 'Scroll to see the full map · ' : ''}Click on a building polygon to select it
           </Typography>
         </Box>
       ) : (
@@ -394,7 +460,7 @@ const BuildingSelector = () => {
                       border: isSelected 
                         ? '2px solid #8CA551' 
                         : isHoveredCard 
-                          ? `2px solid ${b.polygonStrokeColor || '#14532D'}`
+                          ? `2px solid ${b.polygonStrokeColor || '#14532D'}` 
                           : '2px solid #e0e0e0',
                       borderRadius: 3,
                       transition: 'all 0.3s ease',
