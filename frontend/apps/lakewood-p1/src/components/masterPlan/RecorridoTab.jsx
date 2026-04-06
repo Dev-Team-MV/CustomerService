@@ -62,18 +62,22 @@ const RecorridoTab = () => {
   }, [])
 
   const fetchMasterPlanImages = async () => {
-    try {
+    try {      
       const response = await uploadService.getFilesByFolder('masterplan', true)
+      
       if (response.files && response.files.length > 0) {
-        const latestImage = response.files[response.files.length - 1]
+        // ✅ Usar la imagen más reciente (última en el array)
+        const latestImage = response.files[0]
         setMapUrl(latestImage.url)
       } else {
-        setMapUrl(defaultMap)
+        setMapUrl(map) // Fallback a imagen local
       }
     } catch (error) {
-      setMapUrl(defaultMap)
+      console.error('❌ Error loading master plan:', error)
+      setMapUrl(map) // Fallback a imagen local
     }
   }
+
 // ...existing code...
 const fetchRecorridoImages = async () => {
   try {

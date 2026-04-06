@@ -21,6 +21,13 @@ import Payloads from './Pages/Payloads'
 import MyApartment from './Pages/MyApartment'
 import MasterPlanPage from './Pages/MasterPlanPage'
 import FamilyGroup from './Pages/FamilyGroup'
+import NewsFeed from './Pages/NewsFeed'
+import NewsTable from './Pages/NewsTable'
+import NewsDetails from './Pages/NewsDetails'
+
+import AmenitiesPrivate from './Pages/Amenities/AmenitiesPrivate'
+import AmenitiesPublic from './Pages/Amenities/AmenitiesPublic'
+import AgoraManager from './Pages/AgoraManager'
 
 function App() {
   return (
@@ -29,23 +36,40 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
+
+          {/* Rutas públicas */}
+          <Route
+            element={
+              <Layout
+                publicView={true}
+                menuItems={publicMenuItems}
+                logoSrc={logoPhase2}
+              />
+            }
+          >
+            <Route path="/explore/news" element={<NewsFeed />} />
+            <Route path="/explore/news/:id" element={<NewsDetails />} />
+            <Route path="/explore/amenities" element={<AmenitiesPublic />} />
+          </Route>
+
+          {/* Rutas privadas */}
           <Route element={<ProtectedRoute />}>
             <Route
               element={
                 <Layout
-                publicView={false}
-                menuItems={privateMenuItems}
-                publicMenuItems={publicMenuItems}
-                logoSrc={logoPhase2}
+                  publicView={false}
+                  menuItems={privateMenuItems}
+                  publicMenuItems={publicMenuItems}
+                  logoSrc={logoPhase2}
                 />
               }
             >
-              <Route path="/quote" element={<GetYourQuote />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/residents" element={<Residents />} />
               <Route path="/payloads" element={<Payloads />} />
               <Route path="/configuration" element={<ConfigurationManagerP2 />} />
+              <Route path="/agora" element={<AgoraManager />} />
               <Route path="/master-plan" element={<MasterPlanPage />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/family-group" element={<FamilyGroup />} />
@@ -53,8 +77,14 @@ function App() {
               <Route path="/my-apartment" element={<MyApartment />} />
               <Route path="/buildings" element={<Buildings />} />
               <Route path="/buildings/:id" element={<BuildingDetails />} />
+              <Route path="/news" element={<NewsFeed />} />
+              <Route path="/news/:id" element={<NewsDetails />} />
+              <Route path="/admin/news" element={<NewsTable />} />
+              <Route path="/amenities" element={<AmenitiesPrivate />} />
+              <Route path="/quote" element={<GetYourQuote />} />
             </Route>
           </Route>
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
