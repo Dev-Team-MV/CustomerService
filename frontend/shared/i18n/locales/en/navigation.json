@@ -21,7 +21,8 @@
         "familyGroup": "Family Group",
         "buildings": "Buildings",
         "masterPlan": "Master Plan",
-        "myapartment": "My Apartments"
+        "myapartment": "My Apartments",
+        "agora": "Agora"
     },
     "tooltips": {
         "openMenu": "Open menu",

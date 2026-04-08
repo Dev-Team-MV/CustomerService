@@ -1,89 +1,145 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { Box, Container, Dialog } from '@mui/material'
 import { Add, Home } from '@mui/icons-material'
 import PageHeader from '@shared/components/PageHeader'
 import DataTable from '@shared/components/table/DataTable'
 import EmptyState from '@shared/components/table/EmptyState'
 import { useTheme } from '@mui/material/styles'
-import { usePropertyColumns } from '../Constants/Columns/properties'
-import { useApartments } from '../Constants/hooks/useApartments'
-import { useBuildings } from '../Constants/hooks/useBuildings'
-
-import ContractsModal from '@shared/components/Modals/ContractsModal'
-import ApartmentDetailsModal from '../Components/UI/propertyDetails/ApartmentDetailsModal'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import ConstructionTab from '../Components/UI/propertyDetails/ConstructionTab'
+
+import { usePropertyColumns } from '../Constants/Columns/properties'
+import { usePayloadColumns } from '../Constants/Columns/payloads'
+import { useApartments } from '../Constants/hooks/useApartments'
+import { useBuildings } from '../Constants/hooks/useBuildings'
+import buildingService from '../Services/buildingService'
+
+import ContractsModal from '@shared/components/Modals/ContractsModal'
+import api from '@shared/services/api'
+import {
+  ApartmentDetailsModal,
+  EditApartmentModal,
+  ConstructionTab,
+} from '@shared/components/propertyDetails'
+
 const Properties = () => {
-  const theme = useTheme()
+  const theme    = useTheme()
   const navigate = useNavigate()
-  // Puedes pasar un buildingId si quieres filtrar por edificio, o dejarlo null para traer todos
-  const { assigned, loading, error, refresh } = useApartments()
-const { buildings, loading: loadingBuildings } = useBuildings()
+  const { t } = useTranslation(['property', 'actions', 'common'])
 
-const { t } = useTranslation('property') // Usa el namespace adecuado, por ejemplo 'property'
+  const { assigned, loading, refresh }           = useApartments()
+  const { buildings, loading: loadingBuildings } = useBuildings()
 
-  const [contractsOpen, setContractsOpen] = useState(false)
-  const [selectedApartment, setSelectedApartment] = useState(null)
+  const [contractsOpen, setContractsOpen]             = useState(false)
+  const [selectedApartment, setSelectedApartment]     = useState(null)
+  const [detailsOpen, setDetailsOpen]                 = useState(false)
+  const [constructionOpen, setConstructionOpen]       = useState(false)
+  const [selectedApartmentId, setSelectedApartmentId] = useState(null)
+  const [editOpen, setEditOpen]                       = useState(false)
+  const [editValues, setEditValues]                   = useState({})
+  const [savingEdit, setSavingEdit]                   = useState(false)
+  const [apartmentModels, setApartmentModels]         = useState([])
+  const [users, setUsers]                             = useState([])
 
-const [detailsOpen, setDetailsOpen] = useState(false)
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [modelsRes, usersRes] = await Promise.all([
+          buildingService.getApartmentModels(),
+          api.get('/users')
+        ])
+        setApartmentModels(modelsRes || [])
+        setUsers(usersRes.data || [])
+      } catch (err) {
+        console.error('Error loading data:', err)
+      }
+    }
+    fetchData()
+  }, [])
 
-const [constructionOpen, setConstructionOpen] = useState(false)
-const [selectedApartmentId, setSelectedApartmentId] = useState(null)
+  const buildingMap = useMemo(() => {
+    const map = {}
+    buildings?.forEach(b => { map[b._id] = b.name })
+    return map
+  }, [buildings])
 
-// Crea un mapping de id a nombre
-const buildingMap = useMemo(() => {
-  const map = {}
-  buildings?.forEach(b => { map[b._id] = b.name })
-  return map
-}, [buildings])
-
-  // Adaptar los datos de apartamentos asignados al formato esperado por las columnas
   const data = useMemo(() => assigned.map(apto => ({
-    _id: apto._id,
-    name: `Apt ${apto.apartmentNumber} - Floor ${apto.floorNumber}`,
-    building: buildingMap[apto.building] || 'N/A', // <--- Aquí
-    status: apto.status,
-    model: apto.apartmentModel?.name || 'N/A',
+    _id:      apto._id,
+    name:     t('property:apartmentName', { number: apto.apartmentNumber, floor: apto.floorNumber }, 'Apt {{number}} - Floor {{floor}}'),
+    building: buildingMap[apto.building] || t('common:notAvailable', 'N/A'),
+    status:   apto.status,
+    model:    apto.apartmentModel?.name || t('common:notAvailable', 'N/A'),
     resident: Array.isArray(apto.users) && apto.users.length > 0
       ? `${apto.users[0]?.firstName || ''} ${apto.users[0]?.lastName || ''}`.trim()
-      : 'Unassigned',
-    price: apto.price,
-    phases: apto.phases || [],
-    raw: apto
-  })), [assigned, buildingMap])
+      : t('property:unassigned', 'Unassigned'),
+    price:    apto.price,
+    pending:  apto.pending,
+    phases:   apto.phases || [],
+    raw:      apto
+  })), [assigned, buildingMap, t])
 
-const columns = usePropertyColumns({
-  isAdmin: true,
-  t,
-  onViewDetails: (row) => {
-    setSelectedApartment(row.raw)
-    setDetailsOpen(true)
-  },
-  onEdit: null,
-  onDelete: (row) => alert(`Delete property ${row.name}`),
-  onOpenContracts: (row) => {
-    setSelectedApartment(row.raw)
-    setContractsOpen(true)
-  },
+  const columns = usePropertyColumns({
+    isAdmin: true,
+    t,
+    onViewDetails: (row) => {
+      setSelectedApartment(row.raw)
+      setDetailsOpen(true)
+    },
+    onEdit: (row) => {
+      setSelectedApartment(row.raw)
+      setEditValues({
+        apartmentModel:     row.raw.apartmentModel?._id,
+        floorNumber:        row.raw.floorNumber,
+        apartmentNumber:    row.raw.apartmentNumber,
+        users:              row.raw.users?.map(u => u._id) || [],
+        price:              row.raw.price,
+        initialPayment:     row.raw.initialPayment,
+        pending:            row.raw.pending,
+        status:             row.raw.status,
+        selectedRenderType: row.raw.selectedRenderType,
+        floorPlanPolygonId: row.raw.floorPlanPolygonId,
+        saleDate:           row.raw.saleDate
+      })
+      setEditOpen(true)
+    },
+    onDelete: (row) => alert(t('actions.deleteProperty', { name: row.name }, `Delete property ${row.name}`)),
+    onOpenContracts: (row) => {
+      setSelectedApartment(row.raw)
+      setContractsOpen(true)
+    },
     onOpenPhases: (row) => {
-    setSelectedApartmentId(row.raw._id) // o row._id según tu estructura
-    setConstructionOpen(true)
+      setSelectedApartmentId(row.raw._id)
+      setConstructionOpen(true)
+    }
+  })
+
+  const handleSaveEdit = async () => {
+    setSavingEdit(true)
+    try {
+      await buildingService.updateApartment(selectedApartment._id, editValues)
+      await refresh()
+      setEditOpen(false)
+      setEditValues({})
+    } catch (error) {
+      console.error('Error updating apartment:', error)
+      alert(t('common:error', 'Error updating apartment'))
+    } finally {
+      setSavingEdit(false)
+    }
   }
-})
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.background.default, p: { xs: 2, sm: 3 } }}>
       <Container maxWidth="xl">
         <PageHeader
           icon={Home}
-          title="Properties"
-          subtitle="Manage and view all assigned apartments"
+          title={t('property:title', 'Properties')}
+          subtitle={t('property:subtitleApartment', 'Manage and view all assigned apartments')}
           actionButton={{
-            label: (t('actions.addProperty')), // Usa la función de traducción
+            label:   t('actions.addProperty', 'Add Property'),
             onClick: () => navigate('/quote'),
-            icon: <Add />,
-            tooltip: 'Add new property'
+            icon:    <Add />,
+            tooltip: t('actions.addPropertyTooltip', 'Add new property')
           }}
         />
 
@@ -94,10 +150,10 @@ const columns = usePropertyColumns({
           emptyState={
             <EmptyState
               icon={Home}
-              title="No assigned apartments"
-              description="There are no assigned apartments yet."
-              actionLabel="Add Property"
-              onAction={() => alert('Add property')}
+              title={t('property:noAssigned', 'No assigned apartments')}
+              description={t('property:noAssignedDesc', 'There are no assigned apartments yet.')}
+              actionLabel={t('actions.addProperty', 'Add Property')}
+              onAction={() => navigate('/quote')}
             />
           }
           stickyHeader
@@ -112,25 +168,38 @@ const columns = usePropertyColumns({
           onContractUpdated={refresh}
         />
 
+        <EditApartmentModal
+          open={editOpen}
+          onClose={() => { setEditOpen(false); setEditValues({}) }}
+          apartment={selectedApartment}
+          values={editValues}
+          onChange={setEditValues}
+          onSave={handleSaveEdit}
+          saving={savingEdit}
+          apartmentModels={apartmentModels}
+          users={users}
+        />
+
         <ApartmentDetailsModal
           open={detailsOpen}
           onClose={() => setDetailsOpen(false)}
           apartment={selectedApartment}
+          usePayloadColumnsFn={usePayloadColumns}
         />
 
         <Dialog
-  open={constructionOpen}
-  onClose={() => setConstructionOpen(false)}
-  maxWidth="lg"
-  fullWidth
->
-  <Box p={2}>
-    <ConstructionTab
-      apartmentId={selectedApartmentId}
-      isAdmin={true}
-    />
-  </Box>
-</Dialog>
+          open={constructionOpen}
+          onClose={() => setConstructionOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <Box p={2}>
+            <ConstructionTab
+              apartmentId={selectedApartmentId}
+              isAdmin={true}
+            />
+          </Box>
+        </Dialog>
       </Container>
     </Box>
   )

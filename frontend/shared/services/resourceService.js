@@ -10,10 +10,11 @@ export const createResourceService = (config) => {
         console.log(`📡 [ResourceService:${config.type}] Fetching all resources...`)
         console.log(`📡 [ResourceService:${config.type}] Endpoint: ${config.endpoints.list}`)
         
-        const [resourcesRes, profileRes] = await Promise.all([
-          api.get(config.endpoints.list),
-          api.get(config.endpoints.profile)
-        ])
+const projectId = import.meta.env.VITE_PROJECT_ID
+const [resourcesRes, profileRes] = await Promise.all([
+  api.get(config.endpoints.list, { params: { projectId } }),
+  api.get(config.endpoints.profile)
+])
         
         const allResources = resourcesRes.data
         const profile = profileRes.data
@@ -137,7 +138,9 @@ export const createResourceService = (config) => {
           return []
         }
         
-        const response = await api.get('/payloads')
+        // const response = await api.get('/payloads')
+        const projectId = import.meta.env.VITE_PROJECT_ID
+const response = await api.get('/payloads', { params: { projectId } })
         const allPayloads = response.data
         
         console.log(`💳 [ResourceService:${config.type}] All payloads from API:`, allPayloads.length)
@@ -174,10 +177,11 @@ export const createResourceService = (config) => {
       }
     },
     
-    async getPayloads(id) {
-      try {
-        console.log(`💳 [ResourceService:${config.type}] Fetching payloads for: ${id}`)
-        const response = await api.get(config.endpoints.payloads(id))
+async getPayloads(id) {
+  try {
+    console.log(`💳 [ResourceService:${config.type}] Fetching payloads for: ${id}`)
+    const projectId = import.meta.env.VITE_PROJECT_ID
+    const response = await api.get(config.endpoints.payloads(id), { params: { projectId } })
         console.log(`✅ [ResourceService:${config.type}] Payloads for resource:`, response.data)
         return response.data
       } catch (error) {

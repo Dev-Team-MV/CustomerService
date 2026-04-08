@@ -4,10 +4,9 @@ import api from './api'
 const payloadService = {
   // Listar payloads por recurso
 getPayloadsByResource: async (resourceType, resourceId) => {
-  const params = {}
+  const params = { projectId: import.meta.env.VITE_PROJECT_ID }
   if (resourceType === 'apartment' && resourceId) params.apartment = resourceId
   else if (resourceType === 'property' && resourceId) params.property = resourceId
-  // Si no hay resourceId, trae todos
   const response = await api.get('/payloads', { params })
   return response.data
 },

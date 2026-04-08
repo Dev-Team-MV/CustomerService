@@ -103,7 +103,7 @@ const Dashboard = () => {
     { icon: <PersonAdd />, label: t('quickActions.inviteUser'),  description: t('quickActions.inviteUserDesc'),  color: '#8CA551', bgColor: '#f0f7e8', onClick: () => handleOpenDialog() },
     { icon: <BarChart />,  label: t('quickActions.analytics'),   description: t('quickActions.analyticsDesc'),   color: '#E5863C', bgColor: '#fff5e6', onClick: () => navigate('/analytics') },
     { icon: <Deck />,      label: t('quickActions.amenities'),   description: t('quickActions.amenitiesDesc'),   color: '#8CA551', bgColor: '#f0f7e8', onClick: () => navigate('/amenities') },
-    { icon: <Article />,   label: t('quickActions.manageNews'),  description: t('quickActions.manageNewsDesc'),  color: '#E5863C', bgColor: '#fff5e6', onClick: () => navigate('/news') },
+    { icon: <Article />,   label: t('quickActions.manageNews'),  description: t('quickActions.manageNewsDesc'),  color: '#E5863C', bgColor: '#fff5e6', onClick: () => navigate('/admin/news') },
   ], [t, navigate, handleOpenDialog])
 
   const userActions = useMemo(() => [

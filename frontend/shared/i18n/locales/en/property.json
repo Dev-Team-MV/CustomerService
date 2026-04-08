@@ -60,5 +60,14 @@
     "title": "No properties found",
     "description": "Click 'Add Property' to create one",
     "action": "Add Property"
-  }
+  },
+
+
+    
+    "subtitleApartment": "Manage and view all assigned apartments",
+    "apartmentName": "Apt {{number}} - Floor {{floor}}",
+    "noAssigned": "No assigned apartments",
+    "noAssignedDesc": "There are no assigned apartments yet.",
+    "unassigned": "Unassigned"
+  
 }

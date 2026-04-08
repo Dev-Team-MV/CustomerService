@@ -95,15 +95,16 @@ export default function Dashboard() {
     let url = selectedProject?.externalUrl
   
     // Si no hay externalUrl, usa una URL local por defecto según el slug
-    if (!url) {
-      if (selectedProject?.slug === 'lakewood') {
-        url = 'http://localhost:5173'
-      } else if (selectedProject?.slug === 'phase2') {
-        url = 'http://localhost:5174'
-      } else {
-        url = 'http://localhost:5173' // fallback
-      }
-    }
+// /apps/mv-crm/src/pages/Dashboard.jsx línea 98-104
+if (!url) {
+  if (selectedProject?.slug === 'lakewood') {
+    url = 'http://localhost:5173'  // lakewood-p1
+  } else if (selectedProject?.slug === 'lakewood-f2') {
+    url = 'http://localhost:5175'  // phase-2 ✅ CORREGIDO
+  } else {
+    url = 'http://localhost:5173' // fallback
+  }
+}
   
     window.open(`${url}/dashboard?token=${token}`, '_blank')
   }

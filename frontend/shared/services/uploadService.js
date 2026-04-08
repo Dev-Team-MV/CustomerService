@@ -298,6 +298,28 @@ deleteClubhouseImages: async ({ filenames = [], names = [], deleteFromStorage = 
     },
   // ...existing code...
 
+    // ── BUILDING UPLOADS ───────────────────────────────────────
+  uploadBuildingExteriorImage: async (file, isPublic = true) => {
+    return uploadService.uploadImage(file, 'buildings/exterior', '', isPublic)
+  },
+
+  uploadBuildingExteriorImages: async (files, isPublic = true) => {
+    return uploadService.uploadMultipleImages(files, 'buildings/exterior', isPublic)
+  },
+
+  uploadBuildingFloorPlan: async (file, buildingId, floorNumber, isPublic = true) => {
+    const fileName = `${buildingId}_floor_${floorNumber}`
+    return uploadService.uploadImage(file, 'buildings/floor-plans', fileName, isPublic)
+  },
+
+  // ── APARTMENT UPLOADS ──────────────────────────────────────
+  uploadApartmentModelFloorPlan: async (file, isPublic = true) => {
+    return uploadService.uploadImage(file, 'apartments/models/floor-plans', '', isPublic)
+  },
+
+  uploadApartmentInteriorImages: async (files, type = 'basic', isPublic = true) => {
+    return uploadService.uploadMultipleImages(files, `apartments/interior/${type}`, isPublic)
+  },
 }
 
 export default uploadService

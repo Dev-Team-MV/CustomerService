@@ -1,0 +1,21 @@
+{
+  "apartmentContracts": "Contratos de Apartamento",
+  "propertyContracts": "Contratos de Propiedad",
+  "apartmentSubtitle": "Sube y gestiona contratos para el Apartamento {{number}}",
+  "propertySubtitle": "Sube y gestiona contratos para la Propiedad {{number}}",
+  "submitContracts": "Enviar {{count}} Contrato",
+  "submitContracts_plural": "Enviar {{count}} Contratos",
+  "uploadProgress": "Progreso de Subida",
+  "progressSummary": "{{uploaded}} subidos • {{pending}} pendientes",
+  "filesReady": "{{count}} archivo(s) listo(s) para subir",
+  "submitAllHint": "Haz clic en \"Enviar Todos los Contratos\" para completar la subida",
+  "uploaded": "Subido",
+  "pending": "Pendiente",
+  "view": "Ver",
+  "download": "Descargar",
+  "delete": "Eliminar",
+  "deleting": "Eliminando...",
+  "deleteHint": "💡 Elimina este documento para subir uno nuevo si es necesario",
+  "selectFile": "Seleccionar Archivo",
+  "pendingHint": "Este archivo está pendiente de subida. Haz clic en \"Enviar Todos los Contratos\" para subirlo."
+}

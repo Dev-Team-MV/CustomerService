@@ -5,7 +5,7 @@ import { Home } from '@mui/icons-material'
 import useModalState from '@shared/hooks/useModalState'
 import ApartmentDialog from '../ApartmentDialog'
 import ApartmentCard from './ApartmentCard'
-
+import { useTranslation } from 'react-i18next'
 const BuildingApartmentsTab = ({
   apartments,
   apartmentModels,
@@ -16,12 +16,12 @@ const BuildingApartmentsTab = ({
   handleCloseApartment,
 
 }) => {
-
+const { t } = useTranslation(['buildings', 'common'])
   return (
     <Box>
       <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
         <Home sx={{ color: 'secondary.main' }} />
-        Apartments
+        {t('buildings:apartmentsTab', 'Apartments')}
       </Typography>
 
       <Button
@@ -36,7 +36,8 @@ const BuildingApartmentsTab = ({
           fontWeight: 600
         }}
       >
-        Create Apartment
+                {t('buildings:createApartment', 'Create Apartment')}
+
       </Button>
 
       {apartments.length === 0 ? (
@@ -44,7 +45,7 @@ const BuildingApartmentsTab = ({
           variant="body2"
           sx={{ color: 'text.secondary', fontFamily: '"Poppins", sans-serif' }}
         >
-          No apartments created yet. Total expected: {building.totalApartments}
+          {t('buildings:noApartments', 'No apartments created yet. Total expected: {{count}}', { count: building.totalApartments })}
         </Typography>
       ) : (
 <Box

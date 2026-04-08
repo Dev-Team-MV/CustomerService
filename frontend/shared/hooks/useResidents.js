@@ -62,73 +62,100 @@ export const useResidents = (projectId = null) => {
   const [isPhoneValid, setIsPhoneValid] = useState(false)
 
   // --- Fetch users ---
-  // const fetchData = useCallback(async () => {
-  //   setLoading(true)
-  //   try {
-  //     // ✅ Construir URL con filtro de proyecto si existe
-  //     const params = {}
-  //     if (projectId) {
-  //       params.projectId = projectId
-  //     }
-      
-  //     const res = await api.get('/users', { params })
-      
-  //     // El backend ya devuelve usuarios filtrados por proyecto con campo 'projects'
-  //     setUsers(res.data)
-  //     setStats({
-  //       total: res.data.length,
-  //       superadmins: res.data.filter(u => u.role === 'superadmin').length,
-  //       admins: res.data.filter(u => u.role === 'admin').length,
-  //       residents: res.data.filter(u => u.role === 'user').length,
-  //     })
-  //   } catch (error) {
-  //     setSnackbar({ open: true, message: error.message, severity: 'error' })
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }, [projectId])
-  const fetchData = useCallback(async () => {
-  setLoading(true)
-  try {
-    if (projectId) {
-      // ✅ Si hay projectId, hacer 3 llamadas en paralelo
-      const [residentsRes, adminsRes, superadminsRes] = await Promise.all([
-        api.get('/users', { params: { projectId } }), // Residentes del proyecto
-        api.get('/users', { params: { role: 'admin' } }), // Todos los admins
-        api.get('/users', { params: { role: 'superadmin' } }) // Todos los superadmins
-      ])
+//   const fetchData = useCallback(async () => {
+//   setLoading(true)
+//   try {
+//     if (projectId) {
+//       // ✅ Si hay projectId, hacer 3 llamadas en paralelo
+//       const [residentsRes, adminsRes, superadminsRes] = await Promise.all([
+//         api.get('/users', { params: { projectId } }), // Residentes del proyecto
+//         api.get('/users', { params: { role: 'admin' } }), // Todos los admins
+//         api.get('/users', { params: { role: 'superadmin' } }) // Todos los superadmins
+//       ])
  
-      // Combinar resultados y eliminar duplicados por _id
-      const allUsers = [...residentsRes.data, ...adminsRes.data, ...superadminsRes.data]
-      const uniqueUsers = Array.from(
-        new Map(allUsers.map(user => [user._id, user])).values()
-      )
+//       // Combinar resultados y eliminar duplicados por _id
+//       const allUsers = [...residentsRes.data, ...adminsRes.data, ...superadminsRes.data]
+//       const uniqueUsers = Array.from(
+//         new Map(allUsers.map(user => [user._id, user])).values()
+//       )
  
-      setUsers(uniqueUsers)
-      setStats({
-        total: uniqueUsers.length,
-        superadmins: uniqueUsers.filter(u => u.role === 'superadmin').length,
-        admins: uniqueUsers.filter(u => u.role === 'admin').length,
-        residents: uniqueUsers.filter(u => u.role === 'user').length,
-      })
-    } else {
-      // ✅ Sin filtro de proyecto, obtener todos los usuarios
-      const res = await api.get('/users/search')
-      setUsers(res.data)
-      setStats({
-        total: res.data.length,
-        superadmins: res.data.filter(u => u.role === 'superadmin').length,
-        admins: res.data.filter(u => u.role === 'admin').length,
-        residents: res.data.filter(u => u.role === 'user').length,
-      })
-    }
-  } catch (error) {
-    setSnackbar({ open: true, message: error.message, severity: 'error' })
-  } finally {
-    setLoading(false)
-  }
-}, [projectId])
+//       setUsers(uniqueUsers)
+//       setStats({
+//         total: uniqueUsers.length,
+//         superadmins: uniqueUsers.filter(u => u.role === 'superadmin').length,
+//         admins: uniqueUsers.filter(u => u.role === 'admin').length,
+//         residents: uniqueUsers.filter(u => u.role === 'user').length,
+//       })
+//     } else {
+//       // ✅ Sin filtro de proyecto, obtener todos los usuarios
+//       // const res = await api.get('/users/search')
+          
+//       const fallbackId = import.meta.env.VITE_PROJECT_ID
+//       const res = await api.get('/users/search', { params: { projectId: fallbackId } })
+//       setUsers(res.data)
+//       setStats({
+//         total: res.data.length,
+//         superadmins: res.data.filter(u => u.role === 'superadmin').length,
+//         admins: res.data.filter(u => u.role === 'admin').length,
+//         residents: res.data.filter(u => u.role === 'user').length,
+//       })
+//     }
+//   } catch (error) {
+//     setSnackbar({ open: true, message: error.message, severity: 'error' })
+//   } finally {
+//     setLoading(false)
+//   }
+// }, [projectId])
 
+  const fetchData = useCallback(async () => {
+    setLoading(true)
+    try {
+      if (projectId) {
+        try {
+          // Admin path: 3 llamadas paralelas
+          const [residentsRes, adminsRes, superadminsRes] = await Promise.all([
+            api.get('/users', { params: { projectId } }),
+            api.get('/users', { params: { role: 'admin' } }),
+            api.get('/users', { params: { role: 'superadmin' } })
+          ])
+          const allUsers = [...residentsRes.data, ...adminsRes.data, ...superadminsRes.data]
+          const uniqueUsers = Array.from(
+            new Map(allUsers.map(user => [user._id, user])).values()
+          )
+          setUsers(uniqueUsers)
+          setStats({
+            total: uniqueUsers.length,
+            superadmins: uniqueUsers.filter(u => u.role === 'superadmin').length,
+            admins: uniqueUsers.filter(u => u.role === 'admin').length,
+            residents: uniqueUsers.filter(u => u.role === 'user').length,
+          })
+        } catch {
+          // Fallback para role 'user' (sin acceso a /users)
+          const res = await api.get('/users/search', { params: { projectId } })
+          setUsers(res.data)
+          setStats({
+            total: res.data.length,
+            superadmins: res.data.filter(u => u.role === 'superadmin').length,
+            admins: res.data.filter(u => u.role === 'admin').length,
+            residents: res.data.filter(u => u.role === 'user').length,
+          })
+        }
+      } else {
+        const res = await api.get('/users')
+        setUsers(res.data)
+        setStats({
+          total: res.data.length,
+          superadmins: res.data.filter(u => u.role === 'superadmin').length,
+          admins: res.data.filter(u => u.role === 'admin').length,
+          residents: res.data.filter(u => u.role === 'user').length,
+        })
+      }
+    } catch (error) {
+      setSnackbar({ open: true, message: error.message, severity: 'error' })
+    } finally {
+      setLoading(false)
+    }
+  }, [projectId])
 
 
   useEffect(() => { fetchData() }, [fetchData])
@@ -208,7 +235,34 @@ export const useResidents = (projectId = null) => {
   }, [formData, isEmailValid, isPhoneValid])
 
   // --- Submit ---
-  const handleSubmit = useCallback(async () => {
+  // const handleSubmit = useCallback(async () => {
+  //   try {
+  //     const payload = { ...formData }
+  //     payload.phoneNumber = e164Value || toE164(formData.phoneNumber)
+  //     if (selectedUser) {
+  //       if (!payload.password) delete payload.password
+  //       await api.put(`/users/${selectedUser._id}`, payload)
+  //       setSnackbar({ open: true, message: t('residents:snackbar.updated'), severity: 'success' })
+  //       handleCloseDialog()
+  //       fetchData()
+  //     } else {
+  //       const res = await api.post('/auth/register', { ...payload, skipPasswordSetup: true })
+  //       const newUser = res.data.user || res.data
+  //       setSnackbar({ open: true, message: t('residents:snackbar.created'), severity: 'success' })
+  //       setOpenDialog(false)
+  //       setUsers(prev => [...prev, newUser])
+  //       setSelectedUser(newUser)
+  //     }
+  //   } catch (error) {
+  //     setSnackbar({
+  //       open: true,
+  //       message: error.response?.data?.message || error.message,
+  //       severity: 'error'
+  //     })
+  //   }
+  // }, [formData, selectedUser, handleCloseDialog, fetchData, t, e164Value])
+
+    const handleSubmit = useCallback(async () => {
     try {
       const payload = { ...formData }
       payload.phoneNumber = e164Value || toE164(formData.phoneNumber)
@@ -216,12 +270,23 @@ export const useResidents = (projectId = null) => {
         if (!payload.password) delete payload.password
         await api.put(`/users/${selectedUser._id}`, payload)
         setSnackbar({ open: true, message: t('residents:snackbar.updated'), severity: 'success' })
+        handleCloseDialog()
+        fetchData()
       } else {
-        await api.post('/auth/register', { ...payload, skipPasswordSetup: true })
+        const registerPayload = { 
+          ...payload, 
+          skipPasswordSetup: true
+        }
+        if (projectId) {
+          registerPayload.projectId = projectId
+        }
+        const res = await api.post('/auth/register', registerPayload)
+        const newUser = res.data.user || res.data
         setSnackbar({ open: true, message: t('residents:snackbar.created'), severity: 'success' })
+        setOpenDialog(false)
+        setUsers(prev => [...prev, newUser])
+        setSelectedUser(newUser)
       }
-      handleCloseDialog()
-      fetchData()
     } catch (error) {
       setSnackbar({
         open: true,
@@ -229,8 +294,7 @@ export const useResidents = (projectId = null) => {
         severity: 'error'
       })
     }
-  }, [formData, selectedUser, handleCloseDialog, fetchData, t, e164Value])
-
+  }, [formData, selectedUser, handleCloseDialog, fetchData, t, e164Value, projectId])
   // --- Delete ---
   const handleDelete = useCallback(async (id) => {
     if (!window.confirm(t('residents:confirmDelete'))) return

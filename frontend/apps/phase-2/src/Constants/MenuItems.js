@@ -3,8 +3,15 @@ import {
   People as PeopleIcon,
   Home as HomeIcon,
   BarChart as BarChartIcon,
-    Settings as Settings,
+  Settings as SettingsIcon,
   Newspaper as NewspaperIcon,
+  Apartment as ApartmentIcon,
+  AccountBalance as AccountBalanceIcon,
+  Deck as DeckIcon,
+  Forum as ForumIcon,
+  Map as MapIcon,
+  MeetingRoom as MeetingRoomIcon,
+  Groups as GroupsIcon,
 } from "@mui/icons-material"
 
 export const privateMenuItems = [
@@ -16,7 +23,7 @@ export const privateMenuItems = [
   },
   {
     textKey: "navigation:menu.buildings",
-    icon: HomeIcon,
+    icon: ApartmentIcon,
     path: "/buildings",
     roles: ["superadmin", "admin"],
   },
@@ -34,21 +41,21 @@ export const privateMenuItems = [
   },
   {
     textKey: "navigation:menu.payloads",
-    icon: HomeIcon,
+    icon: AccountBalanceIcon,
     path: "/payloads",
     roles: ["superadmin", "admin"],
   },
   {
     textKey: "navigation:menu.amenities",
-    icon: HomeIcon,
+    icon: DeckIcon,
     path: "/amenities",
     roles: ["superadmin", "admin", "user"],
   },
   {
     textKey: "navigation:menu.agora",
-    icon: HomeIcon,
+    icon: ForumIcon,
     path: "/agora",
-    roles: ["superadmin", "admin", "user"],
+    roles: ["superadmin", "admin"],
   },
   {
     textKey: "navigation:menu.residents",
@@ -58,19 +65,19 @@ export const privateMenuItems = [
   },
   {
     textKey: "navigation:menu.masterPlan",
-    icon: PeopleIcon,
+    icon: MapIcon,
     path: "/master-plan",
     roles: ["superadmin", "admin"],
   },
   {
     textKey: "navigation:menu.myapartment",
-    icon: PeopleIcon,
+    icon: MeetingRoomIcon,
     path: "/my-apartment",
     roles: ["superadmin", "admin", "user"],
   },
   {
     textKey: "navigation:menu.familyGroup",
-    icon: PeopleIcon,
+    icon: GroupsIcon,
     path: "/family-group",
     roles: ["superadmin", "admin", "user"],
   },
@@ -82,15 +89,14 @@ export const privateMenuItems = [
   },
   {
     textKey: "navigation:menu.configuration",
-    icon: Settings,
+    icon: SettingsIcon,
     path: "/configuration",
     roles: ["superadmin", "admin"],
   },
-  
 ]
 
 export const publicMenuItems = [
   { textKey: "navigation:menu.home", icon: HomeIcon, path: "/" },
   { textKey: "navigation:menu.news", icon: NewspaperIcon, path: "/explore/news" },
-  { textKey: "navigation:menu.amenities", icon: HomeIcon, path: "/explore/amenities" }
+  { textKey: "navigation:menu.amenities", icon: DeckIcon, path: "/explore/amenities" }
 ]

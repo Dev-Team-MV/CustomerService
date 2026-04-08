@@ -64,7 +64,7 @@ export const privateMenuItems = [
   {
     textKey: "navigation:menu.news",
     icon: Article,
-    path: "/news",
+    path: "/admin/news",
     roles: ["superadmin", "admin"],
   },
   {
