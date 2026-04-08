@@ -7,6 +7,7 @@ import User from '../models/User.js'
 import Phase from '../models/Phase.js'
 import { normalizeImageArray } from '../utils/imageUtils.js'
 import { getVisiblePropertyIdsForUser, canUserAccessProperty } from '../utils/propertyVisibility.js'
+import { hydrateUrlsInObject } from '../services/urlResolverService.js'
 
 /** Normalize ref/id to string; safe when value is undefined. */
 function toIdStr(val) {
@@ -154,6 +155,7 @@ export const getAllProperties = async (req, res) => {
       return propertyObj
     })
     
+    await hydrateUrlsInObject(propertiesWithPercentage)
     res.json(propertiesWithPercentage)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -197,6 +199,7 @@ export const getPropertyById = async (req, res) => {
     propertyObj.totalConstructionPercentage = property.totalConstructionPercentage || 0
     propertyObj.images = getPropertyImages(property)
     propertyObj.blueprints = getPropertyBlueprints(property)
+    await hydrateUrlsInObject(propertyObj)
     res.json(propertyObj)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -343,6 +346,7 @@ export const createProperty = async (req, res) => {
     propertyObj.images = getPropertyImages(populatedProperty)
     propertyObj.blueprints = getPropertyBlueprints(populatedProperty)
     
+    await hydrateUrlsInObject(propertyObj)
     res.status(201).json(propertyObj)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -478,6 +482,7 @@ export const updateProperty = async (req, res) => {
       propertyObj.images = getPropertyImages(populatedProperty)
       propertyObj.blueprints = getPropertyBlueprints(populatedProperty)
       
+      await hydrateUrlsInObject(propertyObj)
       res.json(propertyObj)
     } else {
       res.status(404).json({ message: 'Property not found' })
