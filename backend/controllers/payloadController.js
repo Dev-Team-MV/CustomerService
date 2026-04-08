@@ -1,22 +1,74 @@
 import Payload from '../models/Payload.js'
 import Property from '../models/Property.js'
 import Apartment from '../models/Apartment.js'
+import Building from '../models/Building.js'
+import Project from '../models/Project.js'
 import Lot from '../models/Lot.js'
 import { canUserAccessProperty, canUserAccessApartment } from '../utils/propertyVisibility.js'
+import { canUserAccessProject } from '../utils/projectAccess.js'
 import { uploadFile } from '../services/storageService.js'
 import { processImageForUpload } from '../services/imageProcessingService.js'
 import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
 import crypto from 'crypto'
 import path from 'path'
 
+async function resolvePayloadScopeByProject(projectId) {
+  const [propertyIds, buildingIds] = await Promise.all([
+    Property.distinct('_id', { project: projectId }),
+    Building.distinct('_id', { project: projectId })
+  ])
+  const apartmentIds = buildingIds.length
+    ? await Apartment.distinct('_id', { building: { $in: buildingIds } })
+    : []
+
+  return {
+    $or: [
+      { property: { $in: propertyIds } },
+      { apartment: { $in: apartmentIds } }
+    ]
+  }
+}
+
+async function validateProjectAccessFromQuery(req, res, options = {}) {
+  const { required = false } = options
+  const { projectId } = req.query
+  if (!projectId) {
+    if (required) {
+      res.status(400).json({ message: 'projectId is required' })
+      return { ok: false }
+    }
+    return { ok: true, projectId: null }
+  }
+
+  const exists = await Project.exists({ _id: projectId })
+  if (!exists) {
+    res.status(404).json({ message: 'Project not found' })
+    return { ok: false }
+  }
+
+  const allowed = await canUserAccessProject(req.user._id, projectId, { role: req.user.role })
+  if (!allowed) {
+    res.status(403).json({ message: 'No access to this project' })
+    return { ok: false }
+  }
+
+  return { ok: true, projectId }
+}
+
 export const getAllPayloads = async (req, res) => {
   try {
-    const { status, property, apartment } = req.query
+    const access = await validateProjectAccessFromQuery(req, res, { required: true })
+    if (!access.ok) return
+
+    const { status, property, apartment, projectId } = req.query
     const filter = {}
     
     if (status) filter.status = status
     if (property) filter.property = property
     if (apartment) filter.apartment = apartment
+    if (projectId) {
+      Object.assign(filter, await resolvePayloadScopeByProject(projectId))
+    }
     
     const payloads = await Payload.find(filter)
       .populate({
@@ -314,16 +366,23 @@ export const deletePayload = async (req, res) => {
 
 export const getPayloadStats = async (req, res) => {
   try {
+    const access = await validateProjectAccessFromQuery(req, res, { required: true })
+    if (!access.ok) return
+
+    const projectScope = access.projectId
+      ? await resolvePayloadScopeByProject(access.projectId)
+      : {}
+
     const totalCollected = await Payload.aggregate([
-      { $match: { status: 'signed' } },
+      { $match: { ...projectScope, status: 'signed' } },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ])
     
-    const pendingPayloads = await Payload.countDocuments({ status: 'pending' })
-    const rejectedPayloads = await Payload.countDocuments({ status: 'rejected' })
+    const pendingPayloads = await Payload.countDocuments({ ...projectScope, status: 'pending' })
+    const rejectedPayloads = await Payload.countDocuments({ ...projectScope, status: 'rejected' })
     
     const recentFailures = await Payload.aggregate([
-      { $match: { status: 'rejected' } },
+      { $match: { ...projectScope, status: 'rejected' } },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ])
     
@@ -340,6 +399,13 @@ export const getPayloadStats = async (req, res) => {
 
 export const getApprovedPayloadsThisMonth = async (req, res) => {
   try {
+    const access = await validateProjectAccessFromQuery(req, res, { required: true })
+    if (!access.ok) return
+
+    const projectScope = access.projectId
+      ? await resolvePayloadScopeByProject(access.projectId)
+      : {}
+
     // Obtener el primer y último día del mes actual
     const now = new Date()
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -347,6 +413,7 @@ export const getApprovedPayloadsThisMonth = async (req, res) => {
     
     // Filtrar pagos aprobados (signed) del mes actual
     const payloads = await Payload.find({
+      ...projectScope,
       status: 'signed',
       date: {
         $gte: firstDayOfMonth,

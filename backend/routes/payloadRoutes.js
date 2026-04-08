@@ -23,6 +23,12 @@ const router = express.Router()
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Project ID. Required to keep payloads isolated by project.
+ *       - in: query
  *         name: property
  *         schema:
  *           type: string
@@ -121,6 +127,13 @@ router.route('/')
  *     tags: [Payloads]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Project ID. Required to compute stats per project.
  *     responses:
  *       200:
  *         description: Payload statistics
@@ -135,6 +148,13 @@ router.get('/stats', protect, getPayloadStats)
  *     tags: [Payloads]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Project ID. Required to list approved payloads by project.
  *     responses:
  *       200:
  *         description: List of approved payloads from this month
