@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 import User from '../models/User.js'
+import Project from '../models/Project.js'
 import { sendSMSWithValidation } from '../services/twilioService.js'
 
 const generateToken = (id) => {
@@ -19,7 +20,7 @@ function getFrontendUrlOrThrow() {
 
 export const register = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, phoneNumber, birthday, role, skipPasswordSetup } = req.body
+    const { firstName, lastName, email, password, phoneNumber, birthday, role, skipPasswordSetup, projectId } = req.body
 
     const userExists = await User.findOne({ email })
 
@@ -65,6 +66,14 @@ export const register = async (req, res) => {
       phoneNumber,
       birthday,
       role: role || 'user'
+    }
+
+    if (projectId) {
+      const exists = await Project.exists({ _id: projectId })
+      if (!exists) {
+        return res.status(404).json({ message: 'Project not found' })
+      }
+      userData.projectMemberships = [{ project: projectId, role: 'resident' }]
     }
 
     // Si no es admin creando usuario, requiere contraseña

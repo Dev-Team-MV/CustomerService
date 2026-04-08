@@ -50,6 +50,9 @@ const router = express.Router()
  *               skipPasswordSetup:
  *                 type: boolean
  *                 description: If true (admin only), user will receive SMS with setup link instead of password. Requires admin authentication.
+ *               projectId:
+ *                 type: string
+ *                 description: Optional project ID. If sent, user is created with project membership so it appears immediately in project-scoped searches/lists.
  *     responses:
  *       201:
  *         description: User registered successfully
