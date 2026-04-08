@@ -190,6 +190,12 @@ router.get('/approved/this-month', protect, getApprovedPayloadsThisMonth)
  *         required: true
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Project ID used to validate payload scope.
  *     responses:
  *       200:
  *         description: Payload details
@@ -209,6 +215,12 @@ router.get('/approved/this-month', protect, getApprovedPayloadsThisMonth)
  *         required: true
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Project ID used to validate payload scope.
  *       - in: formData
  *         name: images
  *         type: file
@@ -255,6 +267,12 @@ router.get('/approved/this-month', protect, getApprovedPayloadsThisMonth)
  *         required: true
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Project ID used to validate payload scope.
  *     responses:
  *       200:
  *         description: Payload deleted

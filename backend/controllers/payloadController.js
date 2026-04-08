@@ -55,6 +55,24 @@ async function validateProjectAccessFromQuery(req, res, options = {}) {
   return { ok: true, projectId }
 }
 
+async function resolveProjectIdForPayload(payloadDoc) {
+  if (payloadDoc.property) {
+    const prop = await Property.findById(payloadDoc.property).select('project').lean()
+    return prop?.project ? prop.project.toString() : null
+  }
+
+  if (payloadDoc.apartment) {
+    const apt = await Apartment.findById(payloadDoc.apartment)
+      .select('building')
+      .populate('building', 'project')
+      .lean()
+    const project = apt?.building?.project
+    return project ? project.toString() : null
+  }
+
+  return null
+}
+
 export const getAllPayloads = async (req, res) => {
   try {
     const access = await validateProjectAccessFromQuery(req, res, { required: true })
@@ -100,6 +118,9 @@ export const getAllPayloads = async (req, res) => {
 
 export const getPayloadById = async (req, res) => {
   try {
+    const access = await validateProjectAccessFromQuery(req, res, { required: true })
+    if (!access.ok) return
+
     const payload = await Payload.findById(req.params.id)
       .populate({
         path: 'property',
@@ -120,6 +141,10 @@ export const getPayloadById = async (req, res) => {
       .populate('processedBy', 'firstName lastName')
     
     if (payload) {
+      const payloadProjectId = await resolveProjectIdForPayload(payload)
+      if (!payloadProjectId || payloadProjectId !== access.projectId.toString()) {
+        return res.status(404).json({ message: 'Payload not found in this project' })
+      }
       const data = payload.toObject()
       await hydrateUrlsInObject(data)
       res.json(data)
@@ -231,9 +256,16 @@ export const createPayload = async (req, res) => {
 
 export const updatePayload = async (req, res) => {
   try {
+    const access = await validateProjectAccessFromQuery(req, res, { required: true })
+    if (!access.ok) return
+
     const payload = await Payload.findById(req.params.id)
     
     if (payload) {
+      const payloadProjectId = await resolveProjectIdForPayload(payload)
+      if (!payloadProjectId || payloadProjectId !== access.projectId.toString()) {
+        return res.status(404).json({ message: 'Payload not found in this project' })
+      }
       const oldStatus = payload.status
       const oldAmount = payload.amount
       const { folder } = req.body
@@ -340,9 +372,16 @@ export const updatePayload = async (req, res) => {
 
 export const deletePayload = async (req, res) => {
   try {
+    const access = await validateProjectAccessFromQuery(req, res, { required: true })
+    if (!access.ok) return
+
     const payload = await Payload.findById(req.params.id)
     
     if (payload) {
+      const payloadProjectId = await resolveProjectIdForPayload(payload)
+      if (!payloadProjectId || payloadProjectId !== access.projectId.toString()) {
+        return res.status(404).json({ message: 'Payload not found in this project' })
+      }
       if (payload.status === 'signed') {
         const unitId = payload.property || payload.apartment
         const unit = payload.property

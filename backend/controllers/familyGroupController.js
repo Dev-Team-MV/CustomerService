@@ -30,15 +30,11 @@ export const createFamilyGroup = async (req, res) => {
       return res.status(400).json({ message: 'Group name is required' })
     }
     let pid = projectId || req.body.project
-    if (pid && !mongoose.Types.ObjectId.isValid(pid)) {
-      return res.status(400).json({ message: 'Valid projectId is required' })
-    }
     if (!pid) {
-      const fallback = await Project.findOne().sort({ _id: 1 }).select('_id').lean()
-      if (!fallback) {
-        return res.status(400).json({ message: 'No project exists; create a project or send projectId' })
-      }
-      pid = fallback._id
+      return res.status(400).json({ message: 'projectId is required' })
+    }
+    if (!mongoose.Types.ObjectId.isValid(pid)) {
+      return res.status(400).json({ message: 'Valid projectId is required' })
     }
     const projectExists = await Project.exists({ _id: pid })
     if (!projectExists) {

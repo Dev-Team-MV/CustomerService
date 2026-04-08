@@ -9,6 +9,14 @@ const generateToken = (id) => {
   })
 }
 
+function getFrontendUrlOrThrow() {
+  const frontendUrl = process.env.FRONTEND_URL
+  if (!frontendUrl) {
+    throw new Error('FRONTEND_URL is not configured')
+  }
+  return frontendUrl
+}
+
 export const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password, phoneNumber, birthday, role, skipPasswordSetup } = req.body
@@ -75,7 +83,7 @@ export const register = async (req, res) => {
       // Enviar SMS con el link de setup
       if (phoneNumber) {
         try {
-          const frontendUrl = process.env.FRONTEND_URL || 'https://lakewoodp1.michelangelodelvalle.com'
+          const frontendUrl = getFrontendUrlOrThrow()
           const setupLink = `${frontendUrl}/setup-password/${setupToken}`
           const message = `Hi ${firstName}, your account has been created. Please set your password by visiting this link: ${setupLink}`
           
@@ -415,7 +423,7 @@ export const sendSetupPasswordLink = async (req, res) => {
     const setupToken = user.generateSetupToken()
     await user.save()
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://lakewoodp1.michelangelodelvalle.com'
+    const frontendUrl = getFrontendUrlOrThrow()
     const setupLink = `${frontendUrl}/setup-password/${setupToken}`
     const message = `Hi ${user.firstName}, you can set your password by visiting this link: ${setupLink}`
 
