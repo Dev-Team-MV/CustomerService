@@ -112,7 +112,7 @@ export const searchUsers = async (req, res) => {
     }
 
     const users = await User.find(filter)
-      .select('_id firstName lastName email')
+      .select('_id firstName lastName email projectMemberships')
       .limit(query.length >= 2 ? 50 : 100)
       .sort({ lastName: 1, firstName: 1 })
 
