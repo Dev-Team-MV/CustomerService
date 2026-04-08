@@ -47,6 +47,11 @@ export const createFamilyGroup = async (req, res) => {
       createdBy: req.user._id,
       members: []
     })
+    // Ensure creator can access the project even before owning/sharing a property.
+    await User.updateOne(
+      { _id: req.user._id },
+      { $addToSet: { projectMemberships: { project: pid, role: 'resident' } } }
+    )
     await group.populate('createdBy', 'firstName lastName email')
     await group.populate(POPULATE_PROJECT)
     res.status(201).json(group)
@@ -193,6 +198,12 @@ export const addMemberToFamilyGroup = async (req, res) => {
     group.members.push({ user: userId, role: role === 'admin' ? 'admin' : 'member' })
     group.markModified('members')
     await group.save()
+
+    // Grant explicit project access so new member can see project context immediately.
+    await User.updateOne(
+      { _id: userId },
+      { $addToSet: { projectMemberships: { project: group.project, role: 'resident' } } }
+    )
 
     // Sync shares for the newly added member:
     // - when a group was already sharing properties/apartments,
