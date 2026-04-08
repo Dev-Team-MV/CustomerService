@@ -37,49 +37,28 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
   //   return null
   // }
     // Helper para extraer URLs - versión mejorada
-  // Helper para construir URL completa
-  const buildFullUrl = (path) => {
-    if (!path) return null
-    // Si ya es una URL completa, retornarla
-    if (path.startsWith('http://') || path.startsWith('https://')) return path
-    // Construir URL completa con el backend
-    const baseUrl = import.meta.env.VITE_API_URL || 'https://apicsdev.michelangelodelvalle.com'
-    return `${baseUrl}/uploads/${path}`
-  }
-
-  // Helper para extraer URLs - versión mejorada
   const extractUrl = (item) => {
     if (!item) return null
     
-    let rawPath = null
-    
     // Caso 1: string directo
-    if (typeof item === 'string') {
-      rawPath = item
-    }
+    if (typeof item === 'string') return item
+    
     // Caso 2: objeto con propiedad url
-    else if (item.url) {
+    if (item.url) {
       if (Array.isArray(item.url) && item.url.length > 0) {
-        rawPath = typeof item.url[0] === 'string' ? item.url[0] : null
-      } else if (typeof item.url === 'string') {
-        rawPath = item.url
+        return typeof item.url[0] === 'string' ? item.url[0] : null
       }
+      if (typeof item.url === 'string') return item.url
     }
-    // Caso 3: objeto con propiedad path
-    else if (item.path && typeof item.path === 'string') {
-      rawPath = item.path
-    }
+    
+    // Caso 3: objeto con propiedad path (algunos backends usan esto)
+    if (item.path && typeof item.path === 'string') return item.path
+    
     // Caso 4: objeto con propiedad src
-    else if (item.src && typeof item.src === 'string') {
-      rawPath = item.src
-    }
+    if (item.src && typeof item.src === 'string') return item.src
     
-    if (!rawPath) {
-      console.warn('⚠️ No se pudo extraer URL de:', item)
-      return null
-    }
-    
-    return buildFullUrl(rawPath)
+    console.warn('⚠️ No se pudo extraer URL de:', item)
+    return null
   }
 
   // Imágenes y blueprints directamente de propertyDetails

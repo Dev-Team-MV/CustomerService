@@ -28,6 +28,8 @@ import Payloads from './Pages/Payloads'
 import MasterPlanPage from './Pages/MasterPlanPage'
 import MyApartment from './Pages/MyApartment'
 import FamilyGroup from './Pages/FamilyGroup'
+import AmenitiesPublic from './Pages/Amenities/AmenitiesPublic'
+import AmenitiesPrivate from './Pages/Amenities/AmenitiesPrivate'
 
 // ...agrega aquí el resto de tus páginas privadas
 
@@ -69,6 +71,7 @@ function App() {
               />
             }
           >
+            <Route path="/explore/amenities" element={<AmenitiesPublic />} />
             {/* Agrega aquí tus rutas públicas si las tienes */}
           </Route>
 
@@ -104,6 +107,7 @@ function App() {
               <Route path="/master-plan" element={<MasterPlanPage />} />
               <Route path="/my-apartment" element={<MyApartment />} />
               <Route path="/family-group" element={<FamilyGroup />} /> 
+              <Route path="/amenities" element={<AmenitiesPrivate />} />
 
               {/* Agrega aquí el resto de tus rutas privadas ISQ */}
             </Route>

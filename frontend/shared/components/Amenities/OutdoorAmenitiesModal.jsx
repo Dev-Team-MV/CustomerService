@@ -1,20 +1,18 @@
-// OutdoorAmenitiesModal.jsx (Phase 2) - reemplazar todo el contenido
-
 import { useState, useEffect } from 'react'
 import { Box, Typography, Grid, CircularProgress, Chip } from '@mui/material'
 import { CloudUpload, Check } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
 import { useTranslation } from 'react-i18next'
-import uploadService from '../../../Services/uploadService'
-import { OUTDOOR_AMENITIES } from '../../../Constants/amenities'
-import ImagePreview from '@shared/components/ImgPreview'
-import ModalWrapper from '@shared/constants/ModalWrapper'
-import PrimaryButton from '@shared/constants/PrimaryButton'
+import uploadService from '../../services/uploadService'
+import ImagePreview from '../ImgPreview'
+import ModalWrapper from '../../constants/ModalWrapper'
+import PrimaryButton from '../../constants/PrimaryButton'
 
 const OutdoorAmenitiesModal = ({
   open,
   onClose,
   projectId,
+  amenities = [],
   amenitySections = [],
   onUploaded
 }) => {
@@ -23,13 +21,16 @@ const OutdoorAmenitiesModal = ({
 
   const [selectedAmenity, setSelectedAmenity] = useState('')
   const [selectedFiles, setSelectedFiles] = useState(
-    OUTDOOR_AMENITIES.reduce((acc, amenity) => ({ ...acc, [amenity.key]: [] }), {})
+    amenities.reduce((acc, a) => ({ ...acc, [a.key]: [] }), {})
   )
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
-    if (open) setSelectedAmenity('')
-  }, [open])
+    if (open) {
+      setSelectedAmenity('')
+      setSelectedFiles(amenities.reduce((acc, a) => ({ ...acc, [a.key]: [] }), {}))
+    }
+  }, [open, amenities])
 
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files)
@@ -52,9 +53,7 @@ const OutdoorAmenitiesModal = ({
   const handleToggleSelectedFileVisibility = (amenityKey, idx, checked) => {
     setSelectedFiles(prev => ({
       ...prev,
-      [amenityKey]: prev[amenityKey].map((f, i) =>
-        i === idx ? { ...f, isPublic: checked } : f
-      )
+      [amenityKey]: prev[amenityKey].map((f, i) => i === idx ? { ...f, isPublic: checked } : f)
     }))
   }
 
@@ -62,9 +61,9 @@ const OutdoorAmenitiesModal = ({
     setUploading(true)
     try {
       const updatedSections = [...amenitySections]
-      for (const amenity of OUTDOOR_AMENITIES) {
+      for (const amenity of amenities) {
         const key = amenity.key
-        if (selectedFiles[key].length > 0) {
+        if (selectedFiles[key]?.length > 0) {
           const uploadedImages = await uploadService.uploadOutdoorAmenityImages(selectedFiles[key], key)
           const existingSection = updatedSections.find(s => s.key === key)
           if (existingSection) {
@@ -75,7 +74,7 @@ const OutdoorAmenitiesModal = ({
         }
       }
       await uploadService.saveOutdoorAmenities(projectId, updatedSections)
-      setSelectedFiles(OUTDOOR_AMENITIES.reduce((acc, amenity) => ({ ...acc, [amenity.key]: [] }), {}))
+      setSelectedFiles(amenities.reduce((acc, a) => ({ ...acc, [a.key]: [] }), {}))
       if (onUploaded) onUploaded()
       onClose()
     } catch (err) {
@@ -109,13 +108,14 @@ const OutdoorAmenitiesModal = ({
       await uploadService.saveOutdoorAmenities(projectId, updatedSections)
       if (onUploaded) onUploaded()
     } catch (err) {
-      console.error('[OutdoorAmenitiesModal] Error deleting uploaded image:', err)
+      console.error('[OutdoorAmenitiesModal] Error deleting image:', err)
     }
   }
 
   const currentSection = amenitySections.find(s => s.key === selectedAmenity)
   const currentImages = currentSection?.images || []
   const currentSelectedFiles = selectedFiles[selectedAmenity] || []
+  const hasAnyPending = amenities.some(a => selectedFiles[a.key]?.length > 0)
 
   return (
     <ModalWrapper
@@ -127,27 +127,26 @@ const OutdoorAmenitiesModal = ({
       fullWidth
       actions={
         <>
-          <PrimaryButton variant="outlined" color="secondary" onClick={onClose}>
-            {t('common:close')}
+          <PrimaryButton variant="outlined" onClick={onClose}>
+            {t('common:close', 'Close')}
           </PrimaryButton>
           <PrimaryButton
             variant="contained"
-            color="primary"
             onClick={handleUpload}
-            disabled={OUTDOOR_AMENITIES.every(a => selectedFiles[a.key].length === 0) || uploading}
+            disabled={!hasAnyPending || uploading}
             startIcon={uploading ? <CircularProgress size={20} /> : <Check />}
           >
-            {uploading ? t('common:uploading', 'Subiendo...') : t('common:uploadAll', 'Subir Todo')}
+            {uploading ? t('common:uploading', 'Uploading...') : t('common:uploadAll', 'Upload All')}
           </PrimaryButton>
         </>
       }
     >
       <Typography variant="subtitle2" fontWeight={700} mb={1.5}>
-        {t('amenities:selectAmenity', 'Selecciona una amenidad')}
+        {t('amenities:selectAmenity', 'Select an amenity')}
       </Typography>
 
       <Box display="flex" flexWrap="wrap" gap={1} mb={3}>
-        {OUTDOOR_AMENITIES.map(amenity => {
+        {amenities.map(amenity => {
           const section = amenitySections.find(s => s.key === amenity.key)
           const count = (section?.images?.length || 0) + (selectedFiles[amenity.key]?.length || 0)
           const isSelected = selectedAmenity === amenity.key
@@ -171,14 +170,12 @@ const OutdoorAmenitiesModal = ({
               }
               onClick={() => setSelectedAmenity(amenity.key)}
               sx={{
-                bgcolor: isSelected ? theme.palette.primary.main : `rgba(26,35,126,0.08)`,
+                bgcolor: isSelected ? theme.palette.primary.main : 'rgba(26,35,126,0.08)',
                 color: isSelected ? 'white' : theme.palette.primary.main,
                 fontWeight: 600,
                 border: `1px solid ${isSelected ? theme.palette.primary.main : 'rgba(26,35,126,0.2)'}`,
                 cursor: 'pointer',
-                '&:hover': {
-                  bgcolor: isSelected ? theme.palette.primary.dark : 'rgba(26,35,126,0.14)'
-                }
+                '&:hover': { bgcolor: isSelected ? theme.palette.primary.dark : 'rgba(26,35,126,0.14)' }
               }}
             />
           )
@@ -188,14 +185,8 @@ const OutdoorAmenitiesModal = ({
       {selectedAmenity && (
         <>
           <Box mb={2}>
-            <PrimaryButton
-              variant="contained"
-              color="primary"
-              component="label"
-              startIcon={<CloudUpload />}
-              disabled={uploading}
-            >
-              {t('amenities:selectImages', 'Seleccionar Imágenes')}
+            <PrimaryButton component="label" startIcon={<CloudUpload />} disabled={uploading}>
+              {t('amenities:selectImages', 'Select Images')}
               <input type="file" hidden multiple accept="image/*" onChange={handleFileSelect} />
             </PrimaryButton>
           </Box>
@@ -203,7 +194,7 @@ const OutdoorAmenitiesModal = ({
           {currentSelectedFiles.length > 0 && (
             <>
               <Typography variant="subtitle2" fontWeight={700} mb={1}>
-                {t('amenities:newImages', 'Nuevas Imágenes')} ({currentSelectedFiles.length})
+                {t('amenities:newImages', 'New Images')} ({currentSelectedFiles.length})
               </Typography>
               <Grid container spacing={2} mb={3}>
                 {currentSelectedFiles.map((item, idx) => (
@@ -215,10 +206,10 @@ const OutdoorAmenitiesModal = ({
                       onTogglePublic={checked => handleToggleSelectedFileVisibility(selectedAmenity, idx, checked)}
                       onDelete={() => handleRemoveSelectedFile(selectedAmenity, idx)}
                       showVisibilityChip={true}
-                      label={t('common:new')}
-                      publicLabel={t('common:public')}
-                      privateLabel={t('common:private')}
-                      noImageLabel={t('common:noImage')}
+                      label={t('common:new', 'New')}
+                      publicLabel={t('common:public', 'Public')}
+                      privateLabel={t('common:private', 'Private')}
+                      noImageLabel={t('common:noImage', 'No image')}
                       imgSx={{ height: 150 }}
                     />
                   </Grid>
@@ -230,7 +221,7 @@ const OutdoorAmenitiesModal = ({
           {currentImages.length > 0 && (
             <>
               <Typography variant="subtitle2" fontWeight={700} mb={1}>
-                {t('amenities:uploadedImages', 'Imágenes Subidas')} ({currentImages.length})
+                {t('amenities:uploadedImages', 'Uploaded Images')} ({currentImages.length})
               </Typography>
               <Grid container spacing={2}>
                 {currentImages.map((img, idx) => (
@@ -242,9 +233,9 @@ const OutdoorAmenitiesModal = ({
                       onTogglePublic={checked => handleToggleUploadedImageVisibility(selectedAmenity, idx, checked)}
                       onDelete={() => handleDeleteUploadedImage(selectedAmenity, idx)}
                       showVisibilityChip={true}
-                      publicLabel={t('common:public')}
-                      privateLabel={t('common:private')}
-                      noImageLabel={t('common:noImage')}
+                      publicLabel={t('common:public', 'Public')}
+                      privateLabel={t('common:private', 'Private')}
+                      noImageLabel={t('common:noImage', 'No image')}
                       imgSx={{ height: 150 }}
                     />
                   </Grid>

@@ -49,6 +49,12 @@ export const privateMenuItems = [
         roles: ["superadmin", "admin", "user"],
     },
     {
+    textKey: "navigation:menu.amenities",
+    icon: MapIcon,
+    path: "/amenities",
+    roles: ["superadmin", "admin", "user"],
+},
+    {
         textKey: "navigation:menu.masterPlan",
         icon: MapIcon,
         path: "/master-plan",
