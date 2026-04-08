@@ -30,7 +30,7 @@ const router = express.Router()
  *         name: projectId
  *         schema:
  *           type: string
- *         description: Filter apartments by project ID
+ *         description: Filter apartments by project ID (recommended with visible=true to avoid mixing projects)
  *       - in: query
  *         name: buildingId
  *         schema:

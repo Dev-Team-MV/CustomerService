@@ -30,15 +30,11 @@ export const createFamilyGroup = async (req, res) => {
       return res.status(400).json({ message: 'Group name is required' })
     }
     let pid = projectId || req.body.project
-    if (pid && !mongoose.Types.ObjectId.isValid(pid)) {
-      return res.status(400).json({ message: 'Valid projectId is required' })
-    }
     if (!pid) {
-      const fallback = await Project.findOne().sort({ _id: 1 }).select('_id').lean()
-      if (!fallback) {
-        return res.status(400).json({ message: 'No project exists; create a project or send projectId' })
-      }
-      pid = fallback._id
+      return res.status(400).json({ message: 'projectId is required' })
+    }
+    if (!mongoose.Types.ObjectId.isValid(pid)) {
+      return res.status(400).json({ message: 'Valid projectId is required' })
     }
     const projectExists = await Project.exists({ _id: pid })
     if (!projectExists) {
@@ -51,6 +47,11 @@ export const createFamilyGroup = async (req, res) => {
       createdBy: req.user._id,
       members: []
     })
+    // Ensure creator can access the project even before owning/sharing a property.
+    await User.updateOne(
+      { _id: req.user._id },
+      { $addToSet: { projectMemberships: { project: pid, role: 'resident' } } }
+    )
     await group.populate('createdBy', 'firstName lastName email')
     await group.populate(POPULATE_PROJECT)
     res.status(201).json(group)
@@ -197,6 +198,12 @@ export const addMemberToFamilyGroup = async (req, res) => {
     group.members.push({ user: userId, role: role === 'admin' ? 'admin' : 'member' })
     group.markModified('members')
     await group.save()
+
+    // Grant explicit project access so new member can see project context immediately.
+    await User.updateOne(
+      { _id: userId },
+      { $addToSet: { projectMemberships: { project: group.project, role: 'resident' } } }
+    )
 
     // Sync shares for the newly added member:
     // - when a group was already sharing properties/apartments,
