@@ -24,15 +24,11 @@ const contractSchema = new mongoose.Schema(
   {
     property: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Property',
-      unique: true,
-      sparse: true
+      ref: 'Property'
     },
     apartment: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Apartment',
-      unique: true,
-      sparse: true
+      ref: 'Apartment'
     },
     contracts: {
       type: [contractItemSchema],
@@ -53,6 +49,16 @@ contractSchema.pre('validate', function (next) {
     next()
   }
 })
+
+// Enforce uniqueness only when the link field exists and is not null.
+contractSchema.index(
+  { property: 1 },
+  { unique: true, partialFilterExpression: { property: { $exists: true, $ne: null } } }
+)
+contractSchema.index(
+  { apartment: 1 },
+  { unique: true, partialFilterExpression: { apartment: { $exists: true, $ne: null } } }
+)
 
 const Contract = mongoose.model('Contract', contractSchema)
 

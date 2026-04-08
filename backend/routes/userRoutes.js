@@ -46,11 +46,16 @@ router.route('/').get(protect, admin, getAllUsers)
  * /api/users/search:
  *   get:
  *     summary: Search users (for adding to family groups, etc.)
- *     description: Any authenticated user. With q (min 2 chars) searches by email/name; without q returns up to 100 users for dropdowns.
+ *     description: Any authenticated user. Requires projectId to return only users related to that project. With q (min 2 chars) searches by email/name; without q returns up to 100 users for dropdowns.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         required: true
+ *         schema: { type: string }
+ *         description: Project ID used to isolate results by project.
  *       - in: query
  *         name: q
  *         schema: { type: string }
