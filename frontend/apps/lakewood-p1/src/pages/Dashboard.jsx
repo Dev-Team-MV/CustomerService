@@ -80,7 +80,9 @@ const Dashboard = () => {
   // ── stats ───────────────────────────────────────────────────
   const stats = useDashboardStats(lots)
 
-  // ✅ Mismo hook que Residents.jsx
+  const projectId = import.meta.env.VITE_PROJECT_ID
+
+  // ✅ Mismo hook que Residents.jsx (projectId → SMS / registro con URL correcta)
   const {
     openDialog,
     selectedUser,
@@ -95,7 +97,7 @@ const Dashboard = () => {
     e164Value,
     displayVal,
     isPhoneValid,
-  } = useResidents()
+  } = useResidents(projectId)
 
   // ── quick actions ───────────────────────────────────────────
   const adminActions = useMemo(() => [

@@ -41,10 +41,14 @@ const DEFAULT_FORM = {
 
 /**
  * Hook para gestionar residentes con filtrado opcional por proyecto
- * @param {string} projectId - ID del proyecto para filtrar usuarios (opcional)
+ * @param {string|null|undefined} projectId - Si existe, filtra la carga de usuarios por proyecto
+ * @param {{ smsProjectId?: string|null|undefined }} [options] - Opcional: ID para body de SMS y registro sin cambiar el filtro del listado (ej. CRM lista global + SMS con proyecto CRM)
  */
-export const useResidents = (projectId = null) => {
+export const useResidents = (projectId = null, options = {}) => {
   const { t } = useTranslation(['residents', 'common'])
+  const idForSmsAndRegister = Object.prototype.hasOwnProperty.call(options, 'smsProjectId')
+    ? options.smsProjectId
+    : projectId
 
   // --- State ---
   const [users, setUsers] = useState([])
@@ -217,7 +221,11 @@ export const useResidents = (projectId = null) => {
         await api.put(`/users/${selectedUser._id}`, payload)
         setSnackbar({ open: true, message: t('residents:snackbar.updated'), severity: 'success' })
       } else {
-        await api.post('/auth/register', { ...payload, skipPasswordSetup: true })
+        await api.post('/auth/register', {
+          ...payload,
+          skipPasswordSetup: true,
+          ...(idForSmsAndRegister ? { projectId: idForSmsAndRegister } : {})
+        })
         setSnackbar({ open: true, message: t('residents:snackbar.created'), severity: 'success' })
       }
       handleCloseDialog()
@@ -229,7 +237,7 @@ export const useResidents = (projectId = null) => {
         severity: 'error'
       })
     }
-  }, [formData, selectedUser, handleCloseDialog, fetchData, t, e164Value])
+  }, [formData, selectedUser, handleCloseDialog, fetchData, t, e164Value, idForSmsAndRegister])
 
   // --- Delete ---
   const handleDelete = useCallback(async (id) => {
@@ -253,7 +261,7 @@ export const useResidents = (projectId = null) => {
     try {
       await api.post(
         `/users/${user._id}/send-password-sms`,
-        projectId ? { projectId } : {}
+        idForSmsAndRegister ? { projectId: idForSmsAndRegister } : {}
       )
       setSnackbar({
         open: true,
@@ -269,7 +277,7 @@ export const useResidents = (projectId = null) => {
     } finally {
       setSendingSMS(false)
     }
-  }, [t, projectId])
+  }, [t, idForSmsAndRegister])
 
   // --- Filtrado y búsqueda ---
   const getAvailableUsers = useCallback((group) => {

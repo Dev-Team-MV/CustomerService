@@ -25,14 +25,16 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
     selectedProject, setSelectedProject, projects, loadingProjects, setProjects
   } = useProperty()
 
-  // Hook de residentes
+  const residentsProjectId = selectedProject || import.meta.env.VITE_PROJECT_ID
+
+  // Hook de residentes (proyecto elegido en el flujo o VITE_PROJECT_ID)
   const {
     users, loading,
     openDialog, selectedUser, setSelectedUser, formData, setFormData,
     handleOpenDialog, handleCloseDialog, handleSubmit,
     handleFieldChange, handlePhoneChange, isFormValid,
     e164Value, displayVal, isPhoneValid
-  } = useResidents()
+  } = useResidents(residentsProjectId)
 
   // Estados locales para asignación y SMS
   const [submitting, setSubmitting] = useState(false)

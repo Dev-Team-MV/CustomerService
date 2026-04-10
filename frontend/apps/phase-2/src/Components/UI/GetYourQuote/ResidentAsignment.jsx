@@ -25,15 +25,16 @@ const ResidentAsignment = ({ expanded, onToggle }) => {
   } = usePropertyBuilding()
 
   const theme = useTheme()
+  const residentsProjectId = selectedProject || import.meta.env.VITE_PROJECT_ID
 
-  // Hook de residentes (igual que Lakewood)
+  // Hook de residentes (proyecto del contexto o VITE_PROJECT_ID)
   const {
     users, loading,
     openDialog, selectedUser, setSelectedUser, formData, setFormData,
     handleOpenDialog, handleCloseDialog, handleSubmit,
     handleFieldChange, handlePhoneChange, isFormValid,
     e164Value, displayVal, isPhoneValid
-  } = useResidents()
+  } = useResidents(residentsProjectId)
 
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState('')
