@@ -117,6 +117,12 @@ const projectSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    /** Base pública del SPA para enlaces (ej. SMS setup-password). Opcional; si falta, se usa mapa por slug o FRONTEND_URL. */
+    frontendBaseUrl: {
+      type: String,
+      trim: true,
+      default: ''
+    },
     location: {
       type: String,
       trim: true

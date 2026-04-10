@@ -251,7 +251,10 @@ export const useResidents = (projectId = null) => {
     }
     setSendingSMS(true)
     try {
-      await api.post(`/users/${user._id}/send-password-sms`)
+      await api.post(
+        `/users/${user._id}/send-password-sms`,
+        projectId ? { projectId } : {}
+      )
       setSnackbar({
         open: true,
         message: t('residents:snackbar.smsSent', { phone: user.phoneNumber }),
@@ -266,7 +269,7 @@ export const useResidents = (projectId = null) => {
     } finally {
       setSendingSMS(false)
     }
-  }, [t])
+  }, [t, projectId])
 
   // --- Filtrado y búsqueda ---
   const getAvailableUsers = useCallback((group) => {
