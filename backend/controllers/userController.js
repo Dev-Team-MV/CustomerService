@@ -1,6 +1,6 @@
 import User from '../models/User.js'
 import Project from '../models/Project.js'
-import { getProjectIdsForUser } from '../utils/projectAccess.js'
+import { getProjectIdsForUser, canUserAccessProject } from '../utils/projectAccess.js'
 import Property from '../models/Property.js'
 import Apartment from '../models/Apartment.js'
 
@@ -84,7 +84,10 @@ async function buildUserProjectsMap(userDocs) {
  */
 export const searchUsers = async (req, res) => {
   try {
-    const { q } = req.query
+    const { q, projectId } = req.query
+    if (!projectId) {
+      return res.status(400).json({ message: 'projectId is required' })
+    }
     const query = typeof q === 'string' ? q.trim() : ''
     let filter = {}
     if (query.length >= 2) {
@@ -97,11 +100,27 @@ export const searchUsers = async (req, res) => {
         ]
       }
     }
+
+    const exists = await Project.exists({ _id: projectId })
+    if (!exists) {
+      return res.status(404).json({ message: 'Project not found' })
+    }
+
+    const allowed = await canUserAccessProject(req.user._id, projectId, { role: req.user.role })
+    if (!allowed) {
+      return res.status(403).json({ message: 'No access to this project' })
+    }
+
     const users = await User.find(filter)
-      .select('_id firstName lastName email')
+      .select('_id firstName lastName email projectMemberships')
       .limit(query.length >= 2 ? 50 : 100)
       .sort({ lastName: 1, firstName: 1 })
-    res.json(users)
+
+    const projectsMap = await buildUserProjectsMap(users)
+    const filtered = users.filter((u) =>
+      (projectsMap.get(toIdStr(u._id)) || []).some((p) => toIdStr(p._id) === toIdStr(projectId))
+    )
+    res.json(filtered)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }

@@ -97,15 +97,13 @@ export const getAllApartments = async (req, res) => {
     const isSuperadmin = req.user.role === 'superadmin'
 
     if (apartmentModelId) filter.apartmentModel = apartmentModelId
-    if (buildingId) {
-      const models = await ApartmentModel.find({ building: buildingId }).select('_id')
-      filter.apartmentModel = { $in: models.map(m => m._id) }
-    }
     if (projectId) {
       const buildings = await Building.find({ project: projectId }).select('_id')
       const buildIds = buildings.map(b => b._id)
-      const models = await ApartmentModel.find({ building: { $in: buildIds } }).select('_id')
-      filter.apartmentModel = { $in: models.map(m => m._id) }
+      filter.building = { $in: buildIds }
+    }
+    if (buildingId) {
+      filter.building = buildingId
     }
     if (status) filter.status = status
     if (floorNumber != null && floorNumber !== '') {
@@ -417,12 +415,10 @@ export const getApartmentStats = async (req, res) => {
     if (projectId) {
       const buildings = await Building.find({ project: projectId }).select('_id')
       const buildIds = buildings.map(b => b._id)
-      const models = await ApartmentModel.find({ building: { $in: buildIds } }).select('_id')
-      filter.apartmentModel = { $in: models.map(m => m._id) }
+      filter.building = { $in: buildIds }
     }
     if (buildingId) {
-      const models = await ApartmentModel.find({ building: buildingId }).select('_id')
-      filter.apartmentModel = { $in: models.map(m => m._id) }
+      filter.building = buildingId
     }
 
     const total = await Apartment.countDocuments(filter)

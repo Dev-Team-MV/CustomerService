@@ -3,16 +3,76 @@ import {
   getAllProjects,
   getProjectById,
   getProjectBySlug,
+  getOutdoorAmenityKeys,
+  addOutdoorAmenityKeys,
+  getProjectOutdoorAmenities,
+  getProjectOutdoorAmenitiesBySlug,
+  updateProjectOutdoorAmenities,
   createProject,
   updateProject,
   deleteProject
 } from '../controllers/projectController.js'
+import {
+  getCommunitySpaces,
+  getCommunitySpacesBySlug,
+  getCommunitySpaceById,
+  getCommunitySpaceBySlug,
+  upsertCommunitySpace
+} from '../controllers/communitySpaceController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
 // Debug: confirm router is mounted (GET /api/projects/ping)
 router.get('/ping', (req, res) => res.json({ ok: true, message: 'projects router mounted' }))
+
+/**
+ * @swagger
+ * /api/projects/outdoor-amenity-keys:
+ *   get:
+ *     summary: Listar keys permitidas para outdoorAmenitySections (built-in + extras en BD)
+ *     description: |
+ *       `keys` es la unión ordenada. Las extras se añaden con POST (admin).
+ *       Usar estas keys en `outdoorAmenitySections[].key` al actualizar el proyecto.
+ *     tags: [Projects]
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/OutdoorAmenityKeysList'
+ *   post:
+ *     summary: Añadir keys extra (persistidas; solo admin)
+ *     description: |
+ *       Formato slug: minúsculas, números, guiones (ej. `dog-park`). Duplicados o ya existentes → 200 sin error.
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AddOutdoorAmenityKeysRequest'
+ *     responses:
+ *       201:
+ *         description: Se añadieron nuevas keys
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AddOutdoorAmenityKeysResponse'
+ *       200:
+ *         description: Nada nuevo que añadir (todas ya estaban permitidas)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AddOutdoorAmenityKeysResponse'
+ *       400:
+ *         description: Formato de key inválido
+ */
+router.get('/outdoor-amenity-keys', getOutdoorAmenityKeys)
+router.post('/outdoor-amenity-keys', protect, admin, addOutdoorAmenityKeys)
 
 /**
  * @swagger
@@ -154,6 +214,79 @@ router.get('/slug/:slug', getProjectBySlug)
 
 /**
  * @swagger
+ * /api/projects/slug/{slug}/outdoor-amenities:
+ *   get:
+ *     summary: Amenidades exteriores del proyecto por slug (ej. phase2)
+ *     description: Devuelve secciones con imágenes; URLs pueden venir firmadas (GCS).
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: phase2
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProjectOutdoorAmenitiesPayload'
+ *       404:
+ *         description: Project not found
+ */
+router.get('/slug/:slug/outdoor-amenities', getProjectOutdoorAmenitiesBySlug)
+
+/**
+ * @swagger
+ * /api/projects/slug/{slug}/community-spaces:
+ *   get:
+ *     summary: Listar espacios comunitarios del proyecto (Ágora) por slug
+ *     description: Solo secciones exterior y planos. Público.
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/CommunitySpacesListPayload' }
+ *       404:
+ *         description: Project not found
+ */
+router.get('/slug/:slug/community-spaces', getCommunitySpacesBySlug)
+
+/**
+ * @swagger
+ * /api/projects/slug/{slug}/community-spaces/{spaceId}:
+ *   get:
+ *     summary: Espacio Ágora por slug y spaceId (agora)
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: spaceId
+ *         required: true
+ *         schema: { type: string, enum: [agora] }
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/CommunitySpacePayload' }
+ *       404:
+ *         description: Not found
+ */
+router.get('/slug/:slug/community-spaces/:spaceId', getCommunitySpaceBySlug)
+
+/**
+ * @swagger
  * /api/projects/{id}:
  *   get:
  *     summary: Get project by ID
@@ -233,5 +366,139 @@ router.route('/:id')
   .get(getProjectById)
   .put(protect, admin, updateProject)
   .delete(protect, admin, deleteProject)
+
+/**
+ * @swagger
+ * /api/projects/{id}/outdoor-amenities:
+ *   get:
+ *     summary: Amenidades exteriores del proyecto por ID
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProjectOutdoorAmenitiesPayload'
+ *       404:
+ *         description: Project not found
+ *   put:
+ *     summary: Reemplazar outdoorAmenitySections del proyecto (admin)
+ *     description: |
+ *       Cada `key` debe existir en GET /api/projects/outdoor-amenity-keys.
+ *       Sustituye todo el array de secciones.
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - outdoorAmenitySections
+ *             properties:
+ *               outdoorAmenitySections:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/OutdoorAmenitySection'
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProjectOutdoorAmenitiesPayload'
+ *       400:
+ *         description: Keys no permitidas o body inválido
+ *       404:
+ *         description: Project not found
+ */
+router.get('/:id/outdoor-amenities', getProjectOutdoorAmenities)
+router.put('/:id/outdoor-amenities', protect, admin, updateProjectOutdoorAmenities)
+
+/**
+ * @swagger
+ * /api/projects/{id}/community-spaces:
+ *   get:
+ *     summary: Listar espacios comunitarios por projectId
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/CommunitySpacesListPayload' }
+ *       404:
+ *         description: Project not found
+ */
+router.get('/:id/community-spaces', getCommunitySpaces)
+
+/**
+ * @swagger
+ * /api/projects/{id}/community-spaces/{spaceId}:
+ *   get:
+ *     summary: Obtener un espacio comunitario por projectId
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: spaceId
+ *         required: true
+ *         schema: { type: string, enum: [agora] }
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/CommunitySpacePayload' }
+ *       404:
+ *         description: Not found
+ *   put:
+ *     summary: Crear o actualizar Ágora (admin)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: spaceId
+ *         required: true
+ *         schema: { type: string, enum: [agora] }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/CommunitySpaceUpsertBody' }
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/CommunitySpacePayload' }
+ *       400:
+ *         description: Invalid body or id mismatch
+ */
+router.get('/:id/community-spaces/:spaceId', getCommunitySpaceById)
+router.put('/:id/community-spaces/:spaceId', protect, admin, upsertCommunitySpace)
 
 export default router

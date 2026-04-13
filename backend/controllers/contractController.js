@@ -159,6 +159,20 @@ export const createContract = async (req, res) => {
     await hydrateUrlsInObject(data)
     res.status(201).json(data)
   } catch (error) {
+    if (error?.code === 11000) {
+      const duplicateField = Object.keys(error?.keyPattern || {})[0]
+      if (duplicateField === 'property') {
+        return res.status(409).json({
+          message: 'A contract record for this property already exists. Use update endpoint instead.'
+        })
+      }
+      if (duplicateField === 'apartment') {
+        return res.status(409).json({
+          message: 'A contract record for this apartment already exists. Use update endpoint instead.'
+        })
+      }
+      return res.status(409).json({ message: 'Duplicate contract key detected' })
+    }
     res.status(500).json({ message: error.message })
   }
 }
