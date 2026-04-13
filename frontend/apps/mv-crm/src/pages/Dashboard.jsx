@@ -24,7 +24,7 @@ export default function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const { t } = useTranslation('dashboard')
 
-  // ── Resident hook for quick user creation ──
+  // ── Resident hook for quick user creation (SMS con proyecto CRM si VITE_PROJECT_ID está en el build)
   const {
     openDialog,
     handleOpenDialog,
@@ -41,7 +41,7 @@ export default function Dashboard() {
     isPhoneValid,
     snackbar,
     handleCloseSnackbar,
-  } = useResidents()
+  } = useResidents(null, { smsProjectId: import.meta.env.VITE_PROJECT_ID })
 
   // ── Projects hook ──
   const {

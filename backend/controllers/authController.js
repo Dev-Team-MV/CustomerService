@@ -1,8 +1,10 @@
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
+import mongoose from 'mongoose'
 import User from '../models/User.js'
 import Project from '../models/Project.js'
 import { sendSMSWithValidation } from '../services/twilioService.js'
+import { resolveFrontendBaseUrl } from '../services/resolveFrontendBaseUrl.js'
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -10,12 +12,10 @@ const generateToken = (id) => {
   })
 }
 
-function getFrontendUrlOrThrow() {
-  const frontendUrl = process.env.FRONTEND_URL
-  if (!frontendUrl) {
-    throw new Error('FRONTEND_URL is not configured')
-  }
-  return frontendUrl
+function userBelongsToProject(user, projectId) {
+  if (!user.projectMemberships?.length) return false
+  const pid = String(projectId)
+  return user.projectMemberships.some((m) => m.project && String(m.project) === pid)
 }
 
 export const register = async (req, res) => {
@@ -92,7 +92,7 @@ export const register = async (req, res) => {
       // Enviar SMS con el link de setup
       if (phoneNumber) {
         try {
-          const frontendUrl = getFrontendUrlOrThrow()
+          const frontendUrl = await resolveFrontendBaseUrl(projectId)
           const setupLink = `${frontendUrl}/setup-password/${setupToken}`
           const message = `Hi ${firstName}, your account has been created. Please set your password by visiting this link: ${setupLink}`
           
@@ -410,7 +410,7 @@ export const verifySetupToken = async (req, res) => {
  */
 export const sendSetupPasswordLink = async (req, res) => {
   try {
-    const { userId, email } = req.body
+    const { userId, email, projectId } = req.body
 
     if (!userId && !email) {
       return res.status(400).json({ message: 'userId or email is required' })
@@ -429,10 +429,29 @@ export const sendSetupPasswordLink = async (req, res) => {
       })
     }
 
+    if (projectId) {
+      if (!mongoose.Types.ObjectId.isValid(projectId)) {
+        return res.status(400).json({ message: 'Invalid projectId' })
+      }
+      if (!userBelongsToProject(user, projectId)) {
+        return res.status(400).json({
+          message: 'User is not a member of the specified project. Omit projectId to use the default frontend URL.'
+        })
+      }
+    }
+
     const setupToken = user.generateSetupToken()
     await user.save()
 
-    const frontendUrl = getFrontendUrlOrThrow()
+    let frontendUrl
+    try {
+      frontendUrl = await resolveFrontendBaseUrl(projectId)
+    } catch (resolveErr) {
+      if (resolveErr.statusCode === 404) {
+        return res.status(404).json({ message: resolveErr.message })
+      }
+      throw resolveErr
+    }
     const setupLink = `${frontendUrl}/setup-password/${setupToken}`
     const message = `Hi ${user.firstName}, you can set your password by visiting this link: ${setupLink}`
 

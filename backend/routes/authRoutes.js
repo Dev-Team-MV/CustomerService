@@ -309,7 +309,7 @@ router.get('/verify-setup-token/:token', verifySetupToken)
 /**
  * POST /api/auth/admin/send-setup-password-link
  * Admin only. Sends SMS to a user (by userId or email) with link to set password.
- * Body: { userId } or { email }
+ * Body: { userId } or { email }; opcional { projectId } si el usuario es miembro de ese proyecto (misma lógica que /api/users/:id/send-password-sms).
  */
 router.post('/admin/send-setup-password-link', protect, admin, sendSetupPasswordLink)
 

@@ -164,7 +164,9 @@ router.get('/me/projects', protect, getMyProjects)
  */
 /**
  * POST /api/users/:id/send-password-sms
- * Admin only. Resends SMS to user with link to set password.
+ * Admin only. Resends SMS con enlace para establecer contraseña.
+ * Body opcional: { "projectId": "<ObjectId>" } — el usuario debe pertenecer a ese proyecto; la URL del enlace se elige por proyecto (slug o Project.frontendBaseUrl).
+ * Sin projectId se usa FRONTEND_URL del servidor.
  */
 router.post('/:id/send-password-sms', protect, admin, (req, res, next) => {
   req.body = { ...req.body, userId: req.params.id }

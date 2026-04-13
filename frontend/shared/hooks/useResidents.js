@@ -41,10 +41,14 @@ const DEFAULT_FORM = {
 
 /**
  * Hook para gestionar residentes con filtrado opcional por proyecto
- * @param {string} projectId - ID del proyecto para filtrar usuarios (opcional)
+ * @param {string|null|undefined} projectId - Si existe, filtra la carga de usuarios por proyecto
+ * @param {{ smsProjectId?: string|null|undefined }} [options] - Opcional: ID para body de SMS y registro sin cambiar el filtro del listado (ej. CRM lista global + SMS con proyecto CRM)
  */
-export const useResidents = (projectId = null) => {
+export const useResidents = (projectId = null, options = {}) => {
   const { t } = useTranslation(['residents', 'common'])
+  const idForSmsAndRegister = Object.prototype.hasOwnProperty.call(options, 'smsProjectId')
+    ? options.smsProjectId
+    : projectId
 
   // --- State ---
   const [users, setUsers] = useState([])
@@ -273,15 +277,11 @@ export const useResidents = (projectId = null) => {
         handleCloseDialog()
         fetchData()
       } else {
-        const registerPayload = { 
-          ...payload, 
-          skipPasswordSetup: true
-        }
-        if (projectId) {
-          registerPayload.projectId = projectId
-        }
-        const res = await api.post('/auth/register', registerPayload)
-        const newUser = res.data.user || res.data
+        await api.post('/auth/register', {
+          ...payload,
+          skipPasswordSetup: true,
+          ...(idForSmsAndRegister ? { projectId: idForSmsAndRegister } : {})
+        })
         setSnackbar({ open: true, message: t('residents:snackbar.created'), severity: 'success' })
         setOpenDialog(false)
         setUsers(prev => [...prev, newUser])
@@ -294,7 +294,8 @@ export const useResidents = (projectId = null) => {
         severity: 'error'
       })
     }
-  }, [formData, selectedUser, handleCloseDialog, fetchData, t, e164Value, projectId])
+  }, [formData, selectedUser, handleCloseDialog, fetchData, t, e164Value, idForSmsAndRegister])
+
   // --- Delete ---
   const handleDelete = useCallback(async (id) => {
     if (!window.confirm(t('residents:confirmDelete'))) return
@@ -315,7 +316,10 @@ export const useResidents = (projectId = null) => {
     }
     setSendingSMS(true)
     try {
-      await api.post(`/users/${user._id}/send-password-sms`)
+      await api.post(
+        `/users/${user._id}/send-password-sms`,
+        idForSmsAndRegister ? { projectId: idForSmsAndRegister } : {}
+      )
       setSnackbar({
         open: true,
         message: t('residents:snackbar.smsSent', { phone: user.phoneNumber }),
@@ -330,7 +334,7 @@ export const useResidents = (projectId = null) => {
     } finally {
       setSendingSMS(false)
     }
-  }, [t])
+  }, [t, idForSmsAndRegister])
 
   // --- Filtrado y búsqueda ---
   const getAvailableUsers = useCallback((group) => {
