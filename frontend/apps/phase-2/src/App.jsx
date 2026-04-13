@@ -32,7 +32,7 @@ import AmenitiesPublic from './Pages/Amenities/AmenitiesPublic'
 import AgoraManager from './Pages/AgoraManager'
 import TermsAndCondition from './Pages/TermsAndCondition'
 import theme from './theme'
-
+import Register from './Pages/Register'
 
 // const theme = createTheme({
 //   palette: {
@@ -65,7 +65,8 @@ function App() {
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/terms-and-conditions" element={<TermsAndCondition />} />
-
+          <Route path="/register" element={<Register />} />
+          <Route path="/setup-password/:token" element={<Register />} />
 
           {/* Public Routes */}
           <Route

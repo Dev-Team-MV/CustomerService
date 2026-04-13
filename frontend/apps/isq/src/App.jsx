@@ -30,6 +30,7 @@ import MyApartment from './Pages/MyApartment'
 import FamilyGroup from './Pages/FamilyGroup'
 import AmenitiesPublic from './Pages/Amenities/AmenitiesPublic'
 import AmenitiesPrivate from './Pages/Amenities/AmenitiesPrivate'
+import Register from './Pages/Register'
 
 // ...agrega aquí el resto de tus páginas privadas
 
@@ -59,7 +60,8 @@ function App() {
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/terms-and-conditions" element={<TermsAndCondition />} />
-
+          <Route path="/register" element={<Register />} />
+          <Route path="/setup-password/:token" element={<Register />} />
 
           {/* Public Routes */}
           <Route

@@ -71,11 +71,20 @@ const Dashboard = () => {
   const { data: lots,     loading: lotsLoading }     = useFetch(
     useCallback(() => api.get('/lots').then(r => r.data), [])
   )
-  const { data: payloads, loading: payloadsLoading } = useFetch(
-    useCallback(() => api.get('/payloads?limit=3&sort=-date').then(r => r.data), [])
-  )
+const { data: payloads } = useFetch(
+  useCallback(() =>
+    api.get('/payloads', {
+      params: {
+        projectId: import.meta.env.VITE_PROJECT_ID,
+        limit: 3,
+        sort: '-date'
+      }
+    }).then(r => r.data),
+  []),
+  { initialData: [] }
+)
 
-  const loading = lotsLoading || payloadsLoading
+  const loading = lotsLoading || payloads.loading
 
   // ── stats ───────────────────────────────────────────────────
   const stats = useDashboardStats(lots)
