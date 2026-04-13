@@ -107,7 +107,14 @@ export const privateMenuItems = [
     icon: GroupsIcon,
     path: "/family-group",
     roles: ["superadmin", "admin", "user"],
-  }
+  },
+  // En privateMenuItems o donde corresponda:
+  {
+    textKey: "navigation:menu.mapInventory",
+    icon: MapIcon,
+    path: "/map-inventory",
+    roles: ["admin", "superadmin"],
+  },
 ]
 
 export const publicMenuItems = [

@@ -33,6 +33,7 @@ import MasterPlanManager from './pages/MasterPlanManager'
 import TimeLine from './pages/TimeLine'
 import ConfigurationManager from './pages/ConfigurationManager'
 import FamilyGroup from './pages/FamilyGroup'
+import MapInventoryPage from './pages/MapInventoryPage'
 
 import theme from './theme' // Usa SIEMPRE el theme extendido
 
@@ -75,6 +76,7 @@ function App() {
           >
             <Route path="/explore/properties" element={<PropertySelection />} />
             <Route path="/explore/amenities" element={<AmenitiesPublic />} />
+            <Route path="/map-inventory" element={<MapInventoryPage />} />
           </Route>
 
           {/* Hybrid Routes */}
@@ -112,6 +114,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/timeline" element={<TimeLine />} />
               <Route path="/clubhouse-manager" element={<ClubhouseManager />} />
+              <Route path="/map-inventory" element={<MapInventoryPage />} />
             </Route>
           </Route>
           <Route path="*" element={<NotFound />} />
