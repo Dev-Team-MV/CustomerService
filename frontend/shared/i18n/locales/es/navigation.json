@@ -22,7 +22,8 @@
         "buildings": "Edificios",
         "masterPlan": "Master Plan",
         "myapartment": "Mis Apartamentos",
-        "agora": "Ágora"
+        "agora": "Ágora",
+        "mapInventory": "Inventario de Mapa"
     },
     "tooltips": {
         "openMenu": "Abrir menú",

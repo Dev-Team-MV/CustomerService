@@ -76,7 +76,7 @@ function App() {
           >
             <Route path="/explore/properties" element={<PropertySelection />} />
             <Route path="/explore/amenities" element={<AmenitiesPublic />} />
-            <Route path="/map-inventory" element={<MapInventoryPage />} />
+            {/* <Route path="/explore/map-inventory" element={<MapInventoryPage />} /> */}
           </Route>
 
           {/* Hybrid Routes */}

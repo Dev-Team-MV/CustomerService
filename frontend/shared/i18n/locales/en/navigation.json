@@ -22,7 +22,8 @@
         "buildings": "Buildings",
         "masterPlan": "Master Plan",
         "myapartment": "My Apartments",
-        "agora": "Agora"
+        "agora": "Agora",
+        "mapInventory": "Map Inventory"
     },
     "tooltips": {
         "openMenu": "Open menu",

@@ -246,10 +246,11 @@ import PrimaryButton from '../../constants/PrimaryButton'
 
 // 4 colores hardcodeados para inventario
 const LOT_COLORS = [
-  { value: 'green', label: 'Green', hex: '#4caf50' },
-  { value: 'yellow', label: 'Yellow', hex: '#ffc107' },
-  { value: 'red', label: 'Red', hex: '#f44336' },
-  { value: 'blue', label: 'Blue', hex: '#2196f3' }
+  { value: 'green', label: 'Available', hex: '#4caf50' },
+  { value: 'yellow', label: 'Model 10', hex: '#ffc107' },
+  { value: 'red', label: 'Sold', hex: '#f44336' },
+  { value: 'blue', label: 'Hold', hex: '#2196f3' },
+  {value: 'pink', label: 'Pink', hex: '#f0467f'}
 ]
 
 const LotDialog = ({ open, onClose, selectedLot, onSubmit }) => {
@@ -454,9 +455,9 @@ const LotDialog = ({ open, onClose, selectedLot, onSubmit }) => {
         {/* COLOR SELECTOR */}
         <Grid item xs={12}>
           <Box>
-            <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600, color: '#706f6f' }}>
-              Inventory Color
-            </Typography>
+<Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600, color: '#706f6f' }}>
+  {t('lots:form.inventoryColor')}
+</Typography>
             <ToggleButtonGroup
               value={formData.color}
               exclusive

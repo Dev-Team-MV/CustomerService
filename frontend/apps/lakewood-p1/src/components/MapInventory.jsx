@@ -1,4 +1,4 @@
-import { Box, Paper, Typography, IconButton, Grid, Chip } from '@mui/material'
+import { Box, Paper, Typography, IconButton, Grid } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import MyLocationIcon from '@mui/icons-material/MyLocation'
@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next'
 
 const map = '/images/mapLakewood.png'
 
-// Mismas posiciones que DashboardMap
 const lotPositions = {
   1: { x: 23, y: 25 },
   2: { x: 26.3, y: 25 },
@@ -84,16 +83,20 @@ const lotPositions = {
   70: { x: 91, y: 73.5 }
 }
 
-// Colores hardcodeados (mismo que LotDialog)
+// Todos los colores disponibles (para renderizar puntos)
 const LOT_COLORS = {
-  green: { hex: '#4caf50', label: 'Green' },
-  yellow: { hex: '#ffc107', label: 'Yellow' },
-  red: { hex: '#f44336', label: 'Red' },
-  blue: { hex: '#2196f3', label: 'Blue' }
+  green: { hex: '#4caf50' },
+  blue: { hex: '#2196f3' },
+  red: { hex: '#f44336' },
+  yellow: { hex: '#ffc107' },
+  pink: { hex: '#f0467f' }
 }
 
+// Solo 3 colores para el contador (con labels de status)
+const COUNTER_COLORS = ['green', 'blue', 'red']
+
 const MapInventory = () => {
-  const { t } = useTranslation(['masterPlan'])
+  const { t } = useTranslation(['lots'])
   const [lots, setLots] = useState([])
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
@@ -130,7 +133,6 @@ const MapInventory = () => {
     }
   }
 
-  // Contador por color
   const colorCounts = lots.reduce((acc, lot) => {
     const color = lot.color || 'green'
     acc[color] = (acc[color] || 0) + 1
@@ -181,38 +183,39 @@ const MapInventory = () => {
 
   return (
     <Box>
-      {/* Contador por color */}
       <Paper sx={{ p: 2, mb: 2, borderRadius: 3 }}>
         <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#333F1F' }}>
-          Inventory by Color
+          {t('lots:mapInventory.title')}
         </Typography>
         <Grid container spacing={2}>
-          {Object.entries(LOT_COLORS).map(([colorKey, colorData]) => (
-            <Grid item xs={6} sm={3} key={colorKey}>
-              <Paper
-                elevation={2}
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  border: `2px solid ${colorData.hex}`,
-                  bgcolor: `${colorData.hex}10`,
-                  textAlign: 'center'
-                }}
-              >
-                <Circle sx={{ fontSize: 32, color: colorData.hex, mb: 1 }} />
-                <Typography variant="h4" sx={{ fontWeight: 700, color: colorData.hex }}>
-                  {colorCounts[colorKey] || 0}
-                </Typography>
-                <Typography variant="caption" sx={{ color: '#706f6f', fontWeight: 600 }}>
-                  {colorData.label}
-                </Typography>
-              </Paper>
-            </Grid>
-          ))}
+          {COUNTER_COLORS.map((colorKey) => {
+            const colorData = LOT_COLORS[colorKey]
+            return (
+              <Grid item xs={6} sm={4} key={colorKey}>
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    border: `2px solid ${colorData.hex}`,
+                    bgcolor: `${colorData.hex}10`,
+                    textAlign: 'center'
+                  }}
+                >
+                  <Circle sx={{ fontSize: 32, color: colorData.hex, mb: 1 }} />
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: colorData.hex }}>
+                    {colorCounts[colorKey] || 0}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#706f6f', fontWeight: 600 }}>
+                    {t(`lots:mapInventory.colors.${colorKey}`)}
+                  </Typography>
+                </Paper>
+              </Grid>
+            )
+          })}
         </Grid>
       </Paper>
 
-      {/* Map Container */}
       <Box
         ref={mapRef}
         onMouseDown={handleMouseDown}
@@ -233,16 +236,7 @@ const MapInventory = () => {
           touchAction: 'none'
         }}
       >
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%'
-          }}
-        >
-          {/* Map Background */}
+        <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
           <Box
             sx={{
               position: 'absolute',
@@ -258,7 +252,6 @@ const MapInventory = () => {
               backgroundRepeat: 'no-repeat'
             }}
           >
-            {/* Lot Markers con color */}
             {lots.map((lot) => {
               const position = lotPositions[lot.number]
               if (!position) return null
@@ -273,8 +266,8 @@ const MapInventory = () => {
                     left: `${position.x}%`,
                     top: `${position.y}%`,
                     transform: 'translate(-50%, -50%)',
-                    width: { xs: 14, sm: 18, md: 22 },
-                    height: { xs: 14, sm: 18, md: 22 },
+                    width: { xs: 14, sm: 20, md: 24, lg: 30 },
+                    height: { xs: 14, sm: 20, md: 24, lg: 30 },
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
@@ -300,7 +293,6 @@ const MapInventory = () => {
             })}
           </Box>
 
-          {/* Zoom Controls */}
           <Box sx={{
             position: 'absolute',
             bottom: { xs: 10, sm: 15 },
@@ -319,7 +311,6 @@ const MapInventory = () => {
             </Paper>
           </Box>
 
-          {/* Legend con colores */}
           <Box sx={{
             position: 'absolute',
             bottom: 10,
@@ -329,16 +320,19 @@ const MapInventory = () => {
             zIndex: 100,
             flexWrap: 'wrap'
           }}>
-            {Object.entries(LOT_COLORS).map(([colorKey, colorData]) => (
-              <Paper key={colorKey} sx={{ px: 1, py: 0.5, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.95)' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: colorData.hex }} />
-                  <Typography variant="caption" sx={{ fontSize: { xs: '0.6rem', sm: '0.65rem' } }}>
-                    {colorData.label}
-                  </Typography>
-                </Box>
-              </Paper>
-            ))}
+            {COUNTER_COLORS.map((colorKey) => {
+              const colorData = LOT_COLORS[colorKey]
+              return (
+                <Paper key={colorKey} sx={{ px: 1, py: 0.5, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.95)' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: colorData.hex }} />
+                    <Typography variant="caption" sx={{ fontSize: { xs: '0.6rem', sm: '0.65rem' } }}>
+                      {t(`lots:mapInventory.colors.${colorKey}`)}
+                    </Typography>
+                  </Box>
+                </Paper>
+              )
+            })}
           </Box>
         </Box>
       </Box>

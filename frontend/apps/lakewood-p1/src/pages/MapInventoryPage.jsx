@@ -5,14 +5,14 @@ import PageHeader from '../components/PageHeader'
 import MapInventory from '../components/MapInventory'
 
 const MapInventoryPage = () => {
-  const { t } = useTranslation(['lots', 'common'])
+  const { t } = useTranslation(['navigation', 'lots'])
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <PageHeader
         icon={Map}
-        title="Map Inventory"
-        subtitle="Visual inventory overview by color classification"
+        title={t('navigation:menu.mapInventory')}
+        subtitle={t('lots:mapInventory.subtitle')}
         animateIcon={true}
       />
       
