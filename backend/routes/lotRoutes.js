@@ -61,6 +61,9 @@ const router = express.Router()
  *                 description: Project ID (alternative to projectId)
  *               number:
  *                 type: string
+ *               color:
+ *                 type: string
+ *                 description: Lot color (e.g. hex, name)
  *               price:
  *                 type: number
  *               status:
@@ -132,6 +135,9 @@ router.get('/stats', protect, getLotStats)
  *             properties:
  *               number:
  *                 type: string
+ *               color:
+ *                 type: string
+ *                 description: Lot color (e.g. hex, name)
  *               price:
  *                 type: number
  *               status:

@@ -12,6 +12,10 @@ const lotSchema = new mongoose.Schema(
       required: [true, 'Lot number is required'],
       trim: true
     },
+    color: {
+      type: String,
+      trim: true
+    },
     price: {
       type: Number,
       required: [true, 'Price is required'],
