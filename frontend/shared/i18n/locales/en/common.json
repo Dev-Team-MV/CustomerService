@@ -66,5 +66,13 @@
 
       "footer": {
     "copyright": "© {{year}} — MV Platform"
-  }
+  },
+  "public": "Public",
+  "private": "Private",
+  "noImage": "No image",
+
+  "uploading": "Uploading...",
+  "uploadAll": "Upload All",
+
+  "new": "NEW" 
 }

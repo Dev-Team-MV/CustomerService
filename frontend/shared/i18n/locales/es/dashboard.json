@@ -71,5 +71,9 @@
     "phase": "Fase",
     "clients": "clientes"
   },
-  "empty": "Selecciona un proyecto para ver detalles"
+  "empty": "Selecciona un proyecto para ver detalles",
+
+
+  "titleISQL": "ISQL Dashboard",
+  "subtitleISQ": "Bienvenido al sistema ISQ"
 }

@@ -24,7 +24,6 @@
   "confirmRemoveMember": "Are you sure you want to remove this member?",
   "confirmDeleteGroup": "Are you sure you want to delete this group? This will remove all shared properties.",
   "pleaseSelectUser": "Please select a user",
-  "createdBy": "Created by {{name}}",
   "shareProperty": "Share Property",
   "sharingWithGroup": "Sharing with group: {{group}}",
   "selectPropertyToShare": "Select a Property to Share",
@@ -53,5 +52,29 @@
   "addMember": "Add Member",
   "delete": "Delete",
   "noMembers": "No members yet",
-  "owner": "Owner"
+  "owner": "Owner",
+
+
+    "createGroupTitle": "Create Family Group",
+  "createGroupSubtitle": "Create a group to share resources with family members",
+
+  "groupNameHelper": "Choose a descriptive name for your family group",
+
+  "addMemberTitle": "Add Member",
+  "addMemberSubtitle": "Add a member to {{group}}",
+
+  "selectUser": "Select User",
+  "memberRole": "Member Role",
+  "memberDesc": "Can view shared resources",
+  "adminDesc": "Can manage group and share resources",
+
+    "createdBy": "Created by",
+  "creator": "Creator",
+  "manageMembers": "Manage Members",
+  "editGroup": "Edit Group",
+  "deleteGroup": "Delete Group",
+  "membersCount": "{{count}} member",
+  "membersCount_plural": "{{count}} members",
+  "adminsCount": "{{count}} admin",
+  "adminsCount_plural": "{{count}} admins"
 }

@@ -37,11 +37,11 @@ const Payloads = () => {
   } = usePayloads({
     resourceType: 'apartment',
     fetchResources: async () => {
-      const res = await api.get('/apartments', { params: { project: projectId } })
+      const res = await api.get('/apartments', { params: { projectId } })
       return res.data
     },
     fetchStats: async () => {
-      const res = await api.get('/payloads/stats', { params: { project: projectId } })
+      const res = await api.get('/payloads/stats', { params: { projectId } })
       return res.data
     }
   })

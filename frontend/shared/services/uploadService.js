@@ -298,6 +298,61 @@ deleteClubhouseImages: async ({ filenames = [], names = [], deleteFromStorage = 
     },
   // ...existing code...
 
+    // ── BUILDING UPLOADS ───────────────────────────────────────
+  uploadBuildingExteriorImage: async (file, isPublic = true) => {
+    return uploadService.uploadImage(file, 'buildings/exterior', '', isPublic)
+  },
+
+  uploadBuildingExteriorImages: async (files, isPublic = true) => {
+    return uploadService.uploadMultipleImages(files, 'buildings/exterior', isPublic)
+  },
+
+  uploadBuildingFloorPlan: async (file, buildingId, floorNumber, isPublic = true) => {
+    const fileName = `${buildingId}_floor_${floorNumber}`
+    return uploadService.uploadImage(file, 'buildings/floor-plans', fileName, isPublic)
+  },
+
+  // ── APARTMENT UPLOADS ──────────────────────────────────────
+  uploadApartmentModelFloorPlan: async (file, isPublic = true) => {
+    return uploadService.uploadImage(file, 'apartments/models/floor-plans', '', isPublic)
+  },
+
+  uploadApartmentInteriorImages: async (files, type = 'basic', isPublic = true) => {
+    return uploadService.uploadMultipleImages(files, `apartments/interior/${type}`, isPublic)
+  },
+
+
+    getOutdoorAmenitiesBySlug: async (slug) => {
+    try {
+      const response = await api.get(`/projects/slug/${slug}/outdoor-amenities`)
+      return response.data
+    } catch (error) {
+      console.error('❌ Error getting outdoor amenities by slug:', error.response?.data || error.message)
+      return { outdoorAmenitySections: [] }
+    }
+  },
+
+  getOutdoorAmenitiesByProjectId: async (projectId) => {
+    try {
+      const response = await api.get(`/projects/${projectId}/outdoor-amenities`)
+      return response.data
+    } catch (error) {
+      console.error('❌ Error getting outdoor amenities by project ID:', error.response?.data || error.message)
+      return { outdoorAmenitySections: [] }
+    }
+  },
+
+  saveOutdoorAmenities: async (projectId, outdoorAmenitySections) => {
+    try {
+      const response = await api.put(`/projects/${projectId}/outdoor-amenities`, {
+        outdoorAmenitySections
+      })
+      return response.data
+    } catch (error) {
+      console.error('❌ Error saving outdoor amenities:', error.response?.data || error.message)
+      throw error
+    }
+  },
 }
 
 export default uploadService

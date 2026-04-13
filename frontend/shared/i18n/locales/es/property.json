@@ -61,5 +61,13 @@
     "title": "No se encontraron propiedades",
     "description": "Haz clic en 'Agregar Propiedad' para crear una",
     "action": "Agregar Propiedad"
-  }
+  },
+
+    
+    "subtitleApartment": "Gestiona y visualiza todos los departamentos asignados",
+    "apartmentName": "Dpt {{number}} - Piso {{floor}}",
+    "noAssigned": "Departamentos no asignados",
+    "noAssignedDesc": "No se han asignado departamentos aún.",
+    "unassigned": "Sin asignar"
+  
 }

@@ -1,0 +1,21 @@
+{
+  "apartmentContracts": "Apartment Contracts",
+  "propertyContracts": "Property Contracts",
+  "apartmentSubtitle": "Upload and manage contracts for Apartment {{number}}",
+  "propertySubtitle": "Upload and manage contracts for Property {{number}}",
+  "submitContracts": "Submit {{count}} Contract",
+  "submitContracts_plural": "Submit {{count}} Contracts",
+  "uploadProgress": "Upload Progress",
+  "progressSummary": "{{uploaded}} uploaded • {{pending}} pending",
+  "filesReady": "{{count}} file(s) ready to upload",
+  "submitAllHint": "Click \"Submit All Contracts\" to complete the upload",
+  "uploaded": "Uploaded",
+  "pending": "Pending",
+  "view": "View",
+  "download": "Download",
+  "delete": "Delete",
+  "deleting": "Deleting...",
+  "deleteHint": "💡 Delete this document to upload a new one if needed",
+  "selectFile": "Select File",
+  "pendingHint": "This file is pending upload. Click \"Submit All Contracts\" to upload it."
+}

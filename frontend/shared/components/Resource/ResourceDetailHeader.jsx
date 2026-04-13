@@ -41,13 +41,13 @@ const ResourceDetailHeader = ({ details, resourceType, config }) => {
   const isModel10 = model?._id === MODEL_10_ID
   
   const title = isProperty 
-    ? (resource?.lot?.number ? `Lot ${resource.lot.number}` : 'Property')
-    : (resource?.apartmentNumber ? `Apt ${resource.apartmentNumber}` : 'Apartment')
+    ? (resource?.lot?.number ? t('lotLabel', { number: resource.lot.number }, 'Lot {{number}}') : t('propertyLabel', 'Property'))
+    : (resource?.apartmentNumber ? t('apartmentLabel', { number: resource.apartmentNumber }, 'Apt {{number}}') : t('apartment', 'Apartment'))
   
-  const modelName = model?.model || model?.name || 'N/A'
+  const modelName = model?.model || model?.name || t('noModel', 'N/A')
   const price = resource?.price || 0
   const totalConstructionPercentage = resource?.totalConstructionPercentage || 0
-  
+
   const paperSx = {
     p: { xs: 3, sm: 3.5, md: 4 },
     mb: 3,
@@ -152,7 +152,10 @@ const ResourceDetailHeader = ({ details, resourceType, config }) => {
               >
                 {construction?.currentPhase && (
                   <OutlineChip
-                    label={`Phase ${construction.currentPhase.phaseNumber}: ${construction.currentPhase.title}`}
+                    label={t('phaseLabel', {
+                      number: construction.currentPhase.phaseNumber,
+                      title: construction.currentPhase.title
+                    }, 'Phase {{number}}: {{title}}')}
                     icon={<Layers sx={{ fontSize: { xs: 14, sm: 16 } }} />}
                     borderColor={config.colors.primary}
                     color={config.colors.primary}
@@ -163,7 +166,7 @@ const ResourceDetailHeader = ({ details, resourceType, config }) => {
                 <OutlineChip
                   label={
                     typeof totalConstructionPercentage === 'number'
-                      ? `${totalConstructionPercentage}% Complete`
+                      ? t('constructionComplete', { percent: totalConstructionPercentage }, '{{percent}}% Complete')
                       : '—'
                   }
                   icon={<Construction sx={{ fontSize: { xs: 14, sm: 16 } }} />}
@@ -174,7 +177,7 @@ const ResourceDetailHeader = ({ details, resourceType, config }) => {
 
                 {isProperty && resource?.hasBalcony && (
                   <OutlineChip
-                    label={isModel10 ? 'Studio' : 'Balcony'}
+                    label={isModel10 ? t('studio', 'Studio') : t('balcony', 'Balcony')}
                     icon={<AutoAwesome sx={{ fontSize: { xs: 16, sm: 18 } }} />}
                     borderColor={config.colors.secondary}
                     color={config.colors.secondary}
@@ -184,7 +187,7 @@ const ResourceDetailHeader = ({ details, resourceType, config }) => {
 
                 {isProperty && resource?.modelType === 'upgrade' && (
                   <OutlineChip
-                    label="Upgrade"
+                    label={t('upgrade', 'Upgrade')}
                     icon={<Star sx={{ fontSize: { xs: 16, sm: 18 } }} />}
                     borderColor={config.colors.primary}
                     color={config.colors.primary}
@@ -194,7 +197,7 @@ const ResourceDetailHeader = ({ details, resourceType, config }) => {
 
                 {isProperty && resource?.hasStorage && (
                   <OutlineChip
-                    label="Storage"
+                    label={t('storage', 'Storage')}
                     icon={<Layers sx={{ fontSize: { xs: 16, sm: 18 } }} />}
                     borderColor="#706f6f"
                     color="#5a5a5a"
@@ -204,7 +207,7 @@ const ResourceDetailHeader = ({ details, resourceType, config }) => {
 
                 {isModel10 && (
                   <OutlineChip
-                    label="Model 10"
+                    label={t('model10', 'Model 10')}
                     icon={<Star sx={{ fontSize: { xs: 16, sm: 18 } }} />}
                     borderColor="#E5863C"
                     color="#8b6f47"
@@ -214,7 +217,7 @@ const ResourceDetailHeader = ({ details, resourceType, config }) => {
 
                 {!isProperty && resource?.floorNumber && (
                   <OutlineChip
-                    label={`Floor ${resource.floorNumber}`}
+                    label={t('floorLabel', { number: resource.floorNumber }, 'Floor {{number}}')}
                     icon={<Layers sx={{ fontSize: { xs: 16, sm: 18 } }} />}
                     borderColor={config.colors.accent}
                     color={config.colors.accent}
@@ -258,7 +261,7 @@ const ResourceDetailHeader = ({ details, resourceType, config }) => {
                   letterSpacing: '1.5px'
                 }}
               >
-                {t(`${config.i18n.namespace}:propertyValue`, 'Property Value')}
+                {t('propertyValue', 'Property Value')}
               </Typography>
               <Typography
                 variant="h2"
