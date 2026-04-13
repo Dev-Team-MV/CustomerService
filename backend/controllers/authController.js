@@ -12,12 +12,6 @@ const generateToken = (id) => {
   })
 }
 
-function userBelongsToProject(user, projectId) {
-  if (!user.projectMemberships?.length) return false
-  const pid = String(projectId)
-  return user.projectMemberships.some((m) => m.project && String(m.project) === pid)
-}
-
 export const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password, phoneNumber, birthday, role, skipPasswordSetup, projectId } = req.body
@@ -433,10 +427,21 @@ export const sendSetupPasswordLink = async (req, res) => {
       if (!mongoose.Types.ObjectId.isValid(projectId)) {
         return res.status(400).json({ message: 'Invalid projectId' })
       }
-      if (!userBelongsToProject(user, projectId)) {
-        return res.status(400).json({
-          message: 'User is not a member of the specified project. Omit projectId to use the default frontend URL.'
-        })
+
+      const projectExists = await Project.exists({ _id: projectId })
+      if (!projectExists) {
+        return res.status(404).json({ message: 'Project not found' })
+      }
+
+      // Backfill membership for legacy users created before projectMemberships existed.
+      const alreadyMember = user.projectMemberships?.some(
+        (m) => m.project && String(m.project) === String(projectId)
+      )
+      if (!alreadyMember) {
+        user.projectMemberships = [
+          ...(user.projectMemberships || []),
+          { project: projectId, role: 'resident' }
+        ]
       }
     }
 
