@@ -21,7 +21,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import uploadService from "../../services/uploadService";
 import { useTranslation } from "react-i18next";
-import ImagePreview from "../../components/ImgPreview";
+// import ImagePreview from "../../components/ImgPreview";
+import ImagePreview from "@shared/components/ImgPreview";
 import ModalWrapper from "@shared/constants/ModalWrapper";
 import PrimaryButton from "@shared/constants/PrimaryButton";
 
@@ -781,7 +782,7 @@ return (
               {getCurrentSelectedFiles().map((file, idx) => (
                 <Grid item xs={6} sm={4} key={idx}>
                   <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}>
-                    <ImagePreview
+                    {/* <ImagePreview
                       src={
                         file.file instanceof File
                           ? URL.createObjectURL(file.file)
@@ -809,7 +810,39 @@ return (
                       switchPosition="top-right"
                       label="NEW"
                       imgSx={{ height: 160 }}
-                    />
+                    /> */}
+                    {/* // Para archivos nuevos (selectedFiles): */}
+<ImagePreview
+  src={
+    file.file instanceof File
+      ? URL.createObjectURL(file.file)
+      : typeof file.file === 'string'
+        ? file.file
+        : ''
+  }
+  alt={`Preview ${idx + 1}`}
+  isPublic={!!file.isPublic}
+  onTogglePublic={checked =>
+    handleToggleIsPublicSelected(
+      getCurrentSection(),
+      idx,
+      tab === 2 ? selectedInteriorSection : null
+    )({ target: { checked } })
+  }
+  onDelete={() =>
+    handleRemoveSelectedFile(
+      getCurrentSection(),
+      idx,
+      tab === 2 ? selectedInteriorSection : null
+    )
+  }
+  showVisibilityChip={true}
+  label={t('common:new')}
+  publicLabel={t('common:public')}
+  privateLabel={t('common:private')}
+  noImageLabel={t('common:noImage')}
+  imgSx={{ height: 150 }}
+/>
                   </motion.div>
                 </Grid>
               ))}
@@ -827,7 +860,7 @@ return (
                 {getCurrentExistingImages().map((img, idx) => (
                   <Grid item xs={6} sm={4} key={stableKeyForImage(img, idx)}>
                     <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.3 }}>
-                      <ImagePreview
+                      {/* <ImagePreview
                         src={typeof img === 'string' ? img : img.url}
                         alt={`Image ${idx + 1}`}
                         isPublic={!!(img.isPublic ?? true)}
@@ -849,7 +882,34 @@ return (
                         showSwitch={true}
                         switchPosition="top-right"
                         imgSx={{ height: 160 }}
-                      />
+                      /> */}
+                      {/* // Para imágenes ya subidas (existingImages): */}
+<ImagePreview
+  src={typeof img === 'string' ? img : img.url}
+  alt={`Image ${idx + 1}`}
+  isPublic={!!(img.isPublic ?? true)}
+  onTogglePublic={checked =>
+    handleToggleImageVisibility(
+      getCurrentSection(),
+      idx,
+      checked,
+      tab === 2 ? selectedInteriorSection : null
+    )
+  }
+  onDelete={() =>
+    handleDeleteExistingImage(
+      getCurrentSection(),
+      img,
+      tab === 2 ? selectedInteriorSection : null
+    )
+  }
+  showVisibilityChip={true}
+  label={t('common:current')}
+  publicLabel={t('common:public')}
+  privateLabel={t('common:private')}
+  noImageLabel={t('common:noImage')}
+  imgSx={{ height: 150 }}
+/>
                     </motion.div>
                   </Grid>
                 ))}

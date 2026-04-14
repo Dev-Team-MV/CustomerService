@@ -1,9 +1,14 @@
-import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { AuthProvider, useAuth } from '@shared/context/AuthContext'
 import ProtectedRoute from '@shared/components/ProtectedRoute'
 import Layout from '@shared/components/LayoutComponents/Layout'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
+
+// Importa los menús locales
+import { privateMenuItems, publicMenuItems } from './constants/menuItems'
+
+// Páginas
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
@@ -28,25 +33,30 @@ import MasterPlanManager from './pages/MasterPlanManager'
 import TimeLine from './pages/TimeLine'
 import ConfigurationManager from './pages/ConfigurationManager'
 import FamilyGroup from './pages/FamilyGroup'
+import MapInventoryPage from './pages/MapInventoryPage'
 
-const theme = createTheme({
-  palette: {
-    primary: { main: '#4a7c59' },
-    secondary: { main: '#8bc34a' },
-  },
-})
+import theme from './theme' // Usa SIEMPRE el theme extendido
+
 
 const DynamicLayoutWrapper = ({ children }) => {
   const { user } = useAuth()
   const publicView = !user
-  return <Layout publicView={publicView}>{children}</Layout>
+  return (
+    <Layout
+      publicView={publicView}
+      menuItems={publicView ? publicMenuItems : privateMenuItems}
+      publicMenuItems={publicMenuItems}
+    >
+      {children || <Outlet />}
+    </Layout>
+  )
 }
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AuthProvider>
+      <AuthProvider projectSlug="lakewood">
         <Routes>
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
@@ -55,9 +65,18 @@ function App() {
           <Route path="/terms-and-conditions" element={<TermsAndCondition />} />
 
           {/* Public Routes */}
-          <Route element={<Layout publicView={true} />}>
+          <Route
+            element={
+              <Layout
+                publicView={true}
+                menuItems={publicMenuItems}
+                publicMenuItems={publicMenuItems}
+              />
+            }
+          >
             <Route path="/explore/properties" element={<PropertySelection />} />
             <Route path="/explore/amenities" element={<AmenitiesPublic />} />
+            {/* <Route path="/explore/map-inventory" element={<MapInventoryPage />} /> */}
           </Route>
 
           {/* Hybrid Routes */}
@@ -68,7 +87,15 @@ function App() {
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
-            <Route element={<Layout publicView={false} />}>
+            <Route
+              element={
+                <Layout
+                  publicView={false}
+                  menuItems={privateMenuItems}
+                  publicMenuItems={publicMenuItems}
+                />
+              }
+            >
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/my-property" element={<MyProperty />} />
@@ -76,7 +103,7 @@ function App() {
               <Route path="/master-plan/inventory" element={<MasterPlanManager />} />
               <Route path="/configurations" element={<ConfigurationManager />} />
               <Route path="/family-group" element={<FamilyGroup />} />
-              <Route path="/news" element={<NewsTable />} />
+              <Route path="/admin/news" element={<NewsTable />} />
               <Route path="/properties" element={<Properties />} />
               <Route path="/properties/select" element={<PropertySelection />} />
               <Route path="/lots" element={<Lots />} />
@@ -87,6 +114,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/timeline" element={<TimeLine />} />
               <Route path="/clubhouse-manager" element={<ClubhouseManager />} />
+              <Route path="/map-inventory" element={<MapInventoryPage />} />
             </Route>
           </Route>
           <Route path="*" element={<NotFound />} />

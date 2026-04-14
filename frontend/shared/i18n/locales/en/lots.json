@@ -40,8 +40,18 @@
     "number": "Lot Number",
     "price": "Price",
     "status": "Status",
-    "project":"Project",
-    "projectHelp": "Select the project this lot belongs to"
+    "project": "Project",
+    "projectHelp": "Select the project this lot belongs to",
+    "inventoryColor": "Inventory Color"
   },
-  "confirmDelete": "Are you sure you want to delete this lot?"
+  "confirmDelete": "Are you sure you want to delete this lot?",
+  "mapInventory": {
+    "title": "Inventory by Color",
+    "subtitle": "Visual inventory overview by color classification",
+    "colors": {
+      "green": "Available",
+      "blue": "Hold",
+      "red": "Sold"
+    }
+  }
 }

@@ -283,6 +283,7 @@ const options = {
             _id: { type: 'string' },
             project: { type: 'string', description: 'Project ID (ref)' },
             number: { type: 'string' },
+            color: { type: 'string', description: 'Lot color (e.g. hex, name)' },
             price: { type: 'number' },
             status: { type: 'string', enum: ['available', 'pending', 'sold'] },
             assignedUser: { type: 'string' },

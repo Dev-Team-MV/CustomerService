@@ -64,7 +64,7 @@ const FamilyGroup = () => {
   } = useFamilyGroups(projectId)
 
   // Residents hook for user selection
-  const { users, loading: loadingUsers } = useResidents()
+  const { users, loading: loadingUsers } = useResidents(projectId)
 
   // Handlers
   const handleCreateGroup = async (name) => {

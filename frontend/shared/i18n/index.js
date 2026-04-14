@@ -26,6 +26,12 @@ import enProject from './locales/en/project.json'
 import enConstruction from './locales/en/construction.json'
 import enFamilyGroup from './locales/en/FamilyGroup.json'
 import enMyApartment from './locales/en/myApartment.json'
+import enAgora from './locales/en/agora.json'
+import enBuildings from './locales/en/buildings.json'
+import enQuote from './locales/en/quote.json'
+import enShare from './locales/en/share.json'
+import enContracts from './locales/en/contracts.json'
+import enTermsConditions from './locales/en/termsConditions.json' 
 // ES
 import esCommon from './locales/es/common.json'
 import esAuth from './locales/es/auth.json'
@@ -50,6 +56,12 @@ import esProject from './locales/es/project.json'
 import esConstruction from './locales/es/construction.json'
 import esFamilyGroup from './locales/es/FamilyGroup.json'
 import esMyApartment from './locales/es/myApartment.json'
+import esAgora from './locales/es/agora.json'
+import esBuildings from './locales/es/buildings.json'
+import esQuote from './locales/es/quote.json'
+import esShare from './locales/es/share.json'   
+import esContracts from './locales/es/contracts.json'
+import esTermsConditions from './locales/es/termsConditions.json'
 
 i18n
     .use(LanguageDetector)
@@ -80,7 +92,13 @@ i18n
                 project: enProject,
                 construction: enConstruction,
                 familyGroup: enFamilyGroup,
-                myApartment: enMyApartment
+                myApartment: enMyApartment,
+                agora: enAgora,
+                buildings: enBuildings,
+                quote: enQuote,
+                share: enShare,
+                contracts: enContracts,
+                termsConditions: enTermsConditions
             },
             es: {
                 common: esCommon,
@@ -106,12 +124,48 @@ i18n
                 project: esProject,
                 construction: esConstruction,
                 familyGroup: esFamilyGroup,
-                myApartment: esMyApartment
+                myApartment: esMyApartment,
+                agora: esAgora,
+                buildings: esBuildings,
+                quote: esQuote,
+                share: esShare,
+                contracts: esContracts,
+                termsConditions: esTermsConditions
             },
         },
         fallbackLng: 'en',
         defaultNS: 'common',
-        ns: ['common', 'auth', 'navigation', 'dashboard', 'property', 'amenities', 'news', 'profile', 'analytics', 'lots', 'propertySelection', 'residents', 'models', 'payloads', 'clubHouse', 'masterPlan', 'timeLine', 'configuration', 'myProperty', 'project', 'construction', 'familyGroup', 'myApartment'],
+        ns: [
+            'common', 
+            'auth', 
+            'navigation', 
+            'dashboard', 
+            'property', 
+            'amenities', 
+            'news', 
+            'profile', 
+            'analytics', 
+            'lots', 
+            'propertySelection', 
+            'residents', 
+            'models', 
+            'payloads', 
+            'clubHouse', 
+            'masterPlan', 
+            'timeLine', 
+            'configuration', 
+            'myProperty', 
+            'project', 
+            'construction', 
+            'familyGroup', 
+            'myApartment', 
+            'agora', 
+            'buildings', 
+            'quote',
+            'share',
+            'contracts',
+            'termsConditions'
+        ],
         interpolation: {
             escapeValue: false,
         },

@@ -8,6 +8,7 @@ import {
 import { AttachFile, CheckCircle } from '@mui/icons-material'
 import ModalWrapper from '@shared/constants/ModalWrapper'
 import PrimaryButton from '@shared/constants/PrimaryButton'
+import { useTranslation } from 'react-i18next'
 
 const statusOptions = ['pending', 'signed', 'rejected']
 
@@ -43,6 +44,7 @@ const PayloadDialog = ({
   loading = false,
   error = null,
 }) => {
+  const { t } = useTranslation(['payloads', 'common'])
   // resources: array de propiedades o apartamentos
   // resourceType: 'property' o 'apartment'
   return (
@@ -50,8 +52,8 @@ const PayloadDialog = ({
       open={open}
       onClose={onClose}
       icon={AttachFile}
-      title={selectedPayload ? 'Edit Payment' : 'Add Payment'}
-      subtitle="Manage payment details"
+      title={selectedPayload ? t('payloads:edit', 'Edit Payment') : t('payloads:add', 'Add Payment')}
+      subtitle={t('payloads:manageDetails', 'Manage payment details')}
       actions={
         <PrimaryButton
           onClick={onSubmit}
@@ -59,7 +61,7 @@ const PayloadDialog = ({
           startIcon={<CheckCircle />}
           loading={loading}
         >
-          {selectedPayload ? 'Update' : 'Create'}
+          {selectedPayload ? t('payloads:update', 'Update') : t('payloads:create', 'Create')}
         </PrimaryButton>
       }
       maxWidth="sm"
@@ -71,7 +73,7 @@ const PayloadDialog = ({
           <TextField
             fullWidth
             select
-            label={resourceType === 'property' ? 'Property' : 'Apartment'}
+            label={resourceType === 'property' ? t('payloads:property', 'Property') : t('payloads:unit', 'Apartment')}
             value={formData[resourceType] || ''}
             onChange={(e) => setFormData({ ...formData, [resourceType]: e.target.value })}
             sx={fieldSx}
@@ -79,8 +81,8 @@ const PayloadDialog = ({
             {resources.map((unit) => (
               <MenuItem key={unit._id} value={unit._id}>
                 {resourceType === 'property'
-                  ? `Unit ${unit.lot?.number} - ${unit.users?.[0]?.firstName || ''} ${unit.users?.[0]?.lastName || ''}`
-                  : `Apt ${unit.apartmentNumber} - ${unit.users?.[0]?.firstName || ''} ${unit.users?.[0]?.lastName || ''}`
+                  ? `${t('payloads:unit', 'Unit')} ${unit.lot?.number} - ${unit.users?.[0]?.firstName || ''} ${unit.users?.[0]?.lastName || ''}`
+                  : `${t('payloads:unit', 'Apt')} ${unit.apartmentNumber} - ${unit.users?.[0]?.firstName || ''} ${unit.users?.[0]?.lastName || ''}`
                 }
               </MenuItem>
             ))}
@@ -90,7 +92,7 @@ const PayloadDialog = ({
           <TextField
             fullWidth
             type="date"
-            label="Payment Date"
+            label={t('payloads:paymentDate', 'Payment Date')}
             value={formData.date}
             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
             InputLabelProps={{ shrink: true }}
@@ -101,7 +103,7 @@ const PayloadDialog = ({
           <TextField
             fullWidth
             type="number"
-            label="Amount"
+            label={t('payloads:amount', 'Amount')}
             value={formData.amount}
             onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
             InputProps={{
@@ -116,7 +118,7 @@ const PayloadDialog = ({
           <TextField
             fullWidth
             select
-            label="Status"
+            label={t('payloads:status', 'Status')}
             value={formData.status}
             onChange={(e) => setFormData({ ...formData, status: e.target.value })}
             sx={fieldSx}
@@ -132,7 +134,7 @@ const PayloadDialog = ({
           <TextField
             fullWidth
             select
-            label="Payment Type"
+            label={t('payloads:paymentType', 'Payment Type')}
             value={formData.type || ""}
             onChange={e => setFormData({ ...formData, type: e.target.value })}
             required
@@ -150,7 +152,7 @@ const PayloadDialog = ({
             fullWidth
             multiline
             rows={3}
-            label="Notes"
+            label={t('payloads:notes', 'Notes')}
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
             sx={fieldSx}
@@ -163,7 +165,7 @@ const PayloadDialog = ({
             startIcon={<AttachFile />}
             color="secondary"
           >
-            Upload Images
+            {t('payloads:uploadImages', 'Upload Images')}
             <input
               type="file"
               hidden
@@ -175,7 +177,7 @@ const PayloadDialog = ({
           {files && files.length > 0 && (
             <Alert severity="success" sx={{ mt: 2 }}>
               <Typography variant="body2" fontWeight="600">
-                {files.length} file(s) selected
+                {t('payloads:filesSelected', { count: files.length }, '{{count}} file(s) selected')}
               </Typography>
             </Alert>
           )}

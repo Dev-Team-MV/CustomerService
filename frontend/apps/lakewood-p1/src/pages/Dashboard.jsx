@@ -71,16 +71,27 @@ const Dashboard = () => {
   const { data: lots,     loading: lotsLoading }     = useFetch(
     useCallback(() => api.get('/lots').then(r => r.data), [])
   )
-  const { data: payloads, loading: payloadsLoading } = useFetch(
-    useCallback(() => api.get('/payloads?limit=3&sort=-date').then(r => r.data), [])
-  )
+const { data: payloads } = useFetch(
+  useCallback(() =>
+    api.get('/payloads', {
+      params: {
+        projectId: import.meta.env.VITE_PROJECT_ID,
+        limit: 3,
+        sort: '-date'
+      }
+    }).then(r => r.data),
+  []),
+  { initialData: [] }
+)
 
-  const loading = lotsLoading || payloadsLoading
+  const loading = lotsLoading || payloads.loading
 
   // ── stats ───────────────────────────────────────────────────
   const stats = useDashboardStats(lots)
 
-  // ✅ Mismo hook que Residents.jsx
+  const projectId = import.meta.env.VITE_PROJECT_ID
+
+  // ✅ Mismo hook que Residents.jsx (projectId → SMS / registro con URL correcta)
   const {
     openDialog,
     selectedUser,
@@ -95,7 +106,7 @@ const Dashboard = () => {
     e164Value,
     displayVal,
     isPhoneValid,
-  } = useResidents()
+  } = useResidents(projectId)
 
   // ── quick actions ───────────────────────────────────────────
   const adminActions = useMemo(() => [
@@ -103,7 +114,7 @@ const Dashboard = () => {
     { icon: <PersonAdd />, label: t('quickActions.inviteUser'),  description: t('quickActions.inviteUserDesc'),  color: '#8CA551', bgColor: '#f0f7e8', onClick: () => handleOpenDialog() },
     { icon: <BarChart />,  label: t('quickActions.analytics'),   description: t('quickActions.analyticsDesc'),   color: '#E5863C', bgColor: '#fff5e6', onClick: () => navigate('/analytics') },
     { icon: <Deck />,      label: t('quickActions.amenities'),   description: t('quickActions.amenitiesDesc'),   color: '#8CA551', bgColor: '#f0f7e8', onClick: () => navigate('/amenities') },
-    { icon: <Article />,   label: t('quickActions.manageNews'),  description: t('quickActions.manageNewsDesc'),  color: '#E5863C', bgColor: '#fff5e6', onClick: () => navigate('/news') },
+    { icon: <Article />,   label: t('quickActions.manageNews'),  description: t('quickActions.manageNewsDesc'),  color: '#E5863C', bgColor: '#fff5e6', onClick: () => navigate('/admin/news') },
   ], [t, navigate, handleOpenDialog])
 
   const userActions = useMemo(() => [

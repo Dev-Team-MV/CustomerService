@@ -50,7 +50,7 @@
   "uploadPayment": "Subir Pago",
   "paymentProgress": "Progreso de Pago",
   "paymentHistory": "Historial de Pagos",
-  "transactions": "{{count}} transacción",
+  "transactions": "transacción",
   "transactions_plural": "{{count}} transacciones",
   "date": "Fecha",
   "amount": "Monto",
@@ -90,5 +90,21 @@
     "apartmentValue": "Valor del apartamento",
     "included": "Incluido",
     "notAvailable": "No disponible"
-  }
+  },
+
+
+  
+    "lotLabel": "Lote {{number}}",
+    "propertyLabel": "Propiedad",
+    "apartmentLabel": "Apt {{number}}",
+    "noModel": "N/A",
+    "phaseLabel": "Fase {{number}}: {{title}}",
+    "constructionComplete": "{{percent}}% Completado",
+    "studio": "Estudio",
+    "balcony": "Balcón",
+    "storage": "Almacenamiento",
+    "model10": "Modelo 10",
+    "floorLabel": "Piso {{number}}",
+    "propertyValue": "Valor de la Propiedad"
+  
 }

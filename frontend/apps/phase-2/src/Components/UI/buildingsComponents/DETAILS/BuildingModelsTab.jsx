@@ -2,9 +2,10 @@ import {
   Box, Typography, Button
 } from '@mui/material'
 import { ViewModule, Business } from '@mui/icons-material'
-import ApartmentModelDialog from '../ApartmenModelDialog'
+// import ApartmentModelDialog from '../ApartmenModelDialog'
+import ApartmentModelDialog from '@shared/components/Buildings/ApartmenModelDialog' 
 import ModelCard from './ModelCard'
-
+import { useTranslation } from 'react-i18next'
 const BuildingModelsTab = ({
   apartmentModels,
   modelModal,
@@ -13,7 +14,9 @@ const BuildingModelsTab = ({
   onModelSaved,
   buildingId,
   buildingTotalApartments
-}) => (
+}) => {  
+  const { t } = useTranslation(['buildings', 'common'])
+  return(
   <Box>
     <Typography
       variant="h6"
@@ -27,7 +30,7 @@ const BuildingModelsTab = ({
       }}
     >
       <ViewModule sx={{ color: 'info.main' }} />
-      Apartment Models
+        {t('buildings:apartmentModels')}
     </Typography>
 
     <Button
@@ -42,7 +45,7 @@ const BuildingModelsTab = ({
         fontWeight: 600
       }}
     >
-      Create Apartment Model
+        {t('buildings:createApartmentModel', 'Create Apartment Model')}
     </Button>
 
     {apartmentModels.length === 0 ? (
@@ -54,7 +57,7 @@ const BuildingModelsTab = ({
           mt: 2
         }}
       >
-        No apartment models created yet
+          {t('buildings:noApartmentModels', 'No apartment models created yet')}
       </Typography>
     ) : (
     <Box
@@ -87,6 +90,6 @@ const BuildingModelsTab = ({
       existingModels={apartmentModels}
     />
   </Box>
-)
+)}
 
 export default BuildingModelsTab

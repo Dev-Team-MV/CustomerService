@@ -73,5 +73,12 @@
         "Viewpoint": "Viewpoint",
         "Access": "Access",
         "Maintenance Area": "Maintenance Area"
-  }
+  },
+
+  "manageOutdoor": "Manage Outdoor Amenities",
+"selectAmenity": "Select an amenity",
+"selectImages": "Select Images",
+"uploadedImages": "Uploaded Images",
+"newImages": "New Images",
+"manageAmenities": "Manage Amenities"
 }

@@ -1,6 +1,9 @@
 // Jenkinsfile para CustomerService - backend
 // Jobs en Jenkins: CustomerService-Backend-Develop (BD Atlas dev) | CustomerService-Backend-Production (BD VPS pdn)
 // Develop → apicsdev.michelangelodelvalle.com:5001 | Production → apics.michelangelodelvalle.com:5000
+// FRONTEND_URL: base pública del SPA (SMS setup-password). Si el job define FRONTEND_URL en Jenkins, se respeta.
+// SPAs públicos: devlakewoodp1/lakewoodp1 | devlakewoodp2/lakewoodp2 | devcrm/crm (michelangelodelvalle.com).
+// API: apicsdev/apics. Otros (new.*): define FRONTEND_URL manualmente en el job si aplica.
 // Tag de imagen: solo un ":" (ej. customerservice-backend:development-1)
 //
 // IMPORTANTE: Solo se ejecuta si hay cambios en backend/. Si el commit solo toca frontend/, se omite.
@@ -76,6 +79,21 @@ pipeline {
                     env.IMAGE_NAME = 'customerservice-backend'
                     env.IMAGE_TAG = "${env.ENVIRONMENT}-${env.BUILD_NUMBER}"
                     env.PUBLIC_URL = (env.IS_PRODUCTION == 'true') ? 'https://apics.michelangelodelvalle.com' : 'https://apicsdev.michelangelodelvalle.com'
+                    // FRONTEND_URL: si el job Jenkins ya la define (Environment), se usa; si no, se infiere por nombre del job
+                    def fe = (env.FRONTEND_URL ?: '').trim()
+                    if (!fe) {
+                        def jn = (env.JOB_NAME ?: '').toLowerCase()
+                        def prod = env.IS_PRODUCTION == 'true'
+                        if (jn.contains('mvcrm') || jn.contains('mv-crm') || jn.contains('mv_crm')) {
+                            fe = prod ? 'https://crm.michelangelodelvalle.com' : 'https://devcrm.michelangelodelvalle.com'
+                        } else if (jn.contains('phase2') || jn.contains('phase-2') || jn.contains('fase2')
+                                || jn.contains('lakewoodp2') || jn.contains('lakewood-p2')) {
+                            fe = prod ? 'https://lakewoodp2.michelangelodelvalle.com' : 'https://devlakewoodp2.michelangelodelvalle.com'
+                        } else {
+                            fe = prod ? 'https://lakewoodp1.michelangelodelvalle.com' : 'https://devlakewoodp1.michelangelodelvalle.com'
+                        }
+                    }
+                    env.FRONTEND_URL = fe
                     def uriPdn = 'mongodb://mongo_customerservice:WmSld1ZrUWzWcaDZ6QBKl7QDKQsMnPfp@72.61.6.13:27017/customerservice?authSource=admin'
                     def uriDev = 'mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice'
                     env.MONGODB_URI = (env.IS_PRODUCTION == 'true') ? uriPdn : uriDev
@@ -89,6 +107,7 @@ pipeline {
                     echo "Contenedor: ${env.CONTAINER_NAME} | Puerto: ${env.APP_PORT}"
                     echo "BD: ${env.IS_PRODUCTION == 'true' ? 'VPS pdn (72.61.6.13:27017/customerservice)' : 'Atlas dev (customerservice.mkutnlt.mongodb.net)'}"
                     echo "Imagen: ${env.IMAGE_NAME}:${env.IMAGE_TAG}"
+                    echo "FRONTEND_URL (SMS setup): ${env.FRONTEND_URL}"
                     echo "==========================================="
                 }
             }
@@ -141,6 +160,7 @@ pipeline {
                               -e NODE_ENV=''' + (env.IS_PRODUCTION == 'true' ? 'production' : 'development') + ''' \
                               -e PORT=5000 \
                               -e PUBLIC_URL=''' + env.PUBLIC_URL + ''' \
+                              -e FRONTEND_URL=''' + env.FRONTEND_URL + ''' \
                               -e MONGODB_URI="$MONGODB_URI" \
                               -e JWT_SECRET=''' + env.JWT_SECRET + ''' \
                               -e TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID \

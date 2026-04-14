@@ -95,5 +95,18 @@
   "propertyValue": "Valor de la propiedad",
   "included": "Incluido",
   "notAvailable": "No disponible"
-}
+},
+
+
+  "lotLabel": "Lote {{number}}",
+  "propertyLabel": "Propiedad",
+  "apartmentLabel": "Apt {{number}}",
+  "apartment": "Departamento",
+  "noModel": "N/A",
+  "phaseLabel": "Fase {{number}}: {{title}}",
+  "constructionComplete": "{{percent}}% Completado",
+  "studio": "Estudio",
+
+  "floorLabel": "Piso {{number}}"
+
 }

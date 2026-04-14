@@ -21,7 +21,9 @@
         "familyGroup": "Grupo Familiar",
         "buildings": "Edificios",
         "masterPlan": "Master Plan",
-        "myapartment": "Mis Apartamentos"
+        "myapartment": "Mis Apartamentos",
+        "agora": "Ágora",
+        "mapInventory": "Inventario de Mapa"
     },
     "tooltips": {
         "openMenu": "Abrir menú",

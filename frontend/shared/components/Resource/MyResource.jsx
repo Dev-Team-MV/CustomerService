@@ -21,6 +21,7 @@ import {
   ArrowBack,
   AutoAwesome
 } from '@mui/icons-material'
+import { useTheme } from '@mui/material/styles'
 import { motion, AnimatePresence } from 'framer-motion'
 import PropTypes from 'prop-types'
 
@@ -38,6 +39,18 @@ export const MyResource = ({ resourceConfig, resourceType }) => {
   const { t } = useTranslation([resourceConfig.i18n.namespace, 'common'])
   const { user } = useAuth()
   const navigate = useNavigate()
+  const theme = useTheme()
+
+  const themedConfig = {
+    ...resourceConfig,
+    colors: {
+      primary:   theme.palette.primary.main,
+      secondary: theme.palette.secondary.main,
+      accent:    theme.palette.warning?.main  || resourceConfig.colors.accent,
+      border:    theme.palette.divider        || resourceConfig.colors.border,
+      gradient:  `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`
+    }
+  }
 
   const {
     loading,
@@ -123,7 +136,7 @@ export const MyResource = ({ resourceConfig, resourceType }) => {
           <FinancialHeader
             financialSummary={financialSummary}
             user={user}
-            config={resourceConfig}
+            config={themedConfig}
             t={t}
           />
         </motion.div>
@@ -153,7 +166,7 @@ export const MyResource = ({ resourceConfig, resourceType }) => {
                     transition={{ duration: 3, repeat: Infinity }}
                   >
                     <AutoAwesome
-                      sx={{ color: resourceConfig.colors.secondary, fontSize: 32 }}
+                      sx={{ color: themedConfig.colors.secondary, fontSize: 32 }}
                     />
                   </motion.div>
                   <Typography
@@ -173,7 +186,7 @@ export const MyResource = ({ resourceConfig, resourceType }) => {
                     }`
                   )}`}
                   sx={{
-                    bgcolor: resourceConfig.colors.secondary,
+                    bgcolor: themedConfig.colors.secondary,
                     color: 'white',
                     fontWeight: 700,
                     px: 2,
@@ -192,7 +205,7 @@ export const MyResource = ({ resourceConfig, resourceType }) => {
     <Grid item xs={12} md={6} lg={4} key={item._id}>
       <ResourceCard
         resource={transformedResource}
-        config={resourceConfig}
+        config={themedConfig}
         hovered={hoveredCard === item._id}
         onHoverStart={() => setHoveredCard(item._id)}
         onHoverEnd={() => setHoveredCard(null)}
@@ -225,21 +238,21 @@ export const MyResource = ({ resourceConfig, resourceType }) => {
                   onClick={deselectItem}
                   sx={{
                     mb: 3,
-                    color: resourceConfig.colors.primary,
+                    color: themedConfig.colors.primary,
                     fontWeight: 700,
                     textTransform: 'none',
                     fontSize: '1rem',
                     px: 3,
                     py: 1.2,
                     borderRadius: 3,
-                    border: `2px solid ${resourceConfig.colors.secondary}`,
+                    border: `2px solid ${themedConfig.colors.secondary}`,
                     bgcolor: 'white',
                     transition: 'all 0.3s ease',
                     '&:hover': {
-                      bgcolor: resourceConfig.colors.secondary,
+                      bgcolor: themedConfig.colors.secondary,
                       color: 'white',
                       transform: 'translateX(-8px)',
-                      boxShadow: `0 8px 20px ${resourceConfig.colors.secondary}4D`
+                      boxShadow: `0 8px 20px ${themedConfig.colors.secondary}4D`
                     }
                   }}
                 >
@@ -258,7 +271,7 @@ export const MyResource = ({ resourceConfig, resourceType }) => {
       <ResourceDetailHeader
         details={itemDetails}
         resourceType={resourceType}
-        config={resourceConfig}
+        config={themedConfig}
       />
     </motion.div>
                   {/* Tabs */}
@@ -288,11 +301,11 @@ export const MyResource = ({ resourceConfig, resourceType }) => {
                             fontWeight: 700,
                             textTransform: 'none',
                             '&.Mui-selected': {
-                              color: resourceConfig.colors.secondary
+                              color: themedConfig.colors.secondary
                             }
                           },
                           '& .MuiTabs-indicator': {
-                            bgcolor: resourceConfig.colors.secondary
+                            bgcolor: themedConfig.colors.secondary
                           }
                         }}
                       >
@@ -328,7 +341,7 @@ export const MyResource = ({ resourceConfig, resourceType }) => {
                         <ConstructionTab
                           resourceId={selectedItem}
                           resourceType={resourceType}
-                          config={resourceConfig}
+                          config={themedConfig}
                         />
                       )}
                       {activeTab === 1 && (
@@ -338,14 +351,14 @@ export const MyResource = ({ resourceConfig, resourceType }) => {
                           loadingPayloads={loadingPayloads}
                           onPaymentUploaded={fetchPayloads}
                           user={user}
-                          config={resourceConfig}
+                          config={themedConfig}
                           resourceType={resourceType}
                         />
                       )}
                       {activeTab === 2 && (
                         <DetailsTab
                           details={itemDetails}
-                          config={resourceConfig}
+                          config={themedConfig}
                           resourceType={resourceType}
                         />
                       )}
