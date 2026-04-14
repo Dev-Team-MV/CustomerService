@@ -24,7 +24,7 @@
   "confirmRemoveMember": "¿Estás seguro de que quieres eliminar este miembro?",
   "confirmDeleteGroup": "¿Estás seguro de que quieres eliminar este grupo? Esto eliminará todas las propiedades compartidas.",
   "pleaseSelectUser": "Por favor, selecciona un usuario",
-  "createdBy": "Creado por {{name}}",
+  "createdBy": "Creado por",
   "shareProperty": "Compartir Propiedad",
   "sharingWithGroup": "Compartiendo con el grupo: {{group}}",
   "selectPropertyToShare": "Seleccionar una Propiedad para Compartir",
@@ -53,5 +53,31 @@
   "addMember": "Agregar Miembro",
   "delete": "Eliminar",
   "noMembers": "No hay miembros aún",
-  "owner": "Propietario"
+  "owner": "Propietario",
+
+
+    "createGroupTitle": "Crear Grupo Familiar",
+  "createGroupSubtitle": "Crea un grupo para compartir recursos con los miembros de tu familia",
+
+  "groupNameHelper": "Elige un nombre descriptivo para tu grupo familiar",
+
+  "addMemberTitle": "Agregar Miembro",
+  "addMemberSubtitle": "Agregar un miembro a {{group}}",
+
+  "selectUser": "Seleccionar Usuario",
+
+  "memberRole": "Rol del Miembro",
+  "memberDesc": "Puede ver recursos compartidos",
+  "adminDesc": "Puede gestionar el grupo y compartir recursos",
+
+
+
+  "creator": "Creador",
+  "manageMembers": "Gestionar Miembros",
+  "editGroup": "Editar Grupo",
+  "deleteGroup": "Eliminar Grupo",
+  "membersCount": "{{count}} miembros",
+  "membersCount_plural": "{{count}} miembros",
+  "adminsCount": "{{count}} administradores",
+  "adminsCount_plural": "{{count}} administradores"
 }

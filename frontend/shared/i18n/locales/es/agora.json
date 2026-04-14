@@ -1,0 +1,30 @@
+{
+  "title": "Ágora (Teatro)",
+  "subtitle": "Galería de imágenes del Ágora desde distintos ángulos",
+  "manageImages": "Gestionar imágenes",
+  "manageImagesTitle": "Gestión de imágenes del Ágora",
+  "manageTooltip": "Subir o editar imágenes del Ágora",
+  "loading": "Cargando datos del Ágora...",
+  "errorLoading": "Error al cargar los datos del Ágora",
+  "sections": {
+    "exterior": "Exterior",
+    "blueprints": "Planos"
+  },
+  "noExteriorImages": "No hay imágenes de exterior.",
+  "noBlueprintsImages": "No hay planos cargados.",
+  "useManageButton": "Usa el botón \"Gestionar imágenes\" para subir contenido",
+  "newImages": "Nuevas Imágenes",
+  "uploadedImages": "Imágenes Subidas",
+  "noImagesYet": "No hay imágenes en esta sección aún.",
+  "selectToStart": "Selecciona imágenes para comenzar",
+  "currentSection": "Sección actual",
+  "selectImages": "Seleccionar Imágenes",
+  "filesReady": "archivo(s) listo(s) para subir",
+  "uploadAll": "Subir Todo",
+  "uploading": "Subiendo...",
+  "close": "Cerrar",
+  "noImages": "No hay imágenes",
+  "errorUpload": "Error al subir las imágenes. Por favor intenta de nuevo.",
+  "errorVisibility": "Error al actualizar la visibilidad de la imagen.",
+  "errorDelete": "Error al eliminar la imagen."
+}

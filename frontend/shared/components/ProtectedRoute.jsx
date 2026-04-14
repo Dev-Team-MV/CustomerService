@@ -15,9 +15,16 @@ export function ProtectedRoute({ children, requiredRole = null }) {
     )
   }
 
+  // if (!isAuthenticated) {
+  //   return <Navigate to="/login" state={{ from: location }} replace />
+  // }
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />
-  }
+  const tokenParam = new URLSearchParams(location.search).get('token')
+  const loginTo = tokenParam 
+    ? { pathname: '/login', search: `?token=${tokenParam}` }
+    : '/login'
+  return <Navigate to={loginTo} state={{ from: location }} replace />
+}
 
   if (requiredRole) {
     const roleHierarchy = { user: 0, admin: 1, superadmin: 2 }

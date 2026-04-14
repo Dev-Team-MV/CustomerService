@@ -90,5 +90,20 @@
     "apartmentValue": "Apartment Value",
     "included": "Included",
     "notAvailable": "Not available"
-  }
+  },
+
+  
+  "lotLabel": "Lot {{number}}",
+  "propertyLabel": "Property",
+  "apartmentLabel": "Apt {{number}}",
+  "noModel": "N/A",
+  "phaseLabel": "Phase {{number}}: {{title}}",
+  "constructionComplete": "{{percent}}% Complete",
+  "studio": "Studio",
+  "balcony": "Balcony",
+  "storage": "Storage",
+  "model10": "Model 10",
+  "floorLabel": "Floor {{number}}",
+  "propertyValue": "Property Value"
+
 }

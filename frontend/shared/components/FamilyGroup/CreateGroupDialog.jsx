@@ -1,22 +1,10 @@
-// @shared/components/FamilyGroup/CreateGroupDialog.jsx
 import React, { useState, useEffect } from 'react'
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  Box,
-  Typography,
-  IconButton,
-  CircularProgress
-} from '@mui/material'
-import { Close, Group } from '@mui/icons-material'
+import { TextField, Box } from '@mui/material'
+import GroupIcon from '@mui/icons-material/Group'
+import ModalWrapper from '../../constants/ModalWrapper'
+import PrimaryButton from '../../constants/PrimaryButton'
+import { useTranslation } from 'react-i18next'
 
-/**
- * Dialog for creating a new family group
- */
 export const CreateGroupDialog = ({
   open,
   onClose,
@@ -25,6 +13,7 @@ export const CreateGroupDialog = ({
 }) => {
   const [groupName, setGroupName] = useState('')
   const [error, setError] = useState('')
+  const { t } = useTranslation(['family', 'common'])
 
   useEffect(() => {
     if (!open) {
@@ -35,10 +24,9 @@ export const CreateGroupDialog = ({
 
   const handleSubmit = async () => {
     if (!groupName.trim()) {
-      setError('Group name is required')
+      setError(t('family:groupNameRequired', 'Group name is required'))
       return
     }
-
     const success = await onSubmit(groupName.trim())
     if (success) {
       setGroupName('')
@@ -54,79 +42,45 @@ export const CreateGroupDialog = ({
   }
 
   return (
-    <Dialog
+    <ModalWrapper
       open={open}
       onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        sx: { borderRadius: 2 }
-      }}
-    >
-      <DialogTitle>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Box display="flex" alignItems="center" gap={1.5}>
-            <Box
-              sx={{
-                width: 40,
-                height: 40,
-                borderRadius: 2,
-                bgcolor: 'primary.main',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <Group sx={{ color: 'white' }} />
-            </Box>
-            <Box>
-              <Typography variant="h6" fontWeight={600}>
-                Create Family Group
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Create a group to share resources with family members
-              </Typography>
-            </Box>
-          </Box>
-          <IconButton onClick={onClose} size="small">
-            <Close />
-          </IconButton>
-        </Box>
-      </DialogTitle>
-
-      <DialogContent>
-        <TextField
-          autoFocus
-          fullWidth
-          label="Group Name"
-          placeholder="e.g., García Family"
-          value={groupName}
-          onChange={(e) => {
-            setGroupName(e.target.value)
-            setError('')
-          }}
-          onKeyPress={handleKeyPress}
-          error={!!error}
-          helperText={error || 'Choose a descriptive name for your family group'}
-          disabled={loading}
-          sx={{ mt: 2 }}
-        />
-      </DialogContent>
-
-      <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button onClick={onClose} disabled={loading}>
-          Cancel
-        </Button>
-        <Button
-          variant="contained"
+      icon={GroupIcon}
+      title={t('family:createGroupTitle', 'Create Family Group')}
+      subtitle={t('family:createGroupSubtitle', 'Create a group to share resources with family members')}
+      actions={[
+        <PrimaryButton key="cancel" onClick={onClose} disabled={loading} variant="outlined">
+          {t('common:cancel', 'Cancel')}
+        </PrimaryButton>,
+        <PrimaryButton
+          key="create"
+          loading={loading}
           onClick={handleSubmit}
           disabled={loading || !groupName.trim()}
-          startIcon={loading ? <CircularProgress size={16} /> : <Group />}
+          startIcon={<GroupIcon />}
         >
-          {loading ? 'Creating...' : 'Create Group'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+          {t('family:createGroup', 'Create Group')}
+        </PrimaryButton>
+      ]}
+      maxWidth="sm"
+    >
+      <TextField
+        autoFocus
+        fullWidth
+        label={t('family:groupName', 'Group Name')}
+        placeholder={t('family:groupNamePlaceholder', 'e.g., García Family')}
+        value={groupName}
+        onChange={(e) => {
+          setGroupName(e.target.value)
+          setError('')
+        }}
+        onKeyPress={handleKeyPress}
+        error={!!error}
+        helperText={error || t('family:groupNameHelper', 'Choose a descriptive name for your family group')}
+        disabled={loading}
+        sx={{ mt: 2 }}
+      />
+    </ModalWrapper>
   )
 }
 

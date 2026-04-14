@@ -1,0 +1,30 @@
+{
+  "title": "Agora (Theater)",
+  "subtitle": "Agora image gallery from different angles",
+  "manageImages": "Manage images",
+  "manageImagesTitle": "Agora Image Management",
+  "manageTooltip": "Upload or edit Agora images",
+  "loading": "Loading Agora data...",
+  "errorLoading": "Error loading Agora data",
+  "sections": {
+    "exterior": "Exterior",
+    "blueprints": "Blueprints"
+  },
+  "noExteriorImages": "No exterior images.",
+  "noBlueprintsImages": "No blueprints loaded.",
+  "useManageButton": "Use the \"Manage images\" button to upload content",
+  "newImages": "New Images",
+  "uploadedImages": "Uploaded Images",
+  "noImagesYet": "No images in this section yet.",
+  "selectToStart": "Select images to get started",
+  "currentSection": "Current section",
+  "selectImages": "Select Images",
+  "filesReady": "file(s) ready to upload",
+  "uploadAll": "Upload All",
+  "uploading": "Uploading...",
+  "close": "Close",
+  "noImages": "No images",
+  "errorUpload": "Error uploading images. Please try again.",
+  "errorVisibility": "Error updating image visibility.",
+  "errorDelete": "Error deleting image."
+}

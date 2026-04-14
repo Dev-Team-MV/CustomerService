@@ -68,6 +68,14 @@
         
       "footer": {
         "copyright": "© {{year}} — MV Plataforma"
-      }
+      },
+      "public": "Público",
+      "private": "Privado",
+      "noImage": "Sin imagen",
+
+      "uploading": "Subiendo...",
+      "uploadAll": "Subir Todo",
+      "new": "NUEVO",
+      "project": "Proyecto"
     
 }

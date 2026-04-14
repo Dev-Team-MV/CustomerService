@@ -1,9 +1,7 @@
-// @shared/components/FamilyGroup/FamilyGroupCard.jsx
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Card,
   CardContent,
-  CardActions,
   Typography,
   Box,
   Avatar,
@@ -25,11 +23,11 @@ import {
   AdminPanelSettings,
   Share
 } from '@mui/icons-material'
-import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Family Group Card Component
- * Displays a single family group with members and actions
+ * Displays a single familyGroup group with members and actions
  */
 export const FamilyGroupCard = ({
   group,
@@ -43,6 +41,7 @@ export const FamilyGroupCard = ({
 }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const menuOpen = Boolean(anchorEl)
+  const { t } = useTranslation(['familyGroup', 'common', 'share'])
 
   const handleMenuOpen = (event) => {
     event.stopPropagation()
@@ -93,7 +92,7 @@ export const FamilyGroupCard = ({
                 {group.name}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Created by {group.createdBy?.firstName} {group.createdBy?.lastName}
+                {t('familyGroup:createdBy', 'Created by')} {group.createdBy?.firstName} {group.createdBy?.lastName}
               </Typography>
             </Box>
           </Box>
@@ -113,14 +112,18 @@ export const FamilyGroupCard = ({
         <Box display="flex" gap={1} mb={2} flexWrap="wrap">
           <Chip
             icon={<Group />}
-            label={`${memberCount} member${memberCount !== 1 ? 's' : ''}`}
+            label={t('familyGroup:membersCount', {
+              count: memberCount
+            }, '{{count}} member', { count: memberCount })}
             size="small"
             variant="outlined"
           />
           {adminCount > 0 && (
             <Chip
               icon={<AdminPanelSettings />}
-              label={`${adminCount} admin${adminCount !== 1 ? 's' : ''}`}
+              label={t('familyGroup:adminsCount', {
+                count: adminCount
+              }, '{{count}} admin', { count: adminCount })}
               size="small"
               variant="outlined"
               color="primary"
@@ -131,11 +134,11 @@ export const FamilyGroupCard = ({
         {/* Members Avatars */}
         <Box>
           <Typography variant="caption" color="text.secondary" display="block" mb={1}>
-            Members
+            {t('familyGroup:members', 'Members')}
           </Typography>
           <AvatarGroup max={5} sx={{ justifyContent: 'flex-start' }}>
             {/* Creator */}
-            <Tooltip title={`${group.createdBy?.firstName} ${group.createdBy?.lastName} (Creator)`}>
+            <Tooltip title={`${group.createdBy?.firstName} ${group.createdBy?.lastName} (${t('familyGroup:creator', 'Creator')})`}>
               <Avatar
                 sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}
               >
@@ -148,7 +151,7 @@ export const FamilyGroupCard = ({
             {group.members?.map((member) => (
               <Tooltip
                 key={member.user?._id || member._id}
-                title={`${member.user?.firstName} ${member.user?.lastName} ${member.role === 'admin' ? '(Admin)' : ''}`}
+                title={`${member.user?.firstName} ${member.user?.lastName} ${member.role === 'admin' ? `(${t('familyGroup:admin', 'Admin')})` : ''}`}
               >
                 <Avatar
                   sx={{
@@ -178,14 +181,14 @@ export const FamilyGroupCard = ({
           <ListItemIcon>
             <Group fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Manage Members</ListItemText>
+          <ListItemText>{t('familyGroup:manageMembers', 'Manage Members')}</ListItemText>
         </MenuItem>
 
         <MenuItem onClick={() => handleAction(onAddMember)}>
           <ListItemIcon>
             <PersonAdd fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Add Member</ListItemText>
+          <ListItemText>{t('familyGroup:addMember', 'Add Member')}</ListItemText>
         </MenuItem>
 
         {onShare && (
@@ -193,7 +196,7 @@ export const FamilyGroupCard = ({
             <ListItemIcon>
               <Share fontSize="small" />
             </ListItemIcon>
-            <ListItemText>Share Resource</ListItemText>
+            <ListItemText>{t('share:shareResource', 'Share Resource')}</ListItemText>
           </MenuItem>
         )}
 
@@ -201,14 +204,14 @@ export const FamilyGroupCard = ({
           <ListItemIcon>
             <Edit fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Edit Group</ListItemText>
+          <ListItemText>{t('familyGroup:editGroup', 'Edit Group')}</ListItemText>
         </MenuItem>
 
         <MenuItem onClick={() => handleAction(onDelete)} sx={{ color: 'error.main' }}>
           <ListItemIcon>
             <Delete fontSize="small" color="error" />
           </ListItemIcon>
-          <ListItemText>Delete Group</ListItemText>
+          <ListItemText>{t('familyGroup:deleteGroup', 'Delete Group')}</ListItemText>
         </MenuItem>
       </Menu>
     </Card>

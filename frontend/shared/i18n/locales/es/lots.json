@@ -40,8 +40,18 @@
     "number": "Número de Lote",
     "price": "Precio",
     "status": "Estado",
-    "project":"Proyecto",
-    "projectHelp": "Selecciona el proyecto al que pertenece este lote"
+    "project": "Proyecto",
+    "projectHelp": "Selecciona el proyecto al que pertenece este lote",
+    "inventoryColor": "Color de Inventario"
   },
-  "confirmDelete": "¿Seguro que deseas eliminar este lote?"
+  "confirmDelete": "¿Seguro que deseas eliminar este lote?",
+  "mapInventory": {
+    "title": "Inventario por Color",
+    "subtitle": "Visualización del inventario por color",
+    "colors": {
+      "green": "Disponible",
+      "blue": "Apartado",
+      "red": "Vendido"
+    }
+  }
 }

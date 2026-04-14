@@ -6,11 +6,16 @@ import {
   Payment as PaymentIcon,
   People as PeopleIcon,
   BarChart as BarChartIcon,
-  Article,
-  Deck,
-  Explore,
-  Timeline as TimelineIcon
-} from "@mui/icons-material";
+  Article as ArticleIcon,
+  Deck as DeckIcon,
+  Explore as ExploreIcon,
+  Timeline as TimelineIcon,
+  Settings as SettingsIcon,
+  Villa as VillaIcon,
+  Map as MapIcon,
+  Groups as GroupsIcon,
+  Pool as PoolIcon,
+} from "@mui/icons-material"
 
 export const privateMenuItems = [
   {
@@ -21,7 +26,7 @@ export const privateMenuItems = [
   },
   {
     textKey: "navigation:menu.clubHouse",
-    icon: Deck,
+    icon: DeckIcon,
     path: "/clubhouse-manager",
     roles: ["superadmin", "admin"],
   },
@@ -39,7 +44,7 @@ export const privateMenuItems = [
   },
   {
     textKey: "navigation:menu.models",
-    icon: HomeIcon,
+    icon: VillaIcon,
     path: "/models",
     roles: ["superadmin", "admin"],
   },
@@ -63,8 +68,8 @@ export const privateMenuItems = [
   },
   {
     textKey: "navigation:menu.news",
-    icon: Article,
-    path: "/news",
+    icon: ArticleIcon,
+    path: "/admin/news",
     roles: ["superadmin", "admin"],
   },
   {
@@ -75,13 +80,13 @@ export const privateMenuItems = [
   },
   {
     textKey: "navigation:menu.amenities",
-    icon: Deck,
+    icon: PoolIcon,
     path: "/amenities",
     roles: ["superadmin", "admin", "user"],
   },
   {
     textKey: "navigation:menu.masterPlanInventory",
-    icon: LandscapeIcon,
+    icon: MapIcon,
     path: "/master-plan/inventory",
     roles: ["superadmin", "admin"],
   },
@@ -93,21 +98,28 @@ export const privateMenuItems = [
   },
   {
     textKey: "navigation:menu.configuration",
-    icon: DashboardIcon,
+    icon: SettingsIcon,
     path: "/configurations",
     roles: ["superadmin", "admin"],
   },
   {
     textKey: "navigation:menu.familyGroup",
-    icon: PeopleIcon,
+    icon: GroupsIcon,
     path: "/family-group",
     roles: ["superadmin", "admin", "user"],
-  }
-];
+  },
+  // En privateMenuItems o donde corresponda:
+  {
+    textKey: "navigation:menu.mapInventory",
+    icon: MapIcon,
+    path: "/map-inventory",
+    roles: ["admin", "superadmin"],
+  },
+]
 
 export const publicMenuItems = [
   { textKey: "navigation:menu.home", icon: HomeIcon, path: "/" },
-  { textKey: "navigation:menu.news", icon: Article, path: "/explore/news" },
-  { textKey: "navigation:menu.getYourQuote", icon: Explore, path: "/explore/properties" },
-  { textKey: "navigation:menu.exploreAmenities", icon: Deck, path: "/explore/amenities" },
-];
+  { textKey: "navigation:menu.news", icon: ArticleIcon, path: "/explore/news" },
+  { textKey: "navigation:menu.getYourQuote", icon: ExploreIcon, path: "/explore/properties" },
+  { textKey: "navigation:menu.exploreAmenities", icon: PoolIcon, path: "/explore/amenities" },
+]

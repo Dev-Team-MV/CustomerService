@@ -13,6 +13,8 @@ import {
   Undo, Redo, Save, CheckCircle, Palette, Business
 } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
+
 
 const COLORS = [
   '#8CA551', '#333F1F', '#FF6B6B', '#4ECDC4', '#45B7D1',
@@ -27,7 +29,8 @@ const MasterPlanEditor = ({
 }) => {
   const theme = useTheme()
   const stageRef = useRef(null)
-  
+  const { t } = useTranslation('masterPlan')
+
   const [image] = useImage(masterPlanData?.masterPlanImage || '')
   
   // ✅ Cambiar estructura para incluir color data
@@ -252,7 +255,8 @@ const MasterPlanEditor = ({
         <Box sx={{ flex: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
-              Master Plan Editor
+                {t('editorTitle', 'Master Plan Editor')}
+
             </Typography>
             <Chip 
               label={masterPlanData.project.name}
@@ -262,7 +266,10 @@ const MasterPlanEditor = ({
           </Box>
           
           <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
-            {buildings.length} buildings | {buildingsWithPolygons.length} with polygons
+            {t('buildingsCount', {
+              total: buildings.length,
+              withPolygons: buildingsWithPolygons.length
+            }, '{{total}} buildings | {{withPolygons}} with polygons')}
           </Typography>
         </Box>
         <IconButton onClick={onClose}>
@@ -485,12 +492,12 @@ const MasterPlanEditor = ({
           }}
         >
           <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
-              Buildings ({buildings.length})
-            </Typography>
-            <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
-              Select a building to draw polygon
-            </Typography>
+<Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+  {t('buildingsList', 'Buildings')} ({buildings.length})
+</Typography>
+<Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+  {t('selectBuildingToDraw', 'Select a building to draw polygon')}
+</Typography>
           </Box>
 
           <List sx={{ flex: 1, overflow: 'auto', p: 1 }}>
@@ -615,7 +622,7 @@ const MasterPlanEditor = ({
               fontWeight: 600
             }}
           >
-            Cancel
+            {t('cancel', 'Cancel')}
           </Button>
           <Button
             variant="contained"
@@ -630,7 +637,7 @@ const MasterPlanEditor = ({
             }}
             disabled={buildingsWithPolygons.length === 0}
           >
-            Save All Polygons
+            {t('saveAllPolygons', 'Save All Polygons')}
           </Button>
         </Box>
       </Box>

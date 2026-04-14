@@ -66,5 +66,21 @@
   "Viewpoint": "Viewpoint",
   "Access": "Access",
   "Maintenance Area": "Maintenance Area"
-}
+},
+
+
+
+  "overview": "Master Plan Overview",
+  "overviewDescription": "View all building polygons on the master plan. Click \"Edit Master Plan\" to modify.",
+  "showingBuildings": "Showing {{count}} building",
+  "showingBuildings_plural": "Showing {{count}} buildings",
+  "moreBuildings": "+{{count}} more",
+  "editorTitle": "Master Plan Editor",
+  "buildingsCount": "{{total}} buildings | {{withPolygons}} with polygons",
+  "buildingsList": "Buildings",
+  "selectBuildingToDraw": "Select a building to draw polygon",
+  "cancel": "Cancel",
+  "saveAllPolygons": "Save All Polygons",
+  "saveError": "Error saving master plan: {{error}}"
+  
 }

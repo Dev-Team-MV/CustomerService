@@ -25,19 +25,60 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
   const [galleryFilter, setGalleryFilter] = useState("all")
 
   // Helper para extraer URLs
+  // const extractUrl = (item) => {
+  //   if (!item) return null
+  //   if (typeof item === 'string') return item
+  //   if (item.url) {
+  //     if (Array.isArray(item.url) && item.url.length > 0) {
+  //       return typeof item.url[0] === 'string' ? item.url[0] : null
+  //     }
+  //     if (typeof item.url === 'string') return item.url
+  //   }
+  //   return null
+  // }
+    // Helper para extraer URLs - versión mejorada
   const extractUrl = (item) => {
     if (!item) return null
+    
+    // Caso 1: string directo
     if (typeof item === 'string') return item
+    
+    // Caso 2: objeto con propiedad url
     if (item.url) {
       if (Array.isArray(item.url) && item.url.length > 0) {
         return typeof item.url[0] === 'string' ? item.url[0] : null
       }
       if (typeof item.url === 'string') return item.url
     }
+    
+    // Caso 3: objeto con propiedad path (algunos backends usan esto)
+    if (item.path && typeof item.path === 'string') return item.path
+    
+    // Caso 4: objeto con propiedad src
+    if (item.src && typeof item.src === 'string') return item.src
+    
+    console.warn('⚠️ No se pudo extraer URL de:', item)
     return null
   }
 
   // Imágenes y blueprints directamente de propertyDetails
+  // const exterior = propertyDetails?.images?.exterior || []
+  // const interior = propertyDetails?.images?.interior || []
+  // const facade = propertyDetails?.facade
+  //   ? Array.isArray(propertyDetails.facade)
+  //     ? propertyDetails.facade
+  //     : [propertyDetails.facade]
+  //   : []
+  // let blueprints = []
+  // if (propertyDetails?.blueprints) {
+  //   if (Array.isArray(propertyDetails.blueprints)) {
+  //     blueprints = propertyDetails.blueprints
+  //   } else if (propertyDetails.blueprints.default) {
+  //     blueprints = propertyDetails.blueprints.default
+  //   }
+  // }
+
+    // Imágenes y blueprints directamente de propertyDetails
   const exterior = propertyDetails?.images?.exterior || []
   const interior = propertyDetails?.images?.interior || []
   const facade = propertyDetails?.facade
@@ -53,6 +94,16 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
       blueprints = propertyDetails.blueprints.default
     }
   }
+
+    console.log('🔍 PropertyDetails structure:', {
+  exterior,
+  interior,
+  facade,
+  blueprints,
+  rawImages: propertyDetails?.images,
+  rawFacade: propertyDetails?.facade,
+  rawBlueprints: propertyDetails?.blueprints
+})
 
   // Construye el array de imágenes con tipo, extrayendo URLs correctamente
   const allImages = [
