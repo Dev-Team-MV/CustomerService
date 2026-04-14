@@ -2,8 +2,10 @@ import {
   Grid, Box, Typography, Paper, Chip, Divider, Stack, Tooltip, Avatar, Button
 } from '@mui/material'
 import { Image as ImageIcon, InfoOutlined, Apartment, Layers, CalendarToday, Domain, LocationCity } from '@mui/icons-material'
-import ExteriorPolygonEditor from '../ExteriorPolygonEditor'
+// import ExteriorPolygonEditor from '../ExteriorPolygonEditor'
+import ExteriorPolygonEditor from '@shared/components/Buildings/ExteriorPolygonEditor'
 import ImagePreview from '../../ImagePreview'
+import { useTranslation } from 'react-i18next'
 
 const InfoItem = ({ label, value, icon }) => (
   <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
@@ -33,36 +35,39 @@ const BuildingOverviewTab = ({
   handleOpenExteriorEditor,
   handleCloseExteriorEditor,
   handleSaveExteriorPolygons
-}) => (
+}) => 
+{  
+  const {t} = useTranslation(['buildings', 'common'])
+  return(
   <Grid container spacing={4}>
     {/* Left: Images & Polygons */}
-    <Grid item xs={12} md={6}>
-      <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: theme => `1px solid ${theme.palette.cardBorder}` }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <ImageIcon sx={{ color: 'secondary.main' }} />
-          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
-            Exterior Renders
-          </Typography>
-          {building.exteriorRenders && building.exteriorRenders.length > 0 && (
-            <Button
-              variant="contained"
-              size="small"
-              sx={{ borderRadius: 2, fontFamily: '"Poppins", sans-serif', fontWeight: 600, ml: 'auto' }}
-              onClick={handleOpenExteriorEditor}
-            >
-              Edit Polygons
-            </Button>
+      <Grid item xs={12} md={6}>
+        <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: theme => `1px solid ${theme.palette.cardBorder}` }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <ImageIcon sx={{ color: 'secondary.main' }} />
+            <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+              {t('buildings:exteriorRenders', 'Exterior Renders')}
+            </Typography>
+            {building.exteriorRenders && building.exteriorRenders.length > 0 && (
+              <Button
+                variant="contained"
+                size="small"
+                sx={{ borderRadius: 2, fontFamily: '"Poppins", sans-serif', fontWeight: 600, ml: 'auto' }}
+                onClick={handleOpenExteriorEditor}
+              >
+                {t('buildings:editPolygons', 'Edit Polygons')}
+              </Button>
+            )}
+          </Box>
+          {building.exteriorRenders && building.exteriorRenders.length > 0 ? (
+            <ImagePreview images={building.exteriorRenders} height={220} />
+          ) : (
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontFamily: '"Poppins", sans-serif' }}>
+              {t('buildings:noExteriorRenders', 'No exterior renders uploaded')}
+            </Typography>
           )}
-        </Box>
-        {building.exteriorRenders && building.exteriorRenders.length > 0 ? (
-          <ImagePreview images={building.exteriorRenders} height={220} />
-        ) : (
-          <Typography variant="body2" sx={{ color: 'text.secondary', fontFamily: '"Poppins", sans-serif' }}>
-            No exterior renders uploaded
-          </Typography>
-        )}
-      </Paper>
-    </Grid>
+        </Paper>
+      </Grid>
 
     {/* Right: Info */}
 {/* Right: Info */}
@@ -90,7 +95,7 @@ const BuildingOverviewTab = ({
         >
           <InfoOutlined sx={{ color: 'primary.main', mr: 1 }} />
           <Typography variant="h6" sx={{ fontWeight: 800, fontFamily: '"Poppins", sans-serif', letterSpacing: 0.5 }}>
-            Building Information
+            {t('buildings:buildingInformation', 'Building Information')}
           </Typography>
           <Chip
             label={building.status}
@@ -124,24 +129,24 @@ const BuildingOverviewTab = ({
         <Box sx={{ px: 3, py: 3 }}>
           <Stack direction="row" spacing={4} mb={2}>
             <InfoItem
-              label="Project"
+              label={t('common:project', 'Project')}
               value={building.project?.name || 'N/A'}
               icon={<Domain fontSize="small" />}
             />
             <InfoItem
-              label="Total Floors"
+              label={t('buildings:totalFloors', 'Total Floors')}
               value={building.floors}
               icon={<Layers fontSize="small" />}
             />
           </Stack>
           <Stack direction="row" spacing={4} mb={2}>
             <InfoItem
-              label="Total Apartments"
+              label={t('buildings:totalApartments', 'Total Apartments')}
               value={building.totalApartments}
               icon={<Apartment fontSize="small" />}
             />
             <InfoItem
-              label="Section"
+              label={t('buildings:section', 'Section')}
               value={building.section || 'N/A'}
               icon={<LocationCity fontSize="small" />}
             />
@@ -172,6 +177,6 @@ const BuildingOverviewTab = ({
       onSave={handleSaveExteriorPolygons}
     />
   </Grid>
-)
+)}
 
 export default BuildingOverviewTab

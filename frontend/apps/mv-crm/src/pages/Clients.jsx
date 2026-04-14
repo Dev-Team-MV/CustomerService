@@ -15,7 +15,7 @@ import { useClientColumns } from '../constants/Columns/resident'
 export default function Clients() {
   const { t } = useTranslation('residents')
 
-  // Hook de residentes
+  // Lista global de usuarios; SMS/registro llevan el proyecto CRM si está en VITE_PROJECT_ID
   const {
     users, loading, stats,
     openDialog, selectedUser, setSelectedUser, formData, setFormData,
@@ -28,7 +28,7 @@ export default function Clients() {
     e164Value,
     displayVal,
     isPhoneValid,
-  } = useResidents()
+  } = useResidents(null, { smsProjectId: import.meta.env.VITE_PROJECT_ID })
 
   // Buscador
   const [search, setSearch] = useState('')

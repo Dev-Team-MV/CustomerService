@@ -65,5 +65,20 @@
   "Viewpoint": "Mirador",
   "Access": "Acceso",
   "Maintenance Area": "Área de Mantenimiento"
-}
+},
+
+
+
+  "overview": "Resumen del Plan Maestro",
+  "overviewDescription": "Ver todos los polígonos de los edificios en el plan maestro. Haz clic en \"Editar Plan Maestro\" para modificar.",
+  "showingBuildings": "Mostrando {{count}} edificio",
+  "showingBuildings_plural": "Mostrando {{count}} edificios",
+  "moreBuildings": "+{{count}} más",
+  "editorTitle": "Editor del Plan Maestro",
+  "buildingsCount": "{{total}} Edificios | {{withPolygons}} con polígonos",
+  "buildingsList": "Edificios en el Plan Maestro",
+  "selectBuildingToDraw": "Selecciona un edificio para dibujar su polígono en el plan maestro",
+  "cancel": "Cancelar",
+  "saveAllPolygons": "Guardar Todos los Polígonos",
+  "saveError": "Hubo un error al guardar el plan maestro: {{error}}"
 }

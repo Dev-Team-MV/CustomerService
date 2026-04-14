@@ -2,12 +2,13 @@ import { Box, Typography, Grid, CircularProgress } from '@mui/material'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import uploadService from '../../services/uploadService'
-import ImagePreview from '../../components/ImgPreview'
+// import ImagePreview from '../../components/ImgPreview'
+import ImagePreview from '@shared/components/ImgPreview'
 import PrimaryButton from '../../constants/PrimaryButton'
 import ModalWrapper from '../../constants/ModalWrapper'
 
 const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, onVisibilityChange, loading }) => {
-  const { t } = useTranslation(['masterPlan']);
+  const { t } = useTranslation(['masterPlan', 'common']);
   const [files, setFiles] = useState({})
   const [previews, setPreviews] = useState({})
   const [isPublicMap, setIsPublicMap] = useState({});
@@ -105,7 +106,7 @@ const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, onVi
           <Grid item xs={12} sm={6} md={4} key={point.id}>
             <Box sx={{ border: '1px solid #eee', borderRadius: 2, p: 2 }}>
               <Typography fontWeight={600}>{t(`tourPoints.${point.name}`, point.name)}</Typography>
-              <ImagePreview
+              {/* <ImagePreview
                 src={getImageSrc(point.id)}
                 alt={point.name}
                 isPublic={!!isPublicMap[point.id]}
@@ -124,7 +125,29 @@ const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, onVi
                 switchPosition="top-right"
                 sx={{ my: 1, borderRadius: 2 }}
                 imgSx={{ height: 120 }}
-              />
+              /> */}
+              <ImagePreview
+  src={getImageSrc(point.id)}
+  alt={point.name}
+  isPublic={!!isPublicMap[point.id]}
+  onTogglePublic={checked => {
+    if (imagesMap && imagesMap[String(point.id)]) {
+      handleToggleIsPublic(point.id, checked);
+    } else {
+      handleIsPublicChange(point.id, checked);
+    }
+  }}
+  onDelete={files[point.id]
+    ? () => setFiles(prev => ({ ...prev, [point.id]: undefined }))
+    : undefined
+  }
+  showVisibilityChip={!!getImageSrc(point.id)}
+  sx={{ my: 1, borderRadius: 2 }}
+  publicLabel={t('common:public')}
+  privateLabel={t('common:private')}
+  noImageLabel={t('common:noImage')}
+  imgSx={{ height: 150 }}
+/>
               <input
                 type="file"
                 accept="image/*"

@@ -72,18 +72,22 @@ const ExteriorAmenitiesTab = () => {
   }
 
   const fetchMasterPlanImages = async () => {
-    try {
+    try {      
       const response = await uploadService.getFilesByFolder('masterplan', true)
+      
       if (response.files && response.files.length > 0) {
-        const latestImage = response.files[response.files.length - 1]
+        // ✅ Usar la imagen más reciente (última en el array)
+        const latestImage = response.files[0]
         setMapUrl(latestImage.url)
       } else {
-        setMapUrl(defaultMap)
+        setMapUrl(map) // Fallback a imagen local
       }
     } catch (error) {
-      setMapUrl(defaultMap)
+      console.error('❌ Error loading master plan:', error)
+      setMapUrl(map) // Fallback a imagen local
     }
   }
+
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.3, 3))
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.3, 0.5))
   const handleResetView = () => {

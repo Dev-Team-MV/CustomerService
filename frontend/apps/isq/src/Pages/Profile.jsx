@@ -1,0 +1,877 @@
+import { useState, useEffect } from 'react'
+import {
+  Box,
+  Paper,
+  Typography,
+  Avatar,
+  Grid,
+  TextField,
+  Button,
+  Divider,
+  Container,
+  IconButton,
+  Alert,
+  Snackbar,
+  InputAdornment,
+  Chip
+} from '@mui/material'
+import {
+  Edit,
+  Save,
+  Person,
+  Email,
+  Phone,
+  Lock,
+  Visibility,
+  VisibilityOff,
+  CameraAlt,
+  CheckCircle,
+  Cancel
+} from '@mui/icons-material'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
+import { useAuth } from '@shared/context/AuthContext'
+import { useProfile } from '@shared/hooks/useProfile'
+import { useTheme } from '@mui/material/styles'
+
+const Profile = () => {
+  const { setUser } = useAuth()
+  const { t } = useTranslation('common')
+  const theme = useTheme()
+  const [isEditing, setIsEditing] = useState(false)
+  const [showPassword, setShowPassword] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  })
+
+  const {
+    profile,
+    loading,
+    snackbar,
+    fetchProfile,
+    updateProfile,
+    changePassword,
+    handleCloseSnackbar,
+  } = useProfile()
+
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: ''
+  })
+  const [passwordData, setPasswordData] = useState({
+    current: '',
+    new: '',
+    confirm: ''
+  })
+
+  useEffect(() => {
+    fetchProfile()
+  }, [fetchProfile])
+
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        firstName: profile.firstName || '',
+        lastName: profile.lastName || '',
+        email: profile.email || '',
+        phoneNumber: profile.phoneNumber || ''
+      })
+      setUser(profile)
+    }
+  }, [profile, setUser])
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  const handlePasswordChange = (e) => {
+    setPasswordData({
+      ...passwordData,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  const handleSave = async () => {
+    if (
+      passwordData.new ||
+      passwordData.confirm ||
+      passwordData.current
+    ) {
+      if (!passwordData.current || !passwordData.new || !passwordData.confirm) {
+        handleShowSnackbar(t('passwordFillAll'), 'error')
+        return
+      }
+      if (passwordData.new !== passwordData.confirm) {
+        handleShowSnackbar(t('passwordsNoMatch'), 'error')
+        return
+      }
+      if (passwordData.new.length < 6) {
+        handleShowSnackbar(t('passwordMinLength'), 'error')
+        return
+      }
+      await changePassword(passwordData.current, passwordData.new)
+      setPasswordData({ current: '', new: '', confirm: '' })
+    }
+    await updateProfile(formData)
+    setIsEditing(false)
+  }
+
+  const handleCancel = () => {
+    setIsEditing(false)
+    setFormData({
+      firstName: profile?.firstName || '',
+      lastName: profile?.lastName || '',
+      email: profile?.email || '',
+      phoneNumber: profile?.phoneNumber || ''
+    })
+    setPasswordData({
+      current: '',
+      new: '',
+      confirm: ''
+    })
+  }
+
+  const togglePasswordVisibility = (field) => {
+    setShowPassword(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }))
+  }
+
+  const handleShowSnackbar = (message, severity = 'success') => {
+    handleCloseSnackbar()
+    setTimeout(() => {
+      handleCloseSnackbar()
+    }, 100)
+  }
+
+  const gradient =
+    theme.palette.gradient ||
+    `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`
+  const gradient90 =
+    `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`
+  const gradient180 =
+    `linear-gradient(180deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`
+
+  return (
+    <Box
+      sx={{
+        minHeight: '90vh',
+        background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, #f5f5f5 100%)`,
+        p: { xs: 2, sm: 2 },
+      }}
+    >
+      <Container maxWidth="xl">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 3, md: 4 },
+              mb: 4,
+              borderRadius: 4,
+              border: `1px solid ${theme.palette.divider}`,
+              background: gradient180,
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 4,
+                background: gradient90
+              }
+            }}
+          >
+            <Box display="flex" alignItems="center" gap={2}>
+              <motion.div
+                animate={{
+                  scale: [1, 1.05, 1],
+                  rotate: [0, 5, -5, 0]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatDelay: 3
+                }}
+              >
+                <Box
+                  sx={{
+                    width: { xs: 56, md: 64 },
+                    height: { xs: 56, md: 64 },
+                    borderRadius: 3,
+                    background: gradient,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: `0 8px 24px ${theme.palette.primary.main}33`
+                  }}
+                >
+                  <Person sx={{ fontSize: { xs: 28, md: 32 }, color: 'white' }} />
+                </Box>
+              </motion.div>
+
+              <Box flex={1}>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: 800,
+                    color: theme.palette.primary.main,
+                    fontFamily: '"Poppins", sans-serif',
+                    letterSpacing: '0.5px',
+                    fontSize: { xs: '1.75rem', md: '2.125rem' }
+                  }}
+                >
+                  {t('myProfile')}
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontFamily: '"Poppins", sans-serif',
+                    fontSize: { xs: '0.875rem', md: '1rem' }
+                  }}
+                >
+                  {t('managePersonalInfo')}
+                </Typography>
+              </Box>
+            </Box>
+          </Paper>
+        </motion.div>
+
+        <Grid container spacing={3}>
+          {/* Avatar & Basic Info Card */}
+          <Grid item xs={12} md={4}>
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+            >
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 4,
+                  borderRadius: 4,
+                  border: `1px solid ${theme.palette.divider}`,
+                  textAlign: 'center',
+                  background: gradient180,
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 3,
+                    background: gradient90,
+                  }
+                }}
+              >
+                <Box sx={{ position: 'relative', display: 'inline-block', mb: 2 }}>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  >
+                    <Avatar
+                      sx={{
+                        width: { xs: 120, md: 140 },
+                        height: { xs: 120, md: 140 },
+                        margin: '0 auto',
+                        fontSize: '3.5rem',
+                        fontWeight: 700,
+                        background: gradient,
+                        boxShadow: `0 8px 24px ${theme.palette.primary.main}33`,
+                        border: `4px solid ${theme.palette.background.paper}`
+                      }}
+                    >
+                      {formData.firstName?.charAt(0).toUpperCase()}
+                    </Avatar>
+                  </motion.div>
+                  
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <IconButton
+                      sx={{
+                        position: 'absolute',
+                        bottom: 0,
+                        right: 0,
+                        bgcolor: theme.palette.secondary.main,
+                        color: 'white',
+                        width: 44,
+                        height: 44,
+                        boxShadow: `0 4px 12px ${theme.palette.secondary.main}66`,
+                        '&:hover': {
+                          bgcolor: theme.palette.primary.main,
+                          boxShadow: `0 6px 20px ${theme.palette.primary.main}88`
+                        }
+                      }}
+                    >
+                      <CameraAlt sx={{ fontSize: 20 }} />
+                    </IconButton>
+                  </motion.div>
+                </Box>
+
+                <Typography
+                  variant="h5"
+                  sx={{
+                    mt: 2,
+                    fontWeight: 700,
+                    color: theme.palette.primary.main,
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
+                >
+                  {formData.firstName} {formData.lastName}
+                </Typography>
+                
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontFamily: '"Poppins", sans-serif',
+                    mb: 2
+                  }}
+                >
+                  {formData.email}
+                </Typography>
+
+                <Chip
+                  label={t('activeUser')}
+                  size="small"
+                  icon={<CheckCircle />}
+                  sx={{
+                    bgcolor: theme.palette.secondary.main + "26",
+                    color: theme.palette.primary.main,
+                    fontWeight: 600,
+                    border: `1px solid ${theme.palette.secondary.main}`,
+                    fontFamily: '"Poppins", sans-serif',
+                    '& .MuiChip-icon': {
+                      color: theme.palette.secondary.main
+                    }
+                  }}
+                />
+
+                <Divider sx={{ my: 3 }} />
+
+                <Box sx={{ textAlign: 'left' }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: theme.palette.text.disabled,
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px',
+                      fontWeight: 600,
+                      fontFamily: '"Poppins", sans-serif',
+                      mb: 1,
+                      display: 'block'
+                    }}
+                  >
+                    {t('accountDetails')}
+                  </Typography>
+                  
+                  <Box display="flex" alignItems="center" gap={1.5} mb={1.5}>
+                    <Email sx={{ fontSize: 18, color: theme.palette.text.secondary }} />
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: theme.palette.text.secondary,
+                        fontFamily: '"Poppins", sans-serif',
+                        fontSize: '0.85rem'
+                      }}
+                    >
+                      {formData.email}
+                    </Typography>
+                  </Box>
+
+                  {formData.phoneNumber && (
+                    <Box display="flex" alignItems="center" gap={1.5}>
+                      <Phone sx={{ fontSize: 18, color: theme.palette.text.secondary }} />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: theme.palette.text.secondary,
+                          fontFamily: '"Poppins", sans-serif',
+                          fontSize: '0.85rem'
+                        }}
+                      >
+                        {formData.phoneNumber}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Paper>
+            </motion.div>
+          </Grid>
+
+          {/* Personal Information & Password */}
+          <Grid item xs={12} md={8}>
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+            >
+              <Paper
+                elevation={0}
+                sx={{
+                  p: { xs: 3, md: 4 },
+                  borderRadius: 4,
+                  border: `1px solid ${theme.palette.divider}`,
+                  background: theme.palette.background.paper,
+                  mb: 3
+                }}
+              >
+                {/* Personal Info Header */}
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                  <Box>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 700,
+                        color: theme.palette.primary.main,
+                        fontFamily: '"Poppins", sans-serif',
+                        fontSize: { xs: '1.1rem', md: '1.25rem' }
+                      }}
+                    >
+                      {t('personalInformation', { ns: 'profile' })}
+                    </Typography>
+                    <Box
+                      sx={{
+                        width: 50,
+                        height: 3,
+                        bgcolor: theme.palette.secondary.main,
+                        borderRadius: 3,
+                        mt: 0.5
+                      }}
+                    />
+                  </Box>
+
+                  <Box display="flex" gap={1}>
+                    <AnimatePresence mode="wait">
+                      {isEditing ? (
+                        <>
+                          <motion.div
+                            key="cancel"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                          >
+                            <Button
+                              variant="outlined"
+                              startIcon={<Cancel />}
+                              onClick={handleCancel}
+                              sx={{
+                                borderColor: theme.palette.text.secondary,
+                                color: theme.palette.text.secondary,
+                                fontFamily: '"Poppins", sans-serif',
+                                fontWeight: 600,
+                                '&:hover': {
+                                  borderColor: theme.palette.primary.main,
+                                  bgcolor: theme.palette.action.hover
+                                }
+                              }}
+                            >
+                              {t('actions.cancel')}
+                            </Button>
+                          </motion.div>
+                          <motion.div
+                            key="save"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                          >
+                            <Button
+                              variant="contained"
+                              startIcon={<Save />}
+                              onClick={handleSave}
+                              sx={{
+                                bgcolor: theme.palette.secondary.main,
+                                fontFamily: '"Poppins", sans-serif',
+                                fontWeight: 600,
+                                boxShadow: `0 4px 12px ${theme.palette.secondary.main}33`,
+                                '&:hover': {
+                                  bgcolor: theme.palette.primary.main,
+                                  boxShadow: `0 6px 20px ${theme.palette.primary.main}44`
+                                }
+                              }}
+                            >
+                              {loading ? t('status.loading') : t('actions.save')}
+                            </Button>
+                          </motion.div>
+                        </>
+                      ) : (
+                        <motion.div
+                          key="edit"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                        >
+                          <Button
+                            variant="contained"
+                            startIcon={<Edit />}
+                            onClick={() => setIsEditing(true)}
+                            sx={{
+                              bgcolor: theme.palette.primary.main,
+                              fontFamily: '"Poppins", sans-serif',
+                              fontWeight: 600,
+                              boxShadow: `0 4px 12px ${theme.palette.primary.main}33`,
+                              '&:hover': {
+                                bgcolor: theme.palette.secondary.main,
+                                boxShadow: `0 6px 20px ${theme.palette.secondary.main}44`
+                              }
+                            }}
+                          >
+                            {t('editProfile')}
+                          </Button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </Box>
+                </Box>
+
+                <Divider sx={{ mb: 3 }} />
+
+                {/* Form Fields */}
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label={t('firstName', { ns: 'auth' })}
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      disabled={!isEditing}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Person sx={{ color: isEditing ? theme.palette.secondary.main : theme.palette.text.disabled }} />
+                          </InputAdornment>
+                        )
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          fontFamily: '"Poppins", sans-serif',
+                          '&.Mui-focused fieldset': {
+                            borderColor: theme.palette.secondary.main,
+                            borderWidth: 2
+                          }
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: theme.palette.secondary.main
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label={t('lastName', { ns: 'auth' })}
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      disabled={!isEditing}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Person sx={{ color: isEditing ? theme.palette.secondary.main : theme.palette.text.disabled }} />
+                          </InputAdornment>
+                        )
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          fontFamily: '"Poppins", sans-serif',
+                          '&.Mui-focused fieldset': {
+                            borderColor: theme.palette.secondary.main,
+                            borderWidth: 2
+                          }
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: theme.palette.secondary.main
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label={t('emailAddress', { ns: 'auth' })}
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      disabled={!isEditing}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Email sx={{ color: isEditing ? theme.palette.secondary.main : theme.palette.text.disabled }} />
+                          </InputAdornment>
+                        )
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          fontFamily: '"Poppins", sans-serif',
+                          '&.Mui-focused fieldset': {
+                            borderColor: theme.palette.secondary.main,
+                            borderWidth: 2
+                          }
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: theme.palette.secondary.main
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label={t('phoneNumber', { ns: 'auth' })}
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleChange}
+                      disabled={!isEditing}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Phone sx={{ color: isEditing ? theme.palette.secondary.main : theme.palette.text.disabled }} />
+                          </InputAdornment>
+                        )
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          fontFamily: '"Poppins", sans-serif',
+                          '&.Mui-focused fieldset': {
+                            borderColor: theme.palette.secondary.main,
+                            borderWidth: 2
+                          }
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: theme.palette.secondary.main
+                        }
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </Paper>
+
+              {/* Password Section */}
+              <Paper
+                elevation={0}
+                sx={{
+                  p: { xs: 3, md: 4 },
+                  borderRadius: 4,
+                  border: `1px solid ${theme.palette.divider}`,
+                  background: theme.palette.background.paper
+                }}
+              >
+                <Box mb={3}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      color: theme.palette.primary.main,
+                      fontFamily: '"Poppins", sans-serif',
+                      fontSize: { xs: '1.1rem', md: '1.25rem' }
+                    }}
+                  >
+                    {t('changePassword', { ns: 'profile' })}
+                  </Typography>
+                  <Box
+                    sx={{
+                      width: 50,
+                      height: 3,
+                      bgcolor: theme.palette.secondary.main,
+                      borderRadius: 3,
+                      mt: 0.5
+                    }}
+                  />
+                </Box>
+
+                <Divider sx={{ mb: 3 }} />
+
+                {!isEditing && (
+                  <Alert 
+                    severity="info"
+                    sx={{
+                      mb: 3,
+                      borderRadius: 2,
+                      '& .MuiAlert-message': {
+                        fontFamily: '"Poppins", sans-serif'
+                      }
+                    }}
+                  >
+                    {t('enableEditMode')}
+                  </Alert>
+                )}
+
+                <Grid container spacing={3}>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label={t('currentPassword', { ns: 'profile' })}
+                      name="current"
+                      type={showPassword.current ? 'text' : 'password'}
+                      value={passwordData.current}
+                      onChange={handlePasswordChange}
+                      disabled={!isEditing}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Lock sx={{ color: isEditing ? theme.palette.secondary.main : theme.palette.text.disabled }} />
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => togglePasswordVisibility('current')}
+                              disabled={!isEditing}
+                              edge="end"
+                            >
+                              {showPassword.current ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          fontFamily: '"Poppins", sans-serif',
+                          '&.Mui-focused fieldset': {
+                            borderColor: theme.palette.secondary.main,
+                            borderWidth: 2
+                          }
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: theme.palette.secondary.main
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label={t('newPassword', { ns: 'profile' })}
+                      name="new"
+                      type={showPassword.new ? 'text' : 'password'}
+                      value={passwordData.new}
+                      onChange={handlePasswordChange}
+                      disabled={!isEditing}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Lock sx={{ color: isEditing ? theme.palette.secondary.main : theme.palette.text.disabled }} />
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => togglePasswordVisibility('new')}
+                              disabled={!isEditing}
+                              edge="end"
+                            >
+                              {showPassword.new ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          fontFamily: '"Poppins", sans-serif',
+                          '&.Mui-focused fieldset': {
+                            borderColor: theme.palette.secondary.main,
+                            borderWidth: 2
+                          }
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: theme.palette.secondary.main
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label={t('confirmPassword', { ns: 'auth' })}
+                      name="confirm"
+                      type={showPassword.confirm ? 'text' : 'password'}
+                      value={passwordData.confirm}
+                      onChange={handlePasswordChange}
+                      disabled={!isEditing}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Lock sx={{ color: isEditing ? theme.palette.secondary.main : theme.palette.text.disabled }} />
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => togglePasswordVisibility('confirm')}
+                              disabled={!isEditing}
+                              edge="end"
+                            >
+                              {showPassword.confirm ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          fontFamily: '"Poppins", sans-serif',
+                          '&.Mui-focused fieldset': {
+                            borderColor: theme.palette.secondary.main,
+                            borderWidth: 2
+                          }
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: theme.palette.secondary.main
+                        }
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </Paper>
+            </motion.div>
+          </Grid>
+        </Grid>
+
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            variant="filled"
+            sx={{
+              fontFamily: '"Poppins", sans-serif',
+              fontWeight: 600
+            }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Container>
+    </Box>
+  )
+}
+
+export default Profile

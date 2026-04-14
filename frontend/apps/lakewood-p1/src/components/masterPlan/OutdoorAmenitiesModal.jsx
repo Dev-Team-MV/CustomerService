@@ -7,7 +7,8 @@ import { CloudUpload, Close, Delete, Check } from '@mui/icons-material'
 import uploadService from '../../services/uploadService'
 import { useTranslation } from 'react-i18next'
 import { Switch, FormControlLabel } from '@mui/material';
-import ImagePreview from '../../components/ImgPreview'; // Ajusta el path si es necesario
+// import ImagePreview from '../../components/ImgPreview'; // Ajusta el path si es necesario
+import ImagePreview from '@shared/components/ImgPreview'
 import PrimaryButton from '../../constants/PrimaryButton'
 import ModalWrapper from '../../constants/ModalWrapper'
 
@@ -31,7 +32,7 @@ const OutdoorAmenitiesModal = ({
   amenitiesList = [], // [{ name, images }]
   onUploaded
 }) => {
-  const { t } = useTranslation(['masterPlan'])
+  const { t } = useTranslation(['masterPlan', 'common'])
   // Estado para amenidad seleccionada
   const [selectedAmenity, setSelectedAmenity] = useState('')
   // Estado para archivos seleccionados por amenidad
@@ -238,7 +239,7 @@ return (
     <Grid container spacing={2}>
       {currentSelectedFiles.map((item, idx) => (
         <Grid item xs={6} key={idx}>
-          <ImagePreview
+          {/* <ImagePreview
             src={URL.createObjectURL(item.file)}
             alt={`Preview ${idx + 1}`}
             isPublic={!!item.isPublic}
@@ -256,7 +257,28 @@ return (
             label="NEW"
             sx={{ borderRadius: 2 }}
             imgSx={{ height: 120 }}
-          />
+          /> */}
+          <ImagePreview
+  src={URL.createObjectURL(item.file)}
+  alt={`Preview ${idx + 1}`}
+  isPublic={!!item.isPublic}
+  onTogglePublic={checked => {
+    setSelectedFiles(prev => ({
+      ...prev,
+      [selectedAmenity]: prev[selectedAmenity].map((f, i) =>
+        i === idx ? { ...f, isPublic: checked } : f
+      )
+    }));
+  }}
+  onDelete={() => handleRemoveSelectedFile(selectedAmenity, idx)}
+  showVisibilityChip={true}
+  label={t('common:new')}
+  publicLabel={t('common:public')}
+  privateLabel={t('common:private')}
+  noImageLabel={t('common:noImage')}
+  sx={{ borderRadius: 2 }}
+  imgSx={{ height: 150 }}
+/>
         </Grid>
       ))}
     </Grid>
@@ -267,7 +289,7 @@ return (
       <Grid container spacing={2}>
         {currentImages.map((img, idx) => (
           <Grid item xs={6} key={idx}>
-            <ImagePreview
+            {/* <ImagePreview
               src={typeof img === 'string' ? img : img.url}
               alt={`Amenity ${idx + 1}`}
               isPublic={!!img.isPublic}
@@ -277,7 +299,20 @@ return (
               switchPosition="top-right"
               sx={{ borderRadius: 2 }}
               imgSx={{ height: 120 }}
-            />
+            /> */}
+            <ImagePreview
+  src={typeof img === 'string' ? img : img.url}
+  alt={`Amenity ${idx + 1}`}
+  isPublic={!!img.isPublic}
+  onTogglePublic={checked => handleToggleUploadedImageVisibility(idx, checked)}
+  onDelete={() => handleDeleteUploadedImage(idx)}
+  showVisibilityChip={true}
+  sx={{ borderRadius: 2 }}
+  publicLabel={t('common:public')}
+  privateLabel={t('common:private')}
+  noImageLabel={t('common:noImage')}
+  imgSx={{ height: 150 }}
+/>
           </Grid>
         ))}
       </Grid>

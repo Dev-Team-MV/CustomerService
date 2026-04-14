@@ -46,7 +46,10 @@ const FamilyGroup = () => {
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState(null)
 
-  // Family groups hook
+  // ✅ Obtener projectId del env
+  const projectId = import.meta.env.VITE_PROJECT_ID
+
+  // ✅ Pasar projectId al hook
   const {
     groups,
     loading,
@@ -60,10 +63,10 @@ const FamilyGroup = () => {
     updateMemberRole,
     isGroupAdmin,
     clearAlerts
-  } = useFamilyGroups()
+  } = useFamilyGroups(projectId)
 
   // Residents hook for user selection
-  const { users, loading: loadingUsers, searchUsers } = useResidents()
+  const { users, loading: loadingUsers, searchUsers } = useResidents(projectId)
 
   // Handlers
   const handleCreateGroup = async (name) => {

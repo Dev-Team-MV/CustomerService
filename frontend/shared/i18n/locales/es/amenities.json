@@ -74,5 +74,13 @@
     "Viewpoint": "Mirador",
     "Access": "Acceso",
     "Maintenance Area": "Área de Mantenimiento"
-  }
+  },
+
+  "manageOutdoor": "Gestionar Amenidades Exteriores",
+"selectAmenity": "Selecciona una amenidad",
+"selectImages": "Seleccionar Imágenes",
+"uploadedImages": "Imágenes Subidas",
+"newImages": "Nuevas Imágenes",
+
+"manageAmenities": "Gestionar Amenidades"
 }

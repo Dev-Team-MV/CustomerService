@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext'
  * Hook for managing family groups
  * Provides CRUD operations and state management for family groups
  */
-export const useFamilyGroups = () => {
+export const useFamilyGroups = (projectId = null) => {
   const { user } = useAuth()
   
   // State
@@ -20,19 +20,19 @@ export const useFamilyGroups = () => {
   /**
    * Load all family groups
    */
-  const loadGroups = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const data = await familyGroupService.getAll()
-      setGroups(data)
-    } catch (err) {
-      setError(err.message)
-      console.error('[useFamilyGroups] Load error:', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+const loadGroups = useCallback(async () => {
+  try {
+    setLoading(true)
+    setError(null)
+    const data = await familyGroupService.getAll(projectId)
+    setGroups(data)
+  } catch (err) {
+    setError(err.message)
+    console.error('[useFamilyGroups] Load error:', err)
+  } finally {
+    setLoading(false)
+  }
+}, [projectId])
 
   // Load groups on mount
   useEffect(() => {
@@ -44,27 +44,27 @@ export const useFamilyGroups = () => {
    * @param {string} name - Group name
    * @returns {Promise<Object|null>} Created group or null on error
    */
-  const createGroup = useCallback(async (name) => {
-    if (!name?.trim()) {
-      setError('Group name is required')
-      return null
-    }
-
-    try {
-      setOperationLoading(true)
-      setError(null)
-      const newGroup = await familyGroupService.create(name.trim())
-      setGroups(prev => [...prev, newGroup])
-      setSuccess('Group created successfully')
-      return newGroup
-    } catch (err) {
-      setError(err.message)
-      console.error('[useFamilyGroups] Create error:', err)
-      return null
-    } finally {
-      setOperationLoading(false)
-    }
-  }, [])
+const createGroup = useCallback(async (name) => {
+  if (!name?.trim()) {
+    setError('Group name is required')
+    return null
+  }
+ 
+  try {
+    setOperationLoading(true)
+    setError(null)
+    const newGroup = await familyGroupService.create(name.trim(), projectId)
+    setGroups(prev => [...prev, newGroup])
+    setSuccess('Group created successfully')
+    return newGroup
+  } catch (err) {
+    setError(err.message)
+    console.error('[useFamilyGroups] Create error:', err)
+    return null
+  } finally {
+    setOperationLoading(false)
+  }
+}, [projectId])
 
   /**
    * Update a family group

@@ -1,7 +1,10 @@
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
+import mongoose from 'mongoose'
 import User from '../models/User.js'
+import Project from '../models/Project.js'
 import { sendSMSWithValidation } from '../services/twilioService.js'
+import { resolveFrontendBaseUrl } from '../services/resolveFrontendBaseUrl.js'
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -11,7 +14,7 @@ const generateToken = (id) => {
 
 export const register = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, phoneNumber, birthday, role, skipPasswordSetup } = req.body
+    const { firstName, lastName, email, password, phoneNumber, birthday, role, skipPasswordSetup, projectId } = req.body
 
     const userExists = await User.findOne({ email })
 
@@ -59,6 +62,14 @@ export const register = async (req, res) => {
       role: role || 'user'
     }
 
+    if (projectId) {
+      const exists = await Project.exists({ _id: projectId })
+      if (!exists) {
+        return res.status(404).json({ message: 'Project not found' })
+      }
+      userData.projectMemberships = [{ project: projectId, role: 'resident' }]
+    }
+
     // Si no es admin creando usuario, requiere contraseña
     if (!isAdminCreating) {
       if (!password) {
@@ -75,7 +86,7 @@ export const register = async (req, res) => {
       // Enviar SMS con el link de setup
       if (phoneNumber) {
         try {
-          const frontendUrl = process.env.FRONTEND_URL || 'https://lakewoodp1.michelangelodelvalle.com'
+          const frontendUrl = await resolveFrontendBaseUrl(projectId)
           const setupLink = `${frontendUrl}/setup-password/${setupToken}`
           const message = `Hi ${firstName}, your account has been created. Please set your password by visiting this link: ${setupLink}`
           
@@ -393,7 +404,7 @@ export const verifySetupToken = async (req, res) => {
  */
 export const sendSetupPasswordLink = async (req, res) => {
   try {
-    const { userId, email } = req.body
+    const { userId, email, projectId } = req.body
 
     if (!userId && !email) {
       return res.status(400).json({ message: 'userId or email is required' })
@@ -412,10 +423,40 @@ export const sendSetupPasswordLink = async (req, res) => {
       })
     }
 
+    if (projectId) {
+      if (!mongoose.Types.ObjectId.isValid(projectId)) {
+        return res.status(400).json({ message: 'Invalid projectId' })
+      }
+
+      const projectExists = await Project.exists({ _id: projectId })
+      if (!projectExists) {
+        return res.status(404).json({ message: 'Project not found' })
+      }
+
+      // Backfill membership for legacy users created before projectMemberships existed.
+      const alreadyMember = user.projectMemberships?.some(
+        (m) => m.project && String(m.project) === String(projectId)
+      )
+      if (!alreadyMember) {
+        user.projectMemberships = [
+          ...(user.projectMemberships || []),
+          { project: projectId, role: 'resident' }
+        ]
+      }
+    }
+
     const setupToken = user.generateSetupToken()
     await user.save()
 
-    const frontendUrl = process.env.FRONTEND_URL || 'https://lakewoodp1.michelangelodelvalle.com'
+    let frontendUrl
+    try {
+      frontendUrl = await resolveFrontendBaseUrl(projectId)
+    } catch (resolveErr) {
+      if (resolveErr.statusCode === 404) {
+        return res.status(404).json({ message: resolveErr.message })
+      }
+      throw resolveErr
+    }
     const setupLink = `${frontendUrl}/setup-password/${setupToken}`
     const message = `Hi ${user.firstName}, you can set your password by visiting this link: ${setupLink}`
 

@@ -49,14 +49,14 @@ const router = express.Router()
  *         application/json:
  *           schema:
  *             type: object
- *             required: [name]
+ *             required: [name, projectId]
  *             properties:
  *               name:
  *                 type: string
  *                 description: Group name
  *               projectId:
  *                 type: string
- *                 description: Optional; if omitted, uses the first project in the database (legacy clients)
+ *                 description: Required project ID to keep groups isolated by project.
  *     responses:
  *       201:
  *         description: Family group created

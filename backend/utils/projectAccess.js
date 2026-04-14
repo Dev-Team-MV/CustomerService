@@ -66,9 +66,17 @@ export async function getProjectIdsForUser(userId) {
  * @returns {Promise<boolean>}
  */
 export async function canUserAccessProject(userId, projectId, options = {}) {
-  const { role } = options
-  if (role === 'admin' || role === 'superadmin') {
+  const normalizedRole = typeof options.role === 'string'
+    ? options.role.trim().toLowerCase()
+    : ''
+  if (normalizedRole === 'admin' || normalizedRole === 'superadmin') {
     return true
+  }
+  // Fallback defensivo: si req.user.role viene vacío/inconsistente, tomar rol real de BD.
+  if (!normalizedRole && userId) {
+    const userDoc = await User.findById(userId).select('role').lean()
+    const dbRole = typeof userDoc?.role === 'string' ? userDoc.role.trim().toLowerCase() : ''
+    if (dbRole === 'admin' || dbRole === 'superadmin') return true
   }
   if (projectId == null || projectId === '') {
     return false

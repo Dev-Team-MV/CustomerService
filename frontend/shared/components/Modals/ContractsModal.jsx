@@ -11,6 +11,7 @@ import {
 import ModalWrapper from '../../constants/ModalWrapper'
 import PrimaryButton from '../../constants/PrimaryButton'
 import { useContracts, DOCUMENT_TYPES } from '../../hooks/useContracts'
+import {useTranslation} from "react-i18next"
 
 const ContractsModal = ({
   open,
@@ -21,6 +22,8 @@ const ContractsModal = ({
   title,
   subtitle
 }) => {
+    const { t } = useTranslation(['contracts', 'common'])
+
   const {
     existingContracts,
     pendingFiles,
@@ -50,21 +53,36 @@ const ContractsModal = ({
         loading={submitting}
         startIcon={<Send />}
       >
-        {`Submit ${getPendingCount() > 0 ? `${getPendingCount()} ` : ''}Contract${getPendingCount() !== 1 ? 's' : ''}`}
+        {t('contracts:submitContracts', {
+          count: getPendingCount()
+        }, 'Submit {{count}} Contract', { count: getPendingCount() })}
       </PrimaryButton>
     </>
   )
 
  // ── Render ────────────────────────────────────────────────
   return (
-    <ModalWrapper
+   <ModalWrapper
       open={open}
       onClose={onClose}
       icon={Description}
-      title={title || (resourceType === 'apartment' ? 'Apartment Contracts' : 'Property Contracts')}
-      subtitle={subtitle || (resourceType === 'apartment'
-        ? `Upload and manage contracts for Apartment ${resource?.apartmentNumber || ''}`
-        : `Upload and manage contracts for Property ${resource?.lot?.number || ''}`)}
+      title={title || t(
+        resourceType === 'apartment'
+          ? 'contracts:apartmentContracts'
+          : 'contracts:propertyContracts',
+        resourceType === 'apartment'
+          ? 'Apartment Contracts'
+          : 'Property Contracts'
+      )}
+      subtitle={subtitle || t(
+        resourceType === 'apartment'
+          ? 'contracts:apartmentSubtitle'
+          : 'contracts:propertySubtitle',
+        resourceType === 'apartment'
+          ? 'Upload and manage contracts for Apartment {{number}}'
+          : 'Upload and manage contracts for Property {{number}}',
+        { number: resourceType === 'apartment' ? resource?.apartmentNumber : resource?.lot?.number }
+      )}
       maxWidth="md"
       actions={modalActions}
     >
@@ -103,26 +121,15 @@ const ContractsModal = ({
               justifyContent: 'space-between'
             }}
           >
-            <Box>
-              <Typography
-                variant="body2"
-                fontWeight={600}
-                sx={{
-                  color: theme.palette.primary.main,
-                  fontFamily: '"Poppins", sans-serif',
-                  mb: 0.5
-                }}
-              >
-                Upload Progress
+           <Box>
+              <Typography variant="body2" fontWeight={600} sx={{ color: theme.palette.primary.main, fontFamily: '"Poppins", sans-serif', mb: 0.5 }}>
+                {t('contracts:uploadProgress', 'Upload Progress')}
               </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: theme.palette.text.secondary,
-                  fontFamily: '"Poppins", sans-serif'
-                }}
-              >
-                {getExistingCount()} uploaded • {getPendingCount()} pending
+              <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+                {t('contracts:progressSummary', {
+                  uploaded: getExistingCount(),
+                  pending: getPendingCount()
+                }, '{{uploaded}} uploaded • {{pending}} pending')}
               </Typography>
             </Box>
             <Chip
@@ -143,24 +150,12 @@ const ContractsModal = ({
 
           {/* PENDING FILES ALERT */}
           {getPendingCount() > 0 && (
-            <Alert
-              severity="info"
-              sx={{
-                mb: 3,
-                borderRadius: 2,
-                fontFamily: '"Poppins", sans-serif',
-                bgcolor: theme.palette.secondary.light + '14',
-                border: `1px solid ${theme.palette.secondary.main}4D`,
-                '& .MuiAlert-icon': {
-                  color: theme.palette.secondary.main
-                }
-              }}
-            >
+            <Alert severity="info" sx={{ mb: 3, borderRadius: 2, fontFamily: '"Poppins", sans-serif', bgcolor: theme.palette.secondary.light + '14', border: `1px solid ${theme.palette.secondary.main}4D` }}>
               <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
-                {getPendingCount()} file(s) ready to upload
+                {t('contracts:filesReady', { count: getPendingCount() }, '{{count}} file(s) ready to upload')}
               </Typography>
               <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif' }}>
-                Click "Submit All Contracts" to complete the upload
+                {t('contracts:submitAllHint', 'Click "Submit All Contracts" to complete the upload')}
               </Typography>
             </Alert>
           )}
@@ -348,7 +343,7 @@ const ContractsModal = ({
                                 }
                               }}
                             >
-                              View
+                              {t('contracts:view', 'View')}
                             </Button>
                             <Button
                               variant="outlined"
@@ -374,7 +369,7 @@ const ContractsModal = ({
                                 }
                               }}
                             >
-                              Download
+                              {t('contracts:download', 'Download')}
                             </Button>
 
                             <Button
@@ -415,7 +410,7 @@ const ContractsModal = ({
                               mt: 1.5
                             }}
                           >
-                            💡 Delete this document to upload a new one if needed
+                            💡 {t('contracts:deleteHint', 'Delete this document to upload a new one if needed')}
                           </Typography>
                         </Box>
                       ) : pendingFile ? (
@@ -477,7 +472,7 @@ const ContractsModal = ({
                               fontStyle: 'italic'
                             }}
                           >
-                            File ready. Click "Submit All Contracts" to upload.
+                            {t('contracts:pendingHint', 'This file is pending upload. Click "Submit All Contracts" to upload it.')}
                           </Typography>
                         </Box>
                       ) : (
@@ -492,6 +487,7 @@ const ContractsModal = ({
                             }}
                           >
                             Select the {docType.label} document for this {resourceType}
+                            {t('common:acceptedFormats', ' (accepted formats: .pdf, .doc, .docx)')}.
                           </Typography>
                           <Button
                             component="label"
@@ -518,7 +514,7 @@ const ContractsModal = ({
                               }
                             }}
                           >
-                            Select File
+                            {t('contracts:selectFile', 'Select File')}
                             <input
                               type="file"
                               hidden

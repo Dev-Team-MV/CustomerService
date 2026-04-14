@@ -2,8 +2,9 @@ import {
   Box, Typography, Button, Grid, Card, CardMedia, CardContent, Chip
 } from '@mui/material'
 import { Edit, GridOn } from '@mui/icons-material'
-import FloorPlanEditor from '../FloorPlanEditor'
-
+// import FloorPlanEditor from '../FloorPlanEditor'
+import FloorPlanEditor from '@shared/components/Buildings/FloorPlanEditor'
+import { useTranslation } from 'react-i18next'
 const BuildingFloorPlansTab = ({
   building,
   apartmentModels,
@@ -11,29 +12,32 @@ const BuildingFloorPlansTab = ({
   handleOpenFloorPlanEditor,
   handleCloseFloorPlanEditor,
   onSaveFloorPlans
-}) => (
+}) => {  
+    const { t } = useTranslation(['buildings', 'common'])
+
+  return (
   <Box>
-    <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-      <GridOn sx={{ color: 'accent.main' }} />
-      Floor Plans ({building.floorPlans?.length || 0}/{building.floors})
-    </Typography>
+      <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <GridOn sx={{ color: 'accent.main' }} />
+        {t('buildings:floorPlans')} ({building.floorPlans?.length || 0}/{building.floors})
+      </Typography>
     
     {building.floorPlans && building.floorPlans.length > 0 && (
-      <Button
-        variant="contained"
-        startIcon={<Edit />}
-        onClick={handleOpenFloorPlanEditor}
-        sx={{
-          mb: 3,
-          borderRadius: 2,
-          textTransform: 'none',
-          fontFamily: '"Poppins", sans-serif',
-          fontWeight: 600,
-          bgcolor: 'primary.main'
-        }}
-      >
-        Edit Polygons (All Floors)
-      </Button>
+        <Button
+          variant="contained"
+          startIcon={<Edit />}
+          onClick={handleOpenFloorPlanEditor}
+          sx={{
+            mb: 3,
+            borderRadius: 2,
+            textTransform: 'none',
+            fontFamily: '"Poppins", sans-serif',
+            fontWeight: 600,
+            bgcolor: 'primary.main'
+          }}
+        >
+          {t('buildings:editPolygonsAllFloors', 'Edit Polygons (All Floors)')}
+        </Button>
     )}
     
     {!building.floorPlans || building.floorPlans.length === 0 ? (
@@ -41,7 +45,7 @@ const BuildingFloorPlansTab = ({
         variant="body2"
         sx={{ color: 'text.secondary', fontFamily: '"Poppins", sans-serif' }}
       >
-        No floor plans uploaded yet
+          {t('buildings:noFloorPlans', 'No floor plans uploaded yet')}
       </Typography>
     ) : (
       <Grid container spacing={3}>
@@ -84,6 +88,6 @@ const BuildingFloorPlansTab = ({
       onSave={onSaveFloorPlans}
     />
   </Box>
-)
+)}
 
 export default BuildingFloorPlansTab

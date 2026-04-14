@@ -36,7 +36,7 @@ export const getLotById = async (req, res) => {
 
 export const createLot = async (req, res) => {
   try {
-    const { projectId, project, number, price, status } = req.body
+    const { projectId, project, number, color, price, status } = req.body
     const projId = projectId || project
     if (!projId) {
       return res.status(400).json({ message: 'projectId (or project) is required' })
@@ -50,6 +50,7 @@ export const createLot = async (req, res) => {
     const lot = await Lot.create({
       project: projId,
       number,
+      color,
       price,
       status: status || 'available'
     })
@@ -66,6 +67,7 @@ export const updateLot = async (req, res) => {
     
     if (lot) {
       lot.number = req.body.number || lot.number
+      lot.color = req.body.color !== undefined ? req.body.color : lot.color
       lot.price = req.body.price !== undefined ? req.body.price : lot.price
       lot.status = req.body.status || lot.status
       lot.assignedUser = req.body.assignedUser || lot.assignedUser

@@ -8,6 +8,7 @@ import {
 import { CloudUpload, Upload, CheckCircle, Info } from '@mui/icons-material'
 import ModalWrapper from '@shared/constants/ModalWrapper'
 import PrimaryButton from '@shared/constants/PrimaryButton'
+import { useTranslation } from 'react-i18next'
 
 const paymentTypes = [
   "initial down payment",
@@ -42,13 +43,14 @@ const UserCreatePayload = ({
   error,
   success
 }) => {
+  const { t } = useTranslation(['payloads', 'common'])
   return (
     <ModalWrapper
       open={open}
       onClose={onClose}
       icon={CloudUpload}
-      title="Add Payment"
-      subtitle="Submit your payment information"
+      title={t('payloads:add', 'Add Payment')}
+      subtitle={t('payloads:submit', 'Submit your payment information')}
       actions={
         <PrimaryButton
           onClick={onSubmit}
@@ -56,7 +58,7 @@ const UserCreatePayload = ({
           startIcon={<CheckCircle />}
           loading={uploadingPayment}
         >
-          {uploadingPayment ? 'Uploading...' : 'Submit'}
+          {uploadingPayment ? t('payloads:uploading', 'Uploading...') : t('payloads:submit', 'Submit')}
         </PrimaryButton>
       }
       maxWidth="sm"
@@ -68,7 +70,7 @@ const UserCreatePayload = ({
         <Grid item xs={12}>
           <TextField
             fullWidth
-            label="Amount"
+            label={t('payloads:amount', 'Amount')}
             type="number"
             value={paymentForm.amount}
             onChange={(e) => handlePaymentFormChange("amount", e.target.value)}
@@ -87,7 +89,7 @@ const UserCreatePayload = ({
           <TextField
             fullWidth
             select
-            label="Payment Type"
+            label={t('payloads:paymentType', 'Payment Type')}
             value={paymentForm.type || ""}
             onChange={e => handlePaymentFormChange("type", e.target.value)}
             required
@@ -105,7 +107,7 @@ const UserCreatePayload = ({
         <Grid item xs={12}>
           <TextField
             fullWidth
-            label="Payment Date"
+            label={t('payloads:paymentDate', 'Payment Date')}
             type="date"
             value={paymentForm.date}
             onChange={(e) => handlePaymentFormChange("date", e.target.value)}
@@ -121,7 +123,8 @@ const UserCreatePayload = ({
             startIcon={<Upload />}
             color="secondary"
           >
-            Upload Receipt
+                        {t('payloads:uploadReceipt', 'Upload Receipt')}
+
             <input
               type="file"
               hidden
@@ -132,7 +135,7 @@ const UserCreatePayload = ({
           {paymentForm.support && (
             <Alert severity="success" sx={{ mt: 2 }} icon={<CheckCircle />}>
               <Typography variant="body2" fontWeight="600">
-                File selected: {paymentForm.support.name}
+                {t('payloads:fileSelected', { name: paymentForm.support.name }, 'File selected: {{name}}')}
               </Typography>
             </Alert>
           )}
@@ -152,7 +155,7 @@ const UserCreatePayload = ({
       </Grid>
       <Alert severity="info" sx={{ mt: 3 }} icon={<Info />}>
         <Typography variant="body2">
-          Please review your information before submitting.
+          {t('payloads:reviewInfo', 'Please review your information before submitting.')}
         </Typography>
       </Alert>
     </ModalWrapper>
