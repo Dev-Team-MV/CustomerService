@@ -233,6 +233,127 @@ export const getApartmentById = async (req, res) => {
   }
 }
 
+export const getApartmentQuote = async (req, res) => {
+  try {
+    const {
+      apartmentId,
+      apartmentModelId,
+      apartmentModel,
+      building,
+      floorNumber,
+      apartmentNumber,
+      selectedRenderType,
+      price,
+      initialPayment
+    } = req.body
+
+    const modelId = apartmentModelId || apartmentModel
+    const normalizedInitialPayment = Number(initialPayment || 0)
+    if (!Number.isFinite(normalizedInitialPayment) || normalizedInitialPayment < 0) {
+      return res.status(400).json({ message: 'initialPayment must be a number >= 0' })
+    }
+
+    if (apartmentId) {
+      if (!isValidObjectId(apartmentId)) {
+        return res.status(400).json({ message: 'Invalid apartmentId' })
+      }
+
+      const apartment = await Apartment.findById(apartmentId)
+        .populate('apartmentModel', 'name modelNumber bedrooms bathrooms sqft building')
+
+      if (!apartment) {
+        return res.status(404).json({ message: 'Apartment not found' })
+      }
+
+      const basePrice = Number(apartment.price || 0)
+      const pending = basePrice - normalizedInitialPayment
+      const renderType = selectedRenderType || apartment.selectedRenderType || 'basic'
+
+      return res.json({
+        apartmentId: apartment._id,
+        building: apartment.building,
+        apartmentModel: apartment.apartmentModel,
+        floorNumber: apartment.floorNumber,
+        apartmentNumber: apartment.apartmentNumber,
+        selectedRenderType: renderType,
+        totals: {
+          price: basePrice,
+          initialPayment: normalizedInitialPayment,
+          pending
+        }
+      })
+    }
+
+    if (!modelId) {
+      return res.status(400).json({ message: 'apartmentId or apartmentModelId (or apartmentModel) is required' })
+    }
+
+    const modelExists = await ApartmentModel.findById(modelId).populate('building', 'name section floors project')
+    if (!modelExists) {
+      return res.status(404).json({ message: 'Apartment model not found' })
+    }
+
+    const buildingId = building || modelExists.building?._id || modelExists.building
+    if (!buildingId) {
+      return res.status(400).json({ message: 'building could not be resolved for apartment model' })
+    }
+    if (!sameId(buildingId, modelExists.building?._id || modelExists.building)) {
+      return res.status(400).json({ message: 'building must match apartment model building' })
+    }
+
+    if (floorNumber != null || apartmentNumber != null) {
+      const filter = {
+        apartmentModel: modelId,
+        building: buildingId
+      }
+      if (floorNumber != null && floorNumber !== '') filter.floorNumber = Number(floorNumber)
+      if (apartmentNumber != null && apartmentNumber !== '') filter.apartmentNumber = String(apartmentNumber)
+
+      const existingApartment = await Apartment.findOne(filter)
+      if (existingApartment) {
+        const basePrice = Number(existingApartment.price || 0)
+        const pending = basePrice - normalizedInitialPayment
+        const renderType = selectedRenderType || existingApartment.selectedRenderType || 'basic'
+        return res.json({
+          apartmentId: existingApartment._id,
+          building: existingApartment.building,
+          apartmentModel: modelExists,
+          floorNumber: existingApartment.floorNumber,
+          apartmentNumber: existingApartment.apartmentNumber,
+          selectedRenderType: renderType,
+          totals: {
+            price: basePrice,
+            initialPayment: normalizedInitialPayment,
+            pending
+          }
+        })
+      }
+    }
+
+    const basePrice = Number(price ?? 0)
+    if (!Number.isFinite(basePrice) || basePrice < 0) {
+      return res.status(400).json({ message: 'price is required (>= 0) when apartment is not found by apartmentId or floor/apartmentNumber' })
+    }
+    const pending = basePrice - normalizedInitialPayment
+
+    return res.json({
+      apartmentId: null,
+      building: buildingId,
+      apartmentModel: modelExists,
+      floorNumber: floorNumber != null && floorNumber !== '' ? Number(floorNumber) : null,
+      apartmentNumber: apartmentNumber != null && apartmentNumber !== '' ? String(apartmentNumber) : null,
+      selectedRenderType: selectedRenderType || 'basic',
+      totals: {
+        price: basePrice,
+        initialPayment: normalizedInitialPayment,
+        pending
+      }
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 export const createApartment = async (req, res) => {
   try {
     const {

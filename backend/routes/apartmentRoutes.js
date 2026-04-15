@@ -2,6 +2,7 @@ import express from 'express'
 import {
   getAllApartments,
   getApartmentById,
+  getApartmentQuote,
   createApartment,
   updateApartment,
   deleteApartment,
@@ -168,6 +169,49 @@ const router = express.Router()
 router.route('/')
   .get(protect, getAllApartments)
   .post(protect, admin, createApartment)
+
+/**
+ * @swagger
+ * /api/apartments/quote:
+ *   post:
+ *     summary: Calculate apartment quote without creating/updating apartment
+ *     tags: [Apartments]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               apartmentId:
+ *                 type: string
+ *                 description: Existing apartment ID (recommended for Shepherd)
+ *               apartmentModelId:
+ *                 type: string
+ *                 description: Alternative to apartmentId for pre-creation quote
+ *               apartmentModel:
+ *                 type: string
+ *               building:
+ *                 type: string
+ *               floorNumber:
+ *                 type: number
+ *               apartmentNumber:
+ *                 type: string
+ *               selectedRenderType:
+ *                 type: string
+ *                 enum: [basic, upgrade]
+ *               price:
+ *                 type: number
+ *                 description: Required only when apartment cannot be resolved by apartmentId or floor/apartmentNumber
+ *               initialPayment:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Quote calculated
+ */
+router.post('/quote', protect, getApartmentQuote)
 
 /**
  * @swagger
