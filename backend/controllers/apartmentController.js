@@ -140,6 +140,11 @@ export const getAllApartments = async (req, res) => {
       })
       .populate('users', 'firstName lastName email phoneNumber')
       .populate({
+        path: 'parkingSpots',
+        select: 'building floorNumber code spotType status apartment notes createdAt updatedAt',
+        options: { sort: { floorNumber: 1, code: 1 } }
+      })
+      .populate({
         path: 'phases',
         options: { sort: { phaseNumber: 1 } }
       })
@@ -158,6 +163,9 @@ export const getAllApartments = async (req, res) => {
       const obj = a.toObject()
       obj.totalConstructionPercentage = a.totalConstructionPercentage || 0
       obj.selectedRenders = getSelectedApartmentRenders(obj)
+      obj.parkingSpot = Array.isArray(obj.parkingSpots) && obj.parkingSpots.length > 0
+        ? obj.parkingSpots[0]
+        : null
       return obj
     })
     res.json(result)
@@ -175,6 +183,11 @@ export const getApartmentById = async (req, res) => {
         populate: { path: 'building', select: 'name section floors project' }
       })
       .populate('users', 'firstName lastName email phoneNumber birthday')
+      .populate({
+        path: 'parkingSpots',
+        select: 'building floorNumber code spotType status apartment notes createdAt updatedAt',
+        options: { sort: { floorNumber: 1, code: 1 } }
+      })
       .populate({
         path: 'payloads',
         options: { sort: { date: -1 } }
@@ -211,6 +224,9 @@ export const getApartmentById = async (req, res) => {
     const obj = apartment.toObject()
     obj.totalConstructionPercentage = apartment.totalConstructionPercentage || 0
     obj.selectedRenders = getSelectedApartmentRenders(obj)
+    obj.parkingSpot = Array.isArray(obj.parkingSpots) && obj.parkingSpots.length > 0
+      ? obj.parkingSpots[0]
+      : null
     res.json(obj)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -305,6 +321,11 @@ export const createApartment = async (req, res) => {
       })
       .populate('users', 'firstName lastName email phoneNumber')
       .populate({
+        path: 'parkingSpots',
+        select: 'building floorNumber code spotType status apartment notes createdAt updatedAt',
+        options: { sort: { floorNumber: 1, code: 1 } }
+      })
+      .populate({
         path: 'phases',
         options: { sort: { phaseNumber: 1 } }
       })
@@ -312,6 +333,9 @@ export const createApartment = async (req, res) => {
     const obj = populated.toObject()
     obj.totalConstructionPercentage = populated.totalConstructionPercentage || 0
     obj.selectedRenders = getSelectedApartmentRenders(obj)
+    obj.parkingSpot = Array.isArray(obj.parkingSpots) && obj.parkingSpots.length > 0
+      ? obj.parkingSpots[0]
+      : null
     res.status(201).json(obj)
   } catch (error) {
     if (error?.code === 11000 && error?.keyPattern?.floorPlanPolygonId) {
@@ -378,6 +402,11 @@ export const updateApartment = async (req, res) => {
       })
       .populate('users', 'firstName lastName email phoneNumber')
       .populate({
+        path: 'parkingSpots',
+        select: 'building floorNumber code spotType status apartment notes createdAt updatedAt',
+        options: { sort: { floorNumber: 1, code: 1 } }
+      })
+      .populate({
         path: 'phases',
         options: { sort: { phaseNumber: 1 } }
       })
@@ -385,6 +414,9 @@ export const updateApartment = async (req, res) => {
     const obj = populated.toObject()
     obj.totalConstructionPercentage = populated.totalConstructionPercentage || 0
     obj.selectedRenders = getSelectedApartmentRenders(obj)
+    obj.parkingSpot = Array.isArray(obj.parkingSpots) && obj.parkingSpots.length > 0
+      ? obj.parkingSpots[0]
+      : null
     res.json(obj)
   } catch (error) {
     if (error?.code === 11000 && error?.keyPattern?.floorPlanPolygonId) {
