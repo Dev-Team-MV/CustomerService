@@ -206,6 +206,169 @@ export const getPropertyById = async (req, res) => {
   }
 }
 
+const resolvePropertyPricing = async ({
+  projectId,
+  project,
+  lot,
+  model,
+  facade,
+  initialPayment,
+  hasBalcony,
+  modelType,
+  hasStorage,
+  enforceLotAvailability = false,
+  firstOwner = null
+}) => {
+  let projId = projectId || project
+
+  const lotExists = await Lot.findById(lot)
+  if (!lotExists) {
+    return { ok: false, status: 404, message: 'Lot not found' }
+  }
+
+  if (!projId && lotExists.project) {
+    projId = lotExists.project
+  }
+  if (!projId) {
+    return { ok: false, status: 400, message: 'projectId (or project) is required, or use a lot that belongs to a project' }
+  }
+  if (lotExists.project) {
+    projId = lotExists.project
+  }
+
+  if (enforceLotAvailability) {
+    if (lotExists.status === 'sold') {
+      return { ok: false, status: 400, message: 'Lot is already sold' }
+    }
+
+    const existingPropertyForLot = await Property.findOne({ lot })
+    if (!existingPropertyForLot && (lotExists.assignedUser || lotExists.status !== 'available')) {
+      await Lot.findByIdAndUpdate(lot, { status: 'available', assignedUser: null })
+      lotExists.assignedUser = null
+      lotExists.status = 'available'
+    }
+
+    if (firstOwner && lotExists.assignedUser && !sameId(lotExists.assignedUser, firstOwner)) {
+      return { ok: false, status: 400, message: 'Lot is already assigned to another user' }
+    }
+  }
+
+  const modelExists = await Model.findById(model)
+  if (!modelExists) {
+    return { ok: false, status: 404, message: 'Model not found' }
+  }
+  if (!modelExists.project || !sameId(modelExists.project, projId)) {
+    return { ok: false, status: 400, message: 'Model does not belong to this project' }
+  }
+
+  const facadeExists = await Facade.findById(facade)
+  if (!facadeExists) {
+    return { ok: false, status: 404, message: 'Facade not found' }
+  }
+  if (!facadeExists.project || !sameId(facadeExists.project, projId)) {
+    return { ok: false, status: 400, message: 'Facade does not belong to this project' }
+  }
+  if (!sameId(facadeExists.model, model)) {
+    return { ok: false, status: 400, message: 'Facade does not belong to the selected model' }
+  }
+
+  let modelPrice = modelExists.price
+  if (hasBalcony && modelExists.balconyPrice) {
+    modelPrice += modelExists.balconyPrice
+  }
+  if (modelType === 'upgrade' && modelExists.upgradePrice) {
+    modelPrice += modelExists.upgradePrice
+  }
+  if (hasStorage && modelExists.storagePrice) {
+    modelPrice += modelExists.storagePrice
+  }
+
+  const lotPrice = Number(lotExists.price || 0)
+  const facadePrice = Number(facadeExists.price || 0)
+  const totalPrice = lotPrice + modelPrice + facadePrice
+  const initialPaymentAmount = Number(initialPayment || 0)
+  const pendingAmount = totalPrice - initialPaymentAmount
+
+  return {
+    ok: true,
+    data: {
+      projectId: projId,
+      lotExists,
+      modelExists,
+      facadeExists,
+      prices: {
+        lotPrice,
+        modelBasePrice: Number(modelExists.price || 0),
+        balconyPrice: hasBalcony ? Number(modelExists.balconyPrice || 0) : 0,
+        upgradePrice: modelType === 'upgrade' ? Number(modelExists.upgradePrice || 0) : 0,
+        storagePrice: hasStorage ? Number(modelExists.storagePrice || 0) : 0,
+        facadePrice,
+        modelPrice,
+        totalPrice,
+        initialPayment: initialPaymentAmount,
+        pending: pendingAmount
+      }
+    }
+  }
+}
+
+export const getPropertyQuote = async (req, res) => {
+  try {
+    const { projectId, project, lot, model, facade, initialPayment, hasBalcony, modelType, hasStorage } = req.body
+
+    const resolved = await resolvePropertyPricing({
+      projectId,
+      project,
+      lot,
+      model,
+      facade,
+      initialPayment,
+      hasBalcony: hasBalcony === true,
+      modelType: modelType || 'basic',
+      hasStorage: hasStorage === true,
+      enforceLotAvailability: false
+    })
+
+    if (!resolved.ok) {
+      return res.status(resolved.status).json({ message: resolved.message })
+    }
+
+    const { prices, projectId: resolvedProjectId, lotExists, modelExists, facadeExists } = resolved.data
+
+    res.json({
+      projectId: resolvedProjectId,
+      lot: { _id: lotExists._id, number: lotExists.number, price: prices.lotPrice },
+      model: {
+        _id: modelExists._id,
+        model: modelExists.model,
+        modelNumber: modelExists.modelNumber,
+        price: prices.modelBasePrice
+      },
+      facade: { _id: facadeExists._id, title: facadeExists.title, price: prices.facadePrice },
+      options: {
+        hasBalcony: hasBalcony === true,
+        modelType: modelType || 'basic',
+        hasStorage: hasStorage === true
+      },
+      breakdown: {
+        lotPrice: prices.lotPrice,
+        modelBasePrice: prices.modelBasePrice,
+        balconyPrice: prices.balconyPrice,
+        upgradePrice: prices.upgradePrice,
+        storagePrice: prices.storagePrice,
+        facadePrice: prices.facadePrice
+      },
+      totals: {
+        totalPrice: prices.totalPrice,
+        initialPayment: prices.initialPayment,
+        pending: prices.pending
+      }
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 export const createProperty = async (req, res) => {
   try {
     const { projectId, project, lot, model, facade, user, users, initialPayment, hasBalcony, modelType, hasStorage } = req.body
@@ -221,87 +384,25 @@ export const createProperty = async (req, res) => {
       return res.status(400).json({ message: 'At least one owner (user or users) is required' })
     }
 
-    // Validate lot (load first so we can infer project from it if needed)
-    const lotExists = await Lot.findById(lot)
-    if (!lotExists) {
-      return res.status(404).json({ message: 'Lot not found' })
-    }
-    // If no projectId was sent, use the lot's project (allows creating without sending projectId for testing)
-    if (!projId && lotExists.project) {
-      projId = lotExists.project
-    }
-    if (!projId) {
-      return res.status(400).json({ message: 'projectId (or project) is required, or use a lot that belongs to a project' })
-    }
-    // Use lot's project as canonical so we accept even if frontend sent a different projectId (e.g. stale state)
-    if (lotExists.project) {
-      projId = lotExists.project
-    }
-    
-    if (lotExists.status === 'sold') {
-      return res.status(400).json({ message: 'Lot is already sold' })
-    }
-    
-    // If lot has assignedUser but no property exists for this lot (e.g. after a delete that left stale data), treat as available
-    const existingPropertyForLot = await Property.findOne({ lot })
-    if (!existingPropertyForLot && (lotExists.assignedUser || lotExists.status !== 'available')) {
-      await Lot.findByIdAndUpdate(lot, { status: 'available', assignedUser: null })
-      lotExists.assignedUser = null
-      lotExists.status = 'available'
-    }
-    
     const firstOwner = ownerIds[0]
-    if (lotExists.assignedUser && !sameId(lotExists.assignedUser, firstOwner)) {
-      return res.status(400).json({ message: 'Lot is already assigned to another user' })
+    const resolved = await resolvePropertyPricing({
+      projectId,
+      project,
+      lot,
+      model,
+      facade,
+      initialPayment,
+      hasBalcony: hasBalcony === true,
+      modelType: modelType || 'basic',
+      hasStorage: hasStorage === true,
+      enforceLotAvailability: true,
+      firstOwner
+    })
+    if (!resolved.ok) {
+      return res.status(resolved.status).json({ message: resolved.message })
     }
-    
-    // Validate model
-    const modelExists = await Model.findById(model)
-    if (!modelExists) {
-      return res.status(404).json({ message: 'Model not found' })
-    }
-    if (!modelExists.project || !sameId(modelExists.project, projId)) {
-      return res.status(400).json({ message: 'Model does not belong to this project' })
-    }
-
-    // Validate facade
-    const facadeExists = await Facade.findById(facade)
-    if (!facadeExists) {
-      return res.status(404).json({ message: 'Facade not found' })
-    }
-    if (!facadeExists.project || !sameId(facadeExists.project, projId)) {
-      return res.status(400).json({ message: 'Facade does not belong to this project' })
-    }
-
-    // Validate that facade belongs to the selected model
-    if (!sameId(facadeExists.model, model)) {
-      return res.status(400).json({ message: 'Facade does not belong to the selected model' })
-    }
-    
-    // Calculate model price with options
-    let modelPrice = modelExists.price // Base price
-    
-    // Add balcony price if hasBalcony is true
-    if (hasBalcony && modelExists.balconyPrice) {
-      modelPrice += modelExists.balconyPrice
-    }
-    
-    // Add upgrade price if modelType is 'upgrade'
-    if (modelType === 'upgrade' && modelExists.upgradePrice) {
-      modelPrice += modelExists.upgradePrice
-    }
-    
-    // Add storage price if hasStorage is true
-    if (hasStorage && modelExists.storagePrice) {
-      modelPrice += modelExists.storagePrice
-    }
-    
-    // Calculate total price: lot + model (with options) + facade
-    const totalPrice = lotExists.price + modelPrice + facadeExists.price
-    
-    // Calculate pending: total price - initial payment
-    const initialPaymentAmount = initialPayment || 0
-    const pendingAmount = totalPrice - initialPaymentAmount
+    projId = resolved.data.projectId
+    const { totalPrice, initialPayment: initialPaymentAmount, pending: pendingAmount } = resolved.data.prices
     
     const property = await Property.create({
       project: projId,
@@ -313,9 +414,9 @@ export const createProperty = async (req, res) => {
       pending: pendingAmount,
       initialPayment: initialPaymentAmount,
       status: 'pending',
-      hasBalcony: hasBalcony || false,
+      hasBalcony: hasBalcony === true,
       modelType: modelType || 'basic',
-      hasStorage: hasStorage || false
+      hasStorage: hasStorage === true
     })
     
     await Lot.findByIdAndUpdate(lot, {

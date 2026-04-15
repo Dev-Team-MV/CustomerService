@@ -2,6 +2,7 @@ import express from 'express'
 import {
   getAllProperties,
   getPropertyById,
+  getPropertyQuote,
   createProperty,
   updateProperty,
   deleteProperty,
@@ -97,6 +98,37 @@ const router = express.Router()
 router.route('/')
   .get(protect, getAllProperties)
   .post(protect, admin, createProperty)
+
+/**
+ * @swagger
+ * /api/properties/quote:
+ *   post:
+ *     summary: Calculate property quote without creating it
+ *     tags: [Properties]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [lot, model, facade]
+ *             properties:
+ *               projectId: { type: string }
+ *               project: { type: string }
+ *               lot: { type: string }
+ *               model: { type: string }
+ *               facade: { type: string }
+ *               initialPayment: { type: number }
+ *               hasBalcony: { type: boolean }
+ *               modelType: { type: string, enum: [basic, upgrade] }
+ *               hasStorage: { type: boolean }
+ *     responses:
+ *       200:
+ *         description: Quote calculated
+ */
+router.post('/quote', protect, getPropertyQuote)
 
 /**
  * @swagger
