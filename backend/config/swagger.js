@@ -456,6 +456,21 @@ const options = {
             notes: { type: 'string' }
           }
         },
+        ParkingSpotBulkCreateBody: {
+          type: 'object',
+          required: ['buildingId', 'floorNumber', 'startNumber', 'endNumber'],
+          properties: {
+            buildingId: { type: 'string', description: 'Alternativa building' },
+            building: { type: 'string' },
+            floorNumber: { type: 'integer', minimum: 1 },
+            startNumber: { type: 'integer', minimum: 1, example: 2 },
+            endNumber: { type: 'integer', minimum: 1, example: 50 },
+            spotType: { type: 'string', enum: ['standard', 'covered', 'uncovered', 'tandem', 'motorcycle'], default: 'standard' },
+            status: { type: 'string', enum: ['available', 'assigned', 'reserved', 'blocked'], default: 'available' },
+            notes: { type: 'string' },
+            codePrefix: { type: 'string', description: 'Opcional. Por defecto: P{floorNumber}-' }
+          }
+        },
         Property: {
           type: 'object',
           description:
