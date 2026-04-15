@@ -106,6 +106,12 @@ apartmentSchema.virtual('phases', {
   foreignField: 'apartment'
 })
 
+apartmentSchema.virtual('parkingSpots', {
+  ref: 'ParkingSpot',
+  localField: '_id',
+  foreignField: 'apartment'
+})
+
 apartmentSchema.virtual('totalConstructionPercentage').get(function () {
   if (this.phases && Array.isArray(this.phases) && this.phases.length > 0) {
     const phaseWeights = {

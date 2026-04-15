@@ -158,6 +158,112 @@ export const createParkingSpot = async (req, res) => {
   }
 }
 
+export const bulkCreateParkingSpots = async (req, res) => {
+  try {
+    const {
+      buildingId,
+      building: buildingBody,
+      floorNumber,
+      startNumber,
+      endNumber,
+      spotType,
+      status,
+      notes,
+      codePrefix
+    } = req.body
+
+    const buildId = buildingId || buildingBody
+    if (!buildId) {
+      return res.status(400).json({ message: 'buildingId (or building) is required' })
+    }
+    if (!isValidObjectId(buildId)) {
+      return res.status(400).json({ message: 'Invalid building id' })
+    }
+
+    const building = await Building.findById(buildId)
+    if (!building) {
+      return res.status(404).json({ message: 'Building not found' })
+    }
+
+    const floor = Number(floorNumber)
+    if (!Number.isFinite(floor) || floor < 1) {
+      return res.status(400).json({ message: 'floorNumber must be a number >= 1' })
+    }
+
+    const start = Number(startNumber)
+    const end = Number(endNumber)
+    if (!Number.isInteger(start) || start < 1) {
+      return res.status(400).json({ message: 'startNumber must be an integer >= 1' })
+    }
+    if (!Number.isInteger(end) || end < 1) {
+      return res.status(400).json({ message: 'endNumber must be an integer >= 1' })
+    }
+    if (start > end) {
+      return res.status(400).json({ message: 'startNumber must be <= endNumber' })
+    }
+
+    const totalToCreate = end - start + 1
+    if (totalToCreate > 500) {
+      return res.status(400).json({ message: 'Cannot create more than 500 parking spots in one request' })
+    }
+
+    const prefix = codePrefix != null && String(codePrefix).trim()
+      ? String(codePrefix).trim()
+      : `P${floor}-`
+
+    const width = Math.max(3, String(end).length)
+    const codes = []
+    for (let i = start; i <= end; i++) {
+      codes.push(`${prefix}${String(i).padStart(width, '0')}`)
+    }
+
+    const existing = await ParkingSpot.find({
+      building: buildId,
+      code: { $in: codes }
+    }).select('code')
+
+    if (existing.length > 0) {
+      return res.status(400).json({
+        message: 'Some parking codes already exist for this building',
+        duplicates: existing.map((item) => item.code).sort()
+      })
+    }
+
+    const docs = codes.map((code) => ({
+      building: buildId,
+      floorNumber: floor,
+      code,
+      spotType: spotType || 'standard',
+      status: status || 'available',
+      apartment: null,
+      notes: notes != null ? String(notes) : ''
+    }))
+
+    await ParkingSpot.insertMany(docs)
+
+    const spots = await ParkingSpot.find({
+      building: buildId,
+      code: { $in: codes }
+    })
+      .populate('building', 'name section floors project')
+      .populate('apartment', 'apartmentNumber floorNumber building')
+      .sort({ floorNumber: 1, code: 1 })
+
+    res.status(201).json({
+      createdCount: spots.length,
+      range: { startNumber: start, endNumber: end },
+      floorNumber: floor,
+      codePrefix: prefix,
+      spots
+    })
+  } catch (error) {
+    if (error?.code === 11000) {
+      return res.status(400).json({ message: 'Parking code already exists for this building' })
+    }
+    res.status(500).json({ message: error.message })
+  }
+}
+
 export const updateParkingSpot = async (req, res) => {
   try {
     const spot = await ParkingSpot.findById(req.params.id)
