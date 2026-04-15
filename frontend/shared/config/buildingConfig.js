@@ -1,4 +1,4 @@
-// @shared/config/buildingsConfig.js
+// @shared/config/buildingConfig.js
 
 import { PROJECT_IDS } from './projectsConfig'
 
@@ -12,7 +12,9 @@ export const BUILDING_TYPES = {
 // ── FLOOR TYPES ────────────────────────────────────────────────
 export const FLOOR_TYPES = {
   RESIDENTIAL: 'residential',
-  COMMERCIAL: 'commercial'
+  COMMERCIAL: 'commercial',
+  PARKING: 'parking',
+  AMENITY: 'amenity'
 }
 
 // ── BUILDING CONFIGURATIONS ────────────────────────────────────
@@ -21,6 +23,9 @@ export const buildingsConfigs = {
     projectId: PROJECT_IDS.PHASE2,
     projectSlug: 'lakewood-f2',
     projectName: 'Lakewood Phase 2',
+    
+    // Single building mode
+    singleBuildingMode: false,
     
     // Building type
     buildingType: BUILDING_TYPES.MIXED_USE,
@@ -31,7 +36,7 @@ export const buildingsConfigs = {
       min: 2,
       max: 20,
       hasCommercial: true,
-      commercialFloorNumbers: [1], // Primer piso es comercial
+      commercialFloorNumbers: [1],
       residentialStartFloor: 2
     },
     
@@ -106,6 +111,9 @@ export const buildingsConfigs = {
     projectId: PROJECT_IDS.ISQ,
     projectSlug: 'isq',
     projectName: 'ISQ',
+    
+    // Single building mode
+    singleBuildingMode: false,
     
     // Building type
     buildingType: BUILDING_TYPES.RESIDENTIAL,
@@ -185,6 +193,174 @@ export const buildingsConfigs = {
       requireFloorPlans: true,
       requireBuildingFloorPolygons: true
     }
+  },
+
+  sheperd: {
+    projectId: PROJECT_IDS.SHEPERD,
+    projectSlug: 'sheperd',
+    projectName: 'Sheperd',
+    
+    // ✅ Single building mode - ÚNICO EDIFICIO
+    singleBuildingMode: true,
+    
+    // Building type
+    buildingType: BUILDING_TYPES.MIXED_USE,
+    
+    // ✅ Floor configuration - FLEXIBLE CON ARRAYS
+floors: {
+  total: 20, // Cambiado de 12 a 20
+  min: 5,
+  max: 30,
+  
+// In sheperd config, add to parking section:
+parking: {
+  enabled: true,
+  floors: [1, 2],
+  spotsPerFloor: 50,
+  types: ['resident', 'visitor', 'commercial'],
+  
+  // ✅ NEW: Parking management configuration
+  management: {
+    enabled: true,
+    allowBulkCreate: true,
+    allowAssignment: true,
+    codeFormat: 'P{floor}-{number}', // e.g., P1-001, P2-045
+    spotTypes: [
+      { value: 'standard', label: 'Standard', icon: 'DirectionsCar' },
+      { value: 'compact', label: 'Compact', icon: 'DirectionsCar' },
+      { value: 'accessible', label: 'Accessible', icon: 'Accessible' },
+      { value: 'electric', label: 'Electric Vehicle', icon: 'EvStation' },
+      { value: 'motorcycle', label: 'Motorcycle', icon: 'TwoWheeler' }
+    ],
+    statusOptions: [
+      { value: 'available', label: 'Available', color: '#43A047' },
+      { value: 'occupied', label: 'Occupied', color: '#FF6B35' },
+      { value: 'reserved', label: 'Reserved', color: '#FFA726' },
+      { value: 'maintenance', label: 'Maintenance', color: '#757575' }
+    ],
+    defaultSpotType: 'standard',
+    defaultStatus: 'available'
+  }
+},
+  
+  commercial: {
+    enabled: true,
+    floors: [3, 4],
+    allowMixedUse: true
+  },
+  
+  residential: {
+    enabled: true,
+    floors: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], // Extendido hasta 19
+    apartmentTypes: ['studio', '1bed', '2bed', '3bed', 'penthouse']
+  },
+  
+  amenities: {
+    enabled: true,
+    floors: [20], // Cambiado de [12] a [20]
+    allowMultipleFloorsPerAmenity: false,
+    types: [
+      { id: 'gym', label: 'Gym', icon: 'FitnessCenter', defaultFloor: 20 },
+      { id: 'pool', label: 'Pool', icon: 'Pool', defaultFloor: 20 },
+      { id: 'terrace', label: 'Terrace', icon: 'Deck', defaultFloor: 20 },
+      { id: 'coworking', label: 'Coworking', icon: 'Work', defaultFloor: 4 },
+      { id: 'lobby', label: 'Lobby', icon: 'MeetingRoom', defaultFloor: 3 }
+    ]
+  }
+},
+    
+    // ✅ Floor labeling (para UI)
+    floorLabels: {
+      useNegativeNumbers: false, // Si usa números negativos para subterráneos
+      parkingPrefix: 'P', // "P1", "P2" o vacío para números normales
+      customLabels: {
+        // Ejemplo: { 1: 'Ground Floor', 12: 'Rooftop' }
+      }
+    },
+    
+    // Polygon configuration
+    polygons: {
+      masterPlan: {
+        required: true,
+        defaultColor: '#F7931E',
+        defaultStrokeColor: '#1F2937',
+        defaultOpacity: 0.35
+      },
+      floorPlan: {
+        required: true,
+        defaultColor: '#FF8C42',
+        allowMultiple: true
+      },
+      buildingFloor: {
+        required: true,
+        defaultColor: '#FFB84D',
+        allowTypeFlags: true
+      }
+    },
+    
+    // Render configuration
+    renders: {
+      exterior: {
+        required: true,
+        multiple: true,
+        maxCount: 15
+      },
+      floorPlans: {
+        required: true,
+        perFloor: true
+      }
+    },
+    
+    // Apartment configuration
+    apartments: {
+      enabled: true,
+      requireModel: true,
+      allowPolygonPlacement: true,
+      renderTypes: ['basic', 'upgrade'],
+      
+      // ✅ Configuración por tipo de piso
+      byFloorType: {
+        residential: {
+          models: ['studio', '1bed', '2bed', '3bed', 'penthouse'],
+          allowCustomModels: true
+        },
+        commercial: {
+          models: ['office', 'retail', 'restaurant', 'coworking'],
+          allowCustomModels: true
+        }
+      }
+    },
+    
+    // Colors por tipo de piso
+    colors: {
+      primary: '#F7931E',
+      secondary: '#FF8C42',
+      accent: '#FFA726',
+      parking: '#757575',
+      commercial: '#FF6B35',
+      residential: '#43A047',
+      amenity: '#FFB84D'
+    },
+    
+    // i18n
+    i18n: {
+      namespace: 'buildings',
+      labels: {
+        parking: 'Parking Floor',
+        commercial: 'Commercial Floor',
+        residential: 'Residential Floor',
+        amenity: 'Amenity Floor'
+      }
+    },
+    
+    // Validation rules
+    validation: {
+      requireSection: false,
+      requireTotalApartments: true,
+      requireExteriorRenders: true,
+      requireFloorPlans: true,
+      requireBuildingFloorPolygons: true
+    }
   }
 }
 
@@ -193,25 +369,110 @@ export const getBuildingConfig = (projectSlug) => {
   return buildingsConfigs[projectSlug] || buildingsConfigs.isq
 }
 
-export const isCommercialFloor = (projectSlug, floorNumber) => {
+// ✅ ACTUALIZADO - Detecta tipo de piso por arrays
+export const getFloorType = (projectSlug, floorNumber) => {
   const config = getBuildingConfig(projectSlug)
-  return config.floors.commercialFloorNumbers.includes(floorNumber)
+  
+  if (config.singleBuildingMode && config.floors.parking?.floors) {
+    if (config.floors.parking.floors.includes(floorNumber)) return FLOOR_TYPES.PARKING
+    if (config.floors.commercial?.floors.includes(floorNumber)) return FLOOR_TYPES.COMMERCIAL
+    if (config.floors.residential?.floors.includes(floorNumber)) return FLOOR_TYPES.RESIDENTIAL
+    if (config.floors.amenities?.floors.includes(floorNumber)) return FLOOR_TYPES.AMENITY
+    
+    // ✅ NUEVO: Si no está definido, asumir que es residencial por defecto
+    return FLOOR_TYPES.RESIDENTIAL
+  }
+  
+  if (config.floors.commercialFloorNumbers?.includes(floorNumber)) {
+    return FLOOR_TYPES.COMMERCIAL
+  }
+  return FLOOR_TYPES.RESIDENTIAL
 }
 
-export const getFloorType = (projectSlug, floorNumber) => {
-  return isCommercialFloor(projectSlug, floorNumber) 
-    ? FLOOR_TYPES.COMMERCIAL 
-    : FLOOR_TYPES.RESIDENTIAL
+// ✅ NUEVO - Obtener label de piso
+export const getFloorLabel = (projectSlug, floorNumber) => {
+  const config = getBuildingConfig(projectSlug)
+  const labels = config.floorLabels
+  
+  if (!labels) return `Floor ${floorNumber}`
+  
+  // Custom label
+  if (labels.customLabels?.[floorNumber]) {
+    return labels.customLabels[floorNumber]
+  }
+  
+  // Parking prefix
+  const floorType = getFloorType(projectSlug, floorNumber)
+  if (floorType === FLOOR_TYPES.PARKING && labels.parkingPrefix) {
+    const parkingIndex = config.floors.parking.floors.indexOf(floorNumber) + 1
+    return `${labels.parkingPrefix}${parkingIndex}`
+  }
+  
+  // Negative numbers
+  if (labels.useNegativeNumbers && floorNumber < 0) {
+    return `${floorNumber}`
+  }
+  
+  // Default
+  return `Floor ${floorNumber}`
+}
+
+// ✅ NUEVO - Obtener pisos por tipo
+export const getFloorsByType = (projectSlug, type) => {
+  const config = getBuildingConfig(projectSlug)
+  
+  if (!config.singleBuildingMode) {
+    // Lógica para ISQ y Phase-2
+    return []
+  }
+  
+  switch (type) {
+    case FLOOR_TYPES.PARKING:
+      return config.floors.parking?.floors || []
+    case FLOOR_TYPES.COMMERCIAL:
+      return config.floors.commercial?.floors || []
+    case FLOOR_TYPES.RESIDENTIAL:
+      return config.floors.residential?.floors || []
+    case FLOOR_TYPES.AMENITY:
+      return config.floors.amenities?.floors || []
+    default:
+      return []
+  }
+}
+
+// ✅ NUEVO - Obtener todos los pisos organizados
+export const getAllFloorsOrganized = (projectSlug, totalFloors = null) => {
+  const config = getBuildingConfig(projectSlug)
+  
+  if (!config.singleBuildingMode) return []
+  
+  const floorCount = totalFloors || config.floors.total
+  const floors = []
+  for (let i = 1; i <= floorCount; i++) {
+    floors.push({
+      number: i,
+      type: getFloorType(projectSlug, i),
+      label: getFloorLabel(projectSlug, i)
+    })
+  }
+  
+  return floors
+}
+
+// Funciones originales (sin cambios)
+export const isCommercialFloor = (projectSlug, floorNumber) => {
+  const config = getBuildingConfig(projectSlug)
+  return config.floors.commercialFloorNumbers?.includes(floorNumber) || false
 }
 
 export const hasCommercialFloors = (projectSlug) => {
   const config = getBuildingConfig(projectSlug)
-  return config.floors.hasCommercial
+  return config.floors.hasCommercial || false
 }
 
 export const getDefaultFloorCount = (projectSlug) => {
   const config = getBuildingConfig(projectSlug)
-  return config.floors.default
+  return config.floors.default || config.floors.total || 1
 }
 
 export const getFloorRange = (projectSlug) => {
@@ -262,7 +523,6 @@ export const validateBuildingData = (projectSlug, buildingData) => {
   }
 }
 
-// ── FLOOR UTILITIES ────────────────────────────────────────────
 export const generateFloorNumbers = (projectSlug, totalFloors) => {
   const config = getBuildingConfig(projectSlug)
   const floors = []
@@ -288,7 +548,6 @@ export const getCommercialFloors = (projectSlug, totalFloors) => {
     .filter(floor => floor.type === FLOOR_TYPES.COMMERCIAL)
 }
 
-// ── APARTMENT MODEL UTILITIES ──────────────────────────────────
 export const getApartmentModelDefaults = (projectSlug) => {
   const config = getBuildingConfig(projectSlug)
   return {
@@ -304,4 +563,38 @@ export const getRenderTypeOptions = (projectSlug) => {
     value: type,
     label: type.charAt(0).toUpperCase() + type.slice(1)
   }))
+}
+
+// Get parking configuration
+export const getParkingConfig = (projectSlug) => {
+  const config = getBuildingConfig(projectSlug)
+  return config.floors.parking || null
+}
+
+// Check if parking management is enabled
+export const hasParkingManagement = (projectSlug) => {
+  const parkingConfig = getParkingConfig(projectSlug)
+  return parkingConfig?.management?.enabled || false
+}
+
+// Get parking spot types
+export const getParkingSpotTypes = (projectSlug) => {
+  const parkingConfig = getParkingConfig(projectSlug)
+  return parkingConfig?.management?.spotTypes || []
+}
+
+// Get parking status options
+export const getParkingStatusOptions = (projectSlug) => {
+  const parkingConfig = getParkingConfig(projectSlug)
+  return parkingConfig?.management?.statusOptions || []
+}
+
+// Generate parking code
+export const generateParkingCode = (projectSlug, floorNumber, spotNumber) => {
+  const parkingConfig = getParkingConfig(projectSlug)
+  const format = parkingConfig?.management?.codeFormat || 'P{floor}-{number}'
+  
+  return format
+    .replace('{floor}', floorNumber)
+    .replace('{number}', String(spotNumber).padStart(3, '0'))
 }

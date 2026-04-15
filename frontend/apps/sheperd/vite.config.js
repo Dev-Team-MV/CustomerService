@@ -8,10 +8,13 @@ export default defineConfig({
     alias: {
       '@shared': path.resolve(__dirname, '../../shared'),
       '@': path.resolve(__dirname, './src'),
+      'react': path.resolve(__dirname, './node_modules/react'),
+      'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
     },
+    dedupe: ['react', 'react-dom']
   },
   server: {
-    port: 5176, // Usa un puerto libre diferente a los otros
+    port: 5177,
     proxy: {
       '/api': {
         target: 'http://localhost:5001',

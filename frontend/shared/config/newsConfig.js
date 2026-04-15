@@ -5,7 +5,8 @@
 export const PROJECT_IDS = {
   LAKEWOOD: '69a73ce5b20401b061da6451',
   PHASE2: '69b9b2188186434073c6b13d',
-  ISQ: '69d3b025b5ad6754488df957' // <-- Reemplaza por el real
+  ISQ: '69d3b025b5ad6754488df957',
+  SHEPERD: '69dd47f2b3c3af43409aac48' // <-- Reemplaza por el real
 }
 
 // ── NEWS CONFIGURATIONS ────────────────────────────────────────
@@ -76,6 +77,28 @@ export const newsConfigs = {
       { value: 'announcement', label: 'Announcements', icon: '📢', color: '#a78bfa' },
       { value: 'report', label: 'Reports', icon: '📊', color: '#7c3aed' },
       { value: 'event', label: 'Events', icon: '🎉', color: '#a78bfa' }
+    ]
+  },
+    sheperd: {
+    projectId: PROJECT_IDS.SHEPERD,
+    projectName: 'Sheperd',
+    slug: 'sheperd',
+    colors: {
+      primary: '#F7931E',
+      secondary: '#FF8C42',
+      accent: '#FFA726',
+      border: '#fff3e0',
+      gradient: 'linear-gradient(90deg, #F7931E, #FF8C42, #F7931E)'
+    },
+    i18n: {
+      namespace: 'news'
+    },
+    categories: [
+      { value: 'all', label: 'All News', icon: '📰' },
+      { value: 'construction', label: 'Construction', icon: '🏗️', color: '#FFA726' },
+      { value: 'announcement', label: 'Announcements', icon: '📢', color: '#FF8C42' },
+      { value: 'report', label: 'Reports', icon: '📊', color: '#F7931E' },
+      { value: 'event', label: 'Events', icon: '🎉', color: '#FF8C42' }
     ]
   }
 }

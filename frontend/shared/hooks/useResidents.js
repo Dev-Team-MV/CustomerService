@@ -266,35 +266,35 @@ export const useResidents = (projectId = null, options = {}) => {
   //   }
   // }, [formData, selectedUser, handleCloseDialog, fetchData, t, e164Value])
 
-    const handleSubmit = useCallback(async () => {
-    try {
-      const payload = { ...formData }
-      payload.phoneNumber = e164Value || toE164(formData.phoneNumber)
-      if (selectedUser) {
-        if (!payload.password) delete payload.password
-        await api.put(`/users/${selectedUser._id}`, payload)
-        setSnackbar({ open: true, message: t('residents:snackbar.updated'), severity: 'success' })
-        handleCloseDialog()
-        fetchData()
-      } else {
-        await api.post('/auth/register', {
-          ...payload,
-          skipPasswordSetup: true,
-          ...(idForSmsAndRegister ? { projectId: idForSmsAndRegister } : {})
-        })
-        setSnackbar({ open: true, message: t('residents:snackbar.created'), severity: 'success' })
-        setOpenDialog(false)
-        setUsers(prev => [...prev, newUser])
-        setSelectedUser(newUser)
-      }
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: error.response?.data?.message || error.message,
-        severity: 'error'
+const handleSubmit = useCallback(async () => {
+  try {
+    const payload = { ...formData }
+    payload.phoneNumber = e164Value || toE164(formData.phoneNumber)
+    if (selectedUser) {
+      if (!payload.password) delete payload.password
+      await api.put(`/users/${selectedUser._id}`, payload)
+      setSnackbar({ open: true, message: t('residents:snackbar.updated'), severity: 'success' })
+      handleCloseDialog()
+      fetchData()
+    } else {
+      const res = await api.post('/auth/register', {
+        ...payload,
+        skipPasswordSetup: true,
+        ...(idForSmsAndRegister ? { projectId: idForSmsAndRegister } : {})
       })
+      const newUser = res.data.user || res.data
+      setSnackbar({ open: true, message: t('residents:snackbar.created'), severity: 'success' })
+      setOpenDialog(false)
+      fetchData()
     }
-  }, [formData, selectedUser, handleCloseDialog, fetchData, t, e164Value, idForSmsAndRegister])
+  } catch (error) {
+    setSnackbar({
+      open: true,
+      message: error.response?.data?.message || error.message,
+      severity: 'error'
+    })
+  }
+}, [formData, selectedUser, handleCloseDialog, fetchData, t, e164Value, idForSmsAndRegister])
 
   // --- Delete ---
   const handleDelete = useCallback(async (id) => {
