@@ -50,16 +50,22 @@ const parkingSpotService = {
   },
 
   // Bulk create spots (useful for initial setup)
-  bulkCreate: async (spotsArray) => {
-    const response = await api.post('/parking-spots/bulk', { spots: spotsArray })
-    return response.data
+  async bulkCreate(payload) {
+    try {
+      const response = await api.post('/parking-spots/bulk', payload)
+      return response.data
+    } catch (error) {
+      console.error('Error bulk creating parking spots:', error)
+      throw error
+    }
   },
+ 
 
   // Assign spot to apartment
   assignToApartment: async (spotId, apartmentId) => {
     const response = await api.put(`/parking-spots/${spotId}`, {
       apartment: apartmentId,
-      status: 'occupied'
+      status: 'assigned'
     })
     return response.data
   },

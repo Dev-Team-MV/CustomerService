@@ -20,6 +20,13 @@ import {
 } from '@shared/config/buildingConfig'
 import parkingSpotService from '@shared/services/parkingSpotService'
 
+// Agregar estos imports
+import ParkingSpotAssignmentDialog from '@shared/components/Buildings/Parking/ParkingSpotAssignmentDialog'
+import buildingService from '@shared/services/buildingService'
+
+import DataTable from '@shared/components/table/DataTable'
+import { useParkingSpotColumns } from '../../Constants/Columns/parkingSpot'
+
 const ParkingTab = ({ building, config }) => {
   const theme = useTheme()
   const { t } = useTranslation(['buildings'])
@@ -57,6 +64,11 @@ const ParkingTab = ({ building, config }) => {
 
   const parkingFloors = getFloorsByType('sheperd', FLOOR_TYPES.PARKING)
 
+  // Agregar estos estados
+const [assignDialogOpen, setAssignDialogOpen] = useState(false)
+const [spotToAssign, setSpotToAssign] = useState(null)
+const [apartments, setApartments] = useState([])
+
   // Fetch parking spots
   const fetchParkingSpots = async () => {
     if (!building?._id) return
@@ -79,6 +91,20 @@ const ParkingTab = ({ building, config }) => {
   useEffect(() => {
     fetchParkingSpots()
   }, [building?._id])
+
+  // Fetch apartments for assignment
+useEffect(() => {
+  const fetchApartments = async () => {
+    if (!building?._id) return
+    try {
+      const data = await buildingService.getApartments(building._id)
+      setApartments(data)
+    } catch (error) {
+      console.error('Error fetching apartments:', error)
+    }
+  }
+  fetchApartments()
+}, [building?._id])
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -183,31 +209,38 @@ const ParkingTab = ({ building, config }) => {
     }
   }
 
-  // Handle bulk generation
-  const handleBulkGenerate = async () => {
-    try {
-      const spots = []
-      for (let i = bulkData.startNumber; i <= bulkData.endNumber; i++) {
-        spots.push({
-          buildingId: building._id,
-          building: building.name,
-          floorNumber: bulkData.floorNumber,
-          code: generateParkingCode('sheperd', bulkData.floorNumber, i),
-          spotType: bulkData.spotType,
-          status: 'available',
-          notes: ''
-        })
-      }
-
-      await parkingSpotService.bulkCreate(spots)
-      setSnackbar({ open: true, message: `${spots.length} parking spots created successfully`, severity: 'success' })
-      setBulkDialogOpen(false)
-      fetchParkingSpots()
-    } catch (error) {
-      console.error('Error bulk creating spots:', error)
-      setSnackbar({ open: true, message: 'Error creating parking spots', severity: 'error' })
+const handleBulkGenerate = async () => {
+  try {
+    // ✅ NUEVO: Payload según especificación del backend
+    const payload = {
+      buildingId: building._id,
+      building: building.name,
+      floorNumber: bulkData.floorNumber,
+      startNumber: bulkData.startNumber,
+      endNumber: bulkData.endNumber,
+      spotType: bulkData.spotType,
+      status: 'available',
+      notes: '',
+      codePrefix: `P${bulkData.floorNumber}` // Prefijo para generar códigos
     }
+
+    console.log('🚗 BULK CREATE PAYLOAD:', payload);
+    console.log('📊 Total spots to create:', (bulkData.endNumber - bulkData.startNumber + 1));
+    
+    const response = await parkingSpotService.bulkCreate(payload)
+    
+    setSnackbar({ 
+      open: true, 
+      message: `${response.count || (bulkData.endNumber - bulkData.startNumber + 1)} parking spots created successfully`, 
+      severity: 'success' 
+    })
+    setBulkDialogOpen(false)
+    fetchParkingSpots()
+  } catch (error) {
+    console.error('❌ Error bulk creating spots:', error)
+    setSnackbar({ open: true, message: 'Error creating parking spots', severity: 'error' })
   }
+}
 
   // Handle menu
   const handleMenuOpen = (event, spot) => {
@@ -219,6 +252,39 @@ const ParkingTab = ({ building, config }) => {
     setAnchorEl(null)
     setMenuSpot(null)
   }
+
+  // Handle assign to apartment
+const handleAssignToApartment = async (apartmentId) => {
+  try {
+    await parkingSpotService.assignToApartment(spotToAssign._id, apartmentId)
+    setSnackbar({ open: true, message: 'Parking spot assigned successfully', severity: 'success' })
+    setAssignDialogOpen(false)
+    setSpotToAssign(null)
+    fetchParkingSpots()
+  } catch (error) {
+    console.error('Error assigning parking spot:', error)
+    setSnackbar({ open: true, message: 'Error assigning parking spot', severity: 'error' })
+  }
+}
+
+// Handle release spot
+const handleReleaseSpot = async () => {
+  if (!window.confirm(`Release parking spot ${menuSpot?.code} from apartment?`)) return
+  
+  try {
+    await parkingSpotService.releaseSpot(menuSpot._id)
+    setSnackbar({ open: true, message: 'Parking spot released successfully', severity: 'success' })
+    handleMenuClose()
+    fetchParkingSpots()
+  } catch (error) {
+    console.error('Error releasing parking spot:', error)
+    setSnackbar({ open: true, message: 'Error releasing parking spot', severity: 'error' })
+  }
+}
+
+const columns = useParkingSpotColumns({
+  onMenuOpen: handleMenuOpen
+})
 
   if (loading) {
     return (
@@ -459,77 +525,20 @@ const ParkingTab = ({ building, config }) => {
         </Tabs>
 
         {/* Spots Table */}
-        <Box sx={{ p: 2 }}>
-          {floorSpots.length === 0 ? (
-            <Alert severity="info" sx={{ borderRadius: 2 }}>
-              No parking spots created for this floor yet. Click "Add Spot" or "Bulk Generate" to create spots.
-            </Alert>
-          ) : (
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>Code</TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>Type</TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>Apartment</TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>Notes</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {floorSpots.map((spot) => (
-                    <TableRow key={spot._id} hover>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight={600} fontFamily='"Poppins", sans-serif'>
-                          {spot.code}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Box display="flex" alignItems="center" gap={1}>
-                          {getSpotTypeIcon(spot.spotType)}
-                          <Typography variant="body2" fontFamily='"Poppins", sans-serif'>
-                            {spotTypes.find(t => t.value === spot.spotType)?.label || spot.spotType}
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={statusOptions.find(s => s.value === spot.status)?.label || spot.status}
-                          size="small"
-                          sx={{
-                            bgcolor: getStatusColor(spot.status) + '20',
-                            color: getStatusColor(spot.status),
-                            fontWeight: 600,
-                            fontFamily: '"Poppins", sans-serif'
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" fontFamily='"Poppins", sans-serif'>
-                          {spot.apartment || '-'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" color="text.secondary" fontFamily='"Poppins", sans-serif'>
-                          {spot.notes || '-'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <IconButton
-                          size="small"
-                          onClick={(e) => handleMenuOpen(e, spot)}
-                        >
-                          <MoreVert />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </Box>
+<Box sx={{ p: 2 }}>
+  <DataTable
+    columns={columns}
+    data={floorSpots}
+    loading={false}
+    emptyState={
+      <Alert severity="info" sx={{ borderRadius: 2, m: 3 }}>
+        No parking spots created for this floor yet. Click "Add Spot" or "Bulk Generate" to create spots.
+      </Alert>
+    }
+    rowHoverEffect={true}
+    stickyHeader={false}
+  />
+</Box>
       </Card>
 
       {/* Create/Edit Dialog */}
@@ -684,20 +693,50 @@ const ParkingTab = ({ building, config }) => {
       </Dialog>
 
       {/* Context Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={() => { handleOpenDialog(menuSpot); handleMenuClose(); }}>
-          <ListItemIcon><Edit fontSize="small" /></ListItemIcon>
-          <ListItemText>Edit</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => { handleDeleteSpot(menuSpot); handleMenuClose(); }}>
-          <ListItemIcon><Delete fontSize="small" /></ListItemIcon>
-          <ListItemText>Delete</ListItemText>
-        </MenuItem>
-      </Menu>
+<Menu
+  anchorEl={anchorEl}
+  open={Boolean(anchorEl)}
+  onClose={handleMenuClose}
+>
+  <MenuItem onClick={() => { handleOpenDialog(menuSpot); handleMenuClose(); }}>
+    <ListItemIcon><Edit fontSize="small" /></ListItemIcon>
+    <ListItemText>Edit</ListItemText>
+  </MenuItem>
+  
+  {/* Assign/Release Apartment */}
+  {menuSpot?.apartment ? (
+    <MenuItem onClick={() => { handleReleaseSpot(); }}>
+      <ListItemIcon><LinkOff fontSize="small" /></ListItemIcon>
+      <ListItemText>Release from Apartment</ListItemText>
+    </MenuItem>
+  ) : (
+    <MenuItem onClick={() => { 
+  setSpotToAssign(menuSpot); 
+  setAssignDialogOpen(true); 
+  handleMenuClose(); 
+}}>
+      <ListItemIcon><LinkIcon fontSize="small" /></ListItemIcon>
+      <ListItemText>Assign to Apartment</ListItemText>
+    </MenuItem>
+  )}
+  
+  <MenuItem onClick={() => { handleDeleteSpot(menuSpot); handleMenuClose(); }}>
+    <ListItemIcon><Delete fontSize="small" /></ListItemIcon>
+    <ListItemText>Delete</ListItemText>
+  </MenuItem>
+</Menu>
+
+{/* Assignment Dialog */}
+<ParkingSpotAssignmentDialog
+  open={assignDialogOpen}
+  onClose={() => {
+    setAssignDialogOpen(false)
+    setSpotToAssign(null)
+  }}
+  parkingSpot={spotToAssign}
+  apartments={apartments}
+  onAssign={handleAssignToApartment}
+/>
     </Box>
   )
 }

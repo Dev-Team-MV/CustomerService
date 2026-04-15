@@ -227,16 +227,16 @@ parking: {
     codeFormat: 'P{floor}-{number}', // e.g., P1-001, P2-045
     spotTypes: [
       { value: 'standard', label: 'Standard', icon: 'DirectionsCar' },
-      { value: 'compact', label: 'Compact', icon: 'DirectionsCar' },
-      { value: 'accessible', label: 'Accessible', icon: 'Accessible' },
-      { value: 'electric', label: 'Electric Vehicle', icon: 'EvStation' },
+      { value: 'covered', label: 'Covered', icon: 'DirectionsCar' },
+      { value: 'uncovered', label: 'Uncovered', icon: 'Accessible' },
+      { value: 'tandem', label: 'Tandem', icon: 'EvStation' },
       { value: 'motorcycle', label: 'Motorcycle', icon: 'TwoWheeler' }
     ],
     statusOptions: [
       { value: 'available', label: 'Available', color: '#43A047' },
-      { value: 'occupied', label: 'Occupied', color: '#FF6B35' },
+      { value: 'assigned', label: 'Assigned', color: '#FF6B35' },
       { value: 'reserved', label: 'Reserved', color: '#FFA726' },
-      { value: 'maintenance', label: 'Maintenance', color: '#757575' }
+      { value: 'blocked', label: 'Blocked', color: '#757575' }
     ],
     defaultSpotType: 'standard',
     defaultStatus: 'available'

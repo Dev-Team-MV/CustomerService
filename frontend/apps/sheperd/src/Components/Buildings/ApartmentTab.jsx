@@ -12,9 +12,8 @@ import { getAllFloorsOrganized } from '../../../../../shared/config/buildingConf
 const ApartmentsTab = ({ building, config }) => {
   const { t } = useTranslation(['buildings'])
   const [activeSubTab, setActiveSubTab] = useState(0)
-  const [modelModal, setModelModal] = useState({ open: false, model: null })
+  const [modelModal, setModelModal] = useState({ open: false, data: null })
   const [apartmentModal, setApartmentModal] = useState({ open: false, data: null })
-
 
   const projectId = import.meta.env.VITE_PROJECT_ID
   
@@ -40,11 +39,11 @@ const ApartmentsTab = ({ building, config }) => {
   }
 
   const handleOpenModelDialog = (model) => {
-    setModelModal({ open: true, model })
+    setModelModal({ open: true, data: model })
   }
 
   const handleCloseModelDialog = () => {
-    setModelModal({ open: false, model: null })
+    setModelModal({ open: false, data: null })
   }
 
   const onModelSaved = async (modelData) => {
@@ -57,14 +56,24 @@ const ApartmentsTab = ({ building, config }) => {
     }
   }
 
-  // Agregar después de onModelSaved (línea 54):
-const handleOpenApartment = (apartment) => {
-  setApartmentModal({ open: true, data: apartment })
-}
+  const handleOpenApartment = (apartment) => {
+    setApartmentModal({ open: true, data: apartment })
+  }
  
-const handleCloseApartment = () => {
-  setApartmentModal({ open: false, data: null })
-}
+  const handleCloseApartment = () => {
+    setApartmentModal({ open: false, data: null })
+  }
+
+  // ✅ SOLUCIÓN PROBLEMA 1: Wrapper que cierra el modal después de guardar
+  const onApartmentSaved = async (apartmentData) => {
+    try {
+      await handleApartmentSaved(apartmentData)
+      handleCloseApartment() // ✅ Cerrar modal después de guardar
+    } catch (err) {
+      console.error('Error saving apartment:', err)
+      throw err
+    }
+  }
 
   return (
     <Box>
@@ -99,21 +108,21 @@ const handleCloseApartment = () => {
         />
       )}
 
-{activeSubTab === 1 && (
-  <BuildingApartmentTab
-    apartments={apartments || []}
-    apartmentModels={apartmentModels || []}
-    building={{
-      ...building,
-      floorPlans: building?.floorPlans || [],
-      floors: floors
-    }}
-    apartmentModal={apartmentModal}
-    handleOpenApartment={handleOpenApartment}
-    handleCloseApartment={handleCloseApartment}
-    onApartmentSaved={handleApartmentSaved}
-  />
-)}
+      {activeSubTab === 1 && (
+        <BuildingApartmentTab
+          apartments={apartments || []}
+          apartmentModels={apartmentModels || []}
+          building={{
+            ...building,
+            floorPlans: building?.floorPlans || [],
+            floors: floors
+          }}
+          apartmentModal={apartmentModal}
+          handleOpenApartment={handleOpenApartment}
+          handleCloseApartment={handleCloseApartment}
+          onApartmentSaved={onApartmentSaved}
+        />
+      )}
     </Box>
   )
 }

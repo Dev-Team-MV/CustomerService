@@ -1,10 +1,10 @@
-// @/Users/oficina/MV-CRM/CustomerService/frontend/apps/phase-2/src/Components/UI/FloorPlanPolygonSelectorModal.jsx
+// @shared/components/Buildings/FloorPlanPolygonSelectorModal.jsx
 
-import { Modal, Box, Typography, IconButton } from '@mui/material'
-import { Stage, Layer, Image as KonvaImage, Line } from 'react-konva'
+import { Modal, Box, Typography, IconButton, Tooltip } from '@mui/material'
+import { Stage, Layer, Image as KonvaImage, Line, Text } from 'react-konva'
 import useImage from 'use-image'
-import { useState, useEffect } from 'react'
-import { Close } from '@mui/icons-material'
+import { useState, useEffect, useMemo } from 'react'
+import { Close, Block } from '@mui/icons-material'
 
 export default function FloorPlanPolygonSelectorModal({
   open,
@@ -12,17 +12,32 @@ export default function FloorPlanPolygonSelectorModal({
   floorPlan,
   selectedPolygonId,
   onSelectPolygon,
+  existingApartments = [], // ✅ NUEVO: Lista de apartamentos existentes
+  currentApartmentId = null, // ✅ NUEVO: ID del apartamento actual (para edición)
 }) {
   const [image] = useImage(floorPlan?.url || '')
   const [hovered, setHovered] = useState(null)
-  // ✅ Usar las mismas dimensiones que FloorPlanEditor
   const [dimensions, setDimensions] = useState({ width: 1000, height: 700 })
 
-  // ✅ Calcular dimensiones de imagen EXACTAMENTE como FloorPlanEditor
+  // ✅ NUEVO: Crear mapa de polígonos ocupados
+  const occupiedPolygons = useMemo(() => {
+    const map = {}
+    existingApartments.forEach(apt => {
+      // No marcar como ocupado si es el apartamento actual que estamos editando
+      if (apt.floorPlanPolygonId && apt._id !== currentApartmentId) {
+        map[apt.floorPlanPolygonId] = {
+          apartmentNumber: apt.apartmentNumber,
+          apartmentId: apt._id
+        }
+      }
+    })
+    return map
+  }, [existingApartments, currentApartmentId])
+
   useEffect(() => {
     if (image) {
-      const maxWidth = 1000   // ✅ Mismo que FloorPlanEditor
-      const maxHeight = 700   // ✅ Mismo que FloorPlanEditor
+      const maxWidth = 1000
+      const maxHeight = 700
       const imgRatio = image.width / image.height
       
       let width = maxWidth
@@ -37,11 +52,20 @@ export default function FloorPlanPolygonSelectorModal({
     }
   }, [image])
 
+  // ✅ NUEVO: Handler que valida antes de seleccionar
+  const handlePolygonClick = (polygonId) => {
+    // Si el polígono está ocupado, no permitir selección
+    if (occupiedPolygons[polygonId]) {
+      return
+    }
+    onSelectPolygon(polygonId)
+  }
+
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={{
         maxWidth: 1040,
-        maxHeight: 780,
+        maxHeight: 820, // ✅ Aumentado para la leyenda
         bgcolor: '#fff',
         p: 3,
         mx: 'auto',
@@ -77,6 +101,30 @@ export default function FloorPlanPolygonSelectorModal({
           </IconButton>
         </Box>
 
+        {/* ✅ NUEVO: Leyenda */}
+        <Box sx={{ 
+          width: '100%', 
+          display: 'flex', 
+          gap: 2, 
+          mb: 2,
+          p: 1.5,
+          bgcolor: '#f5f5f5',
+          borderRadius: 2
+        }}>
+          <Box display="flex" alignItems="center" gap={0.5}>
+            <Box sx={{ width: 16, height: 16, bgcolor: '#8CA55133', border: '2px solid #8CA551', borderRadius: 0.5 }} />
+            <Typography variant="caption" fontFamily='"Poppins", sans-serif'>Disponible</Typography>
+          </Box>
+          <Box display="flex" alignItems="center" gap={0.5}>
+            <Box sx={{ width: 16, height: 16, bgcolor: '#8CA551BB', border: '2px solid #333F1F', borderRadius: 0.5 }} />
+            <Typography variant="caption" fontFamily='"Poppins", sans-serif'>Seleccionado</Typography>
+          </Box>
+          <Box display="flex" alignItems="center" gap={0.5}>
+            <Box sx={{ width: 16, height: 16, bgcolor: '#75757533', border: '2px solid #757575', borderRadius: 0.5 }} />
+            <Typography variant="caption" fontFamily='"Poppins", sans-serif'>Ocupado</Typography>
+          </Box>
+        </Box>
+
         {/* Canvas */}
         <Box sx={{ 
           display: 'flex', 
@@ -95,7 +143,6 @@ export default function FloorPlanPolygonSelectorModal({
             }}
           >
             <Layer>
-              {/* ✅ Imagen con dimensiones calculadas */}
               {image && (
                 <KonvaImage 
                   image={image} 
@@ -105,11 +152,13 @@ export default function FloorPlanPolygonSelectorModal({
                 />
               )}
               
-              {/* ✅ Polígonos usando coordenadas absolutas */}
+              {/* Polígonos */}
               {(floorPlan?.polygons || []).map(poly => {
                 const isSelected = poly.id === selectedPolygonId
                 const isHovered = poly.id === hovered
+                const isOccupied = !!occupiedPolygons[poly.id] // ✅ NUEVO
                 const baseColor = poly.color || '#8CA551'
+                const occupiedColor = '#757575'
                 
                 return (
                   <Line
@@ -117,20 +166,29 @@ export default function FloorPlanPolygonSelectorModal({
                     points={poly.points}
                     closed
                     fill={
-                      isSelected
-                        ? baseColor + 'BB'
-                        : isHovered
-                          ? baseColor + '77'
-                          : baseColor + '33'
+                      isOccupied
+                        ? occupiedColor + '33' // ✅ Gris si está ocupado
+                        : isSelected
+                          ? baseColor + 'BB'
+                          : isHovered
+                            ? baseColor + '77'
+                            : baseColor + '33'
                     }
-                    stroke={isSelected ? '#333F1F' : baseColor}
+                    stroke={
+                      isOccupied
+                        ? occupiedColor // ✅ Gris si está ocupado
+                        : isSelected 
+                          ? '#333F1F' 
+                          : baseColor
+                    }
                     strokeWidth={isSelected ? 4 : isHovered ? 3 : 2}
-                    onClick={() => onSelectPolygon(poly.id)}
-                    onTap={() => onSelectPolygon(poly.id)}
+                    onClick={() => handlePolygonClick(poly.id)} // ✅ Usar handler con validación
+                    onTap={() => handlePolygonClick(poly.id)}
                     onMouseEnter={(e) => {
                       setHovered(poly.id)
                       const container = e.target.getStage().container()
-                      container.style.cursor = 'pointer'
+                      // ✅ Cambiar cursor según disponibilidad
+                      container.style.cursor = isOccupied ? 'not-allowed' : 'pointer'
                     }}
                     onMouseLeave={(e) => {
                       setHovered(null)
@@ -139,9 +197,10 @@ export default function FloorPlanPolygonSelectorModal({
                     }}
                     listening
                     shadowBlur={isHovered ? 10 : isSelected ? 8 : 0}
-                    shadowColor={baseColor}
+                    shadowColor={isOccupied ? occupiedColor : baseColor}
                     shadowOpacity={0.5}
                     perfectDrawEnabled={false}
+                    opacity={isOccupied ? 0.6 : 1} // ✅ Reducir opacidad si está ocupado
                   />
                 )
               })}
@@ -159,7 +218,9 @@ export default function FloorPlanPolygonSelectorModal({
             textAlign: 'center'
           }}
         >
-          Haz clic en un polígono para seleccionarlo
+          {Object.keys(occupiedPolygons).length > 0 
+            ? `Haz clic en un polígono disponible. Los polígonos en gris ya están asignados.`
+            : 'Haz clic en un polígono para seleccionarlo'}
         </Typography>
       </Box>
     </Modal>
