@@ -16,6 +16,11 @@ const router = express.Router()
  *   get:
  *     summary: Get all outdoor amenities (singleton document)
  *     tags: [Outdoor Amenities]
+ *     parameters:
+ *       - in: query
+ *         name: floorNumber
+ *         schema: { type: integer, minimum: 1 }
+ *         description: Opcional. Filtra amenidades por piso (Sheperd u otros proyectos verticales)
  *     responses:
  *       200:
  *         description: Document with amenities array
@@ -61,12 +66,14 @@ router.get('/:id', getOutdoorAmenityById)
  *                 description: Create one (no id)
  *                 properties:
  *                   name: { type: string }
+ *                   floorNumber: { type: integer, nullable: true, minimum: 1 }
  *                   images: { type: array, items: { type: string } }
  *               - type: object
  *                 description: Update/upsert one
  *                 properties:
  *                   id: { type: number }
  *                   name: { type: string }
+ *                   floorNumber: { type: integer, nullable: true, minimum: 1 }
  *                   images: { type: array, items: { type: string } }
  *     responses:
  *       200:
@@ -96,6 +103,7 @@ router.post('/', protect, admin, createOrUpdateOutdoorAmenities)
  *             type: object
  *             properties:
  *               name: { type: string }
+ *               floorNumber: { type: integer, nullable: true, minimum: 1 }
  *               images: { type: array, items: { type: string } }
  *     responses:
  *       200:

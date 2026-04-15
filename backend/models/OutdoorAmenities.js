@@ -13,6 +13,7 @@ const outdoorAmenitiesSchema = new mongoose.Schema(
         {
           id: { type: Number, required: true },
           name: { type: String, default: '' },
+          floorNumber: { type: Number, default: null, min: 1 },
           images: { type: [imageItemSchema], default: () => [] }
         }
       ],
