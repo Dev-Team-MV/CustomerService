@@ -176,8 +176,6 @@ router.route('/')
  *   post:
  *     summary: Calculate apartment quote without creating/updating apartment
  *     tags: [Apartments]
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -211,7 +209,7 @@ router.route('/')
  *       200:
  *         description: Quote calculated
  */
-router.post('/quote', protect, getApartmentQuote)
+router.post('/quote', getApartmentQuote)
 
 /**
  * @swagger

@@ -105,8 +105,6 @@ router.route('/')
  *   post:
  *     summary: Calculate property quote without creating it
  *     tags: [Properties]
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -128,7 +126,7 @@ router.route('/')
  *       200:
  *         description: Quote calculated
  */
-router.post('/quote', protect, getPropertyQuote)
+router.post('/quote', getPropertyQuote)
 
 /**
  * @swagger

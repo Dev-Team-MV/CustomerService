@@ -106,9 +106,11 @@ export const searchUsers = async (req, res) => {
       return res.status(404).json({ message: 'Project not found' })
     }
 
-    const allowed = await canUserAccessProject(req.user._id, projectId, { role: req.user.role })
-    if (!allowed) {
-      return res.status(403).json({ message: 'No access to this project' })
+    if (req.user) {
+      const allowed = await canUserAccessProject(req.user._id, projectId, { role: req.user.role })
+      if (!allowed) {
+        return res.status(403).json({ message: 'No access to this project' })
+      }
     }
 
     const users = await User.find(filter)
@@ -120,7 +122,12 @@ export const searchUsers = async (req, res) => {
     const filtered = users.filter((u) =>
       (projectsMap.get(toIdStr(u._id)) || []).some((p) => toIdStr(p._id) === toIdStr(projectId))
     )
-    res.json(filtered)
+    res.json(filtered.map((u) => ({
+      _id: u._id,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      email: u.email
+    })))
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -154,7 +161,12 @@ export const getMyProjects = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
     const { role, projectId } = req.query
-    const filter = role ? { role } : {}
+    const isAdmin = req.user && (req.user.role === 'admin' || req.user.role === 'superadmin')
+
+    if (!isAdmin && !projectId) {
+      return res.status(400).json({ message: 'projectId is required' })
+    }
+    const filter = (isAdmin && role) ? { role } : {}
 
     let users = await User.find(filter)
       .select('-password')
@@ -170,9 +182,20 @@ export const getAllUsers = async (req, res) => {
 
     if (projectId) {
       const filtered = usersWithProjects.filter((u) => (u.projects || []).some((p) => toIdStr(p._id) === toIdStr(projectId)))
+      if (!isAdmin) {
+        return res.json(filtered.map((u) => ({
+          _id: u._id,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          email: u.email
+        })))
+      }
       return res.json(filtered)
     }
 
+    if (!isAdmin) {
+      return res.status(403).json({ message: 'Not authorized as admin' })
+    }
     res.json(usersWithProjects)
   } catch (error) {
     res.status(500).json({ message: error.message })
