@@ -94,7 +94,12 @@ export const getAllApartments = async (req, res) => {
     const { status, user, projectId, buildingId, apartmentModelId, floorNumber, floorPlanPolygonId } = req.query
     const filter = {}
     const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
-    const isSuperadmin = req.user.role === 'superadmin'
+    const isPublicCatalog = !req.user
+    const isSuperadmin = req.user?.role === 'superadmin'
+
+    if (isPublicCatalog && !buildingId && !projectId) {
+      return res.status(400).json({ message: 'projectId or buildingId is required without authentication' })
+    }
 
     if (apartmentModelId) filter.apartmentModel = apartmentModelId
     if (projectId) {
@@ -117,7 +122,9 @@ export const getAllApartments = async (req, res) => {
       filter.floorPlanPolygonId = String(floorPlanPolygonId).trim()
     }
 
-    if (!visibleOnly && isSuperadmin) {
+    if (isPublicCatalog) {
+      // Public quote / catalog: scoped by building or project only (no per-user visibility).
+    } else if (!visibleOnly && isSuperadmin) {
       // Superadmin "management" view: return all apartments (optionally filtered by owner user).
       if (user && mongoose.Types.ObjectId.isValid(user)) {
         filter.users = user
@@ -150,14 +157,16 @@ export const getAllApartments = async (req, res) => {
       })
       .sort({ floorNumber: 1, apartmentNumber: 1 })
 
-    // Self-heal legacy apartments assigned to users without phases.
-    const apartmentsMissingPhases = apartments.filter(a =>
-      Array.isArray(a.users) && a.users.length > 0 && (!Array.isArray(a.phases) || a.phases.length === 0)
-    )
-    if (apartmentsMissingPhases.length > 0) {
-      await Promise.all(apartmentsMissingPhases.map(a => ensureApartmentPhases(a._id)))
-      await Promise.all(apartmentsMissingPhases.map(a => a.populate({ path: 'phases', options: { sort: { phaseNumber: 1 } } }))
-    )}
+    // Self-heal legacy apartments assigned to users without phases (authenticated only; avoid writes on public GET).
+    if (!isPublicCatalog) {
+      const apartmentsMissingPhases = apartments.filter(a =>
+        Array.isArray(a.users) && a.users.length > 0 && (!Array.isArray(a.phases) || a.phases.length === 0)
+      )
+      if (apartmentsMissingPhases.length > 0) {
+        await Promise.all(apartmentsMissingPhases.map(a => ensureApartmentPhases(a._id)))
+        await Promise.all(apartmentsMissingPhases.map(a => a.populate({ path: 'phases', options: { sort: { phaseNumber: 1 } } }))
+      )}
+    }
 
     const result = apartments.map(a => {
       const obj = a.toObject()
@@ -166,6 +175,19 @@ export const getAllApartments = async (req, res) => {
       obj.parkingSpot = Array.isArray(obj.parkingSpots) && obj.parkingSpots.length > 0
         ? obj.parkingSpots[0]
         : null
+      if (isPublicCatalog) {
+        delete obj.users
+        if (Array.isArray(obj.parkingSpots)) {
+          obj.parkingSpots = obj.parkingSpots.map((ps) => {
+            const p = typeof ps?.toObject === 'function' ? ps.toObject() : { ...ps }
+            delete p.notes
+            return p
+          })
+        }
+        if (obj.parkingSpot && typeof obj.parkingSpot === 'object') {
+          delete obj.parkingSpot.notes
+        }
+      }
       return obj
     })
     res.json(result)

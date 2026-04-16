@@ -14,7 +14,7 @@ import {
   revokeApartmentShareByGroup,
   getApartmentShares
 } from '../controllers/propertyShareController.js'
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { protect, admin, optionalProtect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -23,9 +23,10 @@ const router = express.Router()
  * /api/apartments:
  *   get:
  *     summary: Get all apartments (optionally filtered)
+ *     description: |
+ *       Public catalog without token requires `projectId` or `buildingId`.
+ *       With token, behavior unchanged (visibility rules apply unless superadmin).
  *     tags: [Apartments]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: projectId
@@ -167,7 +168,7 @@ const router = express.Router()
  *         description: Apartment created (9 phases are created automatically)
  */
 router.route('/')
-  .get(protect, getAllApartments)
+  .get(optionalProtect, getAllApartments)
   .post(protect, admin, createApartment)
 
 /**
