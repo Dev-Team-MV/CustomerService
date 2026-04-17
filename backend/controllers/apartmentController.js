@@ -95,7 +95,7 @@ export const getAllApartments = async (req, res) => {
     const filter = {}
     const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
     const isPublicCatalog = !req.user
-    const isSuperadmin = req.user?.role === 'superadmin'
+    const isAdminOrAbove = req.user?.role === 'superadmin' || req.user?.role === 'admin'
 
     if (isPublicCatalog && !buildingId && !projectId) {
       return res.status(400).json({ message: 'projectId or buildingId is required without authentication' })
@@ -124,13 +124,15 @@ export const getAllApartments = async (req, res) => {
 
     if (isPublicCatalog) {
       // Public quote / catalog: scoped by building or project only (no per-user visibility).
-    } else if (!visibleOnly && isSuperadmin) {
-      // Superadmin "management" view: return all apartments (optionally filtered by owner user).
+    } else if (!visibleOnly && isAdminOrAbove) {
+      // Admin/superadmin "management" view: return all apartments (optionally filtered by owner user).
+      // Ignore `visibleOnly` in this mode - they can see ALL apartments in the project.
       if (user && mongoose.Types.ObjectId.isValid(user)) {
         filter.users = user
       }
     } else {
-      // User/admin view (and MyApartments visible-only view):
+      // User view (and MyApartments visible-only view):
+      // Only apartments where requester is an owner or has access via PropertyShare/familyGroup.
       const visibleIds = await getVisibleApartmentIdsForUser(req.user._id)
       filter._id = { $in: visibleIds }
 
@@ -224,11 +226,11 @@ export const getApartmentById = async (req, res) => {
     }
 
     const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
-    const isSuperadmin = req.user.role === 'superadmin'
+    const isAdminOrAbove = req.user.role === 'superadmin' || req.user.role === 'admin'
 
     const canAccess = visibleOnly
       ? await canUserAccessApartment(req.user._id, apartment._id)
-      : isSuperadmin
+      : isAdminOrAbove
         ? true
         : await canUserAccessApartment(req.user._id, apartment._id)
     if (!canAccess) {
