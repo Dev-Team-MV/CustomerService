@@ -94,7 +94,12 @@ export const getAllApartments = async (req, res) => {
     const { status, user, projectId, buildingId, apartmentModelId, floorNumber, floorPlanPolygonId } = req.query
     const filter = {}
     const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
-    const isSuperadmin = req.user.role === 'superadmin'
+    const isPublicCatalog = !req.user
+    const isAdminOrAbove = req.user?.role === 'superadmin' || req.user?.role === 'admin'
+
+    if (isPublicCatalog && !buildingId && !projectId) {
+      return res.status(400).json({ message: 'projectId or buildingId is required without authentication' })
+    }
 
     if (apartmentModelId) filter.apartmentModel = apartmentModelId
     if (projectId) {
@@ -117,13 +122,17 @@ export const getAllApartments = async (req, res) => {
       filter.floorPlanPolygonId = String(floorPlanPolygonId).trim()
     }
 
-    if (!visibleOnly && isSuperadmin) {
-      // Superadmin "management" view: return all apartments (optionally filtered by owner user).
+    if (isPublicCatalog) {
+      // Public quote / catalog: scoped by building or project only (no per-user visibility).
+    } else if (!visibleOnly && isAdminOrAbove) {
+      // Admin/superadmin "management" view: return all apartments (optionally filtered by owner user).
+      // Ignore `visibleOnly` in this mode - they can see ALL apartments in the project.
       if (user && mongoose.Types.ObjectId.isValid(user)) {
         filter.users = user
       }
     } else {
-      // User/admin view (and MyApartments visible-only view):
+      // User view (and MyApartments visible-only view):
+      // Only apartments where requester is an owner or has access via PropertyShare/familyGroup.
       const visibleIds = await getVisibleApartmentIdsForUser(req.user._id)
       filter._id = { $in: visibleIds }
 
@@ -150,14 +159,16 @@ export const getAllApartments = async (req, res) => {
       })
       .sort({ floorNumber: 1, apartmentNumber: 1 })
 
-    // Self-heal legacy apartments assigned to users without phases.
-    const apartmentsMissingPhases = apartments.filter(a =>
-      Array.isArray(a.users) && a.users.length > 0 && (!Array.isArray(a.phases) || a.phases.length === 0)
-    )
-    if (apartmentsMissingPhases.length > 0) {
-      await Promise.all(apartmentsMissingPhases.map(a => ensureApartmentPhases(a._id)))
-      await Promise.all(apartmentsMissingPhases.map(a => a.populate({ path: 'phases', options: { sort: { phaseNumber: 1 } } }))
-    )}
+    // Self-heal legacy apartments assigned to users without phases (authenticated only; avoid writes on public GET).
+    if (!isPublicCatalog) {
+      const apartmentsMissingPhases = apartments.filter(a =>
+        Array.isArray(a.users) && a.users.length > 0 && (!Array.isArray(a.phases) || a.phases.length === 0)
+      )
+      if (apartmentsMissingPhases.length > 0) {
+        await Promise.all(apartmentsMissingPhases.map(a => ensureApartmentPhases(a._id)))
+        await Promise.all(apartmentsMissingPhases.map(a => a.populate({ path: 'phases', options: { sort: { phaseNumber: 1 } } }))
+      )}
+    }
 
     const result = apartments.map(a => {
       const obj = a.toObject()
@@ -166,6 +177,19 @@ export const getAllApartments = async (req, res) => {
       obj.parkingSpot = Array.isArray(obj.parkingSpots) && obj.parkingSpots.length > 0
         ? obj.parkingSpots[0]
         : null
+      if (isPublicCatalog) {
+        delete obj.users
+        if (Array.isArray(obj.parkingSpots)) {
+          obj.parkingSpots = obj.parkingSpots.map((ps) => {
+            const p = typeof ps?.toObject === 'function' ? ps.toObject() : { ...ps }
+            delete p.notes
+            return p
+          })
+        }
+        if (obj.parkingSpot && typeof obj.parkingSpot === 'object') {
+          delete obj.parkingSpot.notes
+        }
+      }
       return obj
     })
     res.json(result)
@@ -202,11 +226,11 @@ export const getApartmentById = async (req, res) => {
     }
 
     const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
-    const isSuperadmin = req.user.role === 'superadmin'
+    const isAdminOrAbove = req.user.role === 'superadmin' || req.user.role === 'admin'
 
     const canAccess = visibleOnly
       ? await canUserAccessApartment(req.user._id, apartment._id)
-      : isSuperadmin
+      : isAdminOrAbove
         ? true
         : await canUserAccessApartment(req.user._id, apartment._id)
     if (!canAccess) {
@@ -228,6 +252,127 @@ export const getApartmentById = async (req, res) => {
       ? obj.parkingSpots[0]
       : null
     res.json(obj)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const getApartmentQuote = async (req, res) => {
+  try {
+    const {
+      apartmentId,
+      apartmentModelId,
+      apartmentModel,
+      building,
+      floorNumber,
+      apartmentNumber,
+      selectedRenderType,
+      price,
+      initialPayment
+    } = req.body
+
+    const modelId = apartmentModelId || apartmentModel
+    const normalizedInitialPayment = Number(initialPayment || 0)
+    if (!Number.isFinite(normalizedInitialPayment) || normalizedInitialPayment < 0) {
+      return res.status(400).json({ message: 'initialPayment must be a number >= 0' })
+    }
+
+    if (apartmentId) {
+      if (!isValidObjectId(apartmentId)) {
+        return res.status(400).json({ message: 'Invalid apartmentId' })
+      }
+
+      const apartment = await Apartment.findById(apartmentId)
+        .populate('apartmentModel', 'name modelNumber bedrooms bathrooms sqft building')
+
+      if (!apartment) {
+        return res.status(404).json({ message: 'Apartment not found' })
+      }
+
+      const basePrice = Number(apartment.price || 0)
+      const pending = basePrice - normalizedInitialPayment
+      const renderType = selectedRenderType || apartment.selectedRenderType || 'basic'
+
+      return res.json({
+        apartmentId: apartment._id,
+        building: apartment.building,
+        apartmentModel: apartment.apartmentModel,
+        floorNumber: apartment.floorNumber,
+        apartmentNumber: apartment.apartmentNumber,
+        selectedRenderType: renderType,
+        totals: {
+          price: basePrice,
+          initialPayment: normalizedInitialPayment,
+          pending
+        }
+      })
+    }
+
+    if (!modelId) {
+      return res.status(400).json({ message: 'apartmentId or apartmentModelId (or apartmentModel) is required' })
+    }
+
+    const modelExists = await ApartmentModel.findById(modelId).populate('building', 'name section floors project')
+    if (!modelExists) {
+      return res.status(404).json({ message: 'Apartment model not found' })
+    }
+
+    const buildingId = building || modelExists.building?._id || modelExists.building
+    if (!buildingId) {
+      return res.status(400).json({ message: 'building could not be resolved for apartment model' })
+    }
+    if (!sameId(buildingId, modelExists.building?._id || modelExists.building)) {
+      return res.status(400).json({ message: 'building must match apartment model building' })
+    }
+
+    if (floorNumber != null || apartmentNumber != null) {
+      const filter = {
+        apartmentModel: modelId,
+        building: buildingId
+      }
+      if (floorNumber != null && floorNumber !== '') filter.floorNumber = Number(floorNumber)
+      if (apartmentNumber != null && apartmentNumber !== '') filter.apartmentNumber = String(apartmentNumber)
+
+      const existingApartment = await Apartment.findOne(filter)
+      if (existingApartment) {
+        const basePrice = Number(existingApartment.price || 0)
+        const pending = basePrice - normalizedInitialPayment
+        const renderType = selectedRenderType || existingApartment.selectedRenderType || 'basic'
+        return res.json({
+          apartmentId: existingApartment._id,
+          building: existingApartment.building,
+          apartmentModel: modelExists,
+          floorNumber: existingApartment.floorNumber,
+          apartmentNumber: existingApartment.apartmentNumber,
+          selectedRenderType: renderType,
+          totals: {
+            price: basePrice,
+            initialPayment: normalizedInitialPayment,
+            pending
+          }
+        })
+      }
+    }
+
+    const basePrice = Number(price ?? 0)
+    if (!Number.isFinite(basePrice) || basePrice < 0) {
+      return res.status(400).json({ message: 'price is required (>= 0) when apartment is not found by apartmentId or floor/apartmentNumber' })
+    }
+    const pending = basePrice - normalizedInitialPayment
+
+    return res.json({
+      apartmentId: null,
+      building: buildingId,
+      apartmentModel: modelExists,
+      floorNumber: floorNumber != null && floorNumber !== '' ? Number(floorNumber) : null,
+      apartmentNumber: apartmentNumber != null && apartmentNumber !== '' ? String(apartmentNumber) : null,
+      selectedRenderType: selectedRenderType || 'basic',
+      totals: {
+        price: basePrice,
+        initialPayment: normalizedInitialPayment,
+        pending
+      }
+    })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
