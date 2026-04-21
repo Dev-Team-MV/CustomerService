@@ -19,6 +19,11 @@ import {
   getCommunitySpaceBySlug,
   upsertCommunitySpace
 } from '../controllers/communitySpaceController.js'
+import {
+  getProjectCatalogConfig,
+  upsertProjectCatalogConfig,
+  publishProjectCatalogConfig
+} from '../controllers/projectCatalogConfigController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -284,6 +289,77 @@ router.get('/slug/:slug/community-spaces', getCommunitySpacesBySlug)
  *         description: Not found
  */
 router.get('/slug/:slug/community-spaces/:spaceId', getCommunitySpaceBySlug)
+
+/**
+ * @swagger
+ * /api/projects/{id}/catalog-config:
+ *   get:
+ *     summary: Obtener configuración de catálogo por proyecto (versión activa o última)
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: version
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: status
+ *         schema: { type: string, enum: [draft, published, archived] }
+ *       - in: query
+ *         name: activeOnly
+ *         schema: { type: string, enum: ['true', '1'] }
+ *     responses:
+ *       200:
+ *         description: Configuración encontrada
+ *       404:
+ *         description: Project/config no encontrado
+ *   post:
+ *     summary: Crear o actualizar configuración de catálogo (admin)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       201:
+ *         description: Config guardada
+ */
+router.get('/:id/catalog-config', getProjectCatalogConfig)
+router.post('/:id/catalog-config', protect, admin, upsertProjectCatalogConfig)
+router.put('/:id/catalog-config', protect, admin, upsertProjectCatalogConfig)
+
+/**
+ * @swagger
+ * /api/projects/{id}/catalog-config/publish:
+ *   post:
+ *     summary: Publicar una versión del catálogo (admin)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               version:
+ *                 type: integer
+ *                 description: Si no se envía, publica la última versión
+ *     responses:
+ *       200:
+ *         description: Publicado
+ */
+router.post('/:id/catalog-config/publish', protect, admin, publishProjectCatalogConfig)
 
 /**
  * @swagger

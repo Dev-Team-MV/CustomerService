@@ -153,6 +153,53 @@ const options = {
             updatedAt: { type: 'string', format: 'date-time' }
           }
         },
+        ProjectCatalogConfig: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            project: { type: 'string', description: 'Project ID (ref)' },
+            version: { type: 'integer', minimum: 1 },
+            status: { type: 'string', enum: ['draft', 'published', 'archived'] },
+            isActiveVersion: { type: 'boolean' },
+            catalogType: { type: 'string', enum: ['houses', 'apartments', 'mixed'] },
+            structure: { type: 'object', additionalProperties: true },
+            assetsSchema: { type: 'object', additionalProperties: true },
+            pricingRules: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  name: { type: 'string' },
+                  priority: { type: 'number' },
+                  enabled: { type: 'boolean' },
+                  when: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        field: { type: 'string' },
+                        operator: { type: 'string' },
+                        value: {}
+                      }
+                    }
+                  },
+                  apply: {
+                    type: 'object',
+                    properties: {
+                      type: { type: 'string', enum: ['fixed', 'percentage'] },
+                      amount: { type: 'number' },
+                      code: { type: 'string' },
+                      label: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
         ImageItem: {
           type: 'object',
           description: 'Imagen con visibilidad (isPublic false = requiere token para ver)',

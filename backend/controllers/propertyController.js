@@ -8,6 +8,7 @@ import Phase from '../models/Phase.js'
 import { normalizeImageArray } from '../utils/imageUtils.js'
 import { getVisiblePropertyIdsForUser, canUserAccessProperty } from '../utils/propertyVisibility.js'
 import { hydrateUrlsInObject } from '../services/urlResolverService.js'
+import { evaluateProjectPricing } from '../services/projectPricingEngine.js'
 
 /** Normalize ref/id to string; safe when value is undefined. */
 function toIdStr(val) {
@@ -216,6 +217,7 @@ const resolvePropertyPricing = async ({
   hasBalcony,
   modelType,
   hasStorage,
+  selectedOptions = {},
   enforceLotAvailability = false,
   firstOwner = null
 }) => {
@@ -272,20 +274,26 @@ const resolvePropertyPricing = async ({
     return { ok: false, status: 400, message: 'Facade does not belong to the selected model' }
   }
 
-  let modelPrice = modelExists.price
-  if (hasBalcony && modelExists.balconyPrice) {
-    modelPrice += modelExists.balconyPrice
-  }
-  if (modelType === 'upgrade' && modelExists.upgradePrice) {
-    modelPrice += modelExists.upgradePrice
-  }
-  if (hasStorage && modelExists.storagePrice) {
-    modelPrice += modelExists.storagePrice
+  const normalizedSelectedOptions = {
+    hasBalcony: hasBalcony === true,
+    modelType: modelType || 'basic',
+    hasStorage: hasStorage === true,
+    ...selectedOptions
   }
 
-  const lotPrice = Number(lotExists.price || 0)
-  const facadePrice = Number(facadeExists.price || 0)
-  const totalPrice = lotPrice + modelPrice + facadePrice
+  const pricing = await evaluateProjectPricing({
+    projectId: projId,
+    lotExists,
+    modelExists,
+    facadeExists,
+    selectedOptions: normalizedSelectedOptions
+  })
+
+  const lotPrice = Number(pricing.baseBreakdown.lotPrice || 0)
+  const facadePrice = Number(pricing.baseBreakdown.facadePrice || 0)
+  const modelPrice = Number(pricing.baseBreakdown.modelBasePrice || 0) +
+    Number(pricing.totalAdjustments || 0)
+  const totalPrice = Number(pricing.totalPrice || 0)
   const initialPaymentAmount = Number(initialPayment || 0)
   const pendingAmount = totalPrice - initialPaymentAmount
 
@@ -299,14 +307,28 @@ const resolvePropertyPricing = async ({
       prices: {
         lotPrice,
         modelBasePrice: Number(modelExists.price || 0),
-        balconyPrice: hasBalcony ? Number(modelExists.balconyPrice || 0) : 0,
-        upgradePrice: modelType === 'upgrade' ? Number(modelExists.upgradePrice || 0) : 0,
-        storagePrice: hasStorage ? Number(modelExists.storagePrice || 0) : 0,
+        balconyPrice: Number(
+          pricing.adjustments
+            .filter(a => a.code === 'legacy-balcony')
+            .reduce((acc, item) => acc + Number(item.amount || 0), 0)
+        ),
+        upgradePrice: Number(
+          pricing.adjustments
+            .filter(a => a.code === 'legacy-upgrade')
+            .reduce((acc, item) => acc + Number(item.amount || 0), 0)
+        ),
+        storagePrice: Number(
+          pricing.adjustments
+            .filter(a => a.code === 'legacy-storage')
+            .reduce((acc, item) => acc + Number(item.amount || 0), 0)
+        ),
         facadePrice,
         modelPrice,
         totalPrice,
         initialPayment: initialPaymentAmount,
-        pending: pendingAmount
+        pending: pendingAmount,
+        adjustments: pricing.adjustments,
+        configVersion: pricing.configVersion
       }
     }
   }
@@ -314,7 +336,7 @@ const resolvePropertyPricing = async ({
 
 export const getPropertyQuote = async (req, res) => {
   try {
-    const { projectId, project, lot, model, facade, initialPayment, hasBalcony, modelType, hasStorage } = req.body
+    const { projectId, project, lot, model, facade, initialPayment, hasBalcony, modelType, hasStorage, selectedOptions } = req.body
 
     const resolved = await resolvePropertyPricing({
       projectId,
@@ -326,6 +348,7 @@ export const getPropertyQuote = async (req, res) => {
       hasBalcony: hasBalcony === true,
       modelType: modelType || 'basic',
       hasStorage: hasStorage === true,
+      selectedOptions: selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {},
       enforceLotAvailability: false
     })
 
@@ -356,12 +379,16 @@ export const getPropertyQuote = async (req, res) => {
         balconyPrice: prices.balconyPrice,
         upgradePrice: prices.upgradePrice,
         storagePrice: prices.storagePrice,
-        facadePrice: prices.facadePrice
+        facadePrice: prices.facadePrice,
+        adjustments: prices.adjustments || []
       },
       totals: {
         totalPrice: prices.totalPrice,
         initialPayment: prices.initialPayment,
         pending: prices.pending
+      },
+      pricingConfig: {
+        version: prices.configVersion || null
       }
     })
   } catch (error) {
