@@ -110,21 +110,14 @@ router.route('/')
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required: [lot, model, facade]
- *             properties:
- *               projectId: { type: string }
- *               project: { type: string }
- *               lot: { type: string }
- *               model: { type: string }
- *               facade: { type: string }
- *               initialPayment: { type: number }
- *               hasBalcony: { type: boolean }
- *               modelType: { type: string, enum: [basic, upgrade] }
- *               hasStorage: { type: boolean }
+ *             $ref: '#/components/schemas/PropertyQuoteRequest'
  *     responses:
  *       200:
  *         description: Quote calculated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PropertyQuoteResponse'
  */
 router.post('/quote', getPropertyQuote)
 

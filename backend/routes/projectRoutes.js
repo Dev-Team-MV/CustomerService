@@ -325,9 +325,19 @@ router.get('/slug/:slug/community-spaces/:spaceId', getCommunitySpaceBySlug)
  *         name: id
  *         required: true
  *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ProjectCatalogConfigUpsertRequest'
  *     responses:
  *       201:
  *         description: Config guardada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProjectCatalogConfig'
  */
 router.get('/:id/catalog-config', getProjectCatalogConfig)
 router.post('/:id/catalog-config', protect, admin, upsertProjectCatalogConfig)
@@ -350,14 +360,14 @@ router.put('/:id/catalog-config', protect, admin, upsertProjectCatalogConfig)
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               version:
- *                 type: integer
- *                 description: Si no se envía, publica la última versión
+ *             $ref: '#/components/schemas/PublishProjectCatalogConfigRequest'
  *     responses:
  *       200:
  *         description: Publicado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PublishProjectCatalogConfigResponse'
  */
 router.post('/:id/catalog-config/publish', protect, admin, publishProjectCatalogConfig)
 
