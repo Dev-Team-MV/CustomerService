@@ -2,6 +2,17 @@ import OutdoorAmenities from '../models/OutdoorAmenities.js'
 import { normalizeImageArray } from '../utils/imageUtils.js'
 import { hydrateUrlsInObject } from '../services/urlResolverService.js'
 
+function normalizeFloorNumber (value) {
+  if (value === undefined || value === null || value === '') return null
+  const floor = Number(value)
+  if (!Number.isInteger(floor) || floor < 1) return null
+  return floor
+}
+
+function isInvalidProvidedFloor (value) {
+  return value !== undefined && value !== null && value !== '' && normalizeFloorNumber(value) === null
+}
+
 /**
  * @param {object} a - amenity object (may have id, name, images as strings or [{ url, isPublic }])
  * @param {number} [defaultId] - when id is missing or invalid (e.g. in "replace all" payload)
@@ -12,6 +23,7 @@ function normalizeAmenity (a, defaultId) {
   return {
     id,
     name: typeof a.name === 'string' ? a.name : '',
+    floorNumber: normalizeFloorNumber(a.floorNumber),
     images: normalizeImageArray(a.images)
   }
 }
@@ -42,6 +54,11 @@ function normalizeAmenitiesBeforeSave (doc) {
  */
 export const getOutdoorAmenities = async (req, res) => {
   try {
+    const floorFilter = req.query.floorNumber
+    if (floorFilter !== undefined && normalizeFloorNumber(floorFilter) === null) {
+      return res.status(400).json({ message: 'floorNumber must be an integer >= 1' })
+    }
+
     let doc = await OutdoorAmenities.findOne()
     if (!doc) {
       doc = await OutdoorAmenities.create({ amenities: [] })
@@ -50,8 +67,13 @@ export const getOutdoorAmenities = async (req, res) => {
     if (Array.isArray(payload.amenities)) {
       payload.amenities = payload.amenities.map((a) => ({
         ...a,
+        floorNumber: normalizeFloorNumber(a.floorNumber),
         images: normalizeImageArray(a.images)
       }))
+      if (floorFilter !== undefined) {
+        const floorNumber = normalizeFloorNumber(floorFilter)
+        payload.amenities = payload.amenities.filter((a) => a.floorNumber === floorNumber)
+      }
     }
     await hydrateUrlsInObject(payload)
     res.json(payload)
@@ -98,7 +120,11 @@ export const getOutdoorAmenityById = async (req, res) => {
  */
 export const createOrUpdateOutdoorAmenities = async (req, res) => {
   try {
-    const { amenities: bodyAmenities, id, name, images } = req.body
+    const { amenities: bodyAmenities, id, name, images, floorNumber } = req.body
+
+    if (isInvalidProvidedFloor(floorNumber)) {
+      return res.status(400).json({ message: 'floorNumber must be an integer >= 1 or null' })
+    }
 
     let doc = await OutdoorAmenities.findOne()
     if (!doc) {
@@ -106,6 +132,10 @@ export const createOrUpdateOutdoorAmenities = async (req, res) => {
     }
 
     if (Array.isArray(bodyAmenities)) {
+      const invalidAmenity = bodyAmenities.find((a) => isInvalidProvidedFloor(a?.floorNumber))
+      if (invalidAmenity) {
+        return res.status(400).json({ message: 'Each amenity.floorNumber must be an integer >= 1 or null' })
+      }
       doc.amenities = bodyAmenities.map((a, i) => normalizeAmenity(a, i + 1))
       doc.markModified('amenities')
       normalizeAmenitiesBeforeSave(doc)
@@ -124,6 +154,7 @@ export const createOrUpdateOutdoorAmenities = async (req, res) => {
       const newAmenity = normalizeAmenity({
         id: newId,
         name: name ?? '',
+        floorNumber,
         images: images ?? []
       })
       doc.amenities.push(newAmenity)
@@ -146,6 +177,7 @@ export const createOrUpdateOutdoorAmenities = async (req, res) => {
     const payload = normalizeAmenity({
       id: numId,
       name: name !== undefined && name !== null ? name : (existing?.name ?? ''),
+      floorNumber: floorNumber !== undefined ? floorNumber : (existing?.floorNumber ?? null),
       images: Array.isArray(images) ? images : (existing?.images ?? [])
     })
 
@@ -180,7 +212,10 @@ export const updateOutdoorAmenity = async (req, res) => {
     if (Number.isNaN(id)) {
       return res.status(400).json({ message: 'Invalid amenity id' })
     }
-    const { name, images } = req.body
+    const { name, images, floorNumber } = req.body
+    if (isInvalidProvidedFloor(floorNumber)) {
+      return res.status(400).json({ message: 'floorNumber must be an integer >= 1 or null' })
+    }
 
     const doc = await OutdoorAmenities.findOne()
     if (!doc || !doc.amenities) {
@@ -195,6 +230,7 @@ export const updateOutdoorAmenity = async (req, res) => {
     const updated = {
       id: current.id,
       name: name !== undefined && name !== null ? String(name) : current.name,
+      floorNumber: floorNumber !== undefined ? normalizeFloorNumber(floorNumber) : normalizeFloorNumber(current.floorNumber),
       images: Array.isArray(images) ? normalizeImageArray(images) : current.images
     }
     doc.amenities[index] = updated

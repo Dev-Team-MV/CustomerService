@@ -3,6 +3,7 @@ import {
   getParkingSpots,
   getParkingSpotById,
   createParkingSpot,
+  bulkCreateParkingSpots,
   updateParkingSpot,
   deleteParkingSpot
 } from '../controllers/parkingSpotController.js'
@@ -72,6 +73,28 @@ const router = express.Router()
 router.route('/')
   .get(protect, getParkingSpots)
   .post(protect, admin, createParkingSpot)
+
+/**
+ * @swagger
+ * /api/parking-spots/bulk:
+ *   post:
+ *     summary: Crear múltiples cupos en rango (admin)
+ *     tags: [ParkingSpots]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ParkingSpotBulkCreateBody'
+ *     responses:
+ *       201:
+ *         description: Creados
+ *       400:
+ *         description: Validación / códigos duplicados
+ */
+router.post('/bulk', protect, admin, bulkCreateParkingSpots)
 
 /**
  * @swagger

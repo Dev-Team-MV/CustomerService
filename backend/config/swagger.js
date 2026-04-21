@@ -153,6 +153,200 @@ const options = {
             updatedAt: { type: 'string', format: 'date-time' }
           }
         },
+        ProjectCatalogConfig: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            project: { type: 'string', description: 'Project ID (ref)' },
+            version: { type: 'integer', minimum: 1 },
+            status: { type: 'string', enum: ['draft', 'published', 'archived'] },
+            isActiveVersion: { type: 'boolean' },
+            catalogType: { type: 'string', enum: ['houses', 'apartments', 'mixed'] },
+            structure: { type: 'object', additionalProperties: true },
+            assetsSchema: { type: 'object', additionalProperties: true },
+            pricingRules: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  name: { type: 'string' },
+                  priority: { type: 'number' },
+                  enabled: { type: 'boolean' },
+                  when: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        field: { type: 'string' },
+                        operator: { type: 'string' },
+                        value: {}
+                      }
+                    }
+                  },
+                  apply: {
+                    type: 'object',
+                    properties: {
+                      type: { type: 'string', enum: ['fixed', 'percentage'] },
+                      amount: { type: 'number' },
+                      code: { type: 'string' },
+                      label: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        ProjectCatalogConfigUpsertRequest: {
+          type: 'object',
+          required: ['catalogType', 'structure', 'assetsSchema'],
+          properties: {
+            version: { type: 'integer', minimum: 1, description: 'Opcional. Si no se envía, se crea nueva versión incremental' },
+            status: { type: 'string', enum: ['draft', 'published', 'archived'], default: 'draft' },
+            isActiveVersion: { type: 'boolean', description: 'Solo aplica cuando status=published' },
+            catalogType: { type: 'string', enum: ['houses', 'apartments', 'mixed'] },
+            structure: { type: 'object', additionalProperties: true },
+            assetsSchema: { type: 'object', additionalProperties: true },
+            pricingRules: {
+              type: 'array',
+              items: {
+                type: 'object',
+                required: ['id', 'apply'],
+                properties: {
+                  id: { type: 'string' },
+                  name: { type: 'string' },
+                  description: { type: 'string' },
+                  priority: { type: 'number', default: 100 },
+                  enabled: { type: 'boolean', default: true },
+                  when: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      required: ['field', 'operator'],
+                      properties: {
+                        field: { type: 'string', example: 'selectedOptions.level1Upgrade' },
+                        operator: { type: 'string', enum: ['eq', 'neq', 'in', 'not_in', 'gt', 'gte', 'lt', 'lte', 'truthy', 'falsy'] },
+                        value: {}
+                      }
+                    }
+                  },
+                  apply: {
+                    type: 'object',
+                    required: ['type', 'amount'],
+                    properties: {
+                      type: { type: 'string', enum: ['fixed', 'percentage'] },
+                      amount: { type: 'number' },
+                      code: { type: 'string' },
+                      label: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        PublishProjectCatalogConfigRequest: {
+          type: 'object',
+          properties: {
+            version: { type: 'integer', minimum: 1, description: 'Opcional. Si no se envía, publica la última versión' }
+          }
+        },
+        PublishProjectCatalogConfigResponse: {
+          type: 'object',
+          properties: {
+            message: { type: 'string', example: 'Catalog config published' },
+            projectId: { type: 'string' },
+            version: { type: 'integer' }
+          }
+        },
+        PropertyQuoteRequest: {
+          type: 'object',
+          required: ['lot', 'model', 'facade'],
+          properties: {
+            projectId: { type: 'string' },
+            project: { type: 'string' },
+            lot: { type: 'string' },
+            model: { type: 'string' },
+            facade: { type: 'string' },
+            initialPayment: { type: 'number' },
+            hasBalcony: { type: 'boolean' },
+            modelType: { type: 'string', enum: ['basic', 'upgrade'] },
+            hasStorage: { type: 'boolean' },
+            selectedOptions: {
+              type: 'object',
+              additionalProperties: true,
+              description: 'Opciones dinámicas por tenant evaluadas por reglas (ej. level1Upgrade, level2Upgrade, terraceMultifunctional)'
+            }
+          }
+        },
+        PropertyQuoteResponse: {
+          type: 'object',
+          properties: {
+            projectId: { type: 'string' },
+            lot: {
+              type: 'object',
+              properties: { _id: { type: 'string' }, number: { type: 'string' }, price: { type: 'number' } }
+            },
+            model: {
+              type: 'object',
+              properties: {
+                _id: { type: 'string' },
+                model: { type: 'string' },
+                modelNumber: { type: 'string' },
+                price: { type: 'number' }
+              }
+            },
+            facade: {
+              type: 'object',
+              properties: { _id: { type: 'string' }, title: { type: 'string' }, price: { type: 'number' } }
+            },
+            options: {
+              type: 'object',
+              properties: {
+                hasBalcony: { type: 'boolean' },
+                modelType: { type: 'string', enum: ['basic', 'upgrade'] },
+                hasStorage: { type: 'boolean' }
+              }
+            },
+            breakdown: {
+              type: 'object',
+              properties: {
+                lotPrice: { type: 'number' },
+                modelBasePrice: { type: 'number' },
+                balconyPrice: { type: 'number' },
+                upgradePrice: { type: 'number' },
+                storagePrice: { type: 'number' },
+                facadePrice: { type: 'number' },
+                adjustments: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      code: { type: 'string' },
+                      label: { type: 'string' },
+                      amount: { type: 'number' }
+                    }
+                  }
+                }
+              }
+            },
+            totals: {
+              type: 'object',
+              properties: {
+                totalPrice: { type: 'number' },
+                initialPayment: { type: 'number' },
+                pending: { type: 'number' }
+              }
+            },
+            pricingConfig: {
+              type: 'object',
+              properties: { version: { type: 'integer', nullable: true } }
+            }
+          }
+        },
         ImageItem: {
           type: 'object',
           description: 'Imagen con visibilidad (isPublic false = requiere token para ver)',
@@ -341,6 +535,15 @@ const options = {
               type: 'array',
               description: 'Polígonos clicables en fachada por piso (id, floorNumber, points, isCommercial)'
             },
+            quoteRef: {
+              type: 'object',
+              description: 'Mapping opcional para cotización desde master plan (casas): lot/model/facade',
+              properties: {
+                lot: { type: 'string' },
+                model: { type: 'string' },
+                facade: { type: 'string' }
+              }
+            },
             totalApartments: { type: 'integer' },
             status: { type: 'string', enum: ['active', 'inactive'] }
           }
@@ -358,6 +561,14 @@ const options = {
             exteriorRenders: { type: 'array', items: { type: 'string' } },
             polygon: { type: 'array', description: 'Legacy; prefer buildingFloorPolygons' },
             buildingFloorPolygons: { type: 'array' },
+            quoteRef: {
+              type: 'object',
+              properties: {
+                lot: { type: 'string' },
+                model: { type: 'string' },
+                facade: { type: 'string' }
+              }
+            },
             totalApartments: { type: 'integer' }
           }
         },
@@ -454,6 +665,21 @@ const options = {
             status: { type: 'string', enum: ['available', 'assigned', 'reserved', 'blocked'] },
             apartment: { type: 'string', nullable: true, description: 'null para liberar' },
             notes: { type: 'string' }
+          }
+        },
+        ParkingSpotBulkCreateBody: {
+          type: 'object',
+          required: ['buildingId', 'floorNumber', 'startNumber', 'endNumber'],
+          properties: {
+            buildingId: { type: 'string', description: 'Alternativa building' },
+            building: { type: 'string' },
+            floorNumber: { type: 'integer', minimum: 1 },
+            startNumber: { type: 'integer', minimum: 1, example: 2 },
+            endNumber: { type: 'integer', minimum: 1, example: 50 },
+            spotType: { type: 'string', enum: ['standard', 'covered', 'uncovered', 'tandem', 'motorcycle'], default: 'standard' },
+            status: { type: 'string', enum: ['available', 'assigned', 'reserved', 'blocked'], default: 'available' },
+            notes: { type: 'string' },
+            codePrefix: { type: 'string', description: 'Opcional. Por defecto: P{floorNumber}-' }
           }
         },
         Property: {
