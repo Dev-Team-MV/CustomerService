@@ -3,22 +3,26 @@
   "version": "1.0.0",
   "description": "MV Platform - Multi-project property management",
 "scripts": {
-  "dev": "concurrently \"npm run dev:backend\" \"npm run dev:lakewood-p1\" \"npm run dev:crm\" \"npm run dev:phase-2\" \"npm run dev:isq\" \"npm run dev:sheperd\"",
+  "dev": "concurrently \"npm run dev:backend\" \"npm run dev:lakewood-p1\" \"npm run dev:crm\" \"npm run dev:phase-2\" \"npm run dev:isq\" \"npm run dev:sheperd\" \"npm run dev:6town-houses\"",
   "dev:backend": "cd backend && npm run dev",
   "dev:lakewood-p1": "cd frontend/apps/lakewood-p1 && npm run dev",
   "dev:crm": "cd frontend/apps/mv-crm && npm run dev",
   "dev:phase-2": "cd frontend/apps/phase-2 && npm run dev",
   "dev:isq": "cd frontend/apps/isq && npm run dev",
   "dev:sheperd": "cd frontend/apps/sheperd && npm run dev",
+   "dev:6town-houses": "cd frontend/apps/6town-houses && npm run dev",
   "dev:lakewood-p1+backend": "concurrently \"npm run dev:backend\" \"npm run dev:lakewood-p1\"",
   "dev:crm+backend": "concurrently \"npm run dev:backend\" \"npm run dev:crm\"",
   "dev:sheperd+backend": "concurrently \"npm run dev:backend\" \"npm run dev:sheperd\"",
+  "dev:6town-houses+backend": "concurrently \"npm run dev:backend\" \"npm run dev:6town-houses\"",
+
   "install:all": "cd backend && npm install && cd ../frontend/apps/lakewood-p1 && npm install && cd ../mv-crm && npm install && cd ../phase-2 && npm install && cd ../isq && npm install",
   "build:lakewood-p1": "cd frontend/apps/lakewood-p1 && npm run build",
   "build:crm": "cd frontend/apps/mv-crm && npm run build",
   "build:phase-2": "cd frontend/apps/phase-2 && npm run build",
   "build:isq": "cd frontend/apps/isq && npm run build",
-  "build:sheperd": "cd frontend/apps/sheperd && npm run build"
+  "build:sheperd": "cd frontend/apps/sheperd && npm run build",
+  "build:6town-houses": "cd frontend/apps/6town-houses && npm run build"
 },
   "keywords": [],
   "author": "",

@@ -251,21 +251,27 @@ parking: {
   
   residential: {
     enabled: true,
-    floors: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], // Extendido hasta 19
+    floors: [5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19], // Extendido hasta 19
     apartmentTypes: ['studio', '1bed', '2bed', '3bed', 'penthouse']
   },
   
   amenities: {
     enabled: true,
-    floors: [20], // Cambiado de [12] a [20]
-    allowMultipleFloorsPerAmenity: false,
-    types: [
-      { id: 'gym', label: 'Gym', icon: 'FitnessCenter', defaultFloor: 20 },
-      { id: 'pool', label: 'Pool', icon: 'Pool', defaultFloor: 20 },
-      { id: 'terrace', label: 'Terrace', icon: 'Deck', defaultFloor: 20 },
-      { id: 'coworking', label: 'Coworking', icon: 'Work', defaultFloor: 4 },
-      { id: 'lobby', label: 'Lobby', icon: 'MeetingRoom', defaultFloor: 3 }
-    ]
+    floors: [20,10], // Cambiado de [12] a [20]
+    allowMultipleFloorsPerAmenity: true,
+  types: [
+    // Piso 10
+    { id: 'dining', key: 'dining', name: 'Comedor', label: 'Dining', icon: 'Restaurant', floor: 10, defaultFloor: 10 },
+    { id: 'coworking', key: 'coworking', name: 'Coworking', label: 'Coworking', icon: 'Work', floor: 10, defaultFloor: 10 },
+    { id: 'meeting-room', key: 'meeting-room', name: 'Sala de Reuniones', label: 'Meeting Room', icon: 'MeetingRoom', floor: 10, defaultFloor: 10 },
+    { id: 'sports', key: 'sports', name: 'Deportes', label: 'Sports', icon: 'Sports', floor: 10, defaultFloor: 10 },
+    
+    // Piso 20
+    { id: 'parks', key: 'parks', name: 'Parques', label: 'Parks', icon: 'Park', floor: 20, defaultFloor: 20 },
+    { id: 'schools', key: 'schools', name: 'Escuelas', label: 'Schools', icon: 'School', floor: 20, defaultFloor: 20 },
+    { id: 'pool', key: 'pool', name: 'Piscina', label: 'Pool', icon: 'Pool', floor: 20, defaultFloor: 20 },
+    // { id: 'terrace', key: 'terrace', name: 'Terraza', label: 'Terrace', icon: 'Deck', floor: 20, defaultFloor: 20 }
+  ]
   }
 },
     

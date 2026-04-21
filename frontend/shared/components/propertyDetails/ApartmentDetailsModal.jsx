@@ -36,7 +36,7 @@ const paymentTypes = [
 
 // usePayloadColumnsFn se inyecta como prop — cada app pasa la suya
 // ISQ no la pasa → columns = [] (tab de pagos sin columnas custom)
-const ApartmentDetailsModal = ({ open, onClose, apartment, usePayloadColumnsFn }) => {
+const ApartmentDetailsModal = ({ open, onClose, apartment, usePayloadColumnsFn, projectId }) => {
   const { t } = useTranslation(['myProperty', 'common', 'payloads'])
   const theme = useTheme()
 
@@ -84,7 +84,7 @@ const ApartmentDetailsModal = ({ open, onClose, apartment, usePayloadColumnsFn }
   const fetchPayloads = async () => {
     setLoadingPayloads(true)
     try {
-      const res = await api.get(`/payloads?apartment=${apartment._id}`)
+      const res = await api.get(`/payloads?apartment=${apartment._id}&projectId=${projectId}`)
       setPayloads(res.data)
     } catch {
       setPayloads([])

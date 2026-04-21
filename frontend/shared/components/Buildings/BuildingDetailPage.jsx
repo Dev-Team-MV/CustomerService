@@ -60,8 +60,7 @@ const BuildingDetailPage = ({ projectSlug, backRoute = '/buildings' }) => {
     try {
       await handleApartmentSaved(apartmentData)
       setSnackbar({ open: true, message: apartmentModal.data ? t('buildings:apartmentUpdated', 'Apartment updated') : t('buildings:apartmentCreated', 'Apartment created'), severity: 'success' })
-    //   apartmentModal.closeModal()
-    handleCloseApartment()
+      apartmentModal.closeModal()
     } catch (err) {
       setSnackbar({ open: true, message: `Error: ${err.message}`, severity: 'error' })
     }

@@ -6,7 +6,8 @@ export const PROJECT_IDS = {
   LAKEWOOD: '69a73ce5b20401b061da6451',
   PHASE2: '69b9b2188186434073c6b13d',
   ISQ: '69d3b025b5ad6754488df957',
-  SHEPERD: '69dd47f2b3c3af43409aac48' // <-- Reemplaza por el real
+  SHEPERD: '69dd47f2b3c3af43409aac48', // <-- Reemplaza por el real
+  SIXTOWN_HOUSES: '69e623d8699902a57559b557' // <-- Reemplaza por el real
 }
 
 // ── NEWS CONFIGURATIONS ────────────────────────────────────────
@@ -79,7 +80,8 @@ export const newsConfigs = {
       { value: 'event', label: 'Events', icon: '🎉', color: '#a78bfa' }
     ]
   },
-    sheperd: {
+
+  sheperd: {
     projectId: PROJECT_IDS.SHEPERD,
     projectName: 'Sheperd',
     slug: 'sheperd',
@@ -99,6 +101,29 @@ export const newsConfigs = {
       { value: 'announcement', label: 'Announcements', icon: '📢', color: '#FF8C42' },
       { value: 'report', label: 'Reports', icon: '📊', color: '#F7931E' },
       { value: 'event', label: 'Events', icon: '🎉', color: '#FF8C42' }
+    ]
+  },
+
+  '6town-houses': {
+    projectId: PROJECT_IDS.SIXTOWN_HOUSES,
+    projectName: '6Town Houses',
+    slug: '6town-houses',
+    colors: {
+      primary: '#6B7280',
+      secondary: '#9CA3AF',
+      accent: '#4B5563',
+      border: '#E5E7EB',
+      gradient: 'linear-gradient(90deg, #6B7280, #9CA3AF, #6B7280)'
+    },
+    i18n: {
+      namespace: 'news'
+    },
+    categories: [
+      { value: 'all', label: 'All News', icon: '📰' },
+      { value: 'construction', label: 'Construction', icon: '🏗️', color: '#4B5563' },
+      { value: 'announcement', label: 'Announcements', icon: '📢', color: '#9CA3AF' },
+      { value: 'report', label: 'Reports', icon: '📊', color: '#6B7280' },
+      { value: 'event', label: 'Events', icon: '🎉', color: '#9CA3AF' }
     ]
   }
 }

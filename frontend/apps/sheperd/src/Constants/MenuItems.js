@@ -8,7 +8,9 @@ import {
     AccountBalance as AccountBalanceIcon,
     Map as MapIcon,
     MeetingRoom as MeetingRoomIcon,
-    Group as GroupIcon
+    Group as GroupIcon,
+    RequestQuote as RequestQuoteIcon,
+    Business as BusinessIcon
 } from "@mui/icons-material"
 
 export const privateMenuItems = [
@@ -22,6 +24,12 @@ export const privateMenuItems = [
     textKey: 'navigation:menu.building',
     icon: ApartmentIcon,
     path: '/admin/building',
+    roles: ['superadmin', 'admin']
+  },
+  {
+    textKey: 'navigation:menu.properties',
+    icon: BusinessIcon,
+    path: '/properties',
     roles: ['superadmin', 'admin']
   },
   {
@@ -42,7 +50,36 @@ export const privateMenuItems = [
     path: '/configuration',
     roles: ['superadmin', 'admin']
   },
-
+//   {
+//     textKey: 'navigation:menu.getYourQuote',
+//     icon: RequestQuoteIcon,
+//     path: '/get-your-quote',
+//     roles: ['superadmin', 'admin', 'user']
+//   }
+{
+  textKey: 'navigation:menu.masterPlan',
+  icon: MapIcon,
+  path: '/master-plan',
+  roles: ['superadmin', 'admin']
+},
+{
+  textKey: 'navigation:menu.payloads',
+  icon: AccountBalanceIcon,
+  path: '/payloads',
+  roles: ['superadmin', 'admin']
+},
+{
+  textKey: 'navigation:menu.myApartment',
+  icon: MeetingRoomIcon,
+  path: '/my-apartment',
+  roles: ['superadmin', 'admin', 'user']
+},
+{
+  textKey: 'navigation:menu.familyGroup',
+  icon: GroupIcon,
+  path: '/family-group',
+  roles: ['superadmin', 'admin', 'user']
+}
 ]
 
 export const publicMenuItems = [

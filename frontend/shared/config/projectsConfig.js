@@ -4,14 +4,16 @@
 export const PROJECT_IDS = {
   LAKEWOOD: '69a73ce5b20401b061da6451',
   PHASE2: '69b9b2188186434073c6b13d',
-  ISQ: '69d3b025b5ad6754488df957'
+  ISQ: '69d3b025b5ad6754488df957',
+  SHEPERD: '69dd47f2b3c3af43409aac48'
 }
 
 // ── PROJECT SLUGS ──────────────────────────────────────────────
 export const PROJECT_SLUGS = {
   LAKEWOOD: 'lakewood',
   PHASE2: 'lakewood-f2',
-  ISQ: 'isq'
+  ISQ: 'isq',
+  SHEPERD: 'sheperd'
 }
 
 // ── RESOURCE TYPES ─────────────────────────────────────────────
@@ -207,7 +209,71 @@ export const projectConfigs = {
       buildings: `/buildings?projectId=${PROJECT_IDS.ISQ}`,
       apartmentModels: (buildingId) => `/apartment-models?buildingId=${buildingId}`
     }
+  },
+
+  sheperd: {
+  id: PROJECT_IDS.SHEPERD,
+  slug: PROJECT_SLUGS.SHEPERD,
+  name: 'Sheperd',
+  port: 5177, // O el puerto que uses
+  
+  colors: {
+    primary: '#1a237e',
+    secondary: '#43a047',
+    accent: '#ff6f00',
+    border: '#e3f2fd',
+    gradient: 'linear-gradient(90deg, #1a237e, #43a047, #1a237e)'
+  },
+  
+  features: {
+    hasCommercialFloors: false,
+    hasPropertyLots: false,
+    hasApartments: true,
+    hasBuildings: true,
+    showConstructionPhases: true,
+    showContracts: true,
+    showPayments: true,
+    showNews: true,
+    showResources: true,
+    showPolygonEditor: true,
+    hasMultiFloorAmenities: true  // Característica única de Sheperd
+  },
+  
+  resourceType: RESOURCE_TYPES.APARTMENT,
+  
+  routes: {
+    dashboard: '/dashboard',
+    buildings: '/buildings',
+    properties: '/properties',
+    myApartment: '/my-apartment',
+    news: '/news',
+    resources: '/resources',
+    contracts: '/contracts',
+    masterPlan: '/master-plan',
+    payloads: '/payloads'
+  },
+  
+  assets: {
+    logoMain: '/assets/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png',
+    logoSecondary: null,
+    backgroundImage: null
+  },
+  
+  i18n: {
+    namespace: 'myApartment',
+    resourceKey: 'apartment'
+  },
+  
+  endpoints: {
+    list: '/apartments?visible=true',
+    details: (id) => `/apartments/${id}?visible=true`,
+    phases: (id) => `/phases/apartment/${id}`,
+    payloads: (id) => `/payloads?apartment=${id}`,
+    financialSummary: '/user-apartments/financial-summary',
+    buildings: `/buildings?projectId=${PROJECT_IDS.SHEPERD}`,
+    apartmentModels: (buildingId) => `/apartment-models?buildingId=${buildingId}`
   }
+}
 }
 
 // ── HELPER FUNCTIONS ───────────────────────────────────────────

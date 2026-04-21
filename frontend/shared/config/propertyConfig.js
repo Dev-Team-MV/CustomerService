@@ -50,6 +50,32 @@ export const propertyConfigs = {
       cancelled: '#9e9e9e',
     },
   },
+
+  'sheperd': {
+  projectSlug: 'sheperd',
+  steps: [
+    { key: 'building',   labelKey: 'building'   },
+    { key: 'floor',      labelKey: 'floor'       },
+    { key: 'apartment',  labelKey: 'apartment'   },
+    { key: 'customize',  labelKey: 'customize'   },
+  ],
+  financials: {
+    discountPercent:            10,
+    downPaymentPercent:         15,
+    initialDownPaymentPercent:  5,
+    monthlyPaymentPercent:      2,
+  },
+  customization: {
+    enableBasicPackage:   true,
+    enableUpgradePackage: true,
+  },
+  colors: {
+    available: '#4caf50',
+    pending:   '#2196f3',
+    sold:      '#f44336',
+    cancelled: '#9e9e9e',
+  },
+},
 }
 
 export const getPropertyConfig = (projectSlug) =>

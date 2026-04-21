@@ -20,6 +20,12 @@ import NewsFeed from './Pages/NewsFeed'
 import NewsDetails from './Pages/NewsDetails'
 import NewsTable from './Pages/NewsTable'
 import BuildingDashboard from './Pages/BuildingDashboard'
+import GetYourQuote from './Pages/GetYourQuote'
+import Properties from './Pages/Properties'
+import MasterPlanPageWrapper from './Pages/MasterPlanPage'
+import Payloads from './Pages/Payloads'
+import MyApartment from './Pages/MyApartment'
+import FamilyGroup from './Pages/FamilyGroup'
 
 import theme from './theme'
 
@@ -61,6 +67,7 @@ function App() {
               />
             }
           >
+            <Route path="/explore/properties" element={<GetYourQuote />} />
             {/* <Route path="/explore/amenities" element={<AmenitiesPublic />} /> */}
             {/* Agrega aquí tus rutas públicas */}
           </Route>
@@ -90,7 +97,12 @@ function App() {
               <Route path="/configuration" element={<ConfigurationManager />} />
               <Route path="/admin/news" element={<NewsTable />} />
               <Route path="/admin/building" element={<BuildingDashboard />} />
-              
+              <Route path="/get-your-quote" element={<GetYourQuote />} />
+              <Route path="/properties" element={<Properties />} />
+              <Route path="/master-plan" element={<MasterPlanPageWrapper />} />
+              <Route path="/payloads" element={<Payloads />} />
+              <Route path="/my-apartment" element={<MyApartment />} />
+              <Route path="/family-group" element={<FamilyGroup />} />
               {/* Agrega aquí el resto de tus rutas privadas */}
             </Route>
           </Route>
