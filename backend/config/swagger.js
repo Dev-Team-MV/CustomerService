@@ -535,6 +535,15 @@ const options = {
               type: 'array',
               description: 'Polígonos clicables en fachada por piso (id, floorNumber, points, isCommercial)'
             },
+            quoteRef: {
+              type: 'object',
+              description: 'Mapping opcional para cotización desde master plan (casas): lot/model/facade',
+              properties: {
+                lot: { type: 'string' },
+                model: { type: 'string' },
+                facade: { type: 'string' }
+              }
+            },
             totalApartments: { type: 'integer' },
             status: { type: 'string', enum: ['active', 'inactive'] }
           }
@@ -552,6 +561,14 @@ const options = {
             exteriorRenders: { type: 'array', items: { type: 'string' } },
             polygon: { type: 'array', description: 'Legacy; prefer buildingFloorPolygons' },
             buildingFloorPolygons: { type: 'array' },
+            quoteRef: {
+              type: 'object',
+              properties: {
+                lot: { type: 'string' },
+                model: { type: 'string' },
+                facade: { type: 'string' }
+              }
+            },
             totalApartments: { type: 'integer' }
           }
         },
