@@ -24,8 +24,6 @@ const router = express.Router()
  *   get:
  *     summary: List buildings
  *     tags: [Buildings]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Buildings list
@@ -57,7 +55,7 @@ const router = express.Router()
  *         description: Building created
  */
 router.route('/')
-  .get(protect, getAllBuildings)
+  .get(getAllBuildings)
   .post(protect, admin, createBuilding)
 
 /**

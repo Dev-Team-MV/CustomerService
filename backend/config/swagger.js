@@ -126,7 +126,12 @@ const options = {
                 es: { type: 'array', items: { type: 'string' } }
               }
             },
-            type: { type: 'string', enum: ['residential_lots', 'apartments', 'other'] },
+            type: {
+              type: 'string',
+              enum: ['residential_lots', 'apartments', 'other'],
+              description:
+                'residential_lots = casas/lotes (Property + Lot). apartments = torres (Building + Apartment). other = otro.'
+            },
             status: { type: 'string', enum: ['active', 'inactive', 'coming_soon', 'sold_out'] },
             isActive: { type: 'boolean' },
             externalUrl: { type: 'string', description: 'External project URL' },
@@ -146,6 +151,200 @@ const options = {
             },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        ProjectCatalogConfig: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            project: { type: 'string', description: 'Project ID (ref)' },
+            version: { type: 'integer', minimum: 1 },
+            status: { type: 'string', enum: ['draft', 'published', 'archived'] },
+            isActiveVersion: { type: 'boolean' },
+            catalogType: { type: 'string', enum: ['houses', 'apartments', 'mixed'] },
+            structure: { type: 'object', additionalProperties: true },
+            assetsSchema: { type: 'object', additionalProperties: true },
+            pricingRules: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  name: { type: 'string' },
+                  priority: { type: 'number' },
+                  enabled: { type: 'boolean' },
+                  when: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        field: { type: 'string' },
+                        operator: { type: 'string' },
+                        value: {}
+                      }
+                    }
+                  },
+                  apply: {
+                    type: 'object',
+                    properties: {
+                      type: { type: 'string', enum: ['fixed', 'percentage'] },
+                      amount: { type: 'number' },
+                      code: { type: 'string' },
+                      label: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        ProjectCatalogConfigUpsertRequest: {
+          type: 'object',
+          required: ['catalogType', 'structure', 'assetsSchema'],
+          properties: {
+            version: { type: 'integer', minimum: 1, description: 'Opcional. Si no se envía, se crea nueva versión incremental' },
+            status: { type: 'string', enum: ['draft', 'published', 'archived'], default: 'draft' },
+            isActiveVersion: { type: 'boolean', description: 'Solo aplica cuando status=published' },
+            catalogType: { type: 'string', enum: ['houses', 'apartments', 'mixed'] },
+            structure: { type: 'object', additionalProperties: true },
+            assetsSchema: { type: 'object', additionalProperties: true },
+            pricingRules: {
+              type: 'array',
+              items: {
+                type: 'object',
+                required: ['id', 'apply'],
+                properties: {
+                  id: { type: 'string' },
+                  name: { type: 'string' },
+                  description: { type: 'string' },
+                  priority: { type: 'number', default: 100 },
+                  enabled: { type: 'boolean', default: true },
+                  when: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      required: ['field', 'operator'],
+                      properties: {
+                        field: { type: 'string', example: 'selectedOptions.level1Upgrade' },
+                        operator: { type: 'string', enum: ['eq', 'neq', 'in', 'not_in', 'gt', 'gte', 'lt', 'lte', 'truthy', 'falsy'] },
+                        value: {}
+                      }
+                    }
+                  },
+                  apply: {
+                    type: 'object',
+                    required: ['type', 'amount'],
+                    properties: {
+                      type: { type: 'string', enum: ['fixed', 'percentage'] },
+                      amount: { type: 'number' },
+                      code: { type: 'string' },
+                      label: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        PublishProjectCatalogConfigRequest: {
+          type: 'object',
+          properties: {
+            version: { type: 'integer', minimum: 1, description: 'Opcional. Si no se envía, publica la última versión' }
+          }
+        },
+        PublishProjectCatalogConfigResponse: {
+          type: 'object',
+          properties: {
+            message: { type: 'string', example: 'Catalog config published' },
+            projectId: { type: 'string' },
+            version: { type: 'integer' }
+          }
+        },
+        PropertyQuoteRequest: {
+          type: 'object',
+          required: ['lot', 'model', 'facade'],
+          properties: {
+            projectId: { type: 'string' },
+            project: { type: 'string' },
+            lot: { type: 'string' },
+            model: { type: 'string' },
+            facade: { type: 'string' },
+            initialPayment: { type: 'number' },
+            hasBalcony: { type: 'boolean' },
+            modelType: { type: 'string', enum: ['basic', 'upgrade'] },
+            hasStorage: { type: 'boolean' },
+            selectedOptions: {
+              type: 'object',
+              additionalProperties: true,
+              description: 'Opciones dinámicas por tenant evaluadas por reglas (ej. level1Upgrade, level2Upgrade, terraceMultifunctional)'
+            }
+          }
+        },
+        PropertyQuoteResponse: {
+          type: 'object',
+          properties: {
+            projectId: { type: 'string' },
+            lot: {
+              type: 'object',
+              properties: { _id: { type: 'string' }, number: { type: 'string' }, price: { type: 'number' } }
+            },
+            model: {
+              type: 'object',
+              properties: {
+                _id: { type: 'string' },
+                model: { type: 'string' },
+                modelNumber: { type: 'string' },
+                price: { type: 'number' }
+              }
+            },
+            facade: {
+              type: 'object',
+              properties: { _id: { type: 'string' }, title: { type: 'string' }, price: { type: 'number' } }
+            },
+            options: {
+              type: 'object',
+              properties: {
+                hasBalcony: { type: 'boolean' },
+                modelType: { type: 'string', enum: ['basic', 'upgrade'] },
+                hasStorage: { type: 'boolean' }
+              }
+            },
+            breakdown: {
+              type: 'object',
+              properties: {
+                lotPrice: { type: 'number' },
+                modelBasePrice: { type: 'number' },
+                balconyPrice: { type: 'number' },
+                upgradePrice: { type: 'number' },
+                storagePrice: { type: 'number' },
+                facadePrice: { type: 'number' },
+                adjustments: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      code: { type: 'string' },
+                      label: { type: 'string' },
+                      amount: { type: 'number' }
+                    }
+                  }
+                }
+              }
+            },
+            totals: {
+              type: 'object',
+              properties: {
+                totalPrice: { type: 'number' },
+                initialPayment: { type: 'number' },
+                pending: { type: 'number' }
+              }
+            },
+            pricingConfig: {
+              type: 'object',
+              properties: { version: { type: 'integer', nullable: true } }
+            }
           }
         },
         ImageItem: {
@@ -322,8 +521,171 @@ const options = {
             updatedAt: { type: 'string', format: 'date-time' }
           }
         },
+        Building: {
+          type: 'object',
+          description: 'Edificio dentro de un proyecto (type apartments). POST /api/buildings acepta projectId o project.',
+          properties: {
+            _id: { type: 'string' },
+            project: { type: 'string' },
+            name: { type: 'string' },
+            section: { type: 'string' },
+            floors: { type: 'integer', minimum: 1 },
+            floorPlans: { type: 'array', description: 'Planos por piso (floorNumber, url, polygons)' },
+            buildingFloorPolygons: {
+              type: 'array',
+              description: 'Polígonos clicables en fachada por piso (id, floorNumber, points, isCommercial)'
+            },
+            quoteRef: {
+              type: 'object',
+              description: 'Mapping opcional para cotización desde master plan (casas): lot/model/facade',
+              properties: {
+                lot: { type: 'string' },
+                model: { type: 'string' },
+                facade: { type: 'string' }
+              }
+            },
+            totalApartments: { type: 'integer' },
+            status: { type: 'string', enum: ['active', 'inactive'] }
+          }
+        },
+        BuildingCreateBody: {
+          type: 'object',
+          required: ['projectId', 'name'],
+          properties: {
+            projectId: { type: 'string', description: 'Alternativa project' },
+            project: { type: 'string' },
+            name: { type: 'string' },
+            section: { type: 'string' },
+            floors: { type: 'integer', minimum: 1, default: 1 },
+            floorPlans: { type: 'array' },
+            exteriorRenders: { type: 'array', items: { type: 'string' } },
+            polygon: { type: 'array', description: 'Legacy; prefer buildingFloorPolygons' },
+            buildingFloorPolygons: { type: 'array' },
+            quoteRef: {
+              type: 'object',
+              properties: {
+                lot: { type: 'string' },
+                model: { type: 'string' },
+                facade: { type: 'string' }
+              }
+            },
+            totalApartments: { type: 'integer' }
+          }
+        },
+        ApartmentModel: {
+          type: 'object',
+          description: 'Tipología de apartamento por edificio. POST /api/apartment-models requiere buildingId.',
+          properties: {
+            _id: { type: 'string' },
+            building: { type: 'string' },
+            name: { type: 'string' },
+            modelNumber: { type: 'string' },
+            floorPlan: { type: 'string' },
+            sqft: { type: 'number' },
+            bedrooms: { type: 'number' },
+            bathrooms: { type: 'number' },
+            apartmentCount: { type: 'number' },
+            status: { type: 'string', enum: ['active', 'inactive'] }
+          }
+        },
+        Apartment: {
+          type: 'object',
+          description:
+            'Unidad vendible en torre. POST /api/apartments requiere apartmentModelId, floorNumber, apartmentNumber, price. pending = price - initialPayment.',
+          properties: {
+            _id: { type: 'string' },
+            building: { type: 'string' },
+            apartmentModel: { type: 'string' },
+            floorNumber: { type: 'integer', minimum: 1 },
+            apartmentNumber: { type: 'string' },
+            floorPlanPolygonId: { type: 'string', nullable: true },
+            users: { type: 'array', items: { type: 'string' }, description: 'Dueños' },
+            price: { type: 'number' },
+            pending: { type: 'number' },
+            initialPayment: { type: 'number' },
+            status: { type: 'string', enum: ['available', 'pending', 'sold', 'cancelled'] },
+            selectedRenderType: { type: 'string', enum: ['basic', 'upgrade'] }
+          }
+        },
+        ApartmentCreateBody: {
+          type: 'object',
+          required: ['apartmentModelId', 'floorNumber', 'apartmentNumber', 'price'],
+          properties: {
+            apartmentModelId: { type: 'string' },
+            apartmentModel: { type: 'string' },
+            building: { type: 'string', description: 'Debe coincidir con apartmentModel.building' },
+            floorNumber: { type: 'integer', minimum: 1 },
+            apartmentNumber: { type: 'string' },
+            floorPlanPolygonId: { type: 'string' },
+            interiorRendersBasic: { type: 'array', items: { type: 'string' } },
+            interiorRendersUpgrade: { type: 'array', items: { type: 'string' } },
+            selectedRenderType: { type: 'string', enum: ['basic', 'upgrade'] },
+            polygon: { type: 'array', items: { type: 'object', properties: { x: { type: 'number' }, y: { type: 'number' } } } },
+            user: { type: 'string' },
+            users: { type: 'array', items: { type: 'string' } },
+            price: { type: 'number' },
+            initialPayment: { type: 'number' }
+          }
+        },
+        ParkingSpot: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            building: { oneOf: [{ type: 'string' }, { $ref: '#/components/schemas/Building' }] },
+            floorNumber: { type: 'integer', minimum: 1 },
+            code: { type: 'string', description: 'Único por edificio (ej. P3-045)' },
+            spotType: { type: 'string', enum: ['standard', 'covered', 'uncovered', 'tandem', 'motorcycle'] },
+            status: { type: 'string', enum: ['available', 'assigned', 'reserved', 'blocked'] },
+            apartment: { type: 'string', nullable: true, description: 'Apartamento asignado, mismo building' },
+            notes: { type: 'string' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        ParkingSpotCreateBody: {
+          type: 'object',
+          required: ['buildingId', 'floorNumber', 'code'],
+          properties: {
+            buildingId: { type: 'string', description: 'Alternativa building' },
+            building: { type: 'string' },
+            floorNumber: { type: 'integer', minimum: 1 },
+            code: { type: 'string' },
+            spotType: { type: 'string', enum: ['standard', 'covered', 'uncovered', 'tandem', 'motorcycle'] },
+            status: { type: 'string', enum: ['available', 'assigned', 'reserved', 'blocked'] },
+            apartment: { type: 'string', description: 'Opcional; si se envía, status por defecto assigned' },
+            notes: { type: 'string' }
+          }
+        },
+        ParkingSpotUpdateBody: {
+          type: 'object',
+          properties: {
+            floorNumber: { type: 'integer', minimum: 1 },
+            code: { type: 'string' },
+            spotType: { type: 'string', enum: ['standard', 'covered', 'uncovered', 'tandem', 'motorcycle'] },
+            status: { type: 'string', enum: ['available', 'assigned', 'reserved', 'blocked'] },
+            apartment: { type: 'string', nullable: true, description: 'null para liberar' },
+            notes: { type: 'string' }
+          }
+        },
+        ParkingSpotBulkCreateBody: {
+          type: 'object',
+          required: ['buildingId', 'floorNumber', 'startNumber', 'endNumber'],
+          properties: {
+            buildingId: { type: 'string', description: 'Alternativa building' },
+            building: { type: 'string' },
+            floorNumber: { type: 'integer', minimum: 1 },
+            startNumber: { type: 'integer', minimum: 1, example: 2 },
+            endNumber: { type: 'integer', minimum: 1, example: 50 },
+            spotType: { type: 'string', enum: ['standard', 'covered', 'uncovered', 'tandem', 'motorcycle'], default: 'standard' },
+            status: { type: 'string', enum: ['available', 'assigned', 'reserved', 'blocked'], default: 'available' },
+            notes: { type: 'string' },
+            codePrefix: { type: 'string', description: 'Opcional. Por defecto: P{floorNumber}-' }
+          }
+        },
         Property: {
           type: 'object',
+          description:
+            'Propiedad para proyectos residential_lots: lote + modelo casa + fachada. Proyectos apartments usan Apartment (no Property).',
           properties: {
             _id: { type: 'string' },
             project: { type: 'string', description: 'Project ID (ref)' },
@@ -342,9 +704,11 @@ const options = {
         },
         Phase: {
           type: 'object',
+          description: 'Obra: exactamente uno de property (casa) o apartment (torre).',
           properties: {
             _id: { type: 'string' },
-            property: { type: 'string' },
+            property: { type: 'string', nullable: true },
+            apartment: { type: 'string', nullable: true },
             phaseNumber: { type: 'number', minimum: 1, maximum: 9 },
             title: { type: 'string' },
             constructionPercentage: { type: 'number', minimum: 0, maximum: 100 },

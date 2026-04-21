@@ -8,7 +8,7 @@ import {
   getMyProjects
 } from '../controllers/userController.js'
 import { sendSetupPasswordLink } from '../controllers/authController.js'
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { protect, admin, optionalProtect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -16,11 +16,11 @@ const router = express.Router()
  * @swagger
  * /api/users:
  *   get:
- *     summary: Get all users (Admin only)
- *     description: Returns users enriched with `projects` (derived from properties/apartments/memberships). Optional filters by role and projectId.
+ *     summary: Get users (public limited mode or admin full mode)
+ *     description: |
+ *       - Without token: requires `projectId` and returns limited fields (`_id`, `firstName`, `lastName`, `email`).
+ *       - With admin/superadmin token: returns users enriched with `projects` and supports `role` + `projectId` filters.
  *     tags: [Users]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: role
@@ -39,17 +39,17 @@ const router = express.Router()
  *               items:
  *                 $ref: '#/components/schemas/User'
  */
-router.route('/').get(protect, admin, getAllUsers)
+router.route('/').get(optionalProtect, getAllUsers)
 
 /**
  * @swagger
  * /api/users/search:
  *   get:
  *     summary: Search users (for adding to family groups, etc.)
- *     description: Any authenticated user. Requires projectId to return only users related to that project. With q (min 2 chars) searches by email/name; without q returns up to 100 users for dropdowns.
+ *     description: |
+ *       Public endpoint with optional auth. Requires `projectId` and returns limited fields (`_id`, `firstName`, `lastName`, `email`).
+ *       With q (min 2 chars) searches by email/name; without q returns up to 100 users for dropdowns.
  *     tags: [Users]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: projectId
@@ -64,7 +64,7 @@ router.route('/').get(protect, admin, getAllUsers)
  *       200:
  *         description: Array of users { _id, firstName, lastName, email }
  */
-router.get('/search', protect, searchUsers)
+router.get('/search', optionalProtect, searchUsers)
 
 /**
  * @swagger

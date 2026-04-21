@@ -1,6 +1,5 @@
 import express from 'express'
 import { getMasterPlan } from '../controllers/masterPlanController.js'
-import { protect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -10,8 +9,6 @@ const router = express.Router()
  *   get:
  *     summary: Get master plan data for one project
  *     tags: [Master Plan]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: projectId
@@ -71,7 +68,7 @@ const router = express.Router()
  *       404:
  *         description: Project not found
  */
-router.get('/', protect, getMasterPlan)
+router.get('/', getMasterPlan)
 
 export default router
 
