@@ -1,192 +1,292 @@
 // @/Users/oficina/MV-CRM/CustomerService/frontend/apps/6town-houses/src/Pages/Models.jsx
 
-import { useState } from 'react'
-import { Box, Container, Grid, Paper, Typography, Button, Snackbar, Alert } from '@mui/material'
-import { Home, Add } from '@mui/icons-material'
+import { useState, useEffect } from 'react'
+import {
+  Box, Container, Paper, Tabs, Tab, Button,
+  Typography, CircularProgress, Alert, Snackbar
+} from '@mui/material'
+import { Edit, Save, Cancel, Info, Layers, Home } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
-import { AnimatePresence } from 'framer-motion'
+import api from '@shared/services/api'
+import { useCatalogConfig } from '@shared/hooks/useCatalogConfig'
 import PageHeader from '@shared/components/PageHeader'
-import { useModels } from '@shared/hooks/useModels'
-import ModelCard from '../Components/models/ModelCard'
-import ModelDialog from '../Components/models/ModelDialog'
-import FacadeDialog from '../Components/models/FacadeDialog'
+import BaseInfoTab from '../Components/models/BaseInfoTab'
+import FloorTab from '../Components/models/Floortab'
+
+const DEFAULT_FORM = {
+  model: '',
+  modelNumber: '',
+  price: '',
+  bedrooms: '',
+  bathrooms: '',
+  sqft: '',
+  stories: '4'
+}
 
 const Models = () => {
   const theme = useTheme()
   const projectId = import.meta.env.VITE_PROJECT_ID
 
-  const [modelDialog, setModelDialog] = useState({ open: false, data: null })
-  const [facadeDialog, setFacadeDialog] = useState({ open: false, model: null, facade: null })
+  const { catalogConfig, loading: loadingCatalog, transformCatalogToFloors } = useCatalogConfig(projectId, { activeOnly: true })
+
+  const [activeTab, setActiveTab] = useState(0)
+  const [editMode, setEditMode] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [model, setModel] = useState(null)
+  const [floors, setFloors] = useState([])
+  const [formData, setFormData] = useState(DEFAULT_FORM)
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' })
 
-  const {
-    models,
-    facades,
-    loading,
-    handleSubmitModel,
-    handleDeleteModel,
-    handleSubmitFacade,
-    handleDeleteFacade,
-    getModelFacades,
-  } = useModels(projectId)
+  useEffect(() => {
+    if (!loadingCatalog && catalogConfig) {
+      fetchModelData()
+    }
+  }, [loadingCatalog, catalogConfig])
 
-  const handleOpenModelDialog = (model = null) => {
-    setModelDialog({ open: true, data: model })
-  }
-
-  const handleCloseModelDialog = () => {
-    setModelDialog({ open: false, data: null })
-  }
-
-  const handleOpenFacadeDialog = (model, facade = null) => {
-    setFacadeDialog({ open: true, model, facade })
-  }
-
-  const handleCloseFacadeDialog = () => {
-    setFacadeDialog({ open: false, model: null, facade: null })
-  }
-
-  const handleSaveModel = async (formData) => {
+  const fetchModelData = async () => {
     try {
-      await handleSubmitModel(formData, modelDialog.data, handleCloseModelDialog)
-      setSnackbar({ open: true, message: modelDialog.data ? 'Modelo actualizado' : 'Modelo creado', severity: 'success' })
+      setLoading(true)
+      
+      const modelsRes = await api.get('/models', { params: { projectId } })
+      const projectModel = modelsRes.data[0]
+      
+      if (!projectModel) {
+        const floorsFromCatalog = transformCatalogToFloors(catalogConfig)
+        
+        const newModel = await api.post('/models', {
+          projectId,
+          model: '6Town Houses Model',
+          modelNumber: 'M1',
+          price: 280000,
+          bedrooms: 3,
+          bathrooms: 3,
+          sqft: 1800,
+          stories: 4,
+          status: 'active',
+          floors: floorsFromCatalog
+        })
+        
+        setModel(newModel.data)
+        setFormData({
+          model: newModel.data.model,
+          modelNumber: newModel.data.modelNumber,
+          price: newModel.data.price,
+          bedrooms: newModel.data.bedrooms,
+          bathrooms: newModel.data.bathrooms,
+          sqft: newModel.data.sqft,
+          stories: newModel.data.stories
+        })
+        setFloors(newModel.data.floors || floorsFromCatalog)
+      } else {
+        setModel(projectModel)
+        setFormData({
+          model: projectModel.model || '',
+          modelNumber: projectModel.modelNumber || '',
+          price: projectModel.price || '',
+          bedrooms: projectModel.bedrooms || '',
+          bathrooms: projectModel.bathrooms || '',
+          sqft: projectModel.sqft || '',
+          stories: projectModel.stories || '4'
+        })
+        
+        try {
+          const floorsRes = await api.get(`/models/${projectModel._id}/floors`)
+          const existingFloors = floorsRes.data.floors || []
+          
+          if (existingFloors.length === 0) {
+            const floorsFromCatalog = transformCatalogToFloors(catalogConfig)
+            setFloors(floorsFromCatalog)
+          } else {
+            setFloors(existingFloors)
+          }
+        } catch (err) {
+          console.warn('No floors found, using catalog:', err)
+          const floorsFromCatalog = transformCatalogToFloors(catalogConfig)
+          setFloors(floorsFromCatalog)
+        }
+      }
     } catch (err) {
-      setSnackbar({ open: true, message: `Error: ${err.message}`, severity: 'error' })
+      console.error('Error fetching model:', err)
+      setSnackbar({ open: true, message: 'Error al cargar el modelo', severity: 'error' })
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleSaveFacade = async (formData) => {
-    try {
-      await handleSubmitFacade(formData, facadeDialog.facade, handleCloseFacadeDialog)
-      setSnackbar({ open: true, message: facadeDialog.facade ? 'Fachada actualizada' : 'Fachada creada', severity: 'success' })
-    } catch (err) {
-      setSnackbar({ open: true, message: `Error: ${err.message}`, severity: 'error' })
-    }
+  const handleFormChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleDeleteModelConfirm = async (model) => {
-    if (!window.confirm(`¿Eliminar modelo ${model.model}?`)) return
-    try {
-      await handleDeleteModel(model._id)
-      setSnackbar({ open: true, message: 'Modelo eliminado', severity: 'success' })
-    } catch (err) {
-      setSnackbar({ open: true, message: `Error: ${err.message}`, severity: 'error' })
-    }
+  const handleFloorChange = (floorKey, changeType, value) => {
+    setFloors(prev => prev.map(floor => {
+      if (floor.key !== floorKey) return floor
+
+      if (changeType === 'media') {
+        return { ...floor, media: value }
+      }
+
+      if (changeType === 'optionMedia') {
+        return {
+          ...floor,
+          options: floor.options.map(opt =>
+            opt.key === value.optionKey ? { ...opt, media: value.media } : opt
+          )
+        }
+      }
+
+      return floor
+    }))
   }
 
-  const handleDeleteFacadeConfirm = async (facade) => {
-    if (!window.confirm(`¿Eliminar fachada ${facade.title}?`)) return
-    try {
-      await handleDeleteFacade(facade._id)
-      setSnackbar({ open: true, message: 'Fachada eliminada', severity: 'success' })
-    } catch (err) {
-      setSnackbar({ open: true, message: `Error: ${err.message}`, severity: 'error' })
+const handleSave = async () => {
+  if (!model) return
+
+  try {
+    setSaving(true)
+
+    // Si floors está vacío, usar el catálogo
+    const floorsToSend = floors.length > 0 
+      ? floors 
+      : transformCatalogToFloors(catalogConfig)
+
+    const updateData = {
+      model: formData.model,
+      modelNumber: formData.modelNumber,
+      price: Number(formData.price),
+      bedrooms: Number(formData.bedrooms) || 0,
+      bathrooms: Number(formData.bathrooms) || 0,
+      sqft: Number(formData.sqft) || 0,
+      stories: Number(formData.stories) || 4,
+      floors: floorsToSend
     }
+
+    console.log('Sending floors:', floorsToSend) // Debug
+
+    await api.put(`/models/${model._id}`, updateData)
+    
+    setSnackbar({ open: true, message: 'Modelo actualizado exitosamente', severity: 'success' })
+    setEditMode(false)
+    fetchModelData()
+  } catch (err) {
+    console.error('Error saving model:', err)
+    setSnackbar({ open: true, message: `Error: ${err.message}`, severity: 'error' })
+  } finally {
+    setSaving(false)
   }
+}
+
+  const handleCancel = () => {
+    setEditMode(false)
+    fetchModelData()
+  }
+
+  if (loading || loadingCatalog) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  if (!model) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity="error">No se pudo cargar el modelo</Alert>
+      </Container>
+    )
+  }
+
+  const tabs = [
+    { label: 'Información Base', icon: Info },
+    ...floors.map(floor => ({ label: floor.label, icon: Layers }))
+  ]
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.background.default, p: { xs: 2, sm: 3 } }}>
       <Container maxWidth="xl">
         <PageHeader
           icon={Home}
-          title="Modelos"
-          subtitle="Gestiona los modelos de casas y sus fachadas"
-          actionButton={{
-            label: 'Crear Modelo',
-            onClick: () => handleOpenModelDialog(),
-            icon: <Add />,
-            tooltip: 'Crear nuevo modelo',
-            disabled: loading
-          }}
+          title={model.model}
+          subtitle={`${model.modelNumber} - Configuración del modelo de casa`}
+          actionButton={
+            editMode
+              ? {
+                  label: saving ? 'Guardando...' : 'Guardar Cambios',
+                  onClick: handleSave,
+                  icon: saving ? <CircularProgress size={20} /> : <Save />,
+                  disabled: saving,
+                  tooltip: 'Guardar cambios'
+                }
+              : {
+                  label: 'Editar Modelo',
+                  onClick: () => setEditMode(true),
+                  icon: <Edit />,
+                  tooltip: 'Editar modelo y pisos'
+                }
+          }
         />
 
-        <AnimatePresence mode="wait">
-          {loading ? (
-            <Box display="flex" justifyContent="center" py={8}>
-              <Typography>Cargando...</Typography>
-            </Box>
-          ) : models.length === 0 ? (
-            <Paper
-              elevation={0}
-              sx={{
-                p: 8,
-                borderRadius: 4,
-                textAlign: 'center',
-                border: '2px dashed rgba(140, 165, 81, 0.3)',
-                bgcolor: 'rgba(140, 165, 81, 0.03)'
-              }}
+        {editMode && (
+          <Box display="flex" justifyContent="flex-end" mb={2}>
+            <Button
+              variant="outlined"
+              startIcon={<Cancel />}
+              onClick={handleCancel}
+              disabled={saving}
+              sx={{ borderRadius: 2, textTransform: 'none' }}
             >
-              <Box
-                sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: 4,
-                  bgcolor: 'rgba(140, 165, 81, 0.12)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto',
-                  mb: 2
-                }}
-              >
-                <Home sx={{ fontSize: 40, color: theme.palette.primary.main }} />
-              </Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif', mb: 1 }}>
-                No hay modelos creados
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', fontFamily: '"Poppins", sans-serif', mb: 3 }}>
-                Crea tu primer modelo de casa para comenzar
-              </Typography>
-              <Button
-                variant="contained"
-                startIcon={<Add />}
-                onClick={() => handleOpenModelDialog()}
-                sx={{
-                  borderRadius: 3,
-                  textTransform: 'none',
-                  fontFamily: '"Poppins", sans-serif',
-                  fontWeight: 600,
-                  px: 4
-                }}
-              >
-                Crear Modelo
-              </Button>
-            </Paper>
-          ) : (
-            <Grid container spacing={3}>
-              {models.map((model, index) => (
-                <ModelCard
-                  key={model._id}
-                  model={model}
-                  index={index}
-                  facades={getModelFacades(model._id)}
-                  onEdit={handleOpenModelDialog}
-                  onDelete={handleDeleteModelConfirm}
-                  onOpenFacadeDialog={handleOpenFacadeDialog}
-                  onDeleteFacade={handleDeleteFacadeConfirm}
-                  theme={theme}
-                />
-              ))}
-            </Grid>
-          )}
-        </AnimatePresence>
+              Cancelar
+            </Button>
+          </Box>
+        )}
 
-        <ModelDialog
-          open={modelDialog.open}
-          onClose={handleCloseModelDialog}
-          selectedModel={modelDialog.data}
-          onSubmit={handleSaveModel}
-          projectId={projectId}
-        />
+        <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+          <Tabs
+            value={activeTab}
+            onChange={(e, newValue) => setActiveTab(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              borderBottom: 1,
+              borderColor: 'divider',
+              '& .MuiTab-root': {
+                fontFamily: '"Poppins", sans-serif',
+                fontWeight: 600,
+                textTransform: 'none',
+                fontSize: '0.95rem'
+              }
+            }}
+          >
+            {tabs.map((tab, index) => (
+              <Tab
+                key={index}
+                label={tab.label}
+                icon={<tab.icon />}
+                iconPosition="start"
+              />
+            ))}
+          </Tabs>
 
-        <FacadeDialog
-          open={facadeDialog.open}
-          onClose={handleCloseFacadeDialog}
-          selectedModel={facadeDialog.model}
-          selectedFacade={facadeDialog.facade}
-          onSubmit={handleSaveFacade}
-          projectId={projectId}
-        />
+          <Box>
+            {activeTab === 0 && (
+              <BaseInfoTab
+                model={model}
+                editMode={editMode}
+                formData={formData}
+                onChange={handleFormChange}
+              />
+            )}
+
+            {activeTab > 0 && floors[activeTab - 1] && (
+              <FloorTab
+                floor={floors[activeTab - 1]}
+                editMode={editMode}
+                onChange={handleFloorChange}
+              />
+            )}
+          </Box>
+        </Paper>
 
         <Snackbar
           open={snackbar.open}

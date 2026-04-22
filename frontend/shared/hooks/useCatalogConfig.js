@@ -175,6 +175,39 @@ const loadAllVersions = useCallback(async () => {
     }
   }, [projectId, loadAllVersions])
 
+  // Función helper para transformar catálogo -> floors
+const transformCatalogToFloors = (catalogConfig) => {
+  if (!catalogConfig?.levels || !Array.isArray(catalogConfig.levels)) {
+    return []
+  }
+
+  return catalogConfig.levels.map((level, index) => ({
+    key: level.key || `floor-${index + 1}`,
+    label: level.label || `Nivel ${index + 1}`,
+    level: level.level || index + 1,
+    isCustomizable: level.isCustomizable || false,
+    options: (level.options || []).map(option => ({
+      key: option.key,
+      label: option.label,
+      status: option.status || 'active',
+      media: {
+        renders: [],
+        isometrics: [],
+        blueprints: [],
+        cinematics: [],
+        exterior: []
+      }
+    })),
+    media: {
+      renders: [],
+      isometrics: [],
+      blueprints: [],
+      cinematics: [],
+      exterior: []
+    }
+  }))
+}
+
   // Helpers
   const getLevelOptions = useCallback((levelKey) => {
     return catalogConfigService.getLevelOptions(catalogConfig, levelKey)
@@ -215,6 +248,7 @@ const loadAllVersions = useCallback(async () => {
     createConfig,
     updateConfig,
     publishVersion,
+    transformCatalogToFloors,
 
     // Helpers
     getLevelOptions,
