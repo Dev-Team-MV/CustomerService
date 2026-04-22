@@ -133,6 +133,24 @@ const buildingSchema = new mongoose.Schema(
       type: [buildingFloorPolygonSchema],
       default: []
     },
+    /** Mapping técnico para quote desde master plan (casas). */
+    quoteRef: {
+      lot: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Lot',
+        default: null
+      },
+      model: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Model',
+        default: null
+      },
+      facade: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Facade',
+        default: null
+      }
+    },
     totalApartments: {
       type: Number,
       min: 0

@@ -1,4 +1,8 @@
 import Building from '../models/Building.js'
+import Project from '../models/Project.js'
+import Lot from '../models/Lot.js'
+import Model from '../models/Model.js'
+import Facade from '../models/Facade.js'
 
 const toFiniteNumber = (value) => {
   const num = Number(value)
@@ -123,6 +127,49 @@ const validateBuildingFloorPolygons = (buildingFloorPolygons) => {
   return { ok: true }
 }
 
+const normalizeQuoteRefInput = (quoteRef) => {
+  if (!quoteRef || typeof quoteRef !== 'object') return null
+  const lot = quoteRef.lot || null
+  const model = quoteRef.model || null
+  const facade = quoteRef.facade || null
+  if (!lot && !model && !facade) return null
+  return { lot, model, facade }
+}
+
+const validateProjectAndQuoteRef = async ({ projectId, quoteRef }) => {
+  const project = await Project.findById(projectId).select('_id').lean()
+  if (!project) return { ok: false, status: 400, message: 'Project not found' }
+  if (!quoteRef) return { ok: true }
+
+  const { lot, model, facade } = quoteRef
+  if (lot) {
+    const lotDoc = await Lot.findById(lot).select('project').lean()
+    if (!lotDoc) return { ok: false, status: 400, message: 'quoteRef.lot not found' }
+    if (String(lotDoc.project) !== String(projectId)) {
+      return { ok: false, status: 400, message: 'quoteRef.lot does not belong to project' }
+    }
+  }
+  if (model) {
+    const modelDoc = await Model.findById(model).select('project').lean()
+    if (!modelDoc) return { ok: false, status: 400, message: 'quoteRef.model not found' }
+    if (String(modelDoc.project) !== String(projectId)) {
+      return { ok: false, status: 400, message: 'quoteRef.model does not belong to project' }
+    }
+  }
+  if (facade) {
+    const facadeDoc = await Facade.findById(facade).select('project model').lean()
+    if (!facadeDoc) return { ok: false, status: 400, message: 'quoteRef.facade not found' }
+    if (String(facadeDoc.project) !== String(projectId)) {
+      return { ok: false, status: 400, message: 'quoteRef.facade does not belong to project' }
+    }
+    if (model && String(facadeDoc.model) !== String(model)) {
+      return { ok: false, status: 400, message: 'quoteRef.facade does not belong to quoteRef.model' }
+    }
+  }
+
+  return { ok: true }
+}
+
 const toBuildingPayload = (buildingDoc) => {
   const building = buildingDoc?.toObject ? buildingDoc.toObject() : buildingDoc
   const floorPlans = Array.isArray(building.floorPlans) ? building.floorPlans : []
@@ -202,11 +249,20 @@ export const createBuilding = async (req, res) => {
     const {
       projectId, project, name, section, floors, floorPlans,
       exteriorRenders, polygon, polygonColor, polygonStrokeColor, polygonOpacity,
-      buildingFloorPolygons, totalApartments
+      buildingFloorPolygons, totalApartments, quoteRef
     } = req.body
     const projId = projectId || project
     if (!projId) {
       return res.status(400).json({ message: 'projectId (or project) is required' })
+    }
+
+    const normalizedQuoteRef = normalizeQuoteRefInput(quoteRef)
+    const quoteRefValidation = await validateProjectAndQuoteRef({
+      projectId: projId,
+      quoteRef: normalizedQuoteRef
+    })
+    if (!quoteRefValidation.ok) {
+      return res.status(quoteRefValidation.status).json({ message: quoteRefValidation.message })
     }
 
     const normalizedBuildingFloorPolygons = parseBuildingFloorPolygonsInput(buildingFloorPolygons, polygon)
@@ -227,6 +283,7 @@ export const createBuilding = async (req, res) => {
       polygonStrokeColor: polygonStrokeColor || '#1F2937',
       polygonOpacity: polygonOpacity != null ? Number(polygonOpacity) : 0.35,
       buildingFloorPolygons: normalizedBuildingFloorPolygons,
+      quoteRef: normalizedQuoteRef,
       totalApartments: totalApartments || 0
     })
 
@@ -246,7 +303,7 @@ export const updateBuilding = async (req, res) => {
     const {
       name, section, floors, floorPlans, exteriorRenders, polygon,
       polygonColor, polygonStrokeColor, polygonOpacity,
-      buildingFloorPolygons, totalApartments, status
+      buildingFloorPolygons, totalApartments, status, quoteRef
     } = req.body
     if (name != null) building.name = name
     if (section != null) building.section = section
@@ -267,6 +324,17 @@ export const updateBuilding = async (req, res) => {
         return res.status(400).json({ message: polygonsValidation.message })
       }
       building.buildingFloorPolygons = normalizedBuildingFloorPolygons
+    }
+    if (quoteRef !== undefined) {
+      const normalizedQuoteRef = normalizeQuoteRefInput(quoteRef)
+      const quoteRefValidation = await validateProjectAndQuoteRef({
+        projectId: building.project,
+        quoteRef: normalizedQuoteRef
+      })
+      if (!quoteRefValidation.ok) {
+        return res.status(quoteRefValidation.status).json({ message: quoteRefValidation.message })
+      }
+      building.quoteRef = normalizedQuoteRef
     }
     if (totalApartments != null) building.totalApartments = totalApartments
     if (status != null) building.status = status
