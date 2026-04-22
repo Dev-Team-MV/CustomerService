@@ -117,6 +117,7 @@ export const searchUsers = async (req, res) => {
       .select('_id firstName lastName email projectMemberships')
       .limit(query.length >= 2 ? 50 : 100)
       .sort({ lastName: 1, firstName: 1 })
+      .lean()
 
     const projectsMap = await buildUserProjectsMap(users)
     const filtered = users.filter((u) =>
@@ -168,17 +169,25 @@ export const getAllUsers = async (req, res) => {
     }
     const filter = (isAdmin && role) ? { role } : {}
 
-    let users = await User.find(filter)
-      .select('-password')
-      .populate('lots', 'number')
-      .populate('projectMemberships.project', 'name slug phase type')
+    let usersQuery = User.find(filter)
+
+    if (isAdmin) {
+      usersQuery = usersQuery
+        .select('-password')
+        .populate('lots', 'number')
+        .populate('projectMemberships.project', 'name slug phase type')
+    } else {
+      usersQuery = usersQuery
+        .select('_id firstName lastName email projectMemberships')
+    }
+
+    let users = await usersQuery.lean()
 
     const projectsMap = await buildUserProjectsMap(users)
-    const usersWithProjects = users.map((u) => {
-      const obj = u.toObject()
-      obj.projects = projectsMap.get(toIdStr(u._id)) || []
-      return obj
-    })
+    const usersWithProjects = users.map((u) => ({
+      ...u,
+      projects: projectsMap.get(toIdStr(u._id)) || []
+    }))
 
     if (projectId) {
       const filtered = usersWithProjects.filter((u) => (u.projects || []).some((p) => toIdStr(p._id) === toIdStr(projectId)))

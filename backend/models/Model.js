@@ -76,6 +76,7 @@ const modelSchema = new mongoose.Schema(
 
 modelSchema.index({ project: 1, model: 1 }, { unique: true })
 modelSchema.index({ project: 1 })
+modelSchema.index({ project: 1, status: 1 })
 
 const Model = mongoose.model('Model', modelSchema)
 

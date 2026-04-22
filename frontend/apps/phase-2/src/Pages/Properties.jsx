@@ -22,6 +22,8 @@ import {
   ConstructionTab,
 } from '@shared/components/propertyDetails'
 
+const PROJECT_ID = import.meta.env.VITE_PROJECT_ID
+
 const Properties = () => {
   const theme    = useTheme()
   const navigate = useNavigate()
@@ -185,6 +187,7 @@ const Properties = () => {
           onClose={() => setDetailsOpen(false)}
           apartment={selectedApartment}
           usePayloadColumnsFn={usePayloadColumns}
+          projectId={PROJECT_ID}
         />
 
         <Dialog

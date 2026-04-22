@@ -34,7 +34,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
     handleOpenDialog, handleCloseDialog, handleSubmit,
     handleFieldChange, handlePhoneChange, isFormValid,
     e164Value, displayVal, isPhoneValid
-  } = useResidents(residentsProjectId)
+  } = useResidents(null)
 
   // Estados locales para asignación y SMS
   const [submitting, setSubmitting] = useState(false)
