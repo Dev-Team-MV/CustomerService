@@ -25,6 +25,7 @@ import ConstructionTab from './ConstructionTab'
 import ApartmentDetailsTab from './ApartmentDetailsTab'
 import { useAuth } from '@shared/context/AuthContext'
 import { usePayloads } from '@shared/hooks/usePayloads'
+import payloadService from '@shared/services/payloadService'
 
 const paymentTypes = [
   "initial down payment",
@@ -36,7 +37,7 @@ const paymentTypes = [
 
 // usePayloadColumnsFn se inyecta como prop — cada app pasa la suya
 // ISQ no la pasa → columns = [] (tab de pagos sin columnas custom)
-const ApartmentDetailsModal = ({ open, onClose, apartment, usePayloadColumnsFn, projectId }) => {
+const ApartmentDetailsModal = ({ open, onClose, apartment, property, usePayloadColumnsFn, projectId }) => {
   const { t } = useTranslation(['myProperty', 'common', 'payloads'])
   const theme = useTheme()
 
@@ -48,6 +49,7 @@ const ApartmentDetailsModal = ({ open, onClose, apartment, usePayloadColumnsFn, 
   const [loading, setLoading] = useState(true)
   const [payloads, setPayloads] = useState([])
   const [loadingPayloads, setLoadingPayloads] = useState(false)
+  const [files, setFiles] = useState([])
 
   const {
     openDialog,
@@ -62,17 +64,20 @@ const ApartmentDetailsModal = ({ open, onClose, apartment, usePayloadColumnsFn, 
     handleDownload,
   } = usePayloads()
 
-  useEffect(() => {
-    if (open && apartment?._id) {
-      fetchApartmentDetails()
-      fetchPayloads()
-    }
-  }, [open, apartment?._id])
+useEffect(() => {
+  const entityId = property?._id || apartment?._id
+  if (open && entityId) {
+    fetchApartmentDetails()
+    fetchPayloads()
+  }
+}, [open, property?._id, apartment?._id])
 
   const fetchApartmentDetails = async () => {
     setLoading(true)
     try {
-      const res = await api.get(`/apartments/${apartment._id}`)
+      const entityType = property ? 'properties' : 'apartments'
+      const entityId = property?._id || apartment?._id
+      const res = await api.get(`/${entityType}/${entityId}`)
       setApartmentDetails(res.data)
     } catch {
       setApartmentDetails(null)
@@ -81,18 +86,19 @@ const ApartmentDetailsModal = ({ open, onClose, apartment, usePayloadColumnsFn, 
     }
   }
 
-  const fetchPayloads = async () => {
-    setLoadingPayloads(true)
-    try {
-      const res = await api.get(`/payloads?apartment=${apartment._id}&projectId=${projectId}`)
-      setPayloads(res.data)
-    } catch {
-      setPayloads([])
-    } finally {
-      setLoadingPayloads(false)
-    }
+const fetchPayloads = async () => {
+  setLoadingPayloads(true)
+  try {
+    const entityId = property?._id || apartment?._id
+    const entityParam = property ? 'property' : 'apartment'
+    const res = await api.get(`/payloads?${entityParam}=${entityId}&projectId=${projectId}`)
+    setPayloads(res.data)
+  } catch {
+    setPayloads([])
+  } finally {
+    setLoadingPayloads(false)
   }
-
+}
   const handleApproveWithRefresh = async (payload, e) => {
     await handleApprove(payload, e)
     await fetchApartmentDetails()
@@ -105,22 +111,42 @@ const ApartmentDetailsModal = ({ open, onClose, apartment, usePayloadColumnsFn, 
     await fetchPayloads()
   }
 
-  const paymentColumns = usePayloadColumnsFn?.({
-    t,
-    onEdit: handleOpenDialog,
-    onApprove: handleApproveWithRefresh,
-    onReject: handleRejectWithRefresh,
-    onDownload: handleDownload,
-    resourceType: 'apartment'
-  }) ?? []
+// Línea 116 - Actualizar resourceType dinámicamente:
+const paymentColumns = usePayloadColumnsFn?.({
+  t,
+  onEdit: handleOpenDialog,
+  onApprove: handleApproveWithRefresh,
+  onReject: handleRejectWithRefresh,
+  onDownload: handleDownload,
+  resourceType: property ? 'property' : 'apartment'
+}) ?? []
+ 
+// Línea 125 - Actualizar validación:
 
-  const handlePayloadSubmit = async () => {
-    await handleSubmit()
-    fetchPayloads()
-    fetchApartmentDetails()
+const handlePayloadSubmit = async () => {
+  try {
+    const data = {
+      ...formData,
+    }
+    if (selectedPayload) {
+      await payloadService.updatePayload(selectedPayload._id, data, files)
+    } else {
+      await payloadService.createPayload(data, files)
+    }
+    handleCloseDialogWithCleanup()
+    await fetchPayloads()
+    await fetchApartmentDetails()
+  } catch (err) {
+    console.error('Error submitting payload:', err)
   }
+}
 
-  if (!apartment) return null
+  const handleCloseDialogWithCleanup = () => {
+  handleCloseDialog()
+  setFiles([])
+}
+
+if (!apartment && !property) return null
 
   return (
     <Paper
@@ -154,7 +180,7 @@ const ApartmentDetailsModal = ({ open, onClose, apartment, usePayloadColumnsFn, 
         {/* Header y Tabs */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 3, pt: 3 }}>
           <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif' }}>
-            {t('propertyDetails')} - {apartment?.apartmentNumber ? `Apt ${apartment.apartmentNumber}` : ''}
+            {t('propertyDetails')} - {property ? `Property ${property.lot?.number || ''}` : apartment?.apartmentNumber ? `Apt ${apartment.apartmentNumber}` : ''}
           </Typography>
           <Tabs
             value={activeTab}
@@ -232,31 +258,34 @@ const ApartmentDetailsModal = ({ open, onClose, apartment, usePayloadColumnsFn, 
                         description={t('noPaymentsDescription')}
                         actionLabel={t('common:addPayment')}
                         onAction={() => {
-                          handleOpenDialog()
-                          setFormData({
-                            apartment: apartment?._id || '',
-                            amount: '',
-                            date: new Date().toISOString().split('T')[0],
-                            status: 'pending',
-                            type: '',
-                            notes: ''
-                          })
-                        }}
+  handleOpenDialog()
+  setFormData({
+    ...(property ? { property: property._id } : { apartment: apartment._id }),
+    amount: '',
+    date: new Date().toISOString().split('T')[0],
+    status: 'pending',
+    type: '',
+    notes: ''
+  })
+}}
                       />
                     }
                     maxHeight={350}
                   />
-                  <PayloadDialog
-                    open={openDialog}
-                    onClose={handleCloseDialog}
-                    onSubmit={handlePayloadSubmit}
-                    formData={formData}
-                    setFormData={setFormData}
-                    resources={[apartment]}
-                    resourceType="apartment"
-                    selectedPayload={selectedPayload}
-                    paymentTypes={paymentTypes}
-                  />
+<PayloadDialog
+  open={openDialog}
+  // onClose={handleCloseDialog}
+  onClose={handleCloseDialogWithCleanup}
+  onSubmit={handlePayloadSubmit}
+  formData={formData}
+  setFormData={setFormData}
+  resources={property ? [property] : [apartment]}
+  resourceType={property ? 'property' : 'apartment'}
+  selectedPayload={selectedPayload}
+  paymentTypes={paymentTypes}
+  files={files}
+  setFiles={setFiles}
+/>
                 </Box>
               )}
 
@@ -269,6 +298,7 @@ const ApartmentDetailsModal = ({ open, onClose, apartment, usePayloadColumnsFn, 
               {activeTab === 2 && (
                 <ConstructionTab
                   apartmentId={apartment?._id}
+                  propertyId={property?._id}
                   isAdmin={isAdmin}
                 />
               )}

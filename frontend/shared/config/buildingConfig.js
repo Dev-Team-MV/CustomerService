@@ -367,7 +367,146 @@ parking: {
       requireFloorPlans: true,
       requireBuildingFloorPolygons: true
     }
+  },
+
+  '6town-houses': {
+  projectId: PROJECT_IDS.SIXTOWN_HOUSES,
+  projectSlug: '6town-houses',
+  projectName: '6 Town Houses',
+  
+  // ✅ NO es single building - son 6 casas independientes
+  singleBuildingMode: false,
+  
+  // Building type - cada casa es una unidad residencial
+  buildingType: BUILDING_TYPES.RESIDENTIAL,
+  
+  // ✅ Floor configuration - cada casa tiene 1 "piso" técnico
+  floors: {
+    default: 1,
+    min: 1,
+    max: 1,
+    total: 1,
+    
+    // NO tiene pisos comerciales
+    hasCommercial: false,
+    commercialFloorNumbers: [],
+    
+    // NO tiene parking como piso separado
+    parking: {
+      enabled: false
+    },
+    
+    // Toda la casa es "residencial" técnicamente
+    residential: {
+      enabled: true,
+      floors: [1]
+    },
+    
+    // NO tiene amenities como pisos
+    amenities: {
+      enabled: false
+    }
+  },
+  
+  // ✅ Floor labeling (para UI)
+  floorLabels: {
+    useNegativeNumbers: false,
+    parkingPrefix: '',
+    customLabels: {
+      1: 'Casa' // En lugar de "Floor 1"
+    }
+  },
+  
+  // ✅ Polygon configuration - SOLO masterPlan
+  polygons: {
+    masterPlan: {
+      required: true,
+      defaultColor: '#2196f3',
+      defaultStrokeColor: '#1976d2',
+      defaultOpacity: 0.5
+    },
+    // NO requiere floorPlan polygons (no hay apartamentos internos)
+    floorPlan: {
+      required: false,
+      allowMultiple: false
+    },
+    // NO requiere buildingFloor polygons
+    buildingFloor: {
+      required: false
+    }
+  },
+  
+  // ✅ Render configuration
+  renders: {
+    exterior: {
+      required: true,
+      multiple: true,
+      maxCount: 10
+    },
+    // NO requiere floor plans (la customización viene del catalog-config)
+    floorPlans: {
+      required: false,
+      perFloor: false
+    }
+  },
+  
+  // ✅ Apartment configuration - NO tiene apartamentos
+  apartments: {
+    enabled: false,
+    requireModel: false,
+    allowPolygonPlacement: false,
+    renderTypes: []
+  },
+  
+  // ✅ House configuration (específico para 6town)
+  houses: {
+    enabled: true,
+    totalHouses: 6,
+    // La customización viene del catalog-config, no de apartment models
+    useCatalogConfig: true,
+    // Cada casa se cotiza individualmente
+    allowIndividualQuote: true
+  },
+  
+  // Colors
+  colors: {
+    primary: '#1a237e',
+    secondary: '#e5863c',
+    accent: '#00acc1',
+    available: '#4caf50',
+    sold: '#f44336'
+  },
+  
+  // i18n
+  i18n: {
+    namespace: 'buildings',
+    buildingLabel: 'Casa',
+    buildingsLabel: 'Casas',
+    commercialLabel: null,
+    residentialLabel: 'Casa'
+  },
+  
+  // ✅ Validation rules - simplificadas para casas
+  validation: {
+    requireSection: false,
+    requireTotalApartments: false, // NO aplica
+    requireExteriorRenders: true,
+    requireFloorPlans: false, // NO requerido
+    requireBuildingFloorPolygons: false, // Solo masterPlan polygon
+    
+    // Validación específica para 6town
+    requireMasterPlanPolygon: true,
+    allowDuplicateNames: false // Cada casa debe tener nombre único
+  },
+  
+  // ✅ Naming convention
+  naming: {
+    format: 'Casa #{number}',
+    prefix: 'Casa #',
+    startNumber: 1,
+    endNumber: 6
   }
+}
 }
 
 // ── HELPER FUNCTIONS ───────────────────────────────────────────

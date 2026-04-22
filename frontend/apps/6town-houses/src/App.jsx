@@ -22,6 +22,13 @@ import NewsDetails from './Pages/NewsDetails'
 import NewsTable from './Pages/NewsTable'
 import Residents from './Pages/Residents'
 import TermsAndCondition from './Pages/TermsAndConditions'
+import CatalogConfig from './Pages/CtalogConfig'
+import Buildings from './Pages/Buildings'
+import BuildingDetails from './Pages/BuildingDetails'
+import GetYourQuote from './Pages/GetYourQuote'
+import Lots from './Pages/Lots'
+import Models from './Pages/Models'
+import Properties from './Pages/Properties'
 
 import theme from './theme'
 
@@ -96,6 +103,13 @@ function App() {
               <Route path="/master-plan" element={<MasterPlanPageWrapper />} />
               <Route path="/admin/news" element={<NewsTable />} />
               <Route path="/residents" element={<Residents />} />
+              <Route path="/catalog-config" element={<CatalogConfig />} />
+              <Route path="/buildings" element={<Buildings />} />
+              <Route path="/buildings/:id" element={<BuildingDetails />} />
+              <Route path="/get-your-quote" element={<GetYourQuote />} />
+              <Route path="/lots" element={<Lots />} />
+              <Route path="/models" element={<Models />} />
+              <Route path="/properties" element={<Properties />} />
 
               {/* Agrega aquí el resto de tus rutas privadas */}
             </Route>

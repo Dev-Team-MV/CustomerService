@@ -118,9 +118,9 @@ export const useResidents = (projectId = null, options = {}) => {
         try {
           // Admin path: 3 llamadas paralelas
           const [residentsRes, adminsRes, superadminsRes] = await Promise.all([
-            api.get('/users', { params: { projectId } }),
-            api.get('/users', { params: { role: 'admin' } }),
-            api.get('/users', { params: { role: 'superadmin' } })
+  api.get('/users', { params: { projectId, limit: 100 } }),
+  api.get('/users', { params: { role: 'admin', limit: 100 } }),
+  api.get('/users', { params: { role: 'superadmin', limit: 100 } })
           ])
           const allUsers = [...residentsRes.data, ...adminsRes.data, ...superadminsRes.data]
           const uniqueUsers = Array.from(
@@ -135,7 +135,7 @@ export const useResidents = (projectId = null, options = {}) => {
           })
         } catch {
           // Fallback para role 'user' (sin acceso a /users)
-          const res = await api.get('/users/search', { params: { projectId } })
+          const res = await api.get('/users', { params: { projectId } })
           setUsers(res.data)
           setStats({
             total: res.data.length,

@@ -5,7 +5,8 @@ export const PROJECT_IDS = {
   LAKEWOOD: '69a73ce5b20401b061da6451',
   PHASE2: '69b9b2188186434073c6b13d',
   ISQ: '69d3b025b5ad6754488df957',
-  SHEPERD: '69dd47f2b3c3af43409aac48'
+  SHEPERD: '69dd47f2b3c3af43409aac48',
+  SIXTOWN_HOUSES: '69e623d8699902a57559b557'
 }
 
 // ── PROJECT SLUGS ──────────────────────────────────────────────
@@ -13,7 +14,8 @@ export const PROJECT_SLUGS = {
   LAKEWOOD: 'lakewood',
   PHASE2: 'lakewood-f2',
   ISQ: 'isq',
-  SHEPERD: 'sheperd'
+  SHEPERD: 'sheperd',
+  SIXTOWN_HOUSES: '6town-houses'
 }
 
 // ── RESOURCE TYPES ─────────────────────────────────────────────
@@ -272,6 +274,72 @@ export const projectConfigs = {
     financialSummary: '/user-apartments/financial-summary',
     buildings: `/buildings?projectId=${PROJECT_IDS.SHEPERD}`,
     apartmentModels: (buildingId) => `/apartment-models?buildingId=${buildingId}`
+  }
+},
+
+'6town-houses': {
+  id: PROJECT_IDS.SIXTOWN_HOUSES,
+  slug: PROJECT_SLUGS.SIXTOWN_HOUSES,
+  name: '6 Town Houses',
+  port: 5178,
+  
+  colors: {
+    primary: '#2c3e50',
+    secondary: '#95a5a6',
+    accent: '#e74c3c',
+    border: '#ecf0f1',
+    gradient: 'linear-gradient(90deg, #2c3e50, #95a5a6, #2c3e50)'
+  },
+  
+  features: {
+    hasCommercialFloors: false,
+    hasPropertyLots: true,
+    hasApartments: false,
+    hasBuildings: false,
+    hasHouseLevels: true, // 🆕 Feature único
+    useCatalogConfig: true, // 🆕 Usa catalog-config
+    showConstructionPhases: true,
+    showContracts: true,
+    showPayments: true,
+    showNews: true,
+    showResources: true
+  },
+  
+  resourceType: RESOURCE_TYPES.PROPERTY,
+  catalogType: 'houses', // 🆕
+  
+  routes: {
+    dashboard: '/dashboard',
+    properties: '/properties',
+    myHouse: '/my-house',
+    getQuote: '/get-quote', // 🆕 Ruta de cotización
+    news: '/news',
+    resources: '/resources',
+    contracts: '/contracts',
+    masterPlan: '/master-plan'
+  },
+  
+  assets: {
+    logoMain: '/assets/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png',
+    logoSecondary: null,
+    backgroundImage: null
+  },
+  
+  i18n: {
+    namespace: 'myHouse',
+    resourceKey: 'house'
+  },
+  
+  endpoints: {
+    list: '/properties?visible=true',
+    details: (id) => `/properties/${id}?visible=true`,
+    phases: (id) => `/phases/property/${id}`,
+    payloads: (id) => `/payloads?property=${id}`,
+    financialSummary: '/user-properties/financial-summary',
+    catalogConfig: `/projects/${PROJECT_IDS.SIXTOWN_HOUSES}/catalog-config`, // 🆕
+    lots: `/lots?projectId=${PROJECT_IDS.SIXTOWN_HOUSES}`,
+    models: `/models?projectId=${PROJECT_IDS.SIXTOWN_HOUSES}`,
+    facades: `/facades?projectId=${PROJECT_IDS.SIXTOWN_HOUSES}`
   }
 }
 }

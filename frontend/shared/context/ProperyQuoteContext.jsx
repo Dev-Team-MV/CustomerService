@@ -421,6 +421,8 @@ export const PropertyQuoteProvider = ({ projectSlug, projectId, children }) => {
   const [apartmentType, setApartmentType]           = useState(null)
   const [selectedRenderType, setSelectedRenderType] = useState(null)
 
+  const [selectedOptions, setSelectedOptions]       = useState({})
+
   // ── Financials ────────────────────────────────────────────────────────────
   const [financials, setFinancials] = useState({
     listPrice:                  0,
@@ -699,6 +701,7 @@ export const PropertyQuoteProvider = ({ projectSlug, projectId, children }) => {
     setSelectedFloor(null)
     setSelectedApartment(null)
     setApartmentType(null)
+    setSelectedOptions({}) 
     setApartments([])
     setApartmentModels([])
     setFinancials(prev => ({
@@ -731,6 +734,7 @@ export const PropertyQuoteProvider = ({ projectSlug, projectId, children }) => {
     selectedApartment,  setSelectedApartment,
     apartmentType,      setApartmentType,
     selectedRenderType, setSelectedRenderType,
+    selectedOptions,    setSelectedOptions,
 
     // Financials
     financials,
