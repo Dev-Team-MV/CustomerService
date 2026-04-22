@@ -38,7 +38,8 @@ const buildingService = {
         exteriorRenders: buildingData.exteriorRenders || [],
         polygon: buildingData.polygon || [],
         buildingFloorPolygons: buildingData.buildingFloorPolygons || [],
-        status: buildingData.status || 'active'
+        status: buildingData.status || 'active',
+        quoteRef: buildingData.quoteRef || {}  // ✅ Agregar quoteRef
       }
       const response = await api.post('/buildings', payload)
       return response.data
@@ -63,6 +64,8 @@ const buildingService = {
       if (buildingData.polygonStrokeColor !== undefined) payload.polygonStrokeColor = buildingData.polygonStrokeColor
       if (buildingData.polygonOpacity !== undefined) payload.polygonOpacity = buildingData.polygonOpacity
       if (buildingData.status !== undefined) payload.status = buildingData.status
+      if (buildingData.quoteRef !== undefined) payload.quoteRef = buildingData.quoteRef  // ✅ Agregar quoteRef
+
       const response = await api.put(`/buildings/${id}`, payload)
       return response.data
     } catch (error) {

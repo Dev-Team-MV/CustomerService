@@ -3,7 +3,28 @@ import buildingService from './buildingService'
 
 export const propertyService = {
   // ─── Lakewood (Lots / Models / Facades) ────────────────────────────────────
+// @/Users/oficina/MV-CRM/CustomerService/frontend/shared/services/propertyService.js
+// Agregar después de deleteProperty (línea 110):
 
+getAll: async (params = {}) => {
+  try {
+    const response = await api.get('/properties', { params })
+    return Array.isArray(response.data) ? response.data : []
+  } catch (error) {
+    console.error('Error fetching properties:', error)
+    return []
+  }
+},
+
+getByProject: async (projectId) => {
+  try {
+    const response = await api.get('/properties', { params: { projectId } })
+    return Array.isArray(response.data) ? response.data : []
+  } catch (error) {
+    console.error('Error fetching properties by project:', error)
+    return []
+  }
+},
   getLots: async () => {
     try {
       const response = await api.get('/lots')

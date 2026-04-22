@@ -79,6 +79,7 @@ function App() {
             }
           >
             <Route path="/explore/amenities" element={<AmenitiesPublic />} />
+            <Route path="/explore/properties" element={<GetYourQuote />} />
           </Route>
 
           {/* Hybrid Routes */}

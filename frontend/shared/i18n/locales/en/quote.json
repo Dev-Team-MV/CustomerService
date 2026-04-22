@@ -15,19 +15,19 @@
   "clickPolygon": "Click on a building polygon to select it",
   "noBuildings": "No buildings available",
 
-    "selectFloorStep": "02 SELECT A FLOOR",
+  "selectFloorStep": "02 SELECT A FLOOR",
   "clickFloorPolygon": "Click a floor polygon on the building exterior",
   "floor": "Floor",
 
-
-  
   "selectApartmentStep": "03 SELECT AN APARTMENT",
   "hold": "Hold",
   "sold": "Sold",
   "apartment": "Apartment",
   "apartmentShort": "Apt",
   "bedrooms": "Bedrooms",
+  "beds": "beds",
   "bathrooms": "Bathrooms",
+  "baths": "baths",
   "sqft": "sq ft",
   "model": "Model",
   "status": {
@@ -39,8 +39,7 @@
   "noFloorPlan": "No floor plan image uploaded yet.",
   "selectApartmentDropdown": "Select an apartment from Floor {{floor}}…",
 
-
-    "customizeStep": "04 CUSTOMIZE YOUR APARTMENT",
+  "customizeStep": "04 CUSTOMIZE YOUR APARTMENT",
   "apartmentModel": "Apartment Model",
   "selectInteriorPackage": "Select Interior Package",
   "noInteriorPackages": "No interior render packages available for this apartment",
@@ -52,15 +51,12 @@
   "previewThumb": "Thumb {{idx}}",
   "selectApartmentToCustomize": "Please select an apartment to customize",
 
-
-  
   "priceCalculator": "Price Calculator",
   "browsingAsGuest": "Browsing as guest.",
   "signIn": "Sign in",
   "toSaveSelections": "to save your selections.",
   "listPrice": "List Price",
   "notSelected": "Not selected",
-
   "discount": "Discount",
   "amount": "Amount",
   "presalePriceToday": "PRESALE PRICE TODAY",
@@ -88,9 +84,42 @@
   "generateAndSend": "Generate & Send Quote",
   "selectApartment": "Please select an apartment",
   "quoteComingSoon": "Quote functionality coming soon!",
+  "calculating": "Calculating...",
+  "getQuote": "Get Quote",
+  "errorGettingQuote": "Error getting quote. Please try again.",
 
+  "quoteReady": "Your Quote is Ready!",
+  "propertyQuote": "Property Quote Details",
+  "apartmentQuote": "Apartment Quote Details",
+  "summary": "Quote Summary",
+  "totalPrice": "Total Price",
+  "price": "Price",
+  "initialPayment": "Initial Payment",
+  "pending": "Pending",
+  "propertyDetails": "Property Details",
+  "apartmentDetails": "Apartment Details",
+  "lot": "Lot",
+  "facade": "Facade",
+  "included": "Included",
+  "options": "Options",
+  "upgrade": "Upgrade",
+  "basic": "Basic",
+  "balcony": "Balcony",
+  "noBalcony": "No Balcony",
+  "storage": "Storage",
+  "noStorage": "No Storage",
+  "location": "Location",
+  "apartmentNumber": "Apt {{number}} - Floor {{floor}}",
+  "renderType": "Render Type",
+  "lotPrice": "Lot Price",
+  "modelBasePrice": "Model Base Price",
+  "facadePrice": "Facade Price",
+  "upgradePrice": "Upgrade Price",
+  "balconyPrice": "Balcony Price",
+  "storagePrice": "Storage Price",
+  "total": "Total",
 
-    "residentAssignmentStep": "04 Resident Assignment",
+  "residentAssignmentStep": "04 Resident Assignment",
   "selectOrCreateResident": "Select or create a resident",
   "clickToExpand": "Click to expand",
   "selectBuildingAndApartment": "Select building and apartment to assign resident",
@@ -111,6 +140,4 @@
   "apartmentAssigned": "Apartment assigned successfully!",
   "apartmentCreatedAssigned": "Apartment created and assigned successfully!",
   "errorAssigning": "Error creating or assigning apartment"
-
-
 }

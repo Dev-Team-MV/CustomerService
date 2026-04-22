@@ -155,7 +155,7 @@ export const getAllModels = async (req, res) => {
     if (projectId) filter.project = projectId
     if (status) filter.status = status
 
-    const models = await Model.find(filter).sort({ model: 1 })
+    const models = await Model.find(filter).sort({ model: 1 }).lean()
     const data = models.map(normalizeModelForResponse)
     await hydrateUrlsInObject(data)
     res.json(data)

@@ -10,7 +10,7 @@ import ModalWrapper from '@shared/constants/ModalWrapper'
 import PrimaryButton from '@shared/constants/PrimaryButton'
 import ExteriorPolygonEditor from '@shared/components/Buildings/ExteriorPolygonEditor'
 import {
-  getBuildingConfig, isCommercialFloor, getFloorRange
+  getBuildingConfig, isCommercialFloor, getFloorRange, getFloorType, FLOOR_TYPES
 } from '@shared/config/buildingConfig'
 
 const DEFAULT_FORM = {
@@ -170,21 +170,38 @@ const BuildingDialog = ({ open, onClose, onSaved, selectedBuilding, projectSlug 
     }
   }
 
-  const handleSavePolygons = (polygons) => {
-    setExteriorPolygons((polygons || []).map(poly => ({
-      ...poly,
-      floorNumber: poly.floorNumber || 1,
-      isCommercial: isCommercialFloor(projectSlug, poly.floorNumber || 1),
-    })))
-    handleClosePolygonEditor()
-  }
-
-  const getFloorLabel = (floorNumber) => {
-    if (isCommercialFloor(projectSlug, floorNumber)) {
+//   const handleSavePolygons = (polygons) => {
+//     setExteriorPolygons((polygons || []).map(poly => ({
+//       ...poly,
+//       floorNumber: poly.floorNumber || 1,
+//       isCommercial: isCommercialFloor(projectSlug, poly.floorNumber || 1),
+//     })))
+//     handleClosePolygonEditor()
+//   }
+const handleSavePolygons = (polygons) => {
+  setExteriorPolygons((polygons || []).map(poly => ({
+    ...poly,
+    floorNumber: poly.floorNumber || 1,
+    floorType: getFloorType(projectSlug, poly.floorNumber || 1),
+    isCommercial: isCommercialFloor(projectSlug, poly.floorNumber || 1), // Mantener para compatibilidad
+  })))
+  handleClosePolygonEditor()
+}
+const getFloorLabel = (floorNumber) => {
+  const floorType = getFloorType(projectSlug, floorNumber)
+  
+  switch (floorType) {
+    case FLOOR_TYPES.PARKING:
+      return t('buildings:floorTypes.parking', 'Parking')
+    case FLOOR_TYPES.COMMERCIAL:
       return config.i18n.commercialLabel || t('buildings:commercial', 'Commercial')
-    }
-    return config.i18n.residentialLabel || t('buildings:residential', 'Residential')
+    case FLOOR_TYPES.AMENITY:
+      return t('buildings:floorTypes.amenity', 'Amenity')
+    case FLOOR_TYPES.RESIDENTIAL:
+    default:
+      return config.i18n.residentialLabel || t('buildings:residential', 'Residential')
   }
+}
 
   const fieldSx = {
     '& .MuiOutlinedInput-root': { borderRadius: 3, fontFamily: '"Poppins", sans-serif', bgcolor: 'white', '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main, borderWidth: '2px' }, '&:hover fieldset': { borderColor: theme.palette.secondary.main } },
