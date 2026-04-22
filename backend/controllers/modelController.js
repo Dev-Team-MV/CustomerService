@@ -34,6 +34,46 @@ const formatBlueprints = (blueprints) => {
   }
 }
 
+const formatFloorMedia = (media) => {
+  if (!media || typeof media !== 'object') {
+    return {
+      renders: [],
+      isometrics: [],
+      blueprints: [],
+      cinematics: [],
+      exterior: []
+    }
+  }
+
+  return {
+    renders: normalizeImageArray(media.renders),
+    isometrics: normalizeImageArray(media.isometrics),
+    blueprints: normalizeImageArray(media.blueprints),
+    cinematics: normalizeImageArray(media.cinematics),
+    exterior: normalizeImageArray(media.exterior)
+  }
+}
+
+const formatFloors = (floors) => {
+  if (!Array.isArray(floors)) return []
+
+  return floors.map((floor, floorIndex) => ({
+    key: floor?.key || `floor-${floorIndex + 1}`,
+    label: floor?.label || '',
+    level: floor?.level,
+    isCustomizable: floor?.isCustomizable !== undefined ? !!floor.isCustomizable : true,
+    options: Array.isArray(floor?.options)
+      ? floor.options.map((option, optionIndex) => ({
+        key: option?.key || `option-${optionIndex + 1}`,
+        label: option?.label || '',
+        status: option?.status || 'active',
+        media: formatFloorMedia(option?.media)
+      }))
+      : [],
+    media: formatFloorMedia(floor?.media)
+  }))
+}
+
 // Normaliza imágenes en el documento (legacy strings → { url, isPublic }) antes de guardar
 function normalizeModelBeforeSave (model) {
   if (model.images) {
@@ -87,6 +127,17 @@ function normalizeModelBeforeSave (model) {
         if (Array.isArray(s.images.interior) && s.images.interior.some((x) => typeof x === 'string')) {
           s.images.interior = normalizeImageArray(s.images.interior)
         }
+      }
+    })
+  }
+  if (Array.isArray(model.floors)) {
+    model.floors.forEach((floor) => {
+      if (floor.media) floor.media = formatFloorMedia(floor.media)
+
+      if (Array.isArray(floor.options)) {
+        floor.options.forEach((option) => {
+          if (option.media) option.media = formatFloorMedia(option.media)
+        })
       }
     })
   }
@@ -145,6 +196,22 @@ function normalizeModelForResponse (model) {
       return out
     })
   }
+  if (Array.isArray(doc.floors)) {
+    doc.floors = doc.floors.map((floor) => {
+      const floorOut = floor.toObject ? floor.toObject() : { ...floor }
+      floorOut.media = formatFloorMedia(floorOut.media)
+
+      floorOut.options = Array.isArray(floorOut.options)
+        ? floorOut.options.map((option) => {
+          const optionOut = option.toObject ? option.toObject() : { ...option }
+          optionOut.media = formatFloorMedia(optionOut.media)
+          return optionOut
+        })
+        : []
+
+      return floorOut
+    })
+  }
   return doc
 }
 
@@ -175,6 +242,29 @@ export const getModelById = async (req, res) => {
     } else {
       res.status(404).json({ message: 'Model not found' })
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const getModelFloors = async (req, res) => {
+  try {
+    const model = await Model.findById(req.params.id).select('model modelNumber floors')
+
+    if (!model) {
+      return res.status(404).json({ message: 'Model not found' })
+    }
+
+    const data = normalizeModelForResponse(model)
+    const response = {
+      modelId: model._id,
+      modelName: data.model,
+      modelNumber: data.modelNumber,
+      floors: Array.isArray(data.floors) ? data.floors : []
+    }
+
+    await hydrateUrlsInObject(response)
+    res.json(response)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -328,7 +418,8 @@ export const createModel = async (req, res) => {
       status,
       balconies,
       upgrades,
-      storages
+      storages,
+      floors
     } = req.body
 
     const projId = projectId || project
@@ -425,7 +516,8 @@ export const createModel = async (req, res) => {
       status: status || 'active',
       balconies: validatedBalconies,
       upgrades: validatedUpgrades,
-      storages: validatedStorages
+      storages: validatedStorages,
+      floors: formatFloors(floors)
     })
     
     const modelData = normalizeModelForResponse(newModel)
@@ -475,6 +567,12 @@ export const updateModel = async (req, res) => {
     if (req.body.blueprints !== undefined) model.blueprints = formatBlueprints(req.body.blueprints)
     if (req.body.description !== undefined) model.description = req.body.description
     if (req.body.status !== undefined) model.status = req.body.status
+    if (req.body.floors !== undefined) {
+      if (!Array.isArray(req.body.floors)) {
+        return res.status(400).json({ message: 'Floors must be an array' })
+      }
+      model.floors = formatFloors(req.body.floors)
+    }
     
     // Validar y actualizar balcones si se proporcionan
     if (req.body.balconies !== undefined) {
