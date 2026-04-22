@@ -434,6 +434,15 @@ export const createProperty = async (req, res) => {
     }
     projId = resolved.data.projectId
     const { totalPrice, initialPayment: initialPaymentAmount, pending: pendingAmount } = resolved.data.prices
+    if (initialPaymentAmount > totalPrice) {
+      return res.status(400).json({
+        message: 'initialPayment cannot be greater than totalPrice',
+        totals: {
+          totalPrice,
+          initialPayment: initialPaymentAmount
+        }
+      })
+    }
     
     const property = await Property.create({
       project: projId,
