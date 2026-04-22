@@ -15,21 +15,21 @@
   "clickPolygon": "Haz clic en un polígono para seleccionar un edificio",
   "noBuildings": "No hay edificios disponibles",
 
-    "selectFloorStep": "02 SELECCIONA UN PISO",
+  "selectFloorStep": "02 SELECCIONA UN PISO",
   "clickFloorPolygon": "Haz clic en un polígono del edificio para seleccionar un piso",
   "floor": "Piso",
 
-
-  
   "selectApartmentStep": "03 SELECCIONA UN DEPARTAMENTO",
   "hold": "Reservado",
   "sold": "Vendido",
   "apartment": "Departamento",
   "apartmentShort": "Apt",
   "bedrooms": "Habitaciones",
+  "beds": "hab",
   "bathrooms": "Baños",
+  "baths": "baños",
   "sqft": "sq ft",
-  "model": "Model",
+  "model": "Modelo",
   "status": {
     "available": "Disponible",
     "pending": "Reservado",
@@ -39,8 +39,7 @@
   "noFloorPlan": "No hay planos de piso disponibles.",
   "selectApartmentDropdown": "Selecciona un departamento del Piso {{floor}}…",
 
-
-    "customizeStep": "04 PERSONALIZA TU DEPARTAMENTO",
+  "customizeStep": "04 PERSONALIZA TU DEPARTAMENTO",
   "apartmentModel": "Modelo de Departamento",
   "selectInteriorPackage": "Seleccionar Paquete Interior",
   "noInteriorPackages": "No hay paquetes de renderizado interior disponibles para este departamento",
@@ -52,15 +51,12 @@
   "previewThumb": "Thumb {{idx}}",
   "selectApartmentToCustomize": "Por favor selecciona un departamento para personalizar",
 
-
-  
   "priceCalculator": "Calculadora de Precios",
   "browsingAsGuest": "Navegando como invitado.",
   "signIn": "Iniciar sesión",
   "toSaveSelections": "para guardar tus selecciones.",
   "listPrice": "Precio Lista",
   "notSelected": "No seleccionado",
-
   "discount": "Descuento",
   "amount": "Monto",
   "presalePriceToday": "PRECIO DE PREVENTA HOY",
@@ -88,8 +84,42 @@
   "generateAndSend": "Generar y enviar cotización",
   "selectApartment": "Por favor selecciona un departamento",
   "quoteComingSoon": "¡Funcionalidad de cotización disponible pronto!",
+  "calculating": "Calculando...",
+  "getQuote": "Obtener Cotización",
+  "errorGettingQuote": "Error al obtener cotización. Intenta de nuevo.",
 
-    "residentAssignmentStep": "04 Asignación de Residente",
+  "quoteReady": "¡Tu Cotización está Lista!",
+  "propertyQuote": "Detalles de Cotización de Propiedad",
+  "apartmentQuote": "Detalles de Cotización de Departamento",
+  "summary": "Resumen de Cotización",
+  "totalPrice": "Precio Total",
+  "price": "Precio",
+  "initialPayment": "Pago Inicial",
+  "pending": "Pendiente",
+  "propertyDetails": "Detalles de Propiedad",
+  "apartmentDetails": "Detalles de Departamento",
+  "lot": "Lote",
+  "facade": "Fachada",
+  "included": "Incluido",
+  "options": "Opciones",
+  "upgrade": "Mejora",
+  "basic": "Básico",
+  "balcony": "Balcón",
+  "noBalcony": "Sin Balcón",
+  "storage": "Bodega",
+  "noStorage": "Sin Bodega",
+  "location": "Ubicación",
+  "apartmentNumber": "Apt {{number}} - Piso {{floor}}",
+  "renderType": "Tipo de Render",
+  "lotPrice": "Precio del Lote",
+  "modelBasePrice": "Precio Base del Modelo",
+  "facadePrice": "Precio de Fachada",
+  "upgradePrice": "Precio de Mejora",
+  "balconyPrice": "Precio de Balcón",
+  "storagePrice": "Precio de Bodega",
+  "total": "Total",
+
+  "residentAssignmentStep": "04 Asignación de Residente",
   "selectOrCreateResident": "Seleccionar o crear un residente",
   "clickToExpand": "Hacer clic para expandir",
   "selectBuildingAndApartment": "Seleccionar edificio y departamento para asignar residente",
@@ -110,5 +140,4 @@
   "apartmentAssigned": "Departamento asignado exitosamente!",
   "apartmentCreatedAssigned": "Departamento creado y asignado exitosamente!",
   "errorAssigning": "Error al crear o asignar departamento"
-
 }

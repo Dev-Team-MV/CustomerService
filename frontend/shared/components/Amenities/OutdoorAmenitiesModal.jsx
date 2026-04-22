@@ -12,9 +12,12 @@ const OutdoorAmenitiesModal = ({
   open,
   onClose,
   projectId,
+  projectSlug, // ✅ NUEVO: Para identificar el proyecto
   amenities = [],
   amenitySections = [],
-  onUploaded
+  onUploaded,
+  floorNumber = null, // ✅ NUEVO: Para proyectos de apartamentos
+  requiresFloor = false // ✅ NUEVO: Flag para validación
 }) => {
   const theme = useTheme()
   const { t } = useTranslation(['amenities', 'common'])
@@ -57,6 +60,32 @@ const OutdoorAmenitiesModal = ({
     }))
   }
 
+//   const handleUpload = async () => {
+//     setUploading(true)
+//     try {
+//       const updatedSections = [...amenitySections]
+//       for (const amenity of amenities) {
+//         const key = amenity.key
+//         if (selectedFiles[key]?.length > 0) {
+//           const uploadedImages = await uploadService.uploadOutdoorAmenityImages(selectedFiles[key], key)
+//           const existingSection = updatedSections.find(s => s.key === key)
+//           if (existingSection) {
+//             existingSection.images = [...(existingSection.images || []), ...uploadedImages]
+//           } else {
+//             updatedSections.push({ key, images: uploadedImages })
+//           }
+//         }
+//       }
+//       await uploadService.saveOutdoorAmenities(projectId, updatedSections)
+//       setSelectedFiles(amenities.reduce((acc, a) => ({ ...acc, [a.key]: [] }), {}))
+//       if (onUploaded) onUploaded()
+//       onClose()
+//     } catch (err) {
+//       console.error('[OutdoorAmenitiesModal] Error uploading:', err)
+//     } finally {
+//       setUploading(false)
+//     }
+//   }
   const handleUpload = async () => {
     setUploading(true)
     try {
@@ -64,16 +93,27 @@ const OutdoorAmenitiesModal = ({
       for (const amenity of amenities) {
         const key = amenity.key
         if (selectedFiles[key]?.length > 0) {
-          const uploadedImages = await uploadService.uploadOutdoorAmenityImages(selectedFiles[key], key)
+          // ✅ Pasar floorNumber al upload
+          const uploadedImages = await uploadService.uploadOutdoorAmenityImages(
+            selectedFiles[key], 
+            key,
+            floorNumber // ✅ NUEVO
+          )
           const existingSection = updatedSections.find(s => s.key === key)
           if (existingSection) {
             existingSection.images = [...(existingSection.images || []), ...uploadedImages]
+            if (floorNumber) existingSection.floorNumber = floorNumber // ✅ NUEVO
           } else {
-            updatedSections.push({ key, images: uploadedImages })
+            updatedSections.push({ 
+              key, 
+              images: uploadedImages,
+              floorNumber // ✅ NUEVO
+            })
           }
         }
       }
-      await uploadService.saveOutdoorAmenities(projectId, updatedSections)
+      // ✅ Pasar floorNumber al save
+      await uploadService.saveOutdoorAmenities(projectId, updatedSections, floorNumber)
       setSelectedFiles(amenities.reduce((acc, a) => ({ ...acc, [a.key]: [] }), {}))
       if (onUploaded) onUploaded()
       onClose()
@@ -83,6 +123,7 @@ const OutdoorAmenitiesModal = ({
       setUploading(false)
     }
   }
+
 
   const handleToggleUploadedImageVisibility = async (amenityKey, imgIdx, newValue) => {
     try {
@@ -144,6 +185,13 @@ const OutdoorAmenitiesModal = ({
       <Typography variant="subtitle2" fontWeight={700} mb={1.5}>
         {t('amenities:selectAmenity', 'Select an amenity')}
       </Typography>
+            {floorNumber && (
+        <Chip 
+          label={`Floor ${floorNumber}`} 
+          color="primary" 
+          sx={{ mb: 2 }}
+        />
+      )}
 
       <Box display="flex" flexWrap="wrap" gap={1} mb={3}>
         {amenities.map(amenity => {
@@ -156,7 +204,7 @@ const OutdoorAmenitiesModal = ({
               key={amenity.key}
               label={
                 <Box display="flex" alignItems="center" gap={0.5}>
-                  {t(`amenities:amenityNames.${amenity.name}`, amenity.name)}
+                  {amenity.name}
                   {count > 0 && (
                     <Box component="span" sx={{
                       ml: 0.5, px: 0.8, py: 0.2,

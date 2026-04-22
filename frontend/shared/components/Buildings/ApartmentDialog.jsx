@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Grid, TextField, MenuItem, Button, Alert, Typography,Box, IconButton } from '@mui/material'
-import { Home } from '@mui/icons-material'
+import { Grid, TextField, MenuItem, Button, Alert, Typography, Box, IconButton, Chip } from '@mui/material'
+import { Home, LocalParking } from '@mui/icons-material' // ✅ Agregar LocalParking
 import { useTheme } from '@mui/material/styles'
 import ModalWrapper from '@shared/constants/ModalWrapper'
 import PrimaryButton from '@shared/constants/PrimaryButton'
-// import FloorPlanPolygonSelectorModal from '../FloorPlanPolygonSelectorModal'
 import FloorPlanPolygonSelectorModal from '@shared/components/Buildings/FloorPlanPolygonSelectorModal'
-  import uploadService from '@shared/services/uploadService'
+import ParkingSpotSelectorDialog from '@shared/components/Buildings/Parking/ParkingSpotSelectorDialog' // ✅ NUEVO
+import uploadService from '@shared/services/uploadService'
+import parkingSpotService from '@shared/services/parkingSpotService' // ✅ NUEVO
 import CloseIcon from '@mui/icons-material/Close'
 import { useTranslation } from 'react-i18next'
 
@@ -17,6 +18,7 @@ const DEFAULT_FORM = {
   price: '',
   status: 'available',
   interiorRendersBasic: [],
+  parkingSpot: null, // ✅ NUEVO
 }
 
 const ApartmentDialog = ({
@@ -25,17 +27,22 @@ const ApartmentDialog = ({
   onSaved,
   selectedApartment,
   apartmentModels = [],
+  buildingId, // ✅ Asegurarse que esté aquí
   buildingFloors = 1,
   floorPlans = [],
+  existingApartments = [], 
 }) => {
   const { t } = useTranslation(['buildings', 'common'])
   const theme = useTheme()
   const [form, setForm] = useState(DEFAULT_FORM)
   const [polygonSelectorOpen, setPolygonSelectorOpen] = useState(false)
   const [selectedPolygonId, setSelectedPolygonId] = useState(null)
-  const [basicRenders, setBasicRenders] = useState([])
 
-    const [upgradeRenders, setUpgradeRenders] = useState([])
+const [basicRenders, setBasicRenders] = useState([])
+const [upgradeRenders, setUpgradeRenders] = useState([])
+const [parkingSpots, setParkingSpots] = useState([]) // ✅ NUEVO
+const [selectedParkingSpot, setSelectedParkingSpot] = useState(null) // ✅ NUEVO
+const [parkingSelectorOpen, setParkingSelectorOpen] = useState(false) // ✅ NUEVO
 
   const floorPlansArray = Array.isArray(floorPlans)
     ? floorPlans
@@ -47,31 +54,53 @@ const ApartmentDialog = ({
     fp => Number(fp.floorNumber) === Number(form.floorNumber)
   )
 
-  useEffect(() => {
-    if (open) {
-      if (selectedApartment) {
-        setForm({
-          apartmentModel: typeof selectedApartment.apartmentModel === 'object'
-            ? selectedApartment.apartmentModel._id
-            : selectedApartment.apartmentModel || '',
-          floorNumber: selectedApartment.floorNumber || '',
-          apartmentNumber: selectedApartment.apartmentNumber || '',
-          price: selectedApartment.price ?? '',
-          status: selectedApartment.status || 'available',
-          interiorRendersBasic: selectedApartment.interiorRendersBasic || [],
-          interiorRendersUpgrade: selectedApartment.interiorRendersUpgrade || [],
-        })
-        setSelectedPolygonId(selectedApartment.floorPlanPolygonId || null)
-        setBasicRenders(selectedApartment.interiorRendersBasic || [])
-        setUpgradeRenders(selectedApartment.interiorRendersUpgrade || [])
-      } else {
-        setForm(DEFAULT_FORM)
-        setSelectedPolygonId(null)
-        setBasicRenders([])
-        setUpgradeRenders([])
+useEffect(() => {
+  if (open) {
+    if (selectedApartment) {
+      // ✅ ACTUALIZADO: Obtener parking spot del array parkingSpots
+      const parkingSpotData = selectedApartment.parkingSpots?.[0] || selectedApartment.parkingSpot
+      const parkingSpotId = parkingSpotData?._id || parkingSpotData || null
+      
+      setForm({
+        apartmentModel: typeof selectedApartment.apartmentModel === 'object'
+          ? selectedApartment.apartmentModel._id
+          : selectedApartment.apartmentModel || '',
+        floorNumber: selectedApartment.floorNumber || '',
+        apartmentNumber: selectedApartment.apartmentNumber || '',
+        price: selectedApartment.price ?? '',
+        status: selectedApartment.status || 'available',
+        interiorRendersBasic: selectedApartment.interiorRendersBasic || [],
+        interiorRendersUpgrade: selectedApartment.interiorRendersUpgrade || [],
+        parkingSpot: parkingSpotId, // ✅ ACTUALIZADO
+      })
+      setSelectedPolygonId(selectedApartment.floorPlanPolygonId || null)
+      setBasicRenders(selectedApartment.interiorRendersBasic || [])
+      setUpgradeRenders(selectedApartment.interiorRendersUpgrade || [])
+      setSelectedParkingSpot(parkingSpotData || null) // ✅ ACTUALIZADO: Guardar el objeto completo
+    } else {
+      setForm(DEFAULT_FORM)
+      setSelectedPolygonId(null)
+      setBasicRenders([])
+      setUpgradeRenders([])
+      setSelectedParkingSpot(null)
+    }
+  }
+}, [selectedApartment, open])
+
+  // ✅ NUEVO: Fetch available parking spots
+useEffect(() => {
+  const fetchParkingSpots = async () => {
+    if (open && buildingId) {
+      try {
+        const spots = await parkingSpotService.getByBuilding(buildingId)
+        setParkingSpots(spots)
+      } catch (error) {
+        console.error('Error fetching parking spots:', error)
       }
     }
-  }, [selectedApartment, open])
+  }
+  fetchParkingSpots()
+}, [open, buildingId])
 
   const handleChange = (field, value) => {
     if (field === 'floorNumber') {
@@ -87,6 +116,14 @@ const ApartmentDialog = ({
       }))
     }
   }
+
+  // ✅ NUEVO: Handler para seleccionar parking spot
+const handleSelectParkingSpot = (spotId) => {
+  const spot = parkingSpots.find(s => s._id === spotId)
+  setSelectedParkingSpot(spot)
+  setForm(prev => ({ ...prev, parkingSpot: spotId }))
+  setParkingSelectorOpen(false)
+}
 
   // Manejo de subida de renders básicos
   
@@ -119,25 +156,26 @@ const ApartmentDialog = ({
     Number(form.price) >= 0 &&
     selectedPolygonId
 
-  const handleSubmit = () => {
-    if (!isValid) return
+const handleSubmit = () => {
+  if (!isValid) return
 
-    const payload = {
-      apartmentModel: form.apartmentModel,
-      floorNumber: Number(form.floorNumber),
-      apartmentNumber: form.apartmentNumber,
-      price: Number(form.price),
-      status: form.status,
-      floorPlanPolygonId: selectedPolygonId,
-      interiorRendersBasic: basicRenders,
-      interiorRendersUpgrade: upgradeRenders, // <--- NUEVO
-    }
-    if (selectedApartment?._id) {
-      payload._id = selectedApartment._id
-    }
-
-    onSaved(payload)
+  const payload = {
+    apartmentModel: form.apartmentModel,
+    floorNumber: Number(form.floorNumber),
+    apartmentNumber: form.apartmentNumber,
+    price: Number(form.price),
+    status: form.status,
+    floorPlanPolygonId: selectedPolygonId,
+    interiorRendersBasic: basicRenders,
+    interiorRendersUpgrade: upgradeRenders,
+    parkingSpot: form.parkingSpot || null, // ✅ NUEVO
   }
+  if (selectedApartment?._id) {
+    payload._id = selectedApartment._id
+  }
+
+  onSaved(payload)
+}
 
   const fieldSx = {
     '& .MuiOutlinedInput-root': {
@@ -275,6 +313,106 @@ const ApartmentDialog = ({
             <MenuItem value="pending">{t('buildings:pending', 'Pendiente')}</MenuItem>
           </TextField>
         </Grid>
+
+{/* Sección informativa de Parking Spot */}
+<Grid item xs={12}>
+  <Box
+    sx={{
+      p: 2,
+      borderRadius: 2,
+      border: '1px solid',
+      borderColor: selectedParkingSpot ? theme.palette.success.main + '40' : theme.palette.divider,
+      bgcolor: selectedParkingSpot ? theme.palette.success.main + '08' : theme.palette.background.default,
+    }}
+  >
+    <Box display="flex" alignItems="center" gap={1} mb={selectedParkingSpot ? 1 : 0}>
+      <LocalParking 
+        sx={{ 
+          fontSize: 20, 
+          color: selectedParkingSpot ? theme.palette.success.main : theme.palette.text.secondary 
+        }} 
+      />
+      <Typography 
+        variant="subtitle2" 
+        sx={{ 
+          fontWeight: 600, 
+          fontFamily: '"Poppins", sans-serif',
+          color: selectedParkingSpot ? theme.palette.success.main : theme.palette.text.secondary
+        }}
+      >
+        {t('buildings:parkingSpot', 'Parqueadero')}
+      </Typography>
+    </Box>
+    
+    {selectedParkingSpot ? (
+      <Box sx={{ pl: 4 }}>
+        <Box display="flex" gap={2} flexWrap="wrap">
+          <Box>
+            <Typography variant="caption" color="text.secondary" fontFamily='"Poppins", sans-serif'>
+              {t('buildings:code', 'Código')}
+            </Typography>
+            <Typography variant="body2" fontWeight={600} fontFamily='"Poppins", sans-serif'>
+              {selectedParkingSpot.code}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="caption" color="text.secondary" fontFamily='"Poppins", sans-serif'>
+              {t('buildings:type', 'Tipo')}
+            </Typography>
+            <Typography variant="body2" fontWeight={600} fontFamily='"Poppins", sans-serif' sx={{ textTransform: 'capitalize' }}>
+              {selectedParkingSpot.spotType}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="caption" color="text.secondary" fontFamily='"Poppins", sans-serif'>
+              {t('buildings:floor', 'Piso')}
+            </Typography>
+            <Typography variant="body2" fontWeight={600} fontFamily='"Poppins", sans-serif'>
+              {selectedParkingSpot.floorNumber}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="caption" color="text.secondary" fontFamily='"Poppins", sans-serif'>
+              {t('buildings:status', 'Estado')}
+            </Typography>
+            <Chip 
+              label={selectedParkingSpot.status} 
+              size="small"
+              sx={{
+                height: 20,
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                fontFamily: '"Poppins", sans-serif',
+                bgcolor: theme.palette.success.main + '20',
+                color: theme.palette.success.main
+              }}
+            />
+          </Box>
+        </Box>
+        {selectedParkingSpot.notes && (
+          <Box mt={1}>
+            <Typography variant="caption" color="text.secondary" fontFamily='"Poppins", sans-serif'>
+              {t('buildings:notes', 'Notas')}
+            </Typography>
+            <Typography variant="body2" fontFamily='"Poppins", sans-serif'>
+              {selectedParkingSpot.notes}
+            </Typography>
+          </Box>
+        )}
+      </Box>
+    ) : (
+      <Typography 
+        variant="body2" 
+        color="text.secondary" 
+        fontFamily='"Poppins", sans-serif'
+        sx={{ pl: 4 }}
+      >
+        {t('buildings:noParkingAssigned', 'No hay parqueadero asignado. Asigna desde la pestaña de Parking.')}
+      </Typography>
+    )}
+  </Box>
+</Grid>
+
 <Grid item xs={12}>
   <Button
     variant="outlined"
@@ -377,6 +515,16 @@ const ApartmentDialog = ({
           setSelectedPolygonId(id)
           setPolygonSelectorOpen(false)
         }}
+        existingApartments={existingApartments} // ✅ NUEVO
+        currentApartmentId={selectedApartment?._id} // ✅ NUEVO
+      />
+
+      <ParkingSpotSelectorDialog
+        open={parkingSelectorOpen}
+        onClose={() => setParkingSelectorOpen(false)}
+        parkingSpots={parkingSpots}
+        currentSpotId={selectedParkingSpot?._id}
+        onSelect={handleSelectParkingSpot}
       />
     </ModalWrapper>
   )

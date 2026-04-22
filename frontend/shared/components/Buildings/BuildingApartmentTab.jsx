@@ -110,15 +110,16 @@ const BuildingApartmentsTab = ({
         </Grid>
       )}
 
-      <ApartmentDialog
-        open={apartmentModal.open}
-        onClose={handleCloseApartment}
-        onSaved={onApartmentSaved}
-        selectedApartment={apartmentModal.data}
-        buildingId={building?._id}
-        floorPlans={building?.floorPlans || []}
-        apartmentModels={apartmentModels}
-      />
+<ApartmentDialog
+  open={apartmentModal.open}
+  onClose={handleCloseApartment}
+  onSaved={onApartmentSaved}
+  selectedApartment={apartmentModal.data}
+  buildingId={building?._id}
+  floorPlans={building?.floorPlans || []}
+  apartmentModels={apartmentModels}
+  existingApartments={apartments} // ✅ NUEVO: Pasar lista de apartamentos
+/>
     </Box>
   )
 }
