@@ -107,6 +107,30 @@ function getPropertyBlueprints(property) {
   return defaultArr
 }
 
+function calculateTotalConstructionPercentage(phases = []) {
+  const phaseWeights = {
+    1: 10.00,
+    2: 15.00,
+    3: 15.00,
+    4: 15.00,
+    5: 10.00,
+    6: 10.00,
+    7: 10.00,
+    8: 10.00,
+    9: 5.00
+  }
+
+  if (!Array.isArray(phases) || phases.length === 0) return 0
+
+  const total = phases.reduce((acc, phase) => {
+    const weight = phaseWeights[phase?.phaseNumber] || 0
+    const phaseCompletion = Number(phase?.constructionPercentage || 0)
+    return acc + (phaseCompletion * weight) / 100
+  }, 0)
+
+  return Math.round(total * 100) / 100
+}
+
 export const getAllProperties = async (req, res) => {
   try {
     const { status, user, projectId } = req.query
@@ -143,14 +167,16 @@ export const getAllProperties = async (req, res) => {
       .populate('users', 'firstName lastName email phoneNumber')
       .populate({
         path: 'phases',
+        select: 'phaseNumber title constructionPercentage',
         options: { sort: { phaseNumber: 1 } }
       })
       .sort({ createdAt: -1 })
+      .lean()
     
     // Calculate total construction percentage and images for each property
     const propertiesWithPercentage = properties.map(property => {
-      const propertyObj = property.toObject()
-      propertyObj.totalConstructionPercentage = property.totalConstructionPercentage || 0
+      const propertyObj = { ...property }
+      propertyObj.totalConstructionPercentage = calculateTotalConstructionPercentage(propertyObj.phases)
       propertyObj.images = getPropertyImages(property)
       propertyObj.blueprints = getPropertyBlueprints(property)
       return propertyObj

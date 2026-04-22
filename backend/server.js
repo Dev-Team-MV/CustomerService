@@ -31,6 +31,7 @@ import backupRoutes from './routes/backupRoutes.js'
 import masterPlanRoutes from './routes/masterPlanRoutes.js'
 import parkingSpotRoutes from './routes/parkingSpotRoutes.js'
 import { startBackupScheduler } from './services/backupScheduler.js'
+import { requestTimingMiddleware } from './middleware/requestTimingMiddleware.js'
 
 const app = express()
 
@@ -39,6 +40,7 @@ connectDB()
 app.use(cors())
 app.use(express.json({ limit: '100mb' })) // Increase JSON body size limit
 app.use(express.urlencoded({ extended: true, limit: '100mb' })) // Increase URL-encoded body size limit
+app.use(requestTimingMiddleware)
 
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)

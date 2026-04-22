@@ -76,6 +76,7 @@ const propertySchema = new mongoose.Schema(
 )
 
 propertySchema.index({ project: 1 })
+propertySchema.index({ project: 1, status: 1 })
 propertySchema.index({ lot: 1 })
 propertySchema.index({ users: 1 })
 

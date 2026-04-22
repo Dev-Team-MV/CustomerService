@@ -38,6 +38,7 @@ const lotSchema = new mongoose.Schema(
 
 lotSchema.index({ project: 1, number: 1 }, { unique: true })
 lotSchema.index({ project: 1 })
+lotSchema.index({ project: 1, status: 1 })
 
 const Lot = mongoose.model('Lot', lotSchema)
 

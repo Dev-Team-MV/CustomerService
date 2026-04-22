@@ -12,6 +12,7 @@ export const getAllLots = async (req, res) => {
       .populate('project', 'name slug')
       .populate('assignedUser', 'firstName lastName email')
       .sort({ number: 1 })
+      .lean()
     res.json(lots)
   } catch (error) {
     res.status(500).json({ message: error.message })
