@@ -1,3 +1,5 @@
+// @/Users/oficina/MV-CRM/CustomerService/frontend/shared/components/propertyDetails/ConstructionTab.jsx
+
 import { useState, useEffect } from 'react'
 import {
   Box,
@@ -36,13 +38,28 @@ const PHASE_TITLES = [
   'Final Inspection'
 ]
 
-const ConstructionTab = ({ apartmentId, isAdmin = false }) => {
+/**
+ * ConstructionTab - Componente polimórfico para gestionar fases de construcción
+ * @param {string} apartmentId - ID del apartamento (para proyectos phase-2, isq, sheperd)
+ * @param {string} propertyId - ID de la propiedad (para proyectos 6town-houses)
+ * @param {boolean} isAdmin - Si el usuario es admin
+ */
+const ConstructionTab = ({ apartmentId, propertyId, isAdmin = false }) => {
   const theme = useTheme()
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
   const [selectedPhase, setSelectedPhase] = useState(null)
   const [uploading, setUploading] = useState(false)
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0)
 
+  // Determinar automáticamente el tipo de entidad y su ID
+  const entityType = propertyId ? 'property' : 'apartment'
+  const entityId = propertyId || apartmentId
+console.log('🔍 ConstructionTab Debug:', { 
+  apartmentId, 
+  propertyId, 
+  entityType, 
+  entityId 
+})
   const {
     phases: fetchedPhases,
     loading,
@@ -50,8 +67,8 @@ const ConstructionTab = ({ apartmentId, isAdmin = false }) => {
     updateMediaItem,
     deleteMediaItem
   } = usePhases({
-    entityType: 'apartment',
-    entityId: apartmentId
+    entityType,
+    entityId
   })
 
   // Crear array de 9 fases (1-9)
@@ -67,12 +84,13 @@ const ConstructionTab = ({ apartmentId, isAdmin = false }) => {
           title: PHASE_TITLES[i - 1],
           constructionPercentage: 0,
           mediaItems: [],
-          apartment: apartmentId
+          // Asignar dinámicamente la propiedad correcta
+          ...(entityType === 'property' ? { property: entityId } : { apartment: entityId })
         })
       }
       setPhases(allPhases)
     }
-  }, [fetchedPhases, apartmentId])
+  }, [fetchedPhases, entityId, entityType])
 
   // Auto-navegar a la primera fase incompleta
   useEffect(() => {
@@ -82,50 +100,51 @@ const ConstructionTab = ({ apartmentId, isAdmin = false }) => {
     }
   }, [phases])
 
-const handleUpload = async (phaseNumber, uploadForm) => {
-  if (!uploadForm.images.length && !uploadForm.videos.length) {
-    alert('Please select at least one image or video')
-    return
-  }
-
-  setUploading(true)
-  try {
-    const [urls, videoUrls] = await Promise.all([
-      uploadForm.images.length ? uploadService.uploadPhaseImages(uploadForm.images) : Promise.resolve([]),
-      uploadForm.videos.length ? uploadService.uploadPhaseVideos(uploadForm.videos) : Promise.resolve([])
-    ])
-
-    const addedPercentage    = parseFloat(uploadForm.percentage) || 0
-    const totalMedia         = urls.length + videoUrls.length
-    const percentagePerItem  = totalMedia > 0 ? addedPercentage / totalMedia : 0
-
-    for (let i = 0; i < urls.length; i++) {
-      await addMediaItem(phaseNumber, {
-        url:       urls[i],
-        title:     uploadForm.title || `Phase ${phaseNumber} - Image ${i + 1}`,
-        percentage: percentagePerItem,
-        mediaType: 'image'
-      })
+  const handleUpload = async (phaseNumber, uploadForm) => {
+    if (!uploadForm.images.length && !uploadForm.videos.length) {
+      alert('Please select at least one image or video')
+      return
     }
 
-    for (let i = 0; i < videoUrls.length; i++) {
-      await addMediaItem(phaseNumber, {
-        url:       videoUrls[i],
-        title:     uploadForm.title || `Phase ${phaseNumber} - Video ${i + 1}`,
-        percentage: percentagePerItem,
-        mediaType: 'video'
-      })
-    }
+    setUploading(true)
+    try {
+      const [urls, videoUrls] = await Promise.all([
+        uploadForm.images.length ? uploadService.uploadPhaseImages(uploadForm.images) : Promise.resolve([]),
+        uploadForm.videos.length ? uploadService.uploadPhaseVideos(uploadForm.videos) : Promise.resolve([])
+      ])
 
-    setUploadDialogOpen(false)
-    setSelectedPhase(null)
-  } catch (error) {
-    console.error('Upload error:', error)
-    alert(`Upload failed: ${error.message}`)
-  } finally {
-    setUploading(false)
+      const addedPercentage    = parseFloat(uploadForm.percentage) || 0
+      const totalMedia         = urls.length + videoUrls.length
+      const percentagePerItem  = totalMedia > 0 ? addedPercentage / totalMedia : 0
+
+      for (let i = 0; i < urls.length; i++) {
+        await addMediaItem(phaseNumber, {
+          url:       urls[i],
+          title:     uploadForm.title || `Phase ${phaseNumber} - Image ${i + 1}`,
+          percentage: percentagePerItem,
+          mediaType: 'image'
+        })
+      }
+
+      for (let i = 0; i < videoUrls.length; i++) {
+        await addMediaItem(phaseNumber, {
+          url:       videoUrls[i],
+          title:     uploadForm.title || `Phase ${phaseNumber} - Video ${i + 1}`,
+          percentage: percentagePerItem,
+          mediaType: 'video'
+        })
+      }
+
+      setUploadDialogOpen(false)
+      setSelectedPhase(null)
+    } catch (error) {
+      console.error('Upload error:', error)
+      alert(`Upload failed: ${error.message}`)
+    } finally {
+      setUploading(false)
+    }
   }
-}
+
   const handleOpenUploadDialog = (phase) => {
     setSelectedPhase(phase)
     setUploadDialogOpen(true)

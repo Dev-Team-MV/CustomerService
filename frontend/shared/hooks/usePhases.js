@@ -34,45 +34,86 @@ export const usePhases = ({ entityType, entityId }) => {
   }, [entityId, entityType])
 
   // Add media item
-  const addMediaItem = async (phaseNumber, mediaData) => {
-    try {
-      const response = await api.post(
-        `/phases/${entityType}/${entityId}/phase/${phaseNumber}/media`,
-        mediaData
-      )
-      await fetchPhases() // Refresh
-      return response.data
-    } catch (err) {
-      throw new Error(err.response?.data?.message || 'Error adding media')
-    }
-  }
+// @/Users/oficina/MV-CRM/CustomerService/frontend/shared/hooks/usePhases.js
+// Líneas 36-48:
 
-  // Update media item
-  const updateMediaItem = async (phaseNumber, mediaItemId, mediaData) => {
-    try {
-      const response = await api.put(
-        `/phases/${entityType}/${entityId}/phase/${phaseNumber}/media/${mediaItemId}`,
-        mediaData
-      )
-      await fetchPhases() // Refresh
-      return response.data
-    } catch (err) {
-      throw new Error(err.response?.data?.message || 'Error updating media')
+// Add media item
+const addMediaItem = async (phaseNumber, mediaData) => {
+  try {
+    let endpoint
+    
+    if (entityType === 'property') {
+      // Para properties, necesitamos el _id de la fase
+      const phase = phases.find(p => p.phaseNumber === phaseNumber)
+      if (!phase?._id) {
+        throw new Error('Phase not found')
+      }
+      endpoint = `/phases/${phase._id}/media`
+    } else {
+      // Para apartments, usar el endpoint específico
+      endpoint = `/phases/${entityType}/${entityId}/phase/${phaseNumber}/media`
     }
+    
+    const response = await api.post(endpoint, mediaData)
+    await fetchPhases() // Refresh
+    return response.data
+  } catch (err) {
+    throw new Error(err.response?.data?.message || 'Error adding media')
   }
+}
 
-  // Delete media item
-  const deleteMediaItem = async (phaseNumber, mediaItemId) => {
-    try {
-      const response = await api.delete(
-        `/phases/${entityType}/${entityId}/phase/${phaseNumber}/media/${mediaItemId}`
-      )
-      await fetchPhases() // Refresh
-      return response.data
-    } catch (err) {
-      throw new Error(err.response?.data?.message || 'Error deleting media')
+// @/Users/oficina/MV-CRM/CustomerService/frontend/shared/hooks/usePhases.js
+// Líneas 65-90:
+
+// Update media item
+const updateMediaItem = async (phaseNumber, mediaItemId, mediaData) => {
+  try {
+    let endpoint
+    
+    if (entityType === 'property') {
+      // Para properties, usar endpoint genérico por phase ID
+      const phase = phases.find(p => p.phaseNumber === phaseNumber)
+      if (!phase?._id) {
+        throw new Error('Phase not found')
+      }
+      endpoint = `/phases/${phase._id}/media/${mediaItemId}`
+    } else {
+      // Para apartments, usar el endpoint específico
+      endpoint = `/phases/${entityType}/${entityId}/phase/${phaseNumber}/media/${mediaItemId}`
     }
+    
+    const response = await api.put(endpoint, mediaData)
+    await fetchPhases() // Refresh
+    return response.data
+  } catch (err) {
+    throw new Error(err.response?.data?.message || 'Error updating media')
   }
+}
+
+// Delete media item
+const deleteMediaItem = async (phaseNumber, mediaItemId) => {
+  try {
+    let endpoint
+    
+    if (entityType === 'property') {
+      // Para properties, usar endpoint genérico por phase ID
+      const phase = phases.find(p => p.phaseNumber === phaseNumber)
+      if (!phase?._id) {
+        throw new Error('Phase not found')
+      }
+      endpoint = `/phases/${phase._id}/media/${mediaItemId}`
+    } else {
+      // Para apartments, usar el endpoint específico
+      endpoint = `/phases/${entityType}/${entityId}/phase/${phaseNumber}/media/${mediaItemId}`
+    }
+    
+    const response = await api.delete(endpoint)
+    await fetchPhases() // Refresh
+    return response.data
+  } catch (err) {
+    throw new Error(err.response?.data?.message || 'Error deleting media')
+  }
+}
 
   return {
     phases,

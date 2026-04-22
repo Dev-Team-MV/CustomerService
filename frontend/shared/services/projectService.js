@@ -1,3 +1,5 @@
+// @/Users/oficina/MV-CRM/CustomerService/frontend/shared/services/projectService.js
+
 import api from './api'
 
 const projectService = {
@@ -30,6 +32,7 @@ const projectService = {
       return null
     }
   },
+
   create: async (data) => {
     try {
       const response = await api.post('/projects', data)
@@ -39,6 +42,7 @@ const projectService = {
       throw error
     }
   },
+
   update: async (id, data) => {
     try {
       const response = await api.put(`/projects/${id}`, data)
@@ -48,7 +52,8 @@ const projectService = {
       throw error
     }
   },
-    delete: async (id) => {
+
+  delete: async (id) => {
     try {
       const response = await api.delete(`/projects/${id}`)
       return response.data
@@ -57,6 +62,89 @@ const projectService = {
       throw error
     }
   },
+
+  // 🆕 NUEVOS MÉTODOS PARA CATALOG-CONFIG
+
+  /**
+   * Obtener configuración de catálogo de un proyecto
+   * @param {string} projectId - ID del proyecto
+   * @param {Object} filters - Filtros opcionales
+   * @returns {Promise<Object|Array>} Configuración(es) del catálogo
+   */
+  getCatalogConfig: async (projectId, filters = {}) => {
+    try {
+      const params = new URLSearchParams()
+      if (filters.version) params.append('version', filters.version)
+      if (filters.status) params.append('status', filters.status)
+      if (filters.activeOnly) params.append('activeOnly', 'true')
+      
+      const queryString = params.toString()
+      const url = `/projects/${projectId}/catalog-config${queryString ? `?${queryString}` : ''}`
+      
+      const response = await api.get(url)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching catalog config:', error)
+      return null
+    }
+  },
+
+  /**
+   * Crear nueva versión de configuración de catálogo
+   * @param {string} projectId - ID del proyecto
+   * @param {Object} configData - Datos de configuración
+   * @returns {Promise<Object>} Configuración creada
+   */
+  createCatalogConfig: async (projectId, configData) => {
+    try {
+      const response = await api.post(
+        `/projects/${projectId}/catalog-config`,
+        configData
+      )
+      return response.data
+    } catch (error) {
+      console.error('Error creating catalog config:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Actualizar configuración existente
+   * @param {string} projectId - ID del proyecto
+   * @param {Object} configData - Datos de configuración
+   * @returns {Promise<Object>} Configuración actualizada
+   */
+  updateCatalogConfig: async (projectId, configData) => {
+    try {
+      const response = await api.put(
+        `/projects/${projectId}/catalog-config`,
+        configData
+      )
+      return response.data
+    } catch (error) {
+      console.error('Error updating catalog config:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Publicar una versión de configuración
+   * @param {string} projectId - ID del proyecto
+   * @param {number} version - Número de versión a publicar
+   * @returns {Promise<Object>} Configuración publicada
+   */
+  publishCatalogConfig: async (projectId, version) => {
+    try {
+      const response = await api.post(
+        `/projects/${projectId}/catalog-config/publish`,
+        { version }
+      )
+      return response.data
+    } catch (error) {
+      console.error('Error publishing catalog config:', error)
+      throw error
+    }
+  }
 }
 
 export default projectService

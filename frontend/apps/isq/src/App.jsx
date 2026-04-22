@@ -74,6 +74,7 @@ function App() {
             }
           >
             <Route path="/explore/amenities" element={<AmenitiesPublic />} />
+            <Route path="/explore/properties" element={<GetYourQuote />} />
             {/* Agrega aquí tus rutas públicas si las tienes */}
           </Route>
 

@@ -185,6 +185,7 @@ const Properties = () => {
           onClose={() => setDetailsOpen(false)}
           apartment={selectedApartment}
           usePayloadColumnsFn={usePayloadColumns}
+          projectId={PROJECT_ID}  // Agregar esta línea
         />
 
         <Dialog
