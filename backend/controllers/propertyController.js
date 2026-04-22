@@ -398,7 +398,10 @@ export const getPropertyQuote = async (req, res) => {
 
 export const createProperty = async (req, res) => {
   try {
-    const { projectId, project, lot, model, facade, user, users, initialPayment, hasBalcony, modelType, hasStorage } = req.body
+    const {
+      projectId, project, lot, model, facade, user, users, initialPayment,
+      hasBalcony, modelType, hasStorage, selectedOptions
+    } = req.body
     let projId = projectId || project
 
     // Normalize owners: accept single user or users array
@@ -422,6 +425,7 @@ export const createProperty = async (req, res) => {
       hasBalcony: hasBalcony === true,
       modelType: modelType || 'basic',
       hasStorage: hasStorage === true,
+      selectedOptions: selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {},
       enforceLotAvailability: true,
       firstOwner
     })
