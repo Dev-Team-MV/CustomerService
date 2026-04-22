@@ -4,6 +4,64 @@ import upgradeOptionSchema from './Upgrade.js'
 import storageOptionSchema from './Storage.js'
 import imageItemSchema from './schemas/imageItemSchema.js'
 
+const floorOptionSchema = new mongoose.Schema(
+  {
+    key: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    label: {
+      type: String,
+      trim: true
+    },
+    status: {
+      type: String,
+      enum: ['active', 'inactive'],
+      default: 'active'
+    },
+    media: {
+      renders: [imageItemSchema],
+      isometrics: [imageItemSchema],
+      blueprints: [imageItemSchema],
+      cinematics: [imageItemSchema],
+      exterior: [imageItemSchema]
+    }
+  },
+  { _id: true, timestamps: true }
+)
+
+const floorSchema = new mongoose.Schema(
+  {
+    key: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    label: {
+      type: String,
+      trim: true
+    },
+    level: {
+      type: Number,
+      min: 1
+    },
+    isCustomizable: {
+      type: Boolean,
+      default: true
+    },
+    options: [floorOptionSchema],
+    media: {
+      renders: [imageItemSchema],
+      isometrics: [imageItemSchema],
+      blueprints: [imageItemSchema],
+      cinematics: [imageItemSchema],
+      exterior: [imageItemSchema]
+    }
+  },
+  { _id: true, timestamps: true }
+)
+
 const modelSchema = new mongoose.Schema(
   {
     project: {
@@ -59,6 +117,8 @@ const modelSchema = new mongoose.Schema(
       withStorage: [imageItemSchema],
       withBalconyAndStorage: [imageItemSchema]
     },
+    // Estructura opcional para modelar por pisos (sin romper contrato legacy)
+    floors: [floorSchema],
     description: {
       type: String,
       trim: true

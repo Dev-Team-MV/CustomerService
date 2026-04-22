@@ -2,6 +2,7 @@ import express from 'express'
 import {
   getAllModels,
   getModelById,
+  getModelFloors,
   createModel,
   updateModel,
   deleteModel,
@@ -190,6 +191,29 @@ router.route('/:id')
   .get(getModelById)
   .put(protect, admin, updateModel)
   .delete(protect, admin, deleteModel)
+
+/**
+ * @swagger
+ * /api/models/{id}/floors:
+ *   get:
+ *     summary: Get floors data for a model
+ *     tags: [Models]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Model floors data
+ *       404:
+ *         description: Model not found
+ */
+router.route('/:id/floors')
+  .get(protect, getModelFloors)
 
 /**
  * @swagger
