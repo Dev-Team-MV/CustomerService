@@ -158,6 +158,60 @@ function hasFloorMediaContent(media) {
     .some((key) => Array.isArray(media[key]) && media[key].length > 0)
 }
 
+function normalizeComparable(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, '')
+}
+
+function inferSelectedOptionKeyForFloor(floor, selectedOptions = {}, selectedFloors = {}) {
+  const options = Array.isArray(floor?.options) ? floor.options : []
+  if (options.length === 0) return null
+
+  const optionMap = new Map()
+  options.forEach((option) => {
+    if (option?.key) optionMap.set(normalizeComparable(option.key), option.key)
+    if (option?.label) optionMap.set(normalizeComparable(option.label), option.key)
+  })
+
+  // 1) Explicit floors map has priority
+  const explicitFloorSelection = selectedFloors[floor?.key]
+  if (explicitFloorSelection) {
+    const inferred = optionMap.get(normalizeComparable(explicitFloorSelection))
+    if (inferred) return inferred
+  }
+
+  // 2) Try conventional keys in selectedOptions
+  const floorKey = floor?.key || ''
+  const candidateKeys = [
+    floorKey,
+    `${floorKey}Option`,
+    `${floorKey}Upgrade`,
+    `${floorKey}Selection`
+  ]
+
+  for (const key of candidateKeys) {
+    const rawValue = selectedOptions[key]
+    if (!rawValue) continue
+    const inferred = optionMap.get(normalizeComparable(rawValue))
+    if (inferred) return inferred
+  }
+
+  // 3) Heuristic: keys containing floor key text (e.g. level1Upgrade)
+  const normalizedFloorKey = normalizeComparable(floorKey)
+  if (normalizedFloorKey) {
+    for (const [key, value] of Object.entries(selectedOptions)) {
+      if (!key || value == null || typeof value === 'object') continue
+      if (!normalizeComparable(key).includes(normalizedFloorKey)) continue
+      const inferred = optionMap.get(normalizeComparable(value))
+      if (inferred) return inferred
+    }
+  }
+
+  return null
+}
+
 function resolveModelFloorMedia(modelExists, selectedOptions = {}) {
   const floors = Array.isArray(modelExists?.floors) ? modelExists.floors : []
   const selectedFloors = selectedOptions && typeof selectedOptions === 'object'
@@ -169,7 +223,7 @@ function resolveModelFloorMedia(modelExists, selectedOptions = {}) {
     const floorKey = floor?.key || `floor-${index + 1}`
     const floorMedia = normalizeFloorMediaBlock(floor?.media)
     const options = Array.isArray(floor?.options) ? floor.options : []
-    const selectedOptionKey = selectedFloors[floorKey] || null
+    const selectedOptionKey = inferSelectedOptionKeyForFloor(floor, selectedOptions, selectedFloors)
 
     const selectedOptionRaw = selectedOptionKey
       ? options.find((opt) => opt?.key === selectedOptionKey)
