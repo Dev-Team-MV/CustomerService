@@ -275,7 +275,7 @@ export const getAllProperties = async (req, res) => {
     const properties = await Property.find(filter)
       .populate('project', 'name slug')
       .populate('lot', 'number price')
-      .populate('model', 'model price bedrooms bathrooms sqft images blueprints balconies upgrades')
+      .populate('model', 'model modelNumber price bedrooms bathrooms sqft images blueprints balconies upgrades floors')
       .populate('facade', 'title url price')
       .populate('users', 'firstName lastName email phoneNumber')
       .populate({
@@ -292,6 +292,7 @@ export const getAllProperties = async (req, res) => {
       propertyObj.totalConstructionPercentage = calculateTotalConstructionPercentage(propertyObj.phases)
       propertyObj.images = getPropertyImages(property)
       propertyObj.blueprints = getPropertyBlueprints(property)
+      propertyObj.mediaByFloor = resolveModelFloorMedia(property.model, property.selectedOptions || {})
       return propertyObj
     })
     
@@ -307,7 +308,7 @@ export const getPropertyById = async (req, res) => {
     const property = await Property.findById(req.params.id)
       .populate('project', 'name slug')
       .populate('lot', 'number price')
-      .populate('model', 'model price bedrooms bathrooms sqft images blueprints description balconies upgrades')
+      .populate('model', 'model modelNumber price bedrooms bathrooms sqft images blueprints description balconies upgrades floors')
       .populate('facade', 'title url price')
       .populate('users', 'firstName lastName email phoneNumber birthday')
       .populate({
@@ -339,6 +340,7 @@ export const getPropertyById = async (req, res) => {
     propertyObj.totalConstructionPercentage = property.totalConstructionPercentage || 0
     propertyObj.images = getPropertyImages(property)
     propertyObj.blueprints = getPropertyBlueprints(property)
+    propertyObj.mediaByFloor = resolveModelFloorMedia(property.model, property.selectedOptions || {})
     await hydrateUrlsInObject(propertyObj)
     res.json(propertyObj)
   } catch (error) {
@@ -693,7 +695,8 @@ export const createProperty = async (req, res) => {
       status: 'pending',
       hasBalcony: hasBalcony === true,
       modelType: modelType || 'basic',
-      hasStorage: hasStorage === true
+      hasStorage: hasStorage === true,
+      selectedOptions: selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {}
     })
     
     await Lot.findByIdAndUpdate(lot, {
@@ -734,7 +737,7 @@ export const createProperty = async (req, res) => {
 // Schema fields that can be updated via PUT (any value allowed by the model)
 const ALLOWED_PROPERTY_UPDATES = [
   'lot', 'model', 'facade', 'users', 'price', 'pending', 'initialPayment',
-  'status', 'saleDate', 'hasBalcony', 'modelType', 'hasStorage'
+  'status', 'saleDate', 'hasBalcony', 'modelType', 'hasStorage', 'selectedOptions'
 ]
 
 export const updateProperty = async (req, res) => {
