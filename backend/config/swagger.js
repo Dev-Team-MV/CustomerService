@@ -132,6 +132,11 @@ const options = {
               description:
                 'residential_lots = casas/lotes (Property + Lot). apartments = torres (Building + Apartment). other = otro.'
             },
+            facadeEnabled: {
+              type: 'boolean',
+              description: 'Controla si el proyecto requiere/permite fachada en cotización/venta de propiedades',
+              default: true
+            },
             status: { type: 'string', enum: ['active', 'inactive', 'coming_soon', 'sold_out'] },
             isActive: { type: 'boolean' },
             externalUrl: { type: 'string', description: 'External project URL' },
@@ -264,13 +269,13 @@ const options = {
         },
         PropertyQuoteRequest: {
           type: 'object',
-          required: ['lot', 'model', 'facade'],
+          required: ['lot', 'model'],
           properties: {
             projectId: { type: 'string' },
             project: { type: 'string' },
             lot: { type: 'string' },
             model: { type: 'string' },
-            facade: { type: 'string' },
+            facade: { type: 'string', description: 'Requerido solo cuando project.facadeEnabled=true' },
             initialPayment: { type: 'number' },
             hasBalcony: { type: 'boolean' },
             modelType: { type: 'string', enum: ['basic', 'upgrade'] },
@@ -301,8 +306,10 @@ const options = {
             },
             facade: {
               type: 'object',
+              nullable: true,
               properties: { _id: { type: 'string' }, title: { type: 'string' }, price: { type: 'number' } }
             },
+            facadeEnabled: { type: 'boolean' },
             options: {
               type: 'object',
               properties: {
