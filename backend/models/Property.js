@@ -21,7 +21,7 @@ const propertySchema = new mongoose.Schema(
     facade: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Facade',
-      required: [true, 'Facade is required']
+      required: false
     },
     users: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
