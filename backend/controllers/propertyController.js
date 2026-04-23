@@ -3,6 +3,7 @@ import Property from '../models/Property.js'
 import Lot from '../models/Lot.js'
 import Model from '../models/Model.js'
 import Facade from '../models/Facade.js'
+import Project from '../models/Project.js'
 import User from '../models/User.js'
 import Phase from '../models/Phase.js'
 import { normalizeImageArray } from '../utils/imageUtils.js'
@@ -289,15 +290,29 @@ const resolvePropertyPricing = async ({
     return { ok: false, status: 400, message: 'Model does not belong to this project' }
   }
 
-  const facadeExists = await Facade.findById(facade)
-  if (!facadeExists) {
-    return { ok: false, status: 404, message: 'Facade not found' }
+  const projectExists = await Project.findById(projId).select('_id facadeEnabled')
+  if (!projectExists) {
+    return { ok: false, status: 404, message: 'Project not found' }
   }
-  if (!facadeExists.project || !sameId(facadeExists.project, projId)) {
-    return { ok: false, status: 400, message: 'Facade does not belong to this project' }
-  }
-  if (!sameId(facadeExists.model, model)) {
-    return { ok: false, status: 400, message: 'Facade does not belong to the selected model' }
+  const facadeEnabled = projectExists.facadeEnabled !== false
+
+  let facadeExists = null
+  if (facadeEnabled) {
+    if (!facade) {
+      return { ok: false, status: 400, message: 'Facade is required for this project' }
+    }
+    facadeExists = await Facade.findById(facade)
+    if (!facadeExists) {
+      return { ok: false, status: 404, message: 'Facade not found' }
+    }
+    if (!facadeExists.project || !sameId(facadeExists.project, projId)) {
+      return { ok: false, status: 400, message: 'Facade does not belong to this project' }
+    }
+    if (!sameId(facadeExists.model, model)) {
+      return { ok: false, status: 400, message: 'Facade does not belong to the selected model' }
+    }
+  } else if (facade) {
+    return { ok: false, status: 400, message: 'Facades are disabled for this project' }
   }
 
   const normalizedSelectedOptions = {
@@ -330,6 +345,7 @@ const resolvePropertyPricing = async ({
       lotExists,
       modelExists,
       facadeExists,
+      facadeEnabled,
       prices: {
         lotPrice,
         modelBasePrice: Number(modelExists.price || 0),
@@ -382,7 +398,7 @@ export const getPropertyQuote = async (req, res) => {
       return res.status(resolved.status).json({ message: resolved.message })
     }
 
-    const { prices, projectId: resolvedProjectId, lotExists, modelExists, facadeExists } = resolved.data
+    const { prices, projectId: resolvedProjectId, lotExists, modelExists, facadeExists, facadeEnabled } = resolved.data
 
     res.json({
       projectId: resolvedProjectId,
@@ -393,7 +409,10 @@ export const getPropertyQuote = async (req, res) => {
         modelNumber: modelExists.modelNumber,
         price: prices.modelBasePrice
       },
-      facade: { _id: facadeExists._id, title: facadeExists.title, price: prices.facadePrice },
+      facade: facadeExists
+        ? { _id: facadeExists._id, title: facadeExists.title, price: prices.facadePrice }
+        : null,
+      facadeEnabled,
       options: {
         hasBalcony: hasBalcony === true,
         modelType: modelType || 'basic',
@@ -474,7 +493,7 @@ export const createProperty = async (req, res) => {
       project: projId,
       lot,
       model,
-      facade,
+      facade: resolved.data.facadeExists ? resolved.data.facadeExists._id : undefined,
       users: ownerIds,
       price: totalPrice,
       pending: pendingAmount,

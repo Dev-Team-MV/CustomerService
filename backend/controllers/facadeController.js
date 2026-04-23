@@ -1,5 +1,6 @@
 import Facade from '../models/Facade.js'
 import Model from '../models/Model.js'
+import Project from '../models/Project.js'
 import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
 
 /** Normalize ref/id to string; safe when value is undefined. */
@@ -83,6 +84,13 @@ export const createFacade = async (req, res) => {
     if (modelExists.project == null || toIdStr(modelExists.project) !== toIdStr(projId)) {
       return res.status(400).json({ message: 'Model does not belong to this project' })
     }
+    const projectExists = await Project.findById(projId).select('_id facadeEnabled')
+    if (!projectExists) {
+      return res.status(404).json({ message: 'Project not found' })
+    }
+    if (projectExists.facadeEnabled === false) {
+      return res.status(400).json({ message: 'Facades are disabled for this project' })
+    }
 
     // Validar y preparar decks si se proporcionan
     const validatedDecks = []
@@ -136,6 +144,10 @@ export const updateFacade = async (req, res) => {
       const modelExists = await Model.findById(req.body.model)
       if (!modelExists) {
         return res.status(404).json({ message: 'Model not found' })
+      }
+      const projectExists = await Project.findById(facade.project).select('_id facadeEnabled')
+      if (projectExists && projectExists.facadeEnabled === false) {
+        return res.status(400).json({ message: 'Facades are disabled for this project' })
       }
       facade.model = req.body.model
     }
