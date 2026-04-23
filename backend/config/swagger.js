@@ -354,6 +354,51 @@ const options = {
             }
           }
         },
+        PropertyQuotePreviewRequest: {
+          allOf: [
+            { $ref: '#/components/schemas/PropertyQuoteRequest' },
+            {
+              type: 'object',
+              properties: {
+                selectedOptions: {
+                  type: 'object',
+                  description: 'Incluye opcionalmente floors: { "<floorKey>": "<optionKey>" } para resolver media por piso',
+                  additionalProperties: true
+                }
+              }
+            }
+          ]
+        },
+        FloorMediaPreviewItem: {
+          type: 'object',
+          properties: {
+            floorKey: { type: 'string' },
+            level: { type: 'number', nullable: true },
+            label: { type: 'string' },
+            selectedOptionKey: { type: 'string', nullable: true },
+            mediaSource: { type: 'string', enum: ['floor', 'option'] },
+            media: {
+              type: 'object',
+              properties: {
+                renders: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                isometrics: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                blueprints: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                cinematics: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                exterior: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } }
+              }
+            }
+          }
+        },
+        PropertyQuotePreviewResponse: {
+          type: 'object',
+          properties: {
+            quote: { $ref: '#/components/schemas/PropertyQuoteResponse' },
+            mediaByFloor: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/FloorMediaPreviewItem' }
+            }
+          }
+        },
         ImageItem: {
           type: 'object',
           description: 'Imagen con visibilidad (isPublic false = requiere token para ver)',

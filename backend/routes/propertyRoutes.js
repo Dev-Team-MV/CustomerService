@@ -3,6 +3,7 @@ import {
   getAllProperties,
   getPropertyById,
   getPropertyQuote,
+  getPropertyQuotePreview,
   createProperty,
   updateProperty,
   deleteProperty,
@@ -120,6 +121,28 @@ router.route('/')
  *               $ref: '#/components/schemas/PropertyQuoteResponse'
  */
 router.post('/quote', getPropertyQuote)
+
+/**
+ * @swagger
+ * /api/properties/quote-preview:
+ *   post:
+ *     summary: Calculate property quote and resolve floor media preview
+ *     tags: [Properties]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/PropertyQuotePreviewRequest'
+ *     responses:
+ *       200:
+ *         description: Quote and floor media preview calculated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PropertyQuotePreviewResponse'
+ */
+router.post('/quote-preview', getPropertyQuotePreview)
 
 /**
  * @swagger

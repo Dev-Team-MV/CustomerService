@@ -132,6 +132,64 @@ function calculateTotalConstructionPercentage(phases = []) {
   return Math.round(total * 100) / 100
 }
 
+function normalizeFloorMediaBlock(media) {
+  if (!media || typeof media !== 'object') {
+    return {
+      renders: [],
+      isometrics: [],
+      blueprints: [],
+      cinematics: [],
+      exterior: []
+    }
+  }
+
+  return {
+    renders: normalizeImageArray(media.renders),
+    isometrics: normalizeImageArray(media.isometrics),
+    blueprints: normalizeImageArray(media.blueprints),
+    cinematics: normalizeImageArray(media.cinematics),
+    exterior: normalizeImageArray(media.exterior)
+  }
+}
+
+function hasFloorMediaContent(media) {
+  if (!media || typeof media !== 'object') return false
+  return ['renders', 'isometrics', 'blueprints', 'cinematics', 'exterior']
+    .some((key) => Array.isArray(media[key]) && media[key].length > 0)
+}
+
+function resolveModelFloorMedia(modelExists, selectedOptions = {}) {
+  const floors = Array.isArray(modelExists?.floors) ? modelExists.floors : []
+  const selectedFloors = selectedOptions && typeof selectedOptions === 'object'
+    ? (selectedOptions.floors && typeof selectedOptions.floors === 'object' ? selectedOptions.floors : {})
+    : {}
+
+  return floors.map((floorRaw, index) => {
+    const floor = floorRaw?.toObject ? floorRaw.toObject() : floorRaw
+    const floorKey = floor?.key || `floor-${index + 1}`
+    const floorMedia = normalizeFloorMediaBlock(floor?.media)
+    const options = Array.isArray(floor?.options) ? floor.options : []
+    const selectedOptionKey = selectedFloors[floorKey] || null
+
+    const selectedOptionRaw = selectedOptionKey
+      ? options.find((opt) => opt?.key === selectedOptionKey)
+      : null
+    const selectedOption = selectedOptionRaw?.toObject ? selectedOptionRaw.toObject() : selectedOptionRaw
+    const selectedOptionMedia = normalizeFloorMediaBlock(selectedOption?.media)
+
+    const useOptionMedia = selectedOption && hasFloorMediaContent(selectedOptionMedia)
+
+    return {
+      floorKey,
+      level: floor?.level ?? null,
+      label: floor?.label || '',
+      selectedOptionKey,
+      mediaSource: useOptionMedia ? 'option' : 'floor',
+      media: useOptionMedia ? selectedOptionMedia : floorMedia
+    }
+  })
+}
+
 export const getAllProperties = async (req, res) => {
   try {
     const { status, user, projectId } = req.query
@@ -436,6 +494,86 @@ export const getPropertyQuote = async (req, res) => {
         version: prices.configVersion || null
       }
     })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const getPropertyQuotePreview = async (req, res) => {
+  try {
+    const { projectId, project, lot, model, facade, initialPayment, hasBalcony, modelType, hasStorage, selectedOptions } = req.body
+
+    const resolved = await resolvePropertyPricing({
+      projectId,
+      project,
+      lot,
+      model,
+      facade,
+      initialPayment,
+      hasBalcony: hasBalcony === true,
+      modelType: modelType || 'basic',
+      hasStorage: hasStorage === true,
+      selectedOptions: selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {},
+      enforceLotAvailability: false
+    })
+
+    if (!resolved.ok) {
+      return res.status(resolved.status).json({ message: resolved.message })
+    }
+
+    const {
+      prices,
+      projectId: resolvedProjectId,
+      lotExists,
+      modelExists,
+      facadeExists,
+      facadeEnabled
+    } = resolved.data
+
+    const mediaByFloor = resolveModelFloorMedia(modelExists, selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {})
+
+    const response = {
+      quote: {
+        projectId: resolvedProjectId,
+        lot: { _id: lotExists._id, number: lotExists.number, price: prices.lotPrice },
+        model: {
+          _id: modelExists._id,
+          model: modelExists.model,
+          modelNumber: modelExists.modelNumber,
+          price: prices.modelBasePrice
+        },
+        facade: facadeExists
+          ? { _id: facadeExists._id, title: facadeExists.title, price: prices.facadePrice }
+          : null,
+        facadeEnabled,
+        options: {
+          hasBalcony: hasBalcony === true,
+          modelType: modelType || 'basic',
+          hasStorage: hasStorage === true
+        },
+        breakdown: {
+          lotPrice: prices.lotPrice,
+          modelBasePrice: prices.modelBasePrice,
+          balconyPrice: prices.balconyPrice,
+          upgradePrice: prices.upgradePrice,
+          storagePrice: prices.storagePrice,
+          facadePrice: prices.facadePrice,
+          adjustments: prices.adjustments || []
+        },
+        totals: {
+          totalPrice: prices.totalPrice,
+          initialPayment: prices.initialPayment,
+          pending: prices.pending
+        },
+        pricingConfig: {
+          version: prices.configVersion || null
+        }
+      },
+      mediaByFloor
+    }
+
+    await hydrateUrlsInObject(response)
+    res.json(response)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
