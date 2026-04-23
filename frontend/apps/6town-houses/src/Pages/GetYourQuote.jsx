@@ -42,6 +42,9 @@ const {
   const [loadingQuote, setLoadingQuote] = useState(false)
   const [error, setError] = useState(null)
   const [residentExpanded, setResidentExpanded] = useState(false)
+
+  const [modelFloors, setModelFloors] = useState([])
+
  
   // ✅ DESPUÉS: useEffect que usa selectedOptions
   useEffect(() => {
@@ -56,6 +59,22 @@ const {
       setSelectedProject(projectId)
     }
   }, [projectId, setSelectedProject])
+
+  // Agregar useEffect para cargar floors cuando se selecciona un building
+useEffect(() => {
+  const fetchModelFloors = async () => {
+    if (!selectedBuilding?.model?._id) return
+    
+    try {
+      const response = await api.get(`/models/${selectedBuilding.model._id}/floors`)
+      setModelFloors(response.data.floors || [])
+    } catch (err) {
+      console.error('Error fetching model floors:', err)
+    }
+  }
+  
+  fetchModelFloors()
+}, [selectedBuilding])
  
   // Precio base de la casa seleccionada
   const basePrice = useMemo(() => {
@@ -245,6 +264,7 @@ const {
               <HouseCustomizer
                 catalogConfig={catalogConfig}
                 selectedBuilding={selectedBuilding}
+                 modelFloors={modelFloors} 
                 onComplete={handleCustomizationComplete}
                 onBack={() => { setCurrentStep(0); setSelectedBuilding(null); setError(null) }}
                 onOptionsChange={setSelectedOptions}

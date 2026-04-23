@@ -14,7 +14,7 @@ import uploadService from '@shared/services/uploadService'
 
 const FloorTab = ({ floor, editMode, onChange }) => {
   const theme = useTheme()
-  const [selectedOption, setSelectedOption] = useState(floor?.options?.[0]?.id || null)
+  const [selectedOption, setSelectedOption] = useState(floor?.options?.[0]?.key || null)
   const [uploading, setUploading] = useState(false)
 
   if (!floor) {
@@ -27,8 +27,8 @@ const FloorTab = ({ floor, editMode, onChange }) => {
     )
   }
 
-  const currentOption = floor.options?.find(opt => opt.id === selectedOption)
-  const mediaToShow = currentOption?.media || floor.media || { renders: [], isometrics: [], floorPlans: [] }
+  const currentOption = floor.options?.find(opt => opt.key === selectedOption)
+  const mediaToShow = currentOption?.media || floor.media || { renders: [], isometrics: [], blueprints: [] }
 
   const handleFileUpload = async (e, mediaType) => {
     const files = Array.from(e.target.files)
@@ -39,17 +39,14 @@ const FloorTab = ({ floor, editMode, onChange }) => {
       const uploadPromises = files.map(file => uploadService.uploadModelImage(file, `floors/${floor.key}/${mediaType}`))
       const urls = await Promise.all(uploadPromises)
       
-      // Actualizar media del piso o de la opción
       const newMedia = {
         ...mediaToShow,
         [mediaType]: [...(mediaToShow[mediaType] || []), ...urls.map(url => ({ url, isPublic: true }))]
       }
 
       if (currentOption) {
-        // Actualizar media de la opción
-        onChange(floor.key, 'optionMedia', { optionId: selectedOption, media: newMedia })
+        onChange(floor.key, 'optionMedia', { optionKey: selectedOption, media: newMedia })
       } else {
-        // Actualizar media del piso
         onChange(floor.key, 'media', newMedia)
       }
     } catch (err) {
@@ -67,7 +64,7 @@ const FloorTab = ({ floor, editMode, onChange }) => {
     }
 
     if (currentOption) {
-      onChange(floor.key, 'optionMedia', { optionId: selectedOption, media: newMedia })
+      onChange(floor.key, 'optionMedia', { optionKey: selectedOption, media: newMedia })
     } else {
       onChange(floor.key, 'media', newMedia)
     }
@@ -103,7 +100,6 @@ const FloorTab = ({ floor, editMode, onChange }) => {
                 multiple
                 accept="image/*"
                 onChange={(e) => handleFileUpload(e, mediaType)}
-                disabled={uploading}
               />
             </Button>
           )}
@@ -115,37 +111,37 @@ const FloorTab = ({ floor, editMode, onChange }) => {
               p: 4,
               textAlign: 'center',
               border: '2px dashed #e0e0e0',
-              borderRadius: 2,
+              borderRadius: 3,
               bgcolor: '#fafafa'
             }}
           >
-            <Icon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+            <Icon sx={{ fontSize: 48, color: '#bdbdbd', mb: 1 }} />
             <Typography variant="body2" color="text.secondary">
-              No hay {title.toLowerCase()} cargadas
+              {editMode ? 'Sube imágenes para este tipo de media' : 'No hay imágenes disponibles'}
             </Typography>
           </Box>
         ) : (
           <ImageList cols={3} gap={12}>
             {images.map((img, index) => (
-              <ImageListItem key={index}>
+              <ImageListItem key={index} sx={{ borderRadius: 2, overflow: 'hidden' }}>
                 <img
-                  src={img.url || img}
+                  src={img.url}
                   alt={`${title} ${index + 1}`}
                   loading="lazy"
-                  style={{ borderRadius: 8, height: 180, objectFit: 'cover' }}
+                  style={{ height: 180, objectFit: 'cover' }}
                 />
                 {editMode && (
                   <ImageListItemBar
                     actionIcon={
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDeleteImage(mediaType, index)}
-                        sx={{ color: 'white' }}
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
+                      <Tooltip title="Eliminar">
+                        <IconButton
+                          sx={{ color: 'white' }}
+                          onClick={() => handleDeleteImage(mediaType, index)}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Tooltip>
                     }
-                    sx={{ borderRadius: '0 0 8px 8px' }}
                   />
                 )}
               </ImageListItem>
@@ -157,8 +153,7 @@ const FloorTab = ({ floor, editMode, onChange }) => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header del piso */}
+    <Box sx={{ p: 4 }}>
       <Box mb={3}>
         <Typography variant="h5" fontWeight={700} gutterBottom sx={{ fontFamily: '"Poppins", sans-serif' }}>
           {floor.label}
@@ -168,7 +163,6 @@ const FloorTab = ({ floor, editMode, onChange }) => {
         </Typography>
       </Box>
 
-      {/* Selector de opciones (si es customizable) */}
       {floor.isCustomizable && floor.options?.length > 0 && (
         <Box mb={3}>
           <FormControl fullWidth sx={{ maxWidth: 400 }}>
@@ -180,13 +174,13 @@ const FloorTab = ({ floor, editMode, onChange }) => {
               sx={{ borderRadius: 3 }}
             >
               {floor.options.map((option) => (
-                <MenuItem key={option.id} value={option.id}>
+                <MenuItem key={option.key} value={option.key}>
                   <Box display="flex" justifyContent="space-between" width="100%">
-                    <span>{option.name}</span>
+                    <span>{option.label}</span>
                     <Chip
-                      label={option.price > 0 ? `+$${option.price.toLocaleString()}` : 'Incluido'}
+                      label="Incluido"
                       size="small"
-                      color={option.price > 0 ? 'primary' : 'default'}
+                      color="default"
                       sx={{ ml: 2 }}
                     />
                   </Box>
@@ -194,23 +188,11 @@ const FloorTab = ({ floor, editMode, onChange }) => {
               ))}
             </Select>
           </FormControl>
-
-          {currentOption && (
-            <Paper elevation={0} sx={{ p: 2, mt: 2, bgcolor: `${theme.palette.primary.main}08`, borderRadius: 2 }}>
-              <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
-                {currentOption.name}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {currentOption.price > 0 ? `Costo adicional: $${currentOption.price.toLocaleString()}` : 'Sin costo adicional'}
-              </Typography>
-            </Paper>
-          )}
         </Box>
       )}
 
-      {/* Media Sections */}
       <Grid container spacing={3}>
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <MediaSection
             title="Renders"
             mediaType="renders"
@@ -218,8 +200,7 @@ const FloorTab = ({ floor, editMode, onChange }) => {
             color={theme.palette.primary.main}
           />
         </Grid>
-
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <MediaSection
             title="Isométricos"
             mediaType="isometrics"
@@ -227,11 +208,10 @@ const FloorTab = ({ floor, editMode, onChange }) => {
             color={theme.palette.secondary.main}
           />
         </Grid>
-
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <MediaSection
             title="Planos"
-            mediaType="floorPlans"
+            mediaType="blueprints"
             icon={Layers}
             color={theme.palette.info.main}
           />

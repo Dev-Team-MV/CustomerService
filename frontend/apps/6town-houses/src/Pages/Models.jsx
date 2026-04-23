@@ -44,75 +44,82 @@ const Models = () => {
     }
   }, [loadingCatalog, catalogConfig])
 
-  const fetchModelData = async () => {
-    try {
-      setLoading(true)
+const fetchModelData = async () => {
+  try {
+    setLoading(true)
+    
+    const modelsRes = await api.get('/models', { params: { projectId } })
+    const projectModel = modelsRes.data[1]
+    
+    if (!projectModel) {
+      const floorsFromCatalog = transformCatalogToFloors(catalogConfig)
+      console.log('🏗️ Creating new model with floors from catalog:', floorsFromCatalog) // Debug
       
-      const modelsRes = await api.get('/models', { params: { projectId } })
-      const projectModel = modelsRes.data[0]
+      const newModel = await api.post('/models', {
+        projectId,
+        model: '6Town Houses Model',
+        modelNumber: 'M1',
+        price: 280000,
+        bedrooms: 3,
+        bathrooms: 3,
+        sqft: 1800,
+        stories: 4,
+        status: 'active',
+        floors: floorsFromCatalog
+      })
       
-      if (!projectModel) {
-        const floorsFromCatalog = transformCatalogToFloors(catalogConfig)
+      setModel(newModel.data)
+      setFormData({
+        model: newModel.data.model,
+        modelNumber: newModel.data.modelNumber,
+        price: newModel.data.price,
+        bedrooms: newModel.data.bedrooms,
+        bathrooms: newModel.data.bathrooms,
+        sqft: newModel.data.sqft,
+        stories: newModel.data.stories
+      })
+      setFloors(newModel.data.floors || floorsFromCatalog)
+      console.log('✅ New model floors set:', newModel.data.floors || floorsFromCatalog) // Debug
+    } else {
+      setModel(projectModel)
+      setFormData({
+        model: projectModel.model || '',
+        modelNumber: projectModel.modelNumber || '',
+        price: projectModel.price || '',
+        bedrooms: projectModel.bedrooms || '',
+        bathrooms: projectModel.bathrooms || '',
+        sqft: projectModel.sqft || '',
+        stories: projectModel.stories || '4'
+      })
+      
+      try {
+        const floorsRes = await api.get(`/models/${projectModel._id}/floors`)
+        const existingFloors = floorsRes.data.floors || []
         
-        const newModel = await api.post('/models', {
-          projectId,
-          model: '6Town Houses Model',
-          modelNumber: 'M1',
-          price: 280000,
-          bedrooms: 3,
-          bathrooms: 3,
-          sqft: 1800,
-          stories: 4,
-          status: 'active',
-          floors: floorsFromCatalog
-        })
+        console.log('📦 Floors from API:', existingFloors) // Debug
         
-        setModel(newModel.data)
-        setFormData({
-          model: newModel.data.model,
-          modelNumber: newModel.data.modelNumber,
-          price: newModel.data.price,
-          bedrooms: newModel.data.bedrooms,
-          bathrooms: newModel.data.bathrooms,
-          sqft: newModel.data.sqft,
-          stories: newModel.data.stories
-        })
-        setFloors(newModel.data.floors || floorsFromCatalog)
-      } else {
-        setModel(projectModel)
-        setFormData({
-          model: projectModel.model || '',
-          modelNumber: projectModel.modelNumber || '',
-          price: projectModel.price || '',
-          bedrooms: projectModel.bedrooms || '',
-          bathrooms: projectModel.bathrooms || '',
-          sqft: projectModel.sqft || '',
-          stories: projectModel.stories || '4'
-        })
-        
-        try {
-          const floorsRes = await api.get(`/models/${projectModel._id}/floors`)
-          const existingFloors = floorsRes.data.floors || []
-          
-          if (existingFloors.length === 0) {
-            const floorsFromCatalog = transformCatalogToFloors(catalogConfig)
-            setFloors(floorsFromCatalog)
-          } else {
-            setFloors(existingFloors)
-          }
-        } catch (err) {
-          console.warn('No floors found, using catalog:', err)
+        if (existingFloors.length === 0) {
           const floorsFromCatalog = transformCatalogToFloors(catalogConfig)
+          console.log('📚 Using catalog floors (API returned empty):', floorsFromCatalog) // Debug
           setFloors(floorsFromCatalog)
+        } else {
+          console.log('✅ Using existing floors from model') // Debug
+          setFloors(existingFloors)
         }
+      } catch (err) {
+        console.warn('⚠️ No floors found, using catalog:', err)
+        const floorsFromCatalog = transformCatalogToFloors(catalogConfig)
+        console.log('📚 Catalog floors:', floorsFromCatalog) // Debug
+        setFloors(floorsFromCatalog)
       }
-    } catch (err) {
-      console.error('Error fetching model:', err)
-      setSnackbar({ open: true, message: 'Error al cargar el modelo', severity: 'error' })
-    } finally {
-      setLoading(false)
     }
+  } catch (err) {
+    console.error('Error fetching model:', err)
+    setSnackbar({ open: true, message: 'Error al cargar el modelo', severity: 'error' })
+  } finally {
+    setLoading(false)
   }
+}
 
   const handleFormChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))

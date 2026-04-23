@@ -176,20 +176,39 @@ const loadAllVersions = useCallback(async () => {
   }, [projectId, loadAllVersions])
 
   // Función helper para transformar catálogo -> floors
+// En useCatalogConfig.js - REEMPLAZAR la función transformCatalogToFloors
+
 const transformCatalogToFloors = (catalogConfig) => {
-  if (!catalogConfig?.levels || !Array.isArray(catalogConfig.levels)) {
+  if (!catalogConfig?.structure?.levels || typeof catalogConfig.structure.levels !== 'object') {
+    console.warn('⚠️ No levels found in catalog config')
     return []
   }
 
-  return catalogConfig.levels.map((level, index) => ({
-    key: level.key || `floor-${index + 1}`,
-    label: level.label || `Nivel ${index + 1}`,
-    level: level.level || index + 1,
-    isCustomizable: level.isCustomizable || false,
-    options: (level.options || []).map(option => ({
-      key: option.key,
-      label: option.label,
-      status: option.status || 'active',
+  const levelsObj = catalogConfig.structure.levels
+  const levelKeys = Object.keys(levelsObj)
+  
+  console.log('📚 Transforming catalog levels:', levelKeys)
+
+  return levelKeys.map((levelKey, index) => {
+    const levelData = levelsObj[levelKey]
+    
+    return {
+      key: levelKey,
+      label: levelData.label || levelKey.replace(/([A-Z])/g, ' $1').trim(),
+      level: index + 1,
+      isCustomizable: levelData.options && levelData.options.length > 0,
+      options: (levelData.options || []).map(option => ({
+        key: option.id || option.key,
+        label: option.label,
+        status: option.status || 'active',
+        media: {
+          renders: [],
+          isometrics: [],
+          blueprints: [],
+          cinematics: [],
+          exterior: []
+        }
+      })),
       media: {
         renders: [],
         isometrics: [],
@@ -197,15 +216,8 @@ const transformCatalogToFloors = (catalogConfig) => {
         cinematics: [],
         exterior: []
       }
-    })),
-    media: {
-      renders: [],
-      isometrics: [],
-      blueprints: [],
-      cinematics: [],
-      exterior: []
     }
-  }))
+  })
 }
 
   // Helpers
