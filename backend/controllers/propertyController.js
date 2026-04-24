@@ -484,7 +484,8 @@ const resolvePropertyPricing = async ({
         initialPayment: initialPaymentAmount,
         pending: pendingAmount,
         adjustments: pricing.adjustments,
-        configVersion: pricing.configVersion
+        configVersion: pricing.configVersion,
+        pricingMode: pricing.pricingMode || 'legacy_components'
       }
     }
   }
@@ -547,7 +548,8 @@ export const getPropertyQuote = async (req, res) => {
         pending: prices.pending
       },
       pricingConfig: {
-        version: prices.configVersion || null
+        version: prices.configVersion || null,
+        mode: prices.pricingMode || 'legacy_components'
       }
     })
   } catch (error) {
@@ -622,7 +624,8 @@ export const getPropertyQuotePreview = async (req, res) => {
           pending: prices.pending
         },
         pricingConfig: {
-          version: prices.configVersion || null
+          version: prices.configVersion || null,
+          mode: prices.pricingMode || 'legacy_components'
         }
       },
       mediaByFloor

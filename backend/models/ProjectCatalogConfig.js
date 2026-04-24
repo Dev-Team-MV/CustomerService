@@ -73,6 +73,11 @@ const projectCatalogConfigSchema = new mongoose.Schema(
     pricingRules: {
       type: [pricingRuleSchema],
       default: () => []
+    },
+    pricingMode: {
+      type: String,
+      enum: ['legacy_components', 'lot_fixed_total'],
+      default: 'legacy_components'
     }
   },
   { timestamps: true }

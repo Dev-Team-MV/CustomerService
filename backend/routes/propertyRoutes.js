@@ -91,7 +91,7 @@ const router = express.Router()
  *                 description: Owner user IDs (at least one of user or users required)
  *               initialPayment:
  *                 type: number
- *                 description: Initial payment amount (price and pending will be calculated automatically as lot.price + model.price + facade.price)
+ *                 description: Initial payment amount (price and pending are calculated automatically using the active pricing mode for the project)
  *     responses:
  *       201:
  *         description: Property created (9 phases will be automatically created)

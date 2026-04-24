@@ -169,6 +169,11 @@ const options = {
             catalogType: { type: 'string', enum: ['houses', 'apartments', 'mixed'] },
             structure: { type: 'object', additionalProperties: true },
             assetsSchema: { type: 'object', additionalProperties: true },
+            pricingMode: {
+              type: 'string',
+              enum: ['legacy_components', 'lot_fixed_total'],
+              description: 'legacy_components: total = lote + modelo + fachada + ajustes. lot_fixed_total: total base = precio del lote.'
+            },
             pricingRules: {
               type: 'array',
               items: {
@@ -215,6 +220,11 @@ const options = {
             catalogType: { type: 'string', enum: ['houses', 'apartments', 'mixed'] },
             structure: { type: 'object', additionalProperties: true },
             assetsSchema: { type: 'object', additionalProperties: true },
+            pricingMode: {
+              type: 'string',
+              enum: ['legacy_components', 'lot_fixed_total'],
+              default: 'legacy_components'
+            },
             pricingRules: {
               type: 'array',
               items: {
@@ -350,7 +360,10 @@ const options = {
             },
             pricingConfig: {
               type: 'object',
-              properties: { version: { type: 'integer', nullable: true } }
+              properties: {
+                version: { type: 'integer', nullable: true },
+                mode: { type: 'string', enum: ['legacy_components', 'lot_fixed_total'] }
+              }
             }
           }
         },

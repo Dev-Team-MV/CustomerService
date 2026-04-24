@@ -106,22 +106,28 @@ export async function evaluateProjectPricing({
   facadeExists,
   selectedOptions = {}
 }) {
+  const config = await getActiveCatalogConfigForProject(projectId)
+  const pricingMode = config?.pricingMode || 'legacy_components'
   const lotPrice = toNumber(lotExists?.price)
   const modelBasePrice = toNumber(modelExists?.price)
   const facadePrice = toNumber(facadeExists?.price)
-  const base = lotPrice + modelBasePrice + facadePrice
+  const base = pricingMode === 'lot_fixed_total'
+    ? lotPrice
+    : lotPrice + modelBasePrice + facadePrice
 
   const adjustments = []
-  adjustments.push(...resolveLegacyOptionAdjustments({ modelExists, selectedOptions }))
+  if (pricingMode !== 'lot_fixed_total') {
+    adjustments.push(...resolveLegacyOptionAdjustments({ modelExists, selectedOptions }))
+  }
 
-  const config = await getActiveCatalogConfigForProject(projectId)
   if (config && Array.isArray(config.pricingRules) && config.pricingRules.length > 0) {
     const context = {
       selectedOptions,
       lot: lotExists,
       model: modelExists,
       facade: facadeExists,
-      base
+      base,
+      pricingMode
     }
     adjustments.push(...evaluatePricingRules({
       rules: config.pricingRules,
@@ -135,10 +141,11 @@ export async function evaluateProjectPricing({
 
   return {
     configVersion: config?.version || null,
+    pricingMode,
     baseBreakdown: {
       lotPrice,
-      modelBasePrice,
-      facadePrice
+      modelBasePrice: pricingMode === 'lot_fixed_total' ? 0 : modelBasePrice,
+      facadePrice: pricingMode === 'lot_fixed_total' ? 0 : facadePrice
     },
     adjustments,
     totalAdjustments,
