@@ -64,6 +64,9 @@ const router = express.Router()
  *               color:
  *                 type: string
  *                 description: Lot color (e.g. hex, name)
+ *               model:
+ *                 type: string
+ *                 description: Model ID to assign to the lot (optional)
  *               price:
  *                 type: number
  *               status:
@@ -138,6 +141,9 @@ router.get('/stats', protect, getLotStats)
  *               color:
  *                 type: string
  *                 description: Lot color (e.g. hex, name)
+ *               model:
+ *                 type: string
+ *                 description: Model ID to assign to the lot (optional; send null or empty to clear)
  *               price:
  *                 type: number
  *               status:

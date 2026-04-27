@@ -1,4 +1,5 @@
 import Lot from '../models/Lot.js'
+import Model from '../models/Model.js'
 
 export const getAllLots = async (req, res) => {
   try {
@@ -10,6 +11,7 @@ export const getAllLots = async (req, res) => {
 
     const lots = await Lot.find(filter)
       .populate('project', 'name slug')
+      .populate('model', 'model modelNumber price')
       .populate('assignedUser', 'firstName lastName email')
       .sort({ number: 1 })
       .lean()
@@ -23,6 +25,7 @@ export const getLotById = async (req, res) => {
   try {
     const lot = await Lot.findById(req.params.id)
       .populate('project', 'name slug')
+      .populate('model', 'model modelNumber price')
       .populate('assignedUser', 'firstName lastName email')
 
     if (lot) {
@@ -37,7 +40,7 @@ export const getLotById = async (req, res) => {
 
 export const createLot = async (req, res) => {
   try {
-    const { projectId, project, number, color, price, status } = req.body
+    const { projectId, project, number, color, price, status, model } = req.body
     const projId = projectId || project
     if (!projId) {
       return res.status(400).json({ message: 'projectId (or project) is required' })
@@ -48,11 +51,24 @@ export const createLot = async (req, res) => {
       return res.status(400).json({ message: 'Lot number already exists in this project' })
     }
 
+    let modelId = undefined
+    if (model !== undefined && model !== null && model !== '') {
+      const modelExists = await Model.findById(model).select('_id project')
+      if (!modelExists) {
+        return res.status(404).json({ message: 'Model not found' })
+      }
+      if (!modelExists.project || String(modelExists.project) !== String(projId)) {
+        return res.status(400).json({ message: 'Model does not belong to this project' })
+      }
+      modelId = modelExists._id
+    }
+
     const lot = await Lot.create({
       project: projId,
       number,
       color,
       price,
+      model: modelId,
       status: status || 'available'
     })
 
@@ -67,6 +83,21 @@ export const updateLot = async (req, res) => {
     const lot = await Lot.findById(req.params.id)
     
     if (lot) {
+      if (req.body.model !== undefined) {
+        const incomingModel = req.body.model
+        if (incomingModel === null || incomingModel === '') {
+          lot.model = undefined
+        } else {
+          const modelExists = await Model.findById(incomingModel).select('_id project')
+          if (!modelExists) {
+            return res.status(404).json({ message: 'Model not found' })
+          }
+          if (!modelExists.project || String(modelExists.project) !== String(lot.project)) {
+            return res.status(400).json({ message: 'Model does not belong to this project' })
+          }
+          lot.model = modelExists._id
+        }
+      }
       lot.number = req.body.number || lot.number
       lot.color = req.body.color !== undefined ? req.body.color : lot.color
       lot.price = req.body.price !== undefined ? req.body.price : lot.price
