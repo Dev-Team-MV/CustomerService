@@ -70,6 +70,9 @@ payloadSchema.pre('validate', function (next) {
 
 payloadSchema.index({ property: 1 })
 payloadSchema.index({ apartment: 1 })
+payloadSchema.index({ property: 1, date: -1 })
+payloadSchema.index({ apartment: 1, date: -1 })
+payloadSchema.index({ status: 1, date: -1 })
 
 const Payload = mongoose.model('Payload', payloadSchema)
 
