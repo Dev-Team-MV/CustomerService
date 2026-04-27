@@ -24,8 +24,8 @@ import {
 import api from '@shared/services/api'
 import PageHeader from '@shared/components/PageHeader'
 import StatsCards from '../components/statscard'
-import DataTable from '@shared/components/table/DataTable';
-import EmptyState from '@shared/components/table/EmptyState';
+import DataTable from '@shared/components/table/DataTable'
+import EmptyState from '@shared/components/table/EmptyState'
 import LotDialog from '../components/lot/LotDialog'
 
 const Lots = () => {
@@ -36,16 +36,22 @@ const Lots = () => {
   const [openDialog, setOpenDialog] = useState(false)
   const [selectedLot, setSelectedLot] = useState(null)
 
+  // ✅ Obtener projectId del env
+  const projectId = import.meta.env.VITE_PROJECT_ID
+
   useEffect(() => {
-    fetchData()
-  }, [])
+    if (projectId) {
+      fetchData()
+    }
+  }, [projectId])
 
   const fetchData = async () => {
     setLoading(true)
     try {
+      // ✅ Filtrar por projectId en los endpoints
       const [lotsRes, statsRes] = await Promise.all([
-        api.get('/lots'),
-        api.get('/lots/stats')
+        api.get(`/lots?projectId=${projectId}`),
+        api.get(`/lots/stats?projectId=${projectId}`)
       ])
       setLots(lotsRes.data)
       setStats(statsRes.data)
@@ -68,10 +74,16 @@ const Lots = () => {
 
   const handleSubmit = async (formData, selectedLot) => {
     try {
+      // ✅ Incluir projectId en el payload
+      const dataWithProject = {
+        ...formData,
+        projectId
+      }
+
       if (selectedLot) {
-        await api.put(`/lots/${selectedLot._id}`, formData)
+        await api.put(`/lots/${selectedLot._id}`, dataWithProject)
       } else {
-        await api.post('/lots', formData)
+        await api.post('/lots', dataWithProject)
       }
       handleCloseDialog()
       fetchData()
@@ -163,6 +175,46 @@ const Lots = () => {
       )
     },
     {
+      field: 'model',
+      headerName: t('lots:table.model') || 'Model',
+      minWidth: 200,
+      renderCell: ({ row }) => {
+        if (!row.model) {
+          return (
+            <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+              No model assigned
+            </Typography>
+          )
+        }
+        const modelData = typeof row.model === 'object' ? row.model : null
+        return (
+          <Box display="flex" alignItems="center" gap={1}>
+            <Avatar
+              sx={{
+                width: 36,
+                height: 36,
+                bgcolor: '#333F1F',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: '0.75rem',
+                fontFamily: '"Poppins", sans-serif'
+              }}
+            >
+              {modelData?.modelNumber || 'M'}
+            </Avatar>
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif', fontSize: '0.85rem' }}>
+                {modelData?.model || 'Model'}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>
+                {modelData?.modelNumber || ''}
+              </Typography>
+            </Box>
+          </Box>
+        )
+      }
+    },
+    {
       field: 'status',
       headerName: t('lots:table.status'),
       renderCell: ({ value }) => {
@@ -191,6 +243,48 @@ const Lots = () => {
               '& .MuiChip-icon': { color: config.color }
             }}
           />
+        )
+      }
+    },
+    {
+      field: 'assignedUser',
+      headerName: t('lots:table.assignedTo'),
+      minWidth: 200,
+      renderCell: ({ row }) => {
+        if (!row.assignedUser) {
+          return (
+            <Typography variant="caption" color="text.secondary">
+              {t('lots:table.unassigned')}
+            </Typography>
+          )
+        }
+        return (
+          <Box display="flex" alignItems="center" gap={1}>
+            <Avatar
+              sx={{
+                width: 40,
+                height: 40,
+                bgcolor: 'transparent',
+                background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: '0.875rem',
+                fontFamily: '"Poppins", sans-serif',
+                border: '2px solid rgba(255, 255, 255, 0.9)',
+                boxShadow: '0 2px 8px rgba(51, 63, 31, 0.15)'
+              }}
+            >
+              {row.assignedUser.firstName?.charAt(0)}{row.assignedUser.lastName?.charAt(0)}
+            </Avatar>
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}>
+                {row.assignedUser.firstName} {row.assignedUser.lastName}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                {row.assignedUser.email}
+              </Typography>
+            </Box>
+          </Box>
         )
       }
     },

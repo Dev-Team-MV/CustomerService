@@ -281,28 +281,62 @@ const ModelCard = ({
               >
                 #{model.modelNumber}
               </Typography>
-              <Box
-                sx={{
-                  bgcolor: 'rgba(140, 165, 81, 0.08)',
-                  border: '2px solid rgba(140, 165, 81, 0.25)',
-                  borderRadius: 2,
-                  px: 2,
-                  py: 0.8,
-                  display: 'inline-block'
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  fontWeight={700}
-                  sx={{
-                    color: '#333F1F',
-                    fontFamily: '"Poppins", sans-serif',
-                    letterSpacing: '0.5px'
-                  }}
-                >
-                  ${model.price?.toLocaleString()}
-                </Typography>
-              </Box>
+
+{hasPricingOptions(model) && (
+  <Box display="flex" gap={0.8} flexWrap="wrap">
+    {model.balconies?.length > 0 && (
+      <Chip
+        icon={<Balcony sx={{ fontSize: 14 }} />}
+        label={`+$${(model.balconies[0].price / 1000).toFixed(0)}K`}
+        size="small"
+        sx={{
+          height: 24,
+          bgcolor: 'rgba(140, 165, 81, 0.12)',
+          color: '#333F1F',
+          fontWeight: 600,
+          border: '1px solid rgba(140, 165, 81, 0.3)',
+          fontFamily: '"Poppins", sans-serif',
+          fontSize: '0.7rem',
+          '& .MuiChip-icon': { color: '#8CA551' }
+        }}
+      />
+    )}
+    {model.upgrades?.length > 0 && (
+      <Chip
+        icon={<UpgradeIcon sx={{ fontSize: 14 }} />}
+        label={`+$${(model.upgrades[0].price / 1000).toFixed(0)}K`}
+        size="small"
+        sx={{
+          height: 24,
+          bgcolor: 'rgba(229, 134, 60, 0.12)',
+          color: '#E5863C',
+          fontWeight: 600,
+          border: '1px solid rgba(229, 134, 60, 0.3)',
+          fontFamily: '"Poppins", sans-serif',
+          fontSize: '0.7rem',
+          '& .MuiChip-icon': { color: '#E5863C' }
+        }}
+      />
+    )}
+    {model.storages?.length > 0 && (
+      <Chip
+        icon={<StorageIcon sx={{ fontSize: 14 }} />}
+        label={`+$${(model.storages[0].price / 1000).toFixed(0)}K`}
+        size="small"
+        sx={{
+          height: 24,
+          bgcolor: 'rgba(112, 111, 111, 0.12)',
+          color: '#706f6f',
+          fontWeight: 600,
+          border: '1px solid rgba(112, 111, 111, 0.3)',
+          fontFamily: '"Poppins", sans-serif',
+          fontSize: '0.7rem',
+          '& .MuiChip-icon': { color: '#706f6f' }
+        }}
+      />
+    )}
+  </Box>
+)}
             </Box>
           </Box>
 
@@ -374,61 +408,7 @@ const ModelCard = ({
           </Box>
 
           {/* PRICING OPTIONS */}
-          {hasPricingOptions(model) && (
-            <Box display="flex" gap={0.8} mb={2} flexWrap="wrap">
-              {model.balconies?.length > 0 && (
-                <Chip
-                  icon={<Balcony sx={{ fontSize: 14 }} />}
-                  label={`+$${(model.balconies[0].price / 1000).toFixed(0)}K`}
-                  size="small"
-                  sx={{
-                    height: 24,
-                    bgcolor: 'rgba(140, 165, 81, 0.12)',
-                    color: '#333F1F',
-                    fontWeight: 600,
-                    border: '1px solid rgba(140, 165, 81, 0.3)',
-                    fontFamily: '"Poppins", sans-serif',
-                    fontSize: '0.7rem',
-                    '& .MuiChip-icon': { color: '#8CA551' }
-                  }}
-                />
-              )}
-              {model.upgrades?.length > 0 && (
-                <Chip
-                  icon={<UpgradeIcon sx={{ fontSize: 14 }} />}
-                  label={`+$${(model.upgrades[0].price / 1000).toFixed(0)}K`}
-                  size="small"
-                  sx={{
-                    height: 24,
-                    bgcolor: 'rgba(229, 134, 60, 0.12)',
-                    color: '#E5863C',
-                    fontWeight: 600,
-                    border: '1px solid rgba(229, 134, 60, 0.3)',
-                    fontFamily: '"Poppins", sans-serif',
-                    fontSize: '0.7rem',
-                    '& .MuiChip-icon': { color: '#E5863C' }
-                  }}
-                />
-              )}
-              {model.storages?.length > 0 && (
-                <Chip
-                  icon={<StorageIcon sx={{ fontSize: 14 }} />}
-                  label={`+$${(model.storages[0].price / 1000).toFixed(0)}K`}
-                  size="small"
-                  sx={{
-                    height: 24,
-                    bgcolor: 'rgba(112, 111, 111, 0.12)',
-                    color: '#706f6f',
-                    fontWeight: 600,
-                    border: '1px solid rgba(112, 111, 111, 0.3)',
-                    fontFamily: '"Poppins", sans-serif',
-                    fontSize: '0.7rem',
-                    '& .MuiChip-icon': { color: '#706f6f' }
-                  }}
-                />
-              )}
-            </Box>
-          )}
+
 
           {/* ACTIONS */}
           <Box display="flex" gap={1} mb={2.5}>

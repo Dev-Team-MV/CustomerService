@@ -125,9 +125,14 @@ const calculatePricingCombinations = (formData) => {
   return count;
 };
 
+// const calculateMaxPrice = (formData) => {
+//   if (!formData) return 0;
+//   const { price, hasBalcony, balconyPrice, hasUpgrade, upgradePrice, hasStorage, storagePrice } = formData;
+//   return price + (hasBalcony ? balconyPrice : 0) + (hasUpgrade ? upgradePrice : 0) + (hasStorage ? storagePrice : 0);
+// };
 const calculateMaxPrice = (formData) => {
   if (!formData) return 0;
-  const { price, hasBalcony, balconyPrice, hasUpgrade, upgradePrice, hasStorage, storagePrice } = formData;
+  const { price = 0, hasBalcony, balconyPrice, hasUpgrade, upgradePrice, hasStorage, storagePrice } = formData;
   return price + (hasBalcony ? balconyPrice : 0) + (hasUpgrade ? upgradePrice : 0) + (hasStorage ? storagePrice : 0);
 };
 
@@ -151,7 +156,7 @@ export const mapModelToFormData = (selectedModel) => {
   return {
     model: selectedModel.model,
     modelNumber: selectedModel.modelNumber || "",
-    price: selectedModel.price,
+    price: selectedModel.price || 0,
     bedrooms: selectedModel.bedrooms,
     bathrooms: selectedModel.bathrooms,
     sqft: selectedModel.sqft,
@@ -202,17 +207,30 @@ export const useModels = () => {
   const [loadingProjects, setLoadingProjects] = useState(false);
 
   // Fetch models
-  const fetchModels = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await api.get("/models");
-      setModels(response.data);
-    } catch (error) {
-      console.error("Error fetching models:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // const fetchModels = useCallback(async () => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await api.get("/models");
+  //     setModels(response.data);
+  //   } catch (error) {
+  //     console.error("Error fetching models:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, []);
+  // Fetch models
+const fetchModels = useCallback(async (projectId = null) => {
+  setLoading(true);
+  try {
+    const params = projectId ? { projectId } : {};
+    const response = await api.get("/models", { params });
+    setModels(response.data);
+  } catch (error) {
+    console.error("Error fetching models:", error);
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
   // Fetch facades
   const fetchFacades = useCallback(async () => {
@@ -244,10 +262,11 @@ export const useModels = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchModels();
-    fetchFacades();
-  }, [fetchModels, fetchFacades]);
+useEffect(() => {
+  // No llamar fetchModels aquí automáticamente
+  // Se llamará desde el componente con el projectId
+  fetchFacades();
+}, [fetchFacades]);
 
   // Submit model (create/update)
   const handleSubmitModel = async (formData, selectedModel, onClose) => {
@@ -310,7 +329,7 @@ export const useModels = () => {
       const dataToSend = {
         model: formData.model,
         modelNumber: formData.modelNumber,
-        price: formData.price,
+        price: formData.price || 0,
         bedrooms: formData.bedrooms,
         bathrooms: formData.bathrooms,
         sqft: formData.sqft,

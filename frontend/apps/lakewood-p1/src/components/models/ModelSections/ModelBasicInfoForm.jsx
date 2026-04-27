@@ -157,7 +157,7 @@ const ModelBasicInfoForm = ({
         }}
       />
     </Grid>
-    <Grid item xs={6} sm={4}>
+    {/* <Grid item xs={6} sm={4}>
       <TextField
         fullWidth
         size="small"
@@ -197,7 +197,7 @@ const ModelBasicInfoForm = ({
           }
         }}
       />
-    </Grid>
+    </Grid> */}
     <Grid item xs={6} sm={4}>
       <TextField
         fullWidth
