@@ -63,6 +63,12 @@ export function validateProjectCatalogConfigPayload(payload = {}) {
   if (payload.pricingRules !== undefined && !Array.isArray(payload.pricingRules)) {
     errors.push('pricingRules must be an array')
   }
+  if (
+    payload.pricingMode !== undefined &&
+    !['legacy_components', 'lot_fixed_total'].includes(payload.pricingMode)
+  ) {
+    errors.push('pricingMode must be legacy_components or lot_fixed_total')
+  }
 
   if (Array.isArray(payload.pricingRules)) {
     payload.pricingRules.forEach((rule, index) => {

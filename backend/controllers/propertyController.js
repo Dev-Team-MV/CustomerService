@@ -132,6 +132,118 @@ function calculateTotalConstructionPercentage(phases = []) {
   return Math.round(total * 100) / 100
 }
 
+function normalizeFloorMediaBlock(media) {
+  if (!media || typeof media !== 'object') {
+    return {
+      renders: [],
+      isometrics: [],
+      blueprints: [],
+      cinematics: [],
+      exterior: []
+    }
+  }
+
+  return {
+    renders: normalizeImageArray(media.renders),
+    isometrics: normalizeImageArray(media.isometrics),
+    blueprints: normalizeImageArray(media.blueprints),
+    cinematics: normalizeImageArray(media.cinematics),
+    exterior: normalizeImageArray(media.exterior)
+  }
+}
+
+function hasFloorMediaContent(media) {
+  if (!media || typeof media !== 'object') return false
+  return ['renders', 'isometrics', 'blueprints', 'cinematics', 'exterior']
+    .some((key) => Array.isArray(media[key]) && media[key].length > 0)
+}
+
+function normalizeComparable(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, '')
+}
+
+function inferSelectedOptionKeyForFloor(floor, selectedOptions = {}, selectedFloors = {}) {
+  const options = Array.isArray(floor?.options) ? floor.options : []
+  if (options.length === 0) return null
+
+  const optionMap = new Map()
+  options.forEach((option) => {
+    if (option?.key) optionMap.set(normalizeComparable(option.key), option.key)
+    if (option?.label) optionMap.set(normalizeComparable(option.label), option.key)
+  })
+
+  // 1) Explicit floors map has priority
+  const explicitFloorSelection = selectedFloors[floor?.key]
+  if (explicitFloorSelection) {
+    const inferred = optionMap.get(normalizeComparable(explicitFloorSelection))
+    if (inferred) return inferred
+  }
+
+  // 2) Try conventional keys in selectedOptions
+  const floorKey = floor?.key || ''
+  const candidateKeys = [
+    floorKey,
+    `${floorKey}Option`,
+    `${floorKey}Upgrade`,
+    `${floorKey}Selection`
+  ]
+
+  for (const key of candidateKeys) {
+    const rawValue = selectedOptions[key]
+    if (!rawValue) continue
+    const inferred = optionMap.get(normalizeComparable(rawValue))
+    if (inferred) return inferred
+  }
+
+  // 3) Heuristic: keys containing floor key text (e.g. level1Upgrade)
+  const normalizedFloorKey = normalizeComparable(floorKey)
+  if (normalizedFloorKey) {
+    for (const [key, value] of Object.entries(selectedOptions)) {
+      if (!key || value == null || typeof value === 'object') continue
+      if (!normalizeComparable(key).includes(normalizedFloorKey)) continue
+      const inferred = optionMap.get(normalizeComparable(value))
+      if (inferred) return inferred
+    }
+  }
+
+  return null
+}
+
+function resolveModelFloorMedia(modelExists, selectedOptions = {}) {
+  const floors = Array.isArray(modelExists?.floors) ? modelExists.floors : []
+  const selectedFloors = selectedOptions && typeof selectedOptions === 'object'
+    ? (selectedOptions.floors && typeof selectedOptions.floors === 'object' ? selectedOptions.floors : {})
+    : {}
+
+  return floors.map((floorRaw, index) => {
+    const floor = floorRaw?.toObject ? floorRaw.toObject() : floorRaw
+    const floorKey = floor?.key || `floor-${index + 1}`
+    const floorMedia = normalizeFloorMediaBlock(floor?.media)
+    const options = Array.isArray(floor?.options) ? floor.options : []
+    const selectedOptionKey = inferSelectedOptionKeyForFloor(floor, selectedOptions, selectedFloors)
+
+    const selectedOptionRaw = selectedOptionKey
+      ? options.find((opt) => opt?.key === selectedOptionKey)
+      : null
+    const selectedOption = selectedOptionRaw?.toObject ? selectedOptionRaw.toObject() : selectedOptionRaw
+    const selectedOptionMedia = normalizeFloorMediaBlock(selectedOption?.media)
+
+    const useOptionMedia = selectedOption && hasFloorMediaContent(selectedOptionMedia)
+
+    return {
+      floorKey,
+      level: floor?.level ?? null,
+      label: floor?.label || '',
+      selectedOptionKey,
+      mediaSource: useOptionMedia ? 'option' : 'floor',
+      media: useOptionMedia ? selectedOptionMedia : floorMedia
+    }
+  })
+}
+
 export const getAllProperties = async (req, res) => {
   try {
     const { status, user, projectId } = req.query
@@ -163,7 +275,7 @@ export const getAllProperties = async (req, res) => {
     const properties = await Property.find(filter)
       .populate('project', 'name slug')
       .populate('lot', 'number price')
-      .populate('model', 'model price bedrooms bathrooms sqft images blueprints balconies upgrades')
+      .populate('model', 'model modelNumber price bedrooms bathrooms sqft images blueprints balconies upgrades floors')
       .populate('facade', 'title url price')
       .populate('users', 'firstName lastName email phoneNumber')
       .populate({
@@ -180,6 +292,7 @@ export const getAllProperties = async (req, res) => {
       propertyObj.totalConstructionPercentage = calculateTotalConstructionPercentage(propertyObj.phases)
       propertyObj.images = getPropertyImages(property)
       propertyObj.blueprints = getPropertyBlueprints(property)
+      propertyObj.mediaByFloor = resolveModelFloorMedia(property.model, property.selectedOptions || {})
       return propertyObj
     })
     
@@ -195,7 +308,7 @@ export const getPropertyById = async (req, res) => {
     const property = await Property.findById(req.params.id)
       .populate('project', 'name slug')
       .populate('lot', 'number price')
-      .populate('model', 'model price bedrooms bathrooms sqft images blueprints description balconies upgrades')
+      .populate('model', 'model modelNumber price bedrooms bathrooms sqft images blueprints description balconies upgrades floors')
       .populate('facade', 'title url price')
       .populate('users', 'firstName lastName email phoneNumber birthday')
       .populate({
@@ -227,6 +340,7 @@ export const getPropertyById = async (req, res) => {
     propertyObj.totalConstructionPercentage = property.totalConstructionPercentage || 0
     propertyObj.images = getPropertyImages(property)
     propertyObj.blueprints = getPropertyBlueprints(property)
+    propertyObj.mediaByFloor = resolveModelFloorMedia(property.model, property.selectedOptions || {})
     await hydrateUrlsInObject(propertyObj)
     res.json(propertyObj)
   } catch (error) {
@@ -370,7 +484,8 @@ const resolvePropertyPricing = async ({
         initialPayment: initialPaymentAmount,
         pending: pendingAmount,
         adjustments: pricing.adjustments,
-        configVersion: pricing.configVersion
+        configVersion: pricing.configVersion,
+        pricingMode: pricing.pricingMode || 'legacy_components'
       }
     }
   }
@@ -433,9 +548,91 @@ export const getPropertyQuote = async (req, res) => {
         pending: prices.pending
       },
       pricingConfig: {
-        version: prices.configVersion || null
+        version: prices.configVersion || null,
+        mode: prices.pricingMode || 'legacy_components'
       }
     })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const getPropertyQuotePreview = async (req, res) => {
+  try {
+    const { projectId, project, lot, model, facade, initialPayment, hasBalcony, modelType, hasStorage, selectedOptions } = req.body
+
+    const resolved = await resolvePropertyPricing({
+      projectId,
+      project,
+      lot,
+      model,
+      facade,
+      initialPayment,
+      hasBalcony: hasBalcony === true,
+      modelType: modelType || 'basic',
+      hasStorage: hasStorage === true,
+      selectedOptions: selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {},
+      enforceLotAvailability: false
+    })
+
+    if (!resolved.ok) {
+      return res.status(resolved.status).json({ message: resolved.message })
+    }
+
+    const {
+      prices,
+      projectId: resolvedProjectId,
+      lotExists,
+      modelExists,
+      facadeExists,
+      facadeEnabled
+    } = resolved.data
+
+    const mediaByFloor = resolveModelFloorMedia(modelExists, selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {})
+
+    const response = {
+      quote: {
+        projectId: resolvedProjectId,
+        lot: { _id: lotExists._id, number: lotExists.number, price: prices.lotPrice },
+        model: {
+          _id: modelExists._id,
+          model: modelExists.model,
+          modelNumber: modelExists.modelNumber,
+          price: prices.modelBasePrice
+        },
+        facade: facadeExists
+          ? { _id: facadeExists._id, title: facadeExists.title, price: prices.facadePrice }
+          : null,
+        facadeEnabled,
+        options: {
+          hasBalcony: hasBalcony === true,
+          modelType: modelType || 'basic',
+          hasStorage: hasStorage === true
+        },
+        breakdown: {
+          lotPrice: prices.lotPrice,
+          modelBasePrice: prices.modelBasePrice,
+          balconyPrice: prices.balconyPrice,
+          upgradePrice: prices.upgradePrice,
+          storagePrice: prices.storagePrice,
+          facadePrice: prices.facadePrice,
+          adjustments: prices.adjustments || []
+        },
+        totals: {
+          totalPrice: prices.totalPrice,
+          initialPayment: prices.initialPayment,
+          pending: prices.pending
+        },
+        pricingConfig: {
+          version: prices.configVersion || null,
+          mode: prices.pricingMode || 'legacy_components'
+        }
+      },
+      mediaByFloor
+    }
+
+    await hydrateUrlsInObject(response)
+    res.json(response)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -501,7 +698,8 @@ export const createProperty = async (req, res) => {
       status: 'pending',
       hasBalcony: hasBalcony === true,
       modelType: modelType || 'basic',
-      hasStorage: hasStorage === true
+      hasStorage: hasStorage === true,
+      selectedOptions: selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {}
     })
     
     await Lot.findByIdAndUpdate(lot, {
@@ -542,7 +740,7 @@ export const createProperty = async (req, res) => {
 // Schema fields that can be updated via PUT (any value allowed by the model)
 const ALLOWED_PROPERTY_UPDATES = [
   'lot', 'model', 'facade', 'users', 'price', 'pending', 'initialPayment',
-  'status', 'saleDate', 'hasBalcony', 'modelType', 'hasStorage'
+  'status', 'saleDate', 'hasBalcony', 'modelType', 'hasStorage', 'selectedOptions'
 ]
 
 export const updateProperty = async (req, res) => {

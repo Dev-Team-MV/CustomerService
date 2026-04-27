@@ -68,6 +68,11 @@ const propertySchema = new mongoose.Schema(
     hasStorage: {
       type: Boolean,
       default: false
+    },
+    // Selecciones dinámicas por proyecto/catálogo (ej. floors.level1 = 'airbnb')
+    selectedOptions: {
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({})
     }
   },
   {
