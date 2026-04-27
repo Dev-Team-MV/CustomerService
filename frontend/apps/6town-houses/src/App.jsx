@@ -29,6 +29,7 @@ import GetYourQuote from './Pages/GetYourQuote'
 import Lots from './Pages/Lots'
 import Models from './Pages/Models'
 import Properties from './Pages/Properties'
+import Payloads from './Pages/Payloads'
 
 import theme from './theme'
 
@@ -110,6 +111,7 @@ function App() {
               <Route path="/lots" element={<Lots />} />
               <Route path="/models" element={<Models />} />
               <Route path="/properties" element={<Properties />} />
+              <Route path="/payloads" element={<Payloads />} />
 
               {/* Agrega aquí el resto de tus rutas privadas */}
             </Route>

@@ -12,7 +12,9 @@
     "lot": "Lot",
     "price": "PRICE",
     "status": "STATUS",
-    "actions": "ACTIONS"
+    "actions": "ACTIONS",
+    "unassigned": "Unassigned",
+    "assignedTo": "ASSIGNED TO"
   },
   "status": {
     "available": "Available",

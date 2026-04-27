@@ -49,7 +49,7 @@ const fetchModelData = async () => {
     setLoading(true)
     
     const modelsRes = await api.get('/models', { params: { projectId } })
-    const projectModel = modelsRes.data[1]
+    const projectModel = modelsRes.data[0]
     
     if (!projectModel) {
       const floorsFromCatalog = transformCatalogToFloors(catalogConfig)
