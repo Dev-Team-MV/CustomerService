@@ -14,7 +14,8 @@
     "status": "STATUS",
     "actions": "ACTIONS",
     "unassigned": "Unassigned",
-    "assignedTo": "ASSIGNED TO"
+    "assignedTo": "ASSIGNED TO",
+    "model":"MODEL"
   },
   "status": {
     "available": "Available",

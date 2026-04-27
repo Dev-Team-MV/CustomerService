@@ -1,15 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Box,
   Typography,
   TextField,
   MenuItem,
-  Button,
   Grid,
   CircularProgress,
   ToggleButtonGroup,
@@ -21,85 +16,91 @@ import ModalWrapper from '../../constants/ModalWrapper'
 import PrimaryButton from '../../constants/PrimaryButton'
 import modelService from '@shared/services/modelService'
 
-// 4 colores hardcodeados para inventario
 const LOT_COLORS = [
   { value: 'green', label: 'Available', hex: '#4caf50' },
   { value: 'yellow', label: 'Model 10', hex: '#ffc107' },
   { value: 'red', label: 'Sold', hex: '#f44336' },
   { value: 'blue', label: 'Hold', hex: '#2196f3' },
-  {value: 'pink', label: 'Pink', hex: '#f0467f'}
+  { value: 'pink', label: 'Pink', hex: '#f0467f' }
 ]
 
 const LotDialog = ({ open, onClose, selectedLot, onSubmit }) => {
   const { t } = useTranslation(['lots', 'common'])
-  
-const [formData, setFormData] = useState({
-  number: '',
-  price: 0,
-  status: 'available',
-  project: '',
-  projectId: '',
-  color: 'green',
-  model: '' // ✅ Agregar campo model
-})
 
-const [projects, setProjects] = useState([])
-const [loadingProjects, setLoadingProjects] = useState(false)
-const [models, setModels] = useState([])
-const [loadingModels, setLoadingModels] = useState(false)
+  const [formData, setFormData] = useState({
+    number: '',
+    price: 0,
+    status: 'available',
+    project: '',
+    projectId: '',
+    color: 'green',
+    model: ''
+  })
 
-useEffect(() => {
-  if (open) fetchProjects()
-}, [open])
+  const [projects, setProjects] = useState([])
+  const [loadingProjects, setLoadingProjects] = useState(false)
+  const [models, setModels] = useState([])
+  const [loadingModels, setLoadingModels] = useState(false)
 
-// ✅ NUEVO: Fetch modelos cuando cambia el proyecto
-useEffect(() => {
-  if (formData.project) {
-    fetchModels(formData.project)
-  } else {
-    setModels([])
-    setFormData(prev => ({ ...prev, model: '' }))
-  }
-}, [formData.project])
+  // ✅ Cargar proyectos cuando abre el dialog
+  useEffect(() => {
+    if (open) {
+      fetchProjects()
+    }
+  }, [open])
 
-useEffect(() => {
-  if (selectedLot) {
-    const projectId = typeof selectedLot.project === 'object'
-      ? selectedLot.project?._id
-      : selectedLot.project || selectedLot.projectId || ''
+  // ✅ Cargar modelos cuando cambia el proyecto
+  useEffect(() => {
+    if (formData.project) {
+      fetchModels(formData.project)
+    } else {
+      setModels([])
+    }
+  }, [formData.project])
 
-    const modelId = typeof selectedLot.model === 'object'
-      ? selectedLot.model?._id
-      : selectedLot.model || ''
+  // ✅ Inicializar datos cuando abre el dialog con un lote seleccionado
+  useEffect(() => {
+    if (!open) return
 
-    setFormData({
-      number: selectedLot.number,
-      price: selectedLot.price,
-      status: selectedLot.status,
-      project: projectId,
-      projectId: projectId,
-      color: selectedLot.color || 'green',
-      model: modelId // ✅ Incluir model
-    })
-  } else {
-    setFormData({
-      number: '',
-      price: 0,
-      status: 'available',
-      project: '',
-      projectId: '',
-      color: 'green',
-      model: ''
-    })
-  }
-}, [selectedLot, open])
+    if (selectedLot) {
+      const projectId = typeof selectedLot.project === 'object'
+        ? selectedLot.project?._id
+        : selectedLot.project || selectedLot.projectId || ''
+
+      const modelId = typeof selectedLot.model === 'object'
+        ? selectedLot.model?._id
+        : selectedLot.model || ''
+
+      setFormData({
+        number: selectedLot.number,
+        price: selectedLot.price,
+        status: selectedLot.status,
+        project: projectId,
+        projectId: projectId,
+        color: selectedLot.color || 'green',
+        model: modelId
+      })
+    } else {
+      // Nuevo lote
+      setFormData({
+        number: '',
+        price: 0,
+        status: 'available',
+        project: '',
+        projectId: '',
+        color: 'green',
+        model: ''
+      })
+    }
+  }, [open, selectedLot])
 
   const fetchProjects = async () => {
     try {
       setLoadingProjects(true)
       const data = await projectService.getAll()
       setProjects(data)
-      
+
+      // Si hay un solo proyecto y es nuevo lote, auto-seleccionar
       if (data.length === 1 && !selectedLot) {
         setFormData(prev => ({
           ...prev,
@@ -115,36 +116,55 @@ useEffect(() => {
   }
 
   const fetchModels = async (projectId) => {
-  try {
-    setLoadingModels(true)
-    const data = await modelService.getAll({ projectId, status: 'active' })
-    setModels(data)
-  } catch (error) {
-    console.error('Error fetching models:', error)
-    setModels([])
-  } finally {
-    setLoadingModels(false)
-  }
-}
-
-const handleSubmit = () => {
-  if (!formData.number || !formData.price || !formData.project) {
-    alert(t('lots:form.validation'))
-    return
+    try {
+      setLoadingModels(true)
+      const data = await modelService.getAll({ projectId, status: 'active' })
+      setModels(data)
+    } catch (error) {
+      console.error('Error fetching models:', error)
+      setModels([])
+    } finally {
+      setLoadingModels(false)
+    }
   }
 
-  const payload = {
-    number: formData.number,
-    price: Number(formData.price),
-    status: formData.status,
-    project: String(formData.project),
-    projectId: String(formData.projectId || formData.project),
-    color: formData.color,
-    model: formData.model || null // ✅ Incluir model (opcional)
+  const handleProjectChange = (e) => {
+    const newProjectId = e.target.value
+    setFormData(prev => ({
+      ...prev,
+      project: newProjectId,
+      projectId: newProjectId,
+      model: '' // Reset model cuando cambia proyecto
+    }))
   }
 
-  onSubmit(payload, selectedLot)
-}
+  const handleModelChange = (e) => {
+    const newModelId = e.target.value
+    console.log('Selecting model:', newModelId)
+    setFormData(prev => ({
+      ...prev,
+      model: newModelId
+    }))
+  }
+
+  const handleSubmit = () => {
+    if (!formData.number || !formData.price || !formData.project) {
+      alert(t('lots:form.validation'))
+      return
+    }
+
+    const payload = {
+      number: formData.number,
+      price: Number(formData.price),
+      status: formData.status,
+      project: String(formData.project),
+      projectId: String(formData.projectId || formData.project),
+      color: formData.color,
+      model: formData.model || null
+    }
+
+    onSubmit(payload, selectedLot)
+  }
 
   return (
     <ModalWrapper
@@ -176,18 +196,13 @@ const handleSubmit = () => {
       fullWidth
     >
       <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
-        {/* SELECT PROJECT */}
         <Grid item xs={12}>
           <TextField
             fullWidth
             select
             label={t('lots:form.project') || 'Project *'}
             value={formData.project}
-            onChange={(e) => setFormData(prev => ({
-              ...prev,
-              project: e.target.value,
-              projectId: e.target.value
-            }))}
+            onChange={handleProjectChange}
             disabled={loadingProjects}
             helperText={t('lots:form.projectHelp') || 'Select the project this lot belongs to'}
           >
@@ -200,10 +215,7 @@ const handleSubmit = () => {
               <MenuItem disabled>No projects available</MenuItem>
             ) : (
               projects.map((project) => (
-                <MenuItem
-                  key={project._id}
-                  value={project._id}
-                >
+                <MenuItem key={project._id} value={project._id}>
                   {project.name} {project.slug ? `(${project.slug})` : ''}
                 </MenuItem>
               ))
@@ -211,70 +223,59 @@ const handleSubmit = () => {
           </TextField>
         </Grid>
 
-        {/* ✅ NUEVO: SELECT MODEL */}
-<Grid item xs={12}>
-  <TextField
-    fullWidth
-    select
-    label="Model"
-    value={formData.model}
-    onChange={(e) => setFormData(prev => ({
-      ...prev,
-      model: e.target.value
-    }))}
-    disabled={!formData.project || loadingModels}
-    helperText={
-      !formData.project 
-        ? 'Select a project first' 
-        : 'Select the model for this lot (optional)'
-    }
-  >
-    {loadingModels ? (
-      <MenuItem disabled>
-        <CircularProgress size={20} sx={{ mr: 1 }} />
-        Loading models...
-      </MenuItem>
-    ) : models.length === 0 ? (
-      <MenuItem disabled>
-        {formData.project ? 'No models available for this project' : 'Select a project first'}
-      </MenuItem>
-    ) : (
-      <>
-        <MenuItem value="">
-          <em>No model assigned</em>
-        </MenuItem>
-        {models.map((model) => (
-          <MenuItem
-            key={model._id}
-            value={model._id}
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            select
+            label="Model"
+            value={formData.model}
+            onChange={handleModelChange}
+            disabled={!formData.project || loadingModels}
+            helperText={
+              !formData.project
+                ? 'Select a project first'
+                : 'Select the model for this lot (optional)'
+            }
           >
-            {model.model} - {model.modelNumber} (${model.price?.toLocaleString()})
-          </MenuItem>
-        ))}
-      </>
-    )}
-  </TextField>
-</Grid>
+            <MenuItem value="">
+              <em>No model assigned</em>
+            </MenuItem>
+            {loadingModels ? (
+              <MenuItem disabled>
+                <CircularProgress size={20} sx={{ mr: 1 }} />
+                Loading models...
+              </MenuItem>
+            ) : models.length === 0 ? (
+              <MenuItem disabled>
+                {formData.project ? 'No models available for this project' : ''}
+              </MenuItem>
+            ) : (
+              models.map((model) => (
+                <MenuItem key={model._id} value={model._id}>
+                  {model.model} - {model.modelNumber} (${model.price?.toLocaleString()})
+                </MenuItem>
+              ))
+            )}
+          </TextField>
+        </Grid>
 
-        {/* LOT NUMBER */}
         <Grid item xs={12}>
           <TextField
             fullWidth
             label={t('lots:form.number')}
             value={formData.number}
-            onChange={(e) => setFormData({ ...formData, number: e.target.value })}
+            onChange={(e) => setFormData(prev => ({ ...prev, number: e.target.value }))}
             required
           />
         </Grid>
 
-        {/* PRICE */}
         <Grid item xs={12}>
           <TextField
             fullWidth
             type="number"
             label={t('lots:form.price')}
             value={formData.price}
-            onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+            onChange={(e) => setFormData(prev => ({ ...prev, price: Number(e.target.value) }))}
             required
             InputProps={{
               startAdornment: (
@@ -286,39 +287,31 @@ const handleSubmit = () => {
           />
         </Grid>
 
-        {/* STATUS */}
         <Grid item xs={12}>
           <TextField
             fullWidth
             select
             label={t('lots:form.status')}
             value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+            onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
           >
-            <MenuItem value="available">
-              {t('lots:status.available')}
-            </MenuItem>
-            <MenuItem value="pending">
-              {t('lots:status.pending')}
-            </MenuItem>
-            <MenuItem value="sold">
-              {t('lots:status.sold')}
-            </MenuItem>
+            <MenuItem value="available">{t('lots:status.available')}</MenuItem>
+            <MenuItem value="pending">{t('lots:status.pending')}</MenuItem>
+            <MenuItem value="sold">{t('lots:status.sold')}</MenuItem>
           </TextField>
         </Grid>
 
-        {/* COLOR SELECTOR */}
         <Grid item xs={12}>
           <Box>
-<Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600, color: '#706f6f' }}>
-  {t('lots:form.inventoryColor')}
-</Typography>
+            <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600, color: '#706f6f' }}>
+              {t('lots:form.inventoryColor')}
+            </Typography>
             <ToggleButtonGroup
               value={formData.color}
               exclusive
               onChange={(e, newColor) => {
                 if (newColor !== null) {
-                  setFormData({ ...formData, color: newColor })
+                  setFormData(prev => ({ ...prev, color: newColor }))
                 }
               }}
               fullWidth
@@ -330,10 +323,7 @@ const handleSubmit = () => {
                   border: '2px solid #e0e0e0',
                   borderRadius: 2,
                   py: 1.5,
-                  '&.Mui-selected': {
-                    borderWidth: '3px',
-                    fontWeight: 700
-                  }
+                  '&.Mui-selected': { borderWidth: '3px', fontWeight: 700 }
                 }
               }}
             >
@@ -344,13 +334,8 @@ const handleSubmit = () => {
                   sx={{
                     borderColor: `${color.hex} !important`,
                     bgcolor: formData.color === color.value ? `${color.hex}20` : 'transparent',
-                    '&:hover': {
-                      bgcolor: `${color.hex}30`
-                    },
-                    '&.Mui-selected': {
-                      bgcolor: `${color.hex}40`,
-                      color: color.hex
-                    }
+                    '&:hover': { bgcolor: `${color.hex}30` },
+                    '&.Mui-selected': { bgcolor: `${color.hex}40`, color: color.hex }
                   }}
                 >
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
@@ -368,4 +353,5 @@ const handleSubmit = () => {
     </ModalWrapper>
   )
 }
+
 export default LotDialog

@@ -14,7 +14,8 @@
     "status": "ESTADO",
     "actions": "ACCIONES",
     "unassigned": "Sin Asignar",
-    "assignedTo": "ASIGNADO A"
+    "assignedTo": "ASIGNADO A",
+    "model": "MODELO"
   },
   "status": {
     "available": "Disponible",
