@@ -108,6 +108,9 @@ userSchema.methods.generateSetupToken = function () {
   return token
 }
 
+userSchema.index({ role: 1 })
+userSchema.index({ 'projectMemberships.project': 1 })
+
 const User = mongoose.model('User', userSchema)
 
 export default User
