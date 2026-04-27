@@ -1,5 +1,60 @@
 import api from './api'
 
+const FOLDER_FILES_TTL_MS = 60 * 1000
+const folderFilesCache = new Map()
+const folderFilesInFlight = new Map()
+
+const getFolderCacheKey = (folder, urls) => `${String(folder || '').trim().toLowerCase()}|${urls ? '1' : '0'}`
+
+const clearFolderFilesCache = (folder = null) => {
+  if (!folder) {
+    folderFilesCache.clear()
+    folderFilesInFlight.clear()
+    return
+  }
+
+  const normalized = String(folder).trim().toLowerCase()
+  const keys = Array.from(folderFilesCache.keys())
+  keys.forEach((key) => {
+    if (key.startsWith(`${normalized}|`)) folderFilesCache.delete(key)
+  })
+  const inFlightKeys = Array.from(folderFilesInFlight.keys())
+  inFlightKeys.forEach((key) => {
+    if (key.startsWith(`${normalized}|`)) folderFilesInFlight.delete(key)
+  })
+}
+
+const fetchFolderFilesWithCache = async (folder, urls = true) => {
+  const cacheKey = getFolderCacheKey(folder, urls)
+  const now = Date.now()
+  const cached = folderFilesCache.get(cacheKey)
+  if (cached && cached.expiresAt > now) {
+    return cached.data
+  }
+
+  if (folderFilesInFlight.has(cacheKey)) {
+    return folderFilesInFlight.get(cacheKey)
+  }
+
+  const requestPromise = (async () => {
+    const response = await api.get('/upload/files', {
+      params: { folder, urls }
+    })
+    folderFilesCache.set(cacheKey, {
+      data: response.data,
+      expiresAt: Date.now() + FOLDER_FILES_TTL_MS
+    })
+    return response.data
+  })()
+
+  folderFilesInFlight.set(cacheKey, requestPromise)
+  try {
+    return await requestPromise
+  } finally {
+    folderFilesInFlight.delete(cacheKey)
+  }
+}
+
 const uploadService = {
   uploadImage: async (file, folder = '', fileName = '', isPublic = true) => {
     try {
@@ -12,6 +67,7 @@ const uploadService = {
       const response = await api.post('/upload/image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
+      clearFolderFilesCache(folder)
       return response.data.data.url
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to upload image')
@@ -126,6 +182,9 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
       const response = await api.post('/clubhouse/images', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+      clearFolderFilesCache('clubhouse')
+      clearFolderFilesCache('deck')
+      clearFolderFilesCache('clubhouse/deck')
       results.push(response.data);
     }
 
@@ -153,11 +212,7 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
 
   getFilesByFolder: async (folder, urls = true) => {
     try {
-      const response = await api.get('/upload/files', {
-        params: { folder, urls }
-      })
-
-      return response.data
+      return await fetchFolderFilesWithCache(folder, urls)
     } catch (error) {
       console.error(`❌ Error getting files from folder ${folder}:`, error.response?.data || error.message)
       throw new Error(error.response?.data?.message || `Failed to get files from ${folder}`)
@@ -177,6 +232,7 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
   /** PATCH recorrido file visibility. Body: { filename, isPublic }. filename e.g. "recorrido.1.jpg" */
   updateRecorridoVisibility: async (filename, isPublic) => {
     const response = await api.patch('/upload/recorrido/visibility', { filename, isPublic })
+    clearFolderFilesCache('recorrido')
     return response.data
   },
 
@@ -188,10 +244,7 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
 
     getDeckFiles: async (urls = true) => {
     try {
-      const response = await api.get('/upload/files', {
-        params: { folder: 'deck', urls }
-      })
-      return response.data
+      return await fetchFolderFilesWithCache('deck', urls)
     } catch (error) {
       console.error('❌ Error getting files from folder deck:', error.response?.data || error.message)
       throw new Error(error.response?.data?.message || 'Failed to get files from deck')
@@ -201,10 +254,7 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
   // Obtener archivos de la carpeta 'clubhouse/deck' (por si el backend usa ese path)
   getClubhouseDeckFiles: async (urls = true) => {
     try {
-      const response = await api.get('/upload/files', {
-        params: { folder: 'clubhouse/deck', urls }
-      })
-      return response.data
+      return await fetchFolderFilesWithCache('clubhouse/deck', urls)
     } catch (error) {
       console.error('❌ Error getting files from folder clubhouse/deck:', error.response?.data || error.message)
       throw new Error(error.response?.data?.message || 'Failed to get files from clubhouse/deck')
@@ -241,23 +291,31 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
 
 
   updateClubhouseImageVisibility: async ({ section, index, isPublic, interiorKey }) => {
-    return api.patch('/clubhouse/images/visibility', {
+    const response = await api.patch('/clubhouse/images/visibility', {
       section,
       index,
       isPublic,
       ...(section === 'interior' && { interiorKey })
     });
+    clearFolderFilesCache('clubhouse')
+    clearFolderFilesCache('deck')
+    clearFolderFilesCache('clubhouse/deck')
+    return response
   },
 
 
 deleteClubhouseImages: async ({ filenames = [], names = [], deleteFromStorage = true }) => {
   // Log para debug
-  return await api({
+  const response = await api({
     url: '/clubhouse/images',
     method: 'delete',
     data: { filenames, names, deleteFromStorage },
     headers: filenames.length > 0 ? { 'X-Filename': filenames[0] } : {}
   });
+  clearFolderFilesCache('clubhouse')
+  clearFolderFilesCache('deck')
+  clearFolderFilesCache('clubhouse/deck')
+  return response
 },
 
   /**
@@ -287,6 +345,7 @@ deleteClubhouseImages: async ({ filenames = [], names = [], deleteFromStorage = 
         }
   
         const res = await api.patch('/upload/recorrido/visibility', payload);
+        clearFolderFilesCache('recorrido')
         return res.data || res;
       } catch (err) {
         console.error('uploadService.updateRecorridoVisibility error:', err.response?.data || err.message || err);

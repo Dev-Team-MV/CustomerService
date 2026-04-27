@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   Typography,
@@ -26,7 +26,13 @@ import ImagePreview from "@shared/components/ImgPreview";
 import ModalWrapper from "@shared/constants/ModalWrapper";
 import PrimaryButton from "@shared/constants/PrimaryButton";
 
-const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
+const ClubImagesModal = ({
+  open,
+  onClose,
+  onImagesUploaded,
+  images: parentImages,
+  interiorKeys: parentInteriorKeys,
+}) => {
   const { t } = useTranslation(["clubHouse", "common"]);
   const [tab, setTab] = useState(0);
   const [selectedInteriorSection, setSelectedInteriorSection] =
@@ -47,18 +53,34 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const hydratedFromParentRef = useRef(false);
 
   useEffect(() => {
-    if (open) {
-      loadInteriorKeys();
+    if (!open) {
+      hydratedFromParentRef.current = false;
+      return;
     }
-  }, [open]);
+
+    const hasParentKeys =
+      Array.isArray(parentInteriorKeys) && parentInteriorKeys.length > 0;
+
+    if (hasParentKeys) {
+      hydratedFromParentRef.current = true;
+      setInteriorKeys(parentInteriorKeys);
+      setSelectedInteriorSection(parentInteriorKeys[0]);
+      if (parentImages) {
+        setExistingImages(normalizeOrganized(parentImages));
+      }
+      return;
+    }
+
+    loadInteriorKeys();
+  }, [open, parentImages, parentInteriorKeys]);
 
   useEffect(() => {
-    if (open && interiorKeys.length > 0) {
-      loadExistingImages();
-      setSelectedInteriorSection(interiorKeys[0]);
-    }
+    if (!open || interiorKeys.length === 0 || hydratedFromParentRef.current) return;
+    loadExistingImages();
+    setSelectedInteriorSection(interiorKeys[0]);
   }, [open, interiorKeys]);
 
   const loadInteriorKeys = async () => {
@@ -227,35 +249,37 @@ const ClubImagesModal = ({ open, onClose, onImagesUploaded }) => {
           // No agregar a exterior cuando section es null/undefined (evita que imágenes de interior aparezcan en exterior)
         });
 
-        // --- NUEVO: intentar traer archivos específicos de "deck" si no llegaron como section
-        try {
-          let deckResponse = null;
+        // Solo pedir endpoint de deck si no vino section=deck en el listado principal
+        if (organized.deck.length === 0) {
           try {
-            deckResponse = await uploadService.getDeckFiles(true);
-          } catch (err) {
-            // fallback a otro endpoint si existe
+            let deckResponse = null;
             try {
-              deckResponse = await uploadService.getClubhouseDeckFiles(true);
-            } catch (err2) {
-              deckResponse = null;
-            }
-          }
-          if (deckResponse?.files && deckResponse.files.length) {
-            deckResponse.files.forEach((f) => {
-              const imageUrl = f.url || f.publicUrl || f.path || f;
-              // evitar duplicados por URL
-              if (!organized.deck.some((i) => (i.url || i) === imageUrl)) {
-                organized.deck.push({
-                  _id: f._id,
-                  url: imageUrl,
-                  isPublic: f.isPublic ?? true,
-                  raw: f,
-                });
+              deckResponse = await uploadService.getDeckFiles(true);
+            } catch (err) {
+              // fallback a otro endpoint si existe
+              try {
+                deckResponse = await uploadService.getClubhouseDeckFiles(true);
+              } catch (err2) {
+                deckResponse = null;
               }
-            });
+            }
+            if (deckResponse?.files && deckResponse.files.length) {
+              deckResponse.files.forEach((f) => {
+                const imageUrl = f.url || f.publicUrl || f.path || f;
+                // evitar duplicados por URL
+                if (!organized.deck.some((i) => (i.url || i) === imageUrl)) {
+                  organized.deck.push({
+                    _id: f._id,
+                    url: imageUrl,
+                    isPublic: f.isPublic ?? true,
+                    raw: f,
+                  });
+                }
+              });
+            }
+          } catch (err) {
+            console.warn("Could not load deck-specific files:", err);
           }
-        } catch (err) {
-          console.warn("Could not load deck-specific files:", err);
         }
 
         const normalized = normalizeOrganized(organized);

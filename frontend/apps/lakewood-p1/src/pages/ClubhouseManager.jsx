@@ -81,24 +81,11 @@ const ClubhouseManager = () => {
       const keys = keysResponse?.interiorKeys || [];
       setInteriorKeys(keys);
 
-      // listado general y deck específico
+      // listado general
       const filesResponse = await uploadService.getFilesByFolder(
         "clubhouse",
         true,
       );
-      let deckResponse = { files: [] };
-      try {
-        deckResponse = await uploadService.getDeckFiles(true);
-      } catch (e) {
-        try {
-          deckResponse = await uploadService.getClubhouseDeckFiles(true);
-        } catch (e2) {
-          console.warn(
-            "No deck specific listing available:",
-            e2?.message || e2,
-          );
-        }
-      }
 
       const organized = {
         exterior: [],
@@ -136,13 +123,30 @@ const ClubhouseManager = () => {
         });
       }
 
-      // merge deckResponse.files
-      if (deckResponse?.files && deckResponse.files.length > 0) {
-        deckResponse.files.forEach((file) => {
-          const imageObj = getImageObj(file);
-          if (!organized.deck.some((img) => img.url === imageObj.url))
-            organized.deck.push(imageObj);
-        });
+      // Solo pedir deck por endpoint específico si no vino en el listado principal
+      if (organized.deck.length === 0) {
+        let deckResponse = { files: [] };
+        try {
+          deckResponse = await uploadService.getDeckFiles(true);
+        } catch (e) {
+          try {
+            deckResponse = await uploadService.getClubhouseDeckFiles(true);
+          } catch (e2) {
+            console.warn(
+              "No deck specific listing available:",
+              e2?.message || e2,
+            );
+          }
+        }
+
+        if (deckResponse?.files && deckResponse.files.length > 0) {
+          deckResponse.files.forEach((file) => {
+            const imageObj = getImageObj(file);
+            if (!organized.deck.some((img) => img.url === imageObj.url)) {
+              organized.deck.push(imageObj);
+            }
+          });
+        }
       }
 
       setImages(organized);
