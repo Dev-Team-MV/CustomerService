@@ -199,6 +199,11 @@ const options = {
                     properties: {
                       type: { type: 'string', enum: ['fixed', 'percentage'] },
                       amount: { type: 'number' },
+                      amountSource: { type: 'string', enum: ['fixed', 'context_path', 'selected_option_price'] },
+                      amountFrom: { type: 'string', description: 'Ruta en contexto para tomar monto dinámico (ej. selectedOptions.customAmount)' },
+                      optionCollectionPath: { type: 'string', description: 'Ruta a colección de opciones (ej. model.upgrades)' },
+                      selectedIdPath: { type: 'string', description: 'Ruta al id seleccionado (ej. selectedOptions.upgradeId)' },
+                      valueField: { type: 'string', description: 'Campo numérico dentro de la opción. Default: price' },
                       code: { type: 'string' },
                       label: { type: 'string' }
                     }
@@ -254,6 +259,11 @@ const options = {
                     properties: {
                       type: { type: 'string', enum: ['fixed', 'percentage'] },
                       amount: { type: 'number' },
+                      amountSource: { type: 'string', enum: ['fixed', 'context_path', 'selected_option_price'] },
+                      amountFrom: { type: 'string', description: 'Ruta en contexto para tomar monto dinámico' },
+                      optionCollectionPath: { type: 'string', description: 'Ruta a colección de opciones (ej. model.upgrades)' },
+                      selectedIdPath: { type: 'string', description: 'Ruta al id seleccionado (ej. selectedOptions.upgradeId)' },
+                      valueField: { type: 'string', description: 'Campo numérico dentro de la opción. Default: price' },
                       code: { type: 'string' },
                       label: { type: 'string' }
                     }

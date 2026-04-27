@@ -10,6 +10,36 @@ function get(obj, path) {
   return path.split('.').reduce((acc, key) => (acc == null ? undefined : acc[key]), obj)
 }
 
+function toIdStr(value) {
+  if (value == null) return ''
+  if (typeof value === 'string') return value
+  if (value._id != null) return String(value._id)
+  if (value.id != null) return String(value.id)
+  return String(value)
+}
+
+function resolveRuleBaseAmount(ruleApply = {}, context = {}) {
+  const source = ruleApply.amountSource || (ruleApply.amountFrom ? 'context_path' : 'fixed')
+
+  if (source === 'context_path') {
+    return toNumber(get(context, ruleApply.amountFrom))
+  }
+
+  if (source === 'selected_option_price') {
+    const collection = get(context, ruleApply.optionCollectionPath)
+    const selectedId = toIdStr(get(context, ruleApply.selectedIdPath))
+    if (!Array.isArray(collection) || !selectedId) return 0
+
+    const selected = collection.find((item) => toIdStr(item?._id || item?.id) === selectedId)
+    if (!selected) return 0
+
+    const valueField = ruleApply.valueField || 'price'
+    return toNumber(selected?.[valueField])
+  }
+
+  return toNumber(ruleApply.amount)
+}
+
 function evaluateCondition(condition, context) {
   const actual = get(context, condition.field)
   const expected = condition.value
@@ -71,7 +101,7 @@ export function evaluatePricingRules({ rules = [], context = {}, base = 0 }) {
     const pass = when.every((condition) => evaluateCondition(condition, context))
     if (!pass) continue
 
-    const amount = toNumber(rule.apply?.amount)
+    const amount = resolveRuleBaseAmount(rule.apply, context)
     const finalAmount = rule.apply?.type === 'percentage'
       ? (base * amount) / 100
       : amount
