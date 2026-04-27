@@ -63,8 +63,16 @@ const URL_KEYS = ['url', 'fileUrl']
  * @param {any} obj - Object, array, or primitive
  * @param {number} expiresIn - ms for signed URL
  */
-export async function hydrateUrlsInObject (obj, expiresIn = 365 * 24 * 60 * 60 * 1000) {
+export async function hydrateUrlsInObject (
+  obj,
+  expiresIn = 365 * 24 * 60 * 60 * 1000,
+  visited = new WeakSet()
+) {
   if (obj == null) return
+  if (typeof obj === 'object') {
+    if (visited.has(obj)) return
+    visited.add(obj)
+  }
   if (Array.isArray(obj)) {
     for (let i = 0; i < obj.length; i++) {
       const v = obj[i]
@@ -72,7 +80,7 @@ export async function hydrateUrlsInObject (obj, expiresIn = 365 * 24 * 60 * 60 *
         const resolved = await resolveToSignedUrl(v, expiresIn)
         if (resolved) obj[i] = resolved
       } else if (typeof v === 'object' && v !== null) {
-        await hydrateUrlsInObject(v, expiresIn)
+        await hydrateUrlsInObject(v, expiresIn, visited)
       }
     }
     return
@@ -91,7 +99,7 @@ export async function hydrateUrlsInObject (obj, expiresIn = 365 * 24 * 60 * 60 *
         }
       }
     } else if (typeof val === 'object' && val !== null) {
-      await hydrateUrlsInObject(val, expiresIn)
+      await hydrateUrlsInObject(val, expiresIn, visited)
     }
   }
 }

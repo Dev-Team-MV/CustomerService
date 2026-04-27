@@ -70,7 +70,6 @@ const router = express.Router()
  *             required:
  *               - projectId
  *               - model
- *               - price
  *               - bedrooms
  *               - bathrooms
  *               - sqft
@@ -87,6 +86,7 @@ const router = express.Router()
  *                 type: string
  *               price:
  *                 type: number
+ *                 description: Optional base price (defaults to 0)
  *               bedrooms:
  *                 type: number
  *               bathrooms:

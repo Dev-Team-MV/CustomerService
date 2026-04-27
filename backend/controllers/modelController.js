@@ -277,11 +277,18 @@ export const getModelPricingOptions = async (req, res) => {
     if (!model) {
       return res.status(404).json({ message: 'Model not found' })
     }
-    
-    const basePrice = model.price
-    const activeBalconies = model.balconies.filter(b => b.status === 'active')
-    const activeUpgrades = model.upgrades.filter(u => u.status === 'active')
-    const activeStorages = model.storages.filter(s => s.status === 'active')
+
+    // Work with plain objects to avoid circular refs from Mongoose subdocuments
+    // when hydrating URLs recursively.
+    const modelData = normalizeModelForResponse(model)
+
+    const basePrice = Number(modelData.price || 0)
+    const activeBalconies = (Array.isArray(modelData.balconies) ? modelData.balconies : [])
+      .filter(b => b.status === 'active')
+    const activeUpgrades = (Array.isArray(modelData.upgrades) ? modelData.upgrades : [])
+      .filter(u => u.status === 'active')
+    const activeStorages = (Array.isArray(modelData.storages) ? modelData.storages : [])
+      .filter(s => s.status === 'active')
     
     // Generate pricing combinations with all available options
     const allOptions = []
@@ -381,8 +388,8 @@ export const getModelPricingOptions = async (req, res) => {
     }
     
     const response = {
-      modelId: model._id,
-      modelName: model.model,
+      modelId: modelData._id,
+      modelName: modelData.model,
       basePrice: basePrice,
       availableOptions: {
         balconies: activeBalconies,
@@ -428,10 +435,19 @@ export const createModel = async (req, res) => {
     }
 
     // Validar campos requeridos del modelo
-    if (!model || !price || bedrooms === undefined || bathrooms === undefined || sqft === undefined) {
+    if (!model || bedrooms === undefined || bathrooms === undefined || sqft === undefined) {
       return res.status(400).json({
-        message: 'Missing required fields: model, price, bedrooms, bathrooms, and sqft are required'
+        message: 'Missing required fields: model, bedrooms, bathrooms, and sqft are required'
       })
+    }
+
+    if (price !== undefined) {
+      const parsedPrice = Number(price)
+      if (Number.isNaN(parsedPrice) || parsedPrice < 0) {
+        return res.status(400).json({
+          message: 'price must be a number greater than or equal to 0'
+        })
+      }
     }
 
     // Verificar si el modelo ya existe en este proyecto
@@ -505,7 +521,7 @@ export const createModel = async (req, res) => {
       project: projId,
       model,
       modelNumber,
-      price,
+      price: price !== undefined ? Number(price) : 0,
       bedrooms,
       bathrooms,
       sqft,

@@ -55,6 +55,12 @@ const getEnvPrefix = () => {
 }
 
 const KNOWN_PREFIXES = ['dev', 'pdn']
+const SIGNED_URL_EXPIRY_MS = 365 * 24 * 60 * 60 * 1000
+const DEFAULT_LIST_CACHE_MS = 60 * 1000
+const DEFAULT_SIGNED_URL_CACHE_MS = 10 * 60 * 1000
+
+const folderListCache = new Map()
+const signedUrlCache = new Map()
 
 /**
  * Resolve full path in bucket, prepending env prefix if not already present.
@@ -69,6 +75,32 @@ const resolvePath = (pathOrName) => {
   const lower = normalized.toLowerCase()
   if (KNOWN_PREFIXES.some((p) => lower.startsWith(`${p}/`))) return normalized
   return `${prefix}/${normalized}`
+}
+
+const getCacheTtlMs = (value, fallback) => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+}
+
+const getCachedSignedUrl = async (fileName, expiresIn = SIGNED_URL_EXPIRY_MS) => {
+  const fullPath = resolvePath(fileName)
+  const now = Date.now()
+  const signedUrlTtlMs = getCacheTtlMs(process.env.GCS_SIGNED_URL_CACHE_MS, DEFAULT_SIGNED_URL_CACHE_MS)
+  const cached = signedUrlCache.get(fullPath)
+  if (cached && cached.expiresAt > now) {
+    return cached.url
+  }
+
+  const file = bucket.file(fullPath)
+  const [signedUrl] = await file.getSignedUrl({
+    action: 'read',
+    expires: now + expiresIn
+  })
+  signedUrlCache.set(fullPath, {
+    url: signedUrl,
+    expiresAt: now + Math.min(signedUrlTtlMs, Math.max(1000, expiresIn - 1000))
+  })
+  return signedUrl
 }
 
 /**
@@ -154,13 +186,7 @@ export const deleteFile = async (fileName) => {
  */
 export const getSignedUrl = async (fileName, expiresIn = 60 * 60 * 1000) => {
   try {
-    const fullPath = resolvePath(fileName)
-    const file = bucket.file(fullPath)
-    const [signedUrl] = await file.getSignedUrl({
-      action: 'read',
-      expires: Date.now() + expiresIn
-    })
-    return signedUrl
+    return await getCachedSignedUrl(fileName, expiresIn)
   } catch (error) {
     console.error('Error generating signed URL:', error)
     throw new Error(`Failed to generate signed URL: ${error.message}`)
@@ -180,31 +206,40 @@ export const listFilesInFolder = async (folderPrefix, options = {}) => {
     if (!prefix) return []
     const resolvedPrefix = resolvePath(`${prefix}/`)
     const prefixWithSlash = resolvedPrefix.endsWith('/') ? resolvedPrefix : `${resolvedPrefix}/`
-    const [files] = await bucket.getFiles({ prefix: prefixWithSlash })
     const makePublic = process.env.GCS_MAKE_PUBLIC === 'true' || false
-    const result = []
-    for (const file of files) {
-      // Skip "directory" placeholders (GCS has no real folders, but we skip empty names)
+    const listCacheTtlMs = getCacheTtlMs(process.env.GCS_LIST_CACHE_MS, DEFAULT_LIST_CACHE_MS)
+    const cacheKey = `${prefixWithSlash}|${includeSignedUrls}|${makePublic}`
+    const now = Date.now()
+    const cached = folderListCache.get(cacheKey)
+    if (cached && cached.expiresAt > now) {
+      return cached.data
+    }
+
+    const [files] = await bucket.getFiles({ prefix: prefixWithSlash })
+
+    const validFiles = files.filter((file) => file.name && !file.name.endsWith('/'))
+    const result = await Promise.all(validFiles.map(async (file) => {
       const name = file.name
-      if (!name || name.endsWith('/')) continue
       const item = { name }
       if (includeSignedUrls) {
         if (makePublic) {
           item.url = `https://storage.googleapis.com/${bucketName}/${name}`
         } else {
           try {
-            const [signedUrl] = await file.getSignedUrl({
-              action: 'read',
-              expires: Date.now() + 365 * 24 * 60 * 60 * 1000
-            })
-            item.url = signedUrl
+            item.url = await getCachedSignedUrl(name, SIGNED_URL_EXPIRY_MS)
           } catch (e) {
             item.url = null
           }
         }
       }
-      result.push(item)
-    }
+      return item
+    }))
+
+    folderListCache.set(cacheKey, {
+      data: result,
+      expiresAt: now + listCacheTtlMs
+    })
+
     return result
   } catch (error) {
     console.error('Error listing files in GCS:', error)
