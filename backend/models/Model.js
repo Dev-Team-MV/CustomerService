@@ -80,7 +80,7 @@ const modelSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      required: [true, 'Base price is required'],
+      default: 0,
       min: 0
     },
     // Multiple options arrays

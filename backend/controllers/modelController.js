@@ -428,10 +428,19 @@ export const createModel = async (req, res) => {
     }
 
     // Validar campos requeridos del modelo
-    if (!model || !price || bedrooms === undefined || bathrooms === undefined || sqft === undefined) {
+    if (!model || bedrooms === undefined || bathrooms === undefined || sqft === undefined) {
       return res.status(400).json({
-        message: 'Missing required fields: model, price, bedrooms, bathrooms, and sqft are required'
+        message: 'Missing required fields: model, bedrooms, bathrooms, and sqft are required'
       })
+    }
+
+    if (price !== undefined) {
+      const parsedPrice = Number(price)
+      if (Number.isNaN(parsedPrice) || parsedPrice < 0) {
+        return res.status(400).json({
+          message: 'price must be a number greater than or equal to 0'
+        })
+      }
     }
 
     // Verificar si el modelo ya existe en este proyecto
@@ -505,7 +514,7 @@ export const createModel = async (req, res) => {
       project: projId,
       model,
       modelNumber,
-      price,
+      price: price !== undefined ? Number(price) : 0,
       bedrooms,
       bathrooms,
       sqft,
