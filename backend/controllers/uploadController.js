@@ -310,6 +310,8 @@ export const getFolderFiles = async (req, res) => {
     let filesOut = files
     if (folder.toLowerCase() === 'clubhouse' && enrich) {
       const clubHouse = await ClubHouse.findOne()
+        .select('exterior blueprints deck interior')
+        .lean()
       const sectionByFilename = mapClubHouseFilesToSections(clubHouse)
       filesOut = files.map(f => {
         const filename = f.name.includes('/') ? f.name.split('/').pop().split('?')[0] : f.name
@@ -326,6 +328,8 @@ export const getFolderFiles = async (req, res) => {
 
     if (folder.toLowerCase() === 'recorrido' && enrich) {
       const clubHouse = await ClubHouse.findOne()
+        .select('recorridoVisibility')
+        .lean()
       const recorridoVisibility = (clubHouse?.recorridoVisibility && typeof clubHouse.recorridoVisibility === 'object')
         ? clubHouse.recorridoVisibility
         : {}
