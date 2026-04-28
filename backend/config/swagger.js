@@ -952,7 +952,7 @@ const options = {
                   }
                 }
               },
-              description: 'Amenity name -> array of { url, isPublic } (e.g. Reception, Managers Office, Conference Room)'
+              description: 'Amenity name -> array of { url, isPublic } (e.g. property management, Managers Office, Meeting room)'
             },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
