@@ -13,7 +13,7 @@ const DEFAULT_INTERIOR_KEYS = [
   'Golf Simulator',
   'Terrace',
   'Gym',
-  'Bathrooms',
+  'bathrooms & lockers',
   'Laundry',
   'front desk',
   'Catering',

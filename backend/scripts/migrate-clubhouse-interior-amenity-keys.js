@@ -6,6 +6,7 @@
  * - Reception -> property management
  * - Counter -> front desk
  * - Lakeside -> boat dock
+ * - Bathroom / Bathrooms -> bathrooms & lockers
  *
  * Run:
  *   node scripts/migrate-clubhouse-interior-amenity-keys.js
@@ -22,7 +23,9 @@ const KEY_RENAMES = [
   ['Conference Room', 'Meeting room'],
   ['Reception', 'property management'],
   ['Counter', 'front desk'],
-  ['Lakeside', 'boat dock']
+  ['Lakeside', 'boat dock'],
+  ['Bathroom', 'bathrooms & lockers'],
+  ['Bathrooms', 'bathrooms & lockers']
 ]
 
 function isObjectLike(value) {
