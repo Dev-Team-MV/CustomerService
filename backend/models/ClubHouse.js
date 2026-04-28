@@ -20,7 +20,7 @@ const DEFAULT_INTERIOR_KEYS = [
   'Mural',
   'Boat dock',
   'Mechanical room',
-  'Counter Hallway',
+  'Use-mixed hallway',
   'Bathroom Hallway'
 ]
 

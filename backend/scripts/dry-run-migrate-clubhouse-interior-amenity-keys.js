@@ -9,6 +9,7 @@
  * - Lakeside / boat dock -> Boat dock
  * - Bathroom / Bathrooms / bathrooms & lockers -> Bathrooms & lockers
  * - Machines / mechanical room -> Mechanical room
+ * - Counter Hallway -> Use-mixed hallway
  *
  * Run:
  *   node scripts/dry-run-migrate-clubhouse-interior-amenity-keys.js
@@ -35,7 +36,8 @@ const KEY_RENAMES = [
   ['Bathrooms', 'Bathrooms & lockers'],
   ['bathrooms & lockers', 'Bathrooms & lockers'],
   ['Machines', 'Mechanical room'],
-  ['mechanical room', 'Mechanical room']
+  ['mechanical room', 'Mechanical room'],
+  ['Counter Hallway', 'Use-mixed hallway']
 ]
 
 function isObjectLike(value) {
