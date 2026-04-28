@@ -4,6 +4,7 @@
  * Old -> New
  * - Conference room / Conference Room -> Meeting room
  * - Multi-purpose room / Multi-Purpose Room -> Mixed-use room
+ * - Managers Office -> Manager office
  * - Reception / property management -> Property management
  * - Counter / front desk -> Concierge
  * - Lakeside / boat dock -> Boat dock
@@ -26,6 +27,7 @@ const KEY_RENAMES = [
   ['Conference Room', 'Meeting room'],
   ['Multi-purpose room', 'Mixed-use room'],
   ['Multi-Purpose Room', 'Mixed-use room'],
+  ['Managers Office', 'Manager office'],
   ['Reception', 'Property management'],
   ['property management', 'Property management'],
   ['Counter', 'Concierge'],

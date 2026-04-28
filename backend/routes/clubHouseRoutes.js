@@ -68,7 +68,7 @@ router.get('/public', getClubHousePublic)
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: List of interior keys (Property management, Managers Office, etc.)
+ *         description: List of interior keys (Property management, Manager office, etc.)
  */
 router.get('/interior-keys', protect, getClubHouseInteriorKeys)
 
@@ -93,7 +93,7 @@ router.get('/interior-keys', protect, getClubHouseInteriorKeys)
  *                 enum: [exterior, blueprints, deck, interior]
  *               interiorKey:
  *                 type: string
- *                 description: Required when section=interior. Use one of GET /api/clubhouse/interior-keys (e.g. Property management, Managers Office, Meeting room)
+ *                 description: Required when section=interior. Use one of GET /api/clubhouse/interior-keys (e.g. Property management, Manager office, Meeting room)
  *                 example: Property management
  *               isPublic:
  *                 type: boolean

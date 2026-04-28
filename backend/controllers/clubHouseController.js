@@ -11,6 +11,7 @@ const INTERIOR_KEY_RENAMES = [
   ['Conference Room', 'Meeting room'],
   ['Multi-purpose room', 'Mixed-use room'],
   ['Multi-Purpose Room', 'Mixed-use room'],
+  ['Managers Office', 'Manager office'],
   ['Reception', 'Property management'],
   ['property management', 'Property management'],
   ['Counter', 'Concierge'],
@@ -210,7 +211,7 @@ export const getClubHousePublic = async (req, res) => {
 /**
  * POST Upload images to Club House.
  * Body (form-data): section = 'exterior' | 'blueprints' | 'deck' | 'interior'
- *   - If section = 'interior', required: interiorKey (e.g. 'Property management', 'Managers Office', ...)
+ *   - If section = 'interior', required: interiorKey (e.g. 'Property management', 'Manager office', ...)
  *   - isPublic = 'true' | 'false' (opcional): si la(s) imagen(es) se pueden mostrar sin token. Por defecto true.
  * Files: 'images' (array of files) or 'image' (single file)
  * Appends { url, isPublic } to the corresponding array.
@@ -242,7 +243,7 @@ export const uploadClubHouseImages = async (req, res) => {
       const interiorKey = req.body.interiorKey || req.body.interior_key
       if (!interiorKey || typeof interiorKey !== 'string') {
         return res.status(400).json({
-          message: 'interiorKey is required when section is interior (e.g. Property management, Managers Office, Meeting room)'
+          message: 'interiorKey is required when section is interior (e.g. Property management, Manager office, Meeting room)'
         })
       }
       req._clubHouseInteriorKey = normalizeInteriorKey(interiorKey)

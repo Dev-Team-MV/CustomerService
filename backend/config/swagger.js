@@ -810,7 +810,7 @@ const options = {
                   }
                 }
               },
-              description: 'Amenity name -> array of { url, isPublic } (e.g. Property management, Managers Office, Meeting room)'
+              description: 'Amenity name -> array of { url, isPublic } (e.g. Property management, Manager office, Meeting room)'
             },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
