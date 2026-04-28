@@ -1,6 +1,6 @@
 import Model from '../models/Model.js'
 import { normalizeImageArray } from '../utils/imageUtils.js'
-import { hydrateUrlsInObject } from '../services/urlResolverService.js'
+import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
 
 // Helper: format images to { exterior: [{ url, isPublic }], interior: [...] }
 const formatImages = (images) => {
@@ -692,6 +692,148 @@ export const updateModel = async (req, res) => {
     }
     
     res.status(500).json({ message: error.message })
+  }
+}
+
+export const reorderModelImages = async (req, res) => {
+  try {
+    const model = await Model.findById(req.params.id)
+    if (!model) {
+      return res.status(404).json({ message: 'Model not found' })
+    }
+
+    const {
+      section = 'base',
+      sectionId,
+      balconyId,
+      upgradeId,
+      type = 'exterior',
+      count,
+      newOrder
+    } = req.body || {}
+
+    if (!['base', 'balcony', 'upgrade'].includes(section)) {
+      return res.status(400).json({ message: 'section must be one of: base, balcony, upgrade' })
+    }
+
+    if (!['exterior', 'interior'].includes(type)) {
+      return res.status(400).json({ message: 'type must be one of: exterior, interior' })
+    }
+
+    if (!Array.isArray(newOrder) || newOrder.length === 0) {
+      return res.status(400).json({ message: 'newOrder must be a non-empty array' })
+    }
+
+    let currentItems = []
+    let targetSetter = null
+
+    if (section === 'base') {
+      if (!model.images) model.images = { exterior: [], interior: [] }
+      currentItems = normalizeImageArray(model.images[type])
+      targetSetter = (items) => {
+        model.images[type] = items
+        model.markModified(`images.${type}`)
+      }
+    } else if (section === 'balcony') {
+      const targetBalconyId = balconyId || sectionId
+      if (!targetBalconyId) {
+        return res.status(400).json({ message: 'sectionId or balconyId is required when section is balcony' })
+      }
+      const balcony = model.balconies.id(targetBalconyId)
+      if (!balcony) {
+        return res.status(404).json({ message: 'Balcony not found in this model' })
+      }
+      if (!balcony.images) balcony.images = { exterior: [], interior: [] }
+      currentItems = normalizeImageArray(balcony.images[type])
+      targetSetter = (items) => {
+        balcony.images[type] = items
+        model.markModified('balconies')
+      }
+    } else {
+      const targetUpgradeId = upgradeId || sectionId
+      if (!targetUpgradeId) {
+        return res.status(400).json({ message: 'sectionId or upgradeId is required when section is upgrade' })
+      }
+      const upgrade = model.upgrades.id(targetUpgradeId)
+      if (!upgrade) {
+        return res.status(404).json({ message: 'Upgrade not found in this model' })
+      }
+      if (!upgrade.images) upgrade.images = { exterior: [], interior: [] }
+      currentItems = normalizeImageArray(upgrade.images[type])
+      targetSetter = (items) => {
+        upgrade.images[type] = items
+        model.markModified('upgrades')
+      }
+    }
+
+    if (currentItems.length === 0) {
+      return res.status(400).json({ message: 'There are no images to reorder in the selected section/type' })
+    }
+
+    if (count !== undefined && Number(count) !== newOrder.length) {
+      return res.status(400).json({ message: 'count does not match newOrder length' })
+    }
+
+    const incomingItems = []
+    for (const row of newOrder) {
+      if (!row || typeof row !== 'object' || typeof row.url !== 'string') {
+        return res.status(400).json({ message: 'Each newOrder item must include a valid url' })
+      }
+      const normalizedUrl = normalizePathForStorage(row.url)
+      if (!normalizedUrl) {
+        return res.status(400).json({ message: 'Each newOrder item must include a valid url' })
+      }
+      incomingItems.push({
+        url: normalizedUrl,
+        hasIsPublic: Object.prototype.hasOwnProperty.call(row, 'isPublic'),
+        isPublic: row.isPublic !== false
+      })
+    }
+
+    const incomingUrlSet = new Set(incomingItems.map((item) => item.url))
+    if (incomingUrlSet.size !== incomingItems.length) {
+      return res.status(400).json({ message: 'newOrder contains duplicate urls' })
+    }
+
+    const currentByUrl = new Map(currentItems.map((item) => [item.url, item]))
+    const currentUrlSet = new Set(currentItems.map((item) => item.url))
+
+    if (incomingItems.length !== currentItems.length) {
+      return res.status(400).json({
+        message: 'newOrder must contain exactly the same number of images as current collection'
+      })
+    }
+
+    for (const url of incomingUrlSet) {
+      if (!currentUrlSet.has(url)) {
+        return res.status(400).json({
+          message: 'newOrder contains urls not present in current collection'
+        })
+      }
+    }
+
+    const reordered = incomingItems.map((incoming) => {
+      const current = currentByUrl.get(incoming.url)
+      return {
+        url: current.url,
+        isPublic: incoming.hasIsPublic ? incoming.isPublic : current.isPublic !== false
+      }
+    })
+
+    targetSetter(reordered)
+    const updatedModel = await model.save()
+    const modelData = normalizeModelForResponse(updatedModel)
+    await hydrateUrlsInObject(modelData)
+
+    return res.json({
+      message: 'Images reordered successfully',
+      section,
+      type,
+      count: reordered.length,
+      model: modelData
+    })
+  } catch (error) {
+    return res.status(500).json({ message: error.message })
   }
 }
 

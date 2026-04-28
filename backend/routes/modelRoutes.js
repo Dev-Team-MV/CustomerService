@@ -5,6 +5,7 @@ import {
   getModelFloors,
   createModel,
   updateModel,
+  reorderModelImages,
   deleteModel,
   getModelPricingOptions
 } from '../controllers/modelController.js'
@@ -191,6 +192,8 @@ router.route('/:id')
   .get(getModelById)
   .put(protect, admin, updateModel)
   .delete(protect, admin, deleteModel)
+
+router.patch('/:id/images/reorder', protect, admin, reorderModelImages)
 
 /**
  * @swagger
