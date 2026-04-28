@@ -3,10 +3,12 @@
  *
  * Old -> New
  * - Conference room -> Meeting room
- * - Reception -> property management
- * - Counter -> front desk
- * - Lakeside -> boat dock
- * - Bathroom / Bathrooms -> bathrooms & lockers
+ * - Multi-purpose room / Multi-Purpose Room -> Mixed-use room
+ * - Reception / property management -> Property management
+ * - Counter / front desk -> Concierge
+ * - Lakeside / boat dock -> Boat dock
+ * - Bathroom / Bathrooms / bathrooms & lockers -> Bathrooms & lockers
+ * - Machines / mechanical room -> Mechanical room
  *
  * Run:
  *   node scripts/migrate-clubhouse-interior-amenity-keys.js
@@ -21,11 +23,19 @@ import ClubHouse from '../models/ClubHouse.js'
 const KEY_RENAMES = [
   ['Conference room', 'Meeting room'],
   ['Conference Room', 'Meeting room'],
-  ['Reception', 'property management'],
-  ['Counter', 'front desk'],
-  ['Lakeside', 'boat dock'],
-  ['Bathroom', 'bathrooms & lockers'],
-  ['Bathrooms', 'bathrooms & lockers']
+  ['Multi-purpose room', 'Mixed-use room'],
+  ['Multi-Purpose Room', 'Mixed-use room'],
+  ['Reception', 'Property management'],
+  ['property management', 'Property management'],
+  ['Counter', 'Concierge'],
+  ['front desk', 'Concierge'],
+  ['Lakeside', 'Boat dock'],
+  ['boat dock', 'Boat dock'],
+  ['Bathroom', 'Bathrooms & lockers'],
+  ['Bathrooms', 'Bathrooms & lockers'],
+  ['bathrooms & lockers', 'Bathrooms & lockers'],
+  ['Machines', 'Mechanical room'],
+  ['mechanical room', 'Mechanical room']
 ]
 
 function isObjectLike(value) {

@@ -162,7 +162,7 @@ export const getClubHousePublic = async (req, res) => {
 /**
  * POST Upload images to Club House.
  * Body (form-data): section = 'exterior' | 'blueprints' | 'deck' | 'interior'
- *   - If section = 'interior', required: interiorKey (e.g. 'property management', 'Managers Office', ...)
+ *   - If section = 'interior', required: interiorKey (e.g. 'Property management', 'Managers Office', ...)
  *   - isPublic = 'true' | 'false' (opcional): si la(s) imagen(es) se pueden mostrar sin token. Por defecto true.
  * Files: 'images' (array of files) or 'image' (single file)
  * Appends { url, isPublic } to the corresponding array.
@@ -194,7 +194,7 @@ export const uploadClubHouseImages = async (req, res) => {
       const interiorKey = req.body.interiorKey || req.body.interior_key
       if (!interiorKey || typeof interiorKey !== 'string') {
         return res.status(400).json({
-          message: 'interiorKey is required when section is interior (e.g. property management, Managers Office, Meeting room)'
+          message: 'interiorKey is required when section is interior (e.g. Property management, Managers Office, Meeting room)'
         })
       }
       req._clubHouseInteriorKey = interiorKey.trim()
