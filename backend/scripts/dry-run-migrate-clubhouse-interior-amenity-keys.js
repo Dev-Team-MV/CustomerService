@@ -2,15 +2,15 @@
  * Dry-run: preview ClubHouse interior amenity key renames (no writes).
  *
  * Old -> New
- * - Conference room / Conference Room -> Meeting room
- * - Multi-purpose room / Multi-Purpose Room -> Mixed-use room
- * - Managers Office -> Manager office
- * - Reception / property management -> Property management
+ * - Conference room / Meeting room -> Meeting Room
+ * - Multi-purpose room / Multi-Purpose Room / Mixed-use room -> Mixed-use Room
+ * - Managers Office / Manager office -> Manager Office
+ * - Reception / property management / Property management -> Property Management
  * - Counter / front desk -> Concierge
- * - Lakeside / boat dock -> Boat dock
- * - Bathroom / Bathrooms / bathrooms & lockers -> Bathrooms & lockers
- * - Machines / mechanical room -> Mechanical room
- * - Counter Hallway -> Use-mixed hallway
+ * - Lakeside / boat dock / Boat dock -> Boat Dock
+ * - Bathroom / Bathrooms / bathrooms & lockers / Bathrooms & lockers -> Bathrooms & Lockers
+ * - Machines / mechanical room / Mechanical room -> Mechanical Room
+ * - Counter Hallway / Use-mixed hallway -> Use-mixed Hallway
  *
  * Run:
  *   node scripts/dry-run-migrate-clubhouse-interior-amenity-keys.js
@@ -23,23 +23,31 @@ import mongoose from 'mongoose'
 import ClubHouse from '../models/ClubHouse.js'
 
 const KEY_RENAMES = [
-  ['Conference room', 'Meeting room'],
-  ['Conference Room', 'Meeting room'],
-  ['Multi-purpose room', 'Mixed-use room'],
-  ['Multi-Purpose Room', 'Mixed-use room'],
-  ['Managers Office', 'Manager office'],
-  ['Reception', 'Property management'],
-  ['property management', 'Property management'],
+  ['Conference room', 'Meeting Room'],
+  ['Conference Room', 'Meeting Room'],
+  ['Meeting room', 'Meeting Room'],
+  ['Multi-purpose room', 'Mixed-use Room'],
+  ['Multi-Purpose Room', 'Mixed-use Room'],
+  ['Mixed-use room', 'Mixed-use Room'],
+  ['Managers Office', 'Manager Office'],
+  ['Manager office', 'Manager Office'],
+  ['Reception', 'Property Management'],
+  ['property management', 'Property Management'],
+  ['Property management', 'Property Management'],
   ['Counter', 'Concierge'],
   ['front desk', 'Concierge'],
-  ['Lakeside', 'Boat dock'],
-  ['boat dock', 'Boat dock'],
-  ['Bathroom', 'Bathrooms & lockers'],
-  ['Bathrooms', 'Bathrooms & lockers'],
-  ['bathrooms & lockers', 'Bathrooms & lockers'],
-  ['Machines', 'Mechanical room'],
-  ['mechanical room', 'Mechanical room'],
-  ['Counter Hallway', 'Use-mixed hallway']
+  ['Lakeside', 'Boat Dock'],
+  ['boat dock', 'Boat Dock'],
+  ['Boat dock', 'Boat Dock'],
+  ['Bathroom', 'Bathrooms & Lockers'],
+  ['Bathrooms', 'Bathrooms & Lockers'],
+  ['bathrooms & lockers', 'Bathrooms & Lockers'],
+  ['Bathrooms & lockers', 'Bathrooms & Lockers'],
+  ['Machines', 'Mechanical Room'],
+  ['mechanical room', 'Mechanical Room'],
+  ['Mechanical room', 'Mechanical Room'],
+  ['Counter Hallway', 'Use-mixed Hallway'],
+  ['Use-mixed hallway', 'Use-mixed Hallway']
 ]
 
 function isObjectLike(value) {

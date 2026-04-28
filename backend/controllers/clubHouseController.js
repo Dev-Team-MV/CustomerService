@@ -7,23 +7,31 @@ import path from 'path'
 
 const GCS_FOLDER = 'clubhouse'
 const INTERIOR_KEY_RENAMES = [
-  ['Conference room', 'Meeting room'],
-  ['Conference Room', 'Meeting room'],
-  ['Multi-purpose room', 'Mixed-use room'],
-  ['Multi-Purpose Room', 'Mixed-use room'],
-  ['Managers Office', 'Manager office'],
-  ['Reception', 'Property management'],
-  ['property management', 'Property management'],
+  ['Conference room', 'Meeting Room'],
+  ['Conference Room', 'Meeting Room'],
+  ['Meeting room', 'Meeting Room'],
+  ['Multi-purpose room', 'Mixed-use Room'],
+  ['Multi-Purpose Room', 'Mixed-use Room'],
+  ['Mixed-use room', 'Mixed-use Room'],
+  ['Managers Office', 'Manager Office'],
+  ['Manager office', 'Manager Office'],
+  ['Reception', 'Property Management'],
+  ['property management', 'Property Management'],
+  ['Property management', 'Property Management'],
   ['Counter', 'Concierge'],
   ['front desk', 'Concierge'],
-  ['Lakeside', 'Boat dock'],
-  ['boat dock', 'Boat dock'],
-  ['Bathroom', 'Bathrooms & lockers'],
-  ['Bathrooms', 'Bathrooms & lockers'],
-  ['bathrooms & lockers', 'Bathrooms & lockers'],
-  ['Machines', 'Mechanical room'],
-  ['mechanical room', 'Mechanical room'],
-  ['Counter Hallway', 'Use-mixed hallway']
+  ['Lakeside', 'Boat Dock'],
+  ['boat dock', 'Boat Dock'],
+  ['Boat dock', 'Boat Dock'],
+  ['Bathroom', 'Bathrooms & Lockers'],
+  ['Bathrooms', 'Bathrooms & Lockers'],
+  ['bathrooms & lockers', 'Bathrooms & Lockers'],
+  ['Bathrooms & lockers', 'Bathrooms & Lockers'],
+  ['Machines', 'Mechanical Room'],
+  ['mechanical room', 'Mechanical Room'],
+  ['Mechanical room', 'Mechanical Room'],
+  ['Counter Hallway', 'Use-mixed Hallway'],
+  ['Use-mixed hallway', 'Use-mixed Hallway']
 ]
 const INTERIOR_KEY_RENAME_MAP = new Map(INTERIOR_KEY_RENAMES)
 
@@ -211,7 +219,7 @@ export const getClubHousePublic = async (req, res) => {
 /**
  * POST Upload images to Club House.
  * Body (form-data): section = 'exterior' | 'blueprints' | 'deck' | 'interior'
- *   - If section = 'interior', required: interiorKey (e.g. 'Property management', 'Manager office', ...)
+ *   - If section = 'interior', required: interiorKey (e.g. 'Property Management', 'Manager Office', ...)
  *   - isPublic = 'true' | 'false' (opcional): si la(s) imagen(es) se pueden mostrar sin token. Por defecto true.
  * Files: 'images' (array of files) or 'image' (single file)
  * Appends { url, isPublic } to the corresponding array.
@@ -243,7 +251,7 @@ export const uploadClubHouseImages = async (req, res) => {
       const interiorKey = req.body.interiorKey || req.body.interior_key
       if (!interiorKey || typeof interiorKey !== 'string') {
         return res.status(400).json({
-          message: 'interiorKey is required when section is interior (e.g. Property management, Manager office, Meeting room)'
+          message: 'interiorKey is required when section is interior (e.g. Property Management, Manager Office, Meeting Room)'
         })
       }
       req._clubHouseInteriorKey = normalizeInteriorKey(interiorKey)
