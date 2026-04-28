@@ -34,6 +34,16 @@ const INTERIOR_KEY_RENAMES = [
   ['Use-mixed hallway', 'Use-mixed Hallway']
 ]
 const INTERIOR_KEY_RENAME_MAP = new Map(INTERIOR_KEY_RENAMES)
+const INTERIOR_RESPONSE_ALIASES = [
+  ['Property management', 'Property Management'],
+  ['Manager office', 'Manager Office'],
+  ['Meeting room', 'Meeting Room'],
+  ['Mixed-use room', 'Mixed-use Room'],
+  ['Bathrooms & lockers', 'Bathrooms & Lockers'],
+  ['Boat dock', 'Boat Dock'],
+  ['Mechanical room', 'Mechanical Room'],
+  ['Use-mixed hallway', 'Use-mixed Hallway']
+]
 
 /** Extrae el nombre de archivo de una URL (último segmento del path, sin query). */
 function getFilenameFromUrl (url) {
@@ -84,6 +94,15 @@ function normalizeInteriorKey (key) {
   const trimmed = typeof key === 'string' ? key.trim() : ''
   if (!trimmed) return ''
   return INTERIOR_KEY_RENAME_MAP.get(trimmed) || trimmed
+}
+
+function addLegacyInteriorAliases (interior) {
+  if (!interior || typeof interior !== 'object') return
+  for (const [legacyKey, canonicalKey] of INTERIOR_RESPONSE_ALIASES) {
+    if (interior[legacyKey] !== undefined) continue
+    if (!Array.isArray(interior[canonicalKey])) continue
+    interior[legacyKey] = interior[canonicalKey]
+  }
 }
 
 /** Migra y normaliza el documento: strings -> { url, isPublic: true }. Elimina ítems sin url válido. Guarda si hubo cambios. */
@@ -169,6 +188,7 @@ export const getClubHouse = async (req, res) => {
     }
     doc = await migrateAndNormalize(doc)
     const data = doc.toObject ? doc.toObject() : doc
+    addLegacyInteriorAliases(data.interior)
     await hydrateUrlsInObject(data)
     res.json(data)
   } catch (error) {
@@ -205,6 +225,7 @@ export const getClubHousePublic = async (req, res) => {
         publicPayload.interior[key] = filterPublicImages(doc.interior[key])
       }
     }
+    addLegacyInteriorAliases(publicPayload.interior)
     if (doc.recorridoVisibility && typeof doc.recorridoVisibility === 'object') {
       publicPayload.recorridoVisibility = doc.recorridoVisibility
     }
