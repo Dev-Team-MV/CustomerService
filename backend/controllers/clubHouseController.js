@@ -6,6 +6,25 @@ import crypto from 'crypto'
 import path from 'path'
 
 const GCS_FOLDER = 'clubhouse'
+const INTERIOR_KEY_RENAMES = [
+  ['Conference room', 'Meeting room'],
+  ['Conference Room', 'Meeting room'],
+  ['Multi-purpose room', 'Mixed-use room'],
+  ['Multi-Purpose Room', 'Mixed-use room'],
+  ['Reception', 'Property management'],
+  ['property management', 'Property management'],
+  ['Counter', 'Concierge'],
+  ['front desk', 'Concierge'],
+  ['Lakeside', 'Boat dock'],
+  ['boat dock', 'Boat dock'],
+  ['Bathroom', 'Bathrooms & lockers'],
+  ['Bathrooms', 'Bathrooms & lockers'],
+  ['bathrooms & lockers', 'Bathrooms & lockers'],
+  ['Machines', 'Mechanical room'],
+  ['mechanical room', 'Mechanical room'],
+  ['Counter Hallway', 'Use-mixed hallway']
+]
+const INTERIOR_KEY_RENAME_MAP = new Map(INTERIOR_KEY_RENAMES)
 
 /** Extrae el nombre de archivo de una URL (último segmento del path, sin query). */
 function getFilenameFromUrl (url) {
@@ -37,6 +56,25 @@ function normalizeImageItem (item) {
 function normalizeImageArray (arr) {
   if (!Array.isArray(arr)) return []
   return arr.map(normalizeImageItem).filter(Boolean)
+}
+
+function mergeImageArraysUniqueByUrl (target = [], source = []) {
+  const out = Array.isArray(target) ? [...target] : []
+  const seen = new Set(out.map((item) => item?.url).filter(Boolean))
+
+  for (const item of Array.isArray(source) ? source : []) {
+    const key = item?.url
+    if (!key || seen.has(key)) continue
+    out.push(item)
+    seen.add(key)
+  }
+  return out
+}
+
+function normalizeInteriorKey (key) {
+  const trimmed = typeof key === 'string' ? key.trim() : ''
+  if (!trimmed) return ''
+  return INTERIOR_KEY_RENAME_MAP.get(trimmed) || trimmed
 }
 
 /** Migra y normaliza el documento: strings -> { url, isPublic: true }. Elimina ítems sin url válido. Guarda si hubo cambios. */
@@ -92,6 +130,16 @@ async function migrateAndNormalize (doc) {
         doc.interior[key] = normalized
         changed = true
       }
+    }
+    // Re-link legacy interior keys to current canonical names to keep images visible
+    for (const [oldKey, newKey] of INTERIOR_KEY_RENAMES) {
+      if (oldKey === newKey) continue
+      const oldArr = doc.interior[oldKey]
+      if (!Array.isArray(oldArr) || oldArr.length === 0) continue
+
+      doc.interior[newKey] = mergeImageArraysUniqueByUrl(doc.interior[newKey], oldArr)
+      delete doc.interior[oldKey]
+      changed = true
     }
     if (changed) doc.markModified('interior')
   }
@@ -197,7 +245,7 @@ export const uploadClubHouseImages = async (req, res) => {
           message: 'interiorKey is required when section is interior (e.g. Property management, Managers Office, Meeting room)'
         })
       }
-      req._clubHouseInteriorKey = interiorKey.trim()
+      req._clubHouseInteriorKey = normalizeInteriorKey(interiorKey)
     }
 
     let doc = await ClubHouse.findOne()
@@ -298,7 +346,7 @@ export const updateClubHouseImageVisibility = async (req, res) => {
     else if (sec === 'blueprints') arr = doc.blueprints || []
     else if (sec === 'deck') arr = doc.deck || []
     else {
-      const key = (interiorKey || req.body.interior_key || '').trim()
+      const key = normalizeInteriorKey(interiorKey || req.body.interior_key || '')
       if (!key) {
         return res.status(400).json({ message: 'interiorKey is required when section is interior' })
       }
@@ -323,7 +371,7 @@ export const updateClubHouseImageVisibility = async (req, res) => {
     res.status(200).json({
       message: 'Image visibility updated',
       section: sec,
-      ...(sec === 'interior' && { interiorKey: (interiorKey || req.body.interior_key || '').trim() }),
+      ...(sec === 'interior' && { interiorKey: normalizeInteriorKey(interiorKey || req.body.interior_key || '') }),
       index: idx,
       isPublic: wantPublic,
       clubHouse: doc
