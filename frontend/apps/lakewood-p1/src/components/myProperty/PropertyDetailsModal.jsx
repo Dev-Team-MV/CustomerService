@@ -88,7 +88,14 @@ const PropertyDetailsModal = ({ open, onClose, property, isAdmin }) => {
   const fetchPayloads = async () => {
     setLoadingPayloads(true)
     try {
-      const res = await api.get(`/payloads?property=${property._id}`)
+      const projectId = (typeof property?.project === 'object' ? property.project?._id : property?.project) || import.meta.env.VITE_PROJECT_ID
+      if (!projectId) {
+        setPayloads([])
+        return
+      }
+      const res = await api.get('/payloads', {
+        params: { property: property._id, projectId }
+      })
       setPayloads(res.data)
     } catch {
       setPayloads([])

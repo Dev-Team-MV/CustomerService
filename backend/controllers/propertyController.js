@@ -212,36 +212,101 @@ function inferSelectedOptionKeyForFloor(floor, selectedOptions = {}, selectedFlo
   return null
 }
 
-function resolveModelFloorMedia(modelExists, selectedOptions = {}) {
+function resolveModelFloorMedia(modelExists, selectedOptions = {}, previewOptions = {}) {
   const floors = Array.isArray(modelExists?.floors) ? modelExists.floors : []
   const selectedFloors = selectedOptions && typeof selectedOptions === 'object'
     ? (selectedOptions.floors && typeof selectedOptions.floors === 'object' ? selectedOptions.floors : {})
     : {}
+  const includeAllOptionsMedia = previewOptions?.includeAllOptionsMedia === true
+  const includeEmptyOptionMedia = previewOptions?.includeEmptyOptionMedia === true
+  const requestedFloorKeys = Array.isArray(previewOptions?.floorKeys)
+    ? new Set(previewOptions.floorKeys.map((key) => String(key || '').trim()).filter(Boolean))
+    : null
 
-  return floors.map((floorRaw, index) => {
-    const floor = floorRaw?.toObject ? floorRaw.toObject() : floorRaw
-    const floorKey = floor?.key || `floor-${index + 1}`
-    const floorMedia = normalizeFloorMediaBlock(floor?.media)
-    const options = Array.isArray(floor?.options) ? floor.options : []
-    const selectedOptionKey = inferSelectedOptionKeyForFloor(floor, selectedOptions, selectedFloors)
+  return floors
+    .map((floorRaw, index) => {
+      const floor = floorRaw?.toObject ? floorRaw.toObject() : floorRaw
+      const floorKey = floor?.key || `floor-${index + 1}`
+      const floorMedia = normalizeFloorMediaBlock(floor?.media)
+      const options = Array.isArray(floor?.options) ? floor.options : []
+      const selectedOptionKey = inferSelectedOptionKeyForFloor(floor, selectedOptions, selectedFloors)
 
-    const selectedOptionRaw = selectedOptionKey
-      ? options.find((opt) => opt?.key === selectedOptionKey)
-      : null
-    const selectedOption = selectedOptionRaw?.toObject ? selectedOptionRaw.toObject() : selectedOptionRaw
-    const selectedOptionMedia = normalizeFloorMediaBlock(selectedOption?.media)
+      const selectedOptionRaw = selectedOptionKey
+        ? options.find((opt) => opt?.key === selectedOptionKey)
+        : null
+      const selectedOption = selectedOptionRaw?.toObject ? selectedOptionRaw.toObject() : selectedOptionRaw
+      const selectedOptionMedia = normalizeFloorMediaBlock(selectedOption?.media)
+      const useOptionMedia = selectedOption && hasFloorMediaContent(selectedOptionMedia)
 
-    const useOptionMedia = selectedOption && hasFloorMediaContent(selectedOptionMedia)
+      const payload = {
+        floorKey,
+        level: floor?.level ?? null,
+        label: floor?.label || '',
+        selectedOptionKey,
+        mediaSource: useOptionMedia ? 'option' : 'floor',
+        media: useOptionMedia ? selectedOptionMedia : floorMedia
+      }
 
+      if (includeAllOptionsMedia) {
+        const optionsMedia = options
+          .map((optionRaw, optionIndex) => {
+            const option = optionRaw?.toObject ? optionRaw.toObject() : optionRaw
+            const optionMedia = normalizeFloorMediaBlock(option?.media)
+            const hasMedia = hasFloorMediaContent(optionMedia)
+            return {
+              key: option?.key || `option-${optionIndex + 1}`,
+              label: option?.label || '',
+              status: option?.status || 'active',
+              hasMedia,
+              media: optionMedia
+            }
+          })
+          .filter((item) => includeEmptyOptionMedia || item.hasMedia)
+        payload.optionsMedia = optionsMedia
+      }
+
+      return payload
+    })
+    .filter((item) => !requestedFloorKeys || requestedFloorKeys.has(item.floorKey))
+}
+
+function parsePositiveInteger(value) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return null
+  const normalized = Math.floor(parsed)
+  return normalized >= 1 ? normalized : null
+}
+
+function paginateFloorMedia(mediaByFloor = [], previewOptions = {}) {
+  const stepSize = parsePositiveInteger(previewOptions?.stepSize)
+  const step = parsePositiveInteger(previewOptions?.step)
+  if (!stepSize) {
     return {
-      floorKey,
-      level: floor?.level ?? null,
-      label: floor?.label || '',
-      selectedOptionKey,
-      mediaSource: useOptionMedia ? 'option' : 'floor',
-      media: useOptionMedia ? selectedOptionMedia : floorMedia
+      items: mediaByFloor,
+      meta: {
+        totalFloors: mediaByFloor.length
+      }
     }
-  })
+  }
+
+  const totalFloors = mediaByFloor.length
+  const totalSteps = totalFloors > 0 ? Math.ceil(totalFloors / stepSize) : 0
+  const currentStep = totalSteps === 0 ? 1 : Math.min(step || 1, totalSteps)
+  const start = (currentStep - 1) * stepSize
+  const end = start + stepSize
+  const items = mediaByFloor.slice(start, end)
+
+  return {
+    items,
+    meta: {
+      totalFloors,
+      stepSize,
+      totalSteps,
+      currentStep,
+      hasNextStep: currentStep < totalSteps,
+      nextStep: currentStep < totalSteps ? currentStep + 1 : null
+    }
+  }
 }
 
 export const getAllProperties = async (req, res) => {
@@ -559,7 +624,18 @@ export const getPropertyQuote = async (req, res) => {
 
 export const getPropertyQuotePreview = async (req, res) => {
   try {
-    const { projectId, project, lot, model, facade, initialPayment, hasBalcony, modelType, hasStorage, selectedOptions } = req.body
+    const {
+      projectId,
+      project,
+      lot,
+      model,
+      facade,
+      initialPayment,
+      hasBalcony,
+      modelType,
+      hasStorage,
+      selectedOptions
+    } = req.body
 
     const resolved = await resolvePropertyPricing({
       projectId,
@@ -588,7 +664,24 @@ export const getPropertyQuotePreview = async (req, res) => {
       facadeEnabled
     } = resolved.data
 
-    const mediaByFloor = resolveModelFloorMedia(modelExists, selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {})
+    const previewBody = req.body.preview && typeof req.body.preview === 'object' ? req.body.preview : {}
+    const previewOptions = {
+      includeAllOptionsMedia: previewBody.includeAllOptionsMedia === true || req.body.includeAllOptionsMedia === true,
+      includeEmptyOptionMedia: previewBody.includeEmptyOptionMedia === true || req.body.includeEmptyOptionMedia === true,
+      floorKeys: Array.isArray(previewBody.floorKeys)
+        ? previewBody.floorKeys
+        : (Array.isArray(req.body.floorKeys) ? req.body.floorKeys : null),
+      step: previewBody.step ?? req.body.step,
+      stepSize: previewBody.stepSize ?? req.body.stepSize
+    }
+
+    const fullMediaByFloor = resolveModelFloorMedia(
+      modelExists,
+      selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {},
+      previewOptions
+    )
+    const paginatedPreview = paginateFloorMedia(fullMediaByFloor, previewOptions)
+    const mediaByFloor = paginatedPreview.items
 
     const response = {
       quote: {
@@ -628,7 +721,12 @@ export const getPropertyQuotePreview = async (req, res) => {
           mode: prices.pricingMode || 'legacy_components'
         }
       },
-      mediaByFloor
+      mediaByFloor,
+      preview: {
+        includeAllOptionsMedia: previewOptions.includeAllOptionsMedia,
+        includeEmptyOptionMedia: previewOptions.includeEmptyOptionMedia,
+        ...paginatedPreview.meta
+      }
     }
 
     await hydrateUrlsInObject(response)

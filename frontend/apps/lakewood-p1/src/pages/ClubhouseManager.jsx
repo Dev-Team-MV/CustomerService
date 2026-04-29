@@ -76,16 +76,12 @@ const ClubhouseManager = () => {
     setError(null);
 
     try {
-      // interior keys
-      const keysResponse = await uploadService.getClubhouseInteriorKeys();
+      const [keysResponse, clubhouseResponse] = await Promise.all([
+        uploadService.getClubhouseInteriorKeys(),
+        uploadService.getClubhouse(),
+      ]);
       const keys = keysResponse?.interiorKeys || [];
       setInteriorKeys(keys);
-
-      // listado general
-      const filesResponse = await uploadService.getFilesByFolder(
-        "clubhouse",
-        true,
-      );
 
       const organized = {
         exterior: [],
@@ -94,59 +90,22 @@ const ClubhouseManager = () => {
         deck: [],
       };
       keys.forEach((k) => (organized.interior[k] = []));
+      const clubhouse = clubhouseResponse || {};
+      organized.exterior = (clubhouse.exterior || []).map(getImageObj);
+      organized.blueprints = (clubhouse.blueprints || []).map(getImageObj);
+      organized.deck = (clubhouse.deck || []).map(getImageObj);
 
-      if (filesResponse?.files && filesResponse.files.length > 0) {
-        filesResponse.files.forEach((file) => {
-          const section = file.section || file.folder || "";
-          const interiorKey = file.interiorKey || file.key || "";
-          const imageObj = getImageObj(file);
-
-          if (section === "exterior") organized.exterior.push(imageObj);
-          else if (section === "blueprints")
-            organized.blueprints.push(imageObj);
-          else if (section === "interior" && interiorKey) {
-            const matchingKey = keys.find(
-              (k) => k.toLowerCase() === String(interiorKey).toLowerCase(),
-            );
-            if (matchingKey) organized.interior[matchingKey].push(imageObj);
-            else {
-              if (!organized.interior[interiorKey])
-                organized.interior[interiorKey] = [];
-              organized.interior[interiorKey].push(imageObj);
-              console.warn(
-                "Unknown interior key while loading data:",
-                interiorKey,
-              );
-            }
-          } else if (section === "deck") organized.deck.push(imageObj);
-          // No agregar a exterior cuando section es null (evita que imágenes de interior aparezcan en exterior)
-        });
-      }
-
-      // Solo pedir deck por endpoint específico si no vino en el listado principal
-      if (organized.deck.length === 0) {
-        let deckResponse = { files: [] };
-        try {
-          deckResponse = await uploadService.getDeckFiles(true);
-        } catch (e) {
-          try {
-            deckResponse = await uploadService.getClubhouseDeckFiles(true);
-          } catch (e2) {
-            console.warn(
-              "No deck specific listing available:",
-              e2?.message || e2,
-            );
-          }
-        }
-
-        if (deckResponse?.files && deckResponse.files.length > 0) {
-          deckResponse.files.forEach((file) => {
-            const imageObj = getImageObj(file);
-            if (!organized.deck.some((img) => img.url === imageObj.url)) {
-              organized.deck.push(imageObj);
-            }
+      if (clubhouse.interior && typeof clubhouse.interior === "object") {
+        Object.entries(clubhouse.interior).forEach(([rawKey, files]) => {
+          const matchingKey = keys.find(
+            (k) => k.toLowerCase() === String(rawKey).toLowerCase(),
+          );
+          const targetKey = matchingKey || rawKey;
+          if (!organized.interior[targetKey]) organized.interior[targetKey] = [];
+          (Array.isArray(files) ? files : []).forEach((file) => {
+            organized.interior[targetKey].push(getImageObj(file));
           });
-        }
+        });
       }
 
       setImages(organized);

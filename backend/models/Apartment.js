@@ -87,6 +87,7 @@ const apartmentSchema = new mongoose.Schema(
 apartmentSchema.index({ apartmentModel: 1 })
 apartmentSchema.index({ apartmentModel: 1, apartmentNumber: 1 }, { unique: true })
 apartmentSchema.index({ users: 1 })
+apartmentSchema.index({ building: 1 })
 apartmentSchema.index({ building: 1, floorNumber: 1, floorPlanPolygonId: 1 }, {
   unique: true,
   partialFilterExpression: {

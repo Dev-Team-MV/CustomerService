@@ -6,6 +6,44 @@ import crypto from 'crypto'
 import path from 'path'
 
 const GCS_FOLDER = 'clubhouse'
+const INTERIOR_KEY_RENAMES = [
+  ['Conference room', 'Meeting Room'],
+  ['Conference Room', 'Meeting Room'],
+  ['Meeting room', 'Meeting Room'],
+  ['Multi-purpose room', 'Mixed-use Room'],
+  ['Multi-Purpose Room', 'Mixed-use Room'],
+  ['Mixed-use room', 'Mixed-use Room'],
+  ['Managers Office', 'Manager Office'],
+  ['Manager office', 'Manager Office'],
+  ['Reception', 'Property Management'],
+  ['property management', 'Property Management'],
+  ['Property management', 'Property Management'],
+  ['Counter', 'Concierge'],
+  ['front desk', 'Concierge'],
+  ['Lakeside', 'Boat Dock'],
+  ['boat dock', 'Boat Dock'],
+  ['Boat dock', 'Boat Dock'],
+  ['Bathroom', 'Bathrooms & Lockers'],
+  ['Bathrooms', 'Bathrooms & Lockers'],
+  ['bathrooms & lockers', 'Bathrooms & Lockers'],
+  ['Bathrooms & lockers', 'Bathrooms & Lockers'],
+  ['Machines', 'Mechanical Room'],
+  ['mechanical room', 'Mechanical Room'],
+  ['Mechanical room', 'Mechanical Room'],
+  ['Counter Hallway', 'Use-mixed Hallway'],
+  ['Use-mixed hallway', 'Use-mixed Hallway']
+]
+const INTERIOR_KEY_RENAME_MAP = new Map(INTERIOR_KEY_RENAMES)
+const INTERIOR_RESPONSE_ALIASES = [
+  ['Property management', 'Property Management'],
+  ['Manager office', 'Manager Office'],
+  ['Meeting room', 'Meeting Room'],
+  ['Mixed-use room', 'Mixed-use Room'],
+  ['Bathrooms & lockers', 'Bathrooms & Lockers'],
+  ['Boat dock', 'Boat Dock'],
+  ['Mechanical room', 'Mechanical Room'],
+  ['Use-mixed hallway', 'Use-mixed Hallway']
+]
 
 /** Extrae el nombre de archivo de una URL (último segmento del path, sin query). */
 function getFilenameFromUrl (url) {
@@ -37,6 +75,34 @@ function normalizeImageItem (item) {
 function normalizeImageArray (arr) {
   if (!Array.isArray(arr)) return []
   return arr.map(normalizeImageItem).filter(Boolean)
+}
+
+function mergeImageArraysUniqueByUrl (target = [], source = []) {
+  const out = Array.isArray(target) ? [...target] : []
+  const seen = new Set(out.map((item) => item?.url).filter(Boolean))
+
+  for (const item of Array.isArray(source) ? source : []) {
+    const key = item?.url
+    if (!key || seen.has(key)) continue
+    out.push(item)
+    seen.add(key)
+  }
+  return out
+}
+
+function normalizeInteriorKey (key) {
+  const trimmed = typeof key === 'string' ? key.trim() : ''
+  if (!trimmed) return ''
+  return INTERIOR_KEY_RENAME_MAP.get(trimmed) || trimmed
+}
+
+function addLegacyInteriorAliases (interior) {
+  if (!interior || typeof interior !== 'object') return
+  for (const [legacyKey, canonicalKey] of INTERIOR_RESPONSE_ALIASES) {
+    if (interior[legacyKey] !== undefined) continue
+    if (!Array.isArray(interior[canonicalKey])) continue
+    interior[legacyKey] = interior[canonicalKey]
+  }
 }
 
 /** Migra y normaliza el documento: strings -> { url, isPublic: true }. Elimina ítems sin url válido. Guarda si hubo cambios. */
@@ -93,6 +159,16 @@ async function migrateAndNormalize (doc) {
         changed = true
       }
     }
+    // Re-link legacy interior keys to current canonical names to keep images visible
+    for (const [oldKey, newKey] of INTERIOR_KEY_RENAMES) {
+      if (oldKey === newKey) continue
+      const oldArr = doc.interior[oldKey]
+      if (!Array.isArray(oldArr) || oldArr.length === 0) continue
+
+      doc.interior[newKey] = mergeImageArraysUniqueByUrl(doc.interior[newKey], oldArr)
+      delete doc.interior[oldKey]
+      changed = true
+    }
     if (changed) doc.markModified('interior')
   }
 
@@ -112,6 +188,7 @@ export const getClubHouse = async (req, res) => {
     }
     doc = await migrateAndNormalize(doc)
     const data = doc.toObject ? doc.toObject() : doc
+    addLegacyInteriorAliases(data.interior)
     await hydrateUrlsInObject(data)
     res.json(data)
   } catch (error) {
@@ -148,6 +225,7 @@ export const getClubHousePublic = async (req, res) => {
         publicPayload.interior[key] = filterPublicImages(doc.interior[key])
       }
     }
+    addLegacyInteriorAliases(publicPayload.interior)
     if (doc.recorridoVisibility && typeof doc.recorridoVisibility === 'object') {
       publicPayload.recorridoVisibility = doc.recorridoVisibility
     }
@@ -162,7 +240,7 @@ export const getClubHousePublic = async (req, res) => {
 /**
  * POST Upload images to Club House.
  * Body (form-data): section = 'exterior' | 'blueprints' | 'deck' | 'interior'
- *   - If section = 'interior', required: interiorKey (e.g. 'Reception', 'Managers Office', ...)
+ *   - If section = 'interior', required: interiorKey (e.g. 'Property Management', 'Manager Office', ...)
  *   - isPublic = 'true' | 'false' (opcional): si la(s) imagen(es) se pueden mostrar sin token. Por defecto true.
  * Files: 'images' (array of files) or 'image' (single file)
  * Appends { url, isPublic } to the corresponding array.
@@ -194,10 +272,10 @@ export const uploadClubHouseImages = async (req, res) => {
       const interiorKey = req.body.interiorKey || req.body.interior_key
       if (!interiorKey || typeof interiorKey !== 'string') {
         return res.status(400).json({
-          message: 'interiorKey is required when section is interior (e.g. Reception, Managers Office, Conference Room)'
+          message: 'interiorKey is required when section is interior (e.g. Property Management, Manager Office, Meeting Room)'
         })
       }
-      req._clubHouseInteriorKey = interiorKey.trim()
+      req._clubHouseInteriorKey = normalizeInteriorKey(interiorKey)
     }
 
     let doc = await ClubHouse.findOne()
@@ -298,7 +376,7 @@ export const updateClubHouseImageVisibility = async (req, res) => {
     else if (sec === 'blueprints') arr = doc.blueprints || []
     else if (sec === 'deck') arr = doc.deck || []
     else {
-      const key = (interiorKey || req.body.interior_key || '').trim()
+      const key = normalizeInteriorKey(interiorKey || req.body.interior_key || '')
       if (!key) {
         return res.status(400).json({ message: 'interiorKey is required when section is interior' })
       }
@@ -323,7 +401,7 @@ export const updateClubHouseImageVisibility = async (req, res) => {
     res.status(200).json({
       message: 'Image visibility updated',
       section: sec,
-      ...(sec === 'interior' && { interiorKey: (interiorKey || req.body.interior_key || '').trim() }),
+      ...(sec === 'interior' && { interiorKey: normalizeInteriorKey(interiorKey || req.body.interior_key || '') }),
       index: idx,
       isPublic: wantPublic,
       clubHouse: doc

@@ -3,6 +3,7 @@ import Project from '../models/Project.js'
 import { getProjectIdsForUser, canUserAccessProject } from '../utils/projectAccess.js'
 import Property from '../models/Property.js'
 import Apartment from '../models/Apartment.js'
+import Building from '../models/Building.js'
 
 function toIdStr(val) {
   if (val == null) return ''
@@ -77,6 +78,28 @@ async function buildUserProjectsMap(userDocs) {
   return result
 }
 
+async function getUserIdsForProject(projectId) {
+  const [propertyUserIds, buildingIds, membershipUserIds] = await Promise.all([
+    Property.distinct('users', { project: projectId }),
+    Building.distinct('_id', { project: projectId }),
+    User.distinct('_id', { 'projectMemberships.project': projectId })
+  ])
+
+  const apartmentUserIds = buildingIds.length
+    ? await Apartment.distinct('users', { building: { $in: buildingIds } })
+    : []
+
+  const uniqueIds = Array.from(
+    new Set([
+      ...propertyUserIds.map((id) => toIdStr(id)),
+      ...apartmentUserIds.map((id) => toIdStr(id)),
+      ...membershipUserIds.map((id) => toIdStr(id))
+    ].filter(Boolean))
+  )
+
+  return uniqueIds
+}
+
 /**
  * Search users by email, firstName or lastName. Available to any authenticated user
  * (e.g. for adding members to family groups). Returns minimal fields.
@@ -113,17 +136,21 @@ export const searchUsers = async (req, res) => {
       }
     }
 
-    const users = await User.find(filter)
+    const scopedUserIds = await getUserIdsForProject(projectId)
+    if (scopedUserIds.length === 0) {
+      return res.json([])
+    }
+
+    const users = await User.find({
+      ...filter,
+      _id: { $in: scopedUserIds }
+    })
       .select('_id firstName lastName email projectMemberships')
       .limit(query.length >= 2 ? 50 : 100)
       .sort({ lastName: 1, firstName: 1 })
       .lean()
 
-    const projectsMap = await buildUserProjectsMap(users)
-    const filtered = users.filter((u) =>
-      (projectsMap.get(toIdStr(u._id)) || []).some((p) => toIdStr(p._id) === toIdStr(projectId))
-    )
-    res.json(filtered.map((u) => ({
+    res.json(users.map((u) => ({
       _id: u._id,
       firstName: u.firstName,
       lastName: u.lastName,
@@ -167,7 +194,19 @@ export const getAllUsers = async (req, res) => {
     if (!isAdmin && !projectId) {
       return res.status(400).json({ message: 'projectId is required' })
     }
-    const filter = (isAdmin && role) ? { role } : {}
+    const baseFilter = (isAdmin && role) ? { role } : {}
+    let filter = { ...baseFilter }
+
+    if (projectId) {
+      const scopedUserIds = await getUserIdsForProject(projectId)
+      if (scopedUserIds.length === 0) {
+        return res.json([])
+      }
+      filter = {
+        ...filter,
+        _id: { $in: scopedUserIds }
+      }
+    }
 
     let usersQuery = User.find(filter)
 

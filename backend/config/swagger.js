@@ -387,10 +387,58 @@ const options = {
                   type: 'object',
                   description: 'Incluye opcionalmente floors: { "<floorKey>": "<optionKey>" } para resolver media por piso',
                   additionalProperties: true
+                },
+                preview: {
+                  type: 'object',
+                  description: 'Controles para traer media de opciones y/o paginar por pisos',
+                  properties: {
+                    includeAllOptionsMedia: {
+                      type: 'boolean',
+                      description: 'Si true, incluye media de todas las opciones por piso en optionsMedia'
+                    },
+                    includeEmptyOptionMedia: {
+                      type: 'boolean',
+                      description: 'Si true, también incluye opciones sin media'
+                    },
+                    floorKeys: {
+                      type: 'array',
+                      items: { type: 'string' },
+                      description: 'Filtra la respuesta a los pisos indicados'
+                    },
+                    step: {
+                      type: 'integer',
+                      minimum: 1,
+                      description: 'Número de paso para paginación por pisos (1-based)'
+                    },
+                    stepSize: {
+                      type: 'integer',
+                      minimum: 1,
+                      description: 'Cantidad de pisos por paso'
+                    }
+                  }
                 }
               }
             }
           ]
+        },
+        FloorOptionMediaPreviewItem: {
+          type: 'object',
+          properties: {
+            key: { type: 'string' },
+            label: { type: 'string' },
+            status: { type: 'string' },
+            hasMedia: { type: 'boolean' },
+            media: {
+              type: 'object',
+              properties: {
+                renders: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                isometrics: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                blueprints: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                cinematics: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                exterior: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } }
+              }
+            }
+          }
         },
         FloorMediaPreviewItem: {
           type: 'object',
@@ -409,7 +457,25 @@ const options = {
                 cinematics: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
                 exterior: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } }
               }
+            },
+            optionsMedia: {
+              type: 'array',
+              description: 'Se incluye cuando preview.includeAllOptionsMedia=true',
+              items: { $ref: '#/components/schemas/FloorOptionMediaPreviewItem' }
             }
+          }
+        },
+        PropertyQuotePreviewMeta: {
+          type: 'object',
+          properties: {
+            includeAllOptionsMedia: { type: 'boolean' },
+            includeEmptyOptionMedia: { type: 'boolean' },
+            totalFloors: { type: 'integer', minimum: 0 },
+            stepSize: { type: 'integer', minimum: 1, nullable: true },
+            totalSteps: { type: 'integer', minimum: 0, nullable: true },
+            currentStep: { type: 'integer', minimum: 1, nullable: true },
+            hasNextStep: { type: 'boolean', nullable: true },
+            nextStep: { type: 'integer', minimum: 1, nullable: true }
           }
         },
         PropertyQuotePreviewResponse: {
@@ -419,7 +485,8 @@ const options = {
             mediaByFloor: {
               type: 'array',
               items: { $ref: '#/components/schemas/FloorMediaPreviewItem' }
-            }
+            },
+            preview: { $ref: '#/components/schemas/PropertyQuotePreviewMeta' }
           }
         },
         ImageItem: {
@@ -885,7 +952,7 @@ const options = {
                   }
                 }
               },
-              description: 'Amenity name -> array of { url, isPublic } (e.g. Reception, Managers Office, Conference Room)'
+              description: 'Amenity name -> array of { url, isPublic } (e.g. Property Management, Manager Office, Meeting Room)'
             },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
