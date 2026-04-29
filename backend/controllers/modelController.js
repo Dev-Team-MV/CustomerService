@@ -215,6 +215,155 @@ function normalizeModelForResponse (model) {
   return doc
 }
 
+function parseIntegerOrNull (value) {
+  if (value === undefined || value === null || value === '') return null
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return null
+  return Math.trunc(parsed)
+}
+
+function moveArrayItem (arr, fromIndex, toIndex) {
+  const cloned = [...arr]
+  const [moved] = cloned.splice(fromIndex, 1)
+  cloned.splice(toIndex, 0, moved)
+  return cloned
+}
+
+function normalizeReorderUrl (value) {
+  if (typeof value === 'string') return normalizePathForStorage(value)
+  if (value && typeof value === 'object' && typeof value.url === 'string') {
+    return normalizePathForStorage(value.url)
+  }
+  return null
+}
+
+function parseIncomingReorderItems ({ payload = {}, currentItems = [] }) {
+  const currentUrls = currentItems.map((item) => item.url)
+  const currentUrlSet = new Set(currentUrls)
+  const currentIndexByUrl = new Map(currentUrls.map((url, index) => [url, index]))
+
+  const directList = Array.isArray(payload.newOrder)
+    ? payload.newOrder
+    : Array.isArray(payload.order)
+      ? payload.order
+      : Array.isArray(payload.urls)
+        ? payload.urls
+        : Array.isArray(payload.orderedUrls)
+          ? payload.orderedUrls
+          : Array.isArray(payload.collection)
+            ? payload.collection
+            : Array.isArray(payload.items)
+              ? payload.items
+              : null
+
+  if (Array.isArray(directList) && directList.length > 0) {
+    const usesRankFields = directList.some((row) => (
+      row &&
+      typeof row === 'object' &&
+      (
+        row.order !== undefined ||
+        row.position !== undefined ||
+        row.index !== undefined ||
+        row.sort !== undefined
+      )
+    ))
+
+    if (usesRankFields) {
+      const rankByUrl = new Map()
+      const metaByUrl = new Map()
+
+      for (const row of directList) {
+        const normalizedUrl = normalizeReorderUrl(row)
+        if (!normalizedUrl) {
+          return { error: 'Each order item must include a valid url' }
+        }
+        if (!currentUrlSet.has(normalizedUrl)) {
+          return { error: 'Order payload contains urls not present in current collection' }
+        }
+        if (rankByUrl.has(normalizedUrl)) {
+          return { error: 'Order payload contains duplicate urls' }
+        }
+
+        const rankRaw = row.order ?? row.position ?? row.index ?? row.sort
+        const rank = parseIntegerOrNull(rankRaw)
+        if (rank === null) {
+          return { error: 'Each order item must include numeric order/position/index/sort' }
+        }
+
+        rankByUrl.set(normalizedUrl, rank)
+        metaByUrl.set(normalizedUrl, {
+          hasIsPublic: Object.prototype.hasOwnProperty.call(row, 'isPublic'),
+          isPublic: row.isPublic !== false
+        })
+      }
+
+      const orderedUrls = [...currentUrls].sort((a, b) => {
+        const aHasRank = rankByUrl.has(a)
+        const bHasRank = rankByUrl.has(b)
+        if (aHasRank && bHasRank) {
+          const rankDiff = rankByUrl.get(a) - rankByUrl.get(b)
+          if (rankDiff !== 0) return rankDiff
+        } else if (aHasRank) {
+          return -1
+        } else if (bHasRank) {
+          return 1
+        }
+
+        return currentIndexByUrl.get(a) - currentIndexByUrl.get(b)
+      })
+
+      return {
+        items: orderedUrls.map((url) => {
+          const meta = metaByUrl.get(url)
+          return {
+            url,
+            hasIsPublic: meta?.hasIsPublic === true,
+            isPublic: meta?.isPublic !== false
+          }
+        })
+      }
+    }
+
+    const parsedItems = []
+    for (const row of directList) {
+      const normalizedUrl = normalizeReorderUrl(row)
+      if (!normalizedUrl) {
+        return { error: 'Each order item must include a valid url' }
+      }
+      parsedItems.push({
+        url: normalizedUrl,
+        hasIsPublic: !!(row && typeof row === 'object' && Object.prototype.hasOwnProperty.call(row, 'isPublic')),
+        isPublic: !!(!(row && typeof row === 'object') || row.isPublic !== false)
+      })
+    }
+    return { items: parsedItems }
+  }
+
+  const fromIndexRaw = payload.fromIndex ?? payload.sourceIndex
+  const toIndexRaw = payload.toIndex ?? payload.targetIndex
+  const fromIndex = parseIntegerOrNull(fromIndexRaw)
+  const toIndex = parseIntegerOrNull(toIndexRaw)
+
+  if (fromIndex !== null && toIndex !== null) {
+    const lastIndex = currentItems.length - 1
+    if (fromIndex < 0 || fromIndex > lastIndex || toIndex < 0 || toIndex > lastIndex) {
+      return { error: 'fromIndex/toIndex are out of range' }
+    }
+    const reordered = moveArrayItem(currentItems, fromIndex, toIndex)
+    return {
+      items: reordered.map((item) => ({
+        url: item.url,
+        hasIsPublic: false,
+        isPublic: item.isPublic !== false
+      }))
+    }
+  }
+
+  return {
+    error: 'Provide one of: newOrder/order/urls/orderedUrls/collection/items, or fromIndex + toIndex'
+  }
+}
+
 export const getAllModels = async (req, res) => {
   try {
     const { status, projectId } = req.query
@@ -708,8 +857,7 @@ export const reorderModelImages = async (req, res) => {
       balconyId,
       upgradeId,
       type = 'exterior',
-      count,
-      newOrder
+      count
     } = req.body || {}
 
     if (!['base', 'balcony', 'upgrade'].includes(section)) {
@@ -718,10 +866,6 @@ export const reorderModelImages = async (req, res) => {
 
     if (!['exterior', 'interior'].includes(type)) {
       return res.status(400).json({ message: 'type must be one of: exterior, interior' })
-    }
-
-    if (!Array.isArray(newOrder) || newOrder.length === 0) {
-      return res.status(400).json({ message: 'newOrder must be a non-empty array' })
     }
 
     let currentItems = []
@@ -770,29 +914,26 @@ export const reorderModelImages = async (req, res) => {
       return res.status(400).json({ message: 'There are no images to reorder in the selected section/type' })
     }
 
-    if (count !== undefined && Number(count) !== newOrder.length) {
-      return res.status(400).json({ message: 'count does not match newOrder length' })
+    const parsedOrder = parseIncomingReorderItems({
+      payload: req.body || {},
+      currentItems
+    })
+    if (parsedOrder.error) {
+      return res.status(400).json({ message: parsedOrder.error })
     }
 
-    const incomingItems = []
-    for (const row of newOrder) {
-      if (!row || typeof row !== 'object' || typeof row.url !== 'string') {
-        return res.status(400).json({ message: 'Each newOrder item must include a valid url' })
-      }
-      const normalizedUrl = normalizePathForStorage(row.url)
-      if (!normalizedUrl) {
-        return res.status(400).json({ message: 'Each newOrder item must include a valid url' })
-      }
-      incomingItems.push({
-        url: normalizedUrl,
-        hasIsPublic: Object.prototype.hasOwnProperty.call(row, 'isPublic'),
-        isPublic: row.isPublic !== false
-      })
+    const incomingItems = parsedOrder.items
+    if (!Array.isArray(incomingItems) || incomingItems.length === 0) {
+      return res.status(400).json({ message: 'No valid order items were provided' })
+    }
+
+    if (count !== undefined && Number(count) !== incomingItems.length) {
+      return res.status(400).json({ message: 'count does not match order length' })
     }
 
     const incomingUrlSet = new Set(incomingItems.map((item) => item.url))
     if (incomingUrlSet.size !== incomingItems.length) {
-      return res.status(400).json({ message: 'newOrder contains duplicate urls' })
+      return res.status(400).json({ message: 'Order payload contains duplicate urls' })
     }
 
     const currentByUrl = new Map(currentItems.map((item) => [item.url, item]))
@@ -800,14 +941,14 @@ export const reorderModelImages = async (req, res) => {
 
     if (incomingItems.length !== currentItems.length) {
       return res.status(400).json({
-        message: 'newOrder must contain exactly the same number of images as current collection'
+        message: 'Order payload must contain exactly the same number of images as current collection'
       })
     }
 
     for (const url of incomingUrlSet) {
       if (!currentUrlSet.has(url)) {
         return res.status(400).json({
-          message: 'newOrder contains urls not present in current collection'
+          message: 'Order payload contains urls not present in current collection'
         })
       }
     }
