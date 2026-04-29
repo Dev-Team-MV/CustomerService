@@ -206,6 +206,9 @@ export const useModels = () => {
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(false);
 
+  // Proyecto actual
+  const [currentProjectId, setCurrentProjectId] = useState(null);
+
   // Fetch models
   // const fetchModels = useCallback(async () => {
   //   setLoading(true);
@@ -219,18 +222,22 @@ export const useModels = () => {
   //   }
   // }, []);
   // Fetch models
-const fetchModels = useCallback(async (projectId = null) => {
-  setLoading(true);
-  try {
-    const params = projectId ? { projectId } : {};
-    const response = await api.get("/models", { params });
-    setModels(response.data);
-  } catch (error) {
-    console.error("Error fetching models:", error);
-  } finally {
-    setLoading(false);
-  }
-}, []);
+  const fetchModels = useCallback(async (projectId = null) => {
+    setLoading(true);
+    try {
+      if (projectId) setCurrentProjectId(projectId);
+      const idToUse = projectId || currentProjectId;
+      const params = idToUse ? { projectId: idToUse } : {};
+      const response = await api.get("/models", { params });
+      setModels(response.data);
+    } catch (error) {
+      console.error("Error fetching models:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentProjectId]);
+  
+
 
   // Fetch facades
   const fetchFacades = useCallback(async () => {
@@ -354,7 +361,7 @@ useEffect(() => {
         await api.post("/models", dataToSend);
       }
 
-      await fetchModels();
+  await fetchModels(currentProjectId);
       if (onClose) onClose();
       return true;
     } catch (error) {
@@ -367,7 +374,7 @@ useEffect(() => {
   const handleDeleteModel = async (id) => {
     try {
       await api.delete(`/models/${id}`);
-      await fetchModels();
+  await fetchModels(currentProjectId);
     } catch (error) {
       console.error("Error deleting model:", error);
       throw error;
@@ -477,5 +484,7 @@ const handleToggleImageIsPublic = async ({ filename, isPublic }) => {
     handleRemoveImage,
     EMPTY_FORM,
     mapModelToFormData,
+
+    currentProjectId,
   };
 };

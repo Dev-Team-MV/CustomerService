@@ -26,7 +26,8 @@ import { useTranslation } from 'react-i18next'
 import PropTypes from 'prop-types'
 import GalleryCarrousel from '../../../../apps/lakewood-p1/src/components/GalleryCarrousel'
 import { MODEL_10_ID } from '../../../config/resourceConfig'
-
+import PropertyDetailsTab from '../../propertyDetails/PropertyDetailsTab'  // ✅ AGREGAR ESTE IMPORT
+ 
 const extractUrl = (item) => {
   if (!item) return null
   if (typeof item === 'string') return item
@@ -41,6 +42,17 @@ const extractUrl = (item) => {
 
 const DetailsTab = ({ details, config, resourceType }) => {
   const { t } = useTranslation([config.i18n.namespace, 'common'])
+
+    // ✅ AGREGAR: Detectar si tiene mediaByFloor (6town-houses properties)
+  const mediaByFloor = details?.mediaByFloor || []
+  const hasFloorMedia = mediaByFloor.length > 0
+  
+  // ✅ AGREGAR: Si es una property con mediaByFloor, usar PropertyDetailsTab
+  if (hasFloorMedia && resourceType === 'property') {
+    return <PropertyDetailsTab propertyDetails={details} />
+  }
+  
+  
   const [carouselIndex, setCarouselIndex] = useState(0)
   const [galleryFilter, setGalleryFilter] = useState('all')
 

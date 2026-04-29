@@ -46,6 +46,7 @@ const Models = () => {
     handleDeleteFacade,
     getModelFacades,
     fetchModels,
+    currentProjectId,
   } = useModels();
 
   // Navegación a detalle

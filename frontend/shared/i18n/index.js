@@ -32,6 +32,7 @@ import enQuote from './locales/en/quote.json'
 import enShare from './locales/en/share.json'
 import enContracts from './locales/en/contracts.json'
 import enTermsConditions from './locales/en/termsConditions.json' 
+import enHouses6Town from './locales/en/houses6Town.json'
 // ES
 import esCommon from './locales/es/common.json'
 import esAuth from './locales/es/auth.json'
@@ -62,6 +63,7 @@ import esQuote from './locales/es/quote.json'
 import esShare from './locales/es/share.json'   
 import esContracts from './locales/es/contracts.json'
 import esTermsConditions from './locales/es/termsConditions.json'
+import esHouses6Town from './locales/es/houses6Town.json'
 
 i18n
     .use(LanguageDetector)
@@ -98,7 +100,8 @@ i18n
                 quote: enQuote,
                 share: enShare,
                 contracts: enContracts,
-                termsConditions: enTermsConditions
+                termsConditions: enTermsConditions,
+                houses6Town: enHouses6Town
             },
             es: {
                 common: esCommon,
@@ -130,7 +133,8 @@ i18n
                 quote: esQuote,
                 share: esShare,
                 contracts: esContracts,
-                termsConditions: esTermsConditions
+                termsConditions: esTermsConditions,
+                houses6Town: esHouses6Town
             },
         },
         fallbackLng: 'en',
@@ -164,7 +168,8 @@ i18n
             'quote',
             'share',
             'contracts',
-            'termsConditions'
+            'termsConditions',
+            'houses6Town'
         ],
         interpolation: {
             escapeValue: false,
