@@ -174,6 +174,16 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
     }
   },
 
+  getClubhouse: async () => {
+    try {
+      const response = await api.get('/clubhouse')
+      return response.data
+    } catch (error) {
+      console.error('❌ Error getting clubhouse:', error.response?.data || error.message)
+      throw new Error(error.response?.data?.message || 'Failed to get clubhouse')
+    }
+  },
+
   /** PATCH recorrido file visibility. Body: { filename, isPublic }. filename e.g. "recorrido.1.jpg" */
   updateRecorridoVisibility: async (filename, isPublic) => {
     const response = await api.patch('/upload/recorrido/visibility', { filename, isPublic })
