@@ -23,7 +23,10 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
     options,
     selectedPricingOption,
     getModelPricingInfo,
-    selectedProject, setSelectedProject, projects, loadingProjects
+    selectedProject, setSelectedProject, projects, loadingProjects,
+
+        modelType,           // ✅ NUEVO
+    selectedOptions      // ✅ NUEVO
   } = useProperty()
   const { t } = useTranslation('models')
   const { isAuthenticated } = useAuth()
@@ -55,37 +58,77 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
     updateFinancials({ monthlyPaymentPercent: value })
   }
 
-  const handleGetQuote = async () => {
-    if (!selectedLot || !selectedModel) {
-      alert(t('completeSelection', 'Please complete your selection (Lot and Model)'))
-      return
-    }
+  // const handleGetQuote = async () => {
+  //   if (!selectedLot || !selectedModel) {
+  //     alert(t('completeSelection', 'Please complete your selection (Lot and Model)'))
+  //     return
+  //   }
 
-    setLoadingQuote(true)
-    setQuoteResult(null)
+  //   setLoadingQuote(true)
+  //   setQuoteResult(null)
     
-    try {
-      const quoteData = {
-        projectId: selectedProject || import.meta.env.VITE_PROJECT_ID,
-        lot: selectedLot._id,
-        model: selectedModel._id,
-        facade: selectedFacade?._id,
-        initialPayment: financials.initialDownPayment,
-        hasBalcony: options.balcony,
-        modelType: options.upgrade ? 'upgrade' : 'basic',
-        hasStorage: options.storage
-      }
+  //   try {
+  //     const quoteData = {
+  //       projectId: selectedProject || import.meta.env.VITE_PROJECT_ID,
+  //       lot: selectedLot._id,
+  //       model: selectedModel._id,
+  //       facade: selectedFacade?._id,
+  //       initialPayment: financials.initialDownPayment,
+  //       hasBalcony: options.balcony,
+  //       modelType: options.upgrade ? 'upgrade' : 'basic',
+  //       hasStorage: options.storage
+  //     }
       
-      const result = await quoteService.getPropertyQuote(quoteData)
-      setQuoteResult(result)
-      setQuoteModalOpen(true)
-    } catch (error) {
-      console.error('Error getting quote:', error)
-      alert(t('errorGettingQuote', 'Error getting quote. Please try again.'))
-    } finally {
-      setLoadingQuote(false)
-    }
+  //     const result = await quoteService.getPropertyQuote(quoteData)
+  //     setQuoteResult(result)
+  //     setQuoteModalOpen(true)
+  //   } catch (error) {
+  //     console.error('Error getting quote:', error)
+  //     alert(t('errorGettingQuote', 'Error getting quote. Please try again.'))
+  //   } finally {
+  //     setLoadingQuote(false)
+  //   }
+  // }
+  const handleGetQuote = async () => {
+  if (!selectedLot || !selectedModel) {
+    alert(t('completeSelection', 'Please complete your selection (Lot and Model)'))
+    return
   }
+
+  setLoadingQuote(true)
+  setQuoteResult(null)
+  
+  try {
+    // ✅ NUEVA ESTRUCTURA con selectedOptions
+    const quoteData = {
+      projectId: selectedProject || import.meta.env.VITE_PROJECT_ID,
+      lot: selectedLot._id,
+      model: selectedModel._id,
+      facade: selectedFacade?._id,
+      initialPayment: financials.initialDownPayment,
+      // ✅ NUEVO: Campos para catalog config
+      modelType: modelType,                    // 'base' | 'upgrade'
+      hasBalcony: options.balcony,
+      hasStorage: options.storage,
+      selectedOptions: {
+        upgradeId: selectedOptions.upgradeId,
+        balconyId: selectedOptions.balconyId,
+        storageId: selectedOptions.storageId
+      }
+    }
+    
+    console.log('📤 Sending quote with new structure:', quoteData)
+    
+    const result = await quoteService.getPropertyQuote(quoteData)
+    setQuoteResult(result)
+    setQuoteModalOpen(true)
+  } catch (error) {
+    console.error('Error getting quote:', error)
+    alert(t('errorGettingQuote', 'Error getting quote. Please try again.'))
+  } finally {
+    setLoadingQuote(false)
+  }
+}
 
   const handleCreateProperty = () => {
     if (!selectedLot || !selectedModel) {
@@ -204,17 +247,17 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
             >
               <strong style={{ color: '#333F1F' }}>{t('lot', 'Lot')}:</strong> {selectedLot ? `#${selectedLot.number} - $${selectedLot.price?.toLocaleString()}` : t('notSelected', 'Not selected')}
             </Typography>
-            <Typography 
-              variant="body2" 
-              display="block" 
-              sx={{ 
-                color: '#706f6f',
-                fontFamily: '"Poppins", sans-serif',
-                mb: 0.5
-              }}
-            >
-              <strong style={{ color: '#333F1F' }}>{t('model', 'Model')}:</strong> {selectedModel ? `${selectedModel.model} - $${selectedModel.price?.toLocaleString()}` : t('notSelected', 'Not selected')}
-            </Typography>
+<Typography 
+  variant="body2" 
+  display="block" 
+  sx={{ 
+    color: '#706f6f',
+    fontFamily: '"Poppins", sans-serif',
+    mb: 0.5
+  }}
+>
+  <strong style={{ color: '#333F1F' }}>{t('model', 'Model')}:</strong> {selectedModel ? `${selectedModel.model} - ${t('includedInLot', 'Included in lot')}` : t('notSelected', 'Not selected')}
+</Typography>
             
             {/* OPTIONS CHIPS */}
             {selectedModel && pricingInfo && (

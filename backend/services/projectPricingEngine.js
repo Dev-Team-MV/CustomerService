@@ -90,6 +90,33 @@ function resolveLegacyOptionAdjustments({ modelExists, selectedOptions }) {
   return adjustments.filter((adj) => adj.amount !== 0)
 }
 
+// export function evaluatePricingRules({ rules = [], context = {}, base = 0 }) {
+//   const adjustments = []
+//   const enabledRules = (Array.isArray(rules) ? rules : [])
+//     .filter((rule) => rule.enabled !== false)
+//     .sort((a, b) => Number(a.priority || 100) - Number(b.priority || 100))
+
+//   for (const rule of enabledRules) {
+//     const when = Array.isArray(rule.when) ? rule.when : []
+//     const pass = when.every((condition) => evaluateCondition(condition, context))
+//     if (!pass) continue
+
+//     const amount = toNumber(rule.apply?.amount)
+//     const finalAmount = rule.apply?.type === 'percentage'
+//       ? (base * amount) / 100
+//       : amount
+//     adjustments.push({
+//       code: rule.apply?.code || rule.id,
+//       label: rule.apply?.label || rule.name || rule.id,
+//       amount: finalAmount
+//     })
+//   }
+
+//   return adjustments
+// }
+
+// Líneas 63-86 - Función evaluatePricingRules actualizada
+
 export function evaluatePricingRules({ rules = [], context = {}, base = 0 }) {
   const adjustments = []
   const enabledRules = (Array.isArray(rules) ? rules : [])
@@ -101,10 +128,44 @@ export function evaluatePricingRules({ rules = [], context = {}, base = 0 }) {
     const pass = when.every((condition) => evaluateCondition(condition, context))
     if (!pass) continue
 
-    const amount = resolveRuleBaseAmount(rule.apply, context)
+    // ✅ NUEVO: Resolver el monto según amountSource
+    let amount = 0
+    const amountSource = rule.apply?.amountSource || 'fixed'
+    
+    if (amountSource === 'selected_option_price') {
+      // Obtener el ID de la opción seleccionada
+      const selectedId = get(context, rule.apply?.selectedIdPath)
+      
+      if (selectedId) {
+        // Obtener la colección de opciones (ej: model.upgrades)
+        const optionCollection = get(context, rule.apply?.optionCollectionPath)
+        
+        if (Array.isArray(optionCollection)) {
+          // Buscar la opción por ID
+          const selectedOption = optionCollection.find(opt => 
+            String(opt._id) === String(selectedId)
+          )
+          
+          if (selectedOption) {
+            // Extraer el precio de la opción
+            const valueField = rule.apply?.valueField || 'price'
+            amount = toNumber(selectedOption[valueField])
+          }
+        }
+      }
+    } else if (amountSource === 'context_path') {
+      // Obtener monto desde una ruta del contexto
+      const contextValue = get(context, rule.apply?.amountFrom)
+      amount = toNumber(contextValue)
+    } else {
+      // amountSource === 'fixed' (comportamiento por defecto)
+      amount = toNumber(rule.apply?.amount)
+    }
+
     const finalAmount = rule.apply?.type === 'percentage'
       ? (base * amount) / 100
       : amount
+      
     adjustments.push({
       code: rule.apply?.code || rule.id,
       label: rule.apply?.label || rule.name || rule.id,

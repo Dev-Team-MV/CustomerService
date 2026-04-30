@@ -142,7 +142,42 @@ export const quoteService = {
       console.error('❌ Error getting house quote:', error)
       throw new Error(error.response?.data?.message || error.message || 'Failed to get house quote')
     }
+  },
+
+
+  /**
+ * Obtener preview de cotización con media por floor
+ * Nuevo endpoint que devuelve quote + mediaByFloor
+ * 
+ * @param {Object} quoteData - Datos de cotización
+ * @param {string} quoteData.projectId - ID del proyecto
+ * @param {string} quoteData.lot - ID del lote
+ * @param {string} quoteData.model - ID del modelo
+ * @param {string} [quoteData.facade] - ID de la fachada (opcional)
+ * @param {Object} quoteData.selectedOptions - Opciones seleccionadas por level
+ * @returns {Promise<Object>} Resultado con quote y mediaByFloor
+ * @returns {Object} result.quote - Cotización completa
+ * @returns {Object} result.mediaByFloor - Media organizada por floor
+ */
+getQuotePreview: async (quoteData) => {
+  try {
+    const response = await api.post('/properties/quote-preview', quoteData)
+    
+    // Respuesta esperada:
+    // {
+    //   quote: { breakdown: {...}, pricingConfig: {...} },
+    //   mediaByFloor: {
+    //     piso1: { renders: [...], isometrics: [...], blueprints: [...] },
+    //     piso2: { ... },
+    //     ...
+    //   }
+    // }
+    return response.data
+  } catch (error) {
+    console.error('❌ Error getting quote preview:', error)
+    throw new Error(error.response?.data?.message || error.message || 'Failed to get quote preview')
   }
+}
 }
 
 export default quoteService
