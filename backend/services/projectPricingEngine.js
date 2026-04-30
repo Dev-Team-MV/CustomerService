@@ -10,6 +10,36 @@ function get(obj, path) {
   return path.split('.').reduce((acc, key) => (acc == null ? undefined : acc[key]), obj)
 }
 
+function toIdStr(value) {
+  if (value == null) return ''
+  if (typeof value === 'string') return value
+  if (value._id != null) return String(value._id)
+  if (value.id != null) return String(value.id)
+  return String(value)
+}
+
+function resolveRuleBaseAmount(ruleApply = {}, context = {}) {
+  const source = ruleApply.amountSource || (ruleApply.amountFrom ? 'context_path' : 'fixed')
+
+  if (source === 'context_path') {
+    return toNumber(get(context, ruleApply.amountFrom))
+  }
+
+  if (source === 'selected_option_price') {
+    const collection = get(context, ruleApply.optionCollectionPath)
+    const selectedId = toIdStr(get(context, ruleApply.selectedIdPath))
+    if (!Array.isArray(collection) || !selectedId) return 0
+
+    const selected = collection.find((item) => toIdStr(item?._id || item?.id) === selectedId)
+    if (!selected) return 0
+
+    const valueField = ruleApply.valueField || 'price'
+    return toNumber(selected?.[valueField])
+  }
+
+  return toNumber(ruleApply.amount)
+}
+
 function evaluateCondition(condition, context) {
   const actual = get(context, condition.field)
   const expected = condition.value
@@ -60,6 +90,33 @@ function resolveLegacyOptionAdjustments({ modelExists, selectedOptions }) {
   return adjustments.filter((adj) => adj.amount !== 0)
 }
 
+// export function evaluatePricingRules({ rules = [], context = {}, base = 0 }) {
+//   const adjustments = []
+//   const enabledRules = (Array.isArray(rules) ? rules : [])
+//     .filter((rule) => rule.enabled !== false)
+//     .sort((a, b) => Number(a.priority || 100) - Number(b.priority || 100))
+
+//   for (const rule of enabledRules) {
+//     const when = Array.isArray(rule.when) ? rule.when : []
+//     const pass = when.every((condition) => evaluateCondition(condition, context))
+//     if (!pass) continue
+
+//     const amount = toNumber(rule.apply?.amount)
+//     const finalAmount = rule.apply?.type === 'percentage'
+//       ? (base * amount) / 100
+//       : amount
+//     adjustments.push({
+//       code: rule.apply?.code || rule.id,
+//       label: rule.apply?.label || rule.name || rule.id,
+//       amount: finalAmount
+//     })
+//   }
+
+//   return adjustments
+// }
+
+// Líneas 63-86 - Función evaluatePricingRules actualizada
+
 export function evaluatePricingRules({ rules = [], context = {}, base = 0 }) {
   const adjustments = []
   const enabledRules = (Array.isArray(rules) ? rules : [])
@@ -71,10 +128,44 @@ export function evaluatePricingRules({ rules = [], context = {}, base = 0 }) {
     const pass = when.every((condition) => evaluateCondition(condition, context))
     if (!pass) continue
 
-    const amount = toNumber(rule.apply?.amount)
+    // ✅ NUEVO: Resolver el monto según amountSource
+    let amount = 0
+    const amountSource = rule.apply?.amountSource || 'fixed'
+    
+    if (amountSource === 'selected_option_price') {
+      // Obtener el ID de la opción seleccionada
+      const selectedId = get(context, rule.apply?.selectedIdPath)
+      
+      if (selectedId) {
+        // Obtener la colección de opciones (ej: model.upgrades)
+        const optionCollection = get(context, rule.apply?.optionCollectionPath)
+        
+        if (Array.isArray(optionCollection)) {
+          // Buscar la opción por ID
+          const selectedOption = optionCollection.find(opt => 
+            String(opt._id) === String(selectedId)
+          )
+          
+          if (selectedOption) {
+            // Extraer el precio de la opción
+            const valueField = rule.apply?.valueField || 'price'
+            amount = toNumber(selectedOption[valueField])
+          }
+        }
+      }
+    } else if (amountSource === 'context_path') {
+      // Obtener monto desde una ruta del contexto
+      const contextValue = get(context, rule.apply?.amountFrom)
+      amount = toNumber(contextValue)
+    } else {
+      // amountSource === 'fixed' (comportamiento por defecto)
+      amount = toNumber(rule.apply?.amount)
+    }
+
     const finalAmount = rule.apply?.type === 'percentage'
       ? (base * amount) / 100
       : amount
+      
     adjustments.push({
       code: rule.apply?.code || rule.id,
       label: rule.apply?.label || rule.name || rule.id,
@@ -106,22 +197,28 @@ export async function evaluateProjectPricing({
   facadeExists,
   selectedOptions = {}
 }) {
+  const config = await getActiveCatalogConfigForProject(projectId)
+  const pricingMode = config?.pricingMode || 'legacy_components'
   const lotPrice = toNumber(lotExists?.price)
   const modelBasePrice = toNumber(modelExists?.price)
   const facadePrice = toNumber(facadeExists?.price)
-  const base = lotPrice + modelBasePrice + facadePrice
+  const base = pricingMode === 'lot_fixed_total'
+    ? lotPrice
+    : lotPrice + modelBasePrice + facadePrice
 
   const adjustments = []
-  adjustments.push(...resolveLegacyOptionAdjustments({ modelExists, selectedOptions }))
+  if (pricingMode !== 'lot_fixed_total') {
+    adjustments.push(...resolveLegacyOptionAdjustments({ modelExists, selectedOptions }))
+  }
 
-  const config = await getActiveCatalogConfigForProject(projectId)
   if (config && Array.isArray(config.pricingRules) && config.pricingRules.length > 0) {
     const context = {
       selectedOptions,
       lot: lotExists,
       model: modelExists,
       facade: facadeExists,
-      base
+      base,
+      pricingMode
     }
     adjustments.push(...evaluatePricingRules({
       rules: config.pricingRules,
@@ -135,10 +232,11 @@ export async function evaluateProjectPricing({
 
   return {
     configVersion: config?.version || null,
+    pricingMode,
     baseBreakdown: {
       lotPrice,
-      modelBasePrice,
-      facadePrice
+      modelBasePrice: pricingMode === 'lot_fixed_total' ? 0 : modelBasePrice,
+      facadePrice: pricingMode === 'lot_fixed_total' ? 0 : facadePrice
     },
     adjustments,
     totalAdjustments,

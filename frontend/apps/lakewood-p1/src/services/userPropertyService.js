@@ -97,9 +97,22 @@ const userPropertyService = {
       if (propertyIds.length === 0) {
         return []
       }
-      const response = await api.get('/payloads')
-      console.log('ALL PAYLOADS:', response.data)
-      const allPayloads = response.data
+      const projectIds = Array.from(new Set(
+        properties
+          .map((prop) => (typeof prop.project === 'object' ? prop.project?._id : prop.project))
+          .filter(Boolean)
+      ))
+      if (projectIds.length === 0) {
+        return []
+      }
+
+      const payloadResponses = await Promise.all(
+        projectIds.map((projectId) =>
+          api.get('/payloads', { params: { projectId } }).then((res) => res.data).catch(() => [])
+        )
+      )
+      const allPayloads = payloadResponses.flat()
+      console.log('ALL PAYLOADS:', allPayloads)
       const userPayloads = allPayloads.filter(payload => {
         const payloadPropertyId = typeof payload.property === 'object' 
           ? payload.property._id 

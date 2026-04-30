@@ -192,7 +192,7 @@ export const getProjectBySlug = async (req, res) => {
 const pickProjectFields = (body) => {
   const allowed = [
     'name', 'slug', 'phase', 'title', 'subtitle', 'description', 'fullDescription',
-    'image', 'gallery', 'features', 'type', 'status', 'isActive',
+    'image', 'gallery', 'features', 'type', 'facadeEnabled', 'status', 'isActive',
     'externalUrl', 'location', 'area', 'videos', 'outdoorAmenitySections'
   ]
   const data = {}

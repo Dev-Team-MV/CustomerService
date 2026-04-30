@@ -17,6 +17,15 @@ const pricingApplySchema = new mongoose.Schema(
   {
     type: { type: String, required: true, enum: ['fixed', 'percentage'] },
     amount: { type: Number, required: true },
+    amountSource: {
+      type: String,
+      enum: ['fixed', 'context_path', 'selected_option_price'],
+      default: 'fixed'
+    },
+    amountFrom: { type: String, trim: true, default: '' },
+    optionCollectionPath: { type: String, trim: true, default: '' },
+    selectedIdPath: { type: String, trim: true, default: '' },
+    valueField: { type: String, trim: true, default: 'price' },
     code: { type: String, trim: true, default: '' },
     label: { type: String, trim: true, default: '' }
   },
@@ -73,6 +82,11 @@ const projectCatalogConfigSchema = new mongoose.Schema(
     pricingRules: {
       type: [pricingRuleSchema],
       default: () => []
+    },
+    pricingMode: {
+      type: String,
+      enum: ['legacy_components', 'lot_fixed_total'],
+      default: 'legacy_components'
     }
   },
   { timestamps: true }

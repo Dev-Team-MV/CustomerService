@@ -87,6 +87,43 @@ router.get('/test-connection', testGCSConnection)
  */
 router.get('/files', optionalProtect, getFolderFiles)
 router.get('/folder/:folder', optionalProtect, getFolderFiles)
+/**
+ * @swagger
+ * /api/upload/signed-url:
+ *   get:
+ *     summary: Get a fresh signed URL for an existing GCS object
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: path
+ *         schema:
+ *           type: string
+ *         description: GCS path (e.g. "pdn/videos/file.mp4")
+ *       - in: query
+ *         name: url
+ *         schema:
+ *           type: string
+ *         description: Full GCS URL (storage.googleapis.com or storage.cloud.google.com)
+ *       - in: query
+ *         name: expiresInSeconds
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 604800
+ *           default: 3600
+ *         description: Signed URL duration in seconds (max 7 days)
+ *     responses:
+ *       200:
+ *         description: Signed URL generated successfully
+ *       400:
+ *         description: Missing/invalid query params
+ *       404:
+ *         description: Could not generate signed URL
+ *       500:
+ *         description: Error generating signed URL
+ */
 router.get('/signed-url', protect, getSignedUrlForPath)
 
 /**

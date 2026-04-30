@@ -104,6 +104,10 @@ const projectSchema = new mongoose.Schema(
       enum: ['residential_lots', 'apartments', 'other'],
       default: 'residential_lots'
     },
+    facadeEnabled: {
+      type: Boolean,
+      default: true
+    },
     status: {
       type: String,
       enum: ['active', 'inactive', 'coming_soon', 'sold_out'],

@@ -257,14 +257,28 @@ const useMyApartment = () => {
     if (!selectedApartment) return
     try {
       setLoadingPayloads(true)
-      const { data } = await api.get(`/payloads?apartment=${selectedApartment}`)
+      const projectId =
+        (typeof apartmentDetails?.building?.project === 'object'
+          ? apartmentDetails?.building?.project?._id
+          : apartmentDetails?.building?.project) ||
+        user?.projects?.[0]?._id ||
+        import.meta.env.VITE_PROJECT_ID
+
+      if (!projectId) {
+        setPayloads([])
+        return
+      }
+
+      const { data } = await api.get('/payloads', {
+        params: { apartment: selectedApartment, projectId }
+      })
       setPayloads(data)
     } catch {
       // silent
     } finally {
       setLoadingPayloads(false)
     }
-  }, [selectedApartment])
+  }, [selectedApartment, apartmentDetails?.building?.project, user?.projects])
 
   useEffect(() => {
     if (selectedApartment) {

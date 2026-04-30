@@ -2,10 +2,10 @@ import mongoose from 'mongoose'
 
 // Default interior amenities (match app UI: Indoor tabs)
 const DEFAULT_INTERIOR_KEYS = [
-  'Reception',
-  'Managers Office',
-  'Conference Room',
-  'Multi-Purpose Room',
+  'Property Management',
+  'Manager Office',
+  'Meeting Room',
+  'Mixed-use Room',
   'Bar',
   'Lounge',
   'Coworking',
@@ -13,14 +13,14 @@ const DEFAULT_INTERIOR_KEYS = [
   'Golf Simulator',
   'Terrace',
   'Gym',
-  'Bathrooms',
+  'Bathrooms & Lockers',
   'Laundry',
-  'Counter',
+  'Concierge',
   'Catering',
   'Mural',
-  'Lakeside',
-  'Machines',
-  'Counter Hallway',
+  'Boat Dock',
+  'Mechanical Room',
+  'Use-mixed Hallway',
   'Bathroom Hallway'
 ]
 

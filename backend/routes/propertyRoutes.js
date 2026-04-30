@@ -3,6 +3,7 @@ import {
   getAllProperties,
   getPropertyById,
   getPropertyQuote,
+  getPropertyQuotePreview,
   createProperty,
   updateProperty,
   deleteProperty,
@@ -90,7 +91,7 @@ const router = express.Router()
  *                 description: Owner user IDs (at least one of user or users required)
  *               initialPayment:
  *                 type: number
- *                 description: Initial payment amount (price and pending will be calculated automatically as lot.price + model.price + facade.price)
+ *                 description: Initial payment amount (price and pending are calculated automatically using the active pricing mode for the project)
  *     responses:
  *       201:
  *         description: Property created (9 phases will be automatically created)
@@ -120,6 +121,28 @@ router.route('/')
  *               $ref: '#/components/schemas/PropertyQuoteResponse'
  */
 router.post('/quote', getPropertyQuote)
+
+/**
+ * @swagger
+ * /api/properties/quote-preview:
+ *   post:
+ *     summary: Calculate property quote and resolve floor media preview
+ *     tags: [Properties]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/PropertyQuotePreviewRequest'
+ *     responses:
+ *       200:
+ *         description: Quote and floor media preview calculated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PropertyQuotePreviewResponse'
+ */
+router.post('/quote-preview', getPropertyQuotePreview)
 
 /**
  * @swagger

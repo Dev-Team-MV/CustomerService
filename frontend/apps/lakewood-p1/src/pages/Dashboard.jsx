@@ -66,21 +66,24 @@ const Dashboard = () => {
   const navigate    = useNavigate()
   const { t }       = useTranslation(['dashboard', 'common'])
   const isAdmin     = user?.role === 'admin' || user?.role === 'superadmin'
+  const projectId = import.meta.env.VITE_PROJECT_ID || user?.projects?.[0]?._id
 
   // ── fetching ────────────────────────────────────────────────
   const { data: lots,     loading: lotsLoading }     = useFetch(
     useCallback(() => api.get('/lots').then(r => r.data), [])
   )
 const { data: payloads } = useFetch(
-  useCallback(() =>
-    api.get('/payloads', {
+  useCallback(() => {
+    if (!projectId) return Promise.resolve([])
+    return api.get('/payloads', {
       params: {
-        projectId: import.meta.env.VITE_PROJECT_ID,
+        projectId,
         limit: 3,
         sort: '-date'
       }
-    }).then(r => r.data),
-  []),
+    }).then(r => r.data)
+  },
+  [projectId]),
   { initialData: [] }
 )
 
@@ -88,8 +91,6 @@ const { data: payloads } = useFetch(
 
   // ── stats ───────────────────────────────────────────────────
   const stats = useDashboardStats(lots)
-
-  const projectId = import.meta.env.VITE_PROJECT_ID
 
   // ✅ Mismo hook que Residents.jsx (projectId → SMS / registro con URL correcta)
   const {

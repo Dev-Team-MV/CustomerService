@@ -1,6 +1,6 @@
 import Model from '../models/Model.js'
 import { normalizeImageArray } from '../utils/imageUtils.js'
-import { hydrateUrlsInObject } from '../services/urlResolverService.js'
+import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
 
 // Helper: format images to { exterior: [{ url, isPublic }], interior: [...] }
 const formatImages = (images) => {
@@ -32,6 +32,46 @@ const formatBlueprints = (blueprints) => {
     withStorage: normalizeImageArray(blueprints.withStorage),
     withBalconyAndStorage: normalizeImageArray(blueprints.withBalconyAndStorage)
   }
+}
+
+const formatFloorMedia = (media) => {
+  if (!media || typeof media !== 'object') {
+    return {
+      renders: [],
+      isometrics: [],
+      blueprints: [],
+      cinematics: [],
+      exterior: []
+    }
+  }
+
+  return {
+    renders: normalizeImageArray(media.renders),
+    isometrics: normalizeImageArray(media.isometrics),
+    blueprints: normalizeImageArray(media.blueprints),
+    cinematics: normalizeImageArray(media.cinematics),
+    exterior: normalizeImageArray(media.exterior)
+  }
+}
+
+const formatFloors = (floors) => {
+  if (!Array.isArray(floors)) return []
+
+  return floors.map((floor, floorIndex) => ({
+    key: floor?.key || `floor-${floorIndex + 1}`,
+    label: floor?.label || '',
+    level: floor?.level,
+    isCustomizable: floor?.isCustomizable !== undefined ? !!floor.isCustomizable : true,
+    options: Array.isArray(floor?.options)
+      ? floor.options.map((option, optionIndex) => ({
+        key: option?.key || `option-${optionIndex + 1}`,
+        label: option?.label || '',
+        status: option?.status || 'active',
+        media: formatFloorMedia(option?.media)
+      }))
+      : [],
+    media: formatFloorMedia(floor?.media)
+  }))
 }
 
 // Normaliza imágenes en el documento (legacy strings → { url, isPublic }) antes de guardar
@@ -90,6 +130,17 @@ function normalizeModelBeforeSave (model) {
       }
     })
   }
+  if (Array.isArray(model.floors)) {
+    model.floors.forEach((floor) => {
+      if (floor.media) floor.media = formatFloorMedia(floor.media)
+
+      if (Array.isArray(floor.options)) {
+        floor.options.forEach((option) => {
+          if (option.media) option.media = formatFloorMedia(option.media)
+        })
+      }
+    })
+  }
 }
 
 // Normaliza imágenes de un modelo (y balconies/upgrades/storages) para respuesta API
@@ -145,7 +196,172 @@ function normalizeModelForResponse (model) {
       return out
     })
   }
+  if (Array.isArray(doc.floors)) {
+    doc.floors = doc.floors.map((floor) => {
+      const floorOut = floor.toObject ? floor.toObject() : { ...floor }
+      floorOut.media = formatFloorMedia(floorOut.media)
+
+      floorOut.options = Array.isArray(floorOut.options)
+        ? floorOut.options.map((option) => {
+          const optionOut = option.toObject ? option.toObject() : { ...option }
+          optionOut.media = formatFloorMedia(optionOut.media)
+          return optionOut
+        })
+        : []
+
+      return floorOut
+    })
+  }
   return doc
+}
+
+function parseIntegerOrNull (value) {
+  if (value === undefined || value === null || value === '') return null
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return null
+  return Math.trunc(parsed)
+}
+
+function moveArrayItem (arr, fromIndex, toIndex) {
+  const cloned = [...arr]
+  const [moved] = cloned.splice(fromIndex, 1)
+  cloned.splice(toIndex, 0, moved)
+  return cloned
+}
+
+function normalizeReorderUrl (value) {
+  if (typeof value === 'string') return normalizePathForStorage(value)
+  if (value && typeof value === 'object' && typeof value.url === 'string') {
+    return normalizePathForStorage(value.url)
+  }
+  return null
+}
+
+function parseIncomingReorderItems ({ payload = {}, currentItems = [] }) {
+  const currentUrls = currentItems.map((item) => item.url)
+  const currentUrlSet = new Set(currentUrls)
+  const currentIndexByUrl = new Map(currentUrls.map((url, index) => [url, index]))
+
+  const directList = Array.isArray(payload.newOrder)
+    ? payload.newOrder
+    : Array.isArray(payload.order)
+      ? payload.order
+      : Array.isArray(payload.urls)
+        ? payload.urls
+        : Array.isArray(payload.orderedUrls)
+          ? payload.orderedUrls
+          : Array.isArray(payload.collection)
+            ? payload.collection
+            : Array.isArray(payload.items)
+              ? payload.items
+              : null
+
+  if (Array.isArray(directList) && directList.length > 0) {
+    const usesRankFields = directList.some((row) => (
+      row &&
+      typeof row === 'object' &&
+      (
+        row.order !== undefined ||
+        row.position !== undefined ||
+        row.index !== undefined ||
+        row.sort !== undefined
+      )
+    ))
+
+    if (usesRankFields) {
+      const rankByUrl = new Map()
+      const metaByUrl = new Map()
+
+      for (const row of directList) {
+        const normalizedUrl = normalizeReorderUrl(row)
+        if (!normalizedUrl) {
+          return { error: 'Each order item must include a valid url' }
+        }
+        if (!currentUrlSet.has(normalizedUrl)) {
+          return { error: 'Order payload contains urls not present in current collection' }
+        }
+        if (rankByUrl.has(normalizedUrl)) {
+          return { error: 'Order payload contains duplicate urls' }
+        }
+
+        const rankRaw = row.order ?? row.position ?? row.index ?? row.sort
+        const rank = parseIntegerOrNull(rankRaw)
+        if (rank === null) {
+          return { error: 'Each order item must include numeric order/position/index/sort' }
+        }
+
+        rankByUrl.set(normalizedUrl, rank)
+        metaByUrl.set(normalizedUrl, {
+          hasIsPublic: Object.prototype.hasOwnProperty.call(row, 'isPublic'),
+          isPublic: row.isPublic !== false
+        })
+      }
+
+      const orderedUrls = [...currentUrls].sort((a, b) => {
+        const aHasRank = rankByUrl.has(a)
+        const bHasRank = rankByUrl.has(b)
+        if (aHasRank && bHasRank) {
+          const rankDiff = rankByUrl.get(a) - rankByUrl.get(b)
+          if (rankDiff !== 0) return rankDiff
+        } else if (aHasRank) {
+          return -1
+        } else if (bHasRank) {
+          return 1
+        }
+
+        return currentIndexByUrl.get(a) - currentIndexByUrl.get(b)
+      })
+
+      return {
+        items: orderedUrls.map((url) => {
+          const meta = metaByUrl.get(url)
+          return {
+            url,
+            hasIsPublic: meta?.hasIsPublic === true,
+            isPublic: meta?.isPublic !== false
+          }
+        })
+      }
+    }
+
+    const parsedItems = []
+    for (const row of directList) {
+      const normalizedUrl = normalizeReorderUrl(row)
+      if (!normalizedUrl) {
+        return { error: 'Each order item must include a valid url' }
+      }
+      parsedItems.push({
+        url: normalizedUrl,
+        hasIsPublic: !!(row && typeof row === 'object' && Object.prototype.hasOwnProperty.call(row, 'isPublic')),
+        isPublic: !!(!(row && typeof row === 'object') || row.isPublic !== false)
+      })
+    }
+    return { items: parsedItems }
+  }
+
+  const fromIndexRaw = payload.fromIndex ?? payload.sourceIndex
+  const toIndexRaw = payload.toIndex ?? payload.targetIndex
+  const fromIndex = parseIntegerOrNull(fromIndexRaw)
+  const toIndex = parseIntegerOrNull(toIndexRaw)
+
+  if (fromIndex !== null && toIndex !== null) {
+    const lastIndex = currentItems.length - 1
+    if (fromIndex < 0 || fromIndex > lastIndex || toIndex < 0 || toIndex > lastIndex) {
+      return { error: 'fromIndex/toIndex are out of range' }
+    }
+    const reordered = moveArrayItem(currentItems, fromIndex, toIndex)
+    return {
+      items: reordered.map((item) => ({
+        url: item.url,
+        hasIsPublic: false,
+        isPublic: item.isPublic !== false
+      }))
+    }
+  }
+
+  return {
+    error: 'Provide one of: newOrder/order/urls/orderedUrls/collection/items, or fromIndex + toIndex'
+  }
 }
 
 export const getAllModels = async (req, res) => {
@@ -180,6 +396,29 @@ export const getModelById = async (req, res) => {
   }
 }
 
+export const getModelFloors = async (req, res) => {
+  try {
+    const model = await Model.findById(req.params.id).select('model modelNumber floors')
+
+    if (!model) {
+      return res.status(404).json({ message: 'Model not found' })
+    }
+
+    const data = normalizeModelForResponse(model)
+    const response = {
+      modelId: model._id,
+      modelName: data.model,
+      modelNumber: data.modelNumber,
+      floors: Array.isArray(data.floors) ? data.floors : []
+    }
+
+    await hydrateUrlsInObject(response)
+    res.json(response)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 export const getModelPricingOptions = async (req, res) => {
   try {
     const model = await Model.findById(req.params.id)
@@ -187,11 +426,18 @@ export const getModelPricingOptions = async (req, res) => {
     if (!model) {
       return res.status(404).json({ message: 'Model not found' })
     }
-    
-    const basePrice = model.price
-    const activeBalconies = model.balconies.filter(b => b.status === 'active')
-    const activeUpgrades = model.upgrades.filter(u => u.status === 'active')
-    const activeStorages = model.storages.filter(s => s.status === 'active')
+
+    // Work with plain objects to avoid circular refs from Mongoose subdocuments
+    // when hydrating URLs recursively.
+    const modelData = normalizeModelForResponse(model)
+
+    const basePrice = Number(modelData.price || 0)
+    const activeBalconies = (Array.isArray(modelData.balconies) ? modelData.balconies : [])
+      .filter(b => b.status === 'active')
+    const activeUpgrades = (Array.isArray(modelData.upgrades) ? modelData.upgrades : [])
+      .filter(u => u.status === 'active')
+    const activeStorages = (Array.isArray(modelData.storages) ? modelData.storages : [])
+      .filter(s => s.status === 'active')
     
     // Generate pricing combinations with all available options
     const allOptions = []
@@ -291,8 +537,8 @@ export const getModelPricingOptions = async (req, res) => {
     }
     
     const response = {
-      modelId: model._id,
-      modelName: model.model,
+      modelId: modelData._id,
+      modelName: modelData.model,
       basePrice: basePrice,
       availableOptions: {
         balconies: activeBalconies,
@@ -328,7 +574,8 @@ export const createModel = async (req, res) => {
       status,
       balconies,
       upgrades,
-      storages
+      storages,
+      floors
     } = req.body
 
     const projId = projectId || project
@@ -337,10 +584,19 @@ export const createModel = async (req, res) => {
     }
 
     // Validar campos requeridos del modelo
-    if (!model || !price || bedrooms === undefined || bathrooms === undefined || sqft === undefined) {
+    if (!model || bedrooms === undefined || bathrooms === undefined || sqft === undefined) {
       return res.status(400).json({
-        message: 'Missing required fields: model, price, bedrooms, bathrooms, and sqft are required'
+        message: 'Missing required fields: model, bedrooms, bathrooms, and sqft are required'
       })
+    }
+
+    if (price !== undefined) {
+      const parsedPrice = Number(price)
+      if (Number.isNaN(parsedPrice) || parsedPrice < 0) {
+        return res.status(400).json({
+          message: 'price must be a number greater than or equal to 0'
+        })
+      }
     }
 
     // Verificar si el modelo ya existe en este proyecto
@@ -414,7 +670,7 @@ export const createModel = async (req, res) => {
       project: projId,
       model,
       modelNumber,
-      price,
+      price: price !== undefined ? Number(price) : 0,
       bedrooms,
       bathrooms,
       sqft,
@@ -425,7 +681,8 @@ export const createModel = async (req, res) => {
       status: status || 'active',
       balconies: validatedBalconies,
       upgrades: validatedUpgrades,
-      storages: validatedStorages
+      storages: validatedStorages,
+      floors: formatFloors(floors)
     })
     
     const modelData = normalizeModelForResponse(newModel)
@@ -475,6 +732,12 @@ export const updateModel = async (req, res) => {
     if (req.body.blueprints !== undefined) model.blueprints = formatBlueprints(req.body.blueprints)
     if (req.body.description !== undefined) model.description = req.body.description
     if (req.body.status !== undefined) model.status = req.body.status
+    if (req.body.floors !== undefined) {
+      if (!Array.isArray(req.body.floors)) {
+        return res.status(400).json({ message: 'Floors must be an array' })
+      }
+      model.floors = formatFloors(req.body.floors)
+    }
     
     // Validar y actualizar balcones si se proporcionan
     if (req.body.balconies !== undefined) {
@@ -578,6 +841,140 @@ export const updateModel = async (req, res) => {
     }
     
     res.status(500).json({ message: error.message })
+  }
+}
+
+export const reorderModelImages = async (req, res) => {
+  try {
+    const model = await Model.findById(req.params.id)
+    if (!model) {
+      return res.status(404).json({ message: 'Model not found' })
+    }
+
+    const {
+      section = 'base',
+      sectionId,
+      balconyId,
+      upgradeId,
+      type = 'exterior',
+      count
+    } = req.body || {}
+
+    if (!['base', 'balcony', 'upgrade'].includes(section)) {
+      return res.status(400).json({ message: 'section must be one of: base, balcony, upgrade' })
+    }
+
+    if (!['exterior', 'interior'].includes(type)) {
+      return res.status(400).json({ message: 'type must be one of: exterior, interior' })
+    }
+
+    let currentItems = []
+    let targetSetter = null
+
+    if (section === 'base') {
+      if (!model.images) model.images = { exterior: [], interior: [] }
+      currentItems = normalizeImageArray(model.images[type])
+      targetSetter = (items) => {
+        model.images[type] = items
+        model.markModified(`images.${type}`)
+      }
+    } else if (section === 'balcony') {
+      const targetBalconyId = balconyId || sectionId
+      if (!targetBalconyId) {
+        return res.status(400).json({ message: 'sectionId or balconyId is required when section is balcony' })
+      }
+      const balcony = model.balconies.id(targetBalconyId)
+      if (!balcony) {
+        return res.status(404).json({ message: 'Balcony not found in this model' })
+      }
+      if (!balcony.images) balcony.images = { exterior: [], interior: [] }
+      currentItems = normalizeImageArray(balcony.images[type])
+      targetSetter = (items) => {
+        balcony.images[type] = items
+        model.markModified('balconies')
+      }
+    } else {
+      const targetUpgradeId = upgradeId || sectionId
+      if (!targetUpgradeId) {
+        return res.status(400).json({ message: 'sectionId or upgradeId is required when section is upgrade' })
+      }
+      const upgrade = model.upgrades.id(targetUpgradeId)
+      if (!upgrade) {
+        return res.status(404).json({ message: 'Upgrade not found in this model' })
+      }
+      if (!upgrade.images) upgrade.images = { exterior: [], interior: [] }
+      currentItems = normalizeImageArray(upgrade.images[type])
+      targetSetter = (items) => {
+        upgrade.images[type] = items
+        model.markModified('upgrades')
+      }
+    }
+
+    if (currentItems.length === 0) {
+      return res.status(400).json({ message: 'There are no images to reorder in the selected section/type' })
+    }
+
+    const parsedOrder = parseIncomingReorderItems({
+      payload: req.body || {},
+      currentItems
+    })
+    if (parsedOrder.error) {
+      return res.status(400).json({ message: parsedOrder.error })
+    }
+
+    const incomingItems = parsedOrder.items
+    if (!Array.isArray(incomingItems) || incomingItems.length === 0) {
+      return res.status(400).json({ message: 'No valid order items were provided' })
+    }
+
+    if (count !== undefined && Number(count) !== incomingItems.length) {
+      return res.status(400).json({ message: 'count does not match order length' })
+    }
+
+    const incomingUrlSet = new Set(incomingItems.map((item) => item.url))
+    if (incomingUrlSet.size !== incomingItems.length) {
+      return res.status(400).json({ message: 'Order payload contains duplicate urls' })
+    }
+
+    const currentByUrl = new Map(currentItems.map((item) => [item.url, item]))
+    const currentUrlSet = new Set(currentItems.map((item) => item.url))
+
+    if (incomingItems.length !== currentItems.length) {
+      return res.status(400).json({
+        message: 'Order payload must contain exactly the same number of images as current collection'
+      })
+    }
+
+    for (const url of incomingUrlSet) {
+      if (!currentUrlSet.has(url)) {
+        return res.status(400).json({
+          message: 'Order payload contains urls not present in current collection'
+        })
+      }
+    }
+
+    const reordered = incomingItems.map((incoming) => {
+      const current = currentByUrl.get(incoming.url)
+      return {
+        url: current.url,
+        isPublic: incoming.hasIsPublic ? incoming.isPublic : current.isPublic !== false
+      }
+    })
+
+    targetSetter(reordered)
+    const updatedModel = await model.save()
+    const modelData = normalizeModelForResponse(updatedModel)
+    await hydrateUrlsInObject(modelData)
+
+    return res.json({
+      message: 'Images reordered successfully',
+      section,
+      type,
+      count: reordered.length,
+      model: modelData
+    })
+  } catch (error) {
+    return res.status(500).json({ message: error.message })
   }
 }
 

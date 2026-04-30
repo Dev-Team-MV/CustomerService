@@ -68,7 +68,7 @@ router.get('/public', getClubHousePublic)
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: List of interior keys (Reception, Managers Office, etc.)
+ *         description: List of interior keys (Property Management, Manager Office, etc.)
  */
 router.get('/interior-keys', protect, getClubHouseInteriorKeys)
 
@@ -93,8 +93,8 @@ router.get('/interior-keys', protect, getClubHouseInteriorKeys)
  *                 enum: [exterior, blueprints, deck, interior]
  *               interiorKey:
  *                 type: string
- *                 description: Required when section=interior. Use one of GET /api/clubhouse/interior-keys (e.g. Reception, Managers Office, Conference Room)
- *                 example: Reception
+ *                 description: Required when section=interior. Use one of GET /api/clubhouse/interior-keys (e.g. Property Management, Manager Office, Meeting Room)
+ *                 example: Property Management
  *               isPublic:
  *                 type: boolean
  *                 description: Si la(s) imagen(es) se pueden mostrar sin token (pública). Por defecto true.

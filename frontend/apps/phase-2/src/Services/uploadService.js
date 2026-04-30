@@ -3,6 +3,53 @@
 import api from '@shared/services/api'
 
 const PHASE_2_PROJECT_SLUG = 'lakewood-f2'
+const FOLDER_FILES_TTL_MS = 60 * 1000
+const folderFilesCache = new Map()
+const folderFilesInFlight = new Map()
+
+const getFolderCacheKey = (folder, urls) => `${String(folder || '').trim().toLowerCase()}|${urls ? '1' : '0'}`
+
+const clearFolderFilesCache = (folder = null) => {
+  if (!folder) {
+    folderFilesCache.clear()
+    folderFilesInFlight.clear()
+    return
+  }
+  const normalized = String(folder).trim().toLowerCase()
+  for (const key of Array.from(folderFilesCache.keys())) {
+    if (key.startsWith(`${normalized}|`)) folderFilesCache.delete(key)
+  }
+  for (const key of Array.from(folderFilesInFlight.keys())) {
+    if (key.startsWith(`${normalized}|`)) folderFilesInFlight.delete(key)
+  }
+}
+
+const fetchFolderFilesWithCache = async (folder, urls = true) => {
+  const cacheKey = getFolderCacheKey(folder, urls)
+  const now = Date.now()
+  const cached = folderFilesCache.get(cacheKey)
+  if (cached && cached.expiresAt > now) return cached.data
+
+  if (folderFilesInFlight.has(cacheKey)) return folderFilesInFlight.get(cacheKey)
+
+  const requestPromise = (async () => {
+    const response = await api.get('/upload/files', {
+      params: { folder, urls }
+    })
+    folderFilesCache.set(cacheKey, {
+      data: response.data,
+      expiresAt: Date.now() + FOLDER_FILES_TTL_MS
+    })
+    return response.data
+  })()
+
+  folderFilesInFlight.set(cacheKey, requestPromise)
+  try {
+    return await requestPromise
+  } finally {
+    folderFilesInFlight.delete(cacheKey)
+  }
+}
 
 const uploadService = {
   // ========================================
@@ -20,6 +67,7 @@ const uploadService = {
       const response = await api.post('/upload/image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
+      clearFolderFilesCache(folder)
       return response.data.data.url
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to upload image')
@@ -168,10 +216,7 @@ const uploadService = {
 
   getFilesByFolder: async (folder, urls = true) => {
     try {
-      const response = await api.get('/upload/files', {
-        params: { folder, urls }
-      })
-      return response.data
+      return await fetchFolderFilesWithCache(folder, urls)
     } catch (error) {
       console.error(`❌ Error getting files from folder ${folder}:`, error.response?.data || error.message)
       throw new Error(error.response?.data?.message || `Failed to get files from ${folder}`)
@@ -183,6 +228,7 @@ const uploadService = {
       const response = await api.delete('/upload/image', {
         data: { filename }
       })
+      clearFolderFilesCache()
       return response.data
     } catch (error) {
       console.error('❌ Error deleting image:', error)

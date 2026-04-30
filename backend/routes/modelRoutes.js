@@ -2,8 +2,10 @@ import express from 'express'
 import {
   getAllModels,
   getModelById,
+  getModelFloors,
   createModel,
   updateModel,
+  reorderModelImages,
   deleteModel,
   getModelPricingOptions
 } from '../controllers/modelController.js'
@@ -69,7 +71,6 @@ const router = express.Router()
  *             required:
  *               - projectId
  *               - model
- *               - price
  *               - bedrooms
  *               - bathrooms
  *               - sqft
@@ -86,6 +87,7 @@ const router = express.Router()
  *                 type: string
  *               price:
  *                 type: number
+ *                 description: Optional base price (defaults to 0)
  *               bedrooms:
  *                 type: number
  *               bathrooms:
@@ -190,6 +192,31 @@ router.route('/:id')
   .get(getModelById)
   .put(protect, admin, updateModel)
   .delete(protect, admin, deleteModel)
+
+router.patch('/:id/images/reorder', protect, admin, reorderModelImages)
+
+/**
+ * @swagger
+ * /api/models/{id}/floors:
+ *   get:
+ *     summary: Get floors data for a model
+ *     tags: [Models]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Model floors data
+ *       404:
+ *         description: Model not found
+ */
+router.route('/:id/floors')
+  .get(protect, getModelFloors)
 
 /**
  * @swagger

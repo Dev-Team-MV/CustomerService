@@ -118,36 +118,42 @@ const fetchAll = useCallback(async () => {
   }, [formData, files, resourceType, selectedPayload, handleCloseDialog, fetchAll])
 
   // Approve
-  const handleApprove = useCallback(async (payload, e) => {
-    if (e) e.stopPropagation()
-    if (!payload) return
-    if (!window.confirm('Approve this payment?')) return
-    setLoading(true)
-    try {
-      await payloadService.updatePayload(payload._id, { status: 'signed' })
-      await fetchAll()
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }, [fetchAll])
-
-  // Reject
-  const handleReject = useCallback(async (payload, e) => {
-    if (e) e.stopPropagation()
-    if (!payload) return
-    if (!window.confirm('Reject this payment?')) return
-    setLoading(true)
-    try {
-      await payloadService.updatePayload(payload._id, { status: 'rejected' })
-      await fetchAll()
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }, [fetchAll])
+const handleApprove = useCallback(async (payload, e) => {
+  if (e) e.stopPropagation()
+  if (!payload) return
+  if (!window.confirm('Approve this payment?')) return
+  setLoading(true)
+  try {
+    await payloadService.updatePayload(payload._id, { 
+      status: 'signed',
+      projectId: payload.projectId  // ✅ Pasar el projectId del payload original
+    })
+    await fetchAll()
+  } catch (err) {
+    setError(err.message)
+  } finally {
+    setLoading(false)
+  }
+}, [fetchAll])
+ 
+// Línea 137-150 - Reject
+const handleReject = useCallback(async (payload, e) => {
+  if (e) e.stopPropagation()
+  if (!payload) return
+  if (!window.confirm('Reject this payment?')) return
+  setLoading(true)
+  try {
+    await payloadService.updatePayload(payload._id, { 
+      status: 'rejected',
+      projectId: payload.projectId  // ✅ Pasar el projectId del payload original
+    })
+    await fetchAll()
+  } catch (err) {
+    setError(err.message)
+  } finally {
+    setLoading(false)
+  }
+}, [fetchAll])
 
   // Download
   const handleDownload = useCallback((payload) => {

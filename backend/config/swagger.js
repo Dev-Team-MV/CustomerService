@@ -132,6 +132,11 @@ const options = {
               description:
                 'residential_lots = casas/lotes (Property + Lot). apartments = torres (Building + Apartment). other = otro.'
             },
+            facadeEnabled: {
+              type: 'boolean',
+              description: 'Controla si el proyecto requiere/permite fachada en cotización/venta de propiedades',
+              default: true
+            },
             status: { type: 'string', enum: ['active', 'inactive', 'coming_soon', 'sold_out'] },
             isActive: { type: 'boolean' },
             externalUrl: { type: 'string', description: 'External project URL' },
@@ -164,6 +169,11 @@ const options = {
             catalogType: { type: 'string', enum: ['houses', 'apartments', 'mixed'] },
             structure: { type: 'object', additionalProperties: true },
             assetsSchema: { type: 'object', additionalProperties: true },
+            pricingMode: {
+              type: 'string',
+              enum: ['legacy_components', 'lot_fixed_total'],
+              description: 'legacy_components: total = lote + modelo + fachada + ajustes. lot_fixed_total: total base = precio del lote.'
+            },
             pricingRules: {
               type: 'array',
               items: {
@@ -189,6 +199,11 @@ const options = {
                     properties: {
                       type: { type: 'string', enum: ['fixed', 'percentage'] },
                       amount: { type: 'number' },
+                      amountSource: { type: 'string', enum: ['fixed', 'context_path', 'selected_option_price'] },
+                      amountFrom: { type: 'string', description: 'Ruta en contexto para tomar monto dinámico (ej. selectedOptions.customAmount)' },
+                      optionCollectionPath: { type: 'string', description: 'Ruta a colección de opciones (ej. model.upgrades)' },
+                      selectedIdPath: { type: 'string', description: 'Ruta al id seleccionado (ej. selectedOptions.upgradeId)' },
+                      valueField: { type: 'string', description: 'Campo numérico dentro de la opción. Default: price' },
                       code: { type: 'string' },
                       label: { type: 'string' }
                     }
@@ -210,6 +225,11 @@ const options = {
             catalogType: { type: 'string', enum: ['houses', 'apartments', 'mixed'] },
             structure: { type: 'object', additionalProperties: true },
             assetsSchema: { type: 'object', additionalProperties: true },
+            pricingMode: {
+              type: 'string',
+              enum: ['legacy_components', 'lot_fixed_total'],
+              default: 'legacy_components'
+            },
             pricingRules: {
               type: 'array',
               items: {
@@ -239,6 +259,11 @@ const options = {
                     properties: {
                       type: { type: 'string', enum: ['fixed', 'percentage'] },
                       amount: { type: 'number' },
+                      amountSource: { type: 'string', enum: ['fixed', 'context_path', 'selected_option_price'] },
+                      amountFrom: { type: 'string', description: 'Ruta en contexto para tomar monto dinámico' },
+                      optionCollectionPath: { type: 'string', description: 'Ruta a colección de opciones (ej. model.upgrades)' },
+                      selectedIdPath: { type: 'string', description: 'Ruta al id seleccionado (ej. selectedOptions.upgradeId)' },
+                      valueField: { type: 'string', description: 'Campo numérico dentro de la opción. Default: price' },
                       code: { type: 'string' },
                       label: { type: 'string' }
                     }
@@ -264,13 +289,13 @@ const options = {
         },
         PropertyQuoteRequest: {
           type: 'object',
-          required: ['lot', 'model', 'facade'],
+          required: ['lot', 'model'],
           properties: {
             projectId: { type: 'string' },
             project: { type: 'string' },
             lot: { type: 'string' },
             model: { type: 'string' },
-            facade: { type: 'string' },
+            facade: { type: 'string', description: 'Requerido solo cuando project.facadeEnabled=true' },
             initialPayment: { type: 'number' },
             hasBalcony: { type: 'boolean' },
             modelType: { type: 'string', enum: ['basic', 'upgrade'] },
@@ -301,8 +326,10 @@ const options = {
             },
             facade: {
               type: 'object',
+              nullable: true,
               properties: { _id: { type: 'string' }, title: { type: 'string' }, price: { type: 'number' } }
             },
+            facadeEnabled: { type: 'boolean' },
             options: {
               type: 'object',
               properties: {
@@ -343,8 +370,123 @@ const options = {
             },
             pricingConfig: {
               type: 'object',
-              properties: { version: { type: 'integer', nullable: true } }
+              properties: {
+                version: { type: 'integer', nullable: true },
+                mode: { type: 'string', enum: ['legacy_components', 'lot_fixed_total'] }
+              }
             }
+          }
+        },
+        PropertyQuotePreviewRequest: {
+          allOf: [
+            { $ref: '#/components/schemas/PropertyQuoteRequest' },
+            {
+              type: 'object',
+              properties: {
+                selectedOptions: {
+                  type: 'object',
+                  description: 'Incluye opcionalmente floors: { "<floorKey>": "<optionKey>" } para resolver media por piso',
+                  additionalProperties: true
+                },
+                preview: {
+                  type: 'object',
+                  description: 'Controles para traer media de opciones y/o paginar por pisos',
+                  properties: {
+                    includeAllOptionsMedia: {
+                      type: 'boolean',
+                      description: 'Si true, incluye media de todas las opciones por piso en optionsMedia'
+                    },
+                    includeEmptyOptionMedia: {
+                      type: 'boolean',
+                      description: 'Si true, también incluye opciones sin media'
+                    },
+                    floorKeys: {
+                      type: 'array',
+                      items: { type: 'string' },
+                      description: 'Filtra la respuesta a los pisos indicados'
+                    },
+                    step: {
+                      type: 'integer',
+                      minimum: 1,
+                      description: 'Número de paso para paginación por pisos (1-based)'
+                    },
+                    stepSize: {
+                      type: 'integer',
+                      minimum: 1,
+                      description: 'Cantidad de pisos por paso'
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        FloorOptionMediaPreviewItem: {
+          type: 'object',
+          properties: {
+            key: { type: 'string' },
+            label: { type: 'string' },
+            status: { type: 'string' },
+            hasMedia: { type: 'boolean' },
+            media: {
+              type: 'object',
+              properties: {
+                renders: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                isometrics: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                blueprints: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                cinematics: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                exterior: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } }
+              }
+            }
+          }
+        },
+        FloorMediaPreviewItem: {
+          type: 'object',
+          properties: {
+            floorKey: { type: 'string' },
+            level: { type: 'number', nullable: true },
+            label: { type: 'string' },
+            selectedOptionKey: { type: 'string', nullable: true },
+            mediaSource: { type: 'string', enum: ['floor', 'option'] },
+            media: {
+              type: 'object',
+              properties: {
+                renders: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                isometrics: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                blueprints: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                cinematics: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                exterior: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } }
+              }
+            },
+            optionsMedia: {
+              type: 'array',
+              description: 'Se incluye cuando preview.includeAllOptionsMedia=true',
+              items: { $ref: '#/components/schemas/FloorOptionMediaPreviewItem' }
+            }
+          }
+        },
+        PropertyQuotePreviewMeta: {
+          type: 'object',
+          properties: {
+            includeAllOptionsMedia: { type: 'boolean' },
+            includeEmptyOptionMedia: { type: 'boolean' },
+            totalFloors: { type: 'integer', minimum: 0 },
+            stepSize: { type: 'integer', minimum: 1, nullable: true },
+            totalSteps: { type: 'integer', minimum: 0, nullable: true },
+            currentStep: { type: 'integer', minimum: 1, nullable: true },
+            hasNextStep: { type: 'boolean', nullable: true },
+            nextStep: { type: 'integer', minimum: 1, nullable: true }
+          }
+        },
+        PropertyQuotePreviewResponse: {
+          type: 'object',
+          properties: {
+            quote: { $ref: '#/components/schemas/PropertyQuoteResponse' },
+            mediaByFloor: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/FloorMediaPreviewItem' }
+            },
+            preview: { $ref: '#/components/schemas/PropertyQuotePreviewMeta' }
           }
         },
         ImageItem: {
@@ -810,7 +952,7 @@ const options = {
                   }
                 }
               },
-              description: 'Amenity name -> array of { url, isPublic } (e.g. Reception, Managers Office, Conference Room)'
+              description: 'Amenity name -> array of { url, isPublic } (e.g. Property Management, Manager Office, Meeting Room)'
             },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }

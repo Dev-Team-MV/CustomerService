@@ -12,6 +12,25 @@ import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlRes
 import crypto from 'crypto'
 import path from 'path'
 
+const ALLOWED_PAYLOAD_SORT_FIELDS = new Set(['date', 'createdAt', 'amount', 'status'])
+
+function parsePayloadSort(sortParam) {
+  if (!sortParam || typeof sortParam !== 'string') return { date: -1 }
+  const raw = sortParam.trim()
+  if (!raw) return { date: -1 }
+
+  const isDesc = raw.startsWith('-')
+  const field = isDesc ? raw.slice(1) : raw
+  if (!ALLOWED_PAYLOAD_SORT_FIELDS.has(field)) return { date: -1 }
+  return { [field]: isDesc ? -1 : 1 }
+}
+
+function parsePositiveInt(value, fallback = 0, max = 100) {
+  const parsed = Number.parseInt(value, 10)
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback
+  return Math.min(parsed, max)
+}
+
 async function resolvePayloadScopeByProject(projectId) {
   const [propertyIds, buildingIds] = await Promise.all([
     Property.distinct('_id', { project: projectId }),
@@ -88,7 +107,10 @@ export const getAllPayloads = async (req, res) => {
       Object.assign(filter, await resolvePayloadScopeByProject(projectId))
     }
     
-    const payloads = await Payload.find(filter)
+    const limit = parsePositiveInt(req.query.limit, 0, 100)
+    const sort = parsePayloadSort(req.query.sort)
+
+    let query = Payload.find(filter)
       .populate({
         path: 'property',
         populate: [
@@ -106,9 +128,12 @@ export const getAllPayloads = async (req, res) => {
         ]
       })
       .populate('processedBy', 'firstName lastName')
-      .sort({ date: -1 })
+      .sort(sort)
 
-    const data = payloads.map((p) => p.toObject())
+    if (limit > 0) query = query.limit(limit)
+
+    const payloads = await query.lean()
+    const data = payloads.map((p) => ({ ...p }))
     await hydrateUrlsInObject(data)
     res.json(data)
   } catch (error) {

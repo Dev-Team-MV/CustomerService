@@ -83,17 +83,20 @@ const Dashboard = () => {
   const { t } = useTranslation(['dashboard', 'common'])
   const theme = useTheme()
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
+  const projectId = import.meta.env.VITE_PROJECT_ID || user?.projects?.[0]?._id
 
 const { data: payloads } = useFetch(
-  useCallback(() =>
-    api.get('/payloads', {
+  useCallback(() => {
+    if (!projectId) return Promise.resolve([])
+    return api.get('/payloads', {
       params: {
-        projectId: import.meta.env.VITE_PROJECT_ID,
+        projectId,
         limit: 3,
         sort: '-date'
       }
-    }).then(r => r.data),
-  []),
+    }).then(r => r.data)
+  },
+  [projectId]),
   { initialData: [] }
 )
 
