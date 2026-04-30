@@ -313,15 +313,13 @@ export const getAllProperties = async (req, res) => {
   try {
     const { status, user, projectId } = req.query
     const filter = {}
-    const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
     const isAdminOrAbove = req.user.role === 'superadmin' || req.user.role === 'admin'
 
     if (projectId) filter.project = projectId
     if (status) filter.status = status
 
-    if (!visibleOnly && isAdminOrAbove) {
-      // Admin/superadmin "management" view: return all properties (optionally filtered by owner user).
-      // Ignore `visibleOnly` in this mode.
+    if (isAdminOrAbove) {
+      // Admin/superadmin must always see all properties in the project scope.
       if (user && mongoose.Types.ObjectId.isValid(user)) {
         filter.users = user
       }
@@ -389,14 +387,11 @@ export const getPropertyById = async (req, res) => {
       return res.status(404).json({ message: 'Property not found' })
     }
 
-    const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
     const isAdminOrAbove = req.user.role === 'superadmin' || req.user.role === 'admin'
 
-    const canAccess = visibleOnly
-      ? await canUserAccessProperty(req.user._id, property._id)
-      : isAdminOrAbove
-        ? true
-        : await canUserAccessProperty(req.user._id, property._id)
+    const canAccess = isAdminOrAbove
+      ? true
+      : await canUserAccessProperty(req.user._id, property._id)
     if (!canAccess) {
       return res.status(403).json({ message: 'You do not have access to this property' })
     }
