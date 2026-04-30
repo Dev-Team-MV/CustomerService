@@ -20,12 +20,15 @@ export const EMPTY_FORM = {
   projectId: "",
   images: { exterior: [], interior: [], blueprints: [] },
   hasBalcony: false,
+  balconyId: null, // ✅ NUEVO
   balconyPrice: 0,
   balconyImages: { exterior: [], interior: [], blueprints: [] },
   hasUpgrade: false,
+  upgradeId: null, // ✅ NUEVO
   upgradePrice: 0,
   upgradeImages: { exterior: [], interior: [], blueprints: [] },
   hasStorage: false,
+  storageId: null, // ✅ NUEVO
   storagePrice: 0,
   storageImages: { exterior: [], interior: [], blueprints: [] },
 };
@@ -170,6 +173,7 @@ export const mapModelToFormData = (selectedModel) => {
       blueprints: defaultBlueprints,
     },
     hasBalcony: hasBalconyOption,
+    balconyId: hasBalconyOption ? selectedModel.balconies[0]._id : null, // ✅ NUEVO
     balconyPrice: hasBalconyOption ? selectedModel.balconies[0].price : 0,
     balconyImages: hasBalconyOption
       ? {
@@ -178,11 +182,13 @@ export const mapModelToFormData = (selectedModel) => {
         }
       : { exterior: [], interior: [], blueprints: [] },
     hasUpgrade: hasUpgradeOption,
+    upgradeId: hasUpgradeOption ? selectedModel.upgrades[0]._id : null, // ✅ NUEVO
     upgradePrice: hasUpgradeOption ? selectedModel.upgrades[0].price : 0,
     upgradeImages: hasUpgradeOption
       ? normalizeImages(selectedModel.upgrades[0].images)
       : { exterior: [], interior: [], blueprints: [] },
     hasStorage: hasStorageOption,
+    storageId: hasStorageOption ? selectedModel.storages[0]._id : null, // ✅ NUEVO
     storagePrice: hasStorageOption ? selectedModel.storages[0].price : 0,
     storageImages: hasStorageOption
       ? {

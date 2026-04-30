@@ -37,7 +37,7 @@ const Lots = () => {
   const [selectedLot, setSelectedLot] = useState(null)
 
   // ✅ Obtener projectId del env
-  const projectId = import.meta.env.VITE_PROJECT_ID
+const projectId = import.meta.env.VITE_PROJECT_ID || '69a73ce5b20401b061da6451'
 
   useEffect(() => {
     if (projectId) {
@@ -45,22 +45,40 @@ const Lots = () => {
     }
   }, [projectId])
 
+  // const fetchData = async () => {
+  //   setLoading(true)
+  //   try {
+  //     // ✅ Filtrar por projectId en los endpoints
+  //     const [lotsRes, statsRes] = await Promise.all([
+  //       api.get(`/lots?projectId=${projectId}`),
+  //       api.get(`/lots/stats?projectId=${projectId}`)
+  //     ])
+  //     setLots(lotsRes.data)
+  //     setStats(statsRes.data)
+  //   } catch (error) {
+  //     console.error('Error fetching lots:', error)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
   const fetchData = async () => {
-    setLoading(true)
-    try {
-      // ✅ Filtrar por projectId en los endpoints
-      const [lotsRes, statsRes] = await Promise.all([
-        api.get(`/lots?projectId=${projectId}`),
-        api.get(`/lots/stats?projectId=${projectId}`)
-      ])
-      setLots(lotsRes.data)
-      setStats(statsRes.data)
-    } catch (error) {
-      console.error('Error fetching lots:', error)
-    } finally {
-      setLoading(false)
-    }
+  setLoading(true)
+  try {
+    // ✅ MODIFICADO: Usar params object en lugar de template string
+    const params = projectId ? { projectId } : {}
+    
+    const [lotsRes, statsRes] = await Promise.all([
+      api.get('/lots', { params }),
+      api.get('/lots/stats', { params })
+    ])
+    setLots(lotsRes.data)
+    setStats(statsRes.data)
+  } catch (error) {
+    console.error('Error fetching lots:', error)
+  } finally {
+    setLoading(false)
   }
+}
 
   const handleOpenDialog = (lot = null) => {
     setSelectedLot(lot)

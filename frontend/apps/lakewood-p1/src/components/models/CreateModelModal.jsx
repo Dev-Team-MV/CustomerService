@@ -260,6 +260,7 @@ const CreateModelModal = ({
       <ModelImagesPanel
         formData={formData}
         setFormData={setFormData}
+        modelId={selectedModel?._id}
         currentImageType={currentImageType}
         setCurrentImageType={setCurrentImageType}
         currentImageSection={currentImageSection}
