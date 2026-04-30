@@ -31,10 +31,11 @@ const Properties = () => {
   const isAdmin      = user?.role === 'admin' || user?.role === 'superadmin'
 
   // ── Data fetching ─────────────────────────────────────────
-  const { data: properties, loading, refetch } = useFetch(
-    useCallback(() => api.get('/properties').then(r => r.data), [])
-  )
-  
+const projectId = import.meta.env.VITE_PROJECT_ID
+ 
+const { data: properties, loading, refetch } = useFetch(
+  useCallback(() => api.get('/properties', { params: { projectId } }).then(r => r.data), [])
+)
   const { data: lotsArray }  = useFetch(useCallback(() => api.get('/lots').then(r => r.data), []))
   const { data: modelsArray } = useFetch(useCallback(() => api.get('/models').then(r => r.data), []))
   const { data: usersArray }  = useFetch(useCallback(() => api.get('/users').then(r => r.data), []))

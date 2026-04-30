@@ -23,6 +23,7 @@ import EmptyState from '@shared/components/table/EmptyState'
 import PayloadDialog from '@shared/components/Modals/PayloadDialog'
 import ConstructionTab from './ConstructionTab'
 import ApartmentDetailsTab from './ApartmentDetailsTab'
+import PropertyDetailsTab from './PropertyDetailsTab'
 import { useAuth } from '@shared/context/AuthContext'
 import { usePayloads } from '@shared/hooks/usePayloads'
 import payloadService from '@shared/services/payloadService'
@@ -40,6 +41,7 @@ const paymentTypes = [
 const ApartmentDetailsModal = ({ open, onClose, apartment, property, usePayloadColumnsFn, projectId }) => {
   const { t } = useTranslation(['myProperty', 'common', 'payloads'])
   const theme = useTheme()
+  const isHouse = Boolean(property && !apartment)
 
   const { user } = useAuth()
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
@@ -114,6 +116,7 @@ const fetchPayloads = async () => {
 // Línea 116 - Actualizar resourceType dinámicamente:
 const paymentColumns = usePayloadColumnsFn?.({
   t,
+  theme,
   onEdit: handleOpenDialog,
   onApprove: handleApproveWithRefresh,
   onReject: handleRejectWithRefresh,
@@ -290,9 +293,13 @@ if (!apartment && !property) return null
               )}
 
               {/* TAB 1: Property Details */}
-              {activeTab === 1 && (
-                <ApartmentDetailsTab apartmentDetails={apartmentDetails} />
-              )}
+{activeTab === 1 && (
+  isHouse ? (
+    <PropertyDetailsTab propertyDetails={property} />
+  ) : (
+    <ApartmentDetailsTab apartmentDetails={apartmentDetails} />
+  )
+)}
 
               {/* TAB 2: Construction Phases */}
               {activeTab === 2 && (

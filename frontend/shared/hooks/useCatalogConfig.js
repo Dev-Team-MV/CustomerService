@@ -175,6 +175,51 @@ const loadAllVersions = useCallback(async () => {
     }
   }, [projectId, loadAllVersions])
 
+  // Función helper para transformar catálogo -> floors
+// En useCatalogConfig.js - REEMPLAZAR la función transformCatalogToFloors
+
+const transformCatalogToFloors = (catalogConfig) => {
+  if (!catalogConfig?.structure?.levels || typeof catalogConfig.structure.levels !== 'object') {
+    console.warn('⚠️ No levels found in catalog config')
+    return []
+  }
+
+  const levelsObj = catalogConfig.structure.levels
+  const levelKeys = Object.keys(levelsObj)
+  
+  console.log('📚 Transforming catalog levels:', levelKeys)
+
+  return levelKeys.map((levelKey, index) => {
+    const levelData = levelsObj[levelKey]
+    
+    return {
+      key: levelKey,
+      label: levelData.label || levelKey.replace(/([A-Z])/g, ' $1').trim(),
+      level: index + 1,
+      isCustomizable: levelData.options && levelData.options.length > 0,
+      options: (levelData.options || []).map(option => ({
+        key: option.id || option.key,
+        label: option.label,
+        status: option.status || 'active',
+        media: {
+          renders: [],
+          isometrics: [],
+          blueprints: [],
+          cinematics: [],
+          exterior: []
+        }
+      })),
+      media: {
+        renders: [],
+        isometrics: [],
+        blueprints: [],
+        cinematics: [],
+        exterior: []
+      }
+    }
+  })
+}
+
   // Helpers
   const getLevelOptions = useCallback((levelKey) => {
     return catalogConfigService.getLevelOptions(catalogConfig, levelKey)
@@ -215,6 +260,7 @@ const loadAllVersions = useCallback(async () => {
     createConfig,
     updateConfig,
     publishVersion,
+    transformCatalogToFloors,
 
     // Helpers
     getLevelOptions,

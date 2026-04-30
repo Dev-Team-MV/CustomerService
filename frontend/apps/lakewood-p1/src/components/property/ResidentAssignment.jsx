@@ -22,7 +22,7 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
   const navigate = useNavigate()
   const {
     selectedLot, selectedModel, selectedFacade, financials, options, selectedPricingOption,
-    selectedProject, setSelectedProject, projects, loadingProjects, setProjects
+    selectedProject, setSelectedProject, projects, loadingProjects, setProjects,modelType, selectedOptions 
   } = useProperty()
 
   const residentsProjectId = selectedProject || import.meta.env.VITE_PROJECT_ID
@@ -95,32 +95,73 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
       const projectData = projects.find(p => p._id === selectedProject)
       const projectName = projectData?.name || projectData?.slug || 'Unknown'
 
+      // const propertyPayload = {
+      //   project: String(projectName),
+      //   projectId: String(selectedProject),
+      //   lot: String(lotId),
+      //   model: String(modelId),
+      //   facade: facadeId ? String(facadeId) : undefined,
+      //   user: String(selectedUser._id),
+      //   users: [String(selectedUser._id)],
+      //   listPrice: Number(financials.listPrice || 0),
+      //   presalePrice: Number(financials.presalePrice || 0),
+      //   discount: Number(financials.discount || 0),
+      //   discountPercent: Number(financials.discountPercent || 0),
+      //   totalDownPayment: Number(financials.totalDownPayment || 0),
+      //   downPaymentPercent: Number(financials.downPaymentPercent || 0),
+      //   initialPayment: Number(financials.initialDownPayment || 0),
+      //   initialPaymentPercent: Number(financials.initialDownPaymentPercent || 0),
+      //   monthlyPayment: Number(financials.monthlyPayment || 0),
+      //   monthlyPaymentPercent: Number(financials.monthlyPaymentPercent || 0),
+      //   mortgage: Number(financials.mortgage || 0),
+      //   pending: Number(financials.presalePrice || 0),
+      //   price: Number(financials.presalePrice || 0),
+      //   status: 'pending',
+      //   hasBalcony: Boolean(hasBalcony),
+      //   modelType: modelType || 'basic',
+      //   hasStorage: Boolean(hasStorage)
+      // }
+      // Línea 88 en ResidentAssignment.jsx - ANTES de crear propertyPayload
+console.log('🔍 DEBUG ResidentAssignment - Estado antes de crear propiedad:', {
+  selectedOptions,
+  options,
+  modelType,
+  hasBalcony: options?.balcony,
+  hasStorage: options?.storage,
+  hasUpgrade: options?.upgrade
+})
       const propertyPayload = {
-        project: String(projectName),
-        projectId: String(selectedProject),
-        lot: String(lotId),
-        model: String(modelId),
-        facade: facadeId ? String(facadeId) : undefined,
-        user: String(selectedUser._id),
-        users: [String(selectedUser._id)],
-        listPrice: Number(financials.listPrice || 0),
-        presalePrice: Number(financials.presalePrice || 0),
-        discount: Number(financials.discount || 0),
-        discountPercent: Number(financials.discountPercent || 0),
-        totalDownPayment: Number(financials.totalDownPayment || 0),
-        downPaymentPercent: Number(financials.downPaymentPercent || 0),
-        initialPayment: Number(financials.initialDownPayment || 0),
-        initialPaymentPercent: Number(financials.initialDownPaymentPercent || 0),
-        monthlyPayment: Number(financials.monthlyPayment || 0),
-        monthlyPaymentPercent: Number(financials.monthlyPaymentPercent || 0),
-        mortgage: Number(financials.mortgage || 0),
-        pending: Number(financials.presalePrice || 0),
-        price: Number(financials.presalePrice || 0),
-        status: 'pending',
-        hasBalcony: Boolean(hasBalcony),
-        modelType: modelType || 'basic',
-        hasStorage: Boolean(hasStorage)
-      }
+  project: String(projectName),
+  projectId: String(selectedProject),
+  lot: String(lotId),
+  model: String(modelId),
+  facade: facadeId ? String(facadeId) : undefined,
+  user: String(selectedUser._id),
+  users: [String(selectedUser._id)],
+  listPrice: Number(financials.listPrice || 0),
+  presalePrice: Number(financials.presalePrice || 0),
+  discount: Number(financials.discount || 0),
+  discountPercent: Number(financials.discountPercent || 0),
+  totalDownPayment: Number(financials.totalDownPayment || 0),
+  downPaymentPercent: Number(financials.downPaymentPercent || 0),
+  initialPayment: Number(financials.initialDownPayment || 0),
+  initialPaymentPercent: Number(financials.initialDownPaymentPercent || 0),
+  monthlyPayment: Number(financials.monthlyPayment || 0),
+  monthlyPaymentPercent: Number(financials.monthlyPaymentPercent || 0),
+  mortgage: Number(financials.mortgage || 0),
+  pending: Number(financials.presalePrice || 0),
+  price: Number(financials.presalePrice || 0),
+  status: 'pending',
+  hasBalcony: Boolean(hasBalcony),
+  modelType: modelType || 'basic',
+  hasStorage: Boolean(hasStorage),
+  // ✅ NUEVO: Agregar IDs específicos de las opciones seleccionadas
+  selectedOptions: {
+    upgradeId: selectedOptions?.upgradeId || null,
+    balconyId: selectedOptions?.balconyId || null,
+    storageId: selectedOptions?.storageId || null
+  }
+}
       await api.post('/properties', propertyPayload)
 
       if (userInfo?.phoneNumber) {

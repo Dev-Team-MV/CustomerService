@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import {
   Box,
   Typography,
@@ -31,6 +32,9 @@ const Models = () => {
   const facadeModal = useModalState({ model: null, facade: null });
   const galleryModal = useModalState(null);
 
+  const projectId = import.meta.env.VITE_PROJECT_ID;
+
+
   // Hook centralizado de modelos
   const {
     models,
@@ -41,12 +45,20 @@ const Models = () => {
     handleSubmitFacade,
     handleDeleteFacade,
     getModelFacades,
+    fetchModels,
   } = useModels();
 
   // Navegación a detalle
   const handleGoToDetail = (modelId) => {
     navigate(`/models/${modelId}`);
   };
+
+  // ✅ Cargar modelos filtrados por proyecto
+useEffect(() => {
+  if (projectId) {
+    fetchModels(projectId);
+  }
+}, [projectId, fetchModels]);
 
   return (
     <Box

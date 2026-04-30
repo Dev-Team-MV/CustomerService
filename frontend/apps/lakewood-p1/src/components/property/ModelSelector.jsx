@@ -47,6 +47,10 @@ const ModelSelector = () => {
     setOptions,
     getModelPricingInfo,
     selectedPricingOption,
+      // ✅ NUEVO: Agregar estas importaciones
+  availableOptions,
+  setSelectedOptions,
+  setModelType
   } = useProperty();
 
     const { t } = useTranslation('models')
@@ -83,29 +87,79 @@ const ModelSelector = () => {
         icon: Deck,
       };
 
+  // useEffect(() => {
+  //   fetchModels();
+  // }, []);
+
   useEffect(() => {
+  if (selectedLot) {
     fetchModels();
-  }, []);
+  }
+}, [selectedLot]); // ✅ Agregar selectedLot como dependencia
+
+  // const fetchModels = async () => {
+
+  //   try {
+  //     setLoading(true);
+  //     const response = await api.get("/models");
+  //     const activeModels = response.data.filter((m) => m.status === "active");
+  //     setModels(activeModels);
+
+  //     const indices = {};
+  //     activeModels.forEach((model) => {
+  //       indices[model._id] = 0;
+  //     });
+  //     setImageIndices(indices);
+  //   } catch (error) {
+  //     console.error("Error fetching models:", error);
+  //     setError("Failed to load models");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const fetchModels = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get("/models");
-      const activeModels = response.data.filter((m) => m.status === "active");
-      setModels(activeModels);
-
-      const indices = {};
-      activeModels.forEach((model) => {
-        indices[model._id] = 0;
+  try {
+    setLoading(true);
+    const response = await api.get("/models");
+    const activeModels = response.data.filter((m) => m.status === "active");
+    
+    // ✅ Si el lote tiene modelo asignado, mostrar solo ese
+    let filteredModels = activeModels;
+    
+    if (selectedLot?.model) {
+      const assignedModelId = typeof selectedLot.model === 'object' 
+        ? selectedLot.model._id 
+        : selectedLot.model;
+      
+      filteredModels = activeModels.filter(m => m._id === assignedModelId);
+      
+      console.log('🏠 Lote con modelo asignado:', {
+        lotNumber: selectedLot.number,
+        assignedModelId,
+        filteredModels: filteredModels.map(m => m.model)
       });
-      setImageIndices(indices);
-    } catch (error) {
-      console.error("Error fetching models:", error);
-      setError("Failed to load models");
-    } finally {
-      setLoading(false);
     }
-  };
+    
+    setModels(filteredModels);
+
+    const indices = {};
+    filteredModels.forEach((model) => {
+      indices[model._id] = 0;
+    });
+    setImageIndices(indices);
+    
+    // ✅ Auto-seleccionar si solo hay un modelo (el asignado)
+    if (filteredModels.length === 1) {
+      selectModel(filteredModels[0]);
+    }
+  } catch (error) {
+    console.error("Error fetching models:", error);
+    setError("Failed to load models");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSelectModel = (model) => {
     selectModel(model);
@@ -122,14 +176,49 @@ const ModelSelector = () => {
     setOpenCustomizationModal(true);
   };
 
+  // const handleConfirmCustomization = ({
+  //   model,
+  //   options: selectedOptions,
+  //   totalPrice,
+  // }) => {
+  //   setOptions(selectedOptions);
+  //   setOpenCustomizationModal(false);
+  // };
   const handleConfirmCustomization = ({
-    model,
-    options: selectedOptions,
-    totalPrice,
-  }) => {
-    setOptions(selectedOptions);
-    setOpenCustomizationModal(false);
-  };
+  model,
+  options: selectedOptions,
+  totalPrice,
+}) => {
+  // ✅ Actualizar opciones locales
+  setOptions(selectedOptions);
+  
+  // ✅ NUEVO: Actualizar selectedOptions en el contexto con los IDs correctos
+  if (availableOptions) {
+    setSelectedOptions({
+      upgradeId: selectedOptions.upgrade 
+        ? availableOptions?.upgrades?.[0]?._id || null 
+        : null,
+      balconyId: selectedOptions.balcony 
+        ? availableOptions?.balconies?.[0]?._id || null 
+        : null,
+      storageId: selectedOptions.storage 
+        ? availableOptions?.storages?.[0]?._id || null 
+        : null
+    });
+    
+    // ✅ Actualizar modelType
+    setModelType(selectedOptions.upgrade ? 'upgrade' : 'base');
+    
+    console.log('✅ Opciones confirmadas desde modal:', {
+      selectedOptions,
+      upgradeId: selectedOptions.upgrade ? availableOptions?.upgrades?.[0]?._id : null,
+      balconyId: selectedOptions.balcony ? availableOptions?.balconies?.[0]?._id : null,
+      storageId: selectedOptions.storage ? availableOptions?.storages?.[0]?._id : null
+    });
+  }
+  
+  setOpenCustomizationModal(false);
+};
 
   const handleViewDetails = (e, modelId) => {
     e.stopPropagation();

@@ -8,6 +8,7 @@ import { Home, AddPhotoAlternate, Delete, AttachMoney } from '@mui/icons-materia
 import { useTheme } from '@mui/material/styles'
 import ModalWrapper from '@shared/constants/ModalWrapper'
 import PrimaryButton from '@shared/constants/PrimaryButton'
+import api from '@shared/services/api'
 
 const DEFAULT_FORM = {
   name: '',
@@ -39,6 +40,22 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
   const [form, setForm] = useState(DEFAULT_FORM)
   const [exteriorRenders, setExteriorRenders] = useState([])
   const [saving, setSaving] = useState(false)
+  const [projectData, setProjectData] = useState(null)
+
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const response = await api.get(`/projects/${projectId}`)
+        setProjectData(response.data)
+      } catch (err) {
+        console.error('Error fetching project:', err)
+      }
+    }
+    
+    if (projectId) {
+      fetchProject()
+    }
+  }, [projectId])
 
   useEffect(() => {
     if (open) {
@@ -53,7 +70,6 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
           }
         })
         
-        // Manejar exteriorRenders: puede ser array o {urls: []}
         let renders = []
         if (Array.isArray(selectedBuilding.exteriorRenders)) {
           renders = selectedBuilding.exteriorRenders
@@ -67,6 +83,8 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
       }
     }
   }, [selectedBuilding, open])
+
+  const facadeEnabled = projectData?.facadeEnabled ?? true
 
   const handleChange = (field, value) => setForm(prev => ({ ...prev, [field]: value }))
 
@@ -83,15 +101,24 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
     if (!isValid) return
     setSaving(true)
     try {
-      await onSaved({
+      const payload = {
         ...selectedBuilding,
         ...form,
         project: projectId,
         floors: 1,
         totalApartments: 0,
         exteriorRenders,
-        quoteRef: form.quoteRef
-      })
+        quoteRef: {
+          lot: form.quoteRef.lot,
+          model: form.quoteRef.model
+        }
+      }
+
+      if (facadeEnabled && form.quoteRef.facade) {
+        payload.quoteRef.facade = form.quoteRef.facade
+      }
+
+      await onSaved(payload)
     } catch (err) {
       console.error('Error saving house:', err)
     } finally {
@@ -110,7 +137,6 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
     setExteriorRenders(prev => prev.filter((_, idx) => idx !== index))
   }
 
-  // Calcular precio total estimado
   const calculateEstimatedPrice = () => {
     let total = 0
     const selectedLot = lots.find(l => l._id === form.quoteRef.lot)
@@ -119,7 +145,7 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
     
     if (selectedLot) total += selectedLot.price || 0
     if (selectedModel) total += selectedModel.price || 0
-    if (selectedFacade) total += selectedFacade.price || 0
+    if (facadeEnabled && selectedFacade) total += selectedFacade.price || 0
     
     return total
   }
@@ -134,7 +160,9 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
   )
 
   const estimatedPrice = calculateEstimatedPrice()
-  const hasCompleteQuoteRef = form.quoteRef.lot && form.quoteRef.model && form.quoteRef.facade
+  const hasCompleteQuoteRef = facadeEnabled 
+    ? (form.quoteRef.lot && form.quoteRef.model && form.quoteRef.facade)
+    : (form.quoteRef.lot && form.quoteRef.model)
 
   return (
     <ModalWrapper
@@ -158,7 +186,6 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
       </Alert>
 
       <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
-        {/* Información básica */}
         <Grid item xs={12} sm={8}>
           <TextField 
             fullWidth 
@@ -187,19 +214,20 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
           </TextField>
         </Grid>
 
-        {/* Configuración de Quote */}
         <Grid item xs={12}>
           <Alert severity="warning" icon={<AttachMoney />} sx={{ borderRadius: 3, fontFamily: '"Poppins", sans-serif' }}>
             <Typography variant="body2" fontWeight={600} mb={1}>
               Configuración de Cotización
             </Typography>
             <Typography variant="caption">
-              Selecciona el lote, modelo y fachada que se usarán para calcular el precio de esta casa en el quote flow.
+              {facadeEnabled 
+                ? 'Selecciona el lote, modelo y fachada que se usarán para calcular el precio de esta casa en el quote flow.'
+                : 'Selecciona el lote y modelo que se usarán para calcular el precio de esta casa en el quote flow.'}
             </Typography>
           </Alert>
         </Grid>
 
-        <Grid item xs={12} sm={4}>
+        <Grid item xs={12} sm={facadeEnabled ? 4 : 6}>
           <TextField
             select
             fullWidth
@@ -220,7 +248,7 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
           </TextField>
         </Grid>
 
-        <Grid item xs={12} sm={4}>
+        <Grid item xs={12} sm={facadeEnabled ? 4 : 6}>
           <TextField
             select
             fullWidth
@@ -228,8 +256,7 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
             value={form.quoteRef.model}
             onChange={(e) => {
               handleQuoteRefChange('model', e.target.value)
-              // Reset facade si cambia modelo
-              if (form.quoteRef.facade) {
+              if (facadeEnabled && form.quoteRef.facade) {
                 handleQuoteRefChange('facade', '')
               }
             }}
@@ -247,35 +274,36 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
           </TextField>
         </Grid>
 
-        <Grid item xs={12} sm={4}>
-          <TextField
-            select
-            fullWidth
-            label="Fachada"
-            value={form.quoteRef.facade}
-            onChange={(e) => handleQuoteRefChange('facade', e.target.value)}
-            sx={fieldSx}
-            disabled={!form.quoteRef.model}
-            helperText={
-              !form.quoteRef.model 
-                ? 'Selecciona un modelo primero' 
-                : availableFacades.length === 0 
-                  ? 'No hay fachadas para este modelo' 
-                  : 'Fachada de la casa'
-            }
-          >
-            <MenuItem value="">
-              <em>Sin asignar</em>
-            </MenuItem>
-            {availableFacades.map((facade) => (
-              <MenuItem key={facade._id} value={facade._id}>
-                {facade.title} - ${facade.price?.toLocaleString()}
+        {facadeEnabled && (
+          <Grid item xs={12} sm={4}>
+            <TextField
+              select
+              fullWidth
+              label="Fachada"
+              value={form.quoteRef.facade}
+              onChange={(e) => handleQuoteRefChange('facade', e.target.value)}
+              sx={fieldSx}
+              disabled={!form.quoteRef.model}
+              helperText={
+                !form.quoteRef.model 
+                  ? 'Selecciona un modelo primero' 
+                  : availableFacades.length === 0 
+                    ? 'No hay fachadas para este modelo' 
+                    : 'Fachada de la casa'
+              }
+            >
+              <MenuItem value="">
+                <em>Sin asignar</em>
               </MenuItem>
-            ))}
-          </TextField>
-        </Grid>
+              {availableFacades.map((facade) => (
+                <MenuItem key={facade._id} value={facade._id}>
+                  {facade.title} - ${facade.price?.toLocaleString()}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+        )}
 
-        {/* Precio estimado */}
         {hasCompleteQuoteRef && (
           <Grid item xs={12}>
             <Alert severity="success" sx={{ borderRadius: 3, fontFamily: '"Poppins", sans-serif' }}>
@@ -289,7 +317,6 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
           </Grid>
         )}
 
-        {/* Renders exteriores */}
         <Grid item xs={12}>
           <Box sx={{ p: 2, bgcolor: theme.palette.background.default, borderRadius: 3, border: `1px solid ${theme.palette.cardBorder}` }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
