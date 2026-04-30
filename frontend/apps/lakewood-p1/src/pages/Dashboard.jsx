@@ -25,6 +25,7 @@ import StatsCards from '../components/statscard'
 import Loader from '../components/Loader'
 import QuickActionsPanel from '../components/QuickActionsPanel'
 import RecentPayloadsPanel from '../components/RecentPayloadsPanel'
+import { getLakewoodProjectId } from '../utils/projectId'
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 const MapPanel = ({ t }) => (
@@ -66,11 +67,14 @@ const Dashboard = () => {
   const navigate    = useNavigate()
   const { t }       = useTranslation(['dashboard', 'common'])
   const isAdmin     = user?.role === 'admin' || user?.role === 'superadmin'
-  const projectId = import.meta.env.VITE_PROJECT_ID || user?.projects?.[0]?._id
+  const projectId = getLakewoodProjectId(user)
 
   // ── fetching ────────────────────────────────────────────────
   const { data: lots,     loading: lotsLoading }     = useFetch(
-    useCallback(() => api.get('/lots').then(r => r.data), [])
+    useCallback(() => {
+      if (!projectId) return Promise.resolve([])
+      return api.get('/lots', { params: { projectId } }).then(r => r.data)
+    }, [projectId])
   )
 const { data: payloads } = useFetch(
   useCallback(() => {
@@ -107,7 +111,7 @@ const { data: payloads } = useFetch(
     e164Value,
     displayVal,
     isPhoneValid,
-  } = useResidents(projectId)
+  } = useResidents(projectId, { requireProjectId: true })
 
   // ── quick actions ───────────────────────────────────────────
   const adminActions = useMemo(() => [

@@ -19,6 +19,11 @@ pipeline {
       choices: ['lakewood-p1', 'mv-crm', 'phase-2'],
       description: 'App a construir (se puede sobrescribir por nombre del Job)'
     )
+    string(
+      name: 'PROJECT_ID',
+      defaultValue: '',
+      description: 'Opcional: sobrescribe VITE_PROJECT_ID para el build'
+    )
   }
 
   options {
@@ -89,6 +94,20 @@ pipeline {
             ? 'https://apics.michelangelodelvalle.com/api'
             : 'https://apicsdev.michelangelodelvalle.com/api'
 
+          // Resolver VITE_PROJECT_ID:
+          // prioridad 1) parámetro PROJECT_ID, 2) variable del Job (VITE_PROJECT_ID), 3) default por app
+          def defaultProjectIds = [
+            'lakewood-p1': '69a73ce5b20401b061da6451',
+            'phase-2'    : '69b9b2188186434073c6b13d'
+          ]
+          def resolvedProjectId = (params.PROJECT_ID ?: '').trim()
+          if (!resolvedProjectId) resolvedProjectId = (env.VITE_PROJECT_ID ?: '').trim()
+          if (!resolvedProjectId) resolvedProjectId = defaultProjectIds[env.APP_NAME] ?: ''
+          if (!resolvedProjectId) {
+            error "VITE_PROJECT_ID no definido para app '${env.APP_NAME}'. Configure PROJECT_ID (param) o VITE_PROJECT_ID (env del job)."
+          }
+          env.VITE_PROJECT_ID = resolvedProjectId
+
           env.SHOULD_RUN = 'true'
 
           echo "========== CONFIGURACIÓN FRONTEND =========="
@@ -96,6 +115,7 @@ pipeline {
           echo "App: ${env.APP_NAME} | Ambiente: ${env.ENVIRONMENT}"
           echo "Contenedor: ${env.CONTAINER_NAME} | Puerto: ${env.APP_PORT}"
           echo "API: ${env.VITE_API_URL}"
+          echo "PROJECT_ID: ${env.VITE_PROJECT_ID}"
           echo "============================================="
         }
       }
@@ -153,12 +173,16 @@ pipeline {
       steps {
         dir('frontend') {
           script {
-            def buildArg = "VITE_API_URL=${env.VITE_API_URL}"
+            def buildArgs = [
+              "VITE_API_URL=${env.VITE_API_URL}",
+              "VITE_PROJECT_ID=${env.VITE_PROJECT_ID}"
+            ]
             def dockerfile = env.APP_NAME == 'lakewood-p1'
               ? 'Dockerfile'
               : (env.APP_NAME == 'mv-crm' ? 'apps/mv-crm/Dockerfile' : 'apps/phase-2/Dockerfile')
             echo "Build Docker: ${env.IMAGE_NAME}:${env.IMAGE_TAG} (${env.APP_NAME})"
-            sh "docker build --no-cache -f ${dockerfile} -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} --build-arg \"${buildArg}\" ."
+            def buildArgFlags = buildArgs.collect { "--build-arg \"${it}\"" }.join(' ')
+            sh "docker build --no-cache -f ${dockerfile} -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} ${buildArgFlags} ."
           }
         }
       }

@@ -2,6 +2,7 @@ import Facade from '../models/Facade.js'
 import Model from '../models/Model.js'
 import Project from '../models/Project.js'
 import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
+import mongoose from 'mongoose'
 
 /** Normalize ref/id to string; safe when value is undefined. */
 function toIdStr(val) {
@@ -11,12 +12,27 @@ function toIdStr(val) {
   return String(val)
 }
 
+const isSuperadmin = (req) => req.user?.role === 'superadmin'
+const isValidProjectIdParam = (value) =>
+  typeof value === 'string' &&
+  value !== 'undefined' &&
+  value !== 'null' &&
+  mongoose.Types.ObjectId.isValid(value)
+
 export const getAllFacades = async (req, res) => {
   try {
     const { model, projectId } = req.query
     const filter = {}
 
-    if (projectId) filter.project = projectId
+    if (!projectId && !isSuperadmin(req)) {
+      return res.status(400).json({ message: 'projectId query param is required' })
+    }
+    if (projectId) {
+      if (!isValidProjectIdParam(projectId)) {
+        return res.status(400).json({ message: 'Invalid projectId query param' })
+      }
+      filter.project = projectId
+    }
     if (model) filter.model = model
 
     const facades = await Facade.find(filter)

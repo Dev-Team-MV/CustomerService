@@ -1,12 +1,28 @@
 import Lot from '../models/Lot.js'
 import Model from '../models/Model.js'
+import mongoose from 'mongoose'
+
+const isSuperadmin = (req) => req.user?.role === 'superadmin'
+const isValidProjectIdParam = (value) =>
+  typeof value === 'string' &&
+  value !== 'undefined' &&
+  value !== 'null' &&
+  mongoose.Types.ObjectId.isValid(value)
 
 export const getAllLots = async (req, res) => {
   try {
     const { status, projectId } = req.query
     const filter = {}
 
-    if (projectId) filter.project = projectId
+    if (!projectId && !isSuperadmin(req)) {
+      return res.status(400).json({ message: 'projectId query param is required' })
+    }
+    if (projectId) {
+      if (!isValidProjectIdParam(projectId)) {
+        return res.status(400).json({ message: 'Invalid projectId query param' })
+      }
+      filter.project = projectId
+    }
     if (status) filter.status = status
 
     const lots = await Lot.find(filter)
@@ -133,7 +149,15 @@ export const getLotStats = async (req, res) => {
   try {
     const { projectId } = req.query
     const filter = {}
-    if (projectId) filter.project = projectId
+    if (!projectId && !isSuperadmin(req)) {
+      return res.status(400).json({ message: 'projectId query param is required' })
+    }
+    if (projectId) {
+      if (!isValidProjectIdParam(projectId)) {
+        return res.status(400).json({ message: 'Invalid projectId query param' })
+      }
+      filter.project = projectId
+    }
 
     const totalLots = await Lot.countDocuments(filter)
     const availableLots = await Lot.countDocuments({ ...filter, status: 'available' })

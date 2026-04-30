@@ -1,10 +1,12 @@
 import api from './api'
+import { getLakewoodProjectId } from '../utils/projectId'
 
 export const propertyService = {
     // Get all lots
-    getLots: async () => {
+    getLots: async (projectId = getLakewoodProjectId()) => {
+        if (!projectId) return []
         try {
-            const response = await api.get('/lots')
+            const response = await api.get('/lots', { params: { projectId } })
             return Array.isArray(response.data) ? response.data : []
         } catch (err) {
             console.error('Error fetching lots:', err)
@@ -13,9 +15,10 @@ export const propertyService = {
     },
 
     // Get all models
-    getModels: async () => {
+    getModels: async (projectId = getLakewoodProjectId()) => {
+        if (!projectId) return []
         try {
-            const response = await api.get('/models')
+            const response = await api.get('/models', { params: { projectId } })
             return Array.isArray(response.data) ? response.data : []
         } catch (err) {
             console.error('Error fetching models:', err)
@@ -46,10 +49,12 @@ export const propertyService = {
     },
 
     // Get all facades (with optional model filter)
-    getFacades: async (modelId = null) => {
+    getFacades: async (modelId = null, projectId = getLakewoodProjectId()) => {
+        if (!projectId) return []
         try {
-            const url = modelId ? `/facades?model=${modelId}` : '/facades'
-            const response = await api.get(url)
+            const params = { projectId }
+            if (modelId) params.model = modelId
+            const response = await api.get('/facades', { params })
             return Array.isArray(response.data) ? response.data : []
         } catch (err) {
             console.error('Error fetching facades:', err)
@@ -91,9 +96,10 @@ export const propertyService = {
     },
 
     // Get lot statistics
-    getLotStats: async () => {
+    getLotStats: async (projectId = getLakewoodProjectId()) => {
+        if (!projectId) return null
         try {
-            const response = await api.get('/lots/stats')
+            const response = await api.get('/lots/stats', { params: { projectId } })
             return response.data
         } catch (err) {
             console.error('Error fetching lot stats:', err)
