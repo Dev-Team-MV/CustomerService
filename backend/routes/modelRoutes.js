@@ -27,7 +27,7 @@ import {
   updateModelStorage,
   deleteModelStorage
 } from '../controllers/storageController.js'
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { protect, admin, optionalProtect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -108,7 +108,7 @@ const router = express.Router()
  *         description: Model created
  */
 router.route('/')
-  .get(getAllModels)
+  .get(optionalProtect, getAllModels)
   .post(protect, admin, createModel)
 
 /**
