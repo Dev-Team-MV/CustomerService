@@ -1,6 +1,6 @@
 {
   "title": "Property Management",
-  "subtitle": "Oversee inventory, pricing, and resident assignments across the estate",
+  "subtitle": "Manage inventory, pricing and resident assignments across the development",
   "stats": {
     "totalProperties": "Total Properties",
     "sold": "Sold",
@@ -15,8 +15,6 @@
     "notSelected": "Not selected",
     "residentOwner": "RESIDENT / OWNER",
     "noEmail": "No email",
-
-
     "name": "Name",
     "status": "Status",
     "building": "Building",
@@ -35,18 +33,42 @@
   "status": {
     "sold": "Sold",
     "active": "Active",
-    "pending": "Pending"
+    "pending": "Pending",
+    "cancelled": "Cancelled",
+    "reserved": "Reserved"
   },
   "actions": {
-    "addProperty": "Add a New Property",
+    "add": "Create Property",
+    "addProperty": "Add New Property",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "view": "View Details",
     "viewDetails": "View details",
     "editPrice": "Edit Price",
+    "manage": "Manage Contracts",
     "manageContracts": "Manage contracts",
     "managePhases": "Manage Phases",
+    "manageFases": "Manage Phases",
     "viewProgress": "View Progress",
     "deleteProperty": "Delete Property",
-    "confirmDelete": "Are you sure you want to delete this property?",
-    "deleteFailed": "Failed to delete property."
+    "confirmDelete": "Are you sure you want to delete this property?"
+  },
+  "form": {
+    "assignedHouse": "Assigned House",
+    "residents": "Residents",
+    "selectResidents": "Select residents",
+    "status": "Status",
+    "saleDate": "Sale Date",
+    "totalPrice": "Total Price",
+    "initialPayment": "Initial Payment",
+    "pending": "Pending",
+    "autoCalculated": "Automatically calculated",
+    "financialSummary": "Financial Summary",
+    "price": "Price",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "unassigned": "Unassigned"
   },
   "filters": {
     "filterByModel": "Filter by Model",
@@ -54,20 +76,32 @@
     "resident": "Resident",
     "sortResidentAZ": "Sort Resident/Owner A-Z",
     "sortResidentZA": "Sort Resident/Owner Z-A",
-    "removeResidentSort": "Remove Resident/Owner sort"
+    "removeResidentSort": "Remove Resident/Owner Sort"
   },
   "empty": {
     "title": "No properties found",
     "description": "Click 'Add Property' to create one",
     "action": "Add Property"
   },
-
-
-    
-    "subtitleApartment": "Manage and view all assigned apartments",
-    "apartmentName": "Apt {{number}} - Floor {{floor}}",
-    "noAssigned": "No assigned apartments",
-    "noAssignedDesc": "There are no assigned apartments yet.",
-    "unassigned": "Unassigned"
-  
+    "phases": {
+    "phase": "Phase",
+    "of": "of",
+    "completed": "completed",
+    "percentage": "%",
+    "completedInfo": "{completed} completed"
+  },
+  "messages": {
+    "noProperties": "No properties found",
+    "noPropertiesMessage": "No assigned properties were found.",
+    "loading": "Loading properties...",
+    "deleteConfirm": "Delete this property?",
+    "deleteSuccess": "Property updated",
+    "error": "Error: {message}",
+    "unassigned": "Unassigned",
+    "deleteFailed": "Failed to delete property."
+  },
+  "subtitleApartment": "Manage and view all assigned apartments",
+  "apartmentName": "Apt {{number}} - Floor {{floor}}",
+  "noAssigned": "No apartments assigned",
+  "noAssignedDesc": "No apartments have been assigned yet."
 }

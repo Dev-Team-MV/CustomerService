@@ -73,13 +73,7 @@ const handleAssign = async () => {
     let payload
 
 if (isHouse) {
-  // ✅ Transformar selectedOptions al formato esperado por el backend
-const transformedOptions = selectedOptions && Object.keys(selectedOptions).length > 0
-  ? {
-      floors: { ...selectedOptions }  // ✅ Incluye TODAS las claves
-    }
-  : {}
- 
+  // ✅ NO transformar selectedOptions - enviar en formato original
   payload = {
     projectId: selectedProject || selectedBuilding.projectId || import.meta.env.VITE_PROJECT_ID,
     buildingId: selectedBuilding._id,
@@ -88,9 +82,10 @@ const transformedOptions = selectedOptions && Object.keys(selectedOptions).lengt
     userId: selectedUser._id,
     users: [selectedUser._id],
     initialPayment: financials.initialDownPayment,
+    price: financials.presalePrice,
     status: 'pending',
     selectedRenderType: selectedRenderType || 'basic',
-    selectedOptions: transformedOptions,
+    selectedOptions: selectedOptions || {},  // ✅ Enviar sin transformar
   }
  
   // Solo incluir facade si está habilitado

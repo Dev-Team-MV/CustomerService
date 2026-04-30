@@ -23,6 +23,7 @@ import useFetch from '../hooks/useFetch'
 import usePropertyFilters from '../hooks/usePropertyFilters'
 import usePropertyModals from '../hooks/usePropertyModals'
 import { usePropertyColumns } from '../constants/Columns/properties'
+import { getLakewoodProjectId } from '../utils/projectId'
 
 const Properties = () => {
   const { t }        = useTranslation(['property', 'common'])
@@ -31,13 +32,22 @@ const Properties = () => {
   const isAdmin      = user?.role === 'admin' || user?.role === 'superadmin'
 
   // ── Data fetching ─────────────────────────────────────────
-const projectId = import.meta.env.VITE_PROJECT_ID
+const projectId = getLakewoodProjectId(user)
  
 const { data: properties, loading, refetch } = useFetch(
-  useCallback(() => api.get('/properties', { params: { projectId } }).then(r => r.data), [])
+  useCallback(() => {
+    if (!projectId) return Promise.resolve([])
+    return api.get('/properties', { params: { projectId } }).then(r => r.data)
+  }, [projectId])
 )
-  const { data: lotsArray }  = useFetch(useCallback(() => api.get('/lots').then(r => r.data), []))
-  const { data: modelsArray } = useFetch(useCallback(() => api.get('/models').then(r => r.data), []))
+  const { data: lotsArray }  = useFetch(useCallback(() => {
+    if (!projectId) return Promise.resolve([])
+    return api.get('/lots', { params: { projectId } }).then(r => r.data)
+  }, [projectId]))
+  const { data: modelsArray } = useFetch(useCallback(() => {
+    if (!projectId) return Promise.resolve([])
+    return api.get('/models', { params: { projectId } }).then(r => r.data)
+  }, [projectId]))
   const { data: usersArray }  = useFetch(useCallback(() => api.get('/users').then(r => r.data), []))
 
   // ── Filters ───────────────────────────────────────────────

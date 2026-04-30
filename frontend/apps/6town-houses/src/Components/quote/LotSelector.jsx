@@ -251,7 +251,18 @@ const LotSelector = ({ projectId, onBuildingSelect, facadeEnabled = true }) => {
                       <Button
                         variant="contained"
                         fullWidth
-                        onClick={() => onBuildingSelect(building)}
+                          onClick={() => {
+    console.log('🔍 ===== SELECCIONANDO CASA DESDE LOTSELECTOR =====')
+    console.log('🏠 Building antes de enviar:', building)
+    console.log('📦 Building._id:', building._id)
+    console.log('📦 Building.name:', building.name)
+    console.log('📦 Building.quoteRef:', building.quoteRef)
+    console.log('📦 Building.lot:', building.lot)
+    console.log('📦 Building.model:', building.model)
+    console.log('📦 Building.facade:', building.facade)
+    console.log('===================================================')
+    onBuildingSelect(building)
+  }}
                         sx={{
                           borderRadius: 3,
                           py: 1.5,

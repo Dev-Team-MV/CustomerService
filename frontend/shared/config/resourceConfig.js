@@ -79,94 +79,117 @@ export const resourceConfigs = {
     },
     
     // Data transformers
-    transformers: {
-      toCard: (property) => {
-        console.log(`🔄 [Transformer:property] Input property:`, property)
-        console.log(`🔄 [Transformer:property] Property lot:`, property.lot)
-        console.log(`🔄 [Transformer:property] Property model:`, property.model)
-        console.log(`🔄 [Transformer:property] Property modelType:`, property.modelType)
-        console.log(`🔄 [Transformer:property] Property hasBalcony:`, property.hasBalcony)
-        console.log(`🔄 [Transformer:property] Property hasStorage:`, property.hasStorage)
-        
-        // Extract nested objects
-        const lot = typeof property.lot === 'object' ? property.lot : null
-        const model = typeof property.model === 'object' ? property.model : null
-        const facade = typeof property.facade === 'object' ? property.facade : null
-        
-        // ✅ IMPORTANTE: Usar property.images (ya procesadas por backend según modelType)
-        // En lugar de model.images (que son las imágenes base sin procesar)
-        const propertyImages = property.images || {}
-        
-        // Get first image from property.images (already processed by backend)
-        const modelImage = propertyImages.exterior?.[0]?.url || 
-                          propertyImages.interior?.[0]?.url ||
-                          model?.images?.exterior?.[0]?.url || 
-                          model?.images?.interior?.[0]?.url ||
-                          facade?.url?.[0]
-        
-        // Detect Model 10
-        const isModel10 = model?._id === MODEL_10_ID
-        
-        const transformed = {
-          id: property._id,
-          title: lot?.number ? `Lot ${lot.number}` : 'Property',
-          subtitle: model?.model || 'No Model',
-          model: model?.model || '',
-          modelImage: modelImage,
-          isShared: property.isShared || false,
-          isOwned: property.isOwned !== false,
-          
-          // ✅ Metadata adicional para Lakewood
-          modelType: property.modelType || 'basic',
-          hasBalcony: property.hasBalcony || false,
-          hasStorage: property.hasStorage || false,
-          isModel10: isModel10,
-          
-          specs: {
-            area: property.sqft || model?.sqft || 0,
-            bedrooms: property.bedrooms || model?.bedrooms || 0,
-            bathrooms: property.bathrooms || model?.bathrooms || 0,
-            balcony: property.hasBalcony || false,
-            storage: property.hasStorage || false
+// @/Users/oficina/MV-CRM/CustomerService/frontend/shared/config/resourceConfig.js
+// Línea 169 (después de cerrar toCard): Agregar toFinancialSummary
+
+transformers: {
+  toCard: (property) => {
+    console.log(`🔄 [Transformer:property] Input property:`, property)
+    console.log(`🔄 [Transformer:property] Property lot:`, property.lot)
+    console.log(`🔄 [Transformer:property] Property model:`, property.model)
+    console.log(`🔄 [Transformer:property] Property modelType:`, property.modelType)
+    console.log(`🔄 [Transformer:property] Property hasBalcony:`, property.hasBalcony)
+    console.log(`🔄 [Transformer:property] Property hasStorage:`, property.hasStorage)
+    console.log(`🔄 [Transformer:property] Property mediaByFloor:`, property.mediaByFloor)
+    
+    // Extract nested objects
+    const lot = typeof property.lot === 'object' ? property.lot : null
+    const model = typeof property.model === 'object' ? property.model : null
+    const facade = typeof property.facade === 'object' ? property.facade : null
+    
+    // ✅ NUEVO: Si tiene mediaByFloor, obtener primera imagen exterior de ahí
+    let modelImage = null
+    
+    if (property.mediaByFloor && Array.isArray(property.mediaByFloor) && property.mediaByFloor.length > 0) {
+      // Buscar la primera imagen exterior en mediaByFloor
+      for (const floor of property.mediaByFloor) {
+        const exteriors = floor?.media?.exterior || []
+        if (exteriors.length > 0) {
+          const firstExterior = exteriors[0]
+          modelImage = typeof firstExterior === 'string' ? firstExterior : firstExterior?.url
+          if (modelImage) {
+            console.log(`🔄 [Transformer:property] Using exterior from mediaByFloor:`, modelImage)
+            break
           }
         }
-        
-        console.log(`🔄 [Transformer:property] Output card data:`, transformed)
-        return transformed
-      },
-      
-      toFinancialSummary: (properties, payloads) => {
-        console.log(`📊 [Transformer:property] Computing financial summary...`)
-        console.log(`📊 [Transformer:property] Properties:`, properties.length)
-        console.log(`📊 [Transformer:property] Payloads:`, payloads.length)
-        
-        const totalInvestment = properties.reduce((sum, prop) => {
-          const price = prop.price || 0
-          console.log(`  💵 Property ${prop._id} price: ${price}`)
-          return sum + price
-        }, 0)
-        
-        const totalPaid = payloads
-          .filter(p => p.status === 'signed')
-          .reduce((sum, p) => sum + (p.amount || 0), 0)
-        
-        const totalPending = totalInvestment - totalPaid
-        const paymentProgress = totalInvestment > 0 
-          ? (totalPaid / totalInvestment) * 100 
-          : 0
-        
-        const summary = {
-          totalInvestment,
-          totalPaid,
-          totalPending,
-          paymentProgress,
-          properties: properties.length
-        }
-        
-        console.log(`📊 [Transformer:property] Final summary:`, summary)
-        return summary
       }
     }
+    
+    // Si no se encontró en mediaByFloor, usar property.images (comportamiento anterior)
+    if (!modelImage) {
+      const propertyImages = property.images || {}
+      modelImage = propertyImages.exterior?.[0]?.url || 
+                  propertyImages.interior?.[0]?.url ||
+                  model?.images?.exterior?.[0]?.url || 
+                  model?.images?.interior?.[0]?.url ||
+                  facade?.url?.[0]
+      console.log(`🔄 [Transformer:property] Using image from property.images:`, modelImage)
+    }
+    
+    // Detect Model 10
+    const isModel10 = model?._id === MODEL_10_ID
+    
+    const transformed = {
+      id: property._id,
+      title: lot?.number ? `Lot ${lot.number}` : 'Property',
+      subtitle: model?.model || 'No Model',
+      model: model?.model || '',
+      modelImage: modelImage,
+      isShared: property.isShared || false,
+      isOwned: property.isOwned !== false,
+      
+      // ✅ Metadata adicional para Lakewood
+      modelType: property.modelType || 'basic',
+      hasBalcony: property.hasBalcony || false,
+      hasStorage: property.hasStorage || false,
+      isModel10: isModel10,
+      
+      specs: {
+        area: property.sqft || model?.sqft || 0,
+        bedrooms: property.bedrooms || model?.bedrooms || 0,
+        bathrooms: property.bathrooms || model?.bathrooms || 0,
+        balcony: property.hasBalcony || false,
+        storage: property.hasStorage || false
+      }
+    }
+    
+    console.log(`🔄 [Transformer:property] Output card data:`, transformed)
+    return transformed
+  },
+  
+  // ✅ AGREGAR ESTA FUNCIÓN
+  toFinancialSummary: (properties, payloads) => {
+    console.log(`📊 [Transformer:property] Computing financial summary...`)
+    console.log(`📊 [Transformer:property] Properties:`, properties.length)
+    console.log(`📊 [Transformer:property] Payloads:`, payloads.length)
+    
+    const totalInvestment = properties.reduce((sum, prop) => {
+      const price = prop.price || 0
+      console.log(`  💵 Property ${prop._id} price: ${price}`)
+      return sum + price
+    }, 0)
+    
+    const totalPaid = payloads
+      .filter(p => p.status === 'signed')
+      .reduce((sum, p) => sum + (p.amount || 0), 0)
+    
+    const totalPending = totalInvestment - totalPaid
+    const paymentProgress = totalInvestment > 0 
+      ? (totalPaid / totalInvestment) * 100 
+      : 0
+    
+    const summary = {
+      totalInvestment,
+      totalPaid,
+      totalPending,
+      paymentProgress,
+      properties: properties.length
+    }
+    
+    console.log(`📊 [Transformer:property] Final summary:`, summary)
+    return summary
+  }
+}
   },
   
 

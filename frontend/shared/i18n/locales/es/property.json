@@ -15,9 +15,7 @@
     "notSelected": "No seleccionada",
     "residentOwner": "RESIDENTE / PROPIETARIO",
     "noEmail": "Sin correo",
-
-
-        "name": "Nombre",
+    "name": "Nombre",
     "status": "Estado",
     "building": "Edificio",
     "model": "Modelo",
@@ -35,19 +33,42 @@
   "status": {
     "sold": "Vendida",
     "active": "Activa",
-    "pending": "Pendiente"
+    "pending": "Pendiente",
+    "cancelled": "Cancelada",
+    "reserved": "Reservada"
   },
   "actions": {
+    "add": "Crear Propiedad",
     "addProperty": "Agregar Nueva Propiedad",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "cancel": "Cancelar",
+    "view": "Ver Detalle",
     "viewDetails": "Ver detalles",
     "editPrice": "Editar Precio",
+    "manage": "Gestionar Contratos",
     "manageContracts": "Gestionar contratos",
     "managePhases": "Gestionar Fases",
+    "manageFases": "Gestionar Fases",
     "viewProgress": "Ver Progreso",
-        "deleteProperty": "Eliminar Propiedad",
-    "confirmDelete": "¿Estás seguro de que deseas eliminar esta propiedad?",
-    "deleteFailed": "Error al eliminar la propiedad."
-
+    "deleteProperty": "Eliminar Propiedad",
+    "confirmDelete": "¿Estás seguro de que deseas eliminar esta propiedad?"
+  },
+  "form": {
+    "assignedHouse": "Casa Asignada",
+    "residents": "Residentes",
+    "selectResidents": "Seleccionar residentes",
+    "status": "Estado",
+    "saleDate": "Fecha de Venta",
+    "totalPrice": "Precio Total",
+    "initialPayment": "Pago Inicial",
+    "pending": "Pendiente",
+    "autoCalculated": "Calculado automáticamente",
+    "financialSummary": "Resumen Financiero",
+    "price": "Precio",
+    "saving": "Guardando...",
+    "saveChanges": "Guardar Cambios",
+    "unassigned": "Sin asignar"
   },
   "filters": {
     "filterByModel": "Filtrar por Modelo",
@@ -62,12 +83,18 @@
     "description": "Haz clic en 'Agregar Propiedad' para crear una",
     "action": "Agregar Propiedad"
   },
-
-    
-    "subtitleApartment": "Gestiona y visualiza todos los departamentos asignados",
-    "apartmentName": "Dpt {{number}} - Piso {{floor}}",
-    "noAssigned": "Departamentos no asignados",
-    "noAssignedDesc": "No se han asignado departamentos aún.",
-    "unassigned": "Sin asignar"
-  
+  "messages": {
+    "noProperties": "No hay propiedades",
+    "noPropertiesMessage": "No se han asignado propiedades aún.",
+    "loading": "Cargando propiedades...",
+    "deleteConfirm": "¿Eliminar esta propiedad?",
+    "deleteSuccess": "Propiedad actualizada",
+    "error": "Error: {message}",
+    "unassigned": "Sin asignar",
+    "deleteFailed": "Error al eliminar la propiedad."
+  },
+  "subtitleApartment": "Gestiona y visualiza todos los departamentos asignados",
+  "apartmentName": "Dpt {{number}} - Piso {{floor}}",
+  "noAssigned": "Departamentos no asignados",
+  "noAssignedDesc": "No se han asignado departamentos aún."
 }

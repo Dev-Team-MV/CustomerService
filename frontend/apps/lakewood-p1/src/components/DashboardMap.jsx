@@ -14,6 +14,7 @@ import { useAuth } from '@shared/context/AuthContext'
 import uploadService from '../services/uploadService' // ✅ NUEVO IMPORT
 import { useTranslation } from 'react-i18next'
 import DashboardMapPopup from './DashboardMapPopUP'
+import { getLakewoodProjectId } from '../utils/projectId'
 const lotPositions = {
   1: { x: 23, y: 25 },
   2: { x: 26.3, y: 25 },
@@ -107,6 +108,7 @@ const DashboardMap = () => {
   const mapRef = useRef(null)
 
   const { user } = useAuth()
+  const projectId = getLakewoodProjectId(user)
 
   useEffect(() => {
     fetchData()
@@ -114,10 +116,15 @@ const DashboardMap = () => {
   }, [])
 
   const fetchData = async () => {
+    if (!projectId) {
+      setLots([])
+      setProperties([])
+      return
+    }
     try {
       const [lotsRes, propertiesRes] = await Promise.all([
-        api.get('/lots'),
-        api.get('/properties')
+        api.get('/lots', { params: { projectId } }),
+        api.get('/properties', { params: { projectId } })
       ])
       setLots(lotsRes.data)
       setProperties(propertiesRes.data)

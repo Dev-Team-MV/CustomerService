@@ -3,6 +3,8 @@ FROM node:20-alpine AS builder
 
 ARG VITE_API_URL=https://apics.michelangelodelvalle.com/api
 ENV VITE_API_URL=$VITE_API_URL
+ARG VITE_PROJECT_ID
+ENV VITE_PROJECT_ID=$VITE_PROJECT_ID
 
 WORKDIR /app
 

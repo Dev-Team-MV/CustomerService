@@ -7,7 +7,7 @@ import {
   deleteLot,
   getLotStats
 } from '../controllers/lotController.js'
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { protect, admin, optionalProtect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -77,7 +77,7 @@ const router = express.Router()
  *         description: Lot created
  */
 router.route('/')
-  .get(getAllLots)
+  .get(optionalProtect, getAllLots)
   .post(protect, admin, createLot)
 
 /**

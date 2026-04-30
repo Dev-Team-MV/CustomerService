@@ -20,12 +20,15 @@ export const EMPTY_FORM = {
   projectId: "",
   images: { exterior: [], interior: [], blueprints: [] },
   hasBalcony: false,
+  balconyId: null, // ✅ NUEVO
   balconyPrice: 0,
   balconyImages: { exterior: [], interior: [], blueprints: [] },
   hasUpgrade: false,
+  upgradeId: null, // ✅ NUEVO
   upgradePrice: 0,
   upgradeImages: { exterior: [], interior: [], blueprints: [] },
   hasStorage: false,
+  storageId: null, // ✅ NUEVO
   storagePrice: 0,
   storageImages: { exterior: [], interior: [], blueprints: [] },
 };
@@ -170,6 +173,7 @@ export const mapModelToFormData = (selectedModel) => {
       blueprints: defaultBlueprints,
     },
     hasBalcony: hasBalconyOption,
+    balconyId: hasBalconyOption ? selectedModel.balconies[0]._id : null, // ✅ NUEVO
     balconyPrice: hasBalconyOption ? selectedModel.balconies[0].price : 0,
     balconyImages: hasBalconyOption
       ? {
@@ -178,11 +182,13 @@ export const mapModelToFormData = (selectedModel) => {
         }
       : { exterior: [], interior: [], blueprints: [] },
     hasUpgrade: hasUpgradeOption,
+    upgradeId: hasUpgradeOption ? selectedModel.upgrades[0]._id : null, // ✅ NUEVO
     upgradePrice: hasUpgradeOption ? selectedModel.upgrades[0].price : 0,
     upgradeImages: hasUpgradeOption
       ? normalizeImages(selectedModel.upgrades[0].images)
       : { exterior: [], interior: [], blueprints: [] },
     hasStorage: hasStorageOption,
+    storageId: hasStorageOption ? selectedModel.storages[0]._id : null, // ✅ NUEVO
     storagePrice: hasStorageOption ? selectedModel.storages[0].price : 0,
     storageImages: hasStorageOption
       ? {
@@ -206,6 +212,9 @@ export const useModels = () => {
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(false);
 
+  // Proyecto actual
+  const [currentProjectId, setCurrentProjectId] = useState(null);
+
   // Fetch models
   // const fetchModels = useCallback(async () => {
   //   setLoading(true);
@@ -219,18 +228,22 @@ export const useModels = () => {
   //   }
   // }, []);
   // Fetch models
-const fetchModels = useCallback(async (projectId = null) => {
-  setLoading(true);
-  try {
-    const params = projectId ? { projectId } : {};
-    const response = await api.get("/models", { params });
-    setModels(response.data);
-  } catch (error) {
-    console.error("Error fetching models:", error);
-  } finally {
-    setLoading(false);
-  }
-}, []);
+  const fetchModels = useCallback(async (projectId = null) => {
+    setLoading(true);
+    try {
+      if (projectId) setCurrentProjectId(projectId);
+      const idToUse = projectId || currentProjectId;
+      const params = idToUse ? { projectId: idToUse } : {};
+      const response = await api.get("/models", { params });
+      setModels(response.data);
+    } catch (error) {
+      console.error("Error fetching models:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentProjectId]);
+  
+
 
   // Fetch facades
   const fetchFacades = useCallback(async () => {
@@ -354,7 +367,7 @@ useEffect(() => {
         await api.post("/models", dataToSend);
       }
 
-      await fetchModels();
+  await fetchModels(currentProjectId);
       if (onClose) onClose();
       return true;
     } catch (error) {
@@ -367,7 +380,7 @@ useEffect(() => {
   const handleDeleteModel = async (id) => {
     try {
       await api.delete(`/models/${id}`);
-      await fetchModels();
+  await fetchModels(currentProjectId);
     } catch (error) {
       console.error("Error deleting model:", error);
       throw error;
@@ -477,5 +490,7 @@ const handleToggleImageIsPublic = async ({ filename, isPublic }) => {
     handleRemoveImage,
     EMPTY_FORM,
     mapModelToFormData,
+
+    currentProjectId,
   };
 };

@@ -1,6 +1,6 @@
 // @/Users/oficina/MV-CRM/CustomerService/frontend/shared/components/propertyDetails/PropertyDetailsTab.jsx
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Box, Paper, Typography, Chip, IconButton, Grid, Divider
 } from '@mui/material'
@@ -11,11 +11,12 @@ import {
 } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import { useTheme } from '@mui/material/styles'
-
+ 
 const PropertyDetailsTab = ({ propertyDetails }) => {
   const theme = useTheme()
   const [carouselIndex, setCarouselIndex] = useState(0)
   const [selectedFloorKey, setSelectedFloorKey] = useState(null)
+  const [exteriorCarouselIndex, setExteriorCarouselIndex] = useState(0)
  
   const mediaByFloor = propertyDetails?.mediaByFloor || []
   const selectedRenderType = propertyDetails?.selectedRenderType || 'basic'
@@ -25,20 +26,42 @@ const PropertyDetailsTab = ({ propertyDetails }) => {
   const facade = propertyDetails?.facade || {}
   const selectedOptions = propertyDetails?.selectedOptions || {}
  
+  // ✅ NUEVO: Recopilar todos los exteriores de los pisos
+  const allExteriors = useMemo(() => {
+    const exteriors = []
+    mediaByFloor.forEach(floor => {
+      const floorExteriors = floor?.media?.exterior || []
+      floorExteriors.forEach(ext => {
+        const url = ext?.url || ext
+        if (url && !exteriors.includes(url)) {
+          exteriors.push(url)
+        }
+      })
+    })
+    return exteriors
+  }, [mediaByFloor])
+ 
+  console.log('🏠 [PropertyDetailsTab] All exteriors:', allExteriors)
+ 
   useEffect(() => {
     if (mediaByFloor.length > 0 && !selectedFloorKey) {
       setSelectedFloorKey(mediaByFloor[0].floorKey)
     }
   }, [mediaByFloor])
  
-const currentFloorData = mediaByFloor.find(f => f.floorKey === selectedFloorKey) || mediaByFloor[0]
-const selectedRenders = (currentFloorData?.media?.renders || []).map(r => r.url || r)
+  const currentFloorData = mediaByFloor.find(f => f.floorKey === selectedFloorKey) || mediaByFloor[0]
+  const selectedRenders = (currentFloorData?.media?.renders || []).map(r => r.url || r)
   const handleThumbSelect = (idx) => setCarouselIndex(idx)
+  const handleExteriorThumbSelect = (idx) => setExteriorCarouselIndex(idx)
  
   useEffect(() => {
     setCarouselIndex(0)
   }, [selectedRenders.length, selectedFloorKey])
-
+ 
+  useEffect(() => {
+    setExteriorCarouselIndex(0)
+  }, [allExteriors.length])
+ 
   return (
     <Paper
       elevation={0}
@@ -76,7 +99,7 @@ const selectedRenders = (currentFloorData?.media?.renders || []).map(r => r.url 
             {model?.model || 'Model'} • Lot {lot?.number || 'N/A'}
           </Typography>
         </Box>
-
+ 
         <Chip
           icon={<Home sx={{ fontSize: 18 }} />}
           label={selectedRenderType === 'basic' ? 'Basic Package' : 'Upgrade Package'}
@@ -95,12 +118,178 @@ const selectedRenders = (currentFloorData?.media?.renders || []).map(r => r.url 
           }}
         />
       </Box>
-
+ 
+      {/* ✅ NUEVA SECCIÓN: Exteriores */}
+      {allExteriors.length > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Home sx={{ color: theme.palette.success.main, fontSize: 28 }} />
+            <Typography variant="h6" sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700 }}>
+              Renders Exteriores
+            </Typography>
+            <Chip 
+              label={`${allExteriors.length} imagen${allExteriors.length > 1 ? 'es' : ''}`}
+              size="small" 
+              sx={{ 
+                bgcolor: `${theme.palette.success.main}20`, 
+                color: theme.palette.success.main,
+                fontWeight: 600
+              }} 
+            />
+          </Box>
+ 
+          <Box
+            sx={{
+              display: 'flex',
+              gap: { xs: 1.5, sm: 2 },
+              mb: 3,
+              height: { xs: 280, sm: 380, md: 460, lg: 520 },
+            }}
+          >
+            {/* Main exterior image */}
+            <Box
+              sx={{
+                flex: 3,
+                bgcolor: '#000',
+                borderRadius: 3,
+                position: 'relative',
+                overflow: 'hidden',
+                minWidth: 0,
+                border: `2px solid ${theme.palette.success.main}`
+              }}
+            >
+              <motion.img
+                key={exteriorCarouselIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                src={allExteriors[exteriorCarouselIndex]}
+                alt={`exterior-${exteriorCarouselIndex}`}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+              />
+ 
+              <IconButton
+                sx={{
+                  position: 'absolute',
+                  top: { xs: 8, sm: 12 },
+                  right: { xs: 8, sm: 12 },
+                  bgcolor: 'rgba(255,255,255,0.95)',
+                  width: { xs: 32, sm: 38 },
+                  height: { xs: 32, sm: 38 },
+                  '&:hover': { bgcolor: 'white', transform: 'scale(1.1)' }
+                }}
+              >
+                <ZoomIn sx={{ fontSize: { xs: 18, sm: 22 } }} />
+              </IconButton>
+ 
+              <Box
+                sx={{
+                  position: 'absolute',
+                  bottom: 12,
+                  left: 12,
+                  bgcolor: 'rgba(67,160,71,0.9)',
+                  color: 'white',
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 2,
+                  fontFamily: '"Poppins", sans-serif',
+                  fontSize: '0.75rem',
+                  fontWeight: 600
+                }}
+              >
+                {exteriorCarouselIndex + 1} / {allExteriors.length}
+              </Box>
+            </Box>
+ 
+            {/* Exterior thumbnails */}
+            {allExteriors.length > 1 && (
+              <Box
+                sx={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: { xs: 0.8, sm: 1 },
+                  overflowY: 'auto',
+                  minWidth: 0,
+                  pr: 0.5,
+                  '&::-webkit-scrollbar': { width: 4 },
+                  '&::-webkit-scrollbar-track': { bgcolor: 'transparent' },
+                  '&::-webkit-scrollbar-thumb': {
+                    bgcolor: theme.palette.success.main + '33',
+                    borderRadius: 2,
+                  },
+                }}
+              >
+                {allExteriors.map((url, i) => (
+                  <motion.div
+                    key={`exterior-thumb-${i}`}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    style={{ flexShrink: 0 }}
+                  >
+                    <Box
+                      onClick={() => handleExteriorThumbSelect(i)}
+                      sx={{
+                        width: '100%',
+                        aspectRatio: '16/9',
+                        borderRadius: 1.5,
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        border: i === exteriorCarouselIndex
+                          ? `2.5px solid ${theme.palette.success.main}`
+                          : `1.5px solid ${theme.palette.cardBorder}`,
+                        boxShadow: i === exteriorCarouselIndex
+                          ? `0 4px 16px ${theme.palette.success.main}4D`
+                          : 'none',
+                        transition: 'all 0.25s ease',
+                        position: 'relative',
+                        '&:hover': {
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                          borderColor: i === exteriorCarouselIndex ? theme.palette.success.main : theme.palette.secondary.main,
+                        }
+                      }}
+                    >
+                      <img
+                        src={url}
+                        alt={`exterior-thumb-${i}`}
+                        loading="lazy"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      />
+                      {i === exteriorCarouselIndex && (
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            top: 4,
+                            right: 4,
+                            bgcolor: theme.palette.success.main,
+                            borderRadius: '50%',
+                            width: 18,
+                            height: 18,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: `0 2px 8px ${theme.palette.success.main}66`
+                          }}
+                        >
+                          <CheckCircle sx={{ fontSize: 12, color: 'white' }} />
+                        </Box>
+                      )}
+                    </Box>
+                  </motion.div>
+                ))}
+              </Box>
+            )}
+          </Box>
+ 
+          <Divider sx={{ my: 3 }} />
+        </Box>
+      )}
+ 
       {/* Floor Selector */}
       {mediaByFloor.length > 0 && (
         <Box sx={{ mb: 3 }}>
           <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}>
-            Selecciona Piso
+            Renders Interiores por Piso
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             {mediaByFloor.map((floor) => (

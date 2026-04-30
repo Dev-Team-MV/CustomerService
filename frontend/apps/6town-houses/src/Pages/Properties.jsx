@@ -1,7 +1,6 @@
-// @/Users/oficina/MV-CRM/CustomerService/frontend/apps/6town-houses/src/Pages/Properties.jsx
-
 import { useMemo, useState, useEffect } from 'react'
-import { Box, Container, Dialog } from '@mui/material'
+import { useTranslation } from 'react-i18next'
+import { Box, Container, Dialog, Snackbar, Alert } from '@mui/material'
 import { Home, Add } from '@mui/icons-material'
 import PageHeader from '@shared/components/PageHeader'
 import DataTable from '@shared/components/table/DataTable'
@@ -14,8 +13,8 @@ import { useProperties } from '../hooks/useProperties'
 import propertyService from '@shared/services/propertyService'
 import buildingService from '@shared/services/buildingService'
 import { usePayloadColumns } from '../Constants/Columns/payloads'
-import api from '@shared/services/api'
 
+import PropertyEditModal from '../Components/buildings/PropertyEditModal'
 import ContractsModal from '@shared/components/Modals/ContractsModal'
 import {
   ApartmentDetailsModal,
@@ -25,6 +24,7 @@ import {
 const PROJECT_ID = import.meta.env.VITE_PROJECT_ID
 
 const Properties = () => {
+  const { t } = useTranslation(['property', 'common'])
   const theme = useTheme()
   const navigate = useNavigate()
 
@@ -36,6 +36,9 @@ const Properties = () => {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [constructionOpen, setConstructionOpen] = useState(false)
   const [selectedPropertyId, setSelectedPropertyId] = useState(null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [propertyToEdit, setPropertyToEdit] = useState(null)
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' })
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,10 +47,15 @@ const Properties = () => {
         setBuildings(buildingsRes || [])
       } catch (err) {
         console.error('Error loading data:', err)
+        setSnackbar({ 
+          open: true, 
+          message: t('property:messages.error', { message: err.message }), 
+          severity: 'error' 
+        })
       }
     }
     fetchData()
-  }, [])
+  }, [t])
 
   const buildingMap = useMemo(() => {
     const map = {}
@@ -63,13 +71,34 @@ const Properties = () => {
     facade: prop.facade?.title || 'N/A',
     resident: Array.isArray(prop.users) && prop.users.length > 0
       ? `${prop.users[0]?.firstName || ''} ${prop.users[0]?.lastName || ''}`.trim()
-      : 'Sin asignar',
+      : t('property:messages.unassigned'),
     status: prop.status,
     price: prop.price,
     pending: prop.pending || 0,
     phases: prop.phases || [],
     raw: prop
-  })), [properties, buildingMap])
+  })), [properties, buildingMap, t])
+
+  const handleDelete = async (row) => {
+    if (!window.confirm(t('property:messages.deleteConfirm'))) return
+    
+    try {
+      await propertyService.deleteProperty(row._id)
+      setSnackbar({ 
+        open: true, 
+        message: t('property:messages.deleteSuccess'), 
+        severity: 'success' 
+      })
+      refresh()
+    } catch (err) {
+      console.error('Error deleting property:', err)
+      setSnackbar({ 
+        open: true, 
+        message: t('property:messages.error', { message: err.message }), 
+        severity: 'error' 
+      })
+    }
+  }
 
   const columns = usePropertyColumns({
     isAdmin: true,
@@ -78,55 +107,49 @@ const Properties = () => {
       setDetailsOpen(true)
     },
     onEdit: (row) => {
-      console.log('Editar:', row)
+      setPropertyToEdit(row.raw)
+      setEditOpen(true)
     },
-    onDelete: async (row) => {
-      if (window.confirm('¿Estás seguro de eliminar esta propiedad?')) {
-        try {
-          await propertyService.deleteProperty(row._id)
-          refresh()
-        } catch (err) {
-          console.error('Error deleting property:', err)
-        }
-      }
-    },
+    onDelete: handleDelete,
     onOpenContracts: (row) => {
       setSelectedProperty(row.raw)
       setContractsOpen(true)
     },
-onOpenPhases: (row) => {
-  console.log('🔍 Opening phases for:', row.raw._id, row)
-  setSelectedPropertyId(row.raw._id)
-  setConstructionOpen(true)
-},
-    t: (key, defaultValue) => defaultValue
+    onOpenPhases: (row) => {
+      console.log('🔍 Opening phases for:', row.raw._id, row)
+      setSelectedPropertyId(row.raw._id)
+      setConstructionOpen(true)
+    },
+    t
   })
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <PageHeader
-        title="Propiedades"
-        subtitle="Gestión de propiedades asignadas"
+        title={t('property:title')}
+        subtitle={t('property:subtitle')}
         icon={Home}
         actionButton={{
-          label: 'Agregar Propiedad',
+          label: t('property:actions.addProperty'),
           onClick: () => navigate('/get-your-quote'),
           icon: <Add />,
-          tooltip: 'Agregar nueva propiedad'
+          tooltip: t('property:actions.addProperty')
         }}
       />
 
       <Box sx={{ mt: 4 }}>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-            Cargando propiedades...
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8, textAlign: 'center' }}>
+            <Box>
+              Loading...
+            </Box>
           </Box>
         ) : data.length === 0 ? (
           <EmptyState
-            title="No hay propiedades"
-            message="No se encontraron propiedades asignadas para este proyecto."
+            title={t('property:messages.noProperties')}
+            message={t('property:messages.noPropertiesMessage')}
             icon={Home}
-            actionLabel="Agregar Propiedad"
+            actionLabel={t('property:actions.addProperty')}
             onAction={() => navigate('/get-your-quote')}
           />
         ) : (
@@ -157,6 +180,25 @@ onOpenPhases: (row) => {
         theme={theme}
       />
 
+      <PropertyEditModal
+        open={editOpen}
+        onClose={() => {
+          setEditOpen(false)
+          setPropertyToEdit(null)
+        }}
+        property={propertyToEdit}
+        projectId={PROJECT_ID}
+        onSaved={(updatedProperty) => {
+          console.log('Propiedad actualizada:', updatedProperty)
+          setSnackbar({ 
+            open: true, 
+            message: t('property:messages.deleteSuccess'), 
+            severity: 'success' 
+          })
+          refresh()
+        }}
+      />
+
       <Dialog
         open={constructionOpen}
         onClose={() => setConstructionOpen(false)}
@@ -170,6 +212,17 @@ onOpenPhases: (row) => {
           />
         </Box>
       </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert severity={snackbar.severity} sx={{ borderRadius: 3 }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   )
 }
