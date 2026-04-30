@@ -258,45 +258,6 @@ const ModelInfoPanel = ({
         </Box>
       </Box>
 
-      {/* ✅ BASE PRICE - Minimalista */}
-      <Box
-        mb={2.5}
-        p={2}
-        sx={{
-          bgcolor: "white",
-          borderRadius: 2,
-          border: "2px solid #e0e0e0",
-          textAlign: "center",
-        }}
-      >
-        <Typography
-          variant="caption"
-          fontWeight={700}
-          sx={{
-            color: "#706f6f",
-            fontFamily: '"Poppins", sans-serif',
-            letterSpacing: "1.5px",
-            textTransform: "uppercase",
-            fontSize: "0.65rem",
-            display: "block",
-            mb: 1,
-          }}
-        >
-  {t("basePriceWithModel", { price: model.price.toLocaleString(), number: model.modelNumber })}
-        </Typography>
-        <Typography
-          variant={isLarge ? "h5" : "h4"}
-          sx={{
-            color: "#333F1F",
-            fontWeight: 700,
-            fontFamily: '"Poppins", sans-serif',
-            letterSpacing: "-0.5px",
-          }}
-        >
-          ${model.price.toLocaleString()}
-        </Typography>
-      </Box>
-
       {/* ✅ AVAILABLE OPTIONS - Chips minimalistas */}
       {hasPricingOptions && (
         <Box mb={2.5}>
@@ -552,33 +513,6 @@ const ModelInfoPanel = ({
           </Button>
         )}
 
-        {/* <Button
-          variant="outlined"
-          size="small"
-          fullWidth
-          startIcon={<Visibility />}
-          onClick={onViewDetails}
-          sx={{
-            borderRadius: 2,
-            borderColor: "#e0e0e0",
-            borderWidth: "2px",
-            color: "#706f6f",
-            fontSize: "0.75rem",
-            fontWeight: 600,
-            textTransform: "none",
-            letterSpacing: "1px",
-            fontFamily: '"Poppins", sans-serif',
-            py: 1,
-            "&:hover": {
-              borderColor: "#333F1F",
-              borderWidth: "2px",
-              bgcolor: "rgba(51, 63, 31, 0.05)",
-              color: "#333F1F",
-            },
-          }}
-        >
-          {t("fullDetails", "Full Details")}
-        </Button> */}
       </Box>
 
       {/* ✅ INFO MESSAGE - Sin opciones */}

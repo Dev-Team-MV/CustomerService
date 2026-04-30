@@ -154,6 +154,7 @@ onOpenPhases: (row) => {
         property={selectedProperty}
         usePayloadColumnsFn={usePayloadColumns}
         projectId={PROJECT_ID}
+        theme={theme}
       />
 
       <Dialog

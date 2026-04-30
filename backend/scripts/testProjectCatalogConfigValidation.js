@@ -10,7 +10,13 @@ const validPayload = {
       id: 'r1',
       priority: 10,
       when: [{ field: 'selectedOptions.hasBalcony', operator: 'truthy' }],
-      apply: { type: 'fixed', amount: 1000 }
+      apply: {
+        type: 'fixed',
+        amount: 0,
+        amountSource: 'selected_option_price',
+        optionCollectionPath: 'model.balconies',
+        selectedIdPath: 'selectedOptions.balconyId'
+      }
     }
   ]
 }
@@ -23,7 +29,7 @@ const invalidPayload = {
     {
       id: '',
       when: [{ field: '', operator: 'bad-op' }],
-      apply: { type: 'unknown', amount: 'NaN' }
+      apply: { type: 'unknown', amount: 'NaN', amountSource: 'random' }
     }
   ]
 }

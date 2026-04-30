@@ -51,7 +51,8 @@ export const upsertProjectCatalogConfig = async (req, res) => {
       catalogType: req.body.catalogType,
       structure: req.body.structure,
       assetsSchema: req.body.assetsSchema,
-      pricingRules: req.body.pricingRules
+      pricingRules: req.body.pricingRules,
+      pricingMode: req.body.pricingMode
     }
     const validation = validateProjectCatalogConfigPayload(payload)
     if (!validation.valid) {
@@ -84,7 +85,8 @@ export const upsertProjectCatalogConfig = async (req, res) => {
           catalogType: payload.catalogType,
           structure: payload.structure,
           assetsSchema: payload.assetsSchema,
-          pricingRules: payload.pricingRules || []
+          pricingRules: payload.pricingRules || [],
+          pricingMode: payload.pricingMode || 'legacy_components'
         }
       },
       { upsert: true, new: true, runValidators: true }

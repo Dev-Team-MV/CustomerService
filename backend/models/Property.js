@@ -21,7 +21,7 @@ const propertySchema = new mongoose.Schema(
     facade: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Facade',
-      required: [true, 'Facade is required']
+      required: false
     },
     users: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
@@ -68,6 +68,11 @@ const propertySchema = new mongoose.Schema(
     hasStorage: {
       type: Boolean,
       default: false
+    },
+    // Selecciones dinámicas por proyecto/catálogo (ej. floors.level1 = 'airbnb')
+    selectedOptions: {
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({})
     }
   },
   {

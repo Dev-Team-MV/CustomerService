@@ -21,6 +21,11 @@ const lotSchema = new mongoose.Schema(
       required: [true, 'Price is required'],
       min: 0
     },
+    model: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Model',
+      required: false
+    },
     status: {
       type: String,
       enum: ['available', 'pending', 'sold'],

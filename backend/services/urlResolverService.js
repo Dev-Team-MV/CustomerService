@@ -63,37 +63,44 @@ const URL_KEYS = ['url', 'fileUrl']
  * @param {any} obj - Object, array, or primitive
  * @param {number} expiresIn - ms for signed URL
  */
-export async function hydrateUrlsInObject (obj, expiresIn = 365 * 24 * 60 * 60 * 1000) {
+export async function hydrateUrlsInObject (
+  obj,
+  expiresIn = 365 * 24 * 60 * 60 * 1000,
+  visited = new WeakSet()
+) {
   if (obj == null) return
+  if (typeof obj === 'object') {
+    if (visited.has(obj)) return
+    visited.add(obj)
+  }
   if (Array.isArray(obj)) {
-    for (let i = 0; i < obj.length; i++) {
-      const v = obj[i]
+    await Promise.all(obj.map(async (v, i) => {
       if (typeof v === 'string') {
         const resolved = await resolveToSignedUrl(v, expiresIn)
         if (resolved) obj[i] = resolved
       } else if (typeof v === 'object' && v !== null) {
-        await hydrateUrlsInObject(v, expiresIn)
+        await hydrateUrlsInObject(v, expiresIn, visited)
       }
-    }
+    }))
     return
   }
   if (typeof obj !== 'object') return
-  for (const key of Object.keys(obj)) {
+  await Promise.all(Object.keys(obj).map(async (key) => {
     const val = obj[key]
     if (URL_KEYS.includes(key) && typeof val === 'string') {
       const resolved = await resolveToSignedUrl(val, expiresIn)
       if (resolved) obj[key] = resolved
     } else if ((key === 'url' || key === 'urls') && Array.isArray(val)) {
-      for (let i = 0; i < val.length; i++) {
-        if (typeof val[i] === 'string') {
-          const resolved = await resolveToSignedUrl(val[i], expiresIn)
+      await Promise.all(val.map(async (item, i) => {
+        if (typeof item === 'string') {
+          const resolved = await resolveToSignedUrl(item, expiresIn)
           if (resolved) val[i] = resolved
         }
-      }
+      }))
     } else if (typeof val === 'object' && val !== null) {
-      await hydrateUrlsInObject(val, expiresIn)
+      await hydrateUrlsInObject(val, expiresIn, visited)
     }
-  }
+  }))
 }
 
 /**

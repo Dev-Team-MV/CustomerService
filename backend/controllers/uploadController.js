@@ -310,6 +310,8 @@ export const getFolderFiles = async (req, res) => {
     let filesOut = files
     if (folder.toLowerCase() === 'clubhouse' && enrich) {
       const clubHouse = await ClubHouse.findOne()
+        .select('exterior blueprints deck interior')
+        .lean()
       const sectionByFilename = mapClubHouseFilesToSections(clubHouse)
       filesOut = files.map(f => {
         const filename = f.name.includes('/') ? f.name.split('/').pop().split('?')[0] : f.name
@@ -326,6 +328,8 @@ export const getFolderFiles = async (req, res) => {
 
     if (folder.toLowerCase() === 'recorrido' && enrich) {
       const clubHouse = await ClubHouse.findOne()
+        .select('recorridoVisibility')
+        .lean()
       const recorridoVisibility = (clubHouse?.recorridoVisibility && typeof clubHouse.recorridoVisibility === 'object')
         ? clubHouse.recorridoVisibility
         : {}
@@ -685,15 +689,32 @@ export const updateApartmentRenderImage = async (req, res) => {
  */
 export const getSignedUrlForPath = async (req, res) => {
   try {
-    const path = req.query.path || req.params.path
-    if (!path || typeof path !== 'string') {
-      return res.status(400).json({ success: false, message: 'path query parameter is required' })
+    const pathOrUrl = req.query.path || req.query.url || req.params.path
+    if (!pathOrUrl || typeof pathOrUrl !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'Query parameter "path" or "url" is required'
+      })
     }
-    const url = await resolveToSignedUrl(path)
+
+    const rawExpires = req.query.expiresInSeconds
+    const expiresInSeconds = rawExpires !== undefined ? Number(rawExpires) : 3600
+    if (!Number.isFinite(expiresInSeconds) || expiresInSeconds <= 0 || expiresInSeconds > 7 * 24 * 60 * 60) {
+      return res.status(400).json({
+        success: false,
+        message: 'expiresInSeconds must be a number between 1 and 604800'
+      })
+    }
+
+    const url = await resolveToSignedUrl(pathOrUrl, expiresInSeconds * 1000)
     if (!url) {
       return res.status(404).json({ success: false, message: 'Could not generate signed URL' })
     }
-    res.json({ url })
+    res.json({
+      success: true,
+      signedUrl: url,
+      expiresInSeconds
+    })
   } catch (error) {
     console.error('getSignedUrl error:', error)
     res.status(500).json({ success: false, message: error.message })

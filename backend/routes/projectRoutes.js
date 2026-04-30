@@ -164,6 +164,9 @@ router.post('/outdoor-amenity-keys', protect, admin, addOutdoorAmenityKeys)
  *               type:
  *                 type: string
  *                 enum: [residential_lots, apartments, other]
+ *               facadeEnabled:
+ *                 type: boolean
+ *                 description: Si es false, no se usa fachada en propiedades/cotizaciones del proyecto
  *               status:
  *                 type: string
  *                 enum: [active, inactive, coming_soon, sold_out]
@@ -420,6 +423,7 @@ router.post('/:id/catalog-config/publish', protect, admin, publishProjectCatalog
  *               gallery: { type: array, items: { type: string } }
  *               features: { type: object, properties: { en: { type: array }, es: { type: array } } }
  *               type: { type: string, enum: [residential_lots, apartments, other] }
+ *               facadeEnabled: { type: boolean, description: Si es false, no se usa fachada en propiedades/cotizaciones del proyecto }
  *               status: { type: string, enum: [active, inactive, coming_soon, sold_out] }
  *               isActive: { type: boolean }
  *               externalUrl: { type: string }

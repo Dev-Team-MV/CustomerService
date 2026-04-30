@@ -12,7 +12,10 @@
     "lot": "Lote",
     "price": "PRECIO",
     "status": "ESTADO",
-    "actions": "ACCIONES"
+    "actions": "ACCIONES",
+    "unassigned": "Sin Asignar",
+    "assignedTo": "ASIGNADO A",
+    "model": "MODELO"
   },
   "status": {
     "available": "Disponible",
