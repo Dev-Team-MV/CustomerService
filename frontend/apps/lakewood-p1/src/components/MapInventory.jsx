@@ -5,8 +5,10 @@ import MyLocationIcon from '@mui/icons-material/MyLocation'
 import { useState, useEffect, useRef } from 'react'
 import { Circle } from '@mui/icons-material'
 import api from '@shared/services/api'
+import { useAuth } from '@shared/context/AuthContext'
 import uploadService from '../services/uploadService'
 import { useTranslation } from 'react-i18next'
+import { getLakewoodProjectId } from '../utils/projectId'
 
 const map = '/images/mapLakewood.png'
 
@@ -97,6 +99,8 @@ const COUNTER_COLORS = ['green', 'blue', 'red']
 
 const MapInventory = () => {
   const { t } = useTranslation(['lots'])
+  const { user } = useAuth()
+  const projectId = getLakewoodProjectId(user)
   const [lots, setLots] = useState([])
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
@@ -111,8 +115,12 @@ const MapInventory = () => {
   }, [])
 
   const fetchLots = async () => {
+    if (!projectId) {
+      setLots([])
+      return
+    }
     try {
-      const res = await api.get('/lots')
+      const res = await api.get('/lots', { params: { projectId } })
       setLots(res.data)
     } catch (error) {
       console.error('Error loading lots:', error)
