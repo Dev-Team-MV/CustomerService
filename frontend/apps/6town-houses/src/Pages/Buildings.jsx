@@ -1,6 +1,5 @@
-// @/Users/oficina/MV-CRM/CustomerService/frontend/apps/6town-houses/src/Pages/Buildings.jsx
-
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Container, Snackbar, Alert } from '@mui/material'
 import { Home } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
@@ -14,6 +13,7 @@ import { getBuildingColumns } from '../Constants/Columns/buildings'
 import HouseDialog from '../Components/buildings/HouseDialog'
 
 const Buildings = () => {
+  const { t } = useTranslation(['houses6Town', 'common'])
   const theme = useTheme()
   const projectId = import.meta.env.VITE_PROJECT_ID
 
@@ -50,21 +50,21 @@ const Buildings = () => {
       handleCloseDialog()
       setSnackbar({ 
         open: true, 
-        message: selectedBuilding ? 'Casa actualizada' : 'Casa creada', 
+        message: selectedBuilding ? t('houses6Town:messages.updateSuccess') : t('houses6Town:messages.createSuccess'), 
         severity: 'success' 
       })
     } catch (err) {
-      setSnackbar({ open: true, message: `Error: ${err.message}`, severity: 'error' })
+      setSnackbar({ open: true, message: t('houses6Town:messages.error', { message: err.message }), severity: 'error' })
     }
   }
 
   const handleDelete = async (building) => {
-    if (!window.confirm(`¿Eliminar casa ${building.name}?`)) return
+    if (!window.confirm(t('houses6Town:messages.deleteConfirm', { name: building.name }))) return
     try {
       await deleteBuildingAPI(building._id)
-      setSnackbar({ open: true, message: 'Casa eliminada', severity: 'success' })
+      setSnackbar({ open: true, message: t('houses6Town:messages.deleteSuccess'), severity: 'success' })
     } catch (err) {
-      setSnackbar({ open: true, message: `Error: ${err.message}`, severity: 'error' })
+      setSnackbar({ open: true, message: t('houses6Town:messages.error', { message: err.message }), severity: 'error' })
     }
   }
 
@@ -72,13 +72,42 @@ const Buildings = () => {
     onEdit: handleOpenDialog,
     onDelete: handleDelete,
     theme,
+    t
   })
 
   const stats = [
-    { title: 'Total Casas', value: data.length, icon: Home, gradient: theme.palette.gradient, color: '#1a237e', delay: 0 },
-    { title: 'Disponibles', value: data.filter(b => b.status === 'active').length, icon: Home, gradient: theme.palette.gradientSecondary, color: '#4caf50', delay: 0.1 },
-    { title: 'Vendidas', value: data.filter(b => b.status === 'sold').length, icon: Home, gradient: theme.palette.gradientInfo, color: '#f44336', delay: 0.2 },
-    { title: 'Reservadas', value: data.filter(b => b.status === 'reserved').length, icon: Home, gradient: theme.palette.gradientAccent, color: '#ff9800', delay: 0.3 },
+    { 
+      title: t('houses6Town:stats.total'), 
+      value: data.length, 
+      icon: Home, 
+      gradient: theme.palette.gradient, 
+      color: '#1a237e', 
+      delay: 0 
+    },
+    { 
+      title: t('houses6Town:stats.available'), 
+      value: data.filter(b => b.status === 'active').length, 
+      icon: Home, 
+      gradient: theme.palette.gradientSecondary, 
+      color: '#4caf50', 
+      delay: 0.1 
+    },
+    { 
+      title: t('houses6Town:stats.sold'), 
+      value: data.filter(b => b.status === 'sold').length, 
+      icon: Home, 
+      gradient: theme.palette.gradientInfo, 
+      color: '#f44336', 
+      delay: 0.2 
+    },
+    { 
+      title: t('houses6Town:stats.reserved'), 
+      value: data.filter(b => b.status === 'reserved').length, 
+      icon: Home, 
+      gradient: theme.palette.gradientAccent, 
+      color: '#ff9800', 
+      delay: 0.3 
+    },
   ]
 
   return (
@@ -86,13 +115,13 @@ const Buildings = () => {
       <Container maxWidth="xl">
         <PageHeader
           icon={Home}
-          title="Casas"
-          subtitle="Gestiona las casas del proyecto"
+          title={t('houses6Town:title')}
+          subtitle={t('houses6Town:subtitle')}
           actionButton={{
-            label: 'Crear Casa',
+            label: t('houses6Town:actions.add'),
             onClick: () => handleOpenDialog(),
             icon: <Home />,
-            tooltip: 'Crear nueva casa',
+            tooltip: t('houses6Town:actions.add'),
             disabled: loading
           }}
         />
@@ -105,7 +134,7 @@ const Buildings = () => {
           loading={loading}
           emptyState={
             <Box sx={{ py: 8, textAlign: 'center' }}>
-              <Alert severity="info">No hay casas creadas</Alert>
+              <Alert severity="info">{t('houses6Town:messages.noBuildings') || 'No hay casas creadas'}</Alert>
             </Box>
           }
         />
@@ -116,9 +145,9 @@ const Buildings = () => {
           onSaved={handleSaved}
           selectedBuilding={selectedBuilding}
           projectId={projectId}
-          lots={lots}        // ✅ Pasar lots
-          models={models}    // ✅ Pasar models
-          facades={facades}  // ✅ Pasar facades
+          lots={lots}
+          models={models}
+          facades={facades}
         />
 
         <Snackbar

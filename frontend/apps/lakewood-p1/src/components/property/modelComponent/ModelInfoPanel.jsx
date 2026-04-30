@@ -77,6 +77,20 @@ const ModelInfoPanel = ({
         >
           {t("modelNumber", { number: model.modelNumber, defaultValue: "Model #{{number}}" })}
         </Typography>
+
+        {/* ✅ NUEVO: Precio base del modelo */}
+<Typography
+  variant="h5"
+  sx={{
+    color: "#8CA551",
+    fontFamily: '"Poppins", sans-serif',
+    fontWeight: 700,
+    fontSize: "1.5rem",
+    mt: 1,
+  }}
+>
+  ${model.price ? (model.price / 1000).toFixed(0) + 'K' : 'N/A'}
+</Typography>
       </Box>
 
       {/* ✅ LÍNEA DECORATIVA */}

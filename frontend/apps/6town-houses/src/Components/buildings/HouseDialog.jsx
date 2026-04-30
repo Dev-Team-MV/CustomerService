@@ -1,6 +1,5 @@
-// @/Users/oficina/MV-CRM/CustomerService/frontend/apps/6town-houses/src/Components/buildings/HouseDialog.jsx
-
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Grid, TextField, MenuItem, Button, Box, Typography, IconButton, Alert
 } from '@mui/material'
@@ -35,6 +34,7 @@ const ImagePreviewCard = ({ url, onRemove }) => {
 }
 
 const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots = [], models = [], facades = [] }) => {
+  const { t } = useTranslation(['houses6Town', 'common'])
   const theme = useTheme()
 
   const [form, setForm] = useState(DEFAULT_FORM)
@@ -166,23 +166,33 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
 
   return (
     <ModalWrapper
-      open={open} onClose={onClose} icon={Home}
-      title={selectedBuilding ? 'Editar Casa' : 'Nueva Casa'}
-      subtitle={selectedBuilding ? `Editando ${selectedBuilding.name}` : 'Crea una nueva casa para el proyecto'}
+      open={open}
+      onClose={onClose}
+      icon={Home}
+      title={selectedBuilding ? t('houses6Town:dialog.editTitle') : t('houses6Town:dialog.addTitle')}
+      subtitle={selectedBuilding ? t('houses6Town:dialog.editSubtitle', { name: selectedBuilding.name }) : t('houses6Town:dialog.subtitle')}
       maxWidth="md"
       actions={
         <>
-          <Button onClick={onClose} disabled={saving} sx={{ borderRadius: 3, textTransform: 'none', fontWeight: 600, px: 3, py: 1.2, color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', border: `2px solid ${theme.palette.divider}`, '&:hover': { bgcolor: theme.palette.action.hover } }}>
-            Cancelar
+          <Button 
+            onClick={onClose} 
+            disabled={saving} 
+            sx={{ borderRadius: 3, textTransform: 'none', fontWeight: 600, px: 3, py: 1.2, color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', border: `2px solid ${theme.palette.divider}`, '&:hover': { bgcolor: theme.palette.action.hover } }}
+          >
+            {t('houses6Town:actions.cancel')}
           </Button>
-          <PrimaryButton onClick={handleSubmit} disabled={!isValid || saving} startIcon={<Home />}>
-            {saving ? 'Guardando...' : selectedBuilding ? 'Actualizar Casa' : 'Crear Casa'}
+          <PrimaryButton 
+            onClick={handleSubmit} 
+            disabled={!isValid || saving} 
+            startIcon={<Home />}
+          >
+            {saving ? '...' : selectedBuilding ? t('houses6Town:actions.update') : t('houses6Town:actions.create')}
           </PrimaryButton>
         </>
       }
     >
       <Alert severity="info" sx={{ mb: 3, borderRadius: 3, bgcolor: theme.palette.secondary.main + '14', border: `1px solid ${theme.palette.secondary.main}4D`, fontFamily: '"Poppins", sans-serif' }}>
-        Las casas no tienen apartamentos. La customización interna se define en el Catalog Config.
+        {t('houses6Town:dialog.info')}
       </Alert>
 
       <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
@@ -190,10 +200,10 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
           <TextField 
             fullWidth 
             required 
-            label="Nombre de la Casa" 
+            label={t('houses6Town:form.name')}
             value={form.name} 
             onChange={e => handleChange('name', e.target.value)} 
-            placeholder="Casa #1"
+            placeholder={t('houses6Town:form.namePlaceholder')}
             sx={fieldSx} 
           />
         </Grid>
@@ -202,27 +212,27 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
           <TextField
             fullWidth
             select
-            label="Estado"
+            label={t('houses6Town:form.status')}
             value={form.status}
             onChange={e => handleChange('status', e.target.value)}
             sx={fieldSx}
           >
-            <MenuItem value="active">Disponible</MenuItem>
-            <MenuItem value="reserved">Reservada</MenuItem>
-            <MenuItem value="sold">Vendida</MenuItem>
-            <MenuItem value="inactive">Inactiva</MenuItem>
+            <MenuItem value="active">{t('houses6Town:status.active')}</MenuItem>
+            <MenuItem value="reserved">{t('houses6Town:status.reserved')}</MenuItem>
+            <MenuItem value="sold">{t('houses6Town:status.sold')}</MenuItem>
+            <MenuItem value="inactive">{t('houses6Town:status.inactive')}</MenuItem>
           </TextField>
         </Grid>
 
         <Grid item xs={12}>
           <Alert severity="warning" icon={<AttachMoney />} sx={{ borderRadius: 3, fontFamily: '"Poppins", sans-serif' }}>
             <Typography variant="body2" fontWeight={600} mb={1}>
-              Configuración de Cotización
+              {t('houses6Town:form.quoteConfig')}
             </Typography>
             <Typography variant="caption">
               {facadeEnabled 
-                ? 'Selecciona el lote, modelo y fachada que se usarán para calcular el precio de esta casa en el quote flow.'
-                : 'Selecciona el lote y modelo que se usarán para calcular el precio de esta casa en el quote flow.'}
+                ? t('houses6Town:form.quoteConfigDesc')
+                : t('houses6Town:form.quoteConfigDescNoFacade')}
             </Typography>
           </Alert>
         </Grid>
@@ -231,14 +241,14 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
           <TextField
             select
             fullWidth
-            label="Lote"
+            label={t('houses6Town:form.lot')}
             value={form.quoteRef.lot}
             onChange={(e) => handleQuoteRefChange('lot', e.target.value)}
             sx={fieldSx}
-            helperText={lots.length === 0 ? 'No hay lotes creados' : 'Lote asignado'}
+            helperText={lots.length === 0 ? t('houses6Town:form.noLots') : t('houses6Town:form.lotHelper')}
           >
             <MenuItem value="">
-              <em>Sin asignar</em>
+              <em>{t('houses6Town:form.unassigned')}</em>
             </MenuItem>
             {lots.map((lot) => (
               <MenuItem key={lot._id} value={lot._id}>
@@ -252,7 +262,7 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
           <TextField
             select
             fullWidth
-            label="Modelo"
+            label={t('houses6Town:form.model')}
             value={form.quoteRef.model}
             onChange={(e) => {
               handleQuoteRefChange('model', e.target.value)
@@ -261,10 +271,10 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
               }
             }}
             sx={fieldSx}
-            helperText={models.length === 0 ? 'No hay modelos creados' : 'Modelo de casa'}
+            helperText={models.length === 0 ? t('houses6Town:form.noModels') : t('houses6Town:form.modelHelper')}
           >
             <MenuItem value="">
-              <em>Sin asignar</em>
+              <em>{t('houses6Town:form.unassigned')}</em>
             </MenuItem>
             {models.map((model) => (
               <MenuItem key={model._id} value={model._id}>
@@ -279,21 +289,21 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
             <TextField
               select
               fullWidth
-              label="Fachada"
+              label={t('houses6Town:form.facade')}
               value={form.quoteRef.facade}
               onChange={(e) => handleQuoteRefChange('facade', e.target.value)}
               sx={fieldSx}
               disabled={!form.quoteRef.model}
               helperText={
                 !form.quoteRef.model 
-                  ? 'Selecciona un modelo primero' 
+                  ? t('houses6Town:form.selectModel')
                   : availableFacades.length === 0 
-                    ? 'No hay fachadas para este modelo' 
-                    : 'Fachada de la casa'
+                    ? t('houses6Town:form.noFacades')
+                    : t('houses6Town:form.facadeHelper')
               }
             >
               <MenuItem value="">
-                <em>Sin asignar</em>
+                <em>{t('houses6Town:form.unassigned')}</em>
               </MenuItem>
               {availableFacades.map((facade) => (
                 <MenuItem key={facade._id} value={facade._id}>
@@ -308,10 +318,10 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
           <Grid item xs={12}>
             <Alert severity="success" sx={{ borderRadius: 3, fontFamily: '"Poppins", sans-serif' }}>
               <Typography variant="body2" fontWeight={600}>
-                Precio Base Estimado: ${estimatedPrice.toLocaleString()}
+                {t('houses6Town:form.estimatedPrice', { price: estimatedPrice.toLocaleString() })}
               </Typography>
               <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
-                Este es el precio base sin customizaciones del Catalog Config
+                {t('houses6Town:form.estimatedPriceDesc')}
               </Typography>
             </Alert>
           </Grid>
@@ -321,7 +331,7 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
           <Box sx={{ p: 2, bgcolor: theme.palette.background.default, borderRadius: 3, border: `1px solid ${theme.palette.cardBorder}` }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
               <Typography variant="subtitle2" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif' }}>
-                Renders Exteriores ({exteriorRenders.length}/10)
+                {t('houses6Town:form.renders')} ({exteriorRenders.length}/10)
               </Typography>
               <Button
                 variant="outlined"
@@ -330,7 +340,7 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
                 disabled={exteriorRenders.length >= 10}
                 sx={{ borderRadius: 2, textTransform: 'none', fontFamily: '"Poppins", sans-serif' }}
               >
-                Subir
+                {t('houses6Town:form.upload')}
                 <input type="file" hidden multiple accept="image/*" onChange={handleExteriorUpload} />
               </Button>
             </Box>
@@ -349,7 +359,7 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
 
             {exteriorRenders.length === 0 && (
               <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
-                No hay renders cargados
+                {t('houses6Town:form.noRenders')}
               </Typography>
             )}
           </Box>
@@ -357,7 +367,7 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
 
         <Grid item xs={12}>
           <Alert severity="warning" sx={{ borderRadius: 2, fontFamily: '"Poppins", sans-serif' }}>
-            <strong>Nota:</strong> El polígono se define en el Master Plan después de crear la casa.
+            <strong>{t('houses6Town:dialog.notePolygon')}</strong>
           </Alert>
         </Grid>
       </Grid>

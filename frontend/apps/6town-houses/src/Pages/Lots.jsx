@@ -1,6 +1,5 @@
-// @/Users/oficina/MV-CRM/CustomerService/frontend/apps/6town-houses/src/Pages/Lots.jsx
-
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Container, Snackbar, Alert } from '@mui/material'
 import { Landscape } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
@@ -12,6 +11,7 @@ import { getLotColumns } from '../Constants/Columns/lots'
 import LotDialog from '../Components/lots/LotDialog'
 
 const Lots = () => {
+  const { t } = useTranslation(['lots', 'common'])
   const theme = useTheme()
   const projectId = import.meta.env.VITE_PROJECT_ID
 
@@ -37,24 +37,41 @@ const Lots = () => {
     setSelectedLot(null)
   }
 
-const handleSaved = async (lotData) => {
-  try {
-    await handleLotCreated(lotData)
-    await refetch()  // ✅ Ya está haciendo refetch
-    handleCloseDialog()
-    setSnackbar({ open: true, message: selectedLot ? 'Lote actualizado' : 'Lote creado', severity: 'success' })
-  } catch (err) {
-    setSnackbar({ open: true, message: `Error: ${err.message}`, severity: 'error' })
+  const handleSaved = async (lotData) => {
+    try {
+      await handleLotCreated(lotData)
+      await refetch()
+      handleCloseDialog()
+      setSnackbar({ 
+        open: true, 
+        message: selectedLot ? t('lots:messages.updateSuccess') : t('lots:messages.createSuccess'), 
+        severity: 'success' 
+      })
+    } catch (err) {
+      setSnackbar({ 
+        open: true, 
+        message: t('lots:messages.error', { message: err.message }), 
+        severity: 'error' 
+      })
+    }
   }
-}
 
   const handleDelete = async (lot) => {
-    if (!window.confirm(`¿Eliminar lote ${lot.number}?`)) return
+    if (!window.confirm(t('lots:messages.deleteConfirm', { number: lot.number }))) return
     try {
       await deleteLotAPI(lot._id)
-      setSnackbar({ open: true, message: 'Lote eliminado', severity: 'success' })
+      await refetch()
+      setSnackbar({ 
+        open: true, 
+        message: t('lots:messages.deleteSuccess'), 
+        severity: 'success' 
+      })
     } catch (err) {
-      setSnackbar({ open: true, message: `Error: ${err.message}`, severity: 'error' })
+      setSnackbar({ 
+        open: true, 
+        message: t('lots:messages.error', { message: err.message }), 
+        severity: 'error' 
+      })
     }
   }
 
@@ -62,13 +79,42 @@ const handleSaved = async (lotData) => {
     onEdit: handleOpenDialog,
     onDelete: handleDelete,
     theme,
+    t
   })
 
   const stats = [
-    { title: 'Total Lotes', value: data.length, icon: Landscape, gradient: theme.palette.gradient, color: '#1a237e', delay: 0 },
-    { title: 'Disponibles', value: data.filter(l => l.status === 'available').length, icon: Landscape, gradient: theme.palette.gradientSecondary, color: '#4caf50', delay: 0.1 },
-    { title: 'Vendidos', value: data.filter(l => l.status === 'sold').length, icon: Landscape, gradient: theme.palette.gradientInfo, color: '#f44336', delay: 0.2 },
-    { title: 'Reservados', value: data.filter(l => l.status === 'reserved').length, icon: Landscape, gradient: theme.palette.gradientAccent, color: '#ff9800', delay: 0.3 },
+    { 
+      title: t('lots:stats.total'), 
+      value: data.length, 
+      icon: Landscape, 
+      gradient: theme.palette.gradient, 
+      color: '#1a237e', 
+      delay: 0 
+    },
+    { 
+      title: t('lots:stats.available'), 
+      value: data.filter(l => l.status === 'available').length, 
+      icon: Landscape, 
+      gradient: theme.palette.gradientSecondary, 
+      color: '#4caf50', 
+      delay: 0.1 
+    },
+    { 
+      title: t('lots:stats.sold'), 
+      value: data.filter(l => l.status === 'sold').length, 
+      icon: Landscape, 
+      gradient: theme.palette.gradientInfo, 
+      color: '#f44336', 
+      delay: 0.2 
+    },
+    { 
+      title: t('lots:stats.reserved'), 
+      value: data.filter(l => l.status === 'reserved').length, 
+      icon: Landscape, 
+      gradient: theme.palette.gradientAccent, 
+      color: '#ff9800', 
+      delay: 0.3 
+    },
   ]
 
   return (
@@ -76,13 +122,13 @@ const handleSaved = async (lotData) => {
       <Container maxWidth="xl">
         <PageHeader
           icon={Landscape}
-          title="Lotes"
-          subtitle="Gestiona el inventario de lotes del proyecto"
+          title={t('lots:title')}
+          subtitle={t('lots:subtitle')}
           actionButton={{
-            label: 'Crear Lote',
+            label: t('lots:actions.add'),
             onClick: () => handleOpenDialog(),
             icon: <Landscape />,
-            tooltip: 'Crear nuevo lote',
+            tooltip: t('lots:actions.add'),
             disabled: loading
           }}
         />
@@ -95,7 +141,7 @@ const handleSaved = async (lotData) => {
           loading={loading}
           emptyState={
             <Box sx={{ py: 8, textAlign: 'center' }}>
-              <Alert severity="info">No hay lotes creados</Alert>
+              <Alert severity="info">{t('lots:messages.noLots')}</Alert>
             </Box>
           }
         />

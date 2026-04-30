@@ -420,13 +420,14 @@ useEffect(() => {
   }
 
 const calculateFinancials = () => {
-  // ✅ El precio base es del lote (ya incluye el modelo asignado)
   const lotPrice = selectedLot?.price || 0
   
-  // ✅ Solo sumar las opciones adicionales (upgrade, balcony, storage)
+  // ✅ AGREGAR: Precio base del modelo
+  const modelBasePrice = selectedModel?.price || 0
+  
+  // Solo sumar las opciones adicionales (upgrade, balcony, storage)
   let optionsPrice = 0
 
-  // ✅ CORREGIDO: Usar availableOptions en lugar de selectedModel
   if (availableOptions) {
     if (options.upgrade && availableOptions.upgrades?.[0]) {
       optionsPrice += availableOptions.upgrades[0].price
@@ -442,8 +443,17 @@ const calculateFinancials = () => {
   const facadePrice = selectedFacade?.price || 0
   const deckPrice = selectedDeck?.price || 0
   
-  // ✅ listPrice = lotPrice (incluye modelo) + solo opciones adicionales + facade + deck
-  const calculatedListPrice = lotPrice + optionsPrice + facadePrice + deckPrice
+  // ✅ CORREGIDO: Sumar lote + modelo base + opciones + facade + deck
+  const calculatedListPrice = lotPrice + modelBasePrice + optionsPrice + facadePrice + deckPrice
+
+  console.log('💰 [PropertyContext] Precio calculado:', {
+    lotPrice,
+    modelBasePrice,
+    optionsPrice,
+    facadePrice,
+    deckPrice,
+    total: calculatedListPrice
+  })
 
   const discount = (calculatedListPrice * financials.discountPercent) / 100
   const presalePrice = calculatedListPrice - discount
@@ -465,7 +475,31 @@ const calculateFinancials = () => {
   }))
 }
 
-  const selectLot = (lot) => setSelectedLot(lot)
+  // const selectLot = (lot) => setSelectedLot(lot)
+  const selectLot = (lot) => {
+  setSelectedLot(lot)
+  
+  // ✅ Si el lote tiene un modelo asignado, seleccionarlo automáticamente
+  if (lot?.model) {
+    console.log('🏠 [PropertyContext] Lote tiene modelo asignado:', lot.model)
+    selectModel(lot.model)
+  } else {
+    console.log('⚠️ [PropertyContext] Lote sin modelo asignado')
+    // Limpiar selección de modelo si el lote no tiene uno
+    setSelectedModel(null)
+    setSelectedFacade(null)
+    setSelectedDeck(null)
+    setModelPricingOptions(null)
+    setAvailableOptions(null)
+    setOptions({ storage: false, balcony: false, upgrade: false })
+    setModelType('base')
+    setSelectedOptions({
+      upgradeId: null,
+      balconyId: null,
+      storageId: null
+    })
+  }
+}
 
   const selectModel = async (model) => {
     setSelectedModel(model)

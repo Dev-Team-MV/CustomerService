@@ -281,9 +281,23 @@ const ModelCard = ({
               >
                 #{model.modelNumber}
               </Typography>
-
+{/* ✅ NUEVO: Precio base del modelo */}
+<Typography
+  variant="h6"
+  sx={{
+    color: '#8CA551',
+    fontFamily: '"Poppins", sans-serif',
+    fontWeight: 700,
+    fontSize: '1.1rem',
+    mb: 1.5
+  }}
+>
+  ${model.price ? (model.price / 1000).toFixed(0) + 'K' : 'N/A'}
+</Typography>
+            </Box>
+          </Box>
 {hasPricingOptions(model) && (
-  <Box display="flex" gap={0.8} flexWrap="wrap">
+  <Box display="flex" gap={0.8} flexWrap="wrap" sx={{ mb: 2 }}>
     {model.balconies?.length > 0 && (
       <Chip
         icon={<Balcony sx={{ fontSize: 14 }} />}
@@ -337,8 +351,6 @@ const ModelCard = ({
     )}
   </Box>
 )}
-            </Box>
-          </Box>
 
           {/* SPECS */}
           <Box

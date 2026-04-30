@@ -1,5 +1,3 @@
-// @/Users/oficina/MV-CRM/CustomerService/frontend/apps/6town-houses/src/Constants/Columns/properties.jsx
-
 import { useMemo, useCallback } from 'react'
 import { IconButton, Chip, Box, Typography, LinearProgress, Tooltip, Button } from '@mui/material'
 import { Visibility, Edit, Delete, Construction, PhotoLibrary, Description as DescriptionIcon } from '@mui/icons-material'
@@ -29,10 +27,10 @@ const PhaseCell = ({ row, isAdmin, t, onOpenPhases }) => {
       <Box display="flex" alignItems="center" gap={1} mb={0.5}>
         <Construction sx={{ fontSize: 16, color: theme.palette.accent?.main || theme.palette.primary.main }} />
         <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>
-          Fase {p.current} / {p.total}
+          {t('property:phases.phase')} {p.current} {t('property:phases.of')} {p.total}
         </Typography>
       </Box>
-      <Tooltip title={`${p.completed} completadas`}>
+      <Tooltip title={t('property:phases.completedInfo', { completed: p.completed })}>
         <LinearProgress
           variant="determinate"
           value={p.percentage}
@@ -48,7 +46,7 @@ const PhaseCell = ({ row, isAdmin, t, onOpenPhases }) => {
         />
       </Tooltip>
       <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem', display: 'block', mt: 0.5 }}>
-        {p.completed} completadas • {p.percentage}%
+        {p.completed} {t('property:phases.completed')} • {p.percentage}{t('property:phases.percentage')}
       </Typography>
       <Button
         size="small"
@@ -59,10 +57,11 @@ const PhaseCell = ({ row, isAdmin, t, onOpenPhases }) => {
           mt: 1,
           fontSize: '0.7rem',
           textTransform: 'none',
-          fontWeight: 600
+          fontWeight: 600,
+          fontFamily: '"Poppins", sans-serif'
         }}
       >
-        {isAdmin ? 'Gestionar fases' : 'Ver progreso'}
+        {isAdmin ? t('property:actions.managePhases') : t('property:actions.viewProgress')}
       </Button>
     </Box>
   )
@@ -75,76 +74,109 @@ export const usePropertyColumns = ({ isAdmin = false, onViewDetails, onEdit, onD
     const columns = [
       {
         field: 'lot',
-        headerName: 'Lote',
+        headerName: t('property:table.lot'),
         minWidth: 120,
+        flex: 0.8,
         renderCell: ({ row }) => (
-          <Typography variant="body2">
+          <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
             {row.lot}
           </Typography>
         )
       },
       {
         field: 'model',
-        headerName: 'Modelo',
+        headerName: t('property:table.model'),
         minWidth: 150,
+        flex: 1,
         renderCell: ({ row }) => (
-          <Typography variant="body2">
+          <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
             {row.model}
           </Typography>
         )
       },
       {
-        field: 'resident',
-        headerName: 'Residente',
-        minWidth: 200,
+        field: 'facade',
+        headerName: t('property:table.facade'),
+        minWidth: 140,
+        flex: 0.9,
         renderCell: ({ row }) => (
-          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+          <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            {row.facade}
+          </Typography>
+        )
+      },
+      {
+        field: 'resident',
+        headerName: t('property:table.resident'),
+        minWidth: 200,
+        flex: 1.2,
+        renderCell: ({ row }) => (
+          <Typography variant="body2" sx={{ fontWeight: 500, fontFamily: '"Poppins", sans-serif' }}>
             {row.resident}
           </Typography>
         )
       },
       {
         field: 'status',
-        headerName: 'Estado',
+        headerName: t('property:table.status'),
         minWidth: 120,
+        flex: 0.9,
         renderCell: ({ row }) => {
-          const statusColors = {
-            pending: 'warning',
-            active: 'success',
-            sold: 'info',
-            cancelled: 'error'
+          const statusConfig = {
+            pending: { label: t('property:status.pending'), color: 'warning' },
+            active: { label: t('property:status.active'), color: 'success' },
+            sold: { label: t('property:status.sold'), color: 'info' },
+            cancelled: { label: t('property:status.cancelled'), color: 'error' },
+            reserved: { label: t('property:status.reserved'), color: 'secondary' }
           }
+          const config = statusConfig[row.status] || { label: row.status, color: 'default' }
           return (
             <Chip 
-              label={row.status || 'N/A'} 
-              color={statusColors[row.status] || 'default'} 
-              size="small" 
+              label={config.label} 
+              color={config.color} 
+              size="small"
+              sx={{ 
+                fontWeight: 600,
+                fontFamily: '"Poppins", sans-serif'
+              }}
             />
           )
         }
       },
       {
         field: 'phases',
-        headerName: 'Fases',
-        minWidth: 200,
-        renderCell: ({ row }) => <PhaseCell row={row} isAdmin={isAdmin} t={t} onOpenPhases={onOpenPhases} />
+        headerName: t('property:table.phase'),
+        minWidth: 220,
+        flex: 1.3,
+        renderCell: ({ row }) => (
+          <PhaseCell row={row} isAdmin={isAdmin} t={t} onOpenPhases={onOpenPhases} />
+        )
       },
       {
         field: 'price',
-        headerName: 'Precio',
+        headerName: t('property:table.price'),
         minWidth: 130,
+        flex: 1,
         renderCell: ({ row }) => (
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}>
             {row.price ? `$${row.price.toLocaleString()}` : 'N/A'}
           </Typography>
         )
       },
       {
         field: 'pending',
-        headerName: 'Pendiente',
+        headerName: t('property:table.pending'),
         minWidth: 130,
+        flex: 1,
         renderCell: ({ row }) => (
-          <Typography variant="body2" color="warning.main">
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              fontWeight: 600,
+              color: row.pending > 0 ? theme.palette.warning.main : theme.palette.success.main,
+              fontFamily: '"Poppins", sans-serif'
+            }}
+          >
             {row.pending ? `$${row.pending.toLocaleString()}` : '$0'}
           </Typography>
         )
@@ -154,12 +186,24 @@ export const usePropertyColumns = ({ isAdmin = false, onViewDetails, onEdit, onD
     if (isAdmin) {
       columns.push({
         field: 'contracts',
-        headerName: 'Contratos',
+        headerName: t('property:table.contracts'),
         align: 'center',
-        width: 100,
+        minWidth: 100,
+        flex: 0.7,
+        sortable: false,
         renderCell: ({ row }) => (
-          <Tooltip title="Gestionar contratos" placement="top">
-            <IconButton size="small" onClick={(e) => { e.stopPropagation(); onOpenContracts && onOpenContracts(row) }}>
+          <Tooltip title={t('property:actions.manageContracts')} placement="top">
+            <IconButton 
+              size="small" 
+              onClick={(e) => { 
+                e.stopPropagation()
+                onOpenContracts && onOpenContracts(row) 
+              }}
+              sx={{
+                color: theme.palette.primary.main,
+                '&:hover': { bgcolor: theme.palette.primary.main + '14' }
+              }}
+            >
               <DescriptionIcon sx={{ fontSize: 18 }} />
             </IconButton>
           </Tooltip>
@@ -169,20 +213,49 @@ export const usePropertyColumns = ({ isAdmin = false, onViewDetails, onEdit, onD
 
     columns.push({
       field: 'actions',
-      headerName: 'Acciones',
+      headerName: t('property:table.actions'),
       minWidth: 150,
+      flex: 1,
       align: 'center',
+      sortable: false,
       renderCell: ({ row }) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton size="small" onClick={() => onViewDetails?.(row)}>
-            <Visibility fontSize="small" />
-          </IconButton>
-          <IconButton size="small" onClick={() => onEdit?.(row)}>
-            <Edit fontSize="small" />
-          </IconButton>
-          <IconButton size="small" color="error" onClick={() => onDelete?.(row)}>
-            <Delete fontSize="small" />
-          </IconButton>
+        <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+          <Tooltip title={t('property:actions.viewDetails')} placement="top">
+            <IconButton 
+              size="small" 
+              onClick={() => onViewDetails?.(row)}
+              sx={{
+                color: theme.palette.primary.main,
+                '&:hover': { bgcolor: theme.palette.primary.main + '14' }
+              }}
+            >
+              <Visibility fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t('property:actions.edit')} placement="top">
+            <IconButton 
+              size="small" 
+              onClick={() => onEdit?.(row)}
+              sx={{
+                color: theme.palette.secondary.main,
+                '&:hover': { bgcolor: theme.palette.secondary.main + '14' }
+              }}
+            >
+              <Edit fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t('property:actions.deleteProperty')} placement="top">
+            <IconButton 
+              size="small" 
+              color="error" 
+              onClick={() => onDelete?.(row)}
+              sx={{
+                '&:hover': { bgcolor: '#f44336' + '14' }
+              }}
+            >
+              <Delete fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
       )
     })
