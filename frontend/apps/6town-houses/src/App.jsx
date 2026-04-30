@@ -30,6 +30,7 @@ import Lots from './Pages/Lots'
 import Models from './Pages/Models'
 import Properties from './Pages/Properties'
 import Payloads from './Pages/Payloads'
+import MyProperty from './Pages/MyProperty'
 
 import theme from './theme'
 
@@ -112,6 +113,7 @@ function App() {
               <Route path="/models" element={<Models />} />
               <Route path="/properties" element={<Properties />} />
               <Route path="/payloads" element={<Payloads />} />
+              <Route path="/my-property" element={<MyProperty />} />
 
               {/* Agrega aquí el resto de tus rutas privadas */}
             </Route>

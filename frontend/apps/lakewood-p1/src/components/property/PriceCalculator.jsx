@@ -256,7 +256,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
     mb: 0.5
   }}
 >
-  <strong style={{ color: '#333F1F' }}>{t('model', 'Model')}:</strong> {selectedModel ? `${selectedModel.model} - ${t('includedInLot', 'Included in lot')}` : t('notSelected', 'Not selected')}
+  <strong style={{ color: '#333F1F' }}>{t('model', 'Model')}:</strong> {selectedModel ? `${selectedModel.model} - $${selectedModel.price?.toLocaleString()}` : t('notSelected', 'Not selected')}
 </Typography>
             
             {/* OPTIONS CHIPS */}

@@ -3,8 +3,6 @@ import {
   Box,
   Paper,
   Typography,
-  Card,
-  CardContent,
   Chip,
   CircularProgress,
   Alert,
@@ -15,19 +13,12 @@ import {
   Drawer,
 } from "@mui/material";
 import {
-  Home,
-  Bed,
-  Bathtub,
-  SquareFoot,
   ChevronLeft,
   ChevronRight,
   Close,
-  InfoOutlined,
-  Visibility,
-  Tune,
   Deck,
+  Home,
 } from "@mui/icons-material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useProperty } from "@shared/context/PropertyContext";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
@@ -36,7 +27,6 @@ import { motion } from "framer-motion";
 import ModelCard from "./modelComponent/Modelcard";
 import ModelInfoPanel from "./modelComponent/ModelInfoPanel";
 import { useTranslation } from "react-i18next";
-
 
 const ModelSelector = () => {
   const {
@@ -47,20 +37,21 @@ const ModelSelector = () => {
     setOptions,
     getModelPricingInfo,
     selectedPricingOption,
-      // ✅ NUEVO: Agregar estas importaciones
-  availableOptions,
-  setSelectedOptions,
-  setModelType
+    availableOptions,
+    setSelectedOptions,
+    setModelType
   } = useProperty();
 
-    const { t } = useTranslation('models')
-
+  const { t } = useTranslation('models')
 
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isTablet = useMediaQuery(theme.breakpoints.down("lg"));
   const isLarge = useMediaQuery(theme.breakpoints.between("lg", "xl"));
+
+  // ✅ Obtener projectId del environment o del contexto
+  const projectId = import.meta.env.VITE_PROJECT_ID;
 
   const [models, setModels] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,86 +78,90 @@ const ModelSelector = () => {
         icon: Deck,
       };
 
-  // useEffect(() => {
-  //   fetchModels();
-  // }, []);
-
   useEffect(() => {
-  if (selectedLot) {
-    fetchModels();
-  }
-}, [selectedLot]); // ✅ Agregar selectedLot como dependencia
-
-  // const fetchModels = async () => {
-
-  //   try {
-  //     setLoading(true);
-  //     const response = await api.get("/models");
-  //     const activeModels = response.data.filter((m) => m.status === "active");
-  //     setModels(activeModels);
-
-  //     const indices = {};
-  //     activeModels.forEach((model) => {
-  //       indices[model._id] = 0;
-  //     });
-  //     setImageIndices(indices);
-  //   } catch (error) {
-  //     console.error("Error fetching models:", error);
-  //     setError("Failed to load models");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+    if (selectedLot) {
+      fetchModels();
+    }
+  }, [selectedLot, projectId]);
 
   const fetchModels = async () => {
-  try {
-    setLoading(true);
-    const response = await api.get("/models");
-    const activeModels = response.data.filter((m) => m.status === "active");
-    
-    // ✅ Si el lote tiene modelo asignado, mostrar solo ese
-    let filteredModels = activeModels;
-    
-    if (selectedLot?.model) {
-      const assignedModelId = typeof selectedLot.model === 'object' 
-        ? selectedLot.model._id 
-        : selectedLot.model;
-      
-      filteredModels = activeModels.filter(m => m._id === assignedModelId);
-      
-      console.log('🏠 Lote con modelo asignado:', {
-        lotNumber: selectedLot.number,
-        assignedModelId,
-        filteredModels: filteredModels.map(m => m.model)
-      });
-    }
-    
-    setModels(filteredModels);
+    try {
+      setLoading(true);
+      setError(null);
 
-    const indices = {};
-    filteredModels.forEach((model) => {
-      indices[model._id] = 0;
-    });
-    setImageIndices(indices);
-    
-    // ✅ Auto-seleccionar si solo hay un modelo (el asignado)
-    if (filteredModels.length === 1) {
-      selectModel(filteredModels[0]);
+      console.log('🔍 Fetching models with projectId:', projectId);
+
+      // ✅ NUEVO: Pasar projectId como query parameter
+      const response = await api.get("/models", {
+        params: {
+          projectId,
+          status: 'active'
+        }
+      });
+
+      let activeModels = Array.isArray(response.data) ? response.data : [];
+      
+      // ✅ Filtrar por status active si no lo hace el backend
+      activeModels = activeModels.filter((m) => m.status === "active");
+
+      console.log('📦 Modelos obtenidos del servidor:', {
+        projectId,
+        total: activeModels.length,
+        models: activeModels.map(m => ({ id: m._id, name: m.model, project: m.projectId }))
+      });
+
+      // ✅ Si el lote tiene modelo asignado, mostrar solo ese
+      let filteredModels = activeModels;
+      
+      if (selectedLot?.model) {
+        const assignedModelId = typeof selectedLot.model === 'object' 
+          ? selectedLot.model._id 
+          : selectedLot.model;
+        
+        filteredModels = activeModels.filter(m => m._id === assignedModelId);
+        
+        console.log('🏠 Lote con modelo asignado:', {
+          lotNumber: selectedLot.number,
+          assignedModelId,
+          filteredModels: filteredModels.map(m => m.model)
+        });
+      }
+      
+      setModels(filteredModels);
+
+      // ✅ Inicializar índices de imágenes
+      const indices = {};
+      filteredModels.forEach((model) => {
+        indices[model._id] = 0;
+      });
+      setImageIndices(indices);
+      
+      // ✅ Auto-seleccionar si solo hay un modelo (el asignado)
+      if (filteredModels.length === 1) {
+        console.log('✅ Auto-seleccionando modelo único:', filteredModels[0].model);
+        selectModel(filteredModels[0]);
+      }
+
+      if (filteredModels.length === 0) {
+        console.warn('⚠️ No models found for projectId:', projectId);
+        setError(t('noModelsForProject', 'No models available for this project'));
+      }
+    } catch (error) {
+      console.error("❌ Error fetching models:", error);
+      setError(error.response?.data?.message || t('errorLoadingModels', 'Failed to load models'));
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error fetching models:", error);
-    setError("Failed to load models");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleSelectModel = (model) => {
+    console.log('✅ Modelo seleccionado:', model.model);
     selectModel(model);
     if (isMobile) setDrawerOpen(true);
   };
 
   const handleDeselectModel = () => {
+    console.log('❌ Modelo deseleccionado');
     selectModel(null);
     setOptions({ upgrade: false, balcony: false, storage: false });
     setDrawerOpen(false);
@@ -176,49 +171,41 @@ const ModelSelector = () => {
     setOpenCustomizationModal(true);
   };
 
-  // const handleConfirmCustomization = ({
-  //   model,
-  //   options: selectedOptions,
-  //   totalPrice,
-  // }) => {
-  //   setOptions(selectedOptions);
-  //   setOpenCustomizationModal(false);
-  // };
   const handleConfirmCustomization = ({
-  model,
-  options: selectedOptions,
-  totalPrice,
-}) => {
-  // ✅ Actualizar opciones locales
-  setOptions(selectedOptions);
-  
-  // ✅ NUEVO: Actualizar selectedOptions en el contexto con los IDs correctos
-  if (availableOptions) {
-    setSelectedOptions({
-      upgradeId: selectedOptions.upgrade 
-        ? availableOptions?.upgrades?.[0]?._id || null 
-        : null,
-      balconyId: selectedOptions.balcony 
-        ? availableOptions?.balconies?.[0]?._id || null 
-        : null,
-      storageId: selectedOptions.storage 
-        ? availableOptions?.storages?.[0]?._id || null 
-        : null
-    });
+    model,
+    options: selectedOptions,
+    totalPrice,
+  }) => {
+    // ✅ Actualizar opciones locales
+    setOptions(selectedOptions);
     
-    // ✅ Actualizar modelType
-    setModelType(selectedOptions.upgrade ? 'upgrade' : 'base');
+    // ✅ Actualizar selectedOptions en el contexto con los IDs correctos
+    if (availableOptions) {
+      setSelectedOptions({
+        upgradeId: selectedOptions.upgrade 
+          ? availableOptions?.upgrades?.[0]?._id || null 
+          : null,
+        balconyId: selectedOptions.balcony 
+          ? availableOptions?.balconies?.[0]?._id || null 
+          : null,
+        storageId: selectedOptions.storage 
+          ? availableOptions?.storages?.[0]?._id || null 
+          : null
+      });
+      
+      // ✅ Actualizar modelType
+      setModelType(selectedOptions.upgrade ? 'upgrade' : 'base');
+      
+      console.log('✅ Opciones confirmadas desde modal:', {
+        selectedOptions,
+        upgradeId: selectedOptions.upgrade ? availableOptions?.upgrades?.[0]?._id : null,
+        balconyId: selectedOptions.balcony ? availableOptions?.balconies?.[0]?._id : null,
+        storageId: selectedOptions.storage ? availableOptions?.storages?.[0]?._id : null
+      });
+    }
     
-    console.log('✅ Opciones confirmadas desde modal:', {
-      selectedOptions,
-      upgradeId: selectedOptions.upgrade ? availableOptions?.upgrades?.[0]?._id : null,
-      balconyId: selectedOptions.balcony ? availableOptions?.balconies?.[0]?._id : null,
-      storageId: selectedOptions.storage ? availableOptions?.storages?.[0]?._id : null
-    });
-  }
-  
-  setOpenCustomizationModal(false);
-};
+    setOpenCustomizationModal(false);
+  };
 
   const handleViewDetails = (e, modelId) => {
     e.stopPropagation();
@@ -302,7 +289,7 @@ const ModelSelector = () => {
           border: "1px solid #e0e0e0",
         }}
       >
-        <Box display="flex" justifyContent="center">
+        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
           <CircularProgress sx={{ color: "#333F1F" }} />
         </Box>
       </Paper>
@@ -330,7 +317,6 @@ const ModelSelector = () => {
     (pricingInfo?.hasBalcony && selectedModel?.balconies?.length > 0) ||
     (pricingInfo?.hasUpgrade && selectedModel?.upgrades?.length > 0) ||
     (pricingInfo?.hasStorage && selectedModel?.storages?.length > 0);
-
 
   return (
     <>
@@ -398,7 +384,10 @@ const ModelSelector = () => {
               </Button>
             )}
             <Chip
-              label={t("optionsCount", { count: models.length, defaultValue: `${models.length} OPTIONS` })}
+              label={t("optionsCount", { 
+                count: models.length, 
+                defaultValue: `${models.length} OPTIONS` 
+              })}
               size="small"
               sx={{
                 bgcolor: "rgba(140, 165, 81, 0.12)",
@@ -689,14 +678,14 @@ const ModelSelector = () => {
       </Drawer>
 
       {/* Customization Modal */}
-<ModelCustomizationModal
-  open={openCustomizationModal}
-  model={selectedModel}
-  initialOptions={options}
-  onClose={() => setOpenCustomizationModal(false)}
-  onConfirm={handleConfirmCustomization}
-  labels={balconyLabels} // <-- pásalo aquí
-/>
+      <ModelCustomizationModal
+        open={openCustomizationModal}
+        model={selectedModel}
+        initialOptions={options}
+        onClose={() => setOpenCustomizationModal(false)}
+        onConfirm={handleConfirmCustomization}
+        labels={balconyLabels}
+      />
     </>
   );
 };

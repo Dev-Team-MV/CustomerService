@@ -23,7 +23,10 @@
         "masterPlan": "Master Plan",
         "myapartment": "My Apartments",
         "agora": "Agora",
-        "mapInventory": "Map Inventory"
+        "mapInventory": "Map Inventory",
+        "building": "Houses",
+        "lots": "Lots",
+        "catalogConfig": "Catalog Config"
     },
     "tooltips": {
         "openMenu": "Open menu",

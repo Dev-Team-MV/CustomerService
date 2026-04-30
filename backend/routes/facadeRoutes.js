@@ -13,7 +13,7 @@ import {
   updateFacadeDeck,
   deleteFacadeDeck
 } from '../controllers/deckController.js'
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { protect, admin, optionalProtect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -80,7 +80,7 @@ const router = express.Router()
  *         description: Facade created
  */
 router.route('/')
-  .get(getAllFacades)
+  .get(optionalProtect, getAllFacades)
   .post(protect, admin, createFacade)
 
 /**

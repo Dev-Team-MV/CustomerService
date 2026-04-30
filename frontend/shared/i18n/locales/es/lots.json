@@ -5,7 +5,8 @@
     "total": "Total de Lotes",
     "available": "Disponibles",
     "pending": "Pendientes",
-    "sold": "Vendidos"
+    "sold": "Vendidos",
+    "reserved": "Apartados"
   },
   "table": {
     "lotNumber": "NÚMERO DE LOTE",
@@ -21,6 +22,7 @@
     "available": "Disponible",
     "pending": "Pendiente",
     "sold": "Vendido"
+
   },
   "actions": {
     "add": "Agregar Lote",
@@ -45,7 +47,9 @@
     "status": "Estado",
     "project": "Proyecto",
     "projectHelp": "Selecciona el proyecto al que pertenece este lote",
-    "inventoryColor": "Color de Inventario"
+    "inventoryColor": "Color de Inventario",
+    "model": "Modelo",
+    "modelHelper": "Selecciona el modelo asociado a este lote para cálculos de precio y configuración"
   },
   "confirmDelete": "¿Seguro que deseas eliminar este lote?",
   "mapInventory": {
@@ -57,4 +61,6 @@
       "red": "Vendido"
     }
   }
+
+
 }

@@ -5,7 +5,8 @@
     "total": "Total Lots",
     "available": "Available",
     "pending": "Pending",
-    "sold": "Sold"
+    "sold": "Sold",
+    "reserved": "Reserved"
   },
   "table": {
     "lotNumber": "LOT NUMBER",
@@ -45,7 +46,9 @@
     "status": "Status",
     "project": "Project",
     "projectHelp": "Select the project this lot belongs to",
-    "inventoryColor": "Inventory Color"
+    "inventoryColor": "Inventory Color",
+    "model": "Model",
+    "modelHelper": "Select the model associated with this lot for price calculations and configuration"
   },
   "confirmDelete": "Are you sure you want to delete this lot?",
   "mapInventory": {

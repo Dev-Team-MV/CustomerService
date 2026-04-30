@@ -25,6 +25,7 @@ const GetYourQuoteContent = () => {
   const { catalogConfig, loading: loadingConfig } = useCatalogConfig(projectId, { activeOnly: true })
 
   const {
+    financials,
     updateFinancials,
     setSelectedBuilding: setContextBuilding,
     setSelectedApartment: setContextApartment,
@@ -85,13 +86,28 @@ const GetYourQuoteContent = () => {
 
   const facadeEnabled = projectData?.facadeEnabled ?? true
  
-  const basePrice = useMemo(() => {
-    if (!selectedBuilding) return 0
-    const lotPrice = selectedBuilding.lot?.price || 0
-    const modelPrice = selectedBuilding.model?.price || 0
-    const facadePrice = facadeEnabled && selectedBuilding.facade?.price ? selectedBuilding.facade.price : 0
-    return lotPrice + modelPrice + facadePrice
-  }, [selectedBuilding, facadeEnabled])
+const basePrice = useMemo(() => {
+  if (!selectedBuilding) return 0
+  
+  console.log('🏠 ===== CALCULANDO BASE PRICE =====')
+  console.log('📦 selectedBuilding completo:', selectedBuilding)
+  console.log('📍 Lote:', selectedBuilding.lot)
+  console.log('🏗️ Modelo:', selectedBuilding.model)
+  console.log('🎨 Fachada:', selectedBuilding.facade)
+  console.log('⚙️ facadeEnabled:', facadeEnabled)
+  
+  const lotPrice = selectedBuilding.lot?.price || 0
+  const modelPrice = selectedBuilding.model?.price || 0
+  const facadePrice = facadeEnabled && selectedBuilding.facade?.price ? selectedBuilding.facade.price : 0
+  
+  console.log('💰 Precio Lote:', lotPrice)
+  console.log('💰 Precio Modelo:', modelPrice)
+  console.log('💰 Precio Fachada:', facadePrice)
+  console.log('💰 BASE PRICE TOTAL:', lotPrice + modelPrice + facadePrice)
+  console.log('=====================================')
+  
+  return lotPrice + modelPrice + facadePrice
+}, [selectedBuilding, facadeEnabled])
 
   const estimatedPrice = useMemo(() => {
     if (!catalogConfig || !selectedBuilding || Object.keys(selectedOptions).length === 0) return null
@@ -107,7 +123,7 @@ const GetYourQuoteContent = () => {
   const mockApartment = useMemo(() => {
     if (!selectedBuilding) return null
     
-    const price = estimatedPrice?.totalPrice || quoteResult?.breakdown?.totalPrice || basePrice || 0
+const price = estimatedPrice?.totalPrice || quoteResult?.totals?.totalPrice || basePrice || 0
     
     return {
       _id: selectedBuilding._id,
@@ -129,33 +145,138 @@ const GetYourQuoteContent = () => {
     }
   }, [mockApartment, setContextApartment])
 
-  // Actualizar financials cuando cambia el precio estimado
-  useEffect(() => {
-    if (estimatedPrice && currentStep >= 1) {
-      const totalPrice = estimatedPrice.totalPrice
-      updateFinancials({
-        listPrice: totalPrice,
-        discount: 0,
-        discountPercent: 0,
-        presalePrice: totalPrice,
-        totalDownPayment: totalPrice * 0.2,
-        downPaymentPercent: 20,
-        initialDownPayment: totalPrice * 0.1,
-        initialDownPaymentPercent: 10,
-        monthlyPayment: 0,
-        monthlyPaymentPercent: 0,
-        mortgage: totalPrice * 0.8,
-        pending: 0
-      })
-    }
-  }, [estimatedPrice, currentStep])
+// @/Users/oficina/MV-CRM/CustomerService/frontend/apps/6town-houses/src/Pages/GetYourQuote.jsx
 
-  const handleBuildingSelect = (building) => {
-    setSelectedBuilding(building)
-    setContextBuilding(building)
+// Modificar el useEffect de basePrice (línea 150-172)
+useEffect(() => {
+  if (selectedBuilding && basePrice > 0) {
+    // Usar los porcentajes actuales del usuario, o valores por defecto si no existen
+    const downPaymentPercent = financials.downPaymentPercent || 20
+    const initialDownPaymentPercent = financials.initialDownPaymentPercent || 10
+    const monthlyPaymentPercent = financials.monthlyPaymentPercent || 0
+    
+    const discount = (basePrice * (financials.discountPercent || 0)) / 100
+    const presalePrice = basePrice - discount
+    const totalDownPayment = (presalePrice * downPaymentPercent) / 100
+    const initialDownPayment = (presalePrice * initialDownPaymentPercent) / 100
+    const mortgage = presalePrice - totalDownPayment
+    const monthlyPayment = (mortgage * monthlyPaymentPercent) / 100
+    
+    updateFinancials({
+      listPrice: basePrice,
+      discount,
+      discountPercent: financials.discountPercent || 0,
+      presalePrice,
+      totalDownPayment,
+      downPaymentPercent,
+      initialDownPayment,
+      initialDownPaymentPercent,
+      monthlyPayment,
+      monthlyPaymentPercent,
+      mortgage,
+      pending: presalePrice - initialDownPayment
+    })
+    
+    console.log('✅ Financials actualizados con base price preservando porcentajes del usuario')
+    console.log('====================================================')
+  }
+}, [selectedBuilding, basePrice])
+
+// Modificar el useEffect de estimatedPrice (línea 177-196)
+useEffect(() => {
+  if (estimatedPrice && currentStep >= 1) {
+    const totalPrice = estimatedPrice.totalPrice
+    
+    // Usar los porcentajes actuales del usuario
+    const downPaymentPercent = financials.downPaymentPercent || 20
+    const initialDownPaymentPercent = financials.initialDownPaymentPercent || 10
+    const monthlyPaymentPercent = financials.monthlyPaymentPercent || 0
+    
+    const discount = (totalPrice * (financials.discountPercent || 0)) / 100
+    const presalePrice = totalPrice - discount
+    const totalDownPayment = (presalePrice * downPaymentPercent) / 100
+    const initialDownPayment = (presalePrice * initialDownPaymentPercent) / 100
+    const mortgage = presalePrice - totalDownPayment
+    const monthlyPayment = (mortgage * monthlyPaymentPercent) / 100
+    
+    updateFinancials({
+      listPrice: totalPrice,
+      discount,
+      discountPercent: financials.discountPercent || 0,
+      presalePrice,
+      totalDownPayment,
+      downPaymentPercent,
+      initialDownPayment,
+      initialDownPaymentPercent,
+      monthlyPayment,
+      monthlyPaymentPercent,
+      mortgage,
+      pending: presalePrice - initialDownPayment
+    })
+  }
+}, [estimatedPrice, currentStep])
+
+// Modificar handleBuildingSelect para hacer fetch de lot, model y facade
+const handleBuildingSelect = async (building) => {
+  console.log('🎯 ===== CASA SELECCIONADA =====')
+  console.log('🏠 Building completo:', building)
+  console.log('📋 Building name:', building.name)
+  console.log('🔗 Building quoteRef:', building.quoteRef)
+  console.log('📍 Lote ID:', building.quoteRef?.lot)
+  console.log('🏗️ Modelo ID:', building.quoteRef?.model)
+  console.log('🎨 Fachada ID:', building.quoteRef?.facade)
+  
+  try {
+    // Fetch lot, model y facade por sus IDs
+    const lotId = building.quoteRef?.lot
+    const modelId = building.quoteRef?.model
+    const facadeId = building.quoteRef?.facade
+    
+    console.log('🔄 Fetching datos completos...')
+    
+    const [lotData, modelData, facadeData] = await Promise.all([
+      lotId ? api.get(`/lots/${lotId}`).then(res => res.data).catch(err => {
+        console.error('Error fetching lot:', err)
+        return null
+      }) : Promise.resolve(null),
+      modelId ? api.get(`/models/${modelId}`).then(res => res.data).catch(err => {
+        console.error('Error fetching model:', err)
+        return null
+      }) : Promise.resolve(null),
+      facadeId ? api.get(`/facades/${facadeId}`).then(res => res.data).catch(err => {
+        console.error('Error fetching facade:', err)
+        return null
+      }) : Promise.resolve(null)
+    ])
+    
+    console.log('✅ Datos obtenidos:')
+    console.log('📍 Lote:', lotData)
+    console.log('🏗️ Modelo:', modelData)
+    console.log('🎨 Fachada:', facadeData)
+    console.log('💰 Lote price:', lotData?.price)
+    console.log('💰 Modelo price:', modelData?.price)
+    console.log('💰 Fachada price:', facadeData?.price)
+    
+    // Poblar el building con los datos completos
+    const populatedBuilding = {
+      ...building,
+      lot: lotData,
+      model: modelData,
+      facade: facadeData
+    }
+    
+    console.log('🏠 Building poblado:', populatedBuilding)
+    console.log('================================')
+    
+    setSelectedBuilding(populatedBuilding)
+    setContextBuilding(populatedBuilding)
     setCurrentStep(1)
     setError(null)
+  } catch (error) {
+    console.error('❌ Error al obtener datos de la casa:', error)
+    setError('Error al cargar los datos de la casa. Por favor intenta de nuevo.')
   }
+}
 
   const handleCustomizationComplete = async (data) => {
     try {
@@ -180,23 +301,24 @@ const GetYourQuoteContent = () => {
 
       setQuoteResult(response)
 
-      if (response.breakdown?.totalPrice) {
-        const totalPrice = response.breakdown.totalPrice
-        updateFinancials({
-          listPrice: totalPrice,
-          discount: 0,
-          discountPercent: 0,
-          presalePrice: totalPrice,
-          totalDownPayment: totalPrice * 0.2,
-          downPaymentPercent: 20,
-          initialDownPayment: totalPrice * 0.1,
-          initialDownPaymentPercent: 10,
-          monthlyPayment: 0,
-          monthlyPaymentPercent: 0,
-          mortgage: totalPrice * 0.8,
-          pending: 0
-        })
-      }
+// Líneas 183-198 - Corregir handleCustomizationComplete
+if (response.totals?.totalPrice) {
+  const totalPrice = response.totals.totalPrice
+  updateFinancials({
+    listPrice: totalPrice,
+    discount: 0,
+    discountPercent: 0,
+    presalePrice: totalPrice,
+    totalDownPayment: totalPrice * 0.2,
+    downPaymentPercent: 20,
+    initialDownPayment: totalPrice * 0.1,
+    initialDownPaymentPercent: 10,
+    monthlyPayment: 0,
+    monthlyPaymentPercent: 0,
+    mortgage: totalPrice * 0.8,
+    pending: 0
+  })
+}
 
       setCurrentStep(2)
     } catch (err) {
@@ -409,6 +531,21 @@ return (
                           ))}
                         </>
                       )}
+                      {quoteResult.totals?.totalPrice && (
+  <>
+    <Grid item xs={12}><Divider sx={{ my: 1 }} /></Grid>
+    <Grid item xs={12}>
+      <Box display="flex" justifyContent="space-between" py={1}>
+        <Typography variant="h6" fontWeight={700} color="primary">
+          Total
+        </Typography>
+        <Typography variant="h6" fontWeight={700} color="primary">
+          ${quoteResult.totals.totalPrice.toLocaleString()}
+        </Typography>
+      </Box>
+    </Grid>
+  </>
+)}
                     </Grid>
                   </Paper>
 

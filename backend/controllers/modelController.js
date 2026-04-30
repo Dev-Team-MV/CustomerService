@@ -1,6 +1,14 @@
 import Model from '../models/Model.js'
 import { normalizeImageArray } from '../utils/imageUtils.js'
 import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
+import mongoose from 'mongoose'
+
+const isSuperadmin = (req) => req.user?.role === 'superadmin'
+const isValidProjectIdParam = (value) =>
+  typeof value === 'string' &&
+  value !== 'undefined' &&
+  value !== 'null' &&
+  mongoose.Types.ObjectId.isValid(value)
 
 // Helper: format images to { exterior: [{ url, isPublic }], interior: [...] }
 const formatImages = (images) => {
@@ -368,7 +376,15 @@ export const getAllModels = async (req, res) => {
   try {
     const { status, projectId } = req.query
     const filter = {}
-    if (projectId) filter.project = projectId
+    if (!projectId && !isSuperadmin(req)) {
+      return res.status(400).json({ message: 'projectId query param is required' })
+    }
+    if (projectId) {
+      if (!isValidProjectIdParam(projectId)) {
+        return res.status(400).json({ message: 'Invalid projectId query param' })
+      }
+      filter.project = projectId
+    }
     if (status) filter.status = status
 
     const models = await Model.find(filter).sort({ model: 1 }).lean()

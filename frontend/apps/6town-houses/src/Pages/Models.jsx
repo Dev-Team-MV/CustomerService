@@ -1,6 +1,5 @@
-// @/Users/oficina/MV-CRM/CustomerService/frontend/apps/6town-houses/src/Pages/Models.jsx
-
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box, Container, Paper, Tabs, Tab, Button,
   Typography, CircularProgress, Alert, Snackbar
@@ -24,6 +23,7 @@ const DEFAULT_FORM = {
 }
 
 const Models = () => {
+  const { t } = useTranslation(['houses6Town', 'common'])
   const theme = useTheme()
   const projectId = import.meta.env.VITE_PROJECT_ID
 
@@ -44,82 +44,86 @@ const Models = () => {
     }
   }, [loadingCatalog, catalogConfig])
 
-const fetchModelData = async () => {
-  try {
-    setLoading(true)
-    
-    const modelsRes = await api.get('/models', { params: { projectId } })
-    const projectModel = modelsRes.data[0]
-    
-    if (!projectModel) {
-      const floorsFromCatalog = transformCatalogToFloors(catalogConfig)
-      console.log('🏗️ Creating new model with floors from catalog:', floorsFromCatalog) // Debug
+  const fetchModelData = async () => {
+    try {
+      setLoading(true)
       
-      const newModel = await api.post('/models', {
-        projectId,
-        model: '6Town Houses Model',
-        modelNumber: 'M1',
-        price: 280000,
-        bedrooms: 3,
-        bathrooms: 3,
-        sqft: 1800,
-        stories: 4,
-        status: 'active',
-        floors: floorsFromCatalog
-      })
+      const modelsRes = await api.get('/models', { params: { projectId } })
+      const projectModel = modelsRes.data[0]
       
-      setModel(newModel.data)
-      setFormData({
-        model: newModel.data.model,
-        modelNumber: newModel.data.modelNumber,
-        price: newModel.data.price,
-        bedrooms: newModel.data.bedrooms,
-        bathrooms: newModel.data.bathrooms,
-        sqft: newModel.data.sqft,
-        stories: newModel.data.stories
-      })
-      setFloors(newModel.data.floors || floorsFromCatalog)
-      console.log('✅ New model floors set:', newModel.data.floors || floorsFromCatalog) // Debug
-    } else {
-      setModel(projectModel)
-      setFormData({
-        model: projectModel.model || '',
-        modelNumber: projectModel.modelNumber || '',
-        price: projectModel.price || '',
-        bedrooms: projectModel.bedrooms || '',
-        bathrooms: projectModel.bathrooms || '',
-        sqft: projectModel.sqft || '',
-        stories: projectModel.stories || '4'
-      })
-      
-      try {
-        const floorsRes = await api.get(`/models/${projectModel._id}/floors`)
-        const existingFloors = floorsRes.data.floors || []
-        
-        console.log('📦 Floors from API:', existingFloors) // Debug
-        
-        if (existingFloors.length === 0) {
-          const floorsFromCatalog = transformCatalogToFloors(catalogConfig)
-          console.log('📚 Using catalog floors (API returned empty):', floorsFromCatalog) // Debug
-          setFloors(floorsFromCatalog)
-        } else {
-          console.log('✅ Using existing floors from model') // Debug
-          setFloors(existingFloors)
-        }
-      } catch (err) {
-        console.warn('⚠️ No floors found, using catalog:', err)
+      if (!projectModel) {
         const floorsFromCatalog = transformCatalogToFloors(catalogConfig)
-        console.log('📚 Catalog floors:', floorsFromCatalog) // Debug
-        setFloors(floorsFromCatalog)
+        console.log('🏗️ Creating new model with floors from catalog:', floorsFromCatalog)
+        
+        const newModel = await api.post('/models', {
+          projectId,
+          model: '6Town Houses Model',
+          modelNumber: 'M1',
+          price: 280000,
+          bedrooms: 3,
+          bathrooms: 3,
+          sqft: 1800,
+          stories: 4,
+          status: 'active',
+          floors: floorsFromCatalog
+        })
+        
+        setModel(newModel.data)
+        setFormData({
+          model: newModel.data.model,
+          modelNumber: newModel.data.modelNumber,
+          price: newModel.data.price,
+          bedrooms: newModel.data.bedrooms,
+          bathrooms: newModel.data.bathrooms,
+          sqft: newModel.data.sqft,
+          stories: newModel.data.stories
+        })
+        setFloors(newModel.data.floors || floorsFromCatalog)
+        console.log('✅ New model floors set:', newModel.data.floors || floorsFromCatalog)
+      } else {
+        setModel(projectModel)
+        setFormData({
+          model: projectModel.model || '',
+          modelNumber: projectModel.modelNumber || '',
+          price: projectModel.price || '',
+          bedrooms: projectModel.bedrooms || '',
+          bathrooms: projectModel.bathrooms || '',
+          sqft: projectModel.sqft || '',
+          stories: projectModel.stories || '4'
+        })
+        
+        try {
+          const floorsRes = await api.get(`/models/${projectModel._id}/floors`)
+          const existingFloors = floorsRes.data.floors || []
+          
+          console.log('📦 Floors from API:', existingFloors)
+          
+          if (existingFloors.length === 0) {
+            const floorsFromCatalog = transformCatalogToFloors(catalogConfig)
+            console.log('📚 Using catalog floors (API returned empty):', floorsFromCatalog)
+            setFloors(floorsFromCatalog)
+          } else {
+            console.log('✅ Using existing floors from model')
+            setFloors(existingFloors)
+          }
+        } catch (err) {
+          console.warn('⚠️ No floors found, using catalog:', err)
+          const floorsFromCatalog = transformCatalogToFloors(catalogConfig)
+          console.log('📚 Catalog floors:', floorsFromCatalog)
+          setFloors(floorsFromCatalog)
+        }
       }
+    } catch (err) {
+      console.error('Error fetching model:', err)
+      setSnackbar({ 
+        open: true, 
+        message: t('houses6Town:model.messages.errorLoading'), 
+        severity: 'error' 
+      })
+    } finally {
+      setLoading(false)
     }
-  } catch (err) {
-    console.error('Error fetching model:', err)
-    setSnackbar({ open: true, message: 'Error al cargar el modelo', severity: 'error' })
-  } finally {
-    setLoading(false)
   }
-}
 
   const handleFormChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -146,42 +150,49 @@ const fetchModelData = async () => {
     }))
   }
 
-const handleSave = async () => {
-  if (!model) return
+  const handleSave = async () => {
+    if (!model) return
 
-  try {
-    setSaving(true)
+    try {
+      setSaving(true)
 
-    // Si floors está vacío, usar el catálogo
-    const floorsToSend = floors.length > 0 
-      ? floors 
-      : transformCatalogToFloors(catalogConfig)
+      const floorsToSend = floors.length > 0 
+        ? floors 
+        : transformCatalogToFloors(catalogConfig)
 
-    const updateData = {
-      model: formData.model,
-      modelNumber: formData.modelNumber,
-      price: Number(formData.price),
-      bedrooms: Number(formData.bedrooms) || 0,
-      bathrooms: Number(formData.bathrooms) || 0,
-      sqft: Number(formData.sqft) || 0,
-      stories: Number(formData.stories) || 4,
-      floors: floorsToSend
+      const updateData = {
+        model: formData.model,
+        modelNumber: formData.modelNumber,
+        price: Number(formData.price),
+        bedrooms: Number(formData.bedrooms) || 0,
+        bathrooms: Number(formData.bathrooms) || 0,
+        sqft: Number(formData.sqft) || 0,
+        stories: Number(formData.stories) || 4,
+        floors: floorsToSend
+      }
+
+      console.log('Sending floors:', floorsToSend)
+
+      await api.put(`/models/${model._id}`, updateData)
+      
+      setSnackbar({ 
+        open: true, 
+        message: t('houses6Town:model.messages.saveSuccess'), 
+        severity: 'success' 
+      })
+      setEditMode(false)
+      fetchModelData()
+    } catch (err) {
+      console.error('Error saving model:', err)
+      setSnackbar({ 
+        open: true, 
+        message: `${t('houses6Town:model.messages.errorSaving')}: ${err.message}`, 
+        severity: 'error' 
+      })
+    } finally {
+      setSaving(false)
     }
-
-    console.log('Sending floors:', floorsToSend) // Debug
-
-    await api.put(`/models/${model._id}`, updateData)
-    
-    setSnackbar({ open: true, message: 'Modelo actualizado exitosamente', severity: 'success' })
-    setEditMode(false)
-    fetchModelData()
-  } catch (err) {
-    console.error('Error saving model:', err)
-    setSnackbar({ open: true, message: `Error: ${err.message}`, severity: 'error' })
-  } finally {
-    setSaving(false)
   }
-}
 
   const handleCancel = () => {
     setEditMode(false)
@@ -199,13 +210,13 @@ const handleSave = async () => {
   if (!model) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Alert severity="error">No se pudo cargar el modelo</Alert>
+        <Alert severity="error">{t('houses6Town:model.messages.noModel')}</Alert>
       </Container>
     )
   }
 
   const tabs = [
-    { label: 'Información Base', icon: Info },
+    { label: t('houses6Town:model.tabs.baseInfo'), icon: Info },
     ...floors.map(floor => ({ label: floor.label, icon: Layers }))
   ]
 
@@ -215,21 +226,21 @@ const handleSave = async () => {
         <PageHeader
           icon={Home}
           title={model.model}
-          subtitle={`${model.modelNumber} - Configuración del modelo de casa`}
+          subtitle={`${model.modelNumber} - ${t('houses6Town:model.subtitle')}`}
           actionButton={
             editMode
               ? {
-                  label: saving ? 'Guardando...' : 'Guardar Cambios',
+                  label: saving ? t('houses6Town:actions.saving') : t('houses6Town:actions.saveChanges'),
                   onClick: handleSave,
                   icon: saving ? <CircularProgress size={20} /> : <Save />,
                   disabled: saving,
-                  tooltip: 'Guardar cambios'
+                  tooltip: t('houses6Town:actions.saveChanges')
                 }
               : {
-                  label: 'Editar Modelo',
+                  label: t('houses6Town:actions.editModel'),
                   onClick: () => setEditMode(true),
                   icon: <Edit />,
-                  tooltip: 'Editar modelo y pisos'
+                  tooltip: t('houses6Town:actions.editModel')
                 }
           }
         />
@@ -241,9 +252,14 @@ const handleSave = async () => {
               startIcon={<Cancel />}
               onClick={handleCancel}
               disabled={saving}
-              sx={{ borderRadius: 2, textTransform: 'none' }}
+              sx={{
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                fontFamily: '"Poppins", sans-serif'
+              }}
             >
-              Cancelar
+              {t('houses6Town:actions.cancel')}
             </Button>
           </Box>
         )}
@@ -282,6 +298,7 @@ const handleSave = async () => {
                 editMode={editMode}
                 formData={formData}
                 onChange={handleFormChange}
+                t={t}
               />
             )}
 
@@ -290,6 +307,8 @@ const handleSave = async () => {
                 floor={floors[activeTab - 1]}
                 editMode={editMode}
                 onChange={handleFloorChange}
+                catalogConfig={catalogConfig}
+                t={t}
               />
             )}
           </Box>

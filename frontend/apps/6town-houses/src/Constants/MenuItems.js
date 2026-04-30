@@ -65,6 +65,12 @@ export const privateMenuItems = [
     roles: ['superadmin', 'admin', 'user']
   },
   {
+    textKey: 'navigation:menu.myProperty',
+    path: '/my-property',
+    icon: HomeIcon,
+    roles: ['user', 'admin']
+  },
+  {
     textKey: 'navigation:menu.masterPlan',
     icon: MapIcon,
     path: '/master-plan',
