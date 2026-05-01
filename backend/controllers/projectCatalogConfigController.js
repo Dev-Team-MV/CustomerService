@@ -31,7 +31,19 @@ export const getProjectCatalogConfig = async (req, res) => {
       filter.version = parsedVersion
     }
 
-    const config = await ProjectCatalogConfig.findOne(filter).sort({ version: -1 }).lean()
+    let config = await ProjectCatalogConfig.findOne(filter).sort({ version: -1 }).lean()
+
+    // Compatibilidad: si no hay una versión marcada como activa,
+    // usar la última versión publicada para evitar 404 en clientes legacy.
+    if (!config && (activeOnly === 'true' || activeOnly === '1')) {
+      config = await ProjectCatalogConfig.findOne({
+        project: project._id,
+        status: 'published'
+      })
+        .sort({ version: -1 })
+        .lean()
+    }
+
     if (!config) {
       return res.status(404).json({ message: 'Catalog config not found for this project' })
     }
@@ -69,9 +81,20 @@ export const upsertProjectCatalogConfig = async (req, res) => {
       version = latest ? latest.version + 1 : 1
     }
 
-    const status = ['draft', 'published', 'archived'].includes(req.body.status) ? req.body.status : 'draft'
+    const existingConfig = await ProjectCatalogConfig.findOne({ project: project._id, version })
+      .select('status isActiveVersion')
+      .lean()
+
+    const hasExplicitStatus = ['draft', 'published', 'archived'].includes(req.body.status)
+    const status = hasExplicitStatus
+      ? req.body.status
+      : (existingConfig?.status || 'draft')
+
+    const hasExplicitActiveFlag = typeof req.body.isActiveVersion === 'boolean'
     const isActiveVersion = status === 'published'
-      ? req.body.isActiveVersion === true
+      ? (hasExplicitActiveFlag
+          ? req.body.isActiveVersion
+          : (existingConfig?.isActiveVersion ?? true))
       : false
 
     const config = await ProjectCatalogConfig.findOneAndUpdate(
