@@ -49,7 +49,8 @@ const formatFloorMedia = (media) => {
       isometrics: [],
       blueprints: [],
       cinematics: [],
-      exterior: []
+      exterior: [],
+      multi: []
     }
   }
 
@@ -58,7 +59,8 @@ const formatFloorMedia = (media) => {
     isometrics: normalizeImageArray(media.isometrics),
     blueprints: normalizeImageArray(media.blueprints),
     cinematics: normalizeImageArray(media.cinematics),
-    exterior: normalizeImageArray(media.exterior)
+    exterior: normalizeImageArray(media.exterior),
+    multi: normalizeImageArray(media.multi)
   }
 }
 
