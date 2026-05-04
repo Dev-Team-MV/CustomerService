@@ -59,7 +59,8 @@
     "price": "Price",
     "cancelled": "Cancelled",
     "saving": "Saving...",
-    "saveChanges": "Save Changes"
+    "saveChanges": "Save Changes",
+    "defined":"Defined"
   },
   "status": {
     "active": "Available",

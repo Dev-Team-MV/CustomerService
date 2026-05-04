@@ -59,7 +59,8 @@
     "price": "Precio",
     "cancelled": "Cancelada",
     "saving": "Guardando...",
-    "saveChanges": "Guardar Cambios"
+    "saveChanges": "Guardar Cambios",
+    "defined":"Definido"
   },
   "status": {
     "active": "Disponible",

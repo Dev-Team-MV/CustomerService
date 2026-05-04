@@ -1,21 +1,3 @@
-// import api from './api'
-
-// export const quoteService = {
-//   // Para Lakewood (Properties)
-//   getPropertyQuote: async (quoteData) => {
-//     const response = await api.post('/properties/quote', quoteData)
-//     return response.data
-//   },
-
-//   // Para Phase-2, ISQ, Sheperd (Apartments)
-//   getApartmentQuote: async (quoteData) => {
-//     const response = await api.post('/apartments/quote', quoteData)
-//     return response.data
-//   }
-// }
-
-// export default quoteService
-
 import api from './api'
 
 export const quoteService = {
@@ -28,6 +10,7 @@ export const quoteService = {
    * @param {string} quoteData.lot - ID del lote
    * @param {string} quoteData.model - ID del modelo
    * @param {string} [quoteData.facade] - ID de la fachada (opcional)
+   * @param {string} [quoteData.quoteId] - ID del quote para validar lock (NUEVO)
    * @param {number} [quoteData.initialPayment] - Pago inicial
    * 
    * LEGACY (Lakewood actual):
@@ -111,9 +94,6 @@ export const quoteService = {
     return true
   },
 
-  // En /Users/oficina/MV-CRM/CustomerService/frontend/shared/services/quoteService.js
-// Agregar después de validateSelectedOptions (línea ~112):
-
   /**
    * Obtener cotización para casas (6Town Houses)
    * Alias específico de getPropertyQuote para mayor claridad
@@ -121,6 +101,9 @@ export const quoteService = {
    * @param {Object} quoteData - Datos de cotización
    * @param {string} quoteData.projectId - ID del proyecto
    * @param {string} quoteData.lot - ID del building/casa
+   * @param {string} quoteData.model - ID del modelo
+   * @param {string} [quoteData.facade] - ID de la fachada (opcional)
+   * @param {string} [quoteData.quoteId] - ID del quote para validar lock (NUEVO)
    * @param {Object} quoteData.selectedOptions - Opciones seleccionadas por level
    * @returns {Promise<Object>} Resultado de cotización
    */
@@ -135,49 +118,57 @@ export const quoteService = {
         throw new Error('Se requieren las opciones seleccionadas (selectedOptions)')
       }
 
-      // Usar el mismo endpoint que properties
+      console.log('📤 Enviando quote con quoteId:', quoteData.quoteId)
+
+      // Usar el mismo endpoint que properties, incluyendo quoteId si existe
       const response = await api.post('/properties/quote', quoteData)
       return response.data
     } catch (error) {
       console.error('❌ Error getting house quote:', error)
+      
+      // Propagar errores específicos de lock (409)
+      if (error.response?.status === 409) {
+        throw error
+      }
+      
       throw new Error(error.response?.data?.message || error.message || 'Failed to get house quote')
     }
   },
 
-
   /**
- * Obtener preview de cotización con media por floor
- * Nuevo endpoint que devuelve quote + mediaByFloor
- * 
- * @param {Object} quoteData - Datos de cotización
- * @param {string} quoteData.projectId - ID del proyecto
- * @param {string} quoteData.lot - ID del lote
- * @param {string} quoteData.model - ID del modelo
- * @param {string} [quoteData.facade] - ID de la fachada (opcional)
- * @param {Object} quoteData.selectedOptions - Opciones seleccionadas por level
- * @returns {Promise<Object>} Resultado con quote y mediaByFloor
- * @returns {Object} result.quote - Cotización completa
- * @returns {Object} result.mediaByFloor - Media organizada por floor
- */
-getQuotePreview: async (quoteData) => {
-  try {
-    const response = await api.post('/properties/quote-preview', quoteData)
-    
-    // Respuesta esperada:
-    // {
-    //   quote: { breakdown: {...}, pricingConfig: {...} },
-    //   mediaByFloor: {
-    //     piso1: { renders: [...], isometrics: [...], blueprints: [...] },
-    //     piso2: { ... },
-    //     ...
-    //   }
-    // }
-    return response.data
-  } catch (error) {
-    console.error('❌ Error getting quote preview:', error)
-    throw new Error(error.response?.data?.message || error.message || 'Failed to get quote preview')
+   * Obtener preview de cotización con media por floor
+   * Nuevo endpoint que devuelve quote + mediaByFloor
+   * 
+   * @param {Object} quoteData - Datos de cotización
+   * @param {string} quoteData.projectId - ID del proyecto
+   * @param {string} quoteData.lot - ID del lote
+   * @param {string} quoteData.model - ID del modelo
+   * @param {string} [quoteData.facade] - ID de la fachada (opcional)
+   * @param {string} [quoteData.quoteId] - ID del quote para validar lock (NUEVO)
+   * @param {Object} quoteData.selectedOptions - Opciones seleccionadas por level
+   * @returns {Promise<Object>} Resultado con quote y mediaByFloor
+   * @returns {Object} result.quote - Cotización completa
+   * @returns {Object} result.mediaByFloor - Media organizada por floor
+   */
+  getQuotePreview: async (quoteData) => {
+    try {
+      const response = await api.post('/properties/quote-preview', quoteData)
+      
+      // Respuesta esperada:
+      // {
+      //   quote: { breakdown: {...}, pricingConfig: {...} },
+      //   mediaByFloor: {
+      //     piso1: { renders: [...], isometrics: [...], blueprints: [...] },
+      //     piso2: { ... },
+      //     ...
+      //   }
+      // }
+      return response.data
+    } catch (error) {
+      console.error('❌ Error getting quote preview:', error)
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get quote preview')
+    }
   }
-}
 }
 
 export default quoteService

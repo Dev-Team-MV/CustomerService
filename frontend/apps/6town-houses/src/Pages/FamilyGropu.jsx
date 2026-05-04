@@ -1,4 +1,4 @@
-// @lakewood-p1/src/pages/FamilyGroup.jsx
+// @6town-houses/src/Pages/FamilyGroup.jsx
 import React, { useState } from 'react'
 import {
   Container,
@@ -19,7 +19,6 @@ import { useTranslation } from 'react-i18next'
 
 // Shared components
 import PageHeader from '@shared/components/PageHeader'
-
 import FamilyGroupCard from '@shared/components/FamilyGroup/FamilyGroupCard'
 import CreateGroupDialog from '@shared/components/FamilyGroup/CreateGroupDialog'
 import ManageGroupDialog from '@shared/components/FamilyGroup/ManageGroupDialog'
@@ -32,7 +31,7 @@ import { useResidents } from '@shared/hooks/useResidents'
 import { useAuth } from '@shared/context/AuthContext'
 
 /**
- * Family Group Management Page for Lakewood
+ * Family Group Management Page for 6Town Houses
  * Allows users to create and manage family groups for sharing properties
  */
 const FamilyGroup = () => {
@@ -46,8 +45,8 @@ const FamilyGroup = () => {
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState(null)
 
-  // ✅ Obtener projectId del env
-  const projectId = import.meta.env.VITE_PROJECT_ID
+  // ✅ Obtener projectId del env con fallback
+  const projectId = import.meta.env.VITE_PROJECT_ID || '6town-houses-project-id'
 
   // ✅ Pasar projectId al hook
   const {

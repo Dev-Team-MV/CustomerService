@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Paper, Typography, Radio, Checkbox, Divider, CircularProgress, Chip } from '@mui/material'
 import { CheckCircle, Image as ImageIcon, ViewInAr, Map, Close, Home } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
@@ -12,6 +13,7 @@ const OptionCard = ({
   onSelect 
 }) => {
   const theme = useTheme()
+  const { t } = useTranslation(['quote', 'common'])
   const [selectedMediaType, setSelectedMediaType] = useState('all')
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
@@ -21,16 +23,16 @@ const OptionCard = ({
   const renders = media.renders || []
   const isometrics = media.isometrics || []
   const blueprints = media.blueprints || []
-  const exteriors = media.exterior || []  // ✅ NUEVO: Agregar exteriores
-  const allMedia = [...exteriors, ...renders, ...isometrics, ...blueprints]  // ✅ Exteriores primero
+  const exteriors = media.exterior || []
+  const allMedia = [...exteriors, ...renders, ...isometrics, ...blueprints]
   
   const hasImages = allMedia.length > 0
-  const primaryImage = exteriors[0]?.url || renders[0]?.url || isometrics[0]?.url || blueprints[0]?.url  // ✅ Priorizar exteriores
+  const primaryImage = exteriors[0]?.url || renders[0]?.url || isometrics[0]?.url || blueprints[0]?.url
  
   // Filtrar media según el tipo seleccionado
   const getFilteredMedia = () => {
     switch(selectedMediaType) {
-      case 'exteriors':  // ✅ NUEVO
+      case 'exteriors':
         return exteriors
       case 'renders':
         return renders
@@ -189,8 +191,15 @@ const OptionCard = ({
                   pointerEvents: 'none'
                 }}
               >
-                <Typography variant="caption" sx={{ color: 'white', fontWeight: 600 }}>
-                  Click para ver galería →
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: 'white', 
+                    fontWeight: 600,
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
+                >
+                  {t('clickToViewGallery')}
                 </Typography>
               </Box>
             </>
@@ -278,8 +287,13 @@ const OptionCard = ({
             {loadingPreview && !hasMedia && (
               <Box display="flex" justifyContent="center" alignItems="center" py={3}>
                 <CircularProgress size={32} />
-                <Typography variant="body2" ml={2} color="text.secondary">
-                  Cargando...
+                <Typography 
+                  variant="body2" 
+                  ml={2} 
+                  color="text.secondary"
+                  sx={{ fontFamily: '"Poppins", sans-serif' }}
+                >
+                  {t('calculating')}
                 </Typography>
               </Box>
             )}
@@ -296,7 +310,7 @@ const OptionCard = ({
                 {exteriors.length > 0 && (
                   <Chip
                     icon={<Home sx={{ fontSize: 14 }} />}
-                    label={`${exteriors.length} Exteriores`}
+                    label={t('mediaTypes.exteriors', { count: exteriors.length })}
                     size="small"
                     onClick={(e) => handleMediaTypeClick('exteriors', e)}
                     sx={{
@@ -325,7 +339,7 @@ const OptionCard = ({
                 {renders.length > 0 && (
                   <Chip
                     icon={<ImageIcon sx={{ fontSize: 14 }} />}
-                    label={`${renders.length} Renders`}
+                    label={t('mediaTypes.renders', { count: renders.length })}
                     size="small"
                     onClick={(e) => handleMediaTypeClick('renders', e)}
                     sx={{
@@ -353,7 +367,7 @@ const OptionCard = ({
                 {isometrics.length > 0 && (
                   <Chip
                     icon={<ViewInAr sx={{ fontSize: 14 }} />}
-                    label={`${isometrics.length} Isométricos`}
+                    label={t('mediaTypes.isometrics', { count: isometrics.length })}
                     size="small"
                     onClick={(e) => handleMediaTypeClick('isometrics', e)}
                     sx={{
@@ -381,7 +395,7 @@ const OptionCard = ({
                 {blueprints.length > 0 && (
                   <Chip
                     icon={<Map sx={{ fontSize: 14 }} />}
-                    label={`${blueprints.length} Planos`}
+                    label={t('mediaTypes.blueprints', { count: blueprints.length })}
                     size="small"
                     onClick={(e) => handleMediaTypeClick('blueprints', e)}
                     sx={{
@@ -439,7 +453,7 @@ const OptionCard = ({
                   key={idx}
                   component="img"
                   src={img.url}
-                  alt={`Preview ${idx + 1}`}
+                  alt={t('previewImage', { idx: idx + 1 })}
                   onClick={(e) => openLightbox(idx, e)}
                   sx={{
                     width: 70,
@@ -590,7 +604,7 @@ const OptionCard = ({
           <Box
             component="img"
             src={filteredMedia[lightboxIndex]?.url}
-            alt={`Image ${lightboxIndex + 1}`}
+            alt={t('previewImage', { idx: lightboxIndex + 1 })}
             sx={{
               maxWidth: '90%',
               maxHeight: '90%',
@@ -656,7 +670,7 @@ const OptionCard = ({
                 key={idx}
                 component="img"
                 src={img.url}
-                alt={`Thumb ${idx + 1}`}
+                alt={t('previewThumb', { idx: idx + 1 })}
                 onClick={(e) => {
                   e.stopPropagation()
                   setLightboxIndex(idx)
