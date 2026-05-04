@@ -80,6 +80,50 @@ const buildingFloorPolygonSchema = new mongoose.Schema(
   { _id: false }
 )
 
+const availabilityLockSchema = new mongoose.Schema(
+  {
+    quoteId: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    lockedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
+    lockedAt: {
+      type: Date,
+      default: Date.now
+    },
+    expiresAt: {
+      type: Date,
+      required: true
+    }
+  },
+  { _id: false }
+)
+
+const assignmentSchema = new mongoose.Schema(
+  {
+    property: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Property',
+      default: null
+    },
+    customer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
+    assignedAt: {
+      type: Date,
+      default: null
+    }
+  },
+  { _id: false }
+)
+
 const buildingSchema = new mongoose.Schema(
   {
     project: {
@@ -159,6 +203,24 @@ const buildingSchema = new mongoose.Schema(
       type: String,
       enum: ['active', 'inactive'],
       default: 'active'
+    },
+    availabilityStatus: {
+      type: String,
+      enum: ['available', 'quote_locked', 'reserved', 'assigned', 'sold', 'disabled'],
+      default: 'available'
+    },
+    availabilityReason: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    availabilityLock: {
+      type: availabilityLockSchema,
+      default: null
+    },
+    assignment: {
+      type: assignmentSchema,
+      default: null
     }
   },
   {
@@ -168,6 +230,7 @@ const buildingSchema = new mongoose.Schema(
 
 buildingSchema.index({ project: 1 })
 buildingSchema.index({ project: 1, name: 1 }, { unique: true })
+buildingSchema.index({ project: 1, availabilityStatus: 1 })
 
 const Building = mongoose.model('Building', buildingSchema)
 
