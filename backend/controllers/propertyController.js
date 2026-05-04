@@ -6,10 +6,13 @@ import Facade from '../models/Facade.js'
 import Project from '../models/Project.js'
 import User from '../models/User.js'
 import Phase from '../models/Phase.js'
+import Building from '../models/Building.js'
 import { normalizeImageArray } from '../utils/imageUtils.js'
 import { getVisiblePropertyIdsForUser, canUserAccessProperty } from '../utils/propertyVisibility.js'
 import { hydrateUrlsInObject } from '../services/urlResolverService.js'
 import { evaluateProjectPricing } from '../services/projectPricingEngine.js'
+
+const BLOCKED_BUILDING_AVAILABILITY_STATUSES = ['reserved', 'assigned', 'sold', 'disabled']
 
 /** Normalize ref/id to string; safe when value is undefined. */
 function toIdStr(val) {
@@ -22,6 +25,92 @@ function toIdStr(val) {
 /** Compare two ids (ObjectId or string) in a case-insensitive way for MongoDB hex ids. */
 function sameId(a, b) {
   return toIdStr(a).toLowerCase() === toIdStr(b).toLowerCase()
+}
+
+function isBuildingQuoteLockActive(availabilityLock) {
+  if (!availabilityLock?.expiresAt) return false
+  return new Date(availabilityLock.expiresAt) > new Date()
+}
+
+function getBuildingMatchQueryForProperty({ projectId, lot, model, facade }) {
+  const query = {
+    project: projectId,
+    'quoteRef.lot': lot,
+    'quoteRef.model': model
+  }
+  query['quoteRef.facade'] = facade || null
+  return query
+}
+
+async function validateBuildingForPropertyCreation({ projectId, lot, model, facade, quoteId }) {
+  const query = getBuildingMatchQueryForProperty({ projectId, lot, model, facade })
+  const building = await Building.findOne(query)
+
+  if (!building) return { ok: true, building: null }
+
+  if (building.status !== 'active') {
+    return { ok: false, status: 409, message: 'Selected building is inactive' }
+  }
+
+  if (BLOCKED_BUILDING_AVAILABILITY_STATUSES.includes(building.availabilityStatus)) {
+    return { ok: false, status: 409, message: `Selected building is ${building.availabilityStatus}` }
+  }
+
+  if (building.availabilityStatus === 'quote_locked' && isBuildingQuoteLockActive(building.availabilityLock)) {
+    const normalizedQuoteId = String(quoteId || '').trim()
+    const lockQuoteId = String(building.availabilityLock?.quoteId || '').trim()
+    if (!normalizedQuoteId) {
+      return {
+        ok: false,
+        status: 409,
+        message: 'Selected building is quote-locked and requires quoteId to create property'
+      }
+    }
+    if (normalizedQuoteId !== lockQuoteId) {
+      return { ok: false, status: 409, message: 'Selected building lock belongs to a different quote' }
+    }
+  }
+
+  return { ok: true, building }
+}
+
+async function assignBuildingToProperty({ building, propertyId, customerId }) {
+  if (!building) return
+
+  building.availabilityStatus = 'assigned'
+  building.availabilityReason = 'Assigned to customer'
+  building.availabilityLock = null
+  building.assignment = {
+    property: propertyId,
+    customer: customerId || null,
+    assignedAt: new Date()
+  }
+  await building.save()
+}
+
+async function releaseBuildingFromProperty(propertyDoc) {
+  if (!propertyDoc) return
+
+  const assignmentQuery = { 'assignment.property': propertyDoc._id }
+  const quoteRefQuery = getBuildingMatchQueryForProperty({
+    projectId: propertyDoc.project,
+    lot: propertyDoc.lot,
+    model: propertyDoc.model,
+    facade: propertyDoc.facade || null
+  })
+
+  const building = await Building.findOne({ $or: [assignmentQuery, quoteRefQuery] })
+  if (!building) return
+
+  if (building.assignment?.property && !sameId(building.assignment.property, propertyDoc._id)) {
+    return
+  }
+
+  building.availabilityStatus = 'available'
+  building.availabilityReason = ''
+  building.availabilityLock = null
+  building.assignment = null
+  await building.save()
 }
 
 /**
@@ -735,7 +824,7 @@ export const createProperty = async (req, res) => {
   try {
     const {
       projectId, project, lot, model, facade, user, users, initialPayment,
-      hasBalcony, modelType, hasStorage, selectedOptions
+      hasBalcony, modelType, hasStorage, selectedOptions, quoteId
     } = req.body
     let projId = projectId || project
 
@@ -768,6 +857,18 @@ export const createProperty = async (req, res) => {
       return res.status(resolved.status).json({ message: resolved.message })
     }
     projId = resolved.data.projectId
+    const resolvedFacadeId = resolved.data.facadeExists ? resolved.data.facadeExists._id : null
+    const buildingValidation = await validateBuildingForPropertyCreation({
+      projectId: projId,
+      lot,
+      model,
+      facade: resolvedFacadeId,
+      quoteId
+    })
+    if (!buildingValidation.ok) {
+      return res.status(buildingValidation.status).json({ message: buildingValidation.message })
+    }
+
     const { totalPrice, initialPayment: initialPaymentAmount, pending: pendingAmount } = resolved.data.prices
     if (initialPaymentAmount > totalPrice) {
       return res.status(400).json({
@@ -783,7 +884,7 @@ export const createProperty = async (req, res) => {
       project: projId,
       lot,
       model,
-      facade: resolved.data.facadeExists ? resolved.data.facadeExists._id : undefined,
+      facade: resolvedFacadeId || undefined,
       users: ownerIds,
       price: totalPrice,
       pending: pendingAmount,
@@ -793,6 +894,12 @@ export const createProperty = async (req, res) => {
       modelType: modelType || 'basic',
       hasStorage: hasStorage === true,
       selectedOptions: selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {}
+    })
+
+    await assignBuildingToProperty({
+      building: buildingValidation.building,
+      propertyId: property._id,
+      customerId: firstOwner
     })
     
     await Lot.findByIdAndUpdate(lot, {
@@ -983,6 +1090,8 @@ export const deleteProperty = async (req, res) => {
           $pull: { lots: property.lot }
         })
       }
+
+      await releaseBuildingFromProperty(property)
       
       await property.deleteOne()
       res.json({ message: 'Property deleted successfully' })
