@@ -25,12 +25,14 @@ import TermsAndCondition from './Pages/TermsAndConditions'
 import CatalogConfig from './Pages/CtalogConfig'
 import Buildings from './Pages/Buildings'
 import BuildingDetails from './Pages/BuildingDetails'
-import GetYourQuote from './Pages/GetYourQuote'
+// import GetYourQuote from './Pages/GetYourQuote'
+import GetYourQuote from './Components/quote/GetYourQuote'
 import Lots from './Pages/Lots'
 import Models from './Pages/Models'
 import Properties from './Pages/Properties'
 import Payloads from './Pages/Payloads'
 import MyProperty from './Pages/MyProperty'
+import FamilyGroup from './Pages/FamilyGropu'
 
 import theme from './theme'
 
@@ -72,7 +74,7 @@ function App() {
               />
             }
           >
-            {/* <Route path="/explore/properties" element={<GetYourQuote />} /> */}
+            <Route path="/explore/properties" element={<GetYourQuote />} />
             <Route path="/explore/news" element={<NewsFeed />} />
             <Route path="/explore/news/:id" element={<NewsDetails />} />
           </Route>
@@ -114,6 +116,7 @@ function App() {
               <Route path="/properties" element={<Properties />} />
               <Route path="/payloads" element={<Payloads />} />
               <Route path="/my-property" element={<MyProperty />} />
+              <Route path="/family-groups" element={<FamilyGroup />} />
 
               {/* Agrega aquí el resto de tus rutas privadas */}
             </Route>

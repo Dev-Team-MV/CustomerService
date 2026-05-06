@@ -2,18 +2,49 @@
   "title": "Get Your Quote",
   "subtitle": "Select your building, floor, apartment and customize your future home",
   "back": "Back",
+
   "step": {
     "building": "Building",
     "floor": "Floor",
     "apartment": "Apartment",
-    "customize": "Customize"
+    "customize": "Customize",
+    "lot": "Lot",
+    "model": "Model",
+    "facade": "Facade",
+    "of": "Step {{current}} of {{total}}"
   },
+
+  "steps": {
+    "selectHouse": "Select House",
+    "selectBuilding": "Select Building",
+    "selectFloor": "Select Floor",
+    "selectApartment": "Select Apartment",
+    "customize": "Customize",
+    "quote": "Quote",
+    "assignResident": "Assign Resident"
+  },
+
+  "header": {
+    "title": "Quote Your House",
+    "subtitle": "Customize and quote your ideal house in simple steps"
+  },
+
   "selectBuildingStep": "01 SELECT A BUILDING",
+  "selectYourHouse": "Select Your House",
+  "chooseAvailableHouses": "Choose one of our {{count}} available houses",
+  "noAvailableHouses": "No houses available at this time",
+  "incompleteQuoteConfig": "There are {{count}} house(es) without complete quote configuration. Please contact the administrator.",
   "available": "Available",
   "inactive": "Inactive",
   "scrollToSeeMap": "Scroll to see the full map · ",
   "clickPolygon": "Click on a building polygon to select it",
   "noBuildings": "No buildings available",
+  "masterPlan": "Master Plan",
+  "clickHouseToSelect": "Click on a house to select it",
+  "availableHouses": "Available Houses",
+  "noAvailableHousesContact": "No houses available for quoting at this time. Please contact sales.",
+  "completeConfig": "Complete configuration",
+  "selectHouse": "Select House",
 
   "selectFloorStep": "02 SELECT A FLOOR",
   "clickFloorPolygon": "Click a floor polygon on the building exterior",
@@ -50,6 +81,21 @@
   "previewImage": "Preview {{idx}}",
   "previewThumb": "Thumb {{idx}}",
   "selectApartmentToCustomize": "Please select an apartment to customize",
+  "calculating": "Calculating...",
+  "getQuote": "Get Quote",
+  "errorGettingQuote": "Error getting quote. Please try again.",
+  "estimatedPrice": "Estimated Price",
+  "informativeStep": "This level is informational only. Click 'Next' to continue.",
+  "previous": "Previous",
+  "next": "Next",
+  "clickToViewGallery": "Click to view gallery →",
+
+  "mediaTypes": {
+    "exteriors": "{{count}} Exteriors",
+    "renders": "{{count}} Renders",
+    "isometrics": "{{count}} Isometrics",
+    "blueprints": "{{count}} Blueprints"
+  },
 
   "priceCalculator": "Price Calculator",
   "browsingAsGuest": "Browsing as guest.",
@@ -84,9 +130,6 @@
   "generateAndSend": "Generate & Send Quote",
   "selectApartment": "Please select an apartment",
   "quoteComingSoon": "Quote functionality coming soon!",
-  "calculating": "Calculating...",
-  "getQuote": "Get Quote",
-  "errorGettingQuote": "Error getting quote. Please try again.",
 
   "quoteReady": "Your Quote is Ready!",
   "propertyQuote": "Property Quote Details",
@@ -119,7 +162,7 @@
   "storagePrice": "Storage Price",
   "total": "Total",
 
-  "residentAssignmentStep": "04 Resident Assignment",
+  "residentAssignmentStep": "05 RESIDENT ASSIGNMENT",
   "selectOrCreateResident": "Select or create a resident",
   "clickToExpand": "Click to expand",
   "selectBuildingAndApartment": "Select building and apartment to assign resident",
@@ -139,5 +182,59 @@
   "missingSelections": "Missing required selections.",
   "apartmentAssigned": "Apartment assigned successfully!",
   "apartmentCreatedAssigned": "Apartment created and assigned successfully!",
-  "errorAssigning": "Error creating or assigning apartment"
+  "errorAssigning": "Error creating or assigning apartment",
+
+  "priceBreakdown": {
+    "title": "Price Breakdown",
+    "lot": "Lot",
+    "model": "Model",
+    "facade": "Facade",
+    "adjustments": "Adjustments",
+    "total": "Total"
+  },
+
+  "selectedOptions": {
+    "title": "Selected Options"
+  },
+
+  "buttons": {
+    "back": "Back",
+    "assignResident": "Assign Resident",
+    "login": "Sign In",
+    "cancel": "Cancel",
+    "clearSelection": "Clear Selection",
+    "clear": "Clear"
+  },
+
+  "errors": {
+    "loadingBuildings": "Error loading available houses",
+    "loadingBuilding": "Error loading house data. Please try again.",
+    "calculatingQuote": "Error calculating quote",
+    "loadingConfig": "Could not load catalog configuration",
+    "error": "Error: {message}"
+  },
+
+  "messages": {
+    "noBuildings": "No buildings available",
+    "noHouses": "No houses available",
+    "loadingHouses": "Loading houses...",
+    "selectBuildingStep": "Select a building",
+    "selectFloorStep": "Select a floor",
+    "selectApartmentStep": "Select an apartment",
+    "customizeStep": "Customize your apartment"
+  },
+
+  "optionsCount": "{{count}} OPTIONS",
+
+  "availability":{
+    "available": "Available",
+    "reserved": "Reserved",
+    "assigned": "Assigned",
+    "sold": "Sold",
+    "disabled": "Disabled",
+    "quoteLocked": "Quote Locked",
+    "notAvailable": "This house is not available for quote",
+    "notAvailableForQuote": "This house is not available for quote",
+    "notAvailableShort": "Not Available"
+  }
 }

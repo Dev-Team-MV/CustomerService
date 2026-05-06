@@ -57,32 +57,72 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
     }
   }, [projectId])
 
-  useEffect(() => {
-    if (open) {
-      if (selectedBuilding) {
-        setForm({
-          name: selectedBuilding.name || '',
-          status: selectedBuilding.status || 'active',
-          quoteRef: {
-            lot: selectedBuilding.quoteRef?.lot || '',
-            model: selectedBuilding.quoteRef?.model || '',
-            facade: selectedBuilding.quoteRef?.facade || ''
-          }
-        })
+  // useEffect(() => {
+  //   if (open) {
+  //     if (selectedBuilding) {
+  //       setForm({
+  //         name: selectedBuilding.name || '',
+  //         status: selectedBuilding.status || 'active',
+  //         quoteRef: {
+  //           lot: selectedBuilding.quoteRef?.lot || '',
+  //           model: selectedBuilding.quoteRef?.model || '',
+  //           facade: selectedBuilding.quoteRef?.facade || ''
+  //         }
+  //       })
         
-        let renders = []
-        if (Array.isArray(selectedBuilding.exteriorRenders)) {
-          renders = selectedBuilding.exteriorRenders
-        } else if (selectedBuilding.exteriorRenders?.urls) {
-          renders = selectedBuilding.exteriorRenders.urls
+  //       let renders = []
+  //       if (Array.isArray(selectedBuilding.exteriorRenders)) {
+  //         renders = selectedBuilding.exteriorRenders
+  //       } else if (selectedBuilding.exteriorRenders?.urls) {
+  //         renders = selectedBuilding.exteriorRenders.urls
+  //       }
+  //       setExteriorRenders(renders)
+  //     } else {
+  //       setForm(DEFAULT_FORM)
+  //       setExteriorRenders([])
+  //     }
+  //   }
+  // }, [selectedBuilding, open])
+
+  useEffect(() => {
+  if (open) {
+    if (selectedBuilding) {
+      // ✅ Extraer IDs correctamente, manejando objetos poblados
+      const lotId = typeof selectedBuilding.quoteRef?.lot === 'object' 
+        ? selectedBuilding.quoteRef?.lot?._id 
+        : selectedBuilding.quoteRef?.lot || ''
+        
+      const modelId = typeof selectedBuilding.quoteRef?.model === 'object'
+        ? selectedBuilding.quoteRef?.model?._id
+        : selectedBuilding.quoteRef?.model || ''
+        
+      const facadeId = typeof selectedBuilding.quoteRef?.facade === 'object'
+        ? selectedBuilding.quoteRef?.facade?._id
+        : selectedBuilding.quoteRef?.facade || ''
+
+      setForm({
+        name: selectedBuilding.name || '',
+        status: selectedBuilding.status || 'active',
+        quoteRef: {
+          lot: lotId,
+          model: modelId,
+          facade: facadeId
         }
-        setExteriorRenders(renders)
-      } else {
-        setForm(DEFAULT_FORM)
-        setExteriorRenders([])
+      })
+      
+      let renders = []
+      if (Array.isArray(selectedBuilding.exteriorRenders)) {
+        renders = selectedBuilding.exteriorRenders
+      } else if (selectedBuilding.exteriorRenders?.urls) {
+        renders = selectedBuilding.exteriorRenders.urls
       }
+      setExteriorRenders(renders)
+    } else {
+      setForm(DEFAULT_FORM)
+      setExteriorRenders([])
     }
-  }, [selectedBuilding, open])
+  }
+}, [selectedBuilding, open])
 
   const facadeEnabled = projectData?.facadeEnabled ?? true
 
@@ -97,34 +137,40 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
 
   const isValid = form.name.trim().length > 0
 
-  const handleSubmit = async () => {
-    if (!isValid) return
-    setSaving(true)
-    try {
-      const payload = {
-        ...selectedBuilding,
-        ...form,
-        project: projectId,
-        floors: 1,
-        totalApartments: 0,
-        exteriorRenders,
-        quoteRef: {
-          lot: form.quoteRef.lot,
-          model: form.quoteRef.model
-        }
+const handleSubmit = async () => {
+  if (!isValid) return
+  setSaving(true)
+  try {
+    // ✅ Construir payload limpio sin spread de selectedBuilding
+    const payload = {
+      name: form.name,
+      status: form.status,
+      project: projectId,
+      floors: 1,
+      totalApartments: 0,
+      exteriorRenders,
+      quoteRef: {
+        lot: form.quoteRef.lot || null,
+        model: form.quoteRef.model || null
       }
-
-      if (facadeEnabled && form.quoteRef.facade) {
-        payload.quoteRef.facade = form.quoteRef.facade
-      }
-
-      await onSaved(payload)
-    } catch (err) {
-      console.error('Error saving house:', err)
-    } finally {
-      setSaving(false)
     }
+
+    // ✅ Si estamos editando, incluir el _id
+    if (selectedBuilding?._id) {
+      payload._id = selectedBuilding._id
+    }
+
+    if (facadeEnabled && form.quoteRef.facade) {
+      payload.quoteRef.facade = form.quoteRef.facade
+    }
+
+    await onSaved(payload)
+  } catch (err) {
+    console.error('Error saving house:', err)
+  } finally {
+    setSaving(false)
   }
+}
 
   const handleExteriorUpload = (e) => {
     const files = Array.from(e.target.files)
@@ -218,6 +264,7 @@ const HouseDialog = ({ open, onClose, onSaved, selectedBuilding, projectId, lots
             sx={fieldSx}
           >
             <MenuItem value="active">{t('houses6Town:status.active')}</MenuItem>
+            <MenuItem value="pending">{t('houses6Town:status.pending')}</MenuItem>
             <MenuItem value="reserved">{t('houses6Town:status.reserved')}</MenuItem>
             <MenuItem value="sold">{t('houses6Town:status.sold')}</MenuItem>
             <MenuItem value="inactive">{t('houses6Town:status.inactive')}</MenuItem>

@@ -37,24 +37,24 @@ const Lots = () => {
     setSelectedLot(null)
   }
 
-  const handleSaved = async (lotData) => {
-    try {
-      await handleLotCreated(lotData)
-      await refetch()
-      handleCloseDialog()
-      setSnackbar({ 
-        open: true, 
-        message: selectedLot ? t('lots:messages.updateSuccess') : t('lots:messages.createSuccess'), 
-        severity: 'success' 
-      })
-    } catch (err) {
-      setSnackbar({ 
-        open: true, 
-        message: t('lots:messages.error', { message: err.message }), 
-        severity: 'error' 
-      })
-    }
+const handleSaved = async (lotData) => {
+  try {
+    await handleLotCreated(lotData)
+    await refetch()
+    handleCloseDialog()
+    setSnackbar({ 
+      open: true, 
+      message: lotData._id ? t('lots:messages.updateSuccess') : t('lots:messages.createSuccess'),  // ✅ Detectar por _id
+      severity: 'success' 
+    })
+  } catch (err) {
+    setSnackbar({ 
+      open: true, 
+      message: t('lots:messages.error', { message: err.message }), 
+      severity: 'error' 
+    })
   }
+}
 
   const handleDelete = async (lot) => {
     if (!window.confirm(t('lots:messages.deleteConfirm', { number: lot.number }))) return

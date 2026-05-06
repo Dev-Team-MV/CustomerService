@@ -139,24 +139,29 @@ const LotDialog = ({ open, onClose, selectedLot, onSaved, projectId }) => {
     }))
   }
 
-  const handleSubmit = () => {
-    if (!formData.number || !formData.price || !formData.project) {
-      alert(t('lots:form.validation'))
-      return
-    }
-
-    const payload = {
-      number: formData.number,
-      price: Number(formData.price),
-      status: formData.status,
-      project: String(formData.project),
-      projectId: String(formData.projectId || formData.project),
-      color: formData.color,
-      model: formData.model || null
-    }
-
-    onSaved(payload, selectedLot)
+const handleSubmit = () => {
+  if (!formData.number || !formData.price || !formData.project) {
+    alert(t('lots:form.validation'))
+    return
   }
+
+  const payload = {
+    number: formData.number,
+    price: Number(formData.price),
+    status: formData.status,
+    project: String(formData.project),
+    projectId: String(formData.projectId || formData.project),
+    color: formData.color,
+    model: formData.model || null
+  }
+
+  // ✅ AGREGAR: Si estamos editando, incluir el _id
+  if (selectedLot?._id) {
+    payload._id = selectedLot._id
+  }
+
+  onSaved(payload)  // Ya no necesitas pasar selectedLot como segundo parámetro
+}
 
   const fieldSx = {
     '& .MuiOutlinedInput-root': {
