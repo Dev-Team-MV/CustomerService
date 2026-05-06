@@ -8,7 +8,8 @@ const OptionsGrid = ({
   currentLevelKey,
   mediaByFloor,
   loadingPreview,
-  onOptionSelect
+  onOptionSelect,
+  floorMultiMedia  // ✅ NUEVO: Recibir las imágenes multi del floor
 }) => {
   const { t } = useTranslation(['quote'])
   
@@ -38,6 +39,27 @@ const OptionsGrid = ({
     return levelPreviews[optionId] || null
   }
 
+  // ✅ NUEVO: Función para determinar si mostrar multi
+const shouldShowMultiForOption = (option) => {
+  // Si no hay imágenes multi en el floor, no mostrar
+  if (!floorMultiMedia || floorMultiMedia.length === 0) {
+    return false
+  }
+
+  // level2: Solo mostrar si la opción contiene "multifuncional"
+  if (currentLevelKey === 'level2') {
+    return option.label.toLowerCase().includes('multifuncional')
+  }
+
+  // level3 y terrace: Siempre mostrar multi
+  if (currentLevelKey === 'level3' || currentLevelKey === 'terrace') {
+    return true
+  }
+
+  // Para otros niveles (level1, etc.), no mostrar
+  return false
+}
+
   return (
     <Grid 
       container 
@@ -57,6 +79,7 @@ const OptionsGrid = ({
             optionMedia={getMediaForOption(option.id)}
             loadingPreview={loadingPreview}
             onSelect={onOptionSelect}
+            multiMedia={shouldShowMultiForOption(option) ? floorMultiMedia : null}  // ✅ NUEVO
           />
         </Grid>
       ))}

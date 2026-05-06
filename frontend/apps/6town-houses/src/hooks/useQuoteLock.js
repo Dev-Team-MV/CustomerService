@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import buildingService from '@shared/services/buildingService'
-import { v4 as uuidv4 } from 'uuid'
 
 /**
  * Hook para gestionar el ciclo de vida del quote-lock
- * - Adquiere lock automáticamente cuando se habilita
+ * - Adquiere lock automáticamente cuando se habilita (backend genera quoteId)
  * - Renueva el lock cada 10 minutos (antes de que expire a los 15)
  * - Libera el lock al desmontar o cuando se deshabilita
  * 
@@ -13,24 +12,32 @@ import { v4 as uuidv4 } from 'uuid'
  * @returns {Object} Estado y funciones del lock
  */
 const useQuoteLock = (buildingId, enabled = false) => {
-  const [quoteId] = useState(() => `QUOTE-${uuidv4()}`)
+  const [quoteId, setQuoteId] = useState(null) // Backend lo genera
   const [isLocked, setIsLocked] = useState(false)
   const [lockError, setLockError] = useState(null)
   const renewIntervalRef = useRef(null)
   const isMountedRef = useRef(true)
 
-  // Adquirir lock inicial
+  // Adquirir lock inicial (backend genera quoteId)
   const acquireLock = useCallback(async () => {
     if (!buildingId || !enabled) return
 
     try {
-      console.log(`🔒 Adquiriendo lock para building ${buildingId} con quoteId ${quoteId}`)
-      await buildingService.acquireQuoteLock(buildingId, quoteId, 15, 'Cotización en progreso')
+      console.log(`🔒 Solicitando lock para building ${buildingId}`)
+      
+      // Backend genera y retorna el quoteId
+      const response = await buildingService.acquireQuoteLock(
+        buildingId, 
+        null, // No enviamos quoteId, el backend lo genera
+        15, 
+        'Cotización en progreso'
+      )
       
       if (isMountedRef.current) {
+        setQuoteId(response.quoteId) // Guardar quoteId generado por el backend
         setIsLocked(true)
         setLockError(null)
-        console.log('✅ Lock adquirido exitosamente')
+        console.log('✅ Lock adquirido con quoteId:', response.quoteId)
       }
     } catch (error) {
       console.error('❌ Error adquiriendo lock:', error)
@@ -46,19 +53,19 @@ const useQuoteLock = (buildingId, enabled = false) => {
       }
       setIsLocked(false)
     }
-  }, [buildingId, quoteId, enabled])
+  }, [buildingId, enabled])
 
-  // Renovar lock automáticamente cada 10 minutos (antes de que expire a los 15)
+  // Renovar lock automáticamente cada 10 minutos
   const startAutoRenew = useCallback(() => {
     if (renewIntervalRef.current) {
       clearInterval(renewIntervalRef.current)
     }
 
     renewIntervalRef.current = setInterval(async () => {
-      if (!buildingId || !isLocked || !isMountedRef.current) return
+      if (!buildingId || !quoteId || !isLocked || !isMountedRef.current) return
 
       try {
-        console.log(`🔄 Renovando lock para building ${buildingId}`)
+        console.log(`🔄 Renovando lock para building ${buildingId} con quoteId ${quoteId}`)
         await buildingService.renewQuoteLock(buildingId, quoteId, 15)
         console.log('✅ Lock renovado exitosamente')
       } catch (error) {
@@ -87,11 +94,12 @@ const useQuoteLock = (buildingId, enabled = false) => {
     }
 
     try {
-      console.log(`🔓 Liberando lock para building ${buildingId}`)
+      console.log(`🔓 Liberando lock para building ${buildingId} con quoteId ${quoteId}`)
       await buildingService.releaseQuoteLock(buildingId, quoteId, force)
       
       if (isMountedRef.current) {
         setIsLocked(false)
+        setQuoteId(null)
         setLockError(null)
         console.log('✅ Lock liberado exitosamente')
       }
@@ -104,17 +112,17 @@ const useQuoteLock = (buildingId, enabled = false) => {
 
   // Adquirir lock cuando se habilita
   useEffect(() => {
-    if (enabled && buildingId) {
+    if (enabled && buildingId && !quoteId) {
       acquireLock()
-    } else if (!enabled && isLocked) {
+    } else if (!enabled && isLocked && quoteId) {
       // Si se deshabilita, liberar el lock
       releaseLock()
     }
-  }, [enabled, buildingId]) // No incluir acquireLock/releaseLock para evitar loops
+  }, [enabled, buildingId, quoteId]) // Incluir quoteId para evitar múltiples adquisiciones
 
   // Iniciar auto-renovación cuando se adquiere el lock
   useEffect(() => {
-    if (isLocked) {
+    if (isLocked && quoteId) {
       startAutoRenew()
     }
 
@@ -123,7 +131,7 @@ const useQuoteLock = (buildingId, enabled = false) => {
         clearInterval(renewIntervalRef.current)
       }
     }
-  }, [isLocked, startAutoRenew])
+  }, [isLocked, quoteId, startAutoRenew])
 
   // Liberar lock al desmontar el componente
   useEffect(() => {
@@ -144,7 +152,7 @@ const useQuoteLock = (buildingId, enabled = false) => {
   }, []) // Solo al desmontar
 
   return {
-    quoteId,
+    quoteId, // Ahora viene del backend
     isLocked,
     lockError,
     acquireLock,

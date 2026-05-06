@@ -54,16 +54,45 @@ const LotSelector = ({ projectId, onBuildingSelect, facadeEnabled = true }) => {
       setLoading(false)
     }
   }
-
-  const getStatusConfig = (status) => {
-    const configs = {
-      active: { label: t('status.available'), color: 'success', bgColor: '#4caf50' },
-      reserved: { label: t('status.reserved'), color: 'warning', bgColor: '#ff9800' },
-      sold: { label: t('status.sold'), color: 'error', bgColor: '#f44336' },
-      inactive: { label: t('status.unavailable'), color: 'default', bgColor: '#9e9e9e' }
+// DESPUÉS - Cambiar a usar availabilityStatus:
+const getStatusConfig = (building) => {
+  const availabilityStatus = building.availabilityStatus || 'available'
+  
+  const configs = {
+    available: { 
+      label: t('availability.available'), 
+      color: 'success', 
+      bgColor: '#4caf50' 
+    },
+    reserved: { 
+      label: t('availability.reserved'), 
+      color: 'warning', 
+      bgColor: '#ff9800' 
+    },
+    assigned: { 
+      label: t('availability.assigned'), 
+      color: 'info', 
+      bgColor: '#2196f3' 
+    },
+    sold: { 
+      label: t('availability.sold'), 
+      color: 'error', 
+      bgColor: '#f44336' 
+    },
+    disabled: { 
+      label: t('availability.disabled'), 
+      color: 'default', 
+      bgColor: '#9e9e9e' 
+    },
+    quote_locked: { 
+      label: t('availability.quoteLocked'), 
+      color: 'warning', 
+      bgColor: '#ff9800' 
     }
-    return configs[status] || configs.active
   }
+  
+  return configs[availabilityStatus] || configs.available
+}
 
   const validBuildings = buildings.filter(building => {
     const hasLotAndModel = building.quoteRef?.lot && building.quoteRef?.model
@@ -94,7 +123,7 @@ const LotSelector = ({ projectId, onBuildingSelect, facadeEnabled = true }) => {
       .filter(building => building.polygon && building.polygon.length > 0)
       .map(building => {
         const points = building.polygon.flatMap(point => [point.x, point.y])
-        const statusConfig = getStatusConfig(building.status)
+        const statusConfig = getStatusConfig(building)
         
         return {
           id: building._id,
@@ -408,7 +437,7 @@ const handlePopupLeave = () => {
           </Typography>
           <Grid container spacing={3}>
             {validBuildings.map((building) => {
-              const statusConfig = getStatusConfig(building.status)
+              const statusConfig = getStatusConfig(building)
               const firstRender = building.exteriorRenders?.[0]?.url || building.exteriorRenders?.[0]
               const isHovered = hoveredBuildingId === building._id
 

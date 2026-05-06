@@ -7,6 +7,8 @@ import { useAuth } from '@shared/context/AuthContext'
 import { usePropertyBuilding } from '@shared/context/ProperyQuoteContext'
 import quoteService from '@shared/services/quoteService'
 import { calculateEstimatedPrice } from '@shared/utils/pricingEngine'
+import buildingService from '@shared/services/buildingService'
+import useQuoteLock from './useQuoteLock'
 
 const useQuoteFlow = () => {
   const navigate = useNavigate()
@@ -34,6 +36,14 @@ const useQuoteFlow = () => {
   const [residentExpanded, setResidentExpanded] = useState(false)
   const [modelFloors, setModelFloors] = useState([])
   const [projectData, setProjectData] = useState(null)
+
+  // NUEVO: Integrar quote-lock
+  const {
+    quoteId,
+    isLocked,
+    lockError,
+    releaseLock
+  } = useQuoteLock(selectedBuilding?._id, currentStep >= 1)
 
   const STEPS = [
     t('steps.selectHouse'),
@@ -206,6 +216,7 @@ const useQuoteFlow = () => {
     }
   }, [estimatedPrice, currentStep])
 
+  // MODIFICADO: Verificar disponibilidad antes de seleccionar
   const handleBuildingSelect = async (building) => {
     console.log('🎯 ===== CASA SELECCIONADA =====')
     console.log('🏠 Building completo:', building)
@@ -214,6 +225,12 @@ const useQuoteFlow = () => {
     console.log('📍 Lote ID:', building.quoteRef?.lot)
     console.log('🏗️ Modelo ID:', building.quoteRef?.model)
     console.log('🎨 Fachada ID:', building.quoteRef?.facade)
+    
+    // NUEVO: Verificar disponibilidad
+    if (!building.isAvailableForQuote) {
+      setError('Esta propiedad no está disponible para cotización')
+      return
+    }
     
     try {
       const lotId = building.quoteRef?.lot
@@ -259,12 +276,16 @@ const useQuoteFlow = () => {
       setContextBuilding(populatedBuilding)
       setCurrentStep(1)
       setError(null)
+      
+      // NUEVO: El lock se adquiere automáticamente por useQuoteLock cuando currentStep >= 1
+      
     } catch (error) {
       console.error('❌ Error al obtener datos de la casa:', error)
       setError(t('errors.loadingBuilding'))
     }
   }
 
+  // MODIFICADO: Incluir quoteId en el payload
   const handleCustomizationComplete = async (data) => {
     try {
       setLoadingQuote(true)
@@ -275,7 +296,8 @@ const useQuoteFlow = () => {
         projectId,
         lot: selectedBuilding.quoteRef?.lot,
         model: selectedBuilding.quoteRef?.model,
-        selectedOptions: data.selectedOptions
+        selectedOptions: data.selectedOptions,
+        quoteId // NUEVO: Incluir quoteId del lock
       }
 
       if (facadeEnabled && selectedBuilding.quoteRef?.facade) {
@@ -309,7 +331,16 @@ const useQuoteFlow = () => {
       setCurrentStep(2)
     } catch (err) {
       console.error('Error calculating quote:', err)
-      setError(t('errors.calculatingQuote'))
+      
+      // NUEVO: Manejar errores específicos de lock
+      if (err.response?.status === 409) {
+        setError('Esta propiedad ya no está disponible. Por favor seleccione otra.')
+        await releaseLock()
+        setCurrentStep(0)
+        setSelectedBuilding(null)
+      } else {
+        setError(t('errors.calculatingQuote'))
+      }
     } finally {
       setLoadingQuote(false)
     }
@@ -328,9 +359,42 @@ const useQuoteFlow = () => {
     }
   }
 
-  const handleBack = () => {
+  // MODIFICADO: Liberar lock si vuelve al paso 0
+  const handleBack = async () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1)
+      
+      // Si vuelve al paso 0, liberar el lock
+      if (currentStep === 1) {
+        await releaseLock()
+        setSelectedBuilding(null)
+      }
+    }
+  }
+
+  // NUEVO: Función para confirmar asignación (admin)
+  const handleConfirmAssignment = async (propertyId, customerId) => {
+    if (!selectedBuilding?._id) return
+
+    try {
+      await buildingService.updateAvailability(
+        selectedBuilding._id,
+        'assigned',
+        'Asignada a cliente',
+        {
+          propertyId,
+          customerId,
+          assignedAt: new Date().toISOString()
+        }
+      )
+      
+      // Liberar lock después de asignar
+      await releaseLock()
+      
+      console.log('✅ Propiedad asignada exitosamente')
+    } catch (error) {
+      console.error('❌ Error asignando propiedad:', error)
+      throw error
     }
   }
 
@@ -354,6 +418,14 @@ const useQuoteFlow = () => {
     isAuthenticated,
     STEPS,
     projectId,
+    
+    // NUEVO: Exportar estados y funciones de quote-lock
+    quoteId,
+    isLocked,
+    lockError,
+    releaseLock,
+    handleConfirmAssignment,
+    
     handleBuildingSelect,
     handleCustomizationComplete,
     handleOptionsChange,

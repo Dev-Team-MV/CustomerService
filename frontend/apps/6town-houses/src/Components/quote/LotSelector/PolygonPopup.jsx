@@ -2,8 +2,8 @@
 
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { Box, Paper, Typography, Chip, Divider, Skeleton, Button } from '@mui/material'
-import { Home, CheckCircle, AttachMoney } from '@mui/icons-material'
+import { Box, Paper, Typography, Chip, Divider, Skeleton, Button, Alert } from '@mui/material'
+import { Home, CheckCircle, AttachMoney, Lock } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
 import { useResolveReferences } from '../../../hooks/useResolveReferences'
 
@@ -30,11 +30,45 @@ const PolygonPopup = ({
 
   if (!building) return null
 
-  const status = building.status || 'active'
-  const statusLabel = status === 'sold' ? t('status.sold') : status === 'reserved' ? t('status.reserved') : t('status.available')
-  const statusColor = status === 'sold' ? '#f44336' : status === 'reserved' ? '#ff9800' : '#4caf50'
-  const statusBgColor = status === 'sold' ? '#ffebee' : status === 'reserved' ? '#fff3e0' : '#e8f5e9'
+  // NUEVO: Determinar disponibilidad
+  const isAvailable = building.isAvailableForQuote !== false
+  const availabilityStatus = building.availabilityStatus || 'available'
+  
+  // MODIFICADO: Mapeo de estados de disponibilidad
+  const availabilityConfig = {
+    available: { 
+      label: t('availability.available'), 
+      color: '#4caf50', 
+      bgColor: '#e8f5e9' 
+    },
+    reserved: { 
+      label: t('availability.reserved'), 
+      color: '#ff9800', 
+      bgColor: '#fff3e0' 
+    },
+    assigned: { 
+      label: t('availability.assigned'), 
+      color: '#2196f3', 
+      bgColor: '#e3f2fd' 
+    },
+    sold: { 
+      label: t('availability.sold'), 
+      color: '#f44336', 
+      bgColor: '#ffebee' 
+    },
+    disabled: { 
+      label: t('availability.disabled'), 
+      color: '#9e9e9e', 
+      bgColor: '#f5f5f5' 
+    },
+    quote_locked: { 
+      label: t('availability.quoteLocked'), 
+      color: '#ff9800', 
+      bgColor: '#fff3e0' 
+    }
+  }
 
+  const statusInfo = availabilityConfig[availabilityStatus] || availabilityConfig.available
   const lotNumber = building.quoteRef?.lot?._id || building.quoteRef?.lot || 'N/A'
 
   const calculatePosition = () => {
@@ -64,7 +98,7 @@ const PolygonPopup = ({
   return createPortal(
     <>
       <Paper
-      data-popup-id={building._id} 
+        data-popup-id={building._id} 
         elevation={4}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
@@ -81,8 +115,11 @@ const PolygonPopup = ({
           zIndex: 100000,
           borderRadius: 3,
           pointerEvents: 'auto',
-          background: 'linear-gradient(135deg, #fafbf8 85%, #f0f4e6 100%)',
-          border: '1.5px solid #e0e8d0',
+          background: isAvailable 
+            ? 'linear-gradient(135deg, #fafbf8 85%, #f0f4e6 100%)' 
+            : 'linear-gradient(135deg, #f5f5f5 85%, #e0e0e0 100%)',
+          border: `1.5px solid ${isAvailable ? '#e0e8d0' : '#bdbdbd'}`,
+          opacity: isAvailable ? 1 : 0.9,
           animation: 'slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
           '@keyframes slideUp': {
             from: { 
@@ -120,8 +157,11 @@ const PolygonPopup = ({
                 {t('lot')} {String(lotNumber).slice(-8)}
               </Typography>
             </Box>
+            
+            {/* MODIFICADO: Badge de disponibilidad */}
             <Chip 
-              label={statusLabel}
+              icon={!isAvailable ? <Lock sx={{ fontSize: 14 }} /> : undefined}
+              label={statusInfo.label}
               size="small"
               sx={{
                 fontWeight: 700,
@@ -131,9 +171,9 @@ const PolygonPopup = ({
                 py: 0.5,
                 minWidth: 'fit-content',
                 flexShrink: 0,
-                bgcolor: statusBgColor,
-                color: statusColor,
-                border: `1.5px solid ${statusColor}`,
+                bgcolor: statusInfo.bgColor,
+                color: statusInfo.color,
+                border: `1.5px solid ${statusInfo.color}`,
                 fontFamily: '"Poppins", sans-serif'
               }}
             />
@@ -141,6 +181,23 @@ const PolygonPopup = ({
         </Box>
 
         <Divider sx={{ mb: 1.5, borderColor: '#e0e8d0' }} />
+
+        {/* NUEVO: Alerta si no está disponible */}
+        {!isAvailable && (
+          <Alert 
+            severity="warning" 
+            sx={{ 
+              mb: 1.5, 
+              py: 0.5,
+              fontSize: '0.7rem',
+              '& .MuiAlert-message': {
+                fontSize: '0.7rem'
+              }
+            }}
+          >
+            {t('availability.notAvailableForQuote')}
+          </Alert>
+        )}
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2, mb: 1.5 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -262,10 +319,10 @@ const PolygonPopup = ({
           fullWidth
           size="small"
           onClick={onSelectBuilding}
-          disabled={loading}
+          disabled={loading || !isAvailable}
           sx={{
             borderRadius: 2,
-            bgcolor: '#8CA551',
+            bgcolor: isAvailable ? '#8CA551' : '#9e9e9e',
             color: 'white',
             fontWeight: 600,
             textTransform: 'none',
@@ -273,17 +330,18 @@ const PolygonPopup = ({
             fontSize: '12px',
             py: 0.8,
             '&:hover': {
-              bgcolor: '#7a8e46',
-              transform: 'scale(1.02)'
+              bgcolor: isAvailable ? '#7a8e46' : '#9e9e9e',
+              transform: isAvailable ? 'scale(1.02)' : 'none'
             },
             '&:disabled': {
               bgcolor: '#ccc',
+              color: 'white',
               cursor: 'not-allowed'
             },
             transition: 'all 0.2s ease'
           }}
         >
-          {t('selectHouse')}
+          {isAvailable ? t('selectHouse') : t('availability.notAvailableShort')}
         </Button>
       </Paper>
 
@@ -303,7 +361,7 @@ const PolygonPopup = ({
             height: 0,
             borderLeft: '12px solid transparent',
             borderRight: '12px solid transparent',
-            borderTop: '14px solid #fafbf8',
+            borderTop: `14px solid ${isAvailable ? '#fafbf8' : '#f5f5f5'}`,
             filter: 'drop-shadow(0 2px 4px rgba(140, 165, 81, 0.15))',
             animation: 'slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
           }}

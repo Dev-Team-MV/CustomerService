@@ -224,5 +224,17 @@
     "customizeStep": "Customize your apartment"
   },
 
-  "optionsCount": "{{count}} OPTIONS"
+  "optionsCount": "{{count}} OPTIONS",
+
+  "availability":{
+    "available": "Available",
+    "reserved": "Reserved",
+    "assigned": "Assigned",
+    "sold": "Sold",
+    "disabled": "Disabled",
+    "quoteLocked": "Quote Locked",
+    "notAvailable": "This house is not available for quote",
+    "notAvailableForQuote": "This house is not available for quote",
+    "notAvailableShort": "Not Available"
+  }
 }

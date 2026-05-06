@@ -224,5 +224,17 @@
     "customizeStep": "Personaliza tu departamento"
   },
 
-  "optionsCount": "{{count}} OPCIONES"
+  "optionsCount": "{{count}} OPCIONES",
+
+  "availability":{
+    "available": "Disponible",
+    "reserved": "Reservado",
+    "assigned": "Asignado",
+    "sold": "Vendido",
+    "disabled": "Deshabilitado",
+    "quoteLocked": "Cotización Bloqueada",
+    "notAvailable": "Esta casa no está disponible para cotización",
+    "notAvailableForQuote": "Esta casa no está disponible para cotización",
+    "notAvailableShort": "No Disponible"
+  }
 }
