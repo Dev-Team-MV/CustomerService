@@ -2,9 +2,19 @@
     "welcomeUser": "Welcome, {{name}}",
     "overviewSubtitle": "Your Dashboard Overview",
     "propertyMap": "Property Map",
+    "title": "6 Town Houses",
+    "subtitle": "Control Panel",
     "quickActions": {
         "title": "Quick Actions",
-        "subtitle": "Shortcuts to common tasks",
+        "subtitle": "Manage your project",
+        "newQuote": "New Quote",
+        "newQuoteDesc": "Create quote for customer",
+        "viewProperties": "View Properties",
+        "viewPropertiesDesc": "Manage inventory",
+        "clients": "Clients",
+        "clientsDesc": "Manage clients",
+        "news": "News",
+        "newsDesc": "View news",
         "addProperty": "Add Property",
         "addPropertyDesc": "Create new property",
         "inviteUser": "Invite User",
@@ -21,6 +31,21 @@
         "clubHouseDesc": "View club house",
         "newsFeed": "News Feed",
         "newsFeedDesc": "Latest updates"
+    },
+    "masterPlan": {
+        "title": "Project View",
+        "loading": "Loading master plan...",
+        "noImage": "Project Master Plan",
+        "noImageDesc": "No master plan image configured"
+    },
+    "recentQuotes": {
+        "title": "Recent Quotes",
+        "noQuotes": "No recent quotes",
+        "customer": "Customer",
+        "property": "Property",
+        "date": "Date",
+        "pending": "Pending",
+        "completed": "Completed"
     },
     "stats": {
         "lotsListedSold": "Lots Listed / Sold",
@@ -39,40 +64,34 @@
         "noPayloads": "No recent payloads found",
         "lot": "Lot {{number}}"
     },
-
-      "title": "All",
-  "titleBold": "Projects",
-  "topbarLabel": "All Projects — Real-time monitoring",
-  "subtitle": "{{count}} Projects tracked — {{date}}",
-  "sidebarStats": {
-    "projects": "Projects",
-    "users": "Users",
-    "clients": "Clients"
-  },
-  "createProject": "Create Project",
-  "selectProject": "Select Project",
-  "openDashboard": "Open Project Dashboard",
-  "metrics": {
-    "users": "Users",
-    "revenue": "Revenue",
-    "growth": "Growth",
-    "tasks": "Tasks",
-    "performance": "Performance",
-    "totalUsers": "Total Users",
-    "monthlyRecurring": "Monthly recurring",
-    "thisMonth": "+{{growth}}% this month",
-    "complete": "{{percent}}% Complete",
-
-    "totalClients": "Total Clients",
-    "registeredOwners": "Registered owners",
-    "totalCollected": "Collected",
-    "totalPending": "Pending",
-    "phase": "Phase",
-    "clients": "clients"
-  },
-  "empty": "Select a project to view details",
-
-
-  "titleISQL": "ISQL Dashboard",
-  "subtitleISQ": "Welcome to the ISQ system"
+    "titleBold": "Projects",
+    "topbarLabel": "All Projects — Real-time monitoring",
+    "sidebarStats": {
+        "projects": "Projects",
+        "users": "Users",
+        "clients": "Clients"
+    },
+    "createProject": "Create Project",
+    "selectProject": "Select Project",
+    "openDashboard": "Open Project Dashboard",
+    "metrics": {
+        "users": "Users",
+        "revenue": "Revenue",
+        "growth": "Growth",
+        "tasks": "Tasks",
+        "performance": "Performance",
+        "totalUsers": "Total Users",
+        "monthlyRecurring": "Monthly recurring",
+        "thisMonth": "+{{growth}}% this month",
+        "complete": "{{percent}}% Complete",
+        "totalClients": "Total Clients",
+        "registeredOwners": "Registered owners",
+        "totalCollected": "Collected",
+        "totalPending": "Pending",
+        "phase": "Phase",
+        "clients": "clients"
+    },
+    "empty": "Select a project to view details",
+    "titleISQL": "ISQL Dashboard",
+    "subtitleISQ": "Welcome to the ISQ system"
 }

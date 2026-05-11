@@ -92,6 +92,9 @@ const router = express.Router()
  *               initialPayment:
  *                 type: number
  *                 description: Initial payment amount (price and pending are calculated automatically using the active pricing mode for the project)
+ *               quoteId:
+ *                 type: string
+ *                 description: Optional. Required if the matching building is quote-locked.
  *     responses:
  *       201:
  *         description: Property created (9 phases will be automatically created)

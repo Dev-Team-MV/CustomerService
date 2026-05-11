@@ -2,18 +2,49 @@
   "title": "Cotiza tu Departamento",
   "subtitle": "Selecciona edificio, piso, departamento y personaliza tu nuevo hogar",
   "back": "Regresar",
+
   "step": {
     "building": "Edificio",
     "floor": "Piso",
     "apartment": "Departamento",
-    "customize": "Personalizar"
+    "customize": "Personalizar",
+    "lot": "Lote",
+    "model": "Modelo",
+    "facade": "Fachada",
+    "of": "Paso {{current}} de {{total}}"
   },
+
+  "steps": {
+    "selectHouse": "Selecciona Casa",
+    "selectBuilding": "Selecciona Edificio",
+    "selectFloor": "Selecciona Piso",
+    "selectApartment": "Selecciona Departamento",
+    "customize": "Personaliza",
+    "quote": "Cotización",
+    "assignResident": "Asignar Residente"
+  },
+
+  "header": {
+    "title": "Cotiza tu Casa",
+    "subtitle": "Personaliza y cotiza tu casa ideal en simples pasos"
+  },
+
   "selectBuildingStep": "01 SELECCIONA UN EDIFICIO",
+  "selectYourHouse": "Selecciona tu Casa",
+  "chooseAvailableHouses": "Elige una de nuestras {{count}} casas disponibles",
+  "noAvailableHouses": "No hay casas disponibles en este momento",
+  "incompleteQuoteConfig": "Hay {{count}} casa(s) sin configuración de cotización completa. Por favor contacta con el administrador.",
   "available": "Disponible",
   "inactive": "Inactivo",
   "scrollToSeeMap": "Desliza para ver el mapa completo · ",
   "clickPolygon": "Haz clic en un polígono para seleccionar un edificio",
   "noBuildings": "No hay edificios disponibles",
+  "masterPlan": "Master Plan",
+  "clickHouseToSelect": "Haz clic en una casa para seleccionarla",
+  "availableHouses": "Casas Disponibles",
+  "noAvailableHousesContact": "No hay casas disponibles para cotizar en este momento. Por favor contacta con ventas.",
+  "completeConfig": "Configuración completa",
+  "selectHouse": "Seleccionar Casa",
 
   "selectFloorStep": "02 SELECCIONA UN PISO",
   "clickFloorPolygon": "Haz clic en un polígono del edificio para seleccionar un piso",
@@ -50,6 +81,21 @@
   "previewImage": "Vista previa {{idx}}",
   "previewThumb": "Thumb {{idx}}",
   "selectApartmentToCustomize": "Por favor selecciona un departamento para personalizar",
+  "calculating": "Calculando...",
+  "getQuote": "Obtener Cotización",
+  "errorGettingQuote": "Error al obtener cotización. Intenta de nuevo.",
+  "estimatedPrice": "Precio Estimado",
+  "informativeStep": "Este nivel es solo informativo. Haz clic en 'Siguiente' para continuar.",
+  "previous": "Anterior",
+  "next": "Siguiente",
+  "clickToViewGallery": "Haz clic para ver galería →",
+
+  "mediaTypes": {
+    "exteriors": "{{count}} Exteriores",
+    "renders": "{{count}} Renders",
+    "isometrics": "{{count}} Isométricos",
+    "blueprints": "{{count}} Planos"
+  },
 
   "priceCalculator": "Calculadora de Precios",
   "browsingAsGuest": "Navegando como invitado.",
@@ -84,9 +130,6 @@
   "generateAndSend": "Generar y enviar cotización",
   "selectApartment": "Por favor selecciona un departamento",
   "quoteComingSoon": "¡Funcionalidad de cotización disponible pronto!",
-  "calculating": "Calculando...",
-  "getQuote": "Obtener Cotización",
-  "errorGettingQuote": "Error al obtener cotización. Intenta de nuevo.",
 
   "quoteReady": "¡Tu Cotización está Lista!",
   "propertyQuote": "Detalles de Cotización de Propiedad",
@@ -119,7 +162,7 @@
   "storagePrice": "Precio de Bodega",
   "total": "Total",
 
-  "residentAssignmentStep": "04 Asignación de Residente",
+  "residentAssignmentStep": "05 ASIGNACIÓN DE RESIDENTE",
   "selectOrCreateResident": "Seleccionar o crear un residente",
   "clickToExpand": "Hacer clic para expandir",
   "selectBuildingAndApartment": "Seleccionar edificio y departamento para asignar residente",
@@ -139,5 +182,59 @@
   "missingSelections": "Faltan selecciones requeridas.",
   "apartmentAssigned": "Departamento asignado exitosamente!",
   "apartmentCreatedAssigned": "Departamento creado y asignado exitosamente!",
-  "errorAssigning": "Error al crear o asignar departamento"
+  "errorAssigning": "Error al crear o asignar departamento",
+
+  "priceBreakdown": {
+    "title": "Desglose de Precio",
+    "lot": "Lote",
+    "model": "Modelo",
+    "facade": "Fachada",
+    "adjustments": "Ajustes",
+    "total": "Total"
+  },
+
+  "selectedOptions": {
+    "title": "Opciones Seleccionadas"
+  },
+
+  "buttons": {
+    "back": "Atrás",
+    "assignResident": "Asignar Residente",
+    "login": "Inicia sesión",
+    "cancel": "Cancelar",
+    "clearSelection": "Limpiar Selección",
+    "clear": "Limpiar"
+  },
+
+  "errors": {
+    "loadingBuildings": "Error al cargar las casas disponibles",
+    "loadingBuilding": "Error al cargar los datos de la casa. Por favor intenta de nuevo.",
+    "calculatingQuote": "Error al calcular la cotización",
+    "loadingConfig": "No se pudo cargar la configuración del catálogo",
+    "error": "Error: {message}"
+  },
+
+  "messages": {
+    "noBuildings": "No hay casas disponibles",
+    "noHouses": "No hay casas disponibles",
+    "loadingHouses": "Cargando casas...",
+    "selectBuildingStep": "Selecciona un edificio",
+    "selectFloorStep": "Selecciona un piso",
+    "selectApartmentStep": "Selecciona un departamento",
+    "customizeStep": "Personaliza tu departamento"
+  },
+
+  "optionsCount": "{{count}} OPCIONES",
+
+  "availability":{
+    "available": "Disponible",
+    "reserved": "Reservado",
+    "assigned": "Asignado",
+    "sold": "Vendido",
+    "disabled": "Deshabilitado",
+    "quoteLocked": "Cotización Bloqueada",
+    "notAvailable": "Esta casa no está disponible para cotización",
+    "notAvailableForQuote": "Esta casa no está disponible para cotización",
+    "notAvailableShort": "No Disponible"
+  }
 }

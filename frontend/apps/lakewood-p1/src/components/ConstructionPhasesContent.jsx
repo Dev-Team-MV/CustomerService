@@ -114,12 +114,16 @@ export const ConstructionPhasesContent = ({ property, isAdmin }) => {
     }
   }
 
-  const extractUrl = (item) => {
-    if (!item) return null
-    if (typeof item === 'string') return { url: item, type: 'image' }
-    if (item.url) return { url: item.url, type: item.mediaType || 'image' }
-    return null
+const extractUrl = (item) => {
+  if (!item) return null
+  if (typeof item === 'string') return { url: item, type: 'image', title: '' }
+  if (item.url) return { 
+    url: item.url, 
+    type: item.mediaType || 'image',
+    title: item.title || ''
   }
+  return null
+}
 
   const getPhaseTitle = (phase) => {
     if (!phase) return ''
@@ -187,6 +191,8 @@ export const ConstructionPhasesContent = ({ property, isAdmin }) => {
         >
           <ChevronRight />
         </IconButton>
+
+        
       </Box>
 
       {phases[currentPhaseIndex] && (
@@ -224,6 +230,19 @@ export const ConstructionPhasesContent = ({ property, isAdmin }) => {
               />
             </Box>
 
+              <Chip
+    label={`${phases[currentPhaseIndex]?.mediaItems?.length || 0} ${t('mediaItems', { count: phases[currentPhaseIndex]?.mediaItems?.length || 0 })}`}
+    size="small"
+    sx={{
+      bgcolor: 'rgba(51,63,31,0.08)',
+      color: '#333F1F',
+      border: '1px solid rgba(51,63,31,0.2)',
+      fontWeight: 600,
+      fontFamily: '"Poppins", sans-serif',
+      px: 1.5
+    }}
+  />
+
             {isAdmin && (
               <Button
                 variant="contained"
@@ -255,22 +274,31 @@ export const ConstructionPhasesContent = ({ property, isAdmin }) => {
                 }
               }}
             />
+            
           </Box>
 
           {phases[currentPhaseIndex].mediaItems?.length > 0 ? (
             <Box sx={{ bgcolor: '#000', borderRadius: 3, p: 2, minHeight: 280, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-              <GalleryCarrousel
-                images={phases[currentPhaseIndex].mediaItems.map(extractUrl).filter(Boolean)}
-                showPagination autoPlay={false} borderRadius={8} objectFit="contain" startIndex={0}
-                watermark="/images/logos/Logo_LakewoodOaks-08.png"
-              />
+    <GalleryCarrousel
+      images={phases[currentPhaseIndex].mediaItems.map(extractUrl).filter(Boolean)}
+      showPagination 
+      autoPlay={false} 
+      borderRadius={8} 
+      objectFit="contain" 
+      startIndex={0}
+      watermark="/images/logos/Logo_LakewoodOaks-08.png"
+      showTitles={true}  // ✅ NUEVO: Mostrar títulos
+    />
             </Box>
+            
           ) : (
             <Alert severity="info" icon="ℹ️" sx={{ borderRadius: 2, bgcolor: 'rgba(140,165,81,0.08)', border: '1px solid rgba(140,165,81,0.2)', '& .MuiAlert-message': { fontFamily: '"Poppins", sans-serif', color: '#333F1F' } }}>
               {t('noMediaYet')}
             </Alert>
           )}
+          
         </Paper>
+        
       )}
 
       <PhaseUploadDialog

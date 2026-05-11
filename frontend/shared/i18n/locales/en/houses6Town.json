@@ -59,7 +59,8 @@
     "price": "Price",
     "cancelled": "Cancelled",
     "saving": "Saving...",
-    "saveChanges": "Save Changes"
+    "saveChanges": "Save Changes",
+    "defined":"Defined"
   },
   "status": {
     "active": "Available",
@@ -141,7 +142,8 @@
       "exteriorInfo": "These exteriors will be displayed when",
       "inQuote": "is selected in the quote",
       "uploadHint": "Upload images for this media type",
-      "deleteMedia": "Delete image"
+      "deleteMedia": "Delete image",
+      "multi": "Images of Ideas of the Floor"
     },
     "facade": {
       "title": "Facade Configuration",

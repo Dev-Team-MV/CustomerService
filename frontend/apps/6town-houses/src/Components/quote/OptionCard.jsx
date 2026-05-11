@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Paper, Typography, Radio, Checkbox, Divider, CircularProgress, Chip } from '@mui/material'
 import { CheckCircle, Image as ImageIcon, ViewInAr, Map, Close, Home } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
@@ -9,28 +10,33 @@ const OptionCard = ({
   mode, 
   optionMedia, 
   loadingPreview, 
-  onSelect 
+  onSelect,
+  multiMedia = null
 }) => {
   const theme = useTheme()
+  const { t } = useTranslation(['quote', 'common'])
   const [selectedMediaType, setSelectedMediaType] = useState('all')
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
+  const [lightboxSource, setLightboxSource] = useState('media')
   
   const hasMedia = optionMedia?.media
   const media = hasMedia ? optionMedia.media : {}
   const renders = media.renders || []
   const isometrics = media.isometrics || []
   const blueprints = media.blueprints || []
-  const exteriors = media.exterior || []  // ✅ NUEVO: Agregar exteriores
-  const allMedia = [...exteriors, ...renders, ...isometrics, ...blueprints]  // ✅ Exteriores primero
+  const exteriors = media.exterior || []
+  const multiImages = multiMedia || []
+  const hasMultiImages = multiImages.length > 0
+ 
+  const allMedia = [...exteriors, ...renders, ...isometrics, ...blueprints]
   
   const hasImages = allMedia.length > 0
-  const primaryImage = exteriors[0]?.url || renders[0]?.url || isometrics[0]?.url || blueprints[0]?.url  // ✅ Priorizar exteriores
+  const primaryImage = exteriors[0]?.url || renders[0]?.url || isometrics[0]?.url || blueprints[0]?.url
  
-  // Filtrar media según el tipo seleccionado
   const getFilteredMedia = () => {
     switch(selectedMediaType) {
-      case 'exteriors':  // ✅ NUEVO
+      case 'exteriors':
         return exteriors
       case 'renders':
         return renders
@@ -45,14 +51,17 @@ const OptionCard = ({
  
   const filteredMedia = getFilteredMedia()
   const displayImage = filteredMedia[0]?.url || primaryImage
+
+  const lightboxImages = lightboxSource === 'multi' ? multiImages : filteredMedia
  
   const handleMediaTypeClick = (type, e) => {
     e.stopPropagation()
     setSelectedMediaType(type === selectedMediaType ? 'all' : type)
   }
  
-  const openLightbox = (index, e) => {
+  const openLightbox = (index, e, source = 'media') => {
     e.stopPropagation()
+    setLightboxSource(source)
     setLightboxIndex(index)
     setLightboxOpen(true)
   }
@@ -64,12 +73,14 @@ const OptionCard = ({
  
   const nextImage = (e) => {
     e.stopPropagation()
-    setLightboxIndex((prev) => (prev + 1) % filteredMedia.length)
+    const images = lightboxSource === 'multi' ? multiImages : filteredMedia
+    setLightboxIndex((prev) => (prev + 1) % images.length)
   }
  
   const prevImage = (e) => {
     e.stopPropagation()
-    setLightboxIndex((prev) => (prev - 1 + filteredMedia.length) % filteredMedia.length)
+    const images = lightboxSource === 'multi' ? multiImages : filteredMedia
+    setLightboxIndex((prev) => (prev - 1 + images.length) % images.length)
   }
  
   return (
@@ -115,7 +126,6 @@ const OptionCard = ({
         }}
         onClick={() => onSelect(option.id)}
       >
-        {/* Badge de selección */}
         {selected && (
           <Box
             sx={{
@@ -144,7 +154,6 @@ const OptionCard = ({
           </Box>
         )}
  
-        {/* Imagen principal - Altura fija */}
         <Box
           sx={{
             width: '100%',
@@ -171,7 +180,6 @@ const OptionCard = ({
                   }
                 }}
               />
-              {/* Overlay con info */}
               <Box
                 className="image-overlay"
                 sx={{
@@ -189,8 +197,15 @@ const OptionCard = ({
                   pointerEvents: 'none'
                 }}
               >
-                <Typography variant="caption" sx={{ color: 'white', fontWeight: 600 }}>
-                  Click para ver galería →
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: 'white', 
+                    fontWeight: 600,
+                    fontFamily: '"Poppins", sans-serif'
+                  }}
+                >
+                  {t('clickToViewGallery')}
                 </Typography>
               </Box>
             </>
@@ -210,7 +225,6 @@ const OptionCard = ({
           )}
         </Box>
  
-        {/* Contenido - Flex para ocupar espacio restante */}
         <Box 
           sx={{ 
             p: 3,
@@ -220,7 +234,6 @@ const OptionCard = ({
             justifyContent: 'space-between'
           }}
         >
-          {/* Header con título y selector */}
           <Box>
             <Box 
               display="flex" 
@@ -274,17 +287,20 @@ const OptionCard = ({
  
             <Divider sx={{ mb: 2, opacity: 0.6 }} />
  
-            {/* Loading state */}
             {loadingPreview && !hasMedia && (
               <Box display="flex" justifyContent="center" alignItems="center" py={3}>
                 <CircularProgress size={32} />
-                <Typography variant="body2" ml={2} color="text.secondary">
-                  Cargando...
+                <Typography 
+                  variant="body2" 
+                  ml={2} 
+                  color="text.secondary"
+                  sx={{ fontFamily: '"Poppins", sans-serif' }}
+                >
+                  {t('calculating')}
                 </Typography>
               </Box>
             )}
  
-            {/* Media badges - AHORA FUNCIONALES CON EXTERIORES */}
             {hasImages && (
               <Box 
                 display="flex" 
@@ -292,11 +308,10 @@ const OptionCard = ({
                 flexWrap="wrap" 
                 mb={2}
               >
-                {/* ✅ NUEVO: Chip de Exteriores */}
                 {exteriors.length > 0 && (
                   <Chip
                     icon={<Home sx={{ fontSize: 14 }} />}
-                    label={`${exteriors.length} Exteriores`}
+                    label={t('mediaTypes.exteriors', { count: exteriors.length })}
                     size="small"
                     onClick={(e) => handleMediaTypeClick('exteriors', e)}
                     sx={{
@@ -325,7 +340,7 @@ const OptionCard = ({
                 {renders.length > 0 && (
                   <Chip
                     icon={<ImageIcon sx={{ fontSize: 14 }} />}
-                    label={`${renders.length} Renders`}
+                    label={t('mediaTypes.renders', { count: renders.length })}
                     size="small"
                     onClick={(e) => handleMediaTypeClick('renders', e)}
                     sx={{
@@ -353,7 +368,7 @@ const OptionCard = ({
                 {isometrics.length > 0 && (
                   <Chip
                     icon={<ViewInAr sx={{ fontSize: 14 }} />}
-                    label={`${isometrics.length} Isométricos`}
+                    label={t('mediaTypes.isometrics', { count: isometrics.length })}
                     size="small"
                     onClick={(e) => handleMediaTypeClick('isometrics', e)}
                     sx={{
@@ -381,7 +396,7 @@ const OptionCard = ({
                 {blueprints.length > 0 && (
                   <Chip
                     icon={<Map sx={{ fontSize: 14 }} />}
-                    label={`${blueprints.length} Planos`}
+                    label={t('mediaTypes.blueprints', { count: blueprints.length })}
                     size="small"
                     onClick={(e) => handleMediaTypeClick('blueprints', e)}
                     sx={{
@@ -410,7 +425,6 @@ const OptionCard = ({
             )}
           </Box>
 
-          {/* Thumbnails gallery - Filtrados por tipo */}
           {hasImages && filteredMedia.length > 1 && (
             <Box
               sx={{
@@ -439,7 +453,7 @@ const OptionCard = ({
                   key={idx}
                   component="img"
                   src={img.url}
-                  alt={`Preview ${idx + 1}`}
+                  alt={t('previewImage', { idx: idx + 1 })}
                   onClick={(e) => openLightbox(idx, e)}
                   sx={{
                     width: 70,
@@ -486,10 +500,118 @@ const OptionCard = ({
               )}
             </Box>
           )}
+ 
+          {/* {hasMultiImages && (
+            <Box sx={{ mt: 3, pt: 2, borderTop: '1px dashed #e0e0e0' }}>
+              <Typography 
+                variant="subtitle2" 
+                sx={{ 
+                  fontFamily: '"Poppins", sans-serif',
+                  fontWeight: 700,
+                  color: '#9c27b0',
+                  mb: 1.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}
+              >
+                💡 {t('multiIdeas', 'Ideas de Diseño')}
+              </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 0.5,
+                  overflowX: 'auto',
+                  pb: 0.5,
+                  '&::-webkit-scrollbar': { height: '6px' },
+                  '&::-webkit-scrollbar-track': { 
+                    background: 'rgba(156, 39, 176, 0.05)', 
+                    borderRadius: '10px' 
+                  },
+                  '&::-webkit-scrollbar-thumb': { 
+                    background: '#9c27b0', 
+                    borderRadius: '10px',
+                    '&:hover': {
+                      background: '#7b1fa2'
+                    }
+                  }
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {multiImages.slice(0, 4).map((img, idx) => (
+                  <Box
+                    key={idx}
+                    component="img"
+                    src={img.url}
+                    alt={`Idea ${idx + 1}`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setLightboxSource('multi')
+                      setLightboxIndex(idx)
+                      setLightboxOpen(true)
+                    }}
+                    sx={{
+                      width: 60,
+                      height: 60,
+                      objectFit: 'cover',
+                      borderRadius: 2,
+                      flexShrink: 0,
+                      border: '2px solid rgba(156, 39, 176, 0.2)',
+                      transition: 'all 0.3s ease',
+                      cursor: 'pointer',
+                      '&:hover': { 
+                        transform: 'scale(1.15)', 
+                        border: '2px solid #9c27b0',
+                        boxShadow: '0 4px 12px rgba(156, 39, 176, 0.4)',
+                        zIndex: 1
+                      }
+                    }}
+                  />
+                ))}
+                {multiImages.length > 4 && (
+                  <Box
+                    sx={{
+                      width: 60,
+                      height: 60,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(156, 39, 176, 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      border: '2px solid rgba(156, 39, 176, 0.2)'
+                    }}
+                  >
+                    <Typography 
+                      variant="caption" 
+                      fontWeight={700} 
+                      sx={{ 
+                        fontFamily: '"Poppins", sans-serif',
+                        color: '#9c27b0'
+                      }}
+                    >
+                      +{multiImages.length - 4}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  fontFamily: '"Poppins", sans-serif',
+                  color: 'text.secondary',
+                  display: 'block',
+                  mt: 1,
+                  fontSize: '0.7rem'
+                }}
+              >
+                {t('multiIdeasHint', 'Inspiración para personalizar este espacio')}
+              </Typography>
+            </Box>
+          )} */}
         </Box>
       </Paper>
 
-      {/* LIGHTBOX CUSTOM */}
       {lightboxOpen && (
         <Box
           sx={{
@@ -511,7 +633,6 @@ const OptionCard = ({
           }}
           onClick={closeLightbox}
         >
-          {/* Botón cerrar */}
           <Box
             sx={{
               position: 'absolute',
@@ -538,7 +659,6 @@ const OptionCard = ({
             <Close sx={{ fontSize: 32 }} />
           </Box>
 
-          {/* Contador */}
           <Box
             sx={{
               position: 'absolute',
@@ -554,11 +674,10 @@ const OptionCard = ({
               fontWeight: 600
             }}
           >
-            {lightboxIndex + 1} / {filteredMedia.length}
+            {lightboxIndex + 1} / {lightboxImages.length}
           </Box>
 
-          {/* Navegación anterior */}
-          {filteredMedia.length > 1 && (
+          {lightboxImages.length > 1 && (
             <Box
               sx={{
                 position: 'absolute',
@@ -586,11 +705,10 @@ const OptionCard = ({
             </Box>
           )}
 
-          {/* Imagen principal */}
           <Box
             component="img"
-            src={filteredMedia[lightboxIndex]?.url}
-            alt={`Image ${lightboxIndex + 1}`}
+            src={lightboxImages[lightboxIndex]?.url}
+            alt={t('previewImage', { idx: lightboxIndex + 1 })}
             sx={{
               maxWidth: '90%',
               maxHeight: '90%',
@@ -604,8 +722,7 @@ const OptionCard = ({
             onClick={(e) => e.stopPropagation()}
           />
 
-          {/* Navegación siguiente */}
-          {filteredMedia.length > 1 && (
+          {lightboxImages.length > 1 && (
             <Box
               sx={{
                 position: 'absolute',
@@ -633,7 +750,6 @@ const OptionCard = ({
             </Box>
           )}
 
-          {/* Thumbnails en lightbox */}
           <Box
             sx={{
               position: 'absolute',
@@ -651,12 +767,12 @@ const OptionCard = ({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {filteredMedia.map((img, idx) => (
+            {lightboxImages.map((img, idx) => (
               <Box
                 key={idx}
                 component="img"
                 src={img.url}
-                alt={`Thumb ${idx + 1}`}
+                alt={t('previewThumb', { idx: idx + 1 })}
                 onClick={(e) => {
                   e.stopPropagation()
                   setLightboxIndex(idx)

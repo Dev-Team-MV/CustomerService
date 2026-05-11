@@ -310,6 +310,19 @@ console.log('🔍 ConstructionTab Debug:', {
               />
             </Box>
 
+                <Chip
+      label={`${currentPhase?.mediaItems?.length || 0} ${currentPhase?.mediaItems?.length === 1 ? 'item' : 'items'}`}
+      size="small"
+      sx={{
+        bgcolor: `${theme.palette.primary.main}15`,
+        color: theme.palette.primary.main,
+        border: `1px solid ${theme.palette.primary.main}33`,
+        fontWeight: 600,
+        fontFamily: '"Poppins", sans-serif',
+        px: 1.5
+      }}
+    />
+
             {/* Botón Upload - solo para admins */}
             {isAdmin && (
               <Button

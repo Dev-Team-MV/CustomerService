@@ -1,20 +1,24 @@
 import { useState, useMemo } from 'react'
 import {
   Box, Grid, Typography, Paper, Button, IconButton, Chip,
-  Select, MenuItem, FormControl, InputLabel, ImageList, ImageListItem,
-  ImageListItemBar, Tooltip, CircularProgress, Alert
+  Select, MenuItem, FormControl, InputLabel, Alert, CircularProgress
 } from '@mui/material'
 import {
-  CloudUpload, Delete, Image as ImageIcon, Layers, ViewInAr, Home
+  CloudUpload, Delete, Image as ImageIcon, Layers, ViewInAr, Home,
+  SwapVert, Save, Cancel
 } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
 import { useTranslation } from 'react-i18next'
 import uploadService from '@shared/services/uploadService'
+import FloorImageGrid from './FloorImagegrid'
 
 const FloorTab = ({ floor, editMode, onChange, catalogConfig, t }) => {
   const theme = useTheme()
   const [selectedOption, setSelectedOption] = useState(floor?.options?.[0]?.key || null)
   const [uploading, setUploading] = useState(false)
+  const [reorderMode, setReorderMode] = useState(false)
+  const [pendingReorders, setPendingReorders] = useState({})
+  const [originalFloorData, setOriginalFloorData] = useState(null)
 
   if (!floor) {
     return (
@@ -31,10 +35,18 @@ const FloorTab = ({ floor, editMode, onChange, catalogConfig, t }) => {
     renders: [], 
     isometrics: [], 
     blueprints: [],
-    exterior: []
+    exterior: [],
+    multi: []
   }
 
-  // ✅ Determinar qué tipos de media se requieren/permiten para esta opción
+  const floorMedia = floor.media || { 
+    renders: [], 
+    isometrics: [], 
+    blueprints: [],
+    exterior: [],
+    multi: []
+  }
+
   const mediaRequirements = useMemo(() => {
     if (!catalogConfig?.assetsSchema || !selectedOption) {
       return { required: [], optional: [] }
@@ -59,21 +71,29 @@ const FloorTab = ({ floor, editMode, onChange, catalogConfig, t }) => {
   const handleFileUpload = async (e, mediaType) => {
     const files = Array.from(e.target.files)
     if (files.length === 0) return
-
+   
     try {
       setUploading(true)
       const uploadPromises = files.map(file => uploadService.uploadModelImage(file, `floors/${floor.key}/${mediaType}`))
       const urls = await Promise.all(uploadPromises)
       
-      const newMedia = {
-        ...mediaToShow,
-        [mediaType]: [...(mediaToShow[mediaType] || []), ...urls.map(url => ({ url, isPublic: true }))]
-      }
-
-      if (currentOption) {
-        onChange(floor.key, 'optionMedia', { optionKey: selectedOption, media: newMedia })
+      if (mediaType === 'multi') {
+        const newFloorMedia = {
+          ...floorMedia,
+          multi: [...(floorMedia.multi || []), ...urls.map(url => ({ url, isPublic: true }))]
+        }
+        onChange(floor.key, 'media', newFloorMedia)
       } else {
-        onChange(floor.key, 'media', newMedia)
+        const newMedia = {
+          ...mediaToShow,
+          [mediaType]: [...(mediaToShow[mediaType] || []), ...urls.map(url => ({ url, isPublic: true }))]
+        }
+   
+        if (currentOption) {
+          onChange(floor.key, 'optionMedia', { optionKey: selectedOption, media: newMedia })
+        } else {
+          onChange(floor.key, 'media', newMedia)
+        }
       }
     } catch (err) {
       console.error('Error uploading files:', err)
@@ -84,20 +104,146 @@ const FloorTab = ({ floor, editMode, onChange, catalogConfig, t }) => {
   }
 
   const handleDeleteImage = (mediaType, index) => {
-    const newMedia = {
-      ...mediaToShow,
-      [mediaType]: mediaToShow[mediaType].filter((_, i) => i !== index)
-    }
-
-    if (currentOption) {
-      onChange(floor.key, 'optionMedia', { optionKey: selectedOption, media: newMedia })
+    if (mediaType === 'multi') {
+      const newFloorMedia = {
+        ...floorMedia,
+        multi: floorMedia.multi.filter((_, i) => i !== index)
+      }
+      onChange(floor.key, 'media', newFloorMedia)
     } else {
-      onChange(floor.key, 'media', newMedia)
+      const newMedia = {
+        ...mediaToShow,
+        [mediaType]: mediaToShow[mediaType].filter((_, i) => i !== index)
+      }
+   
+      if (currentOption) {
+        onChange(floor.key, 'optionMedia', { optionKey: selectedOption, media: newMedia })
+      } else {
+        onChange(floor.key, 'media', newMedia)
+      }
     }
   }
 
+  const handleToggleReorderMode = () => {
+    if (!reorderMode) {
+      setOriginalFloorData(JSON.parse(JSON.stringify(floor)))
+      setReorderMode(true)
+      console.log('🔄 [FloorTab] Modo reorganización activado')
+    } else {
+      setReorderMode(false)
+      setPendingReorders({})
+      console.log('🔄 [FloorTab] Modo reorganización desactivado')
+    }
+  }
+
+  const handleReorderImages = (floorKey, mediaType, reorderedImages) => {
+    const key = `${floorKey}-${selectedOption || 'floor'}-${mediaType}`
+    
+    if (mediaType === 'multi') {
+      const newFloorMedia = {
+        ...floorMedia,
+        multi: reorderedImages
+      }
+      onChange(floorKey, 'media', newFloorMedia)
+    } else {
+      const newMedia = {
+        ...mediaToShow,
+        [mediaType]: reorderedImages
+      }
+      
+      if (currentOption) {
+        onChange(floorKey, 'optionMedia', { optionKey: selectedOption, media: newMedia })
+      } else {
+        onChange(floorKey, 'media', newMedia)
+      }
+    }
+    
+    if (reorderMode) {
+      setPendingReorders(prev => ({
+        ...prev,
+        [key]: {
+          floorKey,
+          optionKey: selectedOption || null,
+          mediaType,
+          newOrder: reorderedImages.map((img, idx) => ({
+            position: idx + 1,
+            url: typeof img === 'string' ? img : img.url,
+            isPublic: typeof img === 'object' ? (img.isPublic !== false) : true
+          }))
+        }
+      }))
+      
+      console.log(`📦 [FloorTab] Cambio acumulado para ${key}:`, {
+        floorKey,
+        optionKey: selectedOption || 'floor-level',
+        mediaType,
+        count: reorderedImages.length
+      })
+    }
+  }
+
+const handleSaveReorders = async () => {
+  if (Object.keys(pendingReorders).length === 0) return
+  
+  console.log('💾 [FloorTab] GUARDANDO REORGANIZACIONES:')
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+  
+  try {
+    // Enviar cada reorganización al backend
+    for (const [key, reorder] of Object.entries(pendingReorders)) {
+      // Construir payload según especificación del endpoint
+      const payload = {
+        section: "floor",
+        floorKey: reorder.floorKey,
+        mediaType: reorder.mediaType,
+        images: reorder.newOrder
+      }
+      
+      // Solo incluir optionKey si existe (media de opción vs media de piso)
+      if (reorder.optionKey) {
+        payload.optionKey = reorder.optionKey
+      }
+      
+      console.log(`\n📤 Payload para ${key}:`)
+      console.log(JSON.stringify(payload, null, 2))
+      
+      // TODO: Descomentar cuando se conecte con el backend real
+      // const response = await api.patch(`/models/${modelId}/images/reorder`, payload)
+      // console.log(`✅ Reorganización guardada: ${key}`, response.data)
+    }
+    
+    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+    console.log(`✅ Total de reorganizaciones: ${Object.keys(pendingReorders).length}`)
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
+    
+    // Limpiar estado
+    setPendingReorders({})
+    setOriginalFloorData(null)
+    setReorderMode(false)
+    
+    // alert('✅ Reorganización guardada (MOCK). Revisa la consola para ver los payloads.')
+  } catch (error) {
+    console.error('❌ Error guardando reorganizaciones:', error)
+    alert(`Error: ${error.message}`)
+  }
+}
+  const handleCancelReorder = () => {
+    if (originalFloorData) {
+      onChange(floor.key, 'restore', originalFloorData)
+    }
+    
+    setPendingReorders({})
+    setOriginalFloorData(null)
+    setReorderMode(false)
+    
+    console.log('❌ [FloorTab] Reorganización cancelada, datos restaurados')
+    alert('Reorganización cancelada')
+  }
+
+  const pendingCount = Object.keys(pendingReorders).length
+
   const MediaSection = ({ title, mediaType, icon: Icon, color, isRequired = false, showInfo = false }) => {
-    const images = mediaToShow[mediaType] || []
+    const images = mediaType === 'multi' ? (floorMedia.multi || []) : (mediaToShow[mediaType] || [])
 
     return (
       <Paper 
@@ -153,7 +299,7 @@ const FloorTab = ({ floor, editMode, onChange, catalogConfig, t }) => {
             )}
           </Box>
 
-          {editMode && (
+          {editMode && !reorderMode && (
             <Button
               variant="outlined"
               component="label"
@@ -218,103 +364,105 @@ const FloorTab = ({ floor, editMode, onChange, catalogConfig, t }) => {
               color="text.secondary"
               sx={{ fontFamily: '"Poppins", sans-serif' }}
             >
-              {editMode 
-                ? t('houses6Town:model.floor.uploadHint') 
-                : t('houses6Town:model.floor.noMedia')
-              }
+              {editMode ? t('houses6Town:model.floor.uploadHint') : t('houses6Town:model.floor.noMedia')}
             </Typography>
           </Box>
         ) : (
-          <ImageList cols={3} gap={12} sx={{ borderRadius: 2, overflow: 'hidden' }}>
-            {images.map((img, index) => (
-              <ImageListItem 
-                key={index} 
-                sx={{ 
-                  borderRadius: 2, 
-                  overflow: 'hidden',
-                  transition: 'transform 0.3s ease',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    boxShadow: `0 8px 16px ${color}30`
-                  }
-                }}
-              >
-                <img
-                  src={img.url}
-                  alt={`${title} ${index + 1}`}
-                  loading="lazy"
-                  style={{ height: 180, objectFit: 'cover' }}
-                />
-                {editMode && (
-                  <ImageListItemBar
-                    position="bottom"
-                    sx={{ 
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
-                      borderRadius: 2
-                    }}
-                    actionIcon={
-                      <Tooltip title={t('houses6Town:model.floor.removeMedia')}>
-                        <IconButton
-                          size="small"
-                          sx={{ 
-                            color: 'white',
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                              bgcolor: 'rgba(255, 0, 0, 0.3)',
-                              transform: 'scale(1.1)'
-                            }
-                          }}
-                          onClick={() => handleDeleteImage(mediaType, index)}
-                        >
-                          <Delete />
-                        </IconButton>
-                      </Tooltip>
-                    }
-                  />
-                )}
-              </ImageListItem>
-            ))}
-          </ImageList>
+          <FloorImageGrid
+            images={images}
+            floorKey={floor.key}
+            mediaType={mediaType}
+            color={color}
+            onReorderImages={handleReorderImages}
+            onDeleteImage={handleDeleteImage}
+            editMode={editMode}
+            enableDragDrop={reorderMode}
+          />
         )}
       </Paper>
     )
   }
 
   return (
-    <Box sx={{ p: 4 }}>
-      {/* Encabezado del piso */}
-      <Box mb={4}>
-        <Typography 
-          variant="h5" 
-          fontWeight={700} 
-          gutterBottom 
-          sx={{ 
-            fontFamily: '"Poppins", sans-serif',
-            color: theme.palette.text.primary
-          }}
-        >
-          {floor.label}
-        </Typography>
-        <Typography 
-          variant="body2" 
-          color="text.secondary" 
-          sx={{ 
-            fontFamily: '"Poppins", sans-serif',
-            fontSize: '0.9rem'
-          }}
-        >
-          {t('houses6Town:model.floor.level', { number: floor.level })} • {' '}
-          {floor.isCustomizable 
-            ? t('houses6Town:model.floor.customizable') 
-            : t('houses6Town:model.floor.standard')
-          }
-        </Typography>
-      </Box>
+    <Box sx={{ p: 3 }}>
+      {editMode && (
+        <Box sx={{ mb: 3 }}>
+          <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
+            <Button
+              variant={reorderMode ? 'contained' : 'outlined'}
+              startIcon={<SwapVert />}
+              onClick={handleToggleReorderMode}
+              size="medium"
+              sx={{
+                borderRadius: 2,
+                fontWeight: 600,
+                fontFamily: '"Poppins", sans-serif',
+                bgcolor: reorderMode ? theme.palette.primary.main : 'transparent',
+                borderColor: theme.palette.primary.main,
+                color: reorderMode ? 'white' : theme.palette.primary.main,
+                '&:hover': {
+                  bgcolor: reorderMode ? theme.palette.primary.dark : `${theme.palette.primary.main}15`,
+                  borderColor: theme.palette.primary.dark
+                }
+              }}
+            >
+              {reorderMode ? 'Modo Reorganización Activo' : 'Reorganizar Imágenes'}
+            </Button>
+            
+            {pendingCount > 0 && (
+              <Chip
+                label={`${pendingCount} cambio${pendingCount > 1 ? 's' : ''} pendiente${pendingCount > 1 ? 's' : ''}`}
+                color="warning"
+                size="small"
+                sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+              />
+            )}
+          </Box>
 
-      {/* Selector de opciones de configuración */}
-      {floor.isCustomizable && floor.options?.length > 0 && (
-        <Box mb={4}>
-          <FormControl fullWidth sx={{ maxWidth: 450 }}>
+          {reorderMode && (
+            <Alert
+              severity={pendingCount > 0 ? "warning" : "info"}
+              sx={{ mt: 2, borderRadius: 2 }}
+              action={
+                pendingCount > 0 ? (
+                  <Box display="flex" gap={1}>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="success"
+                      startIcon={<Save />}
+                      onClick={handleSaveReorders}
+                      sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+                    >
+                      Guardar
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      color="error"
+                      startIcon={<Cancel />}
+                      onClick={handleCancelReorder}
+                      sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+                    >
+                      Cancelar
+                    </Button>
+                  </Box>
+                ) : null
+              }
+            >
+              <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                {pendingCount > 0
+                  ? 'Arrastra las imágenes para reorganizarlas. Haz clic en "Guardar" para aplicar los cambios.'
+                  : 'Modo reorganización activo. Arrastra las imágenes para cambiar su orden.'}
+              </Typography>
+            </Alert>
+          )}
+        </Box>
+      )}
+
+      {floor.options && floor.options.length > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <FormControl fullWidth>
             <InputLabel 
               sx={{ 
                 fontFamily: '"Poppins", sans-serif',
@@ -328,34 +476,17 @@ const FloorTab = ({ floor, editMode, onChange, catalogConfig, t }) => {
               onChange={(e) => setSelectedOption(e.target.value)}
               label={t('houses6Town:model.floor.configOption')}
               sx={{ 
-                borderRadius: 3,
-                fontFamily: '"Poppins", sans-serif',
-                '& .MuiOutlinedInput-root': {
-                  '&.Mui-focused fieldset': {
-                    borderColor: theme.palette.primary.main,
-                    borderWidth: '2px'
-                  }
-                }
+                borderRadius: 2,
+                fontFamily: '"Poppins", sans-serif'
               }}
             >
-              {floor.options.map((option) => (
-                <MenuItem key={option.key} value={option.key}>
-                  <Box display="flex" justifyContent="space-between" width="100%" gap={2}>
-                    <span style={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600 }}>
-                      {option.label}
-                    </span>
-                    <Chip
-                      label={t('houses6Town:model.floor.included')}
-                      size="small"
-                      color="default"
-                      variant="outlined"
-                      sx={{ 
-                        fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 600,
-                        fontSize: '0.65rem'
-                      }}
-                    />
-                  </Box>
+              {floor.options.map(option => (
+                <MenuItem 
+                  key={option.key} 
+                  value={option.key}
+                  sx={{ fontFamily: '"Poppins", sans-serif' }}
+                >
+                  {option.label}
                 </MenuItem>
               ))}
             </Select>
@@ -363,9 +494,7 @@ const FloorTab = ({ floor, editMode, onChange, catalogConfig, t }) => {
         </Box>
       )}
 
-      {/* Grid de secciones de media */}
       <Grid container spacing={3}>
-        {/* ✅ EXTERIORES - Mostrar primero si es requerido para level1 */}
         {shouldShowExteriors && (
           <Grid item xs={12} md={6}>
             <MediaSection
@@ -374,12 +503,11 @@ const FloorTab = ({ floor, editMode, onChange, catalogConfig, t }) => {
               icon={Home}
               color={theme.palette.success.main}
               isRequired={isExteriorRequired}
-              showInfo={true}
+              showInfo={isExteriorRequired}
             />
           </Grid>
         )}
 
-        {/* RENDERS */}
         <Grid item xs={12} md={6}>
           <MediaSection
             title={t('houses6Town:model.floor.renders')}
@@ -389,8 +517,7 @@ const FloorTab = ({ floor, editMode, onChange, catalogConfig, t }) => {
             isRequired={mediaRequirements.required.includes('renders')}
           />
         </Grid>
-        
-        {/* PLANOS */}
+
         <Grid item xs={12} md={6}>
           <MediaSection
             title={t('houses6Town:model.floor.blueprints')}
@@ -401,7 +528,6 @@ const FloorTab = ({ floor, editMode, onChange, catalogConfig, t }) => {
           />
         </Grid>
         
-        {/* ISOMÉTRICOS */}
         <Grid item xs={12} md={6}>
           <MediaSection
             title={t('houses6Town:model.floor.isometrics')}
@@ -411,6 +537,23 @@ const FloorTab = ({ floor, editMode, onChange, catalogConfig, t }) => {
             isRequired={mediaRequirements.required.includes('isometric')}
           />
         </Grid>
+
+        {floor.key !== 'level1' && (
+          <Grid item xs={12}>
+            <MediaSection
+              title={t('houses6Town:model.floor.multi', 'Imágenes de Ideas del Piso')}
+              mediaType="multi"
+              icon={Layers}
+              color="#9c27b0"
+              isRequired={false}
+            />
+            {currentOption && (
+              <Alert severity="info" sx={{ mt: 2, borderRadius: 2, fontSize: '0.85rem' }}>
+                💡 Estas imágenes son a nivel de piso completo, no de la opción específica.
+              </Alert>
+            )}
+          </Grid>
+        )}
       </Grid>
     </Box>
   )
