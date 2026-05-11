@@ -37,7 +37,8 @@ const GalleryCarrousel = ({
   startIndex = 0,
   onIndexChange = null,
   className = '',
-  watermark = '/images/logos/Logo_LakewoodOaks-08.png'
+  watermark = '/images/logos/Logo_LakewoodOaks-08.png',
+  showTitles = false  // ✅ NUEVO
 }) => {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxStart, setLightboxStart] = useState(0)
@@ -45,27 +46,27 @@ const GalleryCarrousel = ({
   const instanceId = useRef(Math.random().toString(36).slice(2))
   const receivingSync = useRef(false)
 
-  // ...existing code...
-  
-    const safeMedia = useMemo(() => {
-      if (!Array.isArray(images)) return []
-      return images
-        .filter(Boolean)
-        .map((item) => {
-          // Si ya es un objeto con url, usarlo directamente
-          if (typeof item === 'object' && item !== null && item.url) {
-            return { url: item.url, type: item.type || 'image' }
-          }
-          // Si es un string, convertirlo a objeto
-          if (typeof item === 'string') {
-            return { url: item, type: 'image' }
-          }
-          return null
-        })
-        .filter(Boolean)
-    }, [images])
-  
-  // ...existing code...
+const safeMedia = useMemo(() => {
+  if (!Array.isArray(images)) return []
+  return images
+    .filter(Boolean)
+    .map((item) => {
+      // Si ya es un objeto con url, usarlo directamente
+      if (typeof item === 'object' && item !== null && item.url) {
+        return { 
+          url: item.url, 
+          type: item.type || 'image',
+          title: item.title || ''  // ✅ NUEVO
+        }
+      }
+      // Si es un string, convertirlo a objeto
+      if (typeof item === 'string') {
+        return { url: item, type: 'image', title: '' }
+      }
+      return null
+    })
+    .filter(Boolean)
+}, [images])
 
   // ---- Sync listener -----------------------------------------------------
   useEffect(() => {
@@ -134,59 +135,85 @@ const GalleryCarrousel = ({
           grabCursor
           style={{ width: '100%', height: '100%', '--swiper-navigation-color': '#fff', '--swiper-pagination-color': '#fff' }}
         >
-          {safeMedia.map((media, i) => (
-            <SwiperSlide key={i} style={{ position: 'relative' }}>
-              {media.type === 'video' ? (
-                <video
-                  controls
-                  src={media.url}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit,
-                    cursor: 'pointer',
-                    display: 'block',
-                    borderRadius
-                  }}
-                />
-              ) : (
-                <img
-                  src={media.url}
-                  alt={`slide-${i}`}
-                  loading="lazy"
-                  draggable={false}
-                  
-                  onClick={() => openLightbox(i)}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit,
-                    cursor: 'pointer',
-                    display: 'block'
-                  }}
-                />
-              )}
-              {watermark && media.type !== 'video' && (
-                <img
-                  src={watermark}
-                  alt=""
-                  draggable={false}
-                  style={{
-                    position: 'absolute',
-                    bottom: 16,
-                    left: 16,
-                    height: '22%',
-                    maxHeight: 80,
-                    minHeight: 40,
-                    opacity: 0.35,
-                    pointerEvents: 'none',
-                    userSelect: 'none',
-                    filter: 'brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'
-                  }}
-                />
-              )}
-            </SwiperSlide>
-          ))}
+{safeMedia.map((media, i) => (
+  <SwiperSlide key={i} style={{ position: 'relative' }}>
+    {media.type === 'video' ? (
+      <video
+        controls
+        src={media.url}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit,
+          cursor: 'pointer',
+          display: 'block',
+          borderRadius
+        }}
+      />
+    ) : (
+      <img
+        src={media.url}
+        alt={media.title || `slide-${i}`}
+        loading="lazy"
+        draggable={false}
+        onClick={() => openLightbox(i)}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit,
+          cursor: 'pointer',
+          display: 'block'
+        }}
+      />
+    )}
+    
+    {/* Título del media item */}
+    {showTitles && media.title && (
+      <div
+        style={{
+          width: '22%',
+          position: 'absolute',
+          top: 16,
+          left: 16,
+          right: 16,
+          background: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(8px)',
+          color: 'white',
+          padding: '8px 16px',
+          borderRadius: 8,
+          fontFamily: '"Poppins", sans-serif',
+          fontSize: 14,
+          fontWeight: 600,
+          pointerEvents: 'none',
+          userSelect: 'none',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}
+      >
+        {media.title}
+      </div>
+    )}
+    
+    {watermark && media.type !== 'video' && (
+      <img
+        src={watermark}
+        alt=""
+        draggable={false}
+        style={{
+          position: 'absolute',
+          bottom: 16,
+          left: 16,
+          height: '22%',
+          maxHeight: 80,
+          minHeight: 40,
+          opacity: 0.35,
+          pointerEvents: 'none',
+          userSelect: 'none',
+          filter: 'brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,0.3))'
+        }}
+      />
+    )}
+  </SwiperSlide>
+))}
         </Swiper>
       </div>
     </>

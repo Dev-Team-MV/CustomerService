@@ -6,7 +6,8 @@ import {
   Newspaper as NewspaperIcon,
   Business as BusinessIcon,
   RequestQuote as RequestQuoteIcon,
-  Map as MapIcon
+  Map as MapIcon,
+  Group as GroupIcon
 } from "@mui/icons-material"
 
 export const privateMenuItems = [
@@ -58,17 +59,12 @@ export const privateMenuItems = [
     path: '/residents',
     roles: ['superadmin', 'admin']
   },
-  {
-    textKey: 'navigation:menu.getYourQuote',
-    icon: RequestQuoteIcon,
-    path: '/get-your-quote',
-    roles: ['superadmin', 'admin', 'user']
-  },
+
   {
     textKey: 'navigation:menu.myProperty',
     path: '/my-property',
     icon: HomeIcon,
-    roles: ['user', 'admin']
+    roles: ['superadmin','user', 'admin']
   },
   {
     textKey: 'navigation:menu.masterPlan',
@@ -76,6 +72,12 @@ export const privateMenuItems = [
     path: '/master-plan',
     roles: ['superadmin', 'admin']
   },
+  {
+  textKey: 'navigation:menu.familyGroup',
+  path: '/family-groups',
+  icon: GroupIcon,
+  roles: ['user', 'admin', 'superadmin']
+},
   {
     textKey: 'navigation:menu.configuration',
     icon: SettingsIcon,

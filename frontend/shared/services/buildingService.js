@@ -222,14 +222,7 @@ const buildingService = {
   },
 
   // ── APARTMENTS ─────────────────────────────────────────────
-//   getApartments: async (buildingId) => {
-//     try {
-//       const response = await api.get('/apartments', { params: { buildingId } })
-//       return response.data
-//     } catch (error) {
-//       throw new Error(error.response?.data?.message || 'Failed to fetch apartments')
-//     }
-//   },
+
   getApartments: async (buildingId = null, projectId = null) => {
     try {
       const params = {}
@@ -285,6 +278,101 @@ const buildingService = {
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to delete apartment')
     }
+  },
+
+
+/**
+ * Adquirir o renovar lock de quote para un building
+ * @param {string} buildingId - ID del building
+ * @param {string|null} quoteId - ID único del quote (null si el backend debe generarlo)
+ * @param {number} lockMinutes - Duración del lock en minutos (default: 15)
+ * @param {string} reason - Razón del lock
+ * @returns {Promise} Respuesta del servidor con quoteId generado
+ */
+acquireQuoteLock: async (buildingId, quoteId = null, lockMinutes = 15, reason = 'Cotización en progreso') => {
+  try {
+    const payload = {
+      lockMinutes,
+      reason
+    }
+    
+    // Solo incluir quoteId si existe (para renovaciones)
+    if (quoteId) {
+      payload.quoteId = quoteId
+    }
+    
+    const response = await api.post(`/buildings/${buildingId}/quote-lock`, payload)
+    
+    // Backend debe retornar: { quoteId: "...", expiresAt: "...", ... }
+    return response.data
+  } catch (error) {
+    console.error('Error acquiring quote lock:', error)
+    throw error
+  }
+},
+ 
+  /**
+   * Liberar lock de quote para un building
+   * @param {string} buildingId - ID del building
+   * @param {string} quoteId - ID único del quote
+   * @param {boolean} force - Forzar liberación (solo admin)
+   * @returns {Promise} Respuesta del servidor
+   */
+  releaseQuoteLock: async (buildingId, quoteId, force = false) => {
+    try {
+      const response = await api.delete(`/buildings/${buildingId}/quote-lock`, {
+        data: { 
+          quoteId, 
+          force 
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error releasing quote lock:', error)
+      throw error
+    }
+  },
+ 
+  /**
+   * Actualizar estado de disponibilidad comercial (admin)
+   * @param {string} buildingId - ID del building
+   * @param {string} availabilityStatus - Estado: 'available' | 'reserved' | 'assigned' | 'sold' | 'disabled'
+   * @param {string} availabilityReason - Razón del cambio
+   * @param {object} assignment - Datos de asignación (opcional)
+   * @returns {Promise} Respuesta del servidor
+   */
+  updateAvailability: async (buildingId, availabilityStatus, availabilityReason = '', assignment = null) => {
+    try {
+      const payload = {
+        availabilityStatus,
+        availabilityReason
+      }
+ 
+      if (assignment) {
+        payload.assignment = {
+          propertyId: assignment.propertyId,
+          customerId: assignment.customerId,
+          assignedAt: assignment.assignedAt || new Date().toISOString()
+        }
+      }
+ 
+      const response = await api.put(`/buildings/${buildingId}/availability`, payload)
+      return response.data
+    } catch (error) {
+      console.error('Error updating availability:', error)
+      throw error
+    }
+  },
+ 
+  /**
+   * Renovar lock automáticamente (helper)
+   * @param {string} buildingId - ID del building
+   * @param {string} quoteId - ID único del quote
+   * @param {number} lockMinutes - Duración del lock en minutos
+   * @returns {Promise} Respuesta del servidor
+   */
+  renewQuoteLock: async (buildingId, quoteId, lockMinutes = 15) => {
+    return buildingService.acquireQuoteLock(buildingId, quoteId, lockMinutes, 'Renovación automática')
   }
 }
 

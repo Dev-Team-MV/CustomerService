@@ -26,6 +26,8 @@ import MasterPlanPageWrapper from './Pages/MasterPlanPage'
 import Payloads from './Pages/Payloads'
 import MyApartment from './Pages/MyApartment'
 import FamilyGroup from './Pages/FamilyGroup'
+import TermsAndConditions from './Pages/TermsAndConditions'
+import Register from './Pages/Register'
 
 import theme from './theme'
 
@@ -52,9 +54,9 @@ function App() {
         <Routes>
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
-          {/* <Route path="/register" element={<Register />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/setup-password/:token" element={<Register />} />
-          <Route path="/terms-and-conditions" element={<TermsAndCondition />} /> */}
 
           {/* Public Routes */}
           <Route

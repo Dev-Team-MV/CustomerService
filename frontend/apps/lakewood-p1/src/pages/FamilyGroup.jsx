@@ -295,6 +295,7 @@ const FamilyGroup = () => {
           }}
           resourceType="property"
           preSelectedGroup={selectedGroup}
+          projectId={projectId} 
         />
       </motion.div>
     </Container>
