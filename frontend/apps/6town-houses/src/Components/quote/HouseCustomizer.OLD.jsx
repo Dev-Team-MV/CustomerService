@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import quoteService from '@shared/services/quoteService'
 import { calculateEstimatedPrice } from '@shared/utils/pricingEngine'
 import {
@@ -11,6 +12,7 @@ import OptionCard from './OptionCard'
 
 const HouseCustomizer = ({ catalogConfig, selectedBuilding, modelFloors = [], onComplete, onBack, onOptionsChange }) => {
   const theme = useTheme()
+  const { t } = useTranslation(['quote', 'common'])
   const [currentStep, setCurrentStep] = useState(0)
   const [selectedOptions, setSelectedOptions] = useState({})
   const [mediaByFloor, setMediaByFloor] = useState({})
@@ -169,7 +171,7 @@ const HouseCustomizer = ({ catalogConfig, selectedBuilding, modelFloors = [], on
     
     if (mode !== 'none' && !selectedOptions[currentLevelKey]) {
       console.error('❌ No hay opción seleccionada para:', currentLevelKey)
-      alert('Por favor selecciona al menos una opción')
+      alert(t('selectApartmentToCustomize'))
       return
     }
 
@@ -194,7 +196,7 @@ const HouseCustomizer = ({ catalogConfig, selectedBuilding, modelFloors = [], on
   }
 
   if (!catalogConfig || levelKeys.length === 0) {
-    return <Alert severity="error">No hay configuración de niveles disponible</Alert>
+    return <Alert severity="error">{t('errors.loadingConfig')}</Alert>
   }
 
   const getMediaForOption = (optionId) => {
@@ -209,7 +211,7 @@ const HouseCustomizer = ({ catalogConfig, selectedBuilding, modelFloors = [], on
     if (mode === 'none') {
       return (
         <Alert severity="info" sx={{ mb: 3 }}>
-          Este nivel es solo informativo. Haz clic en "Siguiente" para continuar.
+          {t('informativeStep')}
         </Alert>
       )
     }
@@ -246,17 +248,24 @@ const HouseCustomizer = ({ catalogConfig, selectedBuilding, modelFloors = [], on
         <Box display="flex" alignItems="center" gap={2} mb={2}>
           <Home sx={{ fontSize: 32, color: theme.palette.primary.main }} />
           <Box flex={1}>
-            <Typography variant="h5" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif', color: theme.palette.primary.main }}>
+            <Typography 
+              variant="h5" 
+              fontWeight={700} 
+              sx={{ 
+                fontFamily: '"Poppins", sans-serif', 
+                color: theme.palette.primary.main 
+              }}
+            >
               {currentLevel?.label}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Paso {currentStep + 1} de {levelKeys.length}
+              {t('step.of', { current: currentStep + 1, total: levelKeys.length })}
             </Typography>
           </Box>
           {estimatedPrice && (
             <Box textAlign="right">
               <Typography variant="caption" color="text.secondary" display="block">
-                Precio Estimado
+                {t('estimatedPrice')}
               </Typography>
               <Typography variant="h5" fontWeight={700} color="primary">
                 ${estimatedPrice?.totalPrice?.toLocaleString() || '0'}
@@ -275,8 +284,13 @@ const HouseCustomizer = ({ catalogConfig, selectedBuilding, modelFloors = [], on
       {/* Resumen de Selecciones */}
       {Object.keys(selectedOptions).length > 0 && (
         <Paper elevation={2} sx={{ p: 3, mb: 3, bgcolor: '#f5f5f5', borderRadius: 3 }}>
-          <Typography variant="h6" fontWeight={700} mb={2} sx={{ fontFamily: '"Poppins", sans-serif' }}>
-            Resumen de Selecciones
+          <Typography 
+            variant="h6" 
+            fontWeight={700} 
+            mb={2} 
+            sx={{ fontFamily: '"Poppins", sans-serif' }}
+          >
+            {t('selectedOptions.title')}
           </Typography>
           <Divider sx={{ mb: 2 }} />
           <Grid container spacing={2}>
@@ -288,10 +302,19 @@ const HouseCustomizer = ({ catalogConfig, selectedBuilding, modelFloors = [], on
               return (
                 <Grid item xs={12} sm={6} md={3} key={levelKey}>
                   <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>
+                    <Typography 
+                      variant="caption" 
+                      color="text.secondary" 
+                      sx={{ textTransform: 'uppercase', fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+                    >
                       {level?.label}
                     </Typography>
-                    <Typography variant="body1" fontWeight={600} color="primary">
+                    <Typography 
+                      variant="body1" 
+                      fontWeight={600} 
+                      color="primary"
+                      sx={{ fontFamily: '"Poppins", sans-serif' }}
+                    >
                       {labels.join(', ')}
                     </Typography>
                   </Box>
@@ -309,17 +332,37 @@ const HouseCustomizer = ({ catalogConfig, selectedBuilding, modelFloors = [], on
             variant="outlined"
             startIcon={<ArrowBack />}
             onClick={handlePrevious}
-            sx={{ minWidth: 120 }}
+            sx={{ 
+              minWidth: 120,
+              fontFamily: '"Poppins", sans-serif',
+              fontWeight: 600,
+              textTransform: 'none',
+              borderColor: theme.palette.divider,
+              color: theme.palette.text.secondary,
+              '&:hover': {
+                borderColor: theme.palette.primary.main,
+                bgcolor: theme.palette.action.hover
+              }
+            }}
           >
-            {currentStep === 0 ? 'Volver' : 'Anterior'}
+            {currentStep === 0 ? t('buttons.back') : t('previous')}
           </Button>
           <Button
             variant="contained"
             endIcon={isLastStep ? <Calculate /> : <ArrowForward />}
             onClick={handleNext}
-            sx={{ minWidth: 120 }}
+            sx={{ 
+              minWidth: 120,
+              fontFamily: '"Poppins", sans-serif',
+              fontWeight: 600,
+              textTransform: 'none',
+              bgcolor: theme.palette.primary.main,
+              '&:hover': {
+                bgcolor: theme.palette.primary.dark
+              }
+            }}
           >
-            {isLastStep ? 'Ver Cotización' : 'Siguiente'}
+            {isLastStep ? t('getQuote') : t('next')}
           </Button>
         </Box>
       </Paper>

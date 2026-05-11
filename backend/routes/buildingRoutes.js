@@ -5,6 +5,9 @@ import {
   createBuilding,
   updateBuilding,
   deleteBuilding,
+  acquireBuildingQuoteLock,
+  releaseBuildingQuoteLock,
+  setBuildingAvailability,
   getBuildingFloorPlans,
   createOrReplaceBuildingFloorPlan,
   updateBuildingFloorPlan,
@@ -114,6 +117,126 @@ router.route('/:id')
   .get(protect, getBuildingById)
   .put(protect, admin, updateBuilding)
   .delete(protect, admin, deleteBuilding)
+
+/**
+ * @swagger
+ * /api/buildings/{id}/quote-lock:
+ *   post:
+ *     summary: Acquire or renew quote lock for one building
+ *     tags: [Buildings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [quoteId]
+ *             properties:
+ *               quoteId:
+ *                 type: string
+ *                 description: External or internal quote identifier
+ *               lockMinutes:
+ *                 type: number
+ *                 description: Lock duration in minutes (default 15, max 240)
+ *               reason:
+ *                 type: string
+ *                 description: Optional lock reason shown to UI
+ *     responses:
+ *       200:
+ *         description: Lock acquired
+ *       404:
+ *         description: Building not found
+ *       409:
+ *         description: Building not available to lock
+ *   delete:
+ *     summary: Release quote lock for one building
+ *     tags: [Buildings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               quoteId:
+ *                 type: string
+ *                 description: Required when lock belongs to a specific quote
+ *               force:
+ *                 type: boolean
+ *                 description: Force unlock (admin/superadmin only)
+ *     responses:
+ *       200:
+ *         description: Lock released
+ *       404:
+ *         description: Building not found
+ *       409:
+ *         description: Lock belongs to another quote
+ */
+router.post('/:id/quote-lock', protect, acquireBuildingQuoteLock)
+router.delete('/:id/quote-lock', protect, releaseBuildingQuoteLock)
+
+/**
+ * @swagger
+ * /api/buildings/{id}/availability:
+ *   put:
+ *     summary: Update commercial availability status for one building (admin)
+ *     tags: [Buildings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [availabilityStatus]
+ *             properties:
+ *               availabilityStatus:
+ *                 type: string
+ *                 enum: [available, reserved, assigned, sold, disabled]
+ *               availabilityReason:
+ *                 type: string
+ *               assignment:
+ *                 type: object
+ *                 properties:
+ *                   propertyId:
+ *                     type: string
+ *                   customerId:
+ *                     type: string
+ *                   assignedAt:
+ *                     type: string
+ *                     format: date-time
+ *     responses:
+ *       200:
+ *         description: Availability updated
+ *       400:
+ *         description: Invalid availabilityStatus or invalid body
+ *       404:
+ *         description: Building not found
+ */
+router.put('/:id/availability', protect, admin, setBuildingAvailability)
 
 /**
  * @swagger

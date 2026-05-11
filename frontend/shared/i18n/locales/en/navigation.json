@@ -10,6 +10,7 @@
         "analytics": "Analytics",
         "news": "News",
         "myProperty": "My Property",
+        
         "amenities": "Amenities",
         "masterPlanInventory": "Master Plan Inventory",
         "home": "Home",
@@ -21,7 +22,7 @@
         "familyGroup": "Family Group",
         "buildings": "Buildings",
         "masterPlan": "Master Plan",
-        "myapartment": "My Apartments",
+        "myApartment": "My Apartments",
         "agora": "Agora",
         "mapInventory": "Map Inventory",
         "building": "Houses",

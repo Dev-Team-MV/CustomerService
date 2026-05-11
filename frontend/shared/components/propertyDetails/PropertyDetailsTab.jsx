@@ -16,8 +16,9 @@ const PropertyDetailsTab = ({ propertyDetails }) => {
   const theme = useTheme()
   const [carouselIndex, setCarouselIndex] = useState(0)
   const [selectedFloorKey, setSelectedFloorKey] = useState(null)
+  const [selectedMediaType, setSelectedMediaType] = useState('all') // ✅ NUEVO
   const [exteriorCarouselIndex, setExteriorCarouselIndex] = useState(0)
- 
+  
   const mediaByFloor = propertyDetails?.mediaByFloor || []
   const selectedRenderType = propertyDetails?.selectedRenderType || 'basic'
   const building = propertyDetails?.building || {}
@@ -49,19 +50,73 @@ const PropertyDetailsTab = ({ propertyDetails }) => {
     }
   }, [mediaByFloor])
  
+
   const currentFloorData = mediaByFloor.find(f => f.floorKey === selectedFloorKey) || mediaByFloor[0]
-  const selectedRenders = (currentFloorData?.media?.renders || []).map(r => r.url || r)
+
+  const selectedRenders = useMemo(() => {
+    if (!currentFloorData?.media) return []
+    
+    const allImages = []
+    const media = currentFloorData.media
+    
+    // Agregar renders
+    if (media.renders && media.renders.length > 0) {
+      media.renders.forEach(img => {
+        const url = img?.url || img
+        if (url) allImages.push({ url, type: 'renders' })
+      })
+    }
+    
+    // Agregar isométricos
+    if (media.isometrics && media.isometrics.length > 0) {
+      media.isometrics.forEach(img => {
+        const url = img?.url || img
+        if (url) allImages.push({ url, type: 'isometrics' })
+      })
+    }
+    
+    // Agregar planos
+    if (media.blueprints && media.blueprints.length > 0) {
+      media.blueprints.forEach(img => {
+        const url = img?.url || img
+        if (url) allImages.push({ url, type: 'blueprints' })
+      })
+    }
+  
+    // ✅ Filtrar por tipo seleccionado
+    const filtered = selectedMediaType === 'all' 
+      ? allImages 
+      : allImages.filter(img => img.type === selectedMediaType)
+
+    return filtered.map(img => img.url)
+  }, [currentFloorData, selectedMediaType])
+  
+// ✅ NUEVO: Calcular contadores por tipo
+const mediaTypeCounts = useMemo(() => {
+  if (!currentFloorData?.media) return {}
+  
+  const media = currentFloorData.media
+  return {
+    renders: media.renders?.length || 0,
+    isometrics: media.isometrics?.length || 0,
+    blueprints: media.blueprints?.length || 0,
+    all: (media.renders?.length || 0) + (media.isometrics?.length || 0) + (media.blueprints?.length || 0)
+  }
+}, [currentFloorData])
+ 
+
   const handleThumbSelect = (idx) => setCarouselIndex(idx)
   const handleExteriorThumbSelect = (idx) => setExteriorCarouselIndex(idx)
  
-  useEffect(() => {
-    setCarouselIndex(0)
-  }, [selectedRenders.length, selectedFloorKey])
+useEffect(() => {
+  setCarouselIndex(0)
+  setSelectedMediaType('all')
+}, [selectedFloorKey])
  
   useEffect(() => {
     setExteriorCarouselIndex(0)
   }, [allExteriors.length])
- 
+
   return (
     <Paper
       elevation={0}
@@ -286,43 +341,146 @@ const PropertyDetailsTab = ({ propertyDetails }) => {
       )}
  
       {/* Floor Selector */}
-      {mediaByFloor.length > 0 && (
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}>
-            Renders Interiores por Piso
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            {mediaByFloor.map((floor) => (
-              <Chip
-                key={floor.floorKey}
-                label={floor.label}
-                onClick={() => setSelectedFloorKey(floor.floorKey)}
-                icon={<Layers sx={{ fontSize: 16 }} />}
-                sx={{
-                  height: 32,
-                  fontSize: '0.85rem',
-                  fontWeight: selectedFloorKey === floor.floorKey ? 700 : 500,
-                  fontFamily: '"Poppins", sans-serif',
-                  bgcolor: selectedFloorKey === floor.floorKey 
-                    ? theme.palette.primary.main 
-                    : 'rgba(0,0,0,0.08)',
-                  color: selectedFloorKey === floor.floorKey ? 'white' : theme.palette.text.primary,
-                  '&:hover': {
-                    bgcolor: selectedFloorKey === floor.floorKey 
-                      ? theme.palette.primary.dark 
-                      : 'rgba(0,0,0,0.12)',
-                  }
-                }}
-              />
-            ))}
-          </Box>
-          {currentFloorData?.selectedOptionKey && (
-            <Typography variant="caption" sx={{ mt: 1, display: 'block', color: theme.palette.text.secondary }}>
-              Opción seleccionada: <strong>{currentFloorData.selectedOptionKey}</strong>
-            </Typography>
+{/* Floor Selector */}
+{mediaByFloor.length > 0 && (
+  <Box sx={{ mb: 3 }}>
+    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}>
+      Renders Interiores por Piso
+    </Typography>
+    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+      {mediaByFloor.map((floor) => (
+        <Chip
+          key={floor.floorKey}
+          label={floor.label}
+          onClick={() => setSelectedFloorKey(floor.floorKey)}
+          icon={<Layers sx={{ fontSize: 16 }} />}
+          sx={{
+            height: 32,
+            fontSize: '0.85rem',
+            fontWeight: selectedFloorKey === floor.floorKey ? 700 : 500,
+            fontFamily: '"Poppins", sans-serif',
+            bgcolor: selectedFloorKey === floor.floorKey 
+              ? theme.palette.primary.main 
+              : 'rgba(0,0,0,0.08)',
+            color: selectedFloorKey === floor.floorKey ? 'white' : theme.palette.text.primary,
+            '&:hover': {
+              bgcolor: selectedFloorKey === floor.floorKey 
+                ? theme.palette.primary.dark 
+                : 'rgba(0,0,0,0.12)',
+            }
+          }}
+        />
+      ))}
+    </Box>
+    {currentFloorData?.selectedOptionKey && (
+      <Typography variant="caption" sx={{ mt: 1, display: 'block', color: theme.palette.text.secondary }}>
+        Opción seleccionada: <strong>{currentFloorData.selectedOptionKey}</strong>
+      </Typography>
+    )}
+ 
+    {/* ✅ NUEVO: Filtros de tipo de imagen */}
+    {mediaTypeCounts.all > 0 && (
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="caption" sx={{ mb: 1, display: 'block', fontWeight: 600, color: theme.palette.text.secondary }}>
+          Filtrar por tipo:
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <Chip
+            label={`Todas (${mediaTypeCounts.all})`}
+            onClick={() => setSelectedMediaType('all')}
+            sx={{
+              height: 28,
+              fontSize: '0.75rem',
+              fontWeight: selectedMediaType === 'all' ? 700 : 500,
+              fontFamily: '"Poppins", sans-serif',
+              bgcolor: selectedMediaType === 'all' 
+                ? theme.palette.secondary.main 
+                : 'rgba(0,0,0,0.05)',
+              color: selectedMediaType === 'all' ? 'white' : theme.palette.text.secondary,
+              '&:hover': {
+                bgcolor: selectedMediaType === 'all' 
+                  ? theme.palette.secondary.dark 
+                  : 'rgba(0,0,0,0.1)',
+              }
+            }}
+          />
+          
+          {mediaTypeCounts.renders > 0 && (
+            <Chip
+              icon={<ImageIcon sx={{ fontSize: 14 }} />}
+              label={`Renders (${mediaTypeCounts.renders})`}
+              onClick={() => setSelectedMediaType('renders')}
+              sx={{
+                height: 28,
+                fontSize: '0.75rem',
+                fontWeight: selectedMediaType === 'renders' ? 700 : 500,
+                fontFamily: '"Poppins", sans-serif',
+                bgcolor: selectedMediaType === 'renders' 
+                  ? theme.palette.primary.main 
+                  : 'rgba(140, 165, 81, 0.1)',
+                color: selectedMediaType === 'renders' ? 'white' : theme.palette.primary.main,
+                border: `1px solid ${selectedMediaType === 'renders' ? theme.palette.primary.main : 'rgba(140, 165, 81, 0.3)'}`,
+                '&:hover': {
+                  bgcolor: selectedMediaType === 'renders' 
+                    ? theme.palette.primary.dark 
+                    : 'rgba(140, 165, 81, 0.2)',
+                }
+              }}
+            />
+          )}
+ 
+          {mediaTypeCounts.isometrics > 0 && (
+            <Chip
+              icon={<ViewInArIcon sx={{ fontSize: 14 }} />}
+              label={`Isométricos (${mediaTypeCounts.isometrics})`}
+              onClick={() => setSelectedMediaType('isometrics')}
+              sx={{
+                height: 28,
+                fontSize: '0.75rem',
+                fontWeight: selectedMediaType === 'isometrics' ? 700 : 500,
+                fontFamily: '"Poppins", sans-serif',
+                bgcolor: selectedMediaType === 'isometrics' 
+                  ? theme.palette.secondary.main 
+                  : 'rgba(156, 39, 176, 0.1)',
+                color: selectedMediaType === 'isometrics' ? 'white' : theme.palette.secondary.main,
+                border: `1px solid ${selectedMediaType === 'isometrics' ? theme.palette.secondary.main : 'rgba(156, 39, 176, 0.3)'}`,
+                '&:hover': {
+                  bgcolor: selectedMediaType === 'isometrics' 
+                    ? theme.palette.secondary.dark 
+                    : 'rgba(156, 39, 176, 0.2)',
+                }
+              }}
+            />
+          )}
+ 
+          {mediaTypeCounts.blueprints > 0 && (
+            <Chip
+              icon={<MapIcon sx={{ fontSize: 14 }} />}
+              label={`Planos (${mediaTypeCounts.blueprints})`}
+              onClick={() => setSelectedMediaType('blueprints')}
+              sx={{
+                height: 28,
+                fontSize: '0.75rem',
+                fontWeight: selectedMediaType === 'blueprints' ? 700 : 500,
+                fontFamily: '"Poppins", sans-serif',
+                bgcolor: selectedMediaType === 'blueprints' 
+                  ? theme.palette.info.main 
+                  : 'rgba(33, 150, 243, 0.1)',
+                color: selectedMediaType === 'blueprints' ? 'white' : theme.palette.info.main,
+                border: `1px solid ${selectedMediaType === 'blueprints' ? theme.palette.info.main : 'rgba(33, 150, 243, 0.3)'}`,
+                '&:hover': {
+                  bgcolor: selectedMediaType === 'blueprints' 
+                    ? theme.palette.info.dark 
+                    : 'rgba(33, 150, 243, 0.2)',
+                }
+              }}
+            />
           )}
         </Box>
-      )}
+      </Box>
+    )}
+  </Box>
+)}
 
       {/* Gallery */}
       <Box

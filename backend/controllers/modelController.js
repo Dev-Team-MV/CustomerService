@@ -49,7 +49,8 @@ const formatFloorMedia = (media) => {
       isometrics: [],
       blueprints: [],
       cinematics: [],
-      exterior: []
+      exterior: [],
+      multi: []
     }
   }
 
@@ -58,7 +59,8 @@ const formatFloorMedia = (media) => {
     isometrics: normalizeImageArray(media.isometrics),
     blueprints: normalizeImageArray(media.blueprints),
     cinematics: normalizeImageArray(media.cinematics),
-    exterior: normalizeImageArray(media.exterior)
+    exterior: normalizeImageArray(media.exterior),
+    multi: normalizeImageArray(media.multi)
   }
 }
 
@@ -245,6 +247,10 @@ function normalizeReorderUrl (value) {
   return null
 }
 
+function normalizeComparableKey (value) {
+  return String(value || '').trim().toLowerCase()
+}
+
 function parseIncomingReorderItems ({ payload = {}, currentItems = [] }) {
   const currentUrls = currentItems.map((item) => item.url)
   const currentUrlSet = new Set(currentUrls)
@@ -262,6 +268,8 @@ function parseIncomingReorderItems ({ payload = {}, currentItems = [] }) {
             ? payload.collection
             : Array.isArray(payload.items)
               ? payload.items
+              : Array.isArray(payload.images)
+                ? payload.images
               : null
 
   if (Array.isArray(directList) && directList.length > 0) {
@@ -872,29 +880,41 @@ export const reorderModelImages = async (req, res) => {
       sectionId,
       balconyId,
       upgradeId,
+      floorKey,
+      floorId,
+      optionKey,
+      mediaType,
       type = 'exterior',
       count
     } = req.body || {}
 
-    if (!['base', 'balcony', 'upgrade'].includes(section)) {
-      return res.status(400).json({ message: 'section must be one of: base, balcony, upgrade' })
-    }
+    const resolvedMediaType = String(mediaType || type || 'exterior').trim()
+    const floorMediaTypes = ['renders', 'isometrics', 'blueprints', 'cinematics', 'exterior', 'multi']
+    const legacyMediaTypes = ['exterior', 'interior']
 
-    if (!['exterior', 'interior'].includes(type)) {
-      return res.status(400).json({ message: 'type must be one of: exterior, interior' })
+    if (!['base', 'balcony', 'upgrade', 'floor'].includes(section)) {
+      return res.status(400).json({ message: 'section must be one of: base, balcony, upgrade, floor' })
     }
 
     let currentItems = []
     let targetSetter = null
+    let selectedFloor = null
+    let selectedOption = null
 
     if (section === 'base') {
+      if (!legacyMediaTypes.includes(resolvedMediaType)) {
+        return res.status(400).json({ message: 'type/mediaType must be one of: exterior, interior for base section' })
+      }
       if (!model.images) model.images = { exterior: [], interior: [] }
-      currentItems = normalizeImageArray(model.images[type])
+      currentItems = normalizeImageArray(model.images[resolvedMediaType])
       targetSetter = (items) => {
-        model.images[type] = items
-        model.markModified(`images.${type}`)
+        model.images[resolvedMediaType] = items
+        model.markModified(`images.${resolvedMediaType}`)
       }
     } else if (section === 'balcony') {
+      if (!legacyMediaTypes.includes(resolvedMediaType)) {
+        return res.status(400).json({ message: 'type/mediaType must be one of: exterior, interior for balcony section' })
+      }
       const targetBalconyId = balconyId || sectionId
       if (!targetBalconyId) {
         return res.status(400).json({ message: 'sectionId or balconyId is required when section is balcony' })
@@ -904,12 +924,15 @@ export const reorderModelImages = async (req, res) => {
         return res.status(404).json({ message: 'Balcony not found in this model' })
       }
       if (!balcony.images) balcony.images = { exterior: [], interior: [] }
-      currentItems = normalizeImageArray(balcony.images[type])
+      currentItems = normalizeImageArray(balcony.images[resolvedMediaType])
       targetSetter = (items) => {
-        balcony.images[type] = items
+        balcony.images[resolvedMediaType] = items
         model.markModified('balconies')
       }
-    } else {
+    } else if (section === 'upgrade') {
+      if (!legacyMediaTypes.includes(resolvedMediaType)) {
+        return res.status(400).json({ message: 'type/mediaType must be one of: exterior, interior for upgrade section' })
+      }
       const targetUpgradeId = upgradeId || sectionId
       if (!targetUpgradeId) {
         return res.status(400).json({ message: 'sectionId or upgradeId is required when section is upgrade' })
@@ -919,10 +942,57 @@ export const reorderModelImages = async (req, res) => {
         return res.status(404).json({ message: 'Upgrade not found in this model' })
       }
       if (!upgrade.images) upgrade.images = { exterior: [], interior: [] }
-      currentItems = normalizeImageArray(upgrade.images[type])
+      currentItems = normalizeImageArray(upgrade.images[resolvedMediaType])
       targetSetter = (items) => {
-        upgrade.images[type] = items
+        upgrade.images[resolvedMediaType] = items
         model.markModified('upgrades')
+      }
+    } else {
+      if (!floorMediaTypes.includes(resolvedMediaType)) {
+        return res.status(400).json({
+          message: `mediaType/type must be one of: ${floorMediaTypes.join(', ')} for floor section`
+        })
+      }
+
+      const targetFloorRef = floorKey || floorId || sectionId
+      if (!targetFloorRef) {
+        return res.status(400).json({ message: 'floorKey or floorId is required when section is floor' })
+      }
+
+      const normalizedFloorRef = normalizeComparableKey(targetFloorRef)
+      selectedFloor = Array.isArray(model.floors)
+        ? model.floors.find((floor) => (
+          String(floor?._id || '') === String(targetFloorRef) ||
+          normalizeComparableKey(floor?.key) === normalizedFloorRef
+        ))
+        : null
+
+      if (!selectedFloor) {
+        return res.status(404).json({ message: 'Floor not found in this model' })
+      }
+
+      if (!selectedFloor.media) selectedFloor.media = formatFloorMedia(selectedFloor.media)
+
+      if (optionKey) {
+        const normalizedOptionRef = normalizeComparableKey(optionKey)
+        selectedOption = Array.isArray(selectedFloor.options)
+          ? selectedFloor.options.find((option) => (
+            String(option?._id || '') === String(optionKey) ||
+            normalizeComparableKey(option?.key) === normalizedOptionRef
+          ))
+          : null
+
+        if (!selectedOption) {
+          return res.status(404).json({ message: 'Option not found in selected floor' })
+        }
+        if (!selectedOption.media) selectedOption.media = formatFloorMedia(selectedOption.media)
+      }
+
+      const mediaOwner = selectedOption || selectedFloor
+      currentItems = normalizeImageArray(mediaOwner.media?.[resolvedMediaType])
+      targetSetter = (items) => {
+        mediaOwner.media[resolvedMediaType] = items
+        model.markModified('floors')
       }
     }
 
@@ -985,7 +1055,10 @@ export const reorderModelImages = async (req, res) => {
     return res.json({
       message: 'Images reordered successfully',
       section,
-      type,
+      type: resolvedMediaType,
+      mediaType: resolvedMediaType,
+      floorKey: selectedFloor?.key,
+      optionKey: selectedOption?.key,
       count: reordered.length,
       model: modelData
     })

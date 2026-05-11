@@ -25,7 +25,8 @@ const floorOptionSchema = new mongoose.Schema(
       isometrics: [imageItemSchema],
       blueprints: [imageItemSchema],
       cinematics: [imageItemSchema],
-      exterior: [imageItemSchema]
+      exterior: [imageItemSchema],
+      multi: [imageItemSchema]
     }
   },
   { _id: true, timestamps: true }
@@ -56,7 +57,8 @@ const floorSchema = new mongoose.Schema(
       isometrics: [imageItemSchema],
       blueprints: [imageItemSchema],
       cinematics: [imageItemSchema],
-      exterior: [imageItemSchema]
+      exterior: [imageItemSchema],
+      multi: [imageItemSchema]
     }
   },
   { _id: true, timestamps: true }

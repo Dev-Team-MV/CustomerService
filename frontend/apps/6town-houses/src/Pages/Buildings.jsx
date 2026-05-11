@@ -43,20 +43,20 @@ const Buildings = () => {
     setSelectedBuilding(null)
   }
 
-  const handleSaved = async (buildingData) => {
-    try {
-      await handleBuildingCreated(buildingData)
-      await refreshBuildings()
-      handleCloseDialog()
-      setSnackbar({ 
-        open: true, 
-        message: selectedBuilding ? t('houses6Town:messages.updateSuccess') : t('houses6Town:messages.createSuccess'), 
-        severity: 'success' 
-      })
-    } catch (err) {
-      setSnackbar({ open: true, message: t('houses6Town:messages.error', { message: err.message }), severity: 'error' })
-    }
+const handleSaved = async (buildingData) => {
+  try {
+    await handleBuildingCreated(buildingData)
+    await refreshBuildings()
+    handleCloseDialog()
+    setSnackbar({ 
+      open: true, 
+      message: buildingData._id ? t('houses6Town:messages.updateSuccess') : t('houses6Town:messages.createSuccess'),  // ✅ Detectar por _id
+      severity: 'success' 
+    })
+  } catch (err) {
+    setSnackbar({ open: true, message: t('houses6Town:messages.error', { message: err.message }), severity: 'error' })
   }
+}
 
   const handleDelete = async (building) => {
     if (!window.confirm(t('houses6Town:messages.deleteConfirm', { name: building.name }))) return

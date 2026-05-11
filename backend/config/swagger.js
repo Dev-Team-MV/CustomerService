@@ -435,7 +435,8 @@ const options = {
                 isometrics: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
                 blueprints: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
                 cinematics: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
-                exterior: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } }
+                exterior: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                multi: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } }
               }
             }
           }
@@ -455,7 +456,8 @@ const options = {
                 isometrics: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
                 blueprints: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
                 cinematics: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
-                exterior: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } }
+                exterior: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } },
+                multi: { type: 'array', items: { $ref: '#/components/schemas/ImageItem' } }
               }
             },
             optionsMedia: {

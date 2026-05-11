@@ -2,9 +2,19 @@
     "welcomeUser": "Bienvenido, {{name}}",
     "overviewSubtitle": "Resumen de Tu Panel",
     "propertyMap": "Mapa de Propiedades",
+    "title": "6 Town Houses",
+    "subtitle": "Panel de Control",
     "quickActions": {
         "title": "Acciones Rápidas",
-        "subtitle": "Atajos a tareas comunes",
+        "subtitle": "Gestiona tu proyecto",
+        "newQuote": "Nueva Cotización",
+        "newQuoteDesc": "Crear cotización para cliente",
+        "viewProperties": "Ver Propiedades",
+        "viewPropertiesDesc": "Gestionar inventario",
+        "clients": "Clientes",
+        "clientsDesc": "Administrar clientes",
+        "news": "Noticias",
+        "newsDesc": "Ver noticias",
         "addProperty": "Agregar Propiedad",
         "addPropertyDesc": "Crear nueva propiedad",
         "inviteUser": "Invitar Usuario",
@@ -21,6 +31,21 @@
         "clubHouseDesc": "Ver club house",
         "newsFeed": "Noticias",
         "newsFeedDesc": "Últimas novedades"
+    },
+    "masterPlan": {
+        "title": "Vista del Proyecto",
+        "loading": "Cargando master plan...",
+        "noImage": "Master Plan del Proyecto",
+        "noImageDesc": "No hay imagen de master plan configurada"
+    },
+    "recentQuotes": {
+        "title": "Cotizaciones Recientes",
+        "noQuotes": "No hay cotizaciones recientes",
+        "customer": "Cliente",
+        "property": "Propiedad",
+        "date": "Fecha",
+        "pending": "Pendiente",
+        "completed": "Completado"
     },
     "stats": {
         "lotsListedSold": "Lotes Listados / Vendidos",
@@ -39,41 +64,34 @@
         "noPayloads": "No se encontraron pagos recientes",
         "lot": "Lote {{number}}"
     },
-
-      "title": "Todos",
-  "titleBold": "Los Proyectos",
-  "topbarLabel": "Todos los Proyectos — Monitoreo en tiempo real",
-  "subtitle": "{{count}} Proyectos monitoreados — {{date}}",
-  "sidebarStats": {
-    "projects": "Proyectos",
-    "users": "Usuarios",
-    "clients": "Clientes"
-    
-  },
-  "createProject": "Crear Proyecto",
-  "selectProject": "Selecciona un proyecto",
-  "openDashboard": "Abrir Dashboard del Proyecto",
-  "metrics": {
-    "users": "Usuarios",
-    "revenue": "Ingresos",
-    "growth": "Crecimiento",
-    "tasks": "Tareas",
-    "performance": "Desempeño",
-    "totalUsers": "Usuarios Totales",
-    "monthlyRecurring": "Ingresos mensuales",
-    "thisMonth": "+{{growth}}% este mes",
-    "complete": "{{percent}}% Completado",
-    
+    "titleBold": "Los Proyectos",
+    "topbarLabel": "Todos los Proyectos — Monitoreo en tiempo real",
+    "sidebarStats": {
+        "projects": "Proyectos",
+        "users": "Usuarios",
+        "clients": "Clientes"
+    },
+    "createProject": "Crear Proyecto",
+    "selectProject": "Selecciona un proyecto",
+    "openDashboard": "Abrir Dashboard del Proyecto",
+    "metrics": {
+        "users": "Usuarios",
+        "revenue": "Ingresos",
+        "growth": "Crecimiento",
+        "tasks": "Tareas",
+        "performance": "Desempeño",
+        "totalUsers": "Usuarios Totales",
+        "monthlyRecurring": "Ingresos mensuales",
+        "thisMonth": "+{{growth}}% este mes",
+        "complete": "{{percent}}% Completado",
         "totalClients": "Total Clientes",
-    "registeredOwners": "Propietarios registrados",
-    "totalCollected": "Recaudado",
-    "totalPending": "Pendiente",
-    "phase": "Fase",
-    "clients": "clientes"
-  },
-  "empty": "Selecciona un proyecto para ver detalles",
-
-
-  "titleISQL": "ISQL Dashboard",
-  "subtitleISQ": "Bienvenido al sistema ISQ"
+        "registeredOwners": "Propietarios registrados",
+        "totalCollected": "Recaudado",
+        "totalPending": "Pendiente",
+        "phase": "Fase",
+        "clients": "clientes"
+    },
+    "empty": "Selecciona un proyecto para ver detalles",
+    "titleISQL": "ISQL Dashboard",
+    "subtitleISQ": "Bienvenido al sistema ISQ"
 }

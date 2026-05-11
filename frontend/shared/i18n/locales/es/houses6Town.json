@@ -59,7 +59,8 @@
     "price": "Precio",
     "cancelled": "Cancelada",
     "saving": "Guardando...",
-    "saveChanges": "Guardar Cambios"
+    "saveChanges": "Guardar Cambios",
+    "defined":"Definido"
   },
   "status": {
     "active": "Disponible",
@@ -141,7 +142,8 @@
       "exteriorInfo": "Estos exteriores se mostrarán cuando se seleccione",
       "inQuote": "en la cotización",
       "uploadHint": "Sube imágenes para este tipo de media",
-      "delete": "Eliminar imagen"
+      "delete": "Eliminar imagen",
+      "multi": "Imágenes de Ideas del Piso"
     },
     "facade": {
       "title": "Configuración de Fachadas",

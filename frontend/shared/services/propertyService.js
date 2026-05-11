@@ -25,25 +25,27 @@ getByProject: async (projectId) => {
     return []
   }
 },
-  getLots: async () => {
-    try {
-      const response = await api.get('/lots')
-      return Array.isArray(response.data) ? response.data : []
-    } catch (error) {
-      console.error('Error fetching lots:', error)
-      return []
-    }
-  },
+getLots: async (projectId) => {
+  try {
+    const params = projectId ? { projectId } : {}
+    const response = await api.get('/lots', { params })
+    return Array.isArray(response.data) ? response.data : []
+  } catch (error) {
+    console.error('Error fetching lots:', error)
+    return []
+  }
+},
 
-  getModels: async () => {
-    try {
-      const response = await api.get('/models')
-      return Array.isArray(response.data) ? response.data : []
-    } catch (error) {
-      console.error('Error fetching models:', error)
-      return []
-    }
-  },
+getModels: async (projectId) => {
+  try {
+    const params = projectId ? { projectId } : {}
+    const response = await api.get('/models', { params })
+    return Array.isArray(response.data) ? response.data : []
+  } catch (error) {
+    console.error('Error fetching models:', error)
+    return []
+  }
+},
 
   getFacadesByModel: async (modelId) => {
     try {

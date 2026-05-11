@@ -20,6 +20,7 @@ export const ShareDialog = ({
   resourceId = null,
   resourceName = null,
   preSelectedGroup = null,
+  projectId = null,  // ✅ NUEVO
   availableUsers = [],
   availableGroups = [],
   onShareWithUser,
@@ -68,18 +69,32 @@ export const ShareDialog = ({
     if (isGroupMode && selectedResourceId) loadShares(selectedResourceId)
   }, [selectedResourceId, isGroupMode])
 
+  // const loadResources = async () => {
+  //   try {
+  //     setLoadingResources(true)
+  //     const response = await api.get(endpoint)
+  //     setMyResources(response.data)
+  //     if (response.data.length > 0 && !selectedResourceId) setSelectedResourceId(response.data[0]._id)
+  //   } catch (err) {
+  //     setError(t('share:loadResourcesError', 'Failed to load resources'))
+  //   } finally {
+  //     setLoadingResources(false)
+  //   }
+  // }
   const loadResources = async () => {
-    try {
-      setLoadingResources(true)
-      const response = await api.get(endpoint)
-      setMyResources(response.data)
-      if (response.data.length > 0 && !selectedResourceId) setSelectedResourceId(response.data[0]._id)
-    } catch (err) {
-      setError(t('share:loadResourcesError', 'Failed to load resources'))
-    } finally {
-      setLoadingResources(false)
-    }
+  try {
+    setLoadingResources(true)
+    // ✅ MODIFICADO: Agregar projectId como parámetro si existe
+    const params = projectId ? { projectId } : {}
+    const response = await api.get(endpoint, { params })
+    setMyResources(response.data)
+    if (response.data.length > 0 && !selectedResourceId) setSelectedResourceId(response.data[0]._id)
+  } catch (err) {
+    setError(t('share:loadResourcesError', 'Failed to load resources'))
+  } finally {
+    setLoadingResources(false)
   }
+}
 
   const loadShares = async (resId) => {
     try {

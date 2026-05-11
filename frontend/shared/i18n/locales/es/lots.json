@@ -27,7 +27,10 @@
   "actions": {
     "add": "Agregar Lote",
     "edit": "Editar Lote",
-    "delete": "Eliminar Lote"
+    "delete": "Eliminar Lote",
+    "update": "Actualizar",
+    "cancel": "Cancelar",
+    "create": "Crear"
   },
   "empty": {
     "title": "No hay lotes disponibles",
@@ -39,7 +42,8 @@
     "editTitle": "Editar Lote",
     "subtitle": "Gestiona los detalles del lote",
     "update": "Actualizar",
-    "create": "Crear"
+    "create": "Crear",
+    "editSubtitle": "Editando lote"
   },
   "form": {
     "number": "Número de Lote",
@@ -49,7 +53,9 @@
     "projectHelp": "Selecciona el proyecto al que pertenece este lote",
     "inventoryColor": "Color de Inventario",
     "model": "Modelo",
-    "modelHelper": "Selecciona el modelo asociado a este lote para cálculos de precio y configuración"
+    "modelHelper": "Selecciona el modelo asociado a este lote para cálculos de precio y configuración",
+    "selectProject": "Seleccionar Proyecto",
+    "noModels": "No hay modelos disponibles"
   },
   "confirmDelete": "¿Seguro que deseas eliminar este lote?",
   "mapInventory": {

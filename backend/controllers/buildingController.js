@@ -4,6 +4,11 @@ import Lot from '../models/Lot.js'
 import Model from '../models/Model.js'
 import Facade from '../models/Facade.js'
 
+const AVAILABILITY_STATUSES = ['available', 'quote_locked', 'reserved', 'assigned', 'sold', 'disabled']
+const LOCKABLE_AVAILABILITY_STATUSES = ['available', 'quote_locked']
+const DEFAULT_LOCK_MINUTES = 15
+const MAX_LOCK_MINUTES = 240
+
 const toFiniteNumber = (value) => {
   const num = Number(value)
   return Number.isFinite(num) ? num : null
@@ -136,6 +141,33 @@ const normalizeQuoteRefInput = (quoteRef) => {
   return { lot, model, facade }
 }
 
+const isActiveLock = (availabilityLock) => {
+  if (!availabilityLock?.expiresAt) return false
+  return new Date(availabilityLock.expiresAt) > new Date()
+}
+
+const getEffectiveAvailabilityStatus = (building) => {
+  if (building?.availabilityStatus !== 'quote_locked') {
+    return building?.availabilityStatus || 'available'
+  }
+
+  return isActiveLock(building?.availabilityLock) ? 'quote_locked' : 'available'
+}
+
+const normalizeLockMinutes = (lockMinutesRaw) => {
+  const lockMinutes = Number(lockMinutesRaw)
+  if (!Number.isFinite(lockMinutes)) return DEFAULT_LOCK_MINUTES
+  const rounded = Math.floor(lockMinutes)
+  if (rounded < 1) return 1
+  if (rounded > MAX_LOCK_MINUTES) return MAX_LOCK_MINUTES
+  return rounded
+}
+
+const parseObjectIdOrNull = (value) => {
+  if (!value) return null
+  return value
+}
+
 const validateProjectAndQuoteRef = async ({ projectId, quoteRef }) => {
   const project = await Project.findById(projectId).select('_id').lean()
   if (!project) return { ok: false, status: 400, message: 'Project not found' }
@@ -178,6 +210,9 @@ const toBuildingPayload = (buildingDoc) => {
     building.buildingFloorPolygons,
     building.polygon
   )
+  const effectiveAvailabilityStatus = getEffectiveAvailabilityStatus(building)
+  const isAvailableForQuote = building.status === 'active' && effectiveAvailabilityStatus === 'available'
+  const lockActive = isActiveLock(building.availabilityLock)
 
   return {
     ...building,
@@ -195,7 +230,10 @@ const toBuildingPayload = (buildingDoc) => {
       count: exteriorRenders.length,
       urls: exteriorRenders
     },
-    buildingFloorPolygons
+    buildingFloorPolygons,
+    effectiveAvailabilityStatus,
+    isAvailableForQuote,
+    availabilityLockActive: lockActive
   }
 }
 
@@ -249,7 +287,8 @@ export const createBuilding = async (req, res) => {
     const {
       projectId, project, name, section, floors, floorPlans,
       exteriorRenders, polygon, polygonColor, polygonStrokeColor, polygonOpacity,
-      buildingFloorPolygons, totalApartments, quoteRef
+      buildingFloorPolygons, totalApartments, quoteRef,
+      availabilityStatus, availabilityReason
     } = req.body
     const projId = projectId || project
     if (!projId) {
@@ -284,7 +323,11 @@ export const createBuilding = async (req, res) => {
       polygonOpacity: polygonOpacity != null ? Number(polygonOpacity) : 0.35,
       buildingFloorPolygons: normalizedBuildingFloorPolygons,
       quoteRef: normalizedQuoteRef,
-      totalApartments: totalApartments || 0
+      totalApartments: totalApartments || 0,
+      availabilityStatus: AVAILABILITY_STATUSES.includes(availabilityStatus)
+        ? availabilityStatus
+        : 'available',
+      availabilityReason: availabilityReason || ''
     })
 
     res.status(201).json(toBuildingPayload(building))
@@ -303,7 +346,8 @@ export const updateBuilding = async (req, res) => {
     const {
       name, section, floors, floorPlans, exteriorRenders, polygon,
       polygonColor, polygonStrokeColor, polygonOpacity,
-      buildingFloorPolygons, totalApartments, status, quoteRef
+      buildingFloorPolygons, totalApartments, status, quoteRef,
+      availabilityStatus, availabilityReason
     } = req.body
     if (name != null) building.name = name
     if (section != null) building.section = section
@@ -338,6 +382,28 @@ export const updateBuilding = async (req, res) => {
     }
     if (totalApartments != null) building.totalApartments = totalApartments
     if (status != null) building.status = status
+    if (availabilityStatus != null) {
+      if (!AVAILABILITY_STATUSES.includes(availabilityStatus)) {
+        return res.status(400).json({
+          message: `Invalid availabilityStatus. Allowed values: ${AVAILABILITY_STATUSES.join(', ')}`
+        })
+      }
+      if (availabilityStatus === 'quote_locked' && !building.availabilityLock?.quoteId) {
+        return res.status(400).json({
+          message: 'Use /quote-lock endpoint to set quote_locked status'
+        })
+      }
+      building.availabilityStatus = availabilityStatus
+      if (availabilityStatus !== 'quote_locked') {
+        building.availabilityLock = null
+      }
+      if (availabilityStatus === 'available') {
+        building.assignment = null
+      }
+    }
+    if (availabilityReason != null) {
+      building.availabilityReason = availabilityReason
+    }
 
     await building.save()
     res.json(toBuildingPayload(building))
@@ -356,6 +422,165 @@ export const deleteBuilding = async (req, res) => {
     res.json({ message: 'Building deleted successfully' })
   } catch (error) {
     res.status(500).json({ message: error.message })
+  }
+}
+
+export const acquireBuildingQuoteLock = async (req, res) => {
+  try {
+    const { quoteId, lockMinutes, reason } = req.body || {}
+    if (!quoteId || String(quoteId).trim().length === 0) {
+      return res.status(400).json({ message: 'quoteId is required' })
+    }
+
+    const now = new Date()
+    const minutes = normalizeLockMinutes(lockMinutes)
+    const expiresAt = new Date(now.getTime() + minutes * 60 * 1000)
+    const normalizedQuoteId = String(quoteId).trim()
+
+    const building = await Building.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        status: 'active',
+        availabilityStatus: { $in: LOCKABLE_AVAILABILITY_STATUSES },
+        $or: [
+          { availabilityStatus: 'available' },
+          {
+            availabilityStatus: 'quote_locked',
+            'availabilityLock.expiresAt': { $lte: now }
+          },
+          {
+            availabilityStatus: 'quote_locked',
+            'availabilityLock.quoteId': normalizedQuoteId
+          }
+        ]
+      },
+      {
+        $set: {
+          availabilityStatus: 'quote_locked',
+          availabilityReason: reason || 'Locked for quote',
+          availabilityLock: {
+            quoteId: normalizedQuoteId,
+            lockedBy: req.user?._id || null,
+            lockedAt: now,
+            expiresAt
+          }
+        }
+      },
+      { new: true }
+    ).populate('project', 'name slug')
+
+    if (!building) {
+      const current = await Building.findById(req.params.id).populate('project', 'name slug')
+      if (!current) return res.status(404).json({ message: 'Building not found' })
+      return res.status(409).json({
+        message: 'Building is not available for quote lock',
+        building: toBuildingPayload(current)
+      })
+    }
+
+    return res.json({
+      message: 'Quote lock acquired',
+      building: toBuildingPayload(building)
+    })
+  } catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
+}
+
+export const releaseBuildingQuoteLock = async (req, res) => {
+  try {
+    const { quoteId, force } = req.body || {}
+    const forceRelease = force === true
+    const isAdminOrAbove = req.user?.role === 'admin' || req.user?.role === 'superadmin'
+    if (forceRelease && !isAdminOrAbove) {
+      return res.status(403).json({ message: 'Only admin can force lock release' })
+    }
+
+    const building = await Building.findById(req.params.id).populate('project', 'name slug')
+    if (!building) {
+      return res.status(404).json({ message: 'Building not found' })
+    }
+
+    if (building.availabilityStatus !== 'quote_locked') {
+      return res.json({
+        message: 'Building lock already released',
+        building: toBuildingPayload(building)
+      })
+    }
+
+    const lockActive = isActiveLock(building.availabilityLock)
+    const sameQuote = quoteId && String(quoteId).trim() === String(building.availabilityLock?.quoteId || '')
+    if (lockActive && !forceRelease && !sameQuote) {
+      return res.status(409).json({
+        message: 'Lock belongs to a different quote',
+        building: toBuildingPayload(building)
+      })
+    }
+
+    building.availabilityStatus = 'available'
+    building.availabilityLock = null
+    if (!building.assignment?.property && !building.assignment?.customer) {
+      building.assignment = null
+    }
+    if (building.availabilityReason === 'Locked for quote') {
+      building.availabilityReason = ''
+    }
+    await building.save()
+
+    return res.json({
+      message: 'Quote lock released',
+      building: toBuildingPayload(building)
+    })
+  } catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
+}
+
+export const setBuildingAvailability = async (req, res) => {
+  try {
+    const { availabilityStatus, availabilityReason, assignment } = req.body || {}
+
+    if (!AVAILABILITY_STATUSES.includes(availabilityStatus)) {
+      return res.status(400).json({
+        message: `availabilityStatus is required and must be one of: ${AVAILABILITY_STATUSES.join(', ')}`
+      })
+    }
+    if (availabilityStatus === 'quote_locked') {
+      return res.status(400).json({
+        message: 'Use /quote-lock endpoint to set quote_locked status'
+      })
+    }
+
+    const building = await Building.findById(req.params.id).populate('project', 'name slug')
+    if (!building) {
+      return res.status(404).json({ message: 'Building not found' })
+    }
+
+    building.availabilityStatus = availabilityStatus
+    building.availabilityReason = availabilityReason || ''
+    if (availabilityStatus !== 'quote_locked') {
+      building.availabilityLock = null
+    }
+
+    if (availabilityStatus === 'assigned' || availabilityStatus === 'sold') {
+      const propertyId = parseObjectIdOrNull(assignment?.propertyId || assignment?.property)
+      const customerId = parseObjectIdOrNull(assignment?.customerId || assignment?.customer)
+      building.assignment = {
+        property: propertyId,
+        customer: customerId,
+        assignedAt: assignment?.assignedAt ? new Date(assignment.assignedAt) : new Date()
+      }
+    } else if (availabilityStatus === 'available') {
+      building.assignment = null
+    }
+
+    await building.save()
+    return res.json({
+      message: 'Building availability updated',
+      building: toBuildingPayload(building)
+    })
+  } catch (error) {
+    return res.status(500).json({ message: error.message })
   }
 }
 
