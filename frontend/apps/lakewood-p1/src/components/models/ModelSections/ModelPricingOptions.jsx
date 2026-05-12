@@ -10,33 +10,27 @@ const ModelPricingOptions = ({
 }) => (
   <>
     <Grid item xs={12}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
         <Box sx={{
-          width: 40,
-          height: 40,
+          width: 32,
+          height: 32,
           borderRadius: 2,
           bgcolor: 'rgba(140, 165, 81, 0.12)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
-          <UpgradeIcon sx={{ fontSize: 22, color: '#8CA551' }} />
+          <UpgradeIcon sx={{ fontSize: 18, color: '#8CA551' }} />
         </Box>
         <Typography 
           variant="subtitle1" 
           fontWeight={700} 
-          fontSize={{ xs: "0.95rem", md: "1.05rem" }}
+          fontSize={{ xs: "0.85rem", md: "0.95rem" }}
           sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif', letterSpacing: '0.5px' }}
         >
           {t('models:pricingOptions')}
         </Typography>
       </Box>
-      <Alert 
-        severity="info" 
-        sx={{ mb: 2, py: 0.5, fontSize: "0.75rem", borderRadius: 2, bgcolor: 'rgba(140, 165, 81, 0.08)', border: '1px solid rgba(140, 165, 81, 0.3)', fontFamily: '"Poppins", sans-serif', "& .MuiAlert-icon": { color: "#8CA551" } }}
-      >
-        {t('models:pricingOptionsDescription')}
-      </Alert>
     </Grid>
 
     {/* Balcony */}
@@ -55,17 +49,18 @@ const ModelPricingOptions = ({
                 setExpandedAccordions((prev) => ({ ...prev, balcony: true }));
               }
             }}
-            sx={{ '&.Mui-checked': { color: '#8CA551' } }}
+            sx={{ '&.Mui-checked': { color: '#8CA551' }, padding: '4px' }}
           />
         }
         label={
           <Box display="flex" alignItems="center" gap={0.5}>
-            <Balcony fontSize="small" sx={{ color: formData.hasBalcony ? '#8CA551' : '#706f6f' }} />
-            <Typography fontWeight={600} fontSize={{ xs: "0.875rem", md: "0.95rem" }} sx={{ color: formData.hasBalcony ? '#333F1F' : '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+            <Balcony fontSize="small" sx={{ color: formData.hasBalcony ? '#8CA551' : '#706f6f', fontSize: '1rem' }} />
+            <Typography fontWeight={600} fontSize="0.8rem" sx={{ color: formData.hasBalcony ? '#333F1F' : '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
               {t('models:balcony')}
             </Typography>
           </Box>
         }
+        sx={{ margin: 0 }}
       />
     </Grid>
     {formData.hasBalcony && (
@@ -82,7 +77,7 @@ const ModelPricingOptions = ({
           required
           InputProps={{
             startAdornment: (
-              <Typography sx={{ mr: 0.5, fontSize: "0.75rem", color: '#8CA551', fontWeight: 600 }}>$</Typography>
+              <Typography sx={{ mr: 0.5, fontSize: "0.7rem", color: '#8CA551', fontWeight: 600 }}>$</Typography>
             ),
           }}
           sx={{
@@ -94,7 +89,7 @@ const ModelPricingOptions = ({
               "&.Mui-focused fieldset": { borderColor: "#8CA551", borderWidth: "2px" },
               "&:hover fieldset": { borderColor: "#8CA551" }
             },
-            "& .MuiInputLabel-root": { fontFamily: '"Poppins", sans-serif', "&.Mui-focused": { color: "#8CA551" } }
+            "& .MuiInputLabel-root": { fontFamily: '"Poppins", sans-serif', "&.Mui-focused": { color: "#8CA551" }, fontSize: '0.8rem' }
           }}
         />
       </Grid>
@@ -116,17 +111,18 @@ const ModelPricingOptions = ({
                 setExpandedAccordions((prev) => ({ ...prev, upgrade: true }));
               }
             }}
-            sx={{ '&.Mui-checked': { color: '#9c27b0' } }}
+            sx={{ '&.Mui-checked': { color: '#9c27b0' }, padding: '4px' }}
           />
         }
         label={
           <Box display="flex" alignItems="center" gap={0.5}>
-            <UpgradeIcon fontSize="small" sx={{ color: formData.hasUpgrade ? '#9c27b0' : '#706f6f' }} />
-            <Typography fontWeight={600} fontSize={{ xs: "0.875rem", md: "0.95rem" }} sx={{ color: formData.hasUpgrade ? '#333F1F' : '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+            <UpgradeIcon fontSize="small" sx={{ color: formData.hasUpgrade ? '#9c27b0' : '#706f6f', fontSize: '1rem' }} />
+            <Typography fontWeight={600} fontSize="0.8rem" sx={{ color: formData.hasUpgrade ? '#333F1F' : '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
               {t('models:upgrade')}
             </Typography>
           </Box>
         }
+        sx={{ margin: 0 }}
       />
     </Grid>
     {formData.hasUpgrade && (
@@ -143,7 +139,7 @@ const ModelPricingOptions = ({
           required
           InputProps={{
             startAdornment: (
-              <Typography sx={{ mr: 0.5, fontSize: "0.75rem", color: '#9c27b0', fontWeight: 600 }}>$</Typography>
+              <Typography sx={{ mr: 0.5, fontSize: "0.7rem", color: '#9c27b0', fontWeight: 600 }}>$</Typography>
             ),
           }}
           sx={{
@@ -154,7 +150,7 @@ const ModelPricingOptions = ({
               "&.Mui-focused fieldset": { borderColor: "#9c27b0", borderWidth: "2px" },
               "&:hover fieldset": { borderColor: "#9c27b0" }
             },
-            "& .MuiInputLabel-root": { fontFamily: '"Poppins", sans-serif', "&.Mui-focused": { color: "#9c27b0" } }
+            "& .MuiInputLabel-root": { fontFamily: '"Poppins", sans-serif', "&.Mui-focused": { color: "#9c27b0" }, fontSize: '0.8rem' }
           }}
         />
       </Grid>
@@ -176,17 +172,18 @@ const ModelPricingOptions = ({
                 setExpandedAccordions((prev) => ({ ...prev, storage: true }));
               }
             }}
-            sx={{ '&.Mui-checked': { color: '#4caf50' } }}
+            sx={{ '&.Mui-checked': { color: '#4caf50' }, padding: '4px' }}
           />
         }
         label={
           <Box display="flex" alignItems="center" gap={0.5}>
-            <StorageIcon fontSize="small" sx={{ color: formData.hasStorage ? '#4caf50' : '#706f6f' }} />
-            <Typography fontWeight={600} fontSize={{ xs: "0.875rem", md: "0.95rem" }} sx={{ color: formData.hasStorage ? '#333F1F' : '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+            <StorageIcon fontSize="small" sx={{ color: formData.hasStorage ? '#4caf50' : '#706f6f', fontSize: '1rem' }} />
+            <Typography fontWeight={600} fontSize="0.8rem" sx={{ color: formData.hasStorage ? '#333F1F' : '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
               {t('models:storage')}
             </Typography>
           </Box>
         }
+        sx={{ margin: 0 }}
       />
     </Grid>
     {formData.hasStorage && (
@@ -203,7 +200,7 @@ const ModelPricingOptions = ({
           required
           InputProps={{
             startAdornment: (
-              <Typography sx={{ mr: 0.5, fontSize: "0.75rem", color: '#4caf50', fontWeight: 600 }}>$</Typography>
+              <Typography sx={{ mr: 0.5, fontSize: "0.7rem", color: '#4caf50', fontWeight: 600 }}>$</Typography>
             ),
           }}
           sx={{
@@ -214,7 +211,7 @@ const ModelPricingOptions = ({
               "&.Mui-focused fieldset": { borderColor: "#4caf50", borderWidth: "2px" },
               "&:hover fieldset": { borderColor: "#4caf50" }
             },
-            "& .MuiInputLabel-root": { fontFamily: '"Poppins", sans-serif', "&.Mui-focused": { color: "#4caf50" } }
+            "& .MuiInputLabel-root": { fontFamily: '"Poppins", sans-serif', "&.Mui-focused": { color: "#4caf50" }, fontSize: '0.8rem' }
           }}
         />
       </Grid>

@@ -356,7 +356,7 @@ const ModelSelector = () => {
           >
             {t("modelSelection", "02 Model Selection")}
           </Typography>
-          <Box display="flex" alignItems="center" gap={1}>
+          {/* <Box display="flex" alignItems="center" gap={1}>
             {selectedModel && !isMobile && (
               <Button
                 size="small"
@@ -400,7 +400,7 @@ const ModelSelector = () => {
                 px: 1,
               }}
             />
-          </Box>
+          </Box> */}
         </Box>
 
         {/* Main Content Area */}

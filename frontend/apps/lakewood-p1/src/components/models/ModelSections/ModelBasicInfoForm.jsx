@@ -4,72 +4,27 @@ import { Home } from '@mui/icons-material';
 const ModelBasicInfoForm = ({
   formData,
   setFormData,
-  projects,
-  loadingProjects,
+  projectId,
   t
 }) => (
-  <Grid container spacing={{ xs: 1.5, md: 2.5 }}>
-    <Grid item xs={12}>
-      <TextField
-        fullWidth
-        select
-        label="Project *"
-        value={formData.project}
-        onChange={(e) => setFormData(prev => ({
-          ...prev,
-          project: e.target.value,
-          projectId: e.target.value,
-        }))}
-        disabled={loadingProjects}
-        helperText="Select the project this model belongs to"
-        sx={{
-          "& .MuiOutlinedInput-root": {
-            borderRadius: 3,
-            fontFamily: '"Poppins", sans-serif',
-            bgcolor: 'white',
-            "& fieldset": { borderColor: 'rgba(140, 165, 81, 0.3)', borderWidth: '2px' },
-            "&:hover fieldset": { borderColor: "#8CA551" },
-            "&.Mui-focused fieldset": { borderColor: "#333F1F", borderWidth: "2px" }
-          },
-          "& .MuiInputLabel-root": {
-            fontFamily: '"Poppins", sans-serif',
-            "&.Mui-focused": { color: "#333F1F" }
-          },
-          "& .MuiFormHelperText-root": { fontFamily: '"Poppins", sans-serif' }
-        }}
-      >
-        {loadingProjects ? (
-          <MenuItem disabled>Loading projects...</MenuItem>
-        ) : projects.length === 0 ? (
-          <MenuItem disabled>No projects available</MenuItem>
-        ) : (
-          projects.map(project => (
-            <MenuItem
-              key={project._id}
-              value={project._id}
-              sx={{ fontFamily: '"Poppins", sans-serif', '&:hover': { bgcolor: 'rgba(140, 165, 81, 0.08)' } }}
-            >
-              {project.name} {project.slug ? `(${project.slug})` : ''}
-            </MenuItem>
-          ))
-        )}
-      </TextField>
-    </Grid>
+  <Grid container spacing={{ xs: 1, md: 1.5 }}>
+    {/* SELECT PROJECT - REMOVIDO */}
+    
     <Grid item xs={12}>
       <Box
         sx={{
           display: 'flex',
           alignItems: 'center',
-          gap: 1.5,
-          mb: 2,
-          pb: 2,
+          gap: 1,
+          mb: 1,
+          pb: 1,
           borderBottom: '2px solid rgba(140, 165, 81, 0.2)'
         }}
       >
         <Box
           sx={{
-            width: 40,
-            height: 40,
+            width: 32,
+            height: 32,
             borderRadius: 2,
             bgcolor: 'rgba(51, 63, 31, 0.08)',
             display: 'flex',
@@ -77,11 +32,11 @@ const ModelBasicInfoForm = ({
             justifyContent: 'center'
           }}
         >
-          <Home sx={{ fontSize: 22, color: '#333F1F' }} />
+          <Home sx={{ fontSize: 18, color: '#333F1F' }} />
         </Box>
         <Typography
           variant="h6"
-          fontSize={{ xs: "1rem", md: "1.15rem" }}
+          fontSize={{ xs: "0.9rem", md: "1rem" }}
           fontWeight={700}
           sx={{ 
             color: '#333F1F',
@@ -173,7 +128,7 @@ const ModelBasicInfoForm = ({
         required
         InputProps={{
           startAdornment: (
-            <Typography sx={{ mr: 0.5, fontSize: "0.875rem", color: '#333F1F', fontWeight: 600 }}>$</Typography>
+            <Typography sx={{ mr: 0.5, fontSize: "0.75rem", color: '#333F1F', fontWeight: 600 }}>$</Typography>
           ),
         }}
         sx={{
@@ -408,7 +363,7 @@ const ModelBasicInfoForm = ({
       />
     </Grid>
     <Grid item xs={12}>
-      <Divider sx={{ my: { xs: 1, md: 2 }, borderColor: 'rgba(112, 111, 111, 0.2)' }} />
+      <Divider sx={{ my: 1, borderColor: 'rgba(112, 111, 111, 0.2)' }} />
     </Grid>
   </Grid>
 );

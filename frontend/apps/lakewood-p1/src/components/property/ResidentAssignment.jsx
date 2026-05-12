@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import {
   Box, Paper, Typography, TextField, MenuItem, Divider,
   Collapse, Alert, Button, CircularProgress, Tooltip
@@ -16,6 +16,8 @@ import { sendPropertyAssignmentSMS } from '../../services/smsService'
 import ResidentDialog from '../ResidentDialog'
 import { useTranslation } from 'react-i18next'
 import { useResidents } from '@shared/hooks/useResidents'
+import CrossProjectResidentDialog from '@shared/components/Modals/CroosProjectsResidentDialog'
+
 
 const ResidentAssignment = ({ expanded, onToggle }) => {
   const { t } = useTranslation('models')
@@ -29,16 +31,27 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
 
   // Hook de residentes (proyecto elegido en el flujo o VITE_PROJECT_ID)
   const {
-    users, loading,
+    users: projectUsers, loading,
     openDialog, selectedUser, setSelectedUser, formData, setFormData,
     handleOpenDialog, handleCloseDialog, handleSubmit,
     handleFieldChange, handlePhoneChange, isFormValid,
     e164Value, displayVal, isPhoneValid
-  } = useResidents(null)
+  } = useResidents(residentsProjectId)
 
-  // Estados locales para asignación y SMS
-  const [submitting, setSubmitting] = useState(false)
-  const [smsStatus, setSmsStatus] = useState(null)
+  // ✅ Estado para incluir usuarios cross-project
+const [crossProjectUsers, setCrossProjectUsers] = useState([])
+ 
+// ✅ Combinar usuarios del proyecto + cross-project
+const users = useMemo(() => {
+  const allUsers = [...projectUsers, ...crossProjectUsers]
+  // Eliminar duplicados por _id
+  return Array.from(new Map(allUsers.map(u => [u._id, u])).values())
+}, [projectUsers, crossProjectUsers])
+ 
+
+const [submitting, setSubmitting] = useState(false)
+const [smsStatus, setSmsStatus] = useState(null)
+const [openCrossProjectDialog, setOpenCrossProjectDialog] = useState(false)
 
   // Cargar proyectos si es necesario
   useEffect(() => {
@@ -59,138 +72,115 @@ const ResidentAssignment = ({ expanded, onToggle }) => {
   }
 
   // Asignar propiedad
-  const handleAssignProperty = async () => {
-    try {
-      setSubmitting(true)
-      setSmsStatus(null)
+const handleAssignProperty = async () => {
+  try {
+    setSubmitting(true)
+    setSmsStatus(null)
 
-      if (!selectedUser?._id) {
-        alert('Please select a user')
-        setSubmitting(false)
-        return
+    if (!selectedUser?._id) {
+      alert('Please select a user')
+      setSubmitting(false)
+      return
+    }
+    
+    // ✅ Usar residentsProjectId en lugar de selectedProject
+    if (!residentsProjectId) {
+      alert('Project ID is required')
+      setSubmitting(false)
+      return
+    }
+
+    const userInfo = users.find(u => u._id === selectedUser._id)
+    const lotId    = selectedLot?._id    || selectedLot
+    const modelId  = selectedModel?._id  || selectedModel
+    const facadeId = selectedFacade?._id || selectedFacade || null
+
+    const hasBalcony = selectedPricingOption
+      ? Boolean(selectedPricingOption.hasBalcony)
+      : Boolean(options?.balcony)
+
+    const hasStorage = selectedPricingOption
+      ? Boolean(selectedPricingOption.hasStorage)
+      : Boolean(options?.storage)
+
+    const modelType = selectedPricingOption?.modelType
+      ? String(selectedPricingOption.modelType)
+      : (options?.upgrade ? 'upgrade' : 'basic')
+
+    // ✅ Usar residentsProjectId para obtener project data
+    const projectData = projects.find(p => p._id === residentsProjectId)
+    const projectName = projectData?.name || projectData?.slug || 'Unknown'
+
+    console.log('🔍 DEBUG ResidentAssignment - Estado antes de crear propiedad:', {
+      selectedOptions,
+      options,
+      modelType,
+      hasBalcony: options?.balcony,
+      hasStorage: options?.storage,
+      hasUpgrade: options?.upgrade
+    })
+    
+    const propertyPayload = {
+      project: String(projectName),
+      projectId: String(residentsProjectId), // ✅ Usar residentsProjectId
+      lot: String(lotId),
+      model: String(modelId),
+      facade: facadeId ? String(facadeId) : undefined,
+      user: String(selectedUser._id),
+      users: [String(selectedUser._id)],
+      listPrice: Number(financials.listPrice || 0),
+      presalePrice: Number(financials.presalePrice || 0),
+      discount: Number(financials.discount || 0),
+      discountPercent: Number(financials.discountPercent || 0),
+      totalDownPayment: Number(financials.totalDownPayment || 0),
+      downPaymentPercent: Number(financials.downPaymentPercent || 0),
+      initialPayment: Number(financials.initialDownPayment || 0),
+      initialPaymentPercent: Number(financials.initialDownPaymentPercent || 0),
+      monthlyPayment: Number(financials.monthlyPayment || 0),
+      monthlyPaymentPercent: Number(financials.monthlyPaymentPercent || 0),
+      mortgage: Number(financials.mortgage || 0),
+      pending: Number(financials.presalePrice || 0),
+      price: Number(financials.presalePrice || 0),
+      status: 'pending',
+      hasBalcony: Boolean(hasBalcony),
+      modelType: modelType || 'basic',
+      hasStorage: Boolean(hasStorage),
+      selectedOptions: {
+        upgradeId: selectedOptions?.upgradeId || null,
+        balconyId: selectedOptions?.balconyId || null,
+        storageId: selectedOptions?.storageId || null
       }
-      if (!selectedProject) {
-        alert('Please select a project')
-        setSubmitting(false)
-        return
+    }
+    
+    await api.post('/properties', propertyPayload)
+
+    if (userInfo?.phoneNumber) {
+      setSmsStatus('sending-property')
+      try {
+        const propertySMS = await sendPropertyAssignmentSMS({
+          firstName: userInfo.firstName,
+          phoneNumber: userInfo.phoneNumber,
+          lotNumber: selectedLot.number,
+          section: selectedLot.section,
+          modelName: selectedModel.model,
+          price: financials.presalePrice,
+          status: 'pending'
+        })
+        setSmsStatus(propertySMS?.success ? 'sent' : 'failed')
+      } catch (e) {
+        setSmsStatus('failed')
       }
+    }
 
-      const userInfo = users.find(u => u._id === selectedUser._id)
-      const lotId    = selectedLot?._id    || selectedLot
-      const modelId  = selectedModel?._id  || selectedModel
-      const facadeId = selectedFacade?._id || selectedFacade || null
-
-      const hasBalcony = selectedPricingOption
-        ? Boolean(selectedPricingOption.hasBalcony)
-        : Boolean(options?.balcony)
-
-      const hasStorage = selectedPricingOption
-        ? Boolean(selectedPricingOption.hasStorage)
-        : Boolean(options?.storage)
-
-      const modelType = selectedPricingOption?.modelType
-        ? String(selectedPricingOption.modelType)
-        : (options?.upgrade ? 'upgrade' : 'basic')
-
-      const projectData = projects.find(p => p._id === selectedProject)
-      const projectName = projectData?.name || projectData?.slug || 'Unknown'
-
-      // const propertyPayload = {
-      //   project: String(projectName),
-      //   projectId: String(selectedProject),
-      //   lot: String(lotId),
-      //   model: String(modelId),
-      //   facade: facadeId ? String(facadeId) : undefined,
-      //   user: String(selectedUser._id),
-      //   users: [String(selectedUser._id)],
-      //   listPrice: Number(financials.listPrice || 0),
-      //   presalePrice: Number(financials.presalePrice || 0),
-      //   discount: Number(financials.discount || 0),
-      //   discountPercent: Number(financials.discountPercent || 0),
-      //   totalDownPayment: Number(financials.totalDownPayment || 0),
-      //   downPaymentPercent: Number(financials.downPaymentPercent || 0),
-      //   initialPayment: Number(financials.initialDownPayment || 0),
-      //   initialPaymentPercent: Number(financials.initialDownPaymentPercent || 0),
-      //   monthlyPayment: Number(financials.monthlyPayment || 0),
-      //   monthlyPaymentPercent: Number(financials.monthlyPaymentPercent || 0),
-      //   mortgage: Number(financials.mortgage || 0),
-      //   pending: Number(financials.presalePrice || 0),
-      //   price: Number(financials.presalePrice || 0),
-      //   status: 'pending',
-      //   hasBalcony: Boolean(hasBalcony),
-      //   modelType: modelType || 'basic',
-      //   hasStorage: Boolean(hasStorage)
-      // }
-      // Línea 88 en ResidentAssignment.jsx - ANTES de crear propertyPayload
-console.log('🔍 DEBUG ResidentAssignment - Estado antes de crear propiedad:', {
-  selectedOptions,
-  options,
-  modelType,
-  hasBalcony: options?.balcony,
-  hasStorage: options?.storage,
-  hasUpgrade: options?.upgrade
-})
-      const propertyPayload = {
-  project: String(projectName),
-  projectId: String(selectedProject),
-  lot: String(lotId),
-  model: String(modelId),
-  facade: facadeId ? String(facadeId) : undefined,
-  user: String(selectedUser._id),
-  users: [String(selectedUser._id)],
-  listPrice: Number(financials.listPrice || 0),
-  presalePrice: Number(financials.presalePrice || 0),
-  discount: Number(financials.discount || 0),
-  discountPercent: Number(financials.discountPercent || 0),
-  totalDownPayment: Number(financials.totalDownPayment || 0),
-  downPaymentPercent: Number(financials.downPaymentPercent || 0),
-  initialPayment: Number(financials.initialDownPayment || 0),
-  initialPaymentPercent: Number(financials.initialDownPaymentPercent || 0),
-  monthlyPayment: Number(financials.monthlyPayment || 0),
-  monthlyPaymentPercent: Number(financials.monthlyPaymentPercent || 0),
-  mortgage: Number(financials.mortgage || 0),
-  pending: Number(financials.presalePrice || 0),
-  price: Number(financials.presalePrice || 0),
-  status: 'pending',
-  hasBalcony: Boolean(hasBalcony),
-  modelType: modelType || 'basic',
-  hasStorage: Boolean(hasStorage),
-  // ✅ NUEVO: Agregar IDs específicos de las opciones seleccionadas
-  selectedOptions: {
-    upgradeId: selectedOptions?.upgradeId || null,
-    balconyId: selectedOptions?.balconyId || null,
-    storageId: selectedOptions?.storageId || null
+    alert('Property assigned successfully!')
+    navigate('/properties')
+  } catch (error) {
+    alert(error.response?.data?.message || 'Error assigning property')
+  } finally {
+    setSubmitting(false)
+    setSmsStatus(null)
   }
 }
-      await api.post('/properties', propertyPayload)
-
-      if (userInfo?.phoneNumber) {
-        setSmsStatus('sending-property')
-        try {
-          const propertySMS = await sendPropertyAssignmentSMS({
-            firstName: userInfo.firstName,
-            phoneNumber: userInfo.phoneNumber,
-            lotNumber: selectedLot.number,
-            section: selectedLot.section,
-            modelName: selectedModel.model,
-            price: financials.presalePrice,
-            status: 'pending'
-          })
-          setSmsStatus(propertySMS?.success ? 'sent' : 'failed')
-        } catch (e) {
-          setSmsStatus('failed')
-        }
-      }
-
-      alert('Property assigned successfully!')
-      navigate('/properties')
-    } catch (error) {
-      alert(error.response?.data?.message || 'Error assigning property')
-    } finally {
-      setSubmitting(false)
-      setSmsStatus(null)
-    }
-  }
 
   if (!selectedLot || !selectedModel) {
     return (
@@ -266,54 +256,10 @@ console.log('🔍 DEBUG ResidentAssignment - Estado antes de crear propiedad:', 
             </Alert>
           )}
 
-          {/* SELECT PROJECT */}
-          <TextField
-            fullWidth
-            select
-            label="Project"
-            value={selectedProject}
-            onChange={(e) => setSelectedProject(e.target.value)}
-            helperText="Select the project this property belongs to"
-            disabled={loadingProjects}
-            sx={{ mb: 2 }}
-          >
-            {loadingProjects ? (
-              <MenuItem disabled>Loading projects...</MenuItem>
-            ) : projects.length === 0 ? (
-              <MenuItem disabled>No projects available</MenuItem>
-            ) : (
-              projects.map((project) => (
-                <MenuItem key={project._id} value={project._id}>
-                  {project.name} {project.slug ? `(${project.slug})` : ''}
-                </MenuItem>
-              ))
-            )}
-          </TextField>
 
           {/* SELECT USER */}
           <Box display="flex" alignItems="flex-start" gap={2}>
-            {/* <TextField
-              fullWidth select
-              label={t('selectResident', 'Select Resident')}
-              value={selectedUser?._id || ''}
-              onChange={e => setSelectedUser(users.find(u => u._id === e.target.value))}
-              helperText={t('chooseExistingResident', 'Choose an existing resident to assign this property')}
-              disabled={loading}
-            >
-              {loading ? (
-                <MenuItem disabled>{t('loadingUsers', 'Loading users...')}</MenuItem>
-              ) : users.length === 0 ? (
-                <MenuItem disabled>{t('noUsersAvailable', 'No users available')}</MenuItem>
-              ) : (
-                users.map((user) => (
-                  <MenuItem key={user._id} value={user._id}>
-                    {user.firstName} {user.lastName} - {user.email}
-                    {user.phoneNumber && ` 📱 ${user.phoneNumber}`}
-                  </MenuItem>
-                ))
-              )}
-            </TextField> */}
-                        <TextField
+            <TextField
               fullWidth select
               label={t('selectResident', 'Select Resident')}
               value={selectedUser?._id || ''}
@@ -338,6 +284,18 @@ console.log('🔍 DEBUG ResidentAssignment - Estado antes de crear propiedad:', 
                 <PersonAddIcon />
               </Button>
             </Tooltip>
+
+              {/* ✅ NUEVO: Botón para seleccionar de otro proyecto */}
+  <Tooltip title="Seleccionar residente de otro proyecto">
+    <Button variant="outlined" onClick={() => setOpenCrossProjectDialog(true)} sx={{
+      minWidth: 48, height: '56px', borderRadius: 3, px: 0,
+      bgcolor: '#fff', border: '2px solid #706f6f', color: '#706f6f',
+      alignSelf: 'flex-start',
+      '&:hover': { bgcolor: 'rgba(112, 111, 111, 0.08)' }
+    }}>
+      <PersonIcon />
+    </Button>
+  </Tooltip>
           </Box>
 
           {/* PROPERTY SUMMARY ... */}
@@ -347,7 +305,8 @@ console.log('🔍 DEBUG ResidentAssignment - Estado antes de crear propiedad:', 
           <Button
             variant="contained" fullWidth
             onClick={handleAssignProperty}
-            disabled={!selectedUser?._id || !selectedProject || submitting}
+            disabled={!selectedUser?._id || !residentsProjectId || submitting}
+
             startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <CheckCircleIcon />}
             sx={{
               mt: 3, borderRadius: 3, bgcolor: '#333F1F', color: 'white',
@@ -387,6 +346,23 @@ console.log('🔍 DEBUG ResidentAssignment - Estado antes de crear propiedad:', 
             displayVal={displayVal}
             isPhoneValid={isPhoneValid}
           />
+
+          {/* ✅ NUEVO: Modal para seleccionar residente de otro proyecto */}
+{/* ✅ NUEVO: Modal para seleccionar residente de otro proyecto */}
+<CrossProjectResidentDialog
+  open={openCrossProjectDialog}
+  onClose={() => setOpenCrossProjectDialog(false)}
+  currentProjectId={residentsProjectId}
+  onSelectUser={(user) => {
+    // ✅ Agregar usuario a la lista de cross-project users
+    setCrossProjectUsers(prev => {
+      const exists = prev.find(u => u._id === user._id)
+      return exists ? prev : [...prev, user]
+    })
+    setSelectedUser(user)
+    setOpenCrossProjectDialog(false)
+  }}
+/>
         </Box>
       </Collapse>
     </Paper>

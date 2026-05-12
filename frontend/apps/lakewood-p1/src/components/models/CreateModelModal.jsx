@@ -22,9 +22,6 @@ const CreateModelModal = ({
 }) => {
   const { t } = useTranslation(['models', 'common']);
   const {
-    projects,
-    loadingProjects,
-    fetchProjects,
     groupImagesByRoomType,
     getRoomTypeName,
     getTotalImagesCount,
@@ -47,10 +44,8 @@ const CreateModelModal = ({
     storage: false,
   });
 
-  // Cargar proyectos al abrir
-  useEffect(() => {
-    if (open) fetchProjects();
-  }, [open, fetchProjects]);
+  // ✅ Obtener projectId automáticamente
+  const projectId = import.meta.env.VITE_PROJECT_ID
 
   // Cargar datos del modelo seleccionado
   useEffect(() => {
@@ -63,7 +58,12 @@ const CreateModelModal = ({
         storage: !!(selectedModel.storages && selectedModel.storages.length > 0),
       });
     } else {
-      setFormData({ ...EMPTY_FORM });
+      // ✅ Nuevo modelo - usar projectId automático
+      setFormData({ 
+        ...EMPTY_FORM,
+        project: projectId,
+        projectId: projectId
+      });
       setExpandedAccordions({
         base: true,
         balcony: false,
@@ -74,7 +74,7 @@ const CreateModelModal = ({
     setCurrentImageType("exterior");
     setCurrentImageSection("base");
     setCurrentRoomType("general");
-  }, [selectedModel, open]);
+  }, [selectedModel, open, projectId]);
 
   // Handlers
   const handleClose = () => {
@@ -85,11 +85,17 @@ const CreateModelModal = ({
   };
 
   const handleSubmit = () => {
-    if (!formData.project) {
-      alert("Please select a project");
+    if (!projectId) {
+      alert("Project ID is required");
       return;
     }
-    onSubmit(formData);
+    // ✅ Asegurar que formData tenga projectId
+    const payload = {
+      ...formData,
+      project: projectId,
+      projectId: projectId
+    }
+    onSubmit(payload);
   };
 
   // Remover imagen local y en storage
@@ -218,12 +224,12 @@ const CreateModelModal = ({
     sx={{
       width: { xs: "100%", md: "50%" },
       p: { xs: 2, md: 3 },
-      bgcolor: '#fafafa',
+      // bgcolor: '#fafafa',
       borderRight: { xs: "none", md: "1px solid #e0e0e0" },
       borderBottom: { xs: "1px solid #e0e0e0", md: "none" },
       position: { md: "sticky" },
       top: 0,
-      height: { xs: "auto", md: "100vh" },
+      height: { xs: "auto", md: "90vh" },
       zIndex: 2,
       overflowY: { xs: "auto", md: "hidden" },
       "&::-webkit-scrollbar": { width: "8px" },
@@ -237,8 +243,7 @@ const CreateModelModal = ({
       <ModelBasicInfoForm
         formData={formData}
         setFormData={setFormData}
-        projects={projects}
-        loadingProjects={loadingProjects}
+        projectId={projectId}
         t={t}
       />
       <ModelPricingOptions

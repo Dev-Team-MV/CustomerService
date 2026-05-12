@@ -22,26 +22,33 @@ export const useContracts = ({
   const [deleting, setDeleting] = useState(null)
   const [error, setError] = useState(null)
 
-  // Fetch contracts
-  const fetchContracts = useCallback(async () => {
-    if (!resource?._id) return
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await contractsService.getContractsByResource(resourceType, resource._id)
-      // data.contracts es un array [{type, fileUrl, uploadedAt}]
-      const contractsMap = {}
-      if (data?.contracts) {
-        for (const c of data.contracts) contractsMap[c.type] = c
-      }
-      setExistingContracts(contractsMap)
-    } catch (err) {
-      setExistingContracts({})
-      setError(err.message)
-    } finally {
-      setLoading(false)
+// Fetch contracts
+const fetchContracts = useCallback(async () => {
+  if (!resource?._id) return
+  setLoading(true)
+  setError(null)
+  try {
+    const data = await contractsService.getContractsByResource(resourceType, resource._id)
+    // data.contracts es un array [{type, fileUrl, uploadedAt}]
+    const contractsMap = {}
+    if (data?.contracts) {
+      for (const c of data.contracts) contractsMap[c.type] = c
     }
-  }, [resource, resourceType])
+    setExistingContracts(contractsMap)
+  } catch (err) {
+    setExistingContracts({})
+    // ✅ Si es 404, no es un error real - solo significa que no hay contratos aún
+    if (err.response?.status === 404 || err.message?.includes('404') || err.message?.includes('not found')) {
+      // No establecer error, es normal que no haya contratos
+      setError(null)
+    } else {
+      // Otros errores sí son problemas reales
+      setError(err.message)
+    }
+  } finally {
+    setLoading(false)
+  }
+}, [resource, resourceType])
 
   useEffect(() => {
     if (open && resource?._id) fetchContracts()

@@ -11,7 +11,6 @@ import {
   ToggleButton
 } from '@mui/material'
 import { Landscape, Circle } from '@mui/icons-material'
-import projectService from '../../services/projectService'
 import ModalWrapper from '../../constants/ModalWrapper'
 import PrimaryButton from '../../constants/PrimaryButton'
 import modelService from '@shared/services/modelService'
@@ -37,35 +36,29 @@ const LotDialog = ({ open, onClose, selectedLot, onSubmit }) => {
     model: ''
   })
 
-  const [projects, setProjects] = useState([])
-  const [loadingProjects, setLoadingProjects] = useState(false)
   const [models, setModels] = useState([])
   const [loadingModels, setLoadingModels] = useState(false)
 
-  // ✅ Cargar proyectos cuando abre el dialog
-  useEffect(() => {
-    if (open) {
-      fetchProjects()
-    }
-  }, [open])
+  // ✅ Obtener projectId automáticamente
+  const projectId = import.meta.env.VITE_PROJECT_ID
 
-  // ✅ Cargar modelos cuando cambia el proyecto
+  // ✅ Cargar modelos cuando abre el modal
   useEffect(() => {
-    if (formData.project) {
-      fetchModels(formData.project)
+    if (open && projectId) {
+      fetchModels(projectId)
     } else {
       setModels([])
     }
-  }, [formData.project])
+  }, [open, projectId])
 
-  // ✅ Inicializar datos cuando abre el dialog con un lote seleccionado
+  // ✅ Inicializar datos cuando abre el dialog
   useEffect(() => {
     if (!open) return
 
     if (selectedLot) {
-      const projectId = typeof selectedLot.project === 'object'
+      const lotProjectId = typeof selectedLot.project === 'object'
         ? selectedLot.project?._id
-        : selectedLot.project || selectedLot.projectId || ''
+        : selectedLot.project || selectedLot.projectId || projectId
 
       const modelId = typeof selectedLot.model === 'object'
         ? selectedLot.model?._id
@@ -75,45 +68,24 @@ const LotDialog = ({ open, onClose, selectedLot, onSubmit }) => {
         number: selectedLot.number,
         price: selectedLot.price,
         status: selectedLot.status,
-        project: projectId,
-        projectId: projectId,
+        project: lotProjectId,
+        projectId: lotProjectId,
         color: selectedLot.color || 'green',
         model: modelId
       })
     } else {
-      // Nuevo lote
+      // ✅ Nuevo lote - usar projectId automático
       setFormData({
         number: '',
         price: 0,
         status: 'available',
-        project: '',
-        projectId: '',
+        project: projectId,
+        projectId: projectId,
         color: 'green',
         model: ''
       })
     }
-  }, [open, selectedLot])
-
-  const fetchProjects = async () => {
-    try {
-      setLoadingProjects(true)
-      const data = await projectService.getAll()
-      setProjects(data)
-
-      // Si hay un solo proyecto y es nuevo lote, auto-seleccionar
-      if (data.length === 1 && !selectedLot) {
-        setFormData(prev => ({
-          ...prev,
-          project: data[0]._id,
-          projectId: data[0]._id
-        }))
-      }
-    } catch (error) {
-      console.error('Error fetching projects:', error)
-    } finally {
-      setLoadingProjects(false)
-    }
-  }
+  }, [open, selectedLot, projectId])
 
   const fetchModels = async (projectId) => {
     try {
@@ -128,16 +100,6 @@ const LotDialog = ({ open, onClose, selectedLot, onSubmit }) => {
     }
   }
 
-  const handleProjectChange = (e) => {
-    const newProjectId = e.target.value
-    setFormData(prev => ({
-      ...prev,
-      project: newProjectId,
-      projectId: newProjectId,
-      model: '' // Reset model cuando cambia proyecto
-    }))
-  }
-
   const handleModelChange = (e) => {
     const newModelId = e.target.value
     console.log('Selecting model:', newModelId)
@@ -148,7 +110,7 @@ const LotDialog = ({ open, onClose, selectedLot, onSubmit }) => {
   }
 
   const handleSubmit = () => {
-    if (!formData.number || !formData.price || !formData.project) {
+    if (!formData.number || !formData.price || !projectId) {
       alert(t('lots:form.validation'))
       return
     }
@@ -157,8 +119,8 @@ const LotDialog = ({ open, onClose, selectedLot, onSubmit }) => {
       number: formData.number,
       price: Number(formData.price),
       status: formData.status,
-      project: String(formData.project),
-      projectId: String(formData.projectId || formData.project),
+      project: String(projectId),
+      projectId: String(projectId),
       color: formData.color,
       model: formData.model || null
     }
@@ -186,7 +148,7 @@ const LotDialog = ({ open, onClose, selectedLot, onSubmit }) => {
             onClick={handleSubmit}
             variant="contained"
             color="primary"
-            disabled={!formData.number || !formData.price || !formData.project}
+            disabled={!formData.number || !formData.price || !projectId}
           >
             {selectedLot ? t('lots:dialog.update') : t('lots:dialog.create')}
           </PrimaryButton>
@@ -196,32 +158,7 @@ const LotDialog = ({ open, onClose, selectedLot, onSubmit }) => {
       fullWidth
     >
       <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
-        <Grid item xs={12}>
-          <TextField
-            fullWidth
-            select
-            label={t('lots:form.project') || 'Project *'}
-            value={formData.project}
-            onChange={handleProjectChange}
-            disabled={loadingProjects}
-            helperText={t('lots:form.projectHelp') || 'Select the project this lot belongs to'}
-          >
-            {loadingProjects ? (
-              <MenuItem disabled>
-                <CircularProgress size={20} sx={{ mr: 1 }} />
-                Loading projects...
-              </MenuItem>
-            ) : projects.length === 0 ? (
-              <MenuItem disabled>No projects available</MenuItem>
-            ) : (
-              projects.map((project) => (
-                <MenuItem key={project._id} value={project._id}>
-                  {project.name} {project.slug ? `(${project.slug})` : ''}
-                </MenuItem>
-              ))
-            )}
-          </TextField>
-        </Grid>
+        {/* SELECT PROJECT - REMOVIDO */}
 
         <Grid item xs={12}>
           <TextField
@@ -230,12 +167,8 @@ const LotDialog = ({ open, onClose, selectedLot, onSubmit }) => {
             label="Model"
             value={formData.model}
             onChange={handleModelChange}
-            disabled={!formData.project || loadingModels}
-            helperText={
-              !formData.project
-                ? 'Select a project first'
-                : 'Select the model for this lot (optional)'
-            }
+            disabled={loadingModels}
+            helperText="Select the model for this lot (optional)"
           >
             <MenuItem value="">
               <em>No model assigned</em>
@@ -247,7 +180,7 @@ const LotDialog = ({ open, onClose, selectedLot, onSubmit }) => {
               </MenuItem>
             ) : models.length === 0 ? (
               <MenuItem disabled>
-                {formData.project ? 'No models available for this project' : ''}
+                No models available for this project
               </MenuItem>
             ) : (
               models.map((model) => (
