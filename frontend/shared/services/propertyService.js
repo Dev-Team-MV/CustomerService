@@ -132,6 +132,36 @@ getModels: async (projectId) => {
     return response.data
   },
 
+  downloadAccountStatementPdf: async (propertyId, suggestedFilename = null) => {
+    const token = localStorage.getItem('token')
+    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api'
+    const response = await fetch(`${baseURL}/properties/${propertyId}/account-statement/pdf`, {
+      method: 'GET',
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    })
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      throw new Error(data.message || `Download failed: ${response.status}`)
+    }
+
+    const blob = await response.blob()
+    const disposition = response.headers.get('Content-Disposition')
+    let filename = suggestedFilename || `property-statement-${propertyId}.pdf`
+    if (disposition) {
+      const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";\n]+)"?/i) || disposition.match(/filename="?([^";\n]+)"?/i)
+      if (match && match[1]) filename = match[1].trim().replace(/^["']|["']$/g, '')
+    }
+
+    const objectUrl = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = objectUrl
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(objectUrl)
+  },
+
   getPhasesByProperty: async (propertyId) => {
     const response = await api.get(`/phases/property/${propertyId}`)
     return response.data

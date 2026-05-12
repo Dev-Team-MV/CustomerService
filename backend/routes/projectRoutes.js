@@ -24,6 +24,7 @@ import {
   upsertProjectCatalogConfig,
   publishProjectCatalogConfig
 } from '../controllers/projectCatalogConfigController.js'
+import { downloadProjectStatementPdf } from '../controllers/accountStatementController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -373,6 +374,7 @@ router.put('/:id/catalog-config', protect, admin, upsertProjectCatalogConfig)
  *               $ref: '#/components/schemas/PublishProjectCatalogConfigResponse'
  */
 router.post('/:id/catalog-config/publish', protect, admin, publishProjectCatalogConfig)
+router.get('/:id/account-statement/pdf', protect, downloadProjectStatementPdf)
 
 /**
  * @swagger
