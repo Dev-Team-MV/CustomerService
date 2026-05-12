@@ -9,6 +9,7 @@ import {
   deleteProperty,
   getPropertyStats
 } from '../controllers/propertyController.js'
+import { downloadPropertyStatementPdf } from '../controllers/accountStatementController.js'
 import {
   shareProperty,
   revokePropertyShare,
@@ -166,6 +167,7 @@ router.post('/quote-preview', getPropertyQuotePreview)
  *         description: Property statistics (total, active, pending, sold, totalRevenue, pendingPayments)
  */
 router.get('/stats', protect, getPropertyStats)
+router.get('/:id/account-statement/pdf', protect, downloadPropertyStatementPdf)
 
 /**
  * @swagger

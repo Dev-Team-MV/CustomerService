@@ -30,11 +30,11 @@ const PHASE_TITLES = [
   'Site Preparation and Groundbreaking',
   'Foundation, Framing & Windows',
   'Exterior Cladding and Roofing Installation',
-  'All MEP\'s starts rough in work',
+  "All MEP's starts rough in work",
   'Drywall Work and Paint',
   'Flooring and Millwork',
   'Kitchen and Bathrooms',
-  'Interior Finishes, Driveway Applaiances & Landscaping',
+  'Interior Finishes, Driveway Applainces & Landscaping',
   'Inspections (Delays)'
 ]
 
