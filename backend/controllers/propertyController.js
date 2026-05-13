@@ -42,6 +42,34 @@ function getBuildingMatchQueryForProperty({ projectId, lot, model, facade }) {
   return query
 }
 
+async function resolveFacadeReference({ facadeId, projectId, modelId, allowDeckId = false }) {
+  const normalizedFacadeId = typeof facadeId === 'string' ? facadeId.trim() : facadeId
+  if (!normalizedFacadeId) return { ok: true, facade: null, source: 'none' }
+
+  let facadeExists = null
+  if (mongoose.Types.ObjectId.isValid(normalizedFacadeId)) {
+    facadeExists = await Facade.findById(normalizedFacadeId)
+  }
+
+  if (!facadeExists && allowDeckId && mongoose.Types.ObjectId.isValid(normalizedFacadeId)) {
+    facadeExists = await Facade.findOne({ 'decks._id': normalizedFacadeId })
+  }
+
+  if (!facadeExists) {
+    return { ok: false, status: 404, message: 'Facade not found' }
+  }
+
+  if (!facadeExists.project || !sameId(facadeExists.project, projectId)) {
+    return { ok: false, status: 400, message: 'Facade does not belong to this project' }
+  }
+
+  if (!sameId(facadeExists.model, modelId)) {
+    return { ok: false, status: 400, message: 'Facade does not belong to the selected model' }
+  }
+
+  return { ok: true, facade: facadeExists, source: sameId(facadeExists._id, normalizedFacadeId) ? 'facade' : 'deck' }
+}
+
 async function validateBuildingForPropertyCreation({ projectId, lot, model, facade, quoteId }) {
   const query = getBuildingMatchQueryForProperty({ projectId, lot, model, facade })
   const building = await Building.findOne(query)
@@ -564,16 +592,16 @@ const resolvePropertyPricing = async ({
     if (!facade) {
       return { ok: false, status: 400, message: 'Facade is required for this project' }
     }
-    facadeExists = await Facade.findById(facade)
-    if (!facadeExists) {
-      return { ok: false, status: 404, message: 'Facade not found' }
+    const resolvedFacade = await resolveFacadeReference({
+      facadeId: facade,
+      projectId: projId,
+      modelId: model,
+      allowDeckId: true
+    })
+    if (!resolvedFacade.ok) {
+      return resolvedFacade
     }
-    if (!facadeExists.project || !sameId(facadeExists.project, projId)) {
-      return { ok: false, status: 400, message: 'Facade does not belong to this project' }
-    }
-    if (!sameId(facadeExists.model, model)) {
-      return { ok: false, status: 400, message: 'Facade does not belong to the selected model' }
-    }
+    facadeExists = resolvedFacade.facade
   } else if (facade) {
     return { ok: false, status: 400, message: 'Facades are disabled for this project' }
   }
@@ -951,7 +979,9 @@ export const updateProperty = async (req, res) => {
       const previousLotId = property.lot ? toIdStr(property.lot) : null
 
       // Apply any allowed field present in the request body (price is only calculated on create; updates use the sent values)
+      // Facade is handled later to support deck ids and full validation.
       for (const key of ALLOWED_PROPERTY_UPDATES) {
+        if (key === 'facade') continue
         if (req.body[key] !== undefined) {
           if (key === 'price') {
             const newPrice = Number(req.body.price)
@@ -1009,6 +1039,26 @@ export const updateProperty = async (req, res) => {
             property[key] = req.body[key]
             property.markModified(key)
           }
+        }
+      }
+
+      if (req.body.facade !== undefined) {
+        const facadeCandidate = req.body.facade
+        if (facadeCandidate === null || facadeCandidate === '') {
+          property.facade = undefined
+          property.markModified('facade')
+        } else {
+          const resolvedFacade = await resolveFacadeReference({
+            facadeId: facadeCandidate,
+            projectId: property.project,
+            modelId: property.model,
+            allowDeckId: true
+          })
+          if (!resolvedFacade.ok) {
+            return res.status(resolvedFacade.status).json({ message: resolvedFacade.message })
+          }
+          property.facade = resolvedFacade.facade._id
+          property.markModified('facade')
         }
       }
 
