@@ -1,8 +1,52 @@
 import express from 'express'
+import multer from 'multer'
 import { uploadImage, uploadMultipleImages, updateImage, updateApartmentRenderImage, deleteImage, testGCSConnection, getFolderFiles, getSignedUrlForPath, updateRecorridoVisibility, upload } from '../controllers/uploadController.js'
 import { protect, admin, optionalProtect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
+const DEFAULT_MAX_UPLOAD_MB = 300
+const parsedMaxUploadMb = Number.parseInt(process.env.UPLOAD_MAX_FILE_SIZE_MB, 10)
+const maxUploadMb = Number.isFinite(parsedMaxUploadMb) && parsedMaxUploadMb > 0
+  ? parsedMaxUploadMb
+  : DEFAULT_MAX_UPLOAD_MB
+
+const handleUploadError = (err, res) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({
+        success: false,
+        message: `File too large. Maximum allowed size is ${maxUploadMb}MB per file.`
+      })
+    }
+
+    if (err.code === 'LIMIT_FILE_COUNT') {
+      return res.status(400).json({
+        success: false,
+        message: 'Too many files uploaded. Maximum allowed is 20 files per request.'
+      })
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: err.message || 'Invalid upload request'
+    })
+  }
+
+  return res.status(400).json({
+    success: false,
+    message: err.message || 'Invalid file upload'
+  })
+}
+
+const runUpload = (uploader) => (req, res, next) => {
+  uploader(req, res, (err) => {
+    if (err) return handleUploadError(err, res)
+    next()
+  })
+}
+
+const uploadSingleImage = runUpload(upload.single('image'))
+const uploadManyImages = runUpload(upload.array('images', 20))
 
 /**
  * @swagger
@@ -224,7 +268,7 @@ router.patch('/recorrido/visibility', protect, admin, updateRecorridoVisibility)
  *       500:
  *         description: Error uploading image
  */
-router.post('/image', protect, upload.single('image'), uploadImage)
+router.post('/image', protect, uploadSingleImage, uploadImage)
 
 /**
  * @swagger
@@ -284,7 +328,7 @@ router.post('/image', protect, upload.single('image'), uploadImage)
  *       500:
  *         description: Error uploading images
  */
-router.post('/images', protect, upload.array('images', 20), uploadMultipleImages)
+router.post('/images', protect, uploadManyImages, uploadMultipleImages)
 
 /**
  * @swagger
@@ -349,7 +393,7 @@ router.post('/images', protect, upload.array('images', 20), uploadMultipleImages
  *       500:
  *         description: Error updating image
  */
-router.post('/image/update', protect, admin, upload.single('image'), updateImage)
+router.post('/image/update', protect, admin, uploadSingleImage, updateImage)
 
 /**
  * @swagger
@@ -416,7 +460,7 @@ router.post('/image/update', protect, admin, upload.single('image'), updateImage
  *       500:
  *         description: Error updating apartment render image
  */
-router.post('/apartment-render/update', protect, admin, upload.single('image'), updateApartmentRenderImage)
+router.post('/apartment-render/update', protect, admin, uploadSingleImage, updateApartmentRenderImage)
 
 /**
  * @swagger
