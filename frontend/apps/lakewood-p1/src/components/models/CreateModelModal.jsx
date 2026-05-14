@@ -229,9 +229,9 @@ const CreateModelModal = ({
       borderBottom: { xs: "1px solid #e0e0e0", md: "none" },
       position: { md: "sticky" },
       top: 0,
-      height: { xs: "auto", md: "90vh" },
+      height: { xs: "auto", md: "70vh" },
       zIndex: 2,
-      overflowY: { xs: "auto", md: "hidden" },
+      overflowY: { xs: "auto", md: "auto" },
       "&::-webkit-scrollbar": { width: "8px" },
       "&::-webkit-scrollbar-thumb": {
         backgroundColor: "rgba(51, 63, 31, 0.2)",

@@ -141,8 +141,17 @@ const MapInventory = () => {
     }
   }
 
-  const colorCounts = lots.reduce((acc, lot) => {
-    const color = lot.color || 'green'
+  // const colorCounts = lots.reduce((acc, lot) => {
+  //   const color = lot.color || 'green'
+  //   acc[color] = (acc[color] || 0) + 1
+  //   return acc
+  // }, {})
+    const colorCounts = lots.reduce((acc, lot) => {
+    let color = lot.color || 'green'
+    // Sumar amarillos al verde
+    if (color === 'yellow') {
+      color = 'green'
+    }
     acc[color] = (acc[color] || 0) + 1
     return acc
   }, {})

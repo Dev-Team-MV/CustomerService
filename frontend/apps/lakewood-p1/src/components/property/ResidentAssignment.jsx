@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import {
   Box, Paper, Typography, TextField, MenuItem, Divider,
-  Collapse, Alert, Button, CircularProgress, Tooltip
+  Collapse, Alert, Button, CircularProgress, Tooltip,Autocomplete
 } from '@mui/material'
 import { useProperty } from '@shared/context/PropertyContext'
 import { useNavigate } from 'react-router-dom'
@@ -256,24 +256,43 @@ const handleAssignProperty = async () => {
             </Alert>
           )}
 
-
-          {/* SELECT USER */}
+          {/* SELECT USER - CON AUTOCOMPLETE */}
           <Box display="flex" alignItems="flex-start" gap={2}>
-            <TextField
-              fullWidth select
-              label={t('selectResident', 'Select Resident')}
-              value={selectedUser?._id || ''}
-              onChange={e => setSelectedUser(users.find(u => u._id === e.target.value))}
-              helperText={t('chooseExistingResident', 'Choose an existing resident to assign this property')}
+            <Autocomplete
+              fullWidth
+              options={users}
+              getOptionLabel={(option) => 
+                `${option.firstName} ${option.lastName} - ${option.email}${option.phoneNumber ? ` 📱 ${option.phoneNumber}` : ''}`
+              }
+              value={selectedUser || null}
+              onChange={(event, newValue) => setSelectedUser(newValue)}
               disabled={loading}
-            >
-              {users.map((user) => (
-                <MenuItem key={user._id} value={user._id}>
-                  {user.firstName} {user.lastName} - {user.email}
-                  {user.phoneNumber && ` 📱 ${user.phoneNumber}`}
-                </MenuItem>
-              ))}
-            </TextField>
+              loading={loading}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={t('selectResident', 'Select Resident')}
+                  helperText={t('chooseExistingResident', 'Choose an existing resident to assign this property')}
+                  placeholder="Busca por nombre o correo..."
+                />
+              )}
+              filterOptions={(options, state) => {
+                const inputValue = state.inputValue.toLowerCase()
+                return options.filter(option =>
+                  `${option.firstName} ${option.lastName}`.toLowerCase().includes(inputValue) ||
+                  option.email.toLowerCase().includes(inputValue) ||
+                  (option.phoneNumber && option.phoneNumber.includes(inputValue))
+                )
+              }}
+              noOptionsText="No se encontraron usuarios"
+              isOptionEqualToValue={(option, value) => option._id === value?._id}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderColor: '#8CA551'
+                }
+              }}
+            />
+
             <Tooltip title={t('addNewResident', 'Add New Resident')}>
               <Button variant="outlined" onClick={() => handleOpenDialog()} sx={{
                 minWidth: 48, height: '56px', borderRadius: 3, ml: 1, px: 0,
@@ -285,17 +304,17 @@ const handleAssignProperty = async () => {
               </Button>
             </Tooltip>
 
-              {/* ✅ NUEVO: Botón para seleccionar de otro proyecto */}
-  <Tooltip title="Seleccionar residente de otro proyecto">
-    <Button variant="outlined" onClick={() => setOpenCrossProjectDialog(true)} sx={{
-      minWidth: 48, height: '56px', borderRadius: 3, px: 0,
-      bgcolor: '#fff', border: '2px solid #706f6f', color: '#706f6f',
-      alignSelf: 'flex-start',
-      '&:hover': { bgcolor: 'rgba(112, 111, 111, 0.08)' }
-    }}>
-      <PersonIcon />
-    </Button>
-  </Tooltip>
+            {/* ✅ NUEVO: Botón para seleccionar de otro proyecto */}
+            <Tooltip title="Seleccionar residente de otro proyecto">
+              <Button variant="outlined" onClick={() => setOpenCrossProjectDialog(true)} sx={{
+                minWidth: 48, height: '56px', borderRadius: 3, px: 0,
+                bgcolor: '#fff', border: '2px solid #706f6f', color: '#706f6f',
+                alignSelf: 'flex-start',
+                '&:hover': { bgcolor: 'rgba(112, 111, 111, 0.08)' }
+              }}>
+                <PersonIcon />
+              </Button>
+            </Tooltip>
           </Box>
 
           {/* PROPERTY SUMMARY ... */}

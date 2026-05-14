@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react'
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, MenuItem, Button, CircularProgress,
-  Box, Typography, Chip
+  Box, Autocomplete, TextField, Chip, CircularProgress
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
+import { People as PeopleIcon } from '@mui/icons-material'
 import api from '@shared/services/api'
+import ModalWrapper from '@shared/constants/ModalWrapper'
+import PrimaryButton from '@shared/constants/PrimaryButton'
 
 const CrossProjectResidentDialog = ({ open, onClose, currentProjectId, onSelectUser }) => {
   const { t } = useTranslation(['residents', 'common'])
   const [projects, setProjects] = useState([])
-  const [selectedProjectId, setSelectedProjectId] = useState('')
+  const [selectedProject, setSelectedProject] = useState(null)
   const [users, setUsers] = useState([])
-  const [selectedUserId, setSelectedUserId] = useState('')
+  const [selectedUser, setSelectedUser] = useState(null)
   const [loading, setLoading] = useState(false)
   const [loadingUsers, setLoadingUsers] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   // Cargar proyectos al abrir
   useEffect(() => {
@@ -22,8 +24,8 @@ const CrossProjectResidentDialog = ({ open, onClose, currentProjectId, onSelectU
       fetchProjects()
     } else {
       // Reset al cerrar
-      setSelectedProjectId('')
-      setSelectedUserId('')
+      setSelectedProject(null)
+      setSelectedUser(null)
       setUsers([])
     }
   }, [open])
@@ -44,13 +46,13 @@ const CrossProjectResidentDialog = ({ open, onClose, currentProjectId, onSelectU
 
   // Cargar usuarios cuando se selecciona un proyecto
   useEffect(() => {
-    if (selectedProjectId) {
-      fetchUsers(selectedProjectId)
+    if (selectedProject?._id) {
+      fetchUsers(selectedProject._id)
     } else {
       setUsers([])
-      setSelectedUserId('')
+      setSelectedUser(null)
     }
-  }, [selectedProjectId])
+  }, [selectedProject])
 
   const fetchUsers = async (projectId) => {
     setLoadingUsers(true)
@@ -65,99 +67,131 @@ const CrossProjectResidentDialog = ({ open, onClose, currentProjectId, onSelectU
     }
   }
 
-  const handleConfirm = () => {
-    const user = users.find(u => u._id === selectedUserId)
-    if (user) {
-      onSelectUser(user)
+  const handleConfirm = async () => {
+    if (selectedUser) {
+      setSubmitting(true)
+      try {
+        onSelectUser(selectedUser)
+        onClose()
+      } finally {
+        setSubmitting(false)
+      }
     }
   }
 
+  const actions = [
+    <PrimaryButton
+      key="cancel"
+      variant="outlined"
+      onClick={onClose}
+      sx={{
+        borderColor: '#706f6f',
+        color: '#706f6f',
+        '&:hover': {
+          bgcolor: 'rgba(112, 111, 111, 0.08)',
+          borderColor: '#706f6f'
+        }
+      }}
+    >
+      {t('common:cancel', 'Cancelar')}
+    </PrimaryButton>,
+    <PrimaryButton
+      key="confirm"
+      loading={submitting}
+      disabled={!selectedUser || loadingUsers}
+      onClick={handleConfirm}
+    >
+      {t('residents:selectResident', 'Seleccionar')}
+    </PrimaryButton>
+  ]
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        <Typography variant="h6" fontWeight={600}>
-          Seleccionar Residente de Otro Proyecto
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          Asignar un residente que pertenece a otro proyecto
-        </Typography>
-      </DialogTitle>
-
-      <DialogContent>
-        <Box sx={{ pt: 2 }}>
-          {/* Selector de proyecto */}
-          <TextField
-            fullWidth
-            select
-            label="Proyecto"
-            value={selectedProjectId}
-            onChange={(e) => setSelectedProjectId(e.target.value)}
-            disabled={loading}
-            sx={{ mb: 3 }}
-            helperText="Selecciona el proyecto del residente"
-          >
-            {loading ? (
-              <MenuItem disabled>Cargando proyectos...</MenuItem>
-            ) : projects.length === 0 ? (
-              <MenuItem disabled>No hay otros proyectos disponibles</MenuItem>
-            ) : (
-              projects.map((project) => (
-                <MenuItem key={project._id} value={project._id}>
-                  {project.name}
-                  <Chip 
-                    label={project.slug || 'N/A'} 
-                    size="small" 
-                    sx={{ ml: 1 }} 
-                  />
-                </MenuItem>
-              ))
-            )}
-          </TextField>
-
-          {/* Selector de usuario */}
-          {selectedProjectId && (
+    <ModalWrapper
+      open={open}
+      onClose={onClose}
+      icon={PeopleIcon}
+      title={t('residents:selectFromOtherProject', 'Seleccionar Residente de Otro Proyecto')}
+      subtitle={t('residents:selectFromOtherProjectDesc', 'Asignar un residente que pertenece a otro proyecto')}
+      actions={actions}
+      maxWidth="sm"
+    >
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {/* Autocomplete de proyecto */}
+        <Autocomplete
+          fullWidth
+          options={projects}
+          getOptionLabel={(option) => option.name || ''}
+          value={selectedProject}
+          onChange={(event, newValue) => setSelectedProject(newValue)}
+          loading={loading}
+          disabled={loading}
+          renderInput={(params) => (
             <TextField
-              fullWidth
-              select
-              label="Residente"
-              value={selectedUserId}
-              onChange={(e) => setSelectedUserId(e.target.value)}
-              disabled={loadingUsers}
-              helperText="Selecciona el residente a asignar"
-            >
-              {loadingUsers ? (
-                <MenuItem disabled>
-                  <CircularProgress size={20} sx={{ mr: 1 }} />
-                  Cargando residentes...
-                </MenuItem>
-              ) : users.length === 0 ? (
-                <MenuItem disabled>No hay residentes en este proyecto</MenuItem>
-              ) : (
-                users.map((user) => (
-                  <MenuItem key={user._id} value={user._id}>
-                    {user.firstName} {user.lastName} - {user.email}
-                    {user.phoneNumber && ` 📱 ${user.phoneNumber}`}
-                  </MenuItem>
-                ))
-              )}
-            </TextField>
+              {...params}
+              label={t('residents:project', 'Proyecto')}
+              helperText={t('residents:selectProjectResident', 'Selecciona el proyecto del residente')}
+              placeholder={t('residents:searchByName', 'Busca por nombre...')}
+            />
           )}
-        </Box>
-      </DialogContent>
+          filterOptions={(options, state) => {
+            const inputValue = state.inputValue.toLowerCase()
+            return options.filter(option =>
+              option.name.toLowerCase().includes(inputValue) ||
+              (option.slug && option.slug.toLowerCase().includes(inputValue))
+            )
+          }}
+          noOptionsText={t('residents:noOtherProjects', 'No hay otros proyectos disponibles')}
+          isOptionEqualToValue={(option, value) => option._id === value?._id}
+          renderOption={(props, option) => (
+            <Box component="li" {...props}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <Box>{option.name}</Box>
+                {option.slug && (
+                  <Chip 
+                    label={option.slug} 
+                    size="small" 
+                    variant="outlined"
+                  />
+                )}
+              </Box>
+            </Box>
+          )}
+        />
 
-      <DialogActions sx={{ p: 3, pt: 2 }}>
-        <Button onClick={onClose} color="inherit">
-          Cancelar
-        </Button>
-        <Button
-          onClick={handleConfirm}
-          variant="contained"
-          disabled={!selectedUserId}
-        >
-          Seleccionar
-        </Button>
-      </DialogActions>
-    </Dialog>
+        {/* Autocomplete de usuario */}
+        {selectedProject && (
+          <Autocomplete
+            fullWidth
+            options={users}
+            getOptionLabel={(option) => 
+              `${option.firstName} ${option.lastName} - ${option.email}${option.phoneNumber ? ` 📱 ${option.phoneNumber}` : ''}`
+            }
+            value={selectedUser}
+            onChange={(event, newValue) => setSelectedUser(newValue)}
+            loading={loadingUsers}
+            disabled={loadingUsers}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={t('residents:resident', 'Residente')}
+                helperText={t('residents:selectResidentToAssign', 'Selecciona el residente a asignar')}
+                placeholder={t('residents:searchByNameOrEmail', 'Busca por nombre o correo...')}
+              />
+            )}
+            filterOptions={(options, state) => {
+              const inputValue = state.inputValue.toLowerCase()
+              return options.filter(option =>
+                `${option.firstName} ${option.lastName}`.toLowerCase().includes(inputValue) ||
+                option.email.toLowerCase().includes(inputValue) ||
+                (option.phoneNumber && option.phoneNumber.includes(inputValue))
+              )
+            }}
+            noOptionsText={t('residents:noResidentsInProject', 'No hay residentes en este proyecto')}
+            isOptionEqualToValue={(option, value) => option._id === value?._id}
+          />
+        )}
+      </Box>
+    </ModalWrapper>
   )
 }
 

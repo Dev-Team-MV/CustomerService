@@ -1,9 +1,10 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react' // ✅ Agregar useState
 import { useTranslation } from 'react-i18next'
-import { Box, Container } from '@mui/material'
+import { Box, Container, CircularProgress } from '@mui/material' // ✅ Agregar CircularProgress
 import {
   Add, AccountBalance,
-  Schedule, ErrorOutline, Cancel
+  Schedule, ErrorOutline, Cancel,
+  Download // ✅ Agregar Download
 } from '@mui/icons-material'
 
 import PageHeader    from '@shared/components/PageHeader'
@@ -14,6 +15,7 @@ import PayloadDialog from '@shared/components/Modals/PayloadDialog'
 import { usePayloads } from '@shared/hooks/usePayloads'
 import api from '@shared/services/api'
 import { usePayloadColumns } from '../constants/Columns/payloads'
+import projectService from '@shared/services/projectService' // ✅ Agregar
 
 const paymentTypes = [
   "initial down payment",
@@ -27,7 +29,8 @@ const projectId = import.meta.env.VITE_PROJECT_ID
 
 const Payloads = () => {
   const { t } = useTranslation(['payloads', 'common'])
-
+  const [downloadingProjectStatement, setDownloadingProjectStatement] = useState(false) // ✅ Nuevo estado
+ 
   const {
     payloads, resources, stats, loading,
     openDialog, selectedPayload, formData, setFormData,
@@ -45,6 +48,22 @@ const Payloads = () => {
       return res.data
     }
   })
+ 
+  // ✅ Nuevo handler para descargar estado de cuenta del proyecto
+  const handleDownloadProjectStatement = async () => {
+    try {
+      setDownloadingProjectStatement(true)
+      await projectService.downloadAccountStatementPdf(
+        projectId,
+        `project-statement-${new Date().toISOString().split('T')[0]}.pdf`
+      )
+    } catch (error) {
+      console.error('Error downloading project statement:', error)
+      alert('Error downloading project statement: ' + error.message)
+    } finally {
+      setDownloadingProjectStatement(false)
+    }
+  }
 
   useEffect(() => {
     fetchAll()
@@ -107,17 +126,36 @@ const Payloads = () => {
     <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)', p: { xs: 2, sm: 3 } }}>
       <Container maxWidth="xl">
 
-        <PageHeader
-          icon={AccountBalance}
-          title={t('payloads:title')}
-          subtitle={t('payloads:subtitle')}
-          actionButton={{
-            label:   t('payloads:add'),
-            onClick: () => handleOpenDialog(),
-            icon:    <Add />,
-            tooltip: t('payloads:new')
-          }}
-        />
+<PageHeader
+  icon={AccountBalance}
+  title={t('payloads:title')}
+  subtitle={t('payloads:subtitle')}
+  actionButton={{
+    label:   t('payloads:add'),
+    onClick: () => handleOpenDialog(),
+    icon:    <Add />,
+    tooltip: t('payloads:new')
+  }}
+  secondaryButton={{
+    label: downloadingProjectStatement ? 'Downloading...' : 'Project Statement',
+    onClick: handleDownloadProjectStatement,
+    icon: downloadingProjectStatement ? <CircularProgress size={16} sx={{ color: '#8CA551' }} /> : <Download />,
+    tooltip: 'Download project account statement PDF',
+    variant: 'outlined',
+    disabled: downloadingProjectStatement,
+    sx: {
+      borderColor: '#8CA551',
+      color: '#8CA551',
+      '&:hover': {
+        borderColor: '#7a9447',
+        bgcolor: 'rgba(140, 165, 81, 0.08)'
+      },
+      '&:disabled': {
+        opacity: 0.6
+      }
+    }
+  }}
+/>
 
         <StatsCards stats={payloadsStats} loading={loading} />
 
