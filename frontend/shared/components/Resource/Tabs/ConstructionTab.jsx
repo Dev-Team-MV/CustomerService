@@ -23,7 +23,7 @@ import {
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { usePhases } from '@shared/hooks/usePhases'
-import GalleryCarrousel from '../../../../apps/lakewood-p1/src/components/GalleryCarrousel'
+import GalleryCarrousel from '../../GalleryCarrousel'
 import PropTypes from 'prop-types'
 
 const PHASE_DESCRIPTIONS = [
