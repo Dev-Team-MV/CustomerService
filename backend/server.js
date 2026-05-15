@@ -37,7 +37,29 @@ const app = express()
 
 connectDB()
 
-app.use(cors())
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://devlakewoodp1.michelangelodelvalle.com',
+  'https://lakewoodp1.michelangelodelvalle.com',
+  'https://devphase2.michelangelodelvalle.com',
+  'https://phase2.michelangelodelvalle.com'
+]
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Filename']
+}
+
+app.use(cors(corsOptions))
 app.use(express.json({ limit: '100mb' })) // Increase JSON body size limit
 app.use(express.urlencoded({ extended: true, limit: '100mb' })) // Increase URL-encoded body size limit
 app.use(requestTimingMiddleware)
