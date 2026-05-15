@@ -30,6 +30,7 @@ const router = express.Router()
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6650f1a2a47f4b9f7296f1ab
  *         description: Project ID
  *     responses:
  *       200:
@@ -65,6 +66,11 @@ const router = express.Router()
  *               key: { type: string, example: blocked }
  *               name: { type: string, example: Bloqueadas }
  *               order: { type: number, example: 2 }
+ *           example:
+ *             projectId: 6650f1a2a47f4b9f7296f1ab
+ *             key: review
+ *             name: En revision
+ *             order: 3
  *     responses:
  *       201:
  *         description: Column created
@@ -88,6 +94,7 @@ router.post('/columns', protect, admin, createActivityColumn)
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6650f7a7d31d9c9b1e60a021
  *     requestBody:
  *       content:
  *         application/json:
@@ -96,6 +103,9 @@ router.post('/columns', protect, admin, createActivityColumn)
  *             properties:
  *               name: { type: string, example: Doing }
  *               order: { type: number, example: 2 }
+ *           example:
+ *             name: En progreso
+ *             order: 2
  *     responses:
  *       200:
  *         description: Column updated
@@ -112,6 +122,7 @@ router.post('/columns', protect, admin, createActivityColumn)
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6650f7a7d31d9c9b1e60a021
  *     responses:
  *       200:
  *         description: Column deleted
@@ -135,6 +146,7 @@ router.delete('/columns/:id', protect, admin, deleteActivityColumn)
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6650f1a2a47f4b9f7296f1ab
  *     responses:
  *       200:
  *         description: Board with columns and activities
@@ -174,19 +186,23 @@ router.get('/board', protect, getActivityBoard)
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6650f1a2a47f4b9f7296f1ab
  *       - in: query
  *         name: columnId
  *         schema:
  *           type: string
+ *         example: 6650f7a7d31d9c9b1e60a021
  *       - in: query
  *         name: assignedTo
  *         schema:
  *           type: string
+ *         example: 6648e3df9a9ed2f35f1234ab
  *       - in: query
  *         name: priority
  *         schema:
  *           type: string
  *           enum: [low, medium, high, urgent]
+ *         example: high
  *     responses:
  *       200:
  *         description: Activities list
@@ -218,6 +234,18 @@ router.get('/board', protect, getActivityBoard)
  *               tags:
  *                 type: array
  *                 items: { type: string }
+ *           example:
+ *             projectId: 6650f1a2a47f4b9f7296f1ab
+ *             title: Confirmar firma de contrato
+ *             description: Llamar al cliente y coordinar firma electronica
+ *             columnId: 6650f7a7d31d9c9b1e60a021
+ *             position: 0
+ *             priority: high
+ *             dueDate: 2026-05-20T17:00:00.000Z
+ *             assignedTo: 6648e3df9a9ed2f35f1234ab
+ *             tags:
+ *               - legal
+ *               - onboarding
  *     responses:
  *       201:
  *         description: Activity created
@@ -241,6 +269,7 @@ router
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6651033f7ab5d67c62d102ef
  *     responses:
  *       200:
  *         description: Activity details
@@ -257,6 +286,7 @@ router
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6651033f7ab5d67c62d102ef
  *     requestBody:
  *       content:
  *         application/json:
@@ -277,6 +307,17 @@ router
  *               tags:
  *                 type: array
  *                 items: { type: string }
+ *           example:
+ *             title: Confirmar firma con notaria
+ *             description: Cliente solicita mover firma para manana
+ *             columnId: 6650f7a7d31d9c9b1e60a022
+ *             position: 1
+ *             priority: urgent
+ *             dueDate: 2026-05-21T14:30:00.000Z
+ *             assignedTo: 6648e3df9a9ed2f35f1234ab
+ *             tags:
+ *               - legal
+ *               - follow-up
  *     responses:
  *       200:
  *         description: Activity updated
@@ -291,6 +332,7 @@ router
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6651033f7ab5d67c62d102ef
  *     responses:
  *       200:
  *         description: Activity deleted
@@ -315,6 +357,7 @@ router
  *         required: true
  *         schema:
  *           type: string
+ *         example: 6651033f7ab5d67c62d102ef
  *     requestBody:
  *       required: true
  *       content:
@@ -325,6 +368,9 @@ router
  *             properties:
  *               columnId: { type: string }
  *               position: { type: number, example: 0 }
+ *           example:
+ *             columnId: 6650f7a7d31d9c9b1e60a023
+ *             position: 0
  *     responses:
  *       200:
  *         description: Activity moved
