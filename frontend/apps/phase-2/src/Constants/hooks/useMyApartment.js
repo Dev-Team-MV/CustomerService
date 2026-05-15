@@ -3,9 +3,15 @@
 
 // // Puedes personalizar los títulos de fases si lo necesitas
 // const PHASE_TITLES = [
-//   'Site Preparation', 'Foundation', 'Framing', 'Roofing',
-//   'MEP Installation', 'Drywall & Insulation', 'Interior Finishes',
-//   'Exterior Completion', 'Final Inspection',
+//   'Site Preparation and Groundbreaking',
+//   'Foundation, Framing & Windows',
+//   'Exterior Cladding and Roofing Installation',
+//   "All MEP's starts rough in work",
+//   'Drywall Work and Paint',
+//   'Flooring and Millwork',
+//   'Kitchen and Bathrooms',
+//   'Interior Finishes, Driveway Applainces & Landscaping',
+//   'Inspections (Delays)'
 // ]
 
 // const useMyApartment = () => {
@@ -148,9 +154,15 @@ import { useAuth } from '@shared/context/AuthContext'
 
 // Puedes personalizar los títulos de fases si lo necesitas
 const PHASE_TITLES = [
-  'Site Preparation', 'Foundation', 'Framing', 'Roofing',
-  'MEP Installation', 'Drywall & Insulation', 'Interior Finishes',
-  'Exterior Completion', 'Final Inspection',
+  'Site Preparation and Groundbreaking',
+  'Foundation, Framing & Windows',
+  'Exterior Cladding and Roofing Installation',
+  "All MEP's starts rough in work",
+  'Drywall Work and Paint',
+  'Flooring and Millwork',
+  'Kitchen and Bathrooms',
+  'Interior Finishes, Driveway Applainces & Landscaping',
+  'Inspections (Delays)',
 ]
 
 const useMyApartment = () => {

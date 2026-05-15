@@ -31,6 +31,18 @@ import { usePhases } from '@shared/hooks/usePhases'
 import uploadService from '../services/uploadService'
 import api from '../services/api'
 
+const BACKEND_PHASE_TITLES = [
+  'Site Preparation and Groundbreaking',
+  'Foundation, Framing & Windows',
+  'Exterior Cladding and Roofing Installation',
+  "All MEP's starts rough in work",
+  'Drywall Work and Paint',
+  'Flooring and Millwork',
+  'Kitchen and Bathrooms',
+  'Interior Finishes, Driveway Applainces & Landscaping',
+  'Inspections (Delays)'
+]
+
 export const ConstructionPhasesContent = ({ property, isAdmin }) => {
   const { t } = useTranslation('construction')
   const { phases, loading, fetchPhases: refetch } = usePhases({ 
@@ -127,20 +139,11 @@ const extractUrl = (item) => {
 
   const getPhaseTitle = (phase) => {
     if (!phase) return ''
-    if (phase.phaseKey) return t(`phases.${phase.phaseKey}`)
-    const phaseKeys = [
-      'sitePreparation',
-      'foundation',
-      'framing',
-      'roofing',
-      'mepInstallation',
-      'insulationDrywall',
-      'interiorFinishes',
-      'exteriorFinishes',
-      'finalInspection'
-    ]
-    const key = phaseKeys[phase.phaseNumber - 1]
-    return key ? t(`phases.${key}`) : phase.title
+
+    // Prioriza el título persistido en backend para evitar desfases de nombres.
+    if (phase.title) return phase.title
+
+    return BACKEND_PHASE_TITLES[phase.phaseNumber - 1] || ''
   }
 
   if (loading) {
