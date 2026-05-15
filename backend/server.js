@@ -38,7 +38,13 @@ const app = express()
 connectDB()
 
 const exactCorsOrigins = [
-  process.env.FRONTEND_URL
+  process.env.FRONTEND_URL,
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://devlakewoodp1.michelangelodelvalle.com',
+  'https://lakewoodp1.michelangelodelvalle.com',
+  'https://devphase2.michelangelodelvalle.com',
+  'https://phase2.michelangelodelvalle.com'
 ].filter(Boolean)
 
 const extraCorsOrigins = (process.env.CORS_ORIGINS || '')
@@ -65,8 +71,9 @@ const corsOptions = {
 
     return callback(new Error(`CORS blocked for origin: ${origin}`))
   },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Authorization', 'Content-Type', 'X-Requested-With'],
+  allowedHeaders: ['Authorization', 'Content-Type', 'X-Requested-With', 'X-Filename'],
   optionsSuccessStatus: 204
 }
 
