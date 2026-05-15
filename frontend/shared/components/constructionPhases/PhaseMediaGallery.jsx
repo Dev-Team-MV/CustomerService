@@ -3,8 +3,16 @@ import { Box, IconButton, Typography } from '@mui/material'
 import { ChevronLeft, ChevronRight, PlayCircle } from '@mui/icons-material'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@mui/material/styles'
+import MediaItemEditor from './MediaItemEditor'
 
-const PhaseMediaGallery = ({ mediaItems, onMediaClick }) => {
+const PhaseMediaGallery = ({ 
+  mediaItems, 
+  onMediaClick,
+  isAdmin = false,
+  onEditMedia,
+  onDeleteMedia,
+  uploadService
+ }) => {
   const theme = useTheme()
   const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -60,6 +68,25 @@ const PhaseMediaGallery = ({ mediaItems, onMediaClick }) => {
               justifyContent: 'center'
             }}
           >
+  {/* Admin Actions */}
+  {isAdmin && (
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 12,
+        right: 12,
+        zIndex: 10
+      }}
+    >
+  <MediaItemEditor
+    mediaItem={currentItem}
+    isAdmin={isAdmin}
+    onEdit={onEditMedia}
+    onDelete={onDeleteMedia}
+    uploadService={uploadService}  // ✅ Pasar
+  />
+    </Box>
+  )}
             {currentItem.mediaType === 'video' ? (
               <Box
                 onClick={() => onMediaClick?.(currentItem)}

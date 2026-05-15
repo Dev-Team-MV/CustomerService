@@ -11,6 +11,13 @@ import path from 'path'
 // Configurar multer para almacenar en memoria
 const storage = multer.memoryStorage()
 
+const DEFAULT_MAX_UPLOAD_MB = 300
+const parsedMaxUploadMb = Number.parseInt(process.env.UPLOAD_MAX_FILE_SIZE_MB, 10)
+const maxUploadMb = Number.isFinite(parsedMaxUploadMb) && parsedMaxUploadMb > 0
+  ? parsedMaxUploadMb
+  : DEFAULT_MAX_UPLOAD_MB
+const maxUploadBytes = maxUploadMb * 1024 * 1024
+
 // Filtro de archivos - imágenes, PDF y videos
 const fileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase().replace(/^\./, '')
@@ -28,7 +35,7 @@ const fileFilter = (req, file, cb) => {
 export const upload = multer({
   storage,
   limits: {
-    fileSize: 300 * 1024 * 1024, // 300MB max per file
+    fileSize: maxUploadBytes, // configurable via UPLOAD_MAX_FILE_SIZE_MB
     files: 20 // Maximum number of files
   },
   fileFilter

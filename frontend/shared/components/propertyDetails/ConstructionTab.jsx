@@ -1,6 +1,6 @@
 // @/Users/oficina/MV-CRM/CustomerService/frontend/shared/components/propertyDetails/ConstructionTab.jsx
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'  // Agregar useMemo
 import {
   Box,
   Button,
@@ -10,7 +10,13 @@ import {
   Chip,
   Alert,
   CircularProgress,
-  Paper
+  Paper,
+  Dialog,              // ✅ Agregar
+  DialogTitle,         // ✅ Agregar
+  DialogContent,       // ✅ Agregar
+  Accordion,           // ✅ Agregar
+  AccordionSummary,    // ✅ Agregar
+  AccordionDetails     // ✅ Agregar
 } from '@mui/material'
 import {
   CloudUpload,
@@ -18,24 +24,30 @@ import {
   Lock,
   LockOpen,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Edit,                // ✅ Agregar
+  Close,               // ✅ Agregar
+  ExpandMore,          // ✅ Agregar
+  Delete,              // ✅ Agregar
+  PlayCircle           // ✅ Agregar
 } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
 import { usePhases } from '@shared/hooks/usePhases'
 import PhaseUploadDialog from '@shared/components/constructionPhases/PhaseUploadDialog'
 import PhaseMediaGallery from '@shared/components/constructionPhases/PhaseMediaGallery'
 import uploadService from '@shared/services/uploadService'
+import MediaItemEditor from '@shared/components/constructionPhases/MediaItemEditor'
 
 const PHASE_TITLES = [
-  'Site Preparation',
-  'Foundation',
-  'Framing',
-  'Roofing',
-  'MEP Installation',
-  'Insulation & Drywall',
-  'Interior Finishes',
-  'Exterior Finishes',
-  'Final Inspection'
+  'Site Preparation and Groundbreaking',
+  'Foundation, Framing & Windows',
+  'Exterior Cladding and Roofing Installation',
+  "All MEP's starts rough in work",
+  'Drywall Work and Paint',
+  'Flooring and Millwork',
+  'Kitchen and Bathrooms',
+  'Interior Finishes, Driveway Applainces & Landscaping',
+  'Inspections (Delays)'
 ]
 
 /**
@@ -73,6 +85,34 @@ console.log('🔍 ConstructionTab Debug:', {
 
   // Crear array de 9 fases (1-9)
   const [phases, setPhases] = useState([])
+
+  const [manageMediaOpen, setManageMediaOpen] = useState(false)
+
+// Agrupar media por título
+const groupedMedia = useMemo(() => {
+  const currentPhase = phases[currentPhaseIndex]
+  const mediaItems = currentPhase?.mediaItems || []
+  const groups = {}
+  mediaItems.forEach(item => {
+    const title = item.title || 'Sin título'
+    if (!groups[title]) groups[title] = []
+    groups[title].push(item)
+  })
+  return groups
+}, [phases, currentPhaseIndex])
+
+// Handler para eliminar grupo completo
+const handleDeleteGroup = async (items) => {
+  if (!window.confirm(`¿Eliminar ${items.length} items del grupo "${items[0]?.title}"?`)) return
+  const currentPhase = phases[currentPhaseIndex]
+  try {
+    for (const item of items) {
+      await deleteMediaItem(currentPhase.phaseNumber, item._id)
+    }
+  } catch (error) {
+    alert('Error eliminando grupo: ' + error.message)
+  }
+}
 
   useEffect(() => {
     if (fetchedPhases) {
@@ -325,6 +365,29 @@ console.log('🔍 ConstructionTab Debug:', {
 
             {/* Botón Upload - solo para admins */}
             {isAdmin && (
+              <>
+                <Button
+    variant="outlined"
+    size="small"
+    startIcon={<Edit />}
+    onClick={() => setManageMediaOpen(true)}
+    sx={{
+      borderRadius: 3,
+      borderColor: theme.palette.primary.main,
+      color: theme.palette.primary.main,
+      fontWeight: 600,
+      fontFamily: '"Poppins", sans-serif',
+      textTransform: 'none',
+      px: 2,
+      py: 1,
+      '&:hover': { 
+        borderColor: theme.palette.primary.dark, 
+        bgcolor: `${theme.palette.primary.main}10`
+      }
+    }}
+  >
+    Manage
+  </Button>
               <Button
                 variant="contained"
                 size="small"
@@ -348,6 +411,7 @@ console.log('🔍 ConstructionTab Debug:', {
               >
                 Upload
               </Button>
+              </>
             )}
           </Box>
 
@@ -372,10 +436,20 @@ console.log('🔍 ConstructionTab Debug:', {
 
           {/* Galería de media */}
           {currentPhase.mediaItems && currentPhase.mediaItems.length > 0 ? (
-            <PhaseMediaGallery
-              mediaItems={currentPhase.mediaItems}
-              onMediaClick={(media) => console.log('Media clicked:', media)}
-            />
+<PhaseMediaGallery
+  mediaItems={currentPhase.mediaItems}
+  onMediaClick={(media) => console.log('Media clicked:', media)}
+  isAdmin={isAdmin}
+  onEditMedia={async (mediaItem, newData) => {
+    await updateMediaItem(currentPhase.phaseNumber, mediaItem._id, newData)
+  }}
+  onDeleteMedia={async (mediaItemId) => {
+    await deleteMediaItem(currentPhase.phaseNumber, mediaItemId)
+
+  }}
+    uploadService={uploadService}  // ✅ Agregar esta línea
+
+/>
           ) : (
             <Alert
               severity="info"
@@ -412,6 +486,124 @@ console.log('🔍 ConstructionTab Debug:', {
           }}
         />
       )}
+
+      {/* Dialog para gestionar media items agrupados */}
+<Dialog
+  open={manageMediaOpen}
+  onClose={() => setManageMediaOpen(false)}
+  maxWidth="md"
+  fullWidth
+>
+  <DialogTitle>
+    <Box display="flex" justifyContent="space-between" alignItems="center">
+      <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+        Manage Media Items - Phase {phases[currentPhaseIndex]?.phaseNumber}
+      </Typography>
+      <IconButton onClick={() => setManageMediaOpen(false)}>
+        <Close />
+      </IconButton>
+    </Box>
+  </DialogTitle>
+  <DialogContent>
+    <Box sx={{ mt: 2 }}>
+      {Object.keys(groupedMedia).length === 0 ? (
+        <Alert severity="info">No media items in this phase</Alert>
+      ) : (
+        Object.entries(groupedMedia).map(([title, items]) => (
+          <Accordion 
+            key={title} 
+            defaultExpanded={Object.keys(groupedMedia).length === 1}
+            sx={{ 
+              mb: 1, 
+              border: '1px solid #e0e0e0', 
+              borderRadius: '8px !important',
+              '&:before': { display: 'none' },
+              boxShadow: 'none'
+            }}
+          >
+            <AccordionSummary 
+              expandIcon={<ExpandMore />}
+              sx={{ 
+                bgcolor: '#fafafa',
+                borderRadius: '8px',
+                '&.Mui-expanded': { borderRadius: '8px 8px 0 0' }
+              }}
+            >
+              <Box display="flex" alignItems="center" gap={2} width="100%">
+                <Typography fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                  {title}
+                </Typography>
+                <Chip 
+                  label={`${items.length} ${items.length === 1 ? 'item' : 'items'}`} 
+                  size="small" 
+                  sx={{ 
+                    bgcolor: theme.palette.primary.main,
+                    color: 'white',
+                    fontWeight: 600
+                  }} 
+                />
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails sx={{ pt: 2 }}>
+              <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 2 }}>
+                {items.map((item) => (
+                  <Box 
+                    key={item._id} 
+                    sx={{ 
+                      position: 'relative', 
+                      width: 120, 
+                      height: 90,
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      border: '1px solid #e0e0e0',
+                      bgcolor: '#000'
+                    }}
+                  >
+                    {item.mediaType === 'video' ? (
+                      <Box display="flex" alignItems="center" justifyContent="center" height="100%">
+                        <PlayCircle sx={{ color: 'white', fontSize: 32 }} />
+                      </Box>
+                    ) : (
+                      <img
+                        src={item.url}
+                        alt={item.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    )}
+                    <Box sx={{ position: 'absolute', top: 4, right: 4, display: 'flex', gap: 0.5 }}>
+                      <MediaItemEditor
+                        mediaItem={item}
+                        isAdmin={isAdmin}
+                        onEdit={async (mediaItem, newData) => {
+                          await updateMediaItem(phases[currentPhaseIndex].phaseNumber, mediaItem._id, newData)
+                        }}
+                        onDelete={async (mediaItemId) => {
+                          await deleteMediaItem(phases[currentPhaseIndex].phaseNumber, mediaItemId)
+                        }}
+                        uploadService={uploadService}
+                        config={{ iconSize: 16, buttonSize: 'small' }}
+                      />
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+              <Button
+                variant="outlined"
+                color="error"
+                size="small"
+                startIcon={<Delete />}
+                onClick={() => handleDeleteGroup(items)}
+                sx={{ textTransform: 'none', borderRadius: 2 }}
+              >
+                Delete entire group ({items.length} items)
+              </Button>
+            </AccordionDetails>
+          </Accordion>
+        ))
+      )}
+    </Box>
+  </DialogContent>
+</Dialog>
     </Box>
   )
 }

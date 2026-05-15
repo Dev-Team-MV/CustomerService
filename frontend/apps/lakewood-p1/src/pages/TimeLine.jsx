@@ -244,25 +244,8 @@ const TimeLine = () => {
   // --- DataTable columns ---
 const columns = [
   {
-    field: 'createdAt',
-    headerName: t('date', 'Date'),
-    width: 120,
-    renderCell: ({ row }) => (
-      <Typography
-        variant="body2"
-        sx={{
-          color: '#706f6f',
-          fontFamily: '"Poppins", sans-serif',
-          fontWeight: 500
-        }}
-      >
-        {new Date(row.createdAt).toLocaleDateString()}
-      </Typography>
-    )
-  },
-  {
     field: 'title',
-    headerName: t('title', 'Title'),
+    headerName: t('date', 'Date'),
     width: 180,
     renderCell: ({ row }) => (
       <Typography

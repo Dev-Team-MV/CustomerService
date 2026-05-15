@@ -19,15 +19,15 @@
   "noMediaYet": "Aún no se han subido imágenes para esta fase",
   "defaultMediaTitle": "Fase {{phase}} - {{type}} {{index}}",
   "phases": {
-    "sitePreparation": "Preparación del Sitio",
-    "foundation": "Cimentación",
-    "framing": "Estructura",
-    "roofing": "Techado",
-    "mepInstallation": "Instalación MEP",
-    "insulationDrywall": "Aislamiento y Drywall",
-    "interiorFinishes": "Acabados Interiores",
-    "exteriorFinishes": "Acabados Exteriores",
-    "finalInspection": "Inspección Final"
+    "sitePreparation": "Preparación del sitio y comienzo de obra",
+    "foundation": "Cimentación, estructura y ventanas",
+    "framing": "Revestimiento exterior e instalación de techado",
+    "roofing": "Inicio de obra gruesa de MEP",
+    "mepInstallation": "Trabajo de drywall y pintura",
+    "insulationDrywall": "Pisos y carpintería",
+    "interiorFinishes": "Cocina y baños",
+    "exteriorFinishes": "Acabados interiores, entrada, electrodomésticos y jardinería",
+    "finalInspection": "Inspecciones (Retrasos)"
   },
   "alerts": {
     "selectMedia": "Por favor selecciona al menos una imagen o video",

@@ -246,21 +246,25 @@ export const useModels = () => {
 
 
   // Fetch facades
-  const fetchFacades = useCallback(async () => {
-    try {
-      const response = await api.get("/facades");
-      const validFacades = response.data.filter((facade) => {
-        if (!facade.model) {
-          console.warn("⚠️ Facade without model found:", facade._id);
-          return false;
-        }
-        return true;
-      });
-      setFacades(validFacades);
-    } catch (error) {
-      console.error("Error fetching facades:", error);
-    }
-  }, []);
+// Fetch facades
+const fetchFacades = useCallback(async (projectId = null) => {
+  try {
+    if (projectId) setCurrentProjectId(projectId);
+    const idToUse = projectId || currentProjectId;
+    const params = idToUse ? { projectId: idToUse } : {};
+    const response = await api.get("/facades", { params });
+    const validFacades = response.data.filter((facade) => {
+      if (!facade.model) {
+        console.warn("⚠️ Facade without model found:", facade._id);
+        return false;
+      }
+      return true;
+    });
+    setFacades(validFacades);
+  } catch (error) {
+    console.error("Error fetching facades:", error);
+  }
+}, [currentProjectId]);
 
   // Fetch projects
   const fetchProjects = useCallback(async () => {
@@ -276,9 +280,11 @@ export const useModels = () => {
   }, []);
 
 useEffect(() => {
-  // No llamar fetchModels aquí automáticamente
-  // Se llamará desde el componente con el projectId
-  fetchFacades();
+  // Obtener projectId del env
+  const projectId = import.meta.env.VITE_PROJECT_ID;
+  if (projectId) {
+    fetchFacades(projectId);
+  }
 }, [fetchFacades]);
 
   // Submit model (create/update)
@@ -388,31 +394,32 @@ useEffect(() => {
   };
 
   // Facade handlers
-  const handleSubmitFacade = async (facadeFormData, selectedFacade, onClose) => {
-    try {
-      if (selectedFacade) {
-        await api.put(`/facades/${selectedFacade._id}`, facadeFormData);
-      } else {
-        await api.post("/facades", facadeFormData);
-      }
-      await fetchFacades();
-      if (onClose) onClose();
-      return true;
-    } catch (error) {
-      console.error("Error saving facade:", error);
-      throw error;
+// Facade handlers
+const handleSubmitFacade = async (facadeFormData, selectedFacade, onClose) => {
+  try {
+    if (selectedFacade) {
+      await api.put(`/facades/${selectedFacade._id}`, facadeFormData);
+    } else {
+      await api.post("/facades", facadeFormData);
     }
-  };
+    await fetchFacades(currentProjectId); // ✅ CAMBIO AQUÍ
+    if (onClose) onClose();
+    return true;
+  } catch (error) {
+    console.error("Error saving facade:", error);
+    throw error;
+  }
+};
 
-  const handleDeleteFacade = async (id) => {
-    try {
-      await api.delete(`/facades/${id}`);
-      await fetchFacades();
-    } catch (error) {
-      console.error("Error deleting facade:", error);
-      throw error;
-    }
-  };
+const handleDeleteFacade = async (id) => {
+  try {
+    await api.delete(`/facades/${id}`);
+    await fetchFacades(currentProjectId); // ✅ CAMBIO AQUÍ
+  } catch (error) {
+    console.error("Error deleting facade:", error);
+    throw error;
+  }
+};
 
   // Get facades for a model
   const getModelFacades = useCallback((modelId) => {

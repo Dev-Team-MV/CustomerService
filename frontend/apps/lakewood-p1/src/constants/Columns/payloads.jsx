@@ -41,9 +41,7 @@ export const usePayloadColumns = ({
         <Typography variant="body2" sx={{ fontWeight: 600, color: '#1a1a1a', fontFamily: '"Poppins", sans-serif' }}>
           Unit {row.property?.lot?.number || 'N/A'}
         </Typography>
-        <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>
-          ID: #{row.property?.model?.modelNumber || 'N/A'}
-        </Typography>
+
       </Box>
     )
   },
