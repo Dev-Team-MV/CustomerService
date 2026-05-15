@@ -167,22 +167,22 @@ const EditPropertyModal = ({
         </Select>
       </FormControl>
 
-      <FormControl fullWidth sx={fieldSx}>
-        <InputLabel>Facade</InputLabel>
-        <Select
-          label="Facade"
-          value={values.facade || ''}
-          onChange={e => onChange({ ...values, facade: e.target.value })}
-          sx={selectSx}
-          startAdornment={<Storefront sx={{ color: '#8CA551', mr: 1, fontSize: 20 }} />}
-        >
-          {facades.map(facade => (
-            <MenuItem key={facade._id} value={facade._id} sx={{ fontFamily: '"Poppins", sans-serif' }}>
-              {facade.title}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+<FormControl fullWidth sx={fieldSx}>
+  <InputLabel>Facade</InputLabel>
+  <Select
+    label="Facade"
+    value={values.facade || ''}
+    onChange={e => onChange({ ...values, facade: e.target.value })}
+    sx={selectSx}
+    startAdornment={<Storefront sx={{ color: '#8CA551', mr: 1, fontSize: 20 }} />}
+  >
+    {facades.map(deck => (
+      <MenuItem key={deck._id} value={deck._id} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+        {deck.name} {deck.price > 0 ? `— $${deck.price.toLocaleString()}` : '— Included'}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
 
       <FormControl fullWidth sx={fieldSx}>
         <InputLabel>Owners</InputLabel>

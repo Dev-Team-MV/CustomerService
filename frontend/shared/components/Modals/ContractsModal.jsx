@@ -106,6 +106,26 @@ const ContractsModal = ({
               {error}
             </Alert>
           )}
+              {/* ✅ NUEVO: Mensaje informativo cuando no hay contratos */}
+    {!error && getExistingCount() === 0 && getPendingCount() === 0 && (
+      <Alert
+        severity="info"
+        sx={{
+          mb: 3,
+          borderRadius: 2,
+          fontFamily: '"Poppins", sans-serif',
+          bgcolor: theme.palette.info.light + '14',
+          border: `1px solid ${theme.palette.info.main}4D`
+        }}
+      >
+        <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif', mb: 0.5 }}>
+          {t('contracts:noContractsYet', 'No contracts uploaded yet')}
+        </Typography>
+        <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+          {t('contracts:startUploading', 'Start by selecting and uploading the required documents below')}
+        </Typography>
+      </Alert>
+    )}
 
           {/* PROGRESS INDICATOR */}
           <Paper

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useCallback } from 'react'
+import { useEffect, useMemo, useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -65,13 +65,58 @@ const { data: properties, loading, refetch } = useFetch(
     openEdit, closeEdit
   } = usePropertyModals()
 
-  // Facades dependientes del modelo seleccionado en edición
-  const { data: facades } = useFetch(
-    useCallback(() => {
-      if (!editValues.model) return Promise.resolve([])
-      return propertyService.getFacades(editValues.model)
-    }, [editValues.model])
-  )
+// Facades del modelo seleccionado - usar useState + useEffect
+const [facades, setFacades] = useState([])
+const [loadingFacades, setLoadingFacades] = useState(false)
+
+useEffect(() => {
+  const loadFacades = async () => {
+    console.log('🔍 useEffect ejecutado:', { 
+      modalOpen: editModal.open, 
+      model: editValues.model 
+    })
+    
+    if (!editModal.open || !editValues.model) {
+      console.log('⚠️ Modal cerrado o sin modelo, limpiando facades')
+      setFacades([])
+      return
+    }
+    
+    console.log('🎭 Loading facades for model:', editValues.model)
+    setLoadingFacades(true)
+    
+    try {
+      const facadesArray = await propertyService.getFacadesByModel(editValues.model)
+      console.log('✅ Facades loaded:', facadesArray)
+      
+      // Extraer todos los decks de todas las facades
+      const allDecks = []
+      facadesArray.forEach(facade => {
+        if (facade.decks && Array.isArray(facade.decks)) {
+          facade.decks.forEach(deck => {
+            allDecks.push({
+              ...deck,
+              facadeId: facade._id,
+              facadeTitle: facade.title
+            })
+          })
+        }
+      })
+      
+      console.log('🎨 Decks extracted:', allDecks)
+      setFacades(allDecks)
+    } catch (error) {
+      console.error('❌ Error loading facades:', error)
+      setFacades([])
+    } finally {
+      setLoadingFacades(false)
+    }
+  }
+  
+  loadFacades()
+}, [editModal.open, editValues.model])
+
+console.log('🎯 Facades final para el select:', facades)
 
   // ── Handlers ──────────────────────────────────────────────
   const handleSaveEdit = useCallback(async () => {

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import {
-  Box, Paper, Typography, TextField, MenuItem, Collapse, Alert, Button, CircularProgress, Tooltip
+  Box, Paper, Typography, TextField, MenuItem, Collapse, Alert, Button, CircularProgress, Tooltip, Autocomplete
 } from '@mui/material'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
@@ -15,6 +15,7 @@ import { useResidents } from '@shared/hooks/useResidents'
 import { useTheme } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import CrossProjectResidentDialog from '@shared/components/Modals/CroosProjectsResidentDialog'
 
 const ResidentAsignment = ({ expanded, onToggle,onBack, facadeEnabled = true  }) => {
 const {
@@ -34,17 +35,28 @@ const {
   const navigate = useNavigate()
   const residentsProjectId = selectedProject || import.meta.env.VITE_PROJECT_ID
 
-  const {
-    users, loading,
-    openDialog, selectedUser, setSelectedUser, formData, setFormData,
-    handleOpenDialog, handleCloseDialog, handleSubmit,
-    handleFieldChange, handlePhoneChange, isFormValid,
-    e164Value, displayVal, isPhoneValid
-  } = useResidents(null)
-
+const {
+  users: projectUsers, loading,
+  openDialog, selectedUser, setSelectedUser, formData, setFormData,
+  handleOpenDialog, handleCloseDialog, handleSubmit,
+  handleFieldChange, handlePhoneChange, isFormValid,
+  e164Value, displayVal, isPhoneValid
+} = useResidents(residentsProjectId)
+ 
+// ✅ Estado para incluir usuarios cross-project
+const [crossProjectUsers, setCrossProjectUsers] = useState([])
+ 
+// ✅ Combinar usuarios del proyecto + cross-project
+const users = useMemo(() => {
+  const allUsers = [...projectUsers, ...crossProjectUsers]
+  return Array.from(new Map(allUsers.map(u => [u._id, u])).values())
+}, [projectUsers, crossProjectUsers])
+ 
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
+  const [openCrossProjectDialog, setOpenCrossProjectDialog] = useState(false) // ✅ NUEVO
+
 
   useEffect(() => {
     if (expanded && (!projects || projects.length === 0)) refreshProjects?.()
@@ -234,57 +246,45 @@ if (isHouse) {
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
-          {/* SELECT PROJECT - Solo para apartments */}
-          
-            <TextField
-              fullWidth
-              select
-              label={t('quote:project', 'Project')}
-              value={selectedProject || ''}
-              onChange={(e) => setSelectedProject(e.target.value)}
-              helperText={t('quote:selectProject', 'Select the project this apartment belongs to')}
-              disabled={loadingProjects}
-              sx={{ mb: 2 }}
-            >
-              {loadingProjects ? (
-                <MenuItem disabled>{t('quote:loadingProjects', 'Loading projects...')}</MenuItem>
-              ) : projects?.length === 0 ? (
-                <MenuItem disabled>{t('quote:noProjects', 'No projects available')}</MenuItem>
-              ) : (
-                projects.map((project) => (
-                  <MenuItem key={project._id} value={project._id}>
-                    {project.name}
-                  </MenuItem>
-                ))
-              )}
-            </TextField>
-          
-
-          {/* SELECT USER */}
+          {/* SELECT USER - CON AUTOCOMPLETE */}
           <Box display="flex" alignItems="flex-start" gap={2} mb={2}>
-            <TextField
-              fullWidth select
-              label={t('quote:selectResident', 'Select Resident')}
-              value={selectedUser?._id || ''}
-              onChange={e => setSelectedUser(users.find(u => u._id === e.target.value))}
-              helperText={isHouse 
-                ? 'Elige un residente existente para asignar esta casa'
-                : t('quote:chooseResident', 'Choose an existing resident to assign this apartment')}
+            <Autocomplete
+              fullWidth
+              options={users}
+              getOptionLabel={(option) => 
+                `${option.firstName} ${option.lastName} - ${option.email}${option.phoneNumber ? ` 📱 ${option.phoneNumber}` : ''}`
+              }
+              value={selectedUser || null}
+              onChange={(event, newValue) => setSelectedUser(newValue)}
               disabled={loading}
-            >
-              {loading ? (
-                <MenuItem disabled>{t('quote:loadingUsers', 'Loading users...')}</MenuItem>
-              ) : users?.length === 0 ? (
-                <MenuItem disabled>{t('quote:noUsers', 'No users available')}</MenuItem>
-              ) : (
-                users.map((user) => (
-                  <MenuItem key={user._id} value={user._id}>
-                    {user.firstName} {user.lastName} - {user.email}
-                    {user.phoneNumber && ` 📱 ${user.phoneNumber}`}
-                  </MenuItem>
-                ))
+              loading={loading}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={t('quote:selectResident', 'Select Resident')}
+                  helperText={isHouse 
+                    ? 'Elige un residente existente para asignar esta casa'
+                    : t('quote:chooseResident', 'Choose an existing resident to assign this apartment')}
+                  placeholder={t('quote:searchByNameOrEmail', 'Search by name or email...')}
+                />
               )}
-            </TextField>
+              filterOptions={(options, state) => {
+                const inputValue = state.inputValue.toLowerCase()
+                return options.filter(option =>
+                  `${option.firstName} ${option.lastName}`.toLowerCase().includes(inputValue) ||
+                  option.email.toLowerCase().includes(inputValue) ||
+                  (option.phoneNumber && option.phoneNumber.includes(inputValue))
+                )
+              }}
+              noOptionsText={t('quote:noUsersFound', 'No users found')}
+              isOptionEqualToValue={(option, value) => option._id === value?._id}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderColor: theme.palette.secondary.main
+                }
+              }}
+            />
+
             <Tooltip title={t('quote:addNewResident', 'Add New Resident')}>
               <Button
                 variant="outlined"
@@ -300,7 +300,25 @@ if (isHouse) {
                 <PersonAddIcon />
               </Button>
             </Tooltip>
+
+            {/* ✅ Botón cross-project */}
+            <Tooltip title="Seleccionar de otro proyecto">
+              <Button
+                variant="outlined"
+                onClick={() => setOpenCrossProjectDialog(true)}
+                sx={{
+                  minWidth: 48, height: '56px', borderRadius: 3, px: 0,
+                  bgcolor: theme.palette.background.paper,
+                  border: `2px solid ${theme.palette.text.secondary}`,
+                  color: theme.palette.text.secondary,
+                  alignSelf: 'flex-start',
+                  '&:hover': { bgcolor: theme.palette.text.secondary + '14' }
+                }}>
+                <PersonIcon />
+              </Button>
+            </Tooltip>
           </Box>
+
 
           {/* SUMMARY - Adaptado según tipo */}
 <Box sx={{ mb: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 2 }}>
@@ -381,6 +399,22 @@ if (isHouse) {
             displayVal={displayVal}
             isPhoneValid={isPhoneValid}
           />
+
+{/* ✅ NUEVO: Modal cross-project */}
+<CrossProjectResidentDialog
+  open={openCrossProjectDialog}
+  onClose={() => setOpenCrossProjectDialog(false)}
+  currentProjectId={residentsProjectId}
+  onSelectUser={(user) => {
+    // ✅ Agregar usuario a la lista de cross-project users
+    setCrossProjectUsers(prev => {
+      const exists = prev.find(u => u._id === user._id)
+      return exists ? prev : [...prev, user]
+    })
+    setSelectedUser(user)
+    setOpenCrossProjectDialog(false)
+  }}
+/>
         </Box>
       </Collapse>
     </Paper>
