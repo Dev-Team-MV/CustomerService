@@ -37,7 +37,41 @@ const app = express()
 
 connectDB()
 
-app.use(cors())
+const exactCorsOrigins = [
+  process.env.FRONTEND_URL
+].filter(Boolean)
+
+const extraCorsOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean)
+
+const allowedCorsOrigins = new Set([...exactCorsOrigins, ...extraCorsOrigins])
+
+const allowedOriginPatterns = [
+  /^https?:\/\/localhost(?::\d+)?$/i,
+  /^https:\/\/([a-z0-9-]+\.)?michelangelodelvalle\.com$/i
+]
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Permitir requests sin Origin (health checks, curl, server-to-server)
+    if (!origin) return callback(null, true)
+
+    if (allowedCorsOrigins.has(origin)) return callback(null, true)
+
+    const matchesPattern = allowedOriginPatterns.some((pattern) => pattern.test(origin))
+    if (matchesPattern) return callback(null, true)
+
+    return callback(new Error(`CORS blocked for origin: ${origin}`))
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Authorization', 'Content-Type', 'X-Requested-With'],
+  optionsSuccessStatus: 204
+}
+
+app.use(cors(corsOptions))
+app.options('*', cors(corsOptions))
 app.use(express.json({ limit: '100mb' })) // Increase JSON body size limit
 app.use(express.urlencoded({ extended: true, limit: '100mb' })) // Increase URL-encoded body size limit
 app.use(requestTimingMiddleware)
