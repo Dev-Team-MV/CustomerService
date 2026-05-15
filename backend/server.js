@@ -30,6 +30,7 @@ import crmRoutes from './routes/crmRoutes.js'
 import backupRoutes from './routes/backupRoutes.js'
 import masterPlanRoutes from './routes/masterPlanRoutes.js'
 import parkingSpotRoutes from './routes/parkingSpotRoutes.js'
+import activityRoutes from './routes/activityRoutes.js'
 import { startBackupScheduler } from './services/backupScheduler.js'
 import { requestTimingMiddleware } from './middleware/requestTimingMiddleware.js'
 
@@ -100,6 +101,7 @@ app.use('/api/crm', crmRoutes)
 app.use('/api/backup', backupRoutes)
 app.use('/api/master-plan', masterPlanRoutes)
 app.use('/api/parking-spots', parkingSpotRoutes)
+app.use('/api/activities', activityRoutes)
 
 // Start automatic GCS backup scheduler (if enabled)
 startBackupScheduler()
