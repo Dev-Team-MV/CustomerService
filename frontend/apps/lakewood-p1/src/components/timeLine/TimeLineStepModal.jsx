@@ -120,7 +120,7 @@ const TimeLineStepModal = ({
 
         {/* TITLE */}
         <TextField
-          label={t('title', 'Title')}
+          label={t('date', 'Date')}
           value={form.title}
           onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
           fullWidth autoFocus variant="outlined"

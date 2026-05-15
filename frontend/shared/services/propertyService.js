@@ -67,16 +67,19 @@ getModels: async (projectId) => {
     }
   },
 
-  getFacades: async (modelId = null) => {
-    try {
-      const url = modelId ? `/facades?model=${modelId}` : '/facades'
-      const response = await api.get(url)
-      return Array.isArray(response.data) ? response.data : []
-    } catch (error) {
-      console.error('Error fetching facades:', error)
-      return []
-    }
-  },
+getFacades: async (projectId = null, modelId = null) => {
+  try {
+    const params = {};
+    if (projectId) params.projectId = projectId;
+    if (modelId) params.model = modelId;
+    
+    const response = await api.get('/facades', { params });
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    console.error('Error fetching facades:', error);
+    return []
+  }
+},
 
   getLotById: async (id) => {
     try {

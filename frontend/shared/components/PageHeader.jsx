@@ -3,17 +3,19 @@ import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
 
+// Modificar PageHeader.jsx
+
 const PageHeader = ({
   icon: Icon,
   title,
   subtitle,
   actionButton,
+  secondaryButton, // ✅ Nueva prop
   animateIcon = true,
-  gradientColors, // ahora opcional, si no se pasa usa theme
+  gradientColors,
 }) => {
   const theme = useTheme();
 
-  // Gradientes y colores por defecto desde el theme
   const defaultGradient = [
     theme.palette.primary.main,
     theme.palette.secondary.main,
@@ -50,6 +52,7 @@ const PageHeader = ({
       >
         <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
           <Box display="flex" alignItems="center" gap={2}>
+            {/* Icon section - sin cambios */}
             {animateIcon ? (
               <motion.div
                 animate={{
@@ -122,63 +125,99 @@ const PageHeader = ({
             </Box>
           </Box>
 
-          {actionButton && (
-            <Tooltip title={actionButton.tooltip || ''} placement="left">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  variant="contained"
-                  onClick={actionButton.onClick}
-                  startIcon={actionButton.icon}
-                  sx={{
-                    borderRadius: 3,
-                    bgcolor: theme.palette.primary.main,
-                    color: theme.palette.primary.contrastText,
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    letterSpacing: '1px',
-                    fontFamily: '"Poppins", sans-serif',
-                    px: 3,
-                    py: 1.5,
-                    boxShadow: `0 4px 12px ${theme.palette.primary.main}40`,
-                    position: 'relative',
-                    overflow: 'hidden',
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: 0,
-                      left: '-100%',
-                      width: '100%',
-                      height: '100%',
-                      bgcolor: theme.palette.secondary.main,
-                      transition: 'left 0.4s ease',
-                      zIndex: 0
-                    },
-                    '&:hover': {
-                      bgcolor: theme.palette.primary.dark,
-                      boxShadow: `0 8px 20px ${theme.palette.primary.main}55`,
-                      '&::before': {
-                        left: 0
-                      },
-                      '& .MuiButton-startIcon': {
-                        color: theme.palette.primary.contrastText
-                      }
-                    },
-                    '& .MuiButton-startIcon': {
-                      position: 'relative',
-                      zIndex: 1,
-                      color: theme.palette.primary.contrastText
-                    }
-                  }}
-                >
-                  <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
-                    {actionButton.label}
-                  </Box>
-                </Button>
-              </motion.div>
-            </Tooltip>
+          {/* ✅ Sección de botones - Modificada para soportar múltiples botones */}
+          {(actionButton || secondaryButton) && (
+            <Box display="flex" gap={2} flexWrap="wrap">
+              {/* Botón secundario (ej: descarga) */}
+              {secondaryButton && (
+                <Tooltip title={secondaryButton.tooltip || ''} placement="left">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      variant={secondaryButton.variant || 'outlined'}
+                      onClick={secondaryButton.onClick}
+                      startIcon={secondaryButton.icon}
+                      disabled={secondaryButton.disabled}
+                      sx={{
+                        borderRadius: 3,
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        letterSpacing: '0.5px',
+                        fontFamily: '"Poppins", sans-serif',
+                        px: 3,
+                        py: 1.5,
+                        minWidth: 160,
+                        ...(secondaryButton.sx || {})
+                      }}
+                    >
+                      {secondaryButton.label}
+                    </Button>
+                  </motion.div>
+                </Tooltip>
+              )}
+
+              {/* Botón principal (action) */}
+              {actionButton && (
+                <Tooltip title={actionButton.tooltip || ''} placement="left">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      variant="contained"
+                      onClick={actionButton.onClick}
+                      startIcon={actionButton.icon}
+                      sx={{
+                        borderRadius: 3,
+                        bgcolor: theme.palette.primary.main,
+                        color: theme.palette.primary.contrastText,
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        letterSpacing: '1px',
+                        fontFamily: '"Poppins", sans-serif',
+                        px: 3,
+                        py: 1.5,
+                        boxShadow: `0 4px 12px ${theme.palette.primary.main}40`,
+                        position: 'relative',
+                        overflow: 'hidden',
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: 0,
+                          left: '-100%',
+                          width: '100%',
+                          height: '100%',
+                          bgcolor: theme.palette.secondary.main,
+                          transition: 'left 0.4s ease',
+                          zIndex: 0
+                        },
+                        '&:hover': {
+                          bgcolor: theme.palette.primary.dark,
+                          boxShadow: `0 8px 20px ${theme.palette.primary.main}55`,
+                          '&::before': {
+                            left: 0
+                          },
+                          '& .MuiButton-startIcon': {
+                            color: theme.palette.primary.contrastText
+                          }
+                        },
+                        '& .MuiButton-startIcon': {
+                          position: 'relative',
+                          zIndex: 1,
+                          color: theme.palette.primary.contrastText
+                        }
+                      }}
+                    >
+                      <Box component="span" sx={{ position: 'relative', zIndex: 1 }}>
+                        {actionButton.label}
+                      </Box>
+                    </Button>
+                  </motion.div>
+                </Tooltip>
+              )}
+            </Box>
           )}
         </Box>
       </Paper>
@@ -195,6 +234,15 @@ PageHeader.propTypes = {
     onClick: PropTypes.func.isRequired,
     icon: PropTypes.element,
     tooltip: PropTypes.string
+  }),
+  secondaryButton: PropTypes.shape({
+    label: PropTypes.string.isRequired,
+    onClick: PropTypes.func.isRequired,
+    icon: PropTypes.element,
+    tooltip: PropTypes.string,
+    variant: PropTypes.string,
+    disabled: PropTypes.bool,
+    sx: PropTypes.object
   }),
   animateIcon: PropTypes.bool,
   gradientColors: PropTypes.arrayOf(PropTypes.string)

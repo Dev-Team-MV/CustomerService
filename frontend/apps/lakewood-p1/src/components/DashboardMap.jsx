@@ -203,27 +203,43 @@ const DashboardMap = () => {
 
   const handleTouchEnd = () => setIsDragging(false)
 
-  const handleLotHover = (event, lot) => {
-    isOverMarkerRef.current = true
-    
-    if (closeTimeoutRef.current) {
-      clearTimeout(closeTimeoutRef.current)
-      closeTimeoutRef.current = null
-    }
-
-    if (lot.status === 'sold' || lot.status === 'pending') {
-      const property = properties.find(p => p.lot?._id === lot._id || p.lot === lot._id)
-      if (property) {
-        const rect = event.currentTarget.getBoundingClientRect()
-        setPopupPosition({
-          x: rect.left + rect.width / 2,
-          y: rect.top
-        })
-        setSelectedProperty({ ...property, lot })
-        setShowPopup(true)
-      }
-    }
+const handleLotHover = (event, lot) => {
+  isOverMarkerRef.current = true
+  
+  if (closeTimeoutRef.current) {
+    clearTimeout(closeTimeoutRef.current)
+    closeTimeoutRef.current = null
   }
+
+  // ✅ Mostrar popUp para todos los status: sold, pending, y available
+  if (lot.status === 'sold' || lot.status === 'pending') {
+    const property = properties.find(p => p.lot?._id === lot._id || p.lot === lot._id)
+    if (property) {
+      const rect = event.currentTarget.getBoundingClientRect()
+      setPopupPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.top
+      })
+      setSelectedProperty({ ...property, lot })
+      setShowPopup(true)
+    }
+  } else if (lot.status === 'available') {
+    // ✅ NUEVO: Mostrar popUp para lotes available (sin propiedad asignada)
+    const rect = event.currentTarget.getBoundingClientRect()
+    setPopupPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.top
+    })
+    // Crear objeto con información del lote
+    setSelectedProperty({ 
+      lot,
+      status: 'available',
+      model: lot.model || null,
+      price: lot.price || 0
+    })
+    setShowPopup(true)
+  }
+}
 
   const handleLotLeave = () => {
     isOverMarkerRef.current = false
