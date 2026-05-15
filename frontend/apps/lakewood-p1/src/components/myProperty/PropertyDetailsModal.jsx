@@ -28,6 +28,9 @@ import { ConstructionPhasesContent } from '../ConstructionPhasesContent'
 import ModalWrapper from '../../constants/ModalWrapper'
 import PrimaryButton from '../../constants/PrimaryButton'
 
+import { Download } from '@mui/icons-material'
+import propertyService from '@shared/services/propertyService'
+ 
 import { usePayloads } from '@shared/hooks/usePayloads'
 import { usePayloadColumns } from '../../constants/Columns/payloads'
 
@@ -38,6 +41,9 @@ const PropertyDetailsModal = ({ open, onClose, property, isAdmin }) => {
   const [loading, setLoading] = useState(true)
   const [payloads, setPayloads] = useState([])
   const [loadingPayloads, setLoadingPayloads] = useState(false)
+
+  const [downloadingStatement, setDownloadingStatement] = useState(false)
+
 
   const MODEL_10_ID = "6977c7bbd1f24768968719de"
   const isModel10 = propertyDetails?.model?._id === MODEL_10_ID
@@ -130,6 +136,22 @@ const PropertyDetailsModal = ({ open, onClose, property, isAdmin }) => {
     fetchPayloads()
     fetchPropertyDetails()
   }
+
+  // Agregar handler para descargar estado de cuenta (después de handlePayloadSubmit, línea 133)
+const handleDownloadStatement = async () => {
+  try {
+    setDownloadingStatement(true)
+    await propertyService.downloadAccountStatementPdf(
+      property._id,
+      `statement-lot-${property.lot?.number || property._id}.pdf`
+    )
+  } catch (error) {
+    console.error('Error downloading statement:', error)
+    alert('Error downloading account statement: ' + error.message)
+  } finally {
+    setDownloadingStatement(false)
+  }
+}
 
   if (!property) return null
 
@@ -236,6 +258,25 @@ const PropertyDetailsModal = ({ open, onClose, property, isAdmin }) => {
         },
         icon: <AccountBalance />,
         tooltip: t('common:addNewPayment')
+      }}
+      secondaryButton={{
+        label: downloadingStatement ? 'Downloading...' : 'Download Statement',
+        onClick: handleDownloadStatement,
+        icon: downloadingStatement ? <CircularProgress size={16} sx={{ color: '#8CA551' }} /> : <Download />,
+        tooltip: 'Download property account statement PDF',
+        variant: 'outlined',
+        disabled: downloadingStatement,
+        sx: {
+          borderColor: '#8CA551',
+          color: '#8CA551',
+          '&:hover': {
+            borderColor: '#7a9447',
+            bgcolor: 'rgba(140, 165, 81, 0.08)'
+          },
+          '&:disabled': {
+            opacity: 0.6
+          }
+        }
       }}
       animateIcon={false}
       gradientColors={['#333F1F', '#8CA551', '#333F1F']}

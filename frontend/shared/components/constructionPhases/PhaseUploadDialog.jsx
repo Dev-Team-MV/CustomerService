@@ -138,11 +138,12 @@ const PhaseUploadDialog = ({
             type="number"
             label="Progress Added (%)"
             value={uploadForm.percentage}
-            onChange={(e) => {
-              const val = parseFloat(e.target.value) || 0
-              const clamped = Math.min(Math.max(0, val), maxAddable)
-              setUploadForm(prev => ({ ...prev, percentage: clamped }))
-            }}
+onChange={(e) => {
+  // ✅ Redondear cualquier valor decimal a entero
+  const val = Math.round(parseFloat(e.target.value)) || 0
+  const clamped = Math.min(Math.max(0, val), maxAddable)
+  setUploadForm(prev => ({ ...prev, percentage: clamped }))
+}}
             inputProps={{ min: 0, max: maxAddable, step: 1 }}
             helperText={
               <Box component="span" sx={{ display: 'flex', justifyContent: 'space-between' }}>
