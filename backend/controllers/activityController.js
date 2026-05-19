@@ -13,6 +13,24 @@ const parsePosition = (value) => {
 
 const dedupeObjectIds = (ids) => [...new Set(ids.map((id) => id.toString()))]
 
+const normalizeContact = (contact) => {
+  if (contact === undefined) return undefined
+  if (contact === null) return {}
+  if (typeof contact !== 'object' || Array.isArray(contact)) return null
+
+  const { user, name, phone, email } = contact
+  if (user && !isValidObjectId(user)) {
+    return null
+  }
+
+  return {
+    user: user || undefined,
+    name: typeof name === 'string' ? name.trim() : undefined,
+    phone: typeof phone === 'string' ? phone.trim() : undefined,
+    email: typeof email === 'string' ? email.trim().toLowerCase() : undefined
+  }
+}
+
 const normalizeRelatedProjects = (relatedProjects, projectIds) => {
   const source = relatedProjects ?? projectIds
   if (source === undefined) return undefined
@@ -40,13 +58,20 @@ const normalizeSubtasks = (subtasks) => {
       return null
     }
 
+    const normalizedContact = normalizeContact(item.contact)
+    if (normalizedContact === null) {
+      return null
+    }
+
     const completed = item.completed === true
     const parsedOrder = typeof item.order === 'number' ? parsePosition(item.order) : null
     normalized.push({
       title: item.title.trim(),
+      description: typeof item.description === 'string' ? item.description.trim() : '',
       completed,
       dueDate: item.dueDate || undefined,
       assignedTo: item.assignedTo || undefined,
+      contact: normalizedContact || {},
       order: parsedOrder === null ? index : parsedOrder,
       completedAt: completed ? (item.completedAt || new Date()) : undefined
     })
@@ -97,8 +122,10 @@ const populateActivityQuery = (query, options = {}) => {
   let q = query
     .populate('assignedTo', 'firstName lastName email')
     .populate('createdBy', 'firstName lastName email')
+    .populate('contact.user', 'firstName lastName email phoneNumber')
     .populate('relatedProjects', '_id name slug phase title')
     .populate('subtasks.assignedTo', 'firstName lastName email')
+    .populate('subtasks.contact.user', 'firstName lastName email phoneNumber')
     .populate('threads.createdBy', 'firstName lastName email')
 
   if (includeColumn) {
@@ -417,6 +444,7 @@ export const createActivity = async (req, res) => {
       priority,
       dueDate,
       assignedTo,
+      contact,
       tags,
       relatedProjects,
       projectIds,
@@ -452,6 +480,10 @@ export const createActivity = async (req, res) => {
     if (assignedTo && !isValidObjectId(assignedTo)) {
       return res.status(400).json({ message: 'assignedTo must be a valid user id' })
     }
+    const normalizedContact = normalizeContact(contact)
+    if (normalizedContact === null) {
+      return res.status(400).json({ message: 'contact must be a valid contact object' })
+    }
 
     const normalizedRelatedProjects = normalizeRelatedProjects(relatedProjects, projectIds)
     if (normalizedRelatedProjects === null) {
@@ -471,6 +503,7 @@ export const createActivity = async (req, res) => {
       priority: priority || 'medium',
       dueDate: dueDate || undefined,
       assignedTo: assignedTo || undefined,
+      contact: normalizedContact || {},
       createdBy: req.user._id,
       tags: Array.isArray(tags) ? tags : [],
       relatedProjects: normalizedRelatedProjects || [],
@@ -508,6 +541,7 @@ export const updateActivity = async (req, res) => {
       priority,
       dueDate,
       assignedTo,
+      contact,
       tags,
       relatedProjects,
       projectIds,
@@ -523,6 +557,13 @@ export const updateActivity = async (req, res) => {
         return res.status(400).json({ message: 'assignedTo must be a valid user id' })
       }
       activity.assignedTo = assignedTo || undefined
+    }
+    const normalizedContact = normalizeContact(contact)
+    if (normalizedContact === null) {
+      return res.status(400).json({ message: 'contact must be a valid contact object' })
+    }
+    if (normalizedContact !== undefined) {
+      activity.contact = normalizedContact
     }
     if (tags !== undefined) activity.tags = Array.isArray(tags) ? tags : []
 
@@ -633,7 +674,7 @@ export const deleteActivity = async (req, res) => {
 export const addActivitySubtask = async (req, res) => {
   try {
     const { id } = req.params
-    const { title, assignedTo, dueDate, completed } = req.body
+    const { title, description, assignedTo, dueDate, completed, contact } = req.body
 
     if (!isValidObjectId(id)) {
       return res.status(400).json({ message: 'Valid activity id is required' })
@@ -644,6 +685,10 @@ export const addActivitySubtask = async (req, res) => {
     if (assignedTo && !isValidObjectId(assignedTo)) {
       return res.status(400).json({ message: 'assignedTo must be a valid user id' })
     }
+    const normalizedContact = normalizeContact(contact)
+    if (normalizedContact === null) {
+      return res.status(400).json({ message: 'contact must be a valid contact object' })
+    }
 
     const activity = await Activity.findById(id)
     if (!activity) {
@@ -652,7 +697,9 @@ export const addActivitySubtask = async (req, res) => {
 
     const subtask = {
       title: title.trim(),
+      description: typeof description === 'string' ? description.trim() : '',
       assignedTo: assignedTo || undefined,
+      contact: normalizedContact || {},
       dueDate: dueDate || undefined,
       completed: completed === true,
       completedAt: completed === true ? new Date() : undefined,
@@ -672,13 +719,17 @@ export const addActivitySubtask = async (req, res) => {
 export const updateActivitySubtask = async (req, res) => {
   try {
     const { id, subtaskId } = req.params
-    const { title, assignedTo, dueDate, completed, order } = req.body
+    const { title, description, assignedTo, dueDate, completed, order, contact } = req.body
 
     if (!isValidObjectId(id) || !isValidObjectId(subtaskId)) {
       return res.status(400).json({ message: 'Valid activity id and subtask id are required' })
     }
     if (assignedTo && !isValidObjectId(assignedTo)) {
       return res.status(400).json({ message: 'assignedTo must be a valid user id' })
+    }
+    const normalizedContact = normalizeContact(contact)
+    if (normalizedContact === null) {
+      return res.status(400).json({ message: 'contact must be a valid contact object' })
     }
 
     const activity = await Activity.findById(id)
@@ -697,7 +748,11 @@ export const updateActivitySubtask = async (req, res) => {
       }
       subtask.title = title.trim()
     }
+    if (description !== undefined) {
+      subtask.description = typeof description === 'string' ? description.trim() : ''
+    }
     if (assignedTo !== undefined) subtask.assignedTo = assignedTo || undefined
+    if (normalizedContact !== undefined) subtask.contact = normalizedContact
     if (dueDate !== undefined) subtask.dueDate = dueDate || undefined
     if (completed !== undefined) {
       const isCompleted = completed === true

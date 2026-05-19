@@ -1,11 +1,39 @@
 import mongoose from 'mongoose'
 
+const activityContactSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    name: {
+      type: String,
+      trim: true
+    },
+    phone: {
+      type: String,
+      trim: true
+    },
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true
+    }
+  },
+  { _id: false }
+)
+
 const activitySubtaskSchema = new mongoose.Schema(
   {
     title: {
       type: String,
       required: [true, 'Subtask title is required'],
       trim: true
+    },
+    description: {
+      type: String,
+      trim: true,
+      default: ''
     },
     completed: {
       type: Boolean,
@@ -17,6 +45,10 @@ const activitySubtaskSchema = new mongoose.Schema(
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
+    },
+    contact: {
+      type: activityContactSchema,
+      default: () => ({})
     },
     order: {
       type: Number,
@@ -97,6 +129,10 @@ const activitySchema = new mongoose.Schema(
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
+    },
+    contact: {
+      type: activityContactSchema,
+      default: () => ({})
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

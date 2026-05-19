@@ -242,6 +242,13 @@ router.get('/board', protect, getActivityBoard)
  *                 type: string
  *                 format: date-time
  *               assignedTo: { type: string }
+ *               contact:
+ *                 type: object
+ *                 properties:
+ *                   user: { type: string, description: User ID registrado }
+ *                   name: { type: string }
+ *                   phone: { type: string }
+ *                   email: { type: string }
  *               tags:
  *                 type: array
  *                 items: { type: string }
@@ -264,6 +271,14 @@ router.get('/board', protect, getActivityBoard)
  *                       type: string
  *                       format: date-time
  *                     assignedTo: { type: string }
+ *                     contact:
+ *                       type: object
+ *                       properties:
+ *                         user: { type: string }
+ *                         name: { type: string }
+ *                         phone: { type: string }
+ *                         email: { type: string }
+ *                     description: { type: string }
  *                     order: { type: number }
  *           example:
  *             title: Confirmar firma de contrato
@@ -273,6 +288,11 @@ router.get('/board', protect, getActivityBoard)
  *             priority: high
  *             dueDate: 2026-05-20T17:00:00.000Z
  *             assignedTo: 6648e3df9a9ed2f35f1234ab
+ *             contact:
+ *               user: 6648e3df9a9ed2f35f1234ab
+ *               name: Carlos Cardona
+ *               phone: "+573001112233"
+ *               email: carlos@demo.com
  *             tags:
  *               - legal
  *               - onboarding
@@ -281,10 +301,16 @@ router.get('/board', protect, getActivityBoard)
  *               - 6650f1a2a47f4b9f7296f1ac
  *             subtasks:
  *               - title: Validar documentos del cliente
+ *                 description: Revisar cedula y formulario firmado
  *                 completed: false
  *               - title: Coordinar cita con notaria
+ *                 description: Ajustar fecha con agenda del cliente
  *                 dueDate: 2026-05-19T16:00:00.000Z
  *                 assignedTo: 6648e3df9a9ed2f35f1234ab
+ *                 contact:
+ *                   name: Laura Perez
+ *                   phone: "+573102223344"
+ *                   email: laura@mail.com
  *     responses:
  *       201:
  *         description: Activity created
@@ -343,6 +369,13 @@ router
  *                 type: string
  *                 format: date-time
  *               assignedTo: { type: string }
+ *               contact:
+ *                 type: object
+ *                 properties:
+ *                   user: { type: string, description: User ID registrado }
+ *                   name: { type: string }
+ *                   phone: { type: string }
+ *                   email: { type: string }
  *               tags:
  *                 type: array
  *                 items: { type: string }
@@ -365,6 +398,14 @@ router
  *                       type: string
  *                       format: date-time
  *                     assignedTo: { type: string }
+ *                     contact:
+ *                       type: object
+ *                       properties:
+ *                         user: { type: string }
+ *                         name: { type: string }
+ *                         phone: { type: string }
+ *                         email: { type: string }
+ *                     description: { type: string }
  *                     order: { type: number }
  *           example:
  *             title: Confirmar firma con notaria
@@ -374,6 +415,10 @@ router
  *             priority: urgent
  *             dueDate: 2026-05-21T14:30:00.000Z
  *             assignedTo: 6648e3df9a9ed2f35f1234ab
+ *             contact:
+ *               name: Contacto externo notaria
+ *               phone: "+573209876543"
+ *               email: notaria@mail.com
  *             tags:
  *               - legal
  *               - follow-up
@@ -381,8 +426,10 @@ router
  *               - 6650f1a2a47f4b9f7296f1ac
  *             subtasks:
  *               - title: Enviar recordatorio por WhatsApp
+ *                 description: Mensaje 24h antes de la cita
  *                 completed: true
  *               - title: Cerrar seguimiento
+ *                 description: Marcar negocio en CRM
  *                 completed: false
  *     responses:
  *       200:
@@ -467,15 +514,29 @@ router.patch('/:id/move', protect, admin, moveActivity)
  *             required: [title]
  *             properties:
  *               title: { type: string }
+ *               description: { type: string }
  *               completed: { type: boolean }
  *               dueDate:
  *                 type: string
  *                 format: date-time
  *               assignedTo: { type: string }
+ *               contact:
+ *                 type: object
+ *                 properties:
+ *                   user: { type: string, description: User ID registrado }
+ *                   name: { type: string }
+ *                   phone: { type: string }
+ *                   email: { type: string }
  *           example:
  *             title: Confirmar disponibilidad del cliente
+ *             description: Llamar y definir horario final
  *             dueDate: 2026-05-21T14:00:00.000Z
  *             assignedTo: 6648e3df9a9ed2f35f1234ab
+ *             contact:
+ *               user: 6648e3df9a9ed2f35f1234ab
+ *               name: Carlos Cardona
+ *               phone: "+573001112233"
+ *               email: carlos@demo.com
  *     responses:
  *       201:
  *         description: Subtask added
@@ -508,15 +569,28 @@ router.post('/:id/subtasks', protect, admin, addActivitySubtask)
  *             type: object
  *             properties:
  *               title: { type: string }
+ *               description: { type: string }
  *               completed: { type: boolean }
  *               dueDate:
  *                 type: string
  *                 format: date-time
  *               assignedTo: { type: string }
+ *               contact:
+ *                 type: object
+ *                 properties:
+ *                   user: { type: string, description: User ID registrado }
+ *                   name: { type: string }
+ *                   phone: { type: string }
+ *                   email: { type: string }
  *               order: { type: number }
  *           example:
  *             completed: true
  *             title: Cliente confirmado por llamada
+ *             description: Cliente acepta firma el viernes
+ *             contact:
+ *               name: Cliente alterno
+ *               phone: "+573188887777"
+ *               email: cliente@mail.com
  *     responses:
  *       200:
  *         description: Subtask updated
