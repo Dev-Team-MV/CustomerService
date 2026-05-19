@@ -15,7 +15,6 @@ import {
   FormControl,
   InputLabel,
   Autocomplete,
-  Divider,
   Chip
 } from '@mui/material'
 import { Close, Save } from '@mui/icons-material'
@@ -23,80 +22,97 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { es } from 'date-fns/locale'
-import ContactSelector from './ContactSelector'
-import SubActivityList from './SubActivityList'
-import { 
-  ACTIVITY_STATUSES, 
-  ACTIVITY_CATEGORIES, 
-  ACTIVITY_PRIORITIES 
-} from '../../constants/hooks/useActivities'
+import { useResidents } from '@shared/hooks/useResidents'
+import { ACTIVITY_PRIORITIES } from '../../constants/hooks/useActivities'
 
 const initialFormData = {
   title: '',
   description: '',
-  status: 'pending',
-  category: 'task',
+  columnId: '',
   priority: 'medium',
-  project: null,
   dueDate: null,
-  contact: { type: 'none', relatedUser: null, externalContact: null }
+  assignedTo: null,
+  tags: []
 }
 
 const ActivityModal = ({ 
   open, 
   onClose, 
   activity = null, 
-  projects = [],
-  onSave,
-  onAddSubActivity,
-  onUpdateSubActivity,
-  onDeleteSubActivity
+  columns = [],
+  onSave
 }) => {
   const [formData, setFormData] = useState(initialFormData)
   const [saving, setSaving] = useState(false)
+  const [tagInput, setTagInput] = useState('')
 
-  const isEditing = Boolean(activity)
+  const isEditing = Boolean(activity?._id)
+
+  // Obtener usuarios para asignar
+  const { users, loading: loadingUsers } = useResidents(null, { 
+    smsProjectId: import.meta.env.VITE_PROJECT_ID 
+  })
+
+  const userOptions = users.map(u => ({
+    _id: u._id,
+    name: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email,
+    email: u.email
+  }))
 
   useEffect(() => {
     if (activity) {
+      const assignee = activity.assignedTo
       setFormData({
         title: activity.title || '',
         description: activity.description || '',
-        status: activity.status || 'pending',
-        category: activity.category || 'task',
+        columnId: typeof activity.columnId === 'object' 
+          ? activity.columnId._id 
+          : (activity.columnId || columns[0]?._id || ''),
         priority: activity.priority || 'medium',
-        project: activity.project || null,
         dueDate: activity.dueDate ? new Date(activity.dueDate) : null,
-        contact: {
-          type: activity.relatedUser ? 'registered' : activity.externalContact ? 'external' : 'none',
-          relatedUser: activity.relatedUser || null,
-          externalContact: activity.externalContact || null
-        }
+        assignedTo: assignee ? {
+          _id: assignee._id,
+          name: `${assignee.firstName || ''} ${assignee.lastName || ''}`.trim(),
+          email: assignee.email
+        } : null,
+        tags: activity.tags || []
       })
     } else {
-      setFormData(initialFormData)
+      setFormData({
+        ...initialFormData,
+        columnId: columns[0]?._id || ''
+      })
     }
-  }, [activity, open])
+  }, [activity, open, columns])
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  const handleAddTag = () => {
+    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
+      setFormData(prev => ({ ...prev, tags: [...prev.tags, tagInput.trim()] }))
+      setTagInput('')
+    }
+  }
+
+  const handleRemoveTag = (tag) => {
+    setFormData(prev => ({ ...prev, tags: prev.tags.filter(t => t !== tag) }))
+  }
+
   const handleSave = async () => {
-    if (!formData.title.trim()) return
+    if (!formData.title.trim() || !formData.columnId) return
     
     setSaving(true)
     try {
       const payload = {
         title: formData.title,
         description: formData.description,
-        status: formData.status,
-        category: formData.category,
+        columnId: formData.columnId,
         priority: formData.priority,
-        project: formData.project,
-        dueDate: formData.dueDate,
-        relatedUser: formData.contact.type === 'registered' ? formData.contact.relatedUser : null,
-        externalContact: formData.contact.type === 'external' ? formData.contact.externalContact : null
+        dueDate: formData.dueDate || undefined,
+        assignedTo: formData.assignedTo?._id || undefined,
+        tags: formData.tags
       }
       await onSave?.(payload, activity?._id)
       onClose()
@@ -111,7 +127,7 @@ const ActivityModal = ({
     <Dialog 
       open={open} 
       onClose={onClose} 
-      maxWidth="md" 
+      maxWidth="sm" 
       fullWidth
       PaperProps={{ sx: { borderRadius: 3 } }}
     >
@@ -128,7 +144,7 @@ const ActivityModal = ({
 
       <DialogContent dividers>
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
-          <Box display="flex" flexDirection="column" gap={3} py={1}>
+          <Box display="flex" flexDirection="column" gap={2.5} py={1}>
             {/* Título */}
             <TextField
               label="Título"
@@ -136,7 +152,7 @@ const ActivityModal = ({
               onChange={(e) => handleChange('title', e.target.value)}
               fullWidth
               required
-              placeholder="Ej: Reunión con cliente potencial"
+              placeholder="Ej: Llamar al cliente"
             />
 
             {/* Descripción */}
@@ -150,42 +166,27 @@ const ActivityModal = ({
               placeholder="Detalles de la actividad..."
             />
 
-            {/* Fila: Estado, Categoría, Prioridad */}
+            {/* Columna y Prioridad */}
             <Box display="flex" gap={2}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Estado</InputLabel>
+              <FormControl fullWidth>
+                <InputLabel>Columna</InputLabel>
                 <Select
-                  value={formData.status}
-                  label="Estado"
-                  onChange={(e) => handleChange('status', e.target.value)}
+                  value={formData.columnId}
+                  label="Columna"
+                  onChange={(e) => handleChange('columnId', e.target.value)}
                 >
-                  {ACTIVITY_STATUSES.map(s => (
-                    <MenuItem key={s.id} value={s.id}>
+                  {columns.map(col => (
+                    <MenuItem key={col._id} value={col._id}>
                       <Box display="flex" alignItems="center" gap={1}>
-                        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: s.color }} />
-                        {s.label}
+                        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: col.color }} />
+                        {col.name}
                       </Box>
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
 
-              <FormControl fullWidth size="small">
-                <InputLabel>Categoría</InputLabel>
-                <Select
-                  value={formData.category}
-                  label="Categoría"
-                  onChange={(e) => handleChange('category', e.target.value)}
-                >
-                  {ACTIVITY_CATEGORIES.map(c => (
-                    <MenuItem key={c.id} value={c.id}>
-                      {c.icon} {c.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth>
                 <InputLabel>Prioridad</InputLabel>
                 <Select
                   value={formData.priority}
@@ -197,12 +198,7 @@ const ActivityModal = ({
                       <Chip 
                         label={p.label} 
                         size="small" 
-                        sx={{ 
-                          bgcolor: `${p.color}20`, 
-                          color: p.color,
-                          fontWeight: 600,
-                          height: 22
-                        }} 
+                        sx={{ bgcolor: `${p.color}20`, color: p.color, height: 22 }} 
                       />
                     </MenuItem>
                   ))}
@@ -210,49 +206,56 @@ const ActivityModal = ({
               </FormControl>
             </Box>
 
-            {/* Fila: Proyecto, Fecha */}
+            {/* Fecha y Asignado */}
             <Box display="flex" gap={2}>
-              <Autocomplete
-                options={projects}
-                getOptionLabel={(option) => option.name || ''}
-                value={formData.project}
-                onChange={(_, newValue) => handleChange('project', newValue)}
-                renderInput={(params) => (
-                  <TextField {...params} label="Proyecto (opcional)" size="small" />
-                )}
-                sx={{ flex: 1 }}
-              />
-
               <DatePicker
                 label="Fecha límite"
                 value={formData.dueDate}
                 onChange={(newValue) => handleChange('dueDate', newValue)}
-                slotProps={{ 
-                  textField: { size: 'small', sx: { flex: 1 } } 
-                }}
+                slotProps={{ textField: { fullWidth: true } }}
+              />
+
+              <Autocomplete
+                options={userOptions}
+                loading={loadingUsers}
+                getOptionLabel={(option) => option.name || ''}
+                isOptionEqualToValue={(option, val) => option._id === val?._id}
+                value={formData.assignedTo}
+                onChange={(_, newValue) => handleChange('assignedTo', newValue)}
+                fullWidth
+                renderInput={(params) => (
+                  <TextField {...params} label="Asignar a" placeholder="Buscar usuario..." />
+                )}
               />
             </Box>
 
-            <Divider />
-
-            {/* Selector de contacto */}
-            <ContactSelector
-              value={formData.contact}
-              onChange={(newContact) => handleChange('contact', newContact)}
-            />
-
-            {/* SubActividades (solo en edición) */}
-            {isEditing && activity?.subActivities && (
-              <>
-                <Divider />
-                <SubActivityList
-                  subActivities={activity.subActivities}
-                  onAdd={(data) => onAddSubActivity?.(activity._id, data)}
-                  onUpdate={(subId, data) => onUpdateSubActivity?.(activity._id, subId, data)}
-                  onDelete={(subId) => onDeleteSubActivity?.(activity._id, subId)}
+            {/* Tags */}
+            <Box>
+              <Typography variant="subtitle2" mb={1}>Etiquetas</Typography>
+              <Box display="flex" gap={1} flexWrap="wrap" mb={1}>
+                {formData.tags.map(tag => (
+                  <Chip
+                    key={tag}
+                    label={tag}
+                    size="small"
+                    onDelete={() => handleRemoveTag(tag)}
+                  />
+                ))}
+              </Box>
+              <Box display="flex" gap={1}>
+                <TextField
+                  size="small"
+                  placeholder="Nueva etiqueta..."
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
+                  sx={{ flex: 1 }}
                 />
-              </>
-            )}
+                <Button variant="outlined" size="small" onClick={handleAddTag}>
+                  Agregar
+                </Button>
+              </Box>
+            </Box>
           </Box>
         </LocalizationProvider>
       </DialogContent>
@@ -264,7 +267,7 @@ const ActivityModal = ({
         <Button
           variant="contained"
           onClick={handleSave}
-          disabled={!formData.title.trim() || saving}
+          disabled={!formData.title.trim() || !formData.columnId || saving}
           startIcon={<Save />}
         >
           {saving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear actividad'}

@@ -3,15 +3,15 @@ import { useState } from 'react'
 import { Box, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material'
 import { Edit, Delete, Visibility } from '@mui/icons-material'
 import KanbanColumn from './KanbanColumn'
-import { ACTIVITY_STATUSES } from '../../constants/hooks/useActivities'
 
 const KanbanBoard = ({ 
-  groupedByStatus, 
+  columns = [],
+  groupedByColumn = {},
   onActivityClick,
   onAddActivity,
   onEditActivity,
   onDeleteActivity,
-  onStatusChange
+  onMoveActivity
 }) => {
   const [draggedActivity, setDraggedActivity] = useState(null)
   const [menuAnchor, setMenuAnchor] = useState(null)
@@ -21,9 +21,15 @@ const KanbanBoard = ({
     setDraggedActivity(activity)
   }
 
-  const handleDrop = async (newStatus) => {
-    if (draggedActivity && draggedActivity.status !== newStatus) {
-      await onStatusChange?.(draggedActivity._id, newStatus)
+  const handleDrop = async (targetColumnId) => {
+    if (draggedActivity) {
+      const currentColumnId = typeof draggedActivity.columnId === 'object'
+        ? draggedActivity.columnId._id
+        : draggedActivity.columnId
+      
+      if (currentColumnId !== targetColumnId) {
+        await onMoveActivity?.(draggedActivity._id, targetColumnId)
+      }
     }
     setDraggedActivity(null)
   }
@@ -47,20 +53,17 @@ const KanbanBoard = ({
         pb: 2,
         height: 'calc(100vh - 200px)',
         '&::-webkit-scrollbar': { height: 8 },
-        '&::-webkit-scrollbar-thumb': { 
-          bgcolor: '#ccc', 
-          borderRadius: 4 
-        }
+        '&::-webkit-scrollbar-thumb': { bgcolor: '#ccc', borderRadius: 4 }
       }}
     >
-      {ACTIVITY_STATUSES.map(status => (
+      {columns.map(column => (
         <KanbanColumn
-          key={status.id}
-          status={status}
-          activities={groupedByStatus[status.id] || []}
+          key={column._id}
+          column={column}
+          activities={groupedByColumn[column._id] || []}
           onActivityClick={onActivityClick}
           onActivityMenuClick={handleMenuClick}
-          onAddClick={(statusId) => onAddActivity?.(statusId)}
+          onAddClick={() => onAddActivity?.(column._id)}
           onDragStart={handleDragStart}
           onDrop={handleDrop}
         />

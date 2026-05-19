@@ -18,33 +18,35 @@ import PageLayout from '@shared/components/LayoutComponents/PageLayout'
 import KanbanBoard from '../components/activities/KanbanBoard'
 import ActivityModal from '../components/activities/ActivityModal'
 import ActivityDetails from '../components/activities/ActivityDetails'
-import { useActivities, ACTIVITY_CATEGORIES } from '../constants/hooks/useActivities'
+import { useActivities, ACTIVITY_PRIORITIES } from '../constants/hooks/useActivities'
+import { useProjects } from '@shared/hooks/useProjects'
+
+const PROJECT_ID = import.meta.env.VITE_PROJECT_ID
 
 export default function Activities() {
+  const {currentProject} = useProjects()
+  const projectId = currentProject?._id 
   const {
-    groupedByStatus,
+    columns,
+    groupedByColumn,
     loading,
     error,
-    projects,
-    filters,
-    setFilters,
     createActivity,
     updateActivity,
-    changeStatus,
+    moveActivity,
     deleteActivity,
-    addSubActivity,
-    updateSubActivity,
-    deleteSubActivity
-  } = useActivities()
+    fetchBoard
+  } = useActivities(projectId)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingActivity, setEditingActivity] = useState(null)
   const [detailsActivity, setDetailsActivity] = useState(null)
   const [searchValue, setSearchValue] = useState('')
+  const [priorityFilter, setPriorityFilter] = useState('all')
 
   // Abrir modal para crear nueva actividad
-  const handleAddActivity = (initialStatus = 'pending') => {
-    setEditingActivity({ status: initialStatus })
+  const handleAddActivity = (columnId) => {
+    setEditingActivity({ columnId })
     setModalOpen(true)
   }
 
@@ -62,11 +64,13 @@ export default function Activities() {
 
   // Guardar actividad (crear o editar)
   const handleSaveActivity = async (data, activityId) => {
-    if (activityId && activityId !== 'new') {
+    if (activityId) {
       await updateActivity(activityId, data)
     } else {
       await createActivity(data)
     }
+    setModalOpen(false)
+    setEditingActivity(null)
   }
 
   // Eliminar actividad
@@ -77,18 +81,9 @@ export default function Activities() {
     }
   }
 
-  // Buscar
-  const handleSearch = (value) => {
-    setSearchValue(value)
-    setFilters(prev => ({ ...prev, search: value }))
-  }
-
-  // Filtrar por categoría
-  const handleCategoryFilter = (category) => {
-    setFilters(prev => ({ 
-      ...prev, 
-      category: category === 'all' ? undefined : category 
-    }))
+  // Mover actividad (drag & drop)
+  const handleMoveActivity = async (activityId, columnId) => {
+    await moveActivity(activityId, columnId)
   }
 
   return (
@@ -101,13 +96,14 @@ export default function Activities() {
               Actividades
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Gestiona tus tareas, reuniones y seguimientos
+              Gestiona tus tareas y seguimientos
             </Typography>
           </Box>
           <Button
             variant="contained"
             startIcon={<Add />}
-            onClick={() => handleAddActivity()}
+            onClick={() => handleAddActivity(columns[0]?._id)}
+            disabled={columns.length === 0}
             sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
           >
             Nueva Actividad
@@ -119,7 +115,7 @@ export default function Activities() {
           <TextField
             placeholder="Buscar actividades..."
             value={searchValue}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={(e) => setSearchValue(e.target.value)}
             size="small"
             sx={{ width: 300 }}
             InputProps={{
@@ -133,8 +129,8 @@ export default function Activities() {
           
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <Select
-              value={filters.category || 'all'}
-              onChange={(e) => handleCategoryFilter(e.target.value)}
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value)}
               displayEmpty
               startAdornment={
                 <InputAdornment position="start">
@@ -142,27 +138,23 @@ export default function Activities() {
                 </InputAdornment>
               }
             >
-              <MenuItem value="all">Todas las categorías</MenuItem>
-              {ACTIVITY_CATEGORIES.map(c => (
-                <MenuItem key={c.id} value={c.id}>
-                  {c.icon} {c.label}
+              <MenuItem value="all">Todas las prioridades</MenuItem>
+              {ACTIVITY_PRIORITIES.map(p => (
+                <MenuItem key={p.id} value={p.id}>
+                  <Chip 
+                    label={p.label} 
+                    size="small" 
+                    sx={{ bgcolor: `${p.color}20`, color: p.color, height: 20 }} 
+                  />
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-
-          {filters.category && (
-            <Chip
-              label={`Filtro: ${ACTIVITY_CATEGORIES.find(c => c.id === filters.category)?.label}`}
-              onDelete={() => handleCategoryFilter('all')}
-              size="small"
-            />
-          )}
         </Box>
 
         {/* Error */}
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => {}}>
             {error}
           </Alert>
         )}
@@ -175,12 +167,13 @@ export default function Activities() {
         ) : (
           /* Kanban Board */
           <KanbanBoard
-            groupedByStatus={groupedByStatus}
+            columns={columns}
+            groupedByColumn={groupedByColumn}
             onActivityClick={handleViewActivity}
             onAddActivity={handleAddActivity}
             onEditActivity={handleEditActivity}
             onDeleteActivity={handleDeleteActivity}
-            onStatusChange={changeStatus}
+            onMoveActivity={handleMoveActivity}
           />
         )}
 
@@ -189,11 +182,8 @@ export default function Activities() {
           open={modalOpen}
           onClose={() => { setModalOpen(false); setEditingActivity(null) }}
           activity={editingActivity}
-          projects={projects}
+          columns={columns}
           onSave={handleSaveActivity}
-          onAddSubActivity={addSubActivity}
-          onUpdateSubActivity={updateSubActivity}
-          onDeleteSubActivity={deleteSubActivity}
         />
 
         {/* Panel de Detalles */}
@@ -203,9 +193,6 @@ export default function Activities() {
           onClose={() => setDetailsActivity(null)}
           onEdit={handleEditActivity}
           onDelete={handleDeleteActivity}
-          onAddSubActivity={addSubActivity}
-          onUpdateSubActivity={updateSubActivity}
-          onDeleteSubActivity={deleteSubActivity}
         />
       </Box>
     </PageLayout>

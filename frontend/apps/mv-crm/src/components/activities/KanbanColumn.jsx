@@ -4,24 +4,22 @@ import { Add } from '@mui/icons-material'
 import ActivityCard from './ActivityCard'
 
 const KanbanColumn = ({ 
-  status, 
+  column,
   activities, 
   onActivityClick, 
   onActivityMenuClick,
   onAddClick,
   onDragStart,
-  onDragOver,
   onDrop
 }) => {
+  const color = column.color || '#757575'
+
   return (
     <Box
-      onDragOver={(e) => {
-        e.preventDefault()
-        onDragOver?.(status.id)
-      }}
+      onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault()
-        onDrop?.(status.id)
+        onDrop?.(column._id)
       }}
       sx={{
         flex: '0 0 280px',
@@ -41,21 +39,14 @@ const KanbanColumn = ({
           p: 2, 
           pb: 1.5,
           borderBottom: '2px solid',
-          borderColor: status.color
+          borderColor: color
         }}
       >
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box display="flex" alignItems="center" gap={1}>
-            <Box
-              sx={{
-                width: 10,
-                height: 10,
-                borderRadius: '50%',
-                bgcolor: status.color
-              }}
-            />
+            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color }} />
             <Typography variant="subtitle2" fontWeight={700}>
-              {status.label}
+              {column.name}
             </Typography>
             <Chip
               label={activities.length}
@@ -64,20 +55,17 @@ const KanbanColumn = ({
                 height: 20,
                 fontSize: '0.7rem',
                 fontWeight: 600,
-                bgcolor: `${status.color}20`,
-                color: status.color
+                bgcolor: `${color}20`,
+                color: color
               }}
             />
           </Box>
           <IconButton 
             size="small" 
-            onClick={() => onAddClick?.(status.id)}
-            sx={{ 
-              bgcolor: `${status.color}15`,
-              '&:hover': { bgcolor: `${status.color}25` }
-            }}
+            onClick={onAddClick}
+            sx={{ bgcolor: `${color}15`, '&:hover': { bgcolor: `${color}25` } }}
           >
-            <Add sx={{ fontSize: 18, color: status.color }} />
+            <Add sx={{ fontSize: 18, color: color }} />
           </IconButton>
         </Box>
       </Box>
@@ -89,10 +77,7 @@ const KanbanColumn = ({
           overflowY: 'auto', 
           p: 1.5,
           '&::-webkit-scrollbar': { width: 6 },
-          '&::-webkit-scrollbar-thumb': { 
-            bgcolor: '#ccc', 
-            borderRadius: 3 
-          }
+          '&::-webkit-scrollbar-thumb': { bgcolor: '#ccc', borderRadius: 3 }
         }}
       >
         {activities.length === 0 ? (
@@ -105,19 +90,14 @@ const KanbanColumn = ({
               color: '#9e9e9e'
             }}
           >
-            <Typography variant="caption">
-              Sin actividades
-            </Typography>
+            <Typography variant="caption">Sin actividades</Typography>
           </Box>
         ) : (
           activities.map(activity => (
             <Box
               key={activity._id}
               draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData('activityId', activity._id)
-                onDragStart?.(activity)
-              }}
+              onDragStart={() => onDragStart?.(activity)}
             >
               <ActivityCard
                 activity={activity}

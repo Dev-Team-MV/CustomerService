@@ -1,24 +1,8 @@
-// frontend/apps/mv-crm/src/hooks/useActivities.js
+// frontend/apps/mv-crm/src/constants/hooks/useActivities.js
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import activityService from '../../services/activityService'
 
-export const ACTIVITY_STATUSES = [
-  { id: 'pending', label: 'Pendiente', color: '#9e9e9e' },
-  { id: 'in_progress', label: 'En Curso', color: '#2196f3' },
-  { id: 'in_review', label: 'En Revisión', color: '#ff9800' },
-  { id: 'completed', label: 'Completada', color: '#4caf50' },
-  { id: 'approved', label: 'Aprobada', color: '#8bc34a' }
-]
-
-export const ACTIVITY_CATEGORIES = [
-  { id: 'meeting', label: 'Reunión', icon: '📅' },
-  { id: 'call', label: 'Llamada', icon: '📞' },
-  { id: 'task', label: 'Tarea', icon: '✅' },
-  { id: 'follow_up', label: 'Seguimiento', icon: '🔄' },
-  { id: 'negotiation', label: 'Negociación', icon: '🤝' },
-  { id: 'other', label: 'Otro', icon: '📌' }
-]
-
+// Prioridades (fijas)
 export const ACTIVITY_PRIORITIES = [
   { id: 'low', label: 'Baja', color: '#9e9e9e' },
   { id: 'medium', label: 'Media', color: '#2196f3' },
@@ -26,158 +10,217 @@ export const ACTIVITY_PRIORITIES = [
   { id: 'urgent', label: 'Urgente', color: '#f44336' }
 ]
 
-export const useActivities = (initialFilters = {}) => {
+// Colores por defecto para columnas
+const COLUMN_COLORS = {
+  backlog: '#9e9e9e',
+  todo: '#2196f3',
+  in_progress: '#ff9800',
+  done: '#4caf50',
+  default: '#757575'
+}
+
+export const useActivities = (projectId) => {
+  const [columns, setColumns] = useState([])
   const [activities, setActivities] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [filters, setFilters] = useState(initialFilters)
-  const [projects, setProjects] = useState([])
+  const [filters, setFilters] = useState({})
 
-  // Fetch activities
-  const fetchActivities = useCallback(async () => {
+  // Fetch board (columnas + actividades)
+  const fetchBoard = useCallback(async () => {
+    if (!projectId) {
+      setError('Project ID is required')
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
     try {
-      const data = await activityService.getAll(filters)
-      setActivities(data)
+      const board = await activityService.getBoard(projectId)
+      
+      // Agregar colores a las columnas
+      const columnsWithColors = board.columns.map(col => ({
+        ...col,
+        color: COLUMN_COLORS[col.key] || COLUMN_COLORS.default
+      }))
+      
+      setColumns(columnsWithColors)
+      
+      // Extraer todas las actividades
+      const allActivities = board.columns.flatMap(col => col.activities || [])
+      setActivities(allActivities)
       setError(null)
     } catch (err) {
-      setError(err.message)
+      setError(err.response?.data?.message || err.message)
     } finally {
       setLoading(false)
     }
-  }, [filters])
+  }, [projectId])
 
-  // Fetch projects for selector
-  const fetchProjects = useCallback(async () => {
+  // Fetch solo columnas
+  const fetchColumns = useCallback(async () => {
+    if (!projectId) return
     try {
-      const data = await activityService.getProjects()
-      setProjects(data)
+      const cols = await activityService.getColumns(projectId)
+      const columnsWithColors = cols.map(col => ({
+        ...col,
+        color: COLUMN_COLORS[col.key] || COLUMN_COLORS.default
+      }))
+      setColumns(columnsWithColors)
     } catch (err) {
-      console.error('Error fetching projects:', err)
+      console.error('Error fetching columns:', err)
     }
-  }, [])
+  }, [projectId])
 
   useEffect(() => {
-    fetchActivities()
-    fetchProjects()
-  }, [fetchActivities, fetchProjects])
+    fetchBoard()
+  }, [fetchBoard])
 
-  // Agrupar por estado para el Kanban
-  const groupedByStatus = useMemo(() => {
+  // Agrupar actividades por columna para el Kanban
+  const groupedByColumn = useMemo(() => {
     const groups = {}
-    ACTIVITY_STATUSES.forEach(status => {
-      groups[status.id] = []
+    columns.forEach(col => {
+      groups[col._id] = []
     })
     activities.forEach(activity => {
-      if (groups[activity.status]) {
-        groups[activity.status].push(activity)
+      const colId = typeof activity.columnId === 'object' 
+        ? activity.columnId._id 
+        : activity.columnId
+      if (groups[colId]) {
+        groups[colId].push(activity)
       }
     })
+    // Ordenar por posición
+    Object.keys(groups).forEach(colId => {
+      groups[colId].sort((a, b) => a.position - b.position)
+    })
     return groups
-  }, [activities])
+  }, [activities, columns])
 
-  // Crear actividad
+  // ==================== CRUD ACTIVITIES ====================
+
   const createActivity = async (data) => {
     try {
-      const newActivity = await activityService.create(data)
+      const payload = {
+        projectId,
+        title: data.title,
+        description: data.description || '',
+        columnId: data.columnId,
+        position: data.position,
+        priority: data.priority || 'medium',
+        dueDate: data.dueDate || undefined,
+        assignedTo: data.assignedTo || undefined,
+        tags: data.tags || []
+      }
+      const newActivity = await activityService.create(payload)
       setActivities(prev => [...prev, newActivity])
       return newActivity
     } catch (err) {
-      setError(err.message)
+      setError(err.response?.data?.message || err.message)
       throw err
     }
   }
 
-  // Actualizar actividad
   const updateActivity = async (id, data) => {
     try {
       const updated = await activityService.update(id, data)
       setActivities(prev => prev.map(a => a._id === id ? updated : a))
       return updated
     } catch (err) {
-      setError(err.message)
+      setError(err.response?.data?.message || err.message)
       throw err
     }
   }
 
-  // Cambiar estado (drag & drop)
-  const changeStatus = async (id, newStatus) => {
+  const moveActivity = async (id, columnId, position = null) => {
     // Optimistic update
     const previousActivities = [...activities]
     setActivities(prev => prev.map(a => 
-      a._id === id ? { ...a, status: newStatus } : a
+      a._id === id ? { ...a, columnId, position: position ?? a.position } : a
     ))
+    
     try {
-      await activityService.updateStatus(id, newStatus)
+      const updated = await activityService.move(id, columnId, position)
+      // Refetch para sincronizar posiciones
+      await fetchBoard()
+      return updated
     } catch (err) {
       // Revert on error
       setActivities(previousActivities)
-      setError(err.message)
+      setError(err.response?.data?.message || err.message)
       throw err
     }
   }
 
-  // Eliminar
   const deleteActivity = async (id) => {
     try {
       await activityService.delete(id)
       setActivities(prev => prev.filter(a => a._id !== id))
     } catch (err) {
-      setError(err.message)
+      setError(err.response?.data?.message || err.message)
       throw err
     }
   }
 
-  // SubActividades
-  const addSubActivity = async (activityId, data) => {
+  // ==================== CRUD COLUMNS ====================
+
+  const createColumn = async (data) => {
     try {
-      const updated = await activityService.addSubActivity(activityId, data)
-      setActivities(prev => prev.map(a => a._id === activityId ? updated : a))
-      return updated
+      const payload = { projectId, ...data }
+      const newColumn = await activityService.createColumn(payload)
+      newColumn.color = COLUMN_COLORS[newColumn.key] || COLUMN_COLORS.default
+      setColumns(prev => [...prev, newColumn].sort((a, b) => a.order - b.order))
+      return newColumn
     } catch (err) {
-      setError(err.message)
+      setError(err.response?.data?.message || err.message)
       throw err
     }
   }
 
-  const updateSubActivity = async (activityId, subId, data) => {
+  const updateColumn = async (id, data) => {
     try {
-      const updated = await activityService.updateSubActivity(activityId, subId, data)
-      setActivities(prev => prev.map(a => a._id === activityId ? updated : a))
+      const updated = await activityService.updateColumn(id, data)
+      updated.color = COLUMN_COLORS[updated.key] || COLUMN_COLORS.default
+      setColumns(prev => prev.map(c => c._id === id ? updated : c).sort((a, b) => a.order - b.order))
       return updated
     } catch (err) {
-      setError(err.message)
+      setError(err.response?.data?.message || err.message)
       throw err
     }
   }
 
-  const deleteSubActivity = async (activityId, subId) => {
+  const deleteColumn = async (id) => {
     try {
-      const updated = await activityService.deleteSubActivity(activityId, subId)
-      setActivities(prev => prev.map(a => a._id === activityId ? updated : a))
-      return updated
+      await activityService.deleteColumn(id)
+      setColumns(prev => prev.filter(c => c._id !== id))
     } catch (err) {
-      setError(err.message)
+      setError(err.response?.data?.message || err.message)
       throw err
     }
   }
 
   return {
+    // Data
+    columns,
     activities,
-    groupedByStatus,
+    groupedByColumn,
     loading,
     error,
     filters,
     setFilters,
-    projects,
-    fetchActivities,
+    
+    // Actions - Activities
+    fetchBoard,
     createActivity,
     updateActivity,
-    changeStatus,
+    moveActivity,
     deleteActivity,
-    addSubActivity,
-    updateSubActivity,
-    deleteSubActivity
+    
+    // Actions - Columns
+    fetchColumns,
+    createColumn,
+    updateColumn,
+    deleteColumn
   }
 }
 
