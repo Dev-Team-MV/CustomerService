@@ -39,6 +39,7 @@ const MediaItemEditor = ({
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editTitle, setEditTitle] = useState('')
+  const [editUploadedAt, setEditUploadedAt] = useState('')
   const [newFile, setNewFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -59,6 +60,11 @@ const MediaItemEditor = ({
   const handleEditOpen = (e) => {
     e?.stopPropagation()
     setEditTitle(mediaItem.title || '')
+    setEditUploadedAt(
+      mediaItem.uploadedAt
+        ? new Date(mediaItem.uploadedAt).toISOString().split('T')[0]
+        : ''
+    )
     setNewFile(null)
     setPreviewUrl(null)
     setEditDialogOpen(true)
@@ -78,7 +84,10 @@ const MediaItemEditor = ({
     if (!onEdit) return
     setLoading(true)
     try {
-      const updateData = { title: editTitle }
+      const updateData = {
+        title: editTitle,
+        uploadedAt: editUploadedAt || null
+      }
       
       // Si hay un nuevo archivo, subirlo primero
       if (newFile && uploadService) {
@@ -133,6 +142,7 @@ const MediaItemEditor = ({
     setEditDialogOpen(false)
     setNewFile(null)
     setPreviewUrl(null)
+    setEditUploadedAt('')
   }
 
   return (
@@ -186,7 +196,19 @@ const MediaItemEditor = ({
             sx={{ mt: 2 }}
             disabled={loading}
           />
-          
+
+          {/* Campo de fecha de subida */}
+          <TextField
+            fullWidth
+            type="date"
+            label="Upload Date"
+            value={editUploadedAt}
+            onChange={(e) => setEditUploadedAt(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ mt: 2 }}
+            disabled={loading}
+          />
+
           {/* Sección para reemplazar archivo */}
           {allowReplaceFile && uploadService && (
             <Box sx={{ mt: 3 }}>
