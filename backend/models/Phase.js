@@ -21,6 +21,10 @@ const mediaItemSchema = new mongoose.Schema({
     type: String,
     enum: ['image', 'video'],
     default: 'image'
+  },
+  uploadedAt: {
+    type: Date,
+    default: null
   }
 }, { _id: true })
 
