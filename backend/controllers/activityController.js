@@ -11,22 +11,60 @@ const parsePosition = (value) => {
   return Math.max(0, Math.floor(parsed))
 }
 
-const ensureDefaultColumns = async (projectId) => {
-  const existing = await ActivityColumn.find({ projectId }).sort({ order: 1 })
+const resolveScope = (projectId) => {
+  if (projectId === undefined || projectId === null || projectId === '') {
+    return { boardType: 'global', projectId: null }
+  }
+  if (!isValidObjectId(projectId)) return null
+  return { boardType: 'project', projectId }
+}
+
+const scopeQueryFilter = (scope) => {
+  if (scope.boardType === 'project') {
+    return {
+      projectId: scope.projectId,
+      $or: [{ boardType: 'project' }, { boardType: { $exists: false } }]
+    }
+  }
+  return {
+    $or: [
+      { boardType: 'global' },
+      { boardType: { $exists: false }, projectId: { $exists: false } }
+    ]
+  }
+}
+
+const scopePersistData = (scope) => (
+  scope.boardType === 'project'
+    ? { boardType: 'project', projectId: scope.projectId }
+    : { boardType: 'global' }
+)
+
+const scopeFromDoc = (doc) => (
+  doc.boardType === 'global'
+    ? { boardType: 'global', projectId: null }
+    : doc.projectId
+      ? { boardType: 'project', projectId: doc.projectId }
+      : { boardType: 'global', projectId: null }
+)
+
+const ensureDefaultColumns = async (scope) => {
+  const filter = scopeQueryFilter(scope)
+  const existing = await ActivityColumn.find(filter).sort({ order: 1 })
   if (existing.length > 0) return existing
 
   await ActivityColumn.insertMany(
     DEFAULT_ACTIVITY_COLUMNS.map((column) => ({
-      projectId,
+      ...scopePersistData(scope),
       ...column
     }))
   )
 
-  return ActivityColumn.find({ projectId }).sort({ order: 1 })
+  return ActivityColumn.find(filter).sort({ order: 1 })
 }
 
-const reorderColumnActivities = async (projectId, columnId, excludeId = null) => {
-  const filter = { projectId, columnId }
+const reorderColumnActivities = async (scope, columnId, excludeId = null) => {
+  const filter = { ...scopeQueryFilter(scope), columnId }
   if (excludeId) {
     filter._id = { $ne: excludeId }
   }
@@ -44,12 +82,13 @@ const reorderColumnActivities = async (projectId, columnId, excludeId = null) =>
 }
 
 const placeActivityInColumn = async (activity, targetColumnId, targetPosition = null) => {
+  const activityScope = scopeFromDoc(activity)
   const sameColumn = activity.columnId.toString() === targetColumnId.toString()
   if (sameColumn && targetPosition === null) {
     return
   }
 
-  const columnCount = await reorderColumnActivities(activity.projectId, targetColumnId, sameColumn ? activity._id : null)
+  const columnCount = await reorderColumnActivities(activityScope, targetColumnId, sameColumn ? activity._id : null)
 
   const finalPosition = targetPosition === null
     ? columnCount
@@ -58,7 +97,7 @@ const placeActivityInColumn = async (activity, targetColumnId, targetPosition = 
   if (sameColumn) {
     await Activity.updateMany(
       {
-        projectId: activity.projectId,
+        ...scopeQueryFilter(activityScope),
         columnId: targetColumnId,
         _id: { $ne: activity._id },
         position: { $gte: finalPosition }
@@ -66,10 +105,10 @@ const placeActivityInColumn = async (activity, targetColumnId, targetPosition = 
       { $inc: { position: 1 } }
     )
   } else {
-    await reorderColumnActivities(activity.projectId, activity.columnId, activity._id)
+    await reorderColumnActivities(activityScope, activity.columnId, activity._id)
     await Activity.updateMany(
       {
-        projectId: activity.projectId,
+        ...scopeQueryFilter(activityScope),
         columnId: targetColumnId,
         position: { $gte: finalPosition }
       },
@@ -84,11 +123,12 @@ const placeActivityInColumn = async (activity, targetColumnId, targetPosition = 
 export const getActivityColumns = async (req, res) => {
   try {
     const { projectId } = req.query
-    if (!projectId || !isValidObjectId(projectId)) {
-      return res.status(400).json({ message: 'Valid projectId is required' })
+    const scope = resolveScope(projectId)
+    if (!scope) {
+      return res.status(400).json({ message: 'projectId must be a valid ObjectId when provided' })
     }
 
-    const columns = await ensureDefaultColumns(projectId)
+    const columns = await ensureDefaultColumns(scope)
     res.json(columns)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -98,8 +138,9 @@ export const getActivityColumns = async (req, res) => {
 export const createActivityColumn = async (req, res) => {
   try {
     const { projectId, key, name, order } = req.body
-    if (!projectId || !isValidObjectId(projectId)) {
-      return res.status(400).json({ message: 'Valid projectId is required' })
+    const scope = resolveScope(projectId)
+    if (!scope) {
+      return res.status(400).json({ message: 'projectId must be a valid ObjectId when provided' })
     }
     if (!key || typeof key !== 'string') {
       return res.status(400).json({ message: 'key is required' })
@@ -108,26 +149,27 @@ export const createActivityColumn = async (req, res) => {
       return res.status(400).json({ message: 'name is required' })
     }
 
-    await ensureDefaultColumns(projectId)
+    await ensureDefaultColumns(scope)
+    const filter = scopeQueryFilter(scope)
 
-    const existing = await ActivityColumn.findOne({ projectId, key: key.trim() })
+    const existing = await ActivityColumn.findOne({ ...filter, key: key.trim() })
     if (existing) {
-      return res.status(409).json({ message: 'Column key already exists for this project' })
+      return res.status(409).json({ message: 'Column key already exists for this board' })
     }
 
-    const existingColumns = await ActivityColumn.find({ projectId })
+    const existingColumns = await ActivityColumn.find(filter)
     const normalizedOrder = parsePosition(order)
     const finalOrder = normalizedOrder === null
       ? existingColumns.length
       : Math.min(normalizedOrder, existingColumns.length)
 
     await ActivityColumn.updateMany(
-      { projectId, order: { $gte: finalOrder } },
+      { ...filter, order: { $gte: finalOrder } },
       { $inc: { order: 1 } }
     )
 
     const column = await ActivityColumn.create({
-      projectId,
+      ...scopePersistData(scope),
       key: key.trim(),
       name: name.trim(),
       order: finalOrder
@@ -160,7 +202,9 @@ export const updateActivityColumn = async (req, res) => {
         return res.status(400).json({ message: 'order must be a number' })
       }
 
-      const columns = await ActivityColumn.find({ projectId: column.projectId }).sort({ order: 1 })
+      const columnScope = scopeFromDoc(column)
+      const columnFilter = scopeQueryFilter(columnScope)
+      const columns = await ActivityColumn.find(columnFilter).sort({ order: 1 })
       const maxOrder = Math.max(0, columns.length - 1)
       const targetOrder = Math.min(nextOrder, maxOrder)
       const previousOrder = column.order
@@ -169,7 +213,7 @@ export const updateActivityColumn = async (req, res) => {
         if (targetOrder > previousOrder) {
           await ActivityColumn.updateMany(
             {
-              projectId: column.projectId,
+              ...columnFilter,
               _id: { $ne: column._id },
               order: { $gt: previousOrder, $lte: targetOrder }
             },
@@ -178,7 +222,7 @@ export const updateActivityColumn = async (req, res) => {
         } else {
           await ActivityColumn.updateMany(
             {
-              projectId: column.projectId,
+              ...columnFilter,
               _id: { $ne: column._id },
               order: { $gte: targetOrder, $lt: previousOrder }
             },
@@ -217,8 +261,9 @@ export const deleteActivityColumn = async (req, res) => {
     const deletedOrder = column.order
     await column.deleteOne()
 
+    const columnScope = scopeFromDoc(column)
     await ActivityColumn.updateMany(
-      { projectId: column.projectId, order: { $gt: deletedOrder } },
+      { ...scopeQueryFilter(columnScope), order: { $gt: deletedOrder } },
       { $inc: { order: -1 } }
     )
 
@@ -231,13 +276,14 @@ export const deleteActivityColumn = async (req, res) => {
 export const getActivities = async (req, res) => {
   try {
     const { projectId, columnId, assignedTo, priority } = req.query
-    if (!projectId || !isValidObjectId(projectId)) {
-      return res.status(400).json({ message: 'Valid projectId is required' })
+    const scope = resolveScope(projectId)
+    if (!scope) {
+      return res.status(400).json({ message: 'projectId must be a valid ObjectId when provided' })
     }
 
-    await ensureDefaultColumns(projectId)
+    await ensureDefaultColumns(scope)
 
-    const filter = { projectId }
+    const filter = scopeQueryFilter(scope)
     if (columnId && isValidObjectId(columnId)) filter.columnId = columnId
     if (assignedTo && isValidObjectId(assignedTo)) filter.assignedTo = assignedTo
     if (priority) filter.priority = priority
@@ -257,12 +303,14 @@ export const getActivities = async (req, res) => {
 export const getActivityBoard = async (req, res) => {
   try {
     const { projectId } = req.query
-    if (!projectId || !isValidObjectId(projectId)) {
-      return res.status(400).json({ message: 'Valid projectId is required' })
+    const scope = resolveScope(projectId)
+    if (!scope) {
+      return res.status(400).json({ message: 'projectId must be a valid ObjectId when provided' })
     }
 
-    const columns = await ensureDefaultColumns(projectId)
-    const activities = await Activity.find({ projectId })
+    const filter = scopeQueryFilter(scope)
+    const columns = await ensureDefaultColumns(scope)
+    const activities = await Activity.find(filter)
       .populate('assignedTo', 'firstName lastName email')
       .populate('createdBy', 'firstName lastName email')
       .sort({ position: 1, createdAt: 1 })
@@ -274,7 +322,8 @@ export const getActivityBoard = async (req, res) => {
     }))
 
     res.json({
-      projectId,
+      boardType: scope.boardType,
+      projectId: scope.boardType === 'project' ? scope.projectId : null,
       columns: grouped
     })
   } catch (error) {
@@ -318,18 +367,20 @@ export const createActivity = async (req, res) => {
       tags
     } = req.body
 
-    if (!projectId || !isValidObjectId(projectId)) {
-      return res.status(400).json({ message: 'Valid projectId is required' })
+    const scope = resolveScope(projectId)
+    if (!scope) {
+      return res.status(400).json({ message: 'projectId must be a valid ObjectId when provided' })
     }
     if (!title || typeof title !== 'string') {
       return res.status(400).json({ message: 'title is required' })
     }
 
-    await ensureDefaultColumns(projectId)
+    await ensureDefaultColumns(scope)
+    const filter = scopeQueryFilter(scope)
 
     let targetColumnId = columnId
     if (!targetColumnId) {
-      const todoColumn = await ActivityColumn.findOne({ projectId, key: 'todo' })
+      const todoColumn = await ActivityColumn.findOne({ ...filter, key: 'todo' })
       targetColumnId = todoColumn?._id
     }
 
@@ -337,9 +388,9 @@ export const createActivity = async (req, res) => {
       return res.status(400).json({ message: 'Valid columnId is required' })
     }
 
-    const column = await ActivityColumn.findOne({ _id: targetColumnId, projectId })
+    const column = await ActivityColumn.findOne({ _id: targetColumnId, ...filter })
     if (!column) {
-      return res.status(400).json({ message: 'Column does not belong to this project' })
+      return res.status(400).json({ message: 'Column does not belong to this board' })
     }
 
     if (assignedTo && !isValidObjectId(assignedTo)) {
@@ -347,7 +398,7 @@ export const createActivity = async (req, res) => {
     }
 
     const activity = new Activity({
-      projectId,
+      ...scopePersistData(scope),
       title: title.trim(),
       description: description || '',
       columnId: targetColumnId,
@@ -412,9 +463,10 @@ export const updateActivity = async (req, res) => {
       return res.status(400).json({ message: 'Valid columnId is required' })
     }
 
-    const column = await ActivityColumn.findOne({ _id: targetColumnId, projectId: activity.projectId })
+    const activityScope = scopeFromDoc(activity)
+    const column = await ActivityColumn.findOne({ _id: targetColumnId, ...scopeQueryFilter(activityScope) })
     if (!column) {
-      return res.status(400).json({ message: 'Column does not belong to this project' })
+      return res.status(400).json({ message: 'Column does not belong to this board' })
     }
 
     await placeActivityInColumn(activity, targetColumnId, parsePosition(position))
@@ -448,9 +500,10 @@ export const moveActivity = async (req, res) => {
       return res.status(404).json({ message: 'Activity not found' })
     }
 
-    const column = await ActivityColumn.findOne({ _id: columnId, projectId: activity.projectId })
+    const activityScope = scopeFromDoc(activity)
+    const column = await ActivityColumn.findOne({ _id: columnId, ...scopeQueryFilter(activityScope) })
     if (!column) {
-      return res.status(400).json({ message: 'Column does not belong to this project' })
+      return res.status(400).json({ message: 'Column does not belong to this board' })
     }
 
     await placeActivityInColumn(activity, columnId, parsePosition(position))
@@ -479,13 +532,14 @@ export const deleteActivity = async (req, res) => {
       return res.status(404).json({ message: 'Activity not found' })
     }
 
-    const { projectId, columnId } = activity
+    const { columnId } = activity
     const deletedPosition = activity.position
+    const activityScope = scopeFromDoc(activity)
 
     await activity.deleteOne()
     await Activity.updateMany(
       {
-        projectId,
+        ...scopeQueryFilter(activityScope),
         columnId,
         position: { $gt: deletedPosition }
       },
