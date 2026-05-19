@@ -47,12 +47,18 @@ async function resolveFacadeReference({ facadeId, projectId, modelId, allowDeckI
   if (!normalizedFacadeId) return { ok: true, facade: null, source: 'none' }
 
   let facadeExists = null
+  let selectedDeck = null
+  let source = 'facade'
   if (mongoose.Types.ObjectId.isValid(normalizedFacadeId)) {
     facadeExists = await Facade.findById(normalizedFacadeId)
   }
 
   if (!facadeExists && allowDeckId && mongoose.Types.ObjectId.isValid(normalizedFacadeId)) {
     facadeExists = await Facade.findOne({ 'decks._id': normalizedFacadeId })
+    if (facadeExists) {
+      selectedDeck = facadeExists.decks.id(normalizedFacadeId) || null
+      source = 'deck'
+    }
   }
 
   if (!facadeExists) {
@@ -67,7 +73,89 @@ async function resolveFacadeReference({ facadeId, projectId, modelId, allowDeckI
     return { ok: false, status: 400, message: 'Facade does not belong to the selected model' }
   }
 
-  return { ok: true, facade: facadeExists, source: sameId(facadeExists._id, normalizedFacadeId) ? 'facade' : 'deck' }
+  const selectedFacadeId = source === 'deck'
+    ? selectedDeck?._id || normalizedFacadeId
+    : facadeExists._id
+
+  return {
+    ok: true,
+    facade: facadeExists,
+    selectedDeck,
+    selectedFacadeId,
+    source
+  }
+}
+
+async function mapFacadeSelections(properties) {
+  if (!Array.isArray(properties) || properties.length === 0) return properties
+
+  const facadeIds = [
+    ...new Set(
+      properties
+        .map((property) => toIdStr(property?.facade))
+        .filter(Boolean)
+    )
+  ]
+  if (facadeIds.length === 0) return properties
+
+  const objectIds = facadeIds
+    .filter((id) => mongoose.Types.ObjectId.isValid(id))
+    .map((id) => new mongoose.Types.ObjectId(id))
+
+  if (objectIds.length === 0) return properties
+
+  const facadeDocs = await Facade.find({
+    $or: [{ _id: { $in: objectIds } }, { 'decks._id': { $in: objectIds } }]
+  }).select('_id title url price decks')
+
+  const byFacadeId = new Map()
+  const byDeckId = new Map()
+
+  for (const facadeDoc of facadeDocs) {
+    const facadeObj = facadeDoc.toObject()
+    byFacadeId.set(toIdStr(facadeObj._id), facadeObj)
+    for (const deck of facadeObj.decks || []) {
+      byDeckId.set(toIdStr(deck._id), { facade: facadeObj, deck })
+    }
+  }
+
+  for (const property of properties) {
+    const selectedId = toIdStr(property?.facade)
+    if (!selectedId) {
+      property.facade = null
+      continue
+    }
+
+    const deckMatch = byDeckId.get(selectedId)
+    if (deckMatch) {
+      property.facade = {
+        _id: deckMatch.deck._id,
+        type: 'deck',
+        name: deckMatch.deck.name,
+        price: deckMatch.deck.price,
+        description: deckMatch.deck.description,
+        images: deckMatch.deck.images || [],
+        status: deckMatch.deck.status,
+        facadeId: deckMatch.facade._id,
+        facadeTitle: deckMatch.facade.title,
+        facadeUrl: deckMatch.facade.url || []
+      }
+      continue
+    }
+
+    const facadeMatch = byFacadeId.get(selectedId)
+    property.facade = facadeMatch
+      ? {
+          _id: facadeMatch._id,
+          type: 'facade',
+          title: facadeMatch.title,
+          url: facadeMatch.url || [],
+          price: facadeMatch.price
+        }
+      : null
+  }
+
+  return properties
 }
 
 async function validateBuildingForPropertyCreation({ projectId, lot, model, facade, quoteId }) {
@@ -456,7 +544,6 @@ export const getAllProperties = async (req, res) => {
       .populate('project', 'name slug')
       .populate('lot', 'number price')
       .populate('model', 'model modelNumber price bedrooms bathrooms sqft images blueprints balconies upgrades floors')
-      .populate('facade', 'title url price')
       .populate('users', 'firstName lastName email phoneNumber')
       .populate({
         path: 'phases',
@@ -475,7 +562,8 @@ export const getAllProperties = async (req, res) => {
       propertyObj.mediaByFloor = resolveModelFloorMedia(property.model, property.selectedOptions || {})
       return propertyObj
     })
-    
+
+    await mapFacadeSelections(propertiesWithPercentage)
     await hydrateUrlsInObject(propertiesWithPercentage)
     res.json(propertiesWithPercentage)
   } catch (error) {
@@ -489,7 +577,6 @@ export const getPropertyById = async (req, res) => {
       .populate('project', 'name slug')
       .populate('lot', 'number price')
       .populate('model', 'model modelNumber price bedrooms bathrooms sqft images blueprints description balconies upgrades floors')
-      .populate('facade', 'title url price')
       .populate('users', 'firstName lastName email phoneNumber birthday')
       .populate({
         path: 'payloads',
@@ -518,6 +605,7 @@ export const getPropertyById = async (req, res) => {
     propertyObj.images = getPropertyImages(property)
     propertyObj.blueprints = getPropertyBlueprints(property)
     propertyObj.mediaByFloor = resolveModelFloorMedia(property.model, property.selectedOptions || {})
+    await mapFacadeSelections([propertyObj])
     await hydrateUrlsInObject(propertyObj)
     res.json(propertyObj)
   } catch (error) {
@@ -663,7 +751,12 @@ const resolvePropertyPricing = async ({
         adjustments: pricing.adjustments,
         configVersion: pricing.configVersion,
         pricingMode: pricing.pricingMode || 'legacy_components'
-      }
+      },
+      selectedFacadeId: facadeExists
+        ? (facade && mongoose.Types.ObjectId.isValid(String(facade))
+          ? String(facade)
+          : toIdStr(facadeExists._id))
+        : null
     }
   }
 }
@@ -885,7 +978,7 @@ export const createProperty = async (req, res) => {
       return res.status(resolved.status).json({ message: resolved.message })
     }
     projId = resolved.data.projectId
-    const resolvedFacadeId = resolved.data.facadeExists ? resolved.data.facadeExists._id : null
+    const resolvedFacadeId = resolved.data.selectedFacadeId || null
     const buildingValidation = await validateBuildingForPropertyCreation({
       projectId: projId,
       lot,
@@ -946,7 +1039,6 @@ export const createProperty = async (req, res) => {
     const populatedProperty = await Property.findById(property._id)
       .populate('lot')
       .populate('model')
-      .populate('facade')
       .populate('users')
       .populate({
         path: 'phases',
@@ -957,7 +1049,7 @@ export const createProperty = async (req, res) => {
     propertyObj.totalConstructionPercentage = populatedProperty.totalConstructionPercentage || 0
     propertyObj.images = getPropertyImages(populatedProperty)
     propertyObj.blueprints = getPropertyBlueprints(populatedProperty)
-    
+    await mapFacadeSelections([propertyObj])
     await hydrateUrlsInObject(propertyObj)
     res.status(201).json(propertyObj)
   } catch (error) {
@@ -1057,7 +1149,7 @@ export const updateProperty = async (req, res) => {
           if (!resolvedFacade.ok) {
             return res.status(resolvedFacade.status).json({ message: resolvedFacade.message })
           }
-          property.facade = resolvedFacade.facade._id
+          property.facade = resolvedFacade.selectedFacadeId
           property.markModified('facade')
         }
       }
@@ -1104,7 +1196,6 @@ export const updateProperty = async (req, res) => {
       const populatedProperty = await Property.findById(updatedProperty._id)
         .populate('lot')
         .populate('model')
-        .populate('facade')
         .populate('users')
         .populate({
           path: 'phases',
@@ -1115,7 +1206,7 @@ export const updateProperty = async (req, res) => {
       propertyObj.totalConstructionPercentage = populatedProperty.totalConstructionPercentage || 0
       propertyObj.images = getPropertyImages(populatedProperty)
       propertyObj.blueprints = getPropertyBlueprints(populatedProperty)
-      
+      await mapFacadeSelections([propertyObj])
       await hydrateUrlsInObject(propertyObj)
       res.json(propertyObj)
     } else {
