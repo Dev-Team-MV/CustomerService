@@ -1,5 +1,55 @@
 import mongoose from 'mongoose'
 
+const activitySubtaskSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: [true, 'Subtask title is required'],
+      trim: true
+    },
+    completed: {
+      type: Boolean,
+      default: false
+    },
+    dueDate: {
+      type: Date
+    },
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    order: {
+      type: Number,
+      min: 0,
+      default: 0
+    },
+    completedAt: {
+      type: Date
+    }
+  },
+  {
+    timestamps: true
+  }
+)
+
+const activityThreadMessageSchema = new mongoose.Schema(
+  {
+    message: {
+      type: String,
+      required: [true, 'Thread message is required'],
+      trim: true
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    }
+  },
+  {
+    timestamps: true
+  }
+)
+
 const activitySchema = new mongoose.Schema(
   {
     boardType: {
@@ -56,6 +106,21 @@ const activitySchema = new mongoose.Schema(
     tags: {
       type: [String],
       default: []
+    },
+    relatedProjects: {
+      type: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Project'
+      }],
+      default: []
+    },
+    subtasks: {
+      type: [activitySubtaskSchema],
+      default: []
+    },
+    threads: {
+      type: [activityThreadMessageSchema],
+      default: []
     }
   },
   {
@@ -65,6 +130,7 @@ const activitySchema = new mongoose.Schema(
 
 activitySchema.index({ boardType: 1, projectId: 1, columnId: 1, position: 1 })
 activitySchema.index({ boardType: 1, projectId: 1, dueDate: 1 })
+activitySchema.index({ relatedProjects: 1 })
 
 const Activity = mongoose.model('Activity', activitySchema)
 

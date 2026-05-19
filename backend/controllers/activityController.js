@@ -11,6 +11,50 @@ const parsePosition = (value) => {
   return Math.max(0, Math.floor(parsed))
 }
 
+const dedupeObjectIds = (ids) => [...new Set(ids.map((id) => id.toString()))]
+
+const normalizeRelatedProjects = (relatedProjects, projectIds) => {
+  const source = relatedProjects ?? projectIds
+  if (source === undefined) return undefined
+  if (source === null) return []
+
+  const list = Array.isArray(source) ? source : [source]
+  if (list.some((id) => !isValidObjectId(id))) {
+    return null
+  }
+
+  return dedupeObjectIds(list)
+}
+
+const normalizeSubtasks = (subtasks) => {
+  if (subtasks === undefined) return undefined
+  if (!Array.isArray(subtasks)) return null
+
+  const normalized = []
+  for (let index = 0; index < subtasks.length; index += 1) {
+    const item = subtasks[index]
+    if (!item || typeof item.title !== 'string' || !item.title.trim()) {
+      return null
+    }
+    if (item.assignedTo && !isValidObjectId(item.assignedTo)) {
+      return null
+    }
+
+    const completed = item.completed === true
+    const parsedOrder = typeof item.order === 'number' ? parsePosition(item.order) : null
+    normalized.push({
+      title: item.title.trim(),
+      completed,
+      dueDate: item.dueDate || undefined,
+      assignedTo: item.assignedTo || undefined,
+      order: parsedOrder === null ? index : parsedOrder,
+      completedAt: completed ? (item.completedAt || new Date()) : undefined
+    })
+  }
+
+  return normalized
+}
+
 const resolveScope = (projectId) => {
   if (projectId === undefined || projectId === null || projectId === '') {
     return { boardType: 'global', projectId: null }
@@ -47,6 +91,22 @@ const scopeFromDoc = (doc) => (
       ? { boardType: 'project', projectId: doc.projectId }
       : { boardType: 'global', projectId: null }
 )
+
+const populateActivityQuery = (query, options = {}) => {
+  const includeColumn = options.includeColumn !== false
+  let q = query
+    .populate('assignedTo', 'firstName lastName email')
+    .populate('createdBy', 'firstName lastName email')
+    .populate('relatedProjects', '_id name slug phase title')
+    .populate('subtasks.assignedTo', 'firstName lastName email')
+    .populate('threads.createdBy', 'firstName lastName email')
+
+  if (includeColumn) {
+    q = q.populate('columnId', 'name key order')
+  }
+
+  return q
+}
 
 const ensureDefaultColumns = async (scope) => {
   const filter = scopeQueryFilter(scope)
@@ -275,7 +335,7 @@ export const deleteActivityColumn = async (req, res) => {
 
 export const getActivities = async (req, res) => {
   try {
-    const { projectId, columnId, assignedTo, priority } = req.query
+    const { projectId, columnId, assignedTo, priority, relatedProjectId } = req.query
     const scope = resolveScope(projectId)
     if (!scope) {
       return res.status(400).json({ message: 'projectId must be a valid ObjectId when provided' })
@@ -287,11 +347,9 @@ export const getActivities = async (req, res) => {
     if (columnId && isValidObjectId(columnId)) filter.columnId = columnId
     if (assignedTo && isValidObjectId(assignedTo)) filter.assignedTo = assignedTo
     if (priority) filter.priority = priority
+    if (relatedProjectId && isValidObjectId(relatedProjectId)) filter.relatedProjects = relatedProjectId
 
-    const activities = await Activity.find(filter)
-      .populate('assignedTo', 'firstName lastName email')
-      .populate('createdBy', 'firstName lastName email')
-      .populate('columnId', 'name key order')
+    const activities = await populateActivityQuery(Activity.find(filter))
       .sort({ position: 1, createdAt: 1 })
 
     res.json(activities)
@@ -310,9 +368,7 @@ export const getActivityBoard = async (req, res) => {
 
     const filter = scopeQueryFilter(scope)
     const columns = await ensureDefaultColumns(scope)
-    const activities = await Activity.find(filter)
-      .populate('assignedTo', 'firstName lastName email')
-      .populate('createdBy', 'firstName lastName email')
+    const activities = await populateActivityQuery(Activity.find(filter), { includeColumn: false })
       .sort({ position: 1, createdAt: 1 })
       .lean()
 
@@ -338,10 +394,7 @@ export const getActivityById = async (req, res) => {
       return res.status(400).json({ message: 'Valid activity id is required' })
     }
 
-    const activity = await Activity.findById(id)
-      .populate('assignedTo', 'firstName lastName email')
-      .populate('createdBy', 'firstName lastName email')
-      .populate('columnId', 'name key order')
+    const activity = await populateActivityQuery(Activity.findById(id))
 
     if (!activity) {
       return res.status(404).json({ message: 'Activity not found' })
@@ -364,7 +417,10 @@ export const createActivity = async (req, res) => {
       priority,
       dueDate,
       assignedTo,
-      tags
+      tags,
+      relatedProjects,
+      projectIds,
+      subtasks
     } = req.body
 
     const scope = resolveScope(projectId)
@@ -397,6 +453,16 @@ export const createActivity = async (req, res) => {
       return res.status(400).json({ message: 'assignedTo must be a valid user id' })
     }
 
+    const normalizedRelatedProjects = normalizeRelatedProjects(relatedProjects, projectIds)
+    if (normalizedRelatedProjects === null) {
+      return res.status(400).json({ message: 'relatedProjects/projectIds must contain valid project ids' })
+    }
+
+    const normalizedSubtasks = normalizeSubtasks(subtasks)
+    if (normalizedSubtasks === null) {
+      return res.status(400).json({ message: 'subtasks must be an array of valid subtask objects' })
+    }
+
     const activity = new Activity({
       ...scopePersistData(scope),
       title: title.trim(),
@@ -406,16 +472,15 @@ export const createActivity = async (req, res) => {
       dueDate: dueDate || undefined,
       assignedTo: assignedTo || undefined,
       createdBy: req.user._id,
-      tags: Array.isArray(tags) ? tags : []
+      tags: Array.isArray(tags) ? tags : [],
+      relatedProjects: normalizedRelatedProjects || [],
+      subtasks: normalizedSubtasks || []
     })
 
     await placeActivityInColumn(activity, targetColumnId, parsePosition(position))
     const created = await activity.save()
 
-    const payload = await Activity.findById(created._id)
-      .populate('assignedTo', 'firstName lastName email')
-      .populate('createdBy', 'firstName lastName email')
-      .populate('columnId', 'name key order')
+    const payload = await populateActivityQuery(Activity.findById(created._id))
 
     res.status(201).json(payload)
   } catch (error) {
@@ -443,7 +508,10 @@ export const updateActivity = async (req, res) => {
       priority,
       dueDate,
       assignedTo,
-      tags
+      tags,
+      relatedProjects,
+      projectIds,
+      subtasks
     } = req.body
 
     if (title !== undefined) activity.title = title
@@ -457,6 +525,22 @@ export const updateActivity = async (req, res) => {
       activity.assignedTo = assignedTo || undefined
     }
     if (tags !== undefined) activity.tags = Array.isArray(tags) ? tags : []
+
+    const normalizedRelatedProjects = normalizeRelatedProjects(relatedProjects, projectIds)
+    if (normalizedRelatedProjects === null) {
+      return res.status(400).json({ message: 'relatedProjects/projectIds must contain valid project ids' })
+    }
+    if (normalizedRelatedProjects !== undefined) {
+      activity.relatedProjects = normalizedRelatedProjects
+    }
+
+    const normalizedSubtasks = normalizeSubtasks(subtasks)
+    if (normalizedSubtasks === null) {
+      return res.status(400).json({ message: 'subtasks must be an array of valid subtask objects' })
+    }
+    if (normalizedSubtasks !== undefined) {
+      activity.subtasks = normalizedSubtasks
+    }
 
     const targetColumnId = columnId || activity.columnId
     if (!isValidObjectId(targetColumnId)) {
@@ -472,10 +556,7 @@ export const updateActivity = async (req, res) => {
     await placeActivityInColumn(activity, targetColumnId, parsePosition(position))
     await activity.save()
 
-    const payload = await Activity.findById(activity._id)
-      .populate('assignedTo', 'firstName lastName email')
-      .populate('createdBy', 'firstName lastName email')
-      .populate('columnId', 'name key order')
+    const payload = await populateActivityQuery(Activity.findById(activity._id))
 
     res.json(payload)
   } catch (error) {
@@ -509,10 +590,7 @@ export const moveActivity = async (req, res) => {
     await placeActivityInColumn(activity, columnId, parsePosition(position))
     await activity.save()
 
-    const payload = await Activity.findById(activity._id)
-      .populate('assignedTo', 'firstName lastName email')
-      .populate('createdBy', 'firstName lastName email')
-      .populate('columnId', 'name key order')
+    const payload = await populateActivityQuery(Activity.findById(activity._id))
 
     res.json(payload)
   } catch (error) {
@@ -547,6 +625,157 @@ export const deleteActivity = async (req, res) => {
     )
 
     res.json({ message: 'Activity deleted successfully' })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const addActivitySubtask = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { title, assignedTo, dueDate, completed } = req.body
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: 'Valid activity id is required' })
+    }
+    if (!title || typeof title !== 'string') {
+      return res.status(400).json({ message: 'title is required' })
+    }
+    if (assignedTo && !isValidObjectId(assignedTo)) {
+      return res.status(400).json({ message: 'assignedTo must be a valid user id' })
+    }
+
+    const activity = await Activity.findById(id)
+    if (!activity) {
+      return res.status(404).json({ message: 'Activity not found' })
+    }
+
+    const subtask = {
+      title: title.trim(),
+      assignedTo: assignedTo || undefined,
+      dueDate: dueDate || undefined,
+      completed: completed === true,
+      completedAt: completed === true ? new Date() : undefined,
+      order: activity.subtasks.length
+    }
+
+    activity.subtasks.push(subtask)
+    await activity.save()
+
+    const payload = await populateActivityQuery(Activity.findById(activity._id))
+    res.status(201).json(payload)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const updateActivitySubtask = async (req, res) => {
+  try {
+    const { id, subtaskId } = req.params
+    const { title, assignedTo, dueDate, completed, order } = req.body
+
+    if (!isValidObjectId(id) || !isValidObjectId(subtaskId)) {
+      return res.status(400).json({ message: 'Valid activity id and subtask id are required' })
+    }
+    if (assignedTo && !isValidObjectId(assignedTo)) {
+      return res.status(400).json({ message: 'assignedTo must be a valid user id' })
+    }
+
+    const activity = await Activity.findById(id)
+    if (!activity) {
+      return res.status(404).json({ message: 'Activity not found' })
+    }
+
+    const subtask = activity.subtasks.id(subtaskId)
+    if (!subtask) {
+      return res.status(404).json({ message: 'Subtask not found' })
+    }
+
+    if (title !== undefined) {
+      if (typeof title !== 'string' || !title.trim()) {
+        return res.status(400).json({ message: 'title must be a non-empty string' })
+      }
+      subtask.title = title.trim()
+    }
+    if (assignedTo !== undefined) subtask.assignedTo = assignedTo || undefined
+    if (dueDate !== undefined) subtask.dueDate = dueDate || undefined
+    if (completed !== undefined) {
+      const isCompleted = completed === true
+      subtask.completed = isCompleted
+      subtask.completedAt = isCompleted ? (subtask.completedAt || new Date()) : undefined
+    }
+    if (order !== undefined) {
+      const parsedOrder = parsePosition(order)
+      if (parsedOrder === null) {
+        return res.status(400).json({ message: 'order must be a number' })
+      }
+      subtask.order = parsedOrder
+    }
+
+    await activity.save()
+
+    const payload = await populateActivityQuery(Activity.findById(activity._id))
+    res.json(payload)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const deleteActivitySubtask = async (req, res) => {
+  try {
+    const { id, subtaskId } = req.params
+    if (!isValidObjectId(id) || !isValidObjectId(subtaskId)) {
+      return res.status(400).json({ message: 'Valid activity id and subtask id are required' })
+    }
+
+    const activity = await Activity.findById(id)
+    if (!activity) {
+      return res.status(404).json({ message: 'Activity not found' })
+    }
+
+    const subtask = activity.subtasks.id(subtaskId)
+    if (!subtask) {
+      return res.status(404).json({ message: 'Subtask not found' })
+    }
+
+    subtask.deleteOne()
+    activity.subtasks.forEach((item, index) => {
+      item.order = index
+    })
+    await activity.save()
+
+    const payload = await populateActivityQuery(Activity.findById(activity._id))
+    res.json(payload)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const addActivityThreadMessage = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { message } = req.body
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: 'Valid activity id is required' })
+    }
+    if (!message || typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({ message: 'message is required' })
+    }
+
+    const activity = await Activity.findById(id)
+    if (!activity) {
+      return res.status(404).json({ message: 'Activity not found' })
+    }
+
+    activity.threads.push({
+      message: message.trim(),
+      createdBy: req.user._id
+    })
+    await activity.save()
+
+    const payload = await populateActivityQuery(Activity.findById(activity._id))
+    res.status(201).json(payload)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
