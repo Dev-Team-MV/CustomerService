@@ -9,10 +9,18 @@ export const DEFAULT_ACTIVITY_COLUMNS = [
 
 const activityColumnSchema = new mongoose.Schema(
   {
+    boardType: {
+      type: String,
+      enum: ['project', 'global'],
+      default: 'project',
+      required: true
+    },
     projectId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Project',
-      required: [true, 'Project is required']
+      required: function () {
+        return this.boardType === 'project'
+      }
     },
     key: {
       type: String,
@@ -35,8 +43,8 @@ const activityColumnSchema = new mongoose.Schema(
   }
 )
 
-activityColumnSchema.index({ projectId: 1, key: 1 }, { unique: true })
-activityColumnSchema.index({ projectId: 1, order: 1 })
+activityColumnSchema.index({ boardType: 1, projectId: 1, key: 1 }, { unique: true })
+activityColumnSchema.index({ boardType: 1, projectId: 1, order: 1 })
 
 const ActivityColumn = mongoose.model('ActivityColumn', activityColumnSchema)
 

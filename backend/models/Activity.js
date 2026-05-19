@@ -2,10 +2,18 @@ import mongoose from 'mongoose'
 
 const activitySchema = new mongoose.Schema(
   {
+    boardType: {
+      type: String,
+      enum: ['project', 'global'],
+      default: 'project',
+      required: true
+    },
     projectId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Project',
-      required: [true, 'Project is required']
+      required: function () {
+        return this.boardType === 'project'
+      }
     },
     title: {
       type: String,
@@ -55,8 +63,8 @@ const activitySchema = new mongoose.Schema(
   }
 )
 
-activitySchema.index({ projectId: 1, columnId: 1, position: 1 })
-activitySchema.index({ projectId: 1, dueDate: 1 })
+activitySchema.index({ boardType: 1, projectId: 1, columnId: 1, position: 1 })
+activitySchema.index({ boardType: 1, projectId: 1, dueDate: 1 })
 
 const Activity = mongoose.model('Activity', activitySchema)
 

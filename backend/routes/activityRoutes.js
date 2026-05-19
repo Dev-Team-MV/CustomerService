@@ -20,18 +20,18 @@ const router = express.Router()
  * @swagger
  * /api/activities/columns:
  *   get:
- *     summary: List kanban columns for a project (creates defaults if missing)
+ *     summary: List kanban columns (project board or global board)
  *     tags: [Activities]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: projectId
- *         required: true
+ *         required: false
  *         schema:
  *           type: string
  *         example: 6650f1a2a47f4b9f7296f1ab
- *         description: Project ID
+ *         description: Optional. If provided returns that project board; if omitted returns global board.
  *     responses:
  *       200:
  *         description: Columns for the project
@@ -60,14 +60,13 @@ const router = express.Router()
  *         application/json:
  *           schema:
  *             type: object
- *             required: [projectId, key, name]
+ *             required: [key, name]
  *             properties:
  *               projectId: { type: string }
  *               key: { type: string, example: blocked }
  *               name: { type: string, example: Bloqueadas }
  *               order: { type: number, example: 2 }
  *           example:
- *             projectId: 6650f1a2a47f4b9f7296f1ab
  *             key: review
  *             name: En revision
  *             order: 3
@@ -136,17 +135,18 @@ router.delete('/columns/:id', protect, admin, deleteActivityColumn)
  * @swagger
  * /api/activities/board:
  *   get:
- *     summary: Get kanban board grouped by columns
+ *     summary: Get kanban board grouped by columns (project or global)
  *     tags: [Activities]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: projectId
- *         required: true
+ *         required: false
  *         schema:
  *           type: string
  *         example: 6650f1a2a47f4b9f7296f1ab
+ *         description: Optional. Omit to use global board.
  *     responses:
  *       200:
  *         description: Board with columns and activities
@@ -176,17 +176,18 @@ router.get('/board', protect, getActivityBoard)
  * @swagger
  * /api/activities:
  *   get:
- *     summary: List activities by project (optional filters)
+ *     summary: List activities (project board or global board)
  *     tags: [Activities]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: projectId
- *         required: true
+ *         required: false
  *         schema:
  *           type: string
  *         example: 6650f1a2a47f4b9f7296f1ab
+ *         description: Optional. Omit to query global board.
  *       - in: query
  *         name: columnId
  *         schema:
@@ -217,7 +218,7 @@ router.get('/board', protect, getActivityBoard)
  *         application/json:
  *           schema:
  *             type: object
- *             required: [projectId, title]
+ *             required: [title]
  *             properties:
  *               projectId: { type: string }
  *               title: { type: string }
@@ -235,7 +236,6 @@ router.get('/board', protect, getActivityBoard)
  *                 type: array
  *                 items: { type: string }
  *           example:
- *             projectId: 6650f1a2a47f4b9f7296f1ab
  *             title: Confirmar firma de contrato
  *             description: Llamar al cliente y coordinar firma electronica
  *             columnId: 6650f7a7d31d9c9b1e60a021
