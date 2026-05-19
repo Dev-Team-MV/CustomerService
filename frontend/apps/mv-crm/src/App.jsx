@@ -12,6 +12,7 @@ import Sales from './pages/Sales'
 import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
 import Analytics from './pages/Analytics'
+import Activities from './pages/Activities'
 import { ProtectedRoute } from '@shared/components/ProtectedRoute'
 
 const theme = createTheme({
@@ -61,6 +62,11 @@ export default function App() {
           <Route path="/analytics" element={
             <ProtectedRoute requiredRole="user">
               <Analytics />
+            </ProtectedRoute>
+          } />
+          <Route path="/activities" element={
+            <ProtectedRoute requiredRole="admin">
+              <Activities />
             </ProtectedRoute>
           } />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

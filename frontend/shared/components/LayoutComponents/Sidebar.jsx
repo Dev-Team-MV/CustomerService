@@ -13,6 +13,7 @@ const NAV = [
   { key: 'clients',  labelKey: 'clients',  icon: People,     path: '/clients'   },
   { key: 'projects', labelKey: 'projects', icon: FolderOpen, path: '/projects'  },
   { key: 'settings', labelKey: 'settings', icon: Settings,   path: '/settings'  },
+  {key: 'activities', labelKey: 'activities', icon: BarChart, path: '/activities' }, 
   {key: 'analytics', labelKey: 'analytics', icon: BarChart, path: '/analytics' }
 ]
 

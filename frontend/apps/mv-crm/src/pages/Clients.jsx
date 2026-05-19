@@ -11,6 +11,8 @@ import ResidentDialog from '@shared/components/Modals/ResidentDialog'
 import { useTranslation } from 'react-i18next'
 import { useResidents } from '@shared/hooks/useResidents'
 import { useClientColumns } from '../constants/Columns/resident'
+import BroadcastMessageModal from '../components/BroadcastMessageModal'
+import { Send } from '@mui/icons-material'
 
 export default function Clients() {
   const { t } = useTranslation('residents')
@@ -51,6 +53,16 @@ export default function Clients() {
     onDelete: handleDelete,
     onSendSMS: handleSendPasswordSMS,
   })
+  const [broadcastModalOpen, setBroadcastModalOpen] = useState(false)
+
+   
+// Handler mock para envío
+const handleSendBroadcast = async (data) => {
+  console.log('📤 Enviando mensaje:', data)
+  // Mock: simular envío
+  await new Promise(resolve => setTimeout(resolve, 1500))
+  alert(`Mensaje enviado a ${data.recipients.length} destinatarios`)
+}
 
   // Stats
   const activeCount   = users.filter(c => c.isActive).length
@@ -71,14 +83,22 @@ export default function Clients() {
         { label: t('clients.withLots'), value: withLotsCount },
       ]} />
 
-      <Button
-        variant="contained"
-        color="primary"
-        sx={{ mb: 2 }}
-        onClick={() => handleOpenDialog()}
-      >
-        + {t('clients.addClient')}
-      </Button>
+<Box display="flex" gap={2} mb={2}>
+  <Button
+    variant="contained"
+    color="primary"
+    onClick={() => handleOpenDialog()}
+  >
+    + {t('clients.addClient')}
+  </Button>
+  <Button
+    variant="outlined"
+    startIcon={<Send />}
+    onClick={() => setBroadcastModalOpen(true)}
+  >
+    Enviar mensaje
+  </Button>
+</Box>
 
       <ResidentDialog
         open={openDialog}
@@ -126,6 +146,13 @@ export default function Clients() {
           onRowClick={(row) => handleOpenDialog(row)}
         />
       </motion.div>
+
+<BroadcastMessageModal
+  open={broadcastModalOpen}
+  onClose={() => setBroadcastModalOpen(false)}
+  users={users}
+  onSend={handleSendBroadcast}
+/>
 
       <Snackbar
         open={snackbar.open}
