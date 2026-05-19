@@ -15,6 +15,7 @@ pipeline {
         APP_DIR = 'backend'
         JWT_SECRET = 'supersecretkey123456789'
         UPLOAD_MAX_FILE_SIZE_MB = '1024'
+        CORS_ORIGINS = 'https://devlakewoodp1.michelangelodelvalle.com,https://lakewoodp1.michelangelodelvalle.com,https://devlakewoodp2.michelangelodelvalle.com,https://lakewoodp2.michelangelodelvalle.com,https://devcrm.michelangelodelvalle.com,https://crm.michelangelodelvalle.com'
         TWILIO_PHONE_FROM = '+18327707897'
         GCS_PROJECT_ID = 'centurions-car-wash-442201'
         GCS_BUCKET_NAME = 'customer-service-7cc'
@@ -163,6 +164,7 @@ pipeline {
                               -e PUBLIC_URL=''' + env.PUBLIC_URL + ''' \
                               -e FRONTEND_URL=''' + env.FRONTEND_URL + ''' \
                               -e UPLOAD_MAX_FILE_SIZE_MB=''' + env.UPLOAD_MAX_FILE_SIZE_MB + ''' \
+                              -e CORS_ORIGINS=''' + env.CORS_ORIGINS + ''' \
                               -e MONGODB_URI="$MONGODB_URI" \
                               -e JWT_SECRET=''' + env.JWT_SECRET + ''' \
                               -e TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID \
