@@ -15,6 +15,7 @@ import {
   Map as MapIcon,
   Groups as GroupsIcon,
   Pool as PoolIcon,
+  GridOn as GridOnIcon,
 } from "@mui/icons-material"
 
 export const privateMenuItems = [
@@ -114,6 +115,12 @@ export const privateMenuItems = [
     icon: MapIcon,
     path: "/map-inventory",
     roles: ["admin", "superadmin"],
+  },
+  {
+    textKey: "navigation:menu.uploadTracker",
+    icon: GridOnIcon,
+    path: "/upload-tracker",
+    roles: ["superadmin", "admin"],
   },
 ]
 
