@@ -50,6 +50,7 @@ const router = express.Router()
  *                   projectId: { type: string }
  *                   key: { type: string, example: todo }
  *                   name: { type: string, example: Por hacer }
+ *                   color: { type: string, example: '#9c27b0' }
  *                   order: { type: number, example: 1 }
  *       400:
  *         description: Invalid projectId
@@ -69,11 +70,13 @@ const router = express.Router()
  *               projectId: { type: string }
  *               key: { type: string, example: blocked }
  *               name: { type: string, example: Bloqueadas }
+ *               color: { type: string, example: '#9c27b0' }
  *               order: { type: number, example: 2 }
  *           example:
- *             key: review
- *             name: En revision
- *             order: 3
+ *             name: test
+ *             key: test
+ *             color: '#9c27b0'
+ *             order: 1
  *     responses:
  *       201:
  *         description: Column created
@@ -105,9 +108,11 @@ router.post('/columns', protect, admin, createActivityColumn)
  *             type: object
  *             properties:
  *               name: { type: string, example: Doing }
+ *               color: { type: string, example: '#9c27b0' }
  *               order: { type: number, example: 2 }
  *           example:
  *             name: En progreso
+ *             color: '#9c27b0'
  *             order: 2
  *     responses:
  *       200:

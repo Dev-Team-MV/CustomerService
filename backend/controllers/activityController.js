@@ -11,6 +11,15 @@ const parsePosition = (value) => {
   return Math.max(0, Math.floor(parsed))
 }
 
+const normalizeHexColor = (value) => {
+  if (value === undefined) return undefined
+  if (value === null || value === '') return '#64748b'
+  if (typeof value !== 'string') return null
+  const color = value.trim()
+  if (!/^#([A-Fa-f0-9]{6})$/.test(color)) return null
+  return color.toLowerCase()
+}
+
 const dedupeObjectIds = (ids) => [...new Set(ids.map((id) => id.toString()))]
 
 const normalizeContact = (contact) => {
@@ -224,7 +233,7 @@ export const getActivityColumns = async (req, res) => {
 
 export const createActivityColumn = async (req, res) => {
   try {
-    const { projectId, key, name, order } = req.body
+    const { projectId, key, name, color, order } = req.body
     const scope = resolveScope(projectId)
     if (!scope) {
       return res.status(400).json({ message: 'projectId must be a valid ObjectId when provided' })
@@ -234,6 +243,10 @@ export const createActivityColumn = async (req, res) => {
     }
     if (!name || typeof name !== 'string') {
       return res.status(400).json({ message: 'name is required' })
+    }
+    const normalizedColor = normalizeHexColor(color)
+    if (normalizedColor === null) {
+      return res.status(400).json({ message: 'color must be a valid hex value like #9c27b0' })
     }
 
     await ensureDefaultColumns(scope)
@@ -259,6 +272,7 @@ export const createActivityColumn = async (req, res) => {
       ...scopePersistData(scope),
       key: key.trim(),
       name: name.trim(),
+      color: normalizedColor || '#64748b',
       order: finalOrder
     })
 
@@ -280,8 +294,15 @@ export const updateActivityColumn = async (req, res) => {
       return res.status(404).json({ message: 'Column not found' })
     }
 
-    const { name, order } = req.body
+    const { name, color, order } = req.body
     if (name !== undefined) column.name = name
+    if (color !== undefined) {
+      const normalizedColor = normalizeHexColor(color)
+      if (normalizedColor === null) {
+        return res.status(400).json({ message: 'color must be a valid hex value like #9c27b0' })
+      }
+      column.color = normalizedColor
+    }
 
     if (order !== undefined) {
       const nextOrder = parsePosition(order)

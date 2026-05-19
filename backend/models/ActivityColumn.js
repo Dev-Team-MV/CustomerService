@@ -1,10 +1,10 @@
 import mongoose from 'mongoose'
 
 export const DEFAULT_ACTIVITY_COLUMNS = [
-  { key: 'backlog', name: 'Backlog', order: 0 },
-  { key: 'todo', name: 'Por hacer', order: 1 },
-  { key: 'in_progress', name: 'En progreso', order: 2 },
-  { key: 'done', name: 'Hecho', order: 3 }
+  { key: 'backlog', name: 'Backlog', color: '#64748b', order: 0 },
+  { key: 'todo', name: 'Por hacer', color: '#0ea5e9', order: 1 },
+  { key: 'in_progress', name: 'En progreso', color: '#f59e0b', order: 2 },
+  { key: 'done', name: 'Hecho', color: '#22c55e', order: 3 }
 ]
 
 const activityColumnSchema = new mongoose.Schema(
@@ -31,6 +31,17 @@ const activityColumnSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Column name is required'],
       trim: true
+    },
+    color: {
+      type: String,
+      trim: true,
+      default: '#64748b',
+      validate: {
+        validator: function (value) {
+          return /^#([A-Fa-f0-9]{6})$/.test(value)
+        },
+        message: 'Color must be a valid hex code like #9c27b0'
+      }
     },
     order: {
       type: Number,
