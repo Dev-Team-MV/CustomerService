@@ -19,6 +19,7 @@ import propertyRoutes from './routes/propertyRoutes.js'
 import payloadRoutes from './routes/payloadRoutes.js'
 import phaseRoutes from './routes/phaseRoutes.js'
 import smsRoutes from './routes/smsRoutes.js'
+import smsTemplateRoutes from './routes/smsTemplateRoutes.js'
 import uploadRoutes from './routes/uploadRoutes.js'
 import newsRoutes from './routes/newsRoutes.js'
 import contractRoutes from './routes/contractRoutes.js'
@@ -90,6 +91,7 @@ app.use('/api/properties', propertyRoutes)
 app.use('/api/payloads', payloadRoutes)
 app.use('/api/phases', phaseRoutes)
 app.use('/api/sms', smsRoutes)
+app.use('/api/sms-templates', smsTemplateRoutes)
 app.use('/api/upload', uploadRoutes)
 app.use('/api/news', newsRoutes)
 app.use('/api/contracts', contractRoutes)
