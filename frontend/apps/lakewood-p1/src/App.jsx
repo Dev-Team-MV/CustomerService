@@ -34,6 +34,7 @@ import TimeLine from './pages/TimeLine'
 import ConfigurationManager from './pages/ConfigurationManager'
 import FamilyGroup from './pages/FamilyGroup'
 import MapInventoryPage from './pages/MapInventoryPage'
+import UploadTracker from './pages/UploadTracker'
 
 import theme from './theme' // Usa SIEMPRE el theme extendido
 
@@ -115,6 +116,7 @@ function App() {
               <Route path="/timeline" element={<TimeLine />} />
               <Route path="/clubhouse-manager" element={<ClubhouseManager />} />
               <Route path="/map-inventory" element={<MapInventoryPage />} />
+              <Route path="/upload-tracker" element={<UploadTracker />} />
             </Route>
           </Route>
           <Route path="*" element={<NotFound />} />

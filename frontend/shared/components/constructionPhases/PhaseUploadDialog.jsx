@@ -25,7 +25,8 @@ const PhaseUploadDialog = ({
     title: '',
     percentage: 0,
     images: [],
-    videos: []
+    videos: [],
+    uploadedAt: new Date().toISOString().split('T')[0]
   })
 
   const maxAddable = maxPercentage - (phase?.constructionPercentage || 0)
@@ -53,11 +54,11 @@ const PhaseUploadDialog = ({
     }
     
     await onUpload(phase?.phaseNumber, uploadForm)
-    setUploadForm({ title: '', percentage: 0, images: [], videos: [] })
+    setUploadForm({ title: '', percentage: 0, images: [], videos: [], uploadedAt: new Date().toISOString().split('T')[0] })
   }
 
   const handleClose = () => {
-    setUploadForm({ title: '', percentage: 0, images: [], videos: [] })
+    setUploadForm({ title: '', percentage: 0, images: [], videos: [], uploadedAt: new Date().toISOString().split('T')[0] })
     onClose()
   }
 
@@ -160,6 +161,19 @@ onChange={(e) => {
               </Box>
             }
             disabled={maxAddable === 0}
+            sx={fieldSx}
+          />
+        </Grid>
+
+        {/* Fecha de subida */}
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            type="date"
+            label="Upload Date"
+            value={uploadForm.uploadedAt}
+            onChange={(e) => setUploadForm(prev => ({ ...prev, uploadedAt: e.target.value }))}
+            InputLabelProps={{ shrink: true }}
             sx={fieldSx}
           />
         </Grid>

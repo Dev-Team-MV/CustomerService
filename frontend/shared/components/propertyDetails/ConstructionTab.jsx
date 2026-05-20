@@ -159,19 +159,21 @@ const handleDeleteGroup = async (items) => {
 
       for (let i = 0; i < urls.length; i++) {
         await addMediaItem(phaseNumber, {
-          url:       urls[i],
-          title:     uploadForm.title || `Phase ${phaseNumber} - Image ${i + 1}`,
+          url:        urls[i],
+          title:      uploadForm.title || `Phase ${phaseNumber} - Image ${i + 1}`,
           percentage: percentagePerItem,
-          mediaType: 'image'
+          mediaType:  'image',
+          uploadedAt: uploadForm.uploadedAt || null
         })
       }
 
       for (let i = 0; i < videoUrls.length; i++) {
         await addMediaItem(phaseNumber, {
-          url:       videoUrls[i],
-          title:     uploadForm.title || `Phase ${phaseNumber} - Video ${i + 1}`,
+          url:        videoUrls[i],
+          title:      uploadForm.title || `Phase ${phaseNumber} - Video ${i + 1}`,
           percentage: percentagePerItem,
-          mediaType: 'video'
+          mediaType:  'video',
+          uploadedAt: uploadForm.uploadedAt || null
         })
       }
 

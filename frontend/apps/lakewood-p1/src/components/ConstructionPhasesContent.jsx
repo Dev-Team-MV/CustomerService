@@ -149,18 +149,20 @@ const handleDeleteMedia = async (mediaItemId) => {
 
       for (let i = 0; i < urls.length; i++) {
         await api.post(`/phases/${phaseId}/media`, {
-          url: urls[i],
-          title: uploadForm.title || t('defaultMediaTitle', { phase: selectedPhase.phaseNumber, type: 'Image', index: i + 1 }),
+          url:        urls[i],
+          title:      uploadForm.title || t('defaultMediaTitle', { phase: selectedPhase.phaseNumber, type: 'Image', index: i + 1 }),
           percentage: addedPercentage / (urls.length + videoUrls.length),
-          mediaType: 'image'
+          mediaType:  'image',
+          uploadedAt: uploadForm.uploadedAt || null
         })
       }
       for (let i = 0; i < videoUrls.length; i++) {
         await api.post(`/phases/${phaseId}/media`, {
-          url: videoUrls[i],
-          title: uploadForm.title || t('defaultMediaTitle', { phase: selectedPhase.phaseNumber, type: 'Video', index: i + 1 }),
+          url:        videoUrls[i],
+          title:      uploadForm.title || t('defaultMediaTitle', { phase: selectedPhase.phaseNumber, type: 'Video', index: i + 1 }),
           percentage: addedPercentage / (urls.length + videoUrls.length),
-          mediaType: 'video'
+          mediaType:  'video',
+          uploadedAt: uploadForm.uploadedAt || null
         })
       }
 
