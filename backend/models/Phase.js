@@ -11,6 +11,11 @@ const mediaItemSchema = new mongoose.Schema({
     required: [true, 'Title is required'],
     trim: true
   },
+  description: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   percentage: {
     type: Number,
     required: [true, 'Percentage is required'],
