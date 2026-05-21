@@ -109,7 +109,7 @@ export const getPhaseByApartmentAndNumber = async (req, res) => {
   }
 }
 
-// Update a phase (title, constructionPercentage)
+// Update a phase (title, description, constructionPercentage)
 export const updatePhase = async (req, res) => {
   try {
     const phase = await Phase.findById(req.params.id)
@@ -120,6 +120,10 @@ export const updatePhase = async (req, res) => {
     
     if (req.body.title !== undefined) {
       phase.title = req.body.title
+    }
+
+    if (req.body.description !== undefined) {
+      phase.description = req.body.description
     }
     
     if (req.body.constructionPercentage !== undefined) {

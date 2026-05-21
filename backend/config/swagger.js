@@ -855,6 +855,7 @@ const options = {
             apartment: { type: 'string', nullable: true },
             phaseNumber: { type: 'number', minimum: 1, maximum: 9 },
             title: { type: 'string' },
+            description: { type: 'string' },
             constructionPercentage: { type: 'number', minimum: 0, maximum: 100 },
             mediaItems: {
               type: 'array',

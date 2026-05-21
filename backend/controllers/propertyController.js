@@ -547,7 +547,7 @@ export const getAllProperties = async (req, res) => {
       .populate('users', 'firstName lastName email phoneNumber')
       .populate({
         path: 'phases',
-        select: 'phaseNumber title constructionPercentage',
+        select: 'phaseNumber title description constructionPercentage',
         options: { sort: { phaseNumber: 1 } }
       })
       .sort({ createdAt: -1 })

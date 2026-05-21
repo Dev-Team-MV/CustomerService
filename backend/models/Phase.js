@@ -48,6 +48,10 @@ const phaseSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    description: {
+      type: String,
+      trim: true
+    },
     constructionPercentage: {
       type: Number,
       required: [true, 'Construction percentage is required'],
