@@ -941,6 +941,32 @@ const options = {
               },
               description: 'Deck images (url, isPublic, name opcional)'
             },
+            clubHouseTimeline: {
+              type: 'array',
+              description: 'Timeline exclusivo del Club House',
+              items: {
+                type: 'object',
+                properties: {
+                  _id: { type: 'string' },
+                  title: { type: 'string' },
+                  description: { type: 'string' },
+                  clubHouseDate: { type: 'string', format: 'date-time' },
+                  media: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        type: { type: 'string', enum: ['image', 'video'] },
+                        url: { type: 'string' },
+                        name: { type: 'string' },
+                        order: { type: 'number' },
+                        isPublic: { type: 'boolean' }
+                      }
+                    }
+                  }
+                }
+              }
+            },
             interior: {
               type: 'object',
               additionalProperties: {

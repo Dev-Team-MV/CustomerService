@@ -1,5 +1,16 @@
 import express from 'express'
-import { getClubHouse, getClubHousePublic, uploadClubHouseImages, getClubHouseInteriorKeys, updateClubHouseImageVisibility, deleteClubHouseImages } from '../controllers/clubHouseController.js'
+import {
+  getClubHouse,
+  getClubHousePublic,
+  getClubHouseTimeline,
+  createClubHouseTimelineStep,
+  updateClubHouseTimelineStep,
+  deleteClubHouseTimelineStep,
+  uploadClubHouseImages,
+  getClubHouseInteriorKeys,
+  updateClubHouseImageVisibility,
+  deleteClubHouseImages
+} from '../controllers/clubHouseController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 import { upload } from '../controllers/uploadController.js'
 
@@ -57,6 +68,45 @@ router.get('/', protect, getClubHouse)
  *                   description: Optional. Map of filename -> boolean for recorrido folder images.
  */
 router.get('/public', getClubHousePublic)
+
+/**
+ * @swagger
+ * /api/clubhouse/timeline:
+ *   get:
+ *     summary: Get Club House timeline (public)
+ *     tags: [ClubHouse]
+ *     responses:
+ *       200:
+ *         description: Public Club House timeline
+ *   post:
+ *     summary: Create Club House timeline step (Admin only)
+ *     tags: [ClubHouse]
+ *     security:
+ *       - bearerAuth: []
+ */
+router
+  .route('/timeline')
+  .get(getClubHouseTimeline)
+  .post(protect, admin, createClubHouseTimelineStep)
+
+/**
+ * @swagger
+ * /api/clubhouse/timeline/{stepId}:
+ *   put:
+ *     summary: Update Club House timeline step by stepId (Admin only)
+ *     tags: [ClubHouse]
+ *     security:
+ *       - bearerAuth: []
+ *   delete:
+ *     summary: Delete Club House timeline step by stepId (Admin only)
+ *     tags: [ClubHouse]
+ *     security:
+ *       - bearerAuth: []
+ */
+router
+  .route('/timeline/:stepId')
+  .put(protect, admin, updateClubHouseTimelineStep)
+  .delete(protect, admin, deleteClubHouseTimelineStep)
 
 /**
  * @swagger
