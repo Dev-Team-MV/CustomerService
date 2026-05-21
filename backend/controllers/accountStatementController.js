@@ -31,7 +31,7 @@ export const downloadPropertyStatementPdf = async (req, res) => {
       return res.status(404).json({ message: 'Property not found' })
     }
 
-    const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin'
+    const isAdmin = req.user.role === 'admin' || req.user.role === 'superadmin' || req.user.role === 'owner'
     if (!isAdmin) {
       const canAccess = await canUserAccessProperty(req.user._id, property._id)
       if (!canAccess) {

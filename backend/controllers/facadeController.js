@@ -12,7 +12,7 @@ function toIdStr(val) {
   return String(val)
 }
 
-const isSuperadmin = (req) => req.user?.role === 'superadmin'
+const isSuperadmin = (req) => req.user?.role === 'superadmin' || req.user?.role === 'owner'
 const isValidProjectIdParam = (value) =>
   typeof value === 'string' &&
   value !== 'undefined' &&

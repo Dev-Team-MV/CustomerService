@@ -61,7 +61,7 @@ const options = {
             email: { type: 'string', format: 'email' },
             phoneNumber: { type: 'string' },
             birthday: { type: 'string', format: 'date' },
-            role: { type: 'string', enum: ['superadmin', 'admin', 'user'] },
+            role: { type: 'string', enum: ['superadmin', 'admin', 'owner', 'user'] },
             lots: { type: 'array', items: { type: 'string' } },
             projectMemberships: {
               type: 'array',

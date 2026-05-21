@@ -2,6 +2,12 @@ import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
 import { canUserAccessProject } from '../utils/projectAccess.js'
 
+const READ_ONLY_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
+
+const isReadOnlyMethod = (method = '') => READ_ONLY_METHODS.has(String(method).toUpperCase())
+
+const isOwnerWriteAttempt = (req) => req.user?.role === 'owner' && !isReadOnlyMethod(req.method)
+
 export const protect = async (req, res, next) => {
   let token
 
@@ -10,6 +16,9 @@ export const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1]
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
       req.user = await User.findById(decoded.id).select('-password')
+      if (isOwnerWriteAttempt(req)) {
+        return res.status(403).json({ message: 'Owner role is read-only' })
+      }
       next()
     } catch (error) {
       console.error(error)
@@ -31,6 +40,9 @@ export const optionalProtect = async (req, res, next) => {
     const token = req.headers.authorization.split(' ')[1]
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
     req.user = await User.findById(decoded.id).select('-password')
+    if (isOwnerWriteAttempt(req)) {
+      return res.status(403).json({ message: 'Owner role is read-only' })
+    }
   } catch (error) {
     // Token missing/invalid: continue without req.user, do not send 401
   }
@@ -38,7 +50,7 @@ export const optionalProtect = async (req, res, next) => {
 }
 
 export const admin = (req, res, next) => {
-  if (req.user && (req.user.role === 'admin' || req.user.role === 'superadmin')) {
+  if (req.user && (req.user.role === 'admin' || req.user.role === 'superadmin' || req.user.role === 'owner')) {
     next()
   } else {
     res.status(403).json({ message: 'Not authorized as admin' })
@@ -46,7 +58,7 @@ export const admin = (req, res, next) => {
 }
 
 export const superadmin = (req, res, next) => {
-  if (req.user && req.user.role === 'superadmin') {
+  if (req.user && (req.user.role === 'superadmin' || req.user.role === 'owner')) {
     next()
   } else {
     res.status(403).json({ message: 'Not authorized as superadmin' })

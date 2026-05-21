@@ -57,7 +57,7 @@ export async function getProjectIdsForUser(userId) {
 
 /**
  * ¿Puede el usuario operar en este proyecto?
- * - admin / superadmin: sí (gestión global)
+ * - admin / superadmin / owner: sí (gestión global o lectura global)
  * - user: sí si tiene al menos un vínculo (propiedad/apartamento visible o projectMemberships)
  *
  * @param {mongoose.Types.ObjectId|string} userId
@@ -69,14 +69,14 @@ export async function canUserAccessProject(userId, projectId, options = {}) {
   const normalizedRole = typeof options.role === 'string'
     ? options.role.trim().toLowerCase()
     : ''
-  if (normalizedRole === 'admin' || normalizedRole === 'superadmin') {
+  if (normalizedRole === 'admin' || normalizedRole === 'superadmin' || normalizedRole === 'owner') {
     return true
   }
   // Fallback defensivo: si req.user.role viene vacío/inconsistente, tomar rol real de BD.
   if (!normalizedRole && userId) {
     const userDoc = await User.findById(userId).select('role').lean()
     const dbRole = typeof userDoc?.role === 'string' ? userDoc.role.trim().toLowerCase() : ''
-    if (dbRole === 'admin' || dbRole === 'superadmin') return true
+    if (dbRole === 'admin' || dbRole === 'superadmin' || dbRole === 'owner') return true
   }
   if (projectId == null || projectId === '') {
     return false

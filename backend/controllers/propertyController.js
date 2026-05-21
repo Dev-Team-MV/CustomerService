@@ -518,7 +518,7 @@ export const getAllProperties = async (req, res) => {
   try {
     const { status, user, projectId } = req.query
     const filter = {}
-    const isAdminOrAbove = req.user.role === 'superadmin' || req.user.role === 'admin'
+    const isAdminOrAbove = req.user.role === 'superadmin' || req.user.role === 'admin' || req.user.role === 'owner'
 
     if (projectId) filter.project = projectId
     if (status) filter.status = status
@@ -591,7 +591,7 @@ export const getPropertyById = async (req, res) => {
       return res.status(404).json({ message: 'Property not found' })
     }
 
-    const isAdminOrAbove = req.user.role === 'superadmin' || req.user.role === 'admin'
+    const isAdminOrAbove = req.user.role === 'superadmin' || req.user.role === 'admin' || req.user.role === 'owner'
 
     const canAccess = isAdminOrAbove
       ? true
