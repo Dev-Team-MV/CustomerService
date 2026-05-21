@@ -13,6 +13,7 @@ import { useResidents } from '@shared/hooks/useResidents'
 import { useClientColumns } from '../constants/Columns/resident'
 import BroadcastMessageModal from '../components/BroadcastMessageModal'
 import { Send } from '@mui/icons-material'
+import smsService from '../services/smsService'
 
 export default function Clients() {
   const { t } = useTranslation('residents')
@@ -56,12 +57,58 @@ export default function Clients() {
   const [broadcastModalOpen, setBroadcastModalOpen] = useState(false)
 
    
-// Handler mock para envío
-const handleSendBroadcast = async (data) => {
-  console.log('📤 Enviando mensaje:', data)
-  // Mock: simular envío
-  await new Promise(resolve => setTimeout(resolve, 1500))
-  alert(`Mensaje enviado a ${data.recipients.length} destinatarios`)
+// Handler real para envío masivo con soporte de templates
+const handleSendBroadcast = async (data, onProgress) => {
+  const { content, recipients, channels, sendToAll, hasTemplateVariables } = data
+  
+  if (!channels.sms) {
+    alert('Envío de email aún no implementado')
+    return { success: [], failed: [] }
+  }
+
+  // Obtener usuarios completos con phoneNumber
+  const targetUsers = sendToAll 
+    ? users 
+    : users.filter(u => recipients.includes(u._id))
+
+  // Filtrar solo usuarios con teléfono válido
+  const usersWithPhone = targetUsers.filter(u => u.phoneNumber?.startsWith('+'))
+  
+  if (usersWithPhone.length === 0) {
+    alert('Ningún destinatario tiene número de teléfono válido')
+    return { success: [], failed: [] }
+  }
+
+  try {
+    let results
+
+    if (hasTemplateVariables) {
+      // ✅ Usar envío con template - reemplaza {{variables}}
+      results = await smsService.sendBulkTemplate(
+        usersWithPhone,
+        content,  // El template con {{firstName}}, {{lastName}}, etc.
+        (user) => ({
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          email: user.email || '',
+          phoneNumber: user.phoneNumber || ''
+        }),
+        onProgress
+      )
+    } else {
+      // Envío directo sin variables
+      results = await smsService.sendBulk(
+        usersWithPhone,
+        content,
+        onProgress
+      )
+    }
+
+    return results
+  } catch (err) {
+    console.error('Error en envío masivo:', err)
+    throw err
+  }
 }
 
   // Stats

@@ -19,37 +19,33 @@ const COLUMN_COLORS = {
   default: '#757575'
 }
 
-export const useActivities = (projectId) => {
+// projectId es OPCIONAL - si no se pasa, carga modo global
+export const useActivities = (projectId = null) => {
   const [columns, setColumns] = useState([])
   const [activities, setActivities] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [filters, setFilters] = useState({})
 
-  // Fetch board (columnas + actividades)
+  // Fetch board (columnas + actividades) - funciona con o sin projectId
   const fetchBoard = useCallback(async () => {
-    if (!projectId) {
-      setError('Project ID is required')
-      setLoading(false)
-      return
-    }
-
     setLoading(true)
+    setError(null)
+    
     try {
       const board = await activityService.getBoard(projectId)
       
       // Agregar colores a las columnas
-      const columnsWithColors = board.columns.map(col => ({
-        ...col,
-        color: COLUMN_COLORS[col.key] || COLUMN_COLORS.default
-      }))
+const columnsWithColors = (board.columns || []).map(col => ({
+  ...col,
+  color: col.color || COLUMN_COLORS[col.key] || COLUMN_COLORS.default
+}))
       
       setColumns(columnsWithColors)
       
       // Extraer todas las actividades
-      const allActivities = board.columns.flatMap(col => col.activities || [])
+      const allActivities = (board.columns || []).flatMap(col => col.activities || [])
       setActivities(allActivities)
-      setError(null)
     } catch (err) {
       setError(err.response?.data?.message || err.message)
     } finally {
@@ -59,18 +55,30 @@ export const useActivities = (projectId) => {
 
   // Fetch solo columnas
   const fetchColumns = useCallback(async () => {
-    if (!projectId) return
     try {
       const cols = await activityService.getColumns(projectId)
-      const columnsWithColors = cols.map(col => ({
-        ...col,
-        color: COLUMN_COLORS[col.key] || COLUMN_COLORS.default
-      }))
+const columnsWithColors = (cols || []).map(col => ({
+  ...col,
+  color: col.color || COLUMN_COLORS[col.key] || COLUMN_COLORS.default
+}))
       setColumns(columnsWithColors)
     } catch (err) {
       console.error('Error fetching columns:', err)
     }
   }, [projectId])
+
+  // Fetch actividades por proyecto relacionado
+  const fetchByRelatedProject = useCallback(async (relatedProjectId) => {
+    setLoading(true)
+    try {
+      const data = await activityService.getAll({ relatedProjectId })
+      setActivities(data)
+    } catch (err) {
+      setError(err.response?.data?.message || err.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
     fetchBoard()
@@ -102,7 +110,6 @@ export const useActivities = (projectId) => {
   const createActivity = async (data) => {
     try {
       const payload = {
-        projectId,
         title: data.title,
         description: data.description || '',
         columnId: data.columnId,
@@ -110,8 +117,16 @@ export const useActivities = (projectId) => {
         priority: data.priority || 'medium',
         dueDate: data.dueDate || undefined,
         assignedTo: data.assignedTo || undefined,
-        tags: data.tags || []
+        tags: data.tags || [],
+        // Nuevos campos
+        relatedProjects: data.relatedProjects || data.projectIds || [],
+        subtasks: data.subtasks || []
       }
+      // Solo incluir projectId si existe
+      if (projectId) {
+        payload.projectId = projectId
+      }
+      
       const newActivity = await activityService.create(payload)
       setActivities(prev => [...prev, newActivity])
       return newActivity
@@ -162,11 +177,61 @@ export const useActivities = (projectId) => {
     }
   }
 
+  // ==================== SUBTASKS ====================
+
+  const addSubtask = async (activityId, data) => {
+    try {
+      const updated = await activityService.createSubtask(activityId, data)
+      setActivities(prev => prev.map(a => a._id === activityId ? updated : a))
+      return updated
+    } catch (err) {
+      setError(err.response?.data?.message || err.message)
+      throw err
+    }
+  }
+
+  const updateSubtask = async (activityId, subtaskId, data) => {
+    try {
+      const updated = await activityService.updateSubtask(activityId, subtaskId, data)
+      setActivities(prev => prev.map(a => a._id === activityId ? updated : a))
+      return updated
+    } catch (err) {
+      setError(err.response?.data?.message || err.message)
+      throw err
+    }
+  }
+
+  const deleteSubtask = async (activityId, subtaskId) => {
+    try {
+      const updated = await activityService.deleteSubtask(activityId, subtaskId)
+      setActivities(prev => prev.map(a => a._id === activityId ? updated : a))
+      return updated
+    } catch (err) {
+      setError(err.response?.data?.message || err.message)
+      throw err
+    }
+  }
+
+  // ==================== THREADS ====================
+
+  const addThreadMessage = async (activityId, data) => {
+    try {
+      const updated = await activityService.addThreadMessage(activityId, data)
+      setActivities(prev => prev.map(a => a._id === activityId ? updated : a))
+      return updated
+    } catch (err) {
+      setError(err.response?.data?.message || err.message)
+      throw err
+    }
+  }
+
   // ==================== CRUD COLUMNS ====================
 
   const createColumn = async (data) => {
     try {
-      const payload = { projectId, ...data }
+      const payload = { ...data }
+      if (projectId) payload.projectId = projectId
+      
       const newColumn = await activityService.createColumn(payload)
       newColumn.color = COLUMN_COLORS[newColumn.key] || COLUMN_COLORS.default
       setColumns(prev => [...prev, newColumn].sort((a, b) => a.order - b.order))
@@ -208,13 +273,23 @@ export const useActivities = (projectId) => {
     error,
     filters,
     setFilters,
+    projectId,
     
     // Actions - Activities
     fetchBoard,
+    fetchByRelatedProject,
     createActivity,
     updateActivity,
     moveActivity,
     deleteActivity,
+    
+    // Actions - Subtasks
+    addSubtask,
+    updateSubtask,
+    deleteSubtask,
+    
+    // Actions - Threads
+    addThreadMessage,
     
     // Actions - Columns
     fetchColumns,

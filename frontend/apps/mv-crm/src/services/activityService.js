@@ -4,9 +4,11 @@ import api from '@shared/services/api'
 const activityService = {
   // ==================== COLUMNS ====================
   
-  // Obtener columnas del proyecto
-  getColumns: async (projectId) => {
-    const res = await api.get('/activities/columns', { params: { projectId } })
+  // Obtener columnas (global o por proyecto)
+  getColumns: async (projectId = null) => {
+    const params = {}
+    if (projectId) params.projectId = projectId
+    const res = await api.get('/activities/columns', { params })
     return res.data
   },
 
@@ -30,9 +32,11 @@ const activityService = {
 
   // ==================== BOARD ====================
   
-  // Obtener tablero completo (columnas + actividades agrupadas)
-  getBoard: async (projectId) => {
-    const res = await api.get('/activities/board', { params: { projectId } })
+  // Obtener tablero completo (global o por proyecto)
+  getBoard: async (projectId = null) => {
+    const params = {}
+    if (projectId) params.projectId = projectId
+    const res = await api.get('/activities/board', { params })
     return res.data
   },
 
@@ -40,11 +44,13 @@ const activityService = {
   
   // Listar actividades con filtros opcionales
   getAll: async (filters = {}) => {
-    const { projectId, columnId, assignedTo, priority } = filters
-    const params = { projectId }
+    const { projectId, columnId, assignedTo, priority, relatedProjectId } = filters
+    const params = {}
+    if (projectId) params.projectId = projectId
     if (columnId) params.columnId = columnId
     if (assignedTo) params.assignedTo = assignedTo
     if (priority) params.priority = priority
+    if (relatedProjectId) params.relatedProjectId = relatedProjectId  // Nuevo filtro
     
     const res = await api.get('/activities', { params })
     return res.data
@@ -56,13 +62,13 @@ const activityService = {
     return res.data
   },
 
-  // Crear actividad
+  // Crear actividad (ahora acepta relatedProjects/projectIds y subtasks)
   create: async (data) => {
     const res = await api.post('/activities', data)
     return res.data
   },
 
-  // Actualizar actividad
+  // Actualizar actividad (ahora acepta relatedProjects/projectIds y subtasks)
   update: async (id, data) => {
     const res = await api.put(`/activities/${id}`, data)
     return res.data
@@ -79,6 +85,34 @@ const activityService = {
   // Eliminar actividad
   delete: async (id) => {
     const res = await api.delete(`/activities/${id}`)
+    return res.data
+  },
+
+  // ==================== SUBTASKS ====================
+
+  // Crear subtask
+  createSubtask: async (activityId, data) => {
+    const res = await api.post(`/activities/${activityId}/subtasks`, data)
+    return res.data
+  },
+
+  // Actualizar subtask
+  updateSubtask: async (activityId, subtaskId, data) => {
+    const res = await api.put(`/activities/${activityId}/subtasks/${subtaskId}`, data)
+    return res.data
+  },
+
+  // Eliminar subtask
+  deleteSubtask: async (activityId, subtaskId) => {
+    const res = await api.delete(`/activities/${activityId}/subtasks/${subtaskId}`)
+    return res.data
+  },
+
+  // ==================== THREADS (Comentarios/Mensajes) ====================
+
+  // Agregar mensaje al hilo
+  addThreadMessage: async (activityId, data) => {
+    const res = await api.post(`/activities/${activityId}/threads`, data)
     return res.data
   }
 }

@@ -14,7 +14,8 @@ const NAV = [
   { key: 'projects', labelKey: 'projects', icon: FolderOpen, path: '/projects'  },
   { key: 'settings', labelKey: 'settings', icon: Settings,   path: '/settings'  },
   {key: 'activities', labelKey: 'activities', icon: BarChart, path: '/activities' }, 
-  {key: 'analytics', labelKey: 'analytics', icon: BarChart, path: '/analytics' }
+  {key: 'analytics', labelKey: 'analytics', icon: BarChart, path: '/analytics' },
+  {key: 'message-templates', labelKey: 'Message Templates', icon: BarChart, path: '/message-templates' }
 ]
 
 

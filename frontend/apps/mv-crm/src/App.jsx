@@ -14,6 +14,7 @@ import NotFound from './pages/NotFound'
 import Analytics from './pages/Analytics'
 import Activities from './pages/Activities'
 import { ProtectedRoute } from '@shared/components/ProtectedRoute'
+import MessageTemplates from './pages/MessageTemplates'
 
 const theme = createTheme({
   palette: {
@@ -67,6 +68,11 @@ export default function App() {
           <Route path="/activities" element={
             <ProtectedRoute requiredRole="admin">
               <Activities />
+            </ProtectedRoute>
+          } />
+          <Route path="/message-templates" element={
+            <ProtectedRoute requiredRole="admin">
+              <MessageTemplates />
             </ProtectedRoute>
           } />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

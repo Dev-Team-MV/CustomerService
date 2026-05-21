@@ -1,4 +1,3 @@
-// frontend/apps/mv-crm/src/components/activities/SubActivityList.jsx
 import { useState, useEffect, useMemo } from 'react'
 import {
   Box,
@@ -29,9 +28,9 @@ import {
   ExpandLess,
   AccessTime,
   Person,
-  PersonAdd,  // <-- Agregar
-  Email,      // <-- Agregar
-  Phone,      // <-- Agregar
+  PersonAdd,
+  Email,
+  Phone,
   Notes
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -40,7 +39,6 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { es } from 'date-fns/locale'
 import { useResidents } from '@shared/hooks/useResidents'
 
-
 const formatDate = (date) => {
   if (!date) return null
   const d = new Date(date)
@@ -48,7 +46,7 @@ const formatDate = (date) => {
 }
 
 const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly }) => {
-  const isCompleted = sub.status === 'completed'
+  const isCompleted = sub.completed || sub.status === 'completed'
   const isOverdue = sub.dueDate && new Date(sub.dueDate) < new Date() && !isCompleted
 
   return (
@@ -109,7 +107,7 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly }) => {
             </Typography>
           )}
 
-          {/* Meta info: fecha, asignado */}
+          {/* Meta info: fecha, asignado, contacto */}
           <Box display="flex" alignItems="center" gap={1.5} mt={1} flexWrap="wrap">
             {sub.dueDate && (
               <Chip
@@ -125,39 +123,56 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly }) => {
                 }}
               />
             )}
-{/* En SubActivityItem, reemplazar la sección de assignedTo */}
-{(sub.assignedTo || sub.externalAssignee) && (
-  <Tooltip title={
-    sub.assignedTo 
-      ? (sub.assignedTo.name || sub.assignedTo.email)
-      : `${sub.externalAssignee.name} (externo)`
-  }>
-    <Chip
-      avatar={
-        <Avatar sx={{ 
-          width: 16, 
-          height: 16, 
-          fontSize: 8,
-          bgcolor: sub.assignedTo ? '#2196f3' : '#ff9800'
-        }}>
-          {(sub.assignedTo?.name || sub.externalAssignee?.name)?.charAt(0) || '?'}
-        </Avatar>
-      }
-      label={
-        sub.assignedTo 
-          ? (sub.assignedTo.name?.split(' ')[0] || 'Asignado')
-          : (sub.externalAssignee?.name?.split(' ')[0] || 'Externo')
-      }
-      size="small"
-      sx={{ 
-        height: 20, 
-        fontSize: '0.65rem',
-        bgcolor: sub.assignedTo ? undefined : '#ff980020',
-        color: sub.assignedTo ? undefined : '#ff9800'
-      }}
-    />
-  </Tooltip>
-)}
+
+            {/* Asignado a usuario */}
+            {sub.assignedTo && (
+              <Tooltip title={`${sub.assignedTo.firstName || ''} ${sub.assignedTo.lastName || ''}`}>
+                <Chip
+                  avatar={
+                    <Avatar sx={{ 
+                      width: 16, 
+                      height: 16, 
+                      fontSize: 8,
+                      bgcolor: '#2196f3'
+                    }}>
+                      {sub.assignedTo.firstName?.charAt(0) || '?'}
+                    </Avatar>
+                  }
+                  label={sub.assignedTo.firstName?.split(' ')[0] || 'Usuario'}
+                  size="small"
+                  sx={{ 
+                    height: 20, 
+                    fontSize: '0.65rem'
+                  }}
+                />
+              </Tooltip>
+            )}
+
+            {/* Contacto externo */}
+            {sub.contact && (
+              <Tooltip title={`${sub.contact.name} (${sub.contact.phone})`}>
+                <Chip
+                  avatar={
+                    <Avatar sx={{ 
+                      width: 16, 
+                      height: 16, 
+                      fontSize: 8,
+                      bgcolor: '#ff9800'
+                    }}>
+                      {sub.contact.name?.charAt(0) || '?'}
+                    </Avatar>
+                  }
+                  label={sub.contact.name?.split(' ')[0] || 'Contacto'}
+                  size="small"
+                  sx={{ 
+                    height: 20, 
+                    fontSize: '0.65rem',
+                    bgcolor: '#ff980020',
+                    color: '#ff9800'
+                  }}
+                />
+              </Tooltip>
+            )}
           </Box>
         </Box>
 
@@ -178,21 +193,27 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly }) => {
 }
 
 // Modal para crear/editar subactividad
-const SubActivityModal = ({ open, onClose, onSave, subActivity = null }) => {
+const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentActivityId = null }) => {
   const [formData, setFormData] = useState({
-    title: subActivity?.title || '',
-    description: subActivity?.description || '',
-    dueDate: subActivity?.dueDate ? new Date(subActivity.dueDate) : null,
-    contactType: subActivity?.assignedTo ? 'registered' : subActivity?.externalAssignee ? 'external' : 'none',
-    assignedTo: subActivity?.assignedTo || null,
-    externalAssignee: subActivity?.externalAssignee || { name: '', email: '', phone: '' }
+    title: '',
+    description: '',
+    dueDate: null,
+    assignedTo: null,
+    contactType: 'none', // 'none', 'user', 'external'
+    contact: {
+      user: null,
+      name: '',
+      phone: '',
+      email: ''
+    }
   })
   const [searchInput, setSearchInput] = useState('')
+  const [saving, setSaving] = useState(false)
 
-  // Obtener usuarios reales
+  // Obtener usuarios
   const { users, loading } = useResidents(null, { smsProjectId: import.meta.env.VITE_PROJECT_ID })
 
-  // Transformar usuarios al formato esperado
+  // Transformar usuarios
   const userOptions = useMemo(() => {
     const filtered = searchInput.trim() 
       ? users.filter(u =>
@@ -201,38 +222,80 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null }) => {
         )
       : users
     
-    return filtered.map(u => ({
-      _id: u._id,
-      name: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email,
-      email: u.email,
-      phone: u.phoneNumber || ''
-    }))
+    return filtered
   }, [users, searchInput])
 
-  // Reset form cuando cambia subActivity
+  // Reset form
   useEffect(() => {
-    setFormData({
-      title: subActivity?.title || '',
-      description: subActivity?.description || '',
-      dueDate: subActivity?.dueDate ? new Date(subActivity.dueDate) : null,
-      contactType: subActivity?.assignedTo ? 'registered' : subActivity?.externalAssignee ? 'external' : 'none',
-      assignedTo: subActivity?.assignedTo || null,
-      externalAssignee: subActivity?.externalAssignee || { name: '', email: '', phone: '' }
-    })
+    if (subActivity) {
+      setFormData({
+        title: subActivity.title || '',
+        description: subActivity.description || '',
+        dueDate: subActivity.dueDate ? new Date(subActivity.dueDate) : null,
+        assignedTo: subActivity.assignedTo || null,
+        contactType: subActivity.contact ? 'external' : (subActivity.assignedTo ? 'user' : 'none'),
+        contact: subActivity.contact || {
+          user: subActivity.assignedTo?._id || null,
+          name: subActivity.contact?.name || '',
+          phone: subActivity.contact?.phone || '',
+          email: subActivity.contact?.email || ''
+        }
+      })
+    } else {
+      setFormData({
+        title: '',
+        description: '',
+        dueDate: null,
+        assignedTo: null,
+        contactType: 'none',
+        contact: {
+          user: null,
+          name: '',
+          phone: '',
+          email: ''
+        }
+      })
+    }
     setSearchInput('')
   }, [subActivity, open])
 
-  const handleSave = () => {
-    if (!formData.title.trim()) return
-    const payload = {
-      title: formData.title,
-      description: formData.description,
-      dueDate: formData.dueDate,
-      assignedTo: formData.contactType === 'registered' ? formData.assignedTo : null,
-      externalAssignee: formData.contactType === 'external' ? formData.externalAssignee : null
+  const handleSave = async () => {
+    if (!formData.title.trim()) {
+      alert('El título es obligatorio')
+      return
     }
-    onSave?.(payload, subActivity?._id)
-    onClose()
+
+    setSaving(true)
+    try {
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        dueDate: formData.dueDate
+      }
+
+      // Agregar asignado según el tipo
+      if (formData.contactType === 'user' && formData.assignedTo) {
+        payload.assignedTo = formData.assignedTo._id || formData.assignedTo
+        payload.contact = {
+          user: formData.assignedTo._id || formData.assignedTo,
+          name: `${formData.assignedTo.firstName || ''} ${formData.assignedTo.lastName || ''}`.trim(),
+          email: formData.assignedTo.email || '',
+          phone: formData.assignedTo.phoneNumber || ''
+        }
+      } else if (formData.contactType === 'external' && formData.contact.name) {
+        payload.contact = {
+          user: null,
+          name: formData.contact.name,
+          phone: formData.contact.phone,
+          email: formData.contact.email
+        }
+      }
+
+      await onSave?.(payload, subActivity?._id)
+      onClose()
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleContactTypeChange = (type) => {
@@ -240,20 +303,18 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null }) => {
       ...prev,
       contactType: type,
       assignedTo: null,
-      externalAssignee: { name: '', email: '', phone: '' }
-    }))
-  }
-
-  const handleExternalChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      externalAssignee: { ...prev.externalAssignee, [field]: value }
+      contact: {
+        user: null,
+        name: '',
+        phone: '',
+        email: ''
+      }
     }))
   }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
+      <DialogTitle fontWeight={700}>
         {subActivity ? 'Editar Subtarea' : 'Nueva Subtarea'}
       </DialogTitle>
       <DialogContent>
@@ -267,6 +328,7 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null }) => {
               fullWidth
               required
               autoFocus
+              placeholder="Ej: Confirmar disponibilidad del cliente"
             />
 
             {/* Descripción */}
@@ -277,7 +339,7 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null }) => {
               fullWidth
               multiline
               rows={2}
-              placeholder="Detalles de la subtarea..."
+              placeholder="Detalles adicionales de la subtarea..."
             />
 
             {/* Fecha límite */}
@@ -290,12 +352,12 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null }) => {
 
             {/* Sección de asignación */}
             <Box>
-              <Typography variant="subtitle2" fontWeight={600} mb={1}>
+              <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
                 Asignar a
               </Typography>
               
               {/* Selector de tipo */}
-              <Box display="flex" gap={1} mb={2}>
+              <Box display="flex" gap={1} mb={2} flexWrap="wrap">
                 <Chip
                   label="Sin asignar"
                   onClick={() => handleContactTypeChange('none')}
@@ -305,9 +367,9 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null }) => {
                 <Chip
                   label="Usuario registrado"
                   icon={<Person sx={{ fontSize: 16 }} />}
-                  onClick={() => handleContactTypeChange('registered')}
-                  color={formData.contactType === 'registered' ? 'primary' : 'default'}
-                  variant={formData.contactType === 'registered' ? 'filled' : 'outlined'}
+                  onClick={() => handleContactTypeChange('user')}
+                  color={formData.contactType === 'user' ? 'primary' : 'default'}
+                  variant={formData.contactType === 'user' ? 'filled' : 'outlined'}
                 />
                 <Chip
                   label="Contacto externo"
@@ -319,11 +381,11 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null }) => {
               </Box>
 
               {/* Usuario registrado */}
-              {formData.contactType === 'registered' && (
+              {formData.contactType === 'user' && (
                 <Autocomplete
                   options={userOptions}
                   loading={loading}
-                  getOptionLabel={(option) => option.name || ''}
+                  getOptionLabel={(option) => `${option.firstName || ''} ${option.lastName || ''} (${option.email})`}
                   isOptionEqualToValue={(option, val) => option._id === val?._id}
                   value={formData.assignedTo}
                   onChange={(_, newValue) => setFormData(prev => ({ ...prev, assignedTo: newValue }))}
@@ -333,13 +395,13 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null }) => {
                     <TextField
                       {...params}
                       label="Buscar usuario"
-                      placeholder="Nombre o email..."
+                      placeholder="Por nombre o email..."
                       InputProps={{
                         ...params.InputProps,
                         startAdornment: (
                           <>
                             <InputAdornment position="start">
-                              <Person />
+                              <Person fontSize="small" />
                             </InputAdornment>
                             {params.InputProps.startAdornment}
                           </>
@@ -354,13 +416,17 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null }) => {
                     />
                   )}
                   renderOption={(props, option) => (
-                    <Box component="li" {...props} key={option._id} display="flex" alignItems="center" gap={1.5} py={1}>
-                      <Avatar sx={{ width: 32, height: 32, bgcolor: '#2196f3' }}>
-                        {option.name?.charAt(0)}
+                    <Box component="li" {...props} display="flex" alignItems="center" gap={1.5} py={1}>
+                      <Avatar sx={{ width: 32, height: 32, bgcolor: '#2196f3', fontSize: 12 }}>
+                        {option.firstName?.charAt(0) || '?'}
                       </Avatar>
                       <Box>
-                        <Typography variant="body1">{option.name}</Typography>
-                        <Typography variant="body2" color="text.secondary">{option.email}</Typography>
+                        <Typography variant="body2">
+                          {option.firstName} {option.lastName}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {option.email}
+                        </Typography>
                       </Box>
                     </Box>
                   )}
@@ -371,43 +437,53 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null }) => {
               {formData.contactType === 'external' && (
                 <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, bgcolor: '#fff8e1' }}>
                   <Box display="flex" alignItems="center" gap={1} mb={2}>
-                    <PersonAdd color="warning" />
+                    <PersonAdd color="warning" fontSize="small" />
                     <Typography variant="body2" color="warning.main" fontWeight={500}>
-                      Contacto no registrado en el sistema
+                      Contacto no registrado
                     </Typography>
                   </Box>
-                  <Box display="flex" flexDirection="column" gap={2}>
+                  <Box display="flex" flexDirection="column" gap={1.5}>
                     <TextField
                       label="Nombre"
-                      value={formData.externalAssignee.name}
-                      onChange={(e) => handleExternalChange('name', e.target.value)}
+                      value={formData.contact.name}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        contact: { ...prev.contact, name: e.target.value }
+                      }))}
                       fullWidth
                       required
+                      size="small"
                       InputProps={{
-                        startAdornment: <InputAdornment position="start"><Person /></InputAdornment>
+                        startAdornment: <InputAdornment position="start"><Person fontSize="small" /></InputAdornment>
                       }}
                     />
-                    <Box display="flex" gap={2}>
-                      <TextField
-                        label="Email"
-                        value={formData.externalAssignee.email}
-                        onChange={(e) => handleExternalChange('email', e.target.value)}
-                        fullWidth
-                        type="email"
-                        InputProps={{
-                          startAdornment: <InputAdornment position="start"><Email /></InputAdornment>
-                        }}
-                      />
-                      <TextField
-                        label="Teléfono"
-                        value={formData.externalAssignee.phone}
-                        onChange={(e) => handleExternalChange('phone', e.target.value)}
-                        fullWidth
-                        InputProps={{
-                          startAdornment: <InputAdornment position="start"><Phone /></InputAdornment>
-                        }}
-                      />
-                    </Box>
+                    <TextField
+                      label="Email"
+                      type="email"
+                      value={formData.contact.email}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        contact: { ...prev.contact, email: e.target.value }
+                      }))}
+                      fullWidth
+                      size="small"
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start"><Email fontSize="small" /></InputAdornment>
+                      }}
+                    />
+                    <TextField
+                      label="Teléfono"
+                      value={formData.contact.phone}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        contact: { ...prev.contact, phone: e.target.value }
+                      }))}
+                      fullWidth
+                      size="small"
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start"><Phone fontSize="small" /></InputAdornment>
+                      }}
+                    />
                   </Box>
                 </Paper>
               )}
@@ -420,9 +496,10 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null }) => {
         <Button 
           variant="contained" 
           onClick={handleSave}
-          disabled={!formData.title.trim()}
+          disabled={!formData.title.trim() || saving}
+          startIcon={saving ? <CircularProgress size={20} /> : null}
         >
-          {subActivity ? 'Guardar' : 'Agregar'}
+          {subActivity ? 'Guardar cambios' : 'Agregar subtarea'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -434,18 +511,19 @@ const SubActivityList = ({
   onAdd, 
   onUpdate, 
   onDelete,
+  parentActivityId = null,
   readOnly = false 
 }) => {
   const [expanded, setExpanded] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingSub, setEditingSub] = useState(null)
 
-  const completedCount = subActivities.filter(s => s.status === 'completed').length
+  const completedCount = subActivities.filter(s => s.completed || s.status === 'completed').length
   const totalCount = subActivities.length
 
   const handleToggleStatus = async (sub) => {
-    const newStatus = sub.status === 'completed' ? 'pending' : 'completed'
-    await onUpdate?.(sub._id, { status: newStatus })
+    const newStatus = (sub.completed || sub.status === 'completed') ? false : true
+    await onUpdate?.(sub._id, { completed: newStatus })
   }
 
   const handleOpenModal = (sub = null) => {
@@ -455,9 +533,11 @@ const SubActivityList = ({
 
   const handleSave = async (data, subId) => {
     if (subId) {
+      // Editar
       await onUpdate?.(subId, data)
     } else {
-      await onAdd?.(data)
+      // Crear
+      await onAdd?.(parentActivityId, data)
     }
     setModalOpen(false)
     setEditingSub(null)
@@ -471,7 +551,7 @@ const SubActivityList = ({
         alignItems="center" 
         justifyContent="space-between"
         onClick={() => setExpanded(!expanded)}
-        sx={{ cursor: 'pointer', mb: 1 }}
+        sx={{ cursor: 'pointer', mb: 1, p: 1, borderRadius: 1, '&:hover': { bgcolor: '#f5f5f5' } }}
       >
         <Box display="flex" alignItems="center" gap={1}>
           <SubdirectoryArrowRight sx={{ fontSize: 20, color: '#757575' }} />
@@ -513,7 +593,7 @@ const SubActivityList = ({
             ))}
           </Box>
         ) : (
-          <Typography variant="caption" color="text.secondary" sx={{ pl: 1 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ pl: 1, display: 'block', py: 1 }}>
             Sin subtareas
           </Typography>
         )}
@@ -524,7 +604,7 @@ const SubActivityList = ({
             startIcon={<Add />}
             size="small"
             onClick={() => handleOpenModal()}
-            sx={{ textTransform: 'none', mt: 1 }}
+            sx={{ textTransform: 'none', mt: 1, ml: 0.5 }}
           >
             Agregar subtarea
           </Button>
@@ -537,6 +617,7 @@ const SubActivityList = ({
         onClose={() => { setModalOpen(false); setEditingSub(null) }}
         onSave={handleSave}
         subActivity={editingSub}
+        parentActivityId={parentActivityId}
       />
     </Box>
   )

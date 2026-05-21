@@ -1,6 +1,6 @@
 // frontend/apps/mv-crm/src/components/activities/KanbanColumn.jsx
-import { Box, Typography, IconButton, Chip } from '@mui/material'
-import { Add } from '@mui/icons-material'
+import { Box, Typography, IconButton, Chip, Tooltip } from '@mui/material'
+import { Add, MoreVert } from '@mui/icons-material'
 import ActivityCard from './ActivityCard'
 
 const KanbanColumn = ({ 
@@ -10,7 +10,8 @@ const KanbanColumn = ({
   onActivityMenuClick,
   onAddClick,
   onDragStart,
-  onDrop
+  onDrop,
+  onColumnMenuClick
 }) => {
   const color = column.color || '#757575'
 
@@ -43,9 +44,9 @@ const KanbanColumn = ({
         }}
       >
         <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Box display="flex" alignItems="center" gap={1}>
-            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color }} />
-            <Typography variant="subtitle2" fontWeight={700}>
+          <Box display="flex" alignItems="center" gap={1} flex={1} minWidth={0}>
+            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color, flexShrink: 0 }} />
+            <Typography variant="subtitle2" fontWeight={700} noWrap>
               {column.name}
             </Typography>
             <Chip
@@ -56,17 +57,38 @@ const KanbanColumn = ({
                 fontSize: '0.7rem',
                 fontWeight: 600,
                 bgcolor: `${color}20`,
-                color: color
+                color: color,
+                flexShrink: 0
               }}
             />
           </Box>
-          <IconButton 
-            size="small" 
-            onClick={onAddClick}
-            sx={{ bgcolor: `${color}15`, '&:hover': { bgcolor: `${color}25` } }}
-          >
-            <Add sx={{ fontSize: 18, color: color }} />
-          </IconButton>
+          
+          <Box display="flex" alignItems="center" gap={0.5}>
+            {/* Botón de opciones de columna */}
+            <Tooltip title="Opciones de columna">
+              <IconButton 
+                size="small" 
+                onClick={(e) => onColumnMenuClick?.(e, column)}
+                sx={{ 
+                  opacity: 0.5, 
+                  '&:hover': { opacity: 1, bgcolor: '#e0e0e0' } 
+                }}
+              >
+                <MoreVert sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+            
+            {/* Botón agregar actividad */}
+            <Tooltip title="Agregar actividad">
+              <IconButton 
+                size="small" 
+                onClick={onAddClick}
+                sx={{ bgcolor: `${color}15`, '&:hover': { bgcolor: `${color}25` } }}
+              >
+                <Add sx={{ fontSize: 18, color: color }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
       </Box>
 

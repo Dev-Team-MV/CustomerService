@@ -1,4 +1,3 @@
-// frontend/apps/mv-crm/src/pages/Activities.jsx
 import { useState } from 'react'
 import {
   Box,
@@ -20,12 +19,13 @@ import ActivityModal from '../components/activities/ActivityModal'
 import ActivityDetails from '../components/activities/ActivityDetails'
 import { useActivities, ACTIVITY_PRIORITIES } from '../constants/hooks/useActivities'
 import { useProjects } from '@shared/hooks/useProjects'
-
-const PROJECT_ID = import.meta.env.VITE_PROJECT_ID
+import activityService from '../services/activityService'
+import ColumnModal from '../components/activities/ColumnModal'
 
 export default function Activities() {
-  const {currentProject} = useProjects()
-  const projectId = currentProject?._id 
+  const { currentProject } = useProjects()
+  const projectId = currentProject?._id || null
+
   const {
     columns,
     groupedByColumn,
@@ -35,7 +35,14 @@ export default function Activities() {
     updateActivity,
     moveActivity,
     deleteActivity,
-    fetchBoard
+    addSubtask,
+    updateSubtask,
+    deleteSubtask,
+    addThreadMessage,
+    fetchBoard,
+      createColumn,
+  updateColumn,
+  deleteColumn
   } = useActivities(projectId)
 
   const [modalOpen, setModalOpen] = useState(false)
@@ -44,47 +51,103 @@ export default function Activities() {
   const [searchValue, setSearchValue] = useState('')
   const [priorityFilter, setPriorityFilter] = useState('all')
 
-  // Abrir modal para crear nueva actividad
+  // Dentro del componente, agregar estados:
+  const [columnModalOpen, setColumnModalOpen] = useState(false)
+  const [editingColumn, setEditingColumn] = useState(null)
+
   const handleAddActivity = (columnId) => {
     setEditingActivity({ columnId })
     setModalOpen(true)
   }
 
-  // Abrir modal para editar
   const handleEditActivity = (activity) => {
     setEditingActivity(activity)
     setModalOpen(true)
     setDetailsActivity(null)
   }
 
-  // Ver detalles
   const handleViewActivity = (activity) => {
     setDetailsActivity(activity)
   }
 
-  // Guardar actividad (crear o editar)
   const handleSaveActivity = async (data, activityId) => {
-    if (activityId) {
-      await updateActivity(activityId, data)
-    } else {
-      await createActivity(data)
+    try {
+      if (activityId) {
+        await updateActivity(activityId, data)
+      } else {
+        await createActivity(data)
+      }
+      setModalOpen(false)
+      setEditingActivity(null)
+      // ✅ Refrescar el tablero después de guardar
+      await fetchBoard()
+    } catch (err) {
+      console.error('Error saving activity:', err)
     }
-    setModalOpen(false)
-    setEditingActivity(null)
   }
 
-  // Eliminar actividad
   const handleDeleteActivity = async (id) => {
     if (window.confirm('¿Estás seguro de eliminar esta actividad?')) {
-      await deleteActivity(id)
-      setDetailsActivity(null)
+      try {
+        await deleteActivity(id)
+        setDetailsActivity(null)
+        await fetchBoard()
+      } catch (err) {
+        console.error('Error deleting activity:', err)
+      }
     }
   }
 
-  // Mover actividad (drag & drop)
   const handleMoveActivity = async (activityId, columnId) => {
     await moveActivity(activityId, columnId)
   }
+
+  // ✅ CORREGIDO: Usar getById en lugar de getActivityById
+  const handleRefreshActivityDetails = async () => {
+    if (!detailsActivity?._id) return
+    try {
+      const updated = await activityService.getById(detailsActivity._id)
+      setDetailsActivity(updated)
+    } catch (err) {
+      console.error('Error refreshing activity:', err)
+    }
+  }
+
+  const handleAddColumn = () => {
+  setEditingColumn(null)
+  setColumnModalOpen(true)
+}
+
+
+  const handleEditColumn = (column) => {
+  setEditingColumn(column)
+  setColumnModalOpen(true)
+}
+ 
+const handleSaveColumn = async (data, columnId) => {
+  try {
+    if (columnId) {
+      await updateColumn(columnId, data)
+    } else {
+      await createColumn(data)
+    }
+    setColumnModalOpen(false)
+    setEditingColumn(null)
+    await fetchBoard()
+  } catch (err) {
+    console.error('Error saving column:', err)
+  }
+}
+ 
+const handleDeleteColumn = async (id) => {
+  try {
+    await deleteColumn(id)
+    await fetchBoard()
+  } catch (err) {
+    console.error('Error deleting column:', err)
+  }
+}
+ 
 
   return (
     <PageLayout>
@@ -126,7 +189,7 @@ export default function Activities() {
               )
             }}
           />
-          
+
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <Select
               value={priorityFilter}
@@ -141,10 +204,10 @@ export default function Activities() {
               <MenuItem value="all">Todas las prioridades</MenuItem>
               {ACTIVITY_PRIORITIES.map(p => (
                 <MenuItem key={p.id} value={p.id}>
-                  <Chip 
-                    label={p.label} 
-                    size="small" 
-                    sx={{ bgcolor: `${p.color}20`, color: p.color, height: 20 }} 
+                  <Chip
+                    label={p.label}
+                    size="small"
+                    sx={{ bgcolor: `${p.color}20`, color: p.color, height: 20 }}
                   />
                 </MenuItem>
               ))}
@@ -165,34 +228,56 @@ export default function Activities() {
             <CircularProgress />
           </Box>
         ) : (
-          /* Kanban Board */
-          <KanbanBoard
-            columns={columns}
-            groupedByColumn={groupedByColumn}
-            onActivityClick={handleViewActivity}
-            onAddActivity={handleAddActivity}
-            onEditActivity={handleEditActivity}
-            onDeleteActivity={handleDeleteActivity}
-            onMoveActivity={handleMoveActivity}
-          />
+<KanbanBoard
+  columns={columns}
+  groupedByColumn={groupedByColumn}
+  onActivityClick={handleViewActivity}
+  onAddActivity={handleAddActivity}
+  onEditActivity={handleEditActivity}
+  onDeleteActivity={handleDeleteActivity}
+  onMoveActivity={handleMoveActivity}
+  // Nuevas props
+  onAddColumn={handleAddColumn}
+  onEditColumn={handleEditColumn}
+  onDeleteColumn={handleDeleteColumn}
+/>
         )}
 
         {/* Modal Crear/Editar */}
         <ActivityModal
           open={modalOpen}
-          onClose={() => { setModalOpen(false); setEditingActivity(null) }}
+          onClose={() => {
+            setModalOpen(false)
+            setEditingActivity(null)
+          }}
           activity={editingActivity}
           columns={columns}
           onSave={handleSaveActivity}
+          onAddSubtask={addSubtask}
+          onUpdateSubtask={updateSubtask}
+          onDeleteSubtask={deleteSubtask}
         />
 
-        {/* Panel de Detalles */}
+<ColumnModal
+  open={columnModalOpen}
+  onClose={() => { setColumnModalOpen(false); setEditingColumn(null) }}
+  column={editingColumn}
+  onSave={handleSaveColumn}
+/>
+
+        {/* Drawer Detalles */}
         <ActivityDetails
           activity={detailsActivity}
           open={Boolean(detailsActivity)}
           onClose={() => setDetailsActivity(null)}
           onEdit={handleEditActivity}
           onDelete={handleDeleteActivity}
+          onAddSubtask={addSubtask}
+          onUpdateSubtask={updateSubtask}
+          onDeleteSubtask={deleteSubtask}
+          onAddThreadMessage={addThreadMessage}
+          onRefresh={handleRefreshActivityDetails}
+          columns={columns}
         />
       </Box>
     </PageLayout>

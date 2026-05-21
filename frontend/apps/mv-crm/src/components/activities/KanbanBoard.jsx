@@ -1,7 +1,7 @@
 // frontend/apps/mv-crm/src/components/activities/KanbanBoard.jsx
 import { useState } from 'react'
-import { Box, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material'
-import { Edit, Delete, Visibility } from '@mui/icons-material'
+import { Box, Menu, MenuItem, ListItemIcon, ListItemText, Button, IconButton, Tooltip } from '@mui/material'
+import { Edit, Delete, Visibility, Add, ViewColumn, MoreVert } from '@mui/icons-material'
 import KanbanColumn from './KanbanColumn'
 
 const KanbanBoard = ({ 
@@ -11,11 +11,21 @@ const KanbanBoard = ({
   onAddActivity,
   onEditActivity,
   onDeleteActivity,
-  onMoveActivity
+  onMoveActivity,
+  // Nuevas props para columnas
+  onAddColumn,
+  onEditColumn,
+  onDeleteColumn
 }) => {
   const [draggedActivity, setDraggedActivity] = useState(null)
-  const [menuAnchor, setMenuAnchor] = useState(null)
+  
+  // Menú de actividad
+  const [activityMenuAnchor, setActivityMenuAnchor] = useState(null)
   const [menuActivity, setMenuActivity] = useState(null)
+  
+  // Menú de columna
+  const [columnMenuAnchor, setColumnMenuAnchor] = useState(null)
+  const [menuColumn, setMenuColumn] = useState(null)
 
   const handleDragStart = (activity) => {
     setDraggedActivity(activity)
@@ -34,14 +44,41 @@ const KanbanBoard = ({
     setDraggedActivity(null)
   }
 
-  const handleMenuClick = (event, activity) => {
-    setMenuAnchor(event.currentTarget)
+  // Activity menu handlers
+  const handleActivityMenuClick = (event, activity) => {
+    setActivityMenuAnchor(event.currentTarget)
     setMenuActivity(activity)
   }
 
-  const handleMenuClose = () => {
-    setMenuAnchor(null)
+  const handleActivityMenuClose = () => {
+    setActivityMenuAnchor(null)
     setMenuActivity(null)
+  }
+
+  // Column menu handlers
+  const handleColumnMenuClick = (event, column) => {
+    event.stopPropagation()
+    setColumnMenuAnchor(event.currentTarget)
+    setMenuColumn(column)
+  }
+
+  const handleColumnMenuClose = () => {
+    setColumnMenuAnchor(null)
+    setMenuColumn(null)
+  }
+
+  const handleDeleteColumn = () => {
+    if (menuColumn) {
+      const activitiesInColumn = groupedByColumn[menuColumn._id]?.length || 0
+      if (activitiesInColumn > 0) {
+        if (!window.confirm(`Esta columna tiene ${activitiesInColumn} actividades. ¿Eliminar de todos modos?`)) {
+          handleColumnMenuClose()
+          return
+        }
+      }
+      onDeleteColumn?.(menuColumn._id)
+    }
+    handleColumnMenuClose()
   }
 
   return (
@@ -62,33 +99,84 @@ const KanbanBoard = ({
           column={column}
           activities={groupedByColumn[column._id] || []}
           onActivityClick={onActivityClick}
-          onActivityMenuClick={handleMenuClick}
+          onActivityMenuClick={handleActivityMenuClick}
           onAddClick={() => onAddActivity?.(column._id)}
           onDragStart={handleDragStart}
           onDrop={handleDrop}
+          onColumnMenuClick={handleColumnMenuClick}
         />
       ))}
 
-      {/* Context Menu */}
-      <Menu
-        anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={handleMenuClose}
+      {/* Botón para agregar nueva columna */}
+      <Box
+        sx={{
+          flex: '0 0 280px',
+          minWidth: 280,
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'center',
+          pt: 2
+        }}
       >
-        <MenuItem onClick={() => { onActivityClick?.(menuActivity); handleMenuClose() }}>
+        <Button
+          variant="outlined"
+          startIcon={<Add />}
+          onClick={onAddColumn}
+          sx={{
+            borderStyle: 'dashed',
+            borderWidth: 2,
+            borderColor: '#bdbdbd',
+            color: '#757575',
+            py: 1.5,
+            px: 3,
+            borderRadius: 2,
+            '&:hover': {
+              borderColor: '#2196f3',
+              color: '#2196f3',
+              bgcolor: '#e3f2fd'
+            }
+          }}
+        >
+          Nueva Columna
+        </Button>
+      </Box>
+
+      {/* Context Menu - Actividades */}
+      <Menu
+        anchorEl={activityMenuAnchor}
+        open={Boolean(activityMenuAnchor)}
+        onClose={handleActivityMenuClose}
+      >
+        <MenuItem onClick={() => { onActivityClick?.(menuActivity); handleActivityMenuClose() }}>
           <ListItemIcon><Visibility fontSize="small" /></ListItemIcon>
           <ListItemText>Ver detalles</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => { onEditActivity?.(menuActivity); handleMenuClose() }}>
+        <MenuItem onClick={() => { onEditActivity?.(menuActivity); handleActivityMenuClose() }}>
           <ListItemIcon><Edit fontSize="small" /></ListItemIcon>
           <ListItemText>Editar</ListItemText>
         </MenuItem>
         <MenuItem 
-          onClick={() => { onDeleteActivity?.(menuActivity._id); handleMenuClose() }}
+          onClick={() => { onDeleteActivity?.(menuActivity._id); handleActivityMenuClose() }}
           sx={{ color: 'error.main' }}
         >
           <ListItemIcon><Delete fontSize="small" color="error" /></ListItemIcon>
           <ListItemText>Eliminar</ListItemText>
+        </MenuItem>
+      </Menu>
+
+      {/* Context Menu - Columnas */}
+      <Menu
+        anchorEl={columnMenuAnchor}
+        open={Boolean(columnMenuAnchor)}
+        onClose={handleColumnMenuClose}
+      >
+        <MenuItem onClick={() => { onEditColumn?.(menuColumn); handleColumnMenuClose() }}>
+          <ListItemIcon><Edit fontSize="small" /></ListItemIcon>
+          <ListItemText>Editar columna</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleDeleteColumn} sx={{ color: 'error.main' }}>
+          <ListItemIcon><Delete fontSize="small" color="error" /></ListItemIcon>
+          <ListItemText>Eliminar columna</ListItemText>
         </MenuItem>
       </Menu>
     </Box>
