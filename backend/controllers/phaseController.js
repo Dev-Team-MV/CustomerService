@@ -109,7 +109,7 @@ export const getPhaseByApartmentAndNumber = async (req, res) => {
   }
 }
 
-// Update a phase (title, constructionPercentage)
+// Update a phase (title, description, constructionPercentage)
 export const updatePhase = async (req, res) => {
   try {
     const phase = await Phase.findById(req.params.id)
@@ -120,6 +120,10 @@ export const updatePhase = async (req, res) => {
     
     if (req.body.title !== undefined) {
       phase.title = req.body.title
+    }
+
+    if (req.body.description !== undefined) {
+      phase.description = req.body.description
     }
     
     if (req.body.constructionPercentage !== undefined) {
@@ -145,27 +149,28 @@ export const addMediaItem = async (req, res) => {
       return res.status(404).json({ message: 'Phase not found' })
     }
     
-    const { url, title, percentage, mediaType } = req.body
-    
+    const { url, title, percentage, mediaType, uploadedAt } = req.body
+
     if (!url || !title || percentage === undefined) {
-      return res.status(400).json({ 
-        message: 'URL, title, and percentage are required' 
+      return res.status(400).json({
+        message: 'URL, title, and percentage are required'
       })
     }
-    
+
     if (percentage < 0 || percentage > 100) {
-      return res.status(400).json({ 
-        message: 'Percentage must be between 0 and 100' 
+      return res.status(400).json({
+        message: 'Percentage must be between 0 and 100'
       })
     }
-    
+
     phase.mediaItems.push({
       url: normalizePathForStorage(url),
       title,
       percentage,
-      mediaType: mediaType || 'image'
+      mediaType: mediaType || 'image',
+      uploadedAt: uploadedAt ? new Date(uploadedAt) : null
     })
-    
+
     recalcConstructionPercentageFromMedia(phase)
     const updatedPhase = await phase.save()
     const populatedPhase = await populatePhase(Phase.findById(updatedPhase._id))
@@ -190,7 +195,7 @@ export const addMediaItemByApartmentAndNumber = async (req, res) => {
       return res.status(404).json({ message: 'Phase not found' })
     }
 
-    const { url, title, percentage, mediaType } = req.body
+    const { url, title, percentage, mediaType, uploadedAt } = req.body
 
     if (!url || !title || percentage === undefined) {
       return res.status(400).json({
@@ -208,7 +213,8 @@ export const addMediaItemByApartmentAndNumber = async (req, res) => {
       url: normalizePathForStorage(url),
       title,
       percentage,
-      mediaType: mediaType || 'image'
+      mediaType: mediaType || 'image',
+      uploadedAt: uploadedAt ? new Date(uploadedAt) : null
     })
 
     recalcConstructionPercentageFromMedia(phase)
@@ -254,7 +260,10 @@ export const updateMediaItem = async (req, res) => {
     if (req.body.mediaType !== undefined) {
       mediaItem.mediaType = req.body.mediaType
     }
-    
+    if (req.body.uploadedAt !== undefined) {
+      mediaItem.uploadedAt = req.body.uploadedAt ? new Date(req.body.uploadedAt) : null
+    }
+
     recalcConstructionPercentageFromMedia(phase)
     const updatedPhase = await phase.save()
     const populatedPhase = await populatePhase(Phase.findById(updatedPhase._id))
@@ -327,6 +336,9 @@ export const updateMediaItemByApartmentAndNumber = async (req, res) => {
     }
     if (req.body.mediaType !== undefined) {
       mediaItem.mediaType = req.body.mediaType
+    }
+    if (req.body.uploadedAt !== undefined) {
+      mediaItem.uploadedAt = req.body.uploadedAt ? new Date(req.body.uploadedAt) : null
     }
 
     recalcConstructionPercentageFromMedia(phase)

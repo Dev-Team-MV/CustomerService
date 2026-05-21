@@ -131,7 +131,7 @@ router.get('/apartment/:apartmentId/phase/:phaseNumber', protect, getPhaseByApar
  *       404:
  *         description: Phase not found
  *   put:
- *     summary: Update phase (title, constructionPercentage) (Admin only)
+ *     summary: Update phase (title, description, constructionPercentage) (Admin only)
  *     tags: [Phases]
  *     security:
  *       - bearerAuth: []
@@ -148,6 +148,8 @@ router.get('/apartment/:apartmentId/phase/:phaseNumber', protect, getPhaseByApar
  *             type: object
  *             properties:
  *               title:
+ *                 type: string
+ *               description:
  *                 type: string
  *               constructionPercentage:
  *                 type: number

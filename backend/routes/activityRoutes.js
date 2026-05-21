@@ -10,7 +10,11 @@ import {
   createActivity,
   updateActivity,
   moveActivity,
-  deleteActivity
+  deleteActivity,
+  addActivitySubtask,
+  updateActivitySubtask,
+  deleteActivitySubtask,
+  addActivityThreadMessage
 } from '../controllers/activityController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
@@ -46,6 +50,7 @@ const router = express.Router()
  *                   projectId: { type: string }
  *                   key: { type: string, example: todo }
  *                   name: { type: string, example: Por hacer }
+ *                   color: { type: string, example: '#9c27b0' }
  *                   order: { type: number, example: 1 }
  *       400:
  *         description: Invalid projectId
@@ -65,11 +70,13 @@ const router = express.Router()
  *               projectId: { type: string }
  *               key: { type: string, example: blocked }
  *               name: { type: string, example: Bloqueadas }
+ *               color: { type: string, example: '#9c27b0' }
  *               order: { type: number, example: 2 }
  *           example:
- *             key: review
- *             name: En revision
- *             order: 3
+ *             name: test
+ *             key: test
+ *             color: '#9c27b0'
+ *             order: 1
  *     responses:
  *       201:
  *         description: Column created
@@ -101,9 +108,11 @@ router.post('/columns', protect, admin, createActivityColumn)
  *             type: object
  *             properties:
  *               name: { type: string, example: Doing }
+ *               color: { type: string, example: '#9c27b0' }
  *               order: { type: number, example: 2 }
  *           example:
  *             name: En progreso
+ *             color: '#9c27b0'
  *             order: 2
  *     responses:
  *       200:
@@ -204,6 +213,12 @@ router.get('/board', protect, getActivityBoard)
  *           type: string
  *           enum: [low, medium, high, urgent]
  *         example: high
+ *       - in: query
+ *         name: relatedProjectId
+ *         schema:
+ *           type: string
+ *         example: 6650f1a2a47f4b9f7296f1ab
+ *         description: Optional. Filter activities linked to this project id.
  *     responses:
  *       200:
  *         description: Activities list
@@ -232,9 +247,44 @@ router.get('/board', protect, getActivityBoard)
  *                 type: string
  *                 format: date-time
  *               assignedTo: { type: string }
+ *               contact:
+ *                 type: object
+ *                 properties:
+ *                   user: { type: string, description: User ID registrado }
+ *                   name: { type: string }
+ *                   phone: { type: string }
+ *                   email: { type: string }
  *               tags:
  *                 type: array
  *                 items: { type: string }
+ *               relatedProjects:
+ *                 type: array
+ *                 items: { type: string }
+ *               projectIds:
+ *                 type: array
+ *                 description: Alias of relatedProjects
+ *                 items: { type: string }
+ *               subtasks:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required: [title]
+ *                   properties:
+ *                     title: { type: string }
+ *                     completed: { type: boolean }
+ *                     dueDate:
+ *                       type: string
+ *                       format: date-time
+ *                     assignedTo: { type: string }
+ *                     contact:
+ *                       type: object
+ *                       properties:
+ *                         user: { type: string }
+ *                         name: { type: string }
+ *                         phone: { type: string }
+ *                         email: { type: string }
+ *                     description: { type: string }
+ *                     order: { type: number }
  *           example:
  *             title: Confirmar firma de contrato
  *             description: Llamar al cliente y coordinar firma electronica
@@ -243,9 +293,29 @@ router.get('/board', protect, getActivityBoard)
  *             priority: high
  *             dueDate: 2026-05-20T17:00:00.000Z
  *             assignedTo: 6648e3df9a9ed2f35f1234ab
+ *             contact:
+ *               user: 6648e3df9a9ed2f35f1234ab
+ *               name: Carlos Cardona
+ *               phone: "+573001112233"
+ *               email: carlos@demo.com
  *             tags:
  *               - legal
  *               - onboarding
+ *             relatedProjects:
+ *               - 6650f1a2a47f4b9f7296f1ab
+ *               - 6650f1a2a47f4b9f7296f1ac
+ *             subtasks:
+ *               - title: Validar documentos del cliente
+ *                 description: Revisar cedula y formulario firmado
+ *                 completed: false
+ *               - title: Coordinar cita con notaria
+ *                 description: Ajustar fecha con agenda del cliente
+ *                 dueDate: 2026-05-19T16:00:00.000Z
+ *                 assignedTo: 6648e3df9a9ed2f35f1234ab
+ *                 contact:
+ *                   name: Laura Perez
+ *                   phone: "+573102223344"
+ *                   email: laura@mail.com
  *     responses:
  *       201:
  *         description: Activity created
@@ -304,9 +374,44 @@ router
  *                 type: string
  *                 format: date-time
  *               assignedTo: { type: string }
+ *               contact:
+ *                 type: object
+ *                 properties:
+ *                   user: { type: string, description: User ID registrado }
+ *                   name: { type: string }
+ *                   phone: { type: string }
+ *                   email: { type: string }
  *               tags:
  *                 type: array
  *                 items: { type: string }
+ *               relatedProjects:
+ *                 type: array
+ *                 items: { type: string }
+ *               projectIds:
+ *                 type: array
+ *                 description: Alias of relatedProjects
+ *                 items: { type: string }
+ *               subtasks:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required: [title]
+ *                   properties:
+ *                     title: { type: string }
+ *                     completed: { type: boolean }
+ *                     dueDate:
+ *                       type: string
+ *                       format: date-time
+ *                     assignedTo: { type: string }
+ *                     contact:
+ *                       type: object
+ *                       properties:
+ *                         user: { type: string }
+ *                         name: { type: string }
+ *                         phone: { type: string }
+ *                         email: { type: string }
+ *                     description: { type: string }
+ *                     order: { type: number }
  *           example:
  *             title: Confirmar firma con notaria
  *             description: Cliente solicita mover firma para manana
@@ -315,9 +420,22 @@ router
  *             priority: urgent
  *             dueDate: 2026-05-21T14:30:00.000Z
  *             assignedTo: 6648e3df9a9ed2f35f1234ab
+ *             contact:
+ *               name: Contacto externo notaria
+ *               phone: "+573209876543"
+ *               email: notaria@mail.com
  *             tags:
  *               - legal
  *               - follow-up
+ *             relatedProjects:
+ *               - 6650f1a2a47f4b9f7296f1ac
+ *             subtasks:
+ *               - title: Enviar recordatorio por WhatsApp
+ *                 description: Mensaje 24h antes de la cita
+ *                 completed: true
+ *               - title: Cerrar seguimiento
+ *                 description: Marcar negocio en CRM
+ *                 completed: false
  *     responses:
  *       200:
  *         description: Activity updated
@@ -376,5 +494,163 @@ router
  *         description: Activity moved
  */
 router.patch('/:id/move', protect, admin, moveActivity)
+
+/**
+ * @swagger
+ * /api/activities/{id}/subtasks:
+ *   post:
+ *     summary: Add subtask to an activity (Admin only)
+ *     tags: [Activities]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 6651033f7ab5d67c62d102ef
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [title]
+ *             properties:
+ *               title: { type: string }
+ *               description: { type: string }
+ *               completed: { type: boolean }
+ *               dueDate:
+ *                 type: string
+ *                 format: date-time
+ *               assignedTo: { type: string }
+ *               contact:
+ *                 type: object
+ *                 properties:
+ *                   user: { type: string, description: User ID registrado }
+ *                   name: { type: string }
+ *                   phone: { type: string }
+ *                   email: { type: string }
+ *           example:
+ *             title: Confirmar disponibilidad del cliente
+ *             description: Llamar y definir horario final
+ *             dueDate: 2026-05-21T14:00:00.000Z
+ *             assignedTo: 6648e3df9a9ed2f35f1234ab
+ *             contact:
+ *               user: 6648e3df9a9ed2f35f1234ab
+ *               name: Carlos Cardona
+ *               phone: "+573001112233"
+ *               email: carlos@demo.com
+ *     responses:
+ *       201:
+ *         description: Subtask added
+ */
+router.post('/:id/subtasks', protect, admin, addActivitySubtask)
+
+/**
+ * @swagger
+ * /api/activities/{id}/subtasks/{subtaskId}:
+ *   put:
+ *     summary: Update subtask (Admin only)
+ *     tags: [Activities]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: subtaskId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title: { type: string }
+ *               description: { type: string }
+ *               completed: { type: boolean }
+ *               dueDate:
+ *                 type: string
+ *                 format: date-time
+ *               assignedTo: { type: string }
+ *               contact:
+ *                 type: object
+ *                 properties:
+ *                   user: { type: string, description: User ID registrado }
+ *                   name: { type: string }
+ *                   phone: { type: string }
+ *                   email: { type: string }
+ *               order: { type: number }
+ *           example:
+ *             completed: true
+ *             title: Cliente confirmado por llamada
+ *             description: Cliente acepta firma el viernes
+ *             contact:
+ *               name: Cliente alterno
+ *               phone: "+573188887777"
+ *               email: cliente@mail.com
+ *     responses:
+ *       200:
+ *         description: Subtask updated
+ *   delete:
+ *     summary: Delete subtask (Admin only)
+ *     tags: [Activities]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: subtaskId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Subtask deleted
+ */
+router.put('/:id/subtasks/:subtaskId', protect, admin, updateActivitySubtask)
+router.delete('/:id/subtasks/:subtaskId', protect, admin, deleteActivitySubtask)
+
+/**
+ * @swagger
+ * /api/activities/{id}/threads:
+ *   post:
+ *     summary: Add message to activity thread (authenticated users)
+ *     tags: [Activities]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [message]
+ *             properties:
+ *               message: { type: string }
+ *           example:
+ *             message: Cliente disponible el viernes a las 4pm para firma.
+ *     responses:
+ *       201:
+ *         description: Thread message added
+ */
+router.post('/:id/threads', protect, addActivityThreadMessage)
 
 export default router

@@ -45,7 +45,7 @@ const router = express.Router()
  *                 format: date
  *               role:
  *                 type: string
- *                 enum: [superadmin, admin, user]
+ *                 enum: [superadmin, admin, owner, user]
  *                 default: user
  *               skipPasswordSetup:
  *                 type: boolean
@@ -115,9 +115,9 @@ router.post('/login', login)
  * @swagger
  * /api/auth/admin/login:
  *   post:
- *     summary: Login for admin/superadmin only
+ *     summary: Login for admin/superadmin/owner only
  *     tags: [Auth]
- *     description: Same as login but only accepts users with role admin or superadmin. Rejects regular users with 403.
+ *     description: Same as login but only accepts users with role admin, superadmin or owner. Rejects regular users with 403.
  *     requestBody:
  *       required: true
  *       content:
@@ -136,7 +136,7 @@ router.post('/login', login)
  *                 type: string
  *     responses:
  *       200:
- *         description: Login successful (admin/superadmin)
+ *         description: Login successful (admin/superadmin/owner)
  *         content:
  *           application/json:
  *             schema:
@@ -151,7 +151,7 @@ router.post('/login', login)
  *       401:
  *         description: Invalid credentials
  *       403:
- *         description: Access denied (not admin/superadmin) or password not set
+ *         description: Access denied (not admin/superadmin/owner) or password not set
  */
 router.post('/admin/login', loginAdmin)
 

@@ -163,11 +163,11 @@ export const searchUsers = async (req, res) => {
 
 /**
  * Proyectos en los que el usuario tiene presencia (P1 vía Property, P2 vía Apartment, o projectMemberships).
- * admin/superadmin: listan todos los proyectos (gestión).
+ * admin/superadmin/owner: listan todos los proyectos (gestión/lectura global).
  */
 export const getMyProjects = async (req, res) => {
   try {
-    if (req.user.role === 'admin' || req.user.role === 'superadmin') {
+    if (req.user.role === 'admin' || req.user.role === 'superadmin' || req.user.role === 'owner') {
       const all = await Project.find({})
         .select('name slug phase type')
         .sort({ name: 1 })
@@ -189,7 +189,7 @@ export const getMyProjects = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
     const { role, projectId } = req.query
-    const isAdmin = req.user && (req.user.role === 'admin' || req.user.role === 'superadmin')
+    const isAdmin = req.user && (req.user.role === 'admin' || req.user.role === 'superadmin' || req.user.role === 'owner')
 
     if (!isAdmin && !projectId) {
       return res.status(400).json({ message: 'projectId is required' })

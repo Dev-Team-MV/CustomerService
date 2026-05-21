@@ -21,6 +21,10 @@ const mediaItemSchema = new mongoose.Schema({
     type: String,
     enum: ['image', 'video'],
     default: 'image'
+  },
+  uploadedAt: {
+    type: Date,
+    default: null
   }
 }, { _id: true })
 
@@ -41,6 +45,10 @@ const phaseSchema = new mongoose.Schema(
       max: 9
     },
     title: {
+      type: String,
+      trim: true
+    },
+    description: {
       type: String,
       trim: true
     },

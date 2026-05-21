@@ -178,6 +178,19 @@ onChange={(e) => {
           />
         </Grid>
 
+        {/* Fecha de subida */}
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            type="date"
+            label="Upload Date"
+            value={uploadForm.uploadedAt}
+            onChange={(e) => setUploadForm(prev => ({ ...prev, uploadedAt: e.target.value }))}
+            InputLabelProps={{ shrink: true }}
+            sx={fieldSx}
+          />
+        </Grid>
+
         {/* Imágenes */}
         <Grid item xs={12}>
           <PrimaryButton
