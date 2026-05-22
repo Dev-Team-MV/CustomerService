@@ -193,6 +193,8 @@ router.put('/:id', protect, admin, updatePhase)
  *                 type: string
  *               title:
  *                 type: string
+ *               description:
+ *                 type: string
  *               percentage:
  *                 type: number
  *                 minimum: 0
@@ -247,6 +249,8 @@ router.post('/:id/media', protect, admin, addMediaItem)
  *                 type: string
  *               title:
  *                 type: string
+ *               description:
+ *                 type: string
  *               percentage:
  *                 type: number
  *                 minimum: 0
@@ -293,6 +297,8 @@ router.post('/apartment/:apartmentId/phase/:phaseNumber/media', protect, admin, 
  *               url:
  *                 type: string
  *               title:
+ *                 type: string
+ *               description:
  *                 type: string
  *               percentage:
  *                 type: number
@@ -366,6 +372,8 @@ router.delete('/:id/media/:mediaItemId', protect, admin, deleteMediaItem)
  *               url:
  *                 type: string
  *               title:
+ *                 type: string
+ *               description:
  *                 type: string
  *               percentage:
  *                 type: number

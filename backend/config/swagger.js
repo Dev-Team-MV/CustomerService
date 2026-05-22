@@ -865,6 +865,7 @@ const options = {
                   _id: { type: 'string' },
                   url: { type: 'string' },
                   title: { type: 'string' },
+                  description: { type: 'string' },
                   percentage: { type: 'number', minimum: 0, maximum: 100 },
                   mediaType: { type: 'string', enum: ['image', 'video'] }
                 }
