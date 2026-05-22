@@ -19,12 +19,12 @@ const router = express.Router()
  *     summary: Get users (public limited mode or admin full mode)
  *     description: |
  *       - Without token: requires `projectId` and returns limited fields (`_id`, `firstName`, `lastName`, `email`).
- *       - With admin/superadmin token: returns users enriched with `projects` and supports `role` + `projectId` filters.
+ *       - With admin/superadmin/owner token: returns users enriched with `projects` and supports `role` + `projectId` filters.
  *     tags: [Users]
  *     parameters:
  *       - in: query
  *         name: role
- *         schema: { type: string, enum: [superadmin, admin, user] }
+ *         schema: { type: string, enum: [superadmin, admin, owner, user] }
  *       - in: query
  *         name: projectId
  *         schema: { type: string }

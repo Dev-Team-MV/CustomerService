@@ -67,6 +67,59 @@ export const useClientColumns = ({
     }
   },
   {
+  field: 'projects', headerName: t('clients.projects'), minWidth: 140,
+  renderCell: ({ row }) => {
+    const projects = row.projects || []
+    if (projects.length === 0) {
+      return <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#ccc' }}>—</Typography>
+    }
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        {projects.slice(0, 4).map((project, idx) => (
+          <Tooltip key={project._id || idx} title={project.name} placement="top">
+            <Avatar
+              sx={{
+                width: 24,
+                height: 24,
+                fontSize: '0.55rem',
+                fontWeight: 700,
+                fontFamily: '"Courier New", monospace',
+                bgcolor: '#1a1a1a',
+                color: '#fff',
+                borderRadius: 0,
+                ml: idx > 0 ? -0.5 : 0,
+                border: '1px solid #fff',
+                cursor: 'default'
+              }}
+            >
+              {project.name?.substring(0, 2).toUpperCase()}
+            </Avatar>
+          </Tooltip>
+        ))}
+        {projects.length > 4 && (
+          <Tooltip title={projects.slice(4).map(p => p.name).join(', ')} placement="top">
+            <Avatar
+              sx={{
+                width: 24,
+                height: 24,
+                fontSize: '0.5rem',
+                fontWeight: 700,
+                bgcolor: '#666',
+                color: '#fff',
+                borderRadius: 0,
+                ml: -0.5,
+                border: '1px solid #fff'
+              }}
+            >
+              +{projects.length - 4}
+            </Avatar>
+          </Tooltip>
+        )}
+      </Box>
+    )
+  }
+},
+  {
     field: 'lots', headerName: t('clients.lots'), minWidth: 110,
     renderCell: ({ row }) => (
       <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.78rem', color: '#666' }}>

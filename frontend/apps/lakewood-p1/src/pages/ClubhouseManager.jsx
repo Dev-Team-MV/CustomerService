@@ -22,7 +22,7 @@ import { PhotoLibrary, Map, Layers, MeetingRoom } from "@mui/icons-material";
 import ClubhouseImagesModal from "../components/ClubHouse/ClubImagesModal";
 import uploadService from "../services/uploadService";
 import PageHeader from '@shared/components/PageHeader'
-
+import ClubhouseUnderConstructionTab from "../components/ClubHouse/ClubhouseUnderConstructionTab";
 import { useTranslation } from "react-i18next";
 import Loader from "../components/Loader";
 
@@ -210,6 +210,8 @@ const ClubhouseManager = () => {
             <Tab label={t("clubHouse:tabs.plans")} />
             <Tab label={t("clubHouse:tabs.interior")} />
             <Tab label={t("clubHouse:tabs.deck")} />
+            <Tab label={t("clubHouse:tabs.underConstruction", "Under Construction")} />  {/* Nueva tab */}
+
           </Tabs>
         </Paper>
 
@@ -567,6 +569,7 @@ const ClubhouseManager = () => {
               )}
             </Grid>
           )}
+          {tab === 4 && <ClubhouseUnderConstructionTab />}
           {/* Lightbox Dialog (simple) */}
           <Dialog
             open={lightboxOpen}

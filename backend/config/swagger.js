@@ -61,7 +61,7 @@ const options = {
             email: { type: 'string', format: 'email' },
             phoneNumber: { type: 'string' },
             birthday: { type: 'string', format: 'date' },
-            role: { type: 'string', enum: ['superadmin', 'admin', 'user'] },
+            role: { type: 'string', enum: ['superadmin', 'admin', 'owner', 'user'] },
             lots: { type: 'array', items: { type: 'string' } },
             projectMemberships: {
               type: 'array',
@@ -855,6 +855,7 @@ const options = {
             apartment: { type: 'string', nullable: true },
             phaseNumber: { type: 'number', minimum: 1, maximum: 9 },
             title: { type: 'string' },
+            description: { type: 'string' },
             constructionPercentage: { type: 'number', minimum: 0, maximum: 100 },
             mediaItems: {
               type: 'array',
@@ -864,6 +865,7 @@ const options = {
                   _id: { type: 'string' },
                   url: { type: 'string' },
                   title: { type: 'string' },
+                  description: { type: 'string' },
                   percentage: { type: 'number', minimum: 0, maximum: 100 },
                   mediaType: { type: 'string', enum: ['image', 'video'] }
                 }
@@ -940,6 +942,32 @@ const options = {
                 }
               },
               description: 'Deck images (url, isPublic, name opcional)'
+            },
+            clubHouseTimeline: {
+              type: 'array',
+              description: 'Timeline exclusivo del Club House',
+              items: {
+                type: 'object',
+                properties: {
+                  _id: { type: 'string' },
+                  title: { type: 'string' },
+                  description: { type: 'string' },
+                  clubHouseDate: { type: 'string', format: 'date-time' },
+                  media: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        type: { type: 'string', enum: ['image', 'video'] },
+                        url: { type: 'string' },
+                        name: { type: 'string' },
+                        order: { type: 'number' },
+                        isPublic: { type: 'boolean' }
+                      }
+                    }
+                  }
+                }
+              }
             },
             interior: {
               type: 'object',

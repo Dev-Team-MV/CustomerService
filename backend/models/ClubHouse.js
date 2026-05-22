@@ -44,6 +44,44 @@ const clubHouseImageSchema = new mongoose.Schema(
   { _id: false }
 )
 
+const clubHouseTimelineMediaSchema = new mongoose.Schema(
+  {
+    type: {
+      type: String,
+      required: true,
+      enum: ['image', 'video']
+    },
+    url: { type: String, required: true, trim: true },
+    name: { type: String, trim: true, default: '' },
+    order: { type: Number, required: true, min: 1 },
+    isPublic: { type: Boolean, default: true }
+  },
+  { _id: false }
+)
+
+const clubHouseTimelineItemSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: [true, 'Title is required'],
+      trim: true
+    },
+    description: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    media: {
+      type: [clubHouseTimelineMediaSchema],
+      default: []
+    },
+    clubHouseDate: {
+      type: Date,
+      required: [true, 'Club house date is required']
+    }
+  }
+)
+
 const clubHouseSchema = new mongoose.Schema(
   {
     exterior: {
@@ -66,6 +104,13 @@ const clubHouseSchema = new mongoose.Schema(
     recorridoVisibility: {
       type: mongoose.Schema.Types.Mixed,
       default: () => ({})
+    },
+    /**
+     * Timeline exclusivo de Club House (independiente al under-construction global del proyecto).
+     */
+    clubHouseTimeline: {
+      type: [clubHouseTimelineItemSchema],
+      default: () => []
     }
   },
   {

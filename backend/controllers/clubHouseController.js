@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import ClubHouse, { DEFAULT_INTERIOR_KEYS } from '../models/ClubHouse.js'
 import { uploadFile, deleteFile } from '../services/storageService.js'
 import { processImageForUpload } from '../services/imageProcessingService.js'
@@ -75,6 +76,39 @@ function normalizeImageItem (item) {
 function normalizeImageArray (arr) {
   if (!Array.isArray(arr)) return []
   return arr.map(normalizeImageItem).filter(Boolean)
+}
+
+/** Normaliza media del timeline de Club House. */
+function normalizeTimelineMediaItem (item) {
+  if (!item || typeof item !== 'object') return null
+  if (!['image', 'video'].includes(item.type)) return null
+  const url = normalizePathForStorage(item.url)
+  if (!url) return null
+  return {
+    type: item.type,
+    url,
+    name: typeof item.name === 'string' ? item.name.trim() : '',
+    order: typeof item.order === 'number' && item.order > 0 ? item.order : 1,
+    isPublic: item.isPublic !== false
+  }
+}
+
+function normalizeTimelineMediaArray (arr) {
+  if (!Array.isArray(arr)) return []
+  return arr
+    .map(normalizeTimelineMediaItem)
+    .filter(Boolean)
+    .sort((a, b) => a.order - b.order)
+    .map((item, index) => ({ ...item, order: index + 1 }))
+}
+
+function timelineStepComparable (step) {
+  return {
+    title: step?.title || '',
+    description: step?.description || '',
+    clubHouseDate: step?.clubHouseDate ? new Date(step.clubHouseDate).toISOString() : null,
+    media: normalizeTimelineMediaArray(step?.media || [])
+  }
 }
 
 function mergeImageArraysUniqueByUrl (target = [], source = []) {
@@ -172,6 +206,29 @@ async function migrateAndNormalize (doc) {
     if (changed) doc.markModified('interior')
   }
 
+  if (Array.isArray(doc.clubHouseTimeline)) {
+    const normalizedTimeline = doc.clubHouseTimeline.map((step) => {
+      if (!step || typeof step !== 'object') return null
+      return {
+        _id: step._id || new mongoose.Types.ObjectId(),
+        title: typeof step.title === 'string' ? step.title.trim() : '',
+        description: typeof step.description === 'string' ? step.description.trim() : '',
+        media: normalizeTimelineMediaArray(step.media),
+        clubHouseDate: step.clubHouseDate ? new Date(step.clubHouseDate) : null
+      }
+    }).filter((step) => step && step.title && step.clubHouseDate && !Number.isNaN(step.clubHouseDate.getTime()))
+
+    const currentComparable = (doc.clubHouseTimeline || []).map(timelineStepComparable)
+    const normalizedComparable = normalizedTimeline.map(timelineStepComparable)
+    const currentMissingIds = (doc.clubHouseTimeline || []).some((step) => !step?._id)
+    const same = !currentMissingIds && JSON.stringify(currentComparable) === JSON.stringify(normalizedComparable) &&
+      normalizedTimeline.length === (doc.clubHouseTimeline || []).length
+    if (!same) {
+      doc.clubHouseTimeline = normalizedTimeline
+      changed = true
+    }
+  }
+
   if (changed) await doc.save()
   return doc
 }
@@ -202,6 +259,61 @@ function filterPublicImages (arr) {
   return arr.map(normalizeImageItem).filter(Boolean).filter((item) => item.isPublic === true)
 }
 
+function filterPublicTimeline (timeline) {
+  if (!Array.isArray(timeline)) return []
+  return timeline
+    .map((step) => {
+      if (!step || typeof step !== 'object') return null
+      return {
+        _id: step._id,
+        title: step.title || '',
+        description: step.description || '',
+        clubHouseDate: step.clubHouseDate || null,
+        media: filterPublicImages(step.media || [])
+      }
+    })
+    .filter((step) => step && step.title && step.clubHouseDate)
+}
+
+function normalizeTimelineStepInput (payload = {}, existingStep = null) {
+  const title = payload.title !== undefined
+    ? (typeof payload.title === 'string' ? payload.title.trim() : '')
+    : (existingStep?.title || '')
+  const description = payload.description !== undefined
+    ? (typeof payload.description === 'string' ? payload.description.trim() : '')
+    : (existingStep?.description || '')
+
+  let media = existingStep?.media || []
+  if (payload.media !== undefined) {
+    media = normalizeTimelineMediaArray(payload.media)
+  } else {
+    media = normalizeTimelineMediaArray(media)
+  }
+
+  let clubHouseDate = existingStep?.clubHouseDate || null
+  if (payload.clubHouseDate !== undefined) {
+    clubHouseDate = payload.clubHouseDate ? new Date(payload.clubHouseDate) : null
+  } else if (clubHouseDate) {
+    clubHouseDate = new Date(clubHouseDate)
+  }
+
+  if (!title) {
+    return { error: 'title is required' }
+  }
+  if (!clubHouseDate || Number.isNaN(clubHouseDate.getTime())) {
+    return { error: 'clubHouseDate is required and must be a valid date' }
+  }
+
+  return {
+    step: {
+      title,
+      description,
+      media,
+      clubHouseDate
+    }
+  }
+}
+
 /**
  * GET Club House (public). Returns clubhouse with only public images (isPublic: true).
  * No authentication required. For public site, landing, etc.
@@ -218,6 +330,7 @@ export const getClubHousePublic = async (req, res) => {
       exterior: filterPublicImages(doc.exterior),
       blueprints: filterPublicImages(doc.blueprints),
       deck: filterPublicImages(doc.deck),
+      clubHouseTimeline: filterPublicTimeline(doc.clubHouseTimeline),
       interior: {}
     }
     if (doc.interior && typeof doc.interior === 'object') {
@@ -232,6 +345,123 @@ export const getClubHousePublic = async (req, res) => {
 
     await hydrateUrlsInObject(publicPayload)
     res.json(publicPayload)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+/**
+ * GET Timeline de Club House (público).
+ */
+export const getClubHouseTimeline = async (req, res) => {
+  try {
+    let doc = await ClubHouse.findOne()
+    if (!doc) doc = await ClubHouse.create({})
+    doc = await migrateAndNormalize(doc)
+
+    const timeline = filterPublicTimeline(doc.clubHouseTimeline || [])
+    await hydrateUrlsInObject(timeline)
+    res.json({ clubHouseTimeline: timeline })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+/**
+ * POST Crea un paso del timeline de Club House (admin).
+ */
+export const createClubHouseTimelineStep = async (req, res) => {
+  try {
+    let doc = await ClubHouse.findOne()
+    if (!doc) doc = await ClubHouse.create({})
+    doc = await migrateAndNormalize(doc)
+
+    const { step, error } = normalizeTimelineStepInput(req.body)
+    if (error) return res.status(400).json({ message: error })
+
+    doc.clubHouseTimeline = Array.isArray(doc.clubHouseTimeline) ? doc.clubHouseTimeline : []
+    doc.clubHouseTimeline.push(step)
+    await doc.save()
+
+    const data = doc.toObject()
+    await hydrateUrlsInObject(data)
+    res.status(201).json({
+      message: 'Club House timeline step created',
+      clubHouse: data
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+/**
+ * PUT Actualiza un paso del timeline por índice (admin).
+ */
+export const updateClubHouseTimelineStep = async (req, res) => {
+  try {
+    const { stepId } = req.params
+    if (!stepId) {
+      return res.status(400).json({ message: 'stepId is required' })
+    }
+
+    let doc = await ClubHouse.findOne()
+    if (!doc) doc = await ClubHouse.create({})
+    doc = await migrateAndNormalize(doc)
+
+    const timeline = Array.isArray(doc.clubHouseTimeline) ? doc.clubHouseTimeline : []
+    const idx = timeline.findIndex((step) => step?._id?.toString() === stepId)
+    if (idx === -1) {
+      return res.status(404).json({ message: 'Timeline step not found' })
+    }
+
+    const { step, error } = normalizeTimelineStepInput(req.body, timeline[idx])
+    if (error) return res.status(400).json({ message: error })
+
+    timeline[idx] = step
+    doc.clubHouseTimeline = timeline
+    await doc.save()
+
+    const data = doc.toObject()
+    await hydrateUrlsInObject(data)
+    res.json({
+      message: 'Club House timeline step updated',
+      clubHouse: data
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+/**
+ * DELETE Elimina un paso del timeline por índice (admin).
+ */
+export const deleteClubHouseTimelineStep = async (req, res) => {
+  try {
+    const { stepId } = req.params
+    if (!stepId) {
+      return res.status(400).json({ message: 'stepId is required' })
+    }
+
+    let doc = await ClubHouse.findOne()
+    if (!doc) doc = await ClubHouse.create({})
+    doc = await migrateAndNormalize(doc)
+
+    const timeline = Array.isArray(doc.clubHouseTimeline) ? doc.clubHouseTimeline : []
+    const idx = timeline.findIndex((step) => step?._id?.toString() === stepId)
+    if (idx === -1) {
+      return res.status(404).json({ message: 'Timeline step not found' })
+    }
+
+    timeline.splice(idx, 1)
+    doc.clubHouseTimeline = timeline
+    await doc.save()
+
+    const data = doc.toObject()
+    await hydrateUrlsInObject(data)
+    res.json({
+      message: 'Club House timeline step deleted',
+      clubHouse: data
+    })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }

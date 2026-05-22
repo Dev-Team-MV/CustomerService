@@ -3,6 +3,7 @@ import { useState } from 'react'
 import InventoryTab from './inventoryTab'
 import ExteriorAmenitiesTab from './ExteriorAmenitiesTab'
 import RecorridoTab from './RecorridoTab'
+import EagleViewTab from './EagleViewTab'
 import { useTranslation } from 'react-i18next'
 
 const MasterPlanTabs = () => {
@@ -19,12 +20,14 @@ const MasterPlanTabs = () => {
           <Tab label={t('inventoryTab')} />
           <Tab label={t('exteriorAmenitiesTab')} />
           <Tab label={t('tourTab')} />
+          <Tab label={t('eagleViewTab')} />
         </Tabs>
       </Paper>
       <Paper elevation={0} sx={{ p: { xs: 2, sm: 3, md: 4 }, minHeight: 300 }}>
         {tab === 0 && <InventoryTab />}
         {tab === 1 && <ExteriorAmenitiesTab />}
         {tab === 2 && <RecorridoTab />}
+        {tab === 3 && <EagleViewTab />}
       </Paper>
     </Box>
   )

@@ -113,77 +113,80 @@ const handleDeleteMedia = async (mediaItemId) => {
     setSelectedPhase(phase)
   }
 
-  const handleUploadMedia = async (phaseNumber, uploadForm) => {
-    if (!uploadForm.images.length && !uploadForm.videos.length) {
-      alert(t('alerts.selectMedia'))
-      return
-    }
-
-    try {
-      setUploading(true)
-      let urls = []
-      let videoUrls = []
-
-      if (uploadForm.images.length) {
-        urls = await uploadService.uploadPhaseImages(uploadForm.images)
-      }
-      if (uploadForm.videos.length) {
-        videoUrls = await uploadService.uploadPhaseVideos(uploadForm.videos)
-      }
-
-      const currentPercentage = selectedPhase.constructionPercentage || 0
-      const addedPercentage = parseFloat(uploadForm.percentage) || 0
-      const newPercentage = Math.min(100, currentPercentage + addedPercentage)
-
-      let phaseId = selectedPhase._id
-      if (!phaseId) {
-        const createResponse = await api.post('/phases', {
-          property: property._id,
-          phaseNumber: selectedPhase.phaseNumber,
-          constructionPercentage: newPercentage
-        })
-        phaseId = createResponse.data._id
-      } else {
-        await api.put(`/phases/${phaseId}`, { constructionPercentage: newPercentage })
-      }
-
-      for (let i = 0; i < urls.length; i++) {
-        await api.post(`/phases/${phaseId}/media`, {
-          url:        urls[i],
-          title:      uploadForm.title || t('defaultMediaTitle', { phase: selectedPhase.phaseNumber, type: 'Image', index: i + 1 }),
-          percentage: addedPercentage / (urls.length + videoUrls.length),
-          mediaType:  'image',
-          uploadedAt: uploadForm.uploadedAt || null
-        })
-      }
-      for (let i = 0; i < videoUrls.length; i++) {
-        await api.post(`/phases/${phaseId}/media`, {
-          url:        videoUrls[i],
-          title:      uploadForm.title || t('defaultMediaTitle', { phase: selectedPhase.phaseNumber, type: 'Video', index: i + 1 }),
-          percentage: addedPercentage / (urls.length + videoUrls.length),
-          mediaType:  'video',
-          uploadedAt: uploadForm.uploadedAt || null
-        })
-      }
-
-      alert(t('alerts.uploadSuccess'))
-      setSelectedPhase(null)
-      refetch()
-    } catch (error) {
-      alert(t('alerts.uploadError', { message: error.response?.data?.message || error.message }))
-    } finally {
-      setUploading(false)
-    }
+const handleUploadMedia = async (phaseNumber, uploadForm) => {
+  if (!uploadForm.images.length && !uploadForm.videos.length) {
+    alert(t('alerts.selectMedia'))
+    return
   }
+
+  try {
+    setUploading(true)
+    let urls = []
+    let videoUrls = []
+
+    if (uploadForm.images.length) {
+      urls = await uploadService.uploadPhaseImages(uploadForm.images)
+    }
+    if (uploadForm.videos.length) {
+      videoUrls = await uploadService.uploadPhaseVideos(uploadForm.videos)
+    }
+
+    const currentPercentage = selectedPhase.constructionPercentage || 0
+    const addedPercentage = parseFloat(uploadForm.percentage) || 0
+    const newPercentage = Math.min(100, currentPercentage + addedPercentage)
+
+    let phaseId = selectedPhase._id
+    if (!phaseId) {
+      const createResponse = await api.post('/phases', {
+        property: property._id,
+        phaseNumber: selectedPhase.phaseNumber,
+        constructionPercentage: newPercentage
+      })
+      phaseId = createResponse.data._id
+    } else {
+      await api.put(`/phases/${phaseId}`, { constructionPercentage: newPercentage })
+    }
+
+    for (let i = 0; i < urls.length; i++) {
+      await api.post(`/phases/${phaseId}/media`, {
+        url:         urls[i],
+        title:       uploadForm.title || t('defaultMediaTitle', { phase: selectedPhase.phaseNumber, type: 'Image', index: i + 1 }),
+        percentage:  addedPercentage / (urls.length + videoUrls.length),
+        mediaType:   'image',
+        uploadedAt:  uploadForm.uploadedAt || null,
+        description: uploadForm.description || ''  // ← Agregar este campo
+      })
+    }
+    for (let i = 0; i < videoUrls.length; i++) {
+      await api.post(`/phases/${phaseId}/media`, {
+        url:         videoUrls[i],
+        title:       uploadForm.title || t('defaultMediaTitle', { phase: selectedPhase.phaseNumber, type: 'Video', index: i + 1 }),
+        percentage:  addedPercentage / (urls.length + videoUrls.length),
+        mediaType:   'video',
+        uploadedAt:  uploadForm.uploadedAt || null,
+        description: uploadForm.description || ''  // ← Agregar este campo
+      })
+    }
+
+    alert(t('alerts.uploadSuccess'))
+    setSelectedPhase(null)
+    refetch()
+  } catch (error) {
+    alert(t('alerts.uploadError', { message: error.response?.data?.message || error.message }))
+  } finally {
+    setUploading(false)
+  }
+}
 
 const extractUrl = (item) => {
   if (!item) return null
   if (typeof item === 'string') return { url: item, type: 'image', title: '' }
-  if (item.url) return { 
-    url: item.url, 
-    type: item.mediaType || 'image',
-    title: item.title || ''
-  }
+if (item.url) return { 
+  url: item.url, 
+  type: item.mediaType || 'image',
+  title: item.title || '',
+  description: item.description || ''  // ✅ Agregar
+}
   return null
 }
 
