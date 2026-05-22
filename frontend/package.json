@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
+    "@mui/x-date-pickers": "^9.2.0",
+    "date-fns": "^4.1.0",
     "swiper": "^12.1.4"
   }
 }

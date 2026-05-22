@@ -56,12 +56,13 @@ const safeMedia = useMemo(() => {
         return { 
           url: item.url, 
           type: item.type || 'image',
-          title: item.title || ''  // ✅ NUEVO
+          title: item.title || '',
+          description: item.description || ''  // ✅ Agregar
         }
       }
       // Si es un string, convertirlo a objeto
       if (typeof item === 'string') {
-        return { url: item, type: 'image', title: '' }
+        return { url: item, type: 'image', title: '', description: '' }
       }
       return null
     })
@@ -168,7 +169,7 @@ const safeMedia = useMemo(() => {
     )}
     
     {/* Título del media item */}
-    {showTitles && media.title && (
+    {showTitles && media.title &&(
       <div
         style={{
           width: '22%',
@@ -190,8 +191,35 @@ const safeMedia = useMemo(() => {
         }}
       >
         {media.title}
+        
       </div>
+
     )}
+    {/* Descripción del media item */}
+{showTitles && media.description && media.description.trim() && (
+  <div
+    style={{
+      position: 'absolute',
+      bottom: 16,
+      left: 16,
+      right: 16,
+      background: 'rgba(0, 0, 0, 0.7)',
+      backdropFilter: 'blur(8px)',
+      color: 'white',
+      padding: '8px 16px',
+      borderRadius: 8,
+      fontFamily: '"Poppins", sans-serif',
+      fontSize: 12,
+      fontWeight: 400,
+      pointerEvents: 'none',
+      userSelect: 'none',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+      maxWidth: '80%'
+    }}
+  >
+    {media.description}
+  </div>
+)}
     
     {watermark && media.type !== 'video' && (
       <img
