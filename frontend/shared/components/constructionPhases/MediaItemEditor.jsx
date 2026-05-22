@@ -39,6 +39,8 @@ const MediaItemEditor = ({
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editTitle, setEditTitle] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+
   const [editUploadedAt, setEditUploadedAt] = useState('')
   const [newFile, setNewFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(null)
@@ -60,6 +62,7 @@ const MediaItemEditor = ({
   const handleEditOpen = (e) => {
     e?.stopPropagation()
     setEditTitle(mediaItem.title || '')
+    setEditDescription(mediaItem.description || '')
     setEditUploadedAt(
       mediaItem.uploadedAt
         ? new Date(mediaItem.uploadedAt).toISOString().split('T')[0]
@@ -86,6 +89,7 @@ const MediaItemEditor = ({
     try {
       const updateData = {
         title: editTitle,
+        description: editDescription,
         uploadedAt: editUploadedAt || null
       }
       
@@ -208,6 +212,17 @@ const MediaItemEditor = ({
             sx={{ mt: 2 }}
             disabled={loading}
           />
+
+          <TextField
+  fullWidth
+  multiline
+  rows={3}
+  label="Description"
+  value={editDescription}
+  onChange={(e) => setEditDescription(e.target.value)}
+  sx={{ mt: 2 }}
+  disabled={loading}
+/>
 
           {/* Sección para reemplazar archivo */}
           {allowReplaceFile && uploadService && (

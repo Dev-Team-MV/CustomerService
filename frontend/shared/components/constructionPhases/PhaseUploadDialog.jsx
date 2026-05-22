@@ -23,10 +23,11 @@ const PhaseUploadDialog = ({
 
 const [uploadForm, setUploadForm] = React.useState({
   title: '',
-  description: '',  // ← Nuevo campo
+  description: '',
   percentage: 0,
   images: [],
-  videos: []
+  videos: [],
+  uploadedAt: ''  // ← Agregar
 })
 
   const maxAddable = maxPercentage - (phase?.constructionPercentage || 0)
@@ -54,11 +55,11 @@ const handleSubmit = async () => {
   }
   
   await onUpload(phase?.phaseNumber, uploadForm)
-  setUploadForm({ title: '', description: '', percentage: 0, images: [], videos: [] })  // ← Agregar description
+setUploadForm({ title: '', description: '', percentage: 0, images: [], videos: [], uploadedAt: '' })
 }
 
 const handleClose = () => {
-  setUploadForm({ title: '', description: '', percentage: 0, images: [], videos: [] })  // ← Agregar description
+setUploadForm({ title: '', description: '', percentage: 0, images: [], videos: [], uploadedAt: '' })
   onClose()
 }
   const fieldSx = {
