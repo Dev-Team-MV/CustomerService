@@ -21,13 +21,14 @@ const PhaseUploadDialog = ({
     maxPercentage = 100
   } = config
 
-  const [uploadForm, setUploadForm] = React.useState({
-    title: '',
-    percentage: 0,
-    images: [],
-    videos: [],
-    uploadedAt: new Date().toISOString().split('T')[0]
-  })
+const [uploadForm, setUploadForm] = React.useState({
+  title: '',
+  description: '',
+  percentage: 0,
+  images: [],
+  videos: [],
+  uploadedAt: ''  // ← Agregar
+})
 
   const maxAddable = maxPercentage - (phase?.constructionPercentage || 0)
 
@@ -47,21 +48,20 @@ const PhaseUploadDialog = ({
     }))
   }
 
-  const handleSubmit = async () => {
-    if (!uploadForm.images.length && !uploadForm.videos.length) {
-      alert('Please select at least one image or video')
-      return
-    }
-    
-    await onUpload(phase?.phaseNumber, uploadForm)
-    setUploadForm({ title: '', percentage: 0, images: [], videos: [], uploadedAt: new Date().toISOString().split('T')[0] })
+const handleSubmit = async () => {
+  if (!uploadForm.images.length && !uploadForm.videos.length) {
+    alert('Please select at least one image or video')
+    return
   }
+  
+  await onUpload(phase?.phaseNumber, uploadForm)
+setUploadForm({ title: '', description: '', percentage: 0, images: [], videos: [], uploadedAt: '' })
+}
 
-  const handleClose = () => {
-    setUploadForm({ title: '', percentage: 0, images: [], videos: [], uploadedAt: new Date().toISOString().split('T')[0] })
-    onClose()
-  }
-
+const handleClose = () => {
+setUploadForm({ title: '', description: '', percentage: 0, images: [], videos: [], uploadedAt: '' })
+  onClose()
+}
   const fieldSx = {
     '& .MuiOutlinedInput-root': {
       borderRadius: 3,
@@ -131,6 +131,20 @@ const PhaseUploadDialog = ({
             sx={fieldSx}
           />
         </Grid>
+
+        <Grid item xs={12}>
+  <TextField
+    fullWidth
+    label="Description (Optional)"
+    value={uploadForm.description}
+    onChange={(e) => setUploadForm(prev => ({ ...prev, description: e.target.value }))}
+    multiline
+    rows={3}
+    placeholder="Add a description for this media upload..."
+    sx={fieldSx}
+  />
+</Grid>
+ 
 
         {/* Porcentaje con límite dinámico */}
         <Grid item xs={12}>

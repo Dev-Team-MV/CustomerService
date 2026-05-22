@@ -3,7 +3,7 @@ import { normalizeImageArray } from '../utils/imageUtils.js'
 import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
 import mongoose from 'mongoose'
 
-const isSuperadmin = (req) => req.user?.role === 'superadmin'
+const isSuperadmin = (req) => req.user?.role === 'superadmin' || req.user?.role === 'owner'
 const isValidProjectIdParam = (value) =>
   typeof value === 'string' &&
   value !== 'undefined' &&

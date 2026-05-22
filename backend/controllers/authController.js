@@ -196,7 +196,7 @@ export const login = async (req, res) => {
 }
 
 /**
- * Login exclusivo para usuarios con rol admin o superadmin.
+ * Login exclusivo para usuarios con rol admin, superadmin u owner.
  * Misma interfaz que login (email o phoneNumber + password) pero rechaza a usuarios con rol "user".
  */
 export const loginAdmin = async (req, res) => {
@@ -218,7 +218,7 @@ export const loginAdmin = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' })
     }
 
-    if (user.role !== 'admin' && user.role !== 'superadmin') {
+    if (user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'owner') {
       return res.status(403).json({ message: 'Access denied. Admin login only.' })
     }
 

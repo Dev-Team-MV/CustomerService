@@ -131,7 +131,7 @@ router.get('/apartment/:apartmentId/phase/:phaseNumber', protect, getPhaseByApar
  *       404:
  *         description: Phase not found
  *   put:
- *     summary: Update phase (title, constructionPercentage) (Admin only)
+ *     summary: Update phase (title, description, constructionPercentage) (Admin only)
  *     tags: [Phases]
  *     security:
  *       - bearerAuth: []
@@ -148,6 +148,8 @@ router.get('/apartment/:apartmentId/phase/:phaseNumber', protect, getPhaseByApar
  *             type: object
  *             properties:
  *               title:
+ *                 type: string
+ *               description:
  *                 type: string
  *               constructionPercentage:
  *                 type: number
@@ -190,6 +192,8 @@ router.put('/:id', protect, admin, updatePhase)
  *               url:
  *                 type: string
  *               title:
+ *                 type: string
+ *               description:
  *                 type: string
  *               percentage:
  *                 type: number
@@ -245,6 +249,8 @@ router.post('/:id/media', protect, admin, addMediaItem)
  *                 type: string
  *               title:
  *                 type: string
+ *               description:
+ *                 type: string
  *               percentage:
  *                 type: number
  *                 minimum: 0
@@ -291,6 +297,8 @@ router.post('/apartment/:apartmentId/phase/:phaseNumber/media', protect, admin, 
  *               url:
  *                 type: string
  *               title:
+ *                 type: string
+ *               description:
  *                 type: string
  *               percentage:
  *                 type: number
@@ -364,6 +372,8 @@ router.delete('/:id/media/:mediaItemId', protect, admin, deleteMediaItem)
  *               url:
  *                 type: string
  *               title:
+ *                 type: string
+ *               description:
  *                 type: string
  *               percentage:
  *                 type: number

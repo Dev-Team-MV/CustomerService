@@ -95,7 +95,7 @@ export const getAllApartments = async (req, res) => {
     const filter = {}
     const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
     const isPublicCatalog = !req.user
-    const isAdminOrAbove = req.user?.role === 'superadmin' || req.user?.role === 'admin'
+    const isAdminOrAbove = req.user?.role === 'superadmin' || req.user?.role === 'admin' || req.user?.role === 'owner'
 
     if (isPublicCatalog && !buildingId && !projectId) {
       return res.status(400).json({ message: 'projectId or buildingId is required without authentication' })
@@ -226,7 +226,7 @@ export const getApartmentById = async (req, res) => {
     }
 
     const visibleOnly = String(req.query.visible).toLowerCase() === 'true' || req.query.visible === '1'
-    const isAdminOrAbove = req.user.role === 'superadmin' || req.user.role === 'admin'
+    const isAdminOrAbove = req.user.role === 'superadmin' || req.user.role === 'admin' || req.user.role === 'owner'
 
     const canAccess = visibleOnly
       ? await canUserAccessApartment(req.user._id, apartment._id)

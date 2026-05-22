@@ -229,6 +229,25 @@ const PhaseMediaGallery = ({
             {currentItem.title}
           </Box>
         )}
+        {currentItem.description && (
+  <Box
+    sx={{
+      position: 'absolute',
+      bottom: 12,
+      right: 12,
+      bgcolor: 'rgba(0,0,0,0.7)',
+      color: 'white',
+      px: 2,
+      py: 1,
+      borderRadius: 2,
+      fontFamily: '"Poppins", sans-serif',
+      fontSize: '0.75rem',
+      maxWidth: '60%'
+    }}
+  >
+    {currentItem.description}
+  </Box>
+)}
       </Box>
 
       {/* Thumbnails */}

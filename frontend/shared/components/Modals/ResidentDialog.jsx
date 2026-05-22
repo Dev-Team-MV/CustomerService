@@ -249,6 +249,9 @@ const ResidentDialog = ({
             <MenuItem value="superadmin" sx={{ fontFamily: '"Poppins", sans-serif' }}>
               {t('dialog.roles.superadmin')}
             </MenuItem>
+            <MenuItem value="owner" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+              {t('dialog.roles.owner')}
+            </MenuItem>
           </TextField>
         </Grid>
 

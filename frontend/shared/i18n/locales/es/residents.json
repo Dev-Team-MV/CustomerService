@@ -18,7 +18,8 @@
   "role": {
     "superadmin": "Super Administrador",
     "admin": "Administrador",
-    "user": "Residente"
+    "user": "Residente",
+    "owner": "Owner"
   },
   "actions": {
     "add": "Agregar Usuario",
@@ -62,7 +63,8 @@
     "assigned": "asignado",
     "activeStatus": "Activo",
     "inactiveStatus": "Inactivo",
-    "confirmDelete": "¿Eliminar {{name}}?"
+    "confirmDelete": "¿Eliminar {{name}}?",
+    "projects":"Proyectos"
   },
 
     "dialog": {
@@ -80,7 +82,8 @@
     "roles": {
       "user": "Residente",
       "admin": "Administrador",
-      "superadmin": "Super Administrador"
+      "superadmin": "Super Administrador",
+      "owner": "Owner"
     },
         "cancel": "Cancelar",
     "save": "Guardar",
