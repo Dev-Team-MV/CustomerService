@@ -2,7 +2,7 @@ import { createTheme } from '@mui/material/styles'
 
 export const BRAND = {
   PRIMARY: '#333F1F',
-  SECONDARY: '#8CA551',
+  SECONDARY: '#004535',
   ACCENT: '#E5863C',
   INFO: '#1976d2',
   WARNING: '#E5863C',
@@ -113,7 +113,7 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"DM Sans", sans-serif',
     fontWeightBold: 800,
     fontWeightMedium: 600,
     fontWeightRegular: 500
@@ -127,7 +127,7 @@ const theme = createTheme({
           '& .MuiOutlinedInput-root': {
             borderRadius: 8,
             backgroundColor: '#fff',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             '& fieldset': {
               borderColor: '#dbe7c9',
               borderWidth: '1.5px'
@@ -141,7 +141,7 @@ const theme = createTheme({
             }
           },
           '& .MuiInputLabel-root': {
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontWeight: 500,
             color: '#706f6f',
             '&.Mui-focused': {
@@ -150,7 +150,7 @@ const theme = createTheme({
             }
           },
           '& .MuiFormHelperText-root': {
-            fontFamily: '"Poppins", sans-serif'
+            fontFamily: '"DM Sans", sans-serif'
           }
         }
       }

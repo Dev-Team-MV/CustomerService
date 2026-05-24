@@ -1,14 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import { Box, IconButton, Tooltip } from '@mui/material'
+import { Box, Tooltip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { motion, AnimatePresence } from 'framer-motion'
 
 const languages = [
-  { code: 'en', label: 'EN', flag: '🇺🇸' },
-  { code: 'es', label: 'ES', flag: '🇪🇸' },
+  { code: 'en', label: 'EN' },
+  { code: 'es', label: 'ES' },
   // Add more languages here as needed:
-  // { code: 'fr', label: 'FR', flag: '🇫🇷' },
-  // { code: 'pt', label: 'PT', flag: '🇧🇷' },
+  // { code: 'fr', label: 'FR' },
 ]
 
 const LanguageSwitcher = ({ variant = 'default' }) => {
@@ -16,82 +14,95 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
   const theme = useTheme()
   const currentLang = i18n.language?.split('-')[0] || 'en'
 
-  const handleToggle = () => {
-    const currentIndex = languages.findIndex(l => l.code === currentLang)
-    const nextIndex = (currentIndex + 1) % languages.length
-    i18n.changeLanguage(languages[nextIndex].code)
+  const handleSelect = (code) => {
+    if (code !== currentLang) i18n.changeLanguage(code)
   }
 
-  const current = languages.find(l => l.code === currentLang) || languages[0]
-
-  // Colores personalizados para el chip del language switcher
-  const chipTheme = theme.palette.chipLanguageSwitcher || {}
-  const bgDefault = chipTheme.bg || 'rgba(229,134,60,0.10)'
-  const borderDefault = chipTheme.border || 'rgba(229,134,60,0.35)'
-  const labelColorDefault = chipTheme.color || '#E5863C'
-  const hoverBg = chipTheme.hoverBg || theme.palette.primary?.main || '#333F1F'
-  const hoverBorder = chipTheme.hoverBorder || borderDefault
-  const hoverShadow = chipTheme.hoverShadow || '0 4px 12px rgba(51, 63, 31, 0.2)'
-
-  // Sidebar variant (puedes personalizar diferente si quieres)
-  const bgSidebar = chipTheme.bgSidebar || bgDefault
-  const borderSidebar = chipTheme.borderSidebar || borderDefault
-  const labelColorSidebar = chipTheme.colorSidebar || labelColorDefault
-
-  const bg = variant === 'sidebar' ? bgSidebar : bgDefault
-  const border = variant === 'sidebar' ? borderSidebar : borderDefault
-  const labelColor = variant === 'sidebar' ? labelColorSidebar : labelColorDefault
-
-  return (
-    <Tooltip title={`Language: ${current.label}`} placement="bottom">
-      <IconButton
-        onClick={handleToggle}
-        sx={{
-          width: 40,
-          height: 40,
-          borderRadius: 2.5,
-          bgcolor: bg,
-          border: '2px solid',
-          borderColor: border,
-          transition: 'all 0.3s ease',
-          overflow: 'hidden',
-          '&:hover': {
-            bgcolor: hoverBg,
-            borderColor: hoverBorder,
-            transform: 'scale(1.08)',
-            boxShadow: hoverShadow,
-            '& .lang-label': {
-              color: theme.palette.primary?.contrastText || 'white',
+  // Sidebar keeps the compact box style (theme-aware)
+  if (variant === 'sidebar') {
+    const chipTheme = theme.palette.chipLanguageSwitcher || {}
+    const current = languages.find(l => l.code === currentLang) || languages[0]
+    const handleToggle = () => {
+      const idx = languages.findIndex(l => l.code === currentLang)
+      i18n.changeLanguage(languages[(idx + 1) % languages.length].code)
+    }
+    return (
+      <Tooltip title={`Language: ${current.label}`} placement="bottom">
+        <Box
+          onClick={handleToggle}
+          sx={{
+            width: 40, height: 40,
+            borderRadius: 2.5,
+            bgcolor: chipTheme.bg || theme.palette.action.hover,
+            border: `2px solid ${chipTheme.border || theme.palette.divider}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              bgcolor: theme.palette.primary.main,
+              borderColor: theme.palette.primary.main,
+              '& .lang-label': { color: theme.palette.primary.contrastText },
             },
-          },
-        }}
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={current.code}
-            initial={{ y: -16, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 16, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+          }}
+        >
+          <Box
+            className="lang-label"
+            sx={{
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              fontFamily: '"Poppins", sans-serif',
+              color: chipTheme.color || theme.palette.text.primary,
+              transition: 'color 0.3s',
+            }}
           >
+            {current.label}
+          </Box>
+        </Box>
+      </Tooltip>
+    )
+  }
+
+  // Default: "ES | EN" inline text
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: 1 }}>
+      {languages.map((lang, i) => (
+        <Box key={lang.code} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          {i > 0 && (
             <Box
-              className="lang-label"
+              component="span"
               sx={{
-                fontSize: '0.75rem',
-                fontWeight: 800,
+                color: theme.palette.secondary?.main || '#8CA551',
+                fontSize: '0.8rem',
                 fontFamily: '"Poppins", sans-serif',
-                color: labelColor,
-                letterSpacing: '0.5px',
-                lineHeight: 1,
-                transition: 'color 0.3s',
+                userSelect: 'none',
               }}
             >
-              {current.label}
+              |
             </Box>
-          </motion.div>
-        </AnimatePresence>
-      </IconButton>
-    </Tooltip>
+          )}
+          <Box
+            component="span"
+            onClick={() => handleSelect(lang.code)}
+            sx={{
+              fontSize: '0.8rem',
+              fontFamily: '"Poppins", sans-serif',
+              fontWeight: lang.code === currentLang ? 800 : 400,
+              color: lang.code === currentLang
+                ? theme.palette.text.primary
+                : theme.palette.text.disabled,
+              cursor: lang.code === currentLang ? 'default' : 'pointer',
+              letterSpacing: '0.5px',
+              transition: 'color 0.2s',
+              '&:hover': lang.code !== currentLang
+                ? { color: theme.palette.text.primary }
+                : {},
+            }}
+          >
+            {lang.label}
+          </Box>
+        </Box>
+      ))}
+    </Box>
   )
 }
 

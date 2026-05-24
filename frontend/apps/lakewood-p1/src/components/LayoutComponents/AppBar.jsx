@@ -1,11 +1,10 @@
+import { useState, useEffect } from "react";
 import {
   AppBar,
-  Toolbar,
   IconButton,
   Box,
   Tooltip,
   Badge,
-  Avatar,
   Menu,
   MenuItem,
   Typography,
@@ -16,11 +15,12 @@ import {
 import {
   Menu as MenuIcon,
   Notifications as NotificationsIcon,
+  Settings as SettingsIcon,
   Login as LoginIcon,
   Logout as LogoutIcon,
   Person as PersonIcon,
 } from "@mui/icons-material";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../LanguageSwitcher'
 
@@ -39,326 +39,196 @@ const AppBarBrandbook = ({
   onCloseUserMenu,
 }) => {
   const { t } = useTranslation()
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 30)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-  <AppBar
-    position="fixed"
-    sx={{
-      bgcolor: "rgba(255, 255, 255, 0.95)",
-      backdropFilter: "blur(20px)",
-      WebkitBackdropFilter: "blur(20px)",
-      color: "#333F1F",
-      boxShadow: "0 2px 8px rgba(51, 63, 31, 0.08)",
-      borderBottom: "2px solid rgba(140, 165, 81, 0.1)",
-      zIndex: 1201,
-      "&::before": {
-        content: '""',
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 3,
-        background:
-          "linear-gradient(90deg, #333F1F 0%, #8CA551 50%, #333F1F 100%)",
-        opacity: 0.6,
-      },
-    }}
-  >
-    <Toolbar sx={{ px: { xs: 2, sm: 3 } }}>
-      <Tooltip title={t('navigation:tooltips.openMenu')} placement="right">
-        <IconButton
-          color="inherit"
-          edge="start"
-          onClick={onMenuClick}
-          sx={{
-            mr: 2,
-            bgcolor: "rgba(140, 165, 81, 0.08)",
-            border: "2px solid rgba(140, 165, 81, 0.2)",
-            transition: "all 0.3s ease",
-            "&:hover": {
-              bgcolor: "#333F1F",
-              color: "white",
-              borderColor: "#333F1F",
-              transform: "rotate(90deg)",
-              boxShadow: "0 4px 12px rgba(51, 63, 31, 0.2)",
-            },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      </Tooltip>
-
-      {/* LOGO CENTRADO */}
-      <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Box
-            component="img"
-            src="/images/logos/Logo_LakewoodOaks-05.png"
-            alt="Lakewood Oaks"
+    <AppBar
+      position="fixed"
+      elevation={0}
+      sx={{
+        bgcolor: "#eef2e8",
+        color: "#333F1F",
+        boxShadow: scrolled ? "0 2px 12px rgba(51,63,31,0.08)" : "none",
+        borderBottom: "1px solid #c8d4b8",
+        zIndex: 1201,
+        height: "auto",
+        transition: "box-shadow 0.3s ease",
+      }}
+    >
+      {/* ── Top controls row ── */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: { xs: 2, md: 4 },
+          pt: scrolled ? 1 : 1.5,
+          pb: scrolled ? 0.5 : 0.5,
+          transition: "padding 0.35s ease",
+        }}
+      >
+        <Tooltip title={t('navigation:tooltips.openMenu')} placement="right">
+          <IconButton
+            color="inherit"
+            edge="start"
+            onClick={onMenuClick}
             sx={{
-              width: "100%",
-              maxWidth: "200px",
-              height: "auto",
-              objectFit: "contain",
-              filter: "drop-shadow(0 2px 8px rgba(51, 63, 31, 0.15))",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              "&:hover": {
-                transform: "scale(1.05)",
-                filter: "drop-shadow(0 4px 12px rgba(51, 63, 31, 0.25))",
-              },
+              color: "#333F1F",
+              "&:hover": { bgcolor: "rgba(51,63,31,0.08)" },
             }}
-            onClick={onLogoClick}
-          />
-        </motion.div>
-      </Box>
+          >
+            <MenuIcon />
+          </IconButton>
+        </Tooltip>
 
-      {/* USER ACTIONS */}
-      <Box sx={{ ml: 2, display: "flex", alignItems: "center", gap: 1 }}>
-        <LanguageSwitcher />
-        {!publicView && user && (
-          <Tooltip title={t('navigation:tooltips.notifications')} placement="bottom">
-            <IconButton
-              onClick={onNotificationsClick}
-              sx={{
-                color: "#E5863C",
-                bgcolor: "rgba(229, 134, 60, 0.08)",
-                border: "2px solid rgba(229, 134, 60, 0.2)",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  bgcolor: "#E5863C",
-                  color: "white",
-                  borderColor: "#E5863C",
-                  transform: "scale(1.1)",
-                  boxShadow: "0 4px 12px rgba(229, 134, 60, 0.25)",
-                },
-              }}
-            >
-              <Badge
-                badgeContent={notifications.filter((n) => !n.read).length}
-                color="error"
-                overlap="circular"
-                sx={{
-                  "& .MuiBadge-badge": {
-                    boxShadow: "0 2px 8px rgba(211, 47, 47, 0.3)",
-                  },
-                }}
-              >
-                <NotificationsIcon sx={{ fontSize: 22 }} />
-              </Badge>
-            </IconButton>
-          </Tooltip>
-        )}
-
-        {user ? (
-          <>
-            <Tooltip title={t('navigation:tooltips.accountSettings')} placement="bottom">
-              <IconButton onClick={onOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    bgcolor: "transparent",
-                    background:
-                      "linear-gradient(135deg, #333F1F 0%, #8CA551 100%)",
-                    color: "white",
-                    fontWeight: 700,
-                    fontSize: "0.9rem",
-                    fontFamily: '"Poppins", sans-serif',
-                    border: "2px solid rgba(255, 255, 255, 0.9)",
-                    boxShadow: "0 4px 12px rgba(51, 63, 31, 0.2)",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      transform: "scale(1.1)",
-                      borderColor: "#8CA551",
-                      boxShadow: "0 6px 16px rgba(51, 63, 31, 0.3)",
-                    },
-                  }}
-                >
-                  {user?.firstName?.charAt(0).toUpperCase()}
-                </Avatar>
-              </IconButton>
-            </Tooltip>
-            <Menu
-              anchorEl={anchorElUser}
-              open={Boolean(anchorElUser)}
-              onClose={onCloseUserMenu}
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-              sx={{
-                mt: 2,
-                "& .MuiPaper-root": {
-                  borderRadius: 4,
-                  boxShadow: "0 8px 32px rgba(51, 63, 31, 0.15)",
-                  minWidth: 240,
-                  border: "2px solid rgba(140, 165, 81, 0.15)",
-                  bgcolor: "rgba(255, 255, 255, 0.98)",
-                  backdropFilter: "blur(20px)",
-                  overflow: "visible",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: 3,
-                    background:
-                      "linear-gradient(90deg, #333F1F, #8CA551, #333F1F)",
-                  },
-                },
-              }}
+        {/* Logo compacto — solo visible cuando se hace scroll */}
+        <AnimatePresence>
+          {scrolled && (
+            <motion.div
+              key="compact-logo"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.25 }}
+              style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", cursor: "pointer" }}
+              onClick={onLogoClick}
             >
               <Box
-                sx={{
-                  px: 3,
-                  py: 2.5,
-                  borderBottom: "2px solid rgba(140, 165, 81, 0.1)",
-                  background:
-                    "linear-gradient(135deg, rgba(51, 63, 31, 0.03) 0%, rgba(140, 165, 81, 0.03) 100%)",
-                }}
-              >
-                <Typography
-                  variant="subtitle1"
-                  fontWeight={700}
-                  sx={{
-                    color: "#333F1F",
-                    fontFamily: '"Poppins", sans-serif',
-                    letterSpacing: "0.5px",
-                    mb: 0.5,
-                  }}
-                >
-                  {user?.firstName} {user?.lastName}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "#706f6f",
-                    fontFamily: '"Poppins", sans-serif',
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  {user?.email}
-                </Typography>
-              </Box>
-              <MenuItem
-                onClick={onProfileClick}
-                sx={{
-                  py: 2,
-                  px: 3,
-                  borderRadius: 0,
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    bgcolor: "rgba(140, 165, 81, 0.08)",
-                    pl: 3.5,
-                  },
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  <PersonIcon sx={{ color: "#8CA551", fontSize: 20 }} />
-                </ListItemIcon>
-                <Typography
-                  sx={{
-                    fontFamily: '"Poppins", sans-serif',
-                    fontWeight: 600,
-                    fontSize: "0.9rem",
-                    color: "#333F1F",
-                  }}
-                >
-                  {t('navigation:userMenu.profile')}
-                </Typography>
-              </MenuItem>
-              <Divider
-                sx={{ my: 0.5, borderColor: "rgba(140, 165, 81, 0.15)" }}
+                component="img"
+                src="/images/logos/Logo_LakewoodOaks-05.png"
+                alt="Lakewood Oaks"
+                sx={{ height: 44, width: "auto", objectFit: "contain", display: "block" }}
               />
-              <MenuItem
-                onClick={onLogoutClick}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <LanguageSwitcher />
+
+          {!publicView && user && (
+            <Tooltip title={t('navigation:tooltips.notifications')} placement="bottom">
+              <IconButton
+                onClick={onNotificationsClick}
+                sx={{ color: "#333F1F", "&:hover": { bgcolor: "rgba(51,63,31,0.08)" } }}
+              >
+                <Badge badgeContent={notifications.filter((n) => !n.read).length} color="error" overlap="circular">
+                  <NotificationsIcon sx={{ fontSize: 22 }} />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+          )}
+
+          {user ? (
+            <>
+              <Tooltip title={t('navigation:tooltips.accountSettings')} placement="bottom">
+                <IconButton
+                  onClick={onOpenUserMenu}
+                  sx={{ color: "#333F1F", "&:hover": { bgcolor: "rgba(51,63,31,0.08)" } }}
+                >
+                  <SettingsIcon sx={{ fontSize: 22 }} />
+                </IconButton>
+              </Tooltip>
+
+              <Menu
+                anchorEl={anchorElUser}
+                open={Boolean(anchorElUser)}
+                onClose={onCloseUserMenu}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
                 sx={{
-                  py: 2,
-                  px: 3,
-                  borderRadius: 0,
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    bgcolor: "rgba(211, 47, 47, 0.08)",
-                    pl: 3.5,
+                  mt: 1,
+                  "& .MuiPaper-root": {
+                    borderRadius: 3,
+                    boxShadow: "0 8px 32px rgba(51, 63, 31, 0.12)",
+                    minWidth: 240,
+                    border: "1px solid #d6ddc9",
+                    bgcolor: "#ffffff",
                   },
                 }}
               >
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  <LogoutIcon sx={{ color: "#d32f2f", fontSize: 20 }} />
-                </ListItemIcon>
-                <Typography
-                  sx={{
-                    fontFamily: '"Poppins", sans-serif',
-                    fontWeight: 600,
-                    fontSize: "0.9rem",
-                    color: "#d32f2f",
-                  }}
-                >
-                  {t('navigation:userMenu.logout')}
-                </Typography>
-              </MenuItem>
-            </Menu>
-          </>
-        ) : (
-          <Tooltip title={t('auth:signInToAccount')} placement="bottom">
+                <Box sx={{ px: 3, py: 2, borderBottom: "1px solid #e8f0de" }}>
+                  <Typography variant="subtitle1" fontWeight={700} sx={{ color: "#333F1F", fontFamily: '"Poppins", sans-serif', mb: 0.3 }}>
+                    {user?.firstName} {user?.lastName}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "#706f6f", fontFamily: '"Poppins", sans-serif' }}>
+                    {user?.email}
+                  </Typography>
+                </Box>
+
+                <MenuItem onClick={onProfileClick} sx={{ py: 1.5, px: 3, "&:hover": { bgcolor: "rgba(140,165,81,0.08)" } }}>
+                  <ListItemIcon sx={{ minWidth: 36 }}>
+                    <PersonIcon sx={{ color: "#8CA551", fontSize: 20 }} />
+                  </ListItemIcon>
+                  <Typography sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: "0.9rem", color: "#333F1F" }}>
+                    {t('navigation:userMenu.profile')}
+                  </Typography>
+                </MenuItem>
+
+                <Divider sx={{ borderColor: "#e8f0de" }} />
+
+                <MenuItem onClick={onLogoutClick} sx={{ py: 1.5, px: 3, "&:hover": { bgcolor: "rgba(211,47,47,0.06)" } }}>
+                  <ListItemIcon sx={{ minWidth: 36 }}>
+                    <LogoutIcon sx={{ color: "#d32f2f", fontSize: 20 }} />
+                  </ListItemIcon>
+                  <Typography sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: "0.9rem", color: "#d32f2f" }}>
+                    {t('navigation:userMenu.logout')}
+                  </Typography>
+                </MenuItem>
+              </Menu>
+            </>
+          ) : (
             <Button
-              variant="contained"
+              variant="text"
               startIcon={<LoginIcon />}
               onClick={onLoginClick}
-              sx={{
-                borderRadius: 3,
-                bgcolor: "#333F1F",
-                color: "white",
-                fontWeight: 600,
-                textTransform: "none",
-                letterSpacing: "1px",
-                fontFamily: '"Poppins", sans-serif',
-                px: 3,
-                py: 1.2,
-                boxShadow: "0 4px 12px rgba(51, 63, 31, 0.25)",
-                border: "2px solid transparent",
-                position: "relative",
-                overflow: "hidden",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  top: 0,
-                  left: "-100%",
-                  width: "100%",
-                  height: "100%",
-                  bgcolor: "#8CA551",
-                  transition: "left 0.4s ease",
-                  zIndex: 0,
-                },
-                "&:hover": {
-                  bgcolor: "#333F1F",
-                  boxShadow: "0 8px 20px rgba(51, 63, 31, 0.35)",
-                  "&::before": {
-                    left: 0,
-                  },
-                  "& .MuiButton-startIcon": {
-                    color: "white",
-                  },
-                },
-                "& .MuiButton-startIcon": {
-                  position: "relative",
-                  zIndex: 1,
-                  color: "white",
-                },
-              }}
+              sx={{ color: "#333F1F", fontWeight: 600, textTransform: "none", fontFamily: '"Poppins", sans-serif', "&:hover": { bgcolor: "rgba(51,63,31,0.08)" } }}
             >
-              <Box component="span" sx={{ position: "relative", zIndex: 1 }}>
-                {t('auth:login')}
-              </Box>
+              {t('auth:login')}
             </Button>
-          </Tooltip>
-        )}
+          )}
+        </Box>
       </Box>
-    </Toolbar>
-  </AppBar>
+
+      {/* ── Logo area — se colapsa con scroll ── */}
+      <AnimatePresence>
+        {!scrolled && (
+          <motion.div
+            key="full-logo"
+            initial={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            style={{ overflow: "hidden" }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                py: { xs: 2, md: 3 },
+                cursor: "pointer",
+              }}
+              onClick={onLogoClick}
+            >
+              <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
+                <Box
+                  component="img"
+                  src="/images/logos/Logo_LakewoodOaks-05.png"
+                  alt="Lakewood Oaks"
+                  sx={{ height: { xs: 120, md: 160 }, width: "auto", objectFit: "contain", display: "block" }}
+                />
+              </motion.div>
+            </Box>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </AppBar>
   )
 }
 

@@ -12,14 +12,14 @@ import {
   Chip,
   Typography,
   Tabs,
-  Tab
+  Tab,
+  Divider
 } from '@mui/material'
 import {
   Construction,
   Payment,
   Visibility,
   ArrowBack,
-  AutoAwesome
 } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -151,56 +151,51 @@ export const MyResource = ({ resourceConfig, resourceType }) => {
               exit={{ opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.4 }}
             >
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                mb={4}
-              >
-                <Box display="flex" alignItems="center" gap={2}>
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 10, -10, 0]
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                  >
-                    <AutoAwesome
-                      sx={{ color: themedConfig.colors.secondary, fontSize: 32 }}
-                    />
-                  </motion.div>
-                  <Typography
-                    variant="h4"
-                    fontWeight={700}
-                    sx={{ color: '#2c3e50' }}
-                  >
-                    {t(`${resourceConfig.i18n.namespace}:${resourceConfig.i18n.keys.selectTitle}`)}
-                  </Typography>
-                </Box>
-                <Chip
-                  label={`${items.length} ${t(
-                    `${resourceConfig.i18n.namespace}:${
-                      items.length === 1
-                        ? resourceConfig.i18n.keys.property
-                        : resourceConfig.i18n.keys.properties
-                    }`
-                  )}`}
-                  sx={{
-                    bgcolor: themedConfig.colors.secondary,
-                    color: 'white',
-                    fontWeight: 700,
-                    px: 2,
-                    height: 36
-                  }}
-                />
-              </Box>
+              {/* ── Section header ── */}
+              {(() => {
+                const selectText  = t(`${resourceConfig.i18n.namespace}:${resourceConfig.i18n.keys.selectTitle}`)
+                const selectWords = selectText.split(' ')
+                const firstWord   = selectWords[0]
+                const restWords   = selectWords.slice(1).join(' ')
+                const countLabel  = `${items.length} ${t(`${resourceConfig.i18n.namespace}:${items.length === 1 ? resourceConfig.i18n.keys.property : resourceConfig.i18n.keys.properties}`)}`
+                return (
+                  <Box mb={4}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                      <Typography
+                        variant="h3"
+                        sx={{
+                          fontWeight: 300,
+                          color: themedConfig.colors.primary,
+                          fontFamily: '"Poppins", sans-serif',
+                          fontSize: { xs: '1.8rem', md: '2.4rem' },
+                          lineHeight: 1.1,
+                        }}
+                      >
+                        {firstWord}{' '}
+                        <Box component="span" sx={{ fontWeight: 800 }}>{restWords}</Box>
+                      </Typography>
+                      <Chip
+                        label={countLabel}
+                        sx={{
+                          bgcolor: themedConfig.colors.primary,
+                          color: 'white',
+                          fontWeight: 700,
+                          fontFamily: '"Poppins", sans-serif',
+                          fontSize: '0.8rem',
+                          px: 1,
+                          height: 32,
+                          borderRadius: 2,
+                        }}
+                      />
+                    </Box>
+                    <Divider sx={{ borderColor: '#d6ddc9' }} />
+                  </Box>
+                )
+              })()}
 
               <Grid container spacing={3}>
 {items.map((item) => {
   const transformedResource = resourceConfig.transformers.toCard(item)
-  console.log(`🎴 [MyResource:${resourceConfig.type}] Original item:`, item)
-  console.log(`🎴 [MyResource:${resourceConfig.type}] Transformed card data:`, transformedResource)
-  
   return (
     <Grid item xs={12} md={6} lg={4} key={item._id}>
       <ResourceCard

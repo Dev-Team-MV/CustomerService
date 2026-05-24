@@ -117,7 +117,7 @@ const Layout = ({ publicView = false }) => {
           width: "100%",
           minHeight: "100vh",
           bgcolor: "#f7fafc",
-          pt: "64px",
+          pt: { xs: "216px", md: "260px" },
         }}
       >
         <AnimatePresence mode="wait">
