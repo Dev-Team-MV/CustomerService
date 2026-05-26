@@ -32,7 +32,7 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
               color: 'white',
               fontWeight: 700,
               fontSize: '1rem',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               border: '2px solid rgba(255, 255, 255, 0.9)',
               boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
             }}
@@ -45,7 +45,7 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
               sx={{
                 fontWeight: 600,
                 color: '#1a1a1a',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: '0.95rem'
               }}
             >
@@ -55,7 +55,7 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
               variant="caption"
               sx={{
                 color: '#706f6f',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: '0.7rem'
               }}
             >
@@ -76,7 +76,7 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
             sx={{
               fontWeight: 700,
               color: '#333F1F',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: '1rem'
             }}
           >
@@ -108,16 +108,16 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
                 color: 'white',
                 fontWeight: 700,
                 fontSize: '0.75rem',
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               {modelData?.modelNumber || 'M'}
             </Avatar>
             <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif', fontSize: '0.85rem' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif', fontSize: '0.85rem' }}>
                 {modelData?.model || 'Model'}
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>
+              <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem' }}>
                 {modelData?.modelNumber || ''}
               </Typography>
             </Box>
@@ -141,7 +141,7 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
             size="small"
             sx={{
               fontWeight: 600,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               height: 28,
               px: 1.5,
               fontSize: '0.75rem',
@@ -180,7 +180,7 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
                 color: 'white',
                 fontWeight: 700,
                 fontSize: '0.875rem',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 border: '2px solid rgba(255, 255, 255, 0.9)',
                 boxShadow: '0 2px 8px rgba(51, 63, 31, 0.15)'
               }}
@@ -188,10 +188,10 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
               {row.assignedUser.firstName?.charAt(0)}{row.assignedUser.lastName?.charAt(0)}
             </Avatar>
             <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}>
                 {row.assignedUser.firstName} {row.assignedUser.lastName}
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                 {row.assignedUser.email}
               </Typography>
             </Box>

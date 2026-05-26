@@ -20,7 +20,7 @@ const PrimaryButton = ({
           fontWeight: 600,
           textTransform: 'none',
           letterSpacing: '1px',
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           px: 3,
           py: 1.5,
           boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
@@ -55,7 +55,7 @@ const PrimaryButton = ({
         }
       : {
           borderRadius: 3,
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           fontWeight: 600,
           textTransform: 'none',
           letterSpacing: '1px',

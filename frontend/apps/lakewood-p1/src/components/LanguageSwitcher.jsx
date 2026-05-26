@@ -36,7 +36,7 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
             '&:hover': { bgcolor: '#333F1F', borderColor: '#333F1F', '& .lang-label': { color: 'white' } },
           }}
         >
-          <Box className="lang-label" sx={{ fontSize: '0.75rem', fontWeight: 800, fontFamily: '"Poppins", sans-serif', color: '#333F1F', transition: 'color 0.3s' }}>
+          <Box className="lang-label" sx={{ fontSize: '0.75rem', fontWeight: 800, fontFamily: '"DM Sans", sans-serif', color: '#333F1F', transition: 'color 0.3s' }}>
             {current.label}
           </Box>
         </Box>
@@ -50,7 +50,7 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
       {languages.map((lang, i) => (
         <Box key={lang.code} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           {i > 0 && (
-            <Box component="span" sx={{ color: '#8CA551', fontSize: '0.8rem', fontFamily: '"Poppins", sans-serif', userSelect: 'none' }}>
+            <Box component="span" sx={{ color: '#8CA551', fontSize: '0.8rem', fontFamily: '"DM Sans", sans-serif', userSelect: 'none' }}>
               |
             </Box>
           )}
@@ -59,7 +59,7 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
             onClick={() => handleSelect(lang.code)}
             sx={{
               fontSize: '0.8rem',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontWeight: lang.code === currentLang ? 800 : 400,
               color: lang.code === currentLang ? '#333F1F' : '#888',
               cursor: lang.code === currentLang ? 'default' : 'pointer',

@@ -50,7 +50,7 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
             sx={{
               fontSize: '0.75rem',
               fontWeight: 800,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               color: chipTheme.color || theme.palette.text.primary,
               transition: 'color 0.3s',
             }}
@@ -73,7 +73,7 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
               sx={{
                 color: theme.palette.secondary?.main || '#8CA551',
                 fontSize: '0.8rem',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 userSelect: 'none',
               }}
             >
@@ -85,7 +85,7 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
             onClick={() => handleSelect(lang.code)}
             sx={{
               fontSize: '0.8rem',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontWeight: lang.code === currentLang ? 800 : 400,
               color: lang.code === currentLang
                 ? theme.palette.text.primary

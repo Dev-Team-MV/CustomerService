@@ -47,7 +47,7 @@ const RegisterPage = ({
       <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#fafafa' }}>
         <Box sx={{ textAlign: 'center' }}>
           <CircularProgress size={60} sx={{ color: brandColors.primary, mb: 2 }} />
-          <Typography variant="h6" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="h6" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
             {t('verifyingSetupLink')}
           </Typography>
         </Box>
@@ -59,11 +59,11 @@ const RegisterPage = ({
     return (
       <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#fafafa', p: 3 }}>
         <Box sx={{ maxWidth: 500, width: '100%' }}>
-          <Alert severity="error" sx={{ mb: 3, borderRadius: 3, fontFamily: '"Poppins", sans-serif' }}>
+          <Alert severity="error" sx={{ mb: 3, borderRadius: 3, fontFamily: '"DM Sans", sans-serif' }}>
             {tokenError}
           </Alert>
           <Button fullWidth variant="contained" onClick={() => navigate('/login')}
-            sx={{ borderRadius: 3, bgcolor: brandColors.primary, py: 1.5, fontFamily: '"Poppins", sans-serif', fontWeight: 600, letterSpacing: '1px', '&:hover': { bgcolor: brandColors.secondary } }}>
+            sx={{ borderRadius: 3, bgcolor: brandColors.primary, py: 1.5, fontFamily: '"DM Sans", sans-serif', fontWeight: 600, letterSpacing: '1px', '&:hover': { bgcolor: brandColors.secondary } }}>
             {t('goToLogin')}
           </Button>
         </Box>

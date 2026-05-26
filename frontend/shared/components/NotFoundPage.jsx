@@ -60,7 +60,7 @@ const NotFoundPage = ({
             sx={{
               fontSize: { xs: '6rem', md: '8rem' },
               fontWeight: 800,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               color: theme.palette.primary.main,
               lineHeight: 1,
               mb: 2
@@ -80,7 +80,7 @@ const NotFoundPage = ({
             gutterBottom
             sx={{
               fontWeight: 700,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               color: theme.palette.text.primary,
               mb: 2
             }}
@@ -93,7 +93,7 @@ const NotFoundPage = ({
             color="text.secondary"
             sx={{
               mb: 4,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: '1.1rem',
               maxWidth: 500,
               mx: 'auto'
@@ -121,7 +121,7 @@ const NotFoundPage = ({
               px: 4,
               py: 1.5,
               borderRadius: 3,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: '1rem',
               boxShadow: `0 8px 24px ${theme.palette.primary.main}30`,
               '&:hover': {

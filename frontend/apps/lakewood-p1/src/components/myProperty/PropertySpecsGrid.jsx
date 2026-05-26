@@ -109,7 +109,7 @@ const PropertySpecsGrid = ({ propertyDetails, isModel10, balconyLabels, gridProp
                   fontWeight: 500,
                   textTransform: "uppercase",
                   letterSpacing: "1px",
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   display: "block",
                   mb: 0.5,
                   fontSize: { xs: "0.65rem", sm: "0.7rem" },
@@ -122,7 +122,7 @@ const PropertySpecsGrid = ({ propertyDetails, isModel10, balconyLabels, gridProp
                 sx={{
                   color: "#1a1a1a",
                   fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   letterSpacing: "-0.5px",
                   fontSize: { xs: "1.1rem", sm: "1.2rem", md: "1.3rem" },
                   lineHeight: 1,

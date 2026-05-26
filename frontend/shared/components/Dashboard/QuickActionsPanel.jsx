@@ -20,11 +20,11 @@ const QuickActionsPanel = ({ actions, title, subtitle }) => {
       <Box sx={{ mb: 2.5 }}>
         <Typography variant="h6" sx={{
           color: theme.palette.primary.main, fontWeight: 700,
-          letterSpacing: '0.5px', mb: 0.5, fontFamily: '"Poppins", sans-serif'
+          letterSpacing: '0.5px', mb: 0.5, fontFamily: '"DM Sans", sans-serif'
         }}>
           {title || t('quickActions.title', 'Acciones Rápidas')}
         </Typography>
-        <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+        <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
           {subtitle || t('quickActions.subtitle', 'Gestiona tu proyecto')}
         </Typography>
       </Box>
@@ -67,11 +67,11 @@ const QuickActionsPanel = ({ actions, title, subtitle }) => {
                     {action.icon}
                   </Box>
                   <Box flex={1}>
-                    <Typography variant="body2" sx={{ color: theme.palette.primary.main, fontWeight: 600, mb: 0.3, fontSize: '0.9rem', fontFamily: '"Poppins", sans-serif' }}>
+                    <Typography variant="body2" sx={{ color: theme.palette.primary.main, fontWeight: 600, mb: 0.3, fontSize: '0.9rem', fontFamily: '"DM Sans", sans-serif' }}>
                       {action.label}
                     </Typography>
                     {action.description && (
-                      <Typography variant="caption" sx={{ color: '#706f6f', fontSize: '0.7rem', fontFamily: '"Poppins", sans-serif' }}>
+                      <Typography variant="caption" sx={{ color: '#706f6f', fontSize: '0.7rem', fontFamily: '"DM Sans", sans-serif' }}>
                         {action.description}
                       </Typography>
                     )}

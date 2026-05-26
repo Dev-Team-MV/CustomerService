@@ -149,7 +149,7 @@ const ConfigurationPage = () => {
             mb: 3,
             '& .MuiTab-root': {
               fontWeight: 600,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: "0.95rem",
               textTransform: "none"
             }

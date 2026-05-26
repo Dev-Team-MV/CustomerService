@@ -1,7 +1,7 @@
 import { useCallback, useMemo }  from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, Chip, Divider } from '@mui/material'
+import { Box, Typography, Chip } from '@mui/material'
 import {
   HomeWork, TrendingUp, AttachMoney, Inbox,
   Business, PersonAdd, BarChart, Deck, Article
@@ -20,6 +20,7 @@ import StatsCards from '../components/statscard'
 import Loader from '../components/Loader'
 import RecentPayloadsPanel from '../components/RecentPayloadsPanel'
 import { getLakewoodProjectId } from '../utils/projectId'
+import PageSection from '@shared/components/PageSection'
 
 // ─── colors ────────────────────────────────────────────────────────────────────
 const C = {
@@ -31,46 +32,6 @@ const C = {
   bgLight: '#f5f7f1',
   border:  '#d6ddc9',
 }
-
-// ─── Section Header ─────────────────────────────────────────────────────────────
-const SectionHeader = ({ title, bold, description }) => (
-  <Box
-    display="flex"
-    justifyContent="space-between"
-    alignItems="flex-start"
-    sx={{ py: 4, px: { xs: 3, md: 6 } }}
-  >
-    <Typography
-      variant="h3"
-      sx={{
-        fontWeight: 300,
-        color: C.dark,
-        fontSize: { xs: '2rem', md: '2.8rem' },
-        fontFamily: '"Poppins", sans-serif',
-        lineHeight: 1.1,
-      }}
-    >
-      {title}{' '}
-      <Box component="span" sx={{ fontWeight: 800 }}>{bold}</Box>
-    </Typography>
-    {description && (
-      <Typography
-        variant="body2"
-        sx={{
-          color: C.gray,
-          maxWidth: 280,
-          textAlign: 'right',
-          lineHeight: 1.7,
-          fontFamily: '"Poppins", sans-serif',
-          fontSize: '0.85rem',
-          mt: 0.5,
-        }}
-      >
-        {description}
-      </Typography>
-    )}
-  </Box>
-)
 
 // ─── main component ─────────────────────────────────────────────────────────────
 const Dashboard = () => {
@@ -207,7 +168,7 @@ const Dashboard = () => {
               fontWeight: 300,
               color: C.dark,
               fontSize: { xs: '2.4rem', md: '3.5rem' },
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               lineHeight: 1.1,
             }}
           >
@@ -220,7 +181,7 @@ const Dashboard = () => {
           <Box display="flex" alignItems="center" gap={1.5} mt={1.5}>
             <Typography
               variant="body2"
-              sx={{ color: C.gray, fontFamily: '"Poppins", sans-serif', fontSize: '0.9rem' }}
+              sx={{ color: C.gray, fontFamily: '"DM Sans", sans-serif', fontSize: '0.9rem' }}
             >
               {t('overviewSubtitle')}
             </Typography>
@@ -232,7 +193,7 @@ const Dashboard = () => {
                 fontWeight: 700,
                 fontSize: '0.65rem',
                 height: 24,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 textTransform: 'uppercase',
                 letterSpacing: '1.5px',
                 borderRadius: 1,
@@ -261,17 +222,17 @@ const Dashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
       >
-        <Box sx={{ bgcolor: 'white', borderTop: `1px solid ${C.green}`, mt: 2 }}>
-          <SectionHeader
-            title={t('propertyMap').split(' ')[0]}
-            bold={t('propertyMap').split(' ').slice(1).join(' ')}
-            description="Here you will find all the information about our properties, as well as details about your specific property and its specifications."
-          />
-          <Divider sx={{ borderColor: C.border, mx: { xs: 3, md: 6 } }} />
-          <Box sx={{ px: { xs: 3, md: 6 }, py: 4 }}>
-            <DashboardMap />
-          </Box>
-        </Box>
+        <PageSection
+          title={t('propertyMap').split(' ')[0]}
+          bold={t('propertyMap').split(' ').slice(1).join(' ')}
+          description="Here you will find all the information about our properties, as well as details about your specific property and its specifications."
+          bgcolor="white"
+          topBorderColor={C.green}
+          dividerColor={C.border}
+          primaryColor={C.dark}
+        >
+          <DashboardMap />
+        </PageSection>
       </motion.div>
 
       {/* ── QUICK ACTIONS ── */}
@@ -280,20 +241,20 @@ const Dashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <Box sx={{ borderTop: `1px solid ${C.green}`, mt: 2 }}>
-          <SectionHeader
-            title={t('quickActions.title').split(' ')[0]}
-            bold={t('quickActions.title').split(' ').slice(1).join(' ')}
-            description={t('quickActions.subtitle')}
-          />
-          <Divider sx={{ borderColor: C.border, mx: { xs: 3, md: 6 } }} />
-
+        <PageSection
+          title={t('quickActions.title').split(' ')[0]}
+          bold={t('quickActions.title').split(' ').slice(1).join(' ')}
+          description={t('quickActions.subtitle')}
+          topBorderColor={C.green}
+          dividerColor={C.border}
+          primaryColor={C.dark}
+          contentPy={0}
+        >
           {/* Numbered actions grid — 2 per row */}
           <Box
             sx={{
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-              px: { xs: 3, md: 6 },
               py: 4,
             }}
           >
@@ -321,7 +282,7 @@ const Dashboard = () => {
                       fontSize: { xs: '4rem', md: '5.5rem' },
                       fontWeight: 400,
                       color: C.dark,
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       lineHeight: 1,
                       minWidth: { xs: 72, md: 96 },
                       letterSpacing: '-2px',
@@ -336,7 +297,7 @@ const Dashboard = () => {
                       sx={{
                         fontWeight: 700,
                         color: C.dark,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontSize: { xs: '1rem', md: '1.1rem' },
                         mb: 0.5,
                       }}
@@ -346,7 +307,7 @@ const Dashboard = () => {
                     <Typography
                       sx={{
                         color: C.gray,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontSize: '0.82rem',
                         lineHeight: 1.5,
                       }}
@@ -383,7 +344,7 @@ const Dashboard = () => {
               )
             })}
           </Box>
-        </Box>
+        </PageSection>
       </motion.div>
 
       {/* ── RECENT PAYLOADS (admin only) ── */}

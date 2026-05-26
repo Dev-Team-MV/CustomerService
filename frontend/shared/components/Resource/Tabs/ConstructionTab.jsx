@@ -182,7 +182,7 @@ const ConstructionTab = ({ resourceId, resourceType, config }) => {
             fontWeight={700}
             sx={{
               color: config.colors.primary,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' },
               letterSpacing: '0.5px'
             }}
@@ -193,7 +193,7 @@ const ConstructionTab = ({ resourceId, resourceType, config }) => {
             variant="body2"
             sx={{
               color: '#706f6f',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: { xs: '0.75rem', sm: '0.85rem' }
             }}
           >
@@ -240,7 +240,7 @@ const ConstructionTab = ({ resourceId, resourceType, config }) => {
             fontWeight={700}
             sx={{
               color: config.colors.primary,
-              fontFamily: '"Poppins", sans-serif'
+              fontFamily: '"DM Sans", sans-serif'
             }}
           >
             Phase {currentPhase?.phaseNumber} / {phases.length}
@@ -249,7 +249,7 @@ const ConstructionTab = ({ resourceId, resourceType, config }) => {
             variant="caption"
             sx={{
               color: '#706f6f',
-              fontFamily: '"Poppins", sans-serif'
+              fontFamily: '"DM Sans", sans-serif'
             }}
           >
             {currentPhase?.title || PHASE_TITLES[currentPhaseIndex]}
@@ -343,7 +343,7 @@ const ConstructionTab = ({ resourceId, resourceType, config }) => {
                 sx={{
                   color: config.colors.primary,
                   letterSpacing: '0.5px',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '1rem', sm: '1.15rem', md: '1.25rem' },
                   mb: 1
                 }}
@@ -365,7 +365,7 @@ const ConstructionTab = ({ resourceId, resourceType, config }) => {
                     fontWeight: 700,
                     fontSize: { xs: '0.75rem', sm: '0.85rem' },
                     height: { xs: 24, sm: 28 },
-                    fontFamily: '"Poppins", sans-serif'
+                    fontFamily: '"DM Sans", sans-serif'
                   }}
                 />
                 <Typography
@@ -373,7 +373,7 @@ const ConstructionTab = ({ resourceId, resourceType, config }) => {
                   sx={{
                     color: '#706f6f',
                     fontWeight: 500,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontSize: { xs: '0.7rem', sm: '0.75rem' }
                   }}
                 >
@@ -434,7 +434,7 @@ const ConstructionTab = ({ resourceId, resourceType, config }) => {
                 borderRadius: 3,
                 bgcolor: `${config.colors.secondary}14`,
                 border: `1px solid ${config.colors.secondary}4D`,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 '& .MuiAlert-icon': { color: config.colors.secondary }
               }}
             >

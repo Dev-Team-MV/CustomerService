@@ -48,15 +48,15 @@ const formatDisplay = (e164) => {
 const fieldSx = {
   "& .MuiOutlinedInput-root": {
     borderRadius: 3,
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"DM Sans", sans-serif',
     "&.Mui-focused fieldset": { borderColor: "#333F1F", borderWidth: "2px" },
     "&:hover fieldset": { borderColor: "#8CA551" }
   },
   "& .MuiInputLabel-root": {
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"DM Sans", sans-serif',
     "&.Mui-focused": { color: "#333F1F" }
   },
-  "& .MuiFormHelperText-root": { fontFamily: '"Poppins", sans-serif' }
+  "& .MuiFormHelperText-root": { fontFamily: '"DM Sans", sans-serif' }
 }
 
 // ── Países permitidos ──
@@ -102,10 +102,10 @@ const ResidentDialog = ({
             <PersonAdd sx={{ color: "white", fontSize: 24 }} />
           </Box>
           <Box>
-            <Typography variant="h6" fontWeight={700} sx={{ color: "#333F1F", fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="h6" fontWeight={700} sx={{ color: "#333F1F", fontFamily: '"DM Sans", sans-serif' }}>
               {selectedUser ? t('dialog.editUser') : t('dialog.inviteNewUser')}
             </Typography>
-            <Typography variant="caption" sx={{ color: "#706f6f", fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="caption" sx={{ color: "#706f6f", fontFamily: '"DM Sans", sans-serif' }}>
               {t('dialog.invitationMessage')}
             </Typography>
           </Box>
@@ -119,7 +119,7 @@ const ResidentDialog = ({
             mb: 2, borderRadius: 3,
             bgcolor: "rgba(140, 165, 81, 0.08)",
             border: "1px solid rgba(140, 165, 81, 0.3)",
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             "& .MuiAlert-icon": { color: "#8CA551" }
           }}
         >
@@ -164,7 +164,7 @@ const ResidentDialog = ({
           {/* Phone ── solo US, MX, CO ── */}
           <Grid item xs={12} sm={6}>
             <Box>
-              <Typography variant="caption" sx={{ mb: 0.5, display: "block", color: "#706f6f", fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="caption" sx={{ mb: 0.5, display: "block", color: "#706f6f", fontFamily: '"DM Sans", sans-serif' }}>
                 {t('dialog.phoneNumber')} *
               </Typography>
               <PhoneInput
@@ -183,7 +183,7 @@ const ResidentDialog = ({
                   fontSize: "16px",
                   border: "2px solid #e0e0e0",
                   borderRadius: 12,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   transition: "all 0.3s"
                 }}
                 buttonStyle={{
@@ -194,17 +194,17 @@ const ResidentDialog = ({
                 }}
                 dropdownStyle={{
                   borderRadius: 12,
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               />
 
               {/* Preview formateado con () y - */}
               {e164Value && (
                 <Box display="flex" justifyContent="space-between" mt={0.5}>
-                  <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', color: '#706f6f' }}>
+                  <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', color: '#706f6f' }}>
                     {displayVal}
                   </Typography>
-                  <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700, color: isPhoneValid ? '#8CA551' : '#E5863C' }}>
+                  <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, color: isPhoneValid ? '#8CA551' : '#E5863C' }}>
                     E.164: {e164Value}
                   </Typography>
                 </Box>
@@ -233,9 +233,9 @@ const ResidentDialog = ({
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
               sx={fieldSx}
             >
-              <MenuItem value="user"       sx={{ fontFamily: '"Poppins", sans-serif' }}>{t('dialog.roles.user')}</MenuItem>
-              <MenuItem value="admin"      sx={{ fontFamily: '"Poppins", sans-serif' }}>{t('dialog.roles.admin')}</MenuItem>
-              <MenuItem value="superadmin" sx={{ fontFamily: '"Poppins", sans-serif' }}>{t('dialog.roles.superadmin')}</MenuItem>
+              <MenuItem value="user"       sx={{ fontFamily: '"DM Sans", sans-serif' }}>{t('dialog.roles.user')}</MenuItem>
+              <MenuItem value="admin"      sx={{ fontFamily: '"DM Sans", sans-serif' }}>{t('dialog.roles.admin')}</MenuItem>
+              <MenuItem value="superadmin" sx={{ fontFamily: '"DM Sans", sans-serif' }}>{t('dialog.roles.superadmin')}</MenuItem>
             </TextField>
           </Grid>
 
@@ -261,7 +261,7 @@ const ResidentDialog = ({
           onClick={onClose}
           sx={{
             borderRadius: 3, textTransform: "none", fontWeight: 600, px: 3, py: 1.2,
-            color: "#706f6f", fontFamily: '"Poppins", sans-serif',
+            color: "#706f6f", fontFamily: '"DM Sans", sans-serif',
             border: "2px solid #e0e0e0",
             "&:hover": { bgcolor: "rgba(112, 111, 111, 0.05)", borderColor: "#706f6f" }
           }}
@@ -280,7 +280,7 @@ const ResidentDialog = ({
           }
           sx={{
             borderRadius: 3, bgcolor: "#333F1F", color: "white", fontWeight: 600,
-            textTransform: "none", letterSpacing: "1px", fontFamily: '"Poppins", sans-serif',
+            textTransform: "none", letterSpacing: "1px", fontFamily: '"DM Sans", sans-serif',
             px: 4, py: 1.5, boxShadow: "0 4px 12px rgba(51, 63, 31, 0.25)",
             position: "relative", overflow: "hidden",
             "&::before": {

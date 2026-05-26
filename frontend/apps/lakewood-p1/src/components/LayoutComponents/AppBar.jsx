@@ -154,10 +154,10 @@ const AppBarBrandbook = ({
                 }}
               >
                 <Box sx={{ px: 3, py: 2, borderBottom: "1px solid #e8f0de" }}>
-                  <Typography variant="subtitle1" fontWeight={700} sx={{ color: "#333F1F", fontFamily: '"Poppins", sans-serif', mb: 0.3 }}>
+                  <Typography variant="subtitle1" fontWeight={700} sx={{ color: "#333F1F", fontFamily: '"DM Sans", sans-serif', mb: 0.3 }}>
                     {user?.firstName} {user?.lastName}
                   </Typography>
-                  <Typography variant="caption" sx={{ color: "#706f6f", fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="caption" sx={{ color: "#706f6f", fontFamily: '"DM Sans", sans-serif' }}>
                     {user?.email}
                   </Typography>
                 </Box>
@@ -166,7 +166,7 @@ const AppBarBrandbook = ({
                   <ListItemIcon sx={{ minWidth: 36 }}>
                     <PersonIcon sx={{ color: "#8CA551", fontSize: 20 }} />
                   </ListItemIcon>
-                  <Typography sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: "0.9rem", color: "#333F1F" }}>
+                  <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: "0.9rem", color: "#333F1F" }}>
                     {t('navigation:userMenu.profile')}
                   </Typography>
                 </MenuItem>
@@ -177,7 +177,7 @@ const AppBarBrandbook = ({
                   <ListItemIcon sx={{ minWidth: 36 }}>
                     <LogoutIcon sx={{ color: "#d32f2f", fontSize: 20 }} />
                   </ListItemIcon>
-                  <Typography sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: "0.9rem", color: "#d32f2f" }}>
+                  <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: "0.9rem", color: "#d32f2f" }}>
                     {t('navigation:userMenu.logout')}
                   </Typography>
                 </MenuItem>
@@ -188,7 +188,7 @@ const AppBarBrandbook = ({
               variant="text"
               startIcon={<LoginIcon />}
               onClick={onLoginClick}
-              sx={{ color: "#333F1F", fontWeight: 600, textTransform: "none", fontFamily: '"Poppins", sans-serif', "&:hover": { bgcolor: "rgba(51,63,31,0.08)" } }}
+              sx={{ color: "#333F1F", fontWeight: 600, textTransform: "none", fontFamily: '"DM Sans", sans-serif', "&:hover": { bgcolor: "rgba(51,63,31,0.08)" } }}
             >
               {t('auth:login')}
             </Button>

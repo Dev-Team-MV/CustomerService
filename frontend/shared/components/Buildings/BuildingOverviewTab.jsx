@@ -10,10 +10,10 @@ const InfoRow = ({ icon: Icon, label, value }) => {
   return (
     <Box display="flex" alignItems="center" gap={1.5} py={1}>
       <Icon sx={{ fontSize: 18, color: theme.palette.text.secondary }} />
-      <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', minWidth: 120 }}>
+      <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif', minWidth: 120 }}>
         {label}
       </Typography>
-      <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}>
+      <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}>
         {value ?? '—'}
       </Typography>
     </Box>
@@ -41,7 +41,7 @@ const BuildingOverviewTab = ({
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
               <Box display="flex" alignItems="center" gap={1}>
                 <ImageIcon sx={{ fontSize: 20, color: theme.palette.secondary.main }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
                   {t('buildings:exteriorRenders', 'Exterior Renders')}
                 </Typography>
               </Box>
@@ -51,7 +51,7 @@ const BuildingOverviewTab = ({
                   variant="outlined"
                   startIcon={<Edit />}
                   onClick={exteriorModal.openModal}
-                  sx={{ borderRadius: 2, textTransform: 'none', fontFamily: '"Poppins", sans-serif', fontWeight: 600 }}
+                  sx={{ borderRadius: 2, textTransform: 'none', fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}
                 >
                   {t('buildings:editPolygons', 'Edit Polygons')}
                 </Button>
@@ -61,7 +61,7 @@ const BuildingOverviewTab = ({
             {exteriorRenders.length === 0 ? (
               <Box sx={{ py: 4, textAlign: 'center' }}>
                 <ImageIcon sx={{ fontSize: 48, color: theme.palette.divider, mb: 1 }} />
-                <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
                   {t('buildings:noExteriorRenders', 'No exterior renders uploaded')}
                 </Typography>
               </Box>
@@ -81,7 +81,7 @@ const BuildingOverviewTab = ({
                 <Chip
                   size="small"
                   label={`${building.buildingFloorPolygons.length} ${t('buildings:polygons', 'polygons')}`}
-                  sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, bgcolor: config.colors.primary + '18', color: config.colors.primary }}
+                  sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, bgcolor: config.colors.primary + '18', color: config.colors.primary }}
                 />
               </Box>
             )}
@@ -93,7 +93,7 @@ const BuildingOverviewTab = ({
           <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, border: `1px solid ${theme.palette.cardBorder}`, bgcolor: theme.palette.cardBg, height: '100%' }}>
             <Box display="flex" alignItems="center" gap={1} mb={2}>
               <InfoOutlined sx={{ fontSize: 20, color: theme.palette.secondary.main }} />
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
                 {t('buildings:buildingInfo', 'Building Info')}
               </Typography>
             </Box>
@@ -110,7 +110,7 @@ const BuildingOverviewTab = ({
               <Chip
                 label={config.buildingType?.replace('_', ' ')}
                 size="small"
-                sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, textTransform: 'capitalize', bgcolor: config.colors.accent + '22', color: config.colors.accent }}
+                sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, textTransform: 'capitalize', bgcolor: config.colors.accent + '22', color: config.colors.accent }}
               />
             </Box>
           </Paper>

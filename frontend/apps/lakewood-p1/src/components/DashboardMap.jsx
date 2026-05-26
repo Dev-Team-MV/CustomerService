@@ -288,7 +288,7 @@ const handleLotHover = (event, lot) => {
               fontWeight: 600,
               textTransform: 'none',
               letterSpacing: '1px',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               px: 3,
               py: 1.2,
               boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',

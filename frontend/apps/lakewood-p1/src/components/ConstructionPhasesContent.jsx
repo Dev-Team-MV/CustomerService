@@ -227,10 +227,10 @@ if (item.url) return {
         </IconButton>
 
         <Box sx={{ textAlign: 'center', minWidth: 180 }}>
-          <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
             {t('phaseCounter', { current: phases[currentPhaseIndex]?.phaseNumber, total: phases.length })}
           </Typography>
-          <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
             {getPhaseTitle(phases[currentPhaseIndex])}
           </Typography>
         </Box>
@@ -270,7 +270,7 @@ if (item.url) return {
             </Box>
 
             <Box flex={1}>
-              <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
                 {getPhaseTitle(phases[currentPhaseIndex])}
               </Typography>
               <Chip
@@ -281,7 +281,7 @@ if (item.url) return {
                   bgcolor: phases[currentPhaseIndex].constructionPercentage === 100 ? 'rgba(140,165,81,0.12)' : 'rgba(229,134,60,0.12)',
                   color: '#333F1F',
                   border: `1px solid ${phases[currentPhaseIndex].constructionPercentage === 100 ? '#8CA551' : '#E5863C'}`,
-                  fontWeight: 600, fontFamily: '"Poppins", sans-serif'
+                  fontWeight: 600, fontFamily: '"DM Sans", sans-serif'
                 }}
               />
             </Box>
@@ -294,7 +294,7 @@ if (item.url) return {
       color: '#333F1F',
       border: '1px solid rgba(51,63,31,0.2)',
       fontWeight: 600,
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       px: 1.5
     }}
   />
@@ -312,7 +312,7 @@ if (item.url) return {
         borderColor: '#706f6f',
         color: '#706f6f',
         fontWeight: 600,
-        fontFamily: '"Poppins", sans-serif',
+        fontFamily: '"DM Sans", sans-serif',
         textTransform: 'none',
         px: 2,
         py: 1,
@@ -328,7 +328,7 @@ if (item.url) return {
                 onClick={() => handleOpenUploadDialog(phases[currentPhaseIndex])}
                 sx={{
                   borderRadius: 3, bgcolor: '#333F1F', color: 'white',
-                  fontWeight: 600, fontFamily: '"Poppins", sans-serif',
+                  fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
                   textTransform: 'none', px: 3, py: 1,
                   boxShadow: '0 4px 12px rgba(51,63,31,0.25)',
                   '&:hover': { bgcolor: '#8CA551', boxShadow: '0 8px 20px rgba(51,63,31,0.35)' }
@@ -382,7 +382,7 @@ if (item.url) return {
   </Box>
             
           ) : (
-            <Alert severity="info" icon="ℹ️" sx={{ borderRadius: 2, bgcolor: 'rgba(140,165,81,0.08)', border: '1px solid rgba(140,165,81,0.2)', '& .MuiAlert-message': { fontFamily: '"Poppins", sans-serif', color: '#333F1F' } }}>
+            <Alert severity="info" icon="ℹ️" sx={{ borderRadius: 2, bgcolor: 'rgba(140,165,81,0.08)', border: '1px solid rgba(140,165,81,0.2)', '& .MuiAlert-message': { fontFamily: '"DM Sans", sans-serif', color: '#333F1F' } }}>
               {t('noMediaYet')}
             </Alert>
           )}
@@ -407,7 +407,7 @@ if (item.url) return {
 >
   <DialogTitle>
     <Box display="flex" justifyContent="space-between" alignItems="center">
-      <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+      <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
         {t('manageMediaItems', 'Manage Media Items')} - Phase {phases[currentPhaseIndex]?.phaseNumber}
       </Typography>
       <IconButton onClick={() => setManageMediaOpen(false)}>
@@ -441,7 +441,7 @@ if (item.url) return {
               }}
             >
               <Box display="flex" alignItems="center" gap={2} width="100%">
-                <Typography fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {title}
                 </Typography>
                 <Chip 
@@ -547,10 +547,10 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
               <Construction sx={{ color: 'white', fontSize: 24 }} />
             </Box>
             <Box>
-              <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
                 {t('title')}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
                 {t('subtitle', { lot: property?.lot?.number })}
               </Typography>
             </Box>
@@ -567,7 +567,7 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
 
       <DialogActions sx={{ p: 3 }}>
         <Button onClick={onClose}
-          sx={{ borderRadius: 3, textTransform: 'none', fontWeight: 600, px: 3, py: 1.2, color: '#706f6f', fontFamily: '"Poppins", sans-serif', border: '2px solid #e0e0e0', '&:hover': { bgcolor: 'rgba(112,111,111,0.05)', borderColor: '#706f6f' } }}>
+          sx={{ borderRadius: 3, textTransform: 'none', fontWeight: 600, px: 3, py: 1.2, color: '#706f6f', fontFamily: '"DM Sans", sans-serif', border: '2px solid #e0e0e0', '&:hover': { bgcolor: 'rgba(112,111,111,0.05)', borderColor: '#706f6f' } }}>
           {t('close')}
         </Button>
       </DialogActions>

@@ -157,10 +157,10 @@ const AppBarBrandbook = ({
                 }}
               >
                 <Box sx={{ px: 3, py: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-                  <Typography variant="subtitle1" fontWeight={700} sx={{ color: theme.palette.text.primary, fontFamily: '"Poppins", sans-serif', mb: 0.3 }}>
+                  <Typography variant="subtitle1" fontWeight={700} sx={{ color: theme.palette.text.primary, fontFamily: '"DM Sans", sans-serif', mb: 0.3 }}>
                     {user?.firstName} {user?.lastName}
                   </Typography>
-                  <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
                     {user?.email}
                   </Typography>
                 </Box>
@@ -169,7 +169,7 @@ const AppBarBrandbook = ({
                   <ListItemIcon sx={{ minWidth: 36 }}>
                     <PersonIcon sx={{ color: theme.palette.secondary.main, fontSize: 20 }} />
                   </ListItemIcon>
-                  <Typography sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: "0.9rem", color: theme.palette.text.primary }}>
+                  <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: "0.9rem", color: theme.palette.text.primary }}>
                     {t('navigation:userMenu.profile')}
                   </Typography>
                 </MenuItem>
@@ -180,7 +180,7 @@ const AppBarBrandbook = ({
                   <ListItemIcon sx={{ minWidth: 36 }}>
                     <LogoutIcon sx={{ color: theme.palette.error.main, fontSize: 20 }} />
                   </ListItemIcon>
-                  <Typography sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: "0.9rem", color: theme.palette.error.main }}>
+                  <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: "0.9rem", color: theme.palette.error.main }}>
                     {t('navigation:userMenu.logout')}
                   </Typography>
                 </MenuItem>
@@ -191,7 +191,7 @@ const AppBarBrandbook = ({
               variant="text"
               startIcon={<LoginIcon />}
               onClick={onLoginClick}
-              sx={{ color: theme.palette.text.primary, fontWeight: 600, textTransform: "none", fontFamily: '"Poppins", sans-serif', "&:hover": { bgcolor: theme.palette.action.hover } }}
+              sx={{ color: theme.palette.text.primary, fontWeight: 600, textTransform: "none", fontFamily: '"DM Sans", sans-serif', "&:hover": { bgcolor: theme.palette.action.hover } }}
             >
               {t('auth:login')}
             </Button>

@@ -21,13 +21,13 @@ import NewsBlockEditor from './NewsBlockEditor'
 const inputSx = {
   '& .MuiOutlinedInput-root': {
     borderRadius: 3,
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"DM Sans", sans-serif',
     '& fieldset': { borderColor: 'rgba(140, 165, 81, 0.3)', borderWidth: '2px' },
     '&:hover fieldset': { borderColor: '#8CA551' },
     '&.Mui-focused fieldset': { borderColor: '#333F1F', borderWidth: '2px' }
   },
   '& .MuiInputLabel-root': {
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"DM Sans", sans-serif',
     fontWeight: 500,
     color: '#706f6f',
     '&.Mui-focused': { color: '#333F1F', fontWeight: 600 }
@@ -40,7 +40,7 @@ const outlinedBtnSx = {
   borderColor: 'rgba(140, 165, 81, 0.3)',
   borderWidth: '2px',
   color: '#333F1F',
-  fontFamily: '"Poppins", sans-serif',
+  fontFamily: '"DM Sans", sans-serif',
   fontWeight: 600,
   '&:hover': {
     borderColor: '#8CA551',
@@ -92,7 +92,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
               px: 3,
               py: 1.2,
               color: '#706f6f',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               border: '2px solid #e0e0e0',
               '&:hover': { bgcolor: 'rgba(112, 111, 111, 0.05)', borderColor: '#706f6f' }
             }}
@@ -114,7 +114,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
         <Grid item xs={12} md={8}>
           {/* Hero Image */}
           <Box mb={3}>
-            <Typography variant="body2" fontWeight={600} mb={1} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="body2" fontWeight={600} mb={1} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
               {t('news:heroImage')} *
             </Typography>
             <Button
@@ -182,7 +182,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
             onChange={(e) => setField('description', e.target.value)}
             inputProps={{ maxLength: 200 }}
             helperText={`${formData.description.length}/200 ${t('news:characters')}`}
-            sx={{ ...inputSx, mb: 3, '& .MuiFormHelperText-root': { fontFamily: '"Poppins", sans-serif' } }}
+            sx={{ ...inputSx, mb: 3, '& .MuiFormHelperText-root': { fontFamily: '"DM Sans", sans-serif' } }}
           />
 
           <Divider sx={{ my: 3 }} />
@@ -190,10 +190,10 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
           {/* Content Blocks */}
           <Box>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
                 {t('news:articleContent')}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
                 {contentBlocks.length} {t('news:blocks')}
               </Typography>
             </Box>
@@ -209,7 +209,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
                   sx={{
                     textTransform: 'none',
                     borderRadius: 2,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontWeight: 600,
                     color: '#333F1F',
                     '&:hover': { bgcolor: 'rgba(140, 165, 81, 0.08)' }
@@ -267,7 +267,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
                                       border: '1px solid rgba(140, 165, 81, 0.3)',
                                       fontWeight: 600,
                                       textTransform: 'capitalize',
-                                      fontFamily: '"Poppins", sans-serif'
+                                      fontFamily: '"DM Sans", sans-serif'
                                     }}
                                   />
                                 </Box>
@@ -294,7 +294,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
                     {provided.placeholder}
                     {contentBlocks.length === 0 && (
                       <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fafafa', borderRadius: 3, border: '2px dashed #e0e0e0' }}>
-                        <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+                        <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
                           {t('news:addContentBlocks')}
                         </Typography>
                       </Box>
@@ -309,7 +309,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
         {/* Sidebar 4/12 */}
         <Grid item xs={12} md={4}>
           <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #e0e0e0', position: 'sticky', top: 20, bgcolor: '#fafafa' }}>
-            <Typography variant="h6" fontWeight={700} mb={3} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="h6" fontWeight={700} mb={3} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
               {t('news:articleSettings')}
             </Typography>
 
@@ -345,7 +345,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
 
             {/* Tags */}
             <Box mb={3}>
-              <Typography variant="body2" fontWeight={600} mb={1} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" fontWeight={600} mb={1} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
                 {t('news:tags')}
               </Typography>
               <Box display="flex" gap={1} mb={1}>
@@ -372,7 +372,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
                       bgcolor: 'rgba(140, 165, 81, 0.12)',
                       color: '#8CA551',
                       border: '1px solid rgba(140, 165, 81, 0.3)',
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       fontWeight: 600
                     }}
                   />
@@ -384,7 +384,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
 
             {/* Gallery */}
             <Box mb={3}>
-              <Typography variant="body2" fontWeight={600} mb={1} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" fontWeight={600} mb={1} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
                 {t('news:galleryImages')}
               </Typography>
               <Button
@@ -428,7 +428,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
 
             {/* Videos */}
             <Box>
-              <Typography variant="body2" fontWeight={600} mb={1} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" fontWeight={600} mb={1} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
                 {t('news:videos')}
               </Typography>
               <Button
@@ -458,7 +458,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
                         bgcolor: 'rgba(229, 134, 60, 0.12)',
                         color: '#E5863C',
                         border: '1px solid rgba(229, 134, 60, 0.3)',
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontWeight: 600
                       }}
                     />

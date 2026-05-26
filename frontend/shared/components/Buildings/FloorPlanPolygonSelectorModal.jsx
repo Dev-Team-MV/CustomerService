@@ -90,7 +90,7 @@ export default function FloorPlanPolygonSelectorModal({
             variant="h6" 
             sx={{ 
               fontWeight: 700, 
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               color: '#333F1F'
             }}
           >
@@ -113,15 +113,15 @@ export default function FloorPlanPolygonSelectorModal({
         }}>
           <Box display="flex" alignItems="center" gap={0.5}>
             <Box sx={{ width: 16, height: 16, bgcolor: '#8CA55133', border: '2px solid #8CA551', borderRadius: 0.5 }} />
-            <Typography variant="caption" fontFamily='"Poppins", sans-serif'>Disponible</Typography>
+            <Typography variant="caption" fontFamily='"DM Sans", sans-serif'>Disponible</Typography>
           </Box>
           <Box display="flex" alignItems="center" gap={0.5}>
             <Box sx={{ width: 16, height: 16, bgcolor: '#8CA551BB', border: '2px solid #333F1F', borderRadius: 0.5 }} />
-            <Typography variant="caption" fontFamily='"Poppins", sans-serif'>Seleccionado</Typography>
+            <Typography variant="caption" fontFamily='"DM Sans", sans-serif'>Seleccionado</Typography>
           </Box>
           <Box display="flex" alignItems="center" gap={0.5}>
             <Box sx={{ width: 16, height: 16, bgcolor: '#75757533', border: '2px solid #757575', borderRadius: 0.5 }} />
-            <Typography variant="caption" fontFamily='"Poppins", sans-serif'>Ocupado</Typography>
+            <Typography variant="caption" fontFamily='"DM Sans", sans-serif'>Ocupado</Typography>
           </Box>
         </Box>
 
@@ -214,7 +214,7 @@ export default function FloorPlanPolygonSelectorModal({
           sx={{ 
             color: '#706f6f', 
             mt: 2, 
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             textAlign: 'center'
           }}
         >

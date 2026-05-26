@@ -15,12 +15,12 @@ import PropTypes from 'prop-types'
 
 // ── Feature label + icon ──────────────────────────────────────────────────────
 const FeatureTag = ({ label, icon }) => (
-  <Box display="flex" alignItems="center" gap={0.5}>
+  <Box display="flex" alignItems="center" gap={0.75}>
     <Typography
       sx={{
-        fontSize: '0.68rem',
+        fontSize: '0.72rem',
         color: '#706f6f',
-        fontFamily: '"Poppins", sans-serif',
+        fontFamily: '"DM Sans", sans-serif',
         lineHeight: 1,
       }}
     >
@@ -35,22 +35,22 @@ const FeatureTag = ({ label, icon }) => (
 // ── Spec row with divider ─────────────────────────────────────────────────────
 const SpecRow = ({ label, value, isLast }) => (
   <>
-    <Box display="flex" justifyContent="space-between" alignItems="center" py={1.1}>
+    <Box display="flex" justifyContent="space-between" alignItems="center" py={1.2}>
       <Typography
         sx={{
-          fontSize: '0.78rem',
+          fontSize: '0.82rem',
           color: '#9ca3af',
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
         }}
       >
         {label}
       </Typography>
       <Typography
         sx={{
-          fontSize: '0.9rem',
+          fontSize: '1.05rem',
           fontWeight: 700,
           color: '#1a2e0f',
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
         }}
       >
         {value}
@@ -92,17 +92,17 @@ const ResourceCard = ({
   // Feature tags
   const features = []
   if (resource.modelType === 'upgrade') {
-    features.push({ label: 'Upgrade',     icon: <StarBorderOutlined sx={{ fontSize: 13 }} /> })
+    features.push({ label: 'Upgrade',     icon: <StarBorderOutlined sx={{ fontSize: 15 }} /> })
   } else if (resource.modelType) {
-    features.push({ label: 'Basic',       icon: <HomeOutlined sx={{ fontSize: 13 }} /> })
+    features.push({ label: 'Basic',       icon: <HomeOutlined sx={{ fontSize: 15 }} /> })
   }
   if (resource.isModel10 && resource.hasBalcony) {
-    features.push({ label: 'Studio',      icon: <WeekendOutlined sx={{ fontSize: 13 }} /> })
+    features.push({ label: 'Studio',      icon: <WeekendOutlined sx={{ fontSize: 15 }} /> })
   } else if (resource.isModel10 && !resource.hasBalcony) {
-    features.push({ label: 'Dining Room', icon: <TableRestaurantOutlined sx={{ fontSize: 13 }} /> })
+    features.push({ label: 'Dining Room', icon: <TableRestaurantOutlined sx={{ fontSize: 15 }} /> })
   }
   if (resource.hasStorage) {
-    features.push({ label: 'Storage',     icon: <InventoryOutlined sx={{ fontSize: 13 }} /> })
+    features.push({ label: 'Storage',     icon: <InventoryOutlined sx={{ fontSize: 15 }} /> })
   }
 
   // Specs
@@ -125,18 +125,18 @@ const ResourceCard = ({
         onClick={onClick}
         sx={{
           bgcolor: 'white',
-          borderRadius: '16px',
+          borderRadius: '20px',
           border: `1px solid ${hovered ? config.colors.secondary : '#e5e7eb'}`,
           cursor: 'pointer',
           overflow: 'hidden',
           transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
           boxShadow: hovered
             ? `0 8px 28px ${config.colors.primary}15`
-            : '0 1px 4px rgba(0,0,0,0.06)',
+            : '0 1px 6px rgba(0,0,0,0.06)',
         }}
       >
         {/* ── Header: lot number + features ── */}
-        <Box sx={{ p: 2.5, pb: 1 }}>
+        <Box sx={{ px: 2.5, pt: 2.5, pb: 1.5 }}>
           <Box display="flex" justifyContent="space-between" alignItems="flex-start">
             {/* Lot label + large number */}
             <Box>
@@ -144,9 +144,9 @@ const ResourceCard = ({
                 sx={{
                   fontSize: '0.6rem',
                   color: '#9ca3af',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.8px',
+                  letterSpacing: '1px',
                   mb: 0,
                 }}
               >
@@ -154,12 +154,12 @@ const ResourceCard = ({
               </Typography>
               <Typography
                 sx={{
-                  fontSize: { xs: '3rem', md: '3.8rem' },
-                  fontWeight: 700,
+                  fontSize: { xs: '3.5rem', md: '4.5rem' },
+                  fontWeight: 300,
                   color: config.colors.primary,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   lineHeight: 0.88,
-                  letterSpacing: '-2px',
+                  letterSpacing: '-3px',
                 }}
               >
                 {lotNumber}
@@ -172,7 +172,7 @@ const ResourceCard = ({
                 display="flex"
                 flexDirection="column"
                 alignItems="flex-end"
-                gap={0.6}
+                gap={0.7}
                 pt={0.5}
               >
                 {features.map((f, i) => (
@@ -181,22 +181,26 @@ const ResourceCard = ({
               </Box>
             )}
           </Box>
+        </Box>
 
-          {/* Model name */}
-          {resource.model && (
+        {/* ── Divider between header and model/image ── */}
+        <Divider sx={{ borderColor: '#e5e7eb', mx: 2.5 }} />
+
+        {/* ── Model name ── */}
+        {resource.model && (
+          <Box sx={{ px: 2.5, pt: 1.5, pb: 1 }}>
             <Typography
               sx={{
-                fontSize: '0.75rem',
+                fontSize: '0.8rem',
                 fontWeight: 700,
                 color: config.colors.primary,
-                fontFamily: '"Poppins", sans-serif',
-                mt: 0.8,
+                fontFamily: '"DM Sans", sans-serif',
               }}
             >
               {resource.model}
             </Typography>
-          )}
-        </Box>
+          </Box>
+        )}
 
         {/* ── Image carousel ── */}
         {images.length > 0 && (
@@ -205,7 +209,7 @@ const ResourceCard = ({
               position: 'relative',
               mx: 2.5,
               mb: 0,
-              borderRadius: '10px',
+              borderRadius: '12px',
               overflow: 'hidden',
             }}
           >
@@ -215,7 +219,7 @@ const ResourceCard = ({
               alt={resource.title}
               sx={{
                 width: '100%',
-                height: { xs: 160, md: 185 },
+                height: { xs: 180, md: 210 },
                 objectFit: 'cover',
                 display: 'block',
                 transition: 'transform 0.35s ease',
@@ -232,11 +236,11 @@ const ResourceCard = ({
                     position: 'absolute', left: 8, top: '50%',
                     transform: 'translateY(-50%)',
                     bgcolor: 'rgba(255,255,255,0.88)',
-                    width: 28, height: 28,
+                    width: 32, height: 32,
                     '&:hover': { bgcolor: 'white' },
                   }}
                 >
-                  <ChevronLeft sx={{ fontSize: 18 }} />
+                  <ChevronLeft sx={{ fontSize: 20 }} />
                 </IconButton>
                 <IconButton
                   onClick={handleNext}
@@ -245,11 +249,11 @@ const ResourceCard = ({
                     position: 'absolute', right: 8, top: '50%',
                     transform: 'translateY(-50%)',
                     bgcolor: 'rgba(255,255,255,0.88)',
-                    width: 28, height: 28,
+                    width: 32, height: 32,
                     '&:hover': { bgcolor: 'white' },
                   }}
                 >
-                  <ChevronRight sx={{ fontSize: 18 }} />
+                  <ChevronRight sx={{ fontSize: 20 }} />
                 </IconButton>
               </>
             )}
@@ -258,7 +262,7 @@ const ResourceCard = ({
 
         {/* ── Specs rows ── */}
         {specs.length > 0 && (
-          <Box sx={{ px: 2.5, pt: 1.5, pb: 2 }}>
+          <Box sx={{ px: 2.5, pt: 2, pb: 2.5 }}>
             {specs.map((spec, i) => (
               <SpecRow
                 key={i}

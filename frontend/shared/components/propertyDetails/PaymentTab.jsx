@@ -93,7 +93,7 @@ const PaymentTab = ({ apartmentDetails, payloads, loadingPayloads, onPaymentUplo
               <Typography
                 variant="h5" fontWeight={700}
                 sx={{
-                  color: '#333F1F', fontFamily: '"Poppins", sans-serif',
+                  color: '#333F1F', fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' },
                   letterSpacing: '0.5px'
                 }}
@@ -103,7 +103,7 @@ const PaymentTab = ({ apartmentDetails, payloads, loadingPayloads, onPaymentUplo
               <Typography
                 variant="body2"
                 sx={{
-                  color: '#706f6f', fontFamily: '"Poppins", sans-serif',
+                  color: '#706f6f', fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '0.75rem', sm: '0.85rem' },
                   display: { xs: 'none', sm: 'block' },
                 }}
@@ -156,7 +156,7 @@ const PaymentTab = ({ apartmentDetails, payloads, loadingPayloads, onPaymentUplo
                         sx={{
                           color: '#999999', fontWeight: 500,
                           textTransform: 'uppercase', letterSpacing: '1px',
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           fontSize: { xs: '0.65rem', sm: '0.7rem' },
                         }}
                       >
@@ -178,7 +178,7 @@ const PaymentTab = ({ apartmentDetails, payloads, loadingPayloads, onPaymentUplo
                       variant="h3" fontWeight={700}
                       sx={{
                         color: stat.color, letterSpacing: '-0.5px',
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' },
                       }}
                     >
@@ -208,7 +208,7 @@ const PaymentTab = ({ apartmentDetails, payloads, loadingPayloads, onPaymentUplo
                 variant="h6"
                 sx={{
                   color: '#333F1F', fontWeight: 700,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '1rem', sm: '1.15rem', md: '1.25rem' },
                   letterSpacing: '0.5px'
                 }}
@@ -218,7 +218,7 @@ const PaymentTab = ({ apartmentDetails, payloads, loadingPayloads, onPaymentUplo
               <Typography
                 variant="caption"
                 sx={{
-                  color: '#706f6f', fontFamily: '"Poppins", sans-serif',
+                  color: '#706f6f', fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '0.7rem', sm: '0.75rem' }
                 }}
               >
@@ -240,7 +240,7 @@ const PaymentTab = ({ apartmentDetails, payloads, loadingPayloads, onPaymentUplo
                   bgcolor: 'rgba(140, 165, 81, 0.08)',
                   border: '1px solid rgba(140, 165, 81, 0.3)',
                   fontSize: { xs: '0.85rem', md: '1rem' },
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   '& .MuiAlert-icon': { color: '#8CA551' }
                 }}
               >

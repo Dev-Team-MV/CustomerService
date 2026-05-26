@@ -125,7 +125,7 @@ useEffect(() => {
                   sx={{
                     color: '#333F1F',
                     fontWeight: 600,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     mb: 1
                   }}
                 >
@@ -135,7 +135,7 @@ useEffect(() => {
                   variant="body2"
                   sx={{
                     color: '#706f6f',
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     mb: 3
                   }}
                 >
@@ -149,7 +149,7 @@ useEffect(() => {
                     borderRadius: 3,
                     bgcolor: '#333F1F',
                     textTransform: 'none',
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontWeight: 600,
                     px: 4,
                     '&:hover': {

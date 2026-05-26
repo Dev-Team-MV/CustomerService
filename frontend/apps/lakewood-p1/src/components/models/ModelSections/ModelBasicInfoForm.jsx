@@ -40,7 +40,7 @@ const ModelBasicInfoForm = ({
           fontWeight={700}
           sx={{ 
             color: '#333F1F',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             letterSpacing: '0.5px'
           }}
         >
@@ -62,7 +62,7 @@ const ModelBasicInfoForm = ({
         sx={{
           "& .MuiOutlinedInput-root": {
             borderRadius: 2,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: 'white',
             "&.Mui-focused fieldset": { 
               borderColor: "#333F1F",
@@ -73,7 +73,7 @@ const ModelBasicInfoForm = ({
             }
           },
           "& .MuiInputLabel-root": {
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             "&.Mui-focused": {
               color: "#333F1F"
             }
@@ -93,7 +93,7 @@ const ModelBasicInfoForm = ({
         sx={{
           "& .MuiOutlinedInput-root": {
             borderRadius: 2,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: 'white',
             "&.Mui-focused fieldset": { 
               borderColor: "#333F1F",
@@ -104,7 +104,7 @@ const ModelBasicInfoForm = ({
             }
           },
           "& .MuiInputLabel-root": {
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             "&.Mui-focused": {
               color: "#333F1F"
             }
@@ -134,7 +134,7 @@ const ModelBasicInfoForm = ({
         sx={{
           "& .MuiOutlinedInput-root": {
             borderRadius: 2,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: 'white',
             "&.Mui-focused fieldset": { 
               borderColor: "#333F1F",
@@ -145,7 +145,7 @@ const ModelBasicInfoForm = ({
             }
           },
           "& .MuiInputLabel-root": {
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             "&.Mui-focused": {
               color: "#333F1F"
             }
@@ -169,7 +169,7 @@ const ModelBasicInfoForm = ({
         sx={{
           "& .MuiOutlinedInput-root": {
             borderRadius: 2,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: 'white',
             "&.Mui-focused fieldset": { 
               borderColor: "#333F1F",
@@ -180,7 +180,7 @@ const ModelBasicInfoForm = ({
             }
           },
           "& .MuiInputLabel-root": {
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             "&.Mui-focused": {
               color: "#333F1F"
             }
@@ -201,7 +201,7 @@ const ModelBasicInfoForm = ({
         sx={{
           "& .MuiOutlinedInput-root": {
             borderRadius: 2,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: 'white',
             "&.Mui-focused fieldset": { 
               borderColor: "#333F1F",
@@ -212,16 +212,16 @@ const ModelBasicInfoForm = ({
             }
           },
           "& .MuiInputLabel-root": {
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             "&.Mui-focused": {
               color: "#333F1F"
             }
           }
         }}
       >
-        <MenuItem value="active" sx={{ fontFamily: '"Poppins", sans-serif' }}>Active</MenuItem>
-        <MenuItem value="draft" sx={{ fontFamily: '"Poppins", sans-serif' }}>Draft</MenuItem>
-        <MenuItem value="inactive" sx={{ fontFamily: '"Poppins", sans-serif' }}>Inactive</MenuItem>
+        <MenuItem value="active" sx={{ fontFamily: '"DM Sans", sans-serif' }}>Active</MenuItem>
+        <MenuItem value="draft" sx={{ fontFamily: '"DM Sans", sans-serif' }}>Draft</MenuItem>
+        <MenuItem value="inactive" sx={{ fontFamily: '"DM Sans", sans-serif' }}>Inactive</MenuItem>
       </TextField>
     </Grid>
     <Grid item xs={4}>
@@ -241,7 +241,7 @@ const ModelBasicInfoForm = ({
         sx={{
           "& .MuiOutlinedInput-root": {
             borderRadius: 2,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: 'white',
             "&.Mui-focused fieldset": { 
               borderColor: "#333F1F",
@@ -252,7 +252,7 @@ const ModelBasicInfoForm = ({
             }
           },
           "& .MuiInputLabel-root": {
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             "&.Mui-focused": {
               color: "#333F1F"
             }
@@ -277,7 +277,7 @@ const ModelBasicInfoForm = ({
         sx={{
           "& .MuiOutlinedInput-root": {
             borderRadius: 2,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: 'white',
             "&.Mui-focused fieldset": { 
               borderColor: "#333F1F",
@@ -288,7 +288,7 @@ const ModelBasicInfoForm = ({
             }
           },
           "& .MuiInputLabel-root": {
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             "&.Mui-focused": {
               color: "#333F1F"
             }
@@ -310,7 +310,7 @@ const ModelBasicInfoForm = ({
         sx={{
           "& .MuiOutlinedInput-root": {
             borderRadius: 2,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: 'white',
             "&.Mui-focused fieldset": { 
               borderColor: "#333F1F",
@@ -321,7 +321,7 @@ const ModelBasicInfoForm = ({
             }
           },
           "& .MuiInputLabel-root": {
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             "&.Mui-focused": {
               color: "#333F1F"
             }
@@ -343,7 +343,7 @@ const ModelBasicInfoForm = ({
         sx={{
           "& .MuiOutlinedInput-root": {
             borderRadius: 2,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: 'white',
             "&.Mui-focused fieldset": { 
               borderColor: "#333F1F",
@@ -354,7 +354,7 @@ const ModelBasicInfoForm = ({
             }
           },
           "& .MuiInputLabel-root": {
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             "&.Mui-focused": {
               color: "#333F1F"
             }

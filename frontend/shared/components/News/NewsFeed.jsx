@@ -75,7 +75,7 @@ const NewsFeed = ({ config }) => {
                 color: config.colors.primary,
                 mb: 2,
                 fontSize: { xs: '2.5rem', md: '3.5rem' },
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 letterSpacing: '-1px'
               }}
             >
@@ -88,7 +88,7 @@ const NewsFeed = ({ config }) => {
                 fontWeight: 400,
                 maxWidth: 600,
                 mx: 'auto',
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               {t('news:feedSubtitle', 'Stay informed with the latest developments, events, and announcements from your community')}
@@ -121,7 +121,7 @@ const NewsFeed = ({ config }) => {
                 '& .MuiTab-root': {
                   textTransform: 'none',
                   fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: '1rem',
                   minHeight: 56,
                   borderRadius: 3,
@@ -157,7 +157,7 @@ const NewsFeed = ({ config }) => {
                             bgcolor: selectedProject === tab.value ? config.colors.secondary : '#e0e0e0',
                             color: selectedProject === tab.value ? 'white' : '#706f6f',
                             fontWeight: 700,
-                            fontFamily: '"Poppins", sans-serif'
+                            fontFamily: '"DM Sans", sans-serif'
                           }
                         }}
                       />
@@ -204,7 +204,7 @@ const NewsFeed = ({ config }) => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 3,
                       bgcolor: '#fafafa',
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       '& fieldset': {
                         borderColor: `${config.colors.secondary}4D`,
                         borderWidth: '2px'
@@ -237,7 +237,7 @@ const NewsFeed = ({ config }) => {
                     '& .MuiTab-root': {
                       textTransform: 'none',
                       fontWeight: 600,
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       minHeight: 48,
                       borderRadius: 3,
                       mr: 1,
@@ -324,7 +324,7 @@ const NewsFeed = ({ config }) => {
                         color: 'white',
                         fontWeight: 700,
                         textTransform: 'uppercase',
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontSize: '0.75rem',
                         boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                         border: 'none'
@@ -342,7 +342,7 @@ const NewsFeed = ({ config }) => {
                           bgcolor: `${config.colors.accent}F0`,
                           color: 'white',
                           fontWeight: 600,
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           border: 'none'
                         }}
                       />
@@ -360,7 +360,7 @@ const NewsFeed = ({ config }) => {
                         mb: 2,
                         fontSize: { xs: '1.8rem', md: '2.2rem' },
                         lineHeight: 1.2,
-                        fontFamily: '"Poppins", sans-serif'
+                        fontFamily: '"DM Sans", sans-serif'
                       }}
                     >
                       {featuredNews.title}
@@ -372,7 +372,7 @@ const NewsFeed = ({ config }) => {
                         color: '#706f6f',
                         mb: 3,
                         lineHeight: 1.6,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
                         WebkitBoxOrient: 'vertical',
@@ -394,7 +394,7 @@ const NewsFeed = ({ config }) => {
                         sx={{
                           bgcolor: '#fafafa',
                           border: '1px solid #e0e0e0',
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           fontWeight: 500
                         }}
                       />
@@ -411,7 +411,7 @@ const NewsFeed = ({ config }) => {
                         fontWeight: 700,
                         py: 1.5,
                         textTransform: 'none',
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         letterSpacing: '1px',
                         boxShadow: `0 4px 12px ${config.colors.primary}40`,
                         position: 'relative',
@@ -488,7 +488,7 @@ const NewsFeed = ({ config }) => {
               variant="h5"
               sx={{
                 color: config.colors.primary,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontWeight: 700,
                 mb: 1
               }}
@@ -499,7 +499,7 @@ const NewsFeed = ({ config }) => {
               variant="body2"
               sx={{
                 color: '#706f6f',
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               {t('news:tryAdjustingSearch', 'Try adjusting your search or filters')}

@@ -43,7 +43,7 @@ const ModelInfoPanel = ({
             fontWeight={700}
             sx={{
               color: "#333F1F",
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: "0.5px",
             }}
           >
@@ -59,7 +59,7 @@ const ModelInfoPanel = ({
                 bgcolor: "#E5863C",
                 color: "white",
                 fontWeight: 600,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 letterSpacing: "0.5px",
                 textTransform: "uppercase",
               }}
@@ -70,7 +70,7 @@ const ModelInfoPanel = ({
           variant="caption"
           sx={{
             color: "#706f6f",
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontSize: "0.75rem",
             display: "block",
           }}
@@ -83,7 +83,7 @@ const ModelInfoPanel = ({
   variant="h5"
   sx={{
     color: "#8CA551",
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"DM Sans", sans-serif',
     fontWeight: 700,
     fontSize: "1.5rem",
     mt: 1,
@@ -110,7 +110,7 @@ const ModelInfoPanel = ({
           fontWeight={700}
           sx={{
             color: "#706f6f",
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             letterSpacing: "1.5px",
             textTransform: "uppercase",
             fontSize: "0.65rem",
@@ -148,7 +148,7 @@ const ModelInfoPanel = ({
                 fontWeight: 500,
                 textTransform: "uppercase",
                 letterSpacing: "1px",
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 display: "block",
                 mb: 0.5,
               }}
@@ -161,7 +161,7 @@ const ModelInfoPanel = ({
                 color: "#333F1F",
                 fontSize: "1.1rem",
                 fontWeight: 700,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
               }}
             >
               {model.bedrooms}
@@ -184,7 +184,7 @@ const ModelInfoPanel = ({
                 fontWeight: 500,
                 textTransform: "uppercase",
                 letterSpacing: "1px",
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 display: "block",
                 mb: 0.5,
               }}
@@ -197,7 +197,7 @@ const ModelInfoPanel = ({
                 color: "#333F1F",
                 fontSize: "1.1rem",
                 fontWeight: 700,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
               }}
             >
               {model.bathrooms}
@@ -220,7 +220,7 @@ const ModelInfoPanel = ({
                 fontWeight: 500,
                 textTransform: "uppercase",
                 letterSpacing: "1px",
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 display: "block",
                 mb: 0.5,
               }}
@@ -233,7 +233,7 @@ const ModelInfoPanel = ({
                 color: "#333F1F",
                 fontSize: "1.1rem",
                 fontWeight: 700,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
               }}
             >
               {model.sqft?.toLocaleString()}
@@ -250,7 +250,7 @@ const ModelInfoPanel = ({
                 fontWeight: 500,
                 textTransform: "uppercase",
                 letterSpacing: "1px",
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 display: "block",
                 mb: 0.5,
               }}
@@ -263,7 +263,7 @@ const ModelInfoPanel = ({
                 color: "#333F1F",
                 fontSize: "1.1rem",
                 fontWeight: 700,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
               }}
             >
               {model.stories || 1}
@@ -280,7 +280,7 @@ const ModelInfoPanel = ({
             fontWeight={700}
             sx={{
               color: "#706f6f",
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: "1.5px",
               textTransform: "uppercase",
               fontSize: "0.65rem",
@@ -315,7 +315,7 @@ const ModelInfoPanel = ({
                     color: "#E5863C",
                     fontWeight: 600,
                     fontSize: "0.7rem",
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     letterSpacing: "0.5px",
                   }}
                 />
@@ -324,7 +324,7 @@ const ModelInfoPanel = ({
                   sx={{
                     color: "#333F1F",
                     fontWeight: 700,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontSize: "0.85rem",
                   }}
                 >
@@ -356,7 +356,7 @@ const ModelInfoPanel = ({
                     color: "#8CA551",
                     fontWeight: 600,
                     fontSize: "0.7rem",
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     letterSpacing: "0.5px",
                   }}
                 />
@@ -365,7 +365,7 @@ const ModelInfoPanel = ({
                   sx={{
                     color: "#333F1F",
                     fontWeight: 700,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontSize: "0.85rem",
                   }}
                 >
@@ -397,7 +397,7 @@ const ModelInfoPanel = ({
                     color: "#706f6f",
                     fontWeight: 600,
                     fontSize: "0.7rem",
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     letterSpacing: "0.5px",
                   }}
                 />
@@ -406,7 +406,7 @@ const ModelInfoPanel = ({
                   sx={{
                     color: "#333F1F",
                     fontWeight: 700,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontSize: "0.85rem",
                   }}
                 >
@@ -435,7 +435,7 @@ const ModelInfoPanel = ({
             fontWeight={700}
             sx={{
               color: "#8CA551",
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: "1.5px",
               textTransform: "uppercase",
               fontSize: "0.65rem",
@@ -451,7 +451,7 @@ const ModelInfoPanel = ({
             fontWeight={600}
             sx={{
               color: "#333F1F",
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               mb: 1,
             }}
           >
@@ -462,7 +462,7 @@ const ModelInfoPanel = ({
             sx={{
               color: "#8CA551",
               fontWeight: 700,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: "-0.5px",
             }}
           >
@@ -487,7 +487,7 @@ const ModelInfoPanel = ({
               fontWeight: 600,
               textTransform: "none",
               letterSpacing: "1px",
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               px: 3,
               py: 1.5,
               boxShadow: "0 4px 12px rgba(51, 63, 31, 0.25)",
@@ -542,7 +542,7 @@ const ModelInfoPanel = ({
           }}
         >
           <InfoOutlined sx={{ fontSize: 28, color: "#999", mb: 0.5 }} />
-          <Typography variant="caption" sx={{ color: "#706f6f", fontFamily: '"Poppins", sans-serif', fontSize: "0.75rem" }}>
+          <Typography variant="caption" sx={{ color: "#706f6f", fontFamily: '"DM Sans", sans-serif', fontSize: "0.75rem" }}>
             {isModel10
               ? t("comedorEstudioInCustomization", "Comedor and Estudio options in customization")
               : t("noAdditionalOptions", "No additional options available")}

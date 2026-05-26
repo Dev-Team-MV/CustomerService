@@ -70,7 +70,7 @@ const DataTable = ({
                     sx={{
                       fontWeight: 700,
                       color: theme.palette.primary?.main || '#333F1F',
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       fontSize: '0.75rem',
                       letterSpacing: '1.5px',
                       textTransform: 'uppercase',
@@ -123,7 +123,7 @@ const DataTable = ({
                             sx={{
                               color: theme.palette.primary?.main || '#333F1F',
                               fontWeight: 600,
-                              fontFamily: '"Poppins", sans-serif'
+                              fontFamily: '"DM Sans", sans-serif'
                             }}
                           >
                             No data available
@@ -132,7 +132,7 @@ const DataTable = ({
                             variant="body2"
                             sx={{
                               color: theme.palette.text?.secondary || '#706f6f',
-                              fontFamily: '"Poppins", sans-serif'
+                              fontFamily: '"DM Sans", sans-serif'
                             }}
                           >
                             No records found
@@ -178,7 +178,7 @@ const DataTable = ({
                               key={column.id || column.field || colIndex}
                               align={column.align || 'left'}
                               sx={{
-                                fontFamily: '"Poppins", sans-serif',
+                                fontFamily: '"DM Sans", sans-serif',
                                 ...column.cellSx
                               }}
                             >

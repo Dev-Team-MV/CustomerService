@@ -190,7 +190,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               color: '#333F1F', 
               fontWeight: 700, 
               letterSpacing: '0.5px',
-              fontFamily: '"Poppins", sans-serif'
+              fontFamily: '"DM Sans", sans-serif'
             }}
           >
             {t('priceCalculator', 'Price Calculator')}
@@ -208,7 +208,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               border: '1px solid rgba(140, 165, 81, 0.2)',
               borderRadius: 2,
               '& .MuiAlert-message': {
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: '0.875rem',
                 color: '#333F1F'
               }
@@ -241,7 +241,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               display="block" 
               sx={{ 
                 color: '#706f6f',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 mb: 0.5
               }}
             >
@@ -252,7 +252,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
   display="block" 
   sx={{ 
     color: '#706f6f',
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"DM Sans", sans-serif',
     mb: 0.5
   }}
 >
@@ -269,7 +269,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                     sx={{ 
                       height: 20, 
                       fontSize: '0.7rem',
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       fontWeight: 600,
                       bgcolor: 'rgba(140, 165, 81, 0.12)',
                       color: '#333F1F',
@@ -284,7 +284,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                     sx={{ 
                       height: 20, 
                       fontSize: '0.7rem',
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       fontWeight: 600,
                       bgcolor: 'rgba(140, 165, 81, 0.12)',
                       color: '#333F1F',
@@ -299,7 +299,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                     sx={{ 
                       height: 20, 
                       fontSize: '0.7rem',
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       fontWeight: 600,
                       bgcolor: 'rgba(229, 134, 60, 0.12)',
                       color: '#333F1F',
@@ -315,7 +315,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               display="block" 
               sx={{ 
                 color: '#706f6f',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 mt: 1.5
               }}
             >
@@ -338,7 +338,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                   fontWeight={600}
                   sx={{ 
                     color: '#333F1F',
-                    fontFamily: '"Poppins", sans-serif'
+                    fontFamily: '"DM Sans", sans-serif'
                   }}
                 >
                   📋 {selectedPricingOption.label}
@@ -388,7 +388,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 color: '#333F1F', 
                 fontWeight: 700, 
                 letterSpacing: '1.5px',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: '0.75rem'
               }}
             >
@@ -400,7 +400,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontWeight: 700, 
                 color: '#333F1F', 
                 mt: 0.5,
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               ${financials.presalePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -410,7 +410,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               sx={{ 
                 color: '#706f6f', 
                 fontStyle: 'italic',
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               {t('limitedTimeOffer', 'Limited time offer')}
@@ -425,7 +425,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
             sx={{ 
               fontWeight: 700, 
               color: '#333F1F',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: '0.5px'
             }}
           >
@@ -473,7 +473,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                   mb: 0.5, 
                   display: 'block', 
                   fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 {t('paymentDate', 'Payment Date')}
@@ -488,7 +488,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 sx={{ 
                   '& .MuiOutlinedInput-root': { 
                     borderRadius: 2,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     '&:hover fieldset': {
                       borderColor: '#8CA551'
                     },
@@ -517,7 +517,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
             sx={{ 
               fontWeight: 700, 
               color: '#333F1F',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: '0.5px'
             }}
           >
@@ -567,7 +567,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               mb={2}
               sx={{ 
                 color: '#333F1F',
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               {t('paymentBreakdown', 'Payment Breakdown')}
@@ -577,7 +577,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 variant="body2" 
                 sx={{ 
                   color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 {t('initialDownPayment', 'Initial Down Payment:')}
@@ -587,7 +587,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontWeight={600}
                 sx={{ 
                   color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 ${financials.initialDownPayment.toLocaleString()}
@@ -598,7 +598,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 variant="body2" 
                 sx={{ 
                   color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 {t('remainingDownPayment', 'Remaining Down Payment:')}
@@ -608,7 +608,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontWeight={600}
                 sx={{ 
                   color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 ${(financials.totalDownPayment - financials.initialDownPayment).toLocaleString()}
@@ -619,7 +619,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 variant="body2" 
                 sx={{ 
                   color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 {t('monthlyPayment', 'Monthly Payment:')}
@@ -629,7 +629,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontWeight={600}
                 sx={{ 
                   color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 ${financials.monthlyPayment.toLocaleString()}
@@ -642,7 +642,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontWeight={700}
                 sx={{ 
                   color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 {t('mortgageToFinance', 'Mortgage to Finance:')}
@@ -652,7 +652,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontWeight={700}
                 sx={{ 
                   color: '#8CA551',
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 ${financials.mortgage.toLocaleString()}
@@ -670,13 +670,13 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               border: '1px solid rgba(229, 134, 60, 0.2)',
               borderRadius: 2,
               '& .MuiAlert-message': {
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: '0.875rem',
                 color: '#333F1F'
               }
             }}
           >
-            <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
               <strong>{t('important', 'Important')}:</strong> {t('discountNote', 'Every 10 houses sold, the discount is reduced by 2%')}
             </Typography>
           </Alert>
@@ -697,7 +697,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontWeight: 600,
                 textTransform: 'none',
                 fontSize: '1rem',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 border: '2px solid #8CA551',
                 '&:hover': {
                   borderColor: '#8CA551',
@@ -734,7 +734,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontWeight: 600,
                 textTransform: 'none',
                 fontSize: '1rem',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
                 position: 'relative',
                 overflow: 'hidden',
@@ -797,7 +797,7 @@ const CalcField = ({ label, value, onChange, prefix, suffix, disabled = false, h
         mb: 0.5, 
         display: 'block', 
         fontWeight: 600,
-        fontFamily: '"Poppins", sans-serif'
+        fontFamily: '"DM Sans", sans-serif'
       }}
     >
       {label}
@@ -822,7 +822,7 @@ const CalcField = ({ label, value, onChange, prefix, suffix, disabled = false, h
           bgcolor: disabled ? (highlighted ? 'rgba(140, 165, 81, 0.08)' : '#fafafa') : '#fff',
           fontWeight: highlighted ? 700 : 400,
           border: highlighted ? '2px solid #8CA551' : 'none',
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           '&:hover fieldset': {
             borderColor: disabled ? 'inherit' : '#8CA551'
           },

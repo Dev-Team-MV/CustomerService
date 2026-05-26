@@ -352,7 +352,7 @@ const CreateFacade = ({
                       variant="caption"
                       sx={{
                         color: '#706f6f',
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         display: "block",
                         mb: 0.5
                       }}
@@ -366,7 +366,7 @@ const CreateFacade = ({
                       noWrap
                       sx={{
                         color: '#333F1F',
-                        fontFamily: '"Poppins", sans-serif'
+                        fontFamily: '"DM Sans", sans-serif'
                       }}
                     >
                       {selectedModel.model}
@@ -376,7 +376,7 @@ const CreateFacade = ({
                       fontSize={{ xs: "0.75rem", md: "0.875rem" }}
                       sx={{
                         color: '#706f6f',
-                        fontFamily: '"Poppins", sans-serif'
+                        fontFamily: '"DM Sans", sans-serif'
                       }}
                     >
                       {t('models:basePrice', {
@@ -406,7 +406,7 @@ const CreateFacade = ({
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 3,
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       "& fieldset": {
                         borderColor: 'rgba(140, 165, 81, 0.3)',
                         borderWidth: '2px'
@@ -420,7 +420,7 @@ const CreateFacade = ({
                       }
                     },
                     "& .MuiInputLabel-root": {
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       fontWeight: 500,
                       color: '#706f6f',
                       "&.Mui-focused": {
@@ -429,7 +429,7 @@ const CreateFacade = ({
                       }
                     },
                     "& .MuiFormHelperText-root": {
-                      fontFamily: '"Poppins", sans-serif'
+                      fontFamily: '"DM Sans", sans-serif'
                     }
                   }}
                 />
@@ -458,7 +458,7 @@ const CreateFacade = ({
                       fontWeight={700}
                       sx={{
                         color: '#333F1F',
-                        fontFamily: '"Poppins", sans-serif'
+                        fontFamily: '"DM Sans", sans-serif'
                       }}
                     >
                       <Deck sx={{ fontSize: { xs: 16, md: 18 }, mr: 0.5, verticalAlign: "middle" }} />
@@ -482,7 +482,7 @@ const CreateFacade = ({
                       sx={{
                         py: { xs: 1.5, md: 2 },
                         color: '#706f6f',
-                        fontFamily: '"Poppins", sans-serif'
+                        fontFamily: '"DM Sans", sans-serif'
                       }}
                     >
                       {t('models:noDecks')}
@@ -530,7 +530,7 @@ const CreateFacade = ({
                                 noWrap
                                 sx={{
                                   color: '#333F1F',
-                                  fontFamily: '"Poppins", sans-serif'
+                                  fontFamily: '"DM Sans", sans-serif'
                                 }}
                               >
                                 {deck.name}
@@ -540,7 +540,7 @@ const CreateFacade = ({
                                 fontSize={{ xs: "0.75rem", md: "0.875rem" }}
                                 sx={{
                                   color: '#706f6f',
-                                  fontFamily: '"Poppins", sans-serif'
+                                  fontFamily: '"DM Sans", sans-serif'
                                 }}
                               >
                                 {t('models:price')}: ${Number(deck.price).toLocaleString()}
@@ -610,7 +610,7 @@ const CreateFacade = ({
                     gutterBottom
                     sx={{
                       color: '#333F1F',
-                      fontFamily: '"Poppins", sans-serif'
+                      fontFamily: '"DM Sans", sans-serif'
                     }}
                   >
                     {t('models:uploadImages')}
@@ -653,16 +653,16 @@ const CreateFacade = ({
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 3,
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       "& fieldset": { borderColor: 'rgba(140, 165, 81, 0.3)', borderWidth: '2px' },
                       "&:hover fieldset": { borderColor: "#8CA551" },
                       "&.Mui-focused fieldset": { borderColor: "#333F1F", borderWidth: "2px" }
                     },
                     "& .MuiInputLabel-root": {
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       "&.Mui-focused": { color: "#333F1F" }
                     },
-                    "& .MuiFormHelperText-root": { fontFamily: '"Poppins", sans-serif' }
+                    "& .MuiFormHelperText-root": { fontFamily: '"DM Sans", sans-serif' }
                   }}
                 >
                   {loadingProjects ? (
@@ -674,7 +674,7 @@ const CreateFacade = ({
                       <MenuItem
                         key={project._id}
                         value={project._id}
-                        sx={{ fontFamily: '"Poppins", sans-serif', '&:hover': { bgcolor: 'rgba(140, 165, 81, 0.08)' } }}
+                        sx={{ fontFamily: '"DM Sans", sans-serif', '&:hover': { bgcolor: 'rgba(140, 165, 81, 0.08)' } }}
                       >
                         {project.name} {project.slug ? `(${project.slug})` : ''}
                       </MenuItem>
@@ -703,7 +703,7 @@ const CreateFacade = ({
                 fontWeight={700}
                 sx={{
                   color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 {t('models:images', { count: facadeFormData.url.length })}
@@ -783,7 +783,7 @@ const CreateFacade = ({
                           bgcolor: 'rgba(140, 165, 81, 0.9)',
                           color: 'white',
                           fontWeight: 600,
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           border: '1px solid #8CA551'
                         }}
                       />
@@ -815,7 +815,7 @@ const CreateFacade = ({
                   fontSize={{ xs: "0.75rem", md: "0.875rem" }}
                   sx={{
                     color: '#706f6f',
-                    fontFamily: '"Poppins", sans-serif'
+                    fontFamily: '"DM Sans", sans-serif'
                   }}
                 >
                   {t('models:noImages')}
@@ -871,7 +871,7 @@ const CreateFacade = ({
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 3,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   "& fieldset": {
                     borderColor: 'rgba(140, 165, 81, 0.3)',
                     borderWidth: '2px'
@@ -885,7 +885,7 @@ const CreateFacade = ({
                   }
                 },
                 "& .MuiInputLabel-root": {
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontWeight: 500,
                   color: '#706f6f',
                   "&.Mui-focused": {
@@ -915,7 +915,7 @@ const CreateFacade = ({
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 3,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   "& fieldset": {
                     borderColor: 'rgba(140, 165, 81, 0.3)',
                     borderWidth: '2px'
@@ -929,7 +929,7 @@ const CreateFacade = ({
                   }
                 },
                 "& .MuiInputLabel-root": {
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontWeight: 500,
                   color: '#706f6f',
                   "&.Mui-focused": {
@@ -956,7 +956,7 @@ const CreateFacade = ({
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 3,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   "& fieldset": {
                     borderColor: 'rgba(140, 165, 81, 0.3)',
                     borderWidth: '2px'
@@ -970,7 +970,7 @@ const CreateFacade = ({
                   }
                 },
                 "& .MuiInputLabel-root": {
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontWeight: 500,
                   color: '#706f6f',
                   "&.Mui-focused": {
@@ -988,7 +988,7 @@ const CreateFacade = ({
               gutterBottom
               sx={{
                 color: '#333F1F',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontWeight: 700,
                 mb: 1.5
               }}

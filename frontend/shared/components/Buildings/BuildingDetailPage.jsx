@@ -118,13 +118,13 @@ const BuildingDetailPage = ({ projectSlug, backRoute = '/buildings' }) => {
           </IconButton>
           <Box flex={1}>
             <Box display="flex" alignItems="center" gap={2} mb={0.5}>
-              <Typography variant="h4" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif', color: theme.palette.text.primary }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif', color: theme.palette.text.primary }}>
                 {building.name}
               </Typography>
-              {building.section && <Chip label={building.section} size="small" sx={{ bgcolor: theme.palette.chipAdmin.bg, color: theme.palette.chipAdmin.color, fontWeight: 600, fontFamily: '"Poppins", sans-serif' }} />}
-              <Chip label={building.status} size="small" color={building.status === 'active' ? 'success' : 'default'} sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }} />
+              {building.section && <Chip label={building.section} size="small" sx={{ bgcolor: theme.palette.chipAdmin.bg, color: theme.palette.chipAdmin.color, fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }} />}
+              <Chip label={building.status} size="small" color={building.status === 'active' ? 'success' : 'default'} sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }} />
             </Box>
-            <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
               {building.project?.name || 'Project'} • {building.floors} {t('buildings:floors', 'floors')} • {building.totalApartments} {t('buildings:apartments', 'apartments')}
             </Typography>
           </Box>
@@ -133,7 +133,7 @@ const BuildingDetailPage = ({ projectSlug, backRoute = '/buildings' }) => {
         <StatsCards stats={buildingStats} loading={loading} />
 
         <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden', border: `1px solid ${theme.palette.cardBorder}`, bgcolor: theme.palette.cardBg, p: 2 }}>
-          <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)} sx={{ borderBottom: `1px solid ${theme.palette.divider}`, px: 2, '& .MuiTab-root': { fontFamily: '"Poppins", sans-serif', fontWeight: 600, textTransform: 'none', fontSize: '0.95rem' } }}>
+          <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)} sx={{ borderBottom: `1px solid ${theme.palette.divider}`, px: 2, '& .MuiTab-root': { fontFamily: '"DM Sans", sans-serif', fontWeight: 600, textTransform: 'none', fontSize: '0.95rem' } }}>
             <Tab label={t('buildings:overview', 'Overview')} />
             <Tab label={t('buildings:floorPlans', 'Floor Plans')} />
             <Tab label={t('buildings:apartmentModels', 'Models')} />
@@ -160,7 +160,7 @@ const BuildingDetailPage = ({ projectSlug, backRoute = '/buildings' }) => {
         </Paper>
 
         <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar(p => ({ ...p, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-          <Alert onClose={() => setSnackbar(p => ({ ...p, open: false }))} severity={snackbar.severity} sx={{ fontFamily: '"Poppins", sans-serif', borderRadius: 3 }}>{snackbar.message}</Alert>
+          <Alert onClose={() => setSnackbar(p => ({ ...p, open: false }))} severity={snackbar.severity} sx={{ fontFamily: '"DM Sans", sans-serif', borderRadius: 3 }}>{snackbar.message}</Alert>
         </Snackbar>
       </Container>
     </Box>

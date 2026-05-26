@@ -126,8 +126,8 @@ const payload = {
           required
           autoFocus
           sx={{
-            '& .MuiOutlinedInput-root': { borderRadius: 2, fontFamily: '"Poppins", sans-serif' },
-            '& .MuiInputLabel-root': { fontFamily: '"Poppins", sans-serif' }
+            '& .MuiOutlinedInput-root': { borderRadius: 2, fontFamily: '"DM Sans", sans-serif' },
+            '& .MuiInputLabel-root': { fontFamily: '"DM Sans", sans-serif' }
           }}
         />
 
@@ -140,8 +140,8 @@ const payload = {
           multiline
           rows={3}
           sx={{
-            '& .MuiOutlinedInput-root': { borderRadius: 2, fontFamily: '"Poppins", sans-serif' },
-            '& .MuiInputLabel-root': { fontFamily: '"Poppins", sans-serif' }
+            '& .MuiOutlinedInput-root': { borderRadius: 2, fontFamily: '"DM Sans", sans-serif' },
+            '& .MuiInputLabel-root': { fontFamily: '"DM Sans", sans-serif' }
           }}
         />
 
@@ -156,8 +156,8 @@ const payload = {
                 {...params} 
                 fullWidth 
                 sx={{
-                  '& .MuiOutlinedInput-root': { borderRadius: 2, fontFamily: '"Poppins", sans-serif' },
-                  '& .MuiInputLabel-root': { fontFamily: '"Poppins", sans-serif' }
+                  '& .MuiOutlinedInput-root': { borderRadius: 2, fontFamily: '"DM Sans", sans-serif' },
+                  '& .MuiInputLabel-root': { fontFamily: '"DM Sans", sans-serif' }
                 }}
               />
             )}
@@ -166,7 +166,7 @@ const payload = {
 
         {/* Imágenes */}
         <Box>
-          <Typography variant="subtitle2" fontWeight={600} mb={1} fontFamily='"Poppins", sans-serif'>
+          <Typography variant="subtitle2" fontWeight={600} mb={1} fontFamily='"DM Sans", sans-serif'>
             {t('images', 'Images')}
           </Typography>
           <PrimaryButton
@@ -185,7 +185,7 @@ const payload = {
             <input type="file" hidden multiple accept="image/*" onChange={(e) => handleFileSelect(e, 'images')} />
           </PrimaryButton>
           {form.images.length > 0 && (
-            <Typography variant="caption" color="text.secondary" fontFamily='"Poppins", sans-serif'>
+            <Typography variant="caption" color="text.secondary" fontFamily='"DM Sans", sans-serif'>
               {form.images.length} {t('imagesSelected', 'image(s) selected')}
             </Typography>
           )}
@@ -193,7 +193,7 @@ const payload = {
 
         {/* Videos */}
         <Box>
-          <Typography variant="subtitle2" fontWeight={600} mb={1} fontFamily='"Poppins", sans-serif'>
+          <Typography variant="subtitle2" fontWeight={600} mb={1} fontFamily='"DM Sans", sans-serif'>
             {t('videos', 'Videos')}
           </Typography>
           <PrimaryButton
@@ -211,7 +211,7 @@ const payload = {
             <input type="file" hidden multiple accept="video/*" onChange={(e) => handleFileSelect(e, 'videos')} />
           </PrimaryButton>
           {form.videos.length > 0 && (
-            <Typography variant="caption" color="text.secondary" fontFamily='"Poppins", sans-serif'>
+            <Typography variant="caption" color="text.secondary" fontFamily='"DM Sans", sans-serif'>
               {form.videos.length} {t('videosSelected', 'video(s) selected')}
             </Typography>
           )}

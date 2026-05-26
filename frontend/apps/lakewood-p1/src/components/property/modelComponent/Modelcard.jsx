@@ -143,7 +143,7 @@ const ModelCard = ({
                   color: 'white',
                   fontSize: '0.65rem',
                   height: 20,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontWeight: 600
                 }}
               />
@@ -162,7 +162,7 @@ const ModelCard = ({
                 flex: 1, 
                 minWidth: 0,
                 color: '#333F1F',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 letterSpacing: '0.5px'
               }}
             >
@@ -174,7 +174,7 @@ const ModelCard = ({
                 color: '#8CA551',
                 fontWeight: 700,
                 ml: 1,
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               ${(model.price / 1000).toFixed(0)}K
@@ -187,7 +187,7 @@ const ModelCard = ({
             mb={isMobile ? 1 : 2}
             sx={{
               color: '#706f6f',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: '0.75rem'
             }}
           >
@@ -213,7 +213,7 @@ const ModelCard = ({
                 fontWeight={600}
                 sx={{ 
                   color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 {model.bedrooms}
@@ -226,7 +226,7 @@ const ModelCard = ({
                 fontWeight={600}
                 sx={{ 
                   color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 {model.bathrooms}
@@ -239,7 +239,7 @@ const ModelCard = ({
                 fontWeight={600}
                 sx={{ 
                   color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 {model.sqft?.toLocaleString()}
@@ -259,7 +259,7 @@ const ModelCard = ({
                 WebkitBoxOrient: 'vertical',
                 lineHeight: 1.5,
                 color: '#706f6f',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: '0.75rem'
               }}
             >

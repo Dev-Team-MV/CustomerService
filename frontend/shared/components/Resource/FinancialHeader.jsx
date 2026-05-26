@@ -7,8 +7,9 @@ import PropTypes from 'prop-types'
 const FinancialHeader = ({ financialSummary, user, config, t }) => {
   const ns = config.i18n.namespace
   const k  = config.i18n.keys
-  const primary   = config.colors.primary
-  const secondary = config.colors.secondary
+  const primary    = config.colors.primary
+  // Light accent for numbers/icons on dark stat cards — secondary is often too dark
+  const cardAccent = config.colors.cardAccent || '#8CA551'
 
   const isLoading = !financialSummary
   const count    = financialSummary?.properties ?? financialSummary?.apartments ?? 0
@@ -22,20 +23,20 @@ const FinancialHeader = ({ financialSummary, user, config, t }) => {
   const statCards = [
     {
       num:   '01',
-      icon:  <HomeOutlined sx={{ fontSize: 20, color: secondary, opacity: 0.75 }} />,
+      icon:  <HomeOutlined sx={{ fontSize: 24, color: cardAccent, opacity: 0.85 }} />,
       value: isLoading ? '—' : `$${financialSummary.totalInvestment?.toLocaleString() ?? '0'}`,
       label: t(`${ns}:${k.totalInvestment}`),
     },
     {
       num:   '02',
-      icon:  <CheckCircleOutline sx={{ fontSize: 20, color: secondary, opacity: 0.75 }} />,
+      icon:  <CheckCircleOutline sx={{ fontSize: 24, color: cardAccent, opacity: 0.85 }} />,
       value: isLoading ? '—' : `$${financialSummary.totalPaid?.toLocaleString() ?? '0'}`,
       label: t(`${ns}:${k.totalPaid}`),
       sub:   isLoading ? null : `${progress}% ${t(`${ns}:${k.completed}`)}`,
     },
     {
       num:   '03',
-      icon:  <CancelOutlined sx={{ fontSize: 20, color: secondary, opacity: 0.75 }} />,
+      icon:  <CancelOutlined sx={{ fontSize: 24, color: cardAccent, opacity: 0.85 }} />,
       value: isLoading ? '—' : `$${(financialSummary.totalPending ?? financialSummary.pending ?? 0).toLocaleString()}`,
       label: t(`${ns}:${k.pendingAmount}`),
     },
@@ -57,8 +58,8 @@ const FinancialHeader = ({ financialSummary, user, config, t }) => {
             sx={{
               fontWeight: 300,
               color: primary,
-              fontFamily: '"Poppins", sans-serif',
-              fontSize: { xs: '2rem', md: '2.8rem' },
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: { xs: '2.2rem', md: '3.5rem' },
               lineHeight: 1.1,
             }}
           >
@@ -69,7 +70,7 @@ const FinancialHeader = ({ financialSummary, user, config, t }) => {
           <Box display="flex" alignItems="center" gap={1.5} mt={1}>
             <Typography
               variant="body2"
-              sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', fontSize: '0.9rem' }}
+              sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif', fontSize: '0.9rem' }}
             >
               {t(`${ns}:${k.welcome}`)}
             </Typography>
@@ -77,10 +78,11 @@ const FinancialHeader = ({ financialSummary, user, config, t }) => {
               label={user?.firstName?.toUpperCase() || 'USER'}
               sx={{
                 bgcolor: primary, color: 'white',
-                fontWeight: 700, fontSize: '0.65rem',
-                height: 24, borderRadius: 1,
-                fontFamily: '"Poppins", sans-serif',
+                fontWeight: 700, fontSize: '0.7rem',
+                height: 28, borderRadius: 1.5,
+                fontFamily: '"DM Sans", sans-serif',
                 letterSpacing: '1.5px',
+                px: 0.5,
               }}
             />
           </Box>
@@ -93,7 +95,7 @@ const FinancialHeader = ({ financialSummary, user, config, t }) => {
             maxWidth: 280,
             textAlign: 'right',
             lineHeight: 1.7,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontSize: '0.85rem',
             mt: 0.5,
             display: { xs: 'none', sm: 'block' },
@@ -106,7 +108,7 @@ const FinancialHeader = ({ financialSummary, user, config, t }) => {
       </Box>
 
       {/* ── 3 dark stat cards ── */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
+      <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
         {statCards.map((card, i) => (
           <Grid item xs={12} sm={4} key={i}>
             <motion.div
@@ -118,10 +120,13 @@ const FinancialHeader = ({ financialSummary, user, config, t }) => {
                 sx={{
                   bgcolor: primary,
                   borderRadius: 3,
-                  p: { xs: 2.5, md: 3 },
-                  minHeight: { xs: 130, md: 150 },
+                  p: { xs: 3, md: 4 },
+                  minHeight: { xs: 160, md: 200 },
                   position: 'relative',
                   overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
                   ...(isLoading && {
                     animation: 'pulse 1.5s ease-in-out infinite',
                     '@keyframes pulse': {
@@ -135,12 +140,12 @@ const FinancialHeader = ({ financialSummary, user, config, t }) => {
                 <Box display="flex" justifyContent="space-between" alignItems="flex-start">
                   <Typography
                     sx={{
-                      fontSize: { xs: '1.8rem', md: '2.2rem' },
+                      fontSize: { xs: '2.5rem', md: '3.5rem' },
                       fontWeight: 300,
-                      color: secondary,
-                      fontFamily: '"Poppins", sans-serif',
+                      color: cardAccent,
+                      fontFamily: '"DM Sans", sans-serif',
                       lineHeight: 1,
-                      letterSpacing: '-1px',
+                      letterSpacing: '-2px',
                     }}
                   >
                     {card.num}
@@ -148,44 +153,45 @@ const FinancialHeader = ({ financialSummary, user, config, t }) => {
                   {card.icon}
                 </Box>
 
-                {/* Value */}
-                <Typography
-                  sx={{
-                    fontSize: { xs: '1.2rem', md: '1.55rem' },
-                    fontWeight: 700,
-                    color: 'white',
-                    fontFamily: '"Poppins", sans-serif',
-                    mt: { xs: 1.5, md: 2 },
-                    lineHeight: 1.1,
-                    letterSpacing: '-0.5px',
-                  }}
-                >
-                  {card.value}
-                </Typography>
-
-                {/* Label + sub */}
-                <Box mt={0.5} display="flex" alignItems="center" gap={0.5} flexWrap="wrap">
+                {/* Value + Label */}
+                <Box>
                   <Typography
                     sx={{
-                      fontSize: '0.72rem',
-                      color: 'rgba(255,255,255,0.55)',
-                      fontFamily: '"Poppins", sans-serif',
+                      fontSize: { xs: '1.5rem', md: '2rem' },
+                      fontWeight: 700,
+                      color: 'white',
+                      fontFamily: '"DM Sans", sans-serif',
+                      lineHeight: 1.1,
+                      letterSpacing: '-0.5px',
+                      mb: 0.5,
                     }}
                   >
-                    {card.label}
+                    {card.value}
                   </Typography>
-                  {card.sub && (
+
+                  <Box display="flex" alignItems="center" gap={0.5} flexWrap="wrap">
                     <Typography
                       sx={{
-                        fontSize: '0.72rem',
-                        color: secondary,
-                        fontWeight: 700,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontSize: '0.78rem',
+                        color: 'rgba(255,255,255,0.55)',
+                        fontFamily: '"DM Sans", sans-serif',
                       }}
                     >
-                      {card.sub}
+                      {card.label}
                     </Typography>
-                  )}
+                    {card.sub && (
+                      <Typography
+                        sx={{
+                          fontSize: '0.78rem',
+                          color: cardAccent,
+                          fontWeight: 700,
+                          fontFamily: '"DM Sans", sans-serif',
+                        }}
+                      >
+                        {card.sub}
+                      </Typography>
+                    )}
+                  </Box>
                 </Box>
               </Box>
             </motion.div>
@@ -203,10 +209,10 @@ const FinancialHeader = ({ financialSummary, user, config, t }) => {
           sx={{
             bgcolor: '#c8d9a3',
             borderRadius: 3,
-            px: { xs: 2.5, md: 3 },
-            pt: { xs: 6, md: 7 },
-            pb: { xs: 2.5, md: 3 },
-            minHeight: { xs: 110, md: 140 },
+            px: { xs: 3, md: 4 },
+            pt: { xs: 7, md: 8 },
+            pb: { xs: 3, md: 4 },
+            minHeight: { xs: 160, md: 220 },
             position: 'relative',
             display: 'flex',
             alignItems: 'flex-end',
@@ -218,9 +224,9 @@ const FinancialHeader = ({ financialSummary, user, config, t }) => {
           <HomeOutlined
             sx={{
               position: 'absolute',
-              top: { xs: 16, md: 20 },
-              left: { xs: 20, md: 24 },
-              fontSize: 28,
+              top: { xs: 20, md: 28 },
+              left: { xs: 24, md: 32 },
+              fontSize: { xs: 28, md: 36 },
               color: primary,
             }}
           />
@@ -228,10 +234,10 @@ const FinancialHeader = ({ financialSummary, user, config, t }) => {
           {/* Label — bottom left */}
           <Typography
             sx={{
-              fontSize: '0.82rem',
+              fontSize: '0.88rem',
               fontWeight: 700,
               color: primary,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: '0.5px',
             }}
           >
@@ -241,12 +247,12 @@ const FinancialHeader = ({ financialSummary, user, config, t }) => {
           {/* Count — bottom right */}
           <Typography
             sx={{
-              fontSize: { xs: '5rem', md: '7rem' },
+              fontSize: { xs: '6rem', md: '9rem' },
               fontWeight: 700,
               color: primary,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               lineHeight: 0.85,
-              letterSpacing: '-4px',
+              letterSpacing: '-5px',
             }}
           >
             {String(count).padStart(2, '0')}

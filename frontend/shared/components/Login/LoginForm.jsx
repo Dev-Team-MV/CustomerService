@@ -121,7 +121,7 @@ if (result.success) {
                 mb: 1,
                 color: '#706f6f',
                 letterSpacing: '1px',
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               {t('welcome')}
@@ -133,7 +133,7 @@ if (result.success) {
                 mb: 2,
                 color: brandColors.primary,
                 letterSpacing: '1px',
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               {t('signIn')}
@@ -167,7 +167,7 @@ if (result.success) {
                     borderRadius: 3,
                     border: '1px solid #d32f2f',
                     bgcolor: '#ffebee',
-                    fontFamily: '"Poppins", sans-serif'
+                    fontFamily: '"DM Sans", sans-serif'
                   }}
                 >
                   {error}
@@ -190,7 +190,7 @@ if (result.success) {
       minWidth: '140px',  // Ancho mínimo para cada botón
       borderRadius: 3,
       border: '2px solid #e0e0e0',
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       fontWeight: 600,
       letterSpacing: '0.5px',
       color: '#706f6f',
@@ -253,7 +253,7 @@ if (result.success) {
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 3,
                           bgcolor: 'white',
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           '& fieldset': {
                             borderWidth: '2px',
                             borderColor: focusedField === 'email' ? brandColors.primary : '#e0e0e0',
@@ -264,7 +264,7 @@ if (result.success) {
                           }
                         },
                         '& .MuiInputLabel-root': {
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           color: '#706f6f',
                           '&.Mui-focused': {
                             color: brandColors.primary
@@ -305,7 +305,7 @@ if (result.success) {
                         border: `2px solid ${focusedField === 'phone' ? brandColors.primary : '#e0e0e0'}`,
                         transition: 'all 0.3s',
                         backgroundColor: 'white',
-                        fontFamily: '"Poppins", sans-serif'
+                        fontFamily: '"DM Sans", sans-serif'
                       }}
                       buttonStyle={{
                         borderRadius: '12px 0 0 12px',
@@ -315,7 +315,7 @@ if (result.success) {
                       }}
                       dropdownStyle={{
                         borderRadius: '12px',
-                        fontFamily: '"Poppins", sans-serif'
+                        fontFamily: '"DM Sans", sans-serif'
                       }}
                     />
                   </Box>
@@ -347,7 +347,7 @@ if (result.success) {
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 3,
                     bgcolor: 'white',
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     '& fieldset': {
                       borderWidth: '2px',
                       borderColor: focusedField === 'password' ? brandColors.primary : '#e0e0e0',
@@ -358,7 +358,7 @@ if (result.success) {
                     }
                   },
                   '& .MuiInputLabel-root': {
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: '#706f6f',
                     '&.Mui-focused': {
                       color: brandColors.primary
@@ -396,7 +396,7 @@ if (result.success) {
                 variant="caption" 
                 sx={{ 
                   color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 {t('termsAgreement')}{' '}
@@ -450,7 +450,7 @@ if (result.success) {
                   fontWeight: 600,
                   textTransform: 'uppercase',
                   letterSpacing: '2px',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   boxShadow: `0 4px 12px ${brandColors.primary}44`,
                   position: 'relative',
                   overflow: 'hidden',

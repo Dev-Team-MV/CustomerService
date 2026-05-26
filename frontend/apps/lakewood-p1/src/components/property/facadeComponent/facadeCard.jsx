@@ -136,7 +136,7 @@ const FacadeCard = ({
             gutterBottom
             sx={{
               color: '#333F1F',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: '0.5px'
             }}
           >
@@ -149,7 +149,7 @@ const FacadeCard = ({
               sx={{
                 color: '#8CA551',
                 fontWeight: 700,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: isSelected && !isMobile ? '1rem' : '0.85rem'
               }}
             >

@@ -65,23 +65,23 @@ setUploadForm({ title: '', description: '', percentage: 0, images: [], videos: [
   const fieldSx = {
     '& .MuiOutlinedInput-root': {
       borderRadius: 3,
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       '& fieldset': { borderColor: theme.palette.cardBorder, borderWidth: '2px' },
       '&:hover fieldset': { borderColor: theme.palette.secondary.main },
       '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main, borderWidth: '2px' }
     },
     '& .MuiInputLabel-root': {
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       fontWeight: 500,
       color: theme.palette.text.secondary,
       '&.Mui-focused': { color: theme.palette.primary.main, fontWeight: 600 }
     },
-    '& .MuiFormHelperText-root': { fontFamily: '"Poppins", sans-serif' }
+    '& .MuiFormHelperText-root': { fontFamily: '"DM Sans", sans-serif' }
   }
 
   const fileButtonSx = {
     py: 1.5, borderRadius: 3, textTransform: 'none',
-    fontWeight: 600, fontFamily: '"Poppins", sans-serif',
+    fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
     borderColor: theme.palette.cardBorder, borderWidth: '2px', 
     color: theme.palette.primary.main,
     '&:hover': { 
@@ -211,7 +211,7 @@ onChange={(e) => {
             <Typography variant="caption" sx={{ 
               color: theme.palette.text.secondary, 
               fontWeight: 600, 
-              fontFamily: '"Poppins", sans-serif', 
+              fontFamily: '"DM Sans", sans-serif', 
               display: 'block', 
               mb: 1 
             }}>
@@ -229,7 +229,7 @@ onChange={(e) => {
                   borderRadius: 2 
                 }}>
                   <Typography variant="body2" noWrap sx={{ 
-                    fontFamily: '"Poppins", sans-serif', 
+                    fontFamily: '"DM Sans", sans-serif', 
                     flex: 1, 
                     mr: 1 
                   }}>
@@ -269,7 +269,7 @@ onChange={(e) => {
                 <Typography variant="caption" sx={{ 
                   color: theme.palette.text.secondary, 
                   fontWeight: 600, 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: '"DM Sans", sans-serif', 
                   display: 'block', 
                   mb: 1 
                 }}>
@@ -287,7 +287,7 @@ onChange={(e) => {
                       borderRadius: 2 
                     }}>
                       <Typography variant="body2" noWrap sx={{ 
-                        fontFamily: '"Poppins", sans-serif', 
+                        fontFamily: '"DM Sans", sans-serif', 
                         flex: 1, 
                         mr: 1 
                       }}>

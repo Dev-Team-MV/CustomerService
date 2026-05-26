@@ -209,7 +209,7 @@ const handleDownloadStatement = async () => {
                     minHeight: { xs: 56, sm: 64, md: 72 },
                     flexDirection: { xs: 'column', sm: 'row' },
                     gap: { xs: 0.3, sm: 1 },
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     '&.Mui-selected': { color: '#4a7c59' },
                     '&:hover': { bgcolor: 'rgba(74,124,89,0.05)' },
                     '& .MuiSvgIcon-root': { fontSize: { xs: 16, sm: 20, md: 24 } }
@@ -331,7 +331,7 @@ const handleDownloadStatement = async () => {
                     <Typography
                       color="error"
                       fontWeight={700}
-                      sx={{ fontFamily: '"Poppins", sans-serif' }}
+                      sx={{ fontFamily: '"DM Sans", sans-serif' }}
                     >
                       {t('noAccessToDetails')}
                     </Typography>
