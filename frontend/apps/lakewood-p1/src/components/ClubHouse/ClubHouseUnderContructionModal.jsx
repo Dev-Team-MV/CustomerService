@@ -1,10 +1,9 @@
-// frontend/apps/lakewood-p1/src/components/ClubHouse/ClubhouseUnderConstructionModal.jsx
 import { useState } from 'react'
 import { Box, TextField, Typography, Stack } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import { es } from 'date-fns/locale'
+import { enUS } from 'date-fns/locale'
 import { CloudUpload } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import ModalWrapper from '../../constants/ModalWrapper'
@@ -32,60 +31,60 @@ const ClubhouseUnderConstructionModal = ({ open, onClose }) => {
     }))
   }
 
-const handleSave = async () => {
-  if (!form.title.trim()) {
-    alert(t('titleRequired', 'Title is required'))
-    return
-  }
-
-  setSaving(true)
-  try {
-    // 1. Subir imágenes y videos primero
-    let uploadedImages = []
-    let uploadedVideos = []
-
-    if (form.images.length > 0) {
-      uploadedImages = await uploadService.uploadTimeLineImages(form.images)
-    }
-    
-    if (form.videos.length > 0) {
-      uploadedVideos = await uploadService.uploadTimeLineImages(form.videos)
+  const handleSave = async () => {
+    if (!form.title.trim()) {
+      alert(t('titleRequired', 'Title is required'))
+      return
     }
 
-    // 2. Construir array media con URLs subidas
-    const media = [
-      ...uploadedImages.map((url, idx) => ({
-        type: 'image',
-        url: url,
-        name: `${form.title}-image-${idx + 1}`,
-        order: idx
-      })),
-      ...uploadedVideos.map((url, idx) => ({
-        type: 'video',
-        url: url,
-        name: `${form.title}-video-${idx + 1}`,
-        order: uploadedImages.length + idx
-      }))
-    ]
+    setSaving(true)
+    try {
+      // 1. Subir imágenes y videos primero
+      let uploadedImages = []
+      let uploadedVideos = []
 
-    // 3. Crear objeto JSON para el backend
-const payload = {
-  title: form.title,
-  description: form.description,
-  clubHouseDate: form.date ? form.date.toISOString() : null,  // ← Cambio: date → clubHouseDate
-  media: media
-}
+      if (form.images.length > 0) {
+        uploadedImages = await uploadService.uploadTimeLineImages(form.images)
+      }
+      
+      if (form.videos.length > 0) {
+        uploadedVideos = await uploadService.uploadTimeLineImages(form.videos)
+      }
 
-    await ClubhouseUnderConstructionService.create(payload)
-    setForm({ title: '', description: '', date: null, images: [], videos: [] })
-    onClose()
-  } catch (err) {
-    console.error('Error saving:', err)
-    alert(t('errorSaving', 'Error saving. Please try again.'))
-  } finally {
-    setSaving(false)
+      // 2. Construir array media con URLs subidas
+      const media = [
+        ...uploadedImages.map((url, idx) => ({
+          type: 'image',
+          url: url,
+          name: `${form.title}-image-${idx + 1}`,
+          order: idx
+        })),
+        ...uploadedVideos.map((url, idx) => ({
+          type: 'video',
+          url: url,
+          name: `${form.title}-video-${idx + 1}`,
+          order: uploadedImages.length + idx
+        }))
+      ]
+
+      // 3. Crear objeto JSON para el backend
+      const payload = {
+        title: form.title,
+        description: form.description,
+        clubHouseDate: form.date ? form.date.toISOString() : null,
+        media: media
+      }
+
+      await ClubhouseUnderConstructionService.create(payload)
+      setForm({ title: '', description: '', date: null, images: [], videos: [] })
+      onClose()
+    } catch (err) {
+      console.error('Error saving:', err)
+      alert(t('errorSaving', 'Error saving. Please try again.'))
+    } finally {
+      setSaving(false)
+    }
   }
-}
 
   const handleClose = () => {
     setForm({ title: '', description: '', date: null, images: [], videos: [] })
@@ -145,22 +144,23 @@ const payload = {
           }}
         />
 
-        {/* Fecha */}
-        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+        {/* Fecha - MM/DD/YYYY */}
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enUS}>
           <DatePicker
             label={t('date', 'Date')}
             value={form.date}
             onChange={newDate => setForm(f => ({ ...f, date: newDate }))}
-            renderInput={(params) => (
-              <TextField 
-                {...params} 
-                fullWidth 
-                sx={{
+            format="MM/dd/yyyy"
+            slotProps={{
+              textField: {
+                fullWidth: true,
+                helperText: 'MM/DD/YYYY',
+                sx: {
                   '& .MuiOutlinedInput-root': { borderRadius: 2, fontFamily: '"DM Sans", sans-serif' },
                   '& .MuiInputLabel-root': { fontFamily: '"DM Sans", sans-serif' }
-                }}
-              />
-            )}
+                }
+              }
+            }}
           />
         </LocalizationProvider>
 
