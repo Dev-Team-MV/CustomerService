@@ -1,5 +1,5 @@
-// frontend/apps/mv-crm/src/components/messageTemplates/MessageTemplateModal.jsx
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogTitle,
@@ -16,13 +16,15 @@ import {
 import { Close, Save, Info } from '@mui/icons-material'
 
 const AVAILABLE_VARIABLES = [
-  { key: 'firstName', label: 'Nombre', example: 'Juan' },
-  { key: 'lastName', label: 'Apellido', example: 'Pérez' },
-  { key: 'email', label: 'Email', example: 'juan@email.com' },
-  { key: 'phoneNumber', label: 'Teléfono', example: '+521555...' }
+  { key: 'firstName', label: 'firstName' },
+  { key: 'lastName', label: 'lastName' },
+  { key: 'email', label: 'email' },
+  { key: 'phoneNumber', label: 'phoneNumber' }
 ]
 
 const MessageTemplateModal = ({ open, onClose, template = null, onSave }) => {
+  const { t } = useTranslation('sms')
+  
   const [formData, setFormData] = useState({
     name: '',
     template: '',
@@ -90,7 +92,7 @@ const MessageTemplateModal = ({ open, onClose, template = null, onSave }) => {
       <DialogTitle>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6" fontWeight={700}>
-            {isEditing ? 'Editar Template' : 'Nuevo Template'}
+            {isEditing ? t('sms.templateModal.editTitle') : t('sms.templateModal.newTitle')}
           </Typography>
           <IconButton onClick={onClose} size="small">
             <Close />
@@ -101,36 +103,36 @@ const MessageTemplateModal = ({ open, onClose, template = null, onSave }) => {
       <DialogContent dividers>
         <Box display="flex" flexDirection="column" gap={2.5} py={1}>
           <TextField
-            label="Nombre del template"
+            label={t('sms.templateModal.name')}
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
             fullWidth
             required
-            placeholder="Ej: Bienvenida a clientes"
+            placeholder={t('sms.templateModal.namePlaceholder')}
             autoFocus
           />
 
           <TextField
-            label="Categoría"
+            label={t('sms.templateModal.category')}
             value={formData.category}
             onChange={(e) => handleChange('category', e.target.value)}
             fullWidth
-            placeholder="Ej: Marketing, Soporte, Notificaciones..."
+            placeholder={t('sms.templateModal.categoryPlaceholder')}
           />
 
           <TextField
-            label="Descripción"
+            label={t('sms.templateModal.description')}
             value={formData.description}
             onChange={(e) => handleChange('description', e.target.value)}
             fullWidth
             multiline
             rows={2}
-            placeholder="Descripción opcional del template..."
+            placeholder={t('sms.templateModal.descriptionPlaceholder')}
           />
 
           <Box>
             <Typography variant="subtitle2" fontWeight={600} mb={1}>
-              Variables disponibles (clic para insertar)
+              {t('sms.content.variablesLabel')}
             </Typography>
             <Box display="flex" gap={1} flexWrap="wrap">
               {AVAILABLE_VARIABLES.map(v => (
@@ -150,15 +152,15 @@ const MessageTemplateModal = ({ open, onClose, template = null, onSave }) => {
           </Box>
 
           <TextField
-            label="Contenido del template"
+            label={t('sms.templateModal.template')}
             value={formData.template}
             onChange={(e) => handleChange('template', e.target.value)}
             fullWidth
             multiline
             rows={6}
             required
-            placeholder="Escribe el contenido... Usa {{firstName}}, {{lastName}}, etc."
-            helperText={`${formData.template.length} caracteres (SMS: ~${Math.ceil(formData.template.length / 160)} mensaje(s))`}
+            placeholder={t('sms.templateModal.templatePlaceholder')}
+            helperText={`${formData.template.length} ${t('sms.content.chars')} (SMS: ~${Math.ceil(formData.template.length / 160)} ${t('sms.content.messages')})`}
           />
 
           {detectedVariables.length > 0 && (
@@ -167,7 +169,7 @@ const MessageTemplateModal = ({ open, onClose, template = null, onSave }) => {
                 <Info fontSize="small" sx={{ mt: 0.5, color: '#1976d2' }} />
                 <Box flex={1}>
                   <Typography variant="caption" fontWeight={600} color="#1976d2">
-                    Variables detectadas
+                    {t('sms.content.variablesDetected')}
                   </Typography>
                   <Box display="flex" gap={1} flexWrap="wrap" mt={1}>
                     {detectedVariables.map(v => (
@@ -183,7 +185,7 @@ const MessageTemplateModal = ({ open, onClose, template = null, onSave }) => {
 
       <DialogActions sx={{ p: 2 }}>
         <Button onClick={onClose} disabled={saving}>
-          Cancelar
+          {t('sms.actions.cancel')}
         </Button>
         <Button
           variant="contained"
@@ -191,7 +193,7 @@ const MessageTemplateModal = ({ open, onClose, template = null, onSave }) => {
           disabled={!formData.name.trim() || !formData.template.trim() || saving}
           startIcon={<Save />}
         >
-          {saving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear template'}
+          {saving ? t('sms.templateModal.saving') : isEditing ? t('sms.templateModal.updateBtn') : t('sms.templateModal.createBtn')}
         </Button>
       </DialogActions>
     </Dialog>

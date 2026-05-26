@@ -1,0 +1,145 @@
+{
+  "sms": {
+    "title": "Envío de SMS",
+    "description": "Gestiona y envía mensajes SMS",
+    "messageTemplates": "Plantillas de Mensajes",
+    "broadcastMessages": "Mensajes Broadcast",
+    "newTemplate": "Nueva Plantilla",
+    "newBroadcast": "Nuevo Broadcast",
+    "form": {
+      "name": "Nombre",
+      "message": "Mensaje",
+      "recipient": "Destinatario",
+      "recipients": "Destinatarios",
+      "selectTemplate": "Seleccionar plantilla",
+      "subject": "Asunto",
+      "content": "Contenido",
+      "variables": "Variables disponibles",
+      "preview": "Vista previa",
+      "send": "Enviar",
+      "save": "Guardar",
+      "update": "Actualizar",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "selectRecipients": "Seleccionar destinatarios",
+      "searchRecipients": "Buscar destinatarios...",
+      "addRecipient": "Agregar destinatario"
+    },
+    "messages": {
+      "sentSuccessfully": "Mensaje enviado correctamente",
+      "savedSuccessfully": "Plantilla guardada correctamente",
+      "deletedSuccessfully": "Plantilla eliminada correctamente",
+      "errorSending": "Error al enviar el mensaje",
+      "errorSaving": "Error al guardar la plantilla",
+      "errorDeleting": "Error al eliminar la plantilla",
+      "confirmDelete": "¿Está seguro de que desea eliminar esta plantilla?"
+    },
+    "table": {
+      "name": "Nombre",
+      "message": "Mensaje",
+      "recipients": "Destinatarios",
+      "sent": "Enviados",
+      "date": "Fecha",
+      "status": "Estado",
+      "actions": "Acciones",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "view": "Ver"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "sent": "Enviado",
+      "failed": "Fallido",
+      "delivered": "Entregado"
+    },
+    "channel": {
+      "title": "Canal de envío",
+      "sms": "SMS",
+      "email": "Correo electrónico",
+      "selectAtLeastOne": "Selecciona al menos un canal de envío",
+      "validPhone": "con teléfono válido"
+    },
+    "recipients": {
+      "title": "Destinatarios",
+      "sendAll": "Enviar a todos",
+      "users": "usuarios",
+      "searchLabel": "Buscar y seleccionar usuarios",
+      "searchPlaceholder": "Nombre, email o teléfono...",
+      "selected": "usuario(s) seleccionado(s)"
+    },
+    "template": {
+      "title": "Usar template guardado",
+      "selectPlaceholder": "Selecciona un template..."
+    },
+    "content": {
+      "title": "Contenido del mensaje",
+      "variablesLabel": "Variables disponibles (clic para insertar):",
+      "variablesDetected": "Variables detectadas",
+      "variablesWillReplace": "Se reemplazarán automáticamente con los datos de cada usuario.",
+      "emailSubject": "Asunto del correo",
+      "emailSubjectPlaceholder": "Asunto del correo electrónico...",
+      "messageLabel": "Mensaje",
+      "messagePlaceholder": "Escribe el contenido del mensaje aquí... Usa {{firstName}}, {{lastName}}, etc. para personalizar",
+      "preview": "Vista previa (ejemplo)",
+      "chars": "caracteres",
+      "messages": "mensaje(s)"
+    },
+    "results": {
+      "title": "Envío completado",
+      "sent": "enviados",
+      "failed": "fallidos"
+    },
+    "progress": {
+      "sending": "Enviando mensajes..."
+    },
+    "summary": {
+      "willSendTo": "Se enviará a",
+      "recipients": "destinatario(s)",
+      "and": "y"
+    },
+    "actions": {
+      "send": "Enviar mensaje",
+      "sending": "Enviando...",
+      "cancel": "Cancelar",
+      "close": "Cerrar",
+      "edit": "Editar",
+      "delete": "Eliminar"
+    },
+    "templateModal": {
+      "editTitle": "Editar Template",
+      "newTitle": "Nuevo Template",
+      "name": "Nombre del template",
+      "namePlaceholder": "Ej: Bienvenida a clientes",
+      "category": "Categoría",
+      "categoryPlaceholder": "Ej: Marketing, Soporte, Notificaciones...",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Descripción opcional del template...",
+      "template": "Contenido del template",
+      "templatePlaceholder": "Escribe el contenido... Usa {{firstName}}, {{lastName}}, etc.",
+      "saving": "Guardando...",
+      "updateBtn": "Guardar cambios",
+      "createBtn": "Crear template"
+    },
+    "templates": {
+      "title": "Templates de Mensajes",
+      "subtitle": "Crea y gestiona templates para envíos masivos",
+      "newBtn": "Nuevo Template",
+      "deleteConfirm": "¿Eliminar este template?",
+      "columns": {
+        "name": "Nombre",
+        "content": "Contenido",
+        "description": "Descripción",
+        "actions": "Acciones"
+      }
+    },
+    "variables": {
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Email",
+      "phone": "Teléfono"
+    },
+    "errors": {
+      "invalidFileType": "Solo se permiten archivos .txt o .html"
+    }
+  }
+}

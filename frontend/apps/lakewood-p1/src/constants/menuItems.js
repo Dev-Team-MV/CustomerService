@@ -26,6 +26,12 @@ export const privateMenuItems = [
     roles: ["superadmin", "admin", "user"],
   },
   {
+    textKey: "navigation:menu.uploadsManager",
+    icon: GridOnIcon,
+    path: "/uploads-manager",
+    roles: ["superadmin", "admin"],
+  },
+  {
     textKey: "navigation:menu.clubHouse",
     icon: DeckIcon,
     path: "/clubhouse-manager",

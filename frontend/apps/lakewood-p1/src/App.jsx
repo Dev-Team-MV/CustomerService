@@ -36,6 +36,8 @@ import FamilyGroup from './pages/FamilyGroup'
 import MapInventoryPage from './pages/MapInventoryPage'
 import UploadTracker from './pages/UploadTracker'
 
+import UploadsManager from './pages/UploadsManager'
+
 import theme from './theme' // Usa SIEMPRE el theme extendido
 
 
@@ -117,6 +119,7 @@ function App() {
               <Route path="/clubhouse-manager" element={<ClubhouseManager />} />
               <Route path="/map-inventory" element={<MapInventoryPage />} />
               <Route path="/upload-tracker" element={<UploadTracker />} />
+              <Route path="/uploads-manager" element={<UploadsManager />} />
             </Route>
           </Route>
           <Route path="*" element={<NotFound />} />

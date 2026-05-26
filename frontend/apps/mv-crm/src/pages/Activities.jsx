@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Typography,
@@ -23,6 +24,7 @@ import activityService from '../services/activityService'
 import ColumnModal from '../components/activities/ColumnModal'
 
 export default function Activities() {
+  const { t } = useTranslation('activities')
   const { currentProject } = useProjects()
   const projectId = currentProject?._id || null
 
@@ -40,9 +42,9 @@ export default function Activities() {
     deleteSubtask,
     addThreadMessage,
     fetchBoard,
-      createColumn,
-  updateColumn,
-  deleteColumn
+    createColumn,
+    updateColumn,
+    deleteColumn
   } = useActivities(projectId)
 
   const [modalOpen, setModalOpen] = useState(false)
@@ -50,8 +52,6 @@ export default function Activities() {
   const [detailsActivity, setDetailsActivity] = useState(null)
   const [searchValue, setSearchValue] = useState('')
   const [priorityFilter, setPriorityFilter] = useState('all')
-
-  // Dentro del componente, agregar estados:
   const [columnModalOpen, setColumnModalOpen] = useState(false)
   const [editingColumn, setEditingColumn] = useState(null)
 
@@ -79,7 +79,6 @@ export default function Activities() {
       }
       setModalOpen(false)
       setEditingActivity(null)
-      // ✅ Refrescar el tablero después de guardar
       await fetchBoard()
     } catch (err) {
       console.error('Error saving activity:', err)
@@ -87,7 +86,7 @@ export default function Activities() {
   }
 
   const handleDeleteActivity = async (id) => {
-    if (window.confirm('¿Estás seguro de eliminar esta actividad?')) {
+    if (window.confirm(t('activities.deleteConfirm'))) {
       try {
         await deleteActivity(id)
         setDetailsActivity(null)
@@ -102,7 +101,6 @@ export default function Activities() {
     await moveActivity(activityId, columnId)
   }
 
-  // ✅ CORREGIDO: Usar getById en lugar de getActivityById
   const handleRefreshActivityDetails = async () => {
     if (!detailsActivity?._id) return
     try {
@@ -114,40 +112,38 @@ export default function Activities() {
   }
 
   const handleAddColumn = () => {
-  setEditingColumn(null)
-  setColumnModalOpen(true)
-}
-
+    setEditingColumn(null)
+    setColumnModalOpen(true)
+  }
 
   const handleEditColumn = (column) => {
-  setEditingColumn(column)
-  setColumnModalOpen(true)
-}
- 
-const handleSaveColumn = async (data, columnId) => {
-  try {
-    if (columnId) {
-      await updateColumn(columnId, data)
-    } else {
-      await createColumn(data)
+    setEditingColumn(column)
+    setColumnModalOpen(true)
+  }
+
+  const handleSaveColumn = async (data, columnId) => {
+    try {
+      if (columnId) {
+        await updateColumn(columnId, data)
+      } else {
+        await createColumn(data)
+      }
+      setColumnModalOpen(false)
+      setEditingColumn(null)
+      await fetchBoard()
+    } catch (err) {
+      console.error('Error saving column:', err)
     }
-    setColumnModalOpen(false)
-    setEditingColumn(null)
-    await fetchBoard()
-  } catch (err) {
-    console.error('Error saving column:', err)
   }
-}
- 
-const handleDeleteColumn = async (id) => {
-  try {
-    await deleteColumn(id)
-    await fetchBoard()
-  } catch (err) {
-    console.error('Error deleting column:', err)
+
+  const handleDeleteColumn = async (id) => {
+    try {
+      await deleteColumn(id)
+      await fetchBoard()
+    } catch (err) {
+      console.error('Error deleting column:', err)
+    }
   }
-}
- 
 
   return (
     <PageLayout>
@@ -156,10 +152,10 @@ const handleDeleteColumn = async (id) => {
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
           <Box>
             <Typography variant="h4" fontWeight={700}>
-              Actividades
+              {t('activities.title')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Gestiona tus tareas y seguimientos
+              {t('activities.description')}
             </Typography>
           </Box>
           <Button
@@ -169,14 +165,14 @@ const handleDeleteColumn = async (id) => {
             disabled={columns.length === 0}
             sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
           >
-            Nueva Actividad
+            {t('activities.newActivity')}
           </Button>
         </Box>
 
         {/* Filtros */}
         <Box display="flex" gap={2} mb={3}>
           <TextField
-            placeholder="Buscar actividades..."
+            placeholder={t('activities.searchPlaceholder')}
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             size="small"
@@ -201,11 +197,11 @@ const handleDeleteColumn = async (id) => {
                 </InputAdornment>
               }
             >
-              <MenuItem value="all">Todas las prioridades</MenuItem>
+              <MenuItem value="all">{t('activities.allPriorities')}</MenuItem>
               {ACTIVITY_PRIORITIES.map(p => (
                 <MenuItem key={p.id} value={p.id}>
                   <Chip
-                    label={p.label}
+                    label={t(`activities.priority.${p.id}`)}
                     size="small"
                     sx={{ bgcolor: `${p.color}20`, color: p.color, height: 20 }}
                   />
@@ -228,19 +224,18 @@ const handleDeleteColumn = async (id) => {
             <CircularProgress />
           </Box>
         ) : (
-<KanbanBoard
-  columns={columns}
-  groupedByColumn={groupedByColumn}
-  onActivityClick={handleViewActivity}
-  onAddActivity={handleAddActivity}
-  onEditActivity={handleEditActivity}
-  onDeleteActivity={handleDeleteActivity}
-  onMoveActivity={handleMoveActivity}
-  // Nuevas props
-  onAddColumn={handleAddColumn}
-  onEditColumn={handleEditColumn}
-  onDeleteColumn={handleDeleteColumn}
-/>
+          <KanbanBoard
+            columns={columns}
+            groupedByColumn={groupedByColumn}
+            onActivityClick={handleViewActivity}
+            onAddActivity={handleAddActivity}
+            onEditActivity={handleEditActivity}
+            onDeleteActivity={handleDeleteActivity}
+            onMoveActivity={handleMoveActivity}
+            onAddColumn={handleAddColumn}
+            onEditColumn={handleEditColumn}
+            onDeleteColumn={handleDeleteColumn}
+          />
         )}
 
         {/* Modal Crear/Editar */}
@@ -258,12 +253,15 @@ const handleDeleteColumn = async (id) => {
           onDeleteSubtask={deleteSubtask}
         />
 
-<ColumnModal
-  open={columnModalOpen}
-  onClose={() => { setColumnModalOpen(false); setEditingColumn(null) }}
-  column={editingColumn}
-  onSave={handleSaveColumn}
-/>
+        <ColumnModal
+          open={columnModalOpen}
+          onClose={() => {
+            setColumnModalOpen(false)
+            setEditingColumn(null)
+          }}
+          column={editingColumn}
+          onSave={handleSaveColumn}
+        />
 
         {/* Drawer Detalles */}
         <ActivityDetails

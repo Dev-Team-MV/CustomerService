@@ -1,5 +1,5 @@
-// frontend/apps/mv-crm/src/components/activities/KanbanBoard.jsx
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Menu, MenuItem, ListItemIcon, ListItemText, Button, IconButton, Tooltip } from '@mui/material'
 import { Edit, Delete, Visibility, Add, ViewColumn, MoreVert } from '@mui/icons-material'
 import KanbanColumn from './KanbanColumn'
@@ -17,6 +17,7 @@ const KanbanBoard = ({
   onEditColumn,
   onDeleteColumn
 }) => {
+  const { t } = useTranslation('activities')
   const [draggedActivity, setDraggedActivity] = useState(null)
   
   // Menú de actividad
@@ -71,7 +72,7 @@ const KanbanBoard = ({
     if (menuColumn) {
       const activitiesInColumn = groupedByColumn[menuColumn._id]?.length || 0
       if (activitiesInColumn > 0) {
-        if (!window.confirm(`Esta columna tiene ${activitiesInColumn} actividades. ¿Eliminar de todos modos?`)) {
+        if (!window.confirm(`${t('activities.deleteColumnConfirm')} ${activitiesInColumn} ${t('activities.activities')}. ¿${t('activities.deletAnyway')}?`)) {
           handleColumnMenuClose()
           return
         }
@@ -137,7 +138,7 @@ const KanbanBoard = ({
             }
           }}
         >
-          Nueva Columna
+          {t('activities.form.addColumn')}
         </Button>
       </Box>
 
@@ -149,18 +150,18 @@ const KanbanBoard = ({
       >
         <MenuItem onClick={() => { onActivityClick?.(menuActivity); handleActivityMenuClose() }}>
           <ListItemIcon><Visibility fontSize="small" /></ListItemIcon>
-          <ListItemText>Ver detalles</ListItemText>
+          <ListItemText>{t('activities.viewDetails')}</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => { onEditActivity?.(menuActivity); handleActivityMenuClose() }}>
           <ListItemIcon><Edit fontSize="small" /></ListItemIcon>
-          <ListItemText>Editar</ListItemText>
+          <ListItemText>{t('activities.form.edit')}</ListItemText>
         </MenuItem>
         <MenuItem 
           onClick={() => { onDeleteActivity?.(menuActivity._id); handleActivityMenuClose() }}
           sx={{ color: 'error.main' }}
         >
           <ListItemIcon><Delete fontSize="small" color="error" /></ListItemIcon>
-          <ListItemText>Eliminar</ListItemText>
+          <ListItemText>{t('activities.form.delete')}</ListItemText>
         </MenuItem>
       </Menu>
 
@@ -172,11 +173,11 @@ const KanbanBoard = ({
       >
         <MenuItem onClick={() => { onEditColumn?.(menuColumn); handleColumnMenuClose() }}>
           <ListItemIcon><Edit fontSize="small" /></ListItemIcon>
-          <ListItemText>Editar columna</ListItemText>
+          <ListItemText>{t('activities.editColumn')}</ListItemText>
         </MenuItem>
         <MenuItem onClick={handleDeleteColumn} sx={{ color: 'error.main' }}>
           <ListItemIcon><Delete fontSize="small" color="error" /></ListItemIcon>
-          <ListItemText>Eliminar columna</ListItemText>
+          <ListItemText>{t('activities.deleteColumn')}</ListItemText>
         </MenuItem>
       </Menu>
     </Box>

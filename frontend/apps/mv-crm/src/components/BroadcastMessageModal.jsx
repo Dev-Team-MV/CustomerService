@@ -1,5 +1,5 @@
-// frontend/apps/mv-crm/src/components/BroadcastMessageModal.jsx
 import { useState, useMemo, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogTitle,
@@ -29,7 +29,6 @@ import {
   Email,
   People,
   PersonAdd,
-  UploadFile,
   CheckCircle,
   Error as ErrorIcon,
   Info
@@ -42,7 +41,8 @@ const BroadcastMessageModal = ({
   users = [],
   onSend 
 }) => {
-  // Estado del formulario
+  const { t } = useTranslation('sms')
+  
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -51,7 +51,6 @@ const BroadcastMessageModal = ({
     sendToAll: false,
     selectedUsers: []
   })
-  const [uploadedFile, setUploadedFile] = useState(null)
   const [sending, setSending] = useState(false)
   const [searchInput, setSearchInput] = useState('')
   const [progress, setProgress] = useState({ current: 0, total: 0, percent: 0 })
@@ -61,41 +60,36 @@ const BroadcastMessageModal = ({
   const [templates, setTemplates] = useState([])
   const [selectedTemplate, setSelectedTemplate] = useState(null)
   const [loadingTemplates, setLoadingTemplates] = useState(false)
- 
 
-  // Agregar useEffect para cargar templates
-useEffect(() => {
-  const fetchTemplates = async () => {
-    setLoadingTemplates(true)
-    try {
-      const data = await messageTemplateService.getAll()
-      setTemplates(data || [])
-    } catch (err) {
-      console.error('Error loading templates:', err)
-    } finally {
-      setLoadingTemplates(false)
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      setLoadingTemplates(true)
+      try {
+        const data = await messageTemplateService.getAll()
+        setTemplates(data || [])
+      } catch (err) {
+        console.error('Error loading templates:', err)
+      } finally {
+        setLoadingTemplates(false)
+      }
     }
-  }
-  if (open) {
-    fetchTemplates()
-  }
-}, [open])
+    if (open) {
+      fetchTemplates()
+    }
+  }, [open])
 
-  // Detectar variables de template en el contenido {{variable}}
   const detectedVariables = useMemo(() => {
     const matches = formData.content.match(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g) || []
     return [...new Set(matches.map(m => m.replace(/[{}]/g, '').trim()))]
   }, [formData.content])
 
-  // Variables disponibles del usuario
   const availableVariables = [
-    { key: 'firstName', label: 'Nombre', example: 'Juan' },
-    { key: 'lastName', label: 'Apellido', example: 'Pérez' },
-    { key: 'email', label: 'Email', example: 'juan@email.com' },
-    { key: 'phoneNumber', label: 'Teléfono', example: '+521555...' }
+    { key: 'firstName', label: t('sms.variables.firstName'), example: 'Juan' },
+    { key: 'lastName', label: t('sms.variables.lastName'), example: 'Pérez' },
+    { key: 'email', label: t('sms.variables.email'), example: 'juan@email.com' },
+    { key: 'phoneNumber', label: t('sms.variables.phone'), example: '+521555...' }
   ]
 
-  // Filtrar usuarios para el autocomplete
   const filteredUsers = useMemo(() => {
     if (!searchInput.trim()) return users
     const q = searchInput.toLowerCase()
@@ -106,7 +100,6 @@ useEffect(() => {
     )
   }, [users, searchInput])
 
-  // Transformar usuarios al formato del chip
   const userOptions = useMemo(() => {
     return filteredUsers.map(u => ({
       _id: u._id,
@@ -118,7 +111,6 @@ useEffect(() => {
     }))
   }, [filteredUsers])
 
-  // Contar usuarios con teléfono válido
   const usersWithValidPhone = useMemo(() => {
     const targetUsers = formData.sendToAll 
       ? users 
@@ -126,45 +118,6 @@ useEffect(() => {
     return targetUsers.filter(u => u.phoneNumber?.startsWith('+'))
   }, [users, formData.sendToAll, formData.selectedUsers])
 
-  // Manejar carga de archivo
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0]
-    if (!file) return
-
-    const validTypes = ['text/plain', 'text/html', 'text/htm']
-    const validExtensions = ['.txt', '.html', '.htm']
-    const hasValidExtension = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
-
-    if (!validTypes.includes(file.type) && !hasValidExtension) {
-      alert('Solo se permiten archivos .txt o .html')
-      return
-    }
-
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      setFormData(prev => ({ ...prev, content: e.target.result }))
-      setUploadedFile(file.name)
-    }
-    reader.readAsText(file)
-  }
-
-  const handleRemoveFile = () => {
-    setUploadedFile(null)
-    setFormData(prev => ({ ...prev, content: '' }))
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-  }
-
-  // Insertar variable en el contenido
-  const handleInsertVariable = (variable) => {
-    setFormData(prev => ({
-      ...prev,
-      content: prev.content + `{{${variable}}}`
-    }))
-  }
-
-  // Manejar selección de usuarios
   const handleUserSelect = (_, newValue) => {
     setFormData(prev => ({ ...prev, selectedUsers: newValue }))
   }
@@ -177,16 +130,22 @@ useEffect(() => {
   }
 
   const handleApplyTemplate = (template) => {
-  if (!template) return
-  setFormData(prev => ({
-    ...prev,
-    content: template.template,
-    title: template.name
-  }))
-  setSelectedTemplate(template)
-}
+    if (!template) return
+    setFormData(prev => ({
+      ...prev,
+      content: template.template,
+      title: template.name
+    }))
+    setSelectedTemplate(template)
+  }
 
-  // Validación
+  const handleInsertVariable = (variable) => {
+    setFormData(prev => ({
+      ...prev,
+      content: prev.content + `{{${variable}}}`
+    }))
+  }
+
   const isValid = useMemo(() => {
     const hasChannel = formData.sendSms || formData.sendEmail
     const hasRecipients = formData.sendToAll || formData.selectedUsers.length > 0
@@ -194,12 +153,10 @@ useEffect(() => {
     return hasChannel && hasRecipients && hasContent
   }, [formData])
 
-  // Conteo de destinatarios
   const recipientCount = formData.sendToAll 
     ? users.length 
     : formData.selectedUsers.length
 
-  // Preview del mensaje con variables reemplazadas
   const messagePreview = useMemo(() => {
     if (!formData.content || detectedVariables.length === 0) return null
     
@@ -209,9 +166,8 @@ useEffect(() => {
       preview = preview.replace(regex, `[${v.example}]`)
     })
     return preview
-  }, [formData.content, detectedVariables])
+  }, [formData.content, detectedVariables, availableVariables])
 
-  // Enviar
   const handleSend = async () => {
     if (!isValid) return
     setSending(true)
@@ -254,7 +210,6 @@ useEffect(() => {
       sendToAll: false,
       selectedUsers: []
     })
-    setUploadedFile(null)
     setSearchInput('')
     setProgress({ current: 0, total: 0, percent: 0 })
     setResults(null)
@@ -274,7 +229,7 @@ useEffect(() => {
           <Box display="flex" alignItems="center" gap={1}>
             <Send color="primary" />
             <Typography variant="h6" fontWeight={700}>
-              Enviar Mensaje Masivo
+              {t('sms.title')}
             </Typography>
           </Box>
           <IconButton onClick={handleClose} size="small" disabled={sending}>
@@ -284,7 +239,6 @@ useEffect(() => {
       </DialogTitle>
 
       <DialogContent dividers>
-        {/* Resultados del envío */}
         {results && (
           <Alert 
             severity={results.failed?.length > 0 ? 'warning' : 'success'}
@@ -292,19 +246,19 @@ useEffect(() => {
             onClose={() => setResults(null)}
           >
             <Typography variant="subtitle2" fontWeight={600}>
-              Envío completado
+              {t('sms.results.title')}
             </Typography>
             <Box display="flex" gap={2} mt={1}>
               <Chip 
                 icon={<CheckCircle />} 
-                label={`${results.success?.length || 0} enviados`} 
+                label={`${results.success?.length || 0} ${t('sms.results.sent')}`} 
                 color="success" 
                 size="small" 
               />
               {results.failed?.length > 0 && (
                 <Chip 
                   icon={<ErrorIcon />} 
-                  label={`${results.failed.length} fallidos`} 
+                  label={`${results.failed.length} ${t('sms.results.failed')}`} 
                   color="error" 
                   size="small" 
                 />
@@ -313,12 +267,11 @@ useEffect(() => {
           </Alert>
         )}
 
-        {/* Progreso de envío */}
         {sending && (
           <Box sx={{ mb: 3 }}>
             <Box display="flex" justifyContent="space-between" mb={1}>
               <Typography variant="body2" color="text.secondary">
-                Enviando mensajes...
+                {t('sms.progress.sending')}
               </Typography>
               <Typography variant="body2" fontWeight={600}>
                 {progress.current}/{progress.total}
@@ -334,10 +287,10 @@ useEffect(() => {
 
         <Box display="flex" flexDirection="column" gap={3}>
           
-          {/* Sección: Canal de envío */}
+          {/* Canal de envío */}
           <Box>
             <Typography variant="subtitle2" fontWeight={600} mb={1}>
-              Canal de envío
+              {t('sms.channel.title')}
             </Typography>
             <FormGroup row>
               <FormControlLabel
@@ -352,10 +305,10 @@ useEffect(() => {
                 }
                 label={
                   <Box display="flex" alignItems="center" gap={0.5}>
-                    <Typography>SMS</Typography>
+                    <Typography>{t('sms.channel.sms')}</Typography>
                     {formData.sendSms && usersWithValidPhone.length < recipientCount && (
                       <Chip 
-                        label={`${usersWithValidPhone.length} con tel. válido`} 
+                        label={`${usersWithValidPhone.length} ${t('sms.channel.validPhone')}`} 
                         size="small" 
                         color="warning"
                         sx={{ height: 20, fontSize: '0.65rem' }}
@@ -374,22 +327,22 @@ useEffect(() => {
                     disabled={sending}
                   />
                 }
-                label="Correo electrónico"
+                label={t('sms.channel.email')}
               />
             </FormGroup>
             {!formData.sendSms && !formData.sendEmail && (
               <Alert severity="info" sx={{ mt: 1 }}>
-                Selecciona al menos un canal de envío
+                {t('sms.channel.selectAtLeastOne')}
               </Alert>
             )}
           </Box>
 
           <Divider />
 
-          {/* Sección: Destinatarios */}
+          {/* Destinatarios */}
           <Box>
             <Typography variant="subtitle2" fontWeight={600} mb={1}>
-              Destinatarios
+              {t('sms.recipients.title')}
             </Typography>
             <FormGroup row>
               <FormControlLabel
@@ -408,14 +361,13 @@ useEffect(() => {
                 }
                 label={
                   <Box display="flex" alignItems="center" gap={1}>
-                    <Typography>Enviar a todos</Typography>
-                    <Chip label={`${users.length} usuarios`} size="small" />
+                    <Typography>{t('sms.recipients.sendAll')}</Typography>
+                    <Chip label={`${users.length} ${t('sms.recipients.users')}`} size="small" />
                   </Box>
                 }
               />
             </FormGroup>
 
-            {/* Selector de usuarios específicos */}
             {!formData.sendToAll && (
               <Box mt={2}>
                 <Autocomplete
@@ -431,8 +383,8 @@ useEffect(() => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Buscar y seleccionar usuarios"
-                      placeholder="Nombre, email o teléfono..."
+                      label={t('sms.recipients.searchLabel')}
+                      placeholder={t('sms.recipients.searchPlaceholder')}
                       InputProps={{
                         ...params.InputProps,
                         startAdornment: (
@@ -472,11 +424,10 @@ useEffect(() => {
                   renderTags={() => null}
                 />
 
-                {/* Chips de usuarios seleccionados */}
                 {formData.selectedUsers.length > 0 && (
                   <Paper variant="outlined" sx={{ mt: 2, p: 1.5, borderRadius: 2 }}>
                     <Typography variant="caption" color="text.secondary" mb={1} display="block">
-                      {formData.selectedUsers.length} usuario(s) seleccionado(s)
+                      {formData.selectedUsers.length} {t('sms.recipients.selected')}
                     </Typography>
                     <Box display="flex" flexWrap="wrap" gap={1}>
                       {formData.selectedUsers.map(user => (
@@ -498,57 +449,57 @@ useEffect(() => {
 
           <Divider />
 
-{/* Selector de templates */}
-<Box>
-  <Typography variant="subtitle2" fontWeight={600} mb={1}>
-    Usar template guardado
-  </Typography>
-  <Autocomplete
-    options={templates}
-    getOptionLabel={(option) => option.name || ''}
-    value={selectedTemplate}
-    onChange={(_, newValue) => {
-      setSelectedTemplate(newValue)
-      if (newValue) handleApplyTemplate(newValue)
-    }}
-    loading={loadingTemplates}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        placeholder="Selecciona un template..."
-        size="small"
-      />
-    )}
-    renderOption={(props, option) => (
-      <Box component="li" {...props} key={option._id}>
-        <Box flex={1}>
-          <Typography variant="body2" fontWeight={500}>
-            {option.name}
-          </Typography>
-          {option.category && (
-            <Chip label={option.category} size="small" sx={{ height: 16, fontSize: '0.6rem', mr: 1 }} />
-          )}
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-            {option.template.substring(0, 60)}...
-          </Typography>
-        </Box>
-      </Box>
-    )}
-    disabled={sending}
-  />
-</Box>
-
-<Divider />
-          {/* Sección: Contenido del mensaje */}
+          {/* Template */}
           <Box>
             <Typography variant="subtitle2" fontWeight={600} mb={1}>
-              Contenido del mensaje
+              {t('sms.template.title')}
+            </Typography>
+            <Autocomplete
+              options={templates}
+              getOptionLabel={(option) => option.name || ''}
+              value={selectedTemplate}
+              onChange={(_, newValue) => {
+                setSelectedTemplate(newValue)
+                if (newValue) handleApplyTemplate(newValue)
+              }}
+              loading={loadingTemplates}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder={t('sms.template.selectPlaceholder')}
+                  size="small"
+                />
+              )}
+              renderOption={(props, option) => (
+                <Box component="li" {...props} key={option._id}>
+                  <Box flex={1}>
+                    <Typography variant="body2" fontWeight={500}>
+                      {option.name}
+                    </Typography>
+                    {option.category && (
+                      <Chip label={option.category} size="small" sx={{ height: 16, fontSize: '0.6rem', mr: 1 }} />
+                    )}
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                      {option.template.substring(0, 60)}...
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+              disabled={sending}
+            />
+          </Box>
+
+          <Divider />
+
+          {/* Contenido */}
+          <Box>
+            <Typography variant="subtitle2" fontWeight={600} mb={1}>
+              {t('sms.content.title')}
             </Typography>
 
-            {/* Variables disponibles */}
             <Box mb={2}>
               <Typography variant="caption" color="text.secondary" display="block" mb={1}>
-                Variables disponibles (clic para insertar):
+                {t('sms.content.variablesLabel')}
               </Typography>
               <Box display="flex" gap={1} flexWrap="wrap">
                 {availableVariables.map(v => (
@@ -568,46 +519,40 @@ useEffect(() => {
               </Box>
             </Box>
 
-            {/* Título (opcional, principalmente para email) */}
             {formData.sendEmail && (
               <TextField
-                label="Asunto del correo"
+                label={t('sms.content.emailSubject')}
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 fullWidth
                 sx={{ mb: 2 }}
-                placeholder="Asunto del correo electrónico..."
+                placeholder={t('sms.content.emailSubjectPlaceholder')}
                 disabled={sending}
               />
             )}
 
-            {/* Área de contenido */}
             <TextField
-              label="Mensaje"
+              label={t('sms.content.messageLabel')}
               value={formData.content}
-              onChange={(e) => {
-                setFormData(prev => ({ ...prev, content: e.target.value }))
-                setUploadedFile(null)
-              }}
+              onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
               fullWidth
               multiline
               rows={6}
-              placeholder="Escribe el contenido del mensaje aquí... Usa {{firstName}}, {{lastName}}, etc. para personalizar"
+              placeholder={t('sms.content.messagePlaceholder')}
               helperText={
                 formData.sendSms && formData.content.length > 0
-                  ? `${formData.content.length} caracteres (SMS: ~${Math.ceil(formData.content.length / 160)} mensaje(s))`
+                  ? `${formData.content.length} ${t('sms.content.chars')} (SMS: ~${Math.ceil(formData.content.length / 160)} ${t('sms.content.messages')})`
                   : ''
               }
               disabled={sending}
             />
 
-            {/* Preview con variables */}
             {messagePreview && detectedVariables.length > 0 && (
               <Paper variant="outlined" sx={{ mt: 2, p: 2, borderRadius: 2, bgcolor: '#f5f5f5' }}>
                 <Box display="flex" alignItems="center" gap={1} mb={1}>
                   <Info fontSize="small" color="info" />
                   <Typography variant="caption" fontWeight={600}>
-                    Vista previa (ejemplo)
+                    {t('sms.content.preview')}
                   </Typography>
                 </Box>
                 <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
@@ -616,46 +561,15 @@ useEffect(() => {
               </Paper>
             )}
 
-            {/* Alerta de variables detectadas */}
             {detectedVariables.length > 0 && (
               <Alert severity="info" sx={{ mt: 2 }} icon={<Info />}>
                 <Typography variant="caption">
-                  Variables detectadas: <strong>{detectedVariables.join(', ')}</strong>
+                  {t('sms.content.variablesDetected')}: <strong>{detectedVariables.join(', ')}</strong>
                   <br />
-                  Se reemplazarán automáticamente con los datos de cada usuario.
+                  {t('sms.content.variablesWillReplace')}
                 </Typography>
               </Alert>
             )}
-
-            {/* Carga de archivo */}
-            <Box mt={2} display="flex" alignItems="center" gap={2}>
-              <input
-                type="file"
-                accept=".txt,.html,.htm"
-                onChange={handleFileUpload}
-                style={{ display: 'none' }}
-                ref={fileInputRef}
-              />
-              <Button
-                variant="outlined"
-                startIcon={<UploadFile />}
-                onClick={() => fileInputRef.current?.click()}
-                size="small"
-                disabled={sending}
-              >
-                Cargar archivo (.txt, .html)
-              </Button>
-              {uploadedFile && (
-                <Chip
-                  label={uploadedFile}
-                  onDelete={handleRemoveFile}
-                  color="primary"
-                  variant="outlined"
-                  size="small"
-                  disabled={sending}
-                />
-              )}
-            </Box>
           </Box>
 
         </Box>
@@ -665,17 +579,17 @@ useEffect(() => {
         <Box>
           {recipientCount > 0 && (formData.sendSms || formData.sendEmail) && (
             <Typography variant="body2" color="text.secondary">
-              Se enviará a <strong>{formData.sendSms ? usersWithValidPhone.length : recipientCount}</strong> destinatario(s) por{' '}
+              {t('sms.summary.willSendTo')} <strong>{formData.sendSms ? usersWithValidPhone.length : recipientCount}</strong> {t('sms.summary.recipients')} {' '}
               {[
-                formData.sendSms && 'SMS',
-                formData.sendEmail && 'Email'
-              ].filter(Boolean).join(' y ')}
+                formData.sendSms && t('sms.channel.sms'),
+                formData.sendEmail && t('sms.channel.email')
+              ].filter(Boolean).join(` ${t('sms.summary.and')} `)}
             </Typography>
           )}
         </Box>
         <Box display="flex" gap={1}>
           <Button onClick={handleClose} disabled={sending}>
-            {results ? 'Cerrar' : 'Cancelar'}
+            {results ? t('sms.actions.close') : t('sms.actions.cancel')}
           </Button>
           {!results && (
             <Button
@@ -684,7 +598,7 @@ useEffect(() => {
               disabled={!isValid || sending}
               startIcon={sending ? <CircularProgress size={16} color="inherit" /> : <Send />}
             >
-              {sending ? `Enviando... ${progress.percent}%` : 'Enviar mensaje'}
+              {sending ? `${t('sms.actions.sending')} ${progress.percent}%` : t('sms.actions.send')}
             </Button>
           )}
         </Box>

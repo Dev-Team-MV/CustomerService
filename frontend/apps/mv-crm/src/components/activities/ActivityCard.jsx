@@ -1,5 +1,6 @@
-import { Box, Typography, Chip, Avatar, IconButton, Tooltip, Menu, MenuItem } from '@mui/material'
-import { AccessTime, Person, MoreVert, Phone, Email as EmailIcon } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
+import { Box, Typography, Chip, Avatar, IconButton } from '@mui/material'
+import { AccessTime, Person, MoreVert } from '@mui/icons-material'
 import { ACTIVITY_PRIORITIES } from '../../constants/hooks/useActivities'
 
 const formatDate = (date) => {
@@ -17,6 +18,7 @@ const formatDate = (date) => {
 }
 
 const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
+  const { t } = useTranslation('activities')
   const priority = ACTIVITY_PRIORITIES.find(p => p.id === activity.priority)
   const dueInfo = formatDate(activity.dueDate)
   const assignee = activity.assignedTo
@@ -180,7 +182,7 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
         </Box>
         
         <Chip
-          label={priority?.label || 'Media'}
+          label={t(`activities.priority.${priority?.id}`) || t('activities.priority.medium')}
           size="small"
           sx={{
             fontSize: '0.65rem',
