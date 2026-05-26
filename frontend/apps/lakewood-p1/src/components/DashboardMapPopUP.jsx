@@ -43,7 +43,7 @@ const DashboardMapPopup = ({
       >
         <Box sx={{ mb: 1 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-            <Typography variant="subtitle1" fontWeight={700} color="#333F1F" sx={{ fontFamily: '"Poppins", sans-serif', fontSize: 17 }}>
+            <Typography variant="subtitle1" fontWeight={700} color="#333F1F" sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: 17 }}>
               Lote {selectedProperty.lot?.number}
             </Typography>
             <Chip 
@@ -60,7 +60,7 @@ const DashboardMapPopup = ({
               }}
             />
           </Box>
-          <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
             {selectedProperty.project?.name || 'Proyecto'}
           </Typography>
         </Box>
@@ -70,19 +70,19 @@ const DashboardMapPopup = ({
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Home sx={{ fontSize: 18, color: '#8CA551' }} />
-            <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
               {modelName}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <SquareFoot sx={{ fontSize: 18, color: '#8CA551' }} />
-            <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
               {sqft !== 'N/A' ? `${sqft.toLocaleString()} ft²` : 'N/A'}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <AttachMoney sx={{ fontSize: 18, color: '#8CA551' }} />
-            <Typography variant="caption" fontWeight={700} color="#E5863C" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="caption" fontWeight={700} color="#E5863C" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
               {price ? `$${price.toLocaleString()}` : 'N/A'}
             </Typography>
           </Box>
@@ -96,10 +96,10 @@ const DashboardMapPopup = ({
                 {client.firstName?.[0] || ''}{client.lastName?.[0] || ''}
               </Avatar>
               <Box>
-                <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {client.firstName} {client.lastName}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif', fontSize: 11 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: 11 }}>
                   {client.email}
                 </Typography>
               </Box>

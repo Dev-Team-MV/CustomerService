@@ -5,20 +5,20 @@ import { useTranslation } from 'react-i18next'
 const inputSx = {
   '& .MuiOutlinedInput-root': {
     borderRadius: 3,
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"DM Sans", sans-serif',
     '& fieldset':                { borderColor: 'rgba(140, 165, 81, 0.3)', borderWidth: '2px' },
     '&:hover fieldset':          { borderColor: '#8CA551' },
     '&.Mui-focused fieldset':    { borderColor: '#333F1F', borderWidth: '2px' },
   },
   '& .MuiInputLabel-root': {
-    fontFamily: '"Poppins", sans-serif', fontWeight: 500, color: '#706f6f',
+    fontFamily: '"DM Sans", sans-serif', fontWeight: 500, color: '#706f6f',
     '&.Mui-focused': { color: '#333F1F', fontWeight: 600 }
   }
 }
 
 const selectSx = {
   borderRadius: 2,
-  fontFamily: '"Poppins", sans-serif',
+  fontFamily: '"DM Sans", sans-serif',
   '& fieldset':              { borderColor: 'rgba(140, 165, 81, 0.3)', borderWidth: '2px' },
   '&:hover fieldset':        { borderColor: '#8CA551' },
   '&.Mui-focused fieldset':  { borderColor: '#333F1F', borderWidth: '2px' },

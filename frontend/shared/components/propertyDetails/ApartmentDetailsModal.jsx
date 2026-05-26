@@ -182,7 +182,7 @@ if (!apartment && !property) return null
       >
         {/* Header y Tabs */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 3, pt: 3 }}>
-          <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
             {t('propertyDetails')} - {property ? `Property ${property.lot?.number || ''}` : apartment?.apartmentNumber ? `Apt ${apartment.apartmentNumber}` : ''}
           </Typography>
           <Tabs
@@ -197,7 +197,7 @@ if (!apartment && !property) return null
                 fontSize: '1rem',
                 textTransform: 'none',
                 color: theme.palette.text.secondary,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 transition: 'all 0.3s ease',
                 '&.Mui-selected': { color: theme.palette.primary.main },
                 '&:hover': { bgcolor: `${theme.palette.primary.main}08` }

@@ -38,7 +38,7 @@ const ParkingSpotSelectorDialog = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+      <DialogTitle sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
         Select Parking Spot
       </DialogTitle>
       <DialogContent>
@@ -65,7 +65,7 @@ const ParkingSpotSelectorDialog = ({
                     <ListItemText
                       primary={
                         <Box display="flex" alignItems="center" gap={1}>
-                          <Typography variant="body1" fontWeight={600} fontFamily='"Poppins", sans-serif'>
+                          <Typography variant="body1" fontWeight={600} fontFamily='"DM Sans", sans-serif'>
                             {spot.code}
                           </Typography>
                           <Chip
@@ -81,7 +81,7 @@ const ParkingSpotSelectorDialog = ({
                         </Box>
                       }
                       secondary={
-                        <Typography variant="caption" fontFamily='"Poppins", sans-serif'>
+                        <Typography variant="caption" fontFamily='"DM Sans", sans-serif'>
                           Floor {spot.floorNumber} • {spot.spotType}
                         </Typography>
                       }
@@ -97,7 +97,7 @@ const ParkingSpotSelectorDialog = ({
         <Button
           onClick={onClose}
           disabled={loading}
-          sx={{ textTransform: 'none', fontFamily: '"Poppins", sans-serif' }}
+          sx={{ textTransform: 'none', fontFamily: '"DM Sans", sans-serif' }}
         >
           Cancel
         </Button>
@@ -105,7 +105,7 @@ const ParkingSpotSelectorDialog = ({
           onClick={handleSelect}
           variant="contained"
           disabled={!selectedSpot || loading}
-          sx={{ textTransform: 'none', fontFamily: '"Poppins", sans-serif' }}
+          sx={{ textTransform: 'none', fontFamily: '"DM Sans", sans-serif' }}
         >
           Select
         </Button>

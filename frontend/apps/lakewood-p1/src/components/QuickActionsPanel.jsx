@@ -29,12 +29,12 @@ const QuickActionsPanel = ({ actions, t }) => (
         sx={{
           color: '#333F1F', fontWeight: 700,
           letterSpacing: '0.5px', mb: 0.5,
-          fontFamily: '"Poppins", sans-serif'
+          fontFamily: '"DM Sans", sans-serif'
         }}
       >
         {t('quickActions.title')}
       </Typography>
-      <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+      <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
         {t('quickActions.subtitle')}
       </Typography>
     </Box>
@@ -111,14 +111,14 @@ const QuickActionsPanel = ({ actions, t }) => (
                     sx={{
                       color: '#333F1F', fontWeight: 600,
                       mb: 0.3, fontSize: '0.9rem',
-                      fontFamily: '"Poppins", sans-serif'
+                      fontFamily: '"DM Sans", sans-serif'
                     }}
                   >
                     {action.label}
                   </Typography>
                   <Typography
                     variant="caption"
-                    sx={{ color: '#706f6f', fontSize: '0.7rem', fontFamily: '"Poppins", sans-serif' }}
+                    sx={{ color: '#706f6f', fontSize: '0.7rem', fontFamily: '"DM Sans", sans-serif' }}
                   >
                     {action.description}
                   </Typography>

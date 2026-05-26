@@ -58,7 +58,7 @@ const EagleViewTab = () => {
     <Box>
       {/* Header */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h6" fontWeight={700} fontFamily='"Poppins", sans-serif'>
+        <Typography variant="h6" fontWeight={700} fontFamily='"DM Sans", sans-serif'>
           {t('eagleView', 'Eagle View')}
         </Typography>
         <Button
@@ -205,7 +205,7 @@ const EagleViewTab = () => {
                     <Typography
                       variant="h5"
                       fontWeight={700}
-                      fontFamily='"Poppins", sans-serif'
+                      fontFamily='"DM Sans", sans-serif'
                       mb={1}
                       color="#333F1F"
                     >
@@ -216,7 +216,7 @@ const EagleViewTab = () => {
                         variant="body2"
                         color="text.secondary"
                         sx={{
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           display: '-webkit-box',
                           WebkitLineClamp: 3,
                           WebkitBoxOrient: 'vertical',

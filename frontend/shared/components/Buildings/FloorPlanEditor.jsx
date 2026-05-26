@@ -308,13 +308,13 @@ const FloorPlanEditor = ({
       }}>
         <Box sx={{ flex: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif', fontSize: isMobile ? '1rem' : '1.25rem' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif', fontSize: isMobile ? '1rem' : '1.25rem' }}>
               Floor Plan Polygon Editor
             </Typography>
             <Chip 
               label={`${currentFloorIndex + 1} of ${floorPlans.length}`}
               size="small"
-              sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+              sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}
             />
           </Box>
           
@@ -331,7 +331,7 @@ const FloorPlanEditor = ({
               <NavigateBefore />
             </IconButton>
             
-            <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif', minWidth: isMobile ? 'auto' : 120, textAlign: 'center', fontSize: isMobile ? '0.85rem' : '0.875rem' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif', minWidth: isMobile ? 'auto' : 120, textAlign: 'center', fontSize: isMobile ? '0.85rem' : '0.875rem' }}>
               Floor {currentFloorPlan.floorNumber}
               {currentFloorPlan.floorNumber === 1 && !isMobile && ' (Commercial)'}
             </Typography>
@@ -350,7 +350,7 @@ const FloorPlanEditor = ({
             
             {!isMobile && <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />}
             
-            <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', fontSize: isMobile ? '0.7rem' : '0.75rem' }}>
+            <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif', fontSize: isMobile ? '0.7rem' : '0.75rem' }}>
               {polygons.length} polygons | {polygons.filter(p => p.apartmentModel).length} assigned
             </Typography>
           </Box>
@@ -537,7 +537,7 @@ const FloorPlanEditor = ({
                 left: '50%',
                 transform: 'translateX(-50%)',
                 zIndex: 10,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 maxWidth: isMobile ? '90%' : 'auto'
               }}
               action={
@@ -564,7 +564,7 @@ const FloorPlanEditor = ({
                 left: '50%',
                 transform: 'translateX(-50%)',
                 zIndex: 10,
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               Click to complete rectangle
@@ -658,10 +658,10 @@ const FloorPlanEditor = ({
             }}
           >
             <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
                 Polygons ({polygons.length})
               </Typography>
-              <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
                 Click to select, drag to move
               </Typography>
             </Box>
@@ -669,10 +669,10 @@ const FloorPlanEditor = ({
             <List sx={{ flex: 1, overflow: 'auto', p: 1 }}>
               {polygons.length === 0 ? (
                 <Box sx={{ p: 3, textAlign: 'center' }}>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', mb: 1 }}>
+                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif', mb: 1 }}>
                     No polygons yet
                   </Typography>
-                  <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
                     Use the toolbar to start drawing
                   </Typography>
                 </Box>
@@ -709,8 +709,8 @@ const FloorPlanEditor = ({
                           ? apartmentModels.find(m => m._id === polygon.apartmentModel)?.name || 'Unknown Model'
                           : 'Not assigned'
                       }
-                      primaryTypographyProps={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.9rem', fontWeight: 600 }}
-                      secondaryTypographyProps={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.75rem' }}
+                      primaryTypographyProps={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.9rem', fontWeight: 600 }}
+                      secondaryTypographyProps={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.75rem' }}
                     />
                     <ListItemSecondaryAction>
                       <IconButton
@@ -737,7 +737,7 @@ const FloorPlanEditor = ({
 
             {selectedPolygon && (
               <Box sx={{ p: 2, borderTop: `1px solid ${theme.palette.divider}`, bgcolor: theme.palette.background.paper }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Palette fontSize="small" />
                   Polygon Settings
                 </Typography>
@@ -752,7 +752,7 @@ const FloorPlanEditor = ({
                 />
                 
                 <Box sx={{ mb: 2 }}>
-                  <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', mb: 1, display: 'block', fontWeight: 600 }}>
+                  <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', mb: 1, display: 'block', fontWeight: 600 }}>
                     Color
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
@@ -823,7 +823,7 @@ const FloorPlanEditor = ({
             }}
           >
             <Box sx={{ p: 1.5, borderBottom: `1px solid ${theme.palette.divider}` }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
                 Polygons ({polygons.length})
               </Typography>
             </Box>
@@ -831,7 +831,7 @@ const FloorPlanEditor = ({
             <List sx={{ flex: 1, overflow: 'auto', p: 1 }}>
               {polygons.length === 0 ? (
                 <Box sx={{ p: 2, textAlign: 'center' }}>
-                  <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
                     No polygons yet. Use toolbar to draw.
                   </Typography>
                 </Box>
@@ -862,8 +862,8 @@ const FloorPlanEditor = ({
                     <ListItemText
                       primary={polygon.name}
                       secondary={polygon.apartmentModel ? apartmentModels.find(m => m._id === polygon.apartmentModel)?.name : 'Not assigned'}
-                      primaryTypographyProps={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.85rem', fontWeight: 600 }}
-                      secondaryTypographyProps={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}
+                      primaryTypographyProps={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.85rem', fontWeight: 600 }}
+                      secondaryTypographyProps={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem' }}
                     />
                     <ListItemSecondaryAction>
                       <IconButton
@@ -922,7 +922,7 @@ const FloorPlanEditor = ({
         alignItems: 'center',
         bgcolor: theme.palette.background.paper
       }}>
-        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', display: isMobile ? 'none' : 'block' }}>
+        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif', display: isMobile ? 'none' : 'block' }}>
           Zoom: {Math.round(scale * 100)}% | Total Polygons: {totalPolygons} | Assigned: {totalAssigned}/{totalPolygons}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, width: isMobile ? '100%' : 'auto' }}>
@@ -933,7 +933,7 @@ const FloorPlanEditor = ({
             sx={{
               borderRadius: 2,
               textTransform: 'none',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontWeight: 600
             }}
           >
@@ -947,7 +947,7 @@ const FloorPlanEditor = ({
             sx={{
               borderRadius: 2,
               textTransform: 'none',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontWeight: 600,
               bgcolor: theme.palette.primary.main
             }}

@@ -58,7 +58,7 @@ const PropertyQuoteContent = ({ projectId }) => {
           >
             <ArrowBackIcon sx={{ color: currentStep === 0 ? '#ccc' : theme.palette.primary.main }} />
           </IconButton>
-          <Typography variant="h6" sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700 }}>
+          <Typography variant="h6" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700 }}>
             {t('quote:back', 'Back')}
           </Typography>
         </Box>
@@ -100,7 +100,7 @@ const PropertyQuoteContent = ({ projectId }) => {
                   >
                     <Typography
                       sx={{
-                        fontFamily: '"Poppins", sans-serif', fontSize: '0.75rem',
+                        fontFamily: '"DM Sans", sans-serif', fontSize: '0.75rem',
                         fontWeight: isActive ? 700 : isCompleted ? 600 : 400,
                         color: isActive ? theme.palette.primary.main : isCompleted ? theme.palette.secondary.main : '#9e9e9e',
                         letterSpacing: '0.5px', cursor: isCompleted ? 'pointer' : 'default',

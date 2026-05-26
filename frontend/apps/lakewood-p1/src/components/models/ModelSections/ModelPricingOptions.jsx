@@ -26,7 +26,7 @@ const ModelPricingOptions = ({
           variant="subtitle1" 
           fontWeight={700} 
           fontSize={{ xs: "0.85rem", md: "0.95rem" }}
-          sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif', letterSpacing: '0.5px' }}
+          sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif', letterSpacing: '0.5px' }}
         >
           {t('models:pricingOptions')}
         </Typography>
@@ -55,7 +55,7 @@ const ModelPricingOptions = ({
         label={
           <Box display="flex" alignItems="center" gap={0.5}>
             <Balcony fontSize="small" sx={{ color: formData.hasBalcony ? '#8CA551' : '#706f6f', fontSize: '1rem' }} />
-            <Typography fontWeight={600} fontSize="0.8rem" sx={{ color: formData.hasBalcony ? '#333F1F' : '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+            <Typography fontWeight={600} fontSize="0.8rem" sx={{ color: formData.hasBalcony ? '#333F1F' : '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
               {t('models:balcony')}
             </Typography>
           </Box>
@@ -83,13 +83,13 @@ const ModelPricingOptions = ({
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: 2,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               bgcolor: 'white',
               borderColor: '#8CA551',
               "&.Mui-focused fieldset": { borderColor: "#8CA551", borderWidth: "2px" },
               "&:hover fieldset": { borderColor: "#8CA551" }
             },
-            "& .MuiInputLabel-root": { fontFamily: '"Poppins", sans-serif', "&.Mui-focused": { color: "#8CA551" }, fontSize: '0.8rem' }
+            "& .MuiInputLabel-root": { fontFamily: '"DM Sans", sans-serif', "&.Mui-focused": { color: "#8CA551" }, fontSize: '0.8rem' }
           }}
         />
       </Grid>
@@ -117,7 +117,7 @@ const ModelPricingOptions = ({
         label={
           <Box display="flex" alignItems="center" gap={0.5}>
             <UpgradeIcon fontSize="small" sx={{ color: formData.hasUpgrade ? '#9c27b0' : '#706f6f', fontSize: '1rem' }} />
-            <Typography fontWeight={600} fontSize="0.8rem" sx={{ color: formData.hasUpgrade ? '#333F1F' : '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+            <Typography fontWeight={600} fontSize="0.8rem" sx={{ color: formData.hasUpgrade ? '#333F1F' : '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
               {t('models:upgrade')}
             </Typography>
           </Box>
@@ -145,12 +145,12 @@ const ModelPricingOptions = ({
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: 2,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               bgcolor: 'white',
               "&.Mui-focused fieldset": { borderColor: "#9c27b0", borderWidth: "2px" },
               "&:hover fieldset": { borderColor: "#9c27b0" }
             },
-            "& .MuiInputLabel-root": { fontFamily: '"Poppins", sans-serif', "&.Mui-focused": { color: "#9c27b0" }, fontSize: '0.8rem' }
+            "& .MuiInputLabel-root": { fontFamily: '"DM Sans", sans-serif', "&.Mui-focused": { color: "#9c27b0" }, fontSize: '0.8rem' }
           }}
         />
       </Grid>
@@ -178,7 +178,7 @@ const ModelPricingOptions = ({
         label={
           <Box display="flex" alignItems="center" gap={0.5}>
             <StorageIcon fontSize="small" sx={{ color: formData.hasStorage ? '#4caf50' : '#706f6f', fontSize: '1rem' }} />
-            <Typography fontWeight={600} fontSize="0.8rem" sx={{ color: formData.hasStorage ? '#333F1F' : '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+            <Typography fontWeight={600} fontSize="0.8rem" sx={{ color: formData.hasStorage ? '#333F1F' : '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
               {t('models:storage')}
             </Typography>
           </Box>
@@ -206,12 +206,12 @@ const ModelPricingOptions = ({
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: 2,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               bgcolor: 'white',
               "&.Mui-focused fieldset": { borderColor: "#4caf50", borderWidth: "2px" },
               "&:hover fieldset": { borderColor: "#4caf50" }
             },
-            "& .MuiInputLabel-root": { fontFamily: '"Poppins", sans-serif', "&.Mui-focused": { color: "#4caf50" }, fontSize: '0.8rem' }
+            "& .MuiInputLabel-root": { fontFamily: '"DM Sans", sans-serif', "&.Mui-focused": { color: "#4caf50" }, fontSize: '0.8rem' }
           }}
         />
       </Grid>

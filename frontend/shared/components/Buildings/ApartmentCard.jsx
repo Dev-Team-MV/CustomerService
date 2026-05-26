@@ -72,7 +72,7 @@ const ApartmentCard = ({ apartment, modelName, onEdit }) => {
               bgcolor: getStatusColor(apartment.status),
               color: 'white',
               fontWeight: 700,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               textTransform: 'capitalize',
               height: 28,
               px: 1.5,
@@ -119,7 +119,7 @@ const ApartmentCard = ({ apartment, modelName, onEdit }) => {
               <Typography
                 variant="h6"
                 sx={{
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   color: theme.palette.primary.main,
                   fontWeight: 700,
                   fontSize: { xs: "1.1rem", sm: "1.25rem" },
@@ -137,7 +137,7 @@ const ApartmentCard = ({ apartment, modelName, onEdit }) => {
                   sx={{
                     color: "#706f6f",
                     fontWeight: 600,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontSize: "0.75rem",
                   }}
                 >
@@ -174,7 +174,7 @@ const ApartmentCard = ({ apartment, modelName, onEdit }) => {
                 sx={{
                   color: "#706f6f",
                   fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: "0.7rem",
                   textTransform: "uppercase",
                   letterSpacing: "1px",
@@ -188,7 +188,7 @@ const ApartmentCard = ({ apartment, modelName, onEdit }) => {
               sx={{
                 color: theme.palette.primary.main,
                 fontWeight: 700,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: "1rem",
                 textAlign: 'center'
               }}
@@ -213,7 +213,7 @@ const ApartmentCard = ({ apartment, modelName, onEdit }) => {
                   sx={{
                     color: "#706f6f",
                     fontWeight: 600,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     display: "block",
                     fontSize: "0.65rem",
                     textTransform: "uppercase",
@@ -227,7 +227,7 @@ const ApartmentCard = ({ apartment, modelName, onEdit }) => {
                   sx={{
                     color: theme.palette.primary.main,
                     fontWeight: 700,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontSize: "1.1rem",
                   }}
                 >
@@ -240,7 +240,7 @@ const ApartmentCard = ({ apartment, modelName, onEdit }) => {
                   sx={{
                     color: "#706f6f",
                     fontWeight: 600,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     display: "block",
                     fontSize: "0.65rem",
                     textTransform: "uppercase",
@@ -254,7 +254,7 @@ const ApartmentCard = ({ apartment, modelName, onEdit }) => {
                   sx={{
                     color: theme.palette.warning.main,
                     fontWeight: 700,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontSize: "1.1rem",
                   }}
                 >
@@ -278,7 +278,7 @@ const ApartmentCard = ({ apartment, modelName, onEdit }) => {
               py: { xs: 1.5, md: 1.8 },
               letterSpacing: "1.5px",
               textTransform: "uppercase",
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               border: "none",
               position: "relative",
               overflow: "hidden",

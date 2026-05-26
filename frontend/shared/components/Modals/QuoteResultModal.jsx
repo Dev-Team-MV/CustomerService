@@ -74,10 +74,10 @@
 //         <Box display="flex" alignItems="center" gap={1.5}>
 //           <CheckIcon sx={{ fontSize: 32 }} />
 //           <Box>
-//             <Typography variant="h5" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//             <Typography variant="h5" fontWeight={700} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //               {t('quote:quoteReady', 'Your Quote is Ready!')}
 //             </Typography>
-//             <Typography variant="body2" sx={{ opacity: 0.9, fontFamily: '"Poppins", sans-serif' }}>
+//             <Typography variant="body2" sx={{ opacity: 0.9, fontFamily: '"DM Sans", sans-serif' }}>
 //               {isProperty ? t('quote:propertyQuote', 'Property Quote Details') : t('quote:apartmentQuote', 'Apartment Quote Details')}
 //             </Typography>
 //           </Box>
@@ -100,36 +100,36 @@
 //             mt: 2
 //           }}
 //         >
-//           <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: primaryColor, fontFamily: '"Poppins", sans-serif' }}>
+//           <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: primaryColor, fontFamily: '"DM Sans", sans-serif' }}>
 //             {t('quote:summary', 'Quote Summary')}
 //           </Typography>
 //           <Grid container spacing={2} sx={{ mt: 1 }}>
 //             <Grid item xs={12} sm={4}>
 //               <Box textAlign="center" p={2} bgcolor="white" borderRadius={2}>
-//                 <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                 <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                   {t('quote:totalPrice', 'Total Price')}
 //                 </Typography>
-//                 <Typography variant="h4" fontWeight={700} sx={{ color: primaryColor, fontFamily: '"Poppins", sans-serif' }}>
+//                 <Typography variant="h4" fontWeight={700} sx={{ color: primaryColor, fontFamily: '"DM Sans", sans-serif' }}>
 //                   {formatCurrency(totals?.totalPrice || totals?.price)}
 //                 </Typography>
 //               </Box>
 //             </Grid>
 //             <Grid item xs={12} sm={4}>
 //               <Box textAlign="center" p={2} bgcolor="white" borderRadius={2}>
-//                 <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                 <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                   {t('quote:initialPayment', 'Initial Payment')}
 //                 </Typography>
-//                 <Typography variant="h4" fontWeight={700} sx={{ color: secondaryColor, fontFamily: '"Poppins", sans-serif' }}>
+//                 <Typography variant="h4" fontWeight={700} sx={{ color: secondaryColor, fontFamily: '"DM Sans", sans-serif' }}>
 //                   {formatCurrency(totals?.initialPayment)}
 //                 </Typography>
 //               </Box>
 //             </Grid>
 //             <Grid item xs={12} sm={4}>
 //               <Box textAlign="center" p={2} bgcolor="white" borderRadius={2}>
-//                 <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                 <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                   {t('quote:pending', 'Pending')}
 //                 </Typography>
-//                 <Typography variant="h4" fontWeight={700} sx={{ color: warningColor, fontFamily: '"Poppins", sans-serif' }}>
+//                 <Typography variant="h4" fontWeight={700} sx={{ color: warningColor, fontFamily: '"DM Sans", sans-serif' }}>
 //                   {formatCurrency(totals?.pending)}
 //                 </Typography>
 //               </Box>
@@ -139,7 +139,7 @@
 
 //         {/* PROPERTY DETAILS */}
 //         <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-//           <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: primaryColor, fontFamily: '"Poppins", sans-serif', display: 'flex', alignItems: 'center', gap: 1 }}>
+//           <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: primaryColor, fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: 1 }}>
 //             {isProperty ? <HomeIcon /> : <ApartmentIcon />}
 //             {isProperty ? t('quote:propertyDetails', 'Property Details') : t('quote:apartmentDetails', 'Apartment Details')}
 //           </Typography>
@@ -149,37 +149,37 @@
 //             <Grid container spacing={2}>
 //               {lot && (
 //                 <Grid item xs={12} sm={6}>
-//                   <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                   <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                     {t('quote:lot', 'Lot')}
 //                   </Typography>
-//                   <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                   <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                     #{lot.number} - {formatCurrency(lot.price)}
 //                   </Typography>
 //                 </Grid>
 //               )}
 //               {model && (
 //                 <Grid item xs={12} sm={6}>
-//                   <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                   <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                     {t('quote:model', 'Model')}
 //                   </Typography>
-//                   <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                   <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                     {model.model} - {formatCurrency(model.price)}
 //                   </Typography>
 //                 </Grid>
 //               )}
 //               {facade && (
 //                 <Grid item xs={12} sm={6}>
-//                   <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                   <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                     {t('quote:facade', 'Facade')}
 //                   </Typography>
-//                   <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                   <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                     {facade.title} {facade.price > 0 ? `- ${formatCurrency(facade.price)}` : '(Included)'}
 //                   </Typography>
 //                 </Grid>
 //               )}
 //               {options && (
 //                 <Grid item xs={12}>
-//                   <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                   <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                     {t('quote:options', 'Options')}
 //                   </Typography>
 //                   <Box display="flex" gap={1} flexWrap="wrap">
@@ -208,28 +208,28 @@
 //             <Grid container spacing={2}>
 //               {apartmentModel && (
 //                 <Grid item xs={12} sm={6}>
-//                   <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                   <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                     {t('quote:apartmentModel', 'Model')}
 //                   </Typography>
-//                   <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                   <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                     {apartmentModel.name} ({apartmentModel.modelNumber})
 //                   </Typography>
-//                   <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                   <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                     {apartmentModel.bedrooms} {t('quote:bedrooms', 'beds')} • {apartmentModel.bathrooms} {t('quote:bathrooms', 'baths')} • {apartmentModel.sqft} sqft
 //                   </Typography>
 //                 </Grid>
 //               )}
 //               <Grid item xs={12} sm={6}>
-//                 <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                 <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                   {t('quote:location', 'Location')}
 //                 </Typography>
-//                 <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                 <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                   {t('quote:apartmentNumber', 'Apt {{number}} - Floor {{floor}}', { number: apartmentNumber, floor: floorNumber })}
 //                 </Typography>
 //               </Grid>
 //               {selectedRenderType && (
 //                 <Grid item xs={12}>
-//                   <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                   <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                     {t('quote:renderType', 'Render Type')}
 //                   </Typography>
 //                   <Chip 
@@ -246,30 +246,30 @@
 //         {/* PRICE BREAKDOWN (only for properties) */}
 //         {isProperty && breakdown && (
 //           <Paper elevation={0} sx={{ p: 3, borderRadius: 2 }}>
-//             <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: primaryColor, fontFamily: '"Poppins", sans-serif', display: 'flex', alignItems: 'center', gap: 1 }}>
+//             <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: primaryColor, fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: 1 }}>
 //               <MoneyIcon />
 //               {t('quote:priceBreakdown', 'Price Breakdown')}
 //             </Typography>
 //             <Divider sx={{ my: 2 }} />
 //             <Grid container spacing={1.5}>
 //               <Grid item xs={6}>
-//                 <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                 <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                   {t('quote:lotPrice', 'Lot Price')}
 //                 </Typography>
 //               </Grid>
 //               <Grid item xs={6} textAlign="right">
-//                 <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                 <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                   {formatCurrency(breakdown.lotPrice)}
 //                 </Typography>
 //               </Grid>
 
 //               <Grid item xs={6}>
-//                 <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                 <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                   {t('quote:modelBasePrice', 'Model Base Price')}
 //                 </Typography>
 //               </Grid>
 //               <Grid item xs={6} textAlign="right">
-//                 <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                 <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                   {formatCurrency(breakdown.modelBasePrice)}
 //                 </Typography>
 //               </Grid>
@@ -277,12 +277,12 @@
 //               {breakdown.facadePrice > 0 && (
 //                 <>
 //                   <Grid item xs={6}>
-//                     <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                     <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                       {t('quote:facadePrice', 'Facade Price')}
 //                     </Typography>
 //                   </Grid>
 //                   <Grid item xs={6} textAlign="right">
-//                     <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                     <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                       {formatCurrency(breakdown.facadePrice)}
 //                     </Typography>
 //                   </Grid>
@@ -292,12 +292,12 @@
 //               {breakdown.upgradePrice > 0 && (
 //                 <>
 //                   <Grid item xs={6}>
-//                     <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                     <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                       {t('quote:upgradePrice', 'Upgrade Price')}
 //                     </Typography>
 //                   </Grid>
 //                   <Grid item xs={6} textAlign="right">
-//                     <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                     <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                       {formatCurrency(breakdown.upgradePrice)}
 //                     </Typography>
 //                   </Grid>
@@ -307,12 +307,12 @@
 //               {breakdown.balconyPrice > 0 && (
 //                 <>
 //                   <Grid item xs={6}>
-//                     <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                     <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                       {t('quote:balconyPrice', 'Balcony Price')}
 //                     </Typography>
 //                   </Grid>
 //                   <Grid item xs={6} textAlign="right">
-//                     <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                     <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                       {formatCurrency(breakdown.balconyPrice)}
 //                     </Typography>
 //                   </Grid>
@@ -322,12 +322,12 @@
 //               {breakdown.storagePrice > 0 && (
 //                 <>
 //                   <Grid item xs={6}>
-//                     <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                     <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                       {t('quote:storagePrice', 'Storage Price')}
 //                     </Typography>
 //                   </Grid>
 //                   <Grid item xs={6} textAlign="right">
-//                     <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                     <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                       {formatCurrency(breakdown.storagePrice)}
 //                     </Typography>
 //                   </Grid>
@@ -339,12 +339,12 @@
 //               </Grid>
 
 //               <Grid item xs={6}>
-//                 <Typography variant="body1" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+//                 <Typography variant="body1" fontWeight={700} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
 //                   {t('quote:total', 'Total')}
 //                 </Typography>
 //               </Grid>
 //               <Grid item xs={6} textAlign="right">
-//                 <Typography variant="body1" fontWeight={700} sx={{ color: secondaryColor, fontFamily: '"Poppins", sans-serif' }}>
+//                 <Typography variant="body1" fontWeight={700} sx={{ color: secondaryColor, fontFamily: '"DM Sans", sans-serif' }}>
 //                   {formatCurrency(totals?.totalPrice || totals?.price)}
 //                 </Typography>
 //               </Grid>
@@ -360,7 +360,7 @@
 //           sx={{
 //             borderColor: secondaryColor,
 //             color: primaryColor,
-//             fontFamily: '"Poppins", sans-serif',
+//             fontFamily: '"DM Sans", sans-serif',
 //             '&:hover': {
 //               borderColor: secondaryColor,
 //               bgcolor: `${secondaryColor}14`
@@ -377,7 +377,7 @@
 //           variant="contained"
 //           sx={{
 //             bgcolor: primaryColor,
-//             fontFamily: '"Poppins", sans-serif',
+//             fontFamily: '"DM Sans", sans-serif',
 //             '&:hover': {
 //               bgcolor: secondaryColor
 //             }
@@ -472,10 +472,10 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
         <Box display="flex" alignItems="center" gap={1.5}>
           <CheckIcon sx={{ fontSize: 32 }} />
           <Box>
-            <Typography variant="h5" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="h5" fontWeight={700} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
               {t('quote:quoteReady', 'Your Quote is Ready!')}
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9, fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="body2" sx={{ opacity: 0.9, fontFamily: '"DM Sans", sans-serif' }}>
               {isProperty ? t('quote:propertyQuote', 'Property Quote Details') : t('quote:apartmentQuote', 'Apartment Quote Details')}
             </Typography>
           </Box>
@@ -498,36 +498,36 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
             mt: 2
           }}
         >
-          <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: primaryColor, fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: primaryColor, fontFamily: '"DM Sans", sans-serif' }}>
             {t('quote:summary', 'Quote Summary')}
           </Typography>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12} sm={4}>
               <Box textAlign="center" p={2} bgcolor="white" borderRadius={2}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {t('quote:totalPrice', 'Total Price')}
                 </Typography>
-                <Typography variant="h4" fontWeight={700} sx={{ color: primaryColor, fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="h4" fontWeight={700} sx={{ color: primaryColor, fontFamily: '"DM Sans", sans-serif' }}>
                   {formatCurrency(totals?.totalPrice || totals?.price)}
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={12} sm={4}>
               <Box textAlign="center" p={2} bgcolor="white" borderRadius={2}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {t('quote:initialPayment', 'Initial Payment')}
                 </Typography>
-                <Typography variant="h4" fontWeight={700} sx={{ color: secondaryColor, fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="h4" fontWeight={700} sx={{ color: secondaryColor, fontFamily: '"DM Sans", sans-serif' }}>
                   {formatCurrency(totals?.initialPayment)}
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={12} sm={4}>
               <Box textAlign="center" p={2} bgcolor="white" borderRadius={2}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {t('quote:pending', 'Pending')}
                 </Typography>
-                <Typography variant="h4" fontWeight={700} sx={{ color: warningColor, fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="h4" fontWeight={700} sx={{ color: warningColor, fontFamily: '"DM Sans", sans-serif' }}>
                   {formatCurrency(totals?.pending)}
                 </Typography>
               </Box>
@@ -537,7 +537,7 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
 
         {/* PROPERTY DETAILS */}
         <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-          <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: primaryColor, fontFamily: '"Poppins", sans-serif', display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: primaryColor, fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: 1 }}>
             {isProperty ? <HomeIcon /> : <ApartmentIcon />}
             {isProperty ? t('quote:propertyDetails', 'Property Details') : t('quote:apartmentDetails', 'Apartment Details')}
           </Typography>
@@ -547,37 +547,37 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
             <Grid container spacing={2}>
               {lot && (
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                     {t('quote:lot', 'Lot')}
                   </Typography>
-                  <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                     #{lot.number} - {formatCurrency(lot.price)}
                   </Typography>
                 </Grid>
               )}
               {model && (
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                     {t('quote:model', 'Model')}
                   </Typography>
-                  <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                     {model.model} - {formatCurrency(model.price)}
                   </Typography>
                 </Grid>
               )}
               {facade && (
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                     {t('quote:facade', 'Facade')}
                   </Typography>
-                  <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                     {facade.title} {facade.price > 0 ? `- ${formatCurrency(facade.price)}` : '(Included)'}
                   </Typography>
                 </Grid>
               )}
               {options && (
                 <Grid item xs={12}>
-                  <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                     {t('quote:options', 'Options')}
                   </Typography>
                   <Box display="flex" gap={1} flexWrap="wrap">
@@ -606,28 +606,28 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
             <Grid container spacing={2}>
               {apartmentModel && (
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                     {t('quote:apartmentModel', 'Model')}
                   </Typography>
-                  <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                     {apartmentModel.name} ({apartmentModel.modelNumber})
                   </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                     {apartmentModel.bedrooms} {t('quote:bedrooms', 'beds')} • {apartmentModel.bathrooms} {t('quote:bathrooms', 'baths')} • {apartmentModel.sqft} sqft
                   </Typography>
                 </Grid>
               )}
               <Grid item xs={12} sm={6}>
-                <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {t('quote:location', 'Location')}
                 </Typography>
-                <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {t('quote:apartmentNumber', 'Apt {{number}} - Floor {{floor}}', { number: apartmentNumber, floor: floorNumber })}
                 </Typography>
               </Grid>
               {selectedRenderType && (
                 <Grid item xs={12}>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                     {t('quote:renderType', 'Render Type')}
                   </Typography>
                   <Chip 
@@ -644,7 +644,7 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
         {/* 🆕 ADJUSTMENTS SECTION (NUEVO - para catalog-config) */}
         {isProperty && breakdown?.adjustments && breakdown.adjustments.length > 0 && (
           <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2, border: `1px solid ${secondaryColor}33` }}>
-            <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: primaryColor, fontFamily: '"Poppins", sans-serif', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: primaryColor, fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: 1 }}>
               <TuneIcon />
               {t('quote:customizations', 'Customizations')}
             </Typography>
@@ -656,7 +656,7 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
                   <Grid item xs={8}>
                     <Box display="flex" alignItems="center" gap={1}>
                       <CheckIcon sx={{ fontSize: 18, color: secondaryColor }} />
-                      <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                      <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                         {adjustment.label || adjustment.code}
                       </Typography>
                     </Box>
@@ -666,7 +666,7 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
                       variant="body2" 
                       fontWeight={600} 
                       sx={{ 
-                        fontFamily: '"Poppins", sans-serif', 
+                        fontFamily: '"DM Sans", sans-serif', 
                         color: adjustment.amount >= 0 ? secondaryColor : warningColor 
                       }}
                     >
@@ -681,12 +681,12 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
               </Grid>
               
               <Grid item xs={8}>
-                <Typography variant="body2" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="body2" fontWeight={700} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {t('quote:totalCustomizations', 'Total Customizations')}
                 </Typography>
               </Grid>
               <Grid item xs={4} textAlign="right">
-                <Typography variant="body2" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif', color: secondaryColor }}>
+                <Typography variant="body2" fontWeight={700} sx={{ fontFamily: '"DM Sans", sans-serif', color: secondaryColor }}>
                   {formatCurrency(breakdown.adjustments.reduce((sum, adj) => sum + adj.amount, 0))}
                 </Typography>
               </Grid>
@@ -694,7 +694,7 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
             
             {pricingConfig?.version && (
               <Box mt={2} p={1.5} bgcolor={`${secondaryColor}0A`} borderRadius={1} border={`1px dashed ${secondaryColor}66`}>
-                <Typography variant="caption" sx={{ color: 'text.secondary', fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontFamily: '"DM Sans", sans-serif' }}>
                   {t('quote:pricingVersion', 'Pricing Configuration Version')}: <Chip label={`v${pricingConfig.version}`} size="small" sx={{ ml: 1, height: 20 }} />
                 </Typography>
               </Box>
@@ -705,30 +705,30 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
         {/* PRICE BREAKDOWN (only for properties) */}
         {isProperty && breakdown && (
           <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-            <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: primaryColor, fontFamily: '"Poppins", sans-serif', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h6" fontWeight={700} gutterBottom sx={{ color: primaryColor, fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: 1 }}>
               <MoneyIcon />
               {t('quote:priceBreakdown', 'Price Breakdown')}
             </Typography>
             <Divider sx={{ my: 2 }} />
             <Grid container spacing={1.5}>
               <Grid item xs={6}>
-                <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {t('quote:lotPrice', 'Lot Price')}
                 </Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
-                <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {formatCurrency(breakdown.lotPrice)}
                 </Typography>
               </Grid>
 
               <Grid item xs={6}>
-                <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {t('quote:modelBasePrice', 'Model Base Price')}
                 </Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
-                <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {formatCurrency(breakdown.modelBasePrice)}
                 </Typography>
               </Grid>
@@ -736,12 +736,12 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
               {breakdown.facadePrice > 0 && (
                 <>
                   <Grid item xs={6}>
-                    <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                    <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                       {t('quote:facadePrice', 'Facade Price')}
                     </Typography>
                   </Grid>
                   <Grid item xs={6} textAlign="right">
-                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                       {formatCurrency(breakdown.facadePrice)}
                     </Typography>
                   </Grid>
@@ -751,12 +751,12 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
               {breakdown.upgradePrice > 0 && (
                 <>
                   <Grid item xs={6}>
-                    <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                    <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                       {t('quote:upgradePrice', 'Upgrade Price')}
                     </Typography>
                   </Grid>
                   <Grid item xs={6} textAlign="right">
-                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                       {formatCurrency(breakdown.upgradePrice)}
                     </Typography>
                   </Grid>
@@ -766,12 +766,12 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
               {breakdown.balconyPrice > 0 && (
                 <>
                   <Grid item xs={6}>
-                    <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                    <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                       {t('quote:balconyPrice', 'Balcony Price')}
                     </Typography>
                   </Grid>
                   <Grid item xs={6} textAlign="right">
-                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                       {formatCurrency(breakdown.balconyPrice)}
                     </Typography>
                   </Grid>
@@ -781,12 +781,12 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
               {breakdown.storagePrice > 0 && (
                 <>
                   <Grid item xs={6}>
-                    <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                    <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                       {t('quote:storagePrice', 'Storage Price')}
                     </Typography>
                   </Grid>
                   <Grid item xs={6} textAlign="right">
-                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                       {formatCurrency(breakdown.storagePrice)}
                     </Typography>
                   </Grid>
@@ -798,12 +798,12 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
               </Grid>
 
               <Grid item xs={6}>
-                <Typography variant="body1" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="body1" fontWeight={700} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {t('quote:total', 'Total')}
                 </Typography>
               </Grid>
               <Grid item xs={6} textAlign="right">
-                <Typography variant="body1" fontWeight={700} sx={{ color: secondaryColor, fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="body1" fontWeight={700} sx={{ color: secondaryColor, fontFamily: '"DM Sans", sans-serif' }}>
                   {formatCurrency(totals?.totalPrice || totals?.price)}
                 </Typography>
               </Grid>
@@ -819,7 +819,7 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
           sx={{
             borderColor: secondaryColor,
             color: primaryColor,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             '&:hover': {
               borderColor: secondaryColor,
               bgcolor: `${secondaryColor}14`
@@ -836,7 +836,7 @@ const QuoteResultModal = ({ open, onClose, quoteData, type = 'property', theme }
           variant="contained"
           sx={{
             bgcolor: primaryColor,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             '&:hover': {
               bgcolor: secondaryColor
             }

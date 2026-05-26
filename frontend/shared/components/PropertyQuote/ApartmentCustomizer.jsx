@@ -46,7 +46,7 @@ const ApartmentCustomizer = () => {
         overflow: 'hidden',
         p: 3
       }}>
-        <Alert severity="info" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+        <Alert severity="info" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
           {t('quote:selectApartmentToCustomize', 'Please select an apartment to customize')}
         </Alert>
       </Paper>
@@ -88,7 +88,7 @@ const ApartmentCustomizer = () => {
 
   const sectionLabelSx = {
     fontWeight: 700,
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"DM Sans", sans-serif',
     letterSpacing: '1.5px',
     textTransform: 'uppercase',
     fontSize: '0.85rem',
@@ -97,7 +97,7 @@ const ApartmentCustomizer = () => {
 
   const sectionSubLabelSx = {
     fontWeight: 700,
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"DM Sans", sans-serif',
     letterSpacing: '1px',
     textTransform: 'uppercase',
     fontSize: '0.7rem',
@@ -109,7 +109,7 @@ const ApartmentCustomizer = () => {
     color: theme.palette.primary.main,
     fontWeight: 700,
     fontSize: '0.65rem',
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"DM Sans", sans-serif',
   }
 
   return (
@@ -138,19 +138,19 @@ const ApartmentCustomizer = () => {
           <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
             <Box display="flex" alignItems="center" gap={0.5}>
               <BedIcon sx={{ fontSize: 16, color: theme.palette.text.secondary }} />
-              <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>
+              <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem' }}>
                 {model.bedrooms || 0} {t('quote:bedrooms', 'Beds')}
               </Typography>
             </Box>
             <Box display="flex" alignItems="center" gap={0.5}>
               <BathtubIcon sx={{ fontSize: 16, color: theme.palette.text.secondary }} />
-              <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>
+              <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem' }}>
                 {model.bathrooms || 0} {t('quote:bathrooms', 'Baths')}
               </Typography>
             </Box>
             <Box display="flex" alignItems="center" gap={0.5}>
               <SquareFootIcon sx={{ fontSize: 16, color: theme.palette.text.secondary }} />
-              <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>
+              <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem' }}>
                 {model.sqft || 0} {t('quote:sqft', 'sq ft')}
               </Typography>
             </Box>
@@ -167,7 +167,7 @@ const ApartmentCustomizer = () => {
         </Typography>
         
         {!hasBasic && !hasUpgrade ? (
-          <Alert severity="warning" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+          <Alert severity="warning" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
             {t('quote:noInteriorPackages', 'No interior render packages available for this apartment')}
           </Alert>
         ) : (
@@ -192,7 +192,7 @@ const ApartmentCustomizer = () => {
                         <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
                           <Box display="flex" alignItems="center" gap={1}>
                             <StarOutlineIcon sx={{ color: theme.palette.success.main, fontSize: 20 }} />
-                            <Typography fontWeight={700} fontSize="0.9rem" sx={{ fontFamily: '"Poppins", sans-serif', color: theme.palette.primary.main }}>
+                            <Typography fontWeight={700} fontSize="0.9rem" sx={{ fontFamily: '"DM Sans", sans-serif', color: theme.palette.primary.main }}>
                               {t('quote:basicPackage', 'Basic Package')}
                             </Typography>
                           </Box>
@@ -200,7 +200,7 @@ const ApartmentCustomizer = () => {
                             <CheckCircleIcon sx={{ color: theme.palette.success.main, fontSize: 20 }} />
                           )}
                         </Box>
-                        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', display: 'block' }}>
+                        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif', display: 'block' }}>
                           {(selectedApartment?.interiorRendersBasic || []).length} {t('quote:render', 'render')}{(selectedApartment?.interiorRendersBasic || []).length !== 1 ? 's' : ''}
                         </Typography>
                       </Box>
@@ -230,7 +230,7 @@ const ApartmentCustomizer = () => {
                         <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
                           <Box display="flex" alignItems="center" gap={1}>
                             <StarIcon sx={{ color: theme.palette.warning.main, fontSize: 20 }} />
-                            <Typography fontWeight={700} fontSize="0.9rem" sx={{ fontFamily: '"Poppins", sans-serif', color: theme.palette.primary.main }}>
+                            <Typography fontWeight={700} fontSize="0.9rem" sx={{ fontFamily: '"DM Sans", sans-serif', color: theme.palette.primary.main }}>
                               {t('quote:upgradePackage', 'Upgrade Package')}
                             </Typography>
                           </Box>
@@ -238,7 +238,7 @@ const ApartmentCustomizer = () => {
                             <CheckCircleIcon sx={{ color: theme.palette.warning.main, fontSize: 20 }} />
                           )}
                         </Box>
-                        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', display: 'block' }}>
+                        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif', display: 'block' }}>
                           {(selectedApartment?.interiorRendersUpgrade || []).length} {t('quote:render', 'render')}{(selectedApartment?.interiorRendersUpgrade || []).length !== 1 ? 's' : ''}
                         </Typography>
                       </Box>

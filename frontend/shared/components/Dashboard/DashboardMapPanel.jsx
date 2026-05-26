@@ -24,7 +24,7 @@ const DashboardMapPanel = ({ title, children }) => {
       }}>
         {title && (
           <Typography variant="h6" sx={{
-            fontWeight: 700, fontFamily: '"Poppins", sans-serif',
+            fontWeight: 700, fontFamily: '"DM Sans", sans-serif',
             color: theme.palette.primary.main, letterSpacing: '0.5px', mb: 2
           }}>
             {title}

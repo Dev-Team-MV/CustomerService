@@ -114,7 +114,7 @@ const NotificationsDrawer = ({
                 variant="h6"
                 fontWeight={700}
                 sx={{
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   letterSpacing: "0.5px",
                 }}
               >
@@ -124,7 +124,7 @@ const NotificationsDrawer = ({
                 variant="caption"
                 sx={{
                   opacity: 0.9,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                 }}
               >
                 {t('unread', { count: notifications.filter((n) => !n.read).length })}
@@ -185,7 +185,7 @@ const NotificationsDrawer = ({
               variant="body1"
               sx={{
                 color: theme.palette.text.secondary,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontWeight: 500,
               }}
             >
@@ -195,7 +195,7 @@ const NotificationsDrawer = ({
               variant="caption"
               sx={{
                 color: theme.palette.text.disabled,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 textAlign: "center",
                 maxWidth: 240,
               }}
@@ -293,7 +293,7 @@ const NotificationsDrawer = ({
                       sx={{
                         color: n.read ? theme.palette.text.secondary : theme.palette.primary.main,
                         mb: 0.5,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontSize: "0.9rem",
                         letterSpacing: "0.3px",
                       }}
@@ -306,7 +306,7 @@ const NotificationsDrawer = ({
                         color: theme.palette.text.disabled,
                         display: "block",
                         mb: 1,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         lineHeight: 1.5,
                       }}
                     >
@@ -332,7 +332,7 @@ const NotificationsDrawer = ({
                         sx={{
                           color: theme.palette.text.disabled,
                           fontSize: "0.7rem",
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                         }}
                       >
                         {t('hoursAgo', { count: 2 })}
@@ -396,7 +396,7 @@ const NotificationsDrawer = ({
               color: theme.palette.primary.main,
               fontWeight: 600,
               py: 1.2,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: "0.5px",
               textTransform: "none",
               fontSize: "0.9rem",

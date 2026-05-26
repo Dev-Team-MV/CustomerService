@@ -33,13 +33,13 @@ const BuildingFloorTabs = ({
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
         <Box display="flex" alignItems="center" gap={1}>
           <GridOn sx={{ fontSize: 20, color: theme.palette.accent?.main || theme.palette.primary.main }} />
-          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
             {t('buildings:floorPlans', 'Floor Plans')}
           </Typography>
           <Chip
             label={`${floorPlans.length} / ${totalFloors}`}
             size="small"
-            sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, bgcolor: theme.palette.chipAdmin?.bg, color: theme.palette.chipAdmin?.color }}
+            sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, bgcolor: theme.palette.chipAdmin?.bg, color: theme.palette.chipAdmin?.color }}
           />
         </Box>
         {floorPlans.length > 0 && (
@@ -48,7 +48,7 @@ const BuildingFloorTabs = ({
             size="small"
             startIcon={<Edit />}
             onClick={handleOpenFloorPlanEditor}
-            sx={{ borderRadius: 2, textTransform: 'none', fontFamily: '"Poppins", sans-serif', fontWeight: 600 }}
+            sx={{ borderRadius: 2, textTransform: 'none', fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}
           >
             {t('buildings:editPolygonsAllFloors', 'Edit Polygons')}
           </Button>
@@ -58,7 +58,7 @@ const BuildingFloorTabs = ({
       {floorPlans.length === 0 ? (
         <Paper elevation={0} sx={{ p: 4, textAlign: 'center', borderRadius: 3, border: `2px dashed ${theme.palette.divider}`, bgcolor: theme.palette.background.default }}>
           <GridOn sx={{ fontSize: 48, color: theme.palette.divider, mb: 1 }} />
-          <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
             {t('buildings:noFloorPlans', 'No floor plans uploaded yet')}
           </Typography>
         </Paper>
@@ -80,13 +80,13 @@ const BuildingFloorTabs = ({
                     )}
                     <CardContent sx={{ pb: '12px !important' }}>
                       <Box display="flex" alignItems="center" justifyContent="space-between">
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
                           Floor {fp.floorNumber}
                         </Typography>
-                        <Chip label={label} size="small" sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: '0.7rem', bgcolor: color + '22', color: color }} />
+                        <Chip label={label} size="small" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: '0.7rem', bgcolor: color + '22', color: color }} />
                       </Box>
                       {fp.polygons?.length > 0 && (
-                        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+                        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
                           {fp.polygons.length} {t('buildings:polygons', 'polygons')}
                         </Typography>
                       )}

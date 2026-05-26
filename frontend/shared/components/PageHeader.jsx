@@ -103,7 +103,7 @@ const PageHeader = ({
                 sx={{
                   fontWeight: 800,
                   color: theme.palette.text.primary,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   letterSpacing: '0.5px',
                   fontSize: { xs: '1.75rem', md: '2.125rem' }
                 }}
@@ -115,7 +115,7 @@ const PageHeader = ({
                   variant="body1"
                   sx={{
                     color: theme.palette.text.secondary,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontSize: { xs: '0.875rem', md: '1rem' }
                   }}
                 >
@@ -145,7 +145,7 @@ const PageHeader = ({
                         fontWeight: 600,
                         textTransform: 'none',
                         letterSpacing: '0.5px',
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         px: 3,
                         py: 1.5,
                         minWidth: 160,
@@ -176,7 +176,7 @@ const PageHeader = ({
                         fontWeight: 600,
                         textTransform: 'none',
                         letterSpacing: '1px',
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         px: 3,
                         py: 1.5,
                         boxShadow: `0 4px 12px ${theme.palette.primary.main}40`,

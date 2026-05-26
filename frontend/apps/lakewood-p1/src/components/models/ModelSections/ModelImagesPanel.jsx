@@ -178,7 +178,7 @@ const handleSaveReorders = async () => {
             sx={{
               borderRadius: 2,
               fontWeight: 600,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               bgcolor: reorderMode ? '#8CA551' : 'transparent',
               borderColor: '#8CA551',
               color: reorderMode ? 'white' : '#8CA551',
@@ -196,7 +196,7 @@ const handleSaveReorders = async () => {
               label={`${pendingCount} cambio${pendingCount > 1 ? 's' : ''} pendiente${pendingCount > 1 ? 's' : ''}`}
               color="warning"
               size="small"
-              sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+              sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}
             />
           )}
         </Box>
@@ -216,7 +216,7 @@ const handleSaveReorders = async () => {
                     startIcon={<Save />}
                     onClick={handleSaveReorders}
                     disabled={savingReorders}
-                    sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+                    sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}
                   >
                     {savingReorders ? 'Guardando...' : 'Guardar'}
                   </Button>
@@ -227,7 +227,7 @@ const handleSaveReorders = async () => {
                     startIcon={<Cancel />}
                     onClick={handleCancelReorder}
                     disabled={savingReorders}
-                    sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+                    sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}
                   >
                     Cancelar
                   </Button>
@@ -260,7 +260,7 @@ const handleSaveReorders = async () => {
             display="block"
             sx={{
               color: '#333F1F',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: '1px',
               textTransform: 'uppercase',
               fontSize: '0.7rem',
@@ -341,7 +341,7 @@ const handleSaveReorders = async () => {
                   fontSize: "0.75rem",
                   borderRadius: 2,
                   bgcolor: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontWeight: 600,
                   '&:hover': {
                     bgcolor: '#4a5d3a'

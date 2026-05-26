@@ -228,7 +228,7 @@ const ProfilePage = () => {
                   sx={{
                     fontWeight: 800,
                     color: theme.palette.primary.main,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     letterSpacing: '0.5px',
                     fontSize: { xs: '1.75rem', md: '2.125rem' }
                   }}
@@ -239,7 +239,7 @@ const ProfilePage = () => {
                   variant="body1"
                   sx={{
                     color: theme.palette.text.secondary,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontSize: { xs: '0.875rem', md: '1rem' }
                   }}
                 >
@@ -330,7 +330,7 @@ const ProfilePage = () => {
                     mt: 2,
                     fontWeight: 700,
                     color: theme.palette.primary.main,
-                    fontFamily: '"Poppins", sans-serif'
+                    fontFamily: '"DM Sans", sans-serif'
                   }}
                 >
                   {formData.firstName} {formData.lastName}
@@ -340,7 +340,7 @@ const ProfilePage = () => {
                   variant="body2"
                   sx={{
                     color: theme.palette.text.secondary,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     mb: 2
                   }}
                 >
@@ -356,7 +356,7 @@ const ProfilePage = () => {
                     color: theme.palette.primary.main,
                     fontWeight: 600,
                     border: `1px solid ${theme.palette.secondary.main}`,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     '& .MuiChip-icon': {
                       color: theme.palette.secondary.main
                     }
@@ -373,7 +373,7 @@ const ProfilePage = () => {
                       textTransform: 'uppercase',
                       letterSpacing: '1px',
                       fontWeight: 600,
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       mb: 1,
                       display: 'block'
                     }}
@@ -387,7 +387,7 @@ const ProfilePage = () => {
                       variant="body2"
                       sx={{
                         color: theme.palette.text.secondary,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontSize: '0.85rem'
                       }}
                     >
@@ -402,7 +402,7 @@ const ProfilePage = () => {
                         variant="body2"
                         sx={{
                           color: theme.palette.text.secondary,
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           fontSize: '0.85rem'
                         }}
                       >
@@ -438,7 +438,7 @@ const ProfilePage = () => {
                       sx={{
                         fontWeight: 700,
                         color: theme.palette.primary.main,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontSize: { xs: '1.1rem', md: '1.25rem' }
                       }}
                     >
@@ -472,7 +472,7 @@ const ProfilePage = () => {
                               sx={{
                                 borderColor: theme.palette.text.secondary,
                                 color: theme.palette.text.secondary,
-                                fontFamily: '"Poppins", sans-serif',
+                                fontFamily: '"DM Sans", sans-serif',
                                 fontWeight: 600,
                                 '&:hover': {
                                   borderColor: theme.palette.primary.main,
@@ -495,7 +495,7 @@ const ProfilePage = () => {
                               onClick={handleSave}
                               sx={{
                                 bgcolor: theme.palette.secondary.main,
-                                fontFamily: '"Poppins", sans-serif',
+                                fontFamily: '"DM Sans", sans-serif',
                                 fontWeight: 600,
                                 boxShadow: `0 4px 12px ${theme.palette.secondary.main}33`,
                                 '&:hover': {
@@ -521,7 +521,7 @@ const ProfilePage = () => {
                             onClick={() => setIsEditing(true)}
                             sx={{
                               bgcolor: theme.palette.primary.main,
-                              fontFamily: '"Poppins", sans-serif',
+                              fontFamily: '"DM Sans", sans-serif',
                               fontWeight: 600,
                               boxShadow: `0 4px 12px ${theme.palette.primary.main}33`,
                               '&:hover': {
@@ -558,7 +558,7 @@ const ProfilePage = () => {
                       }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           '&.Mui-focused fieldset': {
                             borderColor: theme.palette.secondary.main,
                             borderWidth: 2
@@ -588,7 +588,7 @@ const ProfilePage = () => {
                       }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           '&.Mui-focused fieldset': {
                             borderColor: theme.palette.secondary.main,
                             borderWidth: 2
@@ -618,7 +618,7 @@ const ProfilePage = () => {
                       }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           '&.Mui-focused fieldset': {
                             borderColor: theme.palette.secondary.main,
                             borderWidth: 2
@@ -648,7 +648,7 @@ const ProfilePage = () => {
                       }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           '&.Mui-focused fieldset': {
                             borderColor: theme.palette.secondary.main,
                             borderWidth: 2
@@ -678,7 +678,7 @@ const ProfilePage = () => {
                     sx={{
                       fontWeight: 700,
                       color: theme.palette.primary.main,
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       fontSize: { xs: '1.1rem', md: '1.25rem' }
                     }}
                   >
@@ -704,7 +704,7 @@ const ProfilePage = () => {
                       mb: 3,
                       borderRadius: 2,
                       '& .MuiAlert-message': {
-                        fontFamily: '"Poppins", sans-serif'
+                        fontFamily: '"DM Sans", sans-serif'
                       }
                     }}
                   >
@@ -742,7 +742,7 @@ const ProfilePage = () => {
                       }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           '&.Mui-focused fieldset': {
                             borderColor: theme.palette.secondary.main,
                             borderWidth: 2
@@ -784,7 +784,7 @@ const ProfilePage = () => {
                       }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           '&.Mui-focused fieldset': {
                             borderColor: theme.palette.secondary.main,
                             borderWidth: 2
@@ -826,7 +826,7 @@ const ProfilePage = () => {
                       }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           '&.Mui-focused fieldset': {
                             borderColor: theme.palette.secondary.main,
                             borderWidth: 2
@@ -855,7 +855,7 @@ const ProfilePage = () => {
             severity={snackbar.severity}
             variant="filled"
             sx={{
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontWeight: 600
             }}
           >

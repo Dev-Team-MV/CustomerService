@@ -304,7 +304,7 @@ const ModelCustomizationCore = ({
           variant="h4"
           fontWeight={700}
           mb={0.5}
-          sx={{ fontFamily: '"Poppins", sans-serif' }}
+          sx={{ fontFamily: '"DM Sans", sans-serif' }}
         >
           {model.model}
           {isModel10 && (
@@ -316,7 +316,7 @@ const ModelCustomizationCore = ({
                 bgcolor: 'rgba(140, 165, 81, 0.2)',
                 color: 'white',
                 fontWeight: 600,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 border: '1px solid rgba(140, 165, 81, 0.4)'
               }}
             />
@@ -330,7 +330,7 @@ const ModelCustomizationCore = ({
                 bgcolor: 'rgba(140, 165, 81, 0.2)',
                 color: 'white',
                 fontWeight: 600,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 border: '1px solid rgba(140, 165, 81, 0.4)'
               }}
             />
@@ -340,7 +340,7 @@ const ModelCustomizationCore = ({
           variant="body2"
           sx={{
             opacity: 0.9,
-            fontFamily: '"Poppins", sans-serif'
+            fontFamily: '"DM Sans", sans-serif'
           }}
         >
           {compareModel
@@ -388,7 +388,7 @@ const ModelCustomizationCore = ({
                     <Typography
                       variant="body2"
                       fontWeight={600}
-                      sx={{ fontFamily: '"Poppins", sans-serif', color: '#333F1F' }}
+                      sx={{ fontFamily: '"DM Sans", sans-serif', color: '#333F1F' }}
                     >
                       {isSynced ? t('synced') : t('independent')}
                     </Typography>
@@ -412,7 +412,7 @@ const ModelCustomizationCore = ({
     flexWrap: 'wrap', // <-- Añade esto
     maxWidth: '100%', // <-- Añade esto
     '& .MuiToggleButton-root': {
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       fontWeight: 600,
       fontSize: '0.75rem',
       color: '#706f6f',
@@ -457,7 +457,7 @@ const ModelCustomizationCore = ({
                     minHeight: 36,
                     py: 0.5,
                     fontSize: '0.75rem',
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontWeight: 500,
                     color: '#706f6f',
                     '&.Mui-selected': {
@@ -522,7 +522,7 @@ const ModelCustomizationCore = ({
                 fontSize: '1rem',
                 letterSpacing: '1px',
                 textTransform: 'uppercase',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
                 position: 'relative',
                 overflow: 'hidden',
@@ -573,7 +573,7 @@ const ModelCustomizationCore = ({
                   color: 'white',
                   fontWeight: 600,
                   m: 1,
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               />
               <Box sx={{ width: '100%', height: 220, position: 'relative' }}>
@@ -602,7 +602,7 @@ const ModelCustomizationCore = ({
                   color: 'white',
                   fontWeight: 600,
                   m: 1,
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               />
               <Box sx={{ width: '100%', height: 220, position: 'relative' }}>
@@ -647,7 +647,7 @@ const ModelCustomizationCore = ({
                   bgcolor: '#333F1F',
                   color: 'white',
                   fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               />
             </Box>
@@ -693,7 +693,7 @@ const ModelCustomizationCore = ({
                   label={t('customizationOptions')}
                   size="small"
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontWeight: 600
                   }}
                 />
@@ -720,7 +720,7 @@ const ModelCustomizationCore = ({
                       <Typography
                         variant="body2"
                         fontWeight={600}
-                        sx={{ fontFamily: '"Poppins", sans-serif', color: '#333F1F' }}
+                        sx={{ fontFamily: '"DM Sans", sans-serif', color: '#333F1F' }}
                       >
                         {isSynced ? t('synced') : t('independent')}
                       </Typography>
@@ -744,7 +744,7 @@ const ModelCustomizationCore = ({
     flexWrap: 'wrap', // <-- Añade esto
     maxWidth: '100%', // <-- Añade esto
     '& .MuiToggleButton-root': {
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       fontWeight: 600,
       fontSize: '0.75rem',
       color: '#706f6f',
@@ -789,7 +789,7 @@ const ModelCustomizationCore = ({
                       minHeight: 36,
                       py: 0.5,
                       fontSize: '0.75rem',
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       fontWeight: 500,
                       color: '#706f6f',
                       '&.Mui-selected': {
@@ -844,7 +844,7 @@ const ModelCustomizationCore = ({
                   fontSize: '1.1rem',
                   letterSpacing: '1px',
                   textTransform: 'uppercase',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
                   position: 'relative',
                   overflow: 'hidden',
@@ -906,7 +906,7 @@ const ModelCustomizationCore = ({
                   bgcolor: compareModel ? '#8CA551' : (options.upgrade || options.balcony || options.storage ? '#8CA551' : '#333F1F'),
                   color: 'white',
                   fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               />
             </Box>

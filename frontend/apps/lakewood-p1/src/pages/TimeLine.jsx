@@ -253,7 +253,7 @@ const columns = [
         sx={{
           fontWeight: 600,
           color: '#1a1a1a',
-          fontFamily: '"Poppins", sans-serif'
+          fontFamily: '"DM Sans", sans-serif'
         }}
       >
         {row.title}
@@ -269,7 +269,7 @@ const columns = [
         variant="body2"
         sx={{
           color: '#706f6f',
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           fontSize: '0.95rem',
           display: '-webkit-box',
           WebkitLineClamp: 2,
@@ -292,7 +292,7 @@ const columns = [
         sx={{
           fontWeight: 700,
           color: '#8CA551',
-          fontFamily: '"Poppins", sans-serif'
+          fontFamily: '"DM Sans", sans-serif'
         }}
       >
         {(row.media || []).filter(m => m.type === 'image').length}
@@ -310,7 +310,7 @@ const columns = [
         sx={{
           fontWeight: 700,
           color: '#E5863C',
-          fontFamily: '"Poppins", sans-serif'
+          fontFamily: '"DM Sans", sans-serif'
         }}
       >
         {(row.media || []).filter(m => m.type === 'video').length}

@@ -27,7 +27,7 @@ const RecentItemsPanel = ({ title, items = [], renderItem, viewAllPath, emptyMes
       }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
           <Typography variant="h6" sx={{
-            fontWeight: 700, fontFamily: '"Poppins", sans-serif',
+            fontWeight: 700, fontFamily: '"DM Sans", sans-serif',
             color: theme.palette.primary.main, letterSpacing: '0.5px'
           }}>
             {title}
@@ -37,7 +37,7 @@ const RecentItemsPanel = ({ title, items = [], renderItem, viewAllPath, emptyMes
               onClick={() => navigate(viewAllPath)}
               sx={{
                 color: theme.palette.secondary.main, textTransform: 'none',
-                fontWeight: 600, fontFamily: '"Poppins", sans-serif',
+                fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
                 '&:hover': { bgcolor: 'transparent', color: theme.palette.primary.main }
               }}
             >
@@ -50,7 +50,7 @@ const RecentItemsPanel = ({ title, items = [], renderItem, viewAllPath, emptyMes
           ? items.slice(0, 5).map((item, idx) => renderItem(item, idx))
           : (
             <Box py={6} textAlign="center">
-              <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
                 {emptyMessage || t('noItems', 'No hay elementos recientes')}
               </Typography>
             </Box>

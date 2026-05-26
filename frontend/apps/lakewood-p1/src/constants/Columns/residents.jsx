@@ -43,7 +43,7 @@ export const useResidentColumns = ({
             bgcolor: 'transparent',
             background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
             color: 'white', fontWeight: 700, fontSize: '1rem',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             border: '2px solid rgba(255, 255, 255, 0.9)',
             boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
           }}
@@ -51,10 +51,10 @@ export const useResidentColumns = ({
           {row.firstName?.charAt(0)}
         </Avatar>
         <Box>
-          <Typography fontWeight={600} fontFamily='"Poppins", sans-serif'>
+          <Typography fontWeight={600} fontFamily='"DM Sans", sans-serif'>
             {row.firstName} {row.lastName}
           </Typography>
-          <Typography variant="caption" color="#706f6f" fontFamily='"Poppins", sans-serif'>
+          <Typography variant="caption" color="#706f6f" fontFamily='"DM Sans", sans-serif'>
             {row.email}
           </Typography>
         </Box>
@@ -85,7 +85,7 @@ export const useResidentColumns = ({
           icon={<Icon sx={{ color }} />}
           sx={{
             bgcolor: `${color}10`, color,
-            fontWeight: 600, fontFamily: '"Poppins", sans-serif',
+            fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
             border: `1px solid ${color}40`
           }}
           size="small"
@@ -102,7 +102,7 @@ export const useResidentColumns = ({
         <Home sx={{ fontSize: 16, color: '#8CA551' }} />
         <Typography
           variant="body2"
-          sx={{ fontWeight: 600, color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}
+          sx={{ fontWeight: 600, color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}
         >
           {row.lots?.length || 0}
         </Typography>

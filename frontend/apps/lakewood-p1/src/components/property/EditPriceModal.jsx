@@ -28,7 +28,7 @@ const GreenConnector = styled(StepConnector)(() => ({
 const StepIconRoot = styled('div')(({ ownerState }) => ({
   width: 36, height: 36, borderRadius: '50%',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
-  fontFamily: '"Poppins", sans-serif', fontWeight: 700, fontSize: '0.85rem',
+  fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: '0.85rem',
   transition: 'all 0.3s ease',
   ...(ownerState.completed ? {
     background: 'linear-gradient(135deg, #333F1F, #8CA551)',
@@ -54,7 +54,7 @@ const StepIcon = ({ active, completed, icon, icons }) => (
 // ── field styles ───────────────────────────────────────────
 const selectSx = {
   borderRadius: 3,
-  fontFamily: '"Poppins", sans-serif',
+  fontFamily: '"DM Sans", sans-serif',
   '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e0e0e0' },
   '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#8CA551' },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#333F1F' }
@@ -63,12 +63,12 @@ const selectSx = {
 const fieldSx = {
   '& .MuiOutlinedInput-root': {
     borderRadius: 3,
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"DM Sans", sans-serif',
     '& fieldset': { borderColor: '#e0e0e0' },
     '&:hover fieldset': { borderColor: '#8CA551' },
     '&.Mui-focused fieldset': { borderColor: '#333F1F' }
   },
-  '& .MuiInputLabel-root': { fontFamily: '"Poppins", sans-serif' },
+  '& .MuiInputLabel-root': { fontFamily: '"DM Sans", sans-serif' },
   '& .MuiInputLabel-root.Mui-focused': { color: '#333F1F' }
 }
 
@@ -143,7 +143,7 @@ const EditPropertyModal = ({
             .filter(l => l.status === 'available' || l._id === property?.lot?._id)
             .sort((a, b) => Number(a.number) - Number(b.number))
             .map(lot => (
-              <MenuItem key={lot._id} value={lot._id} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+              <MenuItem key={lot._id} value={lot._id} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                 Lot {lot.number} — ${lot.price?.toLocaleString()}
               </MenuItem>
             ))}
@@ -160,7 +160,7 @@ const EditPropertyModal = ({
           startAdornment={<House sx={{ color: '#8CA551', mr: 1, fontSize: 20 }} />}
         >
           {models.map(model => (
-            <MenuItem key={model._id} value={model._id} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            <MenuItem key={model._id} value={model._id} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
               {model.model} — {model.sqft} sqft
             </MenuItem>
           ))}
@@ -177,7 +177,7 @@ const EditPropertyModal = ({
     startAdornment={<Storefront sx={{ color: '#8CA551', mr: 1, fontSize: 20 }} />}
   >
     {facades.map(deck => (
-      <MenuItem key={deck._id} value={deck._id} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+      <MenuItem key={deck._id} value={deck._id} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
         {deck.name} {deck.price > 0 ? `— $${deck.price.toLocaleString()}` : '— Included'}
       </MenuItem>
     ))}
@@ -201,7 +201,7 @@ const EditPropertyModal = ({
                     label={user ? `${user.firstName} ${user.lastName}` : id}
                     size="small"
                     sx={{
-                      fontFamily: '"Poppins", sans-serif', fontWeight: 600,
+                      fontFamily: '"DM Sans", sans-serif', fontWeight: 600,
                       bgcolor: '#e8f5ee', color: '#333F1F',
                       border: '1px solid rgba(140,165,81,0.3)'
                     }}
@@ -212,7 +212,7 @@ const EditPropertyModal = ({
           )}
         >
           {users.map(user => (
-            <MenuItem key={user._id} value={user._id} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            <MenuItem key={user._id} value={user._id} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
               {user.firstName} {user.lastName}
               <Typography variant="caption" sx={{ ml: 1, color: '#706f6f' }}>{user.email}</Typography>
             </MenuItem>
@@ -258,7 +258,7 @@ const EditPropertyModal = ({
           color: 'white'
         }}>
           <Typography variant="caption" sx={{
-            fontFamily: '"Poppins", sans-serif', fontWeight: 600,
+            fontFamily: '"DM Sans", sans-serif', fontWeight: 600,
             textTransform: 'uppercase', letterSpacing: '1.5px',
             opacity: 0.7, display: 'block', mb: 1.5
           }}>
@@ -271,10 +271,10 @@ const EditPropertyModal = ({
               { label: 'Pending',  value: values.pending         ?? property?.pending         ?? 0 },
             ].map(item => (
               <Box key={item.label}>
-                <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', opacity: 0.7 }}>
+                <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', opacity: 0.7 }}>
                   {item.label}
                 </Typography>
-                <Typography variant="h6" sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700, fontSize: '1rem' }}>
+                <Typography variant="h6" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: '1rem' }}>
                   ${Number(item.value).toLocaleString()}
                 </Typography>
               </Box>
@@ -301,7 +301,7 @@ const EditPropertyModal = ({
               { value: 'sold',      label: 'Sold',      color: '#333F1F' },
               { value: 'cancelled', label: 'Cancelled', color: '#d32f2f' },
             ].map(s => (
-              <MenuItem key={s.value} value={s.value} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+              <MenuItem key={s.value} value={s.value} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                 <Box display="flex" alignItems="center" gap={1}>
                   <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: s.color }} />
                   {s.label}
@@ -319,8 +319,8 @@ const EditPropertyModal = ({
             onChange={e => onChange({ ...values, modelType: e.target.value })}
             sx={selectSx}
           >
-            <MenuItem value="basic"   sx={{ fontFamily: '"Poppins", sans-serif' }}>Basic</MenuItem>
-            <MenuItem value="upgrade" sx={{ fontFamily: '"Poppins", sans-serif' }}>Upgrade</MenuItem>
+            <MenuItem value="basic"   sx={{ fontFamily: '"DM Sans", sans-serif' }}>Basic</MenuItem>
+            <MenuItem value="upgrade" sx={{ fontFamily: '"DM Sans", sans-serif' }}>Upgrade</MenuItem>
           </Select>
         </FormControl>
       </Box>
@@ -358,7 +358,7 @@ const EditPropertyModal = ({
               />
             }
             label={
-              <Typography sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: '0.875rem', color: '#333F1F' }}>
+              <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: '0.875rem', color: '#333F1F' }}>
                 {opt.label}
               </Typography>
             }
@@ -396,7 +396,7 @@ const EditPropertyModal = ({
                 )}
                 sx={{
                   '& .MuiStepLabel-label': {
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontWeight: i === step ? 700 : 500,
                     fontSize: '0.75rem',
                     color: i === step ? '#333F1F' : '#706f6f',

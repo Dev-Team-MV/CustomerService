@@ -199,7 +199,7 @@ const PhaseMediaGallery = ({
               px: 1.5,
               py: 0.5,
               borderRadius: 2,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: '0.75rem',
               fontWeight: 600
             }}
@@ -220,7 +220,7 @@ const PhaseMediaGallery = ({
               px: 2,
               py: 1,
               borderRadius: 2,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: '0.85rem',
               fontWeight: 600,
               maxWidth: '60%'
@@ -240,7 +240,7 @@ const PhaseMediaGallery = ({
       px: 2,
       py: 1,
       borderRadius: 2,
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       fontSize: '0.75rem',
       maxWidth: '60%'
     }}

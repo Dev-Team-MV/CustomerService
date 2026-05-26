@@ -62,7 +62,7 @@ const ModelCard = ({ model, onEdit }) => {
               bgcolor: model.status === 'active' ? theme.palette.success.main : theme.palette.cardBg,
               color: model.status === 'active' ? 'white' : theme.palette.text.secondary,
               fontWeight: 700,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               textTransform: 'capitalize',
               height: 28,
               px: 1.5,
@@ -109,7 +109,7 @@ const ModelCard = ({ model, onEdit }) => {
               <Typography
                 variant="h6"
                 sx={{
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   color: theme.palette.primary.main,
                   fontWeight: 700,
                   fontSize: { xs: "1.1rem", sm: "1.25rem" },
@@ -123,7 +123,7 @@ const ModelCard = ({ model, onEdit }) => {
                 variant="caption"
                 sx={{
                   color: theme.palette.text.secondary,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: "0.75rem",
                 }}
               >
@@ -176,7 +176,7 @@ const ModelCard = ({ model, onEdit }) => {
                     fontWeight: 500,
                     textTransform: "uppercase",
                     letterSpacing: "1px",
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     display: "block",
                     mb: 0.8,
                   }}
@@ -189,7 +189,7 @@ const ModelCard = ({ model, onEdit }) => {
                     color: theme.palette.primary.main,
                     fontSize: { xs: "1.1rem", md: "1.2rem" },
                     fontWeight: 600,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     lineHeight: 1,
                   }}
                 >
@@ -216,7 +216,7 @@ const ModelCard = ({ model, onEdit }) => {
                 sx={{
                   color: "#706f6f",
                   fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: "0.7rem",
                   textTransform: "uppercase",
                   letterSpacing: "1px",
@@ -231,7 +231,7 @@ const ModelCard = ({ model, onEdit }) => {
               sx={{
                 color: theme.palette.info.main,
                 fontWeight: 700,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: { xs: "1.5rem", sm: "1.75rem" },
               }}
             >
@@ -253,7 +253,7 @@ const ModelCard = ({ model, onEdit }) => {
               py: { xs: 1.5, md: 1.8 },
               letterSpacing: "1.5px",
               textTransform: "uppercase",
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               border: "none",
               position: "relative",
               overflow: "hidden",

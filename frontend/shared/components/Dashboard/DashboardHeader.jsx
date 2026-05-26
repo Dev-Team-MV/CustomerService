@@ -42,12 +42,12 @@ const DashboardHeader = ({ user, title, subtitle, icon: Icon }) => {
             <Typography variant="h3" sx={{
               color: 'white', fontWeight: 800, letterSpacing: '1px', mb: 0.5,
               fontSize: { xs: '1.75rem', md: '2.5rem' },
-              fontFamily: '"Poppins", sans-serif', textTransform: 'uppercase'
+              fontFamily: '"DM Sans", sans-serif', textTransform: 'uppercase'
             }}>
               {title}
             </Typography>
             <Box display="flex" alignItems="center" gap={1.5} flexWrap="wrap">
-              <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.85)', fontWeight: 400, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.85)', fontWeight: 400, fontFamily: '"DM Sans", sans-serif' }}>
                 {t('overviewSubtitle')}
               </Typography>
               {user?.role && (
@@ -57,7 +57,7 @@ const DashboardHeader = ({ user, title, subtitle, icon: Icon }) => {
                     bgcolor: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)',
                     color: 'white', fontWeight: 600, fontSize: '0.75rem',
                     border: '1px solid rgba(255,255,255,0.3)',
-                    fontFamily: '"Poppins", sans-serif', textTransform: 'uppercase', letterSpacing: '1px'
+                    fontFamily: '"DM Sans", sans-serif', textTransform: 'uppercase', letterSpacing: '1px'
                   }}
                 />
               )}

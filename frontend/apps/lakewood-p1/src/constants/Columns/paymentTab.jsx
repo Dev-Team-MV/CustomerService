@@ -32,7 +32,7 @@ export const usePaymentTabColumns = ({ t }) => [
     renderCell: ({ row }) => (
       <Typography
         variant="body2"
-        sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif', color: '#333F1F' }}
+        sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif', color: '#333F1F' }}
       >
         {new Date(row.date).toLocaleDateString('en-US', {
           year: 'numeric', month: 'short', day: 'numeric'
@@ -49,7 +49,7 @@ export const usePaymentTabColumns = ({ t }) => [
         variant="h6"
         sx={{
           color: '#8CA551', fontWeight: 700,
-          fontFamily: '"Poppins", sans-serif', fontSize: '1.1rem'
+          fontFamily: '"DM Sans", sans-serif', fontSize: '1.1rem'
         }}
       >
         ${row.amount.toLocaleString()}
@@ -67,7 +67,7 @@ export const usePaymentTabColumns = ({ t }) => [
         sx={{
           bgcolor: 'rgba(140, 165, 81, 0.08)', color: '#333F1F',
           fontWeight: 600, textTransform: 'capitalize',
-          fontSize: '0.75rem', fontFamily: '"Poppins", sans-serif',
+          fontSize: '0.75rem', fontFamily: '"DM Sans", sans-serif',
           border: '1px solid rgba(140, 165, 81, 0.2)'
         }}
       />
@@ -88,7 +88,7 @@ export const usePaymentTabColumns = ({ t }) => [
           )}
           color={getStatusColor(row.status)}
           sx={{
-            fontWeight: 700, fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem'
+            fontWeight: 700, fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem'
           }}
         />
       )
@@ -109,7 +109,7 @@ export const usePaymentTabColumns = ({ t }) => [
           startIcon={<Description />}
           sx={{
             borderRadius: 2, textTransform: 'none',
-            fontWeight: 600, fontFamily: '"Poppins", sans-serif',
+            fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
             borderColor: '#e0e0e0', color: '#706f6f',
             '&:hover': { borderColor: '#333F1F', bgcolor: 'rgba(51, 63, 31, 0.05)' }
           }}
@@ -119,7 +119,7 @@ export const usePaymentTabColumns = ({ t }) => [
       ) : (
         <Typography
           variant="caption"
-          sx={{ color: '#999', fontFamily: '"Poppins", sans-serif' }}
+          sx={{ color: '#999', fontFamily: '"DM Sans", sans-serif' }}
         >
           {t('myProperty:noDocument', 'No document')}
         </Typography>
@@ -132,7 +132,7 @@ export const usePaymentTabColumns = ({ t }) => [
     renderCell: ({ row }) => (
       <Typography
         variant="body2"
-        sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', fontSize: '0.85rem' }}
+        sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif', fontSize: '0.85rem' }}
       >
         {row.notes || t('myProperty:noNotes', 'No notes')}
       </Typography>
