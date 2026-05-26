@@ -58,6 +58,9 @@
       "overview": "Overview",
   "clients": "Clients",
   "projects": "Projects",
+  "analytics": "Analytics",
+  "activities": "Activities",
+  "messageTemplates": "Message Templates",
   "settings": "Settings",
   "quickStats": "Quick Stats",
   "signOut": "Sign Out"

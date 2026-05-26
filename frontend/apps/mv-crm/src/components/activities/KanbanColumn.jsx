@@ -1,4 +1,4 @@
-// frontend/apps/mv-crm/src/components/activities/KanbanColumn.jsx
+import { useTranslation } from 'react-i18next'
 import { Box, Typography, IconButton, Chip, Tooltip } from '@mui/material'
 import { Add, MoreVert } from '@mui/icons-material'
 import ActivityCard from './ActivityCard'
@@ -13,6 +13,7 @@ const KanbanColumn = ({
   onDrop,
   onColumnMenuClick
 }) => {
+  const { t } = useTranslation('activities')
   const color = column.color || '#757575'
 
   return (
@@ -64,8 +65,7 @@ const KanbanColumn = ({
           </Box>
           
           <Box display="flex" alignItems="center" gap={0.5}>
-            {/* Botón de opciones de columna */}
-            <Tooltip title="Opciones de columna">
+            <Tooltip title={t('activities.columnOptions')}>
               <IconButton 
                 size="small" 
                 onClick={(e) => onColumnMenuClick?.(e, column)}
@@ -78,8 +78,7 @@ const KanbanColumn = ({
               </IconButton>
             </Tooltip>
             
-            {/* Botón agregar actividad */}
-            <Tooltip title="Agregar actividad">
+            <Tooltip title={t('activities.addActivity')}>
               <IconButton 
                 size="small" 
                 onClick={onAddClick}
@@ -112,7 +111,7 @@ const KanbanColumn = ({
               color: '#9e9e9e'
             }}
           >
-            <Typography variant="caption">Sin actividades</Typography>
+            <Typography variant="caption">{t('activities.noActivities')}</Typography>
           </Box>
         ) : (
           activities.map(activity => (

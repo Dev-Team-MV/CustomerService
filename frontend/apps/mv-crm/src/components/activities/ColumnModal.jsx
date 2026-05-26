@@ -1,5 +1,5 @@
-// frontend/apps/mv-crm/src/components/activities/ColumnModal.jsx
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogTitle,
@@ -19,6 +19,7 @@ const PRESET_COLORS = [
 ]
 
 const ColumnModal = ({ open, onClose, column = null, onSave }) => {
+  const { t } = useTranslation('activities')
   const [formData, setFormData] = useState({
     name: '',
     key: '',
@@ -50,7 +51,6 @@ const ColumnModal = ({ open, onClose, column = null, onSave }) => {
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     
-    // Auto-generar key desde el nombre
     if (field === 'name' && !isEditing) {
       const key = value
         .toLowerCase()
@@ -89,7 +89,7 @@ const ColumnModal = ({ open, onClose, column = null, onSave }) => {
           <Box display="flex" alignItems="center" gap={1}>
             <ViewColumn sx={{ color: formData.color }} />
             <Typography variant="h6" fontWeight={700}>
-              {isEditing ? 'Editar Columna' : 'Nueva Columna'}
+              {isEditing ? t('activities.editColumn') : t('activities.newColumn')}
             </Typography>
           </Box>
           <IconButton onClick={onClose} size="small">
@@ -100,42 +100,39 @@ const ColumnModal = ({ open, onClose, column = null, onSave }) => {
 
       <DialogContent>
         <Box display="flex" flexDirection="column" gap={2.5} py={1}>
-          {/* Nombre */}
           <TextField
-            label="Nombre"
+            label={t('activities.form.name')}
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
             fullWidth
             required
-            placeholder="Ej: En Progreso"
+            placeholder={t('activities.columnNamePlaceholder')}
             autoFocus
           />
 
-          {/* Key */}
           <TextField
-            label="Clave (key)"
+            label={t('activities.form.key')}
             value={formData.key}
             onChange={(e) => handleChange('key', e.target.value)}
             fullWidth
             placeholder="ej: in_progress"
-            helperText="Identificador único (se genera automáticamente)"
+            helperText={t('activities.keyHelperText')}
             disabled={isEditing}
           />
 
-          {/* Orden */}
           <TextField
-            label="Orden"
+            label={t('activities.form.order')}
             type="number"
             value={formData.order}
             onChange={(e) => handleChange('order', parseInt(e.target.value) || 0)}
             fullWidth
             inputProps={{ min: 0 }}
-            helperText="Posición de la columna (0 = primera)"
+            helperText={t('activities.orderHelperText')}
           />
 
           {/* Color */}
           <Box>
-            <Typography variant="subtitle2" mb={1}>Color</Typography>
+            <Typography variant="subtitle2" mb={1}>{t('activities.form.color')}</Typography>
             <Box display="flex" gap={1} flexWrap="wrap">
               {PRESET_COLORS.map(color => (
                 <Box
@@ -165,11 +162,11 @@ const ColumnModal = ({ open, onClose, column = null, onSave }) => {
               borderLeft: `4px solid ${formData.color}`
             }}
           >
-            <Typography variant="caption" color="text.secondary">Vista previa</Typography>
+            <Typography variant="caption" color="text.secondary">{t('activities.form.preview')}</Typography>
             <Box display="flex" alignItems="center" gap={1} mt={0.5}>
               <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: formData.color }} />
               <Typography fontWeight={600}>
-                {formData.name || 'Nombre de columna'}
+                {formData.name || t('activities.columnNameDefault')}
               </Typography>
             </Box>
           </Box>
@@ -178,7 +175,7 @@ const ColumnModal = ({ open, onClose, column = null, onSave }) => {
 
       <DialogActions sx={{ p: 2 }}>
         <Button onClick={onClose} disabled={saving}>
-          Cancelar
+          {t('activities.form.cancel')}
         </Button>
         <Button
           variant="contained"
@@ -186,7 +183,7 @@ const ColumnModal = ({ open, onClose, column = null, onSave }) => {
           disabled={!formData.name.trim() || saving}
           startIcon={<Save />}
         >
-          {saving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear columna'}
+          {saving ? t('activities.saving') : isEditing ? t('activities.form.update') : t('activities.form.create')}
         </Button>
       </DialogActions>
     </Dialog>
