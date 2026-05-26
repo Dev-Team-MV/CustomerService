@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogTitle,
@@ -32,7 +33,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import { es } from 'date-fns/locale'
+import { es, enUS } from 'date-fns/locale'
 import { useResidents } from '@shared/hooks/useResidents'
 import { useProjects } from '@shared/hooks/useProjects'
 import { ACTIVITY_PRIORITIES } from '../../constants/hooks/useActivities'
@@ -62,11 +63,13 @@ const ActivityModal = ({
   onUpdateSubtask,
   onDeleteSubtask
 }) => {
+  const { t, i18n } = useTranslation('activities')
   const [formData, setFormData] = useState(initialFormData)
   const [saving, setSaving] = useState(false)
   const [tagInput, setTagInput] = useState('')
 
   const isEditing = Boolean(activity?._id)
+  const dateLocale = i18n.language === 'es' ? es : enUS
 
   const { users, loading: loadingUsers } = useResidents(null, { 
     smsProjectId: import.meta.env.VITE_PROJECT_ID 
@@ -203,7 +206,6 @@ const ActivityModal = ({
     
     setSaving(true)
     try {
-      // ✅ Construir objeto contact según el tipo seleccionado
       let contactPayload = null
       if (formData.contactType === 'registered' && formData.contact) {
         contactPayload = {
@@ -229,7 +231,7 @@ const ActivityModal = ({
         assignedTo: formData.assignedTo?._id || undefined,
         tags: formData.tags,
         relatedProjects: formData.relatedProjects.map(p => p._id),
-        contact: contactPayload  // ✅ Ahora sí se envía
+        contact: contactPayload
       }
       
       await onSave?.(payload, activity?._id)
@@ -270,7 +272,7 @@ const ActivityModal = ({
       <DialogTitle>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6" fontWeight={700}>
-            {isEditing ? 'Editar Actividad' : 'Nueva Actividad'}
+            {isEditing ? t('activities.editActivity') : t('activities.createActivity')}
           </Typography>
           <IconButton onClick={onClose} size="small">
             <Close />
@@ -279,34 +281,34 @@ const ActivityModal = ({
       </DialogTitle>
 
       <DialogContent dividers>
-        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
           <Box display="flex" gap={3}>
             <Box flex={1} display="flex" flexDirection="column" gap={2.5} py={1}>
               <TextField
-                label="Título"
+                label={t('activities.form.title')}
                 value={formData.title}
                 onChange={(e) => handleChange('title', e.target.value)}
                 fullWidth
                 required
-                placeholder="Ej: Llamar al cliente"
+                placeholder={t('activities.form.titlePlaceholder')}
               />
 
               <TextField
-                label="Descripción"
+                label={t('activities.form.description')}
                 value={formData.description}
                 onChange={(e) => handleChange('description', e.target.value)}
                 fullWidth
                 multiline
                 rows={3}
-                placeholder="Detalles de la actividad..."
+                placeholder={t('activities.form.descriptionPlaceholder')}
               />
 
               <Box display="flex" gap={2}>
                 <FormControl fullWidth>
-                  <InputLabel>Columna</InputLabel>
+                  <InputLabel>{t('activities.form.column')}</InputLabel>
                   <Select
                     value={formData.columnId}
-                    label="Columna"
+                    label={t('activities.form.column')}
                     onChange={(e) => handleChange('columnId', e.target.value)}
                   >
                     {columns.map(col => (
@@ -321,16 +323,16 @@ const ActivityModal = ({
                 </FormControl>
 
                 <FormControl fullWidth>
-                  <InputLabel>Prioridad</InputLabel>
+                  <InputLabel>{t('activities.form.priority')}</InputLabel>
                   <Select
                     value={formData.priority}
-                    label="Prioridad"
+                    label={t('activities.form.priority')}
                     onChange={(e) => handleChange('priority', e.target.value)}
                   >
                     {ACTIVITY_PRIORITIES.map(p => (
                       <MenuItem key={p.id} value={p.id}>
                         <Chip 
-                          label={p.label} 
+                          label={t(`activities.priority.${p.id}`)} 
                           size="small" 
                           sx={{ bgcolor: `${p.color}20`, color: p.color, height: 22 }} 
                         />
@@ -342,7 +344,7 @@ const ActivityModal = ({
 
               <Box display="flex" gap={2}>
                 <DatePicker
-                  label="Fecha límite"
+                  label={t('activities.form.dueDate')}
                   value={formData.dueDate}
                   onChange={(newValue) => handleChange('dueDate', newValue)}
                   slotProps={{ textField: { fullWidth: true } }}
@@ -357,7 +359,7 @@ const ActivityModal = ({
                   onChange={(_, newValue) => handleChange('assignedTo', newValue)}
                   fullWidth
                   renderInput={(params) => (
-                    <TextField {...params} label="Asignar a" placeholder="Buscar usuario..." />
+                    <TextField {...params} label={t('activities.form.assignedTo')} placeholder={t('activities.contact.searchByName')} />
                   )}
                   renderOption={(props, option) => (
                     <Box component="li" {...props} key={option._id} display="flex" alignItems="center" gap={1.5}>
@@ -376,25 +378,25 @@ const ActivityModal = ({
               {/* Sección de Contacto */}
               <Box>
                 <Typography variant="subtitle2" fontWeight={600} mb={1}>
-                  Contacto asociado
+                  {t('activities.form.contact')}
                 </Typography>
                 
                 <Box display="flex" gap={1} mb={2}>
                   <Chip
-                    label="Sin contacto"
+                    label={t('activities.contact.noContact')}
                     onClick={() => handleContactTypeChange('none')}
                     variant={formData.contactType === 'none' ? 'filled' : 'outlined'}
                     sx={{ bgcolor: formData.contactType === 'none' ? '#e0e0e0' : 'transparent' }}
                   />
                   <Chip
-                    label="Usuario registrado"
+                    label={t('activities.contact.registeredUser')}
                     icon={<Person sx={{ fontSize: 16 }} />}
                     onClick={() => handleContactTypeChange('registered')}
                     color={formData.contactType === 'registered' ? 'primary' : 'default'}
                     variant={formData.contactType === 'registered' ? 'filled' : 'outlined'}
                   />
                   <Chip
-                    label="Contacto externo"
+                    label={t('activities.contact.externalContact')}
                     icon={<PersonAdd sx={{ fontSize: 16 }} />}
                     onClick={() => handleContactTypeChange('external')}
                     color={formData.contactType === 'external' ? 'warning' : 'default'}
@@ -414,8 +416,8 @@ const ActivityModal = ({
                     renderInput={(params) => (
                       <TextField 
                         {...params} 
-                        label="Seleccionar contacto" 
-                        placeholder="Buscar usuario..." 
+                        label={t('activities.form.contact')} 
+                        placeholder={t('activities.contact.searchByName')} 
                         size="small"
                       />
                     )}
@@ -440,12 +442,12 @@ const ActivityModal = ({
                     <Box display="flex" alignItems="center" gap={1} mb={2}>
                       <PersonAdd color="warning" />
                       <Typography variant="body2" color="warning.main" fontWeight={500}>
-                        Contacto no registrado en el sistema
+                        {t('activities.contact.unregisteredContact')}
                       </Typography>
                     </Box>
                     <Box display="flex" flexDirection="column" gap={2}>
                       <TextField
-                        label="Nombre"
+                        label={t('activities.contact.name')}
                         value={formData.externalContact.name}
                         onChange={(e) => handleExternalContactChange('name', e.target.value)}
                         fullWidth
@@ -457,7 +459,7 @@ const ActivityModal = ({
                       />
                       <Box display="flex" gap={2}>
                         <TextField
-                          label="Teléfono"
+                          label={t('activities.contact.phone')}
                           value={formData.externalContact.phone}
                           onChange={(e) => handleExternalContactChange('phone', e.target.value)}
                           fullWidth
@@ -467,7 +469,7 @@ const ActivityModal = ({
                           }}
                         />
                         <TextField
-                          label="Email"
+                          label={t('activities.contact.email')}
                           value={formData.externalContact.email}
                           onChange={(e) => handleExternalContactChange('email', e.target.value)}
                           fullWidth
@@ -485,7 +487,7 @@ const ActivityModal = ({
 
               {/* Proyectos relacionados */}
               <Box>
-                <Typography variant="subtitle2" mb={1}>Proyectos relacionados</Typography>
+                <Typography variant="subtitle2" mb={1}>{t('activities.form.relatedProjects')}</Typography>
                 <Autocomplete
                   multiple
                   options={projectOptions}
@@ -496,7 +498,7 @@ const ActivityModal = ({
                   onChange={(_, newValue) => handleChange('relatedProjects', newValue)}
                   disableCloseOnSelect
                   renderInput={(params) => (
-                    <TextField {...params} placeholder="Seleccionar proyectos..." size="small" />
+                    <TextField {...params} placeholder={t('activities.form.searchProjects')} size="small" />
                   )}
                   renderOption={(props, option, { selected }) => (
                     <Box 
@@ -539,7 +541,7 @@ const ActivityModal = ({
 
               {/* Tags */}
               <Box>
-                <Typography variant="subtitle2" mb={1}>Etiquetas</Typography>
+                <Typography variant="subtitle2" mb={1}>{t('activities.form.tags')}</Typography>
                 <Box display="flex" gap={1} flexWrap="wrap" mb={1}>
                   {formData.tags.map(tag => (
                     <Chip key={tag} label={tag} size="small" onDelete={() => handleRemoveTag(tag)} />
@@ -548,14 +550,14 @@ const ActivityModal = ({
                 <Box display="flex" gap={1}>
                   <TextField
                     size="small"
-                    placeholder="Nueva etiqueta..."
+                    placeholder={t('activities.form.enterTag')}
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
                     sx={{ flex: 1 }}
                   />
                   <Button variant="outlined" size="small" onClick={handleAddTag}>
-                    Agregar
+                    {t('activities.form.addTag')}
                   </Button>
                 </Box>
               </Box>
@@ -581,7 +583,7 @@ const ActivityModal = ({
 
       <DialogActions sx={{ p: 2 }}>
         <Button onClick={onClose} disabled={saving}>
-          Cancelar
+          {t('activities.form.cancel')}
         </Button>
         <Button
           variant="contained"
@@ -589,7 +591,7 @@ const ActivityModal = ({
           disabled={!formData.title.trim() || !formData.columnId || saving}
           startIcon={<Save />}
         >
-          {saving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear actividad'}
+          {saving ? t('activities.saving') : isEditing ? t('activities.form.update') : t('activities.form.create')}
         </Button>
       </DialogActions>
     </Dialog>

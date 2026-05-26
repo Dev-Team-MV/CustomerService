@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Drawer,
   Box,
@@ -10,8 +11,7 @@ import {
   Button,
   Paper,
   TextField,
-  CircularProgress,
-  Checkbox
+  CircularProgress
 } from '@mui/material'
 import { 
   Close, 
@@ -28,10 +28,10 @@ import { ACTIVITY_PRIORITIES } from '../../constants/hooks/useActivities'
 import SubActivityList from './SubActivityList'
 import activityService from '../../services/activityService'
 
-const formatDate = (date) => {
+const formatDate = (date, locale = 'es-ES') => {
   if (!date) return 'Sin fecha'
   const due = new Date(date)
-  return due.toLocaleDateString('es-ES', {
+  return due.toLocaleDateString(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -51,6 +51,7 @@ const ActivityDetails = ({
   onAddThreadMessage,
   columns = []
 }) => {
+  const { t, i18n } = useTranslation('activities')
   const [newMessage, setNewMessage] = useState('')
   const [sendingMessage, setSendingMessage] = useState(false)
   const [currentActivity, setCurrentActivity] = useState(activity)
@@ -63,17 +64,16 @@ const ActivityDetails = ({
   if (!currentActivity) return null
 
   const priority = ACTIVITY_PRIORITIES.find(p => p.id === currentActivity.priority)
-const columnId = typeof currentActivity.columnId === 'object' 
-  ? currentActivity.columnId._id 
-  : currentActivity.columnId
-const column = columns.find(c => c._id === columnId) || 
-  (typeof currentActivity.columnId === 'object' ? currentActivity.columnId : null)
+  const columnId = typeof currentActivity.columnId === 'object' 
+    ? currentActivity.columnId._id 
+    : currentActivity.columnId
+  const column = columns.find(c => c._id === columnId) || 
+    (typeof currentActivity.columnId === 'object' ? currentActivity.columnId : null)
   
   const assignee = currentActivity.assignedTo
   const contact = currentActivity.contact
   const creator = currentActivity.createdBy
 
-  // ✅ NUEVA FUNCIÓN: Refrescar la actividad desde el backend
   const handleRefreshActivity = async () => {
     if (!currentActivity?._id) return
     setRefreshing(true)
@@ -87,33 +87,27 @@ const column = columns.find(c => c._id === columnId) ||
     }
   }
 
-  // ✅ Agregar subtarea y refrescar
   const handleAddSubtaskWithRefresh = async (activityId, data) => {
     try {
       await onAddSubtask?.(activityId, data)
-      // Refrescar después de agregar
       await handleRefreshActivity()
     } catch (error) {
       console.error('Error adding subtask:', error)
     }
   }
 
-  // ✅ Actualizar subtarea y refrescar
   const handleUpdateSubtaskWithRefresh = async (activityId, subtaskId, data) => {
     try {
       await onUpdateSubtask?.(activityId, subtaskId, data)
-      // Refrescar después de actualizar
       await handleRefreshActivity()
     } catch (error) {
       console.error('Error updating subtask:', error)
     }
   }
 
-  // ✅ Eliminar subtarea y refrescar
   const handleDeleteSubtaskWithRefresh = async (activityId, subtaskId) => {
     try {
       await onDeleteSubtask?.(activityId, subtaskId)
-      // Refrescar después de eliminar
       await handleRefreshActivity()
     } catch (error) {
       console.error('Error deleting subtask:', error)
@@ -126,12 +120,13 @@ const column = columns.find(c => c._id === columnId) ||
     try {
       await onAddThreadMessage?.(currentActivity._id, { content: newMessage })
       setNewMessage('')
-      // Refrescar para mostrar el nuevo mensaje
       await handleRefreshActivity()
     } finally {
       setSendingMessage(false)
     }
   }
+
+  const locale = i18n.language === 'es' ? 'es-ES' : 'en-US'
 
   return (
     <Drawer
@@ -173,7 +168,7 @@ const column = columns.find(c => c._id === columnId) ||
         {/* Prioridad y Tags */}
         <Box display="flex" gap={1} mb={3} flexWrap="wrap">
           <Chip
-            label={priority?.label || 'Media'}
+            label={t(`activities.priority.${priority?.id}`) || t('activities.priority.medium')}
             sx={{
               bgcolor: `${priority?.color || '#2196f3'}20`,
               color: priority?.color || '#2196f3',
@@ -195,7 +190,7 @@ const column = columns.find(c => c._id === columnId) ||
         {currentActivity.description && (
           <Box mb={3}>
             <Typography variant="subtitle2" fontWeight={600} mb={1}>
-              Descripción
+              {t('activities.form.description')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {currentActivity.description}
@@ -208,10 +203,10 @@ const column = columns.find(c => c._id === columnId) ||
           <AccessTime sx={{ fontSize: 20, color: '#757575' }} />
           <Box>
             <Typography variant="caption" color="text.secondary">
-              Fecha de vencimiento
+              {t('activities.form.dueDate')}
             </Typography>
             <Typography variant="body2" fontWeight={600}>
-              {formatDate(currentActivity.dueDate)}
+              {formatDate(currentActivity.dueDate, locale)}
             </Typography>
           </Box>
         </Box>
@@ -220,7 +215,7 @@ const column = columns.find(c => c._id === columnId) ||
         {assignee && (
           <Box mb={3}>
             <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
-              Asignado a
+              {t('activities.form.assignedTo')}
             </Typography>
             <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
               <Box display="flex" alignItems="center" gap={2}>
@@ -249,7 +244,7 @@ const column = columns.find(c => c._id === columnId) ||
         {contact && (
           <Box mb={3}>
             <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
-              Contacto asociado
+              {t('activities.details.associatedContact')}
             </Typography>
             <Paper 
               variant="outlined" 
@@ -294,7 +289,7 @@ const column = columns.find(c => c._id === columnId) ||
         {creator && (
           <Box mb={3}>
             <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
-              Creado por
+              {t('activities.details.createdBy')}
             </Typography>
             <Box display="flex" alignItems="center" gap={1.5}>
               <Avatar sx={{ bgcolor: '#4caf50', width: 28, height: 28, fontSize: 12 }}>
@@ -314,7 +309,7 @@ const column = columns.find(c => c._id === columnId) ||
 
         <Divider sx={{ my: 2 }} />
 
-        {/* Subtareas - ✅ CON REFRESH AUTOMÁTICO */}
+        {/* Subtareas */}
         <SubActivityList
           subActivities={currentActivity.subtasks || []}
           parentActivityId={currentActivity._id}
@@ -329,7 +324,7 @@ const column = columns.find(c => c._id === columnId) ||
         {/* Comentarios */}
         <Box>
           <Typography variant="subtitle2" fontWeight={600} mb={2}>
-            Comentarios ({currentActivity.threads?.length || 0})
+            {t('activities.details.comments')} ({currentActivity.threads?.length || 0})
           </Typography>
           
           {currentActivity.threads?.length > 0 ? (
@@ -347,10 +342,10 @@ const column = columns.find(c => c._id === columnId) ||
                     <Box flex={1}>
                       <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
                         <Typography variant="caption" fontWeight={600}>
-                          {thread.createdBy?.firstName || 'Usuario'} {thread.createdBy?.lastName || ''}
+                          {thread.createdBy?.firstName || t('activities.user')} {thread.createdBy?.lastName || ''}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {thread.createdAt ? new Date(thread.createdAt).toLocaleDateString('es-ES', {
+                          {thread.createdAt ? new Date(thread.createdAt).toLocaleDateString(locale, {
                             day: 'numeric',
                             month: 'short',
                             hour: '2-digit',
@@ -368,7 +363,7 @@ const column = columns.find(c => c._id === columnId) ||
             </Box>
           ) : (
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-              Sin comentarios
+              {t('activities.details.noComments')}
             </Typography>
           )}
 
@@ -376,7 +371,7 @@ const column = columns.find(c => c._id === columnId) ||
           <Box display="flex" gap={1}>
             <TextField
               size="small"
-              placeholder="Escribe un comentario..."
+              placeholder={t('activities.details.writeComment')}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
@@ -405,14 +400,14 @@ const column = columns.find(c => c._id === columnId) ||
           fullWidth
           size="small"
         >
-          Editar
+          {t('activities.form.edit')}
         </Button>
         <Button
           variant="outlined"
           color="error"
           startIcon={<Delete />}
           onClick={() => {
-            if (window.confirm('¿Eliminar esta actividad?')) {
+            if (window.confirm(t('activities.deleteConfirm'))) {
               onDelete?.(currentActivity._id)
               onClose()
             }
@@ -420,7 +415,7 @@ const column = columns.find(c => c._id === columnId) ||
           fullWidth
           size="small"
         >
-          Eliminar
+          {t('activities.form.delete')}
         </Button>
       </Box>
     </Drawer>

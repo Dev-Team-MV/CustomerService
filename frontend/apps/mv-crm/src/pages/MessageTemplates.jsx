@@ -1,22 +1,20 @@
-// frontend/apps/mv-crm/src/pages/MessageTemplates.jsx
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Typography,
   Button,
-  Chip,
-  Avatar,
-  IconButton,
-  Tooltip,
   Alert
 } from '@mui/material'
-import { Add, Edit, Delete, Sms, Email } from '@mui/icons-material'
+import { Add } from '@mui/icons-material'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
 import DataTable from '@shared/components/table/DataTable'
 import MessageTemplateModal from '../components/MessageTemplateModal'
 import useMessageTemplates from '../constants/hooks/useMessageTemplates'
+import { getMessageTemplatesColumns } from '../constants/Columns/messageTemplates'
 
 export default function MessageTemplates() {
+  const { t } = useTranslation('sms')
   const { templates, loading, error, createTemplate, updateTemplate, deleteTemplate } = useMessageTemplates()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState(null)
@@ -46,7 +44,7 @@ export default function MessageTemplates() {
   }
 
   const handleDeleteTemplate = async (id) => {
-    if (window.confirm('¿Eliminar este template?')) {
+    if (window.confirm(t('sms.templates.deleteConfirm'))) {
       try {
         await deleteTemplate(id)
       } catch (err) {
@@ -55,84 +53,11 @@ export default function MessageTemplates() {
     }
   }
 
-// Actualizar columnas (línea ~58-155)
-const columns = [
-  {
-    field: 'name',
-    headerName: 'Nombre',
-    flex: 1,
-    minWidth: 200,
-    renderCell: (params) => (
-      <Box>
-        <Typography variant="body2" fontWeight={600}>
-          {params.row.name}
-        </Typography>
-        {params.row.category && (
-          <Chip 
-            label={params.row.category} 
-            size="small" 
-            sx={{ height: 18, fontSize: '0.65rem', mt: 0.5 }}
-          />
-        )}
-      </Box>
-    )
-  },
-  {
-    field: 'template',
-    headerName: 'Contenido',
-    flex: 1,
-    minWidth: 300,
-    renderCell: (params) => (
-      <Typography variant="body2" sx={{ 
-        overflow: 'hidden', 
-        textOverflow: 'ellipsis', 
-        whiteSpace: 'nowrap',
-        maxWidth: '100%'
-      }}>
-        {params.row.template}
-      </Typography>
-    )
-  },
-  {
-    field: 'description',
-    headerName: 'Descripción',
-    flex: 1,
-    minWidth: 200,
-    renderCell: (params) => (
-      <Typography variant="caption" color="text.secondary">
-        {params.row.description || '-'}
-      </Typography>
-    )
-  },
-  {
-    field: 'actions',
-    headerName: 'Acciones',
-    width: 120,
-    sortable: false,
-    filterable: false,
-    renderCell: (params) => (
-      <Box display="flex" gap={0.5}>
-        <Tooltip title="Editar">
-          <IconButton 
-            size="small"
-            onClick={() => handleEditTemplate(params.row)}
-          >
-            <Edit fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Eliminar">
-          <IconButton 
-            size="small"
-            color="error"
-            onClick={() => handleDeleteTemplate(params.row._id)}
-          >
-            <Delete fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    )
-  }
-]
+  // Memorizar columnas para que se recalculen solo cuando cambia t
+  const columns = useMemo(
+    () => getMessageTemplatesColumns(t, handleEditTemplate, handleDeleteTemplate),
+    [t]
+  )
 
   return (
     <PageLayout>
@@ -141,10 +66,10 @@ const columns = [
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
           <Box>
             <Typography variant="h4" fontWeight={700}>
-              Templates de Mensajes
+              {t('sms.templates.title')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Crea y gestiona templates para envíos masivos
+              {t('sms.templates.subtitle')}
             </Typography>
           </Box>
           <Button
@@ -152,25 +77,25 @@ const columns = [
             startIcon={<Add />}
             onClick={handleAddTemplate}
           >
-            Nuevo Template
+            {t('sms.templates.newBtn')}
           </Button>
         </Box>
 
         {/* Error Alert */}
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }} onClose={() => {}}>
+          <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
 
         {/* DataTable */}
-<Box flex={1} sx={{ overflow: 'hidden' }}>
-  <DataTable
-    data={templates}
-    columns={columns}
-    loading={loading}
-  />
-</Box>
+        <Box flex={1} sx={{ overflow: 'hidden' }}>
+          <DataTable
+            data={templates}
+            columns={columns}
+            loading={loading}
+          />
+        </Box>
 
         {/* Modal */}
         <MessageTemplateModal

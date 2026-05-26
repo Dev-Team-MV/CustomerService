@@ -1,0 +1,145 @@
+{
+  "sms": {
+    "title": "SMS Sending",
+    "description": "Manage and send SMS messages",
+    "messageTemplates": "Message Templates",
+    "broadcastMessages": "Broadcast Messages",
+    "newTemplate": "New Template",
+    "newBroadcast": "New Broadcast",
+    "form": {
+      "name": "Name",
+      "message": "Message",
+      "recipient": "Recipient",
+      "recipients": "Recipients",
+      "selectTemplate": "Select template",
+      "subject": "Subject",
+      "content": "Content",
+      "variables": "Available variables",
+      "preview": "Preview",
+      "send": "Send",
+      "save": "Save",
+      "update": "Update",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "selectRecipients": "Select recipients",
+      "searchRecipients": "Search recipients...",
+      "addRecipient": "Add recipient"
+    },
+    "messages": {
+      "sentSuccessfully": "Message sent successfully",
+      "savedSuccessfully": "Template saved successfully",
+      "deletedSuccessfully": "Template deleted successfully",
+      "errorSending": "Error sending message",
+      "errorSaving": "Error saving template",
+      "errorDeleting": "Error deleting template",
+      "confirmDelete": "Are you sure you want to delete this template?"
+    },
+    "table": {
+      "name": "Name",
+      "message": "Message",
+      "recipients": "Recipients",
+      "sent": "Sent",
+      "date": "Date",
+      "status": "Status",
+      "actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "view": "View"
+    },
+    "status": {
+      "pending": "Pending",
+      "sent": "Sent",
+      "failed": "Failed",
+      "delivered": "Delivered"
+    },
+    "channel": {
+      "title": "Send channel",
+      "sms": "SMS",
+      "email": "Email",
+      "selectAtLeastOne": "Select at least one send channel",
+      "validPhone": "with valid phone"
+    },
+    "recipients": {
+      "title": "Recipients",
+      "sendAll": "Send to all",
+      "users": "users",
+      "searchLabel": "Search and select users",
+      "searchPlaceholder": "Name, email or phone...",
+      "selected": "user(s) selected"
+    },
+    "template": {
+      "title": "Use saved template",
+      "selectPlaceholder": "Select a template..."
+    },
+    "content": {
+      "title": "Message content",
+      "variablesLabel": "Available variables (click to insert):",
+      "variablesDetected": "Variables detected",
+      "variablesWillReplace": "They will be automatically replaced with each user's data.",
+      "emailSubject": "Email subject",
+      "emailSubjectPlaceholder": "Email subject...",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Write the message content here... Use {{firstName}}, {{lastName}}, etc. to personalize",
+      "preview": "Preview (example)",
+      "chars": "characters",
+      "messages": "message(s)"
+    },
+    "results": {
+      "title": "Send completed",
+      "sent": "sent",
+      "failed": "failed"
+    },
+    "progress": {
+      "sending": "Sending messages..."
+    },
+    "summary": {
+      "willSendTo": "Will be sent to",
+      "recipients": "recipient(s)",
+      "and": "and"
+    },
+    "actions": {
+      "send": "Send message",
+      "sending": "Sending...",
+      "cancel": "Cancel",
+      "close": "Close",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "templateModal": {
+      "editTitle": "Edit Template",
+      "newTitle": "New Template",
+      "name": "Template name",
+      "namePlaceholder": "E.g: Welcome to clients",
+      "category": "Category",
+      "categoryPlaceholder": "E.g: Marketing, Support, Notifications...",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional template description...",
+      "template": "Template content",
+      "templatePlaceholder": "Write the content... Use {{firstName}}, {{lastName}}, etc.",
+      "saving": "Saving...",
+      "updateBtn": "Save changes",
+      "createBtn": "Create template"
+    },
+    "templates": {
+      "title": "Message Templates",
+      "subtitle": "Create and manage templates for bulk sending",
+      "newBtn": "New Template",
+      "deleteConfirm": "Delete this template?",
+      "columns": {
+        "name": "Name",
+        "content": "Content",
+        "description": "Description",
+        "actions": "Actions"
+      }
+    },
+    "variables": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "errors": {
+      "invalidFileType": "Only .txt or .html files are allowed"
+    }
+  }
+}
