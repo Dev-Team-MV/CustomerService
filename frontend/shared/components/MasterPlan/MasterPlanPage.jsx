@@ -99,7 +99,7 @@ const MasterPlanPage = ({ projectId }) => {
                 <Typography
                   variant="h5"
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.primary.main,
                     fontWeight: 700,
                     fontSize: { xs: '1.25rem', sm: '1.5rem' },
@@ -115,7 +115,7 @@ const MasterPlanPage = ({ projectId }) => {
                 sx={{
                   mt: 1.5,
                   color: theme.palette.text.secondary,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: '0.9rem'
                 }}
               >
@@ -178,7 +178,7 @@ const MasterPlanPage = ({ projectId }) => {
                   variant="caption"
                   sx={{
                     color: theme.palette.text.secondary,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontSize: '0.8rem'
                   }}
                 >
@@ -204,7 +204,7 @@ const MasterPlanPage = ({ projectId }) => {
                         variant="caption"
                         sx={{
                           color: theme.palette.text.secondary,
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           fontSize: '0.75rem',
                           fontWeight: 600
                         }}
@@ -218,7 +218,7 @@ const MasterPlanPage = ({ projectId }) => {
                       variant="caption"
                       sx={{
                         color: theme.palette.text.secondary,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontSize: '0.75rem',
                         fontStyle: 'italic'
                       }}

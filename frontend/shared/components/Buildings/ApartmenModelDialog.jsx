@@ -107,13 +107,13 @@ const ApartmentModelDialog = ({
   const fieldSx = {
     '& .MuiOutlinedInput-root': {
       borderRadius: 3,
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       bgcolor: 'white',
       '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main, borderWidth: '2px' },
       '&:hover fieldset': { borderColor: theme.palette.secondary.main }
     },
     '& .MuiInputLabel-root': {
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       '&.Mui-focused': { color: theme.palette.primary.main }
     }
   }
@@ -128,7 +128,7 @@ const ApartmentModelDialog = ({
           fontWeight: 600,
           px: 3, py: 1.2,
           color: theme.palette.text.secondary,
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           border: `2px solid ${theme.palette.divider}`,
           '&:hover': {
             bgcolor: theme.palette.action.hover,
@@ -166,7 +166,7 @@ const ApartmentModelDialog = ({
           borderRadius: 3,
           bgcolor: theme.palette.info.main + '14',
           border: `1px solid ${theme.palette.info.main}4D`,
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           '& .MuiAlert-icon': { color: theme.palette.info.main }
         }}
       >
@@ -185,7 +185,7 @@ const ApartmentModelDialog = ({
           border: `1px solid ${availableApartments > 0 
             ? theme.palette.success.main + '4D' 
             : theme.palette.warning.main + '4D'}`,
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           '& .MuiAlert-icon': { 
             color: availableApartments > 0 
               ? theme.palette.success.main 

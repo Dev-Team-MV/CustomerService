@@ -178,7 +178,7 @@ const summaryCards = [
                 fontWeight={700}
                 sx={{
                   color: config.colors.primary,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' },
                   letterSpacing: '0.5px'
                 }}
@@ -189,7 +189,7 @@ const summaryCards = [
                 variant="body2"
                 sx={{
                   color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '0.75rem', sm: '0.85rem' },
                   display: { xs: 'none', sm: 'block' }
                 }}
@@ -216,7 +216,7 @@ const summaryCards = [
                 cursor: 'pointer',
                 fontWeight: 600,
                 fontSize: { xs: '0.85rem', sm: '0.9rem' },
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 boxShadow: `0 4px 12px ${config.colors.primary}40`,
                 transition: 'all 0.3s ease',
                 '&:hover': {
@@ -271,7 +271,7 @@ const summaryCards = [
                           fontWeight: 500,
                           textTransform: 'uppercase',
                           letterSpacing: '1px',
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           fontSize: { xs: '0.65rem', sm: '0.7rem' }
                         }}
                       >
@@ -301,7 +301,7 @@ const summaryCards = [
                       sx={{
                         color: stat.color,
                         letterSpacing: '-0.5px',
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' }
                       }}
                     >
@@ -336,7 +336,7 @@ const summaryCards = [
                 sx={{
                   color: config.colors.primary,
                   fontWeight: 700,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '1rem', sm: '1.15rem', md: '1.25rem' },
                   letterSpacing: '0.5px'
                 }}
@@ -347,7 +347,7 @@ const summaryCards = [
                 variant="caption"
                 sx={{
                   color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '0.7rem', sm: '0.75rem' }
                 }}
               >
@@ -369,7 +369,7 @@ const summaryCards = [
                   bgcolor: `${config.colors.secondary}14`,
                   border: `1px solid ${config.colors.secondary}4D`,
                   fontSize: { xs: '0.85rem', md: '1rem' },
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   '& .MuiAlert-icon': { color: config.colors.secondary }
                 }}
               >

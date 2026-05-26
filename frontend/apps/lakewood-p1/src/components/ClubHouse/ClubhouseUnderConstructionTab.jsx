@@ -81,7 +81,7 @@ const ClubhouseUnderConstructionTab = () => {
     <Box>
       {/* Header con botón */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h6" fontWeight={700} fontFamily='"Poppins", sans-serif'>
+        <Typography variant="h6" fontWeight={700} fontFamily='"DM Sans", sans-serif'>
           {t('underConstruction', 'Under Construction')}
         </Typography>
         <Button
@@ -251,7 +251,7 @@ const ClubhouseUnderConstructionTab = () => {
                       <Typography
                         variant="h4"
                         fontWeight={700}
-                        fontFamily='"Poppins", sans-serif'
+                        fontFamily='"DM Sans", sans-serif'
                         mb={2}
                         color="#333F1F"
                       >
@@ -262,7 +262,7 @@ const ClubhouseUnderConstructionTab = () => {
                         color="text.secondary"
                         mb={3}
                         sx={{
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           lineHeight: 1.8
                         }}
                       >

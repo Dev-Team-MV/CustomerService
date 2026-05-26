@@ -251,7 +251,7 @@ const handleDeleteGroup = async (items) => {
             fontWeight={700}
             sx={{
               color: theme.palette.primary.main,
-              fontFamily: '"Poppins", sans-serif'
+              fontFamily: '"DM Sans", sans-serif'
             }}
           >
             Phase {currentPhase?.phaseNumber} / {phases.length}
@@ -260,7 +260,7 @@ const handleDeleteGroup = async (items) => {
             variant="caption"
             sx={{
               color: theme.palette.text.secondary,
-              fontFamily: '"Poppins", sans-serif'
+              fontFamily: '"DM Sans", sans-serif'
             }}
           >
             {currentPhase?.title || PHASE_TITLES[currentPhaseIndex]}
@@ -331,7 +331,7 @@ const handleDeleteGroup = async (items) => {
                 fontWeight={700}
                 sx={{
                   color: theme.palette.primary.main,
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 {currentPhase.title || PHASE_TITLES[currentPhaseIndex]}
@@ -347,7 +347,7 @@ const handleDeleteGroup = async (items) => {
                   color: theme.palette.primary.main,
                   border: `1px solid ${currentPhase.constructionPercentage === 100 ? theme.palette.success.main : theme.palette.warning.main}`,
                   fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               />
             </Box>
@@ -360,7 +360,7 @@ const handleDeleteGroup = async (items) => {
         color: theme.palette.primary.main,
         border: `1px solid ${theme.palette.primary.main}33`,
         fontWeight: 600,
-        fontFamily: '"Poppins", sans-serif',
+        fontFamily: '"DM Sans", sans-serif',
         px: 1.5
       }}
     />
@@ -378,7 +378,7 @@ const handleDeleteGroup = async (items) => {
       borderColor: theme.palette.primary.main,
       color: theme.palette.primary.main,
       fontWeight: 600,
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       textTransform: 'none',
       px: 2,
       py: 1,
@@ -400,7 +400,7 @@ const handleDeleteGroup = async (items) => {
                   bgcolor: theme.palette.primary.main,
                   color: 'white',
                   fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   textTransform: 'none',
                   px: 3,
                   py: 1,
@@ -460,7 +460,7 @@ const handleDeleteGroup = async (items) => {
                 bgcolor: 'rgba(33,150,243,0.08)',
                 border: `1px solid rgba(33,150,243,0.2)`,
                 '& .MuiAlert-message': {
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   color: theme.palette.primary.main
                 }
               }}
@@ -498,7 +498,7 @@ const handleDeleteGroup = async (items) => {
 >
   <DialogTitle>
     <Box display="flex" justifyContent="space-between" alignItems="center">
-      <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+      <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
         Manage Media Items - Phase {phases[currentPhaseIndex]?.phaseNumber}
       </Typography>
       <IconButton onClick={() => setManageMediaOpen(false)}>
@@ -532,7 +532,7 @@ const handleDeleteGroup = async (items) => {
               }}
             >
               <Box display="flex" alignItems="center" gap={2} width="100%">
-                <Typography fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {title}
                 </Typography>
                 <Chip 

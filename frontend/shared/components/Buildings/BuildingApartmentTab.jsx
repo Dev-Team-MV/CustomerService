@@ -42,7 +42,7 @@ const BuildingApartmentsTab = ({
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={2} flexWrap="wrap" gap={1}>
         <Box display="flex" alignItems="center" gap={1}>
           <Apartment sx={{ fontSize: 20, color: theme.palette.secondary.main }} />
-          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
             {t('buildings:apartments', 'Apartments')}
           </Typography>
         </Box>
@@ -53,19 +53,19 @@ const BuildingApartmentsTab = ({
               select size="small"
               value={floorFilter}
               onChange={e => setFloorFilter(e.target.value)}
-              sx={{ minWidth: 130, '& .MuiOutlinedInput-root': { borderRadius: 2, fontFamily: '"Poppins", sans-serif', fontSize: '0.85rem' } }}
+              sx={{ minWidth: 130, '& .MuiOutlinedInput-root': { borderRadius: 2, fontFamily: '"DM Sans", sans-serif', fontSize: '0.85rem' } }}
               InputProps={{ startAdornment: <FilterList sx={{ fontSize: 16, mr: 0.5, color: theme.palette.text.secondary }} /> }}
             >
-              <MenuItem value="all" sx={{ fontFamily: '"Poppins", sans-serif' }}>{t('common:allFloors', 'All Floors')}</MenuItem>
+              <MenuItem value="all" sx={{ fontFamily: '"DM Sans", sans-serif' }}>{t('common:allFloors', 'All Floors')}</MenuItem>
               {floors.map(f => (
-                <MenuItem key={f} value={f} sx={{ fontFamily: '"Poppins", sans-serif' }}>Floor {f}</MenuItem>
+                <MenuItem key={f} value={f} sx={{ fontFamily: '"DM Sans", sans-serif' }}>Floor {f}</MenuItem>
               ))}
             </TextField>
           )}
           <Button
             variant="outlined" size="small" startIcon={<Add />}
             onClick={() => handleOpenApartment(null)}
-            sx={{ borderRadius: 2, textTransform: 'none', fontFamily: '"Poppins", sans-serif', fontWeight: 600 }}
+            sx={{ borderRadius: 2, textTransform: 'none', fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}
           >
             {t('buildings:addApartment', 'Add Apartment')}
           </Button>
@@ -80,7 +80,7 @@ const BuildingApartmentsTab = ({
           { label: `${stats.reserved} reserved`, color: 'warning' },
           { label: `${stats.sold} sold`, color: 'error' },
         ].map(({ label, color }) => (
-          <Chip key={label} label={label} size="small" color={color} variant="outlined" sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: '0.75rem' }} />
+          <Chip key={label} label={label} size="small" color={color} variant="outlined" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: '0.75rem' }} />
         ))}
       </Box>
 
@@ -88,11 +88,11 @@ const BuildingApartmentsTab = ({
       {filtered.length === 0 ? (
         <Paper elevation={0} sx={{ p: 4, textAlign: 'center', borderRadius: 3, border: `2px dashed ${theme.palette.divider}`, bgcolor: theme.palette.background.default }}>
           <Apartment sx={{ fontSize: 48, color: theme.palette.divider, mb: 1 }} />
-          <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
             {apartments.length === 0 ? t('buildings:noApartments', 'No apartments yet') : t('buildings:noApartmentsOnFloor', 'No apartments on this floor')}
           </Typography>
           {apartments.length === 0 && (
-            <Button size="small" onClick={() => handleOpenApartment(null)} sx={{ mt: 1.5, textTransform: 'none', fontFamily: '"Poppins", sans-serif', fontWeight: 600 }}>
+            <Button size="small" onClick={() => handleOpenApartment(null)} sx={{ mt: 1.5, textTransform: 'none', fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}>
               {t('buildings:addFirstApartment', 'Add first apartment')}
             </Button>
           )}

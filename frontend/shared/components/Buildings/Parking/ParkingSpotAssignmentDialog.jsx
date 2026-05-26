@@ -25,7 +25,7 @@ const ParkingSpotAssignmentDialog = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+      <DialogTitle sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
         Assign Parking Spot to Apartment
       </DialogTitle>
       <DialogContent>
@@ -34,7 +34,7 @@ const ParkingSpotAssignmentDialog = ({
             <Alert severity="info" sx={{ borderRadius: 2 }}>
               <Box display="flex" alignItems="center" gap={1}>
                 <DirectionsCar fontSize="small" />
-                <Typography variant="body2" fontFamily='"Poppins", sans-serif'>
+                <Typography variant="body2" fontFamily='"DM Sans", sans-serif'>
                   Assigning spot: <strong>{parkingSpot.code}</strong>
                 </Typography>
               </Box>
@@ -72,7 +72,7 @@ const ParkingSpotAssignmentDialog = ({
         <Button
           onClick={onClose}
           disabled={loading}
-          sx={{ textTransform: 'none', fontFamily: '"Poppins", sans-serif' }}
+          sx={{ textTransform: 'none', fontFamily: '"DM Sans", sans-serif' }}
         >
           Cancel
         </Button>
@@ -80,7 +80,7 @@ const ParkingSpotAssignmentDialog = ({
           onClick={handleAssign}
           variant="contained"
           disabled={!selectedApartment || loading}
-          sx={{ textTransform: 'none', fontFamily: '"Poppins", sans-serif' }}
+          sx={{ textTransform: 'none', fontFamily: '"DM Sans", sans-serif' }}
         >
           Assign
         </Button>

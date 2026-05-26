@@ -228,7 +228,7 @@ const BuildingSelector = ({ projectId }) => {
                 <Paper elevation={8} sx={{ p: 2, borderRadius: 3, bgcolor: '#fff', border: `2px solid ${hoveredBuilding.polygonStrokeColor || theme.palette.primary.dark}`, minWidth: 220 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                     <ApartmentIcon sx={{ color: hoveredBuilding.polygonColor || theme.palette.secondary.main, fontSize: 24 }} />
-                    <Typography sx={{ fontWeight: 700, fontSize: '1rem', fontFamily: '"Poppins", sans-serif', color: theme.palette.primary.main }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: '1rem', fontFamily: '"DM Sans", sans-serif', color: theme.palette.primary.main }}>
                       {hoveredBuilding.name}
                     </Typography>
                   </Box>
@@ -253,7 +253,7 @@ const BuildingSelector = ({ projectId }) => {
 
       <Box sx={{ p: 2 }}>
         {image && hasPolygons && (
-          <Typography variant="caption" sx={{ color: '#706f6f', mb: 1, display: 'block', fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="caption" sx={{ color: '#706f6f', mb: 1, display: 'block', fontFamily: '"DM Sans", sans-serif' }}>
             {t('quote:orSelectFromList', 'Or select from the list below:')}
           </Typography>
         )}
@@ -281,12 +281,12 @@ const BuildingSelector = ({ projectId }) => {
                       )}
                       <CardContent sx={{ p: 1.5 }}>
                         <Box display="flex" justifyContent="space-between" alignItems="center">
-                          <Typography fontWeight={700} fontSize="0.85rem" sx={{ fontFamily: '"Poppins", sans-serif', color: theme.palette.primary.main }}>
+                          <Typography fontWeight={700} fontSize="0.85rem" sx={{ fontFamily: '"DM Sans", sans-serif', color: theme.palette.primary.main }}>
                             {b.name}
                           </Typography>
                           {isSelected && <CheckCircleOutlineIcon sx={{ color: theme.palette.secondary.main, fontSize: 18 }} />}
                         </Box>
-                        <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+                        <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
                           {b.floors} floors · {b.totalApartments ?? '–'} apts
                         </Typography>
                         <Box mt={0.5}>
@@ -301,7 +301,7 @@ const BuildingSelector = ({ projectId }) => {
           })}
         </Grid>
         {buildings.length === 0 && (
-          <Typography sx={{ textAlign: 'center', color: '#706f6f', py: 3, fontFamily: '"Poppins", sans-serif' }}>
+          <Typography sx={{ textAlign: 'center', color: '#706f6f', py: 3, fontFamily: '"DM Sans", sans-serif' }}>
             {t('quote:noBuildings', 'No buildings available')}
           </Typography>
         )}
@@ -312,21 +312,21 @@ const BuildingSelector = ({ projectId }) => {
 
 const InfoRow = ({ label, value }) => (
   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-    <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>{label}:</Typography>
-    <Typography variant="caption" sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif', fontSize: '0.75rem' }}>{value}</Typography>
+    <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem' }}>{label}:</Typography>
+    <Typography variant="caption" sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif', fontSize: '0.75rem' }}>{value}</Typography>
   </Box>
 )
 
 const LegendDot = ({ color, label }) => (
   <Box display="flex" alignItems="center" gap={0.5}>
     <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: color }} />
-    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontFamily: '"Poppins", sans-serif' }}>{label}</Typography>
+    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontFamily: '"DM Sans", sans-serif' }}>{label}</Typography>
   </Box>
 )
 
 const paperSx = { bgcolor: '#fff', borderRadius: 4, border: '1px solid #e0e0e0', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', overflow: 'hidden' }
 const headerSx = { p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1, borderBottom: '2px solid rgba(140,165,81,0.2)' }
-const sectionLabelSx = { fontWeight: 700, fontFamily: '"Poppins", sans-serif', letterSpacing: '1.5px', textTransform: 'uppercase', fontSize: '0.85rem' }
-const selectedChipSx = { fontWeight: 700, fontSize: '0.7rem', fontFamily: '"Poppins", sans-serif' }
+const sectionLabelSx = { fontWeight: 700, fontFamily: '"DM Sans", sans-serif', letterSpacing: '1.5px', textTransform: 'uppercase', fontSize: '0.85rem' }
+const selectedChipSx = { fontWeight: 700, fontSize: '0.7rem', fontFamily: '"DM Sans", sans-serif' }
 
 export default BuildingSelector

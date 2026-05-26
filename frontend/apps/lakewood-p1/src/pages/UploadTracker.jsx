@@ -86,13 +86,13 @@ const UploadTracker = () => {
   const fieldSx = {
     '& .MuiOutlinedInput-root': {
       borderRadius: 2,
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       '& fieldset': { borderColor: theme.palette.cardBorder, borderWidth: '2px' },
       '&:hover fieldset': { borderColor: theme.palette.secondary.main },
       '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main, borderWidth: '2px' }
     },
     '& .MuiInputLabel-root': {
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       fontWeight: 500,
       color: theme.palette.text.secondary,
       '&.Mui-focused': { color: theme.palette.primary.main, fontWeight: 600 }
@@ -165,7 +165,7 @@ const UploadTracker = () => {
               />
             }
             label={
-              <Typography sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 500, fontSize: 14 }}>
+              <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 500, fontSize: 14 }}>
                 Properties
               </Typography>
             }
@@ -179,7 +179,7 @@ const UploadTracker = () => {
               />
             }
             label={
-              <Typography sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 500, fontSize: 14 }}>
+              <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 500, fontSize: 14 }}>
                 Masterplan
               </Typography>
             }
@@ -227,7 +227,7 @@ const UploadTracker = () => {
                       left: 0,
                       zIndex: 3,
                       bgcolor: theme.palette.background.paper,
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       fontWeight: 700,
                       fontSize: 13,
                       borderBottom: `2px solid ${theme.palette.cardBorder}`,
@@ -242,7 +242,7 @@ const UploadTracker = () => {
                       key={day}
                       align="center"
                       sx={{
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontWeight: 600,
                         fontSize: 12,
                         borderBottom: `2px solid ${theme.palette.cardBorder}`,
@@ -271,7 +271,7 @@ const UploadTracker = () => {
                         left: 0,
                         zIndex: 1,
                         bgcolor: theme.palette.background.paper,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontWeight: row.type === 'masterplan' ? 700 : 500,
                         fontSize: 13,
                         borderBottom: `1px solid ${theme.palette.cardBorder}`,
@@ -284,7 +284,7 @@ const UploadTracker = () => {
                           size="small"
                           color="primary"
                           variant="outlined"
-                          sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600 }}
+                          sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}
                         />
                       ) : (
                         row.label
@@ -299,7 +299,7 @@ const UploadTracker = () => {
                           key={day}
                           align="center"
                           sx={{
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                             fontSize: 13,
                             fontWeight: hasData ? 700 : 400,
                             borderBottom: `1px solid ${theme.palette.cardBorder}`,

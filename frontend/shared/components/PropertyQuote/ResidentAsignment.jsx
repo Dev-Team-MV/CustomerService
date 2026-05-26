@@ -154,7 +154,7 @@ if (isHouse) {
       }}>
         <Typography variant="subtitle1" textAlign="center" sx={{
           py: 2,
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           letterSpacing: '1.5px',
           textTransform: 'uppercase',
           fontSize: '0.85rem',
@@ -217,7 +217,7 @@ if (isHouse) {
             <Box>
               <Typography variant="subtitle1" fontWeight={700} sx={{
                 color: theme.palette.primary.main,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 letterSpacing: '1.5px',
                 textTransform: 'uppercase',
                 fontSize: '0.95rem'
@@ -226,7 +226,7 @@ if (isHouse) {
               </Typography>
               <Typography variant="caption" sx={{
                 color: theme.palette.text.secondary,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: '0.75rem'
               }}>
                 {expanded

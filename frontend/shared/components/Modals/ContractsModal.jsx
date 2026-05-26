@@ -99,7 +99,7 @@ const ContractsModal = ({
               sx={{
                 mb: 3,
                 borderRadius: 2,
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
               onClose={() => setError(null)}
             >
@@ -113,15 +113,15 @@ const ContractsModal = ({
         sx={{
           mb: 3,
           borderRadius: 2,
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           bgcolor: theme.palette.info.light + '14',
           border: `1px solid ${theme.palette.info.main}4D`
         }}
       >
-        <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif', mb: 0.5 }}>
+        <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif', mb: 0.5 }}>
           {t('contracts:noContractsYet', 'No contracts uploaded yet')}
         </Typography>
-        <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+        <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
           {t('contracts:startUploading', 'Start by selecting and uploading the required documents below')}
         </Typography>
       </Alert>
@@ -142,10 +142,10 @@ const ContractsModal = ({
             }}
           >
            <Box>
-              <Typography variant="body2" fontWeight={600} sx={{ color: theme.palette.primary.main, fontFamily: '"Poppins", sans-serif', mb: 0.5 }}>
+              <Typography variant="body2" fontWeight={600} sx={{ color: theme.palette.primary.main, fontFamily: '"DM Sans", sans-serif', mb: 0.5 }}>
                 {t('contracts:uploadProgress', 'Upload Progress')}
               </Typography>
-              <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
                 {t('contracts:progressSummary', {
                   uploaded: getExistingCount(),
                   pending: getPendingCount()
@@ -162,7 +162,7 @@ const ContractsModal = ({
                 border: `1px solid ${getTotalProgress() === 100 ? theme.palette.secondary.main : theme.palette.warning.main}`,
                 fontWeight: 700,
                 fontSize: '1rem',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 px: 2
               }}
             />
@@ -170,11 +170,11 @@ const ContractsModal = ({
 
           {/* PENDING FILES ALERT */}
           {getPendingCount() > 0 && (
-            <Alert severity="info" sx={{ mb: 3, borderRadius: 2, fontFamily: '"Poppins", sans-serif', bgcolor: theme.palette.secondary.light + '14', border: `1px solid ${theme.palette.secondary.main}4D` }}>
-              <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            <Alert severity="info" sx={{ mb: 3, borderRadius: 2, fontFamily: '"DM Sans", sans-serif', bgcolor: theme.palette.secondary.light + '14', border: `1px solid ${theme.palette.secondary.main}4D` }}>
+              <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                 {t('contracts:filesReady', { count: getPendingCount() }, '{{count}} file(s) ready to upload')}
               </Typography>
-              <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                 {t('contracts:submitAllHint', 'Click "Submit All Contracts" to complete the upload')}
               </Typography>
             </Alert>
@@ -194,7 +194,7 @@ const ContractsModal = ({
                 minHeight: 24
               },
               '& .MuiStepLabel-label': {
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontWeight: 600,
                 color: theme.palette.text.secondary,
                 '&.Mui-active': {
@@ -260,7 +260,7 @@ const ContractsModal = ({
                               : (activeStep === idx
                                 ? theme.palette.primary.main
                                 : theme.palette.text.secondary)),
-                          fontFamily: '"Poppins", sans-serif'
+                          fontFamily: '"DM Sans", sans-serif'
                         }}
                       >
                         {docType.label}
@@ -274,7 +274,7 @@ const ContractsModal = ({
                             color: theme.palette.secondary.main,
                             border: `1px solid ${theme.palette.secondary.main}`,
                             fontWeight: 600,
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                             height: 22
                           }}
                         />
@@ -288,7 +288,7 @@ const ContractsModal = ({
                             color: theme.palette.warning.main,
                             border: `1px solid ${theme.palette.warning.main}`,
                             fontWeight: 600,
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                             height: 22
                           }}
                         />
@@ -315,7 +315,7 @@ const ContractsModal = ({
                             variant="body2"
                             sx={{
                               color: theme.palette.secondary.main,
-                              fontFamily: '"Poppins", sans-serif',
+                              fontFamily: '"DM Sans", sans-serif',
                               fontWeight: 600,
                               mb: 0.5
                             }}
@@ -326,7 +326,7 @@ const ContractsModal = ({
                             variant="caption"
                             sx={{
                               color: theme.palette.text.secondary,
-                              fontFamily: '"Poppins", sans-serif',
+                              fontFamily: '"DM Sans", sans-serif',
                               display: 'block',
                               mb: 2
                             }}
@@ -349,7 +349,7 @@ const ContractsModal = ({
                                 borderRadius: 2,
                                 textTransform: 'none',
                                 fontWeight: 600,
-                                fontFamily: '"Poppins", sans-serif',
+                                fontFamily: '"DM Sans", sans-serif',
                                 borderColor: theme.palette.info.light,
                                 borderWidth: '2px',
                                 color: theme.palette.info.main,
@@ -375,7 +375,7 @@ const ContractsModal = ({
                                 borderRadius: 2,
                                 textTransform: 'none',
                                 fontWeight: 600,
-                                fontFamily: '"Poppins", sans-serif',
+                                fontFamily: '"DM Sans", sans-serif',
                                 borderColor: theme.palette.secondary.light,
                                 borderWidth: '2px',
                                 color: theme.palette.primary.main,
@@ -402,7 +402,7 @@ const ContractsModal = ({
                                 borderRadius: 2,
                                 textTransform: 'none',
                                 fontWeight: 600,
-                                fontFamily: '"Poppins", sans-serif',
+                                fontFamily: '"DM Sans", sans-serif',
                                 borderColor: theme.palette.warning.light,
                                 borderWidth: '2px',
                                 color: theme.palette.warning.main,
@@ -424,7 +424,7 @@ const ContractsModal = ({
                             variant="caption"
                             sx={{
                               color: theme.palette.text.secondary,
-                              fontFamily: '"Poppins", sans-serif',
+                              fontFamily: '"DM Sans", sans-serif',
                               fontStyle: 'italic',
                               display: 'block',
                               mt: 1.5
@@ -455,7 +455,7 @@ const ContractsModal = ({
                                 fontWeight={600}
                                 sx={{
                                   color: theme.palette.primary.main,
-                                  fontFamily: '"Poppins", sans-serif',
+                                  fontFamily: '"DM Sans", sans-serif',
                                   mb: 0.3
                                 }}
                               >
@@ -465,7 +465,7 @@ const ContractsModal = ({
                                 variant="caption"
                                 sx={{
                                   color: theme.palette.text.secondary,
-                                  fontFamily: '"Poppins", sans-serif'
+                                  fontFamily: '"DM Sans", sans-serif'
                                 }}
                               >
                                 {(pendingFile.size / (1024 * 1024)).toFixed(2)} MB
@@ -488,7 +488,7 @@ const ContractsModal = ({
                             variant="caption"
                             sx={{
                               color: theme.palette.text.secondary,
-                              fontFamily: '"Poppins", sans-serif',
+                              fontFamily: '"DM Sans", sans-serif',
                               fontStyle: 'italic'
                             }}
                           >
@@ -502,7 +502,7 @@ const ContractsModal = ({
                             variant="body2"
                             sx={{
                               color: theme.palette.text.secondary,
-                              fontFamily: '"Poppins", sans-serif',
+                              fontFamily: '"DM Sans", sans-serif',
                               mb: 2
                             }}
                           >
@@ -522,7 +522,7 @@ const ContractsModal = ({
                               color: theme.palette.primary.main,
                               fontWeight: 600,
                               textTransform: 'none',
-                              fontFamily: '"Poppins", sans-serif',
+                              fontFamily: '"DM Sans", sans-serif',
                               py: 1.5,
                               '&:hover': {
                                 borderColor: theme.palette.secondary.main,

@@ -110,7 +110,7 @@ const FacadeSelector = () => {
           textAlign="center" 
           sx={{ 
             py: 2,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             letterSpacing: '1.5px',
             textTransform: 'uppercase',
             fontSize: '0.85rem',
@@ -151,7 +151,7 @@ const FacadeSelector = () => {
             fontWeight={700}
             sx={{
               color: '#333F1F',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: '1.5px',
               textTransform: 'uppercase',
               fontSize: '0.95rem'
@@ -164,7 +164,7 @@ const FacadeSelector = () => {
             sx={{
               color: '#8CA551',
               fontWeight: 700,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: '1px',
               textTransform: 'uppercase',
               fontSize: '0.75rem'
@@ -179,7 +179,7 @@ const FacadeSelector = () => {
           sx={{ 
             py: 2,
             color: '#706f6f',
-            fontFamily: '"Poppins", sans-serif'
+            fontFamily: '"DM Sans", sans-serif'
           }}
         >
           {t('noFacades', 'No facades available for this model')}
@@ -218,7 +218,7 @@ const FacadeSelector = () => {
               fontWeight={700}
               sx={{
                 color: '#333F1F',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 letterSpacing: '1.5px',
                 textTransform: 'uppercase',
                 fontSize: '0.85rem'
@@ -234,7 +234,7 @@ const FacadeSelector = () => {
                 color: '#8CA551',
                 fontWeight: 700,
                 fontSize: '0.65rem',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 letterSpacing: '1px',
                 height: 26,
                 px: 1
@@ -306,7 +306,7 @@ const FacadeSelector = () => {
                 fontWeight={700}
                 sx={{
                   color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 {t('facadeDetails', 'Facade Details')}
@@ -356,7 +356,7 @@ const FacadeSelector = () => {
           fontWeight={700}
           sx={{
             color: '#333F1F',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             letterSpacing: '1.5px',
             textTransform: 'uppercase',
             fontSize: '0.95rem'
@@ -386,7 +386,7 @@ const FacadeSelector = () => {
                 fontWeight={700}
                 sx={{
                   color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   letterSpacing: '1px',
                   textTransform: 'uppercase',
                   fontSize: '0.7rem'
@@ -404,7 +404,7 @@ const FacadeSelector = () => {
               color: '#8CA551',
               fontWeight: 700,
               fontSize: '0.65rem',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: '1px',
               height: 26,
               px: 1

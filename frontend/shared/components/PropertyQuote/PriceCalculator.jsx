@@ -130,7 +130,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               color: theme.palette.primary.main,
               fontWeight: 700,
               letterSpacing: '0.5px',
-              fontFamily: '"Poppins", sans-serif'
+              fontFamily: '"DM Sans", sans-serif'
             }}
           >
             {t('quote:priceCalculator', 'Price Calculator')}
@@ -147,7 +147,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               border: `1px solid ${theme.palette.secondary.main}33`,
               borderRadius: 2,
               '& .MuiAlert-message': {
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: '0.875rem',
                 color: theme.palette.primary.main
               }
@@ -173,13 +173,13 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
             border: `1px solid ${theme.palette.cardBorder || '#e0e0e0'}`,
             fontSize: '0.875rem'
           }}>
-            <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', mb: 0.5 }}>
+            <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif', mb: 0.5 }}>
               <strong style={{ color: theme.palette.primary.main }}>{t('quote:apartment', 'Apartment')}:</strong> {selectedApartment ? `#${selectedApartment.apartmentNumber} - $${selectedApartment.price?.toLocaleString()}` : t('quote:notSelected', 'Not selected')}
             </Typography>
-            <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', mb: 0.5 }}>
+            <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif', mb: 0.5 }}>
               <strong style={{ color: theme.palette.primary.main }}>{t('quote:model', 'Model')}:</strong> {selectedApartment?.apartmentModel?.name || t('quote:notSelected', 'Not selected')}
             </Typography>
-            <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', mt: 1.5 }}>
+            <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif', mt: 1.5 }}>
               <strong style={{ color: theme.palette.primary.main }}>{t('quote:floor', 'Floor')}:</strong> {selectedApartment ? selectedApartment.floorNumber : t('quote:notSelected', 'Not selected')}
             </Typography>
           </Box>
@@ -217,20 +217,20 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
             textAlign: 'center',
             boxShadow: `0 4px 12px ${theme.palette.secondary.main}26`
           }}>
-            <Typography variant="caption" sx={{ color: theme.palette.primary.main, fontWeight: 700, letterSpacing: '1.5px', fontFamily: '"Poppins", sans-serif', fontSize: '0.75rem' }}>
+            <Typography variant="caption" sx={{ color: theme.palette.primary.main, fontWeight: 700, letterSpacing: '1.5px', fontFamily: '"DM Sans", sans-serif', fontSize: '0.75rem' }}>
               {t('quote:presalePriceToday', 'PRESALE PRICE TODAY')}
             </Typography>
-            <Typography variant="h3" sx={{ fontWeight: 700, color: theme.palette.primary.main, mt: 0.5, fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="h3" sx={{ fontWeight: 700, color: theme.palette.primary.main, mt: 0.5, fontFamily: '"DM Sans", sans-serif' }}>
               ${financials.presalePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </Typography>
-            <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontStyle: 'italic', fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontStyle: 'italic', fontFamily: '"DM Sans", sans-serif' }}>
               {t('quote:limitedTimeOffer', 'Limited time offer')}
             </Typography>
           </Box>
 
           <Divider sx={{ borderColor: theme.palette.secondary.main + '33' }} />
 
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: theme.palette.primary.main, fontFamily: '"Poppins", sans-serif', letterSpacing: '0.5px' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: theme.palette.primary.main, fontFamily: '"DM Sans", sans-serif', letterSpacing: '0.5px' }}>
             {t('quote:downPaymentDetails', 'Down Payment Details')}
           </Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -266,7 +266,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               />
             </Box>
             <Box sx={{ flex: 1.5 }}>
-              <Typography variant="caption" sx={{ color: theme.palette.text.secondary, mb: 0.5, display: 'block', fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="caption" sx={{ color: theme.palette.text.secondary, mb: 0.5, display: 'block', fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}>
                 {t('quote:paymentDate', 'Payment Date')}
               </Typography>
               <TextField
@@ -279,7 +279,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 2,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     '&:hover fieldset': { borderColor: theme.palette.secondary.main },
                     '&.Mui-focused fieldset': { borderColor: theme.palette.secondary.main }
                   }
@@ -297,7 +297,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
 
           <Divider sx={{ borderColor: theme.palette.secondary.main + '33' }} />
 
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: theme.palette.primary.main, fontFamily: '"Poppins", sans-serif', letterSpacing: '0.5px' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: theme.palette.primary.main, fontFamily: '"DM Sans", sans-serif', letterSpacing: '0.5px' }}>
             {t('quote:monthlyPaymentPlan', 'Monthly Payment Plan')}
           </Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -329,39 +329,39 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
           />
 
           <Box sx={{ p: 2.5, bgcolor: theme.palette.background.default, borderRadius: 2, border: `1px solid ${theme.palette.cardBorder || '#e0e0e0'}` }}>
-            <Typography variant="subtitle2" fontWeight={700} display="block" mb={2} sx={{ color: theme.palette.primary.main, fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="subtitle2" fontWeight={700} display="block" mb={2} sx={{ color: theme.palette.primary.main, fontFamily: '"DM Sans", sans-serif' }}>
               {t('quote:paymentBreakdown', 'Payment Breakdown')}
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
                 {t('quote:initialDownPayment', 'Initial Down Payment')}:
               </Typography>
-              <Typography variant="body2" fontWeight={600} sx={{ color: theme.palette.primary.main, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" fontWeight={600} sx={{ color: theme.palette.primary.main, fontFamily: '"DM Sans", sans-serif' }}>
                 ${financials.initialDownPayment.toLocaleString()}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
                 {t('quote:remainingDownPayment', 'Remaining Down Payment')}:
               </Typography>
-              <Typography variant="body2" fontWeight={600} sx={{ color: theme.palette.primary.main, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" fontWeight={600} sx={{ color: theme.palette.primary.main, fontFamily: '"DM Sans", sans-serif' }}>
                 ${(financials.totalDownPayment - financials.initialDownPayment).toLocaleString()}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
                 {t('quote:monthlyPayment', 'Monthly Payment')}:
               </Typography>
-              <Typography variant="body2" fontWeight={600} sx={{ color: theme.palette.primary.main, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" fontWeight={600} sx={{ color: theme.palette.primary.main, fontFamily: '"DM Sans", sans-serif' }}>
                 ${financials.monthlyPayment.toLocaleString()}
               </Typography>
             </Box>
             <Divider sx={{ my: 1.5, borderColor: theme.palette.secondary.main + '33' }} />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body2" fontWeight={700} sx={{ color: theme.palette.primary.main, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" fontWeight={700} sx={{ color: theme.palette.primary.main, fontFamily: '"DM Sans", sans-serif' }}>
                 {t('quote:mortgageToFinance', 'Mortgage to Finance')}:
               </Typography>
-              <Typography variant="body2" fontWeight={700} sx={{ color: theme.palette.secondary.main, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" fontWeight={700} sx={{ color: theme.palette.secondary.main, fontFamily: '"DM Sans", sans-serif' }}>
                 ${financials.mortgage.toLocaleString()}
               </Typography>
             </Box>
@@ -376,13 +376,13 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
               border: '1px solid rgba(229, 134, 60, 0.2)',
               borderRadius: 2,
               '& .MuiAlert-message': {
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: '0.875rem',
                 color: theme.palette.primary.main
               }
             }}
           >
-            <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
               <strong>{t('quote:important', 'Important')}:</strong> {t('quote:discountNote', 'Every 10 apartments sold, the discount is reduced by 2%')}
             </Typography>
           </Alert>
@@ -402,7 +402,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontWeight: 600,
                 textTransform: 'none',
                 fontSize: '1rem',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 border: `2px solid ${theme.palette.secondary.main}`,
                 '&:hover': {
                   borderColor: theme.palette.secondary.main,
@@ -439,7 +439,7 @@ const PriceCalculator = ({ onCreatePropertyClick, isPublic = false }) => {
                 fontWeight: 600,
                 textTransform: 'none',
                 fontSize: '1rem',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 boxShadow: `0 4px 12px ${theme.palette.primary.main}40`,
                 position: 'relative',
                 overflow: 'hidden',
@@ -513,7 +513,7 @@ const CalcField = ({
           mb: 0.5,
           display: 'block',
           fontWeight: 600,
-          fontFamily: '"Poppins", sans-serif'
+          fontFamily: '"DM Sans", sans-serif'
         }}
       >
         {label}
@@ -542,7 +542,7 @@ const CalcField = ({
               : '#fff',
             fontWeight: highlighted ? 700 : 400,
             border: highlighted ? `2px solid ${theme.palette.secondary.main}` : 'none',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             '&:hover fieldset': {
               borderColor: disabled ? 'inherit' : theme.palette.secondary.main
             },

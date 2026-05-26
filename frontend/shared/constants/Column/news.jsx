@@ -46,7 +46,7 @@ export const useNewsColumns = ({ t, config, handleView, handleEdit, handleDelete
             <Typography
               variant="body2"
               sx={{
-                fontWeight: 600, color: '#1a1a1a', fontFamily: '"Poppins", sans-serif',
+                fontWeight: 600, color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif',
                 mb: 0.3,
                 display: '-webkit-box', WebkitLineClamp: 1,
                 WebkitBoxOrient: 'vertical', overflow: 'hidden'
@@ -57,7 +57,7 @@ export const useNewsColumns = ({ t, config, handleView, handleEdit, handleDelete
             <Typography
               variant="caption"
               sx={{
-                color: '#706f6f', fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem',
+                color: '#706f6f', fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem',
                 display: '-webkit-box', WebkitLineClamp: 1,
                 WebkitBoxOrient: 'vertical', overflow: 'hidden'
               }}
@@ -72,7 +72,7 @@ export const useNewsColumns = ({ t, config, handleView, handleEdit, handleDelete
                   mt: 0.5, height: 20, fontSize: '0.65rem',
                   bgcolor: `${config.colors.accent}1F`, color: config.colors.accent,
                   border: `1px solid ${config.colors.accent}4D`,
-                  fontWeight: 600, fontFamily: '"Poppins", sans-serif'
+                  fontWeight: 600, fontFamily: '"DM Sans", sans-serif'
                 }}
               />
             )}
@@ -91,7 +91,7 @@ export const useNewsColumns = ({ t, config, handleView, handleEdit, handleDelete
             label={t(`news:category${row.category.charAt(0).toUpperCase() + row.category.slice(1)}`, row.category)}
             size="small"
             sx={{
-              fontWeight: 600, fontFamily: '"Poppins", sans-serif',
+              fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
               height: 28, px: 1.5, fontSize: '0.75rem',
               letterSpacing: '0.5px', borderRadius: 2, textTransform: 'capitalize',
               bgcolor: `${categoryColor}1F`, color: categoryColor, 
@@ -112,7 +112,7 @@ export const useNewsColumns = ({ t, config, handleView, handleEdit, handleDelete
             label={t(`news:status${row.status.charAt(0).toUpperCase() + row.status.slice(1)}`, row.status)}
             size="small"
             sx={{
-              fontWeight: 600, fontFamily: '"Poppins", sans-serif',
+              fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
               height: 28, px: 1.5, fontSize: '0.75rem',
               letterSpacing: '0.5px', borderRadius: 2, textTransform: 'capitalize',
               bgcolor: s.bg, color: s.color, border: `1px solid ${s.border}`
@@ -126,7 +126,7 @@ export const useNewsColumns = ({ t, config, handleView, handleEdit, handleDelete
       headerName: t('news:date'),
       minWidth: 120,
       renderCell: ({ value }) => (
-        <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', fontWeight: 500 }}>
+        <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif', fontWeight: 500 }}>
           {new Date(value).toLocaleDateString()}
         </Typography>
       )
@@ -146,7 +146,7 @@ export const useNewsColumns = ({ t, config, handleView, handleEdit, handleDelete
                 height: 24, fontSize: '0.7rem',
                 bgcolor: 'rgba(112, 111, 111, 0.08)',
                 border: '1px solid rgba(112, 111, 111, 0.2)',
-                fontFamily: '"Poppins", sans-serif', fontWeight: 500
+                fontFamily: '"DM Sans", sans-serif', fontWeight: 500
               }}
             />
           ))}
@@ -158,7 +158,7 @@ export const useNewsColumns = ({ t, config, handleView, handleEdit, handleDelete
                 height: 24, fontSize: '0.7rem',
                 bgcolor: `${config.colors.secondary}1F`, color: config.colors.secondary,
                 border: `1px solid ${config.colors.secondary}4D`,
-                fontWeight: 600, fontFamily: '"Poppins", sans-serif'
+                fontWeight: 600, fontFamily: '"DM Sans", sans-serif'
               }}
             />
           )}

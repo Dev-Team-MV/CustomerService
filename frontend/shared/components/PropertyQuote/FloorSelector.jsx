@@ -75,7 +75,7 @@ const FloorSelector = () => {
             <LayersIcon sx={{ color: theme.palette.primary.main, fontSize: 20 }} />
             <Typography sx={{
               fontWeight: 700,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: '1.5px',
               textTransform: 'uppercase',
               fontSize: '0.85rem',
@@ -84,7 +84,7 @@ const FloorSelector = () => {
               {t('quote:selectFloorStep', '02 SELECT A FLOOR')}
             </Typography>
           </Box>
-          <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
             {t('quote:clickFloorPolygon', 'Click a floor polygon on the building exterior')}
           </Typography>
         </Box>
@@ -122,7 +122,7 @@ const FloorSelector = () => {
       pointerEvents: 'none'
     }}
   >
-              <Typography sx={{ fontWeight: 700, fontSize: '1rem', fontFamily: '"Poppins", sans-serif', color: theme.palette.primary.dark }}>
+              <Typography sx={{ fontWeight: 700, fontSize: '1rem', fontFamily: '"DM Sans", sans-serif', color: theme.palette.primary.dark }}>
                 {hoveredPolygon.name}
               </Typography>
               <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>

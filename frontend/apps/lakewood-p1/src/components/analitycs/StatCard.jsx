@@ -61,7 +61,7 @@ const StatCard = ({
                   fontWeight: 600,
                   letterSpacing: '0.5px',
                   textTransform: 'uppercase',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '0.7rem', md: '0.75rem' }
                 }}
               >
@@ -101,7 +101,7 @@ const StatCard = ({
               sx={{
                 fontWeight: 800,
                 mb: 1,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 letterSpacing: '-1px',
                 fontSize: { xs: '2rem', md: '2.5rem' }
               }}
@@ -130,7 +130,7 @@ const StatCard = ({
                 sx={{
                   opacity: 0.85,
                   fontWeight: 500,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '0.7rem', md: '0.75rem' }
                 }}
               >

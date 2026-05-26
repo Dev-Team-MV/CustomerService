@@ -109,7 +109,7 @@ const StatCard = ({ stat, index }) => {
                   fontWeight: 500, 
                   textTransform: 'uppercase',
                   letterSpacing: '1px', 
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '0.65rem', sm: '0.7rem' }
                 }}>
                   {stat.label}
@@ -131,7 +131,7 @@ const StatCard = ({ stat, index }) => {
               <Typography variant="h4" sx={{
                 color: stat.color, 
                 fontWeight: 600, 
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 mb: 0.5, 
                 letterSpacing: '-0.5px',
                 fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }
@@ -145,7 +145,7 @@ const StatCard = ({ stat, index }) => {
                 <Typography variant="caption" sx={{
                   color: '#706f6f', 
                   fontWeight: 500,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '0.65rem', sm: '0.75rem' }
                 }}>
                   {stat.sub}
@@ -249,7 +249,7 @@ const FinancialHeader = ({ financialSummary, user, t }) => {
         </Box>
         <Box flex={1}>
           <Typography variant="h3" sx={{
-            fontFamily: '"Poppins", sans-serif', 
+            fontFamily: '"DM Sans", sans-serif', 
             color: theme.palette.primary.main,
             fontWeight: 700, 
             letterSpacing: '0.5px',
@@ -263,7 +263,7 @@ const FinancialHeader = ({ financialSummary, user, t }) => {
             <Typography variant="h6" sx={{
               color: '#706f6f', 
               fontWeight: 400,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' }
             }}>
               {t('myApartment:welcome', 'Welcome back')}
@@ -280,7 +280,7 @@ const FinancialHeader = ({ financialSummary, user, t }) => {
                 fontSize: { xs: '0.75rem', sm: '0.85rem', md: '0.9rem' },
                 height: { xs: 26, sm: 30, md: 32 }, 
                 px: { xs: 1.5, sm: 2 },
-                fontFamily: '"Poppins", sans-serif', 
+                fontFamily: '"DM Sans", sans-serif', 
                 letterSpacing: '0.5px',
                 transition: 'all 0.3s ease',
                 '&:hover': { 

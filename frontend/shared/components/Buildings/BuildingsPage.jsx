@@ -143,7 +143,7 @@ const BuildingsPage = ({
           <Alert
             onClose={() => setSnackbar(p => ({ ...p, open: false }))}
             severity={snackbar.severity}
-            sx={{ fontFamily: '"Poppins", sans-serif', borderRadius: 3 }}
+            sx={{ fontFamily: '"DM Sans", sans-serif', borderRadius: 3 }}
           >
             {snackbar.message}
           </Alert>

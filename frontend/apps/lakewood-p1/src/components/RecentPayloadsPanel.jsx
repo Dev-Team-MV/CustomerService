@@ -24,17 +24,17 @@ const PayloadRow = ({ payload, t }) => {
       }}
     >
       <Box display="flex" alignItems="center" gap={2}>
-        <Avatar sx={{ bgcolor: '#e8f5ee', color: '#333F1F', fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+        <Avatar sx={{ bgcolor: '#e8f5ee', color: '#333F1F', fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
           {payload.property?.user?.firstName?.charAt(0) || 'U'}
         </Avatar>
         <Box>
-          <Typography variant="body1" sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif', color: '#333F1F' }}>
+          <Typography variant="body1" sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif', color: '#333F1F' }}>
             {payload.property?.lot?.number
               ? t('recentPayloads.lot', { number: payload.property.lot.number })
               : 'N/A'
             }
           </Typography>
-          <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
             {payload.property?.user?.firstName} {payload.property?.user?.lastName}
             {' • '}
             {new Date(payload.date).toLocaleDateString()}
@@ -43,7 +43,7 @@ const PayloadRow = ({ payload, t }) => {
       </Box>
 
       <Box textAlign="right">
-        <Typography variant="body1" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif', color: '#333F1F', mb: 0.5 }}>
+        <Typography variant="body1" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif', color: '#333F1F', mb: 0.5 }}>
           ${payload.amount?.toLocaleString()}
         </Typography>
         <Chip
@@ -51,7 +51,7 @@ const PayloadRow = ({ payload, t }) => {
           size="small"
           sx={{
             fontWeight: 600,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontSize: '0.7rem',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
@@ -97,7 +97,7 @@ const RecentPayloadsPanel = ({ payloads, t }) => {
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
           <Typography
             variant="h6"
-            sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif', color: '#333F1F', letterSpacing: '0.5px' }}
+            sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif', color: '#333F1F', letterSpacing: '0.5px' }}
           >
             {t('recentPayloads.title')}
           </Typography>
@@ -105,7 +105,7 @@ const RecentPayloadsPanel = ({ payloads, t }) => {
             onClick={() => navigate('/payloads')}
             sx={{
               color: '#8CA551', textTransform: 'none',
-              fontWeight: 600, fontFamily: '"Poppins", sans-serif',
+              fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
               '&:hover': { bgcolor: 'transparent', color: '#333F1F' }
             }}
           >
@@ -119,7 +119,7 @@ const RecentPayloadsPanel = ({ payloads, t }) => {
           ))
         ) : (
           <Box py={6} textAlign="center">
-            <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
               {t('recentPayloads.noPayloads')}
             </Typography>
           </Box>

@@ -97,7 +97,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
           <Typography
             variant="h5"
             sx={{
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               color: theme.palette.primary.main,
               fontWeight: 700,
               fontSize: { xs: '1.25rem', sm: '1.5rem' },
@@ -109,7 +109,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
           <Typography
             variant="body2"
             sx={{
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               color: theme.palette.text.secondary,
               fontSize: '0.9rem'
             }}
@@ -126,7 +126,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
             height: 36,
             fontSize: '0.85rem',
             fontWeight: 700,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: selectedRenderType === 'basic' 
               ? 'rgba(67,160,71,0.12)' 
               : theme.palette.chipAdmin.bg,
@@ -181,7 +181,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
               <Home sx={{ fontSize: { xs: 40, sm: 60 }, color: '#666', mb: 2 }} />
               <Typography
                 color="white"
-                sx={{ fontFamily: '"Poppins", sans-serif', fontSize: { xs: '0.85rem', sm: '1rem' } }}
+                sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: { xs: '0.85rem', sm: '1rem' } }}
               >
                 No apartment renders available
               </Typography>
@@ -216,7 +216,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                 px: 1.5,
                 py: 0.5,
                 borderRadius: 2,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: '0.75rem',
                 fontWeight: 600
               }}
@@ -256,7 +256,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
               <Typography
                 variant="caption"
                 color="text.secondary"
-                sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem', textAlign: 'center' }}
+                sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem', textAlign: 'center' }}
               >
                 No images available
               </Typography>
@@ -332,7 +332,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
               <Typography
                 variant="h6"
                 sx={{
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   color: theme.palette.primary.main,
                   fontWeight: 700,
                   fontSize: { xs: '1.1rem', sm: '1.25rem' },
@@ -385,7 +385,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                 textAlign: 'center',
                 mt: 1.5,
                 color: theme.palette.text.secondary,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: '0.75rem'
               }}
             >
@@ -402,7 +402,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
             <Typography
               variant="h6"
               sx={{
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 color: theme.palette.primary.main,
                 fontWeight: 700,
                 fontSize: { xs: '1.1rem', sm: '1.25rem' },
@@ -451,7 +451,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                   <Typography
                     variant="caption"
                     sx={{
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       color: theme.palette.text.secondary,
                       fontSize: '0.75rem',
                       fontWeight: 600,
@@ -464,7 +464,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                 </Box>
                 <Typography
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.primary.main,
                     fontSize: '1.1rem',
                     fontWeight: 700
@@ -475,7 +475,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                 <Typography
                   variant="caption"
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.text.secondary,
                     fontSize: '0.7rem'
                   }}
@@ -520,7 +520,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                   <Typography
                     variant="caption"
                     sx={{
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       color: theme.palette.text.secondary,
                       fontSize: '0.75rem',
                       fontWeight: 600,
@@ -533,7 +533,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                 </Box>
                 <Typography
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.primary.main,
                     fontSize: '1.8rem',
                     fontWeight: 700
@@ -579,7 +579,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                   <Typography
                     variant="caption"
                     sx={{
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       color: theme.palette.text.secondary,
                       fontSize: '0.75rem',
                       fontWeight: 600,
@@ -592,7 +592,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                 </Box>
                 <Typography
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.primary.main,
                     fontSize: '1.8rem',
                     fontWeight: 700
@@ -638,7 +638,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                   <Typography
                     variant="caption"
                     sx={{
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       color: theme.palette.text.secondary,
                       fontSize: '0.75rem',
                       fontWeight: 600,
@@ -651,7 +651,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                 </Box>
                 <Typography
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.primary.main,
                     fontSize: '1.5rem',
                     fontWeight: 700
@@ -662,7 +662,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                 <Typography
                   variant="caption"
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.text.secondary,
                     fontSize: '0.7rem'
                   }}
@@ -690,7 +690,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
               <Typography
                 variant="subtitle2"
                 sx={{
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   color: theme.palette.primary.main,
                   fontWeight: 700,
                   fontSize: '0.95rem'
@@ -704,7 +704,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                 <Typography
                   variant="caption"
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.text.secondary,
                     fontSize: '0.7rem',
                     display: 'block',
@@ -715,7 +715,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                 </Typography>
                 <Typography
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.primary.main,
                     fontSize: '0.9rem',
                     fontWeight: 600
@@ -728,7 +728,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                 <Typography
                   variant="caption"
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.text.secondary,
                     fontSize: '0.7rem',
                     display: 'block',
@@ -739,7 +739,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                 </Typography>
                 <Typography
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.primary.main,
                     fontSize: '0.9rem',
                     fontWeight: 600
@@ -752,7 +752,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                 <Typography
                   variant="caption"
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.text.secondary,
                     fontSize: '0.7rem',
                     display: 'block',
@@ -763,7 +763,7 @@ const floorPlan = floorPlansArray.find(fp => fp.floorNumber === floorNumber)
                 </Typography>
                 <Typography
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.primary.main,
                     fontSize: '0.9rem',
                     fontWeight: 600

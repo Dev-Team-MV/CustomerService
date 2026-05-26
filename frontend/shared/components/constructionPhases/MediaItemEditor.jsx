@@ -187,7 +187,7 @@ const MediaItemEditor = ({
         fullWidth
         onClick={(e) => e.stopPropagation()}
       >
-        <DialogTitle sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600 }}>
+        <DialogTitle sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}>
           {editDialogTitle}
         </DialogTitle>
         <DialogContent>
@@ -323,7 +323,7 @@ const MediaItemEditor = ({
         onClose={() => !loading && setDeleteDialogOpen(false)}
         onClick={(e) => e.stopPropagation()}
       >
-        <DialogTitle sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600 }}>
+        <DialogTitle sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}>
           {deleteDialogTitle}
         </DialogTitle>
         <DialogContent>

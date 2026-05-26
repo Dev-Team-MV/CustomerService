@@ -39,7 +39,7 @@ const DeckPanel = ({ selectedFacade, selectedDeck, onSelectDeck }) => {
           fontWeight={700}
           sx={{
             color: '#333F1F',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             letterSpacing: '0.5px',
             textTransform: 'uppercase',
             fontSize: '0.85rem',
@@ -52,7 +52,7 @@ const DeckPanel = ({ selectedFacade, selectedDeck, onSelectDeck }) => {
           variant="caption" 
           sx={{
             color: '#706f6f',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontSize: '0.75rem'
           }}
         >
@@ -140,7 +140,7 @@ const DeckPanel = ({ selectedFacade, selectedDeck, onSelectDeck }) => {
                           fontWeight={700}
                           sx={{
                             color: '#333F1F',
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                             mb: 0.5
                           }}
                         >
@@ -151,7 +151,7 @@ const DeckPanel = ({ selectedFacade, selectedDeck, onSelectDeck }) => {
                           sx={{
                             color: '#8CA551',
                             fontWeight: 700,
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                             fontSize: '0.9rem'
                           }}
                         >
@@ -189,7 +189,7 @@ const DeckPanel = ({ selectedFacade, selectedDeck, onSelectDeck }) => {
               variant="body2"
               sx={{
                 color: '#706f6f',
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               {t('noDecksForFacade', 'No decks available for this facade')}

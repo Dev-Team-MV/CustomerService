@@ -125,8 +125,8 @@ const TimeLineStepModal = ({
           onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
           fullWidth autoFocus variant="outlined"
           sx={{
-            '& .MuiOutlinedInput-root': { borderRadius: 3, fontFamily: '"Poppins", sans-serif' },
-            '& .MuiInputLabel-root':    { fontFamily: '"Poppins", sans-serif' }
+            '& .MuiOutlinedInput-root': { borderRadius: 3, fontFamily: '"DM Sans", sans-serif' },
+            '& .MuiInputLabel-root':    { fontFamily: '"DM Sans", sans-serif' }
           }}
         />
 
@@ -137,15 +137,15 @@ const TimeLineStepModal = ({
           onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
           fullWidth multiline minRows={2} variant="outlined"
           sx={{
-            '& .MuiOutlinedInput-root': { borderRadius: 3, fontFamily: '"Poppins", sans-serif' },
-            '& .MuiInputLabel-root':    { fontFamily: '"Poppins", sans-serif' }
+            '& .MuiOutlinedInput-root': { borderRadius: 3, fontFamily: '"DM Sans", sans-serif' },
+            '& .MuiInputLabel-root':    { fontFamily: '"DM Sans", sans-serif' }
           }}
         />
 
         {/* MEDIA */}
         <Box>
           <Typography variant="subtitle2" mb={1.5} fontWeight={700}
-            sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}
+            sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}
           >
             {t('media', 'Media')}
           </Typography>
@@ -185,7 +185,7 @@ const TimeLineStepModal = ({
                 />
               }
               label={t('allPublic', 'All images public')}
-              sx={{ fontFamily: '"Poppins", sans-serif', mr: 3 }}
+              sx={{ fontFamily: '"DM Sans", sans-serif', mr: 3 }}
             />
             <FormControlLabel
               control={
@@ -196,7 +196,7 @@ const TimeLineStepModal = ({
                 />
               }
               label={t('customVisibility', 'Customize visibility per image')}
-              sx={{ fontFamily: '"Poppins", sans-serif' }}
+              sx={{ fontFamily: '"DM Sans", sans-serif' }}
             />
           </Box>
 
@@ -266,7 +266,7 @@ const TimeLineStepModal = ({
 
                           {/* Name */}
                           <Typography variant="subtitle2" sx={{
-                            fontWeight: 700, fontFamily: '"Poppins", sans-serif',
+                            fontWeight: 700, fontFamily: '"DM Sans", sans-serif',
                             color: '#3a4d1a', letterSpacing: 0.2, mb: 0.5, textAlign: 'center'
                           }}>
                             {media.name}

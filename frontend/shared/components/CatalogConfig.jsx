@@ -159,10 +159,10 @@ if (loading && !allVersions.length) {
       <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box>
-            <Typography variant="h4" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="h4" fontWeight={700} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
               {t('catalogConfig:title', 'Catalog Configuration')}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif', mt: 0.5 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif', mt: 0.5 }}>
               {t('catalogConfig:subtitle', 'Manage pricing rules and customization options for')} {projectSlug}
             </Typography>
           </Box>
@@ -173,7 +173,7 @@ if (loading && !allVersions.length) {
             disabled={!EditorComponent}
             sx={{
               bgcolor: theme.palette.primary.main,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               textTransform: 'none',
               px: 3
             }}
@@ -208,11 +208,11 @@ if (loading && !allVersions.length) {
         >
           <Tab 
             label={t('catalogConfig:allVersions', 'All Versions')} 
-            sx={{ fontFamily: '"Poppins", sans-serif', textTransform: 'none', fontWeight: 600 }} 
+            sx={{ fontFamily: '"DM Sans", sans-serif', textTransform: 'none', fontWeight: 600 }} 
           />
           <Tab 
             label={t('catalogConfig:activeConfig', 'Active Configuration')} 
-            sx={{ fontFamily: '"Poppins", sans-serif', textTransform: 'none', fontWeight: 600 }} 
+            sx={{ fontFamily: '"DM Sans", sans-serif', textTransform: 'none', fontWeight: 600 }} 
           />
         </Tabs>
 
@@ -223,19 +223,19 @@ if (loading && !allVersions.length) {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+                    <TableCell sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
                       {t('catalogConfig:version', 'Version')}
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+                    <TableCell sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
                       {t('catalogConfig:status', 'Status')}
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+                    <TableCell sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
                       {t('catalogConfig:type', 'Type')}
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+                    <TableCell sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
                       {t('catalogConfig:created', 'Created')}
                     </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+                    <TableCell align="right" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
                       {t('catalogConfig:actions', 'Actions')}
                     </TableCell>
                   </TableRow>
@@ -243,7 +243,7 @@ if (loading && !allVersions.length) {
                 <TableBody>
                   {allVersions.map((config) => (
                     <TableRow key={config.version} hover>
-                      <TableCell sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                      <TableCell sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                         <Chip label={`v${config.version}`} size="small" color="primary" />
                       </TableCell>
                       <TableCell>
@@ -254,10 +254,10 @@ if (loading && !allVersions.length) {
                           icon={config.status === 'published' ? <CheckIcon /> : undefined}
                         />
                       </TableCell>
-                      <TableCell sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                      <TableCell sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                         {config.catalogType || 'N/A'}
                       </TableCell>
-                      <TableCell sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                      <TableCell sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                         {new Date(config.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell align="right">
@@ -265,7 +265,7 @@ if (loading && !allVersions.length) {
                           size="small"
                           startIcon={<ViewIcon />}
                           onClick={() => handleView(config)}
-                          sx={{ fontFamily: '"Poppins", sans-serif', textTransform: 'none', mr: 1 }}
+                          sx={{ fontFamily: '"DM Sans", sans-serif', textTransform: 'none', mr: 1 }}
                         >
                           View
                         </Button>
@@ -275,7 +275,7 @@ if (loading && !allVersions.length) {
                               size="small"
                               startIcon={<EditIcon />}
                               onClick={() => handleEdit(config)}
-                              sx={{ fontFamily: '"Poppins", sans-serif', textTransform: 'none', mr: 1 }}
+                              sx={{ fontFamily: '"DM Sans", sans-serif', textTransform: 'none', mr: 1 }}
                             >
                               Edit
                             </Button>
@@ -284,7 +284,7 @@ if (loading && !allVersions.length) {
                               startIcon={<PublishIcon />}
                               onClick={() => handlePublishClick(config.version)}
                               color="success"
-                              sx={{ fontFamily: '"Poppins", sans-serif', textTransform: 'none' }}
+                              sx={{ fontFamily: '"DM Sans", sans-serif', textTransform: 'none' }}
                             >
                               Publish
                             </Button>
@@ -296,7 +296,7 @@ if (loading && !allVersions.length) {
                   {allVersions.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                           {t('catalogConfig:noVersions', 'No versions found. Create your first configuration.')}
                         </Typography>
                       </TableCell>
@@ -332,7 +332,7 @@ if (loading && !allVersions.length) {
                 <Divider sx={{ my: 3 }} />
 
                 {/* Vista genérica de la estructura */}
-                <Typography variant="h6" fontWeight={700} gutterBottom sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="h6" fontWeight={700} gutterBottom sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {t('catalogConfig:structure', 'Structure')}
                 </Typography>
                 <Paper elevation={0} sx={{ p: 2, bgcolor: '#f5f5f5', mb: 3 }}>
@@ -341,18 +341,18 @@ if (loading && !allVersions.length) {
                   </pre>
                 </Paper>
 
-                <Typography variant="h6" fontWeight={700} gutterBottom sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="h6" fontWeight={700} gutterBottom sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {t('catalogConfig:pricingRules', 'Pricing Rules')}
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif', mb: 2 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif', mb: 2 }}>
                   {catalogConfig.pricingRules?.length || 0} {t('catalogConfig:rulesConfigured', 'rules configured')}
                 </Typography>
                 {catalogConfig.pricingRules?.map((rule, idx) => (
                   <Paper key={idx} elevation={0} sx={{ p: 2, mb: 2, border: '1px solid #e0e0e0' }}>
-                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                    <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                       {rule.label || rule.code}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                       Adjustment: ${rule.adjustment}
                     </Typography>
                   </Paper>
@@ -374,13 +374,13 @@ if (loading && !allVersions.length) {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle sx={{ fontFamily: '"Poppins", sans-serif' }}>
+        <DialogTitle sx={{ fontFamily: '"DM Sans", sans-serif' }}>
           View Configuration v{selectedConfig?.version}
         </DialogTitle>
         <DialogContent>
           {selectedConfig && (
             <Box>
-              <Typography variant="subtitle2" gutterBottom sx={{ fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="subtitle2" gutterBottom sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                 Full Configuration:
               </Typography>
               <Paper elevation={0} sx={{ p: 2, bgcolor: '#f5f5f5' }}>
@@ -392,7 +392,7 @@ if (loading && !allVersions.length) {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setViewDialogOpen(false)} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+          <Button onClick={() => setViewDialogOpen(false)} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
             Close
           </Button>
         </DialogActions>
@@ -405,7 +405,7 @@ if (loading && !allVersions.length) {
         maxWidth="lg"
         fullWidth
       >
-        <DialogTitle sx={{ fontFamily: '"Poppins", sans-serif' }}>
+        <DialogTitle sx={{ fontFamily: '"DM Sans", sans-serif' }}>
           {selectedConfig?.version
             ? `Edit Version ${selectedConfig.version}`
             : 'Create New Configuration'}
@@ -423,14 +423,14 @@ if (loading && !allVersions.length) {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditDialogOpen(false)} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+          <Button onClick={() => setEditDialogOpen(false)} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
             Cancel
           </Button>
           <Button
             onClick={() => handleSave(selectedConfig)}
             variant="contained"
             disabled={saving}
-            sx={{ fontFamily: '"Poppins", sans-serif' }}
+            sx={{ fontFamily: '"DM Sans", sans-serif' }}
           >
             {saving ? <CircularProgress size={20} /> : 'Save'}
           </Button>
@@ -439,16 +439,16 @@ if (loading && !allVersions.length) {
 
       {/* DIALOG: CONFIRM PUBLISH */}
       <Dialog open={publishDialogOpen} onClose={() => setPublishDialogOpen(false)}>
-        <DialogTitle sx={{ fontFamily: '"Poppins", sans-serif' }}>
+        <DialogTitle sx={{ fontFamily: '"DM Sans", sans-serif' }}>
           Confirm Publish
         </DialogTitle>
         <DialogContent>
-          <Typography sx={{ fontFamily: '"Poppins", sans-serif' }}>
+          <Typography sx={{ fontFamily: '"DM Sans", sans-serif' }}>
             Are you sure you want to publish version {versionToPublish}? This will make it the active configuration for all new quotes.
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPublishDialogOpen(false)} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+          <Button onClick={() => setPublishDialogOpen(false)} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
             Cancel
           </Button>
           <Button
@@ -456,7 +456,7 @@ if (loading && !allVersions.length) {
             variant="contained"
             color="success"
             disabled={saving}
-            sx={{ fontFamily: '"Poppins", sans-serif' }}
+            sx={{ fontFamily: '"DM Sans", sans-serif' }}
           >
             {saving ? <CircularProgress size={20} /> : 'Publish'}
           </Button>

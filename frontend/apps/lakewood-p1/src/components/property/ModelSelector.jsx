@@ -265,7 +265,7 @@ const ModelSelector = () => {
           textAlign="center"
           sx={{
             py: 2,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             letterSpacing: "1px",
             textTransform: "uppercase",
             fontSize: "0.85rem",
@@ -348,7 +348,7 @@ const ModelSelector = () => {
             fontWeight={700}
             sx={{
               color: "#333F1F",
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               letterSpacing: "1.5px",
               textTransform: "uppercase",
               fontSize: isMobile ? "0.85rem" : "0.95rem",
@@ -370,7 +370,7 @@ const ModelSelector = () => {
                   color: "#706f6f",
                   fontWeight: 600,
                   textTransform: "none",
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: "0.75rem",
                   "&:hover": {
                     borderColor: "#333F1F",
@@ -394,7 +394,7 @@ const ModelSelector = () => {
                 color: "#8CA551",
                 fontWeight: 700,
                 fontSize: "0.65rem",
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 letterSpacing: "1px",
                 height: 26,
                 px: 1,
@@ -576,7 +576,7 @@ const ModelSelector = () => {
               variant="body2"
               sx={{
                 color: "#706f6f",
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
               }}
             >
               {t("noModels", "No models available")}
@@ -611,7 +611,7 @@ const ModelSelector = () => {
                 fontWeight={700}
                 sx={{
                   color: "#333F1F",
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                 }}
               >
                 {t("modelDetails", "Model Details")}
@@ -626,7 +626,7 @@ const ModelSelector = () => {
                     bgcolor: "#E5863C",
                     color: "white",
                     fontWeight: 600,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                   }}
                 />
               )}
@@ -650,7 +650,7 @@ const ModelSelector = () => {
                 color: "#706f6f",
                 fontWeight: 600,
                 textTransform: "none",
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 "&:hover": {
                   borderColor: "#333F1F",
                   borderWidth: "2px",

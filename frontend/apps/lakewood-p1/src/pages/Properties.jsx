@@ -190,7 +190,7 @@ console.log('🎯 Facades final para el select:', facades)
         {/* FILTERS */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
           <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.85rem', '&.Mui-focused': { color: '#333F1F' } }}>
+            <InputLabel sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.85rem', '&.Mui-focused': { color: '#333F1F' } }}>
               {t('property:filters.filterByModel')}
             </InputLabel>
             <Select
@@ -199,7 +199,7 @@ console.log('🎯 Facades final para el select:', facades)
               onChange={(e) => setModelFilter(e.target.value)}
               startAdornment={<FilterList sx={{ fontSize: 18, color: '#8CA551', mr: 0.5 }} />}
               sx={{
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: '0.85rem',
                 borderRadius: 2,
                 '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(140, 165, 81, 0.3)' },
@@ -225,7 +225,7 @@ console.log('🎯 Facades final para el select:', facades)
               startIcon={<SortByAlpha />}
               onClick={toggleResidentSort}
               sx={{
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontWeight: 600,
                 fontSize: '0.78rem',
                 textTransform: 'none',

@@ -90,7 +90,7 @@ const PageHeader = ({
                 sx={{
                   fontWeight: 800,
                   color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   letterSpacing: '0.5px',
                   fontSize: { xs: '1.75rem', md: '2.125rem' }
                 }}
@@ -102,7 +102,7 @@ const PageHeader = ({
                   variant="body1"
                   sx={{
                     color: '#706f6f',
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontSize: { xs: '0.875rem', md: '1rem' }
                   }}
                 >

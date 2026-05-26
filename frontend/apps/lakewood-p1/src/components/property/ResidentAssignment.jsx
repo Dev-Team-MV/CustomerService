@@ -186,7 +186,7 @@ const handleAssignProperty = async () => {
     return (
       <Paper elevation={0} sx={{ p: 3, bgcolor: '#fff', borderRadius: 4, border: '1px solid #e0e0e0', opacity: 0.6 }}>
         <Typography variant="subtitle1" textAlign="center" sx={{
-          py: 2, fontFamily: '"Poppins", sans-serif', letterSpacing: '1.5px',
+          py: 2, fontFamily: '"DM Sans", sans-serif', letterSpacing: '1.5px',
           textTransform: 'uppercase', fontSize: '0.85rem', fontWeight: 600, color: '#706f6f'
         }}>
           {t('selectLotAndModelToAssignResident', 'SELECT LOT AND MODEL TO ASSIGN RESIDENT')}
@@ -223,12 +223,12 @@ const handleAssignProperty = async () => {
             </Box>
             <Box>
               <Typography variant="subtitle1" fontWeight={700} sx={{
-                color: '#333F1F', fontFamily: '"Poppins", sans-serif',
+                color: '#333F1F', fontFamily: '"DM Sans", sans-serif',
                 letterSpacing: '1.5px', textTransform: 'uppercase', fontSize: '0.95rem'
               }}>
                 {t('residentAssignment', '04 Resident Assignment')}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', fontSize: '0.75rem' }}>
+              <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif', fontSize: '0.75rem' }}>
                 {expanded ? t('selectOrCreateResident', 'Select or create a resident') : t('clickToExpand', 'Click to expand')}
               </Typography>
             </Box>
@@ -241,17 +241,17 @@ const handleAssignProperty = async () => {
         <Box sx={{ p: 3 }}>
           {/* SMS ALERTS */}
           {smsStatus === 'sending-property' && (
-            <Alert severity="info" sx={{ mb: 2, borderRadius: 3, fontFamily: '"Poppins", sans-serif' }}>
+            <Alert severity="info" sx={{ mb: 2, borderRadius: 3, fontFamily: '"DM Sans", sans-serif' }}>
               📱 {t('sendingPropertySMS', 'Sending property assignment SMS...')}
             </Alert>
           )}
           {smsStatus === 'sent' && (
-            <Alert severity="success" sx={{ mb: 2, borderRadius: 3, fontFamily: '"Poppins", sans-serif' }}>
+            <Alert severity="success" sx={{ mb: 2, borderRadius: 3, fontFamily: '"DM Sans", sans-serif' }}>
               ✅ {t('smsSent', 'SMS notifications sent successfully!')}
             </Alert>
           )}
           {smsStatus === 'failed' && (
-            <Alert severity="warning" sx={{ mb: 2, borderRadius: 3, fontFamily: '"Poppins", sans-serif' }}>
+            <Alert severity="warning" sx={{ mb: 2, borderRadius: 3, fontFamily: '"DM Sans", sans-serif' }}>
               ⚠️ {t('smsFailed', 'SMS notification failed but property was created')}
             </Alert>
           )}
@@ -330,7 +330,7 @@ const handleAssignProperty = async () => {
             sx={{
               mt: 3, borderRadius: 3, bgcolor: '#333F1F', color: 'white',
               fontWeight: 600, textTransform: 'none', letterSpacing: '1px',
-              fontFamily: '"Poppins", sans-serif', px: 3, py: 1.5,
+              fontFamily: '"DM Sans", sans-serif', px: 3, py: 1.5,
               boxShadow: '0 4px 12px rgba(51, 63, 31, 0.25)',
               position: 'relative', overflow: 'hidden',
               '&::before': {

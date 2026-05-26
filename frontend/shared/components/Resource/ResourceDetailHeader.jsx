@@ -1,292 +1,373 @@
-import React from 'react'
-import { Grid, Box, Typography, Chip, Paper } from '@mui/material'
-import { Home, Apartment, Construction, Layers, Star, AutoAwesome } from '@mui/icons-material'
+// @shared/components/Resource/ResourceDetailHeader.jsx
+import { useState } from 'react'
+import { Box, Typography, Chip, Divider, IconButton } from '@mui/material'
+import {
+  HomeOutlined,
+  StarBorderOutlined,
+  WeekendOutlined,
+  InventoryOutlined,
+  TableRestaurantOutlined,
+  Construction,
+  ChevronLeft,
+  ChevronRight,
+} from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { MODEL_10_ID } from '../../config/resourceConfig'
 
-const OutlineChip = ({ label, icon, borderColor, color, hoverBg }) => (
+// ── helpers ───────────────────────────────────────────────────────────────────
+const extractUrl = (item) => {
+  if (!item) return null
+  if (typeof item === 'string') return item
+  if (item.url) {
+    if (Array.isArray(item.url) && item.url.length > 0)
+      return typeof item.url[0] === 'string' ? item.url[0] : null
+    if (typeof item.url === 'string') return item.url
+  }
+  return null
+}
+
+const FeatureChip = ({ label, icon, color = '#706f6f' }) => (
   <Chip
     label={label}
-    size="small"
     icon={icon}
+    size="small"
     sx={{
       bgcolor: 'transparent',
-      border: `1.5px solid ${borderColor}`,
+      border: `1.5px solid ${color}50`,
       color,
-      fontWeight: 700,
-      fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' },
-      height: { xs: 28, sm: 30, md: 32 },
-      px: { xs: 1.5, sm: 2 },
-      fontFamily: '"Poppins", sans-serif',
-      letterSpacing: '0.5px',
-      textTransform: 'uppercase',
-      transition: 'all 0.3s ease',
-      '&:hover': { bgcolor: hoverBg, borderColor },
-      '& .MuiChip-icon': { color: borderColor }
+      fontWeight: 600,
+      fontSize: '0.72rem',
+      height: 28,
+      fontFamily: '"DM Sans", sans-serif',
+      '& .MuiChip-icon': { color, fontSize: 14 },
     }}
   />
 )
 
+// ── main ──────────────────────────────────────────────────────────────────────
 const ResourceDetailHeader = ({ details, resourceType, config }) => {
   const { t } = useTranslation(config.i18n.namespace)
-  
-  const resource = details?.[resourceType] || details
-  const model = details?.model || resource?.model || resource?.apartmentModel
-  const construction = details?.construction
-  
-  const isProperty = resourceType === 'property'
-  const Icon = isProperty ? Home : Apartment
-  const isModel10 = model?._id === MODEL_10_ID
-  
-  const title = isProperty 
-    ? (resource?.lot?.number ? t('lotLabel', { number: resource.lot.number }, 'Lot {{number}}') : t('propertyLabel', 'Property'))
-    : (resource?.apartmentNumber ? t('apartmentLabel', { number: resource.apartmentNumber }, 'Apt {{number}}') : t('apartment', 'Apartment'))
-  
-  const modelName = model?.model || model?.name || t('noModel', 'N/A')
-  const price = resource?.price || 0
-  const totalConstructionPercentage = resource?.totalConstructionPercentage || 0
+  const [imgIdx, setImgIdx] = useState(0)
 
-  const paperSx = {
-    p: { xs: 3, sm: 3.5, md: 4 },
-    mb: 3,
-    background: 'linear-gradient(180deg, #ffffff 0%, #fafafa 100%)',
-    borderRadius: { xs: 4, md: 6 },
-    border: `1.5px solid ${config.colors.border}`,
-    boxShadow: `0 12px 32px ${config.colors.primary}1A`,
-    overflow: 'hidden',
-    position: 'relative',
-    transition: 'all 0.3s ease',
-    '&:hover': {
-      boxShadow: `0 24px 48px ${config.colors.primary}26`,
-      border: `2px solid ${config.colors.secondary}4D`
-    },
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: 4,
-      background: config.colors.gradient,
-      opacity: 0.9
-    }
-  }
+  const resource  = details?.[resourceType] || details
+  const model     = details?.model || resource?.model || resource?.apartmentModel
+  const isProperty = resourceType === 'property'
+  const isModel10  = model?._id === MODEL_10_ID
+
+  // ── title ──
+  const modelName  = model?.model || model?.name || '—'
+  const nameParts  = modelName.split(' ')
+  const nameLight  = nameParts.slice(0, -1).join(' ')
+  const nameBold   = nameParts[nameParts.length - 1]
+
+  const lotTitle = isProperty
+    ? (resource?.lot?.number ? `Lot ${resource.lot.number}` : t('propertyLabel', 'Property'))
+    : (resource?.apartmentNumber ? `Apt ${resource.apartmentNumber}` : t('apartment', 'Apartment'))
+
+  const price    = resource?.price || 0
+  const totalPct = resource?.totalConstructionPercentage ?? 0
+
+  // ── specs ──
+  const areaValue      = isProperty ? (details?.property?.sqft || model?.sqft || 0) : (model?.sqft || 0)
+  const bedroomsValue  = isProperty ? (details?.property?.bedrooms  || model?.bedrooms  || 0) : (model?.bedrooms  || 0)
+  const bathroomsValue = isProperty ? (details?.property?.bathrooms || model?.bathrooms || 0) : (model?.bathrooms || 0)
+  const specs = [
+    areaValue      && { label: 'Area',  value: `${areaValue}mt` },
+    bedroomsValue  && { label: 'Beds',  value: bedroomsValue },
+    bathroomsValue && { label: 'Baths', value: bathroomsValue },
+  ].filter(Boolean)
+
+  // ── gallery images (from DetailsTab logic) ──
+  const galleryImages     = resource?.images || {}
+  const blueprintImages   = resource?.blueprints || []
+  const selectedRenders   = resource?.selectedRenders || []
+
+  const allImages = [
+    ...(Array.isArray(galleryImages.exterior)
+      ? galleryImages.exterior.map(i => extractUrl(i)).filter(Boolean).map(url => ({ url, type: 'exterior' }))
+      : []),
+    ...(Array.isArray(galleryImages.interior)
+      ? galleryImages.interior.map(i => extractUrl(i)).filter(Boolean).map(url => ({ url, type: 'interior' }))
+      : []),
+    ...(Array.isArray(blueprintImages)
+      ? blueprintImages.map(i => extractUrl(i)).filter(Boolean).map(url => ({ url, type: 'blueprint' }))
+      : []),
+    ...(Array.isArray(selectedRenders)
+      ? selectedRenders.map(i => extractUrl(i)).filter(Boolean).map(url => ({ url, type: 'render' }))
+      : []),
+  ]
+
+  const handlePrev = () => setImgIdx(p => (p - 1 + allImages.length) % allImages.length)
+  const handleNext = () => setImgIdx(p => (p + 1) % allImages.length)
+  const nextIdx    = allImages.length > 1 ? (imgIdx + 1) % allImages.length : imgIdx
 
   return (
-    <Paper elevation={0} sx={paperSx}>
-      <Grid container spacing={{ xs: 3, md: 4 }} alignItems="center">
-        <Grid item xs={12} md={8}>
-          <Box
-            display="flex"
-            alignItems="center"
-            gap={{ xs: 2, md: 3 }}
-            flexDirection={{ xs: 'column', sm: 'row' }}
-            textAlign={{ xs: 'center', sm: 'left' }}
-          >
-            <Box
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      <Box
+        sx={{
+          bgcolor: 'white',
+          borderRadius: '20px',
+          border: '1px solid #e5e7eb',
+          p: { xs: 3, md: 4 },
+          mb: 3,
+          boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+          overflow: 'hidden',
+        }}
+      >
+        {/* ── Title + price row ── */}
+        <Box display="flex" justifyContent="space-between" alignItems="flex-end" gap={2}>
+          <Box>
+            <Typography
               sx={{
-                width: { xs: 80, sm: 90, md: 100 },
-                height: { xs: 80, sm: 90, md: 100 },
-                borderRadius: '50%',
-                background: config.colors.gradient,
-                boxShadow: `0 8px 24px ${config.colors.primary}30`,
-                border: '3px solid white',
-                flexShrink: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
+                fontWeight: 300,
+                color: config.colors.primary,
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: { xs: '2.2rem', md: '3rem' },
+                lineHeight: 1,
+                letterSpacing: '-1px',
               }}
             >
-              <Icon sx={{ fontSize: { xs: 40, md: 50 }, color: 'white' }} />
-            </Box>
+              {nameLight}{nameLight ? ' ' : ''}
+              <Box component="span" sx={{ fontWeight: 800 }}>{nameBold}</Box>
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '0.85rem',
+                color: '#706f6f',
+                fontFamily: '"DM Sans", sans-serif',
+                mt: 0.5,
+                fontWeight: 500,
+              }}
+            >
+              Lot{' '}
+              <Box component="span" sx={{ fontWeight: 700, color: config.colors.primary }}>
+                {resource?.lot?.number || resource?.apartmentNumber || '—'}
+              </Box>
+            </Typography>
+          </Box>
 
-            <Box flex={1}>
-              <Typography
-                variant="h3"
-                sx={{
-                  fontFamily: '"Poppins", sans-serif',
-                  color: '#1a1a1a',
-                  fontWeight: 700,
-                  letterSpacing: '0.5px',
-                  mb: 1,
-                  fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
-                  textTransform: 'uppercase'
-                }}
-              >
-                {modelName}
-              </Typography>
+          <Box textAlign="right" flexShrink={0}>
+            <Typography
+              sx={{
+                fontSize: '0.68rem',
+                color: '#9ca3af',
+                fontFamily: '"DM Sans", sans-serif',
+                textTransform: 'uppercase',
+                letterSpacing: '0.8px',
+                mb: 0.3,
+              }}
+            >
+              Property value
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: { xs: '1.5rem', md: '2rem' },
+                fontWeight: 700,
+                color: config.colors.primary,
+                fontFamily: '"DM Sans", sans-serif',
+                letterSpacing: '-0.5px',
+                lineHeight: 1,
+              }}
+            >
+              ${price.toLocaleString()}
+            </Typography>
+          </Box>
+        </Box>
 
-              <Box
-                sx={{
-                  width: { xs: 40, sm: 50, md: 60 },
-                  height: 2,
-                  bgcolor: config.colors.secondary,
-                  mb: 1.5,
-                  opacity: 0.8,
-                  mx: { xs: 'auto', sm: 0 }
-                }}
+        <Divider sx={{ borderColor: '#e5e7eb', my: 2 }} />
+
+        {/* ── Chips row: left (progress/model) + right (features) ── */}
+        <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1}>
+          <Box display="flex" gap={1} flexWrap="wrap">
+            <FeatureChip
+              label={`${totalPct}% Complete`}
+              icon={<Construction />}
+              color={config.colors.primary}
+            />
+            {isModel10 && (
+              <FeatureChip
+                label="Model 10"
+                icon={<StarBorderOutlined />}
+                color="#E5863C"
               />
+            )}
+          </Box>
 
-              <Typography
-                variant="h6"
-                sx={{
-                  color: '#706f6f',
-                  fontWeight: 500,
-                  fontFamily: '"Poppins", sans-serif',
-                  fontSize: { xs: '0.9rem', sm: '1rem', md: '1.15rem' },
-                  letterSpacing: '0.5px',
-                  mb: 2
-                }}
-              >
-                {title}
-              </Typography>
+          {/* Feature tags (right side, text+icon minimal style) */}
+          <Box display="flex" gap={1.5} flexWrap="wrap">
+            {isProperty && resource?.modelType === 'upgrade' && (
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <Typography sx={{ fontSize: '0.75rem', color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>Upgrade</Typography>
+                <StarBorderOutlined sx={{ fontSize: 14, color: '#9ca3af' }} />
+              </Box>
+            )}
+            {isProperty && resource?.modelType && resource?.modelType !== 'upgrade' && (
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <Typography sx={{ fontSize: '0.75rem', color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>Basic</Typography>
+                <HomeOutlined sx={{ fontSize: 14, color: '#9ca3af' }} />
+              </Box>
+            )}
+            {isProperty && isModel10 && resource?.hasBalcony && (
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <Typography sx={{ fontSize: '0.75rem', color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>Studio</Typography>
+                <WeekendOutlined sx={{ fontSize: 14, color: '#9ca3af' }} />
+              </Box>
+            )}
+            {isProperty && isModel10 && !resource?.hasBalcony && (
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <Typography sx={{ fontSize: '0.75rem', color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>Dining Room</Typography>
+                <TableRestaurantOutlined sx={{ fontSize: 14, color: '#9ca3af' }} />
+              </Box>
+            )}
+            {isProperty && resource?.hasStorage && (
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <Typography sx={{ fontSize: '0.75rem', color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>Storage</Typography>
+                <InventoryOutlined sx={{ fontSize: 14, color: '#9ca3af' }} />
+              </Box>
+            )}
+          </Box>
+        </Box>
 
-              <Box
-                display="flex"
-                gap={1.5}
-                flexWrap="wrap"
-                justifyContent={{ xs: 'center', sm: 'flex-start' }}
-                mb={2}
-              >
-                {construction?.currentPhase && (
-                  <OutlineChip
-                    label={t('phaseLabel', {
-                      number: construction.currentPhase.phaseNumber,
-                      title: construction.currentPhase.title
-                    }, 'Phase {{number}}: {{title}}')}
-                    icon={<Layers sx={{ fontSize: { xs: 14, sm: 16 } }} />}
-                    borderColor={config.colors.primary}
-                    color={config.colors.primary}
-                    hoverBg={`${config.colors.primary}14`}
-                  />
-                )}
+        {/* ── Specs inline row ── */}
+        {specs.length > 0 && (
+          <Box display="flex" gap={5} mt={2}>
+            {specs.map((s, i) => (
+              <Box key={i} display="flex" alignItems="baseline" gap={1}>
+                <Typography
+                  sx={{
+                    fontSize: '0.72rem',
+                    color: '#9ca3af',
+                    fontFamily: '"DM Sans", sans-serif',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.4px',
+                  }}
+                >
+                  {s.label}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: '1.15rem',
+                    fontWeight: 700,
+                    color: config.colors.primary,
+                    fontFamily: '"DM Sans", sans-serif',
+                    letterSpacing: '-0.3px',
+                  }}
+                >
+                  {s.value}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        )}
 
-                <OutlineChip
-                  label={
-                    typeof totalConstructionPercentage === 'number'
-                      ? t('constructionComplete', { percent: totalConstructionPercentage }, '{{percent}}% Complete')
-                      : '—'
-                  }
-                  icon={<Construction sx={{ fontSize: { xs: 14, sm: 16 } }} />}
-                  borderColor={config.colors.secondary}
-                  color={config.colors.secondary}
-                  hoverBg={`${config.colors.secondary}14`}
+        {/* ── Image gallery (2-up with carousel) ── */}
+        {allImages.length > 0 && (
+          <Box mt={2.5}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 0.45fr',
+                gap: '3px',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                position: 'relative',
+              }}
+            >
+              {/* Main image (left) with arrows */}
+              <Box sx={{ position: 'relative' }}>
+                <Box
+                  component="img"
+                  src={allImages[imgIdx].url}
+                  alt="property"
+                  sx={{
+                    width: '100%',
+                    height: { xs: 220, md: 320 },
+                    objectFit: 'cover',
+                    display: 'block',
+                  }}
                 />
-
-                {isProperty && resource?.hasBalcony && (
-                  <OutlineChip
-                    label={isModel10 ? t('studio', 'Studio') : t('balcony', 'Balcony')}
-                    icon={<AutoAwesome sx={{ fontSize: { xs: 16, sm: 18 } }} />}
-                    borderColor={config.colors.secondary}
-                    color={config.colors.secondary}
-                    hoverBg={`${config.colors.secondary}14`}
-                  />
-                )}
-
-                {isProperty && resource?.modelType === 'upgrade' && (
-                  <OutlineChip
-                    label={t('upgrade', 'Upgrade')}
-                    icon={<Star sx={{ fontSize: { xs: 16, sm: 18 } }} />}
-                    borderColor={config.colors.primary}
-                    color={config.colors.primary}
-                    hoverBg={`${config.colors.primary}14`}
-                  />
-                )}
-
-                {isProperty && resource?.hasStorage && (
-                  <OutlineChip
-                    label={t('storage', 'Storage')}
-                    icon={<Layers sx={{ fontSize: { xs: 16, sm: 18 } }} />}
-                    borderColor="#706f6f"
-                    color="#5a5a5a"
-                    hoverBg="rgba(112,111,111,0.08)"
-                  />
-                )}
-
-                {isModel10 && (
-                  <OutlineChip
-                    label={t('model10', 'Model 10')}
-                    icon={<Star sx={{ fontSize: { xs: 16, sm: 18 } }} />}
-                    borderColor="#E5863C"
-                    color="#8b6f47"
-                    hoverBg="rgba(229,134,60,0.08)"
-                  />
-                )}
-
-                {!isProperty && resource?.floorNumber && (
-                  <OutlineChip
-                    label={t('floorLabel', { number: resource.floorNumber }, 'Floor {{number}}')}
-                    icon={<Layers sx={{ fontSize: { xs: 16, sm: 18 } }} />}
-                    borderColor={config.colors.accent}
-                    color={config.colors.accent}
-                    hoverBg={`${config.colors.accent}14`}
-                  />
+                {allImages.length > 1 && (
+                  <>
+                    <IconButton
+                      onClick={handlePrev}
+                      size="small"
+                      sx={{
+                        position: 'absolute', left: 12, top: '50%',
+                        transform: 'translateY(-50%)',
+                        bgcolor: 'rgba(255,255,255,0.88)',
+                        width: 36, height: 36,
+                        '&:hover': { bgcolor: 'white' },
+                      }}
+                    >
+                      <ChevronLeft sx={{ fontSize: 22 }} />
+                    </IconButton>
+                    <IconButton
+                      onClick={handleNext}
+                      size="small"
+                      sx={{
+                        position: 'absolute', right: 12, top: '50%',
+                        transform: 'translateY(-50%)',
+                        bgcolor: 'rgba(255,255,255,0.88)',
+                        width: 36, height: 36,
+                        '&:hover': { bgcolor: 'white' },
+                      }}
+                    >
+                      <ChevronRight sx={{ fontSize: 22 }} />
+                    </IconButton>
+                  </>
                 )}
               </Box>
-            </Box>
-          </Box>
-        </Grid>
 
-        <Grid item xs={12} md={4}>
-          <motion.div
-            whileHover={{ scale: 1.03 }}
-            transition={{ type: 'spring', stiffness: 300 }}
-          >
-            <Box
+              {/* Second image (right) — slightly dimmed */}
+              {allImages.length > 1 && (
+                <Box
+                  component="img"
+                  src={allImages[nextIdx].url}
+                  alt="property next"
+                  onClick={handleNext}
+                  sx={{
+                    width: '100%',
+                    height: { xs: 220, md: 320 },
+                    objectFit: 'cover',
+                    display: 'block',
+                    filter: 'brightness(0.75)',
+                    cursor: 'pointer',
+                    transition: 'filter 0.2s',
+                    '&:hover': { filter: 'brightness(0.9)' },
+                  }}
+                />
+              )}
+            </Box>
+
+            {/* Note */}
+            <Typography
               sx={{
-                p: 3,
-                borderRadius: 3,
-                background: `linear-gradient(135deg, ${config.colors.secondary}14 0%, ${config.colors.primary}14 100%)`,
-                border: `1px solid ${config.colors.secondary}33`,
-                textAlign: 'center',
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  boxShadow: `0 8px 24px ${config.colors.secondary}26`,
-                  borderColor: config.colors.secondary
-                }
+                fontSize: '0.75rem',
+                color: '#9ca3af',
+                fontFamily: '"DM Sans", sans-serif',
+                mt: 1.5,
+                fontStyle: 'italic',
               }}
             >
-              <Typography
-                variant="caption"
-                sx={{
-                  color: '#706f6f',
-                  fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif',
-                  display: 'block',
-                  mb: 0.5,
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1.5px'
-                }}
-              >
-                {t('propertyValue', 'Property Value')}
-              </Typography>
-              <Typography
-                variant="h2"
-                sx={{
-                  color: config.colors.primary,
-                  fontWeight: 800,
-                  fontFamily: '"Poppins", sans-serif',
-                  letterSpacing: '-1px',
-                  fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
-                }}
-              >
-                ${price?.toLocaleString()}
-              </Typography>
-            </Box>
-          </motion.div>
-        </Grid>
-      </Grid>
-    </Paper>
+              *Browse all the photos of this house model and learn all the construction details, including the floor plans.
+            </Typography>
+          </Box>
+        )}
+      </Box>
+    </motion.div>
   )
 }
 
 ResourceDetailHeader.propTypes = {
-  details: PropTypes.object.isRequired,
+  details:      PropTypes.object.isRequired,
   resourceType: PropTypes.string.isRequired,
-  config: PropTypes.object.isRequired
+  config:       PropTypes.object.isRequired,
 }
 
 export default ResourceDetailHeader

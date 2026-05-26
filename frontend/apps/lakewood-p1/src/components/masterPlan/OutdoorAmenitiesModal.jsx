@@ -209,7 +209,7 @@ return (
               bgcolor: selectedAmenity === name ? '#8CA551' : 'rgba(140, 165, 81, 0.1)',
               color: selectedAmenity === name ? 'white' : '#333F1F',
               fontWeight: 600,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               cursor: 'pointer',
               '&:hover': {
                 bgcolor: selectedAmenity === name ? '#8CA551' : 'rgba(140, 165, 81, 0.2)'

@@ -43,7 +43,7 @@ const ModelProgressBar = ({ model }) => {
             sx={{
               fontWeight: 700,
               color: '#333F1F',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: { xs: '0.95rem', md: '1rem' }
             }}
           >
@@ -54,7 +54,7 @@ const ModelProgressBar = ({ model }) => {
             sx={{
               color: '#706f6f',
               fontWeight: 600,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: { xs: '0.85rem', md: '0.9rem' }
             }}
           >
@@ -142,7 +142,7 @@ const ModelProgressBar = ({ model }) => {
               sx={{
                 color: '#d32f2f',
                 fontWeight: 600,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: { xs: '0.7rem', md: '0.75rem' }
               }}
             >
@@ -165,7 +165,7 @@ const ModelProgressBar = ({ model }) => {
                 sx={{
                   color: '#1976d2',
                   fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '0.7rem', md: '0.75rem' }
                 }}
               >
@@ -188,7 +188,7 @@ const ModelProgressBar = ({ model }) => {
               sx={{
                 color: '#757575',
                 fontWeight: 600,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: { xs: '0.7rem', md: '0.75rem' }
               }}
             >

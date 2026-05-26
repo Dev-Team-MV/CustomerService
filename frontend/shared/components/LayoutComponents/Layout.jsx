@@ -143,7 +143,7 @@ const Layout = ({
           width: "100%",
           minHeight: "100vh",
           bgcolor: theme.palette.background.default,
-          pt: "64px",
+          pt: { xs: "216px", md: "260px" },
         }}
       >
         <AnimatePresence mode="wait">

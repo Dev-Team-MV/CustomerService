@@ -37,7 +37,7 @@ const StepIconRoot = styled('div')(({ ownerState }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontFamily: '"Poppins", sans-serif',
+  fontFamily: '"DM Sans", sans-serif',
   fontWeight: 700,
   fontSize: '0.85rem',
   transition: 'all 0.3s ease',
@@ -65,7 +65,7 @@ const StepIcon = ({ active, completed, icon, icons }) => (
 
 const selectSx = {
   borderRadius: 3,
-  fontFamily: '"Poppins", sans-serif',
+  fontFamily: '"DM Sans", sans-serif',
   '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e0e0e0' },
   '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#42a5f5' },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1976d2' }
@@ -74,12 +74,12 @@ const selectSx = {
 const fieldSx = {
   '& .MuiOutlinedInput-root': {
     borderRadius: 3,
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"DM Sans", sans-serif',
     '& fieldset': { borderColor: '#e0e0e0' },
     '&:hover fieldset': { borderColor: '#42a5f5' },
     '&.Mui-focused fieldset': { borderColor: '#1976d2' }
   },
-  '& .MuiInputLabel-root': { fontFamily: '"Poppins", sans-serif' },
+  '& .MuiInputLabel-root': { fontFamily: '"DM Sans", sans-serif' },
   '& .MuiInputLabel-root.Mui-focused': { color: '#1976d2' }
 }
 
@@ -156,7 +156,7 @@ const EditApartmentModal = ({
             startAdornment={<Apartment sx={{ color: '#1976d2', mr: 1, fontSize: 20 }} />}
           >
             {apartmentModels.map(model => (
-              <MenuItem key={model._id} value={model._id} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+              <MenuItem key={model._id} value={model._id} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                 {model.name} — {model.sqft} sqft, {model.bedrooms}BR/{model.bathrooms}BA
               </MenuItem>
             ))}
@@ -209,7 +209,7 @@ const EditApartmentModal = ({
                       label={user ? `${user.firstName} ${user.lastName}` : id}
                       size="small"
                       sx={{
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontWeight: 600,
                         bgcolor: '#e3f2fd',
                         color: '#1976d2',
@@ -222,7 +222,7 @@ const EditApartmentModal = ({
             )}
           >
             {users.map(user => (
-              <MenuItem key={user._id} value={user._id} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+              <MenuItem key={user._id} value={user._id} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                 {user.firstName} {user.lastName}
                 <Typography variant="caption" sx={{ ml: 1, color: '#706f6f' }}>
                   {user.email}
@@ -277,7 +277,7 @@ const EditApartmentModal = ({
             <Typography
               variant="caption"
               sx={{
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontWeight: 600,
                 textTransform: 'uppercase',
                 letterSpacing: '1.5px',
@@ -295,12 +295,12 @@ const EditApartmentModal = ({
                 { label: 'Pending', value: values.pending ?? apartment?.pending ?? 0 }
               ].map(item => (
                 <Box key={item.label}>
-                  <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', opacity: 0.7 }}>
+                  <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', opacity: 0.7 }}>
                     {item.label}
                   </Typography>
                   <Typography
                     variant="h6"
-                    sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700, fontSize: '1rem' }}
+                    sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: '1rem' }}
                   >
                     ${Number(item.value).toLocaleString()}
                   </Typography>
@@ -328,7 +328,7 @@ const EditApartmentModal = ({
                 { value: 'sold', label: 'Sold', color: '#1976d2' },
                 { value: 'cancelled', label: 'Cancelled', color: '#d32f2f' }
               ].map(s => (
-                <MenuItem key={s.value} value={s.value} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <MenuItem key={s.value} value={s.value} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   <Box display="flex" alignItems="center" gap={1}>
                     <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: s.color }} />
                     {s.label}
@@ -346,13 +346,13 @@ const EditApartmentModal = ({
               onChange={e => onChange({ ...values, selectedRenderType: e.target.value || null })}
               sx={selectSx}
             >
-              <MenuItem value="" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+              <MenuItem value="" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                 <em>None</em>
               </MenuItem>
-              <MenuItem value="basic" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+              <MenuItem value="basic" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                 Basic
               </MenuItem>
-              <MenuItem value="upgrade" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+              <MenuItem value="upgrade" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                 Upgrade
               </MenuItem>
             </Select>
@@ -400,7 +400,7 @@ const EditApartmentModal = ({
                 StepIconComponent={props => <StepIcon {...props} icons={STEP_ICONS} />}
                 sx={{
                   '& .MuiStepLabel-label': {
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontWeight: i === step ? 700 : 500,
                     fontSize: '0.75rem',
                     color: i === step ? '#1976d2' : '#706f6f',

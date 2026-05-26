@@ -105,7 +105,7 @@ const Residents = () => {
           <Alert
             onClose={handleCloseSnackbar}
             severity={snackbar.severity}
-            sx={{ width: '100%', fontFamily: '"Poppins", sans-serif', borderRadius: 3 }}
+            sx={{ width: '100%', fontFamily: '"DM Sans", sans-serif', borderRadius: 3 }}
           >
             {snackbar.message}
           </Alert>

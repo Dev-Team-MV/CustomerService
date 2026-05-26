@@ -272,7 +272,7 @@ const ClubhouseManager = () => {
                             bgcolor: "#4caf50",
                             color: "white",
                             fontWeight: 700,
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                           }}
                         />
                       )}
@@ -328,7 +328,7 @@ const ClubhouseManager = () => {
                             bgcolor: "#4caf50",
                             color: "white",
                             fontWeight: 700,
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                           }}
                         />
                       )}
@@ -382,7 +382,7 @@ const ClubhouseManager = () => {
                             variant="subtitle2"
                             sx={{
                               color: "#706f6f",
-                              fontFamily: '"Poppins", sans-serif',
+                              fontFamily: '"DM Sans", sans-serif',
                               fontWeight: 600,
                             }}
                           >
@@ -450,7 +450,7 @@ const ClubhouseManager = () => {
                                         bgcolor: "#4caf50",
                                         color: "white",
                                         fontWeight: 700,
-                                        fontFamily: '"Poppins", sans-serif',
+                                        fontFamily: '"DM Sans", sans-serif',
                                       }}
                                     />
                                   )}
@@ -559,7 +559,7 @@ const ClubhouseManager = () => {
                             bgcolor: "#4caf50",
                             color: "white",
                             fontWeight: 700,
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                           }}
                         />
                       )}

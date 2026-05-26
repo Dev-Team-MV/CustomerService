@@ -124,7 +124,7 @@ const NewsDetails = ({ config }) => {
               fontSize: block.level === 2 
                 ? { xs: '1.8rem', md: '2.2rem' } 
                 : { xs: '1.4rem', md: '1.8rem' },
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               mt: { xs: 4, md: 6 },
               mb: { xs: 2, md: 3 },
               lineHeight: 1.3,
@@ -155,7 +155,7 @@ const NewsDetails = ({ config }) => {
               fontSize: { xs: '1.05rem', md: '1.15rem' },
               lineHeight: 1.9,
               mb: { xs: 2.5, md: 3 },
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontWeight: 400,
               textAlign: 'justify',
               '& strong': {
@@ -184,7 +184,7 @@ const NewsDetails = ({ config }) => {
               lineHeight: 1.9,
               mb: { xs: 2.5, md: 3 },
               pl: { xs: 3, md: 4 },
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               '& li': {
                 mb: 1.5,
                 position: 'relative',
@@ -222,7 +222,7 @@ const NewsDetails = ({ config }) => {
                 left: 20,
                 fontSize: '6rem',
                 color: `${config.colors.secondary}26`,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 lineHeight: 1
               }
             }}
@@ -231,7 +231,7 @@ const NewsDetails = ({ config }) => {
               sx={{ 
                 fontSize: { xs: '1.15rem', md: '1.3rem' },
                 lineHeight: 1.7,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontStyle: 'italic',
                 color: config.colors.primary,
                 fontWeight: 500,
@@ -248,7 +248,7 @@ const NewsDetails = ({ config }) => {
                   mt: 2, 
                   color: config.colors.secondary,
                   fontWeight: 600,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: '0.95rem'
                 }}
               >
@@ -268,7 +268,7 @@ const NewsDetails = ({ config }) => {
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" bgcolor="#fafafa">
         <Box textAlign="center">
           <CircularProgress size={60} sx={{ color: config.colors.secondary, mb: 2 }} />
-          <Typography sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+          <Typography sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
             {t('news:loadingArticle', 'Loading article...')}
           </Typography>
         </Box>
@@ -284,7 +284,7 @@ const NewsDetails = ({ config }) => {
           sx={{ 
             mb: 3,
             borderRadius: 3,
-            fontFamily: '"Poppins", sans-serif'
+            fontFamily: '"DM Sans", sans-serif'
           }}
         >
           {t('news:articleNotFound', 'News article not found')}
@@ -297,7 +297,7 @@ const NewsDetails = ({ config }) => {
             borderRadius: 3,
             bgcolor: config.colors.primary,
             textTransform: 'none',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontWeight: 600,
             '&:hover': {
               bgcolor: config.colors.secondary
@@ -387,7 +387,7 @@ const NewsDetails = ({ config }) => {
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 fontSize: '0.75rem',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 letterSpacing: '1.5px',
                 mb: 3,
                 height: 32,
@@ -401,7 +401,7 @@ const NewsDetails = ({ config }) => {
                 color: 'white',
                 fontWeight: 900,
                 fontSize: { xs: '2rem', sm: '3rem', md: '4rem' },
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 lineHeight: 1.1,
                 mb: 2,
                 textShadow: '0 4px 20px rgba(0,0,0,0.5)',
@@ -416,7 +416,7 @@ const NewsDetails = ({ config }) => {
               sx={{
                 color: 'rgba(255,255,255,0.95)',
                 fontWeight: 400,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontStyle: 'italic',
                 maxWidth: '800px',
                 fontSize: { xs: '1rem', md: '1.25rem' },
@@ -503,7 +503,7 @@ const NewsDetails = ({ config }) => {
                           variant="caption" 
                           sx={{ 
                             color: '#706f6f',
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                             textTransform: 'uppercase',
                             letterSpacing: '1px',
                             fontWeight: 600,
@@ -517,7 +517,7 @@ const NewsDetails = ({ config }) => {
                           sx={{
                             color: config.colors.primary,
                             fontWeight: 600,
-                            fontFamily: '"Poppins", sans-serif'
+                            fontFamily: '"DM Sans", sans-serif'
                           }}
                         >
                           {new Date(news.createdAt).toLocaleDateString('en-US', {
@@ -536,7 +536,7 @@ const NewsDetails = ({ config }) => {
                       sx={{
                         fontSize: { xs: '1.05rem', md: '1.15rem' },
                         lineHeight: 1.9,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         color: '#495057',
                         mb: 4,
                         textAlign: 'justify',
@@ -544,7 +544,7 @@ const NewsDetails = ({ config }) => {
                           float: 'left',
                           fontSize: '5rem',
                           lineHeight: 0.8,
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           fontWeight: 900,
                           color: config.colors.primary,
                           pr: 1.5,
@@ -572,7 +572,7 @@ const NewsDetails = ({ config }) => {
                           fontWeight={800}
                           sx={{
                             color: config.colors.primary,
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                             mb: 1
                           }}
                         >
@@ -624,7 +624,7 @@ const NewsDetails = ({ config }) => {
                           fontWeight={800}
                           sx={{
                             color: config.colors.primary,
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                             mb: 1
                           }}
                         >
@@ -675,7 +675,7 @@ const NewsDetails = ({ config }) => {
                         mb={2}
                         sx={{
                           color: config.colors.primary,
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           textTransform: 'uppercase',
                           letterSpacing: '1px',
                           fontSize: '0.75rem'
@@ -691,7 +691,7 @@ const NewsDetails = ({ config }) => {
                             sx={{ 
                               bgcolor: `${config.colors.secondary}14`,
                               color: config.colors.primary,
-                              fontFamily: '"Poppins", sans-serif',
+                              fontFamily: '"DM Sans", sans-serif',
                               fontWeight: 600,
                               border: `1px solid ${config.colors.secondary}33`,
                               transition: 'all 0.3s',
@@ -738,7 +738,7 @@ const NewsDetails = ({ config }) => {
                         mb={3}
                         sx={{
                           color: config.colors.primary,
-                          fontFamily: '"Poppins", sans-serif'
+                          fontFamily: '"DM Sans", sans-serif'
                         }}
                       >
                         {t('news:articleInfo', 'Article Info')}
@@ -760,10 +760,10 @@ const NewsDetails = ({ config }) => {
                             <CalendarToday sx={{ fontSize: 18, color: config.colors.secondary }} />
                           </Box>
                           <Box>
-                            <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', display: 'block' }}>
+                            <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif', display: 'block' }}>
                               {t('news:published', 'Published')}
                             </Typography>
-                            <Typography variant="body2" fontWeight={600} sx={{ color: config.colors.primary, fontFamily: '"Poppins", sans-serif' }}>
+                            <Typography variant="body2" fontWeight={600} sx={{ color: config.colors.primary, fontFamily: '"DM Sans", sans-serif' }}>
                               {new Date(news.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </Typography>
                           </Box>
@@ -784,10 +784,10 @@ const NewsDetails = ({ config }) => {
                             <AccessTime sx={{ fontSize: 18, color: config.colors.secondary }} />
                           </Box>
                           <Box>
-                            <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', display: 'block' }}>
+                            <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif', display: 'block' }}>
                               {t('news:readingTime', 'Reading Time')}
                             </Typography>
-                            <Typography variant="body2" fontWeight={600} sx={{ color: config.colors.primary, fontFamily: '"Poppins", sans-serif' }}>
+                            <Typography variant="body2" fontWeight={600} sx={{ color: config.colors.primary, fontFamily: '"DM Sans", sans-serif' }}>
                               {Math.ceil((news.contentBlocks?.length || 3) * 0.5)} min
                             </Typography>
                           </Box>
@@ -814,7 +814,7 @@ const NewsDetails = ({ config }) => {
                         mb={3}
                         sx={{
                           color: config.colors.primary,
-                          fontFamily: '"Poppins", sans-serif'
+                          fontFamily: '"DM Sans", sans-serif'
                         }}
                       >
                         {t('news:relatedNews', 'Related News')}
@@ -828,7 +828,7 @@ const NewsDetails = ({ config }) => {
                           variant="caption" 
                           sx={{ 
                             color: '#706f6f',
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                             display: 'block',
                             textAlign: 'center',
                             py: 2
@@ -892,7 +892,7 @@ const NewsDetails = ({ config }) => {
                                     fontSize: '0.65rem',
                                     height: 20,
                                     mb: 1,
-                                    fontFamily: '"Poppins", sans-serif'
+                                    fontFamily: '"DM Sans", sans-serif'
                                   }}
                                 />
                                 <Typography
@@ -900,7 +900,7 @@ const NewsDetails = ({ config }) => {
                                   fontWeight={600}
                                   sx={{
                                     color: config.colors.primary,
-                                    fontFamily: '"Poppins", sans-serif',
+                                    fontFamily: '"DM Sans", sans-serif',
                                     display: '-webkit-box',
                                     WebkitLineClamp: 2,
                                     WebkitBoxOrient: 'vertical',
@@ -915,7 +915,7 @@ const NewsDetails = ({ config }) => {
                                   variant="caption"
                                   sx={{
                                     color: '#706f6f',
-                                    fontFamily: '"Poppins", sans-serif',
+                                    fontFamily: '"DM Sans", sans-serif',
                                     display: 'block'
                                   }}
                                 >

@@ -134,7 +134,7 @@ useEffect(() => {
           <Typography
             variant="h5"
             sx={{
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               color: theme.palette.primary.main,
               fontWeight: 700,
               fontSize: { xs: '1.25rem', sm: '1.5rem' },
@@ -146,7 +146,7 @@ useEffect(() => {
           <Typography
             variant="body2"
             sx={{
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               color: theme.palette.text.secondary,
               fontSize: '0.9rem'
             }}
@@ -162,7 +162,7 @@ useEffect(() => {
             height: 36,
             fontSize: '0.85rem',
             fontWeight: 700,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: selectedRenderType === 'basic' 
               ? 'rgba(67,160,71,0.12)' 
               : theme.palette.chipAdmin.bg,
@@ -179,7 +179,7 @@ useEffect(() => {
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
             <Home sx={{ color: theme.palette.success.main, fontSize: 28 }} />
-            <Typography variant="h6" sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700 }}>
+            <Typography variant="h6" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700 }}>
               Renders Exteriores
             </Typography>
             <Chip 
@@ -247,7 +247,7 @@ useEffect(() => {
                   px: 1.5,
                   py: 0.5,
                   borderRadius: 2,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: '0.75rem',
                   fontWeight: 600
                 }}
@@ -344,7 +344,7 @@ useEffect(() => {
 {/* Floor Selector */}
 {mediaByFloor.length > 0 && (
   <Box sx={{ mb: 3 }}>
-    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}>
+    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}>
       Renders Interiores por Piso
     </Typography>
     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -358,7 +358,7 @@ useEffect(() => {
             height: 32,
             fontSize: '0.85rem',
             fontWeight: selectedFloorKey === floor.floorKey ? 700 : 500,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: selectedFloorKey === floor.floorKey 
               ? theme.palette.primary.main 
               : 'rgba(0,0,0,0.08)',
@@ -392,7 +392,7 @@ useEffect(() => {
               height: 28,
               fontSize: '0.75rem',
               fontWeight: selectedMediaType === 'all' ? 700 : 500,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               bgcolor: selectedMediaType === 'all' 
                 ? theme.palette.secondary.main 
                 : 'rgba(0,0,0,0.05)',
@@ -414,7 +414,7 @@ useEffect(() => {
                 height: 28,
                 fontSize: '0.75rem',
                 fontWeight: selectedMediaType === 'renders' ? 700 : 500,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 bgcolor: selectedMediaType === 'renders' 
                   ? theme.palette.primary.main 
                   : 'rgba(140, 165, 81, 0.1)',
@@ -438,7 +438,7 @@ useEffect(() => {
                 height: 28,
                 fontSize: '0.75rem',
                 fontWeight: selectedMediaType === 'isometrics' ? 700 : 500,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 bgcolor: selectedMediaType === 'isometrics' 
                   ? theme.palette.secondary.main 
                   : 'rgba(156, 39, 176, 0.1)',
@@ -462,7 +462,7 @@ useEffect(() => {
                 height: 28,
                 fontSize: '0.75rem',
                 fontWeight: selectedMediaType === 'blueprints' ? 700 : 500,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 bgcolor: selectedMediaType === 'blueprints' 
                   ? theme.palette.info.main 
                   : 'rgba(33, 150, 243, 0.1)',
@@ -525,7 +525,7 @@ useEffect(() => {
               <Home sx={{ fontSize: { xs: 40, sm: 60 }, color: '#666', mb: 2 }} />
               <Typography
                 color="white"
-                sx={{ fontFamily: '"Poppins", sans-serif', fontSize: { xs: '0.85rem', sm: '1rem' } }}
+                sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: { xs: '0.85rem', sm: '1rem' } }}
               >
                 No property renders available
               </Typography>
@@ -558,7 +558,7 @@ useEffect(() => {
                   px: 1.5,
                   py: 0.5,
                   borderRadius: 2,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: '0.75rem',
                   fontWeight: 600
                 }}
@@ -599,7 +599,7 @@ useEffect(() => {
               <Typography
                 variant="caption"
                 color="text.secondary"
-                sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem', textAlign: 'center' }}
+                sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem', textAlign: 'center' }}
               >
                 No images available
               </Typography>
@@ -673,7 +673,7 @@ useEffect(() => {
             <Typography
               variant="h6"
               sx={{
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 color: theme.palette.primary.main,
                 fontWeight: 700,
                 fontSize: { xs: '1.1rem', sm: '1.25rem' },
@@ -721,7 +721,7 @@ useEffect(() => {
                   <Typography
                     variant="caption"
                     sx={{
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       color: theme.palette.text.secondary,
                       fontSize: '0.75rem',
                       fontWeight: 600,
@@ -734,7 +734,7 @@ useEffect(() => {
                 </Box>
                 <Typography
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.primary.main,
                     fontSize: '1.5rem',
                     fontWeight: 700
@@ -745,7 +745,7 @@ useEffect(() => {
                 <Typography
                   variant="caption"
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.text.secondary,
                     fontSize: '0.7rem'
                   }}
@@ -790,7 +790,7 @@ useEffect(() => {
                   <Typography
                     variant="caption"
                     sx={{
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       color: theme.palette.text.secondary,
                       fontSize: '0.75rem',
                       fontWeight: 600,
@@ -803,7 +803,7 @@ useEffect(() => {
                 </Box>
                 <Typography
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.primary.main,
                     fontSize: '1.1rem',
                     fontWeight: 700
@@ -814,7 +814,7 @@ useEffect(() => {
                 <Typography
                   variant="caption"
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.text.secondary,
                     fontSize: '0.7rem'
                   }}
@@ -860,7 +860,7 @@ useEffect(() => {
                     <Typography
                       variant="caption"
                       sx={{
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         color: theme.palette.text.secondary,
                         fontSize: '0.75rem',
                         fontWeight: 600,
@@ -873,7 +873,7 @@ useEffect(() => {
                   </Box>
                   <Typography
                     sx={{
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       color: theme.palette.primary.main,
                       fontSize: '1.1rem',
                       fontWeight: 700
@@ -884,7 +884,7 @@ useEffect(() => {
                   <Typography
                     variant="caption"
                     sx={{
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       color: theme.palette.text.secondary,
                       fontSize: '0.7rem'
                     }}
@@ -918,7 +918,7 @@ useEffect(() => {
           <Apartment sx={{ color: 'white', fontSize: 28 }} />
         </Box>
         <Box>
-          <Typography variant="h6" sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700, color: theme.palette.primary.main }}>
+          <Typography variant="h6" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, color: theme.palette.primary.main }}>
             Estructura del Edificio
           </Typography>
           <Typography variant="caption" color="text.secondary">
@@ -994,7 +994,7 @@ useEffect(() => {
                 </Box>
 
                 {/* Título de la opción */}
-                <Typography variant="h6" sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 700, color: theme.palette.text.primary, mb: 1 }}>
+                <Typography variant="h6" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, color: theme.palette.text.primary, mb: 1 }}>
                   {floorData.selectedOptionKey.split('-').map(word => 
                     word.charAt(0).toUpperCase() + word.slice(1)
                   ).join(' ')}

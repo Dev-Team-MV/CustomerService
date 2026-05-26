@@ -47,7 +47,7 @@ const Loader = ({
           variant="body2"
           sx={{
             color: '#706f6f',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontWeight: 500,
             textAlign: 'center'
           }}
