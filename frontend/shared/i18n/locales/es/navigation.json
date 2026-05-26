@@ -57,6 +57,9 @@
       "overview": "Resumen",
   "clients": "Clientes",
   "projects": "Proyectos",
+  "analytics": "Analíticas",
+  "activities": "Actividades",
+  "messageTemplates": "Plantillas de Mensajes",
   "settings": "Configuración",
   "quickStats": "Estadísticas rápidas",
   "signOut": "Cerrar sesión"

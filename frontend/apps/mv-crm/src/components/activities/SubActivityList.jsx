@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Typography,
@@ -30,22 +31,26 @@ import {
   Person,
   PersonAdd,
   Email,
-  Phone,
-  Notes
+  Phone
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import { es } from 'date-fns/locale'
+import { es, enUS } from 'date-fns/locale'
 import { useResidents } from '@shared/hooks/useResidents'
+import { useTranslation as useTranslationLang } from 'react-i18next'
 
-const formatDate = (date) => {
+const formatDate = (date, locale = 'es') => {
   if (!date) return null
   const d = new Date(date)
-  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+  const dateLocale = locale === 'es' ? es : enUS
+  return d.toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-US', { 
+    day: 'numeric', 
+    month: 'short'
+  })
 }
 
-const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly }) => {
+const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly, t }) => {
   const isCompleted = sub.completed || sub.status === 'completed'
   const isOverdue = sub.dueDate && new Date(sub.dueDate) < new Date() && !isCompleted
 
@@ -110,18 +115,20 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly }) => {
           {/* Meta info: fecha, asignado, contacto */}
           <Box display="flex" alignItems="center" gap={1.5} mt={1} flexWrap="wrap">
             {sub.dueDate && (
-              <Chip
-                icon={<AccessTime sx={{ fontSize: 12 }} />}
-                label={formatDate(sub.dueDate)}
-                size="small"
-                sx={{
-                  height: 20,
-                  fontSize: '0.65rem',
-                  bgcolor: isOverdue ? '#f4433620' : '#2196f320',
-                  color: isOverdue ? '#f44336' : '#2196f3',
-                  '& .MuiChip-icon': { color: 'inherit' }
-                }}
-              />
+              <Tooltip title={isOverdue ? t('activities.subActivities.status.overdue') : ''}>
+                <Chip
+                  icon={<AccessTime sx={{ fontSize: 12 }} />}
+                  label={formatDate(sub.dueDate)}
+                  size="small"
+                  sx={{
+                    height: 20,
+                    fontSize: '0.65rem',
+                    bgcolor: isOverdue ? '#f4433620' : '#2196f320',
+                    color: isOverdue ? '#f44336' : '#2196f3',
+                    '& .MuiChip-icon': { color: 'inherit' }
+                  }}
+                />
+              </Tooltip>
             )}
 
             {/* Asignado a usuario */}
@@ -138,7 +145,7 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly }) => {
                       {sub.assignedTo.firstName?.charAt(0) || '?'}
                     </Avatar>
                   }
-                  label={sub.assignedTo.firstName?.split(' ')[0] || 'Usuario'}
+                  label={sub.assignedTo.firstName?.split(' ')[0] || t('activities.user')}
                   size="small"
                   sx={{ 
                     height: 20, 
@@ -149,7 +156,7 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly }) => {
             )}
 
             {/* Contacto externo */}
-            {sub.contact && (
+            {sub.contact && !sub.assignedTo && (
               <Tooltip title={`${sub.contact.name} (${sub.contact.phone})`}>
                 <Chip
                   avatar={
@@ -162,7 +169,7 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly }) => {
                       {sub.contact.name?.charAt(0) || '?'}
                     </Avatar>
                   }
-                  label={sub.contact.name?.split(' ')[0] || 'Contacto'}
+                  label={sub.contact.name?.split(' ')[0] || t('activities.contact.noContact')}
                   size="small"
                   sx={{ 
                     height: 20, 
@@ -179,12 +186,16 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly }) => {
         {/* Actions */}
         {!readOnly && (
           <Box display="flex" gap={0.5}>
-            <IconButton size="small" onClick={() => onEdit?.(sub)}>
-              <Edit sx={{ fontSize: 16, color: '#757575' }} />
-            </IconButton>
-            <IconButton size="small" onClick={() => onDelete?.(sub._id)}>
-              <Delete sx={{ fontSize: 16, color: '#f44336' }} />
-            </IconButton>
+            <Tooltip title={t('activities.form.edit')}>
+              <IconButton size="small" onClick={() => onEdit?.(sub)}>
+                <Edit sx={{ fontSize: 16, color: '#757575' }} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={t('activities.form.delete')}>
+              <IconButton size="small" onClick={() => onDelete?.(sub._id)}>
+                <Delete sx={{ fontSize: 16, color: '#f44336' }} />
+              </IconButton>
+            </Tooltip>
           </Box>
         )}
       </Box>
@@ -194,12 +205,14 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly }) => {
 
 // Modal para crear/editar subactividad
 const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentActivityId = null }) => {
+  const { t, i18n } = useTranslation('activities')
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     dueDate: null,
     assignedTo: null,
-    contactType: 'none', // 'none', 'user', 'external'
+    contactType: 'none',
     contact: {
       user: null,
       name: '',
@@ -210,10 +223,8 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
   const [searchInput, setSearchInput] = useState('')
   const [saving, setSaving] = useState(false)
 
-  // Obtener usuarios
   const { users, loading } = useResidents(null, { smsProjectId: import.meta.env.VITE_PROJECT_ID })
 
-  // Transformar usuarios
   const userOptions = useMemo(() => {
     const filtered = searchInput.trim() 
       ? users.filter(u =>
@@ -225,7 +236,6 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
     return filtered
   }, [users, searchInput])
 
-  // Reset form
   useEffect(() => {
     if (subActivity) {
       setFormData({
@@ -261,7 +271,7 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
 
   const handleSave = async () => {
     if (!formData.title.trim()) {
-      alert('El título es obligatorio')
+      alert(t('activities.subActivities.alerts.titleRequired'))
       return
     }
 
@@ -273,7 +283,6 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
         dueDate: formData.dueDate
       }
 
-      // Agregar asignado según el tipo
       if (formData.contactType === 'user' && formData.assignedTo) {
         payload.assignedTo = formData.assignedTo._id || formData.assignedTo
         payload.contact = {
@@ -312,39 +321,43 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
     }))
   }
 
+  const dateLocale = i18n.language === 'es' ? es : enUS
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle fontWeight={700}>
-        {subActivity ? 'Editar Subtarea' : 'Nueva Subtarea'}
+        {subActivity 
+          ? t('activities.subActivities.editSubActivity') 
+          : t('activities.subActivities.newSubActivity')}
       </DialogTitle>
       <DialogContent>
-        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
           <Box display="flex" flexDirection="column" gap={2.5} pt={1}>
             {/* Título */}
             <TextField
-              label="Título"
+              label={t('activities.subActivities.form.title')}
               value={formData.title}
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               fullWidth
               required
               autoFocus
-              placeholder="Ej: Confirmar disponibilidad del cliente"
+              placeholder={t('activities.subActivities.form.titlePlaceholder')}
             />
 
             {/* Descripción */}
             <TextField
-              label="Descripción"
+              label={t('activities.subActivities.form.description')}
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               fullWidth
               multiline
               rows={2}
-              placeholder="Detalles adicionales de la subtarea..."
+              placeholder={t('activities.subActivities.form.descriptionPlaceholder')}
             />
 
             {/* Fecha límite */}
             <DatePicker
-              label="Fecha límite"
+              label={t('activities.subActivities.form.dueDate')}
               value={formData.dueDate}
               onChange={(newValue) => setFormData(prev => ({ ...prev, dueDate: newValue }))}
               slotProps={{ textField: { fullWidth: true } }}
@@ -353,26 +366,26 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
             {/* Sección de asignación */}
             <Box>
               <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
-                Asignar a
+                {t('activities.subActivities.form.assignTo')}
               </Typography>
               
               {/* Selector de tipo */}
               <Box display="flex" gap={1} mb={2} flexWrap="wrap">
                 <Chip
-                  label="Sin asignar"
+                  label={t('activities.subActivities.form.noAssignment')}
                   onClick={() => handleContactTypeChange('none')}
                   color={formData.contactType === 'none' ? 'primary' : 'default'}
                   variant={formData.contactType === 'none' ? 'filled' : 'outlined'}
                 />
                 <Chip
-                  label="Usuario registrado"
+                  label={t('activities.subActivities.form.registeredUser')}
                   icon={<Person sx={{ fontSize: 16 }} />}
                   onClick={() => handleContactTypeChange('user')}
                   color={formData.contactType === 'user' ? 'primary' : 'default'}
                   variant={formData.contactType === 'user' ? 'filled' : 'outlined'}
                 />
                 <Chip
-                  label="Contacto externo"
+                  label={t('activities.subActivities.form.externalContact')}
                   icon={<PersonAdd sx={{ fontSize: 16 }} />}
                   onClick={() => handleContactTypeChange('external')}
                   color={formData.contactType === 'external' ? 'warning' : 'default'}
@@ -394,8 +407,8 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Buscar usuario"
-                      placeholder="Por nombre o email..."
+                      label={t('activities.subActivities.form.searchUser')}
+                      placeholder={t('activities.subActivities.form.searchByName')}
                       InputProps={{
                         ...params.InputProps,
                         startAdornment: (
@@ -439,12 +452,12 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
                   <Box display="flex" alignItems="center" gap={1} mb={2}>
                     <PersonAdd color="warning" fontSize="small" />
                     <Typography variant="body2" color="warning.main" fontWeight={500}>
-                      Contacto no registrado
+                      {t('activities.subActivities.form.unregisteredContact')}
                     </Typography>
                   </Box>
                   <Box display="flex" flexDirection="column" gap={1.5}>
                     <TextField
-                      label="Nombre"
+                      label={t('activities.subActivities.form.name')}
                       value={formData.contact.name}
                       onChange={(e) => setFormData(prev => ({
                         ...prev,
@@ -458,7 +471,7 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
                       }}
                     />
                     <TextField
-                      label="Email"
+                      label={t('activities.subActivities.form.email')}
                       type="email"
                       value={formData.contact.email}
                       onChange={(e) => setFormData(prev => ({
@@ -472,7 +485,7 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
                       }}
                     />
                     <TextField
-                      label="Teléfono"
+                      label={t('activities.subActivities.form.phone')}
                       value={formData.contact.phone}
                       onChange={(e) => setFormData(prev => ({
                         ...prev,
@@ -492,14 +505,18 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
         </LocalizationProvider>
       </DialogContent>
       <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose}>Cancelar</Button>
+        <Button onClick={onClose}>
+          {t('activities.subActivities.form.cancel')}
+        </Button>
         <Button 
           variant="contained" 
           onClick={handleSave}
           disabled={!formData.title.trim() || saving}
           startIcon={saving ? <CircularProgress size={20} /> : null}
         >
-          {subActivity ? 'Guardar cambios' : 'Agregar subtarea'}
+          {subActivity 
+            ? t('activities.subActivities.form.saveChanges') 
+            : t('activities.subActivities.form.addSubtask')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -514,6 +531,7 @@ const SubActivityList = ({
   parentActivityId = null,
   readOnly = false 
 }) => {
+  const { t } = useTranslation('activities')
   const [expanded, setExpanded] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingSub, setEditingSub] = useState(null)
@@ -533,10 +551,8 @@ const SubActivityList = ({
 
   const handleSave = async (data, subId) => {
     if (subId) {
-      // Editar
       await onUpdate?.(subId, data)
     } else {
-      // Crear
       await onAdd?.(parentActivityId, data)
     }
     setModalOpen(false)
@@ -556,7 +572,7 @@ const SubActivityList = ({
         <Box display="flex" alignItems="center" gap={1}>
           <SubdirectoryArrowRight sx={{ fontSize: 20, color: '#757575' }} />
           <Typography variant="subtitle2" fontWeight={600}>
-            Subtareas
+            {t('activities.subActivities.title')}
           </Typography>
           {totalCount > 0 && (
             <Chip
@@ -589,12 +605,13 @@ const SubActivityList = ({
                 onEdit={handleOpenModal}
                 onDelete={onDelete}
                 readOnly={readOnly}
+                t={t}
               />
             ))}
           </Box>
         ) : (
           <Typography variant="caption" color="text.secondary" sx={{ pl: 1, display: 'block', py: 1 }}>
-            Sin subtareas
+            {t('activities.subActivities.noSubActivities')}
           </Typography>
         )}
 
@@ -606,7 +623,7 @@ const SubActivityList = ({
             onClick={() => handleOpenModal()}
             sx={{ textTransform: 'none', mt: 1, ml: 0.5 }}
           >
-            Agregar subtarea
+            {t('activities.subActivities.addSubActivity')}
           </Button>
         )}
       </Collapse>
