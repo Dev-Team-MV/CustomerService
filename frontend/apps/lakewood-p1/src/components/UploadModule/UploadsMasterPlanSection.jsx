@@ -116,34 +116,7 @@ const handleVisibilityChange = async (id, data) => {
   }
 }
 
-const waitForFileToAppear = async (pointId, maxAttempts = 8) => {
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    console.log(`🔍 Attempt ${attempt}/${maxAttempts}: Checking if file appears...`)
-    
-    // Delay más agresivo: 1s, 1.5s, 2s, 2.5s, 3s, 3.5s, 4s, 4.5s
-    const delay = 1000 + (attempt - 1) * 500
-    await new Promise(resolve => setTimeout(resolve, delay))
-    
-    const response = await uploadService.getFilesByFolderNoCache('recorrido', true)
-    const files = response.files || []
-    
-    const fileExists = files.some(file => {
-      const name = file.name || file.filename || ''
-      const match = name.match(/recorrido\.(\d+)\./)
-      return match && String(match[1]) === String(pointId)
-    })
-    
-    if (fileExists) {
-      console.log(`✅ File found on attempt ${attempt}!`)
-      return true
-    }
-    
-    console.log(`⏳ File not found yet, waiting...`)
-  }
-  
-  console.warn('⚠️ File not found after max attempts')
-  return false
-}
+
 
 const handleRecorridoUpload = async (id, file, isPublic = true) => {
   try {
@@ -157,21 +130,19 @@ const handleRecorridoUpload = async (id, file, isPublic = true) => {
     
     console.log('✅ Upload successful, URL:', url)
     
-    // Esperar a que el archivo aparezca en el servidor
-    const fileAppeared = await waitForFileToAppear(id)
-    
-    if (fileAppeared) {
-      // Refrescar imágenes
-      await fetchRecorridoImages(true)
-      alert('Imagen subida exitosamente')
-    } else {
-      // El archivo se subió pero no aparece en la lista todavía
-      alert('Imagen subida, pero puede tardar en aparecer. Recarga la página si no la ves.')
-      await fetchRecorridoImages(true)
+    if (!url) {
+      throw new Error('No URL returned from upload')
     }
+    
+    // Guardar metadata inmediatamente
+    await uploadService.updateRecorridoVisibility({ filename, isPublic })
+    
+    // Actualizar UI
+    await fetchRecorridoImages(true)
+    
+    alert('Imagen subida exitosamente')
   } catch (err) {
     console.error('❌ Error uploading recorrido image:', err)
-    console.error('Error details:', err.response?.data)
     alert('Error al subir la imagen: ' + (err.message || 'Error desconocido'))
   } finally {
     setLoading(false)
