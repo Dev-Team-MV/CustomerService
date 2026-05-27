@@ -1,17 +1,17 @@
-import { useState } from 'react'
-import { Box, TextField, Typography, Stack } from '@mui/material'
+import { useState, useEffect } from 'react'
+import { Box, TextField, Typography, Stack, IconButton } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { enUS } from 'date-fns/locale'
-import { CloudUpload } from '@mui/icons-material'
+import { CloudUpload, Delete } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import ModalWrapper from '../../constants/ModalWrapper'
 import PrimaryButton from '../../constants/PrimaryButton'
 import ClubhouseUnderConstructionService from '../../services/ClubhouseUnderConstructionService'
 import uploadService from '@shared/services/uploadService'
 
-const ClubhouseUnderConstructionModal = ({ open, onClose }) => {
+const ClubhouseUnderConstructionModal = ({ open, onClose, editingStep }) => {
   const { t } = useTranslation('clubhouse')
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
@@ -22,6 +22,39 @@ const ClubhouseUnderConstructionModal = ({ open, onClose }) => {
     videos: []
   })
 
+useEffect(() => {
+  if (editingStep && open) {
+    // Modo edición: cargar datos del step
+    setForm({
+      title: editingStep.title || '',
+      description: editingStep.description || '',
+      date: editingStep.clubHouseDate ? new Date(editingStep.clubHouseDate) : null,
+      images: (editingStep.media || [])
+        .filter(m => m.type === 'image')
+        .map(img => ({
+          ...img,
+          type: 'image',
+          url: img.url,
+          name: img.name || 'image',
+          order: img.order || 0,
+          isPublic: img.isPublic || false
+        })),
+      videos: (editingStep.media || [])
+        .filter(m => m.type === 'video')
+        .map(vid => ({
+          ...vid,
+          type: 'video',
+          url: vid.url,
+          name: vid.name || 'video',
+          order: vid.order || 0,
+          isPublic: vid.isPublic || false
+        }))
+    })
+  } else if (open && !editingStep) {
+    // Modo crear: resetear form
+    setForm({ title: '', description: '', date: null, images: [], videos: [] })
+  }
+}, [editingStep, open])
   const handleFileSelect = (e, type) => {
     const files = Array.from(e.target.files)
     if (!files.length) return
@@ -31,51 +64,101 @@ const ClubhouseUnderConstructionModal = ({ open, onClose }) => {
     }))
   }
 
-  const handleSave = async () => {
-    if (!form.title.trim()) {
-      alert(t('titleRequired', 'Title is required'))
-      return
+  const handleRemoveFile = (type, index) => {
+    setForm(prev => ({
+      ...prev,
+      [type]: prev[type].filter((_, i) => i !== index)
+    }))
+  }
+
+const handleSave = async () => {
+  if (!form.title.trim()) {
+    alert(t('titleRequired', 'Title is required'))
+    return
+  }
+ 
+  setSaving(true)
+  try {
+    console.log('📤 Form images:', form.images)
+    console.log('📤 Form videos:', form.videos)
+    
+    const newImages = form.images.filter(img => img instanceof File)
+    const existingImages = form.images.filter(img => !(img instanceof File))
+    
+    const newVideos = form.videos.filter(vid => vid instanceof File)
+    const existingVideos = form.videos.filter(vid => !(vid instanceof File))
+ 
+    console.log('📤 New images to upload:', newImages.length)
+    console.log('📤 Existing images:', existingImages.length)
+    console.log('📤 New videos to upload:', newVideos.length)
+    console.log('📤 Existing videos:', existingVideos.length)
+ 
+    let uploadedImages = []
+    let uploadedVideos = []
+ 
+    if (newImages.length > 0) {
+      console.log('📤 Uploading images...')
+      uploadedImages = await uploadService.uploadTimeLineImages(newImages)
+      console.log('✅ Uploaded images:', uploadedImages)
+    }
+    
+    if (newVideos.length > 0) {
+      console.log('📤 Uploading videos...')
+      uploadedVideos = await uploadService.uploadTimeLineImages(newVideos)
+      console.log('✅ Uploaded videos:', uploadedVideos)
     }
 
-    setSaving(true)
-    try {
-      // 1. Subir imágenes y videos primero
-      let uploadedImages = []
-      let uploadedVideos = []
+const allImages = [
+  ...existingImages.map(img => ({
+    type: 'image',  // Asegurar que siempre tenga type
+    url: img.url,
+    name: img.name || '',
+    order: img.order || 0,
+    isPublic: img.isPublic !== false
+  })),
+  ...uploadedImages.map((url, idx) => ({
+    type: 'image',
+    url: url,
+    name: `${form.title}-image-${existingImages.length + idx + 1}`,
+    order: existingImages.length + idx + 1,
+    isPublic: false
+  }))
+]
+ 
+const allVideos = [
+  ...existingVideos.map(vid => ({
+    type: 'video',  // Asegurar que siempre tenga type
+    url: vid.url,
+    name: vid.name || '',
+    order: vid.order || 0,
+    isPublic: vid.isPublic !== false
+  })),
+  ...uploadedVideos.map((url, idx) => ({
+    type: 'video',
+    url: url,
+    name: `${form.title}-video-${allImages.length + existingVideos.length + idx + 1}`,
+    order: allImages.length + existingVideos.length + idx + 1,
+    isPublic: false
+  }))
+]
 
-      if (form.images.length > 0) {
-        uploadedImages = await uploadService.uploadTimeLineImages(form.images)
-      }
-      
-      if (form.videos.length > 0) {
-        uploadedVideos = await uploadService.uploadTimeLineImages(form.videos)
-      }
+      const media = [...allImages, ...allVideos]
 
-      // 2. Construir array media con URLs subidas
-      const media = [
-        ...uploadedImages.map((url, idx) => ({
-          type: 'image',
-          url: url,
-          name: `${form.title}-image-${idx + 1}`,
-          order: idx
-        })),
-        ...uploadedVideos.map((url, idx) => ({
-          type: 'video',
-          url: url,
-          name: `${form.title}-video-${idx + 1}`,
-          order: uploadedImages.length + idx
-        }))
-      ]
-
-      // 3. Crear objeto JSON para el backend
       const payload = {
         title: form.title,
         description: form.description,
         clubHouseDate: form.date ? form.date.toISOString() : null,
         media: media
       }
+      console.log('📤 Final payload:', JSON.stringify(payload, null, 2))
 
-      await ClubhouseUnderConstructionService.create(payload)
+
+      if (editingStep) {
+        await ClubhouseUnderConstructionService.update(editingStep._id, payload)
+      } else {
+        await ClubhouseUnderConstructionService.create(payload)
+      }
+      
       setForm({ title: '', description: '', date: null, images: [], videos: [] })
       onClose()
     } catch (err) {
@@ -96,7 +179,7 @@ const ClubhouseUnderConstructionModal = ({ open, onClose }) => {
       open={open}
       onClose={handleClose}
       icon={CloudUpload}
-      title={t('addStep', 'Add Step')}
+      title={editingStep ? t('editStep', 'Edit Step') : t('addStep', 'Add Step')}
       subtitle={t('addStepSubtitle', 'Upload images and videos for clubhouse construction')}
       maxWidth="md"
       fullWidth
@@ -104,116 +187,122 @@ const ClubhouseUnderConstructionModal = ({ open, onClose }) => {
         <PrimaryButton key="cancel" onClick={handleClose} variant="outlined" color="inherit">
           {t('cancel', 'Cancel')}
         </PrimaryButton>,
-        <PrimaryButton
-          key="save"
-          onClick={handleSave}
-          loading={saving}
-          disabled={saving || !form.title.trim()}
-          startIcon={<CloudUpload />}
-        >
-          {saving ? t('saving', 'Saving...') : t('save', 'Save')}
+        <PrimaryButton key="save" onClick={handleSave} loading={saving}>
+          {t('save', 'Save')}
         </PrimaryButton>
       ]}
     >
-      <Stack spacing={3} sx={{ mt: 1 }}>
-        {/* Título */}
+      <Stack spacing={3}>
         <TextField
           label={t('title', 'Title')}
           value={form.title}
-          onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+          onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
           fullWidth
           required
-          autoFocus
-          sx={{
-            '& .MuiOutlinedInput-root': { borderRadius: 2, fontFamily: '"DM Sans", sans-serif' },
-            '& .MuiInputLabel-root': { fontFamily: '"DM Sans", sans-serif' }
-          }}
         />
 
-        {/* Descripción */}
         <TextField
           label={t('description', 'Description')}
           value={form.description}
-          onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+          onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
           fullWidth
           multiline
           rows={3}
-          sx={{
-            '& .MuiOutlinedInput-root': { borderRadius: 2, fontFamily: '"DM Sans", sans-serif' },
-            '& .MuiInputLabel-root': { fontFamily: '"DM Sans", sans-serif' }
-          }}
         />
 
-        {/* Fecha - MM/DD/YYYY */}
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enUS}>
           <DatePicker
             label={t('date', 'Date')}
             value={form.date}
-            onChange={newDate => setForm(f => ({ ...f, date: newDate }))}
-            format="MM/dd/yyyy"
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                helperText: 'MM/DD/YYYY',
-                sx: {
-                  '& .MuiOutlinedInput-root': { borderRadius: 2, fontFamily: '"DM Sans", sans-serif' },
-                  '& .MuiInputLabel-root': { fontFamily: '"DM Sans", sans-serif' }
-                }
-              }
-            }}
+            onChange={(newValue) => setForm(prev => ({ ...prev, date: newValue }))}
+            renderInput={(params) => <TextField {...params} fullWidth />}
           />
         </LocalizationProvider>
 
-        {/* Imágenes */}
         <Box>
-          <Typography variant="subtitle2" fontWeight={600} mb={1} fontFamily='"DM Sans", sans-serif'>
+          <Typography variant="subtitle2" mb={1} fontWeight={600}>
             {t('images', 'Images')}
           </Typography>
           <PrimaryButton
             component="label"
             variant="outlined"
-            fullWidth
             startIcon={<CloudUpload />}
-            sx={{ 
-              mb: 1,
-              borderColor: '#4a7c59',
-              color: '#4a7c59',
-              '&:hover': { borderColor: '#3a5c49', bgcolor: 'rgba(74, 124, 89, 0.05)' }
-            }}
+            fullWidth
           >
             {t('selectImages', 'Select Images')}
-            <input type="file" hidden multiple accept="image/*" onChange={(e) => handleFileSelect(e, 'images')} />
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={(e) => handleFileSelect(e, 'images')}
+            />
           </PrimaryButton>
           {form.images.length > 0 && (
-            <Typography variant="caption" color="text.secondary" fontFamily='"DM Sans", sans-serif'>
-              {form.images.length} {t('imagesSelected', 'image(s) selected')}
-            </Typography>
+            <Box mt={2} display="flex" gap={1} flexWrap="wrap">
+              {form.images.map((img, idx) => (
+                <Box key={idx} position="relative">
+                  <Box
+                    component="img"
+                    src={img instanceof File ? URL.createObjectURL(img) : img.url}
+                    sx={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 1 }}
+                  />
+                  <IconButton
+                    size="small"
+                    onClick={() => handleRemoveFile('images', idx)}
+                    sx={{
+                      position: 'absolute',
+                      top: -8,
+                      right: -8,
+                      bgcolor: 'error.main',
+                      color: 'white',
+                      '&:hover': { bgcolor: 'error.dark' }
+                    }}
+                  >
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </Box>
+              ))}
+            </Box>
           )}
         </Box>
 
-        {/* Videos */}
         <Box>
-          <Typography variant="subtitle2" fontWeight={600} mb={1} fontFamily='"DM Sans", sans-serif'>
+          <Typography variant="subtitle2" mb={1} fontWeight={600}>
             {t('videos', 'Videos')}
           </Typography>
           <PrimaryButton
             component="label"
             variant="outlined"
-            fullWidth
             startIcon={<CloudUpload />}
-            sx={{
-              borderColor: '#E5863C',
-              color: '#E5863C',
-              '&:hover': { borderColor: '#d57530', bgcolor: 'rgba(229, 134, 60, 0.05)' }
-            }}
+            fullWidth
           >
             {t('selectVideos', 'Select Videos')}
-            <input type="file" hidden multiple accept="video/*" onChange={(e) => handleFileSelect(e, 'videos')} />
+            <input
+              type="file"
+              accept="video/*"
+              multiple
+              hidden
+              onChange={(e) => handleFileSelect(e, 'videos')}
+            />
           </PrimaryButton>
           {form.videos.length > 0 && (
-            <Typography variant="caption" color="text.secondary" fontFamily='"DM Sans", sans-serif'>
-              {form.videos.length} {t('videosSelected', 'video(s) selected')}
-            </Typography>
+            <Box mt={2}>
+              {form.videos.map((vid, idx) => (
+                <Box key={idx} display="flex" alignItems="center" gap={1} mb={1}>
+                  <Typography variant="body2" flex={1}>
+                    {vid instanceof File ? vid.name : vid.name || `Video ${idx + 1}`}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={() => handleRemoveFile('videos', idx)}
+                  >
+                    <Delete />
+                  </IconButton>
+                </Box>
+              ))}
+            </Box>
           )}
         </Box>
       </Stack>
