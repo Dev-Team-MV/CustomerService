@@ -11,7 +11,7 @@ const getStatusColor = (status, config) => {
 }
 
 // Hook de columnas para NewsTable
-export const useNewsColumns = ({ t, config, handleView, handleEdit, handleDeleteClick }) => {
+export const useNewsColumns = ({ t, config, handleView, handleEdit, handleDeleteClick, isOwner }) => {
   return [
     {
       field: 'title',
@@ -187,31 +187,39 @@ export const useNewsColumns = ({ t, config, handleView, handleEdit, handleDelete
           </Tooltip>
 
           <Tooltip title={t('news:edit')} placement="top">
-            <IconButton
-              size="small"
-              onClick={(e) => { e.stopPropagation(); handleEdit(row) }}
-              sx={{
-                bgcolor: `${config.colors.accent}14`, border: `1px solid ${config.colors.accent}33`,
-                borderRadius: 2, transition: 'all 0.3s ease',
-                '&:hover': { bgcolor: config.colors.accent, borderColor: config.colors.accent, transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } }
-              }}
-            >
-              <Edit sx={{ fontSize: 18, color: config.colors.accent }} />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => { e.stopPropagation(); handleEdit(row) }}
+                disabled={isOwner}
+                sx={{
+                  bgcolor: `${config.colors.accent}14`, border: `1px solid ${config.colors.accent}33`,
+                  borderRadius: 2, transition: 'all 0.3s ease',
+                  '&:hover': { bgcolor: config.colors.accent, borderColor: config.colors.accent, transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } },
+                  '&:disabled': { opacity: 0.5 }
+                }}
+              >
+                <Edit sx={{ fontSize: 18, color: config.colors.accent }} />
+              </IconButton>
+            </span>
           </Tooltip>
 
           <Tooltip title={t('news:deleteAction')} placement="top">
-            <IconButton
-              size="small"
-              onClick={(e) => { e.stopPropagation(); handleDeleteClick(row) }}
-              sx={{
-                bgcolor: 'rgba(211, 47, 47, 0.08)', border: '1px solid rgba(211, 47, 47, 0.2)',
-                borderRadius: 2, transition: 'all 0.3s ease',
-                '&:hover': { bgcolor: '#d32f2f', borderColor: '#d32f2f', transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } }
-              }}
-            >
-              <Delete sx={{ fontSize: 18, color: '#d32f2f' }} />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => { e.stopPropagation(); handleDeleteClick(row) }}
+                disabled={isOwner}
+                sx={{
+                  bgcolor: 'rgba(211, 47, 47, 0.08)', border: '1px solid rgba(211, 47, 47, 0.2)',
+                  borderRadius: 2, transition: 'all 0.3s ease',
+                  '&:hover': { bgcolor: '#d32f2f', borderColor: '#d32f2f', transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } },
+                  '&:disabled': { opacity: 0.5 }
+                }}
+              >
+                <Delete sx={{ fontSize: 18, color: '#d32f2f' }} />
+              </IconButton>
+            </span>
           </Tooltip>
         </Box>
       )

@@ -15,7 +15,7 @@ import {
   AttachMoney
 } from '@mui/icons-material'
 
-export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
+export const useLotsColumns = (t, handleOpenDialog, handleDelete, isOwner) => {
   return [
     {
       field: 'number',
@@ -206,50 +206,58 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
       renderCell: ({ row }) => (
         <Box sx={{ display: 'flex', gap: 0.5 }}>
           <Tooltip title={t('lots:actions.edit')} placement="top">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleOpenDialog(row)
-              }}
-              sx={{
-                bgcolor: 'rgba(140, 165, 81, 0.08)',
-                border: '1px solid rgba(140, 165, 81, 0.2)',
-                borderRadius: 2,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  bgcolor: '#8CA551',
-                  borderColor: '#8CA551',
-                  transform: 'scale(1.1)',
-                  '& .MuiSvgIcon-root': { color: 'white' }
-                }
-              }}
-            >
-              <Edit sx={{ fontSize: 18, color: '#8CA551' }} />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleOpenDialog(row)
+                }}
+                disabled={isOwner}
+                sx={{
+                  bgcolor: 'rgba(140, 165, 81, 0.08)',
+                  border: '1px solid rgba(140, 165, 81, 0.2)',
+                  borderRadius: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    bgcolor: '#8CA551',
+                    borderColor: '#8CA551',
+                    transform: 'scale(1.1)',
+                    '& .MuiSvgIcon-root': { color: 'white' }
+                  },
+                  '&:disabled': { opacity: 0.5 }
+                }}
+              >
+                <Edit sx={{ fontSize: 18, color: '#8CA551' }} />
+              </IconButton>
+            </span>
           </Tooltip>
           <Tooltip title={t('lots:actions.delete')} placement="top">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleDelete(row._id)
-              }}
-              sx={{
-                bgcolor: 'rgba(229, 134, 60, 0.08)',
-                border: '1px solid rgba(229, 134, 60, 0.2)',
-                borderRadius: 2,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  bgcolor: '#E5863C',
-                  borderColor: '#E5863C',
-                  transform: 'scale(1.1)',
-                  '& .MuiSvgIcon-root': { color: 'white' }
-                }
-              }}
-            >
-              <Delete sx={{ fontSize: 18, color: '#E5863C' }} />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDelete(row._id)
+                }}
+                disabled={isOwner}
+                sx={{
+                  bgcolor: 'rgba(229, 134, 60, 0.08)',
+                  border: '1px solid rgba(229, 134, 60, 0.2)',
+                  borderRadius: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    bgcolor: '#E5863C',
+                    borderColor: '#E5863C',
+                    transform: 'scale(1.1)',
+                    '& .MuiSvgIcon-root': { color: 'white' }
+                  },
+                  '&:disabled': { opacity: 0.5 }
+                }}
+              >
+                <Delete sx={{ fontSize: 18, color: '#E5863C' }} />
+              </IconButton>
+            </span>
           </Tooltip>
         </Box>
       )

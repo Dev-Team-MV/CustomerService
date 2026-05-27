@@ -1,15 +1,23 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { Box, useMediaQuery, useTheme, Backdrop } from "@mui/material";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "@shared/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import NotificationsDrawer from "./NotificationsDrawer";
 import SidebarDrawer from "./SidebarDrawer";
-import { publicMenuItems, privateMenuItems } from "../../constants/menuItems";
+import { publicMenuItems as defaultPublicMenuItems, privateMenuItems as defaultPrivateMenuItems } from "../../constants/menuItems";
 import AppBarBrandbook from "./AppBar";
+import Footer from "./Footer";
+
 const drawerWidthExpanded = 280;
 
-const Layout = ({ publicView = false }) => {
+const Layout = ({
+  publicView = false,
+  menuItems: customMenuItems,
+  publicMenuItems: customPublicMenuItems,
+  logoSrc,
+  ...props
+}) => {
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [expanded, setExpanded] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -48,9 +56,15 @@ const Layout = ({ publicView = false }) => {
     handleCloseUserMenu();
   };
 
-  const menuItems = publicView
-    ? publicMenuItems
-    : privateMenuItems.filter((item) => item.roles.includes(user?.role));
+  const menuItems = useMemo(() => {
+    if (publicView) {
+      return customPublicMenuItems || customMenuItems || defaultPublicMenuItems;
+    }
+    if (customMenuItems) {
+      return customMenuItems.filter((item) => item.roles.includes(user?.role));
+    }
+    return defaultPrivateMenuItems.filter((item) => item.roles.includes(user?.role));
+  }, [customMenuItems, customPublicMenuItems, publicView, user?.role]);
 
   const handleNavigate = (path) => {
     navigate(path);
@@ -59,7 +73,7 @@ const Layout = ({ publicView = false }) => {
 
   return (
     <Box sx={{ display: "flex", position: "relative" }}>
-      {/* ✅ APPBAR - BRANDBOOK */}
+      {/* AppBar */}
       <AppBarBrandbook
         publicView={publicView}
         user={user}
@@ -76,9 +90,14 @@ const Layout = ({ publicView = false }) => {
         anchorElUser={anchorElUser}
         onOpenUserMenu={handleOpenUserMenu}
         onCloseUserMenu={handleCloseUserMenu}
+        sx={{
+          bgcolor: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText,
+        }}
+        logoSrc={logoSrc}
       />
 
-      {/* ✅ BACKDROP - Mejorado */}
+      {/* Backdrop */}
       <Backdrop
         open={expanded}
         onClick={() => setExpanded(false)}
@@ -86,12 +105,12 @@ const Layout = ({ publicView = false }) => {
           zIndex: 1200,
           backdropFilter: "blur(12px) saturate(180%)",
           WebkitBackdropFilter: "blur(12px) saturate(180%)",
-          bgcolor: "rgba(51, 63, 31, 0.25)",
+          bgcolor: theme.palette.action.disabledBackground,
           transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         }}
       />
 
-      {/* SIDEBAR DRAWER REUTILIZABLE */}
+      {/* Sidebar Drawer */}
       <SidebarDrawer
         open={expanded}
         onClose={() => setExpanded(false)}
@@ -100,37 +119,50 @@ const Layout = ({ publicView = false }) => {
         setNotificationsOpen={setNotificationsOpen}
         user={user}
         drawerWidth={drawerWidthExpanded}
+        sx={{
+          bgcolor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+        }}
       />
 
+      {/* Notifications Drawer */}
       <NotificationsDrawer
         open={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
         notifications={notifications}
         setNotifications={setNotifications}
+        sx={{
+          bgcolor: theme.palette.background.paper,
+        }}
       />
 
-      {/* ✅ MAIN CONTENT */}
+      {/* Main Content */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           width: "100%",
           minHeight: "100vh",
-          bgcolor: "#f7fafc",
+          bgcolor: theme.palette.background.default,
           pt: { xs: "216px", md: "260px" },
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Outlet />
-          </motion.div>
-        </AnimatePresence>
+        <Box sx={{ flexGrow: 1 }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
+        </Box>
+        <Footer />
       </Box>
     </Box>
   );

@@ -30,6 +30,7 @@ const Properties = () => {
   const navigate     = useNavigate()
   const { user }     = useAuth()
   const isAdmin      = user?.role === 'admin' || user?.role === 'superadmin'
+  const isOwner      = user?.role === 'owner'
 
   // ── Data fetching ─────────────────────────────────────────
 const projectId = getLakewoodProjectId(user)
@@ -161,6 +162,7 @@ console.log('🎯 Facades final para el select:', facades)
   // ── Columns (extraídas a su propio archivo) ───────────────
   const columns = usePropertyColumns({
     isAdmin,
+    isOwner,
     t,
     onViewDetails:    details.openModal,
     onEdit:           openEdit,
@@ -273,6 +275,7 @@ console.log('🎯 Facades final para el select:', facades)
           property={phases.data}
           onClose={() => { phases.closeModal(); refetch() }}
           isAdmin={isAdmin}
+          isOwner={isOwner}
         />
 
         {/* <ContractsModal

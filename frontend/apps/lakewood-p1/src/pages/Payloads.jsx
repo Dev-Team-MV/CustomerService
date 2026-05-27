@@ -14,6 +14,7 @@ import EmptyState    from '@shared/components/table/EmptyState'
 import PayloadDialog from '@shared/components/Modals/PayloadDialog'
 import { usePayloads } from '@shared/hooks/usePayloads'
 import api from '@shared/services/api'
+import { useAuth } from '@shared/context/AuthContext'
 import { usePayloadColumns } from '../constants/Columns/payloads'
 import projectService from '@shared/services/projectService' // ✅ Agregar
 
@@ -29,6 +30,8 @@ const projectId = import.meta.env.VITE_PROJECT_ID
 
 const Payloads = () => {
   const { t } = useTranslation(['payloads', 'common'])
+  const { user } = useAuth()
+  const isOwner = user?.role === 'owner'
   const [downloadingProjectStatement, setDownloadingProjectStatement] = useState(false) // ✅ Nuevo estado
  
   const {
@@ -76,6 +79,7 @@ const Payloads = () => {
     onApprove:  handleApprove,
     onReject:   handleReject,
     onDownload: handleDownload,
+    isOwner,
   })
 
   const payloadsStats = useMemo(() => [

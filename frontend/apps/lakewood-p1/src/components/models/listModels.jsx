@@ -37,6 +37,7 @@ const ModelCard = ({
   model,
   index,
   facades,
+  isOwner,
   onEdit,
   onDelete,
   onOpenGallery,
@@ -443,6 +444,8 @@ const ModelCard = ({
               color="primary"
               startIcon={<Edit fontSize="small" />}
               onClick={() => onEdit(model)}
+              disabled={isOwner}
+              sx={isOwner ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
             >
               {t('common:actions.edit')}
             </PrimaryButton>
@@ -452,6 +455,8 @@ const ModelCard = ({
               color="error"
               startIcon={<Delete fontSize="small" />}
               onClick={() => onDelete(model._id)}
+              disabled={isOwner}
+              sx={isOwner ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
             >
               {t('common:actions.delete')}
             </PrimaryButton>
@@ -482,12 +487,14 @@ const ModelCard = ({
               <IconButton
                 size="small"
                 onClick={() => onOpenFacadeDialog(model)}
+                disabled={isOwner}
                 sx={{
                   bgcolor: '#333F1F',
                   color: 'white',
                   width: 28,
                   height: 28,
-                  '&:hover': { bgcolor: '#4a5d3a' }
+                  '&:hover': { bgcolor: '#4a5d3a' },
+                  ...(isOwner ? { opacity: 0.5, cursor: 'not-allowed' } : {})
                 }}
               >
                 <Add sx={{ fontSize: 16 }} />
@@ -545,11 +552,13 @@ const ModelCard = ({
                               e.stopPropagation();
                               onEditFacade(model, facade);
                             }}
+                            disabled={isOwner}
                             sx={{
                               bgcolor: 'rgba(255,255,255,0.95)',
                               width: 20,
                               height: 20,
-                              '&:hover': { bgcolor: 'white' }
+                              '&:hover': { bgcolor: 'white' },
+                              ...(isOwner ? { opacity: 0.5, cursor: 'not-allowed' } : {})
                             }}
                           >
                             <Edit sx={{ fontSize: 12, color: '#8CA551' }} />
@@ -560,11 +569,13 @@ const ModelCard = ({
                               e.stopPropagation();
                               onDeleteFacade(facade._id);
                             }}
+                            disabled={isOwner}
                             sx={{
                               bgcolor: 'rgba(255,255,255,0.95)',
                               width: 20,
                               height: 20,
-                              '&:hover': { bgcolor: 'white' }
+                              '&:hover': { bgcolor: 'white' },
+                              ...(isOwner ? { opacity: 0.5, cursor: 'not-allowed' } : {})
                             }}
                           >
                             <Delete sx={{ fontSize: 12, color: '#E5863C' }} />
