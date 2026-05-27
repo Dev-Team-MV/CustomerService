@@ -200,51 +200,21 @@ const fetchRecorridoImages = async (skipCache = false) => {
   }
 
   // --- UPLOAD ---
-  // const handleUpload = async (id, file, isPublic = true) => {
-  //   setUploading(true);
-  //   const ext = file.name.substring(file.name.lastIndexOf('.'));
-  //   const filename = `recorrido.${id}${ext}`;
-  //   await uploadService.uploadImage(file, 'recorrido', filename, isPublic);
-  //   setUploading(false);
-  //   fetchRecorridoImages();
-  // };
-
-const handleUpload = async (id, file, isPublic = true) => {
-  try {
+  const handleUpload = async (id, file, isPublic = true) => {
     setUploading(true)
-    const ext = file.name.substring(file.name.lastIndexOf('.'))
-    const filename = `recorrido.${id}${ext}`
-    
-    console.log('📤 Uploading:', { id, filename, isPublic })
-    
-    // 1. Subir imagen
-    const url = await uploadService.uploadImage(file, 'recorrido', filename, isPublic)
-    
-    console.log('✅ Upload successful, URL:', url)
-    
-    if (!url) {
-      throw new Error('No URL returned from upload')
+    try {
+      // Backend image processing normalizes to jpg/webp depending on source; we enforce a predictable key.
+      const filename = `recorrido.${id}.jpg`
+      await uploadService.uploadImage(file, 'recorrido', filename, isPublic)
+      await uploadService.updateRecorridoVisibility(filename, isPublic)
+      await fetchRecorridoImages()
+    } finally {
+      setUploading(false)
     }
-    
-    // 2. Guardar metadata de visibilidad INMEDIATAMENTE
-    console.log('💾 Saving visibility metadata...')
-    await uploadService.updateRecorridoVisibility({ filename, isPublic })
-    console.log('✅ Visibility saved')
-    
-    // 3. Actualizar UI inmediatamente
-    await fetchRecorridoImages(true)
-    
-    alert('Imagen subida exitosamente')
-  } catch (err) {
-    console.error('❌ Error uploading:', err)
-    alert('Error al subir la imagen: ' + (err.message || 'Error desconocido'))
-  } finally {
-    setUploading(false)
   }
-}
-  const handleRecorridoVisibility = async (filename, isPublic) => {
-    await uploadService.updateRecorridoVisibility(filename, isPublic)
-    fetchRecorridoImages()
+
+  const handleRecorridoVisibility = async () => {
+    await fetchRecorridoImages()
   }
 
   return (

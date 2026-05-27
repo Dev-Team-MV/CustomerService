@@ -75,7 +75,7 @@ async function deleteFilesWithSameBaseName (folder, fileName) {
   if (!folder || !fileName) return
   const baseName = path.basename(fileName, path.extname(fileName))
   const prefix = baseName + '.' // "recorrido.1." para no matchear "recorrido.10"
-  const files = await listFilesInFolder(folder, { includeSignedUrls: false })
+  const files = await listFilesInFolder(folder, { includeSignedUrls: false, bypassCache: true })
   for (const f of files) {
     const nameInFolder = f.name.includes('/') ? f.name.split('/').pop() : f.name
     if (nameInFolder.startsWith(prefix)) {
