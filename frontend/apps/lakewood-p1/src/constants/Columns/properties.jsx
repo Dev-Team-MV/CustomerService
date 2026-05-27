@@ -86,7 +86,7 @@ const StatusCell = ({ status, t }) => {
 }
 
 export const usePropertyColumns = ({
-  isAdmin, t,
+  isAdmin, isOwner, t,
   onViewDetails, onEdit, onDelete,
   onOpenPhases, onOpenContracts
 }) => {
@@ -255,29 +255,40 @@ export const usePropertyColumns = ({
             </IconButton>
           </Tooltip>
           <Tooltip title={t('property:actions.editPrice')} placement="top">
-            <IconButton size="small" onClick={(e) => { e.stopPropagation(); onEdit(row) }} sx={iconBtnSx('#8CA551', '#333F1F')}>
-              <EditIcon sx={{ fontSize: 18, color: '#8CA551' }} />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => { e.stopPropagation(); onEdit(row) }}
+                disabled={isOwner}
+                sx={{ ...iconBtnSx('#8CA551', '#333F1F'), ...(isOwner ? { opacity: 0.5, cursor: 'not-allowed' } : {}) }}
+              >
+                <EditIcon sx={{ fontSize: 18, color: '#8CA551' }} />
+              </IconButton>
+            </span>
           </Tooltip>
           <Tooltip title={t('property:actions.deleteProperty')} placement="top">
-            <IconButton
-              size="small"
-              onClick={(e) => { e.stopPropagation(); onDelete(row) }}
-              sx={{
-                bgcolor: 'rgba(229, 134, 60, 0.08)',
-                border: '1px solid rgba(229, 134, 60, 0.2)',
-                borderRadius: 2,
-                transition: 'all 0.3s ease',
-                '&:hover': { bgcolor: '#E5863C', borderColor: '#E5863C', transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } }
-              }}
-            >
-              <DeleteIcon sx={{ fontSize: 18, color: '#E5863C' }} />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => { e.stopPropagation(); onDelete(row) }}
+                disabled={isOwner}
+                sx={{
+                  bgcolor: 'rgba(229, 134, 60, 0.08)',
+                  border: '1px solid rgba(229, 134, 60, 0.2)',
+                  borderRadius: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': { bgcolor: '#E5863C', borderColor: '#E5863C', transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } },
+                  ...(isOwner ? { opacity: 0.5, cursor: 'not-allowed' } : {})
+                }}
+              >
+                <DeleteIcon sx={{ fontSize: 18, color: '#E5863C' }} />
+              </IconButton>
+            </span>
           </Tooltip>
         </Box>
       )
     })
 
     return columns
-  }, [isAdmin, t, onViewDetails, onEdit, onDelete, onOpenPhases, onOpenContracts])
+  }, [isAdmin, isOwner, t, onViewDetails, onEdit, onDelete, onOpenPhases, onOpenContracts])
 }

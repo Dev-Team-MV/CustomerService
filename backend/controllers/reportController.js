@@ -50,7 +50,8 @@ export const getUploadTracker = async (req, res) => {
           propertyMap[propId] = {
             id: propId,
             label: `Lot ${lotNum} - ${modelName}`,
-            dates: {}
+            dates: {},
+            media: {}
           }
         }
 
@@ -60,6 +61,12 @@ export const getUploadTracker = async (req, res) => {
           if (d < start || d > end) continue
           const dateKey = d.toISOString().split('T')[0]
           propertyMap[propId].dates[dateKey] = (propertyMap[propId].dates[dateKey] || 0) + 1
+          if (!propertyMap[propId].media[dateKey]) propertyMap[propId].media[dateKey] = []
+          propertyMap[propId].media[dateKey].push({
+            type: item.mediaType || 'image',
+            url: item.url,
+            name: item.title || ''
+          })
         }
       }
 

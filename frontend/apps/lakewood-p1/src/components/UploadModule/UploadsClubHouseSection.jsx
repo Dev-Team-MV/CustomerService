@@ -11,10 +11,13 @@ import {
 import { useTranslation } from 'react-i18next'
 import ClubImagesModal from '../ClubHouse/ClubImagesModal'
 import ClubHouseUnderConstructionModal from '../ClubHouse/ClubHouseUnderContructionModal'
+import { useAuth } from '@shared/context/AuthContext'
 
 const UploadsClubHouseSection = () => {
   const { t } = useTranslation('uploads')
   const theme = useTheme()
+  const { user } = useAuth()
+  const isOwner = user?.role === 'owner'
   const [modalOpen, setModalOpen] = useState(null)
 
   const sections = [
@@ -148,6 +151,7 @@ const UploadsClubHouseSection = () => {
         <ClubImagesModal
           open={true}
           onClose={handleCloseModal}
+          isOwner={isOwner}
           onImagesUploaded={() => {
             handleCloseModal()
             // Refresh data if needed

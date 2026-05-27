@@ -15,6 +15,7 @@ import ModalWrapper  from '@shared/constants/ModalWrapper'
 import PrimaryButton from '@shared/constants/PrimaryButton'
 import { useNewsModal } from '../../hooks/useNews'
 import NewsBlockEditor from './NewsBlockEditor' // Nuevo componente
+import { useAuth } from '@shared/context/AuthContext'
 
 // ── Estilos reutilizables ──────────────────────────────────
 const inputSx = {
@@ -41,6 +42,8 @@ const outlinedBtnSx = {
 // ─────────────────────────────────────────────────────────────
 const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
   const { t } = useTranslation(['news', 'common'])
+  const { user } = useAuth()
+  const isOwner = user?.role === 'owner'
 
   const {
     formData, setField,
@@ -89,7 +92,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit }) => {
           <PrimaryButton
             startIcon={<CheckCircle />}
             onClick={handleSubmit}
-            disabled={!formData.title || !formData.description || !formData.heroImage || isUploading}
+            disabled={!formData.title || !formData.description || !formData.heroImage || isUploading || isOwner}
           >
             {newsData ? t('news:updateArticle') : t('news:publishArticle')}
           </PrimaryButton>

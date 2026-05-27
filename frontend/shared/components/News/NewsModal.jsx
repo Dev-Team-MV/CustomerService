@@ -17,6 +17,7 @@ import ModalWrapper from '@shared/constants/ModalWrapper'
 import PrimaryButton from '@shared/constants/PrimaryButton'
 import { useNewsModal } from '../../hooks/useNewsModal'
 import NewsBlockEditor from './NewsBlockEditor'
+import { useAuth } from '../../context/AuthContext'
 
 const inputSx = {
   '& .MuiOutlinedInput-root': {
@@ -51,6 +52,8 @@ const outlinedBtnSx = {
 
 const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
   const { t } = useTranslation([config.i18n.namespace, 'common'])
+  const { user } = useAuth()
+  const isOwner = user?.role === 'owner'
 
   const {
     formData, setField,
@@ -102,7 +105,7 @@ const NewsModal = ({ open, onClose, newsData = null, onSubmit, config }) => {
           <PrimaryButton
             startIcon={<CheckCircle />}
             onClick={handleSubmit}
-            disabled={!formData.title || !formData.description || !formData.heroImage || isUploading}
+            disabled={!formData.title || !formData.description || !formData.heroImage || isUploading || isOwner}
           >
             {newsData ? t('news:updateArticle') : t('news:publishArticle')}
           </PrimaryButton>

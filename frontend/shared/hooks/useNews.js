@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import newsService from '../services/newsService'
 import useFetch from './useFetch'
 import { useNewsColumns } from '../constants/Column/news'
+import { useAuth } from '../context/AuthContext'
 
 // ─────────────────────────────────────────────────────────────
 // useNews — Admin mode (NewsTable)
@@ -13,6 +14,8 @@ import { useNewsColumns } from '../constants/Column/news'
 // ─────────────────────────────────────────────────────────────
 export const useNews = (config) => {
   const { t } = useTranslation([config.i18n.namespace, 'common'])
+  const { user } = useAuth()
+  const isOwner = user?.role === 'owner'
   const navigate = useNavigate()
 
   // ── Remote data with project filter ───────────────────────
@@ -121,12 +124,13 @@ export const useNews = (config) => {
   }), [news])
 
   // ── Columns ───────────────────────────────────────────────
-  const columns = useNewsColumns({ 
-    t, 
-    config, 
-    handleView, 
-    handleEdit, 
-    handleDeleteClick 
+  const columns = useNewsColumns({
+    t,
+    config,
+    handleView,
+    handleEdit,
+    handleDeleteClick,
+    isOwner
   })
 
   return {

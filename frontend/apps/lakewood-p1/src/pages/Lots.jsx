@@ -13,6 +13,7 @@ import {
   Terrain
 } from '@mui/icons-material'
 import api from '@shared/services/api'
+import { useAuth } from '@shared/context/AuthContext'
 import PageHeader from '@shared/components/PageHeader'
 import StatsCards from '../components/statscard'
 import DataTable from '@shared/components/table/DataTable'
@@ -22,6 +23,8 @@ import { useLotsColumns } from '../constants/Columns/lots'
 
 const Lots = () => {
   const { t } = useTranslation(['lots', 'common'])
+  const { user } = useAuth()
+  const isOwner = user?.role === 'owner'
   const [lots, setLots] = useState([])
   const [stats, setStats] = useState({ total: 0, available: 0, pending: 0, sold: 0 })
   const [loading, setLoading] = useState(true)
@@ -95,7 +98,7 @@ const Lots = () => {
     }
   }
 
-  const columns = useLotsColumns(t, handleOpenDialog, handleDelete)
+  const columns = useLotsColumns(t, handleOpenDialog, handleDelete, isOwner)
 
   const lotsStats = [
     {

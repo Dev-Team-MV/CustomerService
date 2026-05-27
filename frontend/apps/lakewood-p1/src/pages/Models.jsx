@@ -22,10 +22,13 @@ import { useTranslation } from "react-i18next";
 import Loader from "../components/Loader";
 import useModalState from "@shared/hooks/useModalState";
 import { useModels } from "../hooks/useModels";
+import { useAuth } from '@shared/context/AuthContext';
 
 const Models = () => {
   const { t } = useTranslation(['models', 'common']);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isOwner = user?.role === 'owner';
 
   // Hooks para modales
   const modelModal = useModalState(null);
@@ -169,6 +172,7 @@ useEffect(() => {
                   model={model}
                   index={index}
                   facades={getModelFacades(model._id)}
+                  isOwner={isOwner}
                   onEdit={m => modelModal.openModal(m)}
                   onDelete={handleDeleteModel}
                   onOpenGallery={m => galleryModal.openModal(m)}

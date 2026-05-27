@@ -31,6 +31,7 @@ export const usePayloadColumns = ({
   onApprove,
   onReject,
   onDownload,
+  isOwner,
 }) => [
   {
     field: 'property',
@@ -170,17 +171,21 @@ export const usePayloadColumns = ({
 
         {/* Edit */}
         <Tooltip title={t('payloads:edit')} placement="top">
-          <IconButton
-            size="small"
-            onClick={(e) => { e.stopPropagation(); onEdit(row) }}
-            sx={{
-              bgcolor: 'rgba(140, 165, 81, 0.08)', border: '1px solid rgba(140, 165, 81, 0.2)',
-              borderRadius: 2, transition: 'all 0.3s ease',
-              '&:hover': { bgcolor: '#8CA551', borderColor: '#8CA551', transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } }
-            }}
-          >
-            <Edit sx={{ fontSize: 18, color: '#8CA551' }} />
-          </IconButton>
+          <span>
+            <IconButton
+              size="small"
+              onClick={(e) => { e.stopPropagation(); onEdit(row) }}
+              disabled={isOwner}
+              sx={{
+                bgcolor: 'rgba(140, 165, 81, 0.08)', border: '1px solid rgba(140, 165, 81, 0.2)',
+                borderRadius: 2, transition: 'all 0.3s ease',
+                '&:hover': { bgcolor: '#8CA551', borderColor: '#8CA551', transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } },
+                '&:disabled': { opacity: 0.5 }
+              }}
+            >
+              <Edit sx={{ fontSize: 18, color: '#8CA551' }} />
+            </IconButton>
+          </span>
         </Tooltip>
 
         {/* Approve */}
@@ -189,7 +194,7 @@ export const usePayloadColumns = ({
             <IconButton
               size="small"
               onClick={(e) => onApprove(row, e)}
-              disabled={row.status === 'signed'}
+              disabled={row.status === 'signed' || isOwner}
               sx={{
                 bgcolor: 'rgba(76, 175, 80, 0.08)', border: '1px solid rgba(76, 175, 80, 0.2)',
                 borderRadius: 2, transition: 'all 0.3s ease',
@@ -208,7 +213,7 @@ export const usePayloadColumns = ({
             <IconButton
               size="small"
               onClick={(e) => onReject(row, e)}
-              disabled={row.status === 'rejected'}
+              disabled={row.status === 'rejected' || isOwner}
               sx={{
                 bgcolor: 'rgba(211, 47, 47, 0.08)', border: '1px solid rgba(211, 47, 47, 0.2)',
                 borderRadius: 2, transition: 'all 0.3s ease',
