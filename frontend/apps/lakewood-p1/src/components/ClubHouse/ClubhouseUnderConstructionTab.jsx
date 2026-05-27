@@ -1,7 +1,7 @@
 // frontend/apps/lakewood-p1/src/components/ClubHouse/ClubhouseUnderConstructionTab.jsx
 import { useState, useEffect } from 'react'
 import { Box, Typography, Grid, Paper, Chip, Button, Dialog, DialogContent, IconButton } from '@mui/material'
-import { Add, PhotoLibrary, Close, PlayArrow } from '@mui/icons-material'
+import { Add, PhotoLibrary, Close, PlayArrow, Edit, Delete } from '@mui/icons-material'
 import { format } from 'date-fns'
 import ClubhouseUnderConstructionService from '../../services/ClubhouseUnderConstructionService'
 import ClubhouseUnderConstructionModal from './ClubHouseUnderContructionModal'
@@ -9,9 +9,12 @@ import { useTranslation } from 'react-i18next'
 import Loader from '../Loader'
 
 const ClubhouseUnderConstructionTab = () => {
+    console.log('🔵 ClubhouseUnderConstructionTab MOUNTED')
+
   const { t } = useTranslation('clubhouse')
   const [steps, setSteps] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
+  const [editingStep, setEditingStep] = useState(null)
   const [loading, setLoading] = useState(true)
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [selectedMedia, setSelectedMedia] = useState([])
@@ -21,21 +24,40 @@ const ClubhouseUnderConstructionTab = () => {
     loadSteps()
   }, [])
 
-  const loadSteps = async () => {
-    setLoading(true)
+const loadSteps = async () => {
+  setLoading(true)
+  try {
+    const response = await ClubhouseUnderConstructionService.getAll()
+    console.log('📥 Raw response:', response)
+    const data = Array.isArray(response) ? response : (response.clubHouseTimeline || response.timeline || response.data || [])
+    console.log('📥 Parsed steps:', data)
+    setSteps(data)
+  } catch (err) {
+    console.error('Error loading clubhouse under construction:', err)
+    setSteps([])
+  }
+  setLoading(false)
+}
+  const handleEdit = (step) => {
+    setEditingStep(step)
+    setModalOpen(true)
+  }
+
+  const handleDelete = async (stepId) => {
+    if (!confirm(t('confirmDelete', 'Are you sure you want to delete this step?'))) return
+    
     try {
-      const response = await ClubhouseUnderConstructionService.getAll()
-      const data = Array.isArray(response) ? response : (response.clubHouseTimeline || response.timeline || response.data || [])
-      setSteps(data)
+      await ClubhouseUnderConstructionService.delete(stepId)
+      loadSteps()
     } catch (err) {
-      console.error('Error loading clubhouse under construction:', err)
-      setSteps([])
+      console.error('Error deleting step:', err)
+      alert(t('errorDeleting', 'Error deleting step'))
     }
-    setLoading(false)
   }
 
   const handleModalClose = () => {
     setModalOpen(false)
+    setEditingStep(null)
     loadSteps()
   }
 
@@ -59,11 +81,9 @@ const ClubhouseUnderConstructionTab = () => {
     setCurrentIndex((prev) => (prev - 1 + selectedMedia.length) % selectedMedia.length)
   }
 
-  // Detectar tipo de media por nombre
   const getMediaType = (media) => {
     if (media.name?.includes('video')) return 'video'
     if (media.name?.includes('image')) return 'image'
-    // Fallback: detectar por extensión en URL
     const url = media.url?.toLowerCase() || ''
     if (url.includes('.mp4') || url.includes('.mov') || url.includes('.avi')) return 'video'
     return 'image'
@@ -79,7 +99,6 @@ const ClubhouseUnderConstructionTab = () => {
 
   return (
     <Box>
-      {/* Header con botón */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h6" fontWeight={700} fontFamily='"DM Sans", sans-serif'>
           {t('underConstruction', 'Under Construction')}
@@ -100,7 +119,6 @@ const ClubhouseUnderConstructionTab = () => {
         </Button>
       </Box>
 
-      {/* Timeline de steps */}
       {steps.length === 0 ? (
         <Paper sx={{ p: 4, textAlign: 'center', bgcolor: 'grey.100', borderRadius: 3 }}>
           <PhotoLibrary sx={{ fontSize: 48, color: '#4a7c59', mb: 2 }} />
@@ -144,7 +162,6 @@ const ClubhouseUnderConstructionTab = () => {
                 }}
               >
                 <Grid container>
-                  {/* Media principal */}
                   <Grid item xs={12} md={6}>
                     <Box
                       sx={{
@@ -233,7 +250,6 @@ const ClubhouseUnderConstructionTab = () => {
                     </Box>
                   </Grid>
 
-                  {/* Información del step */}
                   <Grid item xs={12} md={6}>
                     <Box p={4}>
                       {step.clubHouseDate && (
@@ -269,7 +285,6 @@ const ClubhouseUnderConstructionTab = () => {
                         {step.description}
                       </Typography>
 
-                      {/* Contadores de media */}
                       <Box display="flex" gap={2} mb={3}>
                         <Chip
                           icon={<PhotoLibrary />}
@@ -295,22 +310,49 @@ const ClubhouseUnderConstructionTab = () => {
                         )}
                       </Box>
 
-                      {/* Botón para ver galería */}
-                      {allMedia.length > 0 && (
+                      <Box display="flex" gap={2} flexWrap="wrap">
+                        {allMedia.length > 0 && (
+                          <Button
+                            variant="contained"
+                            startIcon={<PhotoLibrary />}
+                            onClick={() => openGallery(allMedia, 0)}
+                            sx={{
+                              bgcolor: '#4a7c59',
+                              '&:hover': { bgcolor: '#3a5c49' },
+                              textTransform: 'none',
+                              fontWeight: 600
+                            }}
+                          >
+                            {t('viewGallery', 'View Gallery')}
+                          </Button>
+                        )}
                         <Button
-                          variant="contained"
-                          startIcon={<PhotoLibrary />}
-                          onClick={() => openGallery(allMedia, 0)}
+                          variant="outlined"
+                          startIcon={<Edit />}
+                          onClick={() => handleEdit(step)}
                           sx={{
-                            bgcolor: '#4a7c59',
-                            '&:hover': { bgcolor: '#3a5c49' },
+                            borderColor: '#8CA551',
+                            color: '#8CA551',
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            '&:hover': { borderColor: '#333F1F', color: '#333F1F' }
+                          }}
+                        >
+                          {t('edit', 'Edit')}
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          startIcon={<Delete />}
+                          onClick={() => handleDelete(step._id)}
+                          sx={{
                             textTransform: 'none',
                             fontWeight: 600
                           }}
                         >
-                          {t('viewGallery', 'View Gallery')}
+                          {t('delete', 'Delete')}
                         </Button>
-                      )}
+                      </Box>
                     </Box>
                   </Grid>
                 </Grid>
@@ -320,10 +362,12 @@ const ClubhouseUnderConstructionTab = () => {
         </Box>
       )}
 
-      {/* Modal de creación */}
-      <ClubhouseUnderConstructionModal open={modalOpen} onClose={handleModalClose} />
+      <ClubhouseUnderConstructionModal 
+        open={modalOpen} 
+        onClose={handleModalClose}
+        editingStep={editingStep}
+      />
 
-      {/* Galería lightbox */}
       <Dialog
         open={galleryOpen}
         onClose={closeGallery}

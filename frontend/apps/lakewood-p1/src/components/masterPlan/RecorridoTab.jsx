@@ -78,31 +78,57 @@ const RecorridoTab = () => {
     }
   }
 
-// ...existing code...
-const fetchRecorridoImages = async () => {
+// const fetchRecorridoImages = async () => {
+//   try {
+//     const response = await uploadService.getFilesByFolder('recorrido', true);
+//     const map = {};
+//     (response.files || []).forEach(file => {
+//       // file.name expected like "recorrido.3.jpg"
+//       const name = file.name || file.filename || '';
+//       const match = name.match(/recorrido\.(\d+)\./);
+//       if (match) {
+//         const pointId = String(match[1]); // usa el índice/número del filename como key
+//         map[pointId] = {
+//           url: file.url || file.publicUrl || null,
+//           isPublic: !!file.isPublic,
+//           filename: name
+//         };
+//       }
+//     });
+//     setImagesMap(map); // pasar este imagesMap al modal
+//   } catch (err) {
+//     console.error('Error fetching recorrido files:', err);
+//     setImagesMap({});
+//   }
+// };
+
+const fetchRecorridoImages = async (skipCache = false) => {
   try {
-    const response = await uploadService.getFilesByFolder('recorrido', true);
-    const map = {};
-    (response.files || []).forEach(file => {
-      // file.name expected like "recorrido.3.jpg"
-      const name = file.name || file.filename || '';
-      const match = name.match(/recorrido\.(\d+)\./);
+    const response = skipCache
+      ? await uploadService.getFilesByFolderNoCache('recorrido', true)
+      : await uploadService.getFilesByFolder('recorrido', true)
+      
+    const map = {}
+    ;(response.files || []).forEach(file => {
+      const name = file.name || file.filename || ''
+      const match = name.match(/recorrido\.(\d+)\./)
       if (match) {
-        const pointId = String(match[1]); // usa el índice/número del filename como key
+        const pointId = String(match[1])
         map[pointId] = {
           url: file.url || file.publicUrl || null,
           isPublic: !!file.isPublic,
           filename: name
-        };
+        }
       }
-    });
-    setImagesMap(map); // pasar este imagesMap al modal
+    })
+    setImagesMap(map)
   } catch (err) {
-    console.error('Error fetching recorrido files:', err);
-    setImagesMap({});
+    console.error('Error fetching recorrido files:', err)
+    setImagesMap({})
   }
-};
-// ...existing code...
+}
+
+
 
   // Asocia cada imagen al punto por id (image puede ser { url, isPublic, filename } o null)
   const recorridoPoints = puntosBase.map((p) => ({
@@ -174,14 +200,78 @@ const fetchRecorridoImages = async () => {
   }
 
   // --- UPLOAD ---
-  const handleUpload = async (id, file, isPublic = true) => {
-    setUploading(true);
-    const ext = file.name.substring(file.name.lastIndexOf('.'));
-    const filename = `recorrido.${id}${ext}`;
-    await uploadService.uploadImage(file, 'recorrido', filename, isPublic);
-    setUploading(false);
-    fetchRecorridoImages();
-  };
+  // const handleUpload = async (id, file, isPublic = true) => {
+  //   setUploading(true);
+  //   const ext = file.name.substring(file.name.lastIndexOf('.'));
+  //   const filename = `recorrido.${id}${ext}`;
+  //   await uploadService.uploadImage(file, 'recorrido', filename, isPublic);
+  //   setUploading(false);
+  //   fetchRecorridoImages();
+  // };
+
+// Agregar la función helper antes de handleUpload
+const waitForFileToAppear = async (pointId, maxAttempts = 8) => {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    console.log(`🔍 Attempt ${attempt}/${maxAttempts}: Checking if file appears...`)
+    
+    // Delay más agresivo: 1s, 1.5s, 2s, 2.5s, 3s, 3.5s, 4s, 4.5s
+    const delay = 1000 + (attempt - 1) * 500
+    await new Promise(resolve => setTimeout(resolve, delay))
+    
+    const response = await uploadService.getFilesByFolderNoCache('recorrido', true)
+    const files = response.files || []
+    
+    const fileExists = files.some(file => {
+      const name = file.name || file.filename || ''
+      const match = name.match(/recorrido\.(\d+)\./)
+      return match && String(match[1]) === String(pointId)
+    })
+    
+    if (fileExists) {
+      console.log(`✅ File found on attempt ${attempt}!`)
+      return true
+    }
+    
+    console.log(`⏳ File not found yet, waiting...`)
+  }
+  
+  console.warn('⚠️ File not found after max attempts')
+  return false
+}
+
+const handleUpload = async (id, file, isPublic = true) => {
+  try {
+    setUploading(true)
+    const ext = file.name.substring(file.name.lastIndexOf('.'))
+    const filename = `recorrido.${id}${ext}`
+    
+    console.log('📤 Uploading:', { id, filename, isPublic })
+    
+    const url = await uploadService.uploadImage(file, 'recorrido', filename, isPublic)
+    
+    console.log('✅ Upload successful, URL:', url)
+    
+    if (!url) {
+      throw new Error('No URL returned from upload')
+    }
+    
+    // Esperar a que el archivo aparezca en el servidor
+    const fileAppeared = await waitForFileToAppear(id)
+    
+    if (fileAppeared) {
+      await fetchRecorridoImages(true)
+      alert('Imagen subida exitosamente')
+    } else {
+      alert('Imagen subida, pero puede tardar en aparecer. Recarga la página si no la ves.')
+      await fetchRecorridoImages(true)
+    }
+  } catch (err) {
+    console.error('❌ Error uploading:', err)
+    alert('Error al subir la imagen: ' + (err.message || 'Error desconocido'))
+  } finally {
+    setUploading(false)
+  }
+}
 
   const handleRecorridoVisibility = async (filename, isPublic) => {
     await uploadService.updateRecorridoVisibility(filename, isPublic)
