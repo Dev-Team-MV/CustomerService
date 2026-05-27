@@ -2,7 +2,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { AuthProvider, useAuth } from '@shared/context/AuthContext'
 import ProtectedRoute from '@shared/components/ProtectedRoute'
-import Layout from '@shared/components/LayoutComponents/Layout'
+import Layout from '@shared/components/LayoutComponents/Layout.jsx'
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 
 // Importa los menús locales

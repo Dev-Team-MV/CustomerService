@@ -12,9 +12,12 @@ import ResidentDialog from '../../../../shared/components/Modals/ResidentDialog'
 
 import { useResidents } from '@shared/hooks/useResidents'
 import { useResidentColumns } from '../constants/Columns/residents'
+import { useAuth } from '@shared/context/AuthContext'
 
 const Residents = () => {
   const { t } = useTranslation(['residents', 'common'])
+  const { user } = useAuth()
+  const isOwner = user?.role === 'owner'
 
   // ✅ Pasar PROJECT_ID desde .env para filtrar residentes de lakewood-p1
   const projectId = import.meta.env.VITE_PROJECT_ID
@@ -39,6 +42,7 @@ const Residents = () => {
     onEdit: handleOpenDialog,
     onDelete: handleDelete,
     onSendSMS: handleSendPasswordSMS,
+    isOwner,
   })
 
   const residentsStats = useMemo(() => [

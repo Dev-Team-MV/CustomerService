@@ -32,6 +32,7 @@ const ClubImagesModal = ({
   onImagesUploaded,
   images: parentImages,
   interiorKeys: parentInteriorKeys,
+  isOwner = false,
 }) => {
   const { t } = useTranslation(["clubHouse", "common"]);
   const [tab, setTab] = useState(0);
@@ -725,7 +726,7 @@ return (
     actions={
       <PrimaryButton
         onClick={handleConfirmUpload}
-        disabled={getTotalSelectedFiles() === 0 || uploading}
+        disabled={getTotalSelectedFiles() === 0 || uploading || isOwner}
         loading={uploading}
         startIcon={!uploading ? <Check /> : undefined}
       >
@@ -773,7 +774,7 @@ return (
     )}
 
     <Box mb={3}>
-      <PrimaryButton component="label" startIcon={<CloudUpload />} disabled={uploading || loading}>
+      <PrimaryButton component="label" startIcon={<CloudUpload />} disabled={uploading || loading || isOwner}>
         {t('clubHouse:selectImages')}
         <input
           type="file"
@@ -920,7 +921,7 @@ return (
       tab === 2 ? selectedInteriorSection : null
     )
   }
-  onDelete={() =>
+  onDelete={isOwner ? undefined : () =>
     handleDeleteExistingImage(
       getCurrentSection(),
       img,

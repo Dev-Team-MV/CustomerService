@@ -51,7 +51,7 @@ const BACKEND_PHASE_TITLES = [
   'Inspections (Delays)'
 ]
 
-export const ConstructionPhasesContent = ({ property, isAdmin }) => {
+export const ConstructionPhasesContent = ({ property, isAdmin, isOwner }) => {
   const { t } = useTranslation('construction')
 // En el destructuring del hook:
 const { phases, loading, fetchPhases: refetch, updateMediaItem, deleteMediaItem } = usePhases({ 
@@ -299,7 +299,7 @@ if (item.url) return {
     }}
   />
 
-            {isAdmin && (
+            {isAdmin && !isOwner && (
                 <>
     <Button
       variant="outlined"
@@ -358,7 +358,7 @@ if (item.url) return {
 {phases[currentPhaseIndex].mediaItems?.length > 0 ? (
   <Box sx={{ bgcolor: '#000', borderRadius: 3, p: 2, minHeight: 280, height: 400, position: 'relative' }}>
     {/* Admin Actions */}
-    {isAdmin && phases[currentPhaseIndex].mediaItems[currentMediaIndex] && (
+    {isAdmin && !isOwner && phases[currentPhaseIndex].mediaItems[currentMediaIndex] && (
       <Box sx={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }}>
         <MediaItemEditor
           mediaItem={phases[currentPhaseIndex].mediaItems[currentMediaIndex]}
@@ -532,7 +532,7 @@ if (item.url) return {
   )
 }
 
-const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
+const ConstructionPhasesModal = ({ open, property, onClose, isAdmin, isOwner }) => {
   const { t } = useTranslation('construction')
 
   return (
@@ -562,7 +562,7 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
       </DialogTitle>
 
       <DialogContent sx={{ pt: 3 }}>
-        <ConstructionPhasesContent property={property} isAdmin={isAdmin} />
+        <ConstructionPhasesContent property={property} isAdmin={isAdmin} isOwner={isOwner} />
       </DialogContent>
 
       <DialogActions sx={{ p: 3 }}>
