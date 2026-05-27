@@ -21,23 +21,24 @@ const ClubhouseUnderConstructionModal = ({ open, onClose, editingStep }) => {
     images: [],
     videos: []
   })
-
 useEffect(() => {
   if (editingStep && open) {
-    // Modo edición: cargar datos del step
+    console.log('📝 Editing step:', editingStep)
+    console.log('📝 Media from step:', editingStep.media)
+    
     setForm({
       title: editingStep.title || '',
       description: editingStep.description || '',
       date: editingStep.clubHouseDate ? new Date(editingStep.clubHouseDate) : null,
       images: (editingStep.media || [])
-        .filter(m => m.type === 'image')
+        .filter(m => m.type === 'image' || !m.type)  // ✅ Acepta items sin type
         .map(img => ({
           ...img,
           type: 'image',
           url: img.url,
           name: img.name || 'image',
           order: img.order || 0,
-          isPublic: img.isPublic || false
+          isPublic: img.isPublic !== false
         })),
       videos: (editingStep.media || [])
         .filter(m => m.type === 'video')
@@ -47,11 +48,10 @@ useEffect(() => {
           url: vid.url,
           name: vid.name || 'video',
           order: vid.order || 0,
-          isPublic: vid.isPublic || false
+          isPublic: vid.isPublic !== false
         }))
     })
   } else if (open && !editingStep) {
-    // Modo crear: resetear form
     setForm({ title: '', description: '', date: null, images: [], videos: [] })
   }
 }, [editingStep, open])
@@ -121,7 +121,7 @@ const allImages = [
     url: url,
     name: `${form.title}-image-${existingImages.length + idx + 1}`,
     order: existingImages.length + idx + 1,
-    isPublic: false
+    isPublic: true
   }))
 ]
  
@@ -138,7 +138,7 @@ const allVideos = [
     url: url,
     name: `${form.title}-video-${allImages.length + existingVideos.length + idx + 1}`,
     order: allImages.length + existingVideos.length + idx + 1,
-    isPublic: false
+    isPublic: true
   }))
 ]
 
@@ -153,11 +153,15 @@ const allVideos = [
       console.log('📤 Final payload:', JSON.stringify(payload, null, 2))
 
 
-      if (editingStep) {
-        await ClubhouseUnderConstructionService.update(editingStep._id, payload)
-      } else {
-        await ClubhouseUnderConstructionService.create(payload)
-      }
+if (editingStep) {
+  console.log('📤 Calling UPDATE with stepId:', editingStep._id)
+  const response = await ClubhouseUnderConstructionService.update(editingStep._id, payload)
+  console.log('✅ Update response:', response)
+} else {
+  console.log('📤 Calling CREATE')
+  const response = await ClubhouseUnderConstructionService.create(payload)
+  console.log('✅ Create response:', response)
+}
       
       setForm({ title: '', description: '', date: null, images: [], videos: [] })
       onClose()
