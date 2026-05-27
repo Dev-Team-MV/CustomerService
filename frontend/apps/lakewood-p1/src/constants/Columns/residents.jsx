@@ -30,6 +30,7 @@ export const useResidentColumns = ({
   onEdit,
   onDelete,
   onSendSMS,
+  isOwner,
 }) => [
   {
     field: 'name',
@@ -43,7 +44,7 @@ export const useResidentColumns = ({
             bgcolor: 'transparent',
             background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
             color: 'white', fontWeight: 700, fontSize: '1rem',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             border: '2px solid rgba(255, 255, 255, 0.9)',
             boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
           }}
@@ -51,10 +52,10 @@ export const useResidentColumns = ({
           {row.firstName?.charAt(0)}
         </Avatar>
         <Box>
-          <Typography fontWeight={600} fontFamily='"Poppins", sans-serif'>
+          <Typography fontWeight={600} fontFamily='"DM Sans", sans-serif'>
             {row.firstName} {row.lastName}
           </Typography>
-          <Typography variant="caption" color="#706f6f" fontFamily='"Poppins", sans-serif'>
+          <Typography variant="caption" color="#706f6f" fontFamily='"DM Sans", sans-serif'>
             {row.email}
           </Typography>
         </Box>
@@ -85,7 +86,7 @@ export const useResidentColumns = ({
           icon={<Icon sx={{ color }} />}
           sx={{
             bgcolor: `${color}10`, color,
-            fontWeight: 600, fontFamily: '"Poppins", sans-serif',
+            fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
             border: `1px solid ${color}40`
           }}
           size="small"
@@ -102,7 +103,7 @@ export const useResidentColumns = ({
         <Home sx={{ fontSize: 16, color: '#8CA551' }} />
         <Typography
           variant="body2"
-          sx={{ fontWeight: 600, color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}
+          sx={{ fontWeight: 600, color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}
         >
           {row.lots?.length || 0}
         </Typography>
@@ -123,7 +124,7 @@ export const useResidentColumns = ({
             <IconButton
               size="small"
               onClick={(e) => { e.stopPropagation(); onSendSMS(row) }}
-              disabled={sendingSMS}
+              disabled={sendingSMS || isOwner}
               sx={{
                 bgcolor: 'rgba(140, 165, 81, 0.08)',
                 border: '1px solid rgba(140, 165, 81, 0.2)',
@@ -141,34 +142,42 @@ export const useResidentColumns = ({
 
         {/* Edit */}
         <Tooltip title={t('residents:actions.edit')} placement="top">
-          <IconButton
-            size="small"
-            onClick={(e) => { e.stopPropagation(); onEdit(row) }}
-            sx={{
-              bgcolor: 'rgba(140, 165, 81, 0.08)',
-              border: '1px solid rgba(140, 165, 81, 0.2)',
-              borderRadius: 2, transition: 'all 0.3s ease',
-              '&:hover': { bgcolor: '#8CA551', borderColor: '#8CA551', transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } }
-            }}
-          >
-            <Edit sx={{ fontSize: 18, color: '#8CA551' }} />
-          </IconButton>
+          <span>
+            <IconButton
+              size="small"
+              onClick={(e) => { e.stopPropagation(); onEdit(row) }}
+              disabled={isOwner}
+              sx={{
+                bgcolor: 'rgba(140, 165, 81, 0.08)',
+                border: '1px solid rgba(140, 165, 81, 0.2)',
+                borderRadius: 2, transition: 'all 0.3s ease',
+                '&:hover': { bgcolor: '#8CA551', borderColor: '#8CA551', transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } },
+                '&:disabled': { opacity: 0.5 }
+              }}
+            >
+              <Edit sx={{ fontSize: 18, color: '#8CA551' }} />
+            </IconButton>
+          </span>
         </Tooltip>
 
         {/* Delete */}
         <Tooltip title={t('residents:actions.delete')} placement="top">
-          <IconButton
-            size="small"
-            onClick={(e) => { e.stopPropagation(); onDelete(row._id) }}
-            sx={{
-              bgcolor: 'rgba(229, 134, 60, 0.08)',
-              border: '1px solid rgba(229, 134, 60, 0.2)',
-              borderRadius: 2, transition: 'all 0.3s ease',
-              '&:hover': { bgcolor: '#E5863C', borderColor: '#E5863C', transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } }
-            }}
-          >
-            <Delete sx={{ fontSize: 18, color: '#E5863C' }} />
-          </IconButton>
+          <span>
+            <IconButton
+              size="small"
+              onClick={(e) => { e.stopPropagation(); onDelete(row._id) }}
+              disabled={isOwner}
+              sx={{
+                bgcolor: 'rgba(229, 134, 60, 0.08)',
+                border: '1px solid rgba(229, 134, 60, 0.2)',
+                borderRadius: 2, transition: 'all 0.3s ease',
+                '&:hover': { bgcolor: '#E5863C', borderColor: '#E5863C', transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } },
+                '&:disabled': { opacity: 0.5 }
+              }}
+            >
+              <Delete sx={{ fontSize: 18, color: '#E5863C' }} />
+            </IconButton>
+          </span>
         </Tooltip>
 
       </Box>

@@ -44,8 +44,8 @@ const FloorPlanPreview = ({ floorPlan, label, onRemove }) => {
         {displayUrl && <img src={displayUrl} alt={`Floor ${floorPlan.floorNumber}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
       </Box>
       <Box flex={1}>
-        <Typography variant="body2" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>Floor {floorPlan.floorNumber}</Typography>
-        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>{label}</Typography>
+        <Typography variant="body2" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>Floor {floorPlan.floorNumber}</Typography>
+        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>{label}</Typography>
       </Box>
       {onRemove && (
         <IconButton size="small" onClick={onRemove} sx={{ color: theme.palette.warning.main }}>
@@ -204,8 +204,8 @@ const getFloorLabel = (floorNumber) => {
 }
 
   const fieldSx = {
-    '& .MuiOutlinedInput-root': { borderRadius: 3, fontFamily: '"Poppins", sans-serif', bgcolor: 'white', '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main, borderWidth: '2px' }, '&:hover fieldset': { borderColor: theme.palette.secondary.main } },
-    '& .MuiInputLabel-root': { fontFamily: '"Poppins", sans-serif', '&.Mui-focused': { color: theme.palette.primary.main } }
+    '& .MuiOutlinedInput-root': { borderRadius: 3, fontFamily: '"DM Sans", sans-serif', bgcolor: 'white', '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main, borderWidth: '2px' }, '&:hover fieldset': { borderColor: theme.palette.secondary.main } },
+    '& .MuiInputLabel-root': { fontFamily: '"DM Sans", sans-serif', '&.Mui-focused': { color: theme.palette.primary.main } }
   }
 
   const totalFloors = Number(form.floors) || 0
@@ -218,7 +218,7 @@ const getFloorLabel = (floorNumber) => {
       maxWidth="md"
       actions={
         <>
-          <Button onClick={onClose} disabled={saving} sx={{ borderRadius: 3, textTransform: 'none', fontWeight: 600, px: 3, py: 1.2, color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', border: `2px solid ${theme.palette.divider}`, '&:hover': { bgcolor: theme.palette.action.hover } }}>
+          <Button onClick={onClose} disabled={saving} sx={{ borderRadius: 3, textTransform: 'none', fontWeight: 600, px: 3, py: 1.2, color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif', border: `2px solid ${theme.palette.divider}`, '&:hover': { bgcolor: theme.palette.action.hover } }}>
             {t('common:cancel', 'Cancel')}
           </Button>
           <PrimaryButton onClick={handleSubmit} disabled={!isValid || saving} startIcon={<Business />}>
@@ -229,7 +229,7 @@ const getFloorLabel = (floorNumber) => {
     >
       {/* Alerta solo para proyectos con piso comercial */}
       {config.floors.hasCommercial && (
-        <Alert severity="info" sx={{ mb: 2, borderRadius: 3, bgcolor: theme.palette.secondary.main + '14', border: `1px solid ${theme.palette.secondary.main}4D`, fontFamily: '"Poppins", sans-serif', '& .MuiAlert-icon': { color: theme.palette.secondary.main } }}>
+        <Alert severity="info" sx={{ mb: 2, borderRadius: 3, bgcolor: theme.palette.secondary.main + '14', border: `1px solid ${theme.palette.secondary.main}4D`, fontFamily: '"DM Sans", sans-serif', '& .MuiAlert-icon': { color: theme.palette.secondary.main } }}>
           {t('buildings:commercialFloorNote', 'Floor 1 is reserved for commercial spaces. Residential floors start from Floor 2.')}
         </Alert>
       )}
@@ -268,7 +268,7 @@ const getFloorLabel = (floorNumber) => {
         <Grid item xs={12}>
           <Box display="flex" alignItems="center" gap={1} mb={1}>
             <ImageIcon sx={{ fontSize: 20, color: theme.palette.secondary.main }} />
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>{t('buildings:exteriorRenders', 'Exterior Renders')}</Typography>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>{t('buildings:exteriorRenders', 'Exterior Renders')}</Typography>
             <Box sx={{ ml: 'auto' }}>
               <Button variant="contained" size="small" onClick={handleOpenPolygonEditor} disabled={!exteriorRenders || exteriorRenders.length === 0} sx={{ borderRadius: 2, fontWeight: 600 }}>
                 {t('buildings:editPolygons', 'Edit Polygons')}
@@ -280,7 +280,7 @@ const getFloorLabel = (floorNumber) => {
               const url = typeof item === 'string' ? item : URL.createObjectURL(item)
               return <ImagePreviewCard key={idx} url={url} onRemove={() => setExteriorRenders(prev => prev.filter((_, i) => i !== idx))} />
             })}
-            <Button component="label" variant="outlined" startIcon={<AddPhotoAlternate />} sx={{ borderRadius: 2, textTransform: 'none', fontFamily: '"Poppins", sans-serif', fontWeight: 600, borderStyle: 'dashed', borderWidth: 2, height: 100, minWidth: 100, color: theme.palette.secondary.main, borderColor: theme.palette.secondary.main }}>
+            <Button component="label" variant="outlined" startIcon={<AddPhotoAlternate />} sx={{ borderRadius: 2, textTransform: 'none', fontFamily: '"DM Sans", sans-serif', fontWeight: 600, borderStyle: 'dashed', borderWidth: 2, height: 100, minWidth: 100, color: theme.palette.secondary.main, borderColor: theme.palette.secondary.main }}>
               {t('common:add', 'Add')}
               <input type="file" hidden multiple accept="image/*" onChange={handleExteriorUpload} />
             </Button>
@@ -293,7 +293,7 @@ const getFloorLabel = (floorNumber) => {
         <Grid item xs={12}>
           <Box display="flex" alignItems="center" gap={1} mb={1}>
             <GridOn sx={{ fontSize: 20, color: theme.palette.accent?.main || theme.palette.primary.main }} />
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
               {t('buildings:floorPlans', 'Floor Plans')} {totalFloors > 0 && `(${floorPlans.length}/${totalFloors})`}
             </Typography>
           </Box>
@@ -308,10 +308,10 @@ const getFloorLabel = (floorNumber) => {
                   <FloorPlanPreview key={floorNum} floorPlan={existing} label={floorLabel} onRemove={() => setFloorPlans(prev => prev.filter(fp => fp.floorNumber !== floorNum))} />
                 ) : (
                   <Paper key={floorNum} elevation={0} sx={{ p: 2, mb: 1.5, borderRadius: 2, border: `2px dashed ${theme.palette.cardBorder}`, bgcolor: theme.palette.background.default, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Typography variant="body2" sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600 }}>
+                    <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}>
                       Floor {floorNum} ({floorLabel})
                     </Typography>
-                    <Button component="label" size="small" variant="outlined" startIcon={<AddPhotoAlternate />} sx={{ textTransform: 'none', fontFamily: '"Poppins", sans-serif', borderRadius: 2 }}>
+                    <Button component="label" size="small" variant="outlined" startIcon={<AddPhotoAlternate />} sx={{ textTransform: 'none', fontFamily: '"DM Sans", sans-serif', borderRadius: 2 }}>
                       {t('buildings:uploadPlan', 'Upload Plan')}
                       <input type="file" hidden accept="image/*" onChange={e => handleFloorPlanUpload(e, floorNum)} />
                     </Button>

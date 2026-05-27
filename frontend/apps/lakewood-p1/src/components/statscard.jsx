@@ -89,7 +89,7 @@ const StatsCards = ({ stats, loading = false }) => {
                         textTransform: "uppercase",
                         letterSpacing: "1px",
                         fontSize: "0.7rem",
-                        fontFamily: '"Poppins", sans-serif'
+                        fontFamily: '"DM Sans", sans-serif'
                       }}
                     >
                       {stat.label || stat.title}
@@ -124,7 +124,7 @@ const StatsCards = ({ stats, loading = false }) => {
                       mb: 1,
                       letterSpacing: "-0.5px",
                       fontSize: { xs: "1.5rem", md: "2rem" },
-                      fontFamily: '"Poppins", sans-serif'
+                      fontFamily: '"DM Sans", sans-serif'
                     }}
                   >
                     {stat.value}
@@ -145,7 +145,7 @@ const StatsCards = ({ stats, loading = false }) => {
                           color: stat.subColor || "#706f6f",
                           fontWeight: 500,
                           fontSize: "0.7rem",
-                          fontFamily: '"Poppins", sans-serif'
+                          fontFamily: '"DM Sans", sans-serif'
                         }}
                       >
                         {stat.sub || stat.subtitle}

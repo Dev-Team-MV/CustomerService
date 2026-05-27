@@ -31,7 +31,7 @@ const PhaseCell = ({ row, isAdmin, t, onOpenPhases }) => {
     <Box sx={{ minWidth: 140 }}>
       <Box display="flex" alignItems="center" gap={1} mb={0.5}>
         <Construction sx={{ fontSize: 16, color: '#8CA551' }} />
-        <Typography variant="body2" sx={{ fontWeight: 700, color: '#333F1F', fontFamily: '"Poppins", sans-serif', fontSize: '0.8rem' }}>
+        <Typography variant="body2" sx={{ fontWeight: 700, color: '#333F1F', fontFamily: '"DM Sans", sans-serif', fontSize: '0.8rem' }}>
           {t('property:table.phase')} {p.current} / {p.total}
         </Typography>
       </Box>
@@ -46,7 +46,7 @@ const PhaseCell = ({ row, isAdmin, t, onOpenPhases }) => {
           }}
         />
       </Tooltip>
-      <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem', display: 'block', mt: 0.5 }}>
+      <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem', display: 'block', mt: 0.5 }}>
         {p.completed} {t('property:table.completed')} • {p.percentage}%
       </Typography>
       <Button
@@ -56,7 +56,7 @@ const PhaseCell = ({ row, isAdmin, t, onOpenPhases }) => {
         onClick={(e) => { e.stopPropagation(); onOpenPhases(row) }}
         sx={{
           mt: 1, fontSize: '0.7rem', textTransform: 'none',
-          fontFamily: '"Poppins", sans-serif', fontWeight: 600,
+          fontFamily: '"DM Sans", sans-serif', fontWeight: 600,
           color: '#333F1F', borderColor: 'rgba(51, 63, 31, 0.3)',
           '&:hover': { borderColor: '#333F1F', bgcolor: 'rgba(51, 63, 31, 0.04)' }
         }}
@@ -74,7 +74,7 @@ const StatusCell = ({ status, t }) => {
       label={t(`property:status.${status || 'pending'}`)}
       size="small"
       sx={{
-        fontWeight: 600, fontFamily: '"Poppins", sans-serif',
+        fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
         height: 28, px: 1.5, fontSize: '0.75rem',
         letterSpacing: '0.5px', borderRadius: 2,
         textTransform: 'capitalize',
@@ -86,7 +86,7 @@ const StatusCell = ({ status, t }) => {
 }
 
 export const usePropertyColumns = ({
-  isAdmin, t,
+  isAdmin, isOwner, t,
   onViewDetails, onEdit, onDelete,
   onOpenPhases, onOpenContracts
 }) => {
@@ -97,7 +97,7 @@ export const usePropertyColumns = ({
       background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
       color: 'white', fontWeight: 700,
       fontSize: '0.9rem',
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       border: '2px solid rgba(255, 255, 255, 0.9)',
       boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
     }
@@ -124,10 +124,10 @@ export const usePropertyColumns = ({
           <Box display="flex" alignItems="center" gap={1.5}>
             <Avatar sx={avatarSx}>{row.lot?.number}</Avatar>
             <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: '#1a1a1a', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif' }}>
                 {t('property:table.lot')} {row.lot?.number}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>
+              <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem' }}>
                 {t('property:table.section')} {row.lot?.section || 'N/A'}
               </Typography>
             </Box>
@@ -140,10 +140,10 @@ export const usePropertyColumns = ({
         minWidth: 120,
         renderCell: ({ row }) => (
           <Box>
-            <Typography variant="body2" sx={{ fontWeight: 600, color: '#1a1a1a', fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif' }}>
               {row.model?.model || 'N/A'}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>
+            <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem' }}>
               {row.model?.bedrooms}BR / {row.model?.bathrooms}BA
             </Typography>
           </Box>
@@ -155,11 +155,11 @@ export const usePropertyColumns = ({
         minWidth: 120,
         renderCell: ({ row }) => (
           <Box>
-            <Typography variant="body2" sx={{ fontWeight: 500, color: '#1a1a1a', fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="body2" sx={{ fontWeight: 500, color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif' }}>
               {row.facade?.title || t('property:table.notSelected')}
             </Typography>
             {row.facade?.price > 0 && (
-              <Typography variant="caption" sx={{ color: '#8CA551', fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: '0.7rem' }}>
+              <Typography variant="caption" sx={{ color: '#8CA551', fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: '0.7rem' }}>
                 +${row.facade.price.toLocaleString()}
               </Typography>
             )}
@@ -176,11 +176,11 @@ export const usePropertyColumns = ({
               {row.users?.[0]?.firstName?.charAt(0) || row.client?.firstName?.charAt(0) || '?'}
             </Avatar>
             <Box>
-              <Typography variant="body2" sx={{ fontWeight: 500, color: '#1a1a1a', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" sx={{ fontWeight: 500, color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif' }}>
                 {row.users?.[0]?.firstName || row.client?.firstName || 'N/A'}{' '}
                 {row.users?.[0]?.lastName  || row.client?.lastName  || ''}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>
+              <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem' }}>
                 {row.users?.[0]?.email || row.client?.email || t('property:table.noEmail')}
               </Typography>
             </Box>
@@ -207,17 +207,17 @@ export const usePropertyColumns = ({
           <Box>
             <Box display="flex" alignItems="center" gap={0.5} mb={0.5}>
               <AttachMoney sx={{ fontSize: 16, color: '#8CA551' }} />
-              <Typography variant="body2" sx={{ fontWeight: 700, color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" sx={{ fontWeight: 700, color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
                 {(row.presalePrice || row.price)?.toLocaleString()}
               </Typography>
             </Box>
             {row.pending > 0 && (
-              <Typography variant="caption" sx={{ color: '#E5863C', fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: '0.7rem', display: 'block' }}>
+              <Typography variant="caption" sx={{ color: '#E5863C', fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: '0.7rem', display: 'block' }}>
                 {t('property:table.pending')}: ${row.pending?.toLocaleString()}
               </Typography>
             )}
             {row.initialPayment > 0 && (
-              <Typography variant="caption" sx={{ color: '#8CA551', fontFamily: '"Poppins", sans-serif', fontWeight: 600, fontSize: '0.7rem', display: 'block' }}>
+              <Typography variant="caption" sx={{ color: '#8CA551', fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: '0.7rem', display: 'block' }}>
                 {t('property:table.paid')}: ${row.initialPayment?.toLocaleString()}
               </Typography>
             )}
@@ -255,29 +255,40 @@ export const usePropertyColumns = ({
             </IconButton>
           </Tooltip>
           <Tooltip title={t('property:actions.editPrice')} placement="top">
-            <IconButton size="small" onClick={(e) => { e.stopPropagation(); onEdit(row) }} sx={iconBtnSx('#8CA551', '#333F1F')}>
-              <EditIcon sx={{ fontSize: 18, color: '#8CA551' }} />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => { e.stopPropagation(); onEdit(row) }}
+                disabled={isOwner}
+                sx={{ ...iconBtnSx('#8CA551', '#333F1F'), ...(isOwner ? { opacity: 0.5, cursor: 'not-allowed' } : {}) }}
+              >
+                <EditIcon sx={{ fontSize: 18, color: '#8CA551' }} />
+              </IconButton>
+            </span>
           </Tooltip>
           <Tooltip title={t('property:actions.deleteProperty')} placement="top">
-            <IconButton
-              size="small"
-              onClick={(e) => { e.stopPropagation(); onDelete(row) }}
-              sx={{
-                bgcolor: 'rgba(229, 134, 60, 0.08)',
-                border: '1px solid rgba(229, 134, 60, 0.2)',
-                borderRadius: 2,
-                transition: 'all 0.3s ease',
-                '&:hover': { bgcolor: '#E5863C', borderColor: '#E5863C', transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } }
-              }}
-            >
-              <DeleteIcon sx={{ fontSize: 18, color: '#E5863C' }} />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => { e.stopPropagation(); onDelete(row) }}
+                disabled={isOwner}
+                sx={{
+                  bgcolor: 'rgba(229, 134, 60, 0.08)',
+                  border: '1px solid rgba(229, 134, 60, 0.2)',
+                  borderRadius: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': { bgcolor: '#E5863C', borderColor: '#E5863C', transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } },
+                  ...(isOwner ? { opacity: 0.5, cursor: 'not-allowed' } : {})
+                }}
+              >
+                <DeleteIcon sx={{ fontSize: 18, color: '#E5863C' }} />
+              </IconButton>
+            </span>
           </Tooltip>
         </Box>
       )
     })
 
     return columns
-  }, [isAdmin, t, onViewDetails, onEdit, onDelete, onOpenPhases, onOpenContracts])
+  }, [isAdmin, isOwner, t, onViewDetails, onEdit, onDelete, onOpenPhases, onOpenContracts])
 }

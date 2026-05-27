@@ -198,7 +198,7 @@ const SidebarDrawer = ({
                         fontSize: "0.95rem",
                         fontWeight: isActive ? 700 : 600,
                         color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         letterSpacing: "0.3px",
                       }}
                     />

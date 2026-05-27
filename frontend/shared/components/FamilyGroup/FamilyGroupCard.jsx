@@ -32,6 +32,7 @@ import { useTranslation } from 'react-i18next'
 export const FamilyGroupCard = ({
   group,
   isAdmin = false,
+  isOwner = false,
   onEdit,
   onDelete,
   onAddMember,
@@ -97,7 +98,7 @@ export const FamilyGroupCard = ({
             </Box>
           </Box>
 
-          {isAdmin && (
+          {isAdmin && !isOwner && (
             <IconButton
               size="small"
               onClick={handleMenuOpen}

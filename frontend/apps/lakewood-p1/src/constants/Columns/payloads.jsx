@@ -31,6 +31,7 @@ export const usePayloadColumns = ({
   onApprove,
   onReject,
   onDownload,
+  isOwner,
 }) => [
   {
     field: 'property',
@@ -38,7 +39,7 @@ export const usePayloadColumns = ({
     minWidth: 150,
     renderCell: ({ row }) => (
       <Box>
-        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1a1a1a', fontFamily: '"Poppins", sans-serif' }}>
+        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif' }}>
           Unit {row.property?.lot?.number || 'N/A'}
         </Typography>
 
@@ -57,14 +58,14 @@ export const usePayloadColumns = ({
             bgcolor: 'transparent',
             background: 'linear-gradient(135deg, #333F1F 0%, #8CA551 100%)',
             color: 'white', fontWeight: 700, fontSize: '1rem',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             border: '2px solid rgba(255, 255, 255, 0.9)',
             boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
           }}
         >
           {row.property?.users?.[0]?.firstName?.charAt(0) || 'U'}
         </Avatar>
-        <Typography variant="body2" sx={{ fontWeight: 500, color: '#1a1a1a', fontFamily: '"Poppins", sans-serif' }}>
+        <Typography variant="body2" sx={{ fontWeight: 500, color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif' }}>
           {row.property?.users?.[0]?.firstName} {row.property?.users?.[0]?.lastName}
         </Typography>
       </Box>
@@ -75,7 +76,7 @@ export const usePayloadColumns = ({
     headerName: t('payloads:date'),
     minWidth: 120,
     renderCell: ({ value }) => (
-      <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+      <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
         {new Date(value).toLocaleDateString()}
       </Typography>
     )
@@ -85,7 +86,7 @@ export const usePayloadColumns = ({
     headerName: t('payloads:amount'),
     minWidth: 120,
     renderCell: ({ value }) => (
-      <Typography variant="body2" sx={{ fontWeight: 700, color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+      <Typography variant="body2" sx={{ fontWeight: 700, color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
         ${value?.toLocaleString()}
       </Typography>
     )
@@ -99,7 +100,7 @@ export const usePayloadColumns = ({
         label={value || t('payloads:noFile')}
         size="small"
         sx={{
-          fontWeight: 600, fontFamily: '"Poppins", sans-serif',
+          fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
           height: 28, px: 1.5, fontSize: '0.75rem',
           letterSpacing: '0.5px', borderRadius: 2, textTransform: 'capitalize',
           bgcolor: 'rgba(33, 150, 243, 0.12)', color: '#1976d2',
@@ -121,7 +122,7 @@ export const usePayloadColumns = ({
           icon={<Icon />}
           size="small"
           sx={{
-            fontWeight: 600, fontFamily: '"Poppins", sans-serif',
+            fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
             height: 28, px: 1.5, fontSize: '0.75rem',
             letterSpacing: '0.5px', borderRadius: 2, textTransform: 'capitalize',
             bgcolor: s.bg, color: s.color, border: `1px solid ${s.border}`,
@@ -170,17 +171,21 @@ export const usePayloadColumns = ({
 
         {/* Edit */}
         <Tooltip title={t('payloads:edit')} placement="top">
-          <IconButton
-            size="small"
-            onClick={(e) => { e.stopPropagation(); onEdit(row) }}
-            sx={{
-              bgcolor: 'rgba(140, 165, 81, 0.08)', border: '1px solid rgba(140, 165, 81, 0.2)',
-              borderRadius: 2, transition: 'all 0.3s ease',
-              '&:hover': { bgcolor: '#8CA551', borderColor: '#8CA551', transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } }
-            }}
-          >
-            <Edit sx={{ fontSize: 18, color: '#8CA551' }} />
-          </IconButton>
+          <span>
+            <IconButton
+              size="small"
+              onClick={(e) => { e.stopPropagation(); onEdit(row) }}
+              disabled={isOwner}
+              sx={{
+                bgcolor: 'rgba(140, 165, 81, 0.08)', border: '1px solid rgba(140, 165, 81, 0.2)',
+                borderRadius: 2, transition: 'all 0.3s ease',
+                '&:hover': { bgcolor: '#8CA551', borderColor: '#8CA551', transform: 'scale(1.1)', '& .MuiSvgIcon-root': { color: 'white' } },
+                '&:disabled': { opacity: 0.5 }
+              }}
+            >
+              <Edit sx={{ fontSize: 18, color: '#8CA551' }} />
+            </IconButton>
+          </span>
         </Tooltip>
 
         {/* Approve */}
@@ -189,7 +194,7 @@ export const usePayloadColumns = ({
             <IconButton
               size="small"
               onClick={(e) => onApprove(row, e)}
-              disabled={row.status === 'signed'}
+              disabled={row.status === 'signed' || isOwner}
               sx={{
                 bgcolor: 'rgba(76, 175, 80, 0.08)', border: '1px solid rgba(76, 175, 80, 0.2)',
                 borderRadius: 2, transition: 'all 0.3s ease',
@@ -208,7 +213,7 @@ export const usePayloadColumns = ({
             <IconButton
               size="small"
               onClick={(e) => onReject(row, e)}
-              disabled={row.status === 'rejected'}
+              disabled={row.status === 'rejected' || isOwner}
               sx={{
                 bgcolor: 'rgba(211, 47, 47, 0.08)', border: '1px solid rgba(211, 47, 47, 0.2)',
                 borderRadius: 2, transition: 'all 0.3s ease',

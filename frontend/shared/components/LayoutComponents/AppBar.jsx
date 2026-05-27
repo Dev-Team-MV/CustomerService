@@ -1,11 +1,10 @@
+import { useState, useEffect } from "react";
 import {
   AppBar,
-  Toolbar,
   IconButton,
   Box,
   Tooltip,
   Badge,
-  Avatar,
   Menu,
   MenuItem,
   Typography,
@@ -16,17 +15,18 @@ import {
 import {
   Menu as MenuIcon,
   Notifications as NotificationsIcon,
+  Settings as SettingsIcon,
   Login as LoginIcon,
   Logout as LogoutIcon,
   Person as PersonIcon,
 } from "@mui/icons-material";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../LanguageSwitcher'
 import { useTheme } from "@mui/material/styles";
 
 const AppBarBrandbook = ({
-  logoSrc = "/images/logos/Logo_LakewoodOaks-05.png", // logo por defecto
+  logoSrc = "/images/logos/Logo_LakewoodOaks-05.png",
   publicView,
   user,
   notifications,
@@ -42,114 +42,86 @@ const AppBarBrandbook = ({
 }) => {
   const { t } = useTranslation()
   const theme = useTheme()
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 30)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
     <AppBar
       position="fixed"
+      elevation={0}
       sx={{
-        bgcolor: theme.palette.background.paper,
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
+        bgcolor: theme.palette.background.default,
         color: theme.palette.text.primary,
-        boxShadow: theme.shadows[2],
-        borderBottom: `2px solid ${theme.palette.divider}`,
+        boxShadow: scrolled ? theme.shadows[2] : "none",
+        borderBottom: `1px solid ${theme.palette.divider}`,
         zIndex: 1201,
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 3,
-          background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 50%, ${theme.palette.primary.main} 100%)`,
-          opacity: 0.6,
-        },
+        height: "auto",
+        transition: "box-shadow 0.3s ease",
       }}
     >
-      <Toolbar sx={{ px: { xs: 2, sm: 3 } }}>
+      {/* ── Top controls row ── */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: { xs: 2, md: 4 },
+          pt: scrolled ? 1 : 1.5,
+          pb: 0.5,
+          transition: "padding 0.35s ease",
+        }}
+      >
         <Tooltip title={t('navigation:tooltips.openMenu')} placement="right">
           <IconButton
             color="inherit"
             edge="start"
             onClick={onMenuClick}
             sx={{
-              mr: 2,
-              bgcolor: theme.palette.action.hover,
-              border: `2px solid ${theme.palette.divider}`,
-              transition: "all 0.3s ease",
-              "&:hover": {
-                bgcolor: theme.palette.primary.main,
-                color: theme.palette.primary.contrastText,
-                borderColor: theme.palette.primary.main,
-                transform: "rotate(90deg)",
-                boxShadow: theme.shadows[4],
-              },
+              color: theme.palette.text.primary,
+              "&:hover": { bgcolor: theme.palette.action.hover },
             }}
           >
             <MenuIcon />
           </IconButton>
         </Tooltip>
 
-        {/* LOGO CENTRADO */}
-        <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Box
-              component="img"
-              src={logoSrc}
-              alt="Logo"
-              sx={{
-                width: "100%",
-                maxWidth: "200px",
-                // height: "auto",
-                objectFit: "contain",
-                filter: theme.shadows[1],
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  transform: "scale(1.05)",
-                  filter: theme.shadows[4],
-                },
-              }}
+        {/* Logo compacto — solo visible cuando se hace scroll */}
+        <AnimatePresence>
+          {scrolled && (
+            <motion.div
+              key="compact-logo"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.25 }}
+              style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", cursor: "pointer" }}
               onClick={onLogoClick}
-            />
-          </motion.div>
-        </Box>
+            >
+              <Box
+                component="img"
+                src={logoSrc}
+                alt="Logo"
+                sx={{ height: 44, width: "auto", objectFit: "contain", display: "block" }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* USER ACTIONS */}
-        <Box sx={{ ml: 2, display: "flex", alignItems: "center", gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           <LanguageSwitcher />
+
           {!publicView && user && (
             <Tooltip title={t('navigation:tooltips.notifications')} placement="bottom">
               <IconButton
                 onClick={onNotificationsClick}
-                sx={{
-                  color: theme.palette.secondary.main,
-                  bgcolor: theme.palette.action.hover,
-                  border: `2px solid ${theme.palette.secondary.light}`,
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    bgcolor: theme.palette.secondary.main,
-                    color: theme.palette.secondary.contrastText,
-                    borderColor: theme.palette.secondary.main,
-                    transform: "scale(1.1)",
-                    boxShadow: theme.shadows[4],
-                  },
-                }}
+                sx={{ color: theme.palette.text.primary, "&:hover": { bgcolor: theme.palette.action.hover } }}
               >
-                <Badge
-                  badgeContent={notifications.filter((n) => !n.read).length}
-                  color="error"
-                  overlap="circular"
-                  sx={{
-                    "& .MuiBadge-badge": {
-                      boxShadow: theme.shadows[2],
-                    },
-                  }}
-                >
+                <Badge badgeContent={notifications.filter((n) => !n.read).length} color="error" overlap="circular">
                   <NotificationsIcon sx={{ fontSize: 22 }} />
                 </Badge>
               </IconButton>
@@ -159,31 +131,14 @@ const AppBarBrandbook = ({
           {user ? (
             <>
               <Tooltip title={t('navigation:tooltips.accountSettings')} placement="bottom">
-                <IconButton onClick={onOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      bgcolor: "transparent",
-                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-                      color: theme.palette.primary.contrastText,
-                      fontWeight: 700,
-                      fontSize: "0.9rem",
-                      fontFamily: '"Poppins", sans-serif',
-                      border: `2px solid ${theme.palette.background.paper}`,
-                      boxShadow: theme.shadows[4],
-                      transition: "all 0.3s ease",
-                      "&:hover": {
-                        transform: "scale(1.1)",
-                        borderColor: theme.palette.secondary.main,
-                        boxShadow: theme.shadows[6],
-                      },
-                    }}
-                  >
-                    {user?.firstName?.charAt(0).toUpperCase()}
-                  </Avatar>
+                <IconButton
+                  onClick={onOpenUserMenu}
+                  sx={{ color: theme.palette.text.primary, "&:hover": { bgcolor: theme.palette.action.hover } }}
+                >
+                  <SettingsIcon sx={{ fontSize: 22 }} />
                 </IconButton>
               </Tooltip>
+
               <Menu
                 anchorEl={anchorElUser}
                 open={Boolean(anchorElUser)}
@@ -191,171 +146,91 @@ const AppBarBrandbook = ({
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
                 sx={{
-                  mt: 2,
+                  mt: 1,
                   "& .MuiPaper-root": {
-                    borderRadius: 4,
-                    boxShadow: theme.shadows[8],
+                    borderRadius: 3,
+                    boxShadow: theme.shadows[4],
                     minWidth: 240,
-                    border: `2px solid ${theme.palette.divider}`,
+                    border: `1px solid ${theme.palette.divider}`,
                     bgcolor: theme.palette.background.paper,
-                    backdropFilter: "blur(20px)",
-                    overflow: "visible",
-                    "&::before": {
-                      content: '""',
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: 3,
-                      background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
-                    },
                   },
                 }}
               >
-                <Box
-                  sx={{
-                    px: 3,
-                    py: 2.5,
-                    borderBottom: `2px solid ${theme.palette.divider}`,
-                    background: `white`,
-                  }}
-                >
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight={700}
-                    sx={{
-                      color: theme.palette.text.primary,
-                      fontFamily: '"Poppins", sans-serif',
-                      letterSpacing: "0.5px",
-                      mb: 0.5,
-                    }}
-                  >
+                <Box sx={{ px: 3, py: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
+                  <Typography variant="subtitle1" fontWeight={700} sx={{ color: theme.palette.text.primary, fontFamily: '"DM Sans", sans-serif', mb: 0.3 }}>
                     {user?.firstName} {user?.lastName}
                   </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      fontFamily: '"Poppins", sans-serif',
-                      fontSize: "0.75rem",
-                    }}
-                  >
+                  <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
                     {user?.email}
                   </Typography>
                 </Box>
-                <MenuItem
-                  onClick={onProfileClick}
-                  sx={{
-                    py: 2,
-                    px: 3,
-                    borderRadius: 0,
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      bgcolor: theme.palette.action.hover,
-                      pl: 3.5,
-                    },
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 40 }}>
+
+                <MenuItem onClick={onProfileClick} sx={{ py: 1.5, px: 3, "&:hover": { bgcolor: theme.palette.action.hover } }}>
+                  <ListItemIcon sx={{ minWidth: 36 }}>
                     <PersonIcon sx={{ color: theme.palette.secondary.main, fontSize: 20 }} />
                   </ListItemIcon>
-                  <Typography
-                    sx={{
-                      fontFamily: '"Poppins", sans-serif',
-                      fontWeight: 600,
-                      fontSize: "0.9rem",
-                      color: theme.palette.text.primary,
-                    }}
-                  >
+                  <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: "0.9rem", color: theme.palette.text.primary }}>
                     {t('navigation:userMenu.profile')}
                   </Typography>
                 </MenuItem>
-                <Divider sx={{ my: 0.5, borderColor: theme.palette.divider }} />
-                <MenuItem
-                  onClick={onLogoutClick}
-                  sx={{
-                    py: 2,
-                    px: 3,
-                    borderRadius: 0,
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      bgcolor: 'white',
-                      pl: 3.5,
-                    },
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 40 }}>
+
+                <Divider sx={{ borderColor: theme.palette.divider }} />
+
+                <MenuItem onClick={onLogoutClick} sx={{ py: 1.5, px: 3, "&:hover": { bgcolor: theme.palette.action.hover } }}>
+                  <ListItemIcon sx={{ minWidth: 36 }}>
                     <LogoutIcon sx={{ color: theme.palette.error.main, fontSize: 20 }} />
                   </ListItemIcon>
-                  <Typography
-                    sx={{
-                      fontFamily: '"Poppins", sans-serif',
-                      fontWeight: 600,
-                      fontSize: "0.9rem",
-                      color: theme.palette.error.main,
-                    }}
-                  >
+                  <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: "0.9rem", color: theme.palette.error.main }}>
                     {t('navigation:userMenu.logout')}
                   </Typography>
                 </MenuItem>
               </Menu>
             </>
           ) : (
-            <Tooltip title={t('auth:signInToAccount')} placement="bottom">
-              <Button
-                variant="contained"
-                startIcon={<LoginIcon />}
-                onClick={onLoginClick}
-                sx={{
-                  borderRadius: 3,
-                  bgcolor: theme.palette.primary.main,
-                  color: theme.palette.primary.contrastText,
-                  fontWeight: 600,
-                  textTransform: "none",
-                  letterSpacing: "1px",
-                  fontFamily: '"Poppins", sans-serif',
-                  px: 3,
-                  py: 1.2,
-                  boxShadow: theme.shadows[4],
-                  border: "2px solid transparent",
-                  position: "relative",
-                  overflow: "hidden",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: "-100%",
-                    width: "100%",
-                    height: "100%",
-                    bgcolor: theme.palette.secondary.main,
-                    transition: "left 0.4s ease",
-                    zIndex: 0,
-                  },
-                  "&:hover": {
-                    bgcolor: theme.palette.primary.dark,
-                    boxShadow: theme.shadows[8],
-                    "&::before": {
-                      left: 0,
-                    },
-                    "& .MuiButton-startIcon": {
-                      color: theme.palette.primary.contrastText,
-                    },
-                  },
-                  "& .MuiButton-startIcon": {
-                    position: "relative",
-                    zIndex: 1,
-                    color: theme.palette.primary.contrastText,
-                  },
-                }}
-              >
-                <Box component="span" sx={{ position: "relative", zIndex: 1 }}>
-                  {t('auth:login')}
-                </Box>
-              </Button>
-            </Tooltip>
+            <Button
+              variant="text"
+              startIcon={<LoginIcon />}
+              onClick={onLoginClick}
+              sx={{ color: theme.palette.text.primary, fontWeight: 600, textTransform: "none", fontFamily: '"DM Sans", sans-serif', "&:hover": { bgcolor: theme.palette.action.hover } }}
+            >
+              {t('auth:login')}
+            </Button>
           )}
         </Box>
-      </Toolbar>
+      </Box>
+
+      {/* ── Logo area — se colapsa con scroll ── */}
+      <AnimatePresence>
+        {!scrolled && (
+          <motion.div
+            key="full-logo"
+            initial={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            style={{ overflow: "hidden" }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                py: { xs: 2, md: 3 },
+                cursor: "pointer",
+              }}
+              onClick={onLogoClick}
+            >
+              <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
+                <Box
+                  component="img"
+                  src={logoSrc}
+                  alt="Logo"
+                  sx={{ height: { xs: 120, md: 160 }, width: "auto", objectFit: "contain", display: "block" }}
+                />
+              </motion.div>
+            </Box>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </AppBar>
   )
 }

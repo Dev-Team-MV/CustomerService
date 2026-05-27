@@ -119,7 +119,7 @@ const ApartmentSelector = () => {
               color: theme.palette.text.primary,
               fontWeight: 700,
               fontSize: '0.65rem',
-              fontFamily: '"Poppins", sans-serif'
+              fontFamily: '"DM Sans", sans-serif'
             }}
           />
         </Box>
@@ -183,10 +183,10 @@ const ApartmentSelector = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
                     <HomeIcon sx={{ color: APT_COLOR[hoveredApartment.status] || theme.palette.primary.main, fontSize: 24 }} />
                     <Box>
-                      <Typography sx={{ fontWeight: 700, fontSize: '1rem', fontFamily: '"Poppins", sans-serif', color: theme.palette.text.primary }}>
+                      <Typography sx={{ fontWeight: 700, fontSize: '1rem', fontFamily: '"DM Sans", sans-serif', color: theme.palette.text.primary }}>
                         {t('quote:apartment', 'Apartment')} {hoveredApartment.apartmentNumber}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>
+                      <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem' }}>
                         ${hoveredApartment.price?.toLocaleString() || t('common:notAvailable', 'N/A')}
                       </Typography>
                     </Box>
@@ -198,19 +198,19 @@ const ApartmentSelector = () => {
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <BedIcon sx={{ fontSize: 16, color: theme.palette.text.secondary }} />
-                          <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem', color: theme.palette.text.secondary }}>
+                          <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem', color: theme.palette.text.secondary }}>
                             {hoveredApartment.apartmentModel.bedrooms || 0} {t('quote:bedrooms', 'Bedrooms')}
                           </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <BathtubIcon sx={{ fontSize: 16, color: theme.palette.text.secondary }} />
-                          <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem', color: theme.palette.text.secondary }}>
+                          <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem', color: theme.palette.text.secondary }}>
                             {hoveredApartment.apartmentModel.bathrooms || 0} {t('quote:bathrooms', 'Bathrooms')}
                           </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <SquareFootIcon sx={{ fontSize: 16, color: theme.palette.text.secondary }} />
-                          <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem', color: theme.palette.text.secondary }}>
+                          <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem', color: theme.palette.text.secondary }}>
                             {hoveredApartment.apartmentModel.sqft || 0} {t('quote:sqft', 'sq ft')}
                           </Typography>
                         </Box>
@@ -219,7 +219,7 @@ const ApartmentSelector = () => {
                       <Typography variant="caption" sx={{ 
                         display: 'block',
                         color: theme.palette.text.secondary, 
-                        fontFamily: '"Poppins", sans-serif', 
+                        fontFamily: '"DM Sans", sans-serif', 
                         fontSize: '0.65rem',
                         fontStyle: 'italic',
                         mb: 1
@@ -240,7 +240,7 @@ const ApartmentSelector = () => {
                         bgcolor: `${APT_COLOR[hoveredApartment.status] || theme.palette.primary.main}15`,
                         color: APT_COLOR[hoveredApartment.status] || theme.palette.primary.main,
                         fontWeight: 700,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         textTransform: 'uppercase',
                       }}
                     />
@@ -252,7 +252,7 @@ const ApartmentSelector = () => {
         </Box>
       ) : (
         <Box sx={{ p: 3, textAlign: 'center', color: theme.palette.text.disabled }}>
-          <Typography sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.875rem' }}>
+          <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.875rem' }}>
             {t('quote:noFloorPlan', 'No floor plan image uploaded yet.')}
           </Typography>
         </Box>
@@ -265,7 +265,7 @@ const ApartmentSelector = () => {
           size="small"
           value={selectedApartment?._id || ''}
           onChange={handleDropdownSelect}
-          sx={{ bgcolor: '#fff', borderRadius: 2, fontFamily: '"Poppins", sans-serif' }}
+          sx={{ bgcolor: '#fff', borderRadius: 2, fontFamily: '"DM Sans", sans-serif' }}
         >
           <MenuItem value="" disabled>
             {t('quote:selectApartmentDropdown', 'Select an apartment from Floor {{floor}}…', { floor: selectedFloor.floorNumber })}
@@ -293,7 +293,7 @@ const ApartmentSelector = () => {
 const LegendDot = ({ color, label }) => (
   <Box display="flex" alignItems="center" gap={0.5}>
     <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: color }} />
-    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontFamily: '"Poppins", sans-serif' }}>{label}</Typography>
+    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontFamily: '"DM Sans", sans-serif' }}>{label}</Typography>
   </Box>
 )
 
@@ -317,7 +317,7 @@ const headerSx = {
 
 const sectionLabelSx = {
   fontWeight: 700,
-  fontFamily: '"Poppins", sans-serif',
+  fontFamily: '"DM Sans", sans-serif',
   letterSpacing: '1.5px',
   textTransform: 'uppercase',
   fontSize: '0.85rem',

@@ -37,7 +37,7 @@ const AnimatedProgressBar = ({
           sx={{
             color: '#706f6f',
             fontWeight: 600,
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontSize: { xs: '0.85rem', md: '0.9rem' }
           }}
         >
@@ -53,7 +53,7 @@ const AnimatedProgressBar = ({
             sx={{
               fontWeight: 700,
               color: colors.main,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: { xs: '0.85rem', md: '0.9rem' }
             }}
           >
@@ -144,7 +144,7 @@ const AnimatedProgressBar = ({
         sx={{
           color: percentage >= 100 ? colors.main : '#999',
           fontWeight: 500,
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           fontSize: { xs: '0.7rem', md: '0.75rem' }
         }}
       >

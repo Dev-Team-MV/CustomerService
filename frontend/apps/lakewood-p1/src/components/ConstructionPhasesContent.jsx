@@ -51,7 +51,7 @@ const BACKEND_PHASE_TITLES = [
   'Inspections (Delays)'
 ]
 
-export const ConstructionPhasesContent = ({ property, isAdmin }) => {
+export const ConstructionPhasesContent = ({ property, isAdmin, isOwner }) => {
   const { t } = useTranslation('construction')
 // En el destructuring del hook:
 const { phases, loading, fetchPhases: refetch, updateMediaItem, deleteMediaItem } = usePhases({ 
@@ -113,77 +113,80 @@ const handleDeleteMedia = async (mediaItemId) => {
     setSelectedPhase(phase)
   }
 
-  const handleUploadMedia = async (phaseNumber, uploadForm) => {
-    if (!uploadForm.images.length && !uploadForm.videos.length) {
-      alert(t('alerts.selectMedia'))
-      return
-    }
-
-    try {
-      setUploading(true)
-      let urls = []
-      let videoUrls = []
-
-      if (uploadForm.images.length) {
-        urls = await uploadService.uploadPhaseImages(uploadForm.images)
-      }
-      if (uploadForm.videos.length) {
-        videoUrls = await uploadService.uploadPhaseVideos(uploadForm.videos)
-      }
-
-      const currentPercentage = selectedPhase.constructionPercentage || 0
-      const addedPercentage = parseFloat(uploadForm.percentage) || 0
-      const newPercentage = Math.min(100, currentPercentage + addedPercentage)
-
-      let phaseId = selectedPhase._id
-      if (!phaseId) {
-        const createResponse = await api.post('/phases', {
-          property: property._id,
-          phaseNumber: selectedPhase.phaseNumber,
-          constructionPercentage: newPercentage
-        })
-        phaseId = createResponse.data._id
-      } else {
-        await api.put(`/phases/${phaseId}`, { constructionPercentage: newPercentage })
-      }
-
-      for (let i = 0; i < urls.length; i++) {
-        await api.post(`/phases/${phaseId}/media`, {
-          url:        urls[i],
-          title:      uploadForm.title || t('defaultMediaTitle', { phase: selectedPhase.phaseNumber, type: 'Image', index: i + 1 }),
-          percentage: addedPercentage / (urls.length + videoUrls.length),
-          mediaType:  'image',
-          uploadedAt: uploadForm.uploadedAt || null
-        })
-      }
-      for (let i = 0; i < videoUrls.length; i++) {
-        await api.post(`/phases/${phaseId}/media`, {
-          url:        videoUrls[i],
-          title:      uploadForm.title || t('defaultMediaTitle', { phase: selectedPhase.phaseNumber, type: 'Video', index: i + 1 }),
-          percentage: addedPercentage / (urls.length + videoUrls.length),
-          mediaType:  'video',
-          uploadedAt: uploadForm.uploadedAt || null
-        })
-      }
-
-      alert(t('alerts.uploadSuccess'))
-      setSelectedPhase(null)
-      refetch()
-    } catch (error) {
-      alert(t('alerts.uploadError', { message: error.response?.data?.message || error.message }))
-    } finally {
-      setUploading(false)
-    }
+const handleUploadMedia = async (phaseNumber, uploadForm) => {
+  if (!uploadForm.images.length && !uploadForm.videos.length) {
+    alert(t('alerts.selectMedia'))
+    return
   }
+
+  try {
+    setUploading(true)
+    let urls = []
+    let videoUrls = []
+
+    if (uploadForm.images.length) {
+      urls = await uploadService.uploadPhaseImages(uploadForm.images)
+    }
+    if (uploadForm.videos.length) {
+      videoUrls = await uploadService.uploadPhaseVideos(uploadForm.videos)
+    }
+
+    const currentPercentage = selectedPhase.constructionPercentage || 0
+    const addedPercentage = parseFloat(uploadForm.percentage) || 0
+    const newPercentage = Math.min(100, currentPercentage + addedPercentage)
+
+    let phaseId = selectedPhase._id
+    if (!phaseId) {
+      const createResponse = await api.post('/phases', {
+        property: property._id,
+        phaseNumber: selectedPhase.phaseNumber,
+        constructionPercentage: newPercentage
+      })
+      phaseId = createResponse.data._id
+    } else {
+      await api.put(`/phases/${phaseId}`, { constructionPercentage: newPercentage })
+    }
+
+    for (let i = 0; i < urls.length; i++) {
+      await api.post(`/phases/${phaseId}/media`, {
+        url:         urls[i],
+        title:       uploadForm.title || t('defaultMediaTitle', { phase: selectedPhase.phaseNumber, type: 'Image', index: i + 1 }),
+        percentage:  addedPercentage / (urls.length + videoUrls.length),
+        mediaType:   'image',
+        uploadedAt:  uploadForm.uploadedAt || null,
+        description: uploadForm.description || ''  // ← Agregar este campo
+      })
+    }
+    for (let i = 0; i < videoUrls.length; i++) {
+      await api.post(`/phases/${phaseId}/media`, {
+        url:         videoUrls[i],
+        title:       uploadForm.title || t('defaultMediaTitle', { phase: selectedPhase.phaseNumber, type: 'Video', index: i + 1 }),
+        percentage:  addedPercentage / (urls.length + videoUrls.length),
+        mediaType:   'video',
+        uploadedAt:  uploadForm.uploadedAt || null,
+        description: uploadForm.description || ''  // ← Agregar este campo
+      })
+    }
+
+    alert(t('alerts.uploadSuccess'))
+    setSelectedPhase(null)
+    refetch()
+  } catch (error) {
+    alert(t('alerts.uploadError', { message: error.response?.data?.message || error.message }))
+  } finally {
+    setUploading(false)
+  }
+}
 
 const extractUrl = (item) => {
   if (!item) return null
   if (typeof item === 'string') return { url: item, type: 'image', title: '' }
-  if (item.url) return { 
-    url: item.url, 
-    type: item.mediaType || 'image',
-    title: item.title || ''
-  }
+if (item.url) return { 
+  url: item.url, 
+  type: item.mediaType || 'image',
+  title: item.title || '',
+  description: item.description || ''  // ✅ Agregar
+}
   return null
 }
 
@@ -224,10 +227,10 @@ const extractUrl = (item) => {
         </IconButton>
 
         <Box sx={{ textAlign: 'center', minWidth: 180 }}>
-          <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
             {t('phaseCounter', { current: phases[currentPhaseIndex]?.phaseNumber, total: phases.length })}
           </Typography>
-          <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
             {getPhaseTitle(phases[currentPhaseIndex])}
           </Typography>
         </Box>
@@ -267,7 +270,7 @@ const extractUrl = (item) => {
             </Box>
 
             <Box flex={1}>
-              <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
                 {getPhaseTitle(phases[currentPhaseIndex])}
               </Typography>
               <Chip
@@ -278,7 +281,7 @@ const extractUrl = (item) => {
                   bgcolor: phases[currentPhaseIndex].constructionPercentage === 100 ? 'rgba(140,165,81,0.12)' : 'rgba(229,134,60,0.12)',
                   color: '#333F1F',
                   border: `1px solid ${phases[currentPhaseIndex].constructionPercentage === 100 ? '#8CA551' : '#E5863C'}`,
-                  fontWeight: 600, fontFamily: '"Poppins", sans-serif'
+                  fontWeight: 600, fontFamily: '"DM Sans", sans-serif'
                 }}
               />
             </Box>
@@ -291,12 +294,12 @@ const extractUrl = (item) => {
       color: '#333F1F',
       border: '1px solid rgba(51,63,31,0.2)',
       fontWeight: 600,
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       px: 1.5
     }}
   />
 
-            {isAdmin && (
+            {isAdmin && !isOwner && (
                 <>
     <Button
       variant="outlined"
@@ -309,7 +312,7 @@ const extractUrl = (item) => {
         borderColor: '#706f6f',
         color: '#706f6f',
         fontWeight: 600,
-        fontFamily: '"Poppins", sans-serif',
+        fontFamily: '"DM Sans", sans-serif',
         textTransform: 'none',
         px: 2,
         py: 1,
@@ -325,7 +328,7 @@ const extractUrl = (item) => {
                 onClick={() => handleOpenUploadDialog(phases[currentPhaseIndex])}
                 sx={{
                   borderRadius: 3, bgcolor: '#333F1F', color: 'white',
-                  fontWeight: 600, fontFamily: '"Poppins", sans-serif',
+                  fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
                   textTransform: 'none', px: 3, py: 1,
                   boxShadow: '0 4px 12px rgba(51,63,31,0.25)',
                   '&:hover': { bgcolor: '#8CA551', boxShadow: '0 8px 20px rgba(51,63,31,0.35)' }
@@ -355,7 +358,7 @@ const extractUrl = (item) => {
 {phases[currentPhaseIndex].mediaItems?.length > 0 ? (
   <Box sx={{ bgcolor: '#000', borderRadius: 3, p: 2, minHeight: 280, height: 400, position: 'relative' }}>
     {/* Admin Actions */}
-    {isAdmin && phases[currentPhaseIndex].mediaItems[currentMediaIndex] && (
+    {isAdmin && !isOwner && phases[currentPhaseIndex].mediaItems[currentMediaIndex] && (
       <Box sx={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }}>
         <MediaItemEditor
           mediaItem={phases[currentPhaseIndex].mediaItems[currentMediaIndex]}
@@ -379,7 +382,7 @@ const extractUrl = (item) => {
   </Box>
             
           ) : (
-            <Alert severity="info" icon="ℹ️" sx={{ borderRadius: 2, bgcolor: 'rgba(140,165,81,0.08)', border: '1px solid rgba(140,165,81,0.2)', '& .MuiAlert-message': { fontFamily: '"Poppins", sans-serif', color: '#333F1F' } }}>
+            <Alert severity="info" icon="ℹ️" sx={{ borderRadius: 2, bgcolor: 'rgba(140,165,81,0.08)', border: '1px solid rgba(140,165,81,0.2)', '& .MuiAlert-message': { fontFamily: '"DM Sans", sans-serif', color: '#333F1F' } }}>
               {t('noMediaYet')}
             </Alert>
           )}
@@ -404,7 +407,7 @@ const extractUrl = (item) => {
 >
   <DialogTitle>
     <Box display="flex" justifyContent="space-between" alignItems="center">
-      <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+      <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
         {t('manageMediaItems', 'Manage Media Items')} - Phase {phases[currentPhaseIndex]?.phaseNumber}
       </Typography>
       <IconButton onClick={() => setManageMediaOpen(false)}>
@@ -438,7 +441,7 @@ const extractUrl = (item) => {
               }}
             >
               <Box display="flex" alignItems="center" gap={2} width="100%">
-                <Typography fontWeight={600} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                <Typography fontWeight={600} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                   {title}
                 </Typography>
                 <Chip 
@@ -529,7 +532,7 @@ const extractUrl = (item) => {
   )
 }
 
-const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
+const ConstructionPhasesModal = ({ open, property, onClose, isAdmin, isOwner }) => {
   const { t } = useTranslation('construction')
 
   return (
@@ -544,10 +547,10 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
               <Construction sx={{ color: 'white', fontSize: 24 }} />
             </Box>
             <Box>
-              <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
                 {t('title')}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
                 {t('subtitle', { lot: property?.lot?.number })}
               </Typography>
             </Box>
@@ -559,12 +562,12 @@ const ConstructionPhasesModal = ({ open, property, onClose, isAdmin }) => {
       </DialogTitle>
 
       <DialogContent sx={{ pt: 3 }}>
-        <ConstructionPhasesContent property={property} isAdmin={isAdmin} />
+        <ConstructionPhasesContent property={property} isAdmin={isAdmin} isOwner={isOwner} />
       </DialogContent>
 
       <DialogActions sx={{ p: 3 }}>
         <Button onClick={onClose}
-          sx={{ borderRadius: 3, textTransform: 'none', fontWeight: 600, px: 3, py: 1.2, color: '#706f6f', fontFamily: '"Poppins", sans-serif', border: '2px solid #e0e0e0', '&:hover': { bgcolor: 'rgba(112,111,111,0.05)', borderColor: '#706f6f' } }}>
+          sx={{ borderRadius: 3, textTransform: 'none', fontWeight: 600, px: 3, py: 1.2, color: '#706f6f', fontFamily: '"DM Sans", sans-serif', border: '2px solid #e0e0e0', '&:hover': { bgcolor: 'rgba(112,111,111,0.05)', borderColor: '#706f6f' } }}>
           {t('close')}
         </Button>
       </DialogActions>

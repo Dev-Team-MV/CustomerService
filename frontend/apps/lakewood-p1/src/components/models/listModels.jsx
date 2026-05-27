@@ -37,6 +37,7 @@ const ModelCard = ({
   model,
   index,
   facades,
+  isOwner,
   onEdit,
   onDelete,
   onOpenGallery,
@@ -160,7 +161,7 @@ const ModelCard = ({
             fontWeight: 700,
             zIndex: 2,
             textTransform: 'capitalize',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             letterSpacing: '0.5px',
             fontSize: '0.7rem',
             height: 26,
@@ -211,7 +212,7 @@ const ModelCard = ({
                       height: 22,
                       fontSize: '0.65rem',
                       fontWeight: 600,
-                      fontFamily: '"Poppins", sans-serif'
+                      fontFamily: '"DM Sans", sans-serif'
                     }}
                   />
                   {allImages.length > 1 && (
@@ -262,7 +263,7 @@ const ModelCard = ({
                 fontWeight={700}
                 noWrap
                 sx={{
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   color: '#333F1F',
                   letterSpacing: '0.5px',
                   mb: 0.5
@@ -274,7 +275,7 @@ const ModelCard = ({
                 variant="caption"
                 sx={{
                   color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   display: 'block',
                   mb: 1.5
                 }}
@@ -286,7 +287,7 @@ const ModelCard = ({
   variant="h6"
   sx={{
     color: '#8CA551',
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"DM Sans", sans-serif',
     fontWeight: 700,
     fontSize: '1.1rem',
     mb: 1.5
@@ -309,7 +310,7 @@ const ModelCard = ({
           color: '#333F1F',
           fontWeight: 600,
           border: '1px solid rgba(140, 165, 81, 0.3)',
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           fontSize: '0.7rem',
           '& .MuiChip-icon': { color: '#8CA551' }
         }}
@@ -326,7 +327,7 @@ const ModelCard = ({
           color: '#E5863C',
           fontWeight: 600,
           border: '1px solid rgba(229, 134, 60, 0.3)',
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           fontSize: '0.7rem',
           '& .MuiChip-icon': { color: '#E5863C' }
         }}
@@ -343,7 +344,7 @@ const ModelCard = ({
           color: '#706f6f',
           fontWeight: 600,
           border: '1px solid rgba(112, 111, 111, 0.3)',
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           fontSize: '0.7rem',
           '& .MuiChip-icon': { color: '#706f6f' }
         }}
@@ -370,7 +371,7 @@ const ModelCard = ({
               <Typography
                 variant="caption"
                 sx={{
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontWeight: 600,
                   color: '#706f6f'
                 }}
@@ -383,7 +384,7 @@ const ModelCard = ({
               <Typography
                 variant="caption"
                 sx={{
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontWeight: 600,
                   color: '#706f6f'
                 }}
@@ -396,7 +397,7 @@ const ModelCard = ({
               <Typography
                 variant="caption"
                 sx={{
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontWeight: 600,
                   color: '#706f6f'
                 }}
@@ -409,7 +410,7 @@ const ModelCard = ({
               <Typography
                 variant="caption"
                 sx={{
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontWeight: 600,
                   color: '#706f6f'
                 }}
@@ -443,6 +444,8 @@ const ModelCard = ({
               color="primary"
               startIcon={<Edit fontSize="small" />}
               onClick={() => onEdit(model)}
+              disabled={isOwner}
+              sx={isOwner ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
             >
               {t('common:actions.edit')}
             </PrimaryButton>
@@ -452,6 +455,8 @@ const ModelCard = ({
               color="error"
               startIcon={<Delete fontSize="small" />}
               onClick={() => onDelete(model._id)}
+              disabled={isOwner}
+              sx={isOwner ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
             >
               {t('common:actions.delete')}
             </PrimaryButton>
@@ -471,7 +476,7 @@ const ModelCard = ({
                 fontWeight={700}
                 sx={{
                   color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   textTransform: 'uppercase',
                   letterSpacing: '1px',
                   fontSize: '0.7rem'
@@ -482,12 +487,14 @@ const ModelCard = ({
               <IconButton
                 size="small"
                 onClick={() => onOpenFacadeDialog(model)}
+                disabled={isOwner}
                 sx={{
                   bgcolor: '#333F1F',
                   color: 'white',
                   width: 28,
                   height: 28,
-                  '&:hover': { bgcolor: '#4a5d3a' }
+                  '&:hover': { bgcolor: '#4a5d3a' },
+                  ...(isOwner ? { opacity: 0.5, cursor: 'not-allowed' } : {})
                 }}
               >
                 <Add sx={{ fontSize: 16 }} />
@@ -545,11 +552,13 @@ const ModelCard = ({
                               e.stopPropagation();
                               onEditFacade(model, facade);
                             }}
+                            disabled={isOwner}
                             sx={{
                               bgcolor: 'rgba(255,255,255,0.95)',
                               width: 20,
                               height: 20,
-                              '&:hover': { bgcolor: 'white' }
+                              '&:hover': { bgcolor: 'white' },
+                              ...(isOwner ? { opacity: 0.5, cursor: 'not-allowed' } : {})
                             }}
                           >
                             <Edit sx={{ fontSize: 12, color: '#8CA551' }} />
@@ -560,11 +569,13 @@ const ModelCard = ({
                               e.stopPropagation();
                               onDeleteFacade(facade._id);
                             }}
+                            disabled={isOwner}
                             sx={{
                               bgcolor: 'rgba(255,255,255,0.95)',
                               width: 20,
                               height: 20,
-                              '&:hover': { bgcolor: 'white' }
+                              '&:hover': { bgcolor: 'white' },
+                              ...(isOwner ? { opacity: 0.5, cursor: 'not-allowed' } : {})
                             }}
                           >
                             <Delete sx={{ fontSize: 12, color: '#E5863C' }} />
@@ -577,7 +588,7 @@ const ModelCard = ({
                         fontWeight={700}
                         display="block"
                         sx={{
-                          fontFamily: '"Poppins", sans-serif',
+                          fontFamily: '"DM Sans", sans-serif',
                           color: '#333F1F',
                           mb: 0.3
                         }}
@@ -589,7 +600,7 @@ const ModelCard = ({
                         fontWeight={600}
                         sx={{
                           color: '#8CA551',
-                          fontFamily: '"Poppins", sans-serif'
+                          fontFamily: '"DM Sans", sans-serif'
                         }}
                       >
                         +${facade.price?.toLocaleString()}
@@ -618,7 +629,7 @@ const ModelCard = ({
                   variant="caption"
                   sx={{
                     color: '#706f6f',
-                    fontFamily: '"Poppins", sans-serif'
+                    fontFamily: '"DM Sans", sans-serif'
                   }}
                 >
                   {t('models:noFacades')}
@@ -656,7 +667,7 @@ const ModelCard = ({
         >
           <Typography
             fontWeight={700}
-            sx={{ color: 'white', fontFamily: '"Poppins", sans-serif' }}
+            sx={{ color: 'white', fontFamily: '"DM Sans", sans-serif' }}
           >
             {model.model} — Gallery
           </Typography>

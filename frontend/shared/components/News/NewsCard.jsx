@@ -67,7 +67,7 @@ const NewsCard = ({ newsItem, config, onClick, index = 0 }) => {
               fontWeight: 700,
               fontSize: '0.7rem',
               textTransform: 'uppercase',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
               border: 'none'
             }}
@@ -86,7 +86,7 @@ const NewsCard = ({ newsItem, config, onClick, index = 0 }) => {
                 color: 'white',
                 fontWeight: 600,
                 fontSize: '0.7rem',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 border: 'none'
               }}
             />
@@ -110,7 +110,7 @@ const NewsCard = ({ newsItem, config, onClick, index = 0 }) => {
                 color: config.colors.primary,
                 mb: 1.5,
                 lineHeight: 1.3,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical',
@@ -127,7 +127,7 @@ const NewsCard = ({ newsItem, config, onClick, index = 0 }) => {
                 color: '#706f6f',
                 mb: 2,
                 lineHeight: 1.6,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 display: '-webkit-box',
                 WebkitLineClamp: 3,
                 WebkitBoxOrient: 'vertical',
@@ -151,7 +151,7 @@ const NewsCard = ({ newsItem, config, onClick, index = 0 }) => {
                 sx={{
                   bgcolor: '#fafafa',
                   border: '1px solid #e0e0e0',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: '0.7rem',
                   height: 24
                 }}

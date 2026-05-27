@@ -38,6 +38,7 @@ import { useAuth } from '@shared/context/AuthContext'
 const FamilyGroup = () => {
   const { t } = useTranslation(['familyGroup', 'common'])
   const { user } = useAuth()
+  const isOwner = user?.role === 'owner'
 
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
@@ -234,6 +235,7 @@ const FamilyGroup = () => {
                     <FamilyGroupCard
                       group={group}
                       isAdmin={isGroupAdmin(group)}
+                      isOwner={isOwner}
                       onEdit={() => handleOpenManageDialog(group)}
                       onDelete={() => handleDeleteGroup(group._id)}
                       onAddMember={() => handleOpenAddMemberDialog(group)}

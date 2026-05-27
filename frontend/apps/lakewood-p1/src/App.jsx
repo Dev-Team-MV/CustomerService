@@ -2,7 +2,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { AuthProvider, useAuth } from '@shared/context/AuthContext'
 import ProtectedRoute from '@shared/components/ProtectedRoute'
-import Layout from '@shared/components/LayoutComponents/Layout'
+import Layout from '@shared/components/LayoutComponents/Layout.jsx'
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 
 // Importa los menús locales
@@ -35,6 +35,8 @@ import ConfigurationManager from './pages/ConfigurationManager'
 import FamilyGroup from './pages/FamilyGroup'
 import MapInventoryPage from './pages/MapInventoryPage'
 import UploadTracker from './pages/UploadTracker'
+
+import UploadsManager from './pages/UploadsManager'
 
 import theme from './theme' // Usa SIEMPRE el theme extendido
 
@@ -117,6 +119,7 @@ function App() {
               <Route path="/clubhouse-manager" element={<ClubhouseManager />} />
               <Route path="/map-inventory" element={<MapInventoryPage />} />
               <Route path="/upload-tracker" element={<UploadTracker />} />
+              <Route path="/uploads-manager" element={<UploadsManager />} />
             </Route>
           </Route>
           <Route path="*" element={<NotFound />} />

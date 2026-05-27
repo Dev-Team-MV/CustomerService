@@ -220,7 +220,7 @@ const DetailsTab = ({ details, config, resourceType }) => {
             <Typography
               variant="h5"
               sx={{
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 color: config.colors.primary,
                 fontWeight: 700,
                 fontSize: { xs: '1.25rem', sm: '1.5rem' },
@@ -235,7 +235,7 @@ const DetailsTab = ({ details, config, resourceType }) => {
                 <Typography
                   variant="body2"
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: '#706f6f',
                     fontSize: '0.9rem'
                   }}
@@ -255,7 +255,7 @@ const DetailsTab = ({ details, config, resourceType }) => {
               height: 36,
               fontSize: '0.85rem',
               fontWeight: 700,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               bgcolor: `${config.colors.secondary}1A`,
               color: config.colors.primary,
               border: `2px solid ${config.colors.secondary}`,
@@ -315,7 +315,7 @@ const DetailsTab = ({ details, config, resourceType }) => {
                       fontWeight: 500,
                       textTransform: 'uppercase',
                       letterSpacing: '0.5px',
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       fontSize: '0.7rem',
                       display: 'block',
                       mb: 0.5
@@ -328,7 +328,7 @@ const DetailsTab = ({ details, config, resourceType }) => {
                     sx={{
                       color: spec.color,
                       fontWeight: 700,
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       fontSize: { xs: '1.1rem', sm: '1.25rem' }
                     }}
                   >
@@ -359,7 +359,7 @@ const DetailsTab = ({ details, config, resourceType }) => {
                     color: galleryFilter === filter ? 'white' : '#706f6f',
                     fontWeight: 600,
                     fontSize: '0.85rem',
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     textTransform: 'capitalize',
                     transition: 'all 0.3s ease',
                     '&:hover': {

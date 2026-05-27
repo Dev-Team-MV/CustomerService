@@ -43,7 +43,7 @@ const EmptyState = ({
         sx={{
           color: theme.palette.primary.main,
           fontWeight: 600,
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           mb: 0.5
         }}
       >
@@ -54,7 +54,7 @@ const EmptyState = ({
         variant="body2"
         sx={{
           color: theme.palette.text.secondary,
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           mb: 2
         }}
       >
@@ -69,7 +69,7 @@ const EmptyState = ({
             borderRadius: 3,
             bgcolor: theme.palette.primary.main,
             textTransform: 'none',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontWeight: 600,
             px: 3,
             '&:hover': {

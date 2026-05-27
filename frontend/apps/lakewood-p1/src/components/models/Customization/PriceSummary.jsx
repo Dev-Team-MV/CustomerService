@@ -19,53 +19,53 @@ const PriceSummary = ({
 
   return (
     <Box>
-      <Typography variant="caption" sx={{ color: '#706f6f', fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}>
+      <Typography variant="caption" sx={{ color: '#706f6f', fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}>
         {defaultTitle.toUpperCase()}
       </Typography>
-      <Typography variant="h4" fontWeight={700} sx={{ color: '#333F1F', mb: 1, fontFamily: '"Poppins", sans-serif' }}>
+      <Typography variant="h4" fontWeight={700} sx={{ color: '#333F1F', mb: 1, fontFamily: '"DM Sans", sans-serif' }}>
         ${calculatePrice().toLocaleString()}
       </Typography>
       <Box sx={{ display: 'flex', gap: 1.5, mb: 2, flexWrap: 'wrap' }}>
         <Chip 
           icon={<HomeIcon />} 
           label={`${model.bedrooms} ${t('beds')}`}
-          sx={{ fontFamily: '"Poppins", sans-serif' }}
+          sx={{ fontFamily: '"DM Sans", sans-serif' }}
         />
         <Chip 
           icon={<HomeIcon />} 
           label={`${model.bathrooms} ${t('baths')}`}
-          sx={{ fontFamily: '"Poppins", sans-serif' }}
+          sx={{ fontFamily: '"DM Sans", sans-serif' }}
         />
         <Chip 
           icon={<HomeIcon />} 
           label={`${model.sqft} ${t('sqft')}`}
-          sx={{ fontFamily: '"Poppins", sans-serif' }}
+          sx={{ fontFamily: '"DM Sans", sans-serif' }}
         />
       </Box>
       {compareModel && (
         <>
           <Divider sx={{ my: 2 }} />
-          <Typography variant="caption" sx={{ color: '#706f6f', fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="caption" sx={{ color: '#706f6f', fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}>
             {defaultCompareTitle.toUpperCase()}
           </Typography>
-          <Typography variant="h4" fontWeight={700} sx={{ color: '#333F1F', mb: 1, fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="h4" fontWeight={700} sx={{ color: '#333F1F', mb: 1, fontFamily: '"DM Sans", sans-serif' }}>
             ${calculateComparePrice().toLocaleString()}
           </Typography>
           <Box sx={{ display: 'flex', gap: 1.5, mb: 2, flexWrap: 'wrap' }}>
             <Chip 
               icon={<HomeIcon />} 
               label={`${compareModel.bedrooms} ${t('beds')}`}
-              sx={{ fontFamily: '"Poppins", sans-serif' }}
+              sx={{ fontFamily: '"DM Sans", sans-serif' }}
             />
             <Chip 
               icon={<HomeIcon />} 
               label={`${compareModel.bathrooms} ${t('baths')}`}
-              sx={{ fontFamily: '"Poppins", sans-serif' }}
+              sx={{ fontFamily: '"DM Sans", sans-serif' }}
             />
             <Chip 
               icon={<HomeIcon />} 
               label={`${compareModel.sqft} ${t('sqft')}`}
-              sx={{ fontFamily: '"Poppins", sans-serif' }}
+              sx={{ fontFamily: '"DM Sans", sans-serif' }}
             />
           </Box>
         </>

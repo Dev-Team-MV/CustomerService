@@ -78,31 +78,57 @@ const RecorridoTab = () => {
     }
   }
 
-// ...existing code...
-const fetchRecorridoImages = async () => {
+// const fetchRecorridoImages = async () => {
+//   try {
+//     const response = await uploadService.getFilesByFolder('recorrido', true);
+//     const map = {};
+//     (response.files || []).forEach(file => {
+//       // file.name expected like "recorrido.3.jpg"
+//       const name = file.name || file.filename || '';
+//       const match = name.match(/recorrido\.(\d+)\./);
+//       if (match) {
+//         const pointId = String(match[1]); // usa el índice/número del filename como key
+//         map[pointId] = {
+//           url: file.url || file.publicUrl || null,
+//           isPublic: !!file.isPublic,
+//           filename: name
+//         };
+//       }
+//     });
+//     setImagesMap(map); // pasar este imagesMap al modal
+//   } catch (err) {
+//     console.error('Error fetching recorrido files:', err);
+//     setImagesMap({});
+//   }
+// };
+
+const fetchRecorridoImages = async (skipCache = false) => {
   try {
-    const response = await uploadService.getFilesByFolder('recorrido', true);
-    const map = {};
-    (response.files || []).forEach(file => {
-      // file.name expected like "recorrido.3.jpg"
-      const name = file.name || file.filename || '';
-      const match = name.match(/recorrido\.(\d+)\./);
+    const response = skipCache
+      ? await uploadService.getFilesByFolderNoCache('recorrido', true)
+      : await uploadService.getFilesByFolder('recorrido', true)
+      
+    const map = {}
+    ;(response.files || []).forEach(file => {
+      const name = file.name || file.filename || ''
+      const match = name.match(/recorrido\.(\d+)\./)
       if (match) {
-        const pointId = String(match[1]); // usa el índice/número del filename como key
+        const pointId = String(match[1])
         map[pointId] = {
           url: file.url || file.publicUrl || null,
           isPublic: !!file.isPublic,
           filename: name
-        };
+        }
       }
-    });
-    setImagesMap(map); // pasar este imagesMap al modal
+    })
+    setImagesMap(map)
   } catch (err) {
-    console.error('Error fetching recorrido files:', err);
-    setImagesMap({});
+    console.error('Error fetching recorrido files:', err)
+    setImagesMap({})
   }
-};
-// ...existing code...
+}
+
+
 
   // Asocia cada imagen al punto por id (image puede ser { url, isPublic, filename } o null)
   const recorridoPoints = puntosBase.map((p) => ({
@@ -175,17 +201,17 @@ const fetchRecorridoImages = async () => {
 
   // --- UPLOAD ---
   const handleUpload = async (id, file, isPublic = true) => {
-    setUploading(true);
+    setUploading(true)
     try {
       // Backend image processing normalizes to jpg/webp depending on source; we enforce a predictable key.
-      const filename = `recorrido.${id}.jpg`;
-      await uploadService.uploadImage(file, 'recorrido', filename, isPublic);
-      await uploadService.updateRecorridoVisibility(filename, isPublic);
-      await fetchRecorridoImages();
+      const filename = `recorrido.${id}.jpg`
+      await uploadService.uploadImage(file, 'recorrido', filename, isPublic)
+      await uploadService.updateRecorridoVisibility(filename, isPublic)
+      await fetchRecorridoImages()
     } finally {
-      setUploading(false);
+      setUploading(false)
     }
-  };
+  }
 
   const handleRecorridoVisibility = async () => {
     await fetchRecorridoImages()

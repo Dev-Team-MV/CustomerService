@@ -180,13 +180,13 @@ const handleSubmit = () => {
   const fieldSx = {
     '& .MuiOutlinedInput-root': {
       borderRadius: 3,
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       bgcolor: 'white',
       '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main, borderWidth: '2px' },
       '&:hover fieldset': { borderColor: theme.palette.secondary.main }
     },
     '& .MuiInputLabel-root': {
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       '&.Mui-focused': { color: theme.palette.primary.main }
     }
   }
@@ -201,7 +201,7 @@ const handleSubmit = () => {
           fontWeight: 600,
           px: 3, py: 1.2,
           color: theme.palette.text.secondary,
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           border: `2px solid ${theme.palette.divider}`,
           '&:hover': {
             bgcolor: theme.palette.action.hover,
@@ -236,7 +236,7 @@ const handleSubmit = () => {
           borderRadius: 3,
           bgcolor: theme.palette.info.main + '14',
           border: `1px solid ${theme.palette.info.main}4D`,
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           '& .MuiAlert-icon': { color: theme.palette.info.main }
         }}
       >
@@ -336,7 +336,7 @@ const handleSubmit = () => {
         variant="subtitle2" 
         sx={{ 
           fontWeight: 600, 
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           color: selectedParkingSpot ? theme.palette.success.main : theme.palette.text.secondary
         }}
       >
@@ -348,31 +348,31 @@ const handleSubmit = () => {
       <Box sx={{ pl: 4 }}>
         <Box display="flex" gap={2} flexWrap="wrap">
           <Box>
-            <Typography variant="caption" color="text.secondary" fontFamily='"Poppins", sans-serif'>
+            <Typography variant="caption" color="text.secondary" fontFamily='"DM Sans", sans-serif'>
               {t('buildings:code', 'Código')}
             </Typography>
-            <Typography variant="body2" fontWeight={600} fontFamily='"Poppins", sans-serif'>
+            <Typography variant="body2" fontWeight={600} fontFamily='"DM Sans", sans-serif'>
               {selectedParkingSpot.code}
             </Typography>
           </Box>
           <Box>
-            <Typography variant="caption" color="text.secondary" fontFamily='"Poppins", sans-serif'>
+            <Typography variant="caption" color="text.secondary" fontFamily='"DM Sans", sans-serif'>
               {t('buildings:type', 'Tipo')}
             </Typography>
-            <Typography variant="body2" fontWeight={600} fontFamily='"Poppins", sans-serif' sx={{ textTransform: 'capitalize' }}>
+            <Typography variant="body2" fontWeight={600} fontFamily='"DM Sans", sans-serif' sx={{ textTransform: 'capitalize' }}>
               {selectedParkingSpot.spotType}
             </Typography>
           </Box>
           <Box>
-            <Typography variant="caption" color="text.secondary" fontFamily='"Poppins", sans-serif'>
+            <Typography variant="caption" color="text.secondary" fontFamily='"DM Sans", sans-serif'>
               {t('buildings:floor', 'Piso')}
             </Typography>
-            <Typography variant="body2" fontWeight={600} fontFamily='"Poppins", sans-serif'>
+            <Typography variant="body2" fontWeight={600} fontFamily='"DM Sans", sans-serif'>
               {selectedParkingSpot.floorNumber}
             </Typography>
           </Box>
           <Box>
-            <Typography variant="caption" color="text.secondary" fontFamily='"Poppins", sans-serif'>
+            <Typography variant="caption" color="text.secondary" fontFamily='"DM Sans", sans-serif'>
               {t('buildings:status', 'Estado')}
             </Typography>
             <Chip 
@@ -382,7 +382,7 @@ const handleSubmit = () => {
                 height: 20,
                 fontSize: '0.7rem',
                 fontWeight: 600,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 bgcolor: theme.palette.success.main + '20',
                 color: theme.palette.success.main
               }}
@@ -391,10 +391,10 @@ const handleSubmit = () => {
         </Box>
         {selectedParkingSpot.notes && (
           <Box mt={1}>
-            <Typography variant="caption" color="text.secondary" fontFamily='"Poppins", sans-serif'>
+            <Typography variant="caption" color="text.secondary" fontFamily='"DM Sans", sans-serif'>
               {t('buildings:notes', 'Notas')}
             </Typography>
-            <Typography variant="body2" fontFamily='"Poppins", sans-serif'>
+            <Typography variant="body2" fontFamily='"DM Sans", sans-serif'>
               {selectedParkingSpot.notes}
             </Typography>
           </Box>
@@ -404,7 +404,7 @@ const handleSubmit = () => {
       <Typography 
         variant="body2" 
         color="text.secondary" 
-        fontFamily='"Poppins", sans-serif'
+        fontFamily='"DM Sans", sans-serif'
         sx={{ pl: 4 }}
       >
         {t('buildings:noParkingAssigned', 'No hay parqueadero asignado. Asigna desde la pestaña de Parking.')}
@@ -419,7 +419,7 @@ const handleSubmit = () => {
     fullWidth
     disabled={!selectedFloorPlan}
     onClick={() => setPolygonSelectorOpen(true)}
-    sx={{ mb: 1, borderRadius: 3, fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+    sx={{ mb: 1, borderRadius: 3, fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}
   >
     {selectedPolygonId
       ? t('buildings:selectedPolygon', { id: selectedPolygonId }, 'Polígono seleccionado: {{id}}')
@@ -438,7 +438,7 @@ const handleSubmit = () => {
   <Button
     variant="contained"
     component="label"
-    sx={{ mb: 1, borderRadius: 3, fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+    sx={{ mb: 1, borderRadius: 3, fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}
   >
     {t('buildings:uploadImages', 'Subir Imágenes')}
     <input
@@ -475,7 +475,7 @@ const handleSubmit = () => {
   <Button
     variant="contained"
     component="label"
-    sx={{ mb: 1, borderRadius: 3, fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+    sx={{ mb: 1, borderRadius: 3, fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}
   >
     {t('buildings:uploadImages', 'Subir Imágenes')}
     <input

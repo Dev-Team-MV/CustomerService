@@ -124,7 +124,7 @@ const NewsTable = ({ config }) => {
                   <Typography 
                     variant="h3" 
                     fontWeight={800}
-                    sx={{ fontFamily: '"Poppins", sans-serif' }}
+                    sx={{ fontFamily: '"DM Sans", sans-serif' }}
                   >
                     {loading ? '...' : stat.value}
                   </Typography>
@@ -133,7 +133,7 @@ const NewsTable = ({ config }) => {
                   variant="body2" 
                   fontWeight={600}
                   sx={{ 
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     opacity: 0.95
                   }}
                 >
@@ -189,7 +189,7 @@ const NewsTable = ({ config }) => {
                   px: 3, 
                   py: 1.2, 
                   color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   border: '2px solid #e0e0e0',
                   '&:hover': { 
                     bgcolor: 'rgba(112, 111, 111, 0.05)', 
@@ -220,7 +220,7 @@ const NewsTable = ({ config }) => {
             variant="body2" 
             sx={{ 
               color: '#706f6f', 
-              fontFamily: '"Poppins", sans-serif' 
+              fontFamily: '"DM Sans", sans-serif' 
             }}
           >
             {t('news:deleteNewsConfirm', { title: selectedNews?.title })}
@@ -240,7 +240,7 @@ const NewsTable = ({ config }) => {
             sx={{ 
               width: '100%', 
               borderRadius: 3, 
-              fontFamily: '"Poppins", sans-serif', 
+              fontFamily: '"DM Sans", sans-serif', 
               boxShadow: `0 8px 24px ${config.colors.primary}26` 
             }}
           >

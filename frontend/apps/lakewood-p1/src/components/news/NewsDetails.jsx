@@ -122,7 +122,7 @@
 //               color: '#333F1F',
 //               fontWeight: block.level === 2 ? 800 : 700,
 //               fontSize: block.level === 2 ? { xs: '1.8rem', md: '2.2rem' } : { xs: '1.4rem', md: '1.8rem' },
-//               fontFamily: '"Poppins", sans-serif',
+//               fontFamily: '"DM Sans", sans-serif',
 //               mt: { xs: 4, md: 6 },
 //               mb: { xs: 2, md: 3 },
 //               lineHeight: 1.3,
@@ -152,7 +152,7 @@
 //               fontSize: { xs: '1.05rem', md: '1.15rem' },
 //               lineHeight: 1.9,
 //               mb: { xs: 2.5, md: 3 },
-//               fontFamily: '"Poppins", sans-serif',
+//               fontFamily: '"DM Sans", sans-serif',
 //               fontWeight: 400,
 //               textAlign: 'justify',
 //               '& strong': {
@@ -179,7 +179,7 @@
 //               lineHeight: 1.9,
 //               mb: { xs: 2.5, md: 3 },
 //               pl: { xs: 3, md: 4 },
-//               fontFamily: '"Poppins", sans-serif',
+//               fontFamily: '"DM Sans", sans-serif',
 //               '& li': {
 //                 mb: 1.5,
 //                 position: 'relative',
@@ -216,7 +216,7 @@
 //                 left: 20,
 //                 fontSize: '6rem',
 //                 color: 'rgba(140, 165, 81, 0.15)',
-//                 fontFamily: '"Poppins", sans-serif',
+//                 fontFamily: '"DM Sans", sans-serif',
 //                 lineHeight: 1
 //               }
 //             }}
@@ -225,7 +225,7 @@
 //               sx={{ 
 //                 fontSize: { xs: '1.15rem', md: '1.3rem' },
 //                 lineHeight: 1.7,
-//                 fontFamily: '"Poppins", sans-serif',
+//                 fontFamily: '"DM Sans", sans-serif',
 //                 fontStyle: 'italic',
 //                 color: '#333F1F',
 //                 fontWeight: 500,
@@ -242,7 +242,7 @@
 //                   mt: 2, 
 //                   color: '#8CA551',
 //                   fontWeight: 600,
-//                   fontFamily: '"Poppins", sans-serif',
+//                   fontFamily: '"DM Sans", sans-serif',
 //                   fontSize: '0.95rem'
 //                 }}
 //               >
@@ -261,7 +261,7 @@
 //       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" bgcolor="#fafafa">
 //         <Box textAlign="center">
 //           <CircularProgress size={60} sx={{ color: '#8CA551', mb: 2 }} />
-//           <Typography sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+//           <Typography sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
 //             {t('news:loadingArticle', 'Loading article...')}
 //           </Typography>
 //         </Box>
@@ -277,7 +277,7 @@
 //           sx={{ 
 //             mb: 3,
 //             borderRadius: 3,
-//             fontFamily: '"Poppins", sans-serif'
+//             fontFamily: '"DM Sans", sans-serif'
 //           }}
 //         >
 //           {t('news:articleNotFound', 'News article not found')}
@@ -290,7 +290,7 @@
 //             borderRadius: 3,
 //             bgcolor: '#333F1F',
 //             textTransform: 'none',
-//             fontFamily: '"Poppins", sans-serif',
+//             fontFamily: '"DM Sans", sans-serif',
 //             fontWeight: 600,
 //             '&:hover': {
 //               bgcolor: '#8CA551'
@@ -377,7 +377,7 @@
 //                 fontWeight: 700,
 //                 textTransform: 'uppercase',
 //                 fontSize: '0.75rem',
-//                 fontFamily: '"Poppins", sans-serif',
+//                 fontFamily: '"DM Sans", sans-serif',
 //                 letterSpacing: '1.5px',
 //                 mb: 3,
 //                 height: 32,
@@ -391,7 +391,7 @@
 //                 color: 'white',
 //                 fontWeight: 900,
 //                 fontSize: { xs: '2rem', sm: '3rem', md: '4rem' },
-//                 fontFamily: '"Poppins", sans-serif',
+//                 fontFamily: '"DM Sans", sans-serif',
 //                 lineHeight: 1.1,
 //                 mb: 2,
 //                 textShadow: '0 4px 20px rgba(0,0,0,0.5)',
@@ -406,7 +406,7 @@
 //               sx={{
 //                 color: 'rgba(255,255,255,0.95)',
 //                 fontWeight: 400,
-//                 fontFamily: '"Poppins", sans-serif',
+//                 fontFamily: '"DM Sans", sans-serif',
 //                 fontStyle: 'italic',
 //                 maxWidth: '800px',
 //                 fontSize: { xs: '1rem', md: '1.25rem' },
@@ -489,7 +489,7 @@
 //                           variant="caption" 
 //                           sx={{ 
 //                             color: '#706f6f',
-//                             fontFamily: '"Poppins", sans-serif',
+//                             fontFamily: '"DM Sans", sans-serif',
 //                             textTransform: 'uppercase',
 //                             letterSpacing: '1px',
 //                             fontWeight: 600,
@@ -503,7 +503,7 @@
 //                           sx={{
 //                             color: '#333F1F',
 //                             fontWeight: 600,
-//                             fontFamily: '"Poppins", sans-serif'
+//                             fontFamily: '"DM Sans", sans-serif'
 //                           }}
 //                         >
 //                           {new Date(news.createdAt).toLocaleDateString('en-US', {
@@ -520,14 +520,14 @@
 //                     sx={{
 //                       fontSize: { xs: '1.05rem', md: '1.15rem' },
 //                       lineHeight: 1.9,
-//                       fontFamily: '"Poppins", sans-serif',
+//                       fontFamily: '"DM Sans", sans-serif',
 //                       color: '#495057',
 //                       mb: 4,
 //                       '&::first-letter': {
 //                         float: 'left',
 //                         fontSize: '5rem',
 //                         lineHeight: 0.8,
-//                         fontFamily: '"Poppins", sans-serif',
+//                         fontFamily: '"DM Sans", sans-serif',
 //                         fontWeight: 900,
 //                         color: '#333F1F',
 //                         pr: 1.5,
@@ -552,7 +552,7 @@
 //                           fontWeight={800}
 //                           sx={{
 //                             color: '#333F1F',
-//                             fontFamily: '"Poppins", sans-serif',
+//                             fontFamily: '"DM Sans", sans-serif',
 //                             mb: 1
 //                           }}
 //                         >
@@ -603,7 +603,7 @@
 //                           fontWeight={800}
 //                           sx={{
 //                             color: '#333F1F',
-//                             fontFamily: '"Poppins", sans-serif',
+//                             fontFamily: '"DM Sans", sans-serif',
 //                             mb: 1
 //                           }}
 //                         >
@@ -653,7 +653,7 @@
 //                         mb={2}
 //                         sx={{
 //                           color: '#333F1F',
-//                           fontFamily: '"Poppins", sans-serif',
+//                           fontFamily: '"DM Sans", sans-serif',
 //                           textTransform: 'uppercase',
 //                           letterSpacing: '1px',
 //                           fontSize: '0.75rem'
@@ -669,7 +669,7 @@
 //                             sx={{ 
 //                               bgcolor: 'rgba(140, 165, 81, 0.08)',
 //                               color: '#333F1F',
-//                               fontFamily: '"Poppins", sans-serif',
+//                               fontFamily: '"DM Sans", sans-serif',
 //                               fontWeight: 600,
 //                               border: '1px solid rgba(140, 165, 81, 0.2)',
 //                               transition: 'all 0.3s',
@@ -714,7 +714,7 @@
 //                         mb={3}
 //                         sx={{
 //                           color: '#333F1F',
-//                           fontFamily: '"Poppins", sans-serif'
+//                           fontFamily: '"DM Sans", sans-serif'
 //                         }}
 //                       >
 //                         {t('news:articleInfo', 'Article Info')}
@@ -736,10 +736,10 @@
 //                             <CalendarToday sx={{ fontSize: 18, color: '#8CA551' }} />
 //                           </Box>
 //                           <Box>
-//                             <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', display: 'block' }}>
+//                             <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif', display: 'block' }}>
 //                               {t('news:published', 'Published')}
 //                             </Typography>
-//                             <Typography variant="body2" fontWeight={600} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+//                             <Typography variant="body2" fontWeight={600} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
 //                               {new Date(news.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
 //                             </Typography>
 //                           </Box>
@@ -760,10 +760,10 @@
 //                             <AccessTime sx={{ fontSize: 18, color: '#8CA551' }} />
 //                           </Box>
 //                           <Box>
-//                             <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif', display: 'block' }}>
+//                             <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif', display: 'block' }}>
 //                               {t('news:readingTime', 'Reading Time')}
 //                             </Typography>
-//                             <Typography variant="body2" fontWeight={600} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+//                             <Typography variant="body2" fontWeight={600} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
 //                               {t('news:minRead', { minutes: Math.ceil((news.contentBlocks?.length || 3) * 0.5) })}
 //                             </Typography>
 //                           </Box>
@@ -788,7 +788,7 @@
 //                         mb={3}
 //                         sx={{
 //                           color: '#333F1F',
-//                           fontFamily: '"Poppins", sans-serif'
+//                           fontFamily: '"DM Sans", sans-serif'
 //                         }}
 //                       >
 //                         {t('news:relatedNews', 'Related News')}
@@ -802,7 +802,7 @@
 //                           variant="caption" 
 //                           sx={{ 
 //                             color: '#706f6f',
-//                             fontFamily: '"Poppins", sans-serif',
+//                             fontFamily: '"DM Sans", sans-serif',
 //                             display: 'block',
 //                             textAlign: 'center',
 //                             py: 2
@@ -866,7 +866,7 @@
 //                                     fontSize: '0.65rem',
 //                                     height: 20,
 //                                     mb: 1,
-//                                     fontFamily: '"Poppins", sans-serif'
+//                                     fontFamily: '"DM Sans", sans-serif'
 //                                   }}
 //                                 />
 //                                 <Typography
@@ -874,7 +874,7 @@
 //                                   fontWeight={600}
 //                                   sx={{
 //                                     color: '#333F1F',
-//                                     fontFamily: '"Poppins", sans-serif',
+//                                     fontFamily: '"DM Sans", sans-serif',
 //                                     display: '-webkit-box',
 //                                     WebkitLineClamp: 2,
 //                                     WebkitBoxOrient: 'vertical',
@@ -889,7 +889,7 @@
 //                                   variant="caption"
 //                                   sx={{
 //                                     color: '#706f6f',
-//                                     fontFamily: '"Poppins", sans-serif',
+//                                     fontFamily: '"DM Sans", sans-serif',
 //                                     display: 'block'
 //                                   }}
 //                                 >

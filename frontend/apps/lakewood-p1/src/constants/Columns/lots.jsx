@@ -15,7 +15,7 @@ import {
   AttachMoney
 } from '@mui/icons-material'
 
-export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
+export const useLotsColumns = (t, handleOpenDialog, handleDelete, isOwner) => {
   return [
     {
       field: 'number',
@@ -32,7 +32,7 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
               color: 'white',
               fontWeight: 700,
               fontSize: '1rem',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               border: '2px solid rgba(255, 255, 255, 0.9)',
               boxShadow: '0 4px 12px rgba(51, 63, 31, 0.2)'
             }}
@@ -45,7 +45,7 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
               sx={{
                 fontWeight: 600,
                 color: '#1a1a1a',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: '0.95rem'
               }}
             >
@@ -55,7 +55,7 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
               variant="caption"
               sx={{
                 color: '#706f6f',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontSize: '0.7rem'
               }}
             >
@@ -76,7 +76,7 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
             sx={{
               fontWeight: 700,
               color: '#333F1F',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: '1rem'
             }}
           >
@@ -108,16 +108,16 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
                 color: 'white',
                 fontWeight: 700,
                 fontSize: '0.75rem',
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               {modelData?.modelNumber || 'M'}
             </Avatar>
             <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif', fontSize: '0.85rem' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif', fontSize: '0.85rem' }}>
                 {modelData?.model || 'Model'}
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.7rem' }}>
+              <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.7rem' }}>
                 {modelData?.modelNumber || ''}
               </Typography>
             </Box>
@@ -141,7 +141,7 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
             size="small"
             sx={{
               fontWeight: 600,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               height: 28,
               px: 1.5,
               fontSize: '0.75rem',
@@ -180,7 +180,7 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
                 color: 'white',
                 fontWeight: 700,
                 fontSize: '0.875rem',
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 border: '2px solid rgba(255, 255, 255, 0.9)',
                 boxShadow: '0 2px 8px rgba(51, 63, 31, 0.15)'
               }}
@@ -188,10 +188,10 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
               {row.assignedUser.firstName?.charAt(0)}{row.assignedUser.lastName?.charAt(0)}
             </Avatar>
             <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}>
                 {row.assignedUser.firstName} {row.assignedUser.lastName}
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
                 {row.assignedUser.email}
               </Typography>
             </Box>
@@ -206,50 +206,58 @@ export const useLotsColumns = (t, handleOpenDialog, handleDelete) => {
       renderCell: ({ row }) => (
         <Box sx={{ display: 'flex', gap: 0.5 }}>
           <Tooltip title={t('lots:actions.edit')} placement="top">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleOpenDialog(row)
-              }}
-              sx={{
-                bgcolor: 'rgba(140, 165, 81, 0.08)',
-                border: '1px solid rgba(140, 165, 81, 0.2)',
-                borderRadius: 2,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  bgcolor: '#8CA551',
-                  borderColor: '#8CA551',
-                  transform: 'scale(1.1)',
-                  '& .MuiSvgIcon-root': { color: 'white' }
-                }
-              }}
-            >
-              <Edit sx={{ fontSize: 18, color: '#8CA551' }} />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleOpenDialog(row)
+                }}
+                disabled={isOwner}
+                sx={{
+                  bgcolor: 'rgba(140, 165, 81, 0.08)',
+                  border: '1px solid rgba(140, 165, 81, 0.2)',
+                  borderRadius: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    bgcolor: '#8CA551',
+                    borderColor: '#8CA551',
+                    transform: 'scale(1.1)',
+                    '& .MuiSvgIcon-root': { color: 'white' }
+                  },
+                  '&:disabled': { opacity: 0.5 }
+                }}
+              >
+                <Edit sx={{ fontSize: 18, color: '#8CA551' }} />
+              </IconButton>
+            </span>
           </Tooltip>
           <Tooltip title={t('lots:actions.delete')} placement="top">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleDelete(row._id)
-              }}
-              sx={{
-                bgcolor: 'rgba(229, 134, 60, 0.08)',
-                border: '1px solid rgba(229, 134, 60, 0.2)',
-                borderRadius: 2,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  bgcolor: '#E5863C',
-                  borderColor: '#E5863C',
-                  transform: 'scale(1.1)',
-                  '& .MuiSvgIcon-root': { color: 'white' }
-                }
-              }}
-            >
-              <Delete sx={{ fontSize: 18, color: '#E5863C' }} />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDelete(row._id)
+                }}
+                disabled={isOwner}
+                sx={{
+                  bgcolor: 'rgba(229, 134, 60, 0.08)',
+                  border: '1px solid rgba(229, 134, 60, 0.2)',
+                  borderRadius: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    bgcolor: '#E5863C',
+                    borderColor: '#E5863C',
+                    transform: 'scale(1.1)',
+                    '& .MuiSvgIcon-root': { color: 'white' }
+                  },
+                  '&:disabled': { opacity: 0.5 }
+                }}
+              >
+                <Delete sx={{ fontSize: 18, color: '#E5863C' }} />
+              </IconButton>
+            </span>
           </Tooltip>
         </Box>
       )

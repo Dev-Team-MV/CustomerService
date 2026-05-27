@@ -38,15 +38,15 @@ const ResidentDialog = ({
   const fieldSx = {
     "& .MuiOutlinedInput-root": {
       borderRadius: 3,
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       "&.Mui-focused fieldset": { borderColor: theme.palette.primary.main, borderWidth: "2px" },
       "&:hover fieldset": { borderColor: theme.palette.secondary.main }
     },
     "& .MuiInputLabel-root": {
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       "&.Mui-focused": { color: theme.palette.primary.main }
     },
-    "& .MuiFormHelperText-root": { fontFamily: '"Poppins", sans-serif' }
+    "& .MuiFormHelperText-root": { fontFamily: '"DM Sans", sans-serif' }
   }
 
   // ── Actions ───────────────────────────────────────────────
@@ -61,7 +61,7 @@ const ResidentDialog = ({
           px: 3,
           py: 1.2,
           color: theme.palette.text.secondary,
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           border: `2px solid ${theme.palette.divider}`,
           "&:hover": {
             bgcolor: theme.palette.action.hover,
@@ -101,7 +101,7 @@ const ResidentDialog = ({
           borderRadius: 3,
           bgcolor: theme.palette.secondary.main + "14", // 8% opacity
           border: `1px solid ${theme.palette.secondary.main}4D`, // 30% opacity
-          fontFamily: '"Poppins", sans-serif',
+          fontFamily: '"DM Sans", sans-serif',
           "& .MuiAlert-icon": { color: theme.palette.secondary.main }
         }}
       >
@@ -157,7 +157,7 @@ const ResidentDialog = ({
                 mb: 0.5,
                 display: "block",
                 color: theme.palette.text.secondary,
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               {t('dialog.phoneNumber')} *
@@ -176,7 +176,7 @@ const ResidentDialog = ({
                 fontSize: "16px",
                 border: `2px solid ${theme.palette.divider}`,
                 borderRadius: 12,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 transition: "all 0.3s"
               }}
               buttonStyle={{
@@ -187,7 +187,7 @@ const ResidentDialog = ({
               }}
               dropdownStyle={{
                 borderRadius: 12,
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             />
 
@@ -196,7 +196,7 @@ const ResidentDialog = ({
                 <Typography
                   variant="caption"
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     color: theme.palette.text.secondary
                   }}
                 >
@@ -205,7 +205,7 @@ const ResidentDialog = ({
                 <Typography
                   variant="caption"
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontWeight: 700,
                     color: isPhoneValid ? theme.palette.secondary.main : theme.palette.error.main
                   }}
@@ -240,14 +240,17 @@ const ResidentDialog = ({
             onChange={(e) => handleFieldChange('role', e.target.value)}
             sx={fieldSx}
           >
-            <MenuItem value="user" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            <MenuItem value="user" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
               {t('dialog.roles.user')}
             </MenuItem>
-            <MenuItem value="admin" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            <MenuItem value="admin" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
               {t('dialog.roles.admin')}
             </MenuItem>
-            <MenuItem value="superadmin" sx={{ fontFamily: '"Poppins", sans-serif' }}>
+            <MenuItem value="superadmin" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
               {t('dialog.roles.superadmin')}
+            </MenuItem>
+            <MenuItem value="owner" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
+              {t('dialog.roles.owner')}
             </MenuItem>
           </TextField>
         </Grid>

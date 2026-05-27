@@ -43,7 +43,7 @@ const ImagePreview = ({ images = [], height = 220 }) => {
                 }}
               />
               <Box sx={{ p: 1, textAlign: 'center' }}>
-                <Typography variant="caption" sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="caption" sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}>
                   {`Image ${idx + 1}`}
                 </Typography>
               </Box>

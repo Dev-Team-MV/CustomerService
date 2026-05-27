@@ -190,7 +190,7 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
                 sx={{
                   mb: 0.5,
                   color: '#333F1F',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '0.85rem', sm: '0.9rem' },
                 }}
               >
@@ -200,7 +200,7 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
                 variant="caption"
                 sx={{
                   color: '#706f6f',
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: { xs: '0.75rem', sm: '0.8rem' },
                   lineHeight: 1.6,
                 }}
@@ -234,7 +234,7 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
             bgcolor: galleryFilter === "all" ? '#333F1F' : 'transparent',
             color: galleryFilter === "all" ? 'white' : '#706f6f',
             borderColor: galleryFilter === "all" ? '#333F1F' : '#e0e0e0',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontSize: { xs: '0.7rem', sm: '0.75rem' },
             '&:hover': {
               bgcolor: galleryFilter === "all" ? '#4a5d3a' : 'rgba(51, 63, 31, 0.08)',
@@ -252,7 +252,7 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
             bgcolor: galleryFilter === "exterior" ? '#333F1F' : 'transparent',
             color: galleryFilter === "exterior" ? 'white' : '#706f6f',
             borderColor: galleryFilter === "exterior" ? '#333F1F' : '#e0e0e0',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontSize: { xs: '0.7rem', sm: '0.75rem' },
             '&:hover': {
               bgcolor: galleryFilter === "exterior" ? '#4a5d3a' : 'rgba(51, 63, 31, 0.08)',
@@ -270,7 +270,7 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
             bgcolor: galleryFilter === "interior" ? '#333F1F' : 'transparent',
             color: galleryFilter === "interior" ? 'white' : '#706f6f',
             borderColor: galleryFilter === "interior" ? '#333F1F' : '#e0e0e0',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontSize: { xs: '0.7rem', sm: '0.75rem' },
             '&:hover': {
               bgcolor: galleryFilter === "interior" ? '#4a5d3a' : 'rgba(51, 63, 31, 0.08)',
@@ -288,7 +288,7 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
             bgcolor: galleryFilter === "facade" ? '#333F1F' : 'transparent',
             color: galleryFilter === "facade" ? 'white' : '#706f6f',
             borderColor: galleryFilter === "facade" ? '#333F1F' : '#e0e0e0',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontSize: { xs: '0.7rem', sm: '0.75rem' },
             '&:hover': {
               bgcolor: galleryFilter === "facade" ? '#4a5d3a' : 'rgba(51, 63, 31, 0.08)',
@@ -306,7 +306,7 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
             bgcolor: galleryFilter === "blueprint" ? '#333F1F' : 'transparent',
             color: galleryFilter === "blueprint" ? 'white' : '#706f6f',
             borderColor: galleryFilter === "blueprint" ? '#333F1F' : '#e0e0e0',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             fontSize: { xs: '0.7rem', sm: '0.75rem' },
             '&:hover': {
               bgcolor: galleryFilter === "blueprint" ? '#4a5d3a' : 'rgba(51, 63, 31, 0.08)',
@@ -356,7 +356,7 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
                 <Typography 
                   color="white"
                   sx={{
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontSize: { xs: '0.85rem', sm: '1rem' }
                   }}
                 >
@@ -424,7 +424,7 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
                     variant="caption" 
                     color="text.secondary"
                     sx={{
-                      fontFamily: '"Poppins", sans-serif',
+                      fontFamily: '"DM Sans", sans-serif',
                       fontSize: { xs: '0.75rem', sm: '0.8rem' }
                     }}
                   >
@@ -505,7 +505,7 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
             <Typography
               variant="h6"
               sx={{
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 color: "#1a1a1a",
                 fontWeight: 700,
                 fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.5rem" },
@@ -526,7 +526,7 @@ const AdminPropertyDetails = ({ propertyDetails, isModel10, balconyLabels }) => 
                   fontSize: { xs: "0.65rem", sm: "0.7rem" },
                   height: { xs: 24, sm: 28 },
                   px: { xs: 1, sm: 1.5 },
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   letterSpacing: "0.5px",
                   textTransform: "uppercase",
                   "&:hover": {

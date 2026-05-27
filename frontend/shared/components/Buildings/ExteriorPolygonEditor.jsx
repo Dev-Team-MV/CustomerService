@@ -199,13 +199,13 @@ export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, poly
         justifyContent: 'space-between'
       }}>
         <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif', fontSize: isMobile ? '1rem' : '1.25rem' }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif', fontSize: isMobile ? '1rem' : '1.25rem' }}>
             Exterior Polygon Editor
           </Typography>
           <Chip
             label={`${allPolygons.length} polygons`}
             size="small"
-            sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+            sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}
           />
         </Box>
         <IconButton onClick={onClose}>
@@ -383,7 +383,7 @@ export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, poly
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 10,
-        fontFamily: '"Poppins", sans-serif',
+        fontFamily: '"DM Sans", sans-serif',
         maxWidth: isMobile ? '90%' : 'auto'
       }}
       action={
@@ -410,7 +410,7 @@ export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, poly
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 10,
-        fontFamily: '"Poppins", sans-serif'
+        fontFamily: '"DM Sans", sans-serif'
       }}
     >
       Click to complete rectangle
@@ -521,10 +521,10 @@ export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, poly
             }}
           >
             <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
                 Polygons ({allPolygons.length})
               </Typography>
-              <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
                 Click to select, drag to move
               </Typography>
             </Box>
@@ -532,10 +532,10 @@ export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, poly
             <List sx={{ flex: 1, overflow: 'auto', p: 1 }}>
               {allPolygons.length === 0 ? (
                 <Box sx={{ p: 3, textAlign: 'center' }}>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', mb: 1 }}>
+                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif', mb: 1 }}>
                     No polygons yet
                   </Typography>
-                  <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
                     Use the toolbar to start drawing
                   </Typography>
                 </Box>
@@ -568,8 +568,8 @@ export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, poly
                     <ListItemText
                       primary={polygon.name}
                       secondary="Exterior"
-                      primaryTypographyProps={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.9rem', fontWeight: 600 }}
-                      secondaryTypographyProps={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.75rem' }}
+                      primaryTypographyProps={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.9rem', fontWeight: 600 }}
+                      secondaryTypographyProps={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.75rem' }}
                     />
                     <ListItemSecondaryAction>
                       <IconButton
@@ -596,7 +596,7 @@ export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, poly
 
             {selectedPolygon && (
               <Box sx={{ p: 2, borderTop: `1px solid ${theme.palette.divider}`, bgcolor: theme.palette.background.paper }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Palette fontSize="small" />
                   Polygon Settings
                 </Typography>
@@ -623,7 +623,7 @@ export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, poly
                   sx={{ mb: 2 }}
                 />
                 <Box sx={{ mb: 2 }}>
-                  <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', mb: 1, display: 'block', fontWeight: 600 }}>
+                  <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', mb: 1, display: 'block', fontWeight: 600 }}>
                     Color
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
@@ -674,7 +674,7 @@ export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, poly
             }}
           >
             <Box sx={{ p: 1.5, borderBottom: `1px solid ${theme.palette.divider}` }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
                 Polygons ({allPolygons.length})
               </Typography>
             </Box>
@@ -682,7 +682,7 @@ export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, poly
             <List sx={{ flex: 1, overflow: 'auto', p: 1 }}>
               {allPolygons.length === 0 ? (
                 <Box sx={{ p: 2, textAlign: 'center' }}>
-                  <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+                  <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
                     No polygons yet. Use toolbar to draw.
                   </Typography>
                 </Box>
@@ -712,7 +712,7 @@ export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, poly
                     />
                     <ListItemText
                       primary={polygon.name}
-                      primaryTypographyProps={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.85rem', fontWeight: 600 }}
+                      primaryTypographyProps={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.85rem', fontWeight: 600 }}
                     />
                     <ListItemSecondaryAction>
                       <IconButton
@@ -768,7 +768,7 @@ export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, poly
         alignItems: 'center',
         bgcolor: theme.palette.background.paper
       }}>
-        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif', display: isMobile ? 'none' : 'block' }}>
+        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif', display: isMobile ? 'none' : 'block' }}>
           Zoom: {Math.round(scale * 100)}% | Total Polygons: {allPolygons.length}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, width: isMobile ? '100%' : 'auto' }}>
@@ -779,7 +779,7 @@ export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, poly
             sx={{
               borderRadius: 2,
               textTransform: 'none',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontWeight: 600
             }}
           >
@@ -793,7 +793,7 @@ export default function ExteriorPolygonEditor({ open, onClose, exteriorUrl, poly
             sx={{
               borderRadius: 2,
               textTransform: 'none',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontWeight: 600,
               bgcolor: theme.palette.primary.main
             }}

@@ -174,7 +174,7 @@ const GalleryCarrousel = ({
                   color: 'white',
                   padding: '8px 16px',
                   borderRadius: 8,
-                  fontFamily: '"Poppins", sans-serif',
+                  fontFamily: '"DM Sans", sans-serif',
                   fontSize: 14,
                   fontWeight: 600,
                   pointerEvents: 'none',

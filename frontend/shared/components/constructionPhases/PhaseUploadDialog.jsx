@@ -4,9 +4,14 @@ import {
 } from '@mui/material'
 import { CloudUpload, Delete } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { enUS } from 'date-fns/locale'
 import ModalWrapper from '@shared/constants/ModalWrapper'
 import PrimaryButton from '@shared/constants/PrimaryButton'
 import React from 'react'
+
 const PhaseUploadDialog = ({
   open,
   onClose,
@@ -23,10 +28,11 @@ const PhaseUploadDialog = ({
 
   const [uploadForm, setUploadForm] = React.useState({
     title: '',
+    description: '',
     percentage: 0,
     images: [],
     videos: [],
-    uploadedAt: new Date().toISOString().split('T')[0]
+    uploadedAt: null  // ✅ Cambiar a null para Date object
   })
 
   const maxAddable = maxPercentage - (phase?.constructionPercentage || 0)
@@ -53,35 +59,57 @@ const PhaseUploadDialog = ({
       return
     }
     
-    await onUpload(phase?.phaseNumber, uploadForm)
-    setUploadForm({ title: '', percentage: 0, images: [], videos: [], uploadedAt: new Date().toISOString().split('T')[0] })
+    // ✅ Convertir fecha a ISO string o string en formato MM/DD/YYYY
+    const payload = {
+      ...uploadForm,
+      uploadedAt: uploadForm.uploadedAt 
+        ? uploadForm.uploadedAt.toISOString() 
+        : new Date().toISOString()
+    }
+    
+    await onUpload(phase?.phaseNumber, payload)
+    setUploadForm({ 
+      title: '', 
+      description: '', 
+      percentage: 0, 
+      images: [], 
+      videos: [], 
+      uploadedAt: null 
+    })
   }
 
   const handleClose = () => {
-    setUploadForm({ title: '', percentage: 0, images: [], videos: [], uploadedAt: new Date().toISOString().split('T')[0] })
+    setUploadForm({ 
+      title: '', 
+      description: '', 
+      percentage: 0, 
+      images: [], 
+      videos: [], 
+      uploadedAt: null 
+    })
     onClose()
   }
 
   const fieldSx = {
     '& .MuiOutlinedInput-root': {
       borderRadius: 3,
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       '& fieldset': { borderColor: theme.palette.cardBorder, borderWidth: '2px' },
       '&:hover fieldset': { borderColor: theme.palette.secondary.main },
       '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main, borderWidth: '2px' }
     },
     '& .MuiInputLabel-root': {
-      fontFamily: '"Poppins", sans-serif',
+      fontFamily: '"DM Sans", sans-serif',
       fontWeight: 500,
       color: theme.palette.text.secondary,
       '&.Mui-focused': { color: theme.palette.primary.main, fontWeight: 600 }
     },
-    '& .MuiFormHelperText-root': { fontFamily: '"Poppins", sans-serif' }
+    '& .MuiFormHelperText-root': { fontFamily: '"DM Sans", sans-serif' }
   }
 
   const fileButtonSx = {
     py: 1.5, borderRadius: 3, textTransform: 'none',
-    fontWeight: 600, fontFamily: '"Poppins", sans-serif',
+    fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
     borderColor: theme.palette.cardBorder, borderWidth: '2px', 
     color: theme.palette.primary.main,
     '&:hover': { 
@@ -132,6 +160,20 @@ const PhaseUploadDialog = ({
           />
         </Grid>
 
+        {/* Descripción */}
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Description (Optional)"
+            value={uploadForm.description}
+            onChange={(e) => setUploadForm(prev => ({ ...prev, description: e.target.value }))}
+            multiline
+            rows={3}
+            placeholder="Add a description for this media upload..."
+            sx={fieldSx}
+          />
+        </Grid>
+
         {/* Porcentaje con límite dinámico */}
         <Grid item xs={12}>
           <TextField
@@ -139,12 +181,12 @@ const PhaseUploadDialog = ({
             type="number"
             label="Progress Added (%)"
             value={uploadForm.percentage}
-onChange={(e) => {
-  // ✅ Redondear cualquier valor decimal a entero
-  const val = Math.round(parseFloat(e.target.value)) || 0
-  const clamped = Math.min(Math.max(0, val), maxAddable)
-  setUploadForm(prev => ({ ...prev, percentage: clamped }))
-}}
+            onChange={(e) => {
+              // ✅ Redondear cualquier valor decimal a entero
+              const val = Math.round(parseFloat(e.target.value)) || 0
+              const clamped = Math.min(Math.max(0, val), maxAddable)
+              setUploadForm(prev => ({ ...prev, percentage: clamped }))
+            }}
             inputProps={{ min: 0, max: maxAddable, step: 1 }}
             helperText={
               <Box component="span" sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -165,17 +207,23 @@ onChange={(e) => {
           />
         </Grid>
 
-        {/* Fecha de subida */}
+        {/* ✅ Fecha de subida - MM/DD/YYYY */}
         <Grid item xs={12}>
-          <TextField
-            fullWidth
-            type="date"
-            label="Upload Date"
-            value={uploadForm.uploadedAt}
-            onChange={(e) => setUploadForm(prev => ({ ...prev, uploadedAt: e.target.value }))}
-            InputLabelProps={{ shrink: true }}
-            sx={fieldSx}
-          />
+          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enUS}>
+            <DatePicker
+              label="Upload Date"
+              value={uploadForm.uploadedAt}
+              onChange={(newDate) => setUploadForm(prev => ({ ...prev, uploadedAt: newDate }))}
+              format="MM/dd/yyyy"
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  helperText: 'MM/DD/YYYY',
+                  sx: fieldSx
+                }
+              }}
+            />
+          </LocalizationProvider>
         </Grid>
 
         {/* Imágenes */}
@@ -197,7 +245,7 @@ onChange={(e) => {
             <Typography variant="caption" sx={{ 
               color: theme.palette.text.secondary, 
               fontWeight: 600, 
-              fontFamily: '"Poppins", sans-serif', 
+              fontFamily: '"DM Sans", sans-serif', 
               display: 'block', 
               mb: 1 
             }}>
@@ -215,7 +263,7 @@ onChange={(e) => {
                   borderRadius: 2 
                 }}>
                   <Typography variant="body2" noWrap sx={{ 
-                    fontFamily: '"Poppins", sans-serif', 
+                    fontFamily: '"DM Sans", sans-serif', 
                     flex: 1, 
                     mr: 1 
                   }}>
@@ -255,7 +303,7 @@ onChange={(e) => {
                 <Typography variant="caption" sx={{ 
                   color: theme.palette.text.secondary, 
                   fontWeight: 600, 
-                  fontFamily: '"Poppins", sans-serif', 
+                  fontFamily: '"DM Sans", sans-serif', 
                   display: 'block', 
                   mb: 1 
                 }}>
@@ -273,7 +321,7 @@ onChange={(e) => {
                       borderRadius: 2 
                     }}>
                       <Typography variant="body2" noWrap sx={{ 
-                        fontFamily: '"Poppins", sans-serif', 
+                        fontFamily: '"DM Sans", sans-serif', 
                         flex: 1, 
                         mr: 1 
                       }}>

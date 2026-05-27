@@ -27,7 +27,7 @@ const OptionChips = ({
                   color: '#8CA551',
                   fontSize: '0.85em',
                   ml: 0.5,
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 +${(model.upgradePrice || model.upgrades?.[0]?.price || 0).toLocaleString()}
@@ -40,7 +40,7 @@ const OptionChips = ({
             fontWeight: 600,
             px: 2,
             fontSize: '0.875rem',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: options.upgrade ? 'rgba(140, 165, 81, 0.12)' : '#fafafa',
             color: options.upgrade ? '#333F1F' : '#706f6f',
             border: `1px solid ${options.upgrade ? '#8CA551' : '#e0e0e0'}`,
@@ -60,7 +60,7 @@ const OptionChips = ({
                   color: '#8CA551',
                   fontSize: '0.85em',
                   ml: 0.5,
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 +${(model.balconyPrice || model.balconies?.[0]?.price || 0).toLocaleString()}
@@ -73,7 +73,7 @@ const OptionChips = ({
             fontWeight: 600,
             px: 2,
             fontSize: '0.875rem',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: options.balcony ? 'rgba(140, 165, 81, 0.12)' : '#fafafa',
             color: options.balcony ? '#333F1F' : '#706f6f',
             border: `1px solid ${options.balcony ? '#8CA551' : '#e0e0e0'}`,
@@ -93,7 +93,7 @@ const OptionChips = ({
                   color: '#E5863C',
                   fontSize: '0.85em',
                   ml: 0.5,
-                  fontFamily: '"Poppins", sans-serif'
+                  fontFamily: '"DM Sans", sans-serif'
                 }}
               >
                 +${(model.storagePrice || model.storages?.[0]?.price || 0).toLocaleString()}
@@ -106,7 +106,7 @@ const OptionChips = ({
             fontWeight: 600,
             px: 2,
             fontSize: '0.875rem',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"DM Sans", sans-serif',
             bgcolor: options.storage ? 'rgba(229, 134, 60, 0.12)' : '#fafafa',
             color: options.storage ? '#333F1F' : '#706f6f',
             border: `1px solid ${options.storage ? '#E5863C' : '#e0e0e0'}`,

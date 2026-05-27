@@ -50,7 +50,7 @@ const PhaseViewer = ({
             <Typography
               variant="h6"
               sx={{
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 fontWeight: 700,
                 color: theme.palette.primary.main,
                 mb: 0.5

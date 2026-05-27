@@ -199,7 +199,7 @@ const PhaseMediaGallery = ({
               px: 1.5,
               py: 0.5,
               borderRadius: 2,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: '0.75rem',
               fontWeight: 600
             }}
@@ -220,7 +220,7 @@ const PhaseMediaGallery = ({
               px: 2,
               py: 1,
               borderRadius: 2,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontSize: '0.85rem',
               fontWeight: 600,
               maxWidth: '60%'
@@ -229,6 +229,25 @@ const PhaseMediaGallery = ({
             {currentItem.title}
           </Box>
         )}
+        {currentItem.description && (
+  <Box
+    sx={{
+      position: 'absolute',
+      bottom: 12,
+      right: 12,
+      bgcolor: 'rgba(0,0,0,0.7)',
+      color: 'white',
+      px: 2,
+      py: 1,
+      borderRadius: 2,
+      fontFamily: '"DM Sans", sans-serif',
+      fontSize: '0.75rem',
+      maxWidth: '60%'
+    }}
+  >
+    {currentItem.description}
+  </Box>
+)}
       </Box>
 
       {/* Thumbnails */}

@@ -241,17 +241,17 @@ const MasterPlanEditor = ({
       }}>
         <Box sx={{ flex: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
               {t('editorTitle', 'Master Plan Editor')}
             </Typography>
             <Chip 
               label={masterPlanData.project.name}
               size="small"
-              sx={{ fontWeight: 600, fontFamily: '"Poppins", sans-serif' }}
+              sx={{ fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}
             />
           </Box>
           
-          <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
             {t('buildingsCount', {
               total: buildings.length,
               withPolygons: buildingsWithPolygons.length
@@ -356,7 +356,7 @@ const MasterPlanEditor = ({
                 left: '50%',
                 transform: 'translateX(-50%)',
                 zIndex: 10,
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
               action={
                 <Button
@@ -473,10 +473,10 @@ const MasterPlanEditor = ({
           }}
         >
           <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif' }}>
               {t('buildingsList', 'Buildings')} ({buildings.length})
             </Typography>
-            <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
               {t('selectBuildingToDraw', 'Select a building to draw polygon')}
             </Typography>
           </Box>
@@ -505,8 +505,8 @@ const MasterPlanEditor = ({
                   <ListItemText
                     primary={building.name}
                     secondary={hasPolygon ? 'Has polygon' : 'No polygon'}
-                    primaryTypographyProps={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.9rem', fontWeight: 600 }}
-                    secondaryTypographyProps={{ fontFamily: '"Poppins", sans-serif', fontSize: '0.75rem' }}
+                    primaryTypographyProps={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.9rem', fontWeight: 600 }}
+                    secondaryTypographyProps={{ fontFamily: '"DM Sans", sans-serif', fontSize: '0.75rem' }}
                   />
                   {hasPolygon && (
                     <ListItemSecondaryAction>
@@ -535,7 +535,7 @@ const MasterPlanEditor = ({
 
           {selectedBuilding && selectedPolygonData && (
             <Box sx={{ p: 2, borderTop: `1px solid ${theme.palette.divider}`, bgcolor: theme.palette.background.paper }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"Poppins", sans-serif', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, fontFamily: '"DM Sans", sans-serif', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Palette fontSize="small" />
                 Polygon Style
               </Typography>
@@ -561,7 +561,7 @@ const MasterPlanEditor = ({
               />
               
               <Box sx={{ mb: 1 }}>
-                <Typography variant="caption" sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 600, display: 'block', mb: 1 }}>
+                <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, display: 'block', mb: 1 }}>
                   Opacity: {((selectedPolygonData.polygonOpacity || 0.42) * 100).toFixed(0)}%
                 </Typography>
                 <Slider
@@ -587,7 +587,7 @@ const MasterPlanEditor = ({
         alignItems: 'center',
         bgcolor: theme.palette.background.paper
       }}>
-        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}>
+        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}>
           Zoom: {Math.round(scale * 100)}% | Polygons: {buildingsWithPolygons.length}/{buildings.length}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
@@ -597,7 +597,7 @@ const MasterPlanEditor = ({
             sx={{
               borderRadius: 2,
               textTransform: 'none',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontWeight: 600
             }}
           >
@@ -610,7 +610,7 @@ const MasterPlanEditor = ({
             sx={{
               borderRadius: 2,
               textTransform: 'none',
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               fontWeight: 600,
               bgcolor: theme.palette.primary.main
             }}

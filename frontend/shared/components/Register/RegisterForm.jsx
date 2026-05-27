@@ -57,7 +57,7 @@ const RegisterForm = ({
 
   const fieldSx = (field) => ({
     '& .MuiOutlinedInput-root': {
-      borderRadius: 3, bgcolor: 'white', fontFamily: '"Poppins", sans-serif',
+      borderRadius: 3, bgcolor: 'white', fontFamily: '"DM Sans", sans-serif',
       '& fieldset': {
         borderWidth: '2px',
         borderColor: focusedField === field ? brandColors.primary : '#e0e0e0',
@@ -66,7 +66,7 @@ const RegisterForm = ({
       '&:hover fieldset': { borderColor: brandColors.secondary }
     },
     '& .MuiInputLabel-root': {
-      fontFamily: '"Poppins", sans-serif', color: '#706f6f',
+      fontFamily: '"DM Sans", sans-serif', color: '#706f6f',
       '&.Mui-focused': { color: brandColors.primary }
     }
   })
@@ -76,10 +76,10 @@ const RegisterForm = ({
       <motion.div initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.8, delay: 0.3 }}>
 
         <Box sx={{ mb: 5 }}>
-          <Typography variant="h4" fontWeight="300" sx={{ mb: 1, color: '#706f6f', letterSpacing: '1px', fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="h4" fontWeight="300" sx={{ mb: 1, color: '#706f6f', letterSpacing: '1px', fontFamily: '"DM Sans", sans-serif' }}>
             {isPasswordSetup ? t('completeYour') : t('createYour')}
           </Typography>
-          <Typography variant="h5" fontWeight="700" sx={{ mb: 2, color: brandColors.primary, letterSpacing: '1px', fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="h5" fontWeight="700" sx={{ mb: 2, color: brandColors.primary, letterSpacing: '1px', fontFamily: '"DM Sans", sans-serif' }}>
             {isPasswordSetup ? t('accountSetup') : t('account')}
           </Typography>
           <motion.div initial={{ width: 0 }} animate={{ width: '60px' }} transition={{ delay: 0.8, duration: 0.8 }}>
@@ -88,7 +88,7 @@ const RegisterForm = ({
         </Box>
 
         {isPasswordSetup && firstName && (
-          <Alert severity="info" sx={{ mb: 3, borderRadius: 3, border: `1px solid ${brandColors.primary}4D`, bgcolor: `${brandColors.primary}14`, fontFamily: '"Poppins", sans-serif' }}>
+          <Alert severity="info" sx={{ mb: 3, borderRadius: 3, border: `1px solid ${brandColors.primary}4D`, bgcolor: `${brandColors.primary}14`, fontFamily: '"DM Sans", sans-serif' }}>
             {t('welcomeSetupPlain', { name: firstName })}
           </Alert>
         )}
@@ -96,7 +96,7 @@ const RegisterForm = ({
         {error && (
           <AnimatePresence>
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-              <Alert severity="error" sx={{ mb: 3, borderRadius: 3, fontFamily: '"Poppins", sans-serif' }}>{error}</Alert>
+              <Alert severity="error" sx={{ mb: 3, borderRadius: 3, fontFamily: '"DM Sans", sans-serif' }}>{error}</Alert>
             </motion.div>
           </AnimatePresence>
         )}
@@ -133,7 +133,7 @@ const RegisterForm = ({
 
             <Grid item xs={12}>
               <Box>
-                <Typography variant="caption" sx={{ mb: 0.5, display: 'block', color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+                <Typography variant="caption" sx={{ mb: 0.5, display: 'block', color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
                   {isPasswordSetup ? t('phoneNumber') : t('phoneOptional')}
                 </Typography>
                 <PhoneInput
@@ -145,14 +145,14 @@ const RegisterForm = ({
                     width: '100%', height: '56px', fontSize: '16px', borderRadius: '12px',
                     border: `2px solid ${focusedField === 'phone' ? brandColors.primary : '#e0e0e0'}`,
                     transition: 'all 0.3s', backgroundColor: isPasswordSetup ? '#f5f5f5' : 'white',
-                    paddingLeft: '48px', fontFamily: '"Poppins", sans-serif'
+                    paddingLeft: '48px', fontFamily: '"DM Sans", sans-serif'
                   }}
                   buttonStyle={{
                     borderRadius: '12px 0 0 12px',
                     border: `2px solid ${focusedField === 'phone' ? brandColors.primary : '#e0e0e0'}`,
                     borderRight: 'none', backgroundColor: isPasswordSetup ? '#f5f5f5' : 'white'
                   }}
-                  dropdownStyle={{ borderRadius: '12px', fontFamily: '"Poppins", sans-serif' }}
+                  dropdownStyle={{ borderRadius: '12px', fontFamily: '"DM Sans", sans-serif' }}
                   onFocus={() => setFocusedField('phone')} onBlur={() => setFocusedField(null)}
                   preferredCountries={['us', 'mx', 'ca']}
                 />
@@ -191,7 +191,7 @@ const RegisterForm = ({
 
           <Box sx={{ mt: 3, mb: 2, display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
             <Gavel sx={{ fontSize: 16, color: '#706f6f' }} />
-            <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
               {t('byCreatingAccount')}{' '}
               <Link component={RouterLink} to="/terms-and-conditions" sx={{
                 color: brandColors.primary, fontWeight: 600, textDecoration: 'none',
@@ -206,7 +206,7 @@ const RegisterForm = ({
             <Button type="submit" fullWidth variant="contained" disabled={loading} endIcon={<KeyboardArrowRight />}
               sx={{
                 py: 1.8, borderRadius: 3, bgcolor: brandColors.primary, fontSize: '0.95rem', fontWeight: 600,
-                textTransform: 'uppercase', letterSpacing: '2px', fontFamily: '"Poppins", sans-serif',
+                textTransform: 'uppercase', letterSpacing: '2px', fontFamily: '"DM Sans", sans-serif',
                 boxShadow: `0 4px 12px ${brandColors.primary}4D`, position: 'relative', overflow: 'hidden',
                 '&::before': { content: '""', position: 'absolute', top: 0, left: '-100%', width: '100%', height: '100%', bgcolor: brandColors.secondary, transition: 'left 0.4s ease', zIndex: 0 },
                 '&:hover': { bgcolor: brandColors.primary, '&::before': { left: 0 } },
@@ -225,7 +225,7 @@ const RegisterForm = ({
 
           {!isPasswordSetup && (
             <Box sx={{ mt: 4, textAlign: 'center' }}>
-              <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+              <Typography variant="body2" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
                 {t('alreadyHaveAccount')}{' '}
                 <Link component={RouterLink} to="/login" sx={{ color: brandColors.primary, fontWeight: 600, textDecoration: 'none', '&:hover': { color: brandColors.secondary } }}>
                   {t('login')}

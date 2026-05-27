@@ -42,7 +42,7 @@ const TermsAndConditionsPage = ({
               color: theme.palette.text.secondary,
               textTransform: 'none',
               fontWeight: 600,
-              fontFamily: '"Poppins", sans-serif',
+              fontFamily: '"DM Sans", sans-serif',
               '&:hover': { bgcolor: 'transparent', color: theme.palette.primary.main }
             }}
           >
@@ -102,7 +102,7 @@ const TermsAndConditionsPage = ({
                   fontWeight={800}
                   sx={{
                     fontSize: { xs: '2rem', md: '2.8rem' },
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     letterSpacing: '1px',
                     textTransform: 'uppercase'
                   }}
@@ -113,7 +113,7 @@ const TermsAndConditionsPage = ({
                   variant="body1"
                   sx={{
                     color: 'rgba(255, 255, 255, 0.9)',
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontWeight: 400
                   }}
                 >
@@ -155,7 +155,7 @@ const TermsAndConditionsPage = ({
                         fontWeight: 600,
                         textTransform: 'uppercase',
                         letterSpacing: '1.5px',
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         fontSize: '0.7rem'
                       }}
                     >
@@ -166,7 +166,7 @@ const TermsAndConditionsPage = ({
                       sx={{
                         color: item.color,
                         fontWeight: 700,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         mt: 1
                       }}
                     >
@@ -202,13 +202,13 @@ const TermsAndConditionsPage = ({
               <Typography
                 variant="body1"
                 fontWeight={600}
-                sx={{ color: theme.palette.primary.main, fontFamily: '"Poppins", sans-serif', mb: 0.5 }}
+                sx={{ color: theme.palette.primary.main, fontFamily: '"DM Sans", sans-serif', mb: 0.5 }}
               >
                 {t('acceptance.message')}
               </Typography>
               <Typography
                 variant="body2"
-                sx={{ color: theme.palette.text.secondary, fontFamily: '"Poppins", sans-serif' }}
+                sx={{ color: theme.palette.text.secondary, fontFamily: '"DM Sans", sans-serif' }}
               >
                 {t('acceptance.disclaimer')}
               </Typography>
@@ -272,7 +272,7 @@ const TermsAndConditionsPage = ({
                       fontWeight={700}
                       sx={{
                         color: theme.palette.primary.main,
-                        fontFamily: '"Poppins", sans-serif',
+                        fontFamily: '"DM Sans", sans-serif',
                         letterSpacing: '0.5px',
                         fontSize: { xs: '1rem', md: '1.1rem' }
                       }}
@@ -290,7 +290,7 @@ const TermsAndConditionsPage = ({
                         fontSize: '0.65rem',
                         height: 20,
                         mt: 0.5,
-                        fontFamily: '"Poppins", sans-serif'
+                        fontFamily: '"DM Sans", sans-serif'
                       }}
                     />
                   </Box>
@@ -303,7 +303,7 @@ const TermsAndConditionsPage = ({
                     color: theme.palette.text.primary,
                     fontSize: '1rem',
                     lineHeight: 1.8,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     whiteSpace: 'pre-line'
                   }}
                 >
@@ -320,7 +320,7 @@ const TermsAndConditionsPage = ({
                       bgcolor: `${section.color}15`,
                       color: section.color,
                       fontWeight: 600,
-                      fontFamily: '"Poppins", sans-serif'
+                      fontFamily: '"DM Sans", sans-serif'
                     }}
                   />
                   <Chip
@@ -330,7 +330,7 @@ const TermsAndConditionsPage = ({
                       bgcolor: theme.palette.background.default,
                       color: theme.palette.text.secondary,
                       fontWeight: 600,
-                      fontFamily: '"Poppins", sans-serif'
+                      fontFamily: '"DM Sans", sans-serif'
                     }}
                   />
                 </Box>
@@ -361,7 +361,7 @@ const TermsAndConditionsPage = ({
               sx={{
                 color: theme.palette.primary.main,
                 mb: 2,
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               {t('footer.title')}
@@ -371,7 +371,7 @@ const TermsAndConditionsPage = ({
               sx={{
                 color: theme.palette.text.secondary,
                 mb: 3,
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               {t('footer.description')}
@@ -386,7 +386,7 @@ const TermsAndConditionsPage = ({
                 textTransform: 'none',
                 px: 4,
                 py: 1.5,
-                fontFamily: '"Poppins", sans-serif',
+                fontFamily: '"DM Sans", sans-serif',
                 letterSpacing: '1px',
                 '&:hover': {
                   bgcolor: theme.palette.secondary.main

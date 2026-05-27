@@ -257,7 +257,7 @@
 //                           sx={{
 //                             fontWeight: 700,
 //                             color: '#333F1F',
-//                             fontFamily: '"Poppins", sans-serif',
+//                             fontFamily: '"DM Sans", sans-serif',
 //                             fontSize: { xs: '1.1rem', md: '1.25rem' },
 //                             mb: 0.5
 //                           }}
@@ -336,7 +336,7 @@
 //                           sx={{
 //                             fontWeight: 700,
 //                             color: '#333F1F',
-//                             fontFamily: '"Poppins", sans-serif',
+//                             fontFamily: '"DM Sans", sans-serif',
 //                             fontSize: { xs: '1.1rem', md: '1.25rem' },
 //                             mb: 0.5
 //                           }}
@@ -406,7 +406,7 @@
 //                                   sx={{
 //                                     fontWeight: 800,
 //                                     color: item.color,
-//                                     fontFamily: '"Poppins", sans-serif',
+//                                     fontFamily: '"DM Sans", sans-serif',
 //                                     mb: 0.5
 //                                   }}
 //                                 >
@@ -419,7 +419,7 @@
 //                                     fontWeight: 600,
 //                                     textTransform: 'uppercase',
 //                                     letterSpacing: '0.5px',
-//                                     fontFamily: '"Poppins", sans-serif',
+//                                     fontFamily: '"DM Sans", sans-serif',
 //                                     fontSize: '0.7rem'
 //                                   }}
 //                                 >
@@ -460,7 +460,7 @@
 //                           sx={{
 //                             fontWeight: 700,
 //                             color: '#333F1F',
-//                             fontFamily: '"Poppins", sans-serif',
+//                             fontFamily: '"DM Sans", sans-serif',
 //                             fontSize: { xs: '1.1rem', md: '1.25rem' },
 //                             mb: 0.5
 //                           }}
@@ -501,7 +501,7 @@
 //                           <Typography
 //                             variant="body1"
 //                             sx={{
-//                               fontFamily: '"Poppins", sans-serif',
+//                               fontFamily: '"DM Sans", sans-serif',
 //                               color: '#706f6f'
 //                             }}
 //                           >
@@ -665,7 +665,7 @@ const Analytics = () => {
                           sx={{
                             fontWeight: 700,
                             color: '#333F1F',
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                             fontSize: { xs: '1.1rem', md: '1.25rem' },
                             mb: 0.5
                           }}
@@ -744,7 +744,7 @@ const Analytics = () => {
                           sx={{
                             fontWeight: 700,
                             color: '#333F1F',
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                             fontSize: { xs: '1.1rem', md: '1.25rem' },
                             mb: 0.5
                           }}
@@ -814,7 +814,7 @@ const Analytics = () => {
                                   sx={{
                                     fontWeight: 800,
                                     color: item.color,
-                                    fontFamily: '"Poppins", sans-serif',
+                                    fontFamily: '"DM Sans", sans-serif',
                                     mb: 0.5
                                   }}
                                 >
@@ -827,7 +827,7 @@ const Analytics = () => {
                                     fontWeight: 600,
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.5px',
-                                    fontFamily: '"Poppins", sans-serif',
+                                    fontFamily: '"DM Sans", sans-serif',
                                     fontSize: '0.7rem'
                                   }}
                                 >
@@ -868,7 +868,7 @@ const Analytics = () => {
                           sx={{
                             fontWeight: 700,
                             color: '#333F1F',
-                            fontFamily: '"Poppins", sans-serif',
+                            fontFamily: '"DM Sans", sans-serif',
                             fontSize: { xs: '1.1rem', md: '1.25rem' },
                             mb: 0.5
                           }}
@@ -909,7 +909,7 @@ const Analytics = () => {
                           <Typography
                             variant="body1"
                             sx={{
-                              fontFamily: '"Poppins", sans-serif',
+                              fontFamily: '"DM Sans", sans-serif',
                               color: '#706f6f'
                             }}
                           >

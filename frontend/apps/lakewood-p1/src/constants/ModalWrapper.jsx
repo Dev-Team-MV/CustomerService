@@ -41,11 +41,11 @@ const ModalWrapper = ({
           </Box>
         )}
         <Box>
-          <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"Poppins", sans-serif' }}>
+          <Typography variant="h6" fontWeight={700} sx={{ color: '#333F1F', fontFamily: '"DM Sans", sans-serif' }}>
             {title}
           </Typography>
           {subtitle && (
-            <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"Poppins", sans-serif' }}>
+            <Typography variant="caption" sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
               {subtitle}
             </Typography>
           )}

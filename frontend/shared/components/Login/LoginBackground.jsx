@@ -143,7 +143,7 @@ const LoginBackground = ({
                 opacity: 0.95,
                 letterSpacing: '2px',
                 fontSize: { xs: '1rem', md: '1.25rem' },
-                fontFamily: '"Poppins", sans-serif'
+                fontFamily: '"DM Sans", sans-serif'
               }}
             >
               {tagline}

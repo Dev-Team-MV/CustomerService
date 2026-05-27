@@ -22,10 +22,13 @@ import { useTranslation } from "react-i18next";
 import Loader from "../components/Loader";
 import useModalState from "@shared/hooks/useModalState";
 import { useModels } from "../hooks/useModels";
+import { useAuth } from '@shared/context/AuthContext';
 
 const Models = () => {
   const { t } = useTranslation(['models', 'common']);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isOwner = user?.role === 'owner';
 
   // Hooks para modales
   const modelModal = useModalState(null);
@@ -125,7 +128,7 @@ useEffect(() => {
                   sx={{
                     color: '#333F1F',
                     fontWeight: 600,
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     mb: 1
                   }}
                 >
@@ -135,7 +138,7 @@ useEffect(() => {
                   variant="body2"
                   sx={{
                     color: '#706f6f',
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     mb: 3
                   }}
                 >
@@ -149,7 +152,7 @@ useEffect(() => {
                     borderRadius: 3,
                     bgcolor: '#333F1F',
                     textTransform: 'none',
-                    fontFamily: '"Poppins", sans-serif',
+                    fontFamily: '"DM Sans", sans-serif',
                     fontWeight: 600,
                     px: 4,
                     '&:hover': {
@@ -169,6 +172,7 @@ useEffect(() => {
                   model={model}
                   index={index}
                   facades={getModelFacades(model._id)}
+                  isOwner={isOwner}
                   onEdit={m => modelModal.openModal(m)}
                   onDelete={handleDeleteModel}
                   onOpenGallery={m => galleryModal.openModal(m)}
