@@ -220,24 +220,24 @@ const TimeLine = () => {
       media
     };
 
-    try {
-      if (editingStep) {
-        const updated = await TimeLineService.update(editingStep.id, payload);
-        setSteps((prev) =>
-          prev.map((s) =>
-            s.id === editingStep.id
-              ? updated
-              : s
-          )
-        );
-      } else {
-        const created = await TimeLineService.create(payload);
-        setSteps((prev) => [created, ...prev]);
-      }
-      setModalOpen(false);
-    } catch (err) {
-      alert('Error al guardar. Intenta de nuevo.');
-    }
+try {
+  if (editingStep) {
+    const updated = await TimeLineService.update(editingStep._id, payload);
+    setSteps((prev) =>
+      prev.map((s) =>
+        s._id === editingStep._id
+          ? updated
+          : s
+      )
+    );
+  } else {
+    const created = await TimeLineService.create(payload);
+    setSteps((prev) => [created, ...prev]);
+  }
+  setModalOpen(false);
+} catch (err) {
+  alert('Error al guardar. Intenta de nuevo.');
+}
     setSaving(false);
   };
 
@@ -379,6 +379,7 @@ const columns = [
   columns={columns}
   data={steps}
   loading={loading}
+  getRowId={(row) => row._id}
   emptyState={
     <EmptyState
       icon={AddIcon}
