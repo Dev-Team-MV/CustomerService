@@ -176,16 +176,19 @@ const fetchRecorridoImages = async () => {
   // --- UPLOAD ---
   const handleUpload = async (id, file, isPublic = true) => {
     setUploading(true);
-    const ext = file.name.substring(file.name.lastIndexOf('.'));
-    const filename = `recorrido.${id}${ext}`;
-    await uploadService.uploadImage(file, 'recorrido', filename, isPublic);
-    setUploading(false);
-    fetchRecorridoImages();
+    try {
+      // Backend image processing normalizes to jpg/webp depending on source; we enforce a predictable key.
+      const filename = `recorrido.${id}.jpg`;
+      await uploadService.uploadImage(file, 'recorrido', filename, isPublic);
+      await uploadService.updateRecorridoVisibility(filename, isPublic);
+      await fetchRecorridoImages();
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const handleRecorridoVisibility = async (filename, isPublic) => {
-    await uploadService.updateRecorridoVisibility(filename, isPublic)
-    fetchRecorridoImages()
+  const handleRecorridoVisibility = async () => {
+    await fetchRecorridoImages()
   }
 
   return (
