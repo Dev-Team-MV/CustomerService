@@ -219,6 +219,24 @@ uploadClubhouseImages: async (filesWithVisibility, section, interiorKey = null) 
     }
   },
 
+  // En uploadService.js - agregar esta función
+getFilesByFolderNoCache: async (folder, urls = true) => {
+  try {
+    // Limpiar caché antes de consultar
+    clearFolderFilesCache(folder)
+    
+    const response = await api.get('/upload/files', {
+      params: { folder, urls }
+    })
+    
+    // NO guardar en caché, retornar directamente
+    return response.data
+  } catch (error) {
+    console.error('Error fetching files:', error)
+    throw error
+  }
+},
+
   getClubhouseInteriorKeys: async () => {
     try {      
       const response = await api.get('/clubhouse/interior-keys')

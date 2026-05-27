@@ -200,21 +200,15 @@ const safeMedia = useMemo(() => {
   <div
     style={{
       position: 'absolute',
-      bottom: 16,
-      left: 16,
-      right: 16,
+      bottom: 12,
+      right: 12,
       background: 'rgba(0, 0, 0, 0.7)',
-      backdropFilter: 'blur(8px)',
       color: 'white',
       padding: '8px 16px',
-      borderRadius: 8,
+      borderRadius: 2,
       fontFamily: '"DM Sans", sans-serif',
-      fontSize: 12,
-      fontWeight: 400,
-      pointerEvents: 'none',
-      userSelect: 'none',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-      maxWidth: '80%'
+      fontSize: '0.75rem',
+      maxWidth: '60%'
     }}
   >
     {media.description}
