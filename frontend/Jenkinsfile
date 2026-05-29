@@ -46,7 +46,7 @@ pipeline {
           def branch = env.BRANCH_NAME ?: env.GIT_BRANCH?.replaceFirst('^origin/', '') ?: 'develop'
           def jobName = (env.JOB_NAME ?: '').toLowerCase()
           def isProdJob = jobName.contains('production') || jobName.contains('prod') || jobName.contains('pdn')
-          def isDevJob = jobName.contains('development') || jobName.contains('dev') || jobName.contains('develop')
+          def isDevJob = jobName.contains('development') || jobName.contains('develop') || jobName.endsWith('-dev') || jobName.contains('-dev-')
 
           // Detectar app por nombre del Job
           if (jobName.contains('lakewood') || jobName.contains('lakewood-p1')) {
@@ -99,7 +99,11 @@ pipeline {
             'phase-2': [dev: '5181', prod: '5182'],
             '6town-houses': [dev: '5183', prod: '5184']
           ]
-          env.APP_PORT = env.IS_PRODUCTION == 'true' ? ports[env.APP_NAME].prod : ports[env.APP_NAME].dev
+          def appPorts = ports[env.APP_NAME]
+          if (!appPorts) {
+            error "Puertos no definidos para app '${env.APP_NAME}'. Verifica que develop tenga el Jenkinsfile con soporte 6town-houses y vuelve a ejecutar."
+          }
+          env.APP_PORT = env.IS_PRODUCTION == 'true' ? appPorts.prod : appPorts.dev
 
           env.VITE_API_URL = env.IS_PRODUCTION == 'true'
             ? 'https://apics.michelangelodelvalle.com/api'
