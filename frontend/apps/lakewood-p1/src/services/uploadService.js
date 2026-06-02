@@ -6,6 +6,33 @@ const folderFilesInFlight = new Map()
 
 const getFolderCacheKey = (folder, urls) => `${String(folder || '').trim().toLowerCase()}|${urls ? '1' : '0'}`
 
+const fetchPublicFolderFiles = async (folder, urls) => {
+  const baseUrl = String(api.defaults.baseURL || '').replace(/\/$/, '')
+  const endpoint = `${baseUrl}/upload/files`
+  const requestUrl = new URL(endpoint)
+  requestUrl.searchParams.set('folder', String(folder || '').trim())
+  requestUrl.searchParams.set('urls', String(urls))
+
+  const response = await fetch(requestUrl.toString(), {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'omit'
+  })
+
+  if (!response.ok) {
+    let message = `Failed to get files from ${folder}`
+    try {
+      const data = await response.json()
+      if (data?.message) message = data.message
+    } catch (_) {
+      // noop
+    }
+    throw new Error(message)
+  }
+
+  return response.json()
+}
+
 const clearFolderFilesCache = (folder = null) => {
   if (!folder) {
     folderFilesCache.clear()
@@ -37,14 +64,12 @@ const fetchFolderFilesWithCache = async (folder, urls = true) => {
   }
 
   const requestPromise = (async () => {
-    const response = await api.get('/upload/files', {
-      params: { folder, urls }
-    })
+    const response = await fetchPublicFolderFiles(folder, urls)
     folderFilesCache.set(cacheKey, {
-      data: response.data,
+      data: response,
       expiresAt: Date.now() + FOLDER_FILES_TTL_MS
     })
-    return response.data
+    return response
   })()
 
   folderFilesInFlight.set(cacheKey, requestPromise)
