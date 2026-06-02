@@ -52,7 +52,10 @@
     "manageFases": "Gestionar Fases",
     "viewProgress": "Ver Progreso",
     "deleteProperty": "Eliminar Propiedad",
-    "confirmDelete": "¿Estás seguro de que deseas eliminar esta propiedad?"
+    "confirmDelete": "¿Estás seguro de que deseas eliminar esta propiedad?",
+    "downloadStatement": "Descargar Estado",
+    "selectAll": "Seleccionar todas",
+    "deselectAll": "Deseleccionar todas"
   },
   "form": {
     "assignedHouse": "Casa Asignada",

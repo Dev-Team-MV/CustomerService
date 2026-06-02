@@ -9,7 +9,11 @@ import {
   deleteProperty,
   getPropertyStats
 } from '../controllers/propertyController.js'
-import { downloadPropertyStatementPdf } from '../controllers/accountStatementController.js'
+import {
+  downloadPropertyStatementPdf,
+  downloadBulkCombinedStatementPdf,
+  downloadBalanceGeneralPdf
+} from '../controllers/accountStatementController.js'
 import {
   shareProperty,
   revokePropertyShare,
@@ -167,6 +171,8 @@ router.post('/quote-preview', getPropertyQuotePreview)
  *         description: Property statistics (total, active, pending, sold, totalRevenue, pendingPayments)
  */
 router.get('/stats', protect, getPropertyStats)
+router.post('/bulk/combined-statement/pdf', protect, admin, downloadBulkCombinedStatementPdf)
+router.post('/bulk/balance-general/pdf', protect, admin, downloadBalanceGeneralPdf)
 router.get('/:id/account-statement/pdf', protect, downloadPropertyStatementPdf)
 
 /**

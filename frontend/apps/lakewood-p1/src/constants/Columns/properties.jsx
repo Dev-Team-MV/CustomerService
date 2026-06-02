@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from 'react'
 import {
   Box, Typography, Avatar, IconButton,
-  LinearProgress, Tooltip, Chip, Button
+  LinearProgress, Tooltip, Chip, Button, Checkbox
 } from '@mui/material'
 import {
   Construction, PhotoLibrary, AttachMoney,
@@ -88,7 +88,9 @@ const StatusCell = ({ status, t }) => {
 export const usePropertyColumns = ({
   isAdmin, isOwner, t,
   onViewDetails, onEdit, onDelete,
-  onOpenPhases, onOpenContracts
+  onOpenPhases, onOpenContracts,
+  selectedIds = new Set(), onToggleSelect, onSelectAll,
+  allSelected = false, someSelected = false
 }) => {
   return useMemo(() => {
     const avatarSx = {
@@ -116,6 +118,29 @@ export const usePropertyColumns = ({
     })
 
     const columns = [
+      {
+        field: 'select',
+        headerName: '',
+        width: 48,
+        renderHeader: () => (
+          <Checkbox
+            size="small"
+            checked={allSelected}
+            indeterminate={someSelected}
+            onChange={onSelectAll}
+            sx={{ color: '#8CA551', '&.Mui-checked': { color: '#333F1F' }, '&.MuiCheckbox-indeterminate': { color: '#333F1F' } }}
+          />
+        ),
+        renderCell: ({ row }) => (
+          <Checkbox
+            size="small"
+            checked={selectedIds.has(row._id)}
+            onChange={() => onToggleSelect(row._id)}
+            onClick={(e) => e.stopPropagation()}
+            sx={{ color: '#8CA551', '&.Mui-checked': { color: '#333F1F' } }}
+          />
+        )
+      },
       {
         field: 'lot',
         headerName: t('property:table.lotInfo'),
@@ -290,5 +315,5 @@ export const usePropertyColumns = ({
     })
 
     return columns
-  }, [isAdmin, isOwner, t, onViewDetails, onEdit, onDelete, onOpenPhases, onOpenContracts])
+  }, [isAdmin, isOwner, t, onViewDetails, onEdit, onDelete, onOpenPhases, onOpenContracts, selectedIds, onToggleSelect, onSelectAll, allSelected, someSelected])
 }
