@@ -168,24 +168,6 @@ pipeline {
       }
     }
 
-    stage('Install') {
-      when { expression { env.SHOULD_RUN == 'true' } }
-      steps {
-        dir("frontend/apps/${env.APP_NAME}") {
-          sh '''#!/bin/bash
-            set -e
-            mkdir -p "${WORKSPACE}/.nvm"
-            export NVM_DIR="${WORKSPACE}/.nvm"
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-            [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
-            nvm install 20
-            nvm use 20
-            npm ci
-          '''
-        }
-      }
-    }
-
     stage('Build Docker Image') {
       when { expression { env.SHOULD_RUN == 'true' } }
       steps {
@@ -207,7 +189,7 @@ pipeline {
             }
             echo "Build Docker: ${env.IMAGE_NAME}:${env.IMAGE_TAG} (${env.APP_NAME})"
             def buildArgFlags = buildArgs.collect { "--build-arg \"${it}\"" }.join(' ')
-            sh "docker build --no-cache -f ${dockerfile} -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} ${buildArgFlags} ."
+            sh "docker build -f ${dockerfile} -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} ${buildArgFlags} ."
           }
         }
       }

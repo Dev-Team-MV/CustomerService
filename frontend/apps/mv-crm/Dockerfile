@@ -8,12 +8,17 @@ ENV VITE_PROJECT_ID=$VITE_PROJECT_ID
 
 WORKDIR /app
 
+# Copiar manifests primero permite cachear npm ci cuando solo cambia el código.
+COPY apps/mv-crm/package*.json ./apps/mv-crm/
+WORKDIR /app/apps/mv-crm
+RUN npm ci
+
+WORKDIR /app
 # Copiar shared/ y mv-crm/ (vite.config.js resuelve @shared como ../../shared)
 COPY shared/ ./shared/
 COPY apps/mv-crm/ ./apps/mv-crm/
 
 WORKDIR /app/apps/mv-crm
-RUN npm ci
 # Symlink node_modules al root para que shared/ pueda resolver sus imports
 RUN ln -s /app/apps/mv-crm/node_modules /app/node_modules
 RUN npm run build
