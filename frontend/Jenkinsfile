@@ -110,7 +110,8 @@ pipeline {
             : 'https://apicsdev.michelangelodelvalle.com/api'
 
           // Resolver VITE_PROJECT_ID:
-          // prioridad 1) parámetro PROJECT_ID, 2) variable del Job (VITE_PROJECT_ID), 3) default por app
+          // prioridad 1) parámetro PROJECT_ID, 2) variable del Job (VITE_PROJECT_ID), 3) default por app.
+          // mv-crm puede operar como CRM global; solo usa este valor para asociar SMS/registro si está configurado.
           def defaultProjectIds = [
             'lakewood-p1': '69a73ce5b20401b061da6451',
             'phase-2'    : '69b9b2188186434073c6b13d',
@@ -119,7 +120,8 @@ pipeline {
           def resolvedProjectId = (params.PROJECT_ID ?: '').trim()
           if (!resolvedProjectId) resolvedProjectId = (env.VITE_PROJECT_ID ?: '').trim()
           if (!resolvedProjectId) resolvedProjectId = defaultProjectIds[env.APP_NAME] ?: ''
-          if (!resolvedProjectId) {
+          def requiresProjectId = env.APP_NAME != 'mv-crm'
+          if (!resolvedProjectId && requiresProjectId) {
             error "VITE_PROJECT_ID no definido para app '${env.APP_NAME}'. Configure PROJECT_ID (param) o VITE_PROJECT_ID (env del job)."
           }
           env.VITE_PROJECT_ID = resolvedProjectId
