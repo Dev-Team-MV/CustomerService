@@ -12,7 +12,7 @@ import 'react-phone-input-2/lib/style.css'
 import { useAuth } from '@shared/context/AuthContext'
 import LanguageSwitcher from '@shared/components/LanguageSwitcher'  // ← shared
 
-import mvLogo from '../../../../public/images/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png'
+import mvLogo from '../assets/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png'
 
 
 const Login = () => {
