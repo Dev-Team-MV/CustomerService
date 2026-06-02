@@ -35,6 +35,7 @@ import enTermsConditions from './locales/en/termsConditions.json'
 import enHouses6Town from './locales/en/houses6Town.json'
 import enActivities from './locales/en/activities.json'
 import enSms from './locales/en/sms.json'
+import enUploads from './locales/en/uploads.json'
 // ES
 import esCommon from './locales/es/common.json'
 import esAuth from './locales/es/auth.json'
@@ -68,6 +69,7 @@ import esTermsConditions from './locales/es/termsConditions.json'
 import esHouses6Town from './locales/es/houses6Town.json'
 import esActivities from './locales/es/activities.json'
 import esSms from './locales/es/sms.json'
+import esUploads from './locales/es/uploads.json'
 
 i18n
     .use(LanguageDetector)
@@ -107,7 +109,8 @@ i18n
                 termsConditions: enTermsConditions,
                 houses6Town: enHouses6Town,
                 activities: enActivities,
-                sms: enSms
+                sms: enSms,
+                uploads: enUploads
             },
             es: {
                 common: esCommon,
@@ -142,7 +145,8 @@ i18n
                 termsConditions: esTermsConditions,
                 houses6Town: esHouses6Town,
                 activities: esActivities,
-                sms: esSms
+                sms: esSms,
+                uploads: esUploads
             },
         },
         fallbackLng: 'en',
@@ -179,7 +183,8 @@ i18n
             'termsConditions',
             'houses6Town',
             'activities',
-            'sms'
+            'sms',
+            'uploads'
         ],
         interpolation: {
             escapeValue: false,

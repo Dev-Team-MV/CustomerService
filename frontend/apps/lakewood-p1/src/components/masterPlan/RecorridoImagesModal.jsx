@@ -7,7 +7,7 @@ import ImagePreview from '@shared/components/ImgPreview'
 import PrimaryButton from '../../constants/PrimaryButton'
 import ModalWrapper from '../../constants/ModalWrapper'
 
-const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, onVisibilityChange, loading }) => {
+const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, onVisibilityChange,onDelete, loading }) => {
   const { t } = useTranslation(['masterPlan', 'common']);
   const [files, setFiles] = useState({})
   const [previews, setPreviews] = useState({})
@@ -16,6 +16,41 @@ const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, onVi
   const handleIsPublicChange = (id, value) => {
     setIsPublicMap(prev => ({ ...prev, [id]: value }));
   };
+
+    const handleDelete = async (id) => {
+    const stored = imagesMap && imagesMap[String(id)]
+    if (!stored) return
+    
+    const getFilenameFromImage = (img) => {
+      if (typeof img === 'string') {
+        try {
+          const url = new URL(img)
+          return url.pathname.split('/').pop().split('?')[0]
+        } catch (e) {
+          return img.split('/').pop().split('?')[0]
+        }
+      }
+      return img.filename || img.name || null
+    }
+    
+    const filename = getFilenameFromImage(stored)
+    if (!filename) {
+      alert('No se pudo identificar el archivo')
+      return
+    }
+    
+    if (!confirm(`¿Estás seguro de eliminar la imagen del ${puntos.find(p => p.id === id)?.name}?`)) {
+      return
+    }
+    
+    try {
+      await onDelete(id, filename)
+      alert('Imagen eliminada exitosamente')
+    } catch (err) {
+      console.error('Error deleting image:', err)
+      alert('Error al eliminar la imagen')
+    }
+  }
 
   const getImageSrc = (id) => {
     const p = previews && previews[String(id)];
@@ -137,10 +172,13 @@ const RecorridoImagesModal = ({ open, onClose, puntos, imagesMap, onUpload, onVi
       handleIsPublicChange(point.id, checked);
     }
   }}
-  onDelete={files[point.id]
-    ? () => setFiles(prev => ({ ...prev, [point.id]: undefined }))
-    : undefined
-  }
+      onDelete={
+        files[point.id]
+          ? () => setFiles(prev => ({ ...prev, [point.id]: undefined }))
+          : (imagesMap && imagesMap[String(point.id)])
+            ? () => handleDelete(point.id)
+            : undefined
+      }
   showVisibilityChip={!!getImageSrc(point.id)}
   sx={{ my: 1, borderRadius: 2 }}
   publicLabel={t('common:public')}

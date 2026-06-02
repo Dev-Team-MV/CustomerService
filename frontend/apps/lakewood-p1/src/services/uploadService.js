@@ -237,6 +237,24 @@ getFilesByFolderNoCache: async (folder, urls = true) => {
   }
 },
 
+deleteRecorridoImage: async (filename) => {
+  try {
+    // El filename es solo "recorrido.20.jpg"
+    // El backend ya maneja el path completo con resolvePath()
+    
+    // Eliminar del bucket - el backend agregará dev/recorrido/ automáticamente
+    await api.delete(`/upload/image/${encodeURIComponent(filename)}`)
+    
+    // Limpiar caché
+    clearFolderFilesCache('recorrido')
+    
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting recorrido image:', error)
+    throw new Error(error.response?.data?.message || 'Failed to delete image')
+  }
+},
+
   getClubhouseInteriorKeys: async () => {
     try {      
       const response = await api.get('/clubhouse/interior-keys')
