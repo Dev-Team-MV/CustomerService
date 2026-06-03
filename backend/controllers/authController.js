@@ -165,8 +165,9 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' })
     }
 
-    // Verificar si el usuario tiene contraseña establecida
-    if (!user.password || !user.passwordSet) {
+    // Sin hash de contraseña: debe usar el enlace de setup (usuarios creados por admin).
+    // Usuarios legacy pueden tener passwordSet=false aunque ya tengan contraseña.
+    if (!user.password) {
       return res.status(403).json({ 
         message: 'Password not set. Please set your password using the setup link sent to your phone.',
         requiresPasswordSetup: true
@@ -174,6 +175,10 @@ export const login = async (req, res) => {
     }
 
     if (await user.matchPassword(password)) {
+      if (!user.passwordSet) {
+        user.passwordSet = true
+        await user.save()
+      }
       const { projectMemberships, projectId } = buildAuthProjectFields(user)
       res.json({
         _id: user._id,
@@ -233,7 +238,7 @@ export const loginAdmin = async (req, res) => {
       return res.status(403).json({ message: 'Access denied. Admin login only.' })
     }
 
-    if (!user.password || !user.passwordSet) {
+    if (!user.password) {
       return res.status(403).json({
         message: 'Password not set. Please set your password first.',
         requiresPasswordSetup: true
@@ -241,6 +246,10 @@ export const loginAdmin = async (req, res) => {
     }
 
     if (await user.matchPassword(password)) {
+      if (!user.passwordSet) {
+        user.passwordSet = true
+        await user.save()
+      }
       const { projectMemberships, projectId } = buildAuthProjectFields(user)
       res.json({
         _id: user._id,
