@@ -163,16 +163,31 @@ export const searchUsers = async (req, res) => {
 
 /**
  * Proyectos en los que el usuario tiene presencia (P1 vía Property, P2 vía Apartment, o projectMemberships).
- * admin/superadmin/owner: listan todos los proyectos (gestión/lectura global).
+ * superadmin/owner: todos los proyectos. admin: solo projectMemberships (un proyecto por admin).
  */
 export const getMyProjects = async (req, res) => {
   try {
-    if (req.user.role === 'admin' || req.user.role === 'superadmin' || req.user.role === 'owner') {
+    if (req.user.role === 'superadmin' || req.user.role === 'owner') {
       const all = await Project.find({})
         .select('name slug phase type')
         .sort({ name: 1 })
       return res.json(all)
     }
+
+    if (req.user.role === 'admin') {
+      const user = await User.findById(req.user._id).select('projectMemberships').lean()
+      const ids = (user?.projectMemberships || [])
+        .map((m) => m?.project)
+        .filter(Boolean)
+      if (ids.length === 0) {
+        return res.json([])
+      }
+      const projects = await Project.find({ _id: { $in: ids } })
+        .select('name slug phase type')
+        .sort({ name: 1 })
+      return res.json(projects)
+    }
+
     const ids = await getProjectIdsForUser(req.user._id)
     if (ids.length === 0) {
       return res.json([])

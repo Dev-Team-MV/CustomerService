@@ -5,6 +5,7 @@ import User from '../models/User.js'
 import Project from '../models/Project.js'
 import { sendSMSWithValidation } from '../services/twilioService.js'
 import { resolveFrontendBaseUrl } from '../services/resolveFrontendBaseUrl.js'
+import { buildAuthProjectFields } from '../utils/authProjectContext.js'
 
 const generateToken = (userOrId) => {
   const payload =
@@ -158,7 +159,7 @@ export const login = async (req, res) => {
 
     // Buscar usuario por email o phoneNumber
     const query = email ? { email } : { phoneNumber }
-    const user = await User.findOne(query).select('+password').populate('lots')
+    const user = await User.findOne(query).select('+password projectMemberships').populate('lots')
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' })
@@ -173,6 +174,7 @@ export const login = async (req, res) => {
     }
 
     if (await user.matchPassword(password)) {
+      const { projectMemberships, projectId } = buildAuthProjectFields(user)
       res.json({
         _id: user._id,
         firstName: user.firstName,
@@ -181,6 +183,8 @@ export const login = async (req, res) => {
         phoneNumber: user.phoneNumber,
         role: user.role,
         lots: user.lots,
+        projectMemberships,
+        projectId,
         token: generateToken(user),
         user: {
           id: user._id,
@@ -189,7 +193,9 @@ export const login = async (req, res) => {
           email: user.email,
           phoneNumber: user.phoneNumber,
           role: user.role,
-          lots: user.lots
+          lots: user.lots,
+          projectMemberships,
+          projectId
         }
       })
     } else {
@@ -217,7 +223,7 @@ export const loginAdmin = async (req, res) => {
     }
 
     const query = email ? { email } : { phoneNumber }
-    const user = await User.findOne(query).select('+password')
+    const user = await User.findOne(query).select('+password projectMemberships')
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' })
@@ -235,6 +241,7 @@ export const loginAdmin = async (req, res) => {
     }
 
     if (await user.matchPassword(password)) {
+      const { projectMemberships, projectId } = buildAuthProjectFields(user)
       res.json({
         _id: user._id,
         firstName: user.firstName,
@@ -242,6 +249,8 @@ export const loginAdmin = async (req, res) => {
         email: user.email,
         phoneNumber: user.phoneNumber,
         role: user.role,
+        projectMemberships,
+        projectId,
         token: generateToken(user),
         user: {
           id: user._id,
@@ -249,7 +258,9 @@ export const loginAdmin = async (req, res) => {
           lastName: user.lastName,
           email: user.email,
           phoneNumber: user.phoneNumber,
-          role: user.role
+          role: user.role,
+          projectMemberships,
+          projectId
         }
       })
     } else {
@@ -262,7 +273,9 @@ export const loginAdmin = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).populate('lots')
+    const user = await User.findById(req.user._id)
+      .populate('lots')
+      .populate('projectMemberships.project', 'name slug phase type')
 
     if (user) {
       res.json({
@@ -273,7 +286,8 @@ export const getProfile = async (req, res) => {
         phoneNumber: user.phoneNumber,
         birthday: user.birthday,
         role: user.role,
-        lots: user.lots
+        lots: user.lots,
+        projectMemberships: user.projectMemberships || []
       })
     } else {
       res.status(404).json({ message: 'User not found' })
