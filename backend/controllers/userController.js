@@ -1,6 +1,7 @@
 import User from '../models/User.js'
 import Project from '../models/Project.js'
 import { getProjectIdsForUser, canUserAccessProject } from '../utils/projectAccess.js'
+import { isStaffRole } from '../utils/roles.js'
 import Property from '../models/Property.js'
 import Apartment from '../models/Apartment.js'
 import Building from '../models/Building.js'
@@ -267,6 +268,11 @@ export const getAllUsers = async (req, res) => {
 
 export const getUserById = async (req, res) => {
   try {
+    const isSelf = req.params.id === req.user._id.toString()
+    if (!isSelf && !isStaffRole(req.user.role)) {
+      return res.status(403).json({ message: 'Not authorized to view this user' })
+    }
+
     const user = await User.findById(req.params.id).select('-password').populate('lots')
     
     if (user) {
@@ -281,16 +287,34 @@ export const getUserById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
+    const isSelf = req.params.id === req.user._id.toString()
+    const isStaff = isStaffRole(req.user.role)
+
+    if (!isSelf && !isStaff) {
+      return res.status(403).json({ message: 'Not authorized to update this user' })
+    }
+
+    if (req.body.role !== undefined) {
+      return res.status(400).json({
+        message: 'Role cannot be changed via this endpoint. Use admin scripts or database procedures.'
+      })
+    }
+
     const user = await User.findById(req.params.id)
 
     if (user) {
       user.firstName = req.body.firstName || user.firstName
       user.lastName = req.body.lastName || user.lastName
-      user.email = req.body.email || user.email
-      user.phoneNumber = req.body.phoneNumber || user.phoneNumber
-      user.birthday = req.body.birthday || user.birthday
+      if (isStaff || isSelf) {
+        user.email = req.body.email || user.email
+        user.phoneNumber = req.body.phoneNumber || user.phoneNumber
+        user.birthday = req.body.birthday || user.birthday
+      }
       
       if (req.body.password) {
+        if (!isSelf && !isStaff) {
+          return res.status(403).json({ message: 'Not authorized to change password for this user' })
+        }
         user.password = req.body.password
       }
 

@@ -6,6 +6,7 @@ import Project from '../models/Project.js'
 import { sendSMSWithValidation } from '../services/twilioService.js'
 import { resolveFrontendBaseUrl } from '../services/resolveFrontendBaseUrl.js'
 import { buildAuthProjectFields } from '../utils/authProjectContext.js'
+import { resolveRoleForNewUser } from '../utils/roles.js'
 
 const generateToken = (userOrId) => {
   const payload =
@@ -28,10 +29,11 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' })
     }
 
+    let currentUser = null
+
     // Si skipPasswordSetup es true, requiere autenticación de admin
     if (skipPasswordSetup) {
       let token
-      let currentUser = null
 
       if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
@@ -58,14 +60,16 @@ export const register = async (req, res) => {
 
     // Si es admin creando usuario y skipPasswordSetup es true, crear sin contraseña
     const isAdminCreating = skipPasswordSetup
-    
+    const creatorRole = isAdminCreating ? currentUser?.role : null
+    const assignedRole = resolveRoleForNewUser(creatorRole, role)
+
     let userData = {
       firstName,
       lastName,
       email,
       phoneNumber,
       birthday,
-      role: role || 'user'
+      role: assignedRole
     }
 
     if (projectId) {
