@@ -5,8 +5,8 @@ import User from '../models/User.js'
 import Project from '../models/Project.js'
 import { sendSMSWithValidation } from '../services/twilioService.js'
 import { resolveFrontendBaseUrl } from '../services/resolveFrontendBaseUrl.js'
-import { buildAuthProjectFields } from '../utils/authProjectContext.js'
 import { resolveRoleForNewUser } from '../utils/roles.js'
+import { buildAuthLoginResponse, buildAuthUserPayload } from '../utils/authUserPayload.js'
 
 const generateToken = (userOrId) => {
   const payload =
@@ -123,23 +123,7 @@ export const register = async (req, res) => {
     const user = await User.create(userData)
 
     if (user) {
-      res.status(201).json({
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-        token: generateToken(user),
-        user: {
-          id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          role: user.role
-        }
-      })
+      res.status(201).json(buildAuthLoginResponse(user, generateToken(user)))
     } else {
       res.status(400).json({ message: 'Invalid user data' })
     }
@@ -183,30 +167,7 @@ export const login = async (req, res) => {
         user.passwordSet = true
         await user.save()
       }
-      const { projectMemberships, projectId } = buildAuthProjectFields(user)
-      res.json({
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-        lots: user.lots,
-        projectMemberships,
-        projectId,
-        token: generateToken(user),
-        user: {
-          id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          role: user.role,
-          lots: user.lots,
-          projectMemberships,
-          projectId
-        }
-      })
+      res.json(buildAuthLoginResponse(user, generateToken(user)))
     } else {
       res.status(401).json({ message: 'Invalid credentials' })
     }
@@ -254,28 +215,7 @@ export const loginAdmin = async (req, res) => {
         user.passwordSet = true
         await user.save()
       }
-      const { projectMemberships, projectId } = buildAuthProjectFields(user)
-      res.json({
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-        projectMemberships,
-        projectId,
-        token: generateToken(user),
-        user: {
-          id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          role: user.role,
-          projectMemberships,
-          projectId
-        }
-      })
+      res.json(buildAuthLoginResponse(user, generateToken(user)))
     } else {
       res.status(401).json({ message: 'Invalid credentials' })
     }
@@ -291,16 +231,17 @@ export const getProfile = async (req, res) => {
       .populate('projectMemberships.project', 'name slug phase type')
 
     if (user) {
+      const userPayload = buildAuthUserPayload(user, {
+        projectMemberships: (user.projectMemberships || []).map((m) => ({
+          project: m.project?._id || m.project,
+          membershipRole: m.role || 'resident',
+          name: m.project?.name,
+          slug: m.project?.slug
+        }))
+      })
       res.json({
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        birthday: user.birthday,
-        role: user.role,
-        lots: user.lots,
-        projectMemberships: user.projectMemberships || []
+        ...userPayload,
+        user: userPayload
       })
     } else {
       res.status(404).json({ message: 'User not found' })
@@ -378,17 +319,9 @@ export const setupPassword = async (req, res) => {
     user.setupTokenExpires = undefined
     await user.save()
 
-    res.json({ 
+    res.json({
       message: 'Password set successfully. You can now login.',
-      token: generateToken(user),
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        role: user.role
-      }
+      ...buildAuthLoginResponse(user, generateToken(user))
     })
   } catch (error) {
     res.status(500).json({ message: error.message })

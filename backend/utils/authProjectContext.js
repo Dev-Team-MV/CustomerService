@@ -1,12 +1,11 @@
 /**
  * projectMemberships y projectId (si hay exactamente uno) para respuestas de login/profile.
  */
-/** Rol dentro del proyecto (resident/viewer). Distinto de User.role (superadmin/admin/owner/user). */
+/** Rol dentro del proyecto (resident/viewer). No usar como User.role de la app. */
 export const formatMembershipsForAuthResponse = (memberships) =>
   (memberships || []).map((m) => ({
     project: m.project?._id || m.project,
-    membershipRole: m.role || 'resident',
-    role: m.role || 'resident'
+    membershipRole: m.role || 'resident'
   }))
 
 export const pickSingleProjectIdFromMemberships = (memberships) => {
