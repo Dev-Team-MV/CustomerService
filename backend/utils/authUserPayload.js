@@ -7,6 +7,11 @@ import { buildAuthProjectFields } from './authProjectContext.js'
 export const buildAuthUserPayload = (user, extra = {}) => {
   const id = user._id || user.id
   const { projectMemberships, projectId } = buildAuthProjectFields(user)
+  const appRole = user.role
+
+  if (!appRole) {
+    console.warn('buildAuthUserPayload: user.role missing on document', { id: String(id) })
+  }
 
   return {
     id,
@@ -16,7 +21,7 @@ export const buildAuthUserPayload = (user, extra = {}) => {
     email: user.email,
     phoneNumber: user.phoneNumber,
     birthday: user.birthday,
-    role: user.role,
+    role: appRole,
     lots: user.lots || [],
     projectMemberships: extra.projectMemberships ?? projectMemberships,
     projectId: extra.projectId !== undefined ? extra.projectId : projectId,

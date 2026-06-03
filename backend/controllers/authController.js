@@ -147,7 +147,9 @@ export const login = async (req, res) => {
 
     // Buscar usuario por email o phoneNumber
     const query = email ? { email } : { phoneNumber }
-    const user = await User.findOne(query).select('+password projectMemberships').populate('lots')
+    // Solo +password: incluir hash. No usar select('+password projectMemberships') — Mongoose
+    // interpreta projectMemberships como lista exclusiva y omite role, email, etc.
+    const user = await User.findOne(query).select('+password').populate('lots')
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' })
@@ -193,7 +195,7 @@ export const loginAdmin = async (req, res) => {
     }
 
     const query = email ? { email } : { phoneNumber }
-    const user = await User.findOne(query).select('+password projectMemberships')
+    const user = await User.findOne(query).select('+password')
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' })

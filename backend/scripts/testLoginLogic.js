@@ -6,7 +6,7 @@ const email = (process.argv[2] || 'admin@homecare.com').toLowerCase().trim()
 const password = process.argv[3] || 'admin123'
 
 await mongoose.connect(process.env.MONGODB_URI)
-const user = await User.findOne({ email }).select('+password projectMemberships')
+const user = await User.findOne({ email }).select('+password')
 if (!user) {
   console.log('No encontrado')
   process.exit(1)

@@ -15,7 +15,7 @@ const password = process.argv.includes('--password')
 
 await mongoose.connect(process.env.MONGODB_URI)
 
-const user = await User.findOne({ email }).select('+password projectMemberships')
+const user = await User.findOne({ email }).select('+password')
 const lakewood = await Project.findOne({ slug: 'lakewood' })
 
 if (!user) {
