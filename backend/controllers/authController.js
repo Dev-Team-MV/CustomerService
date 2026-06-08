@@ -6,8 +6,13 @@ import Project from '../models/Project.js'
 import { sendSMSWithValidation } from '../services/twilioService.js'
 import { resolveFrontendBaseUrl } from '../services/resolveFrontendBaseUrl.js'
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+const generateToken = (userOrId) => {
+  const payload =
+    userOrId && typeof userOrId === 'object'
+      ? { id: String(userOrId._id || userOrId.id), role: userOrId.role }
+      : { id: String(userOrId) }
+
+  return jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: '30d'
   })
 }
@@ -120,7 +125,7 @@ export const register = async (req, res) => {
         email: user.email,
         phoneNumber: user.phoneNumber,
         role: user.role,
-        token: generateToken(user._id),
+        token: generateToken(user),
         user: {
           id: user._id,
           firstName: user.firstName,
@@ -176,7 +181,7 @@ export const login = async (req, res) => {
         phoneNumber: user.phoneNumber,
         role: user.role,
         lots: user.lots,
-        token: generateToken(user._id),
+        token: generateToken(user),
         user: {
           id: user._id,
           firstName: user.firstName,
@@ -237,7 +242,7 @@ export const loginAdmin = async (req, res) => {
         email: user.email,
         phoneNumber: user.phoneNumber,
         role: user.role,
-        token: generateToken(user._id),
+        token: generateToken(user),
         user: {
           id: user._id,
           firstName: user.firstName,
@@ -348,7 +353,7 @@ export const setupPassword = async (req, res) => {
 
     res.json({ 
       message: 'Password set successfully. You can now login.',
-      token: generateToken(user._id),
+      token: generateToken(user),
       user: {
         id: user._id,
         firstName: user.firstName,

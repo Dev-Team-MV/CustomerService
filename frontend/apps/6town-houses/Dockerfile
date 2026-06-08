@@ -9,24 +9,22 @@ ENV VITE_PROJECT_ID=$VITE_PROJECT_ID
 WORKDIR /app
 
 # Copiar manifests primero permite cachear npm ci cuando solo cambia el código.
-COPY apps/phase-2/package*.json ./apps/phase-2/
-WORKDIR /app/apps/phase-2
+COPY apps/6town-houses/package*.json ./apps/6town-houses/
+WORKDIR /app/apps/6town-houses
 RUN npm ci
 
 WORKDIR /app
-# Copiar shared/ y phase-2/ (vite.config.js resuelve @shared como ../../shared)
 COPY shared/ ./shared/
-COPY apps/phase-2/ ./apps/phase-2/
+COPY apps/6town-houses/ ./apps/6town-houses/
 
-WORKDIR /app/apps/phase-2
-# Symlink node_modules al root para que shared/ pueda resolver sus imports
-RUN ln -s /app/apps/phase-2/node_modules /app/node_modules
+WORKDIR /app/apps/6town-houses
+RUN ln -s /app/apps/6town-houses/node_modules /app/node_modules
 RUN npm run build
 
 # Stage 2: serve with nginx
 FROM nginx:alpine
 
-COPY --from=builder /app/apps/phase-2/dist /usr/share/nginx/html
+COPY --from=builder /app/apps/6town-houses/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
