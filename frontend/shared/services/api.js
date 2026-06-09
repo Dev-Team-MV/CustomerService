@@ -1,7 +1,6 @@
 // @/Users/oficina/MV-CRM/CustomerService/frontend/shared/services/api.js
 import axios from 'axios'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api'
+import { API_URL } from './apiUrl'
 
 const sanitizeQueryParams = (params) => {
   if (!params || typeof params !== 'object') return params

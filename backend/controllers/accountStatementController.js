@@ -1,12 +1,17 @@
 import Property from '../models/Property.js'
 import Payload from '../models/Payload.js'
 import Project from '../models/Project.js'
+import Phase from '../models/Phase.js'
 import { canUserAccessProperty } from '../utils/propertyVisibility.js'
 import { canUserAccessProject } from '../utils/projectAccess.js'
 import {
   generatePropertyStatementPdf,
-  generateProjectStatementPdf
+  generateProjectStatementPdf,
+  generateBulkCombinedStatementPdf,
+  generateBalanceGeneralPdf
 } from '../services/accountStatementPdfService.js'
+
+const PHASE_WEIGHTS = { 1: 10, 2: 15, 3: 15, 4: 15, 5: 10, 6: 10, 7: 10, 8: 10, 9: 5 }
 
 function sumAmounts(payments = []) {
   return payments.reduce((acc, payment) => acc + Number(payment.amount || 0), 0)
@@ -24,6 +29,7 @@ export const downloadPropertyStatementPdf = async (req, res) => {
     const property = await Property.findById(req.params.id)
       .populate('project', 'name slug')
       .populate('lot', 'number')
+      .populate('model', 'model')
       .populate('users', 'firstName lastName')
       .lean()
 
@@ -43,6 +49,15 @@ export const downloadPropertyStatementPdf = async (req, res) => {
       .sort({ date: 1, createdAt: 1 })
       .lean()
 
+    const phases = await Phase.find({ property: property._id })
+      .sort({ phaseNumber: 1 })
+      .lean()
+
+    const totalConstructionPercentage = phases.reduce(
+      (acc, p) => acc + (p.constructionPercentage * (PHASE_WEIGHTS[p.phaseNumber] ?? 0)) / 100,
+      0
+    )
+
     const signedPayments = payments.filter((payment) => payment.status === 'signed')
     const pendingPayments = payments.filter((payment) => payment.status === 'pending')
     const rejectedPayments = payments.filter((payment) => payment.status === 'rejected')
@@ -51,6 +66,7 @@ export const downloadPropertyStatementPdf = async (req, res) => {
       property,
       projectName: property.project?.name || '-',
       lotNumber: property.lot?.number || '-',
+      modelName: property.model?.model || '-',
       ownerNames: getOwnerNames(property.users),
       totals: {
         totalPrice: Number(property.price || 0),
@@ -60,8 +76,104 @@ export const downloadPropertyStatementPdf = async (req, res) => {
         rejectedPayments: sumAmounts(rejectedPayments),
         outstandingBalance: Number(property.pending || 0)
       },
-      payments
+      payments,
+      phases,
+      totalConstructionPercentage
     })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+async function fetchPropertyData(propertyId) {
+  const property = await Property.findById(propertyId)
+    .populate('project', 'name slug')
+    .populate('lot', 'number')
+    .populate('model', 'model')
+    .populate('users', 'firstName lastName')
+    .lean()
+  if (!property) return null
+
+  const [payments, phases] = await Promise.all([
+    Payload.find({ property: property._id }).sort({ date: 1, createdAt: 1 }).lean(),
+    Phase.find({ property: property._id }).sort({ phaseNumber: 1 }).lean()
+  ])
+
+  const totalConstructionPercentage = phases.reduce(
+    (acc, p) => acc + (p.constructionPercentage * (PHASE_WEIGHTS[p.phaseNumber] ?? 0)) / 100,
+    0
+  )
+
+  const signedPayments   = payments.filter((p) => p.status === 'signed')
+  const pendingPayments  = payments.filter((p) => p.status === 'pending')
+  const rejectedPayments = payments.filter((p) => p.status === 'rejected')
+
+  return {
+    property,
+    projectName: property.project?.name || '-',
+    lotNumber:   property.lot?.number   || '-',
+    modelName:   property.model?.model  || '-',
+    ownerNames:  getOwnerNames(property.users),
+    totals: {
+      totalPrice:         Number(property.price         || 0),
+      initialPayment:     Number(property.initialPayment || 0),
+      signedPayments:     sumAmounts(signedPayments),
+      pendingPayments:    sumAmounts(pendingPayments),
+      rejectedPayments:   sumAmounts(rejectedPayments),
+      outstandingBalance: Number(property.pending || 0)
+    },
+    payments,
+    phases,
+    totalConstructionPercentage
+  }
+}
+
+export const downloadBulkCombinedStatementPdf = async (req, res) => {
+  try {
+    const { propertyIds } = req.body
+    if (!Array.isArray(propertyIds) || propertyIds.length === 0) {
+      return res.status(400).json({ message: 'propertyIds array is required' })
+    }
+
+    const propertiesData = await Promise.all(propertyIds.map((id) => fetchPropertyData(id)))
+    const valid = propertiesData.filter(Boolean)
+    if (valid.length === 0) return res.status(404).json({ message: 'No properties found' })
+
+    generateBulkCombinedStatementPdf(res, valid)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const downloadBalanceGeneralPdf = async (req, res) => {
+  try {
+    const { propertyIds } = req.body
+    if (!Array.isArray(propertyIds) || propertyIds.length === 0) {
+      return res.status(400).json({ message: 'propertyIds array is required' })
+    }
+
+    const propertiesData = await Promise.all(propertyIds.map((id) => fetchPropertyData(id)))
+    const valid = propertiesData.filter(Boolean)
+    if (valid.length === 0) return res.status(404).json({ message: 'No properties found' })
+
+    const projectName = valid[0]?.projectName || '-'
+    const totals = {
+      totalPrice:         valid.reduce((s, p) => s + p.totals.totalPrice,         0),
+      signedPayments:     valid.reduce((s, p) => s + p.totals.signedPayments,     0),
+      pendingPayments:    valid.reduce((s, p) => s + p.totals.pendingPayments,     0),
+      outstandingBalance: valid.reduce((s, p) => s + p.totals.outstandingBalance, 0)
+    }
+    const properties = valid.map((p) => ({
+      lotNumber:          p.lotNumber,
+      modelName:          p.modelName,
+      ownerNames:         p.ownerNames,
+      totalPrice:         p.totals.totalPrice,
+      signedPayments:     p.totals.signedPayments,
+      outstandingBalance: p.totals.outstandingBalance,
+      constructionPct:    p.totalConstructionPercentage
+    }))
+
+    generateBalanceGeneralPdf(res, { projectName, totalProperties: valid.length, totals, properties })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }

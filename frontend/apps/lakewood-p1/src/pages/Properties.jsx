@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Box, Container, Button, FormControl,
-  InputLabel, Select, MenuItem, Tooltip
+  InputLabel, Select, MenuItem, Tooltip, Checkbox
 } from '@mui/material'
-import { Add, SortByAlpha, FilterList, Home } from '@mui/icons-material'
+import { Add, SortByAlpha, FilterList, Home, Download } from '@mui/icons-material'
 import api from '@shared/services/api'
 import { useAuth } from '@shared/context/AuthContext'
 // import ConstructionPhasesModal from '../components/ConstructionPhasesModal'
@@ -18,6 +18,7 @@ import StatsCards from '../components/statscard'
 import DataTable from '@shared/components/table/DataTable'
 import EmptyState from '@shared/components/table/EmptyState'
 import PropertyDetailsModal from '../components/myProperty/PropertyDetailsModal'
+import PropertyDownloadPreviewModal from '../components/property/PropertyDownloadPreviewModal'
 import propertyService from '../services/propertyService'
 import useFetch from '../hooks/useFetch'
 import usePropertyFilters from '../hooks/usePropertyFilters'
@@ -57,6 +58,34 @@ const { data: properties, loading, refetch } = useFetch(
     residentSortOrder, toggleResidentSort,
     modelOptions, processedData
   } = usePropertyFilters(properties)
+
+  // ── Selection ─────────────────────────────────────────────
+  const [selectedIds, setSelectedIds] = useState(new Set())
+  const [downloadPreviewOpen, setDownloadPreviewOpen] = useState(false)
+
+  const allSelected = processedData.length > 0 && processedData.every(p => selectedIds.has(p._id))
+  const someSelected = selectedIds.size > 0 && !allSelected
+
+  const selectedProperties = useMemo(
+    () => processedData.filter(p => selectedIds.has(p._id)),
+    [processedData, selectedIds]
+  )
+
+  const handleToggleSelect = useCallback((id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }, [])
+
+  const handleSelectAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(processedData.map(p => p._id)))
+    }
+  }, [allSelected, processedData])
 
   // ── Modals ────────────────────────────────────────────────
   const {
@@ -169,6 +198,11 @@ console.log('🎯 Facades final para el select:', facades)
     onDelete:         handleDeleteProperty,
     onOpenPhases:     phases.openModal,
     onOpenContracts:  contracts.openModal,
+    selectedIds,
+    onToggleSelect:   handleToggleSelect,
+    onSelectAll:      handleSelectAll,
+    allSelected,
+    someSelected,
   })
 
   // ── Render ────────────────────────────────────────────────
@@ -243,6 +277,51 @@ console.log('🎯 Facades final para el select:', facades)
               {t('property:filters.resident')} {residentSortOrder === 'asc' ? 'A → Z' : residentSortOrder === 'desc' ? 'Z → A' : 'A-Z'}
             </Button>
           </Tooltip>
+
+          {isAdmin && processedData.length > 0 && (
+            <Button
+              variant="text"
+              size="small"
+              onClick={handleSelectAll}
+              sx={{
+                fontFamily: '"DM Sans", sans-serif',
+                fontWeight: 600,
+                fontSize: '0.78rem',
+                textTransform: 'none',
+                color: '#8CA551',
+                px: 1.5,
+                height: 40,
+                '&:hover': { bgcolor: 'rgba(140,165,81,0.08)' }
+              }}
+            >
+              {allSelected
+                ? t('property:actions.deselectAll')
+                : `${t('property:actions.selectAll')} (${processedData.length})`}
+            </Button>
+          )}
+
+          {isAdmin && selectedIds.size > 0 && (
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<Download />}
+              onClick={() => setDownloadPreviewOpen(true)}
+              sx={{
+                fontFamily: '"DM Sans", sans-serif',
+                fontWeight: 600,
+                fontSize: '0.78rem',
+                textTransform: 'none',
+                borderRadius: 2,
+                px: 2,
+                height: 40,
+                bgcolor: '#333F1F',
+                color: 'white',
+                '&:hover': { bgcolor: '#4a5d3a' }
+              }}
+            >
+              {t('property:actions.downloadStatement')} ({selectedIds.size})
+            </Button>
+          )}
         </Box>
 
         <DataTable
@@ -303,6 +382,12 @@ console.log('🎯 Facades final para el select:', facades)
           models={modelsArray}
           facades={facades}
           users={usersArray}
+        />
+
+        <PropertyDownloadPreviewModal
+          open={downloadPreviewOpen}
+          onClose={() => setDownloadPreviewOpen(false)}
+          selectedProperties={selectedProperties}
         />
       </Container>
     </Box>

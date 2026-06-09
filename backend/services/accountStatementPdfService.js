@@ -80,26 +80,23 @@ function createPdfResponse(res, fileName) {
   return doc
 }
 
-export function generatePropertyStatementPdf(res, payload) {
+function renderPropertySections(doc, payload) {
   const {
     property,
     projectName,
     lotNumber,
+    modelName,
     ownerNames,
     totals,
-    payments
+    payments,
+    phases = [],
+    totalConstructionPercentage = 0
   } = payload
-
-  const doc = createPdfResponse(res, `property-statement-${lotNumber || property?._id || 'export'}`)
-
-  doc.font('Helvetica-Bold').fontSize(18).text('Property Account Statement')
-  doc.moveDown(0.3)
-  doc.font('Helvetica').fontSize(10).text(`Generated at: ${new Date().toLocaleString('en-US')}`)
-  drawDivider(doc)
 
   drawSectionTitle(doc, 'Property Information')
   drawKeyValueLine(doc, 'Project', projectName || '-')
   drawKeyValueLine(doc, 'Lot', lotNumber || '-')
+  drawKeyValueLine(doc, 'Model', modelName || '-')
   drawKeyValueLine(doc, 'Property ID', String(property?._id || '-'))
   drawKeyValueLine(doc, 'Owners', ownerNames || '-')
 
@@ -110,6 +107,25 @@ export function generatePropertyStatementPdf(res, payload) {
   drawKeyValueLine(doc, 'Pending Payments', formatCurrency(totals.pendingPayments))
   drawKeyValueLine(doc, 'Rejected Payments', formatCurrency(totals.rejectedPayments))
   drawKeyValueLine(doc, 'Outstanding Balance', formatCurrency(totals.outstandingBalance))
+
+  drawSectionTitle(doc, 'Construction Progress')
+  drawKeyValueLine(doc, 'Overall Progress', `${totalConstructionPercentage.toFixed(1)}%`)
+  if (phases.length) {
+    doc.moveDown(0.5)
+    drawSimpleTable(
+      doc,
+      [
+        { key: 'phaseNumber', label: 'Phase #', x: 50, width: 60 },
+        { key: 'title', label: 'Title', x: 110, width: 260 },
+        { key: 'constructionPercentage', label: 'Progress %', x: 370, width: 100 }
+      ],
+      phases.map((p) => ({
+        phaseNumber: String(p.phaseNumber),
+        title: p.title || '-',
+        constructionPercentage: `${p.constructionPercentage ?? 0}%`
+      }))
+    )
+  }
 
   drawSectionTitle(doc, 'Payment History')
   if (!payments.length) {
@@ -133,6 +149,79 @@ export function generatePropertyStatementPdf(res, payload) {
       }))
     )
   }
+}
+
+export function generatePropertyStatementPdf(res, payload) {
+  const { lotNumber, property } = payload
+  const doc = createPdfResponse(res, `property-statement-${lotNumber || property?._id || 'export'}`)
+  doc.font('Helvetica-Bold').fontSize(18).text('Property Account Statement')
+  doc.moveDown(0.3)
+  doc.font('Helvetica').fontSize(10).text(`Generated at: ${new Date().toLocaleString('en-US')}`)
+  drawDivider(doc)
+  renderPropertySections(doc, payload)
+  doc.end()
+}
+
+export function generateBulkCombinedStatementPdf(res, propertiesPayload) {
+  const doc = createPdfResponse(res, 'combined-statement')
+  doc.font('Helvetica-Bold').fontSize(18).text('Combined Property Statements')
+  doc.moveDown(0.3)
+  doc.font('Helvetica').fontSize(10).text(`Generated at: ${new Date().toLocaleString('en-US')}`)
+  doc.font('Helvetica').fontSize(10).text(`Properties included: ${propertiesPayload.length}`)
+  drawDivider(doc)
+
+  propertiesPayload.forEach((payload, index) => {
+    if (index > 0) doc.addPage()
+    doc.font('Helvetica-Bold').fontSize(14).text(
+      `Property ${index + 1} / ${propertiesPayload.length} — Lot ${payload.lotNumber}`
+    )
+    drawDivider(doc)
+    renderPropertySections(doc, payload)
+  })
+
+  doc.end()
+}
+
+export function generateBalanceGeneralPdf(res, { projectName, totalProperties, totals, properties }) {
+  const doc = createPdfResponse(res, 'balance-general')
+
+  doc.font('Helvetica-Bold').fontSize(18).text('Balance General')
+  doc.moveDown(0.3)
+  doc.font('Helvetica').fontSize(10).text(`Generated at: ${new Date().toLocaleString('en-US')}`)
+  if (projectName && projectName !== '-') {
+    doc.font('Helvetica').fontSize(10).text(`Project: ${projectName}`)
+  }
+  drawDivider(doc)
+
+  drawSectionTitle(doc, 'Financial Summary')
+  drawKeyValueLine(doc, 'Total Properties', String(totalProperties))
+  drawKeyValueLine(doc, 'Portfolio Value', formatCurrency(totals.totalPrice))
+  drawKeyValueLine(doc, 'Total Approved Payments', formatCurrency(totals.signedPayments))
+  drawKeyValueLine(doc, 'Total Pending Payments', formatCurrency(totals.pendingPayments))
+  drawKeyValueLine(doc, 'Total Outstanding Balance', formatCurrency(totals.outstandingBalance))
+
+  drawSectionTitle(doc, 'Properties Breakdown')
+  drawSimpleTable(
+    doc,
+    [
+      { key: 'lot',          label: 'Lot',      x: 50,  width: 45  },
+      { key: 'model',        label: 'Model',    x: 95,  width: 70  },
+      { key: 'owners',       label: 'Owners',   x: 165, width: 115 },
+      { key: 'price',        label: 'Price',    x: 280, width: 75  },
+      { key: 'paid',         label: 'Paid',     x: 355, width: 70  },
+      { key: 'pending',      label: 'Pending',  x: 425, width: 70  },
+      { key: 'construction', label: 'Constr.%', x: 495, width: 50  }
+    ],
+    properties.map((p) => ({
+      lot:          String(p.lotNumber),
+      model:        p.modelName || '-',
+      owners:       p.ownerNames || '-',
+      price:        formatCurrency(p.totalPrice),
+      paid:         formatCurrency(p.signedPayments),
+      pending:      formatCurrency(p.outstandingBalance),
+      construction: `${p.constructionPct.toFixed(1)}%`
+    }))
+  )
 
   doc.end()
 }

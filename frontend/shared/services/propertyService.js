@@ -1,4 +1,5 @@
 import api from './api'
+import { API_URL } from './apiUrl'
 import buildingService from './buildingService'
 
 export const propertyService = {
@@ -137,8 +138,7 @@ getFacades: async (projectId = null, modelId = null) => {
 
   downloadAccountStatementPdf: async (propertyId, suggestedFilename = null) => {
     const token = localStorage.getItem('token')
-    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api'
-    const response = await fetch(`${baseURL}/properties/${propertyId}/account-statement/pdf`, {
+    const response = await fetch(`${API_URL}/properties/${propertyId}/account-statement/pdf`, {
       method: 'GET',
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })

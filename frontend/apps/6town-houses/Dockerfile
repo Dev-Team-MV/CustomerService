@@ -8,11 +8,16 @@ ENV VITE_PROJECT_ID=$VITE_PROJECT_ID
 
 WORKDIR /app
 
+# Copiar manifests primero permite cachear npm ci cuando solo cambia el código.
+COPY apps/6town-houses/package*.json ./apps/6town-houses/
+WORKDIR /app/apps/6town-houses
+RUN npm ci
+
+WORKDIR /app
 COPY shared/ ./shared/
 COPY apps/6town-houses/ ./apps/6town-houses/
 
 WORKDIR /app/apps/6town-houses
-RUN npm ci
 RUN ln -s /app/apps/6town-houses/node_modules /app/node_modules
 RUN npm run build
 

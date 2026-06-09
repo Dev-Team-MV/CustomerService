@@ -9,12 +9,17 @@ ENV VITE_PROJECT_ID=$VITE_PROJECT_ID
 
 WORKDIR /app
 
+# Copiar manifests primero permite cachear npm ci cuando solo cambia el código.
+COPY apps/lakewood-p1/package*.json ./apps/lakewood-p1/
+WORKDIR /app/apps/lakewood-p1
+RUN npm ci
+
+WORKDIR /app
 # Copiar shared/ y lakewood-p1/ (vite.config.js resuelve @shared como ../../shared)
 COPY shared/ ./shared/
 COPY apps/lakewood-p1/ ./apps/lakewood-p1/
 
 WORKDIR /app/apps/lakewood-p1
-RUN npm ci
 # Symlink node_modules al root para que shared/ pueda resolver sus imports
 RUN ln -s /app/apps/lakewood-p1/node_modules /app/node_modules
 RUN npm run build

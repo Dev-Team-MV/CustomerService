@@ -1,7 +1,12 @@
-node_modules
-dist
+**/node_modules
+**/dist
+**/.vite
+**/coverage
 .git
 .gitignore
+.nvm
+.env
+.env.*
 *.log
 .DS_Store
 Dockerfile
