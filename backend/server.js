@@ -50,6 +50,7 @@ const exactCorsOrigins = [
   'https://devphase2.michelangelodelvalle.com',
   'https://phase2.michelangelodelvalle.com',
   'https://dev6town.michelangelodelvalle.com',
+  'https://6towncsdev.michelangelodelvalle.com',
   'https://6town.michelangelodelvalle.com',
   'https://lakewoodoaksonlakeconroe.com',
   'https://www.lakewoodoaksonlakeconroe.com'
