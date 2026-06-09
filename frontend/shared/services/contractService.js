@@ -1,4 +1,5 @@
 import api from './api'
+import { API_URL } from './apiUrl'
 
 const contractsService = {
   // POST /api/contracts (propertyId o apartmentId)
@@ -80,10 +81,9 @@ getContractById: async (contractId) => {
   // Descargar archivo de contrato
   downloadContract: async (resourceType, resourceId, type, suggestedFilename = null) => {
     const token = localStorage.getItem('token')
-    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api'
     const url = resourceType === 'apartment'
-      ? `${baseURL}/contracts/apartment/${resourceId}/download/${type}`
-      : `${baseURL}/contracts/property/${resourceId}/download/${type}`
+      ? `${API_URL}/contracts/apartment/${resourceId}/download/${type}`
+      : `${API_URL}/contracts/property/${resourceId}/download/${type}`
     const response = await fetch(url, {
       method: 'GET',
       headers: token ? { Authorization: `Bearer ${token}` } : {}
