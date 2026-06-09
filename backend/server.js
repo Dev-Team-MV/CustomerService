@@ -52,6 +52,7 @@ const exactCorsOrigins = [
   'https://dev6town.michelangelodelvalle.com',
   'https://6towncsdev.michelangelodelvalle.com',
   'https://6town.michelangelodelvalle.com',
+  'https://6towncs.michelangelodelvalle.com',
   'https://lakewoodoaksonlakeconroe.com',
   'https://www.lakewoodoaksonlakeconroe.com'
 ].filter(Boolean)
