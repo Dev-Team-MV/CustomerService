@@ -48,7 +48,13 @@ const exactCorsOrigins = [
   'https://devlakewoodp1.michelangelodelvalle.com',
   'https://lakewoodp1.michelangelodelvalle.com',
   'https://devphase2.michelangelodelvalle.com',
-  'https://phase2.michelangelodelvalle.com'
+  'https://phase2.michelangelodelvalle.com',
+  'https://dev6town.michelangelodelvalle.com',
+  'https://6towncsdev.michelangelodelvalle.com',
+  'https://6town.michelangelodelvalle.com',
+  'https://6towncs.michelangelodelvalle.com',
+  'https://lakewoodoaksonlakeconroe.com',
+  'https://www.lakewoodoaksonlakeconroe.com'
 ].filter(Boolean)
 
 const extraCorsOrigins = (process.env.CORS_ORIGINS || '')

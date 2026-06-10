@@ -1,6 +1,7 @@
 // @/Users/oficina/MV-CRM/CustomerService/frontend/shared/services/projectService.js
 
 import api from './api'
+import { API_URL } from './apiUrl'
 
 const projectService = {
   getAll: async () => {
@@ -65,8 +66,7 @@ const projectService = {
 
   downloadAccountStatementPdf: async (projectId, suggestedFilename = null) => {
     const token = localStorage.getItem('token')
-    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api'
-    const response = await fetch(`${baseURL}/projects/${projectId}/account-statement/pdf`, {
+    const response = await fetch(`${API_URL}/projects/${projectId}/account-statement/pdf`, {
       method: 'GET',
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })

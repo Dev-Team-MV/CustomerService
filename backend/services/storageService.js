@@ -62,6 +62,15 @@ const DEFAULT_SIGNED_URL_CACHE_MS = 10 * 60 * 1000
 const folderListCache = new Map()
 const signedUrlCache = new Map()
 
+const clearFolderListCache = () => {
+  folderListCache.clear()
+}
+
+const clearSignedUrlCacheForPath = (fullPath) => {
+  if (!fullPath) return
+  signedUrlCache.delete(fullPath)
+}
+
 /**
  * Resolve full path in bucket, prepending env prefix if not already present.
  * @param {string} pathOrName - Path or file name (e.g. 'clubhouse/abc.jpg' or 'dev/clubhouse/abc.jpg')
@@ -130,6 +139,9 @@ export const uploadFile = async (fileBuffer, fileName, mimeType, makePublic = fa
         contentType: mimeType
       }
     })
+    // Write operations must invalidate cached folder listings and signed URL for the object.
+    clearFolderListCache()
+    clearSignedUrlCacheForPath(fullPath)
 
     // Make file public if requested
     if (makePublic) {
@@ -171,6 +183,9 @@ export const deleteFile = async (fileName) => {
     const fullPath = resolvePath(fileName)
     const file = bucket.file(fullPath)
     await file.delete()
+    // Deletions change folder contents; purge stale caches immediately.
+    clearFolderListCache()
+    clearSignedUrlCacheForPath(fullPath)
     return true
   } catch (error) {
     console.error('Error deleting file from GCS:', error)
@@ -200,7 +215,7 @@ export const getSignedUrl = async (fileName, expiresIn = 60 * 60 * 1000) => {
  * @returns {Promise<Array<{ name: string, url?: string }>>} List of files with optional URL
  */
 export const listFilesInFolder = async (folderPrefix, options = {}) => {
-  const { includeSignedUrls = true } = options
+  const { includeSignedUrls = true, bypassCache = false } = options
   try {
     const prefix = (folderPrefix || '').replace(/^\/|\/$/g, '').trim()
     if (!prefix) return []
@@ -211,7 +226,7 @@ export const listFilesInFolder = async (folderPrefix, options = {}) => {
     const cacheKey = `${prefixWithSlash}|${includeSignedUrls}|${makePublic}`
     const now = Date.now()
     const cached = folderListCache.get(cacheKey)
-    if (cached && cached.expiresAt > now) {
+    if (!bypassCache && cached && cached.expiresAt > now) {
       return cached.data
     }
 

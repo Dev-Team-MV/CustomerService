@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../../context/AuthContext'
 import LanguageSwitcher from '@shared/components/LanguageSwitcher'
 import { useTranslation } from 'react-i18next'
-import mvLogo from '../../../public/images/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png'
+import mvLogo from '../../assets/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png'
 
 
 const NAV = [
