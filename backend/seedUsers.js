@@ -61,7 +61,7 @@ const seedUsers = async () => {
     console.log('🗑️  Usuarios anteriores eliminados')
 
     for (const userData of users) {
-      const user = new User(userData)
+      const user = new User({ ...userData, passwordSet: true })
       await user.save()
       console.log(`✅ Usuario creado: ${user.email} (${user.role})`)
     }

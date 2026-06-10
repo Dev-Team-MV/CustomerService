@@ -5,6 +5,8 @@ import User from '../models/User.js'
 import Project from '../models/Project.js'
 import { sendSMSWithValidation } from '../services/twilioService.js'
 import { resolveFrontendBaseUrl } from '../services/resolveFrontendBaseUrl.js'
+import { resolveRoleForNewUser } from '../utils/roles.js'
+import { buildAuthLoginResponse, buildAuthUserPayload } from '../utils/authUserPayload.js'
 
 const generateToken = (userOrId) => {
   const payload =
@@ -27,10 +29,11 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' })
     }
 
+    let currentUser = null
+
     // Si skipPasswordSetup es true, requiere autenticación de admin
     if (skipPasswordSetup) {
       let token
-      let currentUser = null
 
       if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
@@ -57,14 +60,16 @@ export const register = async (req, res) => {
 
     // Si es admin creando usuario y skipPasswordSetup es true, crear sin contraseña
     const isAdminCreating = skipPasswordSetup
-    
+    const creatorRole = isAdminCreating ? currentUser?.role : null
+    const assignedRole = resolveRoleForNewUser(creatorRole, role)
+
     let userData = {
       firstName,
       lastName,
       email,
       phoneNumber,
       birthday,
-      role: role || 'user'
+      role: assignedRole
     }
 
     if (projectId) {
@@ -118,23 +123,7 @@ export const register = async (req, res) => {
     const user = await User.create(userData)
 
     if (user) {
-      res.status(201).json({
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-        token: generateToken(user),
-        user: {
-          id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          role: user.role
-        }
-      })
+      res.status(201).json(buildAuthLoginResponse(user, generateToken(user)))
     } else {
       res.status(400).json({ message: 'Invalid user data' })
     }
@@ -158,14 +147,17 @@ export const login = async (req, res) => {
 
     // Buscar usuario por email o phoneNumber
     const query = email ? { email } : { phoneNumber }
+    // Solo +password: incluir hash. No usar select('+password projectMemberships') — Mongoose
+    // interpreta projectMemberships como lista exclusiva y omite role, email, etc.
     const user = await User.findOne(query).select('+password').populate('lots')
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' })
     }
 
-    // Verificar si el usuario tiene contraseña establecida
-    if (!user.password || !user.passwordSet) {
+    // Sin hash de contraseña: debe usar el enlace de setup (usuarios creados por admin).
+    // Usuarios legacy pueden tener passwordSet=false aunque ya tengan contraseña.
+    if (!user.password) {
       return res.status(403).json({ 
         message: 'Password not set. Please set your password using the setup link sent to your phone.',
         requiresPasswordSetup: true
@@ -173,25 +165,11 @@ export const login = async (req, res) => {
     }
 
     if (await user.matchPassword(password)) {
-      res.json({
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-        lots: user.lots,
-        token: generateToken(user),
-        user: {
-          id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          role: user.role,
-          lots: user.lots
-        }
-      })
+      if (!user.passwordSet) {
+        user.passwordSet = true
+        await user.save()
+      }
+      res.json(buildAuthLoginResponse(user, generateToken(user)))
     } else {
       res.status(401).json({ message: 'Invalid credentials' })
     }
@@ -227,7 +205,7 @@ export const loginAdmin = async (req, res) => {
       return res.status(403).json({ message: 'Access denied. Admin login only.' })
     }
 
-    if (!user.password || !user.passwordSet) {
+    if (!user.password) {
       return res.status(403).json({
         message: 'Password not set. Please set your password first.',
         requiresPasswordSetup: true
@@ -235,23 +213,11 @@ export const loginAdmin = async (req, res) => {
     }
 
     if (await user.matchPassword(password)) {
-      res.json({
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-        token: generateToken(user),
-        user: {
-          id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          role: user.role
-        }
-      })
+      if (!user.passwordSet) {
+        user.passwordSet = true
+        await user.save()
+      }
+      res.json(buildAuthLoginResponse(user, generateToken(user)))
     } else {
       res.status(401).json({ message: 'Invalid credentials' })
     }
@@ -262,18 +228,22 @@ export const loginAdmin = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).populate('lots')
+    const user = await User.findById(req.user._id)
+      .populate('lots')
+      .populate('projectMemberships.project', 'name slug phase type')
 
     if (user) {
+      const userPayload = buildAuthUserPayload(user, {
+        projectMemberships: (user.projectMemberships || []).map((m) => ({
+          project: m.project?._id || m.project,
+          membershipRole: m.role || 'resident',
+          name: m.project?.name,
+          slug: m.project?.slug
+        }))
+      })
       res.json({
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        birthday: user.birthday,
-        role: user.role,
-        lots: user.lots
+        ...userPayload,
+        user: userPayload
       })
     } else {
       res.status(404).json({ message: 'User not found' })
@@ -351,17 +321,9 @@ export const setupPassword = async (req, res) => {
     user.setupTokenExpires = undefined
     await user.save()
 
-    res.json({ 
+    res.json({
       message: 'Password set successfully. You can now login.',
-      token: generateToken(user),
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        role: user.role
-      }
+      ...buildAuthLoginResponse(user, generateToken(user))
     })
   } catch (error) {
     res.status(500).json({ message: error.message })
