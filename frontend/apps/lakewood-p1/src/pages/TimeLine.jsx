@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Box, Button, Modal, TextField, Typography, IconButton, Paper, Stack, Container, CircularProgress } from '@mui/material';
+import { Box, Button, Modal, TextField, Typography, IconButton, Paper, Stack, Container, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 import PageHeader from '@shared/components/PageHeader'
 
 import DataTable from '@shared/components/table/DataTable';
@@ -20,6 +21,11 @@ const TimeLine = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Estados para el diálogo de confirmación de eliminación
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [stepToDelete, setStepToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Form state
   const [form, setForm] = useState({
@@ -39,7 +45,7 @@ const TimeLine = () => {
         setSteps(data);
       } catch (err) {
         setError('No se pudo cargar la línea de tiempo.');
-        setSteps([]); // O puedes dejar el mockSteps si quieres fallback
+        setSteps([]);
       }
       setLoading(false);
     };
@@ -65,6 +71,31 @@ const TimeLine = () => {
   };
 
   const closeModal = () => setModalOpen(false);
+
+  // --- Delete handlers ---
+  const openDeleteDialog = (step) => {
+    setStepToDelete(step);
+    setDeleteDialogOpen(true);
+  };
+
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setStepToDelete(null);
+  };
+
+  const handleDelete = async () => {
+    if (!stepToDelete) return;
+    
+    setDeleting(true);
+    try {
+      await TimeLineService.remove(stepToDelete._id);
+      setSteps((prev) => prev.filter((s) => s._id !== stepToDelete._id));
+      closeDeleteDialog();
+    } catch (err) {
+      alert('Error al eliminar el paso. Intenta de nuevo.');
+    }
+    setDeleting(false);
+  };
 
   // --- Image/video handlers ---
   const handleAddImage = (e) => {
@@ -158,7 +189,6 @@ const TimeLine = () => {
   // --- CRUD handlers ---
   const handleSave = async () => {
     setSaving(true);
-    // Filtra los archivos locales (blob:) para subirlos
     const imagesToUpload = form.images.filter(img => img.url.startsWith('blob:'));
     const videosToUpload = form.videos.filter(vid => vid.url.startsWith('blob:'));
 
@@ -176,7 +206,6 @@ const TimeLine = () => {
       );
     }
 
-    // Reemplaza las URLs locales por las URLs reales
     const images = form.images.map(img => {
       if (img.url.startsWith('blob:')) {
         return {
@@ -197,7 +226,6 @@ const TimeLine = () => {
       return vid;
     });
 
-    // Unifica imágenes y videos en un solo array media y los ordena por order
     const media = [
       ...images.map(img => ({
         type: 'image',
@@ -220,139 +248,164 @@ const TimeLine = () => {
       media
     };
 
-try {
-  if (editingStep) {
-    const updated = await TimeLineService.update(editingStep._id, payload);
-    setSteps((prev) =>
-      prev.map((s) =>
-        s._id === editingStep._id
-          ? updated
-          : s
-      )
-    );
-  } else {
-    const created = await TimeLineService.create(payload);
-    setSteps((prev) => [created, ...prev]);
-  }
-  setModalOpen(false);
-} catch (err) {
-  alert('Error al guardar. Intenta de nuevo.');
-}
+    try {
+      if (editingStep) {
+        const updated = await TimeLineService.update(editingStep._id, payload);
+        setSteps((prev) =>
+          prev.map((s) =>
+            s._id === editingStep._id
+              ? updated
+              : s
+          )
+        );
+      } else {
+        const created = await TimeLineService.create(payload);
+        setSteps((prev) => [created, ...prev]);
+      }
+      setModalOpen(false);
+    } catch (err) {
+      alert('Error al guardar. Intenta de nuevo.');
+    }
     setSaving(false);
   };
 
   // --- DataTable columns ---
-const columns = [
-  {
-    field: 'title',
-    headerName: t('date', 'Date'),
-    width: 180,
-    renderCell: ({ row }) => (
-      <Typography
-        variant="body2"
-        sx={{
-          fontWeight: 600,
-          color: '#1a1a1a',
-          fontFamily: '"DM Sans", sans-serif'
-        }}
-      >
-        {row.title}
-      </Typography>
-    )
-  },
-  {
-    field: 'description',
-    headerName: t('description', 'Description'),
-    width: 300,
-    renderCell: ({ row }) => (
-      <Typography
-        variant="body2"
-        sx={{
-          color: '#706f6f',
-          fontFamily: '"DM Sans", sans-serif',
-          fontSize: '0.95rem',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden'
-        }}
-      >
-        {row.description}
-      </Typography>
-    )
-  },
-  {
-    field: 'images',
-    headerName: t('images', 'Images'),
-    width: 120,
-    align: 'center',
-    renderCell: ({ row }) => (
-      <Typography
-        variant="body2"
-        sx={{
-          fontWeight: 700,
-          color: '#8CA551',
-          fontFamily: '"DM Sans", sans-serif'
-        }}
-      >
-        {(row.media || []).filter(m => m.type === 'image').length}
-      </Typography>
-    )
-  },
-  {
-    field: 'videos',
-    headerName: t('videos', 'Videos'),
-    width: 120,
-    align: 'center',
-    renderCell: ({ row }) => (
-      <Typography
-        variant="body2"
-        sx={{
-          fontWeight: 700,
-          color: '#E5863C',
-          fontFamily: '"DM Sans", sans-serif'
-        }}
-      >
-        {(row.media || []).filter(m => m.type === 'video').length}
-      </Typography>
-    )
-  },
-  {
-    field: 'actions',
-    headerName: t('actions', 'Actions'),
-    width: 100,
-    align: 'center',
-    renderCell: ({ row }) => (
-      <Box display="flex" alignItems="center" gap={1}>
-        <Tooltip title={t('edit', 'Edit')} placement="top">
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              openEditModal(row);
-            }}
-            sx={{
-              bgcolor: 'rgba(140, 165, 81, 0.08)',
-              border: '1px solid rgba(140, 165, 81, 0.2)',
-              borderRadius: 2,
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                bgcolor: '#8CA551',
-                borderColor: '#8CA551',
-                transform: 'scale(1.1)',
-                '& .MuiSvgIcon-root': {
-                  color: 'white'
+  const columns = [
+    {
+      field: 'title',
+      headerName: t('date', 'Date'),
+      width: 180,
+      renderCell: ({ row }) => (
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 600,
+            color: '#1a1a1a',
+            fontFamily: '"DM Sans", sans-serif'
+          }}
+        >
+          {row.title}
+        </Typography>
+      )
+    },
+    {
+      field: 'description',
+      headerName: t('description', 'Description'),
+      width: 300,
+      renderCell: ({ row }) => (
+        <Typography
+          variant="body2"
+          sx={{
+            color: '#706f6f',
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: '0.95rem',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden'
+          }}
+        >
+          {row.description}
+        </Typography>
+      )
+    },
+    {
+      field: 'images',
+      headerName: t('images', 'Images'),
+      width: 120,
+      align: 'center',
+      renderCell: ({ row }) => (
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 700,
+            color: '#8CA551',
+            fontFamily: '"DM Sans", sans-serif'
+          }}
+        >
+          {(row.media || []).filter(m => m.type === 'image').length}
+        </Typography>
+      )
+    },
+    {
+      field: 'videos',
+      headerName: t('videos', 'Videos'),
+      width: 120,
+      align: 'center',
+      renderCell: ({ row }) => (
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 700,
+            color: '#E5863C',
+            fontFamily: '"DM Sans", sans-serif'
+          }}
+        >
+          {(row.media || []).filter(m => m.type === 'video').length}
+        </Typography>
+      )
+    },
+    {
+      field: 'actions',
+      headerName: t('actions', 'Actions'),
+      width: 150,
+      align: 'center',
+      renderCell: ({ row }) => (
+        <Box display="flex" alignItems="center" gap={1} justifyContent="center">
+          <Tooltip title={t('edit', 'Edit')} placement="top">
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                openEditModal(row);
+              }}
+              sx={{
+                bgcolor: 'rgba(140, 165, 81, 0.08)',
+                border: '1px solid rgba(140, 165, 81, 0.2)',
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  bgcolor: '#8CA551',
+                  borderColor: '#8CA551',
+                  transform: 'scale(1.1)',
+                  '& .MuiSvgIcon-root': {
+                    color: 'white'
+                  }
                 }
-              }
-            }}
-          >
-            <EditIcon sx={{ fontSize: 18, color: '#8CA551' }} />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    )
-  }
-];
+              }}
+            >
+              <EditIcon sx={{ fontSize: 18, color: '#8CA551' }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t('delete', 'Delete')} placement="top">
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                openDeleteDialog(row);
+              }}
+              sx={{
+                bgcolor: 'rgba(211, 47, 47, 0.08)',
+                border: '1px solid rgba(211, 47, 47, 0.2)',
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  bgcolor: '#d32f2f',
+                  borderColor: '#d32f2f',
+                  transform: 'scale(1.1)',
+                  '& .MuiSvgIcon-root': {
+                    color: 'white'
+                  }
+                }
+              }}
+            >
+              <DeleteIcon sx={{ fontSize: 18, color: '#d32f2f' }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )
+    }
+  ];
 
   return (
     <Box
@@ -363,52 +416,113 @@ const columns = [
       }}
     >
       <Container maxWidth="xl">
-<PageHeader
-  icon={AddIcon}
-  title={t('timelineTitle', 'Timeline')}
-  subtitle={t('timelineSubtitle', 'Manage project progress and stages')}
-  actionButton={{
-    label: t('newStep', 'New Step'),
-    icon: <AddIcon />,
-    onClick: openCreateModal
-  }}
-/>
+        <PageHeader
+          icon={AddIcon}
+          title={t('timelineTitle', 'Timeline')}
+          subtitle={t('timelineSubtitle', 'Manage project progress and stages')}
+          actionButton={{
+            label: t('newStep', 'New Step'),
+            icon: <AddIcon />,
+            onClick: openCreateModal
+          }}
+        />
 
-
-<DataTable
-  columns={columns}
-  data={steps}
-  loading={loading}
-  getRowId={(row) => row._id}
-  emptyState={
-    <EmptyState
-      icon={AddIcon}
-      title={t('noSteps', 'No steps yet')}
-      description={t('addFirstStep', 'Add the first step to start the timeline.')}
-      actionLabel={t('newStep', 'New Step')}
-      onAction={openCreateModal}
-    />
-  }
-/>
- 
+        <DataTable
+          columns={columns}
+          data={steps}
+          loading={loading}
+          getRowId={(row) => row._id}
+          emptyState={
+            <EmptyState
+              icon={AddIcon}
+              title={t('noSteps', 'No steps yet')}
+              description={t('addFirstStep', 'Add the first step to start the timeline.')}
+              actionLabel={t('newStep', 'New Step')}
+              onAction={openCreateModal}
+            />
+          }
+        />
 
         {/* MODAL CREAR/EDITAR STEP */}
+        <TimeLineStepModal
+          open={modalOpen}
+          onClose={closeModal}
+          onSave={handleSave}
+          form={form}
+          setForm={setForm}
+          saving={saving}
+          handleAddImage={handleAddImage}
+          handleAddVideo={handleAddVideo}
+          moveMedia={moveMedia}
+          removeImage={removeImage}
+          removeVideo={removeVideo}
+          editingStep={editingStep}
+        />
 
-
-<TimeLineStepModal
-  open={modalOpen}
-  onClose={closeModal}
-  onSave={handleSave}
-  form={form}
-  setForm={setForm}
-  saving={saving}
-  handleAddImage={handleAddImage}
-  handleAddVideo={handleAddVideo}
-  moveMedia={moveMedia}
-  removeImage={removeImage}
-  removeVideo={removeVideo}
-  editingStep={editingStep}
-/>
+        {/* DIÁLOGO DE CONFIRMACIÓN DE ELIMINACIÓN */}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={closeDeleteDialog}
+          PaperProps={{
+            sx: {
+              borderRadius: 3,
+              minWidth: 400,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.12)'
+            }
+          }}
+        >
+          <DialogTitle sx={{ pb: 1 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {t('confirmDelete', 'Confirm Delete')}
+            </Typography>
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
+              {t('deleteConfirmation', 'Are you sure you want to delete this step? This action cannot be undone.')}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+            <Button
+              onClick={closeDeleteDialog}
+              disabled={deleting}
+              sx={{
+                color: '#706f6f',
+                borderRadius: 2,
+                px: 3,
+                textTransform: 'none',
+                fontFamily: '"DM Sans", sans-serif',
+                '&:hover': {
+                  bgcolor: 'rgba(0,0,0,0.04)'
+                }
+              }}
+            >
+              {t('cancel', 'Cancel')}
+            </Button>
+            <Button
+              onClick={handleDelete}
+              disabled={deleting}
+              variant="contained"
+              sx={{
+                bgcolor: '#d32f2f',
+                borderRadius: 2,
+                px: 3,
+                textTransform: 'none',
+                fontFamily: '"DM Sans", sans-serif',
+                boxShadow: 'none',
+                '&:hover': {
+                  bgcolor: '#b71c1c',
+                  boxShadow: 'none'
+                }
+              }}
+            >
+              {deleting ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                t('delete', 'Delete')
+              )}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </Box>
   );

@@ -217,6 +217,16 @@ const fetchRecorridoImages = async (skipCache = false) => {
     await fetchRecorridoImages()
   }
 
+  const handleDelete = async (id, filename) => {
+  try {
+    await uploadService.deleteRecorridoImage(filename)
+    await fetchRecorridoImages(true)
+  } catch (err) {
+    console.error('Error deleting image:', err)
+    throw err
+  }
+}
+
   return (
     <>
 <Box sx={{ p: 0, borderRadius: 2, overflow: 'hidden', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
@@ -407,15 +417,16 @@ const fetchRecorridoImages = async (skipCache = false) => {
       </Dialog>
 
       {/* Modal de subida de imagen */}
-      <RecorridoImageUploadModal
-        open={uploadModalOpen}
-        onClose={() => setUploadModalOpen(false)}
-        puntos={puntosBase}
-        imagesMap={imagesMap}
-        onUpload={handleUpload}
-        onVisibilityChange={handleRecorridoVisibility}
-        loading={uploading}
-      />
+<RecorridoImageUploadModal
+  open={uploadModalOpen}
+  onClose={() => setUploadModalOpen(false)}
+  puntos={puntosBase}
+  imagesMap={imagesMap}
+  onUpload={handleUpload}
+  onVisibilityChange={handleRecorridoVisibility}
+  onDelete={handleDelete}
+  loading={uploading}
+/>
     </>
   )
 }

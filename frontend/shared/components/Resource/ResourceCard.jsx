@@ -12,6 +12,8 @@ import {
 } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import PropTypes from 'prop-types'
+import HomeCareLinkButton from '@shared/components/HomeCareLinkButton'
+
 
 // ── Feature label + icon ──────────────────────────────────────────────────────
 const FeatureTag = ({ label, icon }) => (
@@ -273,7 +275,26 @@ const ResourceCard = ({
             ))}
           </Box>
         )}
+        <Box sx={{ px: 2.5, pt: 2, pb: 2.5 }}>
+  <HomeCareLinkButton
+    variant="contained"
+    size="small"
+    fullWidth
+    propertyId={resource._id}
+    propertyName={resource.title}
+    sx={{
+      borderRadius: 2,
+      bgcolor: config.colors.primary,
+      '&:hover': {
+        bgcolor: config.colors.secondary
+      }
+    }}
+  >
+    Solicitar Servicio
+  </HomeCareLinkButton>
+</Box>
       </Box>
+      
     </motion.div>
   )
 }

@@ -1,0 +1,188 @@
+{
+  "title": "Gestión de Cargas",
+  "welcome": "Bienvenido",
+  "subtitle": "Administra todas las imágenes y videos del proyecto desde un solo lugar",
+  "back": "Volver",
+  
+  "categories": {
+    "clubhouse": {
+      "title": "ClubHouse",
+      "description": "Interior, Exterior, Planos, Deck y Timeline"
+    },
+    "masterplan": {
+      "title": "MasterPlan",
+      "description": "Plano Maestro, Recorrido, Amenidades y Eagle View"
+    },
+    "construction": {
+      "title": "Fases de Construcción",
+      "description": "Gestión de media por propiedad y fase"
+    }
+  },
+
+  "clubhouse": {
+    "subtitle": "Gestiona todas las imágenes y contenido del ClubHouse",
+    "interior": "Interior",
+    "interiorDesc": "Reception, Gym, Pool, etc.",
+    "exterior": "Exterior",
+    "exteriorDesc": "Imágenes exteriores del club",
+    "blueprints": "Planos",
+    "blueprintsDesc": "Planos arquitectónicos",
+    "deck": "Deck",
+    "deckDesc": "Imágenes del deck",
+    "timeline": "Timeline de Construcción",
+    "timelineDesc": "Pasos de construcción del club"
+  },
+
+  "masterplan": {
+    "subtitle": "Gestiona el plano maestro, recorrido virtual y amenidades",
+    "main": "Plano Maestro",
+    "mainDesc": "Imagen principal del plano",
+    "tour": "Recorrido Virtual",
+    "tourDesc": "Puntos de recorrido con imágenes",
+    "amenities": "Amenidades Exteriores",
+    "amenitiesDesc": "Pool, Gym, Playground, etc.",
+    "eagleview": "Eagle View",
+    "eagleviewDesc": "Vista aérea del proyecto"
+  },
+
+  "construction": {
+    "subtitle": "Gestiona el progreso de construcción por propiedad y fase",
+    "selectProperty": "Seleccionar Propiedad",
+    "selectPropertyFirst": "Selecciona una propiedad para gestionar sus fases de construcción",
+    "uploadPhases": "Subir Media por Fase",
+    "viewPhases": "Ver Fases con Media",
+    "noPhases": "No hay fases con media todavía",
+    "uploadMedia": "Click para subir media",
+    "phaseLocked": "Bloqueada - Completa la fase anterior",
+    "phase": "Fase",
+    "errorUploading": "Error al subir: ",
+    "successUpload": "Media subida exitosamente",
+    "deleteConfirm": "¿Estás seguro de eliminar este media item?",
+    "successDelete": "Media eliminado exitosamente",
+    "errorDelete": "Error al eliminar: ",
+    "successUpdate": "Media actualizado exitosamente",
+    "errorUpdate": "Error al actualizar: "
+  },
+
+  "uploadDialog": {
+    "title": "Subir Media",
+    "mediaTitle": "Título del Media (Opcional)",
+    "description": "Descripción (Opcional)",
+    "descriptionPlaceholder": "Agregue una descripción para este media...",
+    "progressAdded": "Progreso Agregado (%)",
+    "progressHelper": "Porcentaje del progreso de construcción a agregar",
+    "maxProgress": "Máximo:",
+    "phaseComplete": "Fase ya está al 100%",
+    "uploadDate": "Fecha de Carga",
+    "dateFormat": "MM/DD/YYYY",
+    "selectImages": "Seleccionar Imágenes",
+    "selectVideos": "Seleccionar Videos",
+    "imageSelected": "imagen seleccionada",
+    "imagesSelected": "imágenes seleccionadas",
+    "videoSelected": "video seleccionado",
+    "videosSelected": "videos seleccionados",
+    "cancel": "Cancelar",
+    "upload": "Subir",
+    "uploading": "Subiendo...",
+    "selectAtLeast": "Por favor selecciona al menos una imagen o video"
+  },
+
+  "masterPlanUpload": {
+    "title": "Subir Plano Maestro",
+    "subtitle": "Carga la imagen principal del plano maestro",
+    "selectImage": "Seleccionar Imagen",
+    "imageName": "Nombre de la Imagen",
+    "imageDescription": "Descripción de la Imagen",
+    "descriptionPlaceholder": "Describe el plano maestro...",
+    "publish": "Publicar",
+    "publishing": "Publicando...",
+    "successPublish": "Plano maestro publicado exitosamente"
+  },
+
+  "recorridoModal": {
+    "title": "Recorrido Virtual",
+    "subtitle": "Carga imágenes para cada punto del recorrido",
+    "selectPoint": "Selecciona un punto para cargar la imagen",
+    "imageFor": "Imagen para",
+    "uploadImage": "Subir Imagen",
+    "replace": "Reemplazar",
+    "makePublic": "Hacer Pública",
+    "makePrivate": "Hacer Privada",
+    "public": "Pública",
+    "private": "Privada",
+    "noImage": "Sin imagen",
+    "loading": "Cargando...",
+    "errorLoading": "Error al cargar imágenes"
+  },
+
+  "amenitiesModal": {
+    "title": "Amenidades Exteriores",
+    "subtitle": "Gestiona las imágenes de amenidades",
+    "addAmenity": "Agregar Amenidad",
+    "amenityName": "Nombre de la Amenidad",
+    "amenityImage": "Imagen de la Amenidad",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Describe la amenidad...",
+    "selectImage": "Seleccionar Imagen",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "noAmenities": "No hay amenidades registradas",
+    "successSave": "Amenidad guardada exitosamente"
+  },
+
+  "eagleViewSection": {
+    "title": "Eagle View",
+    "subtitle": "Gestiona las vistas aéreas del proyecto",
+    "addView": "Agregar Vista",
+    "viewTitle": "Título de la Vista",
+    "viewDescription": "Descripción de la Vista",
+    "descriptionPlaceholder": "Describe la vista aérea...",
+    "uploadDate": "Fecha de Carga",
+    "selectImage": "Seleccionar Imágenes",
+    "selectVideo": "Seleccionar Videos",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "noViews": "No hay vistas aéreas registradas"
+  },
+
+  "clubImageModal": {
+    "title": "Imágenes del ClubHouse",
+    "interior": "Interior",
+    "exterior": "Exterior",
+    "blueprints": "Planos",
+    "deck": "Deck",
+    "selectImages": "Seleccionar Imágenes",
+    "selectCategory": "Selecciona una categoría",
+    "uploadImages": "Subir Imágenes",
+    "uploading": "Subiendo...",
+    "successUpload": "Imágenes subidas exitosamente",
+    "errorUpload": "Error al subir imágenes",
+    "deleteImage": "Eliminar Imagen",
+    "deleteConfirm": "¿Estás seguro de eliminar esta imagen?",
+    "loading": "Cargando..."
+  },
+
+  "phaseViewer": {
+    "noPhases": "No hay fases con media todavía",
+    "completionPercentage": "Porcentaje de Completación",
+    "media": "Media",
+    "images": "Imágenes",
+    "videos": "Videos",
+    "uploadedDate": "Fecha de Carga",
+    "view": "Ver",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "close": "Cerrar"
+  },
+
+  "errors": {
+    "selectProperty": "Por favor selecciona una propiedad",
+    "selectImage": "Por favor selecciona una imagen",
+    "uploadFailed": "Error al subir el archivo",
+    "loadingFailed": "Error al cargar los datos",
+    "invalidFile": "Archivo inválido",
+    "fileTooLarge": "El archivo es demasiado grande"
+  }
+}
