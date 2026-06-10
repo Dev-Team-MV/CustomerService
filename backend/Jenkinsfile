@@ -15,7 +15,7 @@ pipeline {
         APP_DIR = 'backend'
         JWT_SECRET = 'supersecretkey123456789'
         UPLOAD_MAX_FILE_SIZE_MB = '1024'
-        CORS_ORIGINS = 'https://devlakewoodp1.michelangelodelvalle.com,https://lakewoodp1.michelangelodelvalle.com,https://devlakewoodp2.michelangelodelvalle.com,https://lakewoodp2.michelangelodelvalle.com,https://devcrm.michelangelodelvalle.com,https://crm.michelangelodelvalle.com'
+        CORS_ORIGINS = 'https://devlakewoodp1.michelangelodelvalle.com,https://lakewoodp1.michelangelodelvalle.com,https://devlakewoodp2.michelangelodelvalle.com,https://lakewoodp2.michelangelodelvalle.com,https://devcrm.michelangelodelvalle.com,https://crm.michelangelodelvalle.com,https://dev6town.michelangelodelvalle.com,https://6towncsdev.michelangelodelvalle.com,https://6town.michelangelodelvalle.com,https://6towncs.michelangelodelvalle.com'
         TWILIO_PHONE_FROM = '+18327707897'
         GCS_PROJECT_ID = 'centurions-car-wash-442201'
         GCS_BUCKET_NAME = 'customer-service-7cc'
