@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Box, Typography, Container, Paper, Breadcrumbs, Link } from '@mui/material'
+import { Box, Typography, Chip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Home, CloudUpload } from '@mui/icons-material'
+import { ArrowBack } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useAuth } from '@shared/context/AuthContext'
 import UploadsCategorySelector from '../components/UploadModule/UploadsCategorySelector'
 import UploadsClubHouseSection from '../components/UploadModule/UploadsClubHouseSection'
 import UploadsMasterPlanSection from '../components/UploadModule/UploadsMasterPlanSection'
@@ -12,7 +13,10 @@ import UploadsConstructionSection from '../components/UploadModule/UploadsConstr
 const UploadsManager = () => {
   const { t } = useTranslation(['uploads', 'common'])
   const theme = useTheme()
+  const { user } = useAuth()
   const [selectedCategory, setSelectedCategory] = useState(null)
+
+  const primary = theme.palette.primary.main
 
   const renderSection = () => {
     switch (selectedCategory) {
@@ -27,79 +31,140 @@ const UploadsManager = () => {
     }
   }
 
+  const titleParts = t('title', 'Gestión de Cargas').split(' ')
+  const titleFirst = titleParts.slice(0, -1).join(' ')
+  const titleLast = titleParts[titleParts.length - 1]
+
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Breadcrumbs sx={{ mb: 2 }}>
-          <Link
-            underline="hover"
-            sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-            color="inherit"
-            onClick={() => setSelectedCategory(null)}
+    <Box sx={{ minHeight: {xs:'20vh',sm:'80vh',md:'73vh'}, bgcolor: '#f8f9fa', px: { xs: 3, md: 6 }, py: 4 }}>
+      <AnimatePresence mode="wait">
+        {!selectedCategory ? (
+          <motion.div
+            key="selector"
+            initial={{ opacity: 0, x: -60 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 60 }}
+            transition={{ duration: 0.5, type: 'spring' }}
           >
-            <Home sx={{ mr: 0.5 }} fontSize="small" />
-            {t('common:home')}
-          </Link>
-          <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
-            <CloudUpload sx={{ mr: 0.5 }} fontSize="small" />
-            {t('uploads:title', 'Gestión de Cargas')}
-          </Typography>
-        </Breadcrumbs>
+            {/* ── Header Section ── */}
+            <Box sx={{ mb: 4 }}>
+              {/* Title row */}
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="flex-start"
+                sx={{ mb: 3 }}
+              >
+                <Box>
+                  <Typography
+                    variant="h3"
+                    sx={{
+                      fontWeight: 300,
+                      color: primary,
+                      fontFamily: '"DM Sans", sans-serif',
+                      fontSize: { xs: '2.2rem', md: '3.5rem' },
+                      lineHeight: 1.1,
+                    }}
+                  >
+                    {titleFirst}{' '}
+                    <Box component="span" sx={{ fontWeight: 800 }}>{titleLast}</Box>
+                  </Typography>
 
-        <Typography
-          variant="h4"
-          sx={{
-            fontFamily: '"Poppins", sans-serif',
-            fontWeight: 700,
-            color: theme.palette.primary.main,
-            mb: 1
-          }}
-        >
-          🏗️ {t('uploads:title', 'Gestión de Cargas')}
-        </Typography>
-        <Typography
-          variant="body1"
-          sx={{
-            fontFamily: '"Poppins", sans-serif',
-            color: theme.palette.text.secondary
-          }}
-        >
-          {t('uploads:subtitle', 'Administra todas las imágenes y videos del proyecto desde un solo lugar')}
-        </Typography>
-      </Box>
+                  <Box display="flex" alignItems="center" gap={1.5} mt={1}>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: '#706f6f', fontFamily: '"DM Sans", sans-serif', fontSize: '0.9rem' }}
+                    >
+                      {t('welcome', 'Bienvenido')}
+                    </Typography>
+                    <Chip
+                      label={user?.firstName?.toUpperCase() || 'ADMIN'}
+                      sx={{
+                        bgcolor: primary,
+                        color: 'white',
+                        fontWeight: 700,
+                        fontSize: '0.7rem',
+                        height: 28,
+                        borderRadius: 1.5,
+                        fontFamily: '"DM Sans", sans-serif',
+                        letterSpacing: '1.5px',
+                        px: 0.5,
+                      }}
+                    />
+                  </Box>
+                </Box>
 
-      {/* Category Selector */}
-      {!selectedCategory && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <UploadsCategorySelector onSelectCategory={setSelectedCategory} />
-        </motion.div>
-      )}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#706f6f',
+                    maxWidth: 280,
+                    textAlign: 'right',
+                    lineHeight: 1.7,
+                    fontFamily: '"DM Sans", sans-serif',
+                    fontSize: '0.85rem',
+                    mt: 0.5,
+                    display: { xs: 'none', sm: 'block' },
+                  }}
+                >
+                  {t('subtitle', 'Administra todas las imágenes y videos del proyecto desde un solo lugar')}
+                </Typography>
+              </Box>
+            </Box>
 
-      {/* Selected Section */}
-      {selectedCategory && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <Paper
-            elevation={2}
-            sx={{
-              p: 3,
-              borderRadius: 3,
-              bgcolor: theme.palette.background.paper
-            }}
+            {/* Category Selector */}
+            <UploadsCategorySelector onSelectCategory={setSelectedCategory} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="detail"
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -60 }}
+            transition={{ duration: 0.5, type: 'spring' }}
           >
+            {/* Back button */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Box
+                onClick={() => setSelectedCategory(null)}
+                sx={{
+                  mb: 3,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  color: primary,
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  px: 2.5,
+                  py: 1,
+                  borderRadius: '50px',
+                  border: `1.5px solid ${primary}40`,
+                  bgcolor: 'white',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s ease',
+                  fontFamily: '"DM Sans", sans-serif',
+                  '&:hover': {
+                    bgcolor: primary,
+                    color: 'white',
+                    borderColor: primary,
+                  }
+                }}
+              >
+                <ArrowBack sx={{ fontSize: 16 }} />
+                {t('common:back', 'Volver')}
+              </Box>
+            </motion.div>
+
+            {/* Selected Section */}
             {renderSection()}
-          </Paper>
-        </motion.div>
-      )}
-    </Container>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Box>
   )
 }
 

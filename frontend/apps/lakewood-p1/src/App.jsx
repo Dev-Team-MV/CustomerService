@@ -10,9 +10,8 @@ import { privateMenuItems, publicMenuItems } from './constants/menuItems'
 
 // Páginas
 import Login from './pages/Login'
-import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
-import Profile from './pages/Profile'
+
 import Properties from './pages/Properties'
 import PropertySelection from './pages/PropertySelection'
 import Lots from './pages/Lots'
@@ -23,15 +22,11 @@ import Analytics from './pages/Analytics'
 import MyProperty from './pages/MyProperty'
 import AmenitiesPublic from './pages/AmenitiesPublic'
 import AmenitiesPrivate from './pages/AmenitiesPrivate'
-import NotFound from './pages/NotFound'
-import NewsTable from './pages/NewsTable'
-import NewsDetails from './components/news/NewsDetails'
-import NewsFeed from './pages/NewsFeed'
-import TermsAndCondition from './pages/TermsAndCondition'
+
 import ClubhouseManager from './pages/ClubhouseManager'
 import MasterPlanManager from './pages/MasterPlanManager'
 import TimeLine from './pages/TimeLine'
-import ConfigurationManager from './pages/ConfigurationManager'
+
 import FamilyGroup from './pages/FamilyGroup'
 import MapInventoryPage from './pages/MapInventoryPage'
 import UploadTracker from './pages/UploadTracker'
@@ -39,6 +34,16 @@ import UploadTracker from './pages/UploadTracker'
 import UploadsManager from './pages/UploadsManager'
 
 import theme from './theme' // Usa SIEMPRE el theme extendido
+
+import SharedNewstable from '@shared/components/News/NewsTable'
+import SharedNewsDetails from '@shared/components/News/NewsDetails'
+import SharedNewsFeed from '@shared/components/News/NewsFeed'
+import SharedRegisterPage from '@shared/components/Register/RegisterPage'
+import SharedProfilePage from '@shared/components/ProfilePage'
+import SharedNotFoundPage from '@shared/components/NotFoundPage'
+import SharedConfigurationPage from '@shared/components/ConfigurationPage'
+import SharedTermsAndConditionsPage from '@shared/components/TermsAndConditions/TermsAndConditionsPage'
+import { getNewsConfig } from '@shared/config/newsConfig'
 
 
 const DynamicLayoutWrapper = ({ children }) => {
@@ -61,11 +66,30 @@ function App() {
       <CssBaseline />
       <AuthProvider projectSlug="lakewood">
         <Routes>
+
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/setup-password/:token" element={<Register />} />
-          <Route path="/terms-and-conditions" element={<TermsAndCondition />} />
+          <Route path="/register" element={
+            <SharedRegisterPage 
+              projectName="Lakewood Oaks on Lake Conroe" 
+              logoMain="/images/logos/Logo_LakewoodOaks-05.png" 
+              logoSecondary="/images/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png" 
+              backgroundImage="/images/260721_001_0010_ISOMETRIA_3-1.png" 
+              tagline="Resort-Style Living on Lake Conroe" 
+              brandColors={{ primary: '#333F1F', secondary: '#8CA551' }} 
+            /> 
+          } />
+          <Route path="/setup-password/:token" element={
+            <SharedRegisterPage 
+              projectName="Lakewood Oaks on Lake Conroe" 
+              logoMain="/images/logos/Logo_LakewoodOaks-05.png" 
+              logoSecondary="/images/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png" 
+              backgroundImage="/images/260721_001_0010_ISOMETRIA_3-1.png" 
+              tagline="Resort-Style Living on Lake Conroe" 
+              brandColors={{ primary: '#333F1F', secondary: '#8CA551' }} 
+            /> 
+          } />
+          <Route path="/terms-and-conditions" element={<SharedTermsAndConditionsPage />} />
 
           {/* Public Routes */}
           <Route
@@ -84,8 +108,8 @@ function App() {
 
           {/* Hybrid Routes */}
           <Route element={<DynamicLayoutWrapper />}>
-            <Route path="/explore/news" element={<NewsFeed />} />
-            <Route path="/explore/news/:id" element={<NewsDetails />} />
+            <Route path="/explore/news" element={<SharedNewsFeed config={getNewsConfig('lakewood')} />} />
+            <Route path="/explore/news/:id" element={<SharedNewsDetails config={getNewsConfig('lakewood')} />} />
           </Route>
 
           {/* Protected Routes */}
@@ -104,9 +128,11 @@ function App() {
               <Route path="/my-property" element={<MyProperty />} />
               <Route path="/amenities" element={<AmenitiesPrivate />} />
               <Route path="/master-plan/inventory" element={<MasterPlanManager />} />
-              <Route path="/configurations" element={<ConfigurationManager />} />
+              {/* <Route path="/configurations" element={<ConfigurationManager />} /> */}
+              <Route path="/configurations" element={<SharedConfigurationPage />} />
               <Route path="/family-group" element={<FamilyGroup />} />
-              <Route path="/admin/news" element={<NewsTable />} />
+              {/* <Route path="/admin/news" element={<NewsTable />} /> */}
+              <Route path="/admin/news" element={<SharedNewstable config={getNewsConfig('lakewood')} />} />
               <Route path="/properties" element={<Properties />} />
               <Route path="/properties/select" element={<PropertySelection />} />
               <Route path="/lots" element={<Lots />} />
@@ -114,7 +140,8 @@ function App() {
               <Route path="/payloads" element={<Payloads />} />
               <Route path="/residents" element={<Residents />} />
               <Route path="/analytics" element={<Analytics />} />
-              <Route path="/profile" element={<Profile />} />
+              {/* <Route path="/profile" element={<Profile />} /> */}
+              <Route path="/profile" element={<SharedProfilePage />} />
               <Route path="/timeline" element={<TimeLine />} />
               <Route path="/clubhouse-manager" element={<ClubhouseManager />} />
               <Route path="/map-inventory" element={<MapInventoryPage />} />
@@ -122,7 +149,7 @@ function App() {
               <Route path="/uploads-manager" element={<UploadsManager />} />
             </Route>
           </Route>
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<SharedNotFoundPage />} />
         </Routes>
       </AuthProvider>
     </ThemeProvider>
