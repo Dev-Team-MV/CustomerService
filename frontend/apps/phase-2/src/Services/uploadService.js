@@ -1,6 +1,7 @@
 // @/Users/oficina/MV-CRM/CustomerService/frontend/apps/phase-2/src/services/uploadService.js
 
 import api from '@shared/services/api'
+import { fetchPublicGet } from '@shared/services/publicFetch'
 
 const PHASE_2_PROJECT_SLUG = 'lakewood-f2'
 const FOLDER_FILES_TTL_MS = 60 * 1000
@@ -33,14 +34,12 @@ const fetchFolderFilesWithCache = async (folder, urls = true) => {
   if (folderFilesInFlight.has(cacheKey)) return folderFilesInFlight.get(cacheKey)
 
   const requestPromise = (async () => {
-    const response = await api.get('/upload/files', {
-      params: { folder, urls }
-    })
+    const response = await fetchPublicGet('/upload/files', { folder, urls })
     folderFilesCache.set(cacheKey, {
-      data: response.data,
+      data: response,
       expiresAt: Date.now() + FOLDER_FILES_TTL_MS
     })
-    return response.data
+    return response
   })()
 
   folderFilesInFlight.set(cacheKey, requestPromise)

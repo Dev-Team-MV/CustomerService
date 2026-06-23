@@ -1,4 +1,5 @@
 import api from './api'
+import { fetchPublicGet } from '@shared/services/publicFetch'
 
 const FOLDER_FILES_TTL_MS = 60 * 1000
 const folderFilesCache = new Map()
@@ -7,30 +8,7 @@ const folderFilesInFlight = new Map()
 const getFolderCacheKey = (folder, urls) => `${String(folder || '').trim().toLowerCase()}|${urls ? '1' : '0'}`
 
 const fetchPublicFolderFiles = async (folder, urls) => {
-  const baseUrl = String(api.defaults.baseURL || '').replace(/\/$/, '')
-  const endpoint = `${baseUrl}/upload/files`
-  const requestUrl = new URL(endpoint)
-  requestUrl.searchParams.set('folder', String(folder || '').trim())
-  requestUrl.searchParams.set('urls', String(urls))
-
-  const response = await fetch(requestUrl.toString(), {
-    method: 'GET',
-    mode: 'cors',
-    credentials: 'omit'
-  })
-
-  if (!response.ok) {
-    let message = `Failed to get files from ${folder}`
-    try {
-      const data = await response.json()
-      if (data?.message) message = data.message
-    } catch (_) {
-      // noop
-    }
-    throw new Error(message)
-  }
-
-  return response.json()
+  return fetchPublicGet('/upload/files', { folder: String(folder || '').trim(), urls })
 }
 
 const clearFolderFilesCache = (folder = null) => {
@@ -249,13 +227,8 @@ getFilesByFolderNoCache: async (folder, urls = true) => {
   try {
     // Limpiar caché antes de consultar
     clearFolderFilesCache(folder)
-    
-    const response = await api.get('/upload/files', {
-      params: { folder, urls }
-    })
-    
-    // NO guardar en caché, retornar directamente
-    return response.data
+
+    return await fetchPublicGet('/upload/files', { folder, urls })
   } catch (error) {
     console.error('Error fetching files:', error)
     throw error
@@ -309,11 +282,10 @@ getFilesByFolderNoCache: async (folder, urls = true) => {
 
     getPublicClubhouse: async () => {
     try {
-      const res = await api.get('/clubhouse/public');
-      return res.data;
+      return await fetchPublicGet('/clubhouse/public')
     } catch (err) {
-      console.error('❌ Error fetching public clubhouse:', err.response?.data || err.message);
-      throw err;
+      console.error('❌ Error fetching public clubhouse:', err.message)
+      throw err
     }
   },
 
