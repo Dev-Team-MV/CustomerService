@@ -1,0 +1,188 @@
+{
+  "title": "Upload Management",
+  "welcome": "Welcome",
+  "subtitle": "Manage all project images and videos from one place",
+  "back": "Back",
+
+  "categories": {
+    "clubhouse": {
+      "title": "ClubHouse",
+      "description": "Interior, Exterior, Blueprints, Deck and Timeline"
+    },
+    "masterplan": {
+      "title": "MasterPlan",
+      "description": "Master Plan, Virtual Tour, Amenities and Eagle View"
+    },
+    "construction": {
+      "title": "Construction Phases",
+      "description": "Media management by property and phase"
+    }
+  },
+
+  "clubhouse": {
+    "subtitle": "Manage all ClubHouse images and content",
+    "interior": "Interior",
+    "interiorDesc": "Reception, Gym, Pool, etc.",
+    "exterior": "Exterior",
+    "exteriorDesc": "Exterior club images",
+    "blueprints": "Blueprints",
+    "blueprintsDesc": "Architectural plans",
+    "deck": "Deck",
+    "deckDesc": "Deck images",
+    "timeline": "Construction Timeline",
+    "timelineDesc": "Club construction steps"
+  },
+
+  "masterplan": {
+    "subtitle": "Manage the master plan, virtual tour and amenities",
+    "main": "Master Plan",
+    "mainDesc": "Main master plan image",
+    "tour": "Virtual Tour",
+    "tourDesc": "Tour points with images",
+    "amenities": "Outdoor Amenities",
+    "amenitiesDesc": "Pool, Gym, Playground, etc.",
+    "eagleview": "Eagle View",
+    "eagleviewDesc": "Aerial view of the project"
+  },
+
+  "construction": {
+    "subtitle": "Manage construction progress by property and phase",
+    "selectProperty": "Select Property",
+    "selectPropertyFirst": "Select a property to manage its construction phases",
+    "uploadPhases": "Upload Media by Phase",
+    "viewPhases": "View Phases with Media",
+    "noPhases": "No phases with media yet",
+    "uploadMedia": "Click to upload media",
+    "phaseLocked": "Locked - Complete the previous phase",
+    "phase": "Phase",
+    "errorUploading": "Error uploading: ",
+    "successUpload": "Media uploaded successfully",
+    "deleteConfirm": "Are you sure you want to delete this media item?",
+    "successDelete": "Media deleted successfully",
+    "errorDelete": "Error deleting: ",
+    "successUpdate": "Media updated successfully",
+    "errorUpdate": "Error updating: "
+  },
+
+  "uploadDialog": {
+    "title": "Upload Media",
+    "mediaTitle": "Media Title (Optional)",
+    "description": "Description (Optional)",
+    "descriptionPlaceholder": "Add a description for this media...",
+    "progressAdded": "Progress Added (%)",
+    "progressHelper": "Percentage of construction progress to add",
+    "maxProgress": "Max:",
+    "phaseComplete": "Phase is already at 100%",
+    "uploadDate": "Upload Date",
+    "dateFormat": "MM/DD/YYYY",
+    "selectImages": "Select Images",
+    "selectVideos": "Select Videos",
+    "imageSelected": "image selected",
+    "imagesSelected": "images selected",
+    "videoSelected": "video selected",
+    "videosSelected": "videos selected",
+    "cancel": "Cancel",
+    "upload": "Upload",
+    "uploading": "Uploading...",
+    "selectAtLeast": "Please select at least one image or video"
+  },
+
+  "masterPlanUpload": {
+    "title": "Upload Master Plan",
+    "subtitle": "Upload the main master plan image",
+    "selectImage": "Select Image",
+    "imageName": "Image Name",
+    "imageDescription": "Image Description",
+    "descriptionPlaceholder": "Describe the master plan...",
+    "publish": "Publish",
+    "publishing": "Publishing...",
+    "successPublish": "Master plan published successfully"
+  },
+
+  "recorridoModal": {
+    "title": "Virtual Tour",
+    "subtitle": "Upload images for each tour point",
+    "selectPoint": "Select a point to upload the image",
+    "imageFor": "Image for",
+    "uploadImage": "Upload Image",
+    "replace": "Replace",
+    "makePublic": "Make Public",
+    "makePrivate": "Make Private",
+    "public": "Public",
+    "private": "Private",
+    "noImage": "No image",
+    "loading": "Loading...",
+    "errorLoading": "Error loading images"
+  },
+
+  "amenitiesModal": {
+    "title": "Outdoor Amenities",
+    "subtitle": "Manage amenity images",
+    "addAmenity": "Add Amenity",
+    "amenityName": "Amenity Name",
+    "amenityImage": "Amenity Image",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe the amenity...",
+    "selectImage": "Select Image",
+    "save": "Save",
+    "saving": "Saving...",
+    "delete": "Delete",
+    "edit": "Edit",
+    "noAmenities": "No amenities registered",
+    "successSave": "Amenity saved successfully"
+  },
+
+  "eagleViewSection": {
+    "title": "Eagle View",
+    "subtitle": "Manage project aerial views",
+    "addView": "Add View",
+    "viewTitle": "View Title",
+    "viewDescription": "View Description",
+    "descriptionPlaceholder": "Describe the aerial view...",
+    "uploadDate": "Upload Date",
+    "selectImage": "Select Images",
+    "selectVideo": "Select Videos",
+    "save": "Save",
+    "saving": "Saving...",
+    "noViews": "No aerial views registered"
+  },
+
+  "clubImageModal": {
+    "title": "ClubHouse Images",
+    "interior": "Interior",
+    "exterior": "Exterior",
+    "blueprints": "Blueprints",
+    "deck": "Deck",
+    "selectImages": "Select Images",
+    "selectCategory": "Select a category",
+    "uploadImages": "Upload Images",
+    "uploading": "Uploading...",
+    "successUpload": "Images uploaded successfully",
+    "errorUpload": "Error uploading images",
+    "deleteImage": "Delete Image",
+    "deleteConfirm": "Are you sure you want to delete this image?",
+    "loading": "Loading..."
+  },
+
+  "phaseViewer": {
+    "noPhases": "No phases with media yet",
+    "completionPercentage": "Completion Percentage",
+    "media": "Media",
+    "images": "Images",
+    "videos": "Videos",
+    "uploadedDate": "Upload Date",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close"
+  },
+
+  "errors": {
+    "selectProperty": "Please select a property",
+    "selectImage": "Please select an image",
+    "uploadFailed": "Error uploading file",
+    "loadingFailed": "Error loading data",
+    "invalidFile": "Invalid file",
+    "fileTooLarge": "File is too large"
+  }
+}

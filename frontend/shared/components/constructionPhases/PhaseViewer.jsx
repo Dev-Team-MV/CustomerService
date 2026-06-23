@@ -6,7 +6,12 @@ const PhaseViewer = ({
   phases, 
   loading, 
   onMediaClick,
-  config = {} 
+  config = {},
+  // ✅ Agregar props para edición
+  isAdmin = false,
+  onEditMedia,
+  onDeleteMedia,
+  uploadService
 }) => {
   const theme = useTheme()
   const {
@@ -91,6 +96,11 @@ const PhaseViewer = ({
             <PhaseMediaGallery
               mediaItems={phase.mediaItems}
               onMediaClick={onMediaClick}
+              // ✅ Pasar props de edición
+              isAdmin={isAdmin}
+              onEditMedia={onEditMedia ? (mediaItem, newData) => onEditMedia(phase, mediaItem, newData) : undefined}
+              onDeleteMedia={onDeleteMedia ? (mediaItemId) => onDeleteMedia(phase, mediaItemId) : undefined}
+              uploadService={uploadService}
             />
           )}
         </Paper>

@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   Grid,
-  Button,
   FormControl,
   InputLabel,
   Select,
@@ -14,10 +13,12 @@ import {
   Divider
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Construction, Add, Lock, CheckCircle } from '@mui/icons-material'
+import { Construction, Lock, CheckCircle } from '@mui/icons-material'
+import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import PhaseUploadDialog from '@shared/components/constructionPhases/PhaseUploadDialog'
 import PhaseViewer from '@shared/components/constructionPhases/PhaseViewer'
+import MediaItemEditor from '@shared/components/constructionPhases/MediaItemEditor'
 import { usePhases } from '@shared/hooks/usePhases'
 import api from '../../services/api'
 import uploadService from '../../services/uploadService'
@@ -43,8 +44,11 @@ const UploadsConstructionSection = () => {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
 
-  // Usar el hook de fases para obtener las fases de la propiedad seleccionada
-  const { phases, loading: phasesLoading, fetchPhases } = usePhases({
+  const primary = theme.palette.primary.main
+  const cardAccent = theme.palette.chipAdmin?.color || '#8CA551'
+
+  // ✅ Obtener updateMediaItem y deleteMediaItem del hook
+  const { phases, loading: phasesLoading, fetchPhases, updateMediaItem, deleteMediaItem } = usePhases({
     entityType: 'property',
     entityId: selectedProperty
   })
@@ -65,7 +69,6 @@ const UploadsConstructionSection = () => {
       const response = await api.get('/properties')
       const allProperties = response.data || []
       
-      // Filtrar solo propiedades del proyecto actual (Lakewood P1)
       const projectId = import.meta.env.VITE_PROJECT_ID
       const filteredProperties = allProperties.filter(
         prop => prop.project?._id === projectId || prop.project?.slug === 'lakewood'
@@ -87,135 +90,169 @@ const UploadsConstructionSection = () => {
     })
   }
 
-const handleUploadMedia = async (phaseNumber, uploadForm) => {
-  if (!uploadForm.images.length && !uploadForm.videos.length) {
-    alert('Por favor selecciona al menos una imagen o video')
-    return
+  const handleUploadMedia = async (phaseNumber, uploadForm) => {
+    if (!uploadForm.images.length && !uploadForm.videos.length) {
+      alert(t('uploadDialog.selectAtLeast', 'Por favor selecciona al menos una imagen o video'))
+      return
+    }
+
+    try {
+      setUploading(true)
+      let urls = []
+      let videoUrls = []
+
+      if (uploadForm.images.length) {
+        urls = await uploadService.uploadPhaseImages(uploadForm.images)
+      }
+
+      if (uploadForm.videos.length) {
+        videoUrls = await uploadService.uploadPhaseVideos(uploadForm.videos)
+      }
+
+      const currentPhase = phases.find(p => p.phaseNumber === phaseNumber)
+      const currentPercentage = currentPhase?.constructionPercentage || 0
+      const addedPercentage = parseFloat(uploadForm.percentage) || 0
+      const newPercentage = Math.min(100, currentPercentage + addedPercentage)
+
+      let phaseId = currentPhase?._id
+      if (!phaseId) {
+        const createResponse = await api.post('/phases', {
+          property: selectedProperty,
+          phaseNumber: phaseNumber,
+          constructionPercentage: newPercentage
+        })
+        phaseId = createResponse.data._id
+      } else {
+        await api.put(`/phases/${phaseId}`, { 
+          constructionPercentage: newPercentage 
+        })
+      }
+
+      const totalMedia = urls.length + videoUrls.length
+      const percentagePerItem = addedPercentage / totalMedia
+
+      for (let i = 0; i < urls.length; i++) {
+        await api.post(`/phases/${phaseId}/media`, {
+          url: urls[i],
+          title: uploadForm.title || `${t('construction.phase', 'Fase')} ${phaseNumber} - ${t('phaseViewer.images', 'Imagen')} ${i + 1}`,
+          percentage: percentagePerItem,
+          mediaType: 'image',
+          uploadedAt: uploadForm.uploadedAt || new Date().toISOString(),
+          description: uploadForm.description || ''
+        })
+      }
+
+      for (let i = 0; i < videoUrls.length; i++) {
+        await api.post(`/phases/${phaseId}/media`, {
+          url: videoUrls[i],
+          title: uploadForm.title || `${t('construction.phase', 'Fase')} ${phaseNumber} - ${t('phaseViewer.videos', 'Video')} ${i + 1}`,
+          percentage: percentagePerItem,
+          mediaType: 'video',
+          uploadedAt: uploadForm.uploadedAt || new Date().toISOString(),
+          description: uploadForm.description || ''
+        })
+      }
+
+      alert(t('construction.successUpload', 'Media subida exitosamente'))
+      setSelectedPhase(null)
+      await fetchPhases()
+    } catch (error) {
+      console.error('Error uploading media:', error)
+      alert(`${t('construction.errorUploading', 'Error al subir')}: ${error.response?.data?.message || error.message}`)
+    } finally {
+      setUploading(false)
+    }
   }
 
-  try {
-    setUploading(true)
-    let urls = []
-    let videoUrls = []
-
-    // Subir imágenes
-    if (uploadForm.images.length) {
-      urls = await uploadService.uploadPhaseImages(uploadForm.images)
+  // ✅ Handlers para editar y eliminar media items
+  const handleEditMedia = async (phaseNumber, mediaItem, newData) => {
+    try {
+      await updateMediaItem(phaseNumber, mediaItem._id, newData)
+      alert(t('construction.successUpdate', 'Media actualizado exitosamente'))
+    } catch (error) {
+      console.error('Error updating media:', error)
+      alert(`${t('construction.errorUpdate', 'Error al actualizar')}: ${error.message}`)
     }
+  }
 
-    // Subir videos
-    if (uploadForm.videos.length) {
-      videoUrls = await uploadService.uploadPhaseVideos(uploadForm.videos)
-    }
-
-    // Calcular nuevo porcentaje
-    const currentPhase = phases.find(p => p.phaseNumber === phaseNumber)
-    const currentPercentage = currentPhase?.constructionPercentage || 0
-    const addedPercentage = parseFloat(uploadForm.percentage) || 0
-    const newPercentage = Math.min(100, currentPercentage + addedPercentage)
-
-    // Crear o actualizar la fase
-    let phaseId = currentPhase?._id
-    if (!phaseId) {
-      // Crear nueva fase si no existe
-      const createResponse = await api.post('/phases', {
-        property: selectedProperty,
-        phaseNumber: phaseNumber,
-        constructionPercentage: newPercentage
-      })
-      phaseId = createResponse.data._id
-    } else {
-      // Actualizar porcentaje de fase existente
-      await api.put(`/phases/${phaseId}`, { 
-        constructionPercentage: newPercentage 
-      })
-    }
-
-    // Agregar media items a la fase
-    const totalMedia = urls.length + videoUrls.length
-    const percentagePerItem = addedPercentage / totalMedia
-
-    // Agregar imágenes
-    for (let i = 0; i < urls.length; i++) {
-      await api.post(`/phases/${phaseId}/media`, {
-        url: urls[i],
-        title: uploadForm.title || `Phase ${phaseNumber} - Image ${i + 1}`,
-        percentage: percentagePerItem,
-        mediaType: 'image',
-        uploadedAt: uploadForm.uploadedAt || new Date().toISOString(),
-        description: uploadForm.description || ''
-      })
-    }
-
-    // Agregar videos
-    for (let i = 0; i < videoUrls.length; i++) {
-      await api.post(`/phases/${phaseId}/media`, {
-        url: videoUrls[i],
-        title: uploadForm.title || `Phase ${phaseNumber} - Video ${i + 1}`,
-        percentage: percentagePerItem,
-        mediaType: 'video',
-        uploadedAt: uploadForm.uploadedAt || new Date().toISOString(),
-        description: uploadForm.description || ''
-      })
-    }
-
-    alert('Media subida exitosamente')
-    setSelectedPhase(null)
+  const handleDeleteMedia = async (phaseNumber, mediaItemId) => {
+    if (!confirm(t('construction.deleteConfirm', '¿Estás seguro de eliminar este media item?'))) return
     
-    // Refrescar las fases
-    await fetchPhases()
-  } catch (error) {
-    console.error('Error uploading media:', error)
-    alert(`Error al subir: ${error.response?.data?.message || error.message}`)
-  } finally {
-    setUploading(false)
+    try {
+      await deleteMediaItem(phaseNumber, mediaItemId)
+      alert(t('construction.successDelete', 'Media eliminado exitosamente'))
+    } catch (error) {
+      console.error('Error deleting media:', error)
+      alert(`${t('construction.errorDelete', 'Error al eliminar')}: ${error.message}`)
+    }
   }
-}
 
-  // Función para obtener el nombre del propietario
   const getOwnerName = (property) => {
-    if (!property.users || property.users.length === 0) return 'Sin propietario'
+    if (!property.users || property.users.length === 0) return t('errors.selectProperty', 'Sin propietario')
     const owner = property.users[0]
     return `${owner.firstName || ''} ${owner.lastName || ''}`.trim() || 'Sin nombre'
   }
 
-  // Obtener el porcentaje de una fase específica
   const getPhasePercentage = (phaseNumber) => {
     const phase = phases.find(p => p.phaseNumber === phaseNumber)
     return phase?.constructionPercentage || 0
   }
 
-  // Verificar si una fase está bloqueada
   const isPhaseBlocked = (phaseNumber) => {
-    if (phaseNumber === 1) return false // La primera fase nunca está bloqueada
-    
-    // Verificar si la fase anterior está completa al 100%
+    if (phaseNumber === 1) return false
     const previousPhase = phases.find(p => p.phaseNumber === phaseNumber - 1)
     return !previousPhase || previousPhase.constructionPercentage < 100
   }
 
-  // Verificar si una fase está completa
   const isPhaseComplete = (phaseNumber) => {
     return getPhasePercentage(phaseNumber) === 100
   }
 
   return (
     <Box>
+      {/* ── Header ── */}
       <Box sx={{ mb: 3 }}>
         <Typography
-          variant="h5"
+          variant="h3"
           sx={{
-            fontFamily: '"Poppins", sans-serif',
-            fontWeight: 700,
-            color: theme.palette.primary.main,
-            mb: 2
+            fontWeight: 300,
+            color: primary,
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: { xs: '2rem', md: '2.5rem' },
+            lineHeight: 1.1,
+            mb: 0.5,
           }}
         >
-          🏗️ {t('construction.title', 'Fases de Construcción')}
+          {t('construction.title', 'Fases de')}{' '}
+          <Box component="span" sx={{ fontWeight: 800 }}>
+            {t('construction.constructionTitle', 'Construcción')}
+          </Box>
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: '0.85rem',
+            color: '#706f6f',
+            fontFamily: '"DM Sans", sans-serif',
+            mb: 3
+          }}
+        >
+          {t('construction.subtitle', 'Gestiona el progreso de construcción por propiedad y fase')}
         </Typography>
 
         {/* Property Selector */}
-        <FormControl fullWidth sx={{ mb: 3 }}>
+        <FormControl 
+          fullWidth 
+          sx={{ 
+            mb: 3,
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+              fontFamily: '"DM Sans", sans-serif',
+            },
+            '& .MuiInputLabel-root': {
+              fontFamily: '"DM Sans", sans-serif',
+            }
+          }}
+        >
           <InputLabel>{t('construction.selectProperty', 'Seleccionar Propiedad')}</InputLabel>
           <Select
             value={selectedProperty}
@@ -224,7 +261,11 @@ const handleUploadMedia = async (phaseNumber, uploadForm) => {
             disabled={loading}
           >
             {properties.map((property) => (
-              <MenuItem key={property._id} value={property._id}>
+              <MenuItem 
+                key={property._id} 
+                value={property._id}
+                sx={{ fontFamily: '"DM Sans", sans-serif' }}
+              >
                 {`Lote ${property.lot?.number || 'N/A'} - Modelo ${property.model?.model || property.model?.modelNumber || 'N/A'} - ${getOwnerName(property)}`}
               </MenuItem>
             ))}
@@ -232,7 +273,13 @@ const handleUploadMedia = async (phaseNumber, uploadForm) => {
         </FormControl>
 
         {!selectedProperty && (
-          <Alert severity="info" sx={{ borderRadius: 2 }}>
+          <Alert 
+            severity="info" 
+            sx={{ 
+              borderRadius: 2,
+              fontFamily: '"DM Sans", sans-serif',
+            }}
+          >
             {t('construction.selectPropertyFirst', 'Selecciona una propiedad para gestionar sus fases de construcción')}
           </Alert>
         )}
@@ -242,17 +289,18 @@ const handleUploadMedia = async (phaseNumber, uploadForm) => {
       {selectedProperty && (
         <>
           <Typography
-            variant="h6"
             sx={{
-              fontFamily: '"Poppins", sans-serif',
-              fontWeight: 600,
-              mb: 2
+              fontSize: '1.1rem',
+              fontWeight: 700,
+              color: primary,
+              fontFamily: '"DM Sans", sans-serif',
+              mb: 2.5
             }}
           >
             {t('construction.uploadPhases', 'Subir Media por Fase')}
           </Typography>
           
-          <Grid container spacing={2} sx={{ mb: 4 }}>
+          <Grid container spacing={2.5} sx={{ mb: 4 }}>
             {PHASES.map((phase, index) => {
               const phaseNumber = index + 1
               const percentage = getPhasePercentage(phaseNumber)
@@ -261,119 +309,127 @@ const handleUploadMedia = async (phaseNumber, uploadForm) => {
 
               return (
                 <Grid item xs={12} sm={6} md={4} key={index}>
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    onClick={() => !blocked && handleOpenPhaseDialog(phaseNumber)}
-                    disabled={blocked}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      textAlign: 'left',
-                      height: '100%',
-                      transition: 'all 0.3s ease',
-                      opacity: blocked ? 0.5 : 1,
-                      borderColor: complete ? theme.palette.success.main : theme.palette.grey[300],
-                      '&:hover': !blocked ? {
-                        borderColor: theme.palette.primary.main,
-                        bgcolor: `${theme.palette.primary.main}10`,
-                        transform: 'translateY(-2px)',
-                        boxShadow: `0 4px 12px ${theme.palette.primary.main}30`
-                      } : {}
-                    }}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.4 }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, width: '100%', justifyContent: 'space-between' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {blocked ? (
-                          <Lock sx={{ color: theme.palette.grey[400], fontSize: 20 }} />
-                        ) : complete ? (
-                          <CheckCircle sx={{ color: theme.palette.success.main, fontSize: 20 }} />
-                        ) : (
-                          <Construction sx={{ color: theme.palette.primary.main, fontSize: 20 }} />
-                        )}
-                        <Chip
-                          label={`Fase ${phaseNumber}`}
-                          size="small"
-                          color={complete ? 'success' : 'primary'}
-                          sx={{ fontFamily: '"Poppins", sans-serif' }}
-                        />
-                      </Box>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          fontFamily: '"Poppins", sans-serif',
-                          fontWeight: 700,
-                          color: complete ? theme.palette.success.main : theme.palette.primary.main
-                        }}
-                      >
-                        {percentage}%
-                      </Typography>
-                    </Box>
-                    
-                    <Typography
-                      variant="body2"
+                    <Box
+                      onClick={() => !blocked && handleOpenPhaseDialog(phaseNumber)}
                       sx={{
-                        fontFamily: '"Poppins", sans-serif',
-                        color: theme.palette.text.primary,
-                        fontWeight: 500,
-                        mb: 1,
-                        flex: 1
+                        bgcolor: blocked ? '#f5f5f5' : 'white',
+                        borderRadius: '16px',
+                        border: `1px solid ${complete ? theme.palette.success.main : '#e5e7eb'}`,
+                        cursor: blocked ? 'not-allowed' : 'pointer',
+                        overflow: 'hidden',
+                        p: 2.5,
+                        minHeight: 180,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        transition: 'border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease',
+                        opacity: blocked ? 0.6 : 1,
+                        boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
+                        '&:hover': !blocked ? {
+                          border: `1px solid ${primary}`,
+                          boxShadow: `0 8px 28px ${primary}15`,
+                          transform: 'translateY(-4px)',
+                        } : {}
                       }}
                     >
-                      {phase}
-                    </Typography>
-
-                    {/* Progress Bar */}
-                    <LinearProgress
-                      variant="determinate"
-                      value={percentage}
-                      sx={{
-                        width: '100%',
-                        height: 6,
-                        borderRadius: 3,
-                        mb: 1,
-                        bgcolor: theme.palette.grey[200],
-                        '& .MuiLinearProgress-bar': {
-                          borderRadius: 3,
-                          bgcolor: complete ? theme.palette.success.main : theme.palette.primary.main
-                        }
-                      }}
-                    />
-
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Add fontSize="small" />
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {blocked ? (
+                            <Lock sx={{ color: '#9ca3af', fontSize: 20 }} />
+                          ) : complete ? (
+                            <CheckCircle sx={{ color: theme.palette.success.main, fontSize: 20 }} />
+                          ) : (
+                            <Construction sx={{ color: primary, fontSize: 20 }} />
+                          )}
+                          <Chip
+                            label={`${t('construction.phase', 'Fase')} ${phaseNumber}`}
+                            size="small"
+                            sx={{
+                              bgcolor: complete ? theme.palette.success.main : primary,
+                              color: 'white',
+                              fontWeight: 700,
+                              fontSize: '0.7rem',
+                              height: 24,
+                              fontFamily: '"DM Sans", sans-serif',
+                            }}
+                          />
+                        </Box>
+                        <Typography
+                          sx={{
+                            fontSize: '1.2rem',
+                            fontWeight: 700,
+                            color: complete ? theme.palette.success.main : primary,
+                            fontFamily: '"DM Sans", sans-serif',
+                          }}
+                        >
+                          {percentage}%
+                        </Typography>
+                      </Box>
+                      
                       <Typography
-                        variant="caption"
                         sx={{
-                          fontFamily: '"Poppins", sans-serif',
-                          color: theme.palette.text.secondary
+                          fontSize: '0.9rem',
+                          fontWeight: 600,
+                          color: blocked ? '#9ca3af' : '#1a2e0f',
+                          fontFamily: '"DM Sans", sans-serif',
+                          mb: 1.5,
+                          flex: 1,
+                          lineHeight: 1.3
+                        }}
+                      >
+                        {phase}
+                      </Typography>
+
+                      <LinearProgress
+                        variant="determinate"
+                        value={percentage}
+                        sx={{
+                          width: '100%',
+                          height: 6,
+                          borderRadius: 3,
+                          mb: 1,
+                          bgcolor: '#e5e7eb',
+                          '& .MuiLinearProgress-bar': {
+                            borderRadius: 3,
+                            bgcolor: complete ? theme.palette.success.main : primary
+                          }
+                        }}
+                      />
+
+                      <Typography
+                        sx={{
+                          fontSize: '0.75rem',
+                          color: blocked ? '#9ca3af' : '#706f6f',
+                          fontFamily: '"DM Sans", sans-serif',
                         }}
                       >
                         {blocked 
-                          ? t('construction.phaseLocked', 'Bloqueada')
-                          : t('construction.uploadMedia', 'Subir media')
+                          ? t('construction.phaseLocked', 'Bloqueada - Completa la fase anterior')
+                          : t('construction.uploadMedia', 'Click para subir media')
                         }
                       </Typography>
                     </Box>
-                  </Button>
+                  </motion.div>
                 </Grid>
               )
             })}
           </Grid>
 
-          {/* Phase Viewer */}
+          {/* Phase Viewer con MediaItemEditor integrado */}
           {phases.length > 0 && (
             <>
-              <Divider sx={{ my: 3 }} />
+              <Divider sx={{ my: 4, borderColor: '#e5e7eb' }} />
               <Typography
-                variant="h6"
                 sx={{
-                  fontFamily: '"Poppins", sans-serif',
-                  fontWeight: 600,
-                  mb: 2
+                  fontSize: '1.1rem',
+                  fontWeight: 700,
+                  color: primary,
+                  fontFamily: '"DM Sans", sans-serif',
+                  mb: 2.5
                 }}
               >
                 {t('construction.viewPhases', 'Ver Fases con Media')}
@@ -386,6 +442,10 @@ const handleUploadMedia = async (phaseNumber, uploadForm) => {
                   showMediaGallery: true,
                   emptyMessage: t('construction.noPhases', 'No hay fases con media todavía')
                 }}
+                isAdmin={true}
+                onEditMedia={(phase, mediaItem, newData) => handleEditMedia(phase.phaseNumber, mediaItem, newData)}
+                onDeleteMedia={(phase, mediaItemId) => handleDeleteMedia(phase.phaseNumber, mediaItemId)}
+                uploadService={uploadService}
               />
             </>
           )}

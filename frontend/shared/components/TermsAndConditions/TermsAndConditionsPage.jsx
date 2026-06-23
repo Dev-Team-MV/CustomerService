@@ -1,4 +1,5 @@
-import { useState } from 'react'
+// @shared/components/TermsAndConditions/TermsAndConditionsPage.jsx
+import { useState, useMemo } from 'react'
 import {
   Container, Box, Typography, Paper, Accordion,
   AccordionSummary, AccordionDetails, Divider,
@@ -11,15 +12,18 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '@mui/material/styles'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '@shared/context/AuthContext'
+import { getTermsSections, getTermsHighlights } from '@shared/config/termsConfig'
 
-const TermsAndConditionsPage = ({
-  sections = [],
-  highlights = [],
-  translationNamespace = 'termsConditions'
-}) => {
+const TermsAndConditionsPage = () => {
   const navigate = useNavigate()
   const theme = useTheme()
-  const { t } = useTranslation(translationNamespace)
+  const { t } = useTranslation('termsConditions')
+  const { projectSlug } = useAuth()
+  
+  // Obtener secciones y highlights automáticamente desde termsConfig
+  const sections = useMemo(() => getTermsSections(projectSlug, theme, t), [projectSlug, theme, t])
+  const highlights = useMemo(() => getTermsHighlights(theme, t), [theme, t])
   const [expanded, setExpanded] = useState(sections[0]?.id || 'panel1')
 
   const handleChange = (panel) => (event, isExpanded) => {
@@ -264,7 +268,7 @@ const TermsAndConditionsPage = ({
                       justifyContent: 'center'
                     }}
                   >
-                    {section.icon}
+                    <section.iconComponent sx={{ color: section.color }} />
                   </Box>
                   <Box>
                     <Typography
