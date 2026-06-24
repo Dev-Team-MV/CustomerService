@@ -53,7 +53,10 @@
     "noNotificationsDesc": "Te notificaremos cuando ocurra algo importante",
     "markAllAsRead": "Marcar todo como leído",
     "unread": "{{count}} sin leer",
+    "justNow": "Justo ahora",
+    "minutesAgo": "hace {{count}} min",
     "hoursAgo": "hace {{count}} horas",
+    "daysAgo": "hace {{count}} días",
 
       "overview": "Resumen",
   "clients": "Clientes",

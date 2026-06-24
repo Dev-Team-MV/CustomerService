@@ -7,6 +7,7 @@ import { sendSMSWithValidation } from '../services/twilioService.js'
 import { resolveFrontendBaseUrl } from '../services/resolveFrontendBaseUrl.js'
 import { resolveRoleForNewUser } from '../utils/roles.js'
 import { buildAuthLoginResponse, buildAuthUserPayload } from '../utils/authUserPayload.js'
+import { notifyUserCreatedByAdmin } from '../utils/notificationTriggers.js'
 
 const generateToken = (userOrId) => {
   const payload =
@@ -92,6 +93,8 @@ export const register = async (req, res) => {
       const user = new User(userData)
       const setupToken = user.generateSetupToken()
       await user.save()
+
+      notifyUserCreatedByAdmin({ user })
 
       // Enviar SMS con el link de setup
       if (phoneNumber) {

@@ -15,11 +15,70 @@ import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
 import { useTheme } from "@mui/material/styles"
 
+const PAYMENT_EVENTS = new Set([
+  'PAYMENT_CREATED',
+  'PAYMENT_SIGNED',
+  'PAYMENT_REJECTED',
+  'PAYMENT_RECEIVED',
+])
+
+const MESSAGE_EVENTS = new Set([
+  'MESSAGE',
+  'NEW_MESSAGE',
+])
+
+const DOCUMENT_EVENTS = new Set([
+  'DOCUMENT_APPROVED',
+  'CONTRACT_SIGNED',
+])
+
+const formatRelativeTime = (dateValue, t) => {
+  if (!dateValue) return ''
+  const date = new Date(dateValue)
+  if (Number.isNaN(date.getTime())) return ''
+
+  const diffMs = Date.now() - date.getTime()
+  const minutes = Math.floor(diffMs / 60000)
+
+  if (minutes < 1) return t('justNow')
+  if (minutes < 60) return t('minutesAgo', { count: minutes })
+
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return t('hoursAgo', { count: hours })
+
+  const days = Math.floor(hours / 24)
+  return t('daysAgo', { count: days })
+}
+
+const getNotificationIcon = (notification, read, theme) => {
+  const event = notification?.payload?.event
+  const title = notification?.title || ''
+  const iconSx = {
+    fontSize: 22,
+    color: read ? theme.palette.text.secondary : theme.palette.primary.main,
+  }
+
+  if (PAYMENT_EVENTS.has(event) || /payment/i.test(title)) {
+    return <PaymentIcon sx={iconSx} />
+  }
+
+  if (MESSAGE_EVENTS.has(event) || /message/i.test(title)) {
+    return <ChatIcon sx={{ ...iconSx, color: read ? theme.palette.text.secondary : theme.palette.secondary.main }} />
+  }
+
+  if (DOCUMENT_EVENTS.has(event) || /document/i.test(title)) {
+    return <CheckCircleIcon sx={{ ...iconSx, color: read ? theme.palette.text.secondary : theme.palette.secondary.main }} />
+  }
+
+  return <NotificationsIcon sx={iconSx} />
+}
+
 const NotificationsDrawer = ({
   open,
   onClose,
   notifications,
-  setNotifications,
+  onMarkAsRead,
+  onMarkAllAsRead,
   width = { xs: "100%", sm: 400 },
 }) => {
   const { t } = useTranslation('navigation')
@@ -206,7 +265,7 @@ const NotificationsDrawer = ({
         ) : (
           notifications.map((n, index) => (
             <motion.div
-              key={n.id}
+              key={n.id || n._id}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05, duration: 0.3 }}
@@ -234,11 +293,7 @@ const NotificationsDrawer = ({
                   },
                 }}
                 onClick={() => {
-                  setNotifications((prev) =>
-                    prev.map((notif) =>
-                      notif.id === n.id ? { ...notif, read: true } : notif,
-                    ),
-                  );
+                  if (!n.read) onMarkAsRead?.(n.id || n._id)
                 }}
               >
                 <Box
@@ -260,30 +315,7 @@ const NotificationsDrawer = ({
                       transition: "all 0.3s",
                     }}
                   >
-                    {n.title.includes("Payment") && (
-                      <PaymentIcon
-                        sx={{
-                          color: n.read ? theme.palette.text.secondary : theme.palette.primary.main,
-                          fontSize: 22,
-                        }}
-                      />
-                    )}
-                    {n.title.includes("message") && (
-                      <ChatIcon
-                        sx={{
-                          color: n.read ? theme.palette.text.secondary : theme.palette.secondary.main,
-                          fontSize: 22,
-                        }}
-                      />
-                    )}
-                    {n.title.includes("Document") && (
-                      <CheckCircleIcon
-                        sx={{
-                          color: n.read ? theme.palette.text.secondary : theme.palette.secondary.main,
-                          fontSize: 22,
-                        }}
-                      />
-                    )}
+                    {getNotificationIcon(n, n.read, theme)}
                   </Box>
 
                   <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -310,7 +342,7 @@ const NotificationsDrawer = ({
                         lineHeight: 1.5,
                       }}
                     >
-                      {n.description}
+                      {n.description || n.body}
                     </Typography>
                     <Box
                       sx={{
@@ -335,7 +367,7 @@ const NotificationsDrawer = ({
                           fontFamily: '"DM Sans", sans-serif',
                         }}
                       >
-                        {t('hoursAgo', { count: 2 })}
+                        {formatRelativeTime(n.createdAt, t)}
                       </Typography>
                     </Box>
                   </Box>
@@ -385,11 +417,7 @@ const NotificationsDrawer = ({
             fullWidth
             variant="outlined"
             size="medium"
-            onClick={() => {
-              setNotifications((prev) =>
-                prev.map((n) => ({ ...n, read: true })),
-              );
-            }}
+            onClick={() => onMarkAllAsRead?.()}
             sx={{
               borderRadius: 3,
               border: `2px solid ${theme.palette.primary.main}`,

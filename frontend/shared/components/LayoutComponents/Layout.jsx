@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { Box, useMediaQuery, useTheme, Backdrop } from "@mui/material";
 import { useAuth } from "../../context/AuthContext";
@@ -7,6 +7,7 @@ import NotificationsDrawer from "./NotificationsDrawer";
 import SidebarDrawer from "./SidebarDrawer";
 import { publicMenuItems as defaultPublicMenuItems, privateMenuItems as defaultPrivateMenuItems } from "../../constants/menuItems";
 import AppBarBrandbook from "./AppBar";
+import useNotifications from "../../hooks/useNotifications";
 const drawerWidthExpanded = 280;
 
 const Layout = ({
@@ -19,28 +20,20 @@ const Layout = ({
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [expanded, setExpanded] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "Payment received",
-      description: "Your payment has been processed.",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "New message",
-      description: "You have a new message from admin.",
-      read: false,
-    },
-    {
-      id: 3,
-      title: "Document approved",
-      description: "Your document was approved.",
-      read: true,
-    },
-  ]);
 
   const { user, logout } = useAuth();
+  const {
+    notifications,
+    refresh: refreshNotifications,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+  } = useNotifications({ enabled: Boolean(user) && !publicView });
+
+  useEffect(() => {
+    if (notificationsOpen && user && !publicView) {
+      refreshNotifications();
+    }
+  }, [notificationsOpen, user, publicView, refreshNotifications]);
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
@@ -129,7 +122,8 @@ const Layout = ({
         open={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
         notifications={notifications}
-        setNotifications={setNotifications}
+        onMarkAsRead={markNotificationAsRead}
+        onMarkAllAsRead={markAllNotificationsAsRead}
         sx={{
           bgcolor: theme.palette.background.paper,
         }}

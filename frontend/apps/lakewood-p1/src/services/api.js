@@ -34,6 +34,12 @@ api.interceptors.request.use(
     }
 
     console.log('📡 Making request to:', config.url)
+
+    const method = String(config.method || 'get').toLowerCase()
+    if (method === 'get' && config.headers) {
+      delete config.headers['Content-Type']
+      delete config.headers['content-type']
+    }
     
     // Obtener token del localStorage
     const token = localStorage.getItem('token')
