@@ -23,14 +23,9 @@ export const buildingsConfigs = {
     projectId: PROJECT_IDS.PHASE2,
     projectSlug: 'lakewood-f2',
     projectName: 'Lakewood Phase 2',
-    
-    // Single building mode
     singleBuildingMode: false,
-    
-    // Building type
     buildingType: BUILDING_TYPES.MIXED_USE,
     
-    // Floor configuration
     floors: {
       default: 4,
       min: 2,
@@ -40,7 +35,6 @@ export const buildingsConfigs = {
       residentialStartFloor: 2
     },
     
-    // Polygon configuration
     polygons: {
       masterPlan: {
         required: true,
@@ -60,7 +54,6 @@ export const buildingsConfigs = {
       }
     },
     
-    // Render configuration
     renders: {
       exterior: {
         required: true,
@@ -73,7 +66,6 @@ export const buildingsConfigs = {
       }
     },
     
-    // Apartment configuration
     apartments: {
       enabled: true,
       requireModel: true,
@@ -81,7 +73,6 @@ export const buildingsConfigs = {
       renderTypes: ['basic', 'upgrade']
     },
     
-    // Colors
     colors: {
       primary: '#1976d2',
       secondary: '#42a5f5',
@@ -90,14 +81,12 @@ export const buildingsConfigs = {
       residential: '#43a047'
     },
     
-    // i18n
     i18n: {
       namespace: 'buildings',
       commercialLabel: 'Commercial Floor',
       residentialLabel: 'Residential Floor'
     },
     
-    // Validation rules
     validation: {
       requireSection: false,
       requireTotalApartments: true,
@@ -111,14 +100,9 @@ export const buildingsConfigs = {
     projectId: PROJECT_IDS.ISQ,
     projectSlug: 'isq',
     projectName: 'ISQ',
-    
-    // Single building mode
     singleBuildingMode: false,
-    
-    // Building type
     buildingType: BUILDING_TYPES.RESIDENTIAL,
     
-    // Floor configuration
     floors: {
       default: 6,
       min: 3,
@@ -128,7 +112,6 @@ export const buildingsConfigs = {
       residentialStartFloor: 1
     },
     
-    // Polygon configuration
     polygons: {
       masterPlan: {
         required: true,
@@ -148,7 +131,6 @@ export const buildingsConfigs = {
       }
     },
     
-    // Render configuration
     renders: {
       exterior: {
         required: true,
@@ -161,7 +143,6 @@ export const buildingsConfigs = {
       }
     },
     
-    // Apartment configuration
     apartments: {
       enabled: true,
       requireModel: true,
@@ -169,7 +150,6 @@ export const buildingsConfigs = {
       renderTypes: ['basic', 'upgrade']
     },
     
-    // Colors
     colors: {
       primary: '#667eea',
       secondary: '#764ba2',
@@ -178,14 +158,12 @@ export const buildingsConfigs = {
       residential: '#667eea'
     },
     
-    // i18n
     i18n: {
       namespace: 'buildings',
       commercialLabel: null,
       residentialLabel: 'Residential Floor'
     },
     
-    // Validation rules
     validation: {
       requireSection: true,
       requireTotalApartments: true,
@@ -199,92 +177,76 @@ export const buildingsConfigs = {
     projectId: PROJECT_IDS.SHEPERD,
     projectSlug: 'sheperd',
     projectName: 'Sheperd',
-    
-    // ✅ Single building mode - ÚNICO EDIFICIO
     singleBuildingMode: true,
-    
-    // Building type
     buildingType: BUILDING_TYPES.MIXED_USE,
     
-    // ✅ Floor configuration - FLEXIBLE CON ARRAYS
-floors: {
-  total: 20, // Cambiado de 12 a 20
-  min: 5,
-  max: 30,
-  
-// In sheperd config, add to parking section:
-parking: {
-  enabled: true,
-  floors: [1, 2],
-  spotsPerFloor: 50,
-  types: ['resident', 'visitor', 'commercial'],
-  
-  // ✅ NEW: Parking management configuration
-  management: {
-    enabled: true,
-    allowBulkCreate: true,
-    allowAssignment: true,
-    codeFormat: 'P{floor}-{number}', // e.g., P1-001, P2-045
-    spotTypes: [
-      { value: 'standard', label: 'Standard', icon: 'DirectionsCar' },
-      { value: 'covered', label: 'Covered', icon: 'DirectionsCar' },
-      { value: 'uncovered', label: 'Uncovered', icon: 'Accessible' },
-      { value: 'tandem', label: 'Tandem', icon: 'EvStation' },
-      { value: 'motorcycle', label: 'Motorcycle', icon: 'TwoWheeler' }
-    ],
-    statusOptions: [
-      { value: 'available', label: 'Available', color: '#43A047' },
-      { value: 'assigned', label: 'Assigned', color: '#FF6B35' },
-      { value: 'reserved', label: 'Reserved', color: '#FFA726' },
-      { value: 'blocked', label: 'Blocked', color: '#757575' }
-    ],
-    defaultSpotType: 'standard',
-    defaultStatus: 'available'
-  }
-},
-  
-  commercial: {
-    enabled: true,
-    floors: [3, 4],
-    allowMixedUse: true
-  },
-  
-  residential: {
-    enabled: true,
-    floors: [5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19], // Extendido hasta 19
-    apartmentTypes: ['studio', '1bed', '2bed', '3bed', 'penthouse']
-  },
-  
-  amenities: {
-    enabled: true,
-    floors: [20,10], // Cambiado de [12] a [20]
-    allowMultipleFloorsPerAmenity: true,
-  types: [
-    // Piso 10
-    { id: 'dining', key: 'dining', name: 'Comedor', label: 'Dining', icon: 'Restaurant', floor: 10, defaultFloor: 10 },
-    { id: 'coworking', key: 'coworking', name: 'Coworking', label: 'Coworking', icon: 'Work', floor: 10, defaultFloor: 10 },
-    { id: 'meeting-room', key: 'meeting-room', name: 'Sala de Reuniones', label: 'Meeting Room', icon: 'MeetingRoom', floor: 10, defaultFloor: 10 },
-    { id: 'sports', key: 'sports', name: 'Deportes', label: 'Sports', icon: 'Sports', floor: 10, defaultFloor: 10 },
-    
-    // Piso 20
-    { id: 'parks', key: 'parks', name: 'Parques', label: 'Parks', icon: 'Park', floor: 20, defaultFloor: 20 },
-    { id: 'schools', key: 'schools', name: 'Escuelas', label: 'Schools', icon: 'School', floor: 20, defaultFloor: 20 },
-    { id: 'pool', key: 'pool', name: 'Piscina', label: 'Pool', icon: 'Pool', floor: 20, defaultFloor: 20 },
-    // { id: 'terrace', key: 'terrace', name: 'Terraza', label: 'Terrace', icon: 'Deck', floor: 20, defaultFloor: 20 }
-  ]
-  }
-},
-    
-    // ✅ Floor labeling (para UI)
-    floorLabels: {
-      useNegativeNumbers: false, // Si usa números negativos para subterráneos
-      parkingPrefix: 'P', // "P1", "P2" o vacío para números normales
-      customLabels: {
-        // Ejemplo: { 1: 'Ground Floor', 12: 'Rooftop' }
+    floors: {
+      total: 20,
+      min: 5,
+      max: 30,
+      
+      parking: {
+        enabled: true,
+        floors: [1, 2],
+        spotsPerFloor: 50,
+        types: ['resident', 'visitor', 'commercial'],
+        management: {
+          enabled: true,
+          allowBulkCreate: true,
+          allowAssignment: true,
+          codeFormat: 'P{floor}-{number}',
+          spotTypes: [
+            { value: 'standard', label: 'Standard', icon: 'DirectionsCar' },
+            { value: 'covered', label: 'Covered', icon: 'DirectionsCar' },
+            { value: 'uncovered', label: 'Uncovered', icon: 'Accessible' },
+            { value: 'tandem', label: 'Tandem', icon: 'EvStation' },
+            { value: 'motorcycle', label: 'Motorcycle', icon: 'TwoWheeler' }
+          ],
+          statusOptions: [
+            { value: 'available', label: 'Available', color: '#43A047' },
+            { value: 'assigned', label: 'Assigned', color: '#FF6B35' },
+            { value: 'reserved', label: 'Reserved', color: '#FFA726' },
+            { value: 'blocked', label: 'Blocked', color: '#757575' }
+          ],
+          defaultSpotType: 'standard',
+          defaultStatus: 'available'
+        }
+      },
+      
+      commercial: {
+        enabled: true,
+        floors: [3, 4],
+        allowMixedUse: true
+      },
+      
+      residential: {
+        enabled: true,
+        floors: [5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+        apartmentTypes: ['studio', '1bed', '2bed', '3bed', 'penthouse']
+      },
+      
+      amenities: {
+        enabled: true,
+        floors: [20, 10],
+        allowMultipleFloorsPerAmenity: true,
+        types: [
+          { id: 'dining', key: 'dining', name: 'Comedor', label: 'Dining', icon: 'Restaurant', floor: 10, defaultFloor: 10 },
+          { id: 'coworking', key: 'coworking', name: 'Coworking', label: 'Coworking', icon: 'Work', floor: 10, defaultFloor: 10 },
+          { id: 'meeting-room', key: 'meeting-room', name: 'Sala de Reuniones', label: 'Meeting Room', icon: 'MeetingRoom', floor: 10, defaultFloor: 10 },
+          { id: 'sports', key: 'sports', name: 'Deportes', label: 'Sports', icon: 'Sports', floor: 10, defaultFloor: 10 },
+          { id: 'parks', key: 'parks', name: 'Parques', label: 'Parks', icon: 'Park', floor: 20, defaultFloor: 20 },
+          { id: 'schools', key: 'schools', name: 'Escuelas', label: 'Schools', icon: 'School', floor: 20, defaultFloor: 20 },
+          { id: 'pool', key: 'pool', name: 'Piscina', label: 'Pool', icon: 'Pool', floor: 20, defaultFloor: 20 }
+        ]
       }
     },
     
-    // Polygon configuration
+    floorLabels: {
+      useNegativeNumbers: false,
+      parkingPrefix: 'P',
+      customLabels: {}
+    },
+    
     polygons: {
       masterPlan: {
         required: true,
@@ -304,7 +266,6 @@ parking: {
       }
     },
     
-    // Render configuration
     renders: {
       exterior: {
         required: true,
@@ -317,14 +278,11 @@ parking: {
       }
     },
     
-    // Apartment configuration
     apartments: {
       enabled: true,
       requireModel: true,
       allowPolygonPlacement: true,
       renderTypes: ['basic', 'upgrade'],
-      
-      // ✅ Configuración por tipo de piso
       byFloorType: {
         residential: {
           models: ['studio', '1bed', '2bed', '3bed', 'penthouse'],
@@ -337,7 +295,6 @@ parking: {
       }
     },
     
-    // Colors por tipo de piso
     colors: {
       primary: '#F7931E',
       secondary: '#FF8C42',
@@ -348,7 +305,6 @@ parking: {
       amenity: '#FFB84D'
     },
     
-    // i18n
     i18n: {
       namespace: 'buildings',
       labels: {
@@ -359,7 +315,6 @@ parking: {
       }
     },
     
-    // Validation rules
     validation: {
       requireSection: false,
       requireTotalApartments: true,
@@ -370,143 +325,171 @@ parking: {
   },
 
   '6town-houses': {
-  projectId: PROJECT_IDS.SIXTOWN_HOUSES,
-  projectSlug: '6town-houses',
-  projectName: '6 Town Houses',
-  
-  // ✅ NO es single building - son 6 casas independientes
-  singleBuildingMode: false,
-  
-  // Building type - cada casa es una unidad residencial
-  buildingType: BUILDING_TYPES.RESIDENTIAL,
-  
-  // ✅ Floor configuration - cada casa tiene 1 "piso" técnico
-  floors: {
-    default: 1,
-    min: 1,
-    max: 1,
-    total: 1,
+    projectId: PROJECT_IDS.SIXTOWN_HOUSES,
+    projectSlug: '6town-houses',
+    projectName: '6 Town Houses',
+    singleBuildingMode: false,
+    buildingType: BUILDING_TYPES.RESIDENTIAL,
     
-    // NO tiene pisos comerciales
-    hasCommercial: false,
-    commercialFloorNumbers: [],
-    
-    // NO tiene parking como piso separado
-    parking: {
-      enabled: false
+    floors: {
+      default: 1,
+      min: 1,
+      max: 1,
+      total: 1,
+      hasCommercial: false,
+      commercialFloorNumbers: [],
+      parking: { enabled: false },
+      residential: { enabled: true, floors: [1] },
+      amenities: { enabled: false }
     },
     
-    // Toda la casa es "residencial" técnicamente
-    residential: {
+    floorLabels: {
+      useNegativeNumbers: false,
+      parkingPrefix: '',
+      customLabels: { 1: 'Casa' }
+    },
+    
+    polygons: {
+      masterPlan: {
+        required: true,
+        defaultColor: '#2196f3',
+        defaultStrokeColor: '#1976d2',
+        defaultOpacity: 0.5
+      },
+      floorPlan: { required: false, allowMultiple: false },
+      buildingFloor: { required: false }
+    },
+    
+    renders: {
+      exterior: { required: true, multiple: true, maxCount: 10 },
+      floorPlans: { required: false, perFloor: false }
+    },
+    
+    apartments: {
+      enabled: false,
+      requireModel: false,
+      allowPolygonPlacement: false,
+      renderTypes: []
+    },
+    
+    houses: {
       enabled: true,
-      floors: [1]
+      totalHouses: 6,
+      useCatalogConfig: true,
+      allowIndividualQuote: true
     },
     
-    // NO tiene amenities como pisos
-    amenities: {
-      enabled: false
-    }
-  },
-  
-  // ✅ Floor labeling (para UI)
-  floorLabels: {
-    useNegativeNumbers: false,
-    parkingPrefix: '',
-    customLabels: {
-      1: 'Casa' // En lugar de "Floor 1"
-    }
-  },
-  
-  // ✅ Polygon configuration - SOLO masterPlan
-  polygons: {
-    masterPlan: {
-      required: true,
-      defaultColor: '#2196f3',
-      defaultStrokeColor: '#1976d2',
-      defaultOpacity: 0.5
+    colors: {
+      primary: '#1a237e',
+      secondary: '#e5863c',
+      accent: '#00acc1',
+      available: '#4caf50',
+      sold: '#f44336'
     },
-    // NO requiere floorPlan polygons (no hay apartamentos internos)
-    floorPlan: {
-      required: false,
-      allowMultiple: false
-    },
-    // NO requiere buildingFloor polygons
-    buildingFloor: {
-      required: false
-    }
-  },
-  
-  // ✅ Render configuration
-  renders: {
-    exterior: {
-      required: true,
-      multiple: true,
-      maxCount: 10
-    },
-    // NO requiere floor plans (la customización viene del catalog-config)
-    floorPlans: {
-      required: false,
-      perFloor: false
-    }
-  },
-  
-  // ✅ Apartment configuration - NO tiene apartamentos
-  apartments: {
-    enabled: false,
-    requireModel: false,
-    allowPolygonPlacement: false,
-    renderTypes: []
-  },
-  
-  // ✅ House configuration (específico para 6town)
-  houses: {
-    enabled: true,
-    totalHouses: 6,
-    // La customización viene del catalog-config, no de apartment models
-    useCatalogConfig: true,
-    // Cada casa se cotiza individualmente
-    allowIndividualQuote: true
-  },
-  
-  // Colors
-  colors: {
-    primary: '#1a237e',
-    secondary: '#e5863c',
-    accent: '#00acc1',
-    available: '#4caf50',
-    sold: '#f44336'
-  },
-  
-  // i18n
-  i18n: {
-    namespace: 'buildings',
-    buildingLabel: 'Casa',
-    buildingsLabel: 'Casas',
-    commercialLabel: null,
-    residentialLabel: 'Casa'
-  },
-  
-  // ✅ Validation rules - simplificadas para casas
-  validation: {
-    requireSection: false,
-    requireTotalApartments: false, // NO aplica
-    requireExteriorRenders: true,
-    requireFloorPlans: false, // NO requerido
-    requireBuildingFloorPolygons: false, // Solo masterPlan polygon
     
-    // Validación específica para 6town
-    requireMasterPlanPolygon: true,
-    allowDuplicateNames: false // Cada casa debe tener nombre único
+    i18n: {
+      namespace: 'buildings',
+      buildingLabel: 'Casa',
+      buildingsLabel: 'Casas',
+      commercialLabel: null,
+      residentialLabel: 'Casa'
+    },
+    
+    validation: {
+      requireSection: false,
+      requireTotalApartments: false,
+      requireExteriorRenders: true,
+      requireFloorPlans: false,
+      requireBuildingFloorPolygons: false,
+      requireMasterPlanPolygon: true,
+      allowDuplicateNames: false
+    },
+    
+    naming: {
+      format: 'Casa #{number}',
+      prefix: 'Casa #',
+      startNumber: 1,
+      endNumber: 6
+    }
   },
-  
-  // ✅ Naming convention
-  naming: {
-    format: 'Casa #{number}',
-    prefix: 'Casa #',
-    startNumber: 1,
-    endNumber: 6
+
+  // ✅ CORREGIDO: Key ahora es 'h-tower' (con guión) para ser consistente
+  'h-tower': {
+    projectId: PROJECT_IDS.HTOWER,
+    projectSlug: 'h-tower',
+    projectName: 'hTower',
+    singleBuildingMode: false,
+    buildingType: BUILDING_TYPES.MIXED_USE,
+    
+    floors: {
+      default: 4,
+      min: 2,
+      max: 20,
+      hasCommercial: true,
+      commercialFloorNumbers: [1],
+      residentialStartFloor: 2
+    },
+    
+    polygons: {
+      masterPlan: {
+        required: true,
+        defaultColor: '#424242',
+        defaultStrokeColor: '#1F2937',
+        defaultOpacity: 0.35
+      },
+      floorPlan: {
+        required: true,
+        defaultColor: '#757575',
+        allowMultiple: true
+      },
+      buildingFloor: {
+        required: true,
+        defaultColor: '#E53935',
+        allowCommercialFlag: true
+      }
+    },
+    
+    renders: {
+      exterior: {
+        required: true,
+        multiple: true,
+        maxCount: 10
+      },
+      floorPlans: {
+        required: true,
+        perFloor: true
+      }
+    },
+    
+    apartments: {
+      enabled: true,
+      requireModel: true,
+      allowPolygonPlacement: true,
+      renderTypes: ['basic', 'upgrade']
+    },
+    
+    colors: {
+      primary: '#424242',
+      secondary: '#757575',
+      accent: '#E53935',
+      commercial: '#E53935',
+      residential: '#424242'
+    },
+    
+    i18n: {
+      namespace: 'buildings',
+      commercialLabel: 'Commercial Floor',
+      residentialLabel: 'Residential Floor'
+    },
+    
+    validation: {
+      requireSection: false,
+      requireTotalApartments: true,
+      requireExteriorRenders: true,
+      requireFloorPlans: true,
+      requireBuildingFloorPolygons: true
+    }
   }
-}
 }
 
 // ── HELPER FUNCTIONS ───────────────────────────────────────────
@@ -514,7 +497,6 @@ export const getBuildingConfig = (projectSlug) => {
   return buildingsConfigs[projectSlug] || buildingsConfigs.isq
 }
 
-// ✅ ACTUALIZADO - Detecta tipo de piso por arrays
 export const getFloorType = (projectSlug, floorNumber) => {
   const config = getBuildingConfig(projectSlug)
   
@@ -523,8 +505,6 @@ export const getFloorType = (projectSlug, floorNumber) => {
     if (config.floors.commercial?.floors.includes(floorNumber)) return FLOOR_TYPES.COMMERCIAL
     if (config.floors.residential?.floors.includes(floorNumber)) return FLOOR_TYPES.RESIDENTIAL
     if (config.floors.amenities?.floors.includes(floorNumber)) return FLOOR_TYPES.AMENITY
-    
-    // ✅ NUEVO: Si no está definido, asumir que es residencial por defecto
     return FLOOR_TYPES.RESIDENTIAL
   }
   
@@ -534,40 +514,33 @@ export const getFloorType = (projectSlug, floorNumber) => {
   return FLOOR_TYPES.RESIDENTIAL
 }
 
-// ✅ NUEVO - Obtener label de piso
 export const getFloorLabel = (projectSlug, floorNumber) => {
   const config = getBuildingConfig(projectSlug)
   const labels = config.floorLabels
   
   if (!labels) return `Floor ${floorNumber}`
   
-  // Custom label
   if (labels.customLabels?.[floorNumber]) {
     return labels.customLabels[floorNumber]
   }
   
-  // Parking prefix
   const floorType = getFloorType(projectSlug, floorNumber)
   if (floorType === FLOOR_TYPES.PARKING && labels.parkingPrefix) {
     const parkingIndex = config.floors.parking.floors.indexOf(floorNumber) + 1
     return `${labels.parkingPrefix}${parkingIndex}`
   }
   
-  // Negative numbers
   if (labels.useNegativeNumbers && floorNumber < 0) {
     return `${floorNumber}`
   }
   
-  // Default
   return `Floor ${floorNumber}`
 }
 
-// ✅ NUEVO - Obtener pisos por tipo
 export const getFloorsByType = (projectSlug, type) => {
   const config = getBuildingConfig(projectSlug)
   
   if (!config.singleBuildingMode) {
-    // Lógica para ISQ y Phase-2
     return []
   }
   
@@ -585,7 +558,6 @@ export const getFloorsByType = (projectSlug, type) => {
   }
 }
 
-// ✅ NUEVO - Obtener todos los pisos organizados
 export const getAllFloorsOrganized = (projectSlug, totalFloors = null) => {
   const config = getBuildingConfig(projectSlug)
   
@@ -604,7 +576,6 @@ export const getAllFloorsOrganized = (projectSlug, totalFloors = null) => {
   return floors
 }
 
-// Funciones originales (sin cambios)
 export const isCommercialFloor = (projectSlug, floorNumber) => {
   const config = getBuildingConfig(projectSlug)
   return config.floors.commercialFloorNumbers?.includes(floorNumber) || false
@@ -710,31 +681,26 @@ export const getRenderTypeOptions = (projectSlug) => {
   }))
 }
 
-// Get parking configuration
 export const getParkingConfig = (projectSlug) => {
   const config = getBuildingConfig(projectSlug)
   return config.floors.parking || null
 }
 
-// Check if parking management is enabled
 export const hasParkingManagement = (projectSlug) => {
   const parkingConfig = getParkingConfig(projectSlug)
   return parkingConfig?.management?.enabled || false
 }
 
-// Get parking spot types
 export const getParkingSpotTypes = (projectSlug) => {
   const parkingConfig = getParkingConfig(projectSlug)
   return parkingConfig?.management?.spotTypes || []
 }
 
-// Get parking status options
 export const getParkingStatusOptions = (projectSlug) => {
   const parkingConfig = getParkingConfig(projectSlug)
   return parkingConfig?.management?.statusOptions || []
 }
 
-// Generate parking code
 export const generateParkingCode = (projectSlug, floorNumber, spotNumber) => {
   const parkingConfig = getParkingConfig(projectSlug)
   const format = parkingConfig?.management?.codeFormat || 'P{floor}-{number}'
