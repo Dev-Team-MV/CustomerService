@@ -1,3 +1,4 @@
+// @shared/hooks/useNotifications.js
 import { useState, useEffect, useCallback, useRef } from 'react'
 import notificationService from '../services/notificationService'
 
@@ -6,6 +7,9 @@ const getNotificationId = (notification) => String(notification?.id || notificat
 export const useNotifications = ({ enabled = true } = {}) => {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(false)
+  const [creating, setCreating] = useState(false) // ✅ NUEVO
+  const [error, setError] = useState(null) // ✅ NUEVO
+  const [success, setSuccess] = useState(null) // ✅ NUEVO
   const wsRef = useRef(null)
   const reconnectTimerRef = useRef(null)
 
@@ -77,6 +81,110 @@ export const useNotifications = ({ enabled = true } = {}) => {
     }
   }, [refresh])
 
+  // ═══════════════════════════════════════════════════════════
+  // ✅ NUEVAS FUNCIONES PARA CREAR NOTIFICACIONES
+  // ═══════════════════════════════════════════════════════════
+
+  const createNotification = useCallback(async (data) => {
+    setCreating(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const notification = await notificationService.create(data)
+      setSuccess('Notificación creada exitosamente')
+      await refresh() // Actualizar lista después de crear
+      return { success: true, data: notification }
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message || 'Error al crear notificación'
+      setError(errorMsg)
+      return { success: false, error: errorMsg }
+    } finally {
+      setCreating(false)
+    }
+  }, [refresh])
+
+  const createForRole = useCallback(async (role, data) => {
+    setCreating(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const notification = await notificationService.createForRole(role, data)
+      setSuccess(`Notificación creada para rol: ${role}`)
+      await refresh()
+      return { success: true, data: notification }
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message || 'Error al crear notificación'
+      setError(errorMsg)
+      return { success: false, error: errorMsg }
+    } finally {
+      setCreating(false)
+    }
+  }, [refresh])
+
+  const createForUser = useCallback(async (userId, data) => {
+    setCreating(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const notification = await notificationService.createForUser(userId, data)
+      setSuccess('Notificación creada para usuario')
+      await refresh()
+      return { success: true, data: notification }
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message || 'Error al crear notificación'
+      setError(errorMsg)
+      return { success: false, error: errorMsg }
+    } finally {
+      setCreating(false)
+    }
+  }, [refresh])
+
+  const createForMultipleUsers = useCallback(async (userIds, data) => {
+    setCreating(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const notification = await notificationService.createForMultipleUsers(userIds, data)
+      setSuccess(`Notificación creada para ${userIds.length} usuarios`)
+      await refresh()
+      return { success: true, data: notification }
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message || 'Error al crear notificación'
+      setError(errorMsg)
+      return { success: false, error: errorMsg }
+    } finally {
+      setCreating(false)
+    }
+  }, [refresh])
+
+  const createForMultipleRoles = useCallback(async (roles, data) => {
+    setCreating(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const notification = await notificationService.createForMultipleRoles(roles, data)
+      setSuccess(`Notificación creada para ${roles.length} roles`)
+      await refresh()
+      return { success: true, data: notification }
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message || 'Error al crear notificación'
+      setError(errorMsg)
+      return { success: false, error: errorMsg }
+    } finally {
+      setCreating(false)
+    }
+  }, [refresh])
+
+  const clearMessages = useCallback(() => {
+    setError(null)
+    setSuccess(null)
+  }, [])
+
   useEffect(() => {
     if (!enabled) {
       setNotifications([])
@@ -129,10 +237,19 @@ export const useNotifications = ({ enabled = true } = {}) => {
   return {
     notifications,
     loading,
+    creating, // ✅ NUEVO
+    error, // ✅ NUEVO
+    success, // ✅ NUEVO
     refresh,
     markNotificationAsRead,
     markAllNotificationsAsRead,
-    setNotifications
+    setNotifications,
+    createNotification, // ✅ NUEVO
+    createForRole, // ✅ NUEVO
+    createForUser, // ✅ NUEVO
+    createForMultipleUsers, // ✅ NUEVO
+    createForMultipleRoles, // ✅ NUEVO
+    clearMessages // ✅ NUEVO
   }
 }
 
