@@ -2,6 +2,7 @@ import Contract from '../models/Contract.js'
 import Property from '../models/Property.js'
 import Apartment from '../models/Apartment.js'
 import { hydrateUrlsInObject, normalizePathForStorage, resolveToSignedUrl } from '../services/urlResolverService.js'
+import { notifyContractChanges } from '../utils/notificationTriggers.js'
 
 const VALID_TYPES = ['promissoryNote', 'purchaseContract', 'agreement']
 
@@ -127,17 +128,30 @@ export const createContract = async (req, res) => {
 
       let contract = await Contract.findOne({ property: propertyId })
       if (contract) {
+        const previousContracts = [...contract.contracts]
         contract.contracts = mergeContractsByType(contract.contracts, normalizedContracts)
         await contract.save()
         const updated = await populateContract(Contract.findById(contract._id))
         const data = updated.toObject()
         await hydrateUrlsInObject(data)
+        notifyContractChanges({
+          contract,
+          previousContracts,
+          incomingContracts: normalizedContracts,
+          actor: req.user
+        })
         return res.json(data)
       }
       contract = await Contract.create({ property: propertyId, contracts: normalizedContracts })
       const populated = await populateContract(Contract.findById(contract._id))
       const data = populated.toObject()
       await hydrateUrlsInObject(data)
+      notifyContractChanges({
+        contract,
+        previousContracts: [],
+        incomingContracts: normalizedContracts,
+        actor: req.user
+      })
       return res.status(201).json(data)
     }
 
@@ -146,17 +160,30 @@ export const createContract = async (req, res) => {
 
     let contract = await Contract.findOne({ apartment: apartmentId })
     if (contract) {
+      const previousContracts = [...contract.contracts]
       contract.contracts = mergeContractsByType(contract.contracts, normalizedContracts)
       await contract.save()
       const updated = await populateContract(Contract.findById(contract._id))
       const data = updated.toObject()
       await hydrateUrlsInObject(data)
+      notifyContractChanges({
+        contract,
+        previousContracts,
+        incomingContracts: normalizedContracts,
+        actor: req.user
+      })
       return res.json(data)
     }
     contract = await Contract.create({ apartment: apartmentId, contracts: normalizedContracts })
     const populated = await populateContract(Contract.findById(contract._id))
     const data = populated.toObject()
     await hydrateUrlsInObject(data)
+    notifyContractChanges({
+      contract,
+      previousContracts: [],
+      incomingContracts: normalizedContracts,
+      actor: req.user
+    })
     res.status(201).json(data)
   } catch (error) {
     if (error?.code === 11000) {
@@ -196,11 +223,20 @@ export const updateContract = async (req, res) => {
           })
         }
       }
+      const previousContracts = [...contract.contracts]
       contract.contracts = mergeContractsByType(contract.contracts, normalizedContracts)
+      await contract.save()
+      notifyContractChanges({
+        contract,
+        previousContracts,
+        incomingContracts: normalizedContracts,
+        actor: req.user
+      })
+    } else {
+      await contract.save()
     }
 
-    const updatedContract = await contract.save()
-    const populated = await populateContract(Contract.findById(updatedContract._id))
+    const populated = await populateContract(Contract.findById(contract._id))
     const data = populated.toObject()
     await hydrateUrlsInObject(data)
     res.json(data)
@@ -230,11 +266,20 @@ export const updateContractByPropertyId = async (req, res) => {
           })
         }
       }
+      const previousContracts = [...contract.contracts]
       contract.contracts = mergeContractsByType(contract.contracts, normalizedContracts)
+      await contract.save()
+      notifyContractChanges({
+        contract,
+        previousContracts,
+        incomingContracts: normalizedContracts,
+        actor: req.user
+      })
+    } else {
+      await contract.save()
     }
 
-    const updatedContract = await contract.save()
-    const populated = await populateContract(Contract.findById(updatedContract._id))
+    const populated = await populateContract(Contract.findById(contract._id))
     const data = populated.toObject()
     await hydrateUrlsInObject(data)
     res.json(data)
@@ -261,10 +306,20 @@ export const updateContractByApartmentId = async (req, res) => {
           })
         }
       }
+      const previousContracts = [...contract.contracts]
       contract.contracts = mergeContractsByType(contract.contracts, normalizedContracts)
+      await contract.save()
+      notifyContractChanges({
+        contract,
+        previousContracts,
+        incomingContracts: normalizedContracts,
+        actor: req.user
+      })
+    } else {
+      await contract.save()
     }
-    const updatedContract = await contract.save()
-    const populated = await populateContract(Contract.findById(updatedContract._id))
+
+    const populated = await populateContract(Contract.findById(contract._id))
     const data = populated.toObject()
     await hydrateUrlsInObject(data)
     res.json(data)

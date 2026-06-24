@@ -1,5 +1,6 @@
 import { sendSMSWithValidation } from '../services/twilioService.js'
 import SMSTemplate from '../models/SMSTemplate.js'
+import { notifySmsMessage } from '../utils/notificationTriggers.js'
 
 const getTemplateValue = (variables, key) => {
   if (!variables || typeof variables !== 'object') return undefined
@@ -48,6 +49,13 @@ export const sendSMS = async (req, res) => {
     }
 
     const result = await sendSMSWithValidation(to, message)
+
+    await notifySmsMessage({
+      to,
+      message,
+      actor: req.user,
+      userId: req.body.userId
+    })
 
     res.status(200).json({
       success: true,
@@ -101,6 +109,13 @@ export const sendSMSTemplate = async (req, res) => {
     }
 
     const result = await sendSMSWithValidation(to, renderedMessage)
+
+    await notifySmsMessage({
+      to,
+      message: renderedMessage,
+      actor: req.user,
+      userId: req.body.userId
+    })
 
     res.status(200).json({
       success: true,
@@ -174,6 +189,13 @@ export const sendSMSByTemplateId = async (req, res) => {
     }
 
     const result = await sendSMSWithValidation(to, renderedMessage)
+
+    await notifySmsMessage({
+      to,
+      message: renderedMessage,
+      actor: req.user,
+      userId: req.body.userId
+    })
 
     res.status(200).json({
       success: true,
