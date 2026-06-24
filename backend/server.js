@@ -66,7 +66,8 @@ const allowedCorsOrigins = new Set([...exactCorsOrigins, ...extraCorsOrigins])
 
 const allowedOriginPatterns = [
   /^https?:\/\/localhost(?::\d+)?$/i,
-  /^https:\/\/([a-z0-9-]+\.)?michelangelodelvalle\.com$/i
+  /^https:\/\/([a-z0-9-]+\.)?michelangelodelvalle\.com$/i,
+  /^https:\/\/(www\.)?lakewoodoaksonlakeconroe\.com$/i
 ]
 
 const corsOptions = {
