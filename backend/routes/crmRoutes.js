@@ -1,5 +1,11 @@
 import express from 'express'
 import { getCrmBalance, getCrmClients } from '../controllers/crmController.js'
+import {
+  getCrmClientById,
+  getCrmClientPayments,
+  addCrmClientNote
+} from '../controllers/crmClientController.js'
+import { getCrmPayments, getCrmPaymentsSummary } from '../controllers/crmPaymentController.js'
 import { protect, superadmin } from '../middleware/authMiddleware.js'
 import leadRoutes from './leadRoutes.js'
 
@@ -27,6 +33,9 @@ router.use('/leads', leadRoutes)
  */
 router.get('/balance', protect, superadmin, getCrmBalance)
 
+router.get('/payments/summary', protect, superadmin, getCrmPaymentsSummary)
+router.get('/payments', protect, superadmin, getCrmPayments)
+
 /**
  * @swagger
  * /api/crm/clients:
@@ -52,5 +61,8 @@ router.get('/balance', protect, superadmin, getCrmBalance)
  *         description: Not authorized as superadmin
  */
 router.get('/clients', protect, superadmin, getCrmClients)
+router.get('/clients/:id/payments', protect, superadmin, getCrmClientPayments)
+router.post('/clients/:id/notes', protect, superadmin, addCrmClientNote)
+router.get('/clients/:id', protect, superadmin, getCrmClientById)
 
 export default router
