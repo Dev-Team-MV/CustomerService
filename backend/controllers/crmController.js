@@ -6,6 +6,7 @@ import Building from '../models/Building.js'
 import Payload from '../models/Payload.js'
 import User from '../models/User.js'
 import Project from '../models/Project.js'
+import { getLeadMetrics } from './leadController.js'
 
 /**
  * Balance consolidado por proyecto y total (para CRM superadmin).
@@ -106,9 +107,12 @@ export const getCrmBalance = async (req, res) => {
       }
     })
 
+    const leads = await getLeadMetrics()
+
     res.json({
       byProject,
-      global: { totalCollected: globalCollected, totalPending: globalPending }
+      global: { totalCollected: globalCollected, totalPending: globalPending },
+      leads
     })
   } catch (error) {
     res.status(500).json({ message: error.message })

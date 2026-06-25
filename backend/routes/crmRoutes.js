@@ -1,8 +1,11 @@
 import express from 'express'
 import { getCrmBalance, getCrmClients } from '../controllers/crmController.js'
 import { protect, superadmin } from '../middleware/authMiddleware.js'
+import leadRoutes from './leadRoutes.js'
 
 const router = express.Router()
+
+router.use('/leads', leadRoutes)
 
 /**
  * @swagger

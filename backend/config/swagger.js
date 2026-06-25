@@ -1016,6 +1016,18 @@ const options = {
                 totalCollected: { type: 'number' },
                 totalPending: { type: 'number' }
               }
+            },
+            leads: {
+              type: 'object',
+              properties: {
+                total: { type: 'number' },
+                converted: { type: 'number' },
+                conversionRate: { type: 'number', description: 'Percentage of leads converted to users' },
+                byStage: {
+                  type: 'object',
+                  additionalProperties: { type: 'number' }
+                }
+              }
             }
           }
         },
