@@ -1051,6 +1051,229 @@ const options = {
             total: { type: 'number' }
           }
         },
+        PaginationMeta: {
+          type: 'object',
+          properties: {
+            page: { type: 'integer' },
+            limit: { type: 'integer' },
+            total: { type: 'integer' },
+            totalPages: { type: 'integer' }
+          }
+        },
+        Lead: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            name: { type: 'string' },
+            phone: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            source: { type: 'string', enum: ['web', 'referido', 'visita', 'llamada'] },
+            projectId: { type: 'object', description: 'Populated Project ref' },
+            stage: {
+              type: 'string',
+              enum: ['nuevo', 'contactado', 'visita_agendada', 'propuesta', 'vendido', 'perdido']
+            },
+            assignedTo: { type: 'object', description: 'Populated User ref' },
+            notes: { type: 'string' },
+            lostReason: { type: 'string' },
+            convertedToUserId: { type: 'object', description: 'Populated User ref when converted' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        CrmLeadsList: {
+          type: 'object',
+          properties: {
+            leads: { type: 'array', items: { $ref: '#/components/schemas/Lead' } },
+            total: { type: 'number' }
+          }
+        },
+        CrmLeadCreate: {
+          type: 'object',
+          required: ['name'],
+          properties: {
+            name: { type: 'string' },
+            phone: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            source: { type: 'string', enum: ['web', 'referido', 'visita', 'llamada'] },
+            projectId: { type: 'string' },
+            stage: {
+              type: 'string',
+              enum: ['nuevo', 'contactado', 'visita_agendada', 'propuesta', 'vendido', 'perdido']
+            },
+            assignedTo: { type: 'string' },
+            notes: { type: 'string' }
+          }
+        },
+        CrmLeadUpdate: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            phone: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            source: { type: 'string', enum: ['web', 'referido', 'visita', 'llamada'] },
+            projectId: { type: 'string' },
+            stage: {
+              type: 'string',
+              enum: ['nuevo', 'contactado', 'visita_agendada', 'propuesta', 'vendido', 'perdido']
+            },
+            assignedTo: { type: 'string' },
+            notes: { type: 'string' },
+            lostReason: { type: 'string' }
+          }
+        },
+        CrmLeadConvertResponse: {
+          type: 'object',
+          properties: {
+            lead: { $ref: '#/components/schemas/Lead' },
+            user: {
+              type: 'object',
+              properties: {
+                _id: { type: 'string' },
+                firstName: { type: 'string' },
+                lastName: { type: 'string' },
+                email: { type: 'string' },
+                phoneNumber: { type: 'string' },
+                role: { type: 'string' }
+              }
+            },
+            smsSent: { type: 'boolean' },
+            setupLink: { type: 'string', description: 'Present only when SMS failed' }
+          }
+        },
+        CrmClientProperty: {
+          type: 'object',
+          properties: {
+            type: { type: 'string', enum: ['property', 'apartment'] },
+            _id: { type: 'string' },
+            lotNumber: { type: 'string', description: 'Property only' },
+            apartmentNumber: { type: 'string', description: 'Apartment only' },
+            floorNumber: { type: 'number', description: 'Apartment only' },
+            buildingName: { type: 'string', description: 'Apartment only' },
+            modelName: { type: 'string' },
+            projectId: { type: 'string' },
+            projectName: { type: 'string' },
+            price: { type: 'number' },
+            pending: { type: 'number', description: 'Outstanding balance on unit' },
+            balance: { type: 'number', description: 'Total collected (signed payloads)' },
+            status: { type: 'string' }
+          }
+        },
+        CrmPayment: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            amount: { type: 'number' },
+            status: { type: 'string', enum: ['pending', 'signed', 'rejected'] },
+            type: { type: 'string' },
+            date: { type: 'string', format: 'date-time' },
+            dueDate: { type: 'string', format: 'date-time', description: 'Same as date field' },
+            notes: { type: 'string' },
+            propertyId: { type: 'string', nullable: true },
+            apartmentId: { type: 'string', nullable: true },
+            clientName: { type: 'string' },
+            unitLabel: { type: 'string', example: 'Lot 42' },
+            projectId: { type: 'string' },
+            projectName: { type: 'string' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        CrmPaymentsPaginated: {
+          type: 'object',
+          properties: {
+            payments: { type: 'array', items: { $ref: '#/components/schemas/CrmPayment' } },
+            pagination: { $ref: '#/components/schemas/PaginationMeta' }
+          }
+        },
+        Activity: {
+          type: 'object',
+          description: 'CRM activity / note / SMS record',
+          properties: {
+            _id: { type: 'string' },
+            boardType: { type: 'string', enum: ['project', 'global'] },
+            title: { type: 'string' },
+            description: { type: 'string' },
+            priority: { type: 'string', enum: ['low', 'medium', 'high', 'urgent'] },
+            tags: { type: 'array', items: { type: 'string' }, example: ['nota'] },
+            dueDate: { type: 'string', format: 'date-time' },
+            assignedTo: { type: 'object' },
+            createdBy: { type: 'object' },
+            contact: {
+              type: 'object',
+              properties: {
+                user: { type: 'object' },
+                name: { type: 'string' },
+                phone: { type: 'string' },
+                email: { type: 'string' }
+              }
+            },
+            columnId: { type: 'object' },
+            relatedProjects: { type: 'array', items: { type: 'string' } },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        CrmClientDetail: {
+          type: 'object',
+          properties: {
+            client: { $ref: '#/components/schemas/User' },
+            properties: { type: 'array', items: { $ref: '#/components/schemas/CrmClientProperty' } },
+            payments: { type: 'array', items: { $ref: '#/components/schemas/CrmPayment' } },
+            paymentsPagination: { $ref: '#/components/schemas/PaginationMeta' },
+            activities: { type: 'array', items: { $ref: '#/components/schemas/Activity' } },
+            activitiesPagination: { $ref: '#/components/schemas/PaginationMeta' },
+            sms: { type: 'array', items: { $ref: '#/components/schemas/Activity' }, description: 'Activities tagged sms' },
+            smsPagination: { $ref: '#/components/schemas/PaginationMeta' },
+            notes: { type: 'array', items: { $ref: '#/components/schemas/Activity' }, description: 'Activities tagged nota' },
+            notesPagination: { $ref: '#/components/schemas/PaginationMeta' }
+          }
+        },
+        CrmClientNoteCreate: {
+          type: 'object',
+          required: ['text'],
+          properties: {
+            text: { type: 'string', description: 'Note body (stored as Activity description)' },
+            title: { type: 'string', default: 'Nota interna' },
+            projectId: { type: 'string', description: 'Optional project scope' }
+          }
+        },
+        CrmPaymentsSummary: {
+          type: 'object',
+          properties: {
+            byProject: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  projectId: { type: 'string' },
+                  name: { type: 'string' },
+                  totalPending: { type: 'number' },
+                  overdueCount: { type: 'integer' },
+                  overdueAmount: { type: 'number' }
+                }
+              }
+            },
+            global: {
+              type: 'object',
+              properties: {
+                totalPending: { type: 'number' },
+                overdueCount: { type: 'integer' },
+                overdueAmount: { type: 'number' }
+              }
+            },
+            currentMonth: {
+              type: 'object',
+              properties: {
+                collected: { type: 'number' },
+                expected: { type: 'number' },
+                collectionRate: { type: 'number', description: 'Percentage' },
+                monthStart: { type: 'string', format: 'date-time' },
+                monthEnd: { type: 'string', format: 'date-time' }
+              }
+            }
+          }
+        },
         FamilyGroupMember: {
           type: 'object',
           properties: {
