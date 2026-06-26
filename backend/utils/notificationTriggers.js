@@ -41,16 +41,45 @@ const excludeActor = (userIds, actorId) => {
   return userIds.filter((id) => String(id) !== actor)
 }
 
+const getProjectIdFromProperty = async (propertyId) => {
+  if (!propertyId) return undefined
+  const doc = await Property.findById(propertyId).select('project').lean()
+  return doc?.project || undefined
+}
+
+const getProjectIdFromApartment = async (apartmentId) => {
+  if (!apartmentId) return undefined
+  const doc = await Apartment.findById(apartmentId)
+    .select('building')
+    .populate('building', 'project')
+    .lean()
+  return doc?.building?.project || undefined
+}
+
+const resolveProjectId = async ({ projectId, propertyId, apartmentId, unitDoc } = {}) => {
+  if (projectId) return projectId
+  if (unitDoc?.project) return unitDoc.project
+  if (propertyId) return getProjectIdFromProperty(propertyId)
+  if (apartmentId) return getProjectIdFromApartment(apartmentId)
+  return undefined
+}
+
 export const notifyPayloadCreated = ({ payload, unitDoc, actor }) => {
   runNotification(async () => {
     const amount = Number(payload.amount || 0).toLocaleString('en-US')
+    const projectId = await resolveProjectId({
+      propertyId: payload.property,
+      apartmentId: payload.apartment,
+      unitDoc
+    })
     const payloadBase = {
       event: 'PAYMENT_CREATED',
       payloadId: payload._id,
       propertyId: payload.property || undefined,
       apartmentId: payload.apartment || undefined,
       status: payload.status,
-      amount: payload.amount
+      amount: payload.amount,
+      projectId
     }
 
     const isAdmin = ['admin', 'superadmin'].includes(actor?.role)
@@ -63,6 +92,7 @@ export const notifyPayloadCreated = ({ payload, unitDoc, actor }) => {
           body: `Se registró un pago de $${amount} pendiente de revisión.`,
           type: 'INFO',
           audience: 'admin',
+          projectId,
           payload: payloadBase
         })
       }
@@ -72,6 +102,7 @@ export const notifyPayloadCreated = ({ payload, unitDoc, actor }) => {
         body: `Tu pago de $${amount} fue recibido y está pendiente de revisión.`,
         type: 'INFO',
         audience: 'user',
+        projectId,
         payload: {
           ...payloadBase,
           event: 'PAYMENT_RECEIVED'
@@ -88,6 +119,7 @@ export const notifyPayloadCreated = ({ payload, unitDoc, actor }) => {
       body: `Se registró un pago de $${amount}.`,
       type: 'INFO',
       audience: 'user',
+      projectId,
       payload: payloadBase
     })
   })
@@ -101,12 +133,18 @@ export const notifyPayloadStatusChanged = ({ payload, unitDoc, previousStatus, a
     if (!ownerIds.length) return
 
     const amount = Number(payload.amount || 0).toLocaleString('en-US')
+    const projectId = await resolveProjectId({
+      propertyId: payload.property,
+      apartmentId: payload.apartment,
+      unitDoc
+    })
     const payloadBase = {
       payloadId: payload._id,
       propertyId: payload.property || undefined,
       apartmentId: payload.apartment || undefined,
       status: payload.status,
-      amount: payload.amount
+      amount: payload.amount,
+      projectId
     }
 
     if (payload.status === 'signed') {
@@ -115,6 +153,7 @@ export const notifyPayloadStatusChanged = ({ payload, unitDoc, previousStatus, a
         body: `Tu pago de $${amount} fue procesado.`,
         type: 'INFO',
         audience: 'user',
+        projectId,
         payload: { ...payloadBase, event: 'PAYMENT_RECEIVED' }
       })
 
@@ -125,6 +164,7 @@ export const notifyPayloadStatusChanged = ({ payload, unitDoc, previousStatus, a
           body: 'Los documentos de tu pago fueron aprobados.',
           type: 'INFO',
           audience: 'user',
+          projectId,
           payload: {
             ...payloadBase,
             event: 'DOCUMENT_APPROVED'
@@ -140,6 +180,7 @@ export const notifyPayloadStatusChanged = ({ payload, unitDoc, previousStatus, a
         body: `Tu pago de $${amount} fue rechazado.`,
         type: 'WARN',
         audience: 'user',
+        projectId,
         payload: { ...payloadBase, event: 'PAYMENT_REJECTED' }
       })
     }
@@ -151,14 +192,18 @@ export const notifyPropertyAssigned = ({ property, ownerIds, actor }) => {
     const targets = excludeActor(toIdList(ownerIds), actor?._id)
     if (!targets.length) return
 
+    const projectId = property.project || await getProjectIdFromProperty(property._id)
+
     await notifyUsers(targets, {
       title: 'Propiedad asignada',
       body: 'Se te asignó una nueva propiedad.',
       type: 'INFO',
       audience: 'user',
+      projectId,
       payload: {
         event: 'PROPERTY_ASSIGNED',
-        propertyId: property._id
+        propertyId: property._id,
+        projectId
       }
     })
   })
@@ -176,19 +221,25 @@ export const notifyPhaseUpdated = ({ phase, actor }) => {
     if (!ownerIds.length) return
 
     const phaseLabel = phase.title || `Fase ${phase.phaseNumber}`
+    const projectId = await resolveProjectId({
+      propertyId: phase.property,
+      apartmentId: phase.apartment
+    })
 
     await notifyUsers(ownerIds, {
       title: 'Avance de construcción',
       body: `Se actualizó ${phaseLabel}.`,
       type: 'INFO',
       audience: 'user',
+      projectId,
       payload: {
         event: 'PHASE_UPDATED',
         phaseId: phase._id,
         phaseNumber: phase.phaseNumber,
         propertyId: phase.property || undefined,
         apartmentId: phase.apartment || undefined,
-        constructionPercentage: phase.constructionPercentage
+        constructionPercentage: phase.constructionPercentage,
+        projectId
       }
     })
   })
@@ -203,6 +254,7 @@ export const notifyFamilyGroupMemberAdded = ({ group, userId, actor }) => {
       body: 'Fuiste agregado a un grupo familiar.',
       type: 'INFO',
       audience: 'user',
+      projectId: group.project || undefined,
       payload: {
         event: 'FAMILY_GROUP_INVITE',
         familyGroupId: group._id,
@@ -224,18 +276,24 @@ export const notifyContractUpdated = ({ contract, actor, contractTypes = [] }) =
     if (!ownerIds.length) return
 
     const typesLabel = contractTypes.length ? contractTypes.join(', ') : 'contrato'
+    const projectId = await resolveProjectId({
+      propertyId: contract.property,
+      apartmentId: contract.apartment
+    })
 
     await notifyUsers(ownerIds, {
       title: 'Contrato actualizado',
       body: `Hay una actualización en tu contrato (${typesLabel}).`,
       type: 'INFO',
       audience: 'user',
+      projectId,
       payload: {
         event: 'CONTRACT_UPDATED',
         contractId: contract._id,
         propertyId: contract.property || undefined,
         apartmentId: contract.apartment || undefined,
-        contractTypes
+        contractTypes,
+        projectId
       }
     })
   })
@@ -253,18 +311,24 @@ export const notifyContractSigned = ({ contract, actor, contractTypes = [] }) =>
     if (!ownerIds.length) return
 
     const typesLabel = contractTypes.length ? contractTypes.join(', ') : 'documento'
+    const projectId = await resolveProjectId({
+      propertyId: contract.property,
+      apartmentId: contract.apartment
+    })
 
     await notifyUsers(ownerIds, {
       title: 'Contrato firmado',
       body: `Se registró un nuevo documento contractual (${typesLabel}).`,
       type: 'INFO',
       audience: 'user',
+      projectId,
       payload: {
         event: 'CONTRACT_SIGNED',
         contractId: contract._id,
         propertyId: contract.property || undefined,
         apartmentId: contract.apartment || undefined,
-        contractTypes
+        contractTypes,
+        projectId
       }
     })
   })
@@ -329,6 +393,7 @@ export const notifyActivityThreadMessage = ({ activity, message, actor }) => {
       body: preview || 'Tienes un nuevo mensaje en una actividad.',
       type: 'INFO',
       audience: 'admin',
+      projectId: activity.projectId || undefined,
       payload: {
         event: 'NEW_MESSAGE',
         activityId: activity._id,
@@ -385,6 +450,7 @@ export const notifyNewsPublished = ({ news, actor }) => {
       type: 'INFO',
       audience: 'user',
       targetRoles: ['user', 'owner'],
+      projectId: news.projectId || undefined,
       payload: {
         event: 'NEWS_PUBLISHED',
         newsId: news._id,
@@ -403,6 +469,7 @@ export const notifyActivityAssigned = ({ activity, assigneeId, actor }) => {
       body: `Se te asignó la actividad "${activity.title}".`,
       type: 'INFO',
       audience: 'admin',
+      projectId: activity.projectId || undefined,
       payload: {
         event: 'ACTIVITY_ASSIGNED',
         activityId: activity._id,

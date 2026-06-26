@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
 import {
   formatNotificationForUser,
+  notificationMatchesProject,
   shouldDeliverToUser
 } from '../utils/notificationHelpers.js'
 
@@ -55,19 +56,26 @@ const resolveUserFromToken = async (token) => {
   return User.findById(decoded.id).select('_id role')
 }
 
-export const broadcastNotification = (notification) => {
+const broadcastNotificationAsync = async (notification) => {
   if (!wss || !notification) return
 
   for (const [userId, sockets] of clientsByUserId.entries()) {
     const ws = [...sockets][0]
     const role = ws?.userRole
     if (!shouldDeliverToUser(notification, userId, role)) continue
+    if (!await notificationMatchesProject(notification, userId, role)) continue
 
     const formatted = formatNotificationForUser(notification, userId)
     for (const socket of sockets) {
       sendJson(socket, { type: 'new_notification', data: formatted })
     }
   }
+}
+
+export const broadcastNotification = (notification) => {
+  Promise.resolve(broadcastNotificationAsync(notification)).catch((error) => {
+    console.error('[Notifications WS]', error.message)
+  })
 }
 
 export const initNotificationWebSocket = (server) => {
