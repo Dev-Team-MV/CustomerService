@@ -6,12 +6,25 @@ import {
   addCrmClientNote
 } from '../controllers/crmClientController.js'
 import { getCrmPayments, getCrmPaymentsSummary } from '../controllers/crmPaymentController.js'
+import { getCrmAgents, getCrmAgentMetrics } from '../controllers/crmAgentController.js'
+import {
+  exportCrmClients,
+  exportCrmPayments,
+  exportCrmLeads
+} from '../controllers/reportController.js'
 import { protect, superadmin } from '../middleware/authMiddleware.js'
 import leadRoutes from './leadRoutes.js'
 
 const router = express.Router()
 
 router.use('/leads', leadRoutes)
+
+router.get('/agents', protect, superadmin, getCrmAgents)
+router.get('/agents/:id/metrics', protect, superadmin, getCrmAgentMetrics)
+
+router.get('/reports/clients/export', protect, superadmin, exportCrmClients)
+router.get('/reports/payments/export', protect, superadmin, exportCrmPayments)
+router.get('/reports/leads/export', protect, superadmin, exportCrmLeads)
 
 /**
  * @swagger
