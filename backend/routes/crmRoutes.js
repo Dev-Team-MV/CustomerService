@@ -19,11 +19,163 @@ const router = express.Router()
 
 router.use('/leads', leadRoutes)
 
+/**
+ * @swagger
+ * /api/crm/agents:
+ *   get:
+ *     summary: List CRM agents (admin and superadmin users)
+ *     tags: [CRM Agents]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Active admin/superadmin users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmAgentsList'
+ *       403:
+ *         description: Not authorized as superadmin
+ */
 router.get('/agents', protect, superadmin, getCrmAgents)
+
+/**
+ * @swagger
+ * /api/crm/agents/{id}/metrics:
+ *   get:
+ *     summary: Agent performance metrics (leads, activities, clients served)
+ *     tags: [CRM Agents]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *         description: Agent (User) ID
+ *     responses:
+ *       200:
+ *         description: Agent metrics for current month
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmAgentMetrics'
+ *       404:
+ *         description: Agent not found
+ */
 router.get('/agents/:id/metrics', protect, superadmin, getCrmAgentMetrics)
 
+/**
+ * @swagger
+ * /api/crm/reports/clients/export:
+ *   get:
+ *     summary: Export clients report as JSON or CSV
+ *     tags: [CRM Reports]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         schema: { type: string }
+ *         description: Optional project filter
+ *       - in: query
+ *         name: format
+ *         schema: { type: string, enum: [json, csv], default: json }
+ *     responses:
+ *       200:
+ *         description: JSON export or CSV file download
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmExportResult'
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               format: binary
+ */
 router.get('/reports/clients/export', protect, superadmin, exportCrmClients)
+
+/**
+ * @swagger
+ * /api/crm/reports/payments/export:
+ *   get:
+ *     summary: Export payments in date range as JSON or CSV
+ *     tags: [CRM Reports]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: dateFrom
+ *         required: true
+ *         schema: { type: string, format: date-time }
+ *       - in: query
+ *         name: dateTo
+ *         required: true
+ *         schema: { type: string, format: date-time }
+ *       - in: query
+ *         name: projectId
+ *         schema: { type: string }
+ *       - in: query
+ *         name: format
+ *         schema: { type: string, enum: [json, csv], default: json }
+ *     responses:
+ *       200:
+ *         description: JSON export or CSV file download
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmExportResult'
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       400:
+ *         description: dateFrom and dateTo are required
+ */
 router.get('/reports/payments/export', protect, superadmin, exportCrmPayments)
+
+/**
+ * @swagger
+ * /api/crm/reports/leads/export:
+ *   get:
+ *     summary: Export leads report as JSON or CSV
+ *     tags: [CRM Reports]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: fromDate
+ *         schema: { type: string, format: date-time }
+ *       - in: query
+ *         name: toDate
+ *         schema: { type: string, format: date-time }
+ *       - in: query
+ *         name: projectId
+ *         schema: { type: string }
+ *       - in: query
+ *         name: stage
+ *         schema:
+ *           type: string
+ *           enum: [nuevo, contactado, visita_agendada, propuesta, vendido, perdido]
+ *       - in: query
+ *         name: assignedTo
+ *         schema: { type: string }
+ *         description: Filter by agent user ID
+ *       - in: query
+ *         name: format
+ *         schema: { type: string, enum: [json, csv], default: json }
+ *     responses:
+ *       200:
+ *         description: JSON export or CSV file download
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmExportResult'
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               format: binary
+ */
 router.get('/reports/leads/export', protect, superadmin, exportCrmLeads)
 
 /**

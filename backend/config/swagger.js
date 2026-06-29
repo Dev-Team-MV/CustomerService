@@ -1274,6 +1274,80 @@ const options = {
             }
           }
         },
+        CrmAgentsList: {
+          type: 'object',
+          properties: {
+            agents: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  _id: { type: 'string' },
+                  firstName: { type: 'string' },
+                  lastName: { type: 'string' },
+                  email: { type: 'string' },
+                  phoneNumber: { type: 'string' },
+                  role: { type: 'string', enum: ['admin', 'superadmin'] }
+                }
+              }
+            },
+            total: { type: 'integer' }
+          }
+        },
+        CrmAgentMetrics: {
+          type: 'object',
+          properties: {
+            agent: {
+              type: 'object',
+              properties: {
+                _id: { type: 'string' },
+                firstName: { type: 'string' },
+                lastName: { type: 'string' },
+                email: { type: 'string' },
+                phoneNumber: { type: 'string' },
+                role: { type: 'string' }
+              }
+            },
+            leads: {
+              type: 'object',
+              properties: {
+                total: { type: 'integer' },
+                converted: { type: 'integer' },
+                byStage: {
+                  type: 'object',
+                  additionalProperties: { type: 'integer' }
+                }
+              }
+            },
+            activitiesCompletedThisMonth: { type: 'integer' },
+            clientsServed: {
+              type: 'object',
+              properties: {
+                total: { type: 'integer' },
+                thisMonth: { type: 'integer' }
+              }
+            },
+            period: {
+              type: 'object',
+              properties: {
+                monthStart: { type: 'string', format: 'date-time' },
+                monthEnd: { type: 'string', format: 'date-time' }
+              }
+            }
+          }
+        },
+        CrmExportResult: {
+          type: 'object',
+          description: 'JSON export response (format=json). format=csv returns text/csv file.',
+          properties: {
+            rows: {
+              type: 'array',
+              items: { type: 'object', additionalProperties: true }
+            },
+            total: { type: 'integer' },
+            columns: { type: 'array', items: { type: 'string' } }
+          }
+        },
         FamilyGroupMember: {
           type: 'object',
           properties: {
