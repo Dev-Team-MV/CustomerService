@@ -1348,6 +1348,49 @@ const options = {
             columns: { type: 'array', items: { type: 'string' } }
           }
         },
+        CrmAlert: {
+          type: 'object',
+          properties: {
+            type: {
+              type: 'string',
+              enum: ['overdue_payment', 'upcoming_activity', 'stale_lead']
+            },
+            id: { type: 'string' },
+            title: { type: 'string' },
+            message: { type: 'string' },
+            dueDate: { type: 'string', format: 'date-time' },
+            payload: { type: 'object', additionalProperties: true }
+          }
+        },
+        CrmAlertsCount: {
+          type: 'object',
+          properties: {
+            count: { type: 'integer', description: 'Total active alerts' }
+          }
+        },
+        CrmAlerts: {
+          type: 'object',
+          properties: {
+            alerts: { type: 'array', items: { $ref: '#/components/schemas/CrmAlert' } },
+            byType: {
+              type: 'object',
+              properties: {
+                overduePayments: { type: 'array', items: { $ref: '#/components/schemas/CrmAlert' } },
+                upcomingActivities: { type: 'array', items: { $ref: '#/components/schemas/CrmAlert' } },
+                staleLeads: { type: 'array', items: { $ref: '#/components/schemas/CrmAlert' } }
+              }
+            },
+            counts: {
+              type: 'object',
+              properties: {
+                overduePayments: { type: 'integer' },
+                upcomingActivities: { type: 'integer' },
+                staleLeads: { type: 'integer' },
+                total: { type: 'integer' }
+              }
+            }
+          }
+        },
         FamilyGroupMember: {
           type: 'object',
           properties: {

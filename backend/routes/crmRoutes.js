@@ -12,6 +12,10 @@ import {
   exportCrmPayments,
   exportCrmLeads
 } from '../controllers/reportController.js'
+import {
+  getCrmNotifications,
+  getCrmNotificationsCount
+} from '../controllers/crmNotificationController.js'
 import { protect, superadmin } from '../middleware/authMiddleware.js'
 import leadRoutes from './leadRoutes.js'
 
@@ -177,6 +181,46 @@ router.get('/reports/payments/export', protect, superadmin, exportCrmPayments)
  *               format: binary
  */
 router.get('/reports/leads/export', protect, superadmin, exportCrmLeads)
+
+/**
+ * @swagger
+ * /api/crm/notifications/count:
+ *   get:
+ *     summary: Total count of active CRM alerts (sidebar badge)
+ *     tags: [CRM Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Total alert count computed on-demand
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmAlertsCount'
+ */
+router.get('/notifications/count', protect, superadmin, getCrmNotificationsCount)
+
+/**
+ * @swagger
+ * /api/crm/notifications:
+ *   get:
+ *     summary: Active CRM alerts computed on-demand (not persisted)
+ *     tags: [CRM Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     description: |
+ *       Returns overdue pending payments, activities due in the next 3 days
+ *       assigned to the current user, and stale leads (7+ days without update)
+ *       assigned to the current user.
+ *     responses:
+ *       200:
+ *         description: Grouped and flat alert lists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmAlerts'
+ */
+router.get('/notifications', protect, superadmin, getCrmNotifications)
 
 /**
  * @swagger
