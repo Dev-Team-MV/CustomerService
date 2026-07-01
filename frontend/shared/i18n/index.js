@@ -36,6 +36,10 @@ import enHouses6Town from './locales/en/houses6Town.json'
 import enActivities from './locales/en/activities.json'
 import enSms from './locales/en/sms.json'
 import enUploads from './locales/en/uploads.json'
+import enLeads from './locales/en/leads.json'
+import enAgents from './locales/en/agents.json'
+import enReports from './locales/en/reports.json'
+import enPayments from './locales/en/payments.json'
 // ES
 import esCommon from './locales/es/common.json'
 import esAuth from './locales/es/auth.json'
@@ -70,6 +74,10 @@ import esHouses6Town from './locales/es/houses6Town.json'
 import esActivities from './locales/es/activities.json'
 import esSms from './locales/es/sms.json'
 import esUploads from './locales/es/uploads.json'
+import esLeads from './locales/es/leads.json'
+import esAgents from './locales/es/agents.json'
+import esReports from './locales/es/reports.json'
+import esPayments from './locales/es/payments.json'
 
 i18n
     .use(LanguageDetector)
@@ -110,7 +118,11 @@ i18n
                 houses6Town: enHouses6Town,
                 activities: enActivities,
                 sms: enSms,
-                uploads: enUploads
+                uploads: enUploads,
+                leads: enLeads,
+                agents: enAgents,
+                reports: enReports,
+                payments: enPayments
             },
             es: {
                 common: esCommon,
@@ -146,7 +158,11 @@ i18n
                 houses6Town: esHouses6Town,
                 activities: esActivities,
                 sms: esSms,
-                uploads: esUploads
+                uploads: esUploads,
+                leads: esLeads,
+                agents: esAgents,
+                reports: esReports,
+                payments: esPayments
             },
         },
         fallbackLng: 'en',
@@ -184,7 +200,11 @@ i18n
             'houses6Town',
             'activities',
             'sms',
-            'uploads'
+            'uploads',
+            'leads',
+            'agents',
+            'reports',
+            'payments'
         ],
         interpolation: {
             escapeValue: false,

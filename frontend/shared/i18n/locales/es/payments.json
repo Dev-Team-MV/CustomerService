@@ -1,0 +1,67 @@
+{
+  "payments": {
+    "title": "Cobranza",
+    "description": "Gestión de pagos y cobranzas",
+    "exportButton": "Exportar Pagos",
+    
+    "filters": {
+      "title": "Filtros",
+      "project": "Proyecto",
+      "projectOptional": "Proyecto (opcional)",
+      "status": "Estado",
+      "dateFrom": "Desde",
+      "dateTo": "Hasta",
+      "clear": "Limpiar",
+      "all": "Todos",
+      "allProjects": "Todos los proyectos"
+    },
+    
+    "status": {
+      "pending": "Pendiente",
+      "signed": "Firmado",
+      "overdue": "Vencido"
+    },
+    
+    "table": {
+      "client": "Cliente",
+      "project": "Proyecto",
+      "unit": "Unidad",
+      "amount": "Monto",
+      "dueDate": "Vencimiento",
+      "status": "Estado",
+      "action": "Acción",
+      "noClient": "Sin cliente",
+      "noProject": "Sin proyecto",
+      "overdue": "Vencido",
+      "sendSms": "Enviar recordatorio SMS"
+    },
+    
+    "empty": {
+      "title": "No hay pagos",
+      "description": "No se encontraron pagos con los filtros actuales"
+    },
+    
+    "pagination": {
+      "showing": "Mostrando {{from}} - {{to}} de {{total}} pagos",
+      "rowsPerPage": "Filas por página"
+    },
+    
+    "sms": {
+      "dialogTitle": "Enviar recordatorio SMS",
+      "client": "Cliente",
+      "phone": "Teléfono",
+      "amount": "Monto",
+      "dueDate": "Vencimiento",
+      "info": "Se enviará un SMS recordando al cliente que realice el pago a tiempo.",
+      "cancel": "Cancelar",
+      "send": "Enviar SMS",
+      "sending": "Enviando...",
+      "success": "SMS enviado exitosamente",
+      "error": "Error al enviar SMS"
+    },
+    
+    "errors": {
+      "loadFailed": "Error al cargar pagos"
+    }
+  }
+}

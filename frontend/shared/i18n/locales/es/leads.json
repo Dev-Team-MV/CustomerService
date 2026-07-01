@@ -1,0 +1,56 @@
+{
+  "title": "Ventas & Leads",
+  "description": "Gestiona tu pipeline de ventas y convierte leads en clientes",
+  "newLead": "Nuevo Lead",
+  "editLead": "Editar Lead",
+  "convert": "Convertir a Cliente",
+  "convertTitle": "Convertir Lead a Cliente",
+  "deleteConfirm": "¿Estás seguro de eliminar este lead?",
+  "searchPlaceholder": "Buscar por nombre, email o teléfono...",
+  "noLeads": "Sin leads",
+  "addLead": "Agregar lead",
+  "exportButton": "Exportar Leads",
+  
+  "stages": {
+    "nuevo": "Nuevo",
+    "contactado": "Contactado",
+    "visita_agendada": "Visita agendada",
+    "propuesta": "Propuesta",
+    "vendido": "Vendido",
+    "perdido": "Perdido"
+  },
+  
+  "filters": {
+    "fromDate": "Desde",
+    "toDate": "Hasta",
+    "project": "Proyecto",
+    "allProjects": "Todos los proyectos",
+    "stage": "Stage",
+    "allStages": "Todos los stages",
+    "assignedTo": "Agente asignado",
+    "allAgents": "Todos los agentes"
+  },
+  
+  "source": {
+    "web": "Web",
+    "referido": "Referido",
+    "visita": "Visita",
+    "llamada": "Llamada"
+  },
+  
+  "form": {
+    "name": "Nombre completo",
+    "namePlaceholder": "Ej: Juan Pérez",
+    "email": "Email",
+    "phone": "Teléfono",
+    "project": "Proyecto de interés",
+    "assignedTo": "Asesor asignado",
+    "stage": "Stage",
+    "source": "Fuente",
+    "notes": "Notas",
+    "notesPlaceholder": "Detalles adicionales sobre el lead...",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "update": "Actualizar"
+  }
+}

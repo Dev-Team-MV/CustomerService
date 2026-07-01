@@ -67,6 +67,16 @@
       "footer": {
     "copyright": "© {{year}} — MV Platform"
   },
+
+
+  "cancel": "Cancel",
+  "clearFilters": "Clear filters",
+  "all": "All",
+  "allProjects": "All projects",
+  "save": "Save",
+  "delete": "Delete",
+  "edit": "Edit",
+  "close": "Close",
   "public": "Public",
   "private": "Private",
   "noImage": "No image",

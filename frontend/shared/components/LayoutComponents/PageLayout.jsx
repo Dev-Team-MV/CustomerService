@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Box, Typography } from '@mui/material'
+import { Box, Typography, IconButton, Badge, Tooltip } from '@mui/material'
+import { Notifications as NotificationsIcon, AddCircle as AddCircleIcon } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import Sidebar from './Sidebar'
+import NotificationsDrawer from '@shared/components/LayoutComponents/NotificationsDrawer'
+import NotificationCreatorModal from '@shared/components/Notifications/NotificationCreatorModal'
+import useNotifications from '@shared/hooks/useNotifications'
+import { useAuth } from '../../context/AuthContext'
+import api from '../../services/api'
 import { useTranslation } from 'react-i18next'
 
 export default function PageLayout({
@@ -13,24 +19,57 @@ export default function PageLayout({
   children
 }) {
   const { t } = useTranslation('common')
+  const { user } = useAuth()
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [notificationCreatorOpen, setNotificationCreatorOpen] = useState(false)
+  const [users, setUsers] = useState([])
+
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
+
+  const {
+    notifications,
+    refresh,
+    markNotificationAsRead,
+    markAllNotificationsAsRead
+  } = useNotifications({ enabled: Boolean(user) })
+
+  // Cargar usuarios cuando se abre el modal de crear notificación
+  useEffect(() => {
+    if (notificationCreatorOpen && isAdmin && users.length === 0) {
+      api.get('/users')
+        .then(res => setUsers(res.data || []))
+        .catch(err => console.error('Error loading users:', err))
+    }
+  }, [notificationCreatorOpen, isAdmin, users.length])
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
 
+  useEffect(() => {
+    if (notificationsOpen && user) {
+      refresh()
+    }
+  }, [notificationsOpen, user, refresh])
+
   const formatTime = (d) => d.toLocaleTimeString('en-US', {
     hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
 
+  const handleNotificationCreated = (notification) => {
+    console.log('✅ Notificación creada:', notification)
+    refresh()
+  }
+
   return (
     <Box sx={{
-      height: '100vh',        // ← fijo, no minHeight
+      height: '100vh',
       display: 'flex',
       background: '#fafafa',
       position: 'relative',
-      overflow: 'hidden',     // ← el overflow lo maneja el Main
+      overflow: 'hidden',
     }}>
 
       {/* Grid bg */}
@@ -50,22 +89,22 @@ export default function PageLayout({
         <Sidebar stats={sidebarStats} />
       </Box>
 
-      {/* Main — único elemento que hace scroll */}
+      {/* Main */}
       <Box sx={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden',   // ← no scroll aquí, solo en el content
+        overflow: 'hidden',
         position: 'relative',
         zIndex: 1,
       }}>
 
-        {/* Topbar — sticky dentro del Main */}
+        {/* Topbar */}
         <motion.div
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
-          style={{ flexShrink: 0 }}   // ← nunca se encoge
+          style={{ flexShrink: 0 }}
         >
           <Box sx={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -84,19 +123,64 @@ export default function PageLayout({
                 {topbarLabel}
               </Typography>
             </Box>
-            <Typography sx={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.7rem', color: '#000000ff', letterSpacing: '2px'
-            }}>
-              {formatTime(currentTime)}
-            </Typography>
+
+            {/* ✅ NUEVO: Botón de notificaciones + reloj */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {/* Botón de crear notificación (solo admins) */}
+              {isAdmin && (
+                <Tooltip title="Crear Notificación" placement="bottom">
+                  <IconButton
+                    onClick={() => setNotificationCreatorOpen(true)}
+                    sx={{
+                      color: '#000',
+                      '&:hover': { bgcolor: 'rgba(0,0,0,0.05)' }
+                    }}
+                  >
+                    <AddCircleIcon sx={{ fontSize: 20 }} />
+                  </IconButton>
+                </Tooltip>
+              )}
+
+              {/* Botón de ver notificaciones */}
+              <Tooltip title="Notificaciones" placement="bottom">
+                <IconButton
+                  onClick={() => setNotificationsOpen(true)}
+                  sx={{
+                    color: '#000',
+                    '&:hover': { bgcolor: 'rgba(0,0,0,0.05)' }
+                  }}
+                >
+                  <Badge 
+                    badgeContent={notifications.filter(n => !n.read).length} 
+                    color="error"
+                    sx={{
+                      '& .MuiBadge-badge': {
+                        fontFamily: '"Courier New", monospace',
+                        fontSize: '0.65rem',
+                        fontWeight: 700
+                      }
+                    }}
+                  >
+                    <NotificationsIcon sx={{ fontSize: 20 }} />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+
+              {/* Reloj */}
+              <Typography sx={{
+                fontFamily: '"Courier New", monospace',
+                fontSize: '0.7rem', color: '#000000ff', letterSpacing: '2px'
+              }}>
+                {formatTime(currentTime)}
+              </Typography>
+            </Box>
           </Box>
         </motion.div>
 
         {/* Scrolleable content */}
         <Box sx={{
           flex: 1,
-          overflowY: 'auto',    // ← único scroll de la página
+          overflowY: 'auto',
           overflowX: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -152,14 +236,14 @@ export default function PageLayout({
             {children}
           </Box>
 
-          {/* Footer — al final del scroll */}
+          {/* Footer */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1 }}>
             <Box sx={{
               px: { xs: 3, md: 5 }, py: 2,
               borderTop: '1px solid #ececec',
               background: '#fff',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              mt: 'auto',       // ← siempre al fondo del contenido
+              mt: 'auto',
             }}>
               <Typography sx={{
                 fontFamily: '"Courier New", monospace',
@@ -179,6 +263,28 @@ export default function PageLayout({
           </motion.div>
         </Box>
       </Box>
+
+      {/* ✅ NUEVO: Drawer de notificaciones */}
+      <NotificationsDrawer
+        open={notificationsOpen}
+        onClose={() => setNotificationsOpen(false)}
+        notifications={notifications}
+        onMarkAsRead={markNotificationAsRead}
+        onMarkAllAsRead={markAllNotificationsAsRead}
+        onCreateNotification={() => setNotificationCreatorOpen(true)}
+        isAdmin={isAdmin}
+      />
+
+      {/* ✅ NUEVO: Modal de crear notificación */}
+      {isAdmin && (
+        <NotificationCreatorModal
+          open={notificationCreatorOpen}
+          onClose={() => setNotificationCreatorOpen(false)}
+          users={users}
+          defaultMode="general"
+          onCreated={handleNotificationCreated}
+        />
+      )}
     </Box>
   )
 }

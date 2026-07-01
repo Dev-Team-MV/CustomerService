@@ -65,6 +65,16 @@
     "passwordChangeError": "Error al cambiar contraseña. Inténtalo de nuevo.",
     "profileUpdated": "¡Perfil actualizado exitosamente!",
 
+
+  "cancel": "Cancelar",
+  "clearFilters": "Limpiar filtros",
+  "all": "Todos",
+  "allProjects": "Todos los proyectos",
+  "save": "Guardar",
+  "delete": "Eliminar",
+  "edit": "Editar",
+  "close": "Cerrar",
+
         
       "footer": {
         "copyright": "© {{year}} — MV Plataforma"

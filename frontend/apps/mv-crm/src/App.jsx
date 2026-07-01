@@ -13,8 +13,12 @@ import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
 import Analytics from './pages/Analytics'
 import Activities from './pages/Activities'
+import Payments from './pages/Payments'
 import { ProtectedRoute } from '@shared/components/ProtectedRoute'
 import MessageTemplates from './pages/MessageTemplates'
+import ClientDetail from './pages/ClientDetails'
+import Reports from './pages/Reports'
+import Agents from './pages/Agents'
 
 const theme = createTheme({
   palette: {
@@ -75,6 +79,30 @@ export default function App() {
               <MessageTemplates />
             </ProtectedRoute>
           } />
+          <Route path="/payments" element={
+            <ProtectedRoute requiredRole="admin">
+              <Payments />
+            </ProtectedRoute> 
+          }
+          />
+          <Route path="/reports" element={
+            <ProtectedRoute requiredRole="admin">
+              <Reports />
+            </ProtectedRoute> 
+          }
+          />
+          <Route path="/agents" element={
+            <ProtectedRoute requiredRole="admin">
+              <Agents />
+            </ProtectedRoute> 
+          }
+          />
+          <Route path="/clients/:id" element={
+            <ProtectedRoute requiredRole="admin">
+              <ClientDetail />
+            </ProtectedRoute> 
+          }
+          />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
