@@ -111,6 +111,10 @@ userSchema.methods.generateSetupToken = function () {
 
 userSchema.index({ role: 1 })
 userSchema.index({ 'projectMemberships.project': 1 })
+userSchema.index(
+  { firstName: 'text', lastName: 'text', email: 'text' },
+  { name: 'user_crm_text', weights: { firstName: 5, lastName: 5, email: 10 } }
+)
 
 const User = mongoose.model('User', userSchema)
 

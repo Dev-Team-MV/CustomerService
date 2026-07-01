@@ -16,6 +16,7 @@ import {
   getCrmNotifications,
   getCrmNotificationsCount
 } from '../controllers/crmNotificationController.js'
+import { searchCrm } from '../controllers/crmSearchController.js'
 import { protect, superadmin } from '../middleware/authMiddleware.js'
 import leadRoutes from './leadRoutes.js'
 import appointmentRoutes from './appointmentRoutes.js'
@@ -26,6 +27,33 @@ const router = express.Router()
 router.use('/leads', leadRoutes)
 router.use('/appointments', appointmentRoutes)
 router.use('/automations', automationRoutes)
+
+/**
+ * @swagger
+ * /api/crm/search:
+ *   get:
+ *     summary: Unified CRM search across clients, leads, activities and projects
+ *     tags: [CRM]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema: { type: string, minLength: 2 }
+ *       - in: query
+ *         name: types
+ *         schema: { type: string, example: 'clients,leads,activities,projects' }
+ *         description: Comma-separated entity types to search (default all)
+ *     responses:
+ *       200:
+ *         description: Results grouped by type (max 5 per category)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmSearchResult'
+ */
+router.get('/search', protect, superadmin, searchCrm)
 
 /**
  * @swagger

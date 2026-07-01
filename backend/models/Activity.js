@@ -167,6 +167,7 @@ const activitySchema = new mongoose.Schema(
 activitySchema.index({ boardType: 1, projectId: 1, columnId: 1, position: 1 })
 activitySchema.index({ boardType: 1, projectId: 1, dueDate: 1 })
 activitySchema.index({ relatedProjects: 1 })
+activitySchema.index({ title: 'text' }, { name: 'activity_crm_text' })
 
 const Activity = mongoose.model('Activity', activitySchema)
 

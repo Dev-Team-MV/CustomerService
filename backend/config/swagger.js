@@ -1348,6 +1348,32 @@ const options = {
             columns: { type: 'array', items: { type: 'string' } }
           }
         },
+        CrmSearchItem: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            label: { type: 'string' },
+            subtitle: { type: 'string' },
+            type: { type: 'string', enum: ['clients', 'leads', 'activities', 'projects'] },
+            url: { type: 'string', description: 'Frontend route path' }
+          }
+        },
+        CrmSearchResult: {
+          type: 'object',
+          properties: {
+            q: { type: 'string' },
+            total: { type: 'integer' },
+            results: {
+              type: 'object',
+              properties: {
+                clients: { type: 'array', items: { $ref: '#/components/schemas/CrmSearchItem' } },
+                leads: { type: 'array', items: { $ref: '#/components/schemas/CrmSearchItem' } },
+                activities: { type: 'array', items: { $ref: '#/components/schemas/CrmSearchItem' } },
+                projects: { type: 'array', items: { $ref: '#/components/schemas/CrmSearchItem' } }
+              }
+            }
+          }
+        },
         CrmAlert: {
           type: 'object',
           properties: {

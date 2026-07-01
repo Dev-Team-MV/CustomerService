@@ -67,6 +67,10 @@ const leadSchema = new mongoose.Schema(
 leadSchema.index({ projectId: 1, stage: 1 })
 leadSchema.index({ assignedTo: 1 })
 leadSchema.index({ createdAt: -1 })
+leadSchema.index(
+  { name: 'text', email: 'text', phone: 'text' },
+  { name: 'lead_crm_text', weights: { name: 10, email: 5, phone: 5 } }
+)
 
 const Lead = mongoose.model('Lead', leadSchema)
 
