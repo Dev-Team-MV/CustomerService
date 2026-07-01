@@ -36,6 +36,11 @@ const notificationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }],
+    projectId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
+      default: null
+    },
     payload: {
       type: mongoose.Schema.Types.Mixed
     }
@@ -49,6 +54,7 @@ notificationSchema.index({ createdAt: -1 })
 notificationSchema.index({ targetUserIds: 1, createdAt: -1 })
 notificationSchema.index({ targetRoles: 1, createdAt: -1 })
 notificationSchema.index({ audience: 1, createdAt: -1 })
+notificationSchema.index({ projectId: 1, createdAt: -1 })
 notificationSchema.index({ type: 1, 'payload.fingerprint': 1 })
 
 export { NOTIFICATION_TYPES, USER_ROLES }
