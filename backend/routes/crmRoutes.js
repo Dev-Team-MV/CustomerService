@@ -19,11 +19,13 @@ import {
 import { protect, superadmin } from '../middleware/authMiddleware.js'
 import leadRoutes from './leadRoutes.js'
 import appointmentRoutes from './appointmentRoutes.js'
+import automationRoutes from './automationRoutes.js'
 
 const router = express.Router()
 
 router.use('/leads', leadRoutes)
 router.use('/appointments', appointmentRoutes)
+router.use('/automations', automationRoutes)
 
 /**
  * @swagger

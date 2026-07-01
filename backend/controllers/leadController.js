@@ -5,6 +5,9 @@ import Project from '../models/Project.js'
 import { sendSMSWithValidation } from '../services/twilioService.js'
 import { resolveFrontendBaseUrl } from '../services/resolveFrontendBaseUrl.js'
 import { notifyUserCreatedByAdmin } from '../utils/notificationTriggers.js'
+import {
+  runAutomationEngineAsync
+} from '../services/automationEngine.js'
 
 const POPULATE_FIELDS = [
   { path: 'projectId', select: 'name slug title' },
@@ -128,8 +131,18 @@ export const updateLead = async (req, res) => {
     if (notes !== undefined) lead.notes = notes
     if (lostReason !== undefined) lead.lostReason = lostReason
 
+    const previousStage = lead.stage
     await lead.save()
     await lead.populate(POPULATE_FIELDS)
+
+    if (stage !== undefined && previousStage !== lead.stage) {
+      runAutomationEngineAsync('lead_stage_changed', {
+        lead: lead.toObject(),
+        previousStage,
+        actor: req.user
+      })
+    }
+
     res.json(lead)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -147,6 +160,7 @@ export const updateLeadStage = async (req, res) => {
     const lead = await Lead.findById(req.params.id)
     if (!lead) return res.status(404).json({ message: 'Lead not found' })
 
+    const previousStage = lead.stage
     lead.stage = stage
     if (stage === 'perdido' && lostReason !== undefined) {
       lead.lostReason = lostReason
@@ -154,6 +168,15 @@ export const updateLeadStage = async (req, res) => {
 
     await lead.save()
     await lead.populate(POPULATE_FIELDS)
+
+    if (previousStage !== lead.stage) {
+      runAutomationEngineAsync('lead_stage_changed', {
+        lead: lead.toObject(),
+        previousStage,
+        actor: req.user
+      })
+    }
+
     res.json(lead)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -230,10 +253,17 @@ export const convertLead = async (req, res) => {
       console.error('Error sending setup SMS for converted lead:', smsError.message)
     }
 
+    const previousStage = lead.stage
     lead.convertedToUserId = user._id
     lead.stage = 'vendido'
     await lead.save()
     await lead.populate(POPULATE_FIELDS)
+
+    runAutomationEngineAsync('lead_stage_changed', {
+      lead: lead.toObject(),
+      previousStage,
+      actor: req.user
+    })
 
     res.status(201).json({
       lead,

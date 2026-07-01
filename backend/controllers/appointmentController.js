@@ -3,6 +3,7 @@ import Lead from '../models/Lead.js'
 import User from '../models/User.js'
 import Project from '../models/Project.js'
 import { isValidObjectId } from '../utils/crmHelpers.js'
+import { runAutomationEngineAsync } from '../services/automationEngine.js'
 
 const POPULATE_FIELDS = [
   { path: 'projectId', select: 'name slug title' },
@@ -131,6 +132,12 @@ export const createAppointment = async (req, res) => {
     })
 
     await appointment.populate(POPULATE_FIELDS)
+
+    runAutomationEngineAsync('appointment_created', {
+      appointment: appointment.toObject(),
+      actor: req.user
+    })
+
     res.status(201).json(appointment)
   } catch (error) {
     res.status(500).json({ message: error.message })
