@@ -18,10 +18,12 @@ import {
 } from '../controllers/crmNotificationController.js'
 import { protect, superadmin } from '../middleware/authMiddleware.js'
 import leadRoutes from './leadRoutes.js'
+import appointmentRoutes from './appointmentRoutes.js'
 
 const router = express.Router()
 
 router.use('/leads', leadRoutes)
+router.use('/appointments', appointmentRoutes)
 
 /**
  * @swagger
