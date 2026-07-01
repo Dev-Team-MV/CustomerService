@@ -66,5 +66,11 @@
   "messageTemplates": "Plantillas de Mensajes",
   "settings": "Configuración",
   "quickStats": "Estadísticas rápidas",
-  "signOut": "Cerrar sesión"
+  "signOut": "Cerrar sesión",
+        
+        "agents":"Agentes",
+        "reports":"Reportes",
+        "payments":"Pagos"
+        
+        
 }

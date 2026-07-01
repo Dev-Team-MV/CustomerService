@@ -1,0 +1,67 @@
+{
+  "title": "Agentes",
+  "titleBold": "CRM",
+  "topbarLabel": "Equipo de ventas",
+  "subtitle": "Gestiona y monitorea el desempeño de tus agentes",
+  
+  "stats": {
+    "total": "Total",
+    "superadmins": "Super Admins",
+    "admins": "Admins",
+    "totalLeads": "Leads Totales",
+    "converted": "Convertidos"
+  },
+  
+  "table": {
+    "name": "Nombre",
+    "role": "Rol",
+    "phone": "Teléfono",
+    "leads": "Leads",
+    "activities": "Actividades",
+    "clients": "Clientes",
+    "actions": "Acciones"
+  },
+  
+  "empty": {
+    "title": "No hay agentes",
+    "description": "Aún no hay agentes registrados en el sistema"
+  },
+  
+  "metrics": {
+    "errorLoading": "Error al cargar métricas",
+    
+    "role": {
+      "superadmin": "Super Admin",
+      "admin": "Admin"
+    },
+    
+    "kpi": {
+      "totalLeads": "Total Leads",
+      "converted": "Convertidos",
+      "conversionRate": "{{rate}}% conversión",
+      "activities": "Actividades",
+      "completedThisMonth": "completadas este mes",
+      "clients": "Clientes",
+      "thisMonthOfTotal": "este mes (de {{total}} total)"
+    },
+    
+    "pipeline": {
+      "title": "Pipeline de Leads por Stage"
+    },
+    
+    "contactInfo": {
+      "title": "Información de Contacto"
+    }
+  },
+  
+  "leads": {
+    "stages": {
+      "nuevo": "Nuevo",
+      "contactado": "Contactado",
+      "visita_agendada": "Visita agendada",
+      "propuesta": "Propuesta",
+      "vendido": "Vendido",
+      "perdido": "Perdido"
+    }
+  }
+}

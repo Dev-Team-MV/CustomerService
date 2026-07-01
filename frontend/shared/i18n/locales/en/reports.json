@@ -1,0 +1,77 @@
+{
+  "title": "Reports",
+  "subtitle": "Data export center",
+  
+  "exportButton": "Export",
+  "exporting": "Exporting...",
+  "exportFormat": "Export {{format}}",
+  "requiredFieldsNote": "Required fields marked with *",
+  
+  "formatSelector": {
+    "title": "Export format",
+    "label": "Format:"
+  },
+  
+  "validation": {
+    "required": "{{field}} is required",
+    "requiredShort": "Required"
+  },
+  
+  "success": {
+    "exported": "✅ Successfully exported to {{format}}"
+  },
+  
+  "errors": {
+    "prefix": "❌ Error:",
+    "exportFailed": "Error exporting"
+  },
+  
+  "common": {
+    "allProjects": "All projects",
+    "all": "All"
+  },
+  
+  "clients": {
+    "title": "Clients Report",
+    "description": "Export the complete list of clients with their contact information",
+    "exportButton": "Export Clients",
+    "filters": {
+      "project": "Filter by project"
+    }
+  },
+  
+  "payments": {
+    "title": "Payments Report",
+    "description": "Export payments within a specific date range",
+    "exportButton": "Export Payments",
+    "datesRequired": "Start and end dates are required",
+    "filters": {
+      "dateFrom": "From",
+      "dateTo": "To",
+      "project": "Project"
+    }
+  },
+  
+  "leads": {
+    "title": "Leads Report",
+    "description": "Export leads filtered by stage, agent or project",
+    "exportButton": "Export Leads",
+    "filters": {
+      "fromDate": "From",
+      "toDate": "To",
+      "project": "Project",
+      "stage": "Stage",
+      "assignedTo": "Assigned agent",
+      "allStages": "All stages",
+      "allAgents": "All agents"
+    },
+    "stages": {
+      "nuevo": "New",
+      "contactado": "Contacted",
+      "visita_agendada": "Visit scheduled",
+      "propuesta": "Proposal",
+      "vendido": "Sold",
+      "perdido": "Lost"
+    }
+  }
+}

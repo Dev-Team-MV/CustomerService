@@ -1,0 +1,67 @@
+{
+  "title": "Agents",
+  "titleBold": "CRM",
+  "topbarLabel": "Sales Team",
+  "subtitle": "Manage and monitor your agents' performance",
+  
+  "stats": {
+    "total": "Total",
+    "superadmins": "Super Admins",
+    "admins": "Admins",
+    "totalLeads": "Total Leads",
+    "converted": "Converted"
+  },
+  
+  "table": {
+    "name": "Name",
+    "role": "Role",
+    "phone": "Phone",
+    "leads": "Leads",
+    "activities": "Activities",
+    "clients": "Clients",
+    "actions": "Actions"
+  },
+  
+  "empty": {
+    "title": "No agents",
+    "description": "There are no agents registered in the system yet"
+  },
+  
+  "metrics": {
+    "errorLoading": "Error loading metrics",
+    
+    "role": {
+      "superadmin": "Super Admin",
+      "admin": "Admin"
+    },
+    
+    "kpi": {
+      "totalLeads": "Total Leads",
+      "converted": "Converted",
+      "conversionRate": "{{rate}}% conversion",
+      "activities": "Activities",
+      "completedThisMonth": "completed this month",
+      "clients": "Clients",
+      "thisMonthOfTotal": "this month (of {{total}} total)"
+    },
+    
+    "pipeline": {
+      "title": "Leads Pipeline by Stage"
+    },
+    
+    "contactInfo": {
+      "title": "Contact Information"
+    }
+  },
+  
+  "leads": {
+    "stages": {
+      "nuevo": "New",
+      "contactado": "Contacted",
+      "visita_agendada": "Visit scheduled",
+      "propuesta": "Proposal",
+      "vendido": "Sold",
+      "perdido": "Lost"
+    }
+  }
+}

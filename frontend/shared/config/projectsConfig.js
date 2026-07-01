@@ -6,7 +6,8 @@ export const PROJECT_IDS = {
   PHASE2: '69b9b2188186434073c6b13d',
   ISQ: '69d3b025b5ad6754488df957',
   SHEPERD: '69dd47f2b3c3af43409aac48',
-  SIXTOWN_HOUSES: '69e623d8699902a57559b557'
+  SIXTOWN_HOUSES: '69e623d8699902a57559b557',
+  HTOWER: '6a31405f45d13efcf60c08d2'
 }
 
 // ── PROJECT SLUGS ──────────────────────────────────────────────
@@ -15,7 +16,8 @@ export const PROJECT_SLUGS = {
   PHASE2: 'lakewood-f2',
   ISQ: 'isq',
   SHEPERD: 'sheperd',
-  SIXTOWN_HOUSES: '6town-houses'
+  SIXTOWN_HOUSES: '6town-houses',
+  HTOWER: 'h-tower'
 }
 
 // ── RESOURCE TYPES ─────────────────────────────────────────────
@@ -33,7 +35,6 @@ export const projectConfigs = {
     name: 'Lakewood Phase 1',
     port: 5174,
     
-    // Brand colors
     colors: {
       primary: '#333F1F',
       secondary: '#8CA551',
@@ -42,7 +43,6 @@ export const projectConfigs = {
       gradient: 'linear-gradient(90deg, #333F1F, #8CA551, #333F1F)'
     },
     
-    // Feature flags
     features: {
       hasCommercialFloors: false,
       hasPropertyLots: true,
@@ -55,10 +55,8 @@ export const projectConfigs = {
       showResources: true
     },
     
-    // Resource configuration
     resourceType: RESOURCE_TYPES.PROPERTY,
     
-    // Routes
     routes: {
       dashboard: '/dashboard',
       properties: '/properties',
@@ -68,20 +66,17 @@ export const projectConfigs = {
       contracts: '/contracts'
     },
     
-    // Assets
     assets: {
       logoMain: '/images/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png',
       logoSecondary: '/images/logos/Logo_LakewoodOaks-05.png',
       backgroundImage: '/images/260721_001_0010_ISOMETRIA_3-1.png'
     },
     
-    // i18n
     i18n: {
       namespace: 'myProperty',
       resourceKey: 'property'
     },
     
-    // API endpoints
     endpoints: {
       list: '/properties?visible=true',
       details: (id) => `/properties/${id}?visible=true`,
@@ -106,7 +101,7 @@ export const projectConfigs = {
     },
     
     features: {
-      hasCommercialFloors: true,  // Primer piso comercial
+      hasCommercialFloors: true,
       hasPropertyLots: false,
       hasApartments: true,
       hasBuildings: true,
@@ -167,7 +162,7 @@ export const projectConfigs = {
     },
     
     features: {
-      hasCommercialFloors: false,  // Solo residencial
+      hasCommercialFloors: false,
       hasPropertyLots: false,
       hasApartments: true,
       hasBuildings: true,
@@ -214,134 +209,198 @@ export const projectConfigs = {
   },
 
   sheperd: {
-  id: PROJECT_IDS.SHEPERD,
-  slug: PROJECT_SLUGS.SHEPERD,
-  name: 'Sheperd',
-  port: 5177, // O el puerto que uses
-  
-  colors: {
-    primary: '#1a237e',
-    secondary: '#43a047',
-    accent: '#ff6f00',
-    border: '#e3f2fd',
-    gradient: 'linear-gradient(90deg, #1a237e, #43a047, #1a237e)'
+    id: PROJECT_IDS.SHEPERD,
+    slug: PROJECT_SLUGS.SHEPERD,
+    name: 'Sheperd',
+    port: 5177,
+    
+    colors: {
+      primary: '#1a237e',
+      secondary: '#43a047',
+      accent: '#ff6f00',
+      border: '#e3f2fd',
+      gradient: 'linear-gradient(90deg, #1a237e, #43a047, #1a237e)'
+    },
+    
+    features: {
+      hasCommercialFloors: false,
+      hasPropertyLots: false,
+      hasApartments: true,
+      hasBuildings: true,
+      showConstructionPhases: true,
+      showContracts: true,
+      showPayments: true,
+      showNews: true,
+      showResources: true,
+      showPolygonEditor: true,
+      hasMultiFloorAmenities: true
+    },
+    
+    resourceType: RESOURCE_TYPES.APARTMENT,
+    
+    routes: {
+      dashboard: '/dashboard',
+      buildings: '/buildings',
+      properties: '/properties',
+      myApartment: '/my-apartment',
+      news: '/news',
+      resources: '/resources',
+      contracts: '/contracts',
+      masterPlan: '/master-plan',
+      payloads: '/payloads'
+    },
+    
+    assets: {
+      logoMain: '/assets/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png',
+      logoSecondary: null,
+      backgroundImage: null
+    },
+    
+    i18n: {
+      namespace: 'myApartment',
+      resourceKey: 'apartment'
+    },
+    
+    endpoints: {
+      list: '/apartments?visible=true',
+      details: (id) => `/apartments/${id}?visible=true`,
+      phases: (id) => `/phases/apartment/${id}`,
+      payloads: (id) => `/payloads?apartment=${id}`,
+      financialSummary: '/user-apartments/financial-summary',
+      buildings: `/buildings?projectId=${PROJECT_IDS.SHEPERD}`,
+      apartmentModels: (buildingId) => `/apartment-models?buildingId=${buildingId}`
+    }
   },
-  
-  features: {
-    hasCommercialFloors: false,
-    hasPropertyLots: false,
-    hasApartments: true,
-    hasBuildings: true,
-    showConstructionPhases: true,
-    showContracts: true,
-    showPayments: true,
-    showNews: true,
-    showResources: true,
-    showPolygonEditor: true,
-    hasMultiFloorAmenities: true  // Característica única de Sheperd
-  },
-  
-  resourceType: RESOURCE_TYPES.APARTMENT,
-  
-  routes: {
-    dashboard: '/dashboard',
-    buildings: '/buildings',
-    properties: '/properties',
-    myApartment: '/my-apartment',
-    news: '/news',
-    resources: '/resources',
-    contracts: '/contracts',
-    masterPlan: '/master-plan',
-    payloads: '/payloads'
-  },
-  
-  assets: {
-    logoMain: '/assets/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png',
-    logoSecondary: null,
-    backgroundImage: null
-  },
-  
-  i18n: {
-    namespace: 'myApartment',
-    resourceKey: 'apartment'
-  },
-  
-  endpoints: {
-    list: '/apartments?visible=true',
-    details: (id) => `/apartments/${id}?visible=true`,
-    phases: (id) => `/phases/apartment/${id}`,
-    payloads: (id) => `/payloads?apartment=${id}`,
-    financialSummary: '/user-apartments/financial-summary',
-    buildings: `/buildings?projectId=${PROJECT_IDS.SHEPERD}`,
-    apartmentModels: (buildingId) => `/apartment-models?buildingId=${buildingId}`
-  }
-},
 
-'6town-houses': {
-  id: PROJECT_IDS.SIXTOWN_HOUSES,
-  slug: PROJECT_SLUGS.SIXTOWN_HOUSES,
-  name: '6 Town Houses',
-  port: 5178,
-  
-  colors: {
-    primary: '#2c3e50',
-    secondary: '#95a5a6',
-    accent: '#e74c3c',
-    border: '#ecf0f1',
-    gradient: 'linear-gradient(90deg, #2c3e50, #95a5a6, #2c3e50)'
+  '6town-houses': {
+    id: PROJECT_IDS.SIXTOWN_HOUSES,
+    slug: PROJECT_SLUGS.SIXTOWN_HOUSES,
+    name: '6 Town Houses',
+    port: 5178,
+    
+    colors: {
+      primary: '#2c3e50',
+      secondary: '#95a5a6',
+      accent: '#e74c3c',
+      border: '#ecf0f1',
+      gradient: 'linear-gradient(90deg, #2c3e50, #95a5a6, #2c3e50)'
+    },
+    
+    features: {
+      hasCommercialFloors: false,
+      hasPropertyLots: true,
+      hasApartments: false,
+      hasBuildings: false,
+      hasHouseLevels: true,
+      useCatalogConfig: true,
+      showConstructionPhases: true,
+      showContracts: true,
+      showPayments: true,
+      showNews: true,
+      showResources: true
+    },
+    
+    resourceType: RESOURCE_TYPES.PROPERTY,
+    catalogType: 'houses',
+    
+    routes: {
+      dashboard: '/dashboard',
+      properties: '/properties',
+      myHouse: '/my-house',
+      getQuote: '/get-quote',
+      news: '/news',
+      resources: '/resources',
+      contracts: '/contracts',
+      masterPlan: '/master-plan'
+    },
+    
+    assets: {
+      logoMain: '/assets/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png',
+      logoSecondary: null,
+      backgroundImage: null
+    },
+    
+    i18n: {
+      namespace: 'myHouse',
+      resourceKey: 'house'
+    },
+    
+    endpoints: {
+      list: '/properties?visible=true',
+      details: (id) => `/properties/${id}?visible=true`,
+      phases: (id) => `/phases/property/${id}`,
+      payloads: (id) => `/payloads?property=${id}`,
+      financialSummary: '/user-properties/financial-summary',
+      catalogConfig: `/projects/${PROJECT_IDS.SIXTOWN_HOUSES}/catalog-config`,
+      lots: `/lots?projectId=${PROJECT_IDS.SIXTOWN_HOUSES}`,
+      models: `/models?projectId=${PROJECT_IDS.SIXTOWN_HOUSES}`,
+      facades: `/facades?projectId=${PROJECT_IDS.SIXTOWN_HOUSES}`
+    }
   },
-  
-  features: {
-    hasCommercialFloors: false,
-    hasPropertyLots: true,
-    hasApartments: false,
-    hasBuildings: false,
-    hasHouseLevels: true, // 🆕 Feature único
-    useCatalogConfig: true, // 🆕 Usa catalog-config
-    showConstructionPhases: true,
-    showContracts: true,
-    showPayments: true,
-    showNews: true,
-    showResources: true
-  },
-  
-  resourceType: RESOURCE_TYPES.PROPERTY,
-  catalogType: 'houses', // 🆕
-  
-  routes: {
-    dashboard: '/dashboard',
-    properties: '/properties',
-    myHouse: '/my-house',
-    getQuote: '/get-quote', // 🆕 Ruta de cotización
-    news: '/news',
-    resources: '/resources',
-    contracts: '/contracts',
-    masterPlan: '/master-plan'
-  },
-  
-  assets: {
-    logoMain: '/assets/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png',
-    logoSecondary: null,
-    backgroundImage: null
-  },
-  
-  i18n: {
-    namespace: 'myHouse',
-    resourceKey: 'house'
-  },
-  
-  endpoints: {
-    list: '/properties?visible=true',
-    details: (id) => `/properties/${id}?visible=true`,
-    phases: (id) => `/phases/property/${id}`,
-    payloads: (id) => `/payloads?property=${id}`,
-    financialSummary: '/user-properties/financial-summary',
-    catalogConfig: `/projects/${PROJECT_IDS.SIXTOWN_HOUSES}/catalog-config`, // 🆕
-    lots: `/lots?projectId=${PROJECT_IDS.SIXTOWN_HOUSES}`,
-    models: `/models?projectId=${PROJECT_IDS.SIXTOWN_HOUSES}`,
-    facades: `/facades?projectId=${PROJECT_IDS.SIXTOWN_HOUSES}`
+
+  // ✅ CORREGIDO: Key ahora es 'h-tower' (con guión) para ser consistente
+  'h-tower': {
+    id: PROJECT_IDS.HTOWER,
+    slug: PROJECT_SLUGS.HTOWER,
+    name: 'hTower',
+    port: 5180,
+    
+    colors: {
+      primary: '#424242',
+      secondary: '#757575',
+      accent: '#E53935',
+      border: '#eeeeee',
+      gradient: 'linear-gradient(90deg, #424242, #757575, #424242)'
+    },
+    
+    features: {
+      hasCommercialFloors: true,
+      hasPropertyLots: false,
+      hasApartments: true,
+      hasBuildings: true,
+      showConstructionPhases: true,
+      showContracts: true,
+      showPayments: true,
+      showNews: true,
+      showResources: true,
+      showPolygonEditor: true
+    },
+    
+    resourceType: RESOURCE_TYPES.APARTMENT,
+    
+    routes: {
+      dashboard: '/dashboard',
+      buildings: '/buildings',
+      properties: '/properties',
+      myApartment: '/my-apartment',
+      news: '/news',
+      resources: '/resources',
+      contracts: '/contracts',
+      masterPlan: '/master-plan',
+      payloads: '/payloads'
+    },
+    
+    assets: {
+      logoMain: '/assets/logos/logo-hTower.png',
+      logoSecondary: null,
+      backgroundImage: null
+    },
+    
+    i18n: {
+      namespace: 'myApartment',
+      resourceKey: 'apartment'
+    },
+    
+    endpoints: {
+      list: '/apartments?visible=true',
+      details: (id) => `/apartments/${id}?visible=true`,
+      phases: (id) => `/phases/apartment/${id}`,
+      payloads: (id) => `/payloads?apartment=${id}`,
+      financialSummary: '/user-apartments/financial-summary',
+      buildings: `/buildings?projectId=${PROJECT_IDS.HTOWER}`,
+      apartmentModels: (buildingId) => `/apartment-models?buildingId=${buildingId}`
+    }
   }
-}
 }
 
 // ── HELPER FUNCTIONS ───────────────────────────────────────────
@@ -373,7 +432,7 @@ export const getProjectEndpoint = (projectSlug, endpointName, ...params) => {
   return typeof endpoint === 'function' ? endpoint(...params) : endpoint
 }
 
-// ── BUILDING CONFIGURATIONS ────────────────────────────────────
+// ── BUILDING CONFIGURATIONS (simplificado) ─────────────────────
 export const buildingConfigs = {
   'lakewood-f2': {
     defaultFloors: 4,
@@ -387,6 +446,14 @@ export const buildingConfigs = {
     defaultFloors: 6,
     hasCommercialFloor: false,
     commercialFloorNumber: null,
+    floorPlanRequired: true,
+    exteriorRendersRequired: true
+  },
+  
+  'h-tower': {
+    defaultFloors: 4,
+    hasCommercialFloor: true,
+    commercialFloorNumber: 1,
     floorPlanRequired: true,
     exteriorRendersRequired: true
   }

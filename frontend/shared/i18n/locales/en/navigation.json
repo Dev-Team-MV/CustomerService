@@ -28,7 +28,8 @@
         "uploadTracker": "Upload Tracker",
         "building": "Houses",
         "lots": "Lots",
-        "catalogConfig": "Catalog Config"
+        "catalogConfig": "Catalog Config",
+        "agents":"Agents"
     },
     "tooltips": {
         "openMenu": "Open menu",
@@ -66,5 +67,10 @@
   "messageTemplates": "Message Templates",
   "settings": "Settings",
   "quickStats": "Quick Stats",
-  "signOut": "Sign Out"
+  "signOut": "Sign Out",
+
+          "agents":"Agents",
+        "reports":"Reports",
+        "payments":"Payments"
+        
 }
