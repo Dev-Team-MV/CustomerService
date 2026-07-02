@@ -1,6 +1,8 @@
 import CrmNotificationRead, { CRM_NOTIFICATION_TYPES } from '../models/CrmNotificationRead.js'
 import { normalizeUserIds } from '../utils/notificationHelpers.js'
 
+export { CRM_NOTIFICATION_TYPES }
+
 export const buildCrmAlertKey = (alertType, entityId) => `${alertType}:${String(entityId)}`
 
 export const getCrmReadAlertKeysForUser = async (userId) => {
