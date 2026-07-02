@@ -1374,6 +1374,104 @@ const options = {
             }
           }
         },
+        AutomationCondition: {
+          type: 'object',
+          properties: {
+            stage: { type: 'string', description: 'Lead stage filter for matching rules' },
+            projectId: { type: 'string', description: 'Project ID scope filter' },
+            daysInactive: {
+              type: 'integer',
+              minimum: 1,
+              default: 7,
+              description: 'Used by inactivity_7days trigger'
+            }
+          }
+        },
+        AutomationActionPayload: {
+          type: 'object',
+          properties: {
+            templateId: { type: 'string', description: 'SMSTemplate ID' },
+            message: { type: 'string', description: 'Message body or fallback text' },
+            assignedTo: { type: 'string', description: 'User ID to assign/notify' },
+            title: { type: 'string', description: 'Optional title for activity or notification' },
+            description: { type: 'string', description: 'Optional description for activity or notification' }
+          }
+        },
+        Automation: {
+          type: 'object',
+          required: ['trigger', 'action'],
+          properties: {
+            _id: { type: 'string' },
+            name: { type: 'string' },
+            trigger: {
+              type: 'string',
+              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days']
+            },
+            condition: { $ref: '#/components/schemas/AutomationCondition' },
+            action: {
+              type: 'string',
+              enum: ['send_sms', 'create_activity', 'notify_agent']
+            },
+            actionPayload: { $ref: '#/components/schemas/AutomationActionPayload' },
+            isActive: { type: 'boolean', default: true },
+            createdBy: { type: 'string', description: 'User ID creator' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        AutomationCreateRequest: {
+          type: 'object',
+          required: ['trigger', 'action'],
+          properties: {
+            name: { type: 'string' },
+            trigger: {
+              type: 'string',
+              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days']
+            },
+            condition: { $ref: '#/components/schemas/AutomationCondition' },
+            action: {
+              type: 'string',
+              enum: ['send_sms', 'create_activity', 'notify_agent']
+            },
+            actionPayload: { $ref: '#/components/schemas/AutomationActionPayload' },
+            isActive: { type: 'boolean', default: true }
+          }
+        },
+        AutomationUpdateRequest: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            trigger: {
+              type: 'string',
+              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days']
+            },
+            condition: { $ref: '#/components/schemas/AutomationCondition' },
+            action: {
+              type: 'string',
+              enum: ['send_sms', 'create_activity', 'notify_agent']
+            },
+            actionPayload: { $ref: '#/components/schemas/AutomationActionPayload' },
+            isActive: { type: 'boolean' }
+          }
+        },
+        AutomationTestRequest: {
+          type: 'object',
+          properties: {
+            leadId: { type: 'string', description: 'Optional lead ID for lead triggers' },
+            payloadId: { type: 'string', description: 'Optional payload ID for payment_overdue trigger' },
+            appointmentId: { type: 'string', description: 'Optional appointment ID for appointment_created trigger' },
+            previousStage: { type: 'string', description: 'Optional previous stage for test context' }
+          }
+        },
+        AutomationTestResponse: {
+          type: 'object',
+          properties: {
+            automation: { $ref: '#/components/schemas/Automation' },
+            matched: { type: 'boolean' },
+            context: { type: 'object', additionalProperties: true },
+            result: { type: 'object', nullable: true, additionalProperties: true }
+          }
+        },
         CrmAlert: {
           type: 'object',
           properties: {
