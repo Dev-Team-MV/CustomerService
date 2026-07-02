@@ -1439,6 +1439,87 @@ const options = {
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
           }
+        },
+        Appointment: {
+          type: 'object',
+          required: ['type', 'projectId', 'assignedTo', 'title', 'startDate', 'endDate'],
+          properties: {
+            _id: { type: 'string', description: 'Appointment ID' },
+            type: {
+              type: 'string',
+              enum: ['visita', 'llamada', 'reunion', 'seguimiento'],
+              description: 'Tipo de cita o actividad'
+            },
+            leadId: { type: 'string', description: 'Lead ID (opcional)' },
+            clientId: { type: 'string', description: 'Client/User ID (opcional)' },
+            projectId: { type: 'string', description: 'Project ID' },
+            assignedTo: { type: 'string', description: 'User ID del asesor responsable' },
+            title: { type: 'string', description: 'Título de la cita' },
+            notes: { type: 'string', description: 'Notas adicionales' },
+            startDate: { type: 'string', format: 'date-time' },
+            endDate: { type: 'string', format: 'date-time' },
+            status: {
+              type: 'string',
+              enum: ['pendiente', 'confirmada', 'completada', 'cancelada'],
+              default: 'pendiente'
+            },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        AppointmentCreateRequest: {
+          type: 'object',
+          required: ['type', 'projectId', 'assignedTo', 'title', 'startDate', 'endDate'],
+          properties: {
+            type: {
+              type: 'string',
+              enum: ['visita', 'llamada', 'reunion', 'seguimiento']
+            },
+            leadId: { type: 'string' },
+            clientId: { type: 'string' },
+            projectId: { type: 'string' },
+            assignedTo: { type: 'string' },
+            title: { type: 'string' },
+            notes: { type: 'string' },
+            startDate: { type: 'string', format: 'date-time' },
+            endDate: { type: 'string', format: 'date-time' },
+            status: {
+              type: 'string',
+              enum: ['pendiente', 'confirmada', 'completada', 'cancelada'],
+              default: 'pendiente'
+            }
+          }
+        },
+        AppointmentUpdateRequest: {
+          type: 'object',
+          properties: {
+            type: {
+              type: 'string',
+              enum: ['visita', 'llamada', 'reunion', 'seguimiento']
+            },
+            leadId: { type: 'string' },
+            clientId: { type: 'string' },
+            projectId: { type: 'string' },
+            assignedTo: { type: 'string' },
+            title: { type: 'string' },
+            notes: { type: 'string' },
+            startDate: { type: 'string', format: 'date-time' },
+            endDate: { type: 'string', format: 'date-time' },
+            status: {
+              type: 'string',
+              enum: ['pendiente', 'confirmada', 'completada', 'cancelada']
+            }
+          }
+        },
+        AppointmentStatusUpdateRequest: {
+          type: 'object',
+          required: ['status'],
+          properties: {
+            status: {
+              type: 'string',
+              enum: ['pendiente', 'confirmada', 'completada', 'cancelada']
+            }
+          }
         }
       }
     }
