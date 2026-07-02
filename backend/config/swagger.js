@@ -1077,6 +1077,9 @@ const options = {
             notes: { type: 'string' },
             lostReason: { type: 'string' },
             convertedToUserId: { type: 'object', description: 'Populated User ref when converted' },
+            score: { type: 'number', description: 'Lead priority score (higher = hotter)' },
+            stageEnteredAt: { type: 'string', format: 'date-time' },
+            smsResponded: { type: 'boolean', description: 'Whether the lead replied to an SMS' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
           }
@@ -1616,6 +1619,142 @@ const options = {
             status: {
               type: 'string',
               enum: ['pendiente', 'confirmada', 'completada', 'cancelada']
+            }
+          }
+        },
+        CampaignAudience: {
+          type: 'object',
+          required: ['type'],
+          properties: {
+            type: { type: 'string', enum: ['clients', 'leads'] },
+            projectId: { type: 'string', description: 'Filter recipients by project' },
+            stage: {
+              type: 'string',
+              enum: ['nuevo', 'contactado', 'visita_agendada', 'propuesta', 'vendido', 'perdido'],
+              description: 'Lead pipeline stage (leads audience only)'
+            },
+            filters: {
+              type: 'object',
+              description: 'Optional filters e.g. assignedTo, source',
+              additionalProperties: true
+            }
+          }
+        },
+        CampaignStats: {
+          type: 'object',
+          properties: {
+            total: { type: 'integer' },
+            sent: { type: 'integer' },
+            failed: { type: 'integer' }
+          }
+        },
+        CampaignRecipient: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            userId: { type: 'string' },
+            leadId: { type: 'string' },
+            phone: { type: 'string' },
+            status: { type: 'string', enum: ['pending', 'sent', 'failed'] },
+            sentAt: { type: 'string', format: 'date-time' },
+            error: { type: 'string' }
+          }
+        },
+        Campaign: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            name: { type: 'string' },
+            templateId: { type: 'object', description: 'Populated SMSTemplate ref' },
+            audience: { $ref: '#/components/schemas/CampaignAudience' },
+            status: {
+              type: 'string',
+              enum: ['borrador', 'programada', 'enviando', 'completada', 'fallida']
+            },
+            scheduledAt: { type: 'string', format: 'date-time' },
+            sentAt: { type: 'string', format: 'date-time' },
+            stats: { $ref: '#/components/schemas/CampaignStats' },
+            recipients: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/CampaignRecipient' }
+            },
+            createdBy: { type: 'object', description: 'Populated User ref' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        CampaignCreateRequest: {
+          type: 'object',
+          required: ['name', 'templateId', 'audience'],
+          properties: {
+            name: { type: 'string', example: 'Promo visitas marzo' },
+            templateId: { type: 'string' },
+            audience: { $ref: '#/components/schemas/CampaignAudience' },
+            status: {
+              type: 'string',
+              enum: ['borrador', 'programada', 'enviando', 'completada', 'fallida']
+            },
+            scheduledAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        CampaignsList: {
+          type: 'object',
+          properties: {
+            campaigns: { type: 'array', items: { $ref: '#/components/schemas/Campaign' } },
+            total: { type: 'integer' }
+          }
+        },
+        CampaignPreviewRecipient: {
+          type: 'object',
+          properties: {
+            userId: { type: 'string' },
+            leadId: { type: 'string' },
+            phone: { type: 'string' },
+            label: { type: 'string' },
+            previewMessage: { type: 'string' }
+          }
+        },
+        CampaignPreviewResponse: {
+          type: 'object',
+          properties: {
+            total: { type: 'integer' },
+            recipients: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/CampaignPreviewRecipient' }
+            }
+          }
+        },
+        CampaignSendResponse: {
+          type: 'object',
+          properties: {
+            message: { type: 'string', example: 'Campaign send started' },
+            campaignId: { type: 'string' },
+            status: { type: 'string', enum: ['enviando'] },
+            stats: { $ref: '#/components/schemas/CampaignStats' }
+          }
+        },
+        CampaignStatsResponse: {
+          type: 'object',
+          properties: {
+            campaignId: { type: 'string' },
+            status: {
+              type: 'string',
+              enum: ['borrador', 'programada', 'enviando', 'completada', 'fallida']
+            },
+            stats: { $ref: '#/components/schemas/CampaignStats' },
+            pending: { type: 'integer' },
+            progressPercent: { type: 'number', example: 42.5 },
+            sentAt: { type: 'string', format: 'date-time' },
+            scheduledAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        CrmLeadSmsRespondedRequest: {
+          type: 'object',
+          required: ['smsResponded'],
+          properties: {
+            smsResponded: {
+              type: 'boolean',
+              description: 'Set true when the lead replied to an outbound SMS'
             }
           }
         }

@@ -37,6 +37,7 @@ import activityRoutes from './routes/activityRoutes.js'
 import reportRoutes from './routes/reportRoutes.js'
 import notificationRoutes from './routes/notificationRoutes.js'
 import { startBackupScheduler } from './services/backupScheduler.js'
+import { startLeadScoringScheduler } from './services/leadScoringScheduler.js'
 import { initNotificationWebSocket } from './services/notificationWebSocket.js'
 import { requestTimingMiddleware } from './middleware/requestTimingMiddleware.js'
 
@@ -129,6 +130,7 @@ app.use('/api/notifications', notificationRoutes)
 
 // Start automatic GCS backup scheduler (if enabled)
 startBackupScheduler()
+startLeadScoringScheduler()
 
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))

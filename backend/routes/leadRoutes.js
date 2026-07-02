@@ -4,6 +4,7 @@ import {
   createLead,
   updateLead,
   updateLeadStage,
+  markLeadSmsResponded,
   deleteLead,
   convertLead
 } from '../controllers/leadController.js'
@@ -43,6 +44,12 @@ router.use(protect, superadmin)
  *         name: toDate
  *         schema: { type: string, format: date-time }
  *         description: Filter leads created on or before this date
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [score]
+ *         description: Sort by lead score (descending) for priority queue
  *     responses:
  *       200:
  *         description: List of leads
@@ -129,6 +136,41 @@ router.post('/', createLead)
  *         description: Lead not found
  */
 router.put('/:id/stage', updateLeadStage)
+
+/**
+ * @swagger
+ * /api/crm/leads/{id}/sms-responded:
+ *   put:
+ *     summary: Mark whether a lead responded to SMS (recalculates score)
+ *     tags: [CRM Leads]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CrmLeadSmsRespondedRequest'
+ *           example:
+ *             smsResponded: true
+ *     responses:
+ *       200:
+ *         description: Lead updated with new score
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Lead'
+ *       400:
+ *         description: smsResponded must be a boolean
+ *       404:
+ *         description: Lead not found
+ */
+router.put('/:id/sms-responded', markLeadSmsResponded)
 
 /**
  * @swagger

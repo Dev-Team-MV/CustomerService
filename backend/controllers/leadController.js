@@ -8,6 +8,10 @@ import { notifyUserCreatedByAdmin } from '../utils/notificationTriggers.js'
 import {
   runAutomationEngineAsync
 } from '../services/automationEngine.js'
+import {
+  touchLeadStage,
+  updateLeadScore
+} from '../services/leadScoringService.js'
 
 const POPULATE_FIELDS = [
   { path: 'projectId', select: 'name slug title' },
@@ -41,9 +45,14 @@ function buildLeadFilter(query) {
 
 export const getLeads = async (req, res) => {
   try {
+    const sort =
+      req.query.sortBy === 'score'
+        ? { score: -1, updatedAt: -1 }
+        : { updatedAt: -1 }
+
     const leads = await Lead.find(buildLeadFilter(req.query))
       .populate(POPULATE_FIELDS)
-      .sort({ updatedAt: -1 })
+      .sort(sort)
       .lean()
 
     res.json({ leads, total: leads.length })
@@ -86,9 +95,11 @@ export const createLead = async (req, res) => {
       projectId: projectId || undefined,
       stage: stage || 'nuevo',
       assignedTo: assignedTo || undefined,
-      notes
+      notes,
+      stageEnteredAt: new Date()
     })
 
+    await updateLeadScore(lead)
     await lead.populate(POPULATE_FIELDS)
     res.status(201).json(lead)
   } catch (error) {
@@ -121,18 +132,22 @@ export const updateLead = async (req, res) => {
       if (!userExists) return res.status(404).json({ message: 'Assigned user not found' })
     }
 
+    const previousStage = lead.stage
+
     if (name !== undefined) lead.name = name.trim()
     if (phone !== undefined) lead.phone = phone
     if (email !== undefined) lead.email = email
     if (source !== undefined) lead.source = source
     if (projectId !== undefined) lead.projectId = projectId || undefined
-    if (stage !== undefined) lead.stage = stage
+    if (stage !== undefined && stage !== lead.stage) {
+      lead.stage = stage
+      touchLeadStage(lead)
+    }
     if (assignedTo !== undefined) lead.assignedTo = assignedTo || undefined
     if (notes !== undefined) lead.notes = notes
     if (lostReason !== undefined) lead.lostReason = lostReason
 
-    const previousStage = lead.stage
-    await lead.save()
+    await updateLeadScore(lead)
     await lead.populate(POPULATE_FIELDS)
 
     if (stage !== undefined && previousStage !== lead.stage) {
@@ -142,6 +157,27 @@ export const updateLead = async (req, res) => {
         actor: req.user
       })
     }
+
+    res.json(lead)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const markLeadSmsResponded = async (req, res) => {
+  try {
+    const { smsResponded } = req.body
+
+    if (typeof smsResponded !== 'boolean') {
+      return res.status(400).json({ message: 'smsResponded must be a boolean' })
+    }
+
+    const lead = await Lead.findById(req.params.id)
+    if (!lead) return res.status(404).json({ message: 'Lead not found' })
+
+    lead.smsResponded = smsResponded
+    await updateLeadScore(lead)
+    await lead.populate(POPULATE_FIELDS)
 
     res.json(lead)
   } catch (error) {
@@ -162,11 +198,14 @@ export const updateLeadStage = async (req, res) => {
 
     const previousStage = lead.stage
     lead.stage = stage
+    if (previousStage !== stage) {
+      touchLeadStage(lead)
+    }
     if (stage === 'perdido' && lostReason !== undefined) {
       lead.lostReason = lostReason
     }
 
-    await lead.save()
+    await updateLeadScore(lead)
     await lead.populate(POPULATE_FIELDS)
 
     if (previousStage !== lead.stage) {
@@ -256,7 +295,10 @@ export const convertLead = async (req, res) => {
     const previousStage = lead.stage
     lead.convertedToUserId = user._id
     lead.stage = 'vendido'
-    await lead.save()
+    if (previousStage !== 'vendido') {
+      touchLeadStage(lead)
+    }
+    await updateLeadScore(lead)
     await lead.populate(POPULATE_FIELDS)
 
     runAutomationEngineAsync('lead_stage_changed', {
