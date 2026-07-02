@@ -272,6 +272,43 @@ router.post('/notifications/:alertType/:entityId/read', protect, superadmin, mar
 
 /**
  * @swagger
+ * /api/crm/notifications/{alertType}/{entityId}/read/raw:
+ *   post:
+ *     summary: Mark a computed CRM alert as read using a raw entityId without prefix
+ *     tags: [CRM Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: alertType
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [overdue_payment, upcoming_activity, stale_lead]
+ *       - in: path
+ *         name: entityId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Alert marked as read
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: OK
+ *                 message:
+ *                   type: string
+ *                   example: CRM notification marked as read
+ */
+router.post('/notifications/:alertType/:entityId/read/raw', protect, superadmin, markCrmNotificationAsRead)
+
+/**
+ * @swagger
  * /api/crm/notifications:
  *   get:
  *     summary: Active CRM alerts computed on-demand (not persisted)
