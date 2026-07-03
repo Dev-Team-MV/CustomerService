@@ -126,17 +126,11 @@ async function ensureBoardColumns(scope) {
 }
 
 async function createAutomationActivity({ projectId, assignedTo, title, description, contact, createdBy }) {
-  const scope =
-    projectId
-      ? { boardType: 'project', projectId }
-      : { boardType: 'global' }
+  const scope = { boardType: 'global' }
 
   const columns = await ensureBoardColumns(scope)
   const todoColumn = columns.find((c) => c.key === 'todo') || columns[0]
-  const columnFilter =
-    scope.boardType === 'project'
-      ? { boardType: 'project', projectId: scope.projectId, columnId: todoColumn._id }
-      : { boardType: 'global', columnId: todoColumn._id }
+  const columnFilter = { boardType: 'global', columnId: todoColumn._id }
 
   const position = await Activity.countDocuments(columnFilter)
 
@@ -150,7 +144,8 @@ async function createAutomationActivity({ projectId, assignedTo, title, descript
     assignedTo,
     contact: contact || {},
     createdBy: createdBy || assignedTo,
-    tags: ['automation']
+    tags: ['automation'],
+    relatedProjects: projectId ? [projectId] : []
   })
 }
 
