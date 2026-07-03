@@ -161,12 +161,16 @@ function buildTemplateVariables(context) {
   const nameParts = clientName.split(/\s+/).filter(Boolean)
   const firstName = client?.firstName || lead?.firstName || nameParts[0] || ''
   const lastName = client?.lastName || lead?.lastName || nameParts.slice(1).join(' ') || ''
+  const phoneNumber = client?.phoneNumber || lead?.phone || payload?.phoneNumber || ''
+  const email = client?.email || lead?.email || payload?.email || ''
 
   return {
     firstName,
     lastName,
     firstname: firstName,
     lastname: lastName,
+    phoneNumber,
+    email,
     leadName: lead?.name || '',
     leadStage: lead?.stage || '',
     leadPhone: lead?.phone || '',
