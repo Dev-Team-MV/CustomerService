@@ -154,17 +154,26 @@ function buildTemplateVariables(context) {
   const appointment = context.appointment
   const payload = context.enrichedPayload || context.payload
   const client = context.client
+  const clientName = client
+    ? [client.firstName, client.lastName].filter(Boolean).join(' ')
+    : payload?.clientName || lead?.name || ''
+
+  const nameParts = clientName.split(/\s+/).filter(Boolean)
+  const firstName = client?.firstName || lead?.firstName || nameParts[0] || ''
+  const lastName = client?.lastName || lead?.lastName || nameParts.slice(1).join(' ') || ''
 
   return {
+    firstName,
+    lastName,
+    firstname: firstName,
+    lastname: lastName,
     leadName: lead?.name || '',
     leadStage: lead?.stage || '',
     leadPhone: lead?.phone || '',
     leadEmail: lead?.email || '',
     appointmentTitle: appointment?.title || '',
     appointmentType: appointment?.type || '',
-    clientName: client
-      ? [client.firstName, client.lastName].filter(Boolean).join(' ')
-      : payload?.clientName || lead?.name || '',
+    clientName,
     amount: payload?.amount ?? '',
     unitLabel: payload?.unitLabel || '',
     projectName: payload?.projectName || ''
