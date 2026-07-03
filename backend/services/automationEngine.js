@@ -5,7 +5,7 @@ import Lead from '../models/Lead.js'
 import SMSTemplate from '../models/SMSTemplate.js'
 import { sendSMSWithValidation } from './twilioService.js'
 import { notifyUser, existsByFingerprint } from './notificationService.js'
-import { enrichPayloadsForCrm } from '../utils/crmHelpers.js'
+import { enrichPayloadsForCrm, resolveClientFromPayload } from '../utils/crmHelpers.js'
 
 const CLOSED_LEAD_STAGES = ['vendido', 'perdido']
 
@@ -137,8 +137,9 @@ function buildTemplateVariables(context) {
     appointmentType: appointment?.type || '',
     clientName: client
       ? [client.firstName, client.lastName].filter(Boolean).join(' ')
-      : lead?.name || '',
+      : payload?.clientName || lead?.name || '',
     amount: payload?.amount ?? '',
+    unitLabel: payload?.unitLabel || '',
     projectName: payload?.projectName || ''
   }
 }
@@ -185,7 +186,10 @@ export async function executeAutomation(automation, context, options = {}) {
     case 'send_sms': {
       const phone = resolvePhone(context)
       if (!phone) {
-        return { automationId: automation._id, success: false, error: 'No phone number in context' }
+        const error = context.client
+          ? 'Client has no phone number on file'
+          : 'No phone number in context'
+        return { automationId: automation._id, success: false, error }
       }
 
       let message = actionPayload.message || ''
@@ -343,10 +347,14 @@ export function isPayloadOverdue(payload) {
 }
 
 export async function buildPaymentOverdueContext(payload, actor) {
-  const enriched = await enrichPayloadsForCrm([payload])
+  const [enriched, client] = await Promise.all([
+    enrichPayloadsForCrm([payload]),
+    resolveClientFromPayload(payload)
+  ])
   return {
     payload,
     enrichedPayload: enriched[0],
+    client,
     actor
   }
 }

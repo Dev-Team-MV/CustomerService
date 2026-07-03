@@ -274,6 +274,34 @@ export async function enrichPayloadsForCrm(payloads) {
   })
 }
 
+/**
+ * Resuelve el cliente deudor de un payload (primer owner con teléfono).
+ */
+export async function resolveClientFromPayload(payload) {
+  const doc = payload?.toObject ? payload.toObject() : payload
+  if (!doc) return null
+
+  const userSelect = 'firstName lastName email phoneNumber'
+
+  if (doc.property) {
+    const property = await Property.findById(doc.property)
+      .populate('users', userSelect)
+      .lean()
+    const users = property?.users || []
+    return users.find((u) => u.phoneNumber) || users[0] || null
+  }
+
+  if (doc.apartment) {
+    const apartment = await Apartment.findById(doc.apartment)
+      .populate('users', userSelect)
+      .lean()
+    const users = apartment?.users || []
+    return users.find((u) => u.phoneNumber) || users[0] || null
+  }
+
+  return null
+}
+
 export async function assertClientExists(userId) {
   if (!isValidObjectId(userId)) return null
   return User.findOne({ _id: userId, isActive: { $ne: false } })
