@@ -5,7 +5,7 @@ import Lead from '../models/Lead.js'
 import SMSTemplate from '../models/SMSTemplate.js'
 import { sendSMSWithValidation } from './twilioService.js'
 import { notifyUser, existsByFingerprint } from './notificationService.js'
-import { enrichPayloadsForCrm, resolveClientFromPayload } from '../utils/crmHelpers.js'
+import { enrichPayloadsForCrm, resolveClientFromPayload, findOverduePayloadSample } from '../utils/crmHelpers.js'
 
 const CLOSED_LEAD_STAGES = ['vendido', 'perdido']
 
@@ -72,6 +72,38 @@ export function matchesAutomationCondition(automation, context) {
   }
 
   return true
+}
+
+export function explainMatchFailure(automation, context) {
+  const condition = automation.condition || {}
+
+  if (condition.projectId) {
+    const ctxProjectId = projectIdFromContext(context)
+    if (!ctxProjectId) {
+      return 'El contexto de prueba no tiene projectId (elige un payload/lead/cita del proyecto correcto)'
+    }
+    if (ctxProjectId !== String(condition.projectId)) {
+      return `Proyecto no coincide: la regla es para ${condition.projectId}, el contexto de prueba es ${ctxProjectId}`
+    }
+  }
+
+  if (condition.stage && context.lead && context.lead.stage !== condition.stage) {
+    return `Stage no coincide: la regla espera "${condition.stage}", el lead está en "${context.lead.stage}"`
+  }
+
+  if (automation.trigger === 'inactivity_7days' && context.lead) {
+    const days = condition.daysInactive || 7
+    const threshold = startOfDay(new Date())
+    threshold.setDate(threshold.getDate() - days)
+    if (new Date(context.lead.updatedAt) >= threshold) {
+      return `El lead no lleva ${days} días inactivo (última actualización: ${context.lead.updatedAt})`
+    }
+    if (CLOSED_LEAD_STAGES.includes(context.lead.stage)) {
+      return `El lead está en stage cerrado: ${context.lead.stage}`
+    }
+  }
+
+  return 'No se cumplieron las condiciones de la regla'
 }
 
 async function ensureBoardColumns(scope) {
@@ -151,6 +183,8 @@ function resolveNotifyUserId(automation, context) {
   if (context.appointment?.assignedTo) {
     return context.appointment.assignedTo._id || context.appointment.assignedTo
   }
+  if (automation.createdBy) return automation.createdBy
+  if (context.actor?._id) return context.actor._id
   return null
 }
 
@@ -360,35 +394,62 @@ export async function buildPaymentOverdueContext(payload, actor) {
 }
 
 export async function buildTestContext(automation, sample = {}) {
+  const projectId = automation.condition?.projectId
+
   switch (automation.trigger) {
     case 'lead_stage_changed':
     case 'inactivity_7days': {
+      const filter = {}
+      if (projectId && !sample.leadId) filter.projectId = projectId
+      if (automation.condition?.stage && !sample.leadId) filter.stage = automation.condition.stage
+
       const lead = sample.leadId
         ? await Lead.findById(sample.leadId).lean()
-        : await Lead.findOne().sort({ updatedAt: -1 }).lean()
-      if (!lead) throw new Error('No lead available for test context')
+        : await Lead.findOne(filter).sort({ updatedAt: -1 }).lean()
+      if (!lead) {
+        throw new Error(
+          projectId
+            ? `No hay leads de prueba para el proyecto ${projectId}`
+            : 'No hay leads disponibles para el contexto de prueba'
+        )
+      }
       return { lead, previousStage: sample.previousStage || 'nuevo', actor: sample.actor }
     }
     case 'payment_overdue': {
-      const Payload = (await import('../models/Payload.js')).default
-      const payload = sample.payloadId
-        ? await Payload.findById(sample.payloadId).lean()
-        : await Payload.findOne({ status: 'pending' }).sort({ date: 1 }).lean()
-      if (!payload) throw new Error('No payload available for test context')
+      const payload = await findOverduePayloadSample({
+        payloadId: sample.payloadId,
+        projectId: projectId && !sample.payloadId ? projectId : undefined
+      })
+      if (!payload) {
+        throw new Error(
+          projectId
+            ? `No hay pagos vencidos pendientes en el proyecto ${projectId}`
+            : 'No hay pagos vencidos pendientes para el contexto de prueba'
+        )
+      }
       return buildPaymentOverdueContext(payload, sample.actor)
     }
     case 'appointment_created': {
       const Appointment = (await import('../models/Appointment.js')).default
+      const filter = projectId && !sample.appointmentId ? { projectId } : {}
+
       const appointment = sample.appointmentId
         ? await Appointment.findById(sample.appointmentId)
             .populate('leadId', 'name phone email')
             .populate('clientId', 'firstName lastName phoneNumber email')
             .lean()
-        : await Appointment.findOne().sort({ createdAt: -1 })
+        : await Appointment.findOne(filter)
+            .sort({ createdAt: -1 })
             .populate('leadId', 'name phone email')
             .populate('clientId', 'firstName lastName phoneNumber email')
             .lean()
-      if (!appointment) throw new Error('No appointment available for test context')
+      if (!appointment) {
+        throw new Error(
+          projectId
+            ? `No hay citas de prueba en el proyecto ${projectId}`
+            : 'No hay citas disponibles para el contexto de prueba'
+        )
+      }
       return { appointment, actor: sample.actor }
     }
     default:
@@ -406,11 +467,25 @@ export async function testAutomationById(automationId, sample = {}) {
     return {
       automation,
       matched: false,
+      matchFailureReason: explainMatchFailure(automation, context),
       context,
       result: null
     }
   }
 
-  const result = await executeAutomation(automation, context)
-  return { automation, matched: true, context, result }
+  try {
+    const result = await executeAutomation(automation, context)
+    return { automation, matched: true, context, result }
+  } catch (error) {
+    return {
+      automation,
+      matched: true,
+      context,
+      result: {
+        automationId: automation._id,
+        success: false,
+        error: error.message
+      }
+    }
+  }
 }

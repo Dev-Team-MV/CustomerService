@@ -277,6 +277,24 @@ export async function enrichPayloadsForCrm(payloads) {
 /**
  * Resuelve el cliente deudor de un payload (primer owner con teléfono).
  */
+export async function findOverduePayloadSample({ payloadId, projectId } = {}) {
+  if (payloadId) {
+    return Payload.findById(payloadId).lean()
+  }
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const baseFilter = { status: 'pending', date: { $lt: today } }
+
+  if (projectId) {
+    const scope = await resolvePayloadScopeByProject(projectId)
+    if (scope._id === null) return null
+    return Payload.findOne({ ...baseFilter, ...scope }).sort({ date: 1 }).lean()
+  }
+
+  return Payload.findOne(baseFilter).sort({ date: 1 }).lean()
+}
+
 export async function resolveClientFromPayload(payload) {
   const doc = payload?.toObject ? payload.toObject() : payload
   if (!doc) return null
