@@ -1,0 +1,77 @@
+{
+  "title": "Reportes",
+  "subtitle": "Centro de exportación de datos",
+  
+  "exportButton": "Exportar",
+  "exporting": "Exportando...",
+  "exportFormat": "Exportar {{format}}",
+  "requiredFieldsNote": "Campos obligatorios marcados con *",
+  
+  "formatSelector": {
+    "title": "Formato de exportación",
+    "label": "Formato:"
+  },
+  
+  "validation": {
+    "required": "{{field}} es obligatorio",
+    "requiredShort": "Requerido"
+  },
+  
+  "success": {
+    "exported": "✅ Exportado a {{format}} exitosamente"
+  },
+  
+  "errors": {
+    "prefix": "❌ Error:",
+    "exportFailed": "Error al exportar"
+  },
+  
+  "common": {
+    "allProjects": "Todos los proyectos",
+    "all": "Todos"
+  },
+  
+  "clients": {
+    "title": "Reporte de Clientes",
+    "description": "Exporta la lista completa de clientes con sus datos de contacto",
+    "exportButton": "Exportar Clientes",
+    "filters": {
+      "project": "Filtrar por proyecto"
+    }
+  },
+  
+  "payments": {
+    "title": "Reporte de Pagos",
+    "description": "Exporta pagos dentro de un rango de fechas específico",
+    "exportButton": "Exportar Pagos",
+    "datesRequired": "Las fechas de inicio y fin son obligatorias",
+    "filters": {
+      "dateFrom": "Desde",
+      "dateTo": "Hasta",
+      "project": "Proyecto"
+    }
+  },
+  
+  "leads": {
+    "title": "Reporte de Leads",
+    "description": "Exporta leads filtrados por stage, agente o proyecto",
+    "exportButton": "Exportar Leads",
+    "filters": {
+      "fromDate": "Desde",
+      "toDate": "Hasta",
+      "project": "Proyecto",
+      "stage": "Stage",
+      "assignedTo": "Agente asignado",
+      "allStages": "Todos los stages",
+      "allAgents": "Todos los agentes"
+    },
+    "stages": {
+      "nuevo": "Nuevo",
+      "contactado": "Contactado",
+      "visita_agendada": "Visita agendada",
+      "propuesta": "Propuesta",
+      "vendido": "Vendido",
+      "perdido": "Perdido"
+    }
+  }
+}
