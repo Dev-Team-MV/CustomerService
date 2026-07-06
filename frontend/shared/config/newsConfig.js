@@ -6,8 +6,9 @@ export const PROJECT_IDS = {
   LAKEWOOD: '69a73ce5b20401b061da6451',
   PHASE2: '69b9b2188186434073c6b13d',
   ISQ: '69d3b025b5ad6754488df957',
-  SHEPERD: '69dd47f2b3c3af43409aac48', // <-- Reemplaza por el real
-  SIXTOWN_HOUSES: '69e623d8699902a57559b557' // <-- Reemplaza por el real
+  SHEPERD: '69dd47f2b3c3af43409aac48',
+  SIXTOWN_HOUSES: '69e623d8699902a57559b557',
+  HTOWER: '6a31405f45d13efcf60c08d2' // <-- Reemplaza por el ID real de hTower
 }
 
 // ── NEWS CONFIGURATIONS ────────────────────────────────────────
@@ -124,6 +125,30 @@ export const newsConfigs = {
       { value: 'announcement', label: 'Announcements', icon: '📢', color: '#9CA3AF' },
       { value: 'report', label: 'Reports', icon: '📊', color: '#6B7280' },
       { value: 'event', label: 'Events', icon: '🎉', color: '#9CA3AF' }
+    ]
+  },
+
+  // ✅ NUEVA CONFIGURACIÓN HTOWER
+  htower: {
+    projectId: PROJECT_IDS.HTOWER,
+    projectName: 'hTower',
+    slug: 'htower',
+    colors: {
+      primary: '#424242',      // Gris oscuro (coincide con el theme)
+      secondary: '#757575',    // Gris medio
+      accent: '#E53935',       // Rojo vibrante
+      border: '#EEEEEE',       // Gris muy claro para bordes
+      gradient: 'linear-gradient(90deg, #424242, #757575, #424242)'
+    },
+    i18n: {
+      namespace: 'news'
+    },
+    categories: [
+      { value: 'all', label: 'All News', icon: '📰' },
+      { value: 'construction', label: 'Construction', icon: '🏗️', color: '#E53935' },  // Rojo
+      { value: 'announcement', label: 'Announcements', icon: '📢', color: '#757575' }, // Gris medio
+      { value: 'report', label: 'Reports', icon: '📊', color: '#424242' },             // Gris oscuro
+      { value: 'event', label: 'Events', icon: '🎉', color: '#757575' }                // Gris medio
     ]
   }
 }

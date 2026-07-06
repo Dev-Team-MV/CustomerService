@@ -1,0 +1,67 @@
+{
+  "payments": {
+    "title": "Collections",
+    "description": "Payment and collections management",
+    "exportButton": "Export Payments",
+    
+    "filters": {
+      "title": "Filters",
+      "project": "Project",
+      "projectOptional": "Project (optional)",
+      "status": "Status",
+      "dateFrom": "From",
+      "dateTo": "To",
+      "clear": "Clear",
+      "all": "All",
+      "allProjects": "All projects"
+    },
+    
+    "status": {
+      "pending": "Pending",
+      "signed": "Signed",
+      "overdue": "Overdue"
+    },
+    
+    "table": {
+      "client": "Client",
+      "project": "Project",
+      "unit": "Unit",
+      "amount": "Amount",
+      "dueDate": "Due Date",
+      "status": "Status",
+      "action": "Action",
+      "noClient": "No client",
+      "noProject": "No project",
+      "overdue": "Overdue",
+      "sendSms": "Send SMS reminder"
+    },
+    
+    "empty": {
+      "title": "No payments",
+      "description": "No payments found with current filters"
+    },
+    
+    "pagination": {
+      "showing": "Showing {{from}} - {{to}} of {{total}} payments",
+      "rowsPerPage": "Rows per page"
+    },
+    
+    "sms": {
+      "dialogTitle": "Send SMS Reminder",
+      "client": "Client",
+      "phone": "Phone",
+      "amount": "Amount",
+      "dueDate": "Due Date",
+      "info": "An SMS will be sent reminding the client to make the payment on time.",
+      "cancel": "Cancel",
+      "send": "Send SMS",
+      "sending": "Sending...",
+      "success": "SMS sent successfully",
+      "error": "Error sending SMS"
+    },
+    
+    "errors": {
+      "loadFailed": "Error loading payments"
+    }
+  }
+}

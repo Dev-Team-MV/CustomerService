@@ -1,0 +1,56 @@
+{
+  "title": "Sales & Leads",
+  "description": "Manage your sales pipeline and convert leads into customers",
+  "newLead": "New Lead",
+  "editLead": "Edit Lead",
+  "convert": "Convert to Customer",
+  "convertTitle": "Convert Lead to Customer",
+  "deleteConfirm": "Are you sure you want to delete this lead?",
+  "searchPlaceholder": "Search by name, email or phone...",
+  "noLeads": "No leads",
+  "addLead": "Add lead",
+  "exportButton": "Export Leads",
+  
+  "stages": {
+    "nuevo": "New",
+    "contactado": "Contacted",
+    "visita_agendada": "Visit scheduled",
+    "propuesta": "Proposal",
+    "vendido": "Sold",
+    "perdido": "Lost"
+  },
+  
+  "filters": {
+    "fromDate": "From",
+    "toDate": "To",
+    "project": "Project",
+    "allProjects": "All projects",
+    "stage": "Stage",
+    "allStages": "All stages",
+    "assignedTo": "Assigned agent",
+    "allAgents": "All agents"
+  },
+  
+  "source": {
+    "web": "Web",
+    "referido": "Referral",
+    "visita": "Visit",
+    "llamada": "Call"
+  },
+  
+  "form": {
+    "name": "Full name",
+    "namePlaceholder": "E.g.: John Smith",
+    "email": "Email",
+    "phone": "Phone",
+    "project": "Project of interest",
+    "assignedTo": "Assigned advisor",
+    "stage": "Stage",
+    "source": "Source",
+    "notes": "Notes",
+    "notesPlaceholder": "Additional details about the lead...",
+    "cancel": "Cancel",
+    "create": "Create",
+    "update": "Update"
+  }
+}
