@@ -53,6 +53,15 @@ const outdoorAmenitySectionSchema = new mongoose.Schema(
   { _id: false }
 )
 
+/** Color de marca por rol (primary, secondary, accent, gradient, etc.) */
+const brandColorItemSchema = new mongoose.Schema(
+  {
+    key: { type: String, required: true, trim: true, lowercase: true },
+    value: { type: String, required: true, trim: true }
+  },
+  { _id: false }
+)
+
 const projectSchema = new mongoose.Schema(
   {
     name: {
@@ -90,6 +99,14 @@ const projectSchema = new mongoose.Schema(
     image: {
       type: String,
       trim: true
+    },
+    logo: {
+      type: String,
+      trim: true
+    },
+    brandColors: {
+      type: [brandColorItemSchema],
+      default: () => []
     },
     gallery: [{
       type: String,

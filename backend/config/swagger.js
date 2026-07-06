@@ -92,6 +92,22 @@ const options = {
             }
           }
         },
+        BrandColorItem: {
+          type: 'object',
+          required: ['key', 'value'],
+          properties: {
+            key: {
+              type: 'string',
+              description: 'Color role (e.g. primary, secondary, accent, gradient)',
+              example: 'primary'
+            },
+            value: {
+              type: 'string',
+              description: 'Hex, rgb/rgba, or CSS gradient',
+              example: '#333F1F'
+            }
+          }
+        },
         Project: {
           type: 'object',
           properties: {
@@ -117,6 +133,12 @@ const options = {
               properties: { en: { type: 'string' }, es: { type: 'string' } }
             },
             image: { type: 'string', description: 'Main image URL' },
+            logo: { type: 'string', description: 'Project logo URL' },
+            brandColors: {
+              type: 'array',
+              description: 'Brand palette entries (primary, secondary, accent, gradient, etc.)',
+              items: { $ref: '#/components/schemas/BrandColorItem' }
+            },
             gallery: { type: 'array', items: { type: 'string' }, description: 'Gallery image URLs' },
             features: {
               type: 'object',

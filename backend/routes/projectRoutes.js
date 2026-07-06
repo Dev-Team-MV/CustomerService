@@ -153,6 +153,24 @@ router.post('/outdoor-amenity-keys', protect, admin, addOutdoorAmenityKeys)
  *               image:
  *                 type: string
  *                 description: Main image URL
+ *               logo:
+ *                 type: string
+ *                 description: Project logo URL
+ *               brandColors:
+ *                 type: array
+ *                 description: Brand palette (primary, secondary, accent, gradient, etc.)
+ *                 items:
+ *                   type: object
+ *                   required: [key, value]
+ *                   properties:
+ *                     key:
+ *                       type: string
+ *                       example: primary
+ *                       description: Color role identifier (e.g. primary, secondary, accent, gradient)
+ *                     value:
+ *                       type: string
+ *                       example: '#333F1F'
+ *                       description: Hex, rgb/rgba, or CSS gradient value
  *               gallery:
  *                 type: array
  *                 items: { type: string }
@@ -422,6 +440,14 @@ router.get('/:id/account-statement/pdf', protect, downloadProjectStatementPdf)
  *               description: { type: object, properties: { en: { type: string }, es: { type: string } } }
  *               fullDescription: { type: object, properties: { en: { type: string }, es: { type: string } } }
  *               image: { type: string }
+ *               logo: { type: string, description: Project logo URL }
+ *               brandColors:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     key: { type: string, example: primary }
+ *                     value: { type: string, example: '#8CA551' }
  *               gallery: { type: array, items: { type: string } }
  *               features: { type: object, properties: { en: { type: array }, es: { type: array } } }
  *               type: { type: string, enum: [residential_lots, apartments, other] }
