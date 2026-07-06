@@ -1,4 +1,5 @@
 import News from '../models/News.js'
+import { notifyNewsPublished } from '../utils/notificationTriggers.js'
 
 export const getAllNews = async (req, res) => {
   try {
@@ -72,6 +73,10 @@ export const createNews = async (req, res) => {
       videos: videos || []
     })
 
+    if (news.status === 'published') {
+      notifyNewsPublished({ news, actor: req.user })
+    }
+
     res.status(201).json(news)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -83,6 +88,7 @@ export const updateNews = async (req, res) => {
     const news = await News.findById(req.params.id)
 
     if (news) {
+      const previousStatus = news.status
       const {
         title,
         description,
@@ -108,6 +114,9 @@ export const updateNews = async (req, res) => {
       if (videos !== undefined) news.videos = videos
 
       const updatedNews = await news.save()
+      if (updatedNews.status === 'published' && previousStatus !== 'published') {
+        notifyNewsPublished({ news: updatedNews, actor: req.user })
+      }
       res.json(updatedNews)
     } else {
       res.status(404).json({ message: 'News article not found' })

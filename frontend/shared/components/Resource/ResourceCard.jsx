@@ -13,7 +13,7 @@ import {
 import { motion } from 'framer-motion'
 import PropTypes from 'prop-types'
 import HomeCareLinkButton from '@shared/components/HomeCareLinkButton'
-
+import ServiceStatusBadge from './ServiceStatusBadge'
 
 // ── Feature label + icon ──────────────────────────────────────────────────────
 const FeatureTag = ({ label, icon }) => (
@@ -115,6 +115,10 @@ const ResourceCard = ({
     resource.specs?.floor     > 0 && { label: 'Floor', value: resource.specs.floor },
   ].filter(Boolean)
 
+  // ✅ Determinar si hay badge de servicio activo
+  const hasServiceBadge = resource.homecareBadge && 
+    (resource.homecareStatus?.total > 0 || resource.homecareBadge.label !== 'Sin servicios')
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -137,7 +141,7 @@ const ResourceCard = ({
             : '0 1px 6px rgba(0,0,0,0.06)',
         }}
       >
-        {/* ── Header: lot number + features ── */}
+        {/* ── Header: lot number + features + service status ── */}
         <Box sx={{ px: 2.5, pt: 2.5, pb: 1.5 }}>
           <Box display="flex" justifyContent="space-between" alignItems="flex-start">
             {/* Lot label + large number */}
@@ -168,20 +172,34 @@ const ResourceCard = ({
               </Typography>
             </Box>
 
-            {/* Feature tags stacked */}
-            {features.length > 0 && (
-              <Box
-                display="flex"
-                flexDirection="column"
-                alignItems="flex-end"
-                gap={0.7}
-                pt={0.5}
-              >
-                {features.map((f, i) => (
-                  <FeatureTag key={i} label={f.label} icon={f.icon} />
-                ))}
-              </Box>
-            )}
+            {/* ── Right column: features + service badge ── */}
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="flex-end"
+              gap={0.7}
+              pt={0.5}
+            >
+              {/* Feature tags stacked */}
+              {features.length > 0 && (
+                <>
+                  {features.map((f, i) => (
+                    <FeatureTag key={i} label={f.label} icon={f.icon} />
+                  ))}
+                </>
+              )}
+
+              {/* ✅ Service Status Badge */}
+              {hasServiceBadge && (
+                <Box sx={{ mt: features.length > 0 ? 0.5 : 0 }}>
+                  <ServiceStatusBadge
+                    badge={resource.homecareBadge}
+                    showCount={true}
+                    totalCount={resource.homecareStatus?.total || 0}
+                  />
+                </Box>
+              )}
+            </Box>
           </Box>
         </Box>
 

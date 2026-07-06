@@ -151,8 +151,7 @@ pipeline {
                         string(credentialsId: 'twilio-auth-token', variable: 'TWILIO_AUTH_TOKEN'),
                         string(credentialsId: 'gcs-credentials-json', variable: 'GCS_CREDENTIALS')
                     ]) {
-                        sh "docker stop ${env.CONTAINER_NAME} 2>/dev/null || true"
-                        sh "docker rm ${env.CONTAINER_NAME} 2>/dev/null || true"
+                        sh "docker rm -f ${env.CONTAINER_NAME} 2>/dev/null || true"
                         sh '''
                             printf 'GCS_CREDENTIALS=%s\\n' "$GCS_CREDENTIALS" > "${WORKSPACE}/backend/gcs.env"
                             docker run -d \

@@ -1,6 +1,18 @@
 // frontend/apps/mv-crm/src/services/activityService.js
 import api from '@shared/services/api'
 
+// ✅ Función helper para sanitizar contacto
+const sanitizeContact = (contact) => {
+  if (!contact) return undefined
+  
+  const sanitized = {}
+  if (contact.name) sanitized.name = contact.name
+  if (contact.phone) sanitized.phone = contact.phone
+  if (contact.email) sanitized.email = contact.email
+  
+  return Object.keys(sanitized).length > 0 ? sanitized : undefined
+}
+
 const activityService = {
   // ==================== COLUMNS ====================
   
@@ -50,7 +62,7 @@ const activityService = {
     if (columnId) params.columnId = columnId
     if (assignedTo) params.assignedTo = assignedTo
     if (priority) params.priority = priority
-    if (relatedProjectId) params.relatedProjectId = relatedProjectId  // Nuevo filtro
+    if (relatedProjectId) params.relatedProjectId = relatedProjectId
     
     const res = await api.get('/activities', { params })
     return res.data
@@ -64,13 +76,29 @@ const activityService = {
 
   // Crear actividad (ahora acepta relatedProjects/projectIds y subtasks)
   create: async (data) => {
-    const res = await api.post('/activities', data)
+    const payload = { ...data }
+    
+    // ✅ Sanitizar contacto antes de enviar
+    if (payload.contact) {
+      payload.contact = sanitizeContact(payload.contact)
+      if (!payload.contact) delete payload.contact
+    }
+    
+    const res = await api.post('/activities', payload)
     return res.data
   },
 
   // Actualizar actividad (ahora acepta relatedProjects/projectIds y subtasks)
   update: async (id, data) => {
-    const res = await api.put(`/activities/${id}`, data)
+    const payload = { ...data }
+    
+    // ✅ Sanitizar contacto antes de enviar
+    if (payload.contact) {
+      payload.contact = sanitizeContact(payload.contact)
+      if (!payload.contact) delete payload.contact
+    }
+    
+    const res = await api.put(`/activities/${id}`, payload)
     return res.data
   },
 

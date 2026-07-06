@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import Activity from '../models/Activity.js'
 import ActivityColumn, { DEFAULT_ACTIVITY_COLUMNS } from '../models/ActivityColumn.js'
+import { notifyActivityAssigned, notifyActivityThreadMessage } from '../utils/notificationTriggers.js'
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value)
 
@@ -536,6 +537,14 @@ export const createActivity = async (req, res) => {
 
     const payload = await populateActivityQuery(Activity.findById(created._id))
 
+    if (created.assignedTo) {
+      notifyActivityAssigned({
+        activity: created,
+        assigneeId: created.assignedTo,
+        actor: req.user
+      })
+    }
+
     res.status(201).json(payload)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -553,6 +562,8 @@ export const updateActivity = async (req, res) => {
     if (!activity) {
       return res.status(404).json({ message: 'Activity not found' })
     }
+
+    const previousAssignee = activity.assignedTo ? String(activity.assignedTo) : null
 
     const {
       title,
@@ -619,6 +630,15 @@ export const updateActivity = async (req, res) => {
     await activity.save()
 
     const payload = await populateActivityQuery(Activity.findById(activity._id))
+
+    const newAssignee = activity.assignedTo ? String(activity.assignedTo) : null
+    if (newAssignee && newAssignee !== previousAssignee) {
+      notifyActivityAssigned({
+        activity,
+        assigneeId: activity.assignedTo,
+        actor: req.user
+      })
+    }
 
     res.json(payload)
   } catch (error) {
@@ -849,6 +869,12 @@ export const addActivityThreadMessage = async (req, res) => {
       createdBy: req.user._id
     })
     await activity.save()
+
+    notifyActivityThreadMessage({
+      activity,
+      message: message.trim(),
+      actor: req.user
+    })
 
     const payload = await populateActivityQuery(Activity.findById(activity._id))
     res.status(201).json(payload)

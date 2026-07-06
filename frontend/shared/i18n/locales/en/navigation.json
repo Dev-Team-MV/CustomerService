@@ -28,7 +28,8 @@
         "uploadTracker": "Upload Tracker",
         "building": "Houses",
         "lots": "Lots",
-        "catalogConfig": "Catalog Config"
+        "catalogConfig": "Catalog Config",
+        "agents":"Agents"
     },
     "tooltips": {
         "openMenu": "Open menu",
@@ -53,7 +54,10 @@
     "noNotificationsDesc": "We'll notify you when something important happens",
     "markAllAsRead": "Mark all as read",
     "unread": "{{count}} unread",
+    "justNow": "Just now",
+    "minutesAgo": "{{count}}m ago",
     "hoursAgo": "{{count}} hours ago",
+    "daysAgo": "{{count}} days ago",
 
       "overview": "Overview",
   "clients": "Clients",
@@ -63,5 +67,10 @@
   "messageTemplates": "Message Templates",
   "settings": "Settings",
   "quickStats": "Quick Stats",
-  "signOut": "Sign Out"
+  "signOut": "Sign Out",
+
+          "agents":"Agents",
+        "reports":"Reports",
+        "payments":"Payments"
+        
 }

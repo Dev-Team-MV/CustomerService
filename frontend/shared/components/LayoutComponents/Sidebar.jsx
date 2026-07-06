@@ -1,26 +1,41 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Box, Typography, Divider, List, ListItem, ListItemIcon, ListItemText } from '@mui/material'
-import { Logout, GridView, FolderOpen, People, Settings, Person, BarChart } from '@mui/icons-material'
+import { 
+  Logout, 
+  GridView, 
+  FolderOpen, 
+  People, 
+  Person, 
+  TrendingUp,
+  AssignmentTurnedIn,
+  Insights,
+  Chat,
+  AttachMoney,
+  Assessment,
+  SupportAgent
+} from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import { useAuth } from '../../context/AuthContext'
 import LanguageSwitcher from '@shared/components/LanguageSwitcher'
 import { useTranslation } from 'react-i18next'
 import mvLogo from '../../assets/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png'
 
-
 const NAV = [
-  { key: 'overview', labelKey: 'overview', icon: GridView,   path: '/dashboard' },
-  { key: 'clients',  labelKey: 'clients',  icon: People,     path: '/clients'   },
-  { key: 'projects', labelKey: 'projects', icon: FolderOpen, path: '/projects'  },
-  {key: 'activities', labelKey: 'activities', icon: BarChart, path: '/activities' }, 
-  {key: 'analytics', labelKey: 'analytics', icon: BarChart, path: '/analytics' },
-  {key: 'messageTemplates', labelKey: 'messageTemplates', icon: BarChart, path: '/message-templates' }
+  { key: 'overview', labelKey: 'overview', icon: GridView, path: '/dashboard' },
+  { key: 'clients', labelKey: 'clients', icon: People, path: '/clients' },
+  { key: 'projects', labelKey: 'projects', icon: FolderOpen, path: '/projects' },
+  { key: 'sales', labelKey: 'sales', icon: TrendingUp, path: '/sales' },
+  { key: 'payments', labelKey: 'payments', icon: AttachMoney, path: '/payments' },
+  { key: 'reports', labelKey: 'reports', icon: Assessment, path: '/reports' },
+  { key: 'agents', labelKey: 'agents', icon: SupportAgent, path: '/agents' },
+  { key: 'activities', labelKey: 'activities', icon: AssignmentTurnedIn, path: '/activities' },
+  { key: 'analytics', labelKey: 'analytics', icon: Insights, path: '/analytics' },
+  { key: 'messageTemplates', labelKey: 'messageTemplates', icon: Chat, path: '/message-templates' }
 ]
 
-
 export default function Sidebar({ stats = [] }) {
-  const navigate       = useNavigate()
-  const location       = useLocation()
+  const navigate = useNavigate()
+  const location = useLocation()
   const { user, logout } = useAuth()
   const { t } = useTranslation('navigation')
   const handleLogout = () => { logout(); navigate('/login') }
@@ -31,36 +46,30 @@ export default function Sidebar({ stats = [] }) {
       display: 'flex', flexDirection: 'column',
       borderRight: '1px solid #1a1a1a', background: '#0a0a0a', flexShrink: 0
     }}>
+      {/* Logo */}
+      <Box sx={{ p: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Box
+            component="img"
+            src={mvLogo}
+            alt="Michelangelo Del Valle"
+            sx={{
+              width: '100%',
+              maxWidth: 140,
+              height: 'auto',
+              objectFit: 'contain',
+              filter: 'invert(1)',
+              opacity: 0.92,
+            }}
+          />
+        </motion.div>
+      </Box>
 
-      {/* ── Logo ── */}
-
-    
-          {/* ─── LOGO — reemplaza el bloque Master Control Panel ─── */}
-          <Box sx={{ p: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6 }}
-            >
-              <Box
-                component="img"
-                src={mvLogo}
-                alt="Michelangelo Del Valle"
-                sx={{
-                  width: '100%',
-                  maxWidth: 140,
-                  height: 'auto',
-                  objectFit: 'contain',
-                  filter: 'invert(1)',
-                  opacity: 0.92,
-                }}
-              />
-            </motion.div>
-          </Box>
-    
-
-
-      {/* ── Quick stats (opcional) ── */}
+      {/* Quick stats */}
       {stats.length > 0 && (
         <Box sx={{ mx: 2, mb: 2, p: '12px 14px', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)' }}>
           <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.55rem', color: 'rgba(255,255,255,0.25)', letterSpacing: '1.5px', textTransform: 'uppercase', mb: 1.5 }}>
@@ -81,13 +90,12 @@ export default function Sidebar({ stats = [] }) {
         </Box>
       )}
 
-      
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)' }} />
 
       {/* Nav */}
       <List sx={{ px: 1.5, py: 2, flex: 1 }} disablePadding>
         {NAV.map((item, i) => {
-          const Icon     = item.icon
+          const Icon = item.icon
           const isActive = location.pathname === item.path
           return (
             <motion.div key={item.key} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 * i }}>
@@ -124,7 +132,7 @@ export default function Sidebar({ stats = [] }) {
         <LanguageSwitcher variant="sidebar" />
       </Box>
 
-      {/* ── User Profile Button ── */}
+      {/* User Profile Button */}
       <Box 
         onClick={() => navigate('/profile')}
         sx={{ 
@@ -154,14 +162,13 @@ export default function Sidebar({ stats = [] }) {
         <Person sx={{ fontSize: 15, color: 'rgba(255,255,255,0.35)' }} />
       </Box>
 
-      {/* ── Sign out ── */}
+      {/* Sign out */}
       <Box onClick={handleLogout} sx={{ p: '14px 20px', display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer', transition: 'background 0.2s', '&:hover': { background: 'rgba(255,255,255,0.05)' } }}>
         <Logout sx={{ fontSize: 15, color: 'rgba(255,255,255,0.35)' }} />
         <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>
           {t('signOut')}
         </Typography>
       </Box>
-
     </Box>
   )
 }

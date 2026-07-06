@@ -81,6 +81,11 @@ export const useNewsFeed = () => {
       value: '6 TownHouses',
       label: newsConfigs['6town-houses'].projectName,
       count: news.filter(n => n.projectId === newsConfigs['6town-houses'].projectId).length
+    },
+    {
+      value: 'H Tower',
+      label: newsConfigs.htower.projectName,
+      count: news.filter(n => n.projectId === newsConfigs.htower.projectId).length
     }
   ], [news, t])
 

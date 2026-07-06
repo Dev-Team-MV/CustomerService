@@ -156,6 +156,10 @@ const projectSchema = new mongoose.Schema(
 
 projectSchema.index({ isActive: 1 })
 projectSchema.index({ status: 1 })
+projectSchema.index(
+  { name: 'text', slug: 'text', 'title.en': 'text', 'title.es': 'text' },
+  { name: 'project_crm_text', weights: { name: 10, slug: 8, 'title.en': 5, 'title.es': 5 } }
+)
 
 /** Ensure localized fields always return full { en, es } structure (not just _id) */
 const normalizeLocalized = (val) => {

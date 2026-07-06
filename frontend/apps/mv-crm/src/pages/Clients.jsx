@@ -1,8 +1,10 @@
+// apps/mv-crm/src/pages/Clients.jsx
 import { useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Box, Button, Typography, TextField, InputAdornment, Snackbar, Alert
 } from '@mui/material'
-import { Search } from '@mui/icons-material'
+import { Search, Send } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import DataTable from '@shared/components/table/DataTable'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
@@ -11,14 +13,17 @@ import ResidentDialog from '@shared/components/Modals/ResidentDialog'
 import { useTranslation } from 'react-i18next'
 import { useResidents } from '@shared/hooks/useResidents'
 import { useClientColumns } from '../constants/Columns/resident'
+import { useProjects } from '@shared/hooks/useProjects' // ✅ NUEVO
 import BroadcastMessageModal from '../components/BroadcastMessageModal'
-import { Send } from '@mui/icons-material'
 import smsService from '../services/smsService'
+import ExportButton from '../components/ExportButton'
+import crmReportsService from '../services/crmReportsService'
 
 export default function Clients() {
   const { t } = useTranslation('residents')
+  const navigate = useNavigate()
+  const { projects } = useProjects() // ✅ NUEVO
 
-  // Lista global de usuarios; SMS/registro llevan el proyecto CRM si está en VITE_PROJECT_ID
   const {
     users, loading, stats,
     openDialog, selectedUser, setSelectedUser, formData, setFormData,
@@ -54,66 +59,66 @@ export default function Clients() {
     onDelete: handleDelete,
     onSendSMS: handleSendPasswordSMS,
   })
+
   const [broadcastModalOpen, setBroadcastModalOpen] = useState(false)
 
-   
-// Handler real para envío masivo con soporte de templates
-const handleSendBroadcast = async (data, onProgress) => {
-  const { content, recipients, channels, sendToAll, hasTemplateVariables } = data
-  
-  if (!channels.sms) {
-    alert('Envío de email aún no implementado')
-    return { success: [], failed: [] }
-  }
+  // Handler real para envío masivo con soporte de templates
+  const handleSendBroadcast = async (data, onProgress) => {
+    const { content, recipients, channels, sendToAll, hasTemplateVariables } = data
 
-  // Obtener usuarios completos con phoneNumber
-  const targetUsers = sendToAll 
-    ? users 
-    : users.filter(u => recipients.includes(u._id))
-
-  // Filtrar solo usuarios con teléfono válido
-  const usersWithPhone = targetUsers.filter(u => u.phoneNumber?.startsWith('+'))
-  
-  if (usersWithPhone.length === 0) {
-    alert('Ningún destinatario tiene número de teléfono válido')
-    return { success: [], failed: [] }
-  }
-
-  try {
-    let results
-
-    if (hasTemplateVariables) {
-      // ✅ Usar envío con template - reemplaza {{variables}}
-      results = await smsService.sendBulkTemplate(
-        usersWithPhone,
-        content,  // El template con {{firstName}}, {{lastName}}, etc.
-        (user) => ({
-          firstName: user.firstName || '',
-          lastName: user.lastName || '',
-          email: user.email || '',
-          phoneNumber: user.phoneNumber || ''
-        }),
-        onProgress
-      )
-    } else {
-      // Envío directo sin variables
-      results = await smsService.sendBulk(
-        usersWithPhone,
-        content,
-        onProgress
-      )
+    if (!channels.sms) {
+      alert('Envío de email aún no implementado')
+      return { success: [], failed: [] }
     }
 
-    return results
-  } catch (err) {
-    console.error('Error en envío masivo:', err)
-    throw err
+    const targetUsers = sendToAll
+      ? users
+      : users.filter(u => recipients.includes(u._id))
+
+    const usersWithPhone = targetUsers.filter(u => u.phoneNumber?.startsWith('+'))
+
+    if (usersWithPhone.length === 0) {
+      alert('Ningún destinatario tiene número de teléfono válido')
+      return { success: [], failed: [] }
+    }
+
+    try {
+      let results
+
+      if (hasTemplateVariables) {
+        results = await smsService.sendBulkTemplate(
+          usersWithPhone,
+          content,
+          (user) => ({
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            email: user.email || '',
+            phoneNumber: user.phoneNumber || ''
+          }),
+          onProgress
+        )
+      } else {
+        results = await smsService.sendBulk(
+          usersWithPhone,
+          content,
+          onProgress
+        )
+      }
+
+      return results
+    } catch (err) {
+      console.error('Error en envío masivo:', err)
+      throw err
+    }
   }
-}
+
+  const handleViewClient = (client) => {
+    navigate(`/clients/${client._id}`)
+  }
 
   // Stats
-  const activeCount   = users.filter(c => c.isActive).length
-  const adminCount    = users.filter(c => ['admin', 'superadmin'].includes(c.role)).length
+  const activeCount = users.filter(c => c.isActive).length
+  const adminCount = users.filter(c => ['admin', 'superadmin'].includes(c.role)).length
   const withLotsCount = users.filter(c => c.lots?.length > 0).length
 
   return (
@@ -130,22 +135,44 @@ const handleSendBroadcast = async (data, onProgress) => {
         { label: t('clients.withLots'), value: withLotsCount },
       ]} />
 
-<Box display="flex" gap={2} mb={2}>
-  <Button
-    variant="contained"
-    color="primary"
-    onClick={() => handleOpenDialog()}
-  >
-    + {t('clients.addClient')}
-  </Button>
-  <Button
-    variant="outlined"
-    startIcon={<Send />}
-    onClick={() => setBroadcastModalOpen(true)}
-  >
-    Enviar mensaje
-  </Button>
-</Box>
+      {/* ═══════════════════════════════════════════════════════════
+          BOTONES DE ACCIÓN
+          ═══════════════════════════════════════════════════════════ */}
+      <Box display="flex" gap={2} mb={2} flexWrap="wrap">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => handleOpenDialog()}
+        >
+          + {t('clients.addClient')}
+        </Button>
+
+        <Button
+          variant="outlined"
+          startIcon={<Send />}
+          onClick={() => setBroadcastModalOpen(true)}
+        >
+          Enviar mensaje
+        </Button>
+
+        {/* ✅ ACTUALIZADO: ExportButton con modal y filtro de proyecto */}
+        <ExportButton
+          label="Exportar Clientes"
+          exportFn={crmReportsService.exportClients}
+          withModal={true}
+          disabled={users.length === 0}
+          filters={[
+            {
+              field: 'projectId',
+              label: 'Proyecto',
+              type: 'select',
+              placeholder: 'Todos los proyectos',
+              required: false,
+              options: projects.map(p => ({ value: p._id, label: p.name }))
+            }
+          ]}
+        />
+      </Box>
 
       <ResidentDialog
         open={openDialog}
@@ -190,17 +217,18 @@ const handleSendBroadcast = async (data, onProgress) => {
           data={filtered}
           loading={loading}
           rowKey="_id"
-          onRowClick={(row) => handleOpenDialog(row)}
+          onRowClick={handleViewClient}
         />
       </motion.div>
 
-<BroadcastMessageModal
-  open={broadcastModalOpen}
-  onClose={() => setBroadcastModalOpen(false)}
-  users={users}
-  onSend={handleSendBroadcast}
-/>
+      <BroadcastMessageModal
+        open={broadcastModalOpen}
+        onClose={() => setBroadcastModalOpen(false)}
+        users={users}
+        onSend={handleSendBroadcast}
+      />
 
+      {/* Snackbar para acciones generales */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
