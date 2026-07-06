@@ -11,6 +11,7 @@ import { normalizeImageArray } from '../utils/imageUtils.js'
 import { getVisiblePropertyIdsForUser, canUserAccessProperty } from '../utils/propertyVisibility.js'
 import { hydrateUrlsInObject } from '../services/urlResolverService.js'
 import { evaluateProjectPricing } from '../services/projectPricingEngine.js'
+import { notifyPropertyAssigned } from '../utils/notificationTriggers.js'
 
 const BLOCKED_BUILDING_AVAILABILITY_STATUSES = ['reserved', 'assigned', 'sold', 'disabled']
 
@@ -1051,6 +1052,13 @@ export const createProperty = async (req, res) => {
     propertyObj.blueprints = getPropertyBlueprints(populatedProperty)
     await mapFacadeSelections([propertyObj])
     await hydrateUrlsInObject(propertyObj)
+
+    notifyPropertyAssigned({
+      property,
+      ownerIds,
+      actor: req.user
+    })
+
     res.status(201).json(propertyObj)
   } catch (error) {
     res.status(500).json({ message: error.message })

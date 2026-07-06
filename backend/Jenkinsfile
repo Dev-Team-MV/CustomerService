@@ -15,7 +15,7 @@ pipeline {
         APP_DIR = 'backend'
         JWT_SECRET = 'supersecretkey123456789'
         UPLOAD_MAX_FILE_SIZE_MB = '1024'
-        CORS_ORIGINS = 'https://devlakewoodp1.michelangelodelvalle.com,https://lakewoodp1.michelangelodelvalle.com,https://devlakewoodp2.michelangelodelvalle.com,https://lakewoodp2.michelangelodelvalle.com,https://devcrm.michelangelodelvalle.com,https://crm.michelangelodelvalle.com,https://dev6town.michelangelodelvalle.com,https://6towncsdev.michelangelodelvalle.com,https://6town.michelangelodelvalle.com,https://6towncs.michelangelodelvalle.com'
+        CORS_ORIGINS = 'https://devlakewoodp1.michelangelodelvalle.com,https://lakewoodp1.michelangelodelvalle.com,https://devlakewoodp2.michelangelodelvalle.com,https://lakewoodp2.michelangelodelvalle.com,https://devcrm.michelangelodelvalle.com,https://crm.michelangelodelvalle.com,https://dev6town.michelangelodelvalle.com,https://6towncsdev.michelangelodelvalle.com,https://6town.michelangelodelvalle.com,https://6towncs.michelangelodelvalle.com,https://lakewoodoaksonlakeconroe.com,https://www.lakewoodoaksonlakeconroe.com'
         TWILIO_PHONE_FROM = '+18327707897'
         GCS_PROJECT_ID = 'centurions-car-wash-442201'
         GCS_BUCKET_NAME = 'customer-service-7cc'
@@ -151,8 +151,7 @@ pipeline {
                         string(credentialsId: 'twilio-auth-token', variable: 'TWILIO_AUTH_TOKEN'),
                         string(credentialsId: 'gcs-credentials-json', variable: 'GCS_CREDENTIALS')
                     ]) {
-                        sh "docker stop ${env.CONTAINER_NAME} 2>/dev/null || true"
-                        sh "docker rm ${env.CONTAINER_NAME} 2>/dev/null || true"
+                        sh "docker rm -f ${env.CONTAINER_NAME} 2>/dev/null || true"
                         sh '''
                             printf 'GCS_CREDENTIALS=%s\\n' "$GCS_CREDENTIALS" > "${WORKSPACE}/backend/gcs.env"
                             docker run -d \

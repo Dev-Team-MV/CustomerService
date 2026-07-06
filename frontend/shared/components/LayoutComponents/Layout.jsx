@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+// @shared/components/LayoutComponents/Layout.jsx
+import { useState, useMemo, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { Box, useMediaQuery, useTheme, Backdrop } from "@mui/material";
 import { useAuth } from "../../context/AuthContext";
@@ -7,40 +8,50 @@ import NotificationsDrawer from "./NotificationsDrawer";
 import SidebarDrawer from "./SidebarDrawer";
 import { publicMenuItems as defaultPublicMenuItems, privateMenuItems as defaultPrivateMenuItems } from "../../constants/menuItems";
 import AppBarBrandbook from "./AppBar";
+import useNotifications from "@shared/hooks/useNotifications";
+import NotificationCreatorModal from "@shared/components/Notifications/NotificationCreatorModal"; // ✅ NUEVO
+import api from "../../services/api"; // ✅ NUEVO
 const drawerWidthExpanded = 280;
 
 const Layout = ({
   publicView = false,
-  menuItems: customMenuItems, // menú privado custom
-  publicMenuItems: customPublicMenuItems, // menú público custom
-  logoSrc, // logo personalizado
+  menuItems: customMenuItems,
+  publicMenuItems: customPublicMenuItems,
+  logoSrc,
   ...props
 }) => {
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [expanded, setExpanded] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "Payment received",
-      description: "Your payment has been processed.",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "New message",
-      description: "You have a new message from admin.",
-      read: false,
-    },
-    {
-      id: 3,
-      title: "Document approved",
-      description: "Your document was approved.",
-      read: true,
-    },
-  ]);
+  const [notificationCreatorOpen, setNotificationCreatorOpen] = useState(false); // ✅ NUEVO
+  const [users, setUsers] = useState([]); // ✅ NUEVO
 
   const { user, logout } = useAuth();
+  const {
+    notifications,
+    refresh,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+  } = useNotifications({ enabled: Boolean(user) && !publicView });
+
+  const refreshNotifications = refresh || (() => {});
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'; // ✅ NUEVO
+
+  // ✅ NUEVO: Cargar usuarios cuando se abre el modal de crear notificación
+  useEffect(() => {
+    if (notificationCreatorOpen && isAdmin && users.length === 0) {
+      api.get('/users')
+        .then(res => setUsers(res.data || []))
+        .catch(err => console.error('Error loading users:', err));
+    }
+  }, [notificationCreatorOpen, isAdmin, users.length]);
+
+  useEffect(() => {
+    if (notificationsOpen && user && !publicView) {
+      refreshNotifications();
+    }
+  }, [notificationsOpen, user, publicView, refreshNotifications]);
+
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
@@ -54,7 +65,6 @@ const Layout = ({
     handleCloseUserMenu();
   };
 
-  // Selección dinámica de menuItems
   const menuItems = useMemo(() => {
     if (publicView) {
       return customPublicMenuItems || customMenuItems || defaultPublicMenuItems;
@@ -70,9 +80,14 @@ const Layout = ({
     setExpanded(false);
   };
 
+  // ✅ NUEVO: Handler para cuando se crea una notificación
+  const handleNotificationCreated = (notification) => {
+    console.log('✅ Notificación creada:', notification);
+    refreshNotifications(); // Actualizar la lista de notificaciones
+  };
+
   return (
     <Box sx={{ display: "flex", position: "relative" }}>
-      {/* AppBar */}
       <AppBarBrandbook
         publicView={publicView}
         user={user}
@@ -96,7 +111,6 @@ const Layout = ({
         logoSrc={logoSrc}
       />
 
-      {/* Backdrop */}
       <Backdrop
         open={expanded}
         onClick={() => setExpanded(false)}
@@ -109,7 +123,6 @@ const Layout = ({
         }}
       />
 
-      {/* Sidebar Drawer */}
       <SidebarDrawer
         open={expanded}
         onClose={() => setExpanded(false)}
@@ -124,18 +137,30 @@ const Layout = ({
         }}
       />
 
-      {/* Notifications Drawer */}
       <NotificationsDrawer
         open={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
         notifications={notifications}
-        setNotifications={setNotifications}
+        onMarkAsRead={markNotificationAsRead}
+        onMarkAllAsRead={markAllNotificationsAsRead}
+        onCreateNotification={() => setNotificationCreatorOpen(true)} // ✅ NUEVO
+        isAdmin={isAdmin} // ✅ NUEVO
         sx={{
           bgcolor: theme.palette.background.paper,
         }}
       />
 
-      {/* Main Content */}
+      {/* ✅ NUEVO: Modal de crear notificación */}
+      {isAdmin && (
+        <NotificationCreatorModal
+          open={notificationCreatorOpen}
+          onClose={() => setNotificationCreatorOpen(false)}
+          users={users}
+          defaultMode="general"
+          onCreated={handleNotificationCreated}
+        />
+      )}
+
       <Box
         component="main"
         sx={{

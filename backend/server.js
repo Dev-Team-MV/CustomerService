@@ -1,6 +1,7 @@
 // Load environment variables FIRST before any other imports
 import './config/env.js'
 
+import http from 'http'
 import express from 'express'
 import cors from 'cors'
 import swaggerUi from 'swagger-ui-express'
@@ -34,7 +35,10 @@ import masterPlanRoutes from './routes/masterPlanRoutes.js'
 import parkingSpotRoutes from './routes/parkingSpotRoutes.js'
 import activityRoutes from './routes/activityRoutes.js'
 import reportRoutes from './routes/reportRoutes.js'
+import notificationRoutes from './routes/notificationRoutes.js'
 import { startBackupScheduler } from './services/backupScheduler.js'
+import { startLeadScoringScheduler } from './services/leadScoringScheduler.js'
+import { initNotificationWebSocket } from './services/notificationWebSocket.js'
 import { requestTimingMiddleware } from './middleware/requestTimingMiddleware.js'
 
 const app = express()
@@ -66,7 +70,8 @@ const allowedCorsOrigins = new Set([...exactCorsOrigins, ...extraCorsOrigins])
 
 const allowedOriginPatterns = [
   /^https?:\/\/localhost(?::\d+)?$/i,
-  /^https:\/\/([a-z0-9-]+\.)?michelangelodelvalle\.com$/i
+  /^https:\/\/([a-z0-9-]+\.)?michelangelodelvalle\.com$/i,
+  /^https:\/\/(www\.)?lakewoodoaksonlakeconroe\.com$/i
 ]
 
 const corsOptions = {
@@ -121,9 +126,11 @@ app.use('/api/master-plan', masterPlanRoutes)
 app.use('/api/parking-spots', parkingSpotRoutes)
 app.use('/api/activities', activityRoutes)
 app.use('/api/reports', reportRoutes)
+app.use('/api/notifications', notificationRoutes)
 
 // Start automatic GCS backup scheduler (if enabled)
 startBackupScheduler()
+startLeadScoringScheduler()
 
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
@@ -155,6 +162,9 @@ app.get('/api/health', (req, res) => {
 
 const PORT = process.env.PORT || 5001
 
-app.listen(PORT, () => {
+const server = http.createServer(app)
+initNotificationWebSocket(server)
+
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })

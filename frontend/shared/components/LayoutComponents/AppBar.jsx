@@ -29,7 +29,7 @@ const AppBarBrandbook = ({
   logoSrc = "/images/logos/Logo_LakewoodOaks-05.png",
   publicView,
   user,
-  notifications,
+  notifications = [], // ✅ AGREGAR VALOR POR DEFECTO
   onMenuClick,
   onLogoClick,
   onNotificationsClick,

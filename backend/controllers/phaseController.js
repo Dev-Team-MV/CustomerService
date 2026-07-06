@@ -2,6 +2,7 @@ import Phase from '../models/Phase.js'
 import Property from '../models/Property.js'
 import Apartment from '../models/Apartment.js'
 import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
+import { notifyPhaseUpdated } from '../utils/notificationTriggers.js'
 
 const populatePhase = (query) =>
   query
@@ -134,6 +135,7 @@ export const updatePhase = async (req, res) => {
     const populatedPhase = await populatePhase(Phase.findById(updatedPhase._id))
     const data = populatedPhase.toObject()
     await hydrateUrlsInObject(data)
+    notifyPhaseUpdated({ phase: updatedPhase, actor: req.user })
     res.json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -177,6 +179,7 @@ export const addMediaItem = async (req, res) => {
     const populatedPhase = await populatePhase(Phase.findById(updatedPhase._id))
     const data = populatedPhase.toObject()
     await hydrateUrlsInObject(data)
+    notifyPhaseUpdated({ phase: updatedPhase, actor: req.user })
     res.status(201).json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -224,6 +227,7 @@ export const addMediaItemByApartmentAndNumber = async (req, res) => {
     const populatedPhase = await populatePhase(Phase.findById(updatedPhase._id))
     const data = populatedPhase.toObject()
     await hydrateUrlsInObject(data)
+    notifyPhaseUpdated({ phase: updatedPhase, actor: req.user })
     res.status(201).json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })

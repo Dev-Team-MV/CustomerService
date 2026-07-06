@@ -199,8 +199,7 @@ pipeline {
       when { expression { env.SHOULD_RUN == 'true' } }
       steps {
         script {
-          sh "docker stop ${env.CONTAINER_NAME} 2>/dev/null || true"
-          sh "docker rm ${env.CONTAINER_NAME} 2>/dev/null || true"
+          sh "docker rm -f ${env.CONTAINER_NAME} 2>/dev/null || true"
           sh """
             docker run -d \
               --name ${env.CONTAINER_NAME} \

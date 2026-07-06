@@ -9,6 +9,15 @@ import { canUserAccessProject } from '../utils/projectAccess.js'
 import { uploadFile } from '../services/storageService.js'
 import { processImageForUpload } from '../services/imageProcessingService.js'
 import { hydrateUrlsInObject, normalizePathForStorage } from '../services/urlResolverService.js'
+import {
+  notifyPayloadCreated,
+  notifyPayloadStatusChanged
+} from '../utils/notificationTriggers.js'
+import {
+  buildPaymentOverdueContext,
+  isPayloadOverdue,
+  runAutomationEngineAsync
+} from '../services/automationEngine.js'
 import crypto from 'crypto'
 import path from 'path'
 
@@ -273,6 +282,19 @@ export const createPayload = async (req, res) => {
 
     const data = populatedPayload.toObject()
     await hydrateUrlsInObject(data)
+
+    notifyPayloadCreated({
+      payload,
+      unitDoc,
+      actor: req.user
+    })
+
+    if (isPayloadOverdue(payload)) {
+      buildPaymentOverdueContext(payload, req.user).then((context) => {
+        runAutomationEngineAsync('payment_overdue', context)
+      })
+    }
+
     res.status(201).json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -385,6 +407,23 @@ export const updatePayload = async (req, res) => {
           ]
         })
         .populate('processedBy')
+
+      const unitForNotification = payload.property
+        ? await Property.findById(payload.property)
+        : await Apartment.findById(payload.apartment)
+
+      notifyPayloadStatusChanged({
+        payload: updatedPayload,
+        unitDoc: unitForNotification,
+        previousStatus: oldStatus,
+        actor: req.user
+      })
+
+      if (isPayloadOverdue(updatedPayload)) {
+        buildPaymentOverdueContext(updatedPayload, req.user).then((context) => {
+          runAutomationEngineAsync('payment_overdue', context)
+        })
+      }
       
       res.json(populatedPayload)
     } else {

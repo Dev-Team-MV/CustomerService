@@ -5,6 +5,7 @@ import User from '../models/User.js'
 import Property from '../models/Property.js'
 import Apartment from '../models/Apartment.js'
 import Project from '../models/Project.js'
+import { notifyFamilyGroupMemberAdded } from '../utils/notificationTriggers.js'
 
 const POPULATE_PROJECT = { path: 'project', select: 'name slug' }
 
@@ -283,6 +284,13 @@ export const addMemberToFamilyGroup = async (req, res) => {
     await group.populate('createdBy', 'firstName lastName email')
     await group.populate('members.user', 'firstName lastName email')
     await group.populate(POPULATE_PROJECT)
+
+    notifyFamilyGroupMemberAdded({
+      group,
+      userId,
+      actor: req.user
+    })
+
     res.json(group)
   } catch (error) {
     res.status(500).json({ message: error.message })
