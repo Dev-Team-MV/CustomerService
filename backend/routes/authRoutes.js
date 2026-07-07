@@ -1,5 +1,5 @@
 import express from 'express'
-import { register, login, loginAdmin, getProfile, changePassword, setupPassword, verifySetupToken, sendSetupPasswordLink } from '../controllers/authController.js'
+import { register, login, loginAdmin, getProfile, changePassword, setupPassword, verifySetupToken, sendSetupPasswordLink, requestPasswordReset, verifyPasswordResetCode, resetPassword } from '../controllers/authController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -313,5 +313,106 @@ router.get('/verify-setup-token/:token', verifySetupToken)
  * (si no existe membresía explícita en `projectMemberships`, se agrega automáticamente).
  */
 router.post('/admin/send-setup-password-link', protect, admin, sendSetupPasswordLink)
+
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Solicitar recuperación de contraseña (envía código 2FA)
+ *     description: |
+ *       El usuario ingresa su correo. Si existe una cuenta activa, se envía un código de 6 dígitos
+ *       por SMS o email (canal configurable). La respuesta es genérica para no revelar si el email existe.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               channel:
+ *                 type: string
+ *                 enum: [sms, email]
+ *                 description: Canal preferido. Por defecto SMS si hay teléfono; si no, email.
+ *     responses:
+ *       200:
+ *         description: Solicitud procesada (código enviado si la cuenta existe)
+ *       400:
+ *         description: Email inválido o canal incorrecto
+ *       502:
+ *         description: No se pudo enviar el código
+ *       503:
+ *         description: Canal email no configurado y sin SMS disponible
+ */
+router.post('/forgot-password', requestPasswordReset)
+
+/**
+ * @swagger
+ * /api/auth/forgot-password/verify:
+ *   post:
+ *     summary: Verificar código 2FA de recuperación de contraseña
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, code]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               code:
+ *                 type: string
+ *                 example: '123456'
+ *                 description: Código de 6 dígitos recibido por SMS o email
+ *     responses:
+ *       200:
+ *         description: Código válido; devuelve resetToken para el paso final
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string }
+ *                 resetToken: { type: string }
+ *                 expiresInMinutes: { type: integer, example: 15 }
+ *       400:
+ *         description: Código inválido o expirado
+ */
+router.post('/forgot-password/verify', verifyPasswordResetCode)
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Establecer nueva contraseña tras verificar el código 2FA
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [resetToken, password]
+ *             properties:
+ *               resetToken:
+ *                 type: string
+ *                 description: Token devuelto por POST /api/auth/forgot-password/verify
+ *               password:
+ *                 type: string
+ *                 minLength: 6
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada; incluye JWT para login inmediato
+ *       400:
+ *         description: Token inválido/expirado o contraseña muy corta
+ */
+router.post('/reset-password', resetPassword)
 
 export default router
