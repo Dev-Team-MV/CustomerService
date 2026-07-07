@@ -24,6 +24,12 @@ import {
   upsertProjectCatalogConfig,
   publishProjectCatalogConfig
 } from '../controllers/projectCatalogConfigController.js'
+import {
+  getProjectVariables,
+  createProjectVariable,
+  updateProjectVariable,
+  deleteProjectVariable
+} from '../controllers/projectVariableController.js'
 import { downloadProjectStatementPdf } from '../controllers/accountStatementController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
@@ -393,6 +399,68 @@ router.put('/:id/catalog-config', protect, admin, upsertProjectCatalogConfig)
  */
 router.post('/:id/catalog-config/publish', protect, admin, publishProjectCatalogConfig)
 router.get('/:id/account-statement/pdf', protect, downloadProjectStatementPdf)
+
+/**
+ * @swagger
+ * /api/projects/{id}/variables:
+ *   get:
+ *     summary: Listar variables de mensajes del proyecto
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: categoria
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Lista de variables del proyecto
+ *   post:
+ *     summary: Crear variable de mensaje del proyecto (admin)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, recorrido, categoria]
+ *             properties:
+ *               name: { type: string, example: firstName }
+ *               recorrido: { type: string, example: user.firstName }
+ *               categoria: { type: string, example: Usuario }
+ *     responses:
+ *       201:
+ *         description: Variable creada
+ */
+router.get('/:id/variables', getProjectVariables)
+router.post('/:id/variables', protect, admin, createProjectVariable)
+
+/**
+ * @swagger
+ * /api/projects/{id}/variables/{variableId}:
+ *   put:
+ *     summary: Actualizar variable de mensaje del proyecto (admin)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *   delete:
+ *     summary: Eliminar variable de mensaje del proyecto (admin)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.put('/:id/variables/:variableId', protect, admin, updateProjectVariable)
+router.delete('/:id/variables/:variableId', protect, admin, deleteProjectVariable)
 
 /**
  * @swagger
