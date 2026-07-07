@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import Project from '../models/Project.js'
 import ProjectVariable from '../models/ProjectVariable.js'
+import { getRecorridoRoots, getRecorridoSegments } from '../services/recorridoRegistry.js'
 
 const VARIABLE_NAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_]*$/
 
@@ -35,6 +36,48 @@ function validatePayload(payload) {
   }
 
   return errors
+}
+
+export const listRecorridoRoots = async (req, res) => {
+  try {
+    const project = await ensureProject(req.params.id)
+    if (!project) return res.status(404).json({ message: 'Project not found' })
+
+    const lang = req.query.lang || 'es'
+    const roots = getRecorridoRoots(lang)
+
+    return res.json({
+      projectId: project._id,
+      roots
+    })
+  } catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
+}
+
+export const listRecorridoSegments = async (req, res) => {
+  try {
+    const project = await ensureProject(req.params.id)
+    if (!project) return res.status(404).json({ message: 'Project not found' })
+
+    const path = req.query.path || ''
+    const lang = req.query.lang || 'es'
+    const result = getRecorridoSegments(path, lang)
+
+    if (result.error) {
+      return res.status(result.status || 400).json({
+        message: result.error,
+        path: result.path || path
+      })
+    }
+
+    return res.json({
+      projectId: project._id,
+      ...result
+    })
+  } catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
 }
 
 export const getProjectVariables = async (req, res) => {

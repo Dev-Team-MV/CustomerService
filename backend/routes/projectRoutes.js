@@ -28,7 +28,9 @@ import {
   getProjectVariables,
   createProjectVariable,
   updateProjectVariable,
-  deleteProjectVariable
+  deleteProjectVariable,
+  listRecorridoRoots,
+  listRecorridoSegments
 } from '../controllers/projectVariableController.js'
 import { downloadProjectStatementPdf } from '../controllers/accountStatementController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
@@ -442,6 +444,58 @@ router.get('/:id/account-statement/pdf', protect, downloadProjectStatementPdf)
  *       201:
  *         description: Variable creada
  */
+/**
+ * @swagger
+ * /api/projects/{id}/variables/recorridos:
+ *   get:
+ *     summary: Listar raíces de recorrido (user, client, lot, etc.)
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: lang
+ *         schema: { type: string, enum: [es, en], default: es }
+ *     responses:
+ *       200:
+ *         description: Raíces disponibles para armar recorridos
+ */
+router.get('/:id/variables/recorridos', listRecorridoRoots)
+
+/**
+ * @swagger
+ * /api/projects/{id}/variables/recorridos/segments:
+ *   get:
+ *     summary: Listar campos disponibles después de un segmento de recorrido
+ *     description: |
+ *       Devuelve los campos del nivel indicado por `path`.
+ *       Ej. `path=lot` → number, price, model…
+ *       Ej. `path=lot.model` → campos del modelo.
+ *       Los campos `type=ref` tienen `hasChildren=true` y se puede seguir navegando.
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: path
+ *         required: true
+ *         schema: { type: string, example: lot }
+ *       - in: query
+ *         name: lang
+ *         schema: { type: string, enum: [es, en], default: es }
+ *     responses:
+ *       200:
+ *         description: Segmentos del recorrido
+ *       400:
+ *         description: path inválido o campo escalar sin hijos
+ *       404:
+ *         description: Segmento no encontrado
+ */
+router.get('/:id/variables/recorridos/segments', listRecorridoSegments)
 router.get('/:id/variables', getProjectVariables)
 router.post('/:id/variables', protect, admin, createProjectVariable)
 
