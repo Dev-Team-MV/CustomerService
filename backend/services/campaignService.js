@@ -8,22 +8,10 @@ import Building from '../models/Building.js'
 import ApartmentModel from '../models/ApartmentModel.js'
 import SMSTemplate from '../models/SMSTemplate.js'
 import { sendSMSWithValidation } from './twilioService.js'
+import { renderTemplate } from './templateRenderService.js'
+import { resolveVariablesForSend } from './projectVariableResolverService.js'
 
 const activeSends = new Set()
-
-function getTemplateValue(variables, key) {
-  return key.split('.').reduce((acc, part) => {
-    if (acc === null || acc === undefined) return undefined
-    return acc[part]
-  }, variables)
-}
-
-export function renderTemplate(template, variables = {}) {
-  return template.replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, (_match, key) => {
-    const value = getTemplateValue(variables, key)
-    return value === undefined || value === null ? '' : String(value)
-  })
-}
 
 function buildLeadFilter(audience) {
   const filter = { phone: { $exists: true, $ne: '' } }
@@ -71,14 +59,7 @@ export async function resolveCampaignRecipients(audience) {
       leadId: lead._id,
       phone: lead.phone,
       label: lead.name,
-      status: 'pending',
-      variables: {
-        name: lead.name,
-        leadName: lead.name,
-        email: lead.email || '',
-        phone: lead.phone || '',
-        stage: lead.stage || ''
-      }
+      status: 'pending'
     }))
   }
 
@@ -101,15 +82,23 @@ export async function resolveCampaignRecipients(audience) {
     userId: user._id,
     phone: user.phoneNumber,
     label: [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.email,
-    status: 'pending',
-    variables: {
-      name: [user.firstName, user.lastName].filter(Boolean).join(' ').trim(),
-      firstName: user.firstName || '',
-      lastName: user.lastName || '',
-      email: user.email || '',
-      phone: user.phoneNumber || ''
-    }
+    status: 'pending'
   }))
+}
+
+async function resolveRecipientTemplateVariables({
+  campaign,
+  template,
+  recipient
+}) {
+  const { variables } = await resolveVariablesForSend({
+    campaignProjectId: campaign.audience?.projectId,
+    templateProjectId: template.projectId,
+    userId: recipient.userId,
+    leadId: recipient.leadId
+  })
+
+  return variables
 }
 
 export async function previewCampaignRecipients(campaign) {
@@ -117,46 +106,24 @@ export async function previewCampaignRecipients(campaign) {
   if (!template) throw new Error('SMS template not found')
 
   const recipients = await resolveCampaignRecipients(campaign.audience)
+  const previews = []
+
+  for (const recipient of recipients) {
+    const variables = await resolveRecipientTemplateVariables({ campaign, template, recipient })
+    previews.push({
+      userId: recipient.userId,
+      leadId: recipient.leadId,
+      phone: recipient.phone,
+      label: recipient.label,
+      previewMessage: renderTemplate(template.template, variables),
+      resolvedVariables: variables
+    })
+  }
+
   return {
-    total: recipients.length,
-    recipients: recipients.map((r) => ({
-      userId: r.userId,
-      leadId: r.leadId,
-      phone: r.phone,
-      label: r.label,
-      previewMessage: renderTemplate(template.template, r.variables)
-    }))
+    total: previews.length,
+    recipients: previews
   }
-}
-
-async function getRecipientVariables(recipient) {
-  if (recipient.leadId) {
-    const lead = await Lead.findById(recipient.leadId).select('name email phone stage').lean()
-    if (!lead) return {}
-    return {
-      name: lead.name,
-      leadName: lead.name,
-      email: lead.email || '',
-      phone: lead.phone || '',
-      stage: lead.stage || ''
-    }
-  }
-
-  if (recipient.userId) {
-    const user = await User.findById(recipient.userId)
-      .select('firstName lastName email phoneNumber')
-      .lean()
-    if (!user) return {}
-    return {
-      name: [user.firstName, user.lastName].filter(Boolean).join(' '),
-      firstName: user.firstName || '',
-      lastName: user.lastName || '',
-      email: user.email || '',
-      phone: user.phoneNumber || ''
-    }
-  }
-
-  return {}
 }
 
 async function processCampaignSend(campaignId) {
@@ -184,7 +151,7 @@ async function processCampaignSend(campaignId) {
     }
 
     try {
-      const variables = await getRecipientVariables(recipient)
+      const variables = await resolveRecipientTemplateVariables({ campaign, template, recipient })
       const message = renderTemplate(template.template, variables)
       await sendSMSWithValidation(recipient.phone, message)
 
@@ -272,3 +239,6 @@ export function getCampaignStats(campaign) {
     scheduledAt: campaign.scheduledAt
   }
 }
+
+// Re-export for backward compatibility
+export { renderTemplate } from './templateRenderService.js'

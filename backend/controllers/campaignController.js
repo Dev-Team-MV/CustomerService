@@ -7,9 +7,10 @@ import {
   previewCampaignRecipients,
   startCampaignSend
 } from '../services/campaignService.js'
+import { assertTemplateProjectMatch } from '../services/projectVariableResolverService.js'
 
 const POPULATE_FIELDS = [
-  { path: 'templateId', select: 'name template category' },
+  { path: 'templateId', select: 'name template category projectId' },
   { path: 'audience.projectId', select: 'name slug title' },
   { path: 'createdBy', select: 'firstName lastName email' }
 ]
@@ -44,6 +45,11 @@ export const createCampaign = async (req, res) => {
     if (audience.projectId) {
       const projectExists = await Project.exists({ _id: audience.projectId })
       if (!projectExists) return res.status(404).json({ message: 'Project not found' })
+    }
+
+    const projectMismatch = assertTemplateProjectMatch(template.projectId, audience.projectId)
+    if (projectMismatch) {
+      return res.status(400).json({ message: projectMismatch })
     }
 
     if (status && !CAMPAIGN_STATUSES.includes(status)) {

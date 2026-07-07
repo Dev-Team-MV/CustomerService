@@ -25,6 +25,16 @@ const router = express.Router()
  *           type: string
  *         description: Filter templates by category
  *       - in: query
+ *         name: projectId
+ *         schema:
+ *           type: string
+ *         description: Filter by project (includes global templates unless projectOnly=true)
+ *       - in: query
+ *         name: projectOnly
+ *         schema:
+ *           type: boolean
+ *         description: When used with projectId, return only templates scoped to that project
+ *       - in: query
  *         name: isActive
  *         schema:
  *           type: boolean
@@ -67,6 +77,10 @@ const router = express.Router()
  *               isActive:
  *                 type: boolean
  *                 example: true
+ *               projectId:
+ *                 type: string
+ *                 description: Optional project scope for this template
+ *                 example: "664abc111111111111111111"
  *     responses:
  *       201:
  *         description: SMS template created
@@ -125,6 +139,9 @@ router
  *                 type: string
  *               isActive:
  *                 type: boolean
+ *               projectId:
+ *                 type: string
+ *                 nullable: true
  *     responses:
  *       200:
  *         description: SMS template updated
