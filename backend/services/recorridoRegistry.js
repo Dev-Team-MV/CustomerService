@@ -101,6 +101,47 @@ const RECORRIDO_NODES = {
       { key: 'price', type: 'scalar', label: L('Precio', 'Price') }
     ]
   },
+  building: {
+    label: L('Edificio', 'Building'),
+    description: L('Edificio del proyecto (torres / apartamentos)', 'Project building (towers / apartments)'),
+    fields: [
+      { key: 'name', type: 'scalar', label: L('Nombre', 'Name') },
+      { key: 'section', type: 'scalar', label: L('Sección', 'Section') },
+      { key: 'floors', type: 'scalar', label: L('Pisos', 'Floors') },
+      { key: 'status', type: 'scalar', label: L('Estado', 'Status') },
+      { key: 'totalApartments', type: 'scalar', label: L('Total apartamentos', 'Total apartments') },
+      { key: 'availabilityStatus', type: 'scalar', label: L('Disponibilidad', 'Availability') }
+    ]
+  },
+  apartment: {
+    label: L('Apartamento', 'Apartment'),
+    description: L('Unidad de apartamento asignada', 'Assigned apartment unit'),
+    fields: [
+      { key: 'apartmentNumber', type: 'scalar', label: L('Número de apartamento', 'Apartment number') },
+      { key: 'floorNumber', type: 'scalar', label: L('Piso', 'Floor number') },
+      { key: 'price', type: 'scalar', label: L('Precio', 'Price') },
+      { key: 'pending', type: 'scalar', label: L('Saldo pendiente', 'Pending balance') },
+      { key: 'initialPayment', type: 'scalar', label: L('Enganche inicial', 'Initial payment') },
+      { key: 'status', type: 'scalar', label: L('Estado', 'Status') },
+      { key: 'saleDate', type: 'scalar', label: L('Fecha de venta', 'Sale date') },
+      { key: 'building', type: 'ref', ref: 'building', label: L('Edificio', 'Building') },
+      { key: 'apartmentModel', type: 'ref', ref: 'apartmentModel', label: L('Modelo de apartamento', 'Apartment model') }
+    ]
+  },
+  apartmentModel: {
+    label: L('Modelo de apartamento', 'Apartment model'),
+    description: L('Tipología de apartamento en el edificio', 'Apartment typology in the building'),
+    fields: [
+      { key: 'name', type: 'scalar', label: L('Nombre', 'Name') },
+      { key: 'modelNumber', type: 'scalar', label: L('Número de modelo', 'Model number') },
+      { key: 'sqft', type: 'scalar', label: L('Pies cuadrados', 'Square feet') },
+      { key: 'bedrooms', type: 'scalar', label: L('Recámaras', 'Bedrooms') },
+      { key: 'bathrooms', type: 'scalar', label: L('Baños', 'Bathrooms') },
+      { key: 'apartmentCount', type: 'scalar', label: L('Cantidad de unidades', 'Unit count') },
+      { key: 'status', type: 'scalar', label: L('Estado', 'Status') },
+      { key: 'building', type: 'ref', ref: 'building', label: L('Edificio', 'Building') }
+    ]
+  },
   payment: {
     label: L('Pago', 'Payment'),
     description: L('Abono o pago registrado', 'Registered payment'),
@@ -115,7 +156,18 @@ const RECORRIDO_NODES = {
   }
 }
 
-const ROOT_KEYS = ['user', 'client', 'lot', 'property', 'project', 'lead', 'payment']
+const ROOT_KEYS = [
+  'user',
+  'client',
+  'lot',
+  'property',
+  'building',
+  'apartment',
+  'apartmentModel',
+  'project',
+  'lead',
+  'payment'
+]
 
 function resolveLang(lang) {
   return lang === 'en' ? 'en' : 'es'

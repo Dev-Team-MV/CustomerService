@@ -437,9 +437,9 @@ router.get('/:id/account-statement/pdf', protect, downloadProjectStatementPdf)
  *             type: object
  *             required: [name, recorrido, categoria]
  *             properties:
- *               name: { type: string, example: firstName }
- *               recorrido: { type: string, example: user.firstName }
- *               categoria: { type: string, example: Usuario }
+ *               name: { type: string, example: apartmentNumber }
+ *               recorrido: { type: string, example: apartment.apartmentNumber }
+ *               categoria: { type: string, example: Apartamento }
  *     responses:
  *       201:
  *         description: Variable creada
@@ -448,7 +448,11 @@ router.get('/:id/account-statement/pdf', protect, downloadProjectStatementPdf)
  * @swagger
  * /api/projects/{id}/variables/recorridos:
  *   get:
- *     summary: Listar raíces de recorrido (user, client, lot, etc.)
+ *     summary: Listar raíces de recorrido para variables de mensajes
+ *     description: |
+ *       Raíces disponibles: `user`, `client`, `lot`, `property`, `building`, `apartment`,
+ *       `apartmentModel`, `project`, `lead`, `payment`.
+ *       Usar junto con `/variables/recorridos/segments` para armar el campo `recorrido`.
  *     tags: [Projects]
  *     parameters:
  *       - in: path
@@ -471,8 +475,9 @@ router.get('/:id/variables/recorridos', listRecorridoRoots)
  *     summary: Listar campos disponibles después de un segmento de recorrido
  *     description: |
  *       Devuelve los campos del nivel indicado por `path`.
- *       Ej. `path=lot` → number, price, model…
- *       Ej. `path=lot.model` → campos del modelo.
+ *       Ejemplos residencial (lotes): `path=lot`, `path=lot.model`, `path=property.lot.number`.
+ *       Ejemplos apartamentos: `path=building`, `path=apartment`, `path=apartment.building`,
+ *       `path=apartment.apartmentModel`, `path=apartmentModel.building`.
  *       Los campos `type=ref` tienen `hasChildren=true` y se puede seguir navegando.
  *     tags: [Projects]
  *     parameters:
@@ -483,7 +488,7 @@ router.get('/:id/variables/recorridos', listRecorridoRoots)
  *       - in: query
  *         name: path
  *         required: true
- *         schema: { type: string, example: lot }
+ *         schema: { type: string, example: apartment }
  *       - in: query
  *         name: lang
  *         schema: { type: string, enum: [es, en], default: es }

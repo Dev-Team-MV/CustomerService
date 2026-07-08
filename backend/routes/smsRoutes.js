@@ -141,11 +141,13 @@ router.post('/send-template', protect, admin, sendSMSTemplate)
  *               variables:
  *                 type: object
  *                 additionalProperties: true
- *                 description: Manual overrides merged with auto-resolved ProjectVariable values
+ *                 description: |
+ *                   Overrides manuales. Si se envía `userId` (y `projectId` efectivo), el backend
+ *                   resuelve automáticamente `ProjectVariable` (user, lot, building, apartment, etc.).
  *                 example:
- *                   name: "Juan"
- *                   amount: "$1,250"
- *                   dueDate: "2026-05-25"
+ *                   firstName: "Juan"
+ *                   apartmentNumber: "1204"
+ *                   buildingName: "Torre A"
  *               projectId:
  *                 type: string
  *                 description: Project used to resolve variables (fallback after template.projectId)
@@ -191,11 +193,13 @@ router.post('/send-by-template', protect, admin, sendSMSByTemplateId)
  *               variables:
  *                 type: object
  *                 additionalProperties: true
- *                 description: Manual overrides merged with auto-resolved ProjectVariable values
+ *                 description: |
+ *                   Overrides manuales. Si se envía `userId` (y `projectId` efectivo), el backend
+ *                   resuelve automáticamente `ProjectVariable` (user, lot, building, apartment, etc.).
  *                 example:
- *                   name: "Juan"
- *                   amount: "$1,250"
- *                   dueDate: "2026-05-25"
+ *                   firstName: "Juan"
+ *                   apartmentNumber: "1204"
+ *                   buildingName: "Torre A"
  *               projectId:
  *                 type: string
  *               userId:

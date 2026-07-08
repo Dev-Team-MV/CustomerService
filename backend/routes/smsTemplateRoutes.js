@@ -73,7 +73,10 @@ const router = express.Router()
  *                 example: payments
  *               template:
  *                 type: string
- *                 example: "Hola {{name}}, tu pago de {{amount}} vence el {{dueDate}}."
+ *                 description: |
+ *                   Texto SMS con placeholders `{{name}}`. Si `projectId` está definido, los valores
+ *                   se resuelven desde `ProjectVariable` del proyecto (ej. `building.name`, `apartment.apartmentNumber`).
+ *                 example: "Hola {{firstName}}, tu apto {{apartmentNumber}} en {{buildingName}}, piso {{floorNumber}}."
  *               isActive:
  *                 type: boolean
  *                 example: true

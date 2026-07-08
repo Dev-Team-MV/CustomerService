@@ -4,6 +4,9 @@ import User from '../models/User.js'
 import Lead from '../models/Lead.js'
 import Property from '../models/Property.js'
 import Lot from '../models/Lot.js'
+import Building from '../models/Building.js'
+import Apartment from '../models/Apartment.js'
+import ApartmentModel from '../models/ApartmentModel.js'
 import ProjectVariable from '../models/ProjectVariable.js'
 import { getPathValue } from './templateRenderService.js'
 
@@ -28,6 +31,57 @@ function formatVariableValue(value) {
     return JSON.stringify(value)
   }
   return String(value)
+}
+
+async function loadApartmentContextForUser(projectId, userId, context) {
+  const buildingIds = await Building.find({ project: projectId }).distinct('_id')
+  if (!buildingIds.length) return
+
+  const apartmentModelIds = await ApartmentModel.find({
+    building: { $in: buildingIds }
+  }).distinct('_id')
+
+  const apartmentFilter = {
+    users: userId,
+    $or: [
+      { building: { $in: buildingIds } },
+      ...(apartmentModelIds.length ? [{ apartmentModel: { $in: apartmentModelIds } }] : [])
+    ]
+  }
+
+  const apartment = await Apartment.findOne(apartmentFilter)
+    .populate({
+      path: 'building',
+      select: 'name section floors status totalApartments availabilityStatus project'
+    })
+    .populate({
+      path: 'apartmentModel',
+      select: 'name modelNumber sqft bedrooms bathrooms apartmentCount status building',
+      populate: {
+        path: 'building',
+        select: 'name section floors status totalApartments availabilityStatus project'
+      }
+    })
+    .lean()
+
+  if (!apartment) return
+
+  context.apartment = apartment
+
+  if (apartment.building && typeof apartment.building === 'object') {
+    context.building = apartment.building
+  }
+
+  if (apartment.apartmentModel && typeof apartment.apartmentModel === 'object') {
+    context.apartmentModel = apartment.apartmentModel
+    if (
+      !context.building &&
+      apartment.apartmentModel.building &&
+      typeof apartment.apartmentModel.building === 'object'
+    ) {
+      context.building = apartment.apartmentModel.building
+    }
+  }
 }
 
 export async function buildRecipientContext({ projectId, userId, leadId } = {}) {
@@ -80,6 +134,8 @@ export async function buildRecipientContext({ projectId, userId, leadId } = {}) 
           if (lot.model && typeof lot.model === 'object') context.model = lot.model
         }
       }
+
+      await loadApartmentContextForUser(projectId, userId, context)
     }
   }
 
