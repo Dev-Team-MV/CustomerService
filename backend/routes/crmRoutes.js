@@ -7,6 +7,8 @@ import {
 } from '../controllers/crmClientController.js'
 import { getCrmPayments, getCrmPaymentsSummary } from '../controllers/crmPaymentController.js'
 import { getCrmAgents, getCrmAgentMetrics } from '../controllers/crmAgentController.js'
+import { getAgentTargets, upsertAgentTargets } from '../controllers/agentTargetController.js'
+import { getAuditLogs } from '../controllers/auditLogController.js'
 import {
   exportCrmClients,
   exportCrmPayments,
@@ -19,6 +21,8 @@ import {
 } from '../controllers/crmNotificationController.js'
 import { searchCrm } from '../controllers/crmSearchController.js'
 import { protect, superadmin } from '../middleware/authMiddleware.js'
+import { logAction } from '../middleware/logAction.js'
+import { fetchClient } from '../utils/auditEntityFetchers.js'
 import leadRoutes from './leadRoutes.js'
 import appointmentRoutes from './appointmentRoutes.js'
 import automationRoutes from './automationRoutes.js'
@@ -57,6 +61,55 @@ router.use('/campaigns', campaignRoutes)
  *               $ref: '#/components/schemas/CrmSearchResult'
  */
 router.get('/search', protect, superadmin, searchCrm)
+
+/**
+ * @swagger
+ * /api/crm/audit:
+ *   get:
+ *     summary: Paginated CRM audit log
+ *     tags: [CRM Audit]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: entity
+ *         schema:
+ *           type: string
+ *           enum: [Lead, Client, Activity, Appointment, Campaign]
+ *       - in: query
+ *         name: entityId
+ *         schema: { type: string }
+ *       - in: query
+ *         name: userId
+ *         schema: { type: string }
+ *       - in: query
+ *         name: action
+ *         schema:
+ *           type: string
+ *           enum: [created, updated, deleted, stage_changed, sms_sent, login]
+ *       - in: query
+ *         name: dateFrom
+ *         schema: { type: string, format: date-time }
+ *       - in: query
+ *         name: dateTo
+ *         schema: { type: string, format: date-time }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20, maximum: 100 }
+ *     responses:
+ *       200:
+ *         description: Audit log entries with pagination
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmAuditLogsPaginated'
+ *       400:
+ *         description: Invalid filter parameter
+ */
+router.get('/audit', protect, superadmin, getAuditLogs)
 
 /**
  * @swagger
@@ -103,6 +156,74 @@ router.get('/agents', protect, superadmin, getCrmAgents)
  *         description: Agent not found
  */
 router.get('/agents/:id/metrics', protect, superadmin, getCrmAgentMetrics)
+
+/**
+ * @swagger
+ * /api/crm/agents/{id}/targets:
+ *   get:
+ *     summary: Monthly targets and real-time progress for an agent
+ *     tags: [CRM Agents]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: month
+ *         schema: { type: integer, minimum: 1, maximum: 12 }
+ *       - in: query
+ *         name: year
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Targets and computed progress for the month
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmAgentTargetsResponse'
+ *       400:
+ *         description: Invalid agent id
+ *       404:
+ *         description: Agent not found
+ *   post:
+ *     summary: Create or update monthly targets for an agent
+ *     tags: [CRM Agents]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AgentTargetUpsertRequest'
+ *           example:
+ *             month: 7
+ *             year: 2026
+ *             leads: 50
+ *             conversions: 10
+ *             appointments: 20
+ *             smsCount: 100
+ *     responses:
+ *       200:
+ *         description: Targets saved with updated progress
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmAgentTargetsResponse'
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Agent not found
+ */
+router.get('/agents/:id/targets', protect, superadmin, getAgentTargets)
+router.post('/agents/:id/targets', protect, superadmin, upsertAgentTargets)
 
 /**
  * @swagger
@@ -512,7 +633,19 @@ router.get('/clients/:id/payments', protect, superadmin, getCrmClientPayments)
  *       404:
  *         description: Client not found
  */
-router.post('/clients/:id/notes', protect, superadmin, addCrmClientNote)
+router.post(
+  '/clients/:id/notes',
+  protect,
+  superadmin,
+  logAction({
+    action: 'created',
+    entity: 'Client',
+    getEntityId: (req) => req.params.id,
+    fetchBefore: fetchClient,
+    buildAfter: (_, body) => ({ noteActivityId: body?._id, title: body?.title })
+  }),
+  addCrmClientNote
+)
 
 /**
  * @swagger

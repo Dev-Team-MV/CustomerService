@@ -1361,6 +1361,118 @@ const options = {
             }
           }
         },
+        AuditLogEntry: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            userId: {
+              type: 'object',
+              description: 'Populated User ref (who performed the action)',
+              properties: {
+                _id: { type: 'string' },
+                firstName: { type: 'string' },
+                lastName: { type: 'string' },
+                email: { type: 'string' },
+                role: { type: 'string' }
+              }
+            },
+            action: {
+              type: 'string',
+              enum: ['created', 'updated', 'deleted', 'stage_changed', 'sms_sent', 'login']
+            },
+            entity: {
+              type: 'string',
+              enum: ['Lead', 'Client', 'Activity', 'Appointment', 'Campaign']
+            },
+            entityId: { type: 'string' },
+            changes: {
+              type: 'object',
+              properties: {
+                before: { type: 'object', nullable: true, additionalProperties: true },
+                after: { type: 'object', nullable: true, additionalProperties: true }
+              }
+            },
+            ip: { type: 'string', nullable: true },
+            timestamp: { type: 'string', format: 'date-time' }
+          }
+        },
+        CrmAuditLogsPaginated: {
+          type: 'object',
+          properties: {
+            logs: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/AuditLogEntry' }
+            },
+            pagination: { $ref: '#/components/schemas/PaginationMeta' }
+          }
+        },
+        AgentTargetMetrics: {
+          type: 'object',
+          description: 'Monthly target or progress counters per metric',
+          properties: {
+            leads: { type: 'number' },
+            conversions: { type: 'number' },
+            appointments: { type: 'number' },
+            smsCount: { type: 'number' }
+          }
+        },
+        AgentTargetCompletion: {
+          type: 'object',
+          nullable: true,
+          description: 'Completion percentage per metric; null when no target is set for that metric',
+          properties: {
+            leads: { type: 'number', nullable: true, description: 'Percentage (0–100+)' },
+            conversions: { type: 'number', nullable: true },
+            appointments: { type: 'number', nullable: true },
+            smsCount: { type: 'number', nullable: true }
+          }
+        },
+        AgentTargetUpsertRequest: {
+          type: 'object',
+          description: 'Accepts flat fields or nested targets object',
+          properties: {
+            month: { type: 'integer', minimum: 1, maximum: 12 },
+            year: { type: 'integer' },
+            leads: { type: 'number', minimum: 0 },
+            conversions: { type: 'number', minimum: 0 },
+            appointments: { type: 'number', minimum: 0 },
+            smsCount: { type: 'number', minimum: 0 },
+            targets: { $ref: '#/components/schemas/AgentTargetMetrics' }
+          }
+        },
+        CrmAgentTargetsResponse: {
+          type: 'object',
+          properties: {
+            agent: {
+              type: 'object',
+              properties: {
+                _id: { type: 'string' },
+                firstName: { type: 'string' },
+                lastName: { type: 'string' },
+                email: { type: 'string' },
+                phoneNumber: { type: 'string' },
+                role: { type: 'string' }
+              }
+            },
+            agentId: { type: 'string' },
+            month: { type: 'integer', minimum: 1, maximum: 12 },
+            year: { type: 'integer' },
+            targets: {
+              allOf: [{ $ref: '#/components/schemas/AgentTargetMetrics' }],
+              nullable: true,
+              description: 'Configured targets; null if none set for the month'
+            },
+            progress: { $ref: '#/components/schemas/AgentTargetMetrics' },
+            completion: { $ref: '#/components/schemas/AgentTargetCompletion' },
+            period: {
+              type: 'object',
+              properties: {
+                start: { type: 'string', format: 'date-time' },
+                end: { type: 'string', format: 'date-time' }
+              }
+            }
+          }
+        },
         CrmExportResult: {
           type: 'object',
           description: 'JSON export response (format=json). format=csv returns text/csv file.',

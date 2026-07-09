@@ -9,6 +9,8 @@ import {
   convertLead
 } from '../controllers/leadController.js'
 import { protect, superadmin } from '../middleware/authMiddleware.js'
+import { logAction } from '../middleware/logAction.js'
+import { fetchLead } from '../utils/auditEntityFetchers.js'
 
 const router = express.Router()
 
@@ -92,7 +94,15 @@ router.use(protect, superadmin)
  *         description: Not authorized as superadmin
  */
 router.get('/', getLeads)
-router.post('/', createLead)
+router.post(
+  '/',
+  logAction({
+    action: 'created',
+    entity: 'Lead',
+    getEntityId: (_, body) => body?._id
+  }),
+  createLead
+)
 
 /**
  * @swagger
@@ -135,7 +145,16 @@ router.post('/', createLead)
  *       404:
  *         description: Lead not found
  */
-router.put('/:id/stage', updateLeadStage)
+router.put(
+  '/:id/stage',
+  logAction({
+    action: 'stage_changed',
+    entity: 'Lead',
+    fetchBefore: fetchLead,
+    buildAfter: (_, body) => ({ stage: body?.stage, lostReason: body?.lostReason })
+  }),
+  updateLeadStage
+)
 
 /**
  * @swagger
@@ -222,8 +241,21 @@ router.put('/:id/sms-responded', markLeadSmsResponded)
  *       404:
  *         description: Lead not found
  */
-router.put('/:id', updateLead)
-router.delete('/:id', deleteLead)
+router.put(
+  '/:id',
+  logAction({ action: 'updated', entity: 'Lead', fetchBefore: fetchLead }),
+  updateLead
+)
+router.delete(
+  '/:id',
+  logAction({
+    action: 'deleted',
+    entity: 'Lead',
+    fetchBefore: fetchLead,
+    buildAfter: () => null
+  }),
+  deleteLead
+)
 
 /**
  * @swagger
@@ -250,6 +282,15 @@ router.delete('/:id', deleteLead)
  *       404:
  *         description: Lead not found
  */
-router.post('/:id/convert', convertLead)
+router.post(
+  '/:id/convert',
+  logAction({
+    action: 'updated',
+    entity: 'Lead',
+    fetchBefore: fetchLead,
+    getEntityId: (req, body) => body?.lead?._id || req.params.id
+  }),
+  convertLead
+)
 
 export default router

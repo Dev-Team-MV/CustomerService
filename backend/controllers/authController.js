@@ -9,6 +9,7 @@ import { resolveFrontendBaseUrl } from '../services/resolveFrontendBaseUrl.js'
 import { resolveRoleForNewUser } from '../utils/roles.js'
 import { buildAuthLoginResponse, buildAuthUserPayload } from '../utils/authUserPayload.js'
 import { notifyUserCreatedByAdmin } from '../utils/notificationTriggers.js'
+import { getClientIp, writeAuditLog } from '../middleware/logAction.js'
 
 const generateToken = (userOrId) => {
   const payload =
@@ -229,6 +230,14 @@ export const login = async (req, res) => {
         user.passwordSet = true
         await user.save()
       }
+      writeAuditLog({
+        userId: user._id,
+        action: 'login',
+        entity: 'Client',
+        entityId: user._id,
+        changes: { before: null, after: { role: user.role } },
+        ip: getClientIp(req)
+      })
       res.json(buildAuthLoginResponse(user, generateToken(user)))
     } else {
       res.status(401).json({ message: 'Invalid credentials' })
@@ -277,6 +286,14 @@ export const loginAdmin = async (req, res) => {
         user.passwordSet = true
         await user.save()
       }
+      writeAuditLog({
+        userId: user._id,
+        action: 'login',
+        entity: 'Client',
+        entityId: user._id,
+        changes: { before: null, after: { role: user.role } },
+        ip: getClientIp(req)
+      })
       res.json(buildAuthLoginResponse(user, generateToken(user)))
     } else {
       res.status(401).json({ message: 'Invalid credentials' })
