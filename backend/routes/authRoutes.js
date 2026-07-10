@@ -1,6 +1,6 @@
 import express from 'express'
-import { register, login, loginAdmin, getProfile, changePassword, setupPassword, verifySetupToken, sendSetupPasswordLink, requestPasswordReset, verifyPasswordResetCode, resetPassword } from '../controllers/authController.js'
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { register, login, loginAdmin, getProfile, changePassword, setupPassword, verifySetupToken, sendSetupPasswordLink, requestPasswordReset, verifyPasswordResetCode, resetPassword, startImpersonation, stopImpersonation } from '../controllers/authController.js'
+import { protect, admin, superadmin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -174,6 +174,55 @@ router.post('/admin/login', loginAdmin)
  *         description: Unauthorized
  */
 router.get('/profile', protect, getProfile)
+
+/**
+ * @swagger
+ * /api/auth/impersonate/stop:
+ *   post:
+ *     summary: Stop impersonation and restore superadmin session
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Superadmin token restored
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ImpersonationAuthResponse'
+ *       400:
+ *         description: Not currently impersonating
+ */
+router.post('/impersonate/stop', protect, stopImpersonation)
+
+/**
+ * @swagger
+ * /api/auth/impersonate/{userId}:
+ *   post:
+ *     summary: Start impersonating a user (Superadmin only)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Impersonation token and target user payload
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ImpersonationAuthResponse'
+ *       400:
+ *         description: Invalid user or already impersonating
+ *       403:
+ *         description: Not superadmin or target role not allowed
+ *       404:
+ *         description: User not found
+ */
+router.post('/impersonate/:userId', protect, superadmin, startImpersonation)
 
 /**
  * @swagger

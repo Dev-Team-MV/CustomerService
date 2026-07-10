@@ -6,7 +6,9 @@ export const AUDIT_ACTIONS = [
   'deleted',
   'stage_changed',
   'sms_sent',
-  'login'
+  'login',
+  'impersonation_started',
+  'impersonation_stopped'
 ]
 
 export const AUDIT_ENTITIES = ['Lead', 'Client', 'Activity', 'Appointment', 'Campaign']

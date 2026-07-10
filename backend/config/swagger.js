@@ -78,6 +78,27 @@ const options = {
             updatedAt: { type: 'string', format: 'date-time' }
           }
         },
+        ImpersonationState: {
+          type: 'object',
+          properties: {
+            active: { type: 'boolean' },
+            impersonatedBy: { $ref: '#/components/schemas/User' }
+          }
+        },
+        ImpersonationAuthResponse: {
+          type: 'object',
+          description: 'Login-like payload when starting or stopping impersonation',
+          properties: {
+            token: { type: 'string' },
+            user: { $ref: '#/components/schemas/User' },
+            impersonation: { $ref: '#/components/schemas/ImpersonationState' },
+            _id: { type: 'string' },
+            firstName: { type: 'string' },
+            lastName: { type: 'string' },
+            email: { type: 'string' },
+            role: { type: 'string' }
+          }
+        },
         MyProjectsResponse: {
           type: 'array',
           description: 'Lista de proyectos accesibles para el usuario actual',
@@ -1378,7 +1399,16 @@ const options = {
             },
             action: {
               type: 'string',
-              enum: ['created', 'updated', 'deleted', 'stage_changed', 'sms_sent', 'login']
+              enum: [
+                'created',
+                'updated',
+                'deleted',
+                'stage_changed',
+                'sms_sent',
+                'login',
+                'impersonation_started',
+                'impersonation_stopped'
+              ]
             },
             entity: {
               type: 'string',

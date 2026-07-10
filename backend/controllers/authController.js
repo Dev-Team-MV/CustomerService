@@ -10,17 +10,10 @@ import { resolveRoleForNewUser } from '../utils/roles.js'
 import { buildAuthLoginResponse, buildAuthUserPayload } from '../utils/authUserPayload.js'
 import { notifyUserCreatedByAdmin } from '../utils/notificationTriggers.js'
 import { getClientIp, writeAuditLog } from '../middleware/logAction.js'
+import { generateToken } from '../utils/jwtUtils.js'
+import { isValidObjectId } from '../utils/crmHelpers.js'
 
-const generateToken = (userOrId) => {
-  const payload =
-    userOrId && typeof userOrId === 'object'
-      ? { id: String(userOrId._id || userOrId.id), role: userOrId.role }
-      : { id: String(userOrId) }
-
-  return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: '30d'
-  })
-}
+const IMPERSONATION_BLOCKED_ROLES = new Set(['superadmin', 'owner'])
 
 const FORGOT_PASSWORD_GENERIC_MESSAGE =
   'If an account with that email exists, a verification code has been sent.'
@@ -318,10 +311,20 @@ export const getProfile = async (req, res) => {
           slug: m.project?.slug
         }))
       })
-      res.json({
+
+      const response = {
         ...userPayload,
         user: userPayload
-      })
+      }
+
+      if (req.isImpersonating && req.impersonatedBy) {
+        response.impersonation = {
+          active: true,
+          impersonatedBy: buildAuthUserPayload(req.impersonatedBy)
+        }
+      }
+
+      res.json(response)
     } else {
       res.status(404).json({ message: 'User not found' })
     }
@@ -330,8 +333,139 @@ export const getProfile = async (req, res) => {
   }
 }
 
+export const startImpersonation = async (req, res) => {
+  try {
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Only superadmin can impersonate users' })
+    }
+
+    if (req.isImpersonating) {
+      return res.status(400).json({ message: 'Stop current impersonation before starting a new one' })
+    }
+
+    const { userId } = req.params
+    if (!isValidObjectId(userId)) {
+      return res.status(400).json({ message: 'Invalid user id' })
+    }
+
+    if (String(userId) === String(req.user._id)) {
+      return res.status(400).json({ message: 'Cannot impersonate yourself' })
+    }
+
+    const targetUser = await User.findOne({
+      _id: userId,
+      isActive: { $ne: false }
+    })
+      .populate('lots')
+      .populate('projectMemberships.project', 'name slug phase type')
+
+    if (!targetUser) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    if (IMPERSONATION_BLOCKED_ROLES.has(targetUser.role)) {
+      return res.status(403).json({ message: 'Cannot impersonate this user role' })
+    }
+
+    const token = generateToken(targetUser, { impersonatedBy: req.user._id })
+    const userPayload = buildAuthUserPayload(targetUser, {
+      projectMemberships: (targetUser.projectMemberships || []).map((m) => ({
+        project: m.project?._id || m.project,
+        membershipRole: m.role || 'resident',
+        name: m.project?.name,
+        slug: m.project?.slug
+      }))
+    })
+    const impersonatedByPayload = buildAuthUserPayload(req.user)
+
+    writeAuditLog({
+      userId: req.user._id,
+      action: 'impersonation_started',
+      entity: 'Client',
+      entityId: targetUser._id,
+      changes: {
+        before: null,
+        after: {
+          targetUserId: targetUser._id,
+          targetRole: targetUser.role,
+          targetEmail: targetUser.email
+        }
+      },
+      ip: getClientIp(req)
+    })
+
+    res.json({
+      ...userPayload,
+      token,
+      user: userPayload,
+      impersonation: {
+        active: true,
+        impersonatedBy: impersonatedByPayload
+      }
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const stopImpersonation = async (req, res) => {
+  try {
+    if (!req.isImpersonating || !req.impersonatedBy) {
+      return res.status(400).json({ message: 'Not currently impersonating a user' })
+    }
+
+    const superadmin = await User.findById(req.impersonatedBy._id)
+      .populate('lots')
+      .populate('projectMemberships.project', 'name slug phase type')
+
+    if (!superadmin || superadmin.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Original superadmin session is no longer valid' })
+    }
+
+    writeAuditLog({
+      userId: superadmin._id,
+      action: 'impersonation_stopped',
+      entity: 'Client',
+      entityId: req.user._id,
+      changes: {
+        before: {
+          impersonatedUserId: req.user._id,
+          impersonatedRole: req.user.role
+        },
+        after: null
+      },
+      ip: getClientIp(req)
+    })
+
+    const token = generateToken(superadmin)
+    const userPayload = buildAuthUserPayload(superadmin, {
+      projectMemberships: (superadmin.projectMemberships || []).map((m) => ({
+        project: m.project?._id || m.project,
+        membershipRole: m.role || 'resident',
+        name: m.project?.name,
+        slug: m.project?.slug
+      }))
+    })
+
+    res.json({
+      ...userPayload,
+      token,
+      user: userPayload,
+      impersonation: {
+        active: false
+      }
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 export const changePassword = async (req, res) => {
   try {
+    if (req.isImpersonating) {
+      return res.status(403).json({ message: 'Cannot change password while impersonating a user' })
+    }
+
     const { currentPassword, newPassword } = req.body
 
     if (!currentPassword || !newPassword) {

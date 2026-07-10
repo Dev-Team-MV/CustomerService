@@ -86,7 +86,7 @@ router.get('/search', protect, superadmin, searchCrm)
  *         name: action
  *         schema:
  *           type: string
- *           enum: [created, updated, deleted, stage_changed, sms_sent, login]
+ *           enum: [created, updated, deleted, stage_changed, sms_sent, login, impersonation_started, impersonation_stopped]
  *       - in: query
  *         name: dateFrom
  *         schema: { type: string, format: date-time }

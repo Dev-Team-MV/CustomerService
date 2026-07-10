@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
 import { canUserAccessProject } from '../utils/projectAccess.js'
+import { verifyToken } from '../utils/jwtUtils.js'
 
 const READ_ONLY_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 
@@ -14,8 +14,15 @@ export const protect = async (req, res, next) => {
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
       token = req.headers.authorization.split(' ')[1]
-      const decoded = jwt.verify(token, process.env.JWT_SECRET)
+      const decoded = verifyToken(token)
       req.user = await User.findById(decoded.id).select('-password')
+      if (!req.user) {
+        return res.status(401).json({ message: 'Unauthorized, user not found' })
+      }
+      if (decoded.impersonatedBy) {
+        req.isImpersonating = true
+        req.impersonatedBy = await User.findById(decoded.impersonatedBy).select('-password')
+      }
       if (isOwnerWriteAttempt(req)) {
         return res.status(403).json({ message: 'Owner role is read-only' })
       }
@@ -38,8 +45,12 @@ export const optionalProtect = async (req, res, next) => {
   }
   try {
     const token = req.headers.authorization.split(' ')[1]
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const decoded = verifyToken(token)
     req.user = await User.findById(decoded.id).select('-password')
+    if (decoded.impersonatedBy) {
+      req.isImpersonating = true
+      req.impersonatedBy = await User.findById(decoded.impersonatedBy).select('-password')
+    }
     if (isOwnerWriteAttempt(req)) {
       return res.status(403).json({ message: 'Owner role is read-only' })
     }
