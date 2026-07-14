@@ -261,7 +261,7 @@ router.delete(
  * @swagger
  * /api/crm/leads/{id}/convert:
  *   post:
- *     summary: Convert lead to User and send setup-password SMS
+ *     summary: Convert lead to User, send setup SMS, and optionally create pending Commission
  *     tags: [CRM Leads]
  *     security:
  *       - bearerAuth: []
@@ -270,9 +270,35 @@ router.delete(
  *         name: id
  *         required: true
  *         schema: { type: string }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               saleAmount:
+ *                 type: number
+ *                 description: If provided (and lead has assignedTo + projectId), creates a pending Commission
+ *               structureId:
+ *                 type: string
+ *               overrideRate:
+ *                 type: number
+ *               overrideAmount:
+ *                 type: number
+ *               splits:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     agentId: { type: string }
+ *                     percentage: { type: number }
+ *               propertyId:
+ *                 type: string
+ *               commissionNotes:
+ *                 type: string
  *     responses:
  *       201:
- *         description: Lead converted to client user
+ *         description: Lead converted to client user (commission included when saleAmount provided)
  *         content:
  *           application/json:
  *             schema:

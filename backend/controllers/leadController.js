@@ -12,6 +12,7 @@ import {
   touchLeadStage,
   updateLeadScore
 } from '../services/leadScoringService.js'
+import { createPendingCommissionFromLead } from './commissionController.js'
 
 const POPULATE_FIELDS = [
   { path: 'projectId', select: 'name slug title' },
@@ -307,6 +308,34 @@ export const convertLead = async (req, res) => {
       actor: req.user
     })
 
+    // Auto-generate pending commission when converting to sale
+    let commission = null
+    try {
+      const {
+        saleAmount,
+        structureId,
+        overrideRate,
+        overrideAmount,
+        splits,
+        propertyId,
+        commissionNotes
+      } = req.body || {}
+
+      if (saleAmount != null && lead.assignedTo && lead.projectId) {
+        commission = await createPendingCommissionFromLead(lead, {
+          saleAmount,
+          structureId,
+          overrideRate,
+          overrideAmount,
+          splits,
+          propertyId,
+          notes: commissionNotes
+        })
+      }
+    } catch (commissionError) {
+      console.error('Auto-commission on lead convert failed:', commissionError.message)
+    }
+
     res.status(201).json({
       lead,
       user: {
@@ -318,7 +347,8 @@ export const convertLead = async (req, res) => {
         role: user.role
       },
       smsSent,
-      setupLink: smsSent ? undefined : setupLink
+      setupLink: smsSent ? undefined : setupLink,
+      commission
     })
   } catch (error) {
     res.status(500).json({ message: error.message })

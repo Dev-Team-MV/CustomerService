@@ -1184,7 +1184,12 @@ const options = {
               }
             },
             smsSent: { type: 'boolean' },
-            setupLink: { type: 'string', description: 'Present only when SMS failed' }
+            setupLink: { type: 'string', description: 'Present only when SMS failed' },
+            commission: {
+              nullable: true,
+              description: 'Pending commission when saleAmount was provided on convert',
+              allOf: [{ $ref: '#/components/schemas/Commission' }]
+            }
           }
         },
         CrmClientProperty: {
@@ -1920,6 +1925,359 @@ const options = {
               type: 'boolean',
               description: 'Set true when the lead replied to an outbound SMS'
             }
+          }
+        },
+        CommissionSplit: {
+          type: 'object',
+          properties: {
+            agentId: { type: 'string' },
+            percentage: { type: 'number' },
+            amount: { type: 'number' }
+          }
+        },
+        Commission: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            propertyId: { type: 'string', nullable: true },
+            projectId: { type: 'string' },
+            agentId: { type: 'string' },
+            leadId: { type: 'string', nullable: true },
+            saleAmount: { type: 'number' },
+            commissionRate: { type: 'number' },
+            commissionAmount: { type: 'number' },
+            bonusAmount: { type: 'number' },
+            splitWith: { type: 'array', items: { $ref: '#/components/schemas/CommissionSplit' } },
+            status: { type: 'string', enum: ['pending', 'approved', 'paid', 'disputed'] },
+            paidAt: { type: 'string', format: 'date-time', nullable: true },
+            approvedBy: { type: 'string', nullable: true },
+            structureId: { type: 'string', nullable: true },
+            notes: { type: 'string' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        CommissionCreate: {
+          type: 'object',
+          required: ['projectId', 'agentId', 'saleAmount'],
+          properties: {
+            propertyId: { type: 'string' },
+            projectId: { type: 'string' },
+            agentId: { type: 'string' },
+            leadId: { type: 'string' },
+            saleAmount: { type: 'number' },
+            structureId: { type: 'string' },
+            overrideRate: { type: 'number' },
+            overrideAmount: { type: 'number' },
+            splits: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  agentId: { type: 'string' },
+                  percentage: { type: 'number' }
+                }
+              }
+            },
+            notes: { type: 'string' }
+          }
+        },
+        CommissionUpdate: {
+          type: 'object',
+          properties: {
+            saleAmount: { type: 'number' },
+            structureId: { type: 'string' },
+            overrideRate: { type: 'number' },
+            overrideAmount: { type: 'number' },
+            splits: { type: 'array', items: { type: 'object' } },
+            notes: { type: 'string' },
+            propertyId: { type: 'string' },
+            status: { type: 'string', enum: ['pending', 'disputed'] }
+          }
+        },
+        CommissionCalculateRequest: {
+          type: 'object',
+          required: ['saleAmount'],
+          properties: {
+            saleAmount: { type: 'number' },
+            projectId: { type: 'string' },
+            structureId: { type: 'string' },
+            overrideRate: { type: 'number' },
+            overrideAmount: { type: 'number' },
+            primaryAgentId: { type: 'string' },
+            splits: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  agentId: { type: 'string' },
+                  percentage: { type: 'number' }
+                }
+              }
+            }
+          }
+        },
+        CommissionCalculateResult: {
+          type: 'object',
+          properties: {
+            saleAmount: { type: 'number' },
+            commissionRate: { type: 'number' },
+            commissionAmount: { type: 'number' },
+            bonusAmount: { type: 'number' },
+            totalPayout: { type: 'number' },
+            bonusesApplied: { type: 'array', items: { type: 'object' } },
+            splitWith: { type: 'array', items: { $ref: '#/components/schemas/CommissionSplit' } },
+            structureType: { type: 'string', nullable: true }
+          }
+        },
+        CommissionStructureTier: {
+          type: 'object',
+          properties: {
+            minAmount: { type: 'number' },
+            maxAmount: { type: 'number', nullable: true },
+            rate: { type: 'number', description: 'Percentage rate for this tier' }
+          }
+        },
+        CommissionBonusRule: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            bonusType: {
+              type: 'string',
+              enum: ['flat', 'percentage_of_sale', 'percentage_of_commission']
+            },
+            value: { type: 'number' },
+            minSaleAmount: { type: 'number' },
+            maxSaleAmount: { type: 'number', nullable: true }
+          }
+        },
+        CommissionStructure: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            projectId: { type: 'string' },
+            name: { type: 'string' },
+            type: { type: 'string', enum: ['flat', 'percentage', 'tiered'] },
+            flatAmount: { type: 'number' },
+            percentageRate: { type: 'number' },
+            tiers: { type: 'array', items: { $ref: '#/components/schemas/CommissionStructureTier' } },
+            bonusRules: { type: 'array', items: { $ref: '#/components/schemas/CommissionBonusRule' } },
+            isDefault: { type: 'boolean' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        CommissionStructureCreate: {
+          type: 'object',
+          required: ['projectId', 'name', 'type'],
+          properties: {
+            projectId: { type: 'string' },
+            name: { type: 'string' },
+            type: { type: 'string', enum: ['flat', 'percentage', 'tiered'] },
+            flatAmount: { type: 'number' },
+            percentageRate: { type: 'number' },
+            tiers: { type: 'array', items: { $ref: '#/components/schemas/CommissionStructureTier' } },
+            bonusRules: { type: 'array', items: { $ref: '#/components/schemas/CommissionBonusRule' } },
+            isDefault: { type: 'boolean' }
+          }
+        },
+        CommissionStructureUpdate: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            type: { type: 'string', enum: ['flat', 'percentage', 'tiered'] },
+            flatAmount: { type: 'number' },
+            percentageRate: { type: 'number' },
+            tiers: { type: 'array', items: { $ref: '#/components/schemas/CommissionStructureTier' } },
+            bonusRules: { type: 'array', items: { $ref: '#/components/schemas/CommissionBonusRule' } },
+            isDefault: { type: 'boolean' }
+          }
+        },
+        Document: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            title: { type: 'string' },
+            description: { type: 'string' },
+            category: {
+              type: 'string',
+              enum: ['contract', 'id_document', 'deed', 'appraisal', 'receipt', 'insurance', 'permit', 'blueprint', 'other']
+            },
+            fileUrl: { type: 'string' },
+            thumbnailUrl: { type: 'string', nullable: true },
+            mimeType: { type: 'string' },
+            fileSize: { type: 'number' },
+            propertyId: { type: 'string', nullable: true },
+            apartmentId: { type: 'string', nullable: true },
+            clientId: { type: 'string', nullable: true },
+            leadId: { type: 'string', nullable: true },
+            projectId: { type: 'string' },
+            tags: { type: 'array', items: { type: 'string' } },
+            version: { type: 'integer' },
+            previousVersion: { type: 'string', nullable: true },
+            uploadedBy: { type: 'string' },
+            expiresAt: { type: 'string', format: 'date-time', nullable: true },
+            isArchived: { type: 'boolean' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        DocumentCreate: {
+          type: 'object',
+          required: ['title', 'category', 'projectId', 'fileUrl'],
+          properties: {
+            title: { type: 'string' },
+            description: { type: 'string' },
+            category: {
+              type: 'string',
+              enum: ['contract', 'id_document', 'deed', 'appraisal', 'receipt', 'insurance', 'permit', 'blueprint', 'other']
+            },
+            fileUrl: { type: 'string' },
+            mimeType: { type: 'string' },
+            fileSize: { type: 'number' },
+            thumbnailUrl: { type: 'string' },
+            propertyId: { type: 'string' },
+            apartmentId: { type: 'string' },
+            clientId: { type: 'string' },
+            leadId: { type: 'string' },
+            projectId: { type: 'string' },
+            tags: { type: 'array', items: { type: 'string' } },
+            expiresAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        DocumentUpdate: {
+          type: 'object',
+          properties: {
+            title: { type: 'string' },
+            description: { type: 'string' },
+            category: { type: 'string' },
+            tags: { type: 'array', items: { type: 'string' } },
+            expiresAt: { type: 'string', format: 'date-time', nullable: true },
+            thumbnailUrl: { type: 'string' },
+            propertyId: { type: 'string', nullable: true },
+            apartmentId: { type: 'string', nullable: true },
+            clientId: { type: 'string', nullable: true },
+            leadId: { type: 'string', nullable: true }
+          }
+        },
+        QuoteScheduleItem: {
+          type: 'object',
+          properties: {
+            monthNumber: { type: 'integer' },
+            date: { type: 'string', format: 'date-time' },
+            principal: { type: 'number' },
+            interest: { type: 'number' },
+            payment: { type: 'number' },
+            balance: { type: 'number' },
+            isBalloon: { type: 'boolean' }
+          }
+        },
+        AmortizationSchedule: {
+          type: 'object',
+          properties: {
+            totalPrice: { type: 'number' },
+            downPayment: { type: 'number' },
+            downPaymentPercentage: { type: 'number' },
+            financedAmount: { type: 'number' },
+            interestRate: { type: 'number' },
+            termMonths: { type: 'integer' },
+            monthlyPayment: { type: 'number' },
+            method: { type: 'string', enum: ['fixed', 'declining'] },
+            balloonAmount: { type: 'number' },
+            balloonMonth: { type: 'integer', nullable: true },
+            schedule: { type: 'array', items: { $ref: '#/components/schemas/QuoteScheduleItem' } }
+          }
+        },
+        Quote: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            leadId: { type: 'string', nullable: true },
+            clientId: { type: 'string', nullable: true },
+            projectId: { type: 'string' },
+            lotId: { type: 'string' },
+            modelId: { type: 'string', nullable: true },
+            facadeId: { type: 'string', nullable: true },
+            totalPrice: { type: 'number' },
+            downPayment: { type: 'number' },
+            downPaymentPercentage: { type: 'number' },
+            financedAmount: { type: 'number' },
+            interestRate: { type: 'number' },
+            termMonths: { type: 'integer' },
+            monthlyPayment: { type: 'number' },
+            amortizationMethod: { type: 'string', enum: ['fixed', 'declining'] },
+            balloonAmount: { type: 'number' },
+            balloonMonth: { type: 'integer', nullable: true },
+            schedule: { type: 'array', items: { $ref: '#/components/schemas/QuoteScheduleItem' } },
+            status: { type: 'string', enum: ['draft', 'sent', 'accepted', 'expired', 'converted'] },
+            validUntil: { type: 'string', format: 'date-time', nullable: true },
+            convertedToPropertyId: { type: 'string', nullable: true },
+            pdfUrl: { type: 'string', nullable: true },
+            sentVia: { type: 'string', enum: ['email', 'sms', 'both', 'download', 'none'] },
+            termsAndConditions: { type: 'string' },
+            notes: { type: 'string' },
+            createdBy: { type: 'string' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        QuoteCreate: {
+          type: 'object',
+          required: ['projectId', 'lotId', 'totalPrice', 'termMonths'],
+          properties: {
+            leadId: { type: 'string' },
+            clientId: { type: 'string' },
+            projectId: { type: 'string' },
+            lotId: { type: 'string' },
+            modelId: { type: 'string' },
+            facadeId: { type: 'string' },
+            totalPrice: { type: 'number' },
+            downPayment: { type: 'number' },
+            interestRate: { type: 'number', description: 'Annual interest rate %' },
+            termMonths: { type: 'integer' },
+            amortizationMethod: { type: 'string', enum: ['fixed', 'declining'] },
+            balloonAmount: { type: 'number' },
+            balloonMonth: { type: 'integer' },
+            startDate: { type: 'string', format: 'date' },
+            validUntil: { type: 'string', format: 'date-time' },
+            termsAndConditions: { type: 'string' },
+            notes: { type: 'string' },
+            status: { type: 'string', enum: ['draft', 'sent', 'accepted'] }
+          }
+        },
+        QuoteUpdate: {
+          type: 'object',
+          properties: {
+            leadId: { type: 'string', nullable: true },
+            clientId: { type: 'string', nullable: true },
+            modelId: { type: 'string', nullable: true },
+            facadeId: { type: 'string', nullable: true },
+            totalPrice: { type: 'number' },
+            downPayment: { type: 'number' },
+            interestRate: { type: 'number' },
+            termMonths: { type: 'integer' },
+            amortizationMethod: { type: 'string', enum: ['fixed', 'declining'] },
+            balloonAmount: { type: 'number' },
+            balloonMonth: { type: 'integer', nullable: true },
+            startDate: { type: 'string', format: 'date' },
+            validUntil: { type: 'string', format: 'date-time', nullable: true },
+            termsAndConditions: { type: 'string' },
+            notes: { type: 'string' },
+            status: { type: 'string', enum: ['draft', 'sent', 'accepted', 'expired'] }
+          }
+        },
+        QuotePreviewRequest: {
+          type: 'object',
+          required: ['totalPrice', 'termMonths'],
+          properties: {
+            totalPrice: { type: 'number' },
+            downPayment: { type: 'number' },
+            interestRate: { type: 'number' },
+            termMonths: { type: 'integer' },
+            amortizationMethod: { type: 'string', enum: ['fixed', 'declining'] },
+            balloonAmount: { type: 'number' },
+            balloonMonth: { type: 'integer' },
+            startDate: { type: 'string', format: 'date' }
           }
         }
       }
