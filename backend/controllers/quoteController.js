@@ -5,6 +5,7 @@ import Model from '../models/Model.js'
 import Facade from '../models/Facade.js'
 import Building from '../models/Building.js'
 import Apartment from '../models/Apartment.js'
+import ApartmentModel from '../models/ApartmentModel.js'
 import Lead from '../models/Lead.js'
 import User from '../models/User.js'
 import Property from '../models/Property.js'
@@ -14,6 +15,7 @@ import { generateQuotePdf, generateQuotePdfBuffer } from '../services/quotePdfSe
 import { uploadFile } from '../services/storageService.js'
 import { sendEmail, isEmailConfigured } from '../services/emailService.js'
 import { sendSMSWithValidation } from '../services/twilioService.js'
+import { resolveApartmentSalePrice } from '../services/apartmentPricingService.js'
 
 const QUOTE_POPULATE = [
   { path: 'projectId', select: 'name slug title logo brandColors' },
@@ -23,7 +25,7 @@ const QUOTE_POPULATE = [
   { path: 'buildingId', select: 'name project' },
   {
     path: 'apartmentId',
-    select: 'apartmentNumber floorNumber price status building apartmentModel selectedRenderType'
+    select: 'apartmentNumber floorNumber price upgradePrice status building apartmentModel selectedRenderType'
   },
   { path: 'leadId', select: 'name email phone stage' },
   { path: 'clientId', select: 'firstName lastName email phoneNumber' },
@@ -226,9 +228,6 @@ export const createQuote = async (req, res) => {
     const clientNorm = optionalObjectId(req.body.clientId, 'clientId')
     if (clientNorm.error) return res.status(400).json({ message: clientNorm.error })
 
-    if (totalPrice == null || !Number.isFinite(Number(totalPrice))) {
-      return res.status(400).json({ message: 'totalPrice is required' })
-    }
     if (termMonths == null || Number(termMonths) < 1) {
       return res.status(400).json({ message: 'termMonths must be >= 1' })
     }
@@ -263,10 +262,27 @@ export const createQuote = async (req, res) => {
     const deckNorm = optionalObjectId(req.body.deckId, 'deckId')
     if (deckNorm.error) return res.status(400).json({ message: deckNorm.error })
 
+    let resolvedTotalPrice = totalPrice
+    if (
+      (resolvedTotalPrice == null || resolvedTotalPrice === '') &&
+      target.apartmentId
+    ) {
+      const apt = await Apartment.findById(target.apartmentId)
+        .populate('apartmentModel', 'basePrice upgradePrice')
+        .lean()
+      if (!apt) return res.status(404).json({ message: 'Apartment not found' })
+      const pricing = resolveApartmentSalePrice(apt, apt.apartmentModel, renderType)
+      resolvedTotalPrice = pricing.listPrice
+    }
+
+    if (resolvedTotalPrice == null || !Number.isFinite(Number(resolvedTotalPrice))) {
+      return res.status(400).json({ message: 'totalPrice is required' })
+    }
+
     let scheduleResult
     try {
       scheduleResult = generateSchedule(
-        totalPrice,
+        resolvedTotalPrice,
         downPayment ?? 0,
         interestRate ?? 0,
         termMonths,
@@ -706,9 +722,20 @@ export const convertQuoteToSale = async (req, res) => {
       }
 
       apartment.selectedRenderType = quote.selectedRenderType === 'upgrade' ? 'upgrade' : 'basic'
-      apartment.price = Number(quote.totalPrice) || apartment.price
+      const contracted = Number(quote.totalPrice)
+      if (Number.isFinite(contracted) && contracted >= 0) {
+        if (apartment.selectedRenderType === 'upgrade') {
+          apartment.upgradePrice = contracted
+        } else {
+          apartment.price = contracted
+        }
+      }
       apartment.initialPayment = Number(quote.downPayment) || 0
-      apartment.pending = Math.max(0, apartment.price - apartment.initialPayment)
+      const model = await ApartmentModel.findById(apartment.apartmentModel)
+        .select('basePrice upgradePrice')
+        .lean()
+      const pricing = resolveApartmentSalePrice(apartment, model, apartment.selectedRenderType)
+      apartment.pending = Math.max(0, pricing.listPrice - apartment.initialPayment)
       if (quote.clientId) {
         const clientIdStr = String(quote.clientId)
         const existingUsers = (apartment.users || []).map((id) => String(id))

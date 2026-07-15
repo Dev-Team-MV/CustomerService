@@ -59,6 +59,12 @@ const apartmentSchema = new mongoose.Schema(
       required: [true, 'Price is required'],
       min: 0
     },
+    /** Absolute list price when selectedRenderType is upgrade. Null = inherit from ApartmentModel.upgradePrice, else fall back to price. */
+    upgradePrice: {
+      type: Number,
+      min: 0,
+      default: null
+    },
     pending: {
       type: Number,
       required: [true, 'Pending amount is required'],

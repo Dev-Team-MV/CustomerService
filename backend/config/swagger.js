@@ -771,6 +771,16 @@ const options = {
             sqft: { type: 'number' },
             bedrooms: { type: 'number' },
             bathrooms: { type: 'number' },
+            basePrice: {
+              type: 'number',
+              nullable: true,
+              description: 'Default basic list price for units of this typology'
+            },
+            upgradePrice: {
+              type: 'number',
+              nullable: true,
+              description: 'Default upgrade list price (absolute). Unit can override.'
+            },
             apartmentCount: { type: 'number' },
             status: { type: 'string', enum: ['active', 'inactive'] }
           }
@@ -778,7 +788,7 @@ const options = {
         Apartment: {
           type: 'object',
           description:
-            'Unidad vendible en torre. POST /api/apartments requiere apartmentModelId, floorNumber, apartmentNumber, price. pending = price - initialPayment.',
+            'Unidad vendible en torre. price = basic; upgradePrice = override del total con upgrade (si null hereda ApartmentModel.upgradePrice).',
           properties: {
             _id: { type: 'string' },
             building: { type: 'string' },
@@ -787,7 +797,12 @@ const options = {
             apartmentNumber: { type: 'string' },
             floorPlanPolygonId: { type: 'string', nullable: true },
             users: { type: 'array', items: { type: 'string' }, description: 'Dueños' },
-            price: { type: 'number' },
+            price: { type: 'number', description: 'Basic list price' },
+            upgradePrice: {
+              type: 'number',
+              nullable: true,
+              description: 'Absolute upgrade list price; null inherits model.upgradePrice'
+            },
             pending: { type: 'number' },
             initialPayment: { type: 'number' },
             status: { type: 'string', enum: ['available', 'pending', 'sold', 'cancelled'] },
@@ -796,7 +811,7 @@ const options = {
         },
         ApartmentCreateBody: {
           type: 'object',
-          required: ['apartmentModelId', 'floorNumber', 'apartmentNumber', 'price'],
+          required: ['apartmentModelId', 'floorNumber', 'apartmentNumber'],
           properties: {
             apartmentModelId: { type: 'string' },
             apartmentModel: { type: 'string' },
@@ -810,7 +825,15 @@ const options = {
             polygon: { type: 'array', items: { type: 'object', properties: { x: { type: 'number' }, y: { type: 'number' } } } },
             user: { type: 'string' },
             users: { type: 'array', items: { type: 'string' } },
-            price: { type: 'number' },
+            price: {
+              type: 'number',
+              description: 'Basic price. If omitted, uses apartmentModel.basePrice'
+            },
+            upgradePrice: {
+              type: 'number',
+              nullable: true,
+              description: 'Absolute upgrade price. If omitted, uses apartmentModel.upgradePrice'
+            },
             initialPayment: { type: 'number' }
           }
         },
