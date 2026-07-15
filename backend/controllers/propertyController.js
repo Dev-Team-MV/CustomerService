@@ -7,6 +7,7 @@ import Project from '../models/Project.js'
 import User from '../models/User.js'
 import Phase from '../models/Phase.js'
 import Building from '../models/Building.js'
+import Quote from '../models/Quote.js'
 import { normalizeImageArray } from '../utils/imageUtils.js'
 import { getVisiblePropertyIdsForUser, canUserAccessProperty } from '../utils/propertyVisibility.js'
 import { hydrateUrlsInObject } from '../services/urlResolverService.js'
@@ -762,6 +763,57 @@ const resolvePropertyPricing = async ({
   }
 }
 
+/**
+ * Final sale amounts on create: calculated lot/model pricing, optional quote, then explicit body.price (CRM/quote UI).
+ */
+async function resolveCreateSaleAmounts({ calculated, body, quoteId, projectId, lotId }) {
+  let totalPrice = Number(calculated.totalPrice) || 0
+  let initialPaymentAmount = Number(calculated.initialPayment) || 0
+  let pendingAmount = Number(calculated.pending) || 0
+  let pricingSource = 'calculated'
+
+  if (quoteId && mongoose.Types.ObjectId.isValid(String(quoteId))) {
+    const quote = await Quote.findById(quoteId)
+      .select('totalPrice downPayment projectId lotId')
+      .lean()
+    if (quote) {
+      const projectMatch = !projectId || !quote.projectId || sameId(quote.projectId, projectId)
+      const lotMatch = !lotId || !quote.lotId || sameId(quote.lotId, lotId)
+      if (projectMatch && lotMatch) {
+        totalPrice = Number(quote.totalPrice) || totalPrice
+        initialPaymentAmount =
+          body.initialPayment !== undefined && body.initialPayment !== null && body.initialPayment !== ''
+            ? Number(body.initialPayment) || 0
+            : Number(quote.downPayment) || initialPaymentAmount
+        pendingAmount = Math.max(0, totalPrice - initialPaymentAmount)
+        pricingSource = 'quote'
+      }
+    }
+  }
+
+  if (body.price !== undefined && body.price !== null && body.price !== '') {
+    const explicitPrice = Number(body.price)
+    if (Number.isFinite(explicitPrice) && explicitPrice >= 0) {
+      totalPrice = explicitPrice
+      if (body.initialPayment !== undefined && body.initialPayment !== null && body.initialPayment !== '') {
+        initialPaymentAmount = Number(body.initialPayment) || 0
+      }
+      if (body.pending !== undefined && body.pending !== null && body.pending !== '') {
+        const explicitPending = Number(body.pending)
+        pendingAmount =
+          Number.isFinite(explicitPending) && explicitPending >= 0
+            ? explicitPending
+            : Math.max(0, totalPrice - initialPaymentAmount)
+      } else {
+        pendingAmount = Math.max(0, totalPrice - initialPaymentAmount)
+      }
+      pricingSource = 'explicit'
+    }
+  }
+
+  return { totalPrice, initialPaymentAmount, pendingAmount, pricingSource }
+}
+
 export const getPropertyQuote = async (req, res) => {
   try {
     const { projectId, project, lot, model, facade, initialPayment, hasBalcony, modelType, hasStorage, selectedOptions } = req.body
@@ -946,7 +998,8 @@ export const createProperty = async (req, res) => {
   try {
     const {
       projectId, project, lot, model, facade, user, users, initialPayment,
-      hasBalcony, modelType, hasStorage, selectedOptions, quoteId
+      hasBalcony, modelType, hasStorage, selectedOptions, quoteId,
+      price: requestedPrice, pending: requestedPending
     } = req.body
     let projId = projectId || project
 
@@ -991,7 +1044,26 @@ export const createProperty = async (req, res) => {
       return res.status(buildingValidation.status).json({ message: buildingValidation.message })
     }
 
-    const { totalPrice, initialPayment: initialPaymentAmount, pending: pendingAmount } = resolved.data.prices
+    const { totalPrice: calculatedTotal, initialPayment: calculatedInitial, pending: calculatedPending } =
+      resolved.data.prices
+
+    const saleAmounts = await resolveCreateSaleAmounts({
+      calculated: {
+        totalPrice: calculatedTotal,
+        initialPayment: calculatedInitial,
+        pending: calculatedPending
+      },
+      body: {
+        price: requestedPrice,
+        pending: requestedPending,
+        initialPayment
+      },
+      quoteId,
+      projectId: projId,
+      lotId: lot
+    })
+
+    const { totalPrice, initialPayment: initialPaymentAmount, pendingAmount } = saleAmounts
     if (initialPaymentAmount > totalPrice) {
       return res.status(400).json({
         message: 'initialPayment cannot be greater than totalPrice',
