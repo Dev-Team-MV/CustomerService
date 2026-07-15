@@ -30,6 +30,7 @@
         "lots": "Lots",
         "catalogConfig": "Catalog Config",
         "agents":"Agents"
+       
     },
     "tooltips": {
         "openMenu": "Open menu",
@@ -67,10 +68,51 @@
   "messageTemplates": "Message Templates",
   "settings": "Settings",
   "quickStats": "Quick Stats",
+  "calendar":"Calendar",
   "signOut": "Sign Out",
-
+ "sales":"Sales",
+  "audit": "Audit Logs",
+ "automations":"Automations",
+ "campaigns":"Campaigns",
+ "documents":"Documents",
+ "quote":"Quote",
+ "comissions":"Commissions",
           "agents":"Agents",
         "reports":"Reports",
-        "payments":"Payments"
+        "payments":"Payments",
+
+  "title": "Alerts",
+  "bell": {
+    "tooltip": "Notifications"
+  },
+  "tabs": {
+    "all": "All",
+    "overduePayments": "Overdue payments",
+    "upcomingActivities": "Upcoming activities",
+    "staleLeads": "Stale leads"
+  },
+  "markAllRead": "Mark all",
+  "empty": "No alerts",
+  "time": {
+    "overdue": "Overdue",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "inDays": "In {{days}} days"
+  },
+  "footer": {
+    "updateInfo": "Updated every 5 minutes"
+  },
+
+    "alerts": {
+    "overduePayment": "Pago vencido",
+    "upcomingActivity": "Actividad próxima",
+    "staleLead": "Lead inactivo",
+    "status": {
+      "pending": "Pendiente",
+      "signed": "Firmado",
+      "rejected": "Rechazado"
+    }
+  }
+
         
 }

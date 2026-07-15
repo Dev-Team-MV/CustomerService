@@ -1,3 +1,4 @@
+// /Users/oficina/MV-CRM/CustomerService/frontend/apps/lakewood-p1/src/App.jsx
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { AuthProvider, useAuth } from '@shared/context/AuthContext'
@@ -9,9 +10,7 @@ import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { privateMenuItems, publicMenuItems } from './constants/menuItems'
 
 // Páginas
-import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
-
 import Properties from './pages/Properties'
 import PropertySelection from './pages/PropertySelection'
 import Lots from './pages/Lots'
@@ -22,19 +21,21 @@ import Analytics from './pages/Analytics'
 import MyProperty from './pages/MyProperty'
 import AmenitiesPublic from './pages/AmenitiesPublic'
 import AmenitiesPrivate from './pages/AmenitiesPrivate'
-
 import ClubhouseManager from './pages/ClubhouseManager'
 import MasterPlanManager from './pages/MasterPlanManager'
 import TimeLine from './pages/TimeLine'
-
 import FamilyGroup from './pages/FamilyGroup'
 import MapInventoryPage from './pages/MapInventoryPage'
 import UploadTracker from './pages/UploadTracker'
-
 import UploadsManager from './pages/UploadsManager'
 
-import theme from './theme' // Usa SIEMPRE el theme extendido
+// Footer local
+import TypingFooter from './components/Footer'
 
+import theme from './theme'
+
+// Componentes compartidos
+import UniversalLogin from '@shared/components/Login/UniversalLogin'
 import SharedNewstable from '@shared/components/News/NewsTable'
 import SharedNewsDetails from '@shared/components/News/NewsDetails'
 import SharedNewsFeed from '@shared/components/News/NewsFeed'
@@ -44,7 +45,7 @@ import SharedNotFoundPage from '@shared/components/NotFoundPage'
 import SharedConfigurationPage from '@shared/components/ConfigurationPage'
 import SharedTermsAndConditionsPage from '@shared/components/TermsAndConditions/TermsAndConditionsPage'
 import { getNewsConfig } from '@shared/config/newsConfig'
-
+import ImpersonationBanner from '@shared/components/ImpersonationBanner'
 
 const DynamicLayoutWrapper = ({ children }) => {
   const { user } = useAuth()
@@ -65,30 +66,22 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider projectSlug="lakewood">
+         {/* <ImpersonationBanner /> */}
+         
         <Routes>
 
           {/* Auth Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={
-            <SharedRegisterPage 
-              projectName="Lakewood Oaks on Lake Conroe" 
-              logoMain="/images/logos/Logo_LakewoodOaks-05.png" 
-              logoSecondary="/images/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png" 
-              backgroundImage="/images/260721_001_0010_ISOMETRIA_3-1.png" 
-              tagline="Resort-Style Living on Lake Conroe" 
-              brandColors={{ primary: '#333F1F', secondary: '#8CA551' }} 
-            /> 
-          } />
-          <Route path="/setup-password/:token" element={
-            <SharedRegisterPage 
-              projectName="Lakewood Oaks on Lake Conroe" 
-              logoMain="/images/logos/Logo_LakewoodOaks-05.png" 
-              logoSecondary="/images/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png" 
-              backgroundImage="/images/260721_001_0010_ISOMETRIA_3-1.png" 
-              tagline="Resort-Style Living on Lake Conroe" 
-              brandColors={{ primary: '#333F1F', secondary: '#8CA551' }} 
-            /> 
-          } />
+          <Route 
+            path="/login" 
+            element={
+              <UniversalLogin 
+                Footer={TypingFooter}
+                showFooter={true}
+              />
+            } 
+          />
+         
+          <Route path="/setup-password/:token" element={<SharedRegisterPage />} />
           <Route path="/terms-and-conditions" element={<SharedTermsAndConditionsPage />} />
 
           {/* Public Routes */}
@@ -103,7 +96,6 @@ function App() {
           >
             <Route path="/explore/properties" element={<PropertySelection />} />
             <Route path="/explore/amenities" element={<AmenitiesPublic />} />
-            {/* <Route path="/explore/map-inventory" element={<MapInventoryPage />} /> */}
           </Route>
 
           {/* Hybrid Routes */}
@@ -128,10 +120,8 @@ function App() {
               <Route path="/my-property" element={<MyProperty />} />
               <Route path="/amenities" element={<AmenitiesPrivate />} />
               <Route path="/master-plan/inventory" element={<MasterPlanManager />} />
-              {/* <Route path="/configurations" element={<ConfigurationManager />} /> */}
               <Route path="/configurations" element={<SharedConfigurationPage />} />
               <Route path="/family-group" element={<FamilyGroup />} />
-              {/* <Route path="/admin/news" element={<NewsTable />} /> */}
               <Route path="/admin/news" element={<SharedNewstable config={getNewsConfig('lakewood')} />} />
               <Route path="/properties" element={<Properties />} />
               <Route path="/properties/select" element={<PropertySelection />} />
@@ -140,7 +130,6 @@ function App() {
               <Route path="/payloads" element={<Payloads />} />
               <Route path="/residents" element={<Residents />} />
               <Route path="/analytics" element={<Analytics />} />
-              {/* <Route path="/profile" element={<Profile />} /> */}
               <Route path="/profile" element={<SharedProfilePage />} />
               <Route path="/timeline" element={<TimeLine />} />
               <Route path="/clubhouse-manager" element={<ClubhouseManager />} />

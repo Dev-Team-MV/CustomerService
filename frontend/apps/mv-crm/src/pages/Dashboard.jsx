@@ -119,7 +119,7 @@ if (!url) {
 
   return (
     <PageLayout
-      title={t('title')}
+      title={t('titleMV')}
       titleBold={t('titleBold')}
       topbarLabel={t('topbarLabel')}
       subtitle={t('subtitle', { count: projects.length, date: formatDate(currentTime) })}

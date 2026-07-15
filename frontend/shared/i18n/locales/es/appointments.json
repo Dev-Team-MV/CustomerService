@@ -1,0 +1,96 @@
+{
+  "title": "Calendario",
+  "titleBold": "CRM",
+  "topbarLabel": "Gestión de citas",
+  "subtitle": "Programa y gestiona tus citas con clientes y leads",
+  "createAppointment": "Nueva cita",
+  "editTitle": "Editar cita",
+  "createTitle": "Nueva cita",
+  "scheduleAppointment": "Agendar cita",
+  "confirmDelete": "¿Estás seguro de eliminar esta cita?",
+  
+  "calendar": {
+    "today": "Hoy",
+    "month": "Mes",
+    "week": "Semana",
+    "day": "Día"
+  },
+  
+  "form": {
+    "title": "Título",
+    "type": "Tipo",
+    "status": "Estado",
+    "duration": "Duración (min)",
+    "date": "Fecha",
+    "time": "Hora",
+    "startDate": "Fecha de inicio",
+    "startTime": "Hora de inicio",
+    "endDate": "Fecha de fin",
+    "endTime": "Hora de fin",
+    "leadName": "Lead",
+    "clientName": "Cliente",
+    "agentName": "Agente",
+    "projectName": "Proyecto",
+    "location": "Ubicación",
+    "description": "Descripción",
+    "notes": "Notas",
+    "assignedTo": "Asesor asignado",
+    "project": "Proyecto",
+    "contact": "Contacto",
+    "selectLead": "Seleccionar lead",
+    "selectClient": "Seleccionar cliente",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "delete": "Eliminar",
+    "saving": "Guardando..."
+  },
+  
+  "types": {
+    "visita": "Visita",
+    "llamada": "Llamada",
+    "reunion": "Reunión"
+  },
+  
+  "statuses": {
+    "pendiente": "Pendiente",
+    "confirmada": "Confirmada",
+    "completada": "Completada",
+    "cancelada": "Cancelada"
+  },
+  
+  "contact": {
+    "title": "Contacto",
+    "lead": "Lead",
+    "client": "Cliente"
+  },
+  
+  "dateTime": {
+    "startTitle": "Fecha y hora de inicio",
+    "endTitle": "Fecha y hora de fin (opcional)",
+    "autoEndHint": "Si no especificas hora de fin, se calculará automáticamente 1 hora después del inicio"
+  },
+  
+  "duration": {
+    "label": "Duración",
+    "minutes": "{{count}} minuto",
+    "minutes_plural": "{{count}} minutos",
+    "hours": "{{count}} hora",
+    "hours_plural": "{{count}} horas",
+    "hoursMinutes": "{{hours}}h {{minutes}}min",
+    "valid": "Duración: {{formatted}}",
+    "minError": "La duración mínima es de 1 hora. Duración actual: {{minutes}} minutos",
+    "maxError": "La duración máxima es de 23 horas 59 minutos. No se permite seleccionar un día completo."
+  },
+  
+  "validation": {
+    "titleRequired": "El título es obligatorio",
+    "typeRequired": "El tipo es obligatorio",
+    "startDateRequired": "La fecha y hora de inicio son obligatorias",
+    "projectRequired": "El proyecto es obligatorio",
+    "assignedToRequired": "El asesor asignado es obligatorio",
+    "contactRequired": "Debe seleccionar un Lead o un Cliente",
+    "saveError": "Error al guardar la cita",
+    "deleteError": "Error al eliminar la cita"
+  }
+}

@@ -116,12 +116,7 @@ export const privateMenuItems = [
     roles: ["superadmin", "admin", "user"],
   },
   // En privateMenuItems o donde corresponda:
-  {
-    textKey: "navigation:menu.mapInventory",
-    icon: MapIcon,
-    path: "/map-inventory",
-    roles: ["admin", "superadmin", "owner"],
-  },
+
   {
     textKey: "navigation:menu.uploadTracker",
     icon: GridOnIcon,

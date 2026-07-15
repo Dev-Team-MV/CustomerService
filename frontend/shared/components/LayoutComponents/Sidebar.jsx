@@ -1,3 +1,4 @@
+// apps/mv-crm/src/components/layout/Sidebar.jsx
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Box, Typography, Divider, List, ListItem, ListItemIcon, ListItemText } from '@mui/material'
 import { 
@@ -12,10 +13,13 @@ import {
   Chat,
   AttachMoney,
   Assessment,
-  SupportAgent
+  SupportAgent,
+  CalendarToday,
+  AutoAwesome,
+  History
 } from '@mui/icons-material'
 import { motion } from 'framer-motion'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '@shared/context/AuthContext'
 import LanguageSwitcher from '@shared/components/LanguageSwitcher'
 import { useTranslation } from 'react-i18next'
 import mvLogo from '../../assets/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png'
@@ -23,6 +27,13 @@ import mvLogo from '../../assets/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.p
 const NAV = [
   { key: 'overview', labelKey: 'overview', icon: GridView, path: '/dashboard' },
   { key: 'clients', labelKey: 'clients', icon: People, path: '/clients' },
+  { key: 'calendar', labelKey: 'calendar', icon: CalendarToday, path: '/calendar' },
+  { key: 'automations', labelKey: 'automations', icon: AutoAwesome, path: '/automations' },
+  { key: 'campaigns', labelKey: 'campaigns', icon: AutoAwesome, path: '/campaigns' },
+  { key: 'comissions', labelKey: 'comissions', icon: AutoAwesome, path: '/comissions' },
+  { key: 'quote', labelKey: 'quote', icon: AutoAwesome, path: '/quote' },
+  { key: 'documents', labelKey: 'documents', icon: AutoAwesome, path: '/documents' },
+  { key: 'audit', labelKey: 'audit', icon: History, path: '/audit' },
   { key: 'projects', labelKey: 'projects', icon: FolderOpen, path: '/projects' },
   { key: 'sales', labelKey: 'sales', icon: TrendingUp, path: '/sales' },
   { key: 'payments', labelKey: 'payments', icon: AttachMoney, path: '/payments' },
@@ -31,23 +42,39 @@ const NAV = [
   { key: 'activities', labelKey: 'activities', icon: AssignmentTurnedIn, path: '/activities' },
   { key: 'analytics', labelKey: 'analytics', icon: Insights, path: '/analytics' },
   { key: 'messageTemplates', labelKey: 'messageTemplates', icon: Chat, path: '/message-templates' }
+
 ]
 
-export default function Sidebar({ stats = [] }) {
+// ✅ NUEVO: Agregar prop onNavigate
+export default function Sidebar({ stats = [], onNavigate }) {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuth()
   const { t } = useTranslation('navigation')
-  const handleLogout = () => { logout(); navigate('/login') }
+  
+  const handleLogout = () => { 
+    logout()
+    navigate('/login') 
+  }
+
+  // ✅ NUEVO: Wrapper para navegación que cierra el drawer móvil
+  const handleNavClick = (path) => {
+    navigate(path)
+    onNavigate?.()
+  }
 
   return (
     <Box sx={{
-      width: 220, height: '100vh', position: 'sticky', top: 0,
-      display: 'flex', flexDirection: 'column',
-      borderRight: '1px solid #1a1a1a', background: '#0a0a0a', flexShrink: 0
+      width: 220, 
+      height: '100vh', 
+      display: 'flex', 
+      flexDirection: 'column',
+      borderRight: '1px solid #1a1a1a', 
+      background: '#0a0a0a', 
+      flexShrink: 0
     }}>
       {/* Logo */}
-      <Box sx={{ p: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <Box sx={{ p: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -71,7 +98,7 @@ export default function Sidebar({ stats = [] }) {
 
       {/* Quick stats */}
       {stats.length > 0 && (
-        <Box sx={{ mx: 2, mb: 2, p: '12px 14px', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)' }}>
+        <Box sx={{ mx: 2, mb: 2, p: '12px 14px', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)', flexShrink: 0 }}>
           <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.55rem', color: 'rgba(255,255,255,0.25)', letterSpacing: '1.5px', textTransform: 'uppercase', mb: 1.5 }}>
             {t('quickStats')}
           </Typography>
@@ -90,17 +117,30 @@ export default function Sidebar({ stats = [] }) {
         </Box>
       )}
 
-      <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)' }} />
+      <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)', flexShrink: 0 }} />
 
-      {/* Nav */}
-      <List sx={{ px: 1.5, py: 2, flex: 1 }} disablePadding>
+      {/* Nav con scroll */}
+      <List sx={{ 
+        px: 1.5, 
+        py: 2, 
+        flex: 1,
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        '&::-webkit-scrollbar': { width: 4 },
+        '&::-webkit-scrollbar-track': { background: 'rgba(255,255,255,0.02)' },
+        '&::-webkit-scrollbar-thumb': {
+          background: 'rgba(255,255,255,0.1)',
+          borderRadius: 2
+        },
+        '&::-webkit-scrollbar-thumb:hover': { background: 'rgba(255,255,255,0.2)' }
+      }} disablePadding>
         {NAV.map((item, i) => {
           const Icon = item.icon
           const isActive = location.pathname === item.path
           return (
             <motion.div key={item.key} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 * i }}>
               <ListItem
-                onClick={() => navigate(item.path)}
+                onClick={() => handleNavClick(item.path)}
                 sx={{
                   borderRadius: 0, mb: 0.5, px: 1.5, py: 1.1, cursor: 'pointer',
                   background: isActive ? 'rgba(255,255,255,0.1)' : 'transparent',
@@ -126,15 +166,16 @@ export default function Sidebar({ stats = [] }) {
         })}
       </List>
 
-      <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)' }} />
+      <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)', flexShrink: 0 }} />
 
-      <Box sx={{ px: 2, py: 1 }}>
+      {/* Footer section */}
+      <Box sx={{ px: 2, py: 1, flexShrink: 0 }}>
         <LanguageSwitcher variant="sidebar" />
       </Box>
 
       {/* User Profile Button */}
       <Box 
-        onClick={() => navigate('/profile')}
+        onClick={() => handleNavClick('/profile')}
         sx={{ 
           p: '12px 16px', 
           display: 'flex', 
@@ -143,7 +184,8 @@ export default function Sidebar({ stats = [] }) {
           borderBottom: '1px solid rgba(255,255,255,0.04)',
           cursor: 'pointer',
           transition: 'background 0.2s',
-          '&:hover': { background: 'rgba(255,255,255,0.05)' }
+          '&:hover': { background: 'rgba(255,255,255,0.05)' },
+          flexShrink: 0
         }}
       >
         <Box sx={{ width: 28, height: 28, bgcolor: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -163,7 +205,7 @@ export default function Sidebar({ stats = [] }) {
       </Box>
 
       {/* Sign out */}
-      <Box onClick={handleLogout} sx={{ p: '14px 20px', display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer', transition: 'background 0.2s', '&:hover': { background: 'rgba(255,255,255,0.05)' } }}>
+      <Box onClick={handleLogout} sx={{ p: '14px 20px', display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer', transition: 'background 0.2s', '&:hover': { background: 'rgba(255,255,255,0.05)' }, flexShrink: 0 }}>
         <Logout sx={{ fontSize: 15, color: 'rgba(255,255,255,0.35)' }} />
         <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)' }}>
           {t('signOut')}

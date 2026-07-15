@@ -1,0 +1,95 @@
+{
+  "title": "Campañas SMS",
+  "titleBold": "CRM",
+  "topbarLabel": "Gestión de campañas",
+  "subtitle": "Envío masivo de mensajes",
+  "filters": "Filtros",
+  "status": "Estado",
+  "project": "Proyecto",
+  "all": "Todos",
+  "createCampaign": "Nueva campaña",
+  "cancel": "Cancelar",
+  "delete": "Eliminar",
+  "edit": "Editar",
+  "send": "Enviar",
+  "refresh": "Actualizar",
+  "back": "Atrás",
+  "continue": "Continuar",
+  "preview": "Preview",
+  "createAndPreview": "Crear y preview",
+  "sendNow": "Enviar ahora",
+  "editTitle": "Editar campaña",
+  "createTitle": "Nueva campaña",
+  "readyToSend": "¿Listo para enviar?",
+  "sendConfirmation": "Se enviarán los SMS a todos los destinatarios del preview",
+  "sending": "Enviando...",
+  "completed": "Completada",
+  "failed": "Fallida",
+  "messagesSent": "mensajes enviados",
+  "total": "Total",
+  "sent": "Enviados",
+  "failedCount": "Fallidos",
+  "recipients": "destinatarios",
+  "allProjects": "Todos los proyectos",
+  "allStages": "Todos los stages",
+  "loadingTemplates": "Cargando plantillas...",
+  "noTemplates": "No hay plantillas disponibles",
+  "campaignCompleted": "✅ Campaña completada exitosamente",
+  "campaignFailed": "❌ Campaña fallida",
+  "retrySend": "Reintentar envío",
+  "resendCampaign": "Reenviar campaña",
+  "resend": "Reenviar",
+  "sendAgainConfirm": "¿Estás seguro de enviar esta campaña nuevamente?",
+  "deleteConfirm": {
+    "title": "¿Eliminar campaña?",
+    "message": "Esta acción no se puede deshacer. La campaña será eliminada permanentemente."
+  },
+  "validation": {
+    "nameRequired": "El nombre es obligatorio",
+    "templateRequired": "La plantilla es obligatoria",
+    "audienceRequired": "El tipo de audiencia es obligatorio"
+  },
+  "form": {
+    "name": "Nombre",
+    "template": "Plantilla",
+    "audience": "Audiencia",
+    "audienceType": "Tipo de audiencia",
+    "project": "Proyecto",
+    "stage": "Stage"
+  },
+  "audience": {
+    "leads": "Leads",
+    "clients": "Clientes"
+  },
+  "table": {
+    "name": "Nombre",
+    "status": "Estado",
+    "audience": "Audiencia",
+    "stats": "Estadísticas",
+    "date": "Fecha",
+    "actions": "Acciones",
+    "phone": "Teléfono",
+    "message": "Mensaje"
+  },
+  "statusLabels": {
+    "borrador": "Borrador",
+    "programada": "Programada",
+    "enviando": "Enviando",
+    "completada": "Completada",
+    "fallida": "Fallida"
+  },
+  "stats": {
+    "total": "total",
+    "sent": "enviados",
+    "failed": "fallidos"
+  },
+  "steps": {
+    "configuration": "Configuración",
+    "preview": "Preview",
+    "send": "Enviar",
+    "template":"Plantilla"
+  },
+  "errors": {
+    "campaignIdNotFound": "ID de campaña no encontrado"
+  }
+}

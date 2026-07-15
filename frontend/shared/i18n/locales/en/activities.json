@@ -24,6 +24,13 @@
     "columnNameDefault": "Column name",
     "keyHelperText": "Unique identifier (auto-generated)",
     "orderHelperText": "Column position (0 = first)",
+    "columns": {
+      "backlog": "Backlog",
+      "todo": "To Do",
+      "inProgress": "In Progress",
+      "done": "Done",
+      "approved": "Approved"
+    },
     "form": {
       "title": "Title",
       "titlePlaceholder": "E.g: Call the client",
@@ -104,6 +111,7 @@
     "details": {
       "associatedContact": "Associated contact",
       "createdBy": "Created by",
+      "relatedProjects": "Related projects",
       "comments": "Comments",
       "noComments": "No comments",
       "writeComment": "Write a comment..."

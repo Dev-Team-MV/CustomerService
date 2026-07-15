@@ -1,0 +1,105 @@
+{
+  "title": "Commissions",
+  "titleBold": "Sales",
+  "topbarLabel": "Commission Management",
+  "subtitle": "Manage, approve and track commission payouts",
+  "tabs": {
+    "commissions": "Commissions",
+    "structures": "Structures"
+  },
+  "stats": {
+    "totalPending": "Total Pending",
+    "paidThisMonth": "Paid This Month",
+    "avgRate": "Average Rate",
+    "topEarner": "Top Earner"
+  },
+  "filters": {
+    "search": "Search by agent or project...",
+    "project": "Project",
+    "allProjects": "All projects",
+    "agent": "Agent",
+    "allAgents": "All agents",
+    "status": "Status",
+    "allStatuses": "All statuses"
+  },
+  "table": {
+    "date": "Date",
+    "agent": "Agent",
+    "project": "Project",
+    "amounts": "Amount / Commission",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "status": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "paid": "Paid",
+    "disputed": "Disputed"
+  },
+  "actions": {
+    "view": "View",
+    "approve": "Approve",
+    "dispute": "Dispute",
+    "confirmDispute": "Confirm Dispute",
+    "markPaid": "Mark as Paid",
+    "close": "Close",
+    "refresh": "Refresh",
+    "create": "Create",
+    "update": "Update",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit"
+  },
+  "detail": {
+    "title": "Commission Details",
+    "editTitle": "Edit Commission",
+    "disputeTitle": "Dispute Commission",
+    "status": "Status",
+    "agent": "Agent",
+    "project": "Project",
+    "saleAmount": "Sale Amount",
+    "commissionAmount": "Commission Amount",
+    "overrideRate": "Custom Rate (%)",
+    "overrideAmount": "Custom Amount ($)",
+    "splits": "Splits",
+    "notes": "Notes",
+    "disputeReason": "Dispute reason"
+  },
+  "structures": {
+    "listTitle": "Project Commission Structures",
+    "create": "New Structure",
+    "edit": "Edit Structure",
+    "name": "Rule name",
+    "type": "Calculation type",
+    "types": {
+      "flat": "Flat Amount",
+      "percentage": "Percentage",
+      "tiered": "Tiered"
+    },
+    "flatAmount": "Flat Amount ($)",
+    "percentageRate": "Percentage (%)",
+    "tiers": "Tiers",
+    "addTier": "Add Tier",
+    "minAmount": "Min",
+    "maxAmount": "Max",
+    "rate": "Rate (%)",
+    "isDefault": "Default",
+    "yes": "Yes",
+    "selectProject": "Select project...",
+    "viewingFor": "Viewing structures for",
+    "selectToView": "Select a project to view its structures",
+    "selectProjectFirst": "Select a project first",
+    "selectProjectToManage": "You must select a project to manage its commission structures",
+    "noStructures": "No structures configured",
+    "createFirst": "Create the first commission structure for this project",
+    "empty": "No structures configured for this project",
+    "confirmDelete": "Are you sure you want to delete this structure?"
+  },
+  "errors": {
+    "updateFailed": "Update failed",
+    "actionFailed": "Action failed",
+    "saveFailed": "Save failed",
+    "deleteFailed": "Delete failed"
+  },
+  "empty": "No commissions found with current filters"
+}

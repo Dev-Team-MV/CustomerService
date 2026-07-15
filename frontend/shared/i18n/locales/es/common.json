@@ -87,6 +87,123 @@
       "uploadAll": "Subir Todo",
       "new": "NUEVO",
       "project": "Proyecto",
-      "back": "Volver"
+      "back": "Volver",
+
+      "notifications": {
+    "title": "Notificaciones",
+    "paymentReceived": "Pago recibido",
+    "paymentReceivedDesc": "Tu pago ha sido procesado.",
+    "newMessage": "Nuevo mensaje",
+    "newMessageDesc": "Tienes un nuevo mensaje del administrador.",
+    "documentApproved": "Documento aprobado",
+    "documentApprovedDesc": "Tu documento fue aprobado.",
+    "creator": {
+      "title": "Crear Notificación",
+      "close": "Cerrar",
+      "recipients": "Destinatarios",
+      "modeGeneral": "General (todos los usuarios)",
+      "modeRole": "Por Rol",
+      "modeUser": "Usuario Específico",
+      "modeMultipleUsers": "Múltiples Usuarios",
+      "titleLabel": "Título",
+      "titlePlaceholder": "Título de la notificación",
+      "bodyLabel": "Mensaje",
+      "bodyPlaceholder": "Contenido de la notificación (opcional)",
+      "typeLabel": "Tipo",
+      "typeInfo": "Información",
+      "typeWarn": "Advertencia",
+      "typeError": "Error",
+      "typeCustom": "Personalizado",
+      "audienceLabel": "Audiencia",
+      "roleSuperadmin": "Super Administrador",
+      "roleAdmin": "Administrador",
+      "roleOwner": "Propietario",
+      "roleUser": "Usuario",
+      "rolesLabel": "Roles",
+      "rolesPlaceholder": "Selecciona roles",
+      "userLabel": "Usuario",
+      "usersLabel": "Usuarios",
+      "userPlaceholder": "Selecciona un usuario",
+      "usersPlaceholder": "Selecciona usuarios",
+      "preview": "Vista previa:",
+      "titleExample": "Título de ejemplo",
+      "cancel": "Cancelar",
+      "send": "Enviar Notificación",
+      "sending": "Enviando..."
+    }
+  },
+
+  "variables": {
+    "title": "Variables de Mensaje",
+    "description": "Las variables se usan en los templates de mensajes con el formato {{nombre}}. El recorrido indica de dónde se obtiene el valor.",
+    "addNew": "Nueva Variable",
+    "editTitle": "Editar Variable",
+    "createTitle": "Nueva Variable",
+    "empty": "No hay variables en esta categoría",
+    "createFirst": "Crear primera variable",
+    "saveProjectFirst": "Guarda el proyecto primero para gestionar las variables.",
+    
+    "name": "Nombre",
+    "nameHelper": "Solo letras, números y _. Debe empezar con letra.",
+    "path": "Recorrido",
+    "pathHelper": "Ruta para obtener el valor (ej: user.firstName, client.email, lot.number)",
+    "currentPath": "Recorrido actual",
+    "category": "Categoría",
+    "categoryAutoSet": "(auto-seteada por la categoría seleccionada)",
+    
+    "modeBuilder": "Visual",
+    "modeManual": "Manual",
+    
+    "selectCategory": "Selecciona una categoría",
+    "selectField": "Selecciona un campo",
+    "noRoots": "No hay categorías disponibles",
+    "noSegments": "No hay campos disponibles en este nivel",
+    
+    "selectedPath": "Recorrido seleccionado",
+    "useThisPath": "Usar este recorrido",
+    "backToRoots": "Volver a categorías",
+    "back": "Volver",
+    
+    "cancel": "Cancelar",
+    "saving": "Guardando...",
+    "create": "Crear",
+    "update": "Actualizar",
+    
+    "availableVariables": "Variables disponibles",
+    "clickToInsert": "Haz click en una variable para insertarla en el mensaje",
+    "loading": "Cargando variables...",
+    "noVariablesForProject": "No hay variables para este proyecto",
+    "noVariablesYet": "No hay variables definidas para este proyecto",
+    "goToConfig": "Ve a la configuración del proyecto para crear variables",
+    "total": "variables",
+    
+    "copyVariable": "Copiar variable",
+    "editVariable": "Editar",
+    "deleteVariable": "Eliminar",
+    "confirmDelete": "¿Eliminar la variable \"{{name}}\"? Esta acción no se puede deshacer.",
+    "errorSaving": "Error al guardar la variable",
+    "errorNameRequired": "El nombre es obligatorio",
+    "errorPathRequired": "El recorrido es obligatorio",
+    "errorCategoryRequired": "La categoría es obligatoria",
+    
+    "categories": {
+      "all": "Todas",
+      "Usuario": "Usuario",
+      "Cliente": "Cliente",
+      "Proyecto": "Proyecto",
+      "Lote": "Lote",
+      "Edificio": "Edificio",
+      "Apartamento": "Apartamento",
+      "ApartamentoModelo": "Modelo Apto",
+      "Pago": "Pago",
+      "Custom": "Personalizado"
+    },
+    
+    "chipTypes": {
+      "ref": "ref",
+      "value": "valor"
+    }
+  }
+
     
 }

@@ -19,6 +19,13 @@ import MessageTemplates from './pages/MessageTemplates'
 import ClientDetail from './pages/ClientDetails'
 import Reports from './pages/Reports'
 import Agents from './pages/Agents'
+import Calendar from './pages/Calendar'
+import Automations from './pages/Automations'
+import Campaigns from './pages/Campaigns'
+import Audit from './pages/AuditLog'
+import Commissions from './pages/Commissions'
+import Documents from './pages/Documents'
+import Quote from './pages/Quotes'
 
 const theme = createTheme({
   palette: {
@@ -97,9 +104,51 @@ export default function App() {
             </ProtectedRoute> 
           }
           />
+          <Route path="/audit" element={
+            <ProtectedRoute requiredRole="admin">
+              <Audit />
+            </ProtectedRoute> 
+          }
+          />
+          <Route path="/calendar" element={
+            <ProtectedRoute requiredRole="admin">
+              <Calendar />
+            </ProtectedRoute> 
+          }
+          />
+          <Route path="/comissions" element={
+            <ProtectedRoute requiredRole="admin">
+              <Commissions />
+            </ProtectedRoute> 
+          }
+          />
+          <Route path="/automations" element={
+            <ProtectedRoute requiredRole="admin">
+              <Automations />
+            </ProtectedRoute> 
+          }
+          />
+          <Route path="/documents" element={
+            <ProtectedRoute requiredRole="admin">
+              <Documents />
+            </ProtectedRoute> 
+          }
+          />
+          <Route path="/quote" element={
+            <ProtectedRoute requiredRole="admin">
+              <Quote />
+            </ProtectedRoute> 
+          }
+          />
           <Route path="/clients/:id" element={
             <ProtectedRoute requiredRole="admin">
               <ClientDetail />
+            </ProtectedRoute> 
+          }
+          />
+          <Route path="/campaigns" element={
+            <ProtectedRoute requiredRole="admin">
+              <Campaigns />
             </ProtectedRoute> 
           }
           />

@@ -1,46 +1,16 @@
 {
   "title": "Residents",
   "subtitle": "Manage resident accounts and information",
-  "stats": {
-    "total": "Total Users",
-    "superadmins": "Super Admins",
-    "admins": "Admins",
-    "residents": "Residents"
-  },
-  "table": {
-    "name": "NAME",
-    "email": "EMAIL",
-    "phone": "PHONE",
-    "role": "ROLE",
-    "properties": "PROPERTIES",
-    "actions": "ACTIONS"
-  },
-  "role": {
-    "superadmin": "Super Admin",
-    "admin": "Admin",
-    "user": "Resident",
-    "owner": "Owner"
-  },
-  "actions": {
-    "add": "Add User",
-    "edit": "Edit",
-    "delete": "Delete",
-    "sendSMS": "Send password setup SMS"
-  },
-  "empty": {
-    "title": "No residents yet",
-    "description": "Start by inviting your first resident",
-    "action": "Add First Resident"
-  },
-  "snackbar": {
-    "smsSent": "Password setup SMS sent successfully to {{phone}}",
-    "smsUnavailable": "SMS service unavailable. Setup link copied to clipboard!",
-    "noPhone": "User does not have a phone number registered",
-    "smsError": "Failed to send password setup SMS"
-  },
-  "confirmDelete": "Are you sure you want to delete this user?",
 
-    "clients": {
+  "tabs": {
+    "overview": "Overview",
+    "payments": "Payments",
+    "activities": "Activities",
+    "notes": "Notes",
+    "history": "History"
+  },
+
+  "clients": {
     "title": "Clients",
     "titleBold": "Management",
     "topbarLabel": "All Clients — Management",
@@ -48,6 +18,8 @@
     "addClient": "Add Client",
     "searchPlaceholder": "Search by name, email or phone...",
     "total": "Total Clients",
+        "sendMessage": "Send Message",
+    "exportClients": "Export Clients",
     "active": "Active",
     "admins": "Admins",
     "withLots": "With Lots",
@@ -64,10 +36,58 @@
     "activeStatus": "Active",
     "inactiveStatus": "Inactive",
     "confirmDelete": "Delete {{name}}?",
-    "projects": "Projects"
+    "projects": "Projects",
+    "scheduleAppointment": "Schedule Appointment",
+    "notFound": "Client not found",
+    "errorLoading": "Error loading client"
   },
 
-    "dialog": {
+  "stats": {
+    "total": "Total Users",
+    "superadmins": "Super Admins",
+    "admins": "Admins",
+    "residents": "Residents"
+  },
+
+  "table": {
+    "name": "NAME",
+    "email": "EMAIL",
+    "phone": "PHONE",
+    "role": "ROLE",
+    "properties": "PROPERTIES",
+    "actions": "ACTIONS"
+  },
+
+  "role": {
+    "superadmin": "Super Admin",
+    "admin": "Admin",
+    "user": "Resident",
+    "owner": "Owner"
+  },
+
+  "actions": {
+    "add": "Add User",
+    "edit": "Edit",
+    "delete": "Delete",
+    "sendSMS": "Send password setup SMS"
+  },
+
+  "empty": {
+    "title": "No residents yet",
+    "description": "Start by inviting your first resident",
+    "action": "Add First Resident"
+  },
+
+  "snackbar": {
+    "smsSent": "Password setup SMS sent successfully to {{phone}}",
+    "smsUnavailable": "SMS service unavailable. Setup link copied to clipboard!",
+    "noPhone": "User does not have a phone number registered",
+    "smsError": "Failed to send password setup SMS"
+  },
+
+  "confirmDelete": "Are you sure you want to delete this user?",
+
+  "dialog": {
     "editUser": "Edit Resident",
     "inviteNewUser": "Invite New Resident",
     "invitationMessage": "Invite a new resident by filling out the form below. They will receive an email/SMS to set up their password.",
@@ -88,6 +108,184 @@
     "cancel": "Cancel",
     "save": "Save",
     "sendInvitation": "Send Invitation",
-    "update":"Update Resident"
+    "update": "Update Resident"
+  },
+
+  "overview": {
+    "personalInfo": "Personal Information",
+    "relatedProjects": "Related Projects",
+    "project": "Project {{number}}",
+    "totalProperties": "Total Properties",
+    "totalValue": "Total Value",
+    "paid": "Paid",
+    "pending": "Pending",
+    "properties": "Properties",
+    "noProperties": "No properties assigned",
+    "property": "property",
+    "propertiesPlural": "properties",
+    "apartment": "Apt {{number}}",
+    "lot": "Lot {{number}}",
+    "floor": "Floor {{number}}",
+    "sold": "Sold",
+    "pendingStatus": "Pending",
+    "price": "Price",
+    "pendingAmount": "Pending",
+    "paidAmount": "Paid",
+    "paymentProgress": "Payment Progress"
+  },
+
+  "payments": {
+    "title": "Payments",
+    "filterStatus": "Status",
+    "all": "All",
+    "statusPending": "Pending",
+    "statusSigned": "Signed",
+    "statusRejected": "Rejected",
+    "paymentsCount": "payment",
+    "paymentsCountPlural": "payments",
+    "empty": {
+      "title": "No payments",
+      "description": "This client has no registered payments"
+    },
+    "showing": "Showing",
+    "of": "of",
+    "rowsPerPage": "Rows per page",
+    "project": "Project",
+    "unit": "Unit",
+    "type": "Type",
+    "typeInitialDownPayment": "Initial down payment",
+    "typeComplementaryDownPayment": "Complementary down payment",
+    "typeMonthlyPayment": "Monthly payment",
+    "typeFinalPayment": "Final payment",
+    "typeDefault": "Payment",
+    "amount": "Amount",
+    "date": "Date",
+    "dueDate": "Due Date",
+    "overdue": "Overdue",
+    "status": "Status",
+    "notes": "Notes"
+  },
+
+  "timeline": {
+    "title": "Activity History",
+    "noActivities": "No activities registered",
+    "noTitle": "No title",
+    "assignedTo": "Assigned",
+    "createdBy": "Created by",
+    "priority": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "activityTypes": {
+      "payment": "Payment",
+      "document": "Document",
+      "note": "Note",
+      "appointment": "Appointment",
+      "sms": "SMS",
+      "email": "Email",
+      "automation": "Automation"
     }
+  },
+
+  "notes": {
+    "title": "Notes",
+    "addNote": "Add Note",
+    "addNew": "Add new note",
+    "placeholder": "Write the internal note here...",
+    "save": "Save note",
+    "saving": "Saving...",
+    "clear": "Clear",
+    "noNotes": "No notes",
+    "noNotesRegistered": "No notes registered",
+    "noTitle": "No title",
+    "history": "Notes history",
+    "success": "Note added successfully",
+    "error": "Error adding note",
+    "noteTitle": "Title (optional)",
+    "content": "Note content",
+    "project": "Project (optional)",
+    "noProject": "No project",
+    "delete": "Delete",
+    "confirmDelete": "Delete this note?",
+    "assignedTo": "Assigned",
+    "createdBy": "Created by",
+    "column": "Column"
+  },
+
+"audit": {
+  "title": "Audit",
+  "titleBold": "System",
+  "topbarLabel": "Activity log",
+  "subtitle": "Global system activity log",
+  "globalSubtitle": "Global system activity log",
+  "errorLoading": "Error loading audit log",
+  
+  "accessDeniedTitle": "Access denied",
+  "accessDeniedMessage": "Only super administrators can access the system audit log.",
+  
+  "historyTitle": "Change history",
+  "refresh": "Refresh",
+  "filters": "Filters",
+  "filterAction": "Action",
+  "allActions": "All",
+  "allEntities": "All",
+  "dateFrom": "From",
+  "dateTo": "To",
+  "clearFilters": "Clear",
+  "applyFilters": "Apply",
+  "noLogs": "No activity records",
+  "showing": "Showing",
+  "of": "of",
+  "entries": "records",
+  "entityLabel": "Entity",
+  "user": "User",
+  "action": "Action",
+  "entity": "Entity",
+  "changes": "Changes",
+  "timestamp": "Date",
+  "detailsTitle": "Change details",
+  "ip": "IP",
+  "date": "Date",
+  "modifiedFields": "Modified fields",
+  "before": "Before",
+  "after": "After",
+  "fullData": "Full data (JSON)",
+  "noChanges": "No changes",
+  "system": "System",
+  "clickToSeeDetails": "Click to see details",
+  
+  "totalRecords": "total records",
+  "pages": "pages",
+  "activeFilters": "active filters",
+  "page": "Page",
+  
+  "entityId": "Entity ID",
+  "entityIdPlaceholder": "E.g.: 69a73ce5b20401b061da6451",
+  "userId": "User ID",
+  "userIdPlaceholder": "E.g.: 695ec1a01b94d9903358a0db",
+  
+  "entities": {
+    "Lead": "Lead",
+    "Client": "Client",
+    "Activity": "Activity",
+    "Appointment": "Appointment",
+    "Campaign": "Campaign"
+  },
+  
+  "time": {
+    "now": "Now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago"
+  },
+  "actions": {
+    "created": "Created",
+    "updated": "Updated",
+    "deleted": "Deleted",
+    "stage_changed": "Stage changed",
+    "sms_sent": "SMS sent",
+    "login": "Login"
+  }
+}
 }

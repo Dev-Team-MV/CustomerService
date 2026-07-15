@@ -1,6 +1,10 @@
+// apps/mv-crm/src/pages/ProjectDetails.jsx
 import { useState } from 'react'
 import { Box, Typography, Chip, Grid, Paper, Divider, Stack, Button, Skeleton, Tabs, Tab } from '@mui/material'
-import { LocationOn, CropSquare, ArrowBack, Image, CalendarToday, Tag, CheckCircleOutline, LinkOutlined } from '@mui/icons-material'
+import { 
+  LocationOn, CropSquare, ArrowBack, Image, CalendarToday, Tag, 
+  CheckCircleOutline, LinkOutlined, Palette, PhotoCamera 
+} from '@mui/icons-material'
 import { useParams, useNavigate } from 'react-router-dom'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
 import { useTranslation } from 'react-i18next'
@@ -26,6 +30,83 @@ const StatBadge = ({ icon, label, value }) => (
     <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#0a0a0a', fontFamily: '"Helvetica Neue", sans-serif' }}>
       {value || '—'}
     </Typography>
+  </Box>
+)
+
+// ✅ NUEVO: Componente para mostrar un color de marca
+const BrandColorBox = ({ color }) => (
+  <Box
+    sx={{
+      width: 100,
+      height: 100,
+      borderRadius: 2,
+      bgcolor: color.value,
+      border: '2px solid #e0e0e0',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 0.5,
+      position: 'relative',
+      overflow: 'hidden',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+      transition: 'transform 0.2s, box-shadow 0.2s',
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+      }
+    }}
+  >
+    {/* Nombre del color */}
+    <Typography
+      sx={{
+        fontFamily: '"Courier New", monospace',
+        fontSize: '0.7rem',
+        fontWeight: 700,
+        color: '#fff',
+        textShadow: '1px 1px 3px rgba(0,0,0,0.6)',
+        letterSpacing: 1,
+        textTransform: 'uppercase',
+      }}
+    >
+      {color.key}
+    </Typography>
+    {/* Valor del color */}
+    <Typography
+      sx={{
+        fontFamily: '"Courier New", monospace',
+        fontSize: '0.65rem',
+        color: '#fff',
+        textShadow: '1px 1px 3px rgba(0,0,0,0.6)',
+        letterSpacing: 0.5,
+      }}
+    >
+      {color.value}
+    </Typography>
+    {/* Indicador de copiar */}
+    <Box
+      onClick={() => {
+        navigator.clipboard.writeText(color.value)
+      }}
+      sx={{
+        position: 'absolute',
+        bottom: 4,
+        right: 4,
+        width: 20,
+        height: 20,
+        borderRadius: '50%',
+        bgcolor: 'rgba(255,255,255,0.3)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        '&:hover': {
+          bgcolor: 'rgba(255,255,255,0.5)',
+        }
+      }}
+    >
+      <CropSquare sx={{ fontSize: 10, color: '#fff' }} />
+    </Box>
   </Box>
 )
 
@@ -75,7 +156,6 @@ export default function ProjectDetails() {
     </PageLayout>
   )
 
-
   const title = normalizeLangField(project.title)
   const subtitle = normalizeLangField(project.subtitle)
   const description = normalizeLangField(project.description)
@@ -83,6 +163,8 @@ export default function ProjectDetails() {
   const features = project.features || { en: [], es: [] }
   const gallery = Array.isArray(project.gallery) ? project.gallery : []
   const mainImage = project.image || ''
+  const logo = project.logo || ''
+  const brandColors = Array.isArray(project.brandColors) ? project.brandColors : []
   const videos = Array.isArray(project.videos) ? project.videos : []
 
   // Merge mainImage + gallery para el viewer, sin duplicados
@@ -125,7 +207,6 @@ export default function ProjectDetails() {
                 objectFit: 'cover',
                 objectPosition: 'center',
                 display: 'block',
-
               }}
             />
           ) : (
@@ -141,21 +222,41 @@ export default function ProjectDetails() {
           p: { xs: 2, md: 4 },
           display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2
         }}>
-          <Box>
-            <Typography sx={{
-              fontFamily: '"Helvetica Neue", sans-serif',
-              fontSize: { xs: '1.5rem', md: '2.2rem' },
-              fontWeight: 700, color: '#fff', lineHeight: 1.1,
-              letterSpacing: '-0.02em', textShadow: '0 2px 12px rgba(0,0,0,0.4)'
-            }}>
-              {title[lang] || project.name}
-            </Typography>
-            <Typography sx={{
-              fontFamily: '"Courier New", monospace', fontSize: '0.75rem',
-              color: 'rgba(255,255,255,0.7)', letterSpacing: 2, textTransform: 'uppercase', mt: 0.5
-            }}>
-              {subtitle[lang] || project.slug}
-            </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {/* ✅ NUEVO: Logo en el hero */}
+            {logo && (
+              <Box
+                component="img"
+                src={logo}
+                alt={`${project.name} logo`}
+                sx={{
+                  width: 60,
+                  height: 60,
+                  objectFit: 'contain',
+                  bgcolor: 'rgba(255,255,255,0.95)',
+                  borderRadius: 2,
+                  p: 0.5,
+                  border: '2px solid rgba(255,255,255,0.3)',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.3)',
+                }}
+              />
+            )}
+            <Box>
+              <Typography sx={{
+                fontFamily: '"Helvetica Neue", sans-serif',
+                fontSize: { xs: '1.5rem', md: '2.2rem' },
+                fontWeight: 700, color: '#fff', lineHeight: 1.1,
+                letterSpacing: '-0.02em', textShadow: '0 2px 12px rgba(0,0,0,0.4)'
+              }}>
+                {title[lang] || project.name}
+              </Typography>
+              <Typography sx={{
+                fontFamily: '"Courier New", monospace', fontSize: '0.75rem',
+                color: 'rgba(255,255,255,0.7)', letterSpacing: 2, textTransform: 'uppercase', mt: 0.5
+              }}>
+                {subtitle[lang] || project.slug}
+              </Typography>
+            </Box>
           </Box>
           <Chip
             label={project.status?.toUpperCase()}
@@ -204,6 +305,98 @@ export default function ProjectDetails() {
               <StatBadge icon={<Tag fontSize="small" />} label={t('details.type')} value={project.type?.replace('_', ' ')} />
               <StatBadge icon={<CalendarToday fontSize="small" />} label={t('details.createdAt')} value={new Date(project.createdAt).toLocaleDateString()} />
             </Box>
+
+            {/* ✅ NUEVO: Branding Section - Logo y Colores */}
+            {(logo || brandColors.length > 0) && (
+              <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #e0e0e0', bgcolor: '#fff' }}>
+                <Typography sx={{ 
+                  fontFamily: '"Courier New", monospace', 
+                  fontSize: '0.65rem', 
+                  letterSpacing: 2, 
+                  color: '#4a7c59', 
+                  textTransform: 'uppercase', 
+                  mb: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}>
+                  <Palette fontSize="small" /> {t('details.branding', 'Branding')}
+                </Typography>
+
+                <Grid container spacing={3}>
+                  {/* Logo */}
+                  {logo && (
+                    <Grid item xs={12} sm={4}>
+                      <Box sx={{ 
+                        p: 2, 
+                        borderRadius: 2, 
+                        border: '1px solid #e8ede8', 
+                        bgcolor: '#fafcf9',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 1
+                      }}>
+                        <Box
+                          component="img"
+                          src={logo}
+                          alt={`${project.name} logo`}
+                          sx={{
+                            maxWidth: '100%',
+                            maxHeight: 120,
+                            objectFit: 'contain',
+                          }}
+                        />
+                        <Typography
+                          sx={{
+                            fontFamily: '"Courier New", monospace',
+                            fontSize: '0.65rem',
+                            color: '#aaa',
+                            letterSpacing: 1,
+                            textTransform: 'uppercase',
+                          }}
+                        >
+                          {t('details.logo', 'Logo')}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  )}
+
+                  {/* Brand Colors */}
+                  {brandColors.length > 0 && (
+                    <Grid item xs={12} sm={logo ? 8 : 12}>
+                      <Box sx={{
+                        p: 2,
+                        borderRadius: 2,
+                        border: '1px solid #e8ede8',
+                        bgcolor: '#fafcf9',
+                        height: '100%',
+                      }}>
+                        <Typography
+                          sx={{
+                            fontFamily: '"Courier New", monospace',
+                            fontSize: '0.65rem',
+                            color: '#aaa',
+                            letterSpacing: 1,
+                            textTransform: 'uppercase',
+                            mb: 1.5,
+                          }}
+                        >
+                          {t('details.brandColors', 'Brand Colors')} ({brandColors.length})
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+                          {brandColors.map((color, idx) => (
+                            <BrandColorBox key={idx} color={color} />
+                          ))}
+                        </Box>
+                      </Box>
+                    </Grid>
+                  )}
+                </Grid>
+              </Paper>
+            )}
 
             {/* Description */}
             <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #e0e0e0', bgcolor: '#fff' }}>

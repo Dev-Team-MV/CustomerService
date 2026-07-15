@@ -1,0 +1,80 @@
+{
+  "title": "Quotes",
+  "titleBold": "Sales",
+  "topbarLabel": "Quote Management",
+  "subtitle": "Create, send, and convert quotes with amortization schedules",
+  
+  "total": "Total",
+  "active": "Active",
+  "createQuote": "New Quote",
+  "confirmDelete": "Are you sure you want to delete this quote?",
+  "confirmConvert": "Convert this quote to a sale?",
+  "none": "None",
+  
+  "form": {
+    "lead": "Lead",
+    "client": "Client",
+    "project": "Project",
+    "lot": "Lot",
+    "model": "Model",
+    "building": "Building",
+    "apartment": "Apartment",
+    "totalPrice": "Total Price",
+    "downPayment": "Down Payment",
+    "interestRate": "Annual Interest Rate",
+    "termMonths": "Term (months)",
+    "amortizationMethod": "Amortization Method",
+    "fixed": "Fixed Payment",
+    "declining": "Declining Balance",
+    "notes": "Additional Notes"
+  },
+
+  "table": {
+    "date": "Date",
+    "client": "Client",
+    "project": "Project",
+    "totalPrice": "Total Price",
+    "status": "Status",
+    "actions": "Actions",
+    "month": "Month",
+    "payment": "Payment",
+    "principal": "Principal",
+    "interest": "Interest",
+    "balance": "Balance"
+  },
+
+  "status": {
+    "draft": "Draft",
+    "sent": "Sent",
+    "accepted": "Accepted",
+    "expired": "Expired",
+    "converted": "Converted"
+  },
+
+  "actions": {
+    "edit": "Edit",
+    "convertToSale": "Convert to Sale",
+    "downloadPdf": "Download PDF",
+    "delete": "Delete"
+  },
+
+  "summary": {
+    "financedAmount": "Financed Amount",
+    "monthlyPayment": "Monthly Payment",
+    "totalInterest": "Total Interest"
+  },
+
+  "empty": {
+    "title": "No quotes",
+    "description": "No quotes found"
+  },
+
+  "editTitle": "Edit Quote",
+  "createTitle": "New Quote",
+  "back": "Back",
+  "cancel": "Cancel",
+  "next": "Next",
+  "saving": "Saving...",
+  "update": "Update",
+  "create": "Create"
+}
