@@ -24,6 +24,14 @@ import {
   upsertProjectCatalogConfig,
   publishProjectCatalogConfig
 } from '../controllers/projectCatalogConfigController.js'
+import {
+  getProjectVariables,
+  createProjectVariable,
+  updateProjectVariable,
+  deleteProjectVariable,
+  listRecorridoRoots,
+  listRecorridoSegments
+} from '../controllers/projectVariableController.js'
 import { downloadProjectStatementPdf } from '../controllers/accountStatementController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
 
@@ -153,6 +161,24 @@ router.post('/outdoor-amenity-keys', protect, admin, addOutdoorAmenityKeys)
  *               image:
  *                 type: string
  *                 description: Main image URL
+ *               logo:
+ *                 type: string
+ *                 description: Project logo URL
+ *               brandColors:
+ *                 type: array
+ *                 description: Brand palette (primary, secondary, accent, gradient, etc.)
+ *                 items:
+ *                   type: object
+ *                   required: [key, value]
+ *                   properties:
+ *                     key:
+ *                       type: string
+ *                       example: primary
+ *                       description: Color role identifier (e.g. primary, secondary, accent, gradient)
+ *                     value:
+ *                       type: string
+ *                       example: '#333F1F'
+ *                       description: Hex, rgb/rgba, or CSS gradient value
  *               gallery:
  *                 type: array
  *                 items: { type: string }
@@ -378,6 +404,125 @@ router.get('/:id/account-statement/pdf', protect, downloadProjectStatementPdf)
 
 /**
  * @swagger
+ * /api/projects/{id}/variables:
+ *   get:
+ *     summary: Listar variables de mensajes del proyecto
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: categoria
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Lista de variables del proyecto
+ *   post:
+ *     summary: Crear variable de mensaje del proyecto (admin)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, recorrido, categoria]
+ *             properties:
+ *               name: { type: string, example: apartmentNumber }
+ *               recorrido: { type: string, example: apartment.apartmentNumber }
+ *               categoria: { type: string, example: Apartamento }
+ *     responses:
+ *       201:
+ *         description: Variable creada
+ */
+/**
+ * @swagger
+ * /api/projects/{id}/variables/recorridos:
+ *   get:
+ *     summary: Listar raíces de recorrido para variables de mensajes
+ *     description: |
+ *       Raíces disponibles: `user`, `client`, `lot`, `property`, `building`, `apartment`,
+ *       `apartmentModel`, `project`, `lead`, `payment`.
+ *       Usar junto con `/variables/recorridos/segments` para armar el campo `recorrido`.
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: lang
+ *         schema: { type: string, enum: [es, en], default: es }
+ *     responses:
+ *       200:
+ *         description: Raíces disponibles para armar recorridos
+ */
+router.get('/:id/variables/recorridos', listRecorridoRoots)
+
+/**
+ * @swagger
+ * /api/projects/{id}/variables/recorridos/segments:
+ *   get:
+ *     summary: Listar campos disponibles después de un segmento de recorrido
+ *     description: |
+ *       Devuelve los campos del nivel indicado por `path`.
+ *       Ejemplos residencial (lotes): `path=lot`, `path=lot.model`, `path=property.lot.number`.
+ *       Ejemplos apartamentos: `path=building`, `path=apartment`, `path=apartment.building`,
+ *       `path=apartment.apartmentModel`, `path=apartmentModel.building`.
+ *       Los campos `type=ref` tienen `hasChildren=true` y se puede seguir navegando.
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: path
+ *         required: true
+ *         schema: { type: string, example: apartment }
+ *       - in: query
+ *         name: lang
+ *         schema: { type: string, enum: [es, en], default: es }
+ *     responses:
+ *       200:
+ *         description: Segmentos del recorrido
+ *       400:
+ *         description: path inválido o campo escalar sin hijos
+ *       404:
+ *         description: Segmento no encontrado
+ */
+router.get('/:id/variables/recorridos/segments', listRecorridoSegments)
+router.get('/:id/variables', getProjectVariables)
+router.post('/:id/variables', protect, admin, createProjectVariable)
+
+/**
+ * @swagger
+ * /api/projects/{id}/variables/{variableId}:
+ *   put:
+ *     summary: Actualizar variable de mensaje del proyecto (admin)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *   delete:
+ *     summary: Eliminar variable de mensaje del proyecto (admin)
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.put('/:id/variables/:variableId', protect, admin, updateProjectVariable)
+router.delete('/:id/variables/:variableId', protect, admin, deleteProjectVariable)
+
+/**
+ * @swagger
  * /api/projects/{id}:
  *   get:
  *     summary: Get project by ID
@@ -422,6 +567,14 @@ router.get('/:id/account-statement/pdf', protect, downloadProjectStatementPdf)
  *               description: { type: object, properties: { en: { type: string }, es: { type: string } } }
  *               fullDescription: { type: object, properties: { en: { type: string }, es: { type: string } } }
  *               image: { type: string }
+ *               logo: { type: string, description: Project logo URL }
+ *               brandColors:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     key: { type: string, example: primary }
+ *                     value: { type: string, example: '#8CA551' }
  *               gallery: { type: array, items: { type: string } }
  *               features: { type: object, properties: { en: { type: array }, es: { type: array } } }
  *               type: { type: string, enum: [residential_lots, apartments, other] }

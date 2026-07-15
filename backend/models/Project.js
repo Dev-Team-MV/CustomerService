@@ -53,6 +53,15 @@ const outdoorAmenitySectionSchema = new mongoose.Schema(
   { _id: false }
 )
 
+/** Color de marca por rol (primary, secondary, accent, gradient, etc.) */
+const brandColorItemSchema = new mongoose.Schema(
+  {
+    key: { type: String, required: true, trim: true, lowercase: true },
+    value: { type: String, required: true, trim: true }
+  },
+  { _id: false }
+)
+
 const projectSchema = new mongoose.Schema(
   {
     name: {
@@ -90,6 +99,14 @@ const projectSchema = new mongoose.Schema(
     image: {
       type: String,
       trim: true
+    },
+    logo: {
+      type: String,
+      trim: true
+    },
+    brandColors: {
+      type: [brandColorItemSchema],
+      default: () => []
     },
     gallery: [{
       type: String,
@@ -156,6 +173,10 @@ const projectSchema = new mongoose.Schema(
 
 projectSchema.index({ isActive: 1 })
 projectSchema.index({ status: 1 })
+projectSchema.index(
+  { name: 'text', slug: 'text', 'title.en': 'text', 'title.es': 'text' },
+  { name: 'project_crm_text', weights: { name: 10, slug: 8, 'title.en': 5, 'title.es': 5 } }
+)
 
 /** Ensure localized fields always return full { en, es } structure (not just _id) */
 const normalizeLocalized = (val) => {

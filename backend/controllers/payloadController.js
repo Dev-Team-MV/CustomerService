@@ -13,6 +13,11 @@ import {
   notifyPayloadCreated,
   notifyPayloadStatusChanged
 } from '../utils/notificationTriggers.js'
+import {
+  buildPaymentOverdueContext,
+  isPayloadOverdue,
+  runAutomationEngineAsync
+} from '../services/automationEngine.js'
 import crypto from 'crypto'
 import path from 'path'
 
@@ -284,6 +289,12 @@ export const createPayload = async (req, res) => {
       actor: req.user
     })
 
+    if (isPayloadOverdue(payload)) {
+      buildPaymentOverdueContext(payload, req.user).then((context) => {
+        runAutomationEngineAsync('payment_overdue', context)
+      })
+    }
+
     res.status(201).json(data)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -407,6 +418,12 @@ export const updatePayload = async (req, res) => {
         previousStatus: oldStatus,
         actor: req.user
       })
+
+      if (isPayloadOverdue(updatedPayload)) {
+        buildPaymentOverdueContext(updatedPayload, req.user).then((context) => {
+          runAutomationEngineAsync('payment_overdue', context)
+        })
+      }
       
       res.json(populatedPayload)
     } else {

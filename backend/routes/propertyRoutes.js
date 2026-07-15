@@ -96,7 +96,13 @@ const router = express.Router()
  *                 description: Owner user IDs (at least one of user or users required)
  *               initialPayment:
  *                 type: number
- *                 description: Initial payment amount (price and pending are calculated automatically using the active pricing mode for the project)
+ *                 description: Initial payment amount
+ *               price:
+ *                 type: number
+ *                 description: Optional negotiated total price (CRM/quote). When sent, overrides calculated lot+model pricing.
+ *               pending:
+ *                 type: number
+ *                 description: Optional outstanding balance. Defaults to price minus initialPayment when price is overridden.
  *               quoteId:
  *                 type: string
  *                 description: Optional. Required if the matching building is quote-locked.

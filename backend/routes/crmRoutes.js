@@ -7,6 +7,8 @@ import {
 } from '../controllers/crmClientController.js'
 import { getCrmPayments, getCrmPaymentsSummary } from '../controllers/crmPaymentController.js'
 import { getCrmAgents, getCrmAgentMetrics } from '../controllers/crmAgentController.js'
+import { getAgentTargets, upsertAgentTargets } from '../controllers/agentTargetController.js'
+import { getAuditLogs } from '../controllers/auditLogController.js'
 import {
   exportCrmClients,
   exportCrmPayments,
@@ -14,14 +16,100 @@ import {
 } from '../controllers/reportController.js'
 import {
   getCrmNotifications,
-  getCrmNotificationsCount
+  getCrmNotificationsCount,
+  markCrmNotificationAsRead
 } from '../controllers/crmNotificationController.js'
+import { searchCrm } from '../controllers/crmSearchController.js'
 import { protect, superadmin } from '../middleware/authMiddleware.js'
+import { logAction } from '../middleware/logAction.js'
+import { fetchClient } from '../utils/auditEntityFetchers.js'
 import leadRoutes from './leadRoutes.js'
+import appointmentRoutes from './appointmentRoutes.js'
+import automationRoutes from './automationRoutes.js'
+import campaignRoutes from './campaignRoutes.js'
 
 const router = express.Router()
 
 router.use('/leads', leadRoutes)
+router.use('/appointments', appointmentRoutes)
+router.use('/automations', automationRoutes)
+router.use('/campaigns', campaignRoutes)
+
+/**
+ * @swagger
+ * /api/crm/search:
+ *   get:
+ *     summary: Unified CRM search across clients, leads, activities and projects
+ *     tags: [CRM]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema: { type: string, minLength: 2 }
+ *       - in: query
+ *         name: types
+ *         schema: { type: string, example: 'clients,leads,activities,projects' }
+ *         description: Comma-separated entity types to search (default all)
+ *     responses:
+ *       200:
+ *         description: Results grouped by type (max 5 per category)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmSearchResult'
+ */
+router.get('/search', protect, superadmin, searchCrm)
+
+/**
+ * @swagger
+ * /api/crm/audit:
+ *   get:
+ *     summary: Paginated CRM audit log
+ *     tags: [CRM Audit]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: entity
+ *         schema:
+ *           type: string
+ *           enum: [Lead, Client, Activity, Appointment, Campaign]
+ *       - in: query
+ *         name: entityId
+ *         schema: { type: string }
+ *       - in: query
+ *         name: userId
+ *         schema: { type: string }
+ *       - in: query
+ *         name: action
+ *         schema:
+ *           type: string
+ *           enum: [created, updated, deleted, stage_changed, sms_sent, login, impersonation_started, impersonation_stopped]
+ *       - in: query
+ *         name: dateFrom
+ *         schema: { type: string, format: date-time }
+ *       - in: query
+ *         name: dateTo
+ *         schema: { type: string, format: date-time }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 20, maximum: 100 }
+ *     responses:
+ *       200:
+ *         description: Audit log entries with pagination
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmAuditLogsPaginated'
+ *       400:
+ *         description: Invalid filter parameter
+ */
+router.get('/audit', protect, superadmin, getAuditLogs)
 
 /**
  * @swagger
@@ -68,6 +156,74 @@ router.get('/agents', protect, superadmin, getCrmAgents)
  *         description: Agent not found
  */
 router.get('/agents/:id/metrics', protect, superadmin, getCrmAgentMetrics)
+
+/**
+ * @swagger
+ * /api/crm/agents/{id}/targets:
+ *   get:
+ *     summary: Monthly targets and real-time progress for an agent
+ *     tags: [CRM Agents]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: month
+ *         schema: { type: integer, minimum: 1, maximum: 12 }
+ *       - in: query
+ *         name: year
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Targets and computed progress for the month
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmAgentTargetsResponse'
+ *       400:
+ *         description: Invalid agent id
+ *       404:
+ *         description: Agent not found
+ *   post:
+ *     summary: Create or update monthly targets for an agent
+ *     tags: [CRM Agents]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AgentTargetUpsertRequest'
+ *           example:
+ *             month: 7
+ *             year: 2026
+ *             leads: 50
+ *             conversions: 10
+ *             appointments: 20
+ *             smsCount: 100
+ *     responses:
+ *       200:
+ *         description: Targets saved with updated progress
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CrmAgentTargetsResponse'
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Agent not found
+ */
+router.get('/agents/:id/targets', protect, superadmin, getAgentTargets)
+router.post('/agents/:id/targets', protect, superadmin, upsertAgentTargets)
 
 /**
  * @swagger
@@ -199,6 +355,80 @@ router.get('/reports/leads/export', protect, superadmin, exportCrmLeads)
  *               $ref: '#/components/schemas/CrmAlertsCount'
  */
 router.get('/notifications/count', protect, superadmin, getCrmNotificationsCount)
+
+/**
+ * @swagger
+ * /api/crm/notifications/{alertType}/{entityId}/read:
+ *   post:
+ *     summary: Mark a computed CRM alert as read for the authenticated user
+ *     tags: [CRM Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: alertType
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [overdue_payment, upcoming_activity, stale_lead]
+ *       - in: path
+ *         name: entityId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Alert marked as read
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: OK
+ *                 message:
+ *                   type: string
+ *                   example: CRM notification marked as read
+ */
+router.post('/notifications/:alertType/:entityId/read', protect, superadmin, markCrmNotificationAsRead)
+
+/**
+ * @swagger
+ * /api/crm/notifications/{alertType}/{entityId}/read/raw:
+ *   post:
+ *     summary: Mark a computed CRM alert as read using a raw entityId without prefix
+ *     tags: [CRM Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: alertType
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [overdue_payment, upcoming_activity, stale_lead]
+ *       - in: path
+ *         name: entityId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Alert marked as read
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: OK
+ *                 message:
+ *                   type: string
+ *                   example: CRM notification marked as read
+ */
+router.post('/notifications/:alertType/:entityId/read/raw', protect, superadmin, markCrmNotificationAsRead)
 
 /**
  * @swagger
@@ -403,7 +633,19 @@ router.get('/clients/:id/payments', protect, superadmin, getCrmClientPayments)
  *       404:
  *         description: Client not found
  */
-router.post('/clients/:id/notes', protect, superadmin, addCrmClientNote)
+router.post(
+  '/clients/:id/notes',
+  protect,
+  superadmin,
+  logAction({
+    action: 'created',
+    entity: 'Client',
+    getEntityId: (req) => req.params.id,
+    fetchBefore: fetchClient,
+    buildAfter: (_, body) => ({ noteActivityId: body?._id, title: body?.title })
+  }),
+  addCrmClientNote
+)
 
 /**
  * @swagger

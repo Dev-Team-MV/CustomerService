@@ -37,12 +37,20 @@ const smsTemplateSchema = new mongoose.Schema(
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
+    },
+    projectId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
+      default: null
     }
   },
   {
     timestamps: true
   }
 )
+
+smsTemplateSchema.index({ projectId: 1 })
+smsTemplateSchema.index({ category: 1, projectId: 1 })
 
 const SMSTemplate = mongoose.model('SMSTemplate', smsTemplateSchema)
 

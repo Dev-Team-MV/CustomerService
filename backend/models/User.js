@@ -59,6 +59,22 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false
     },
+    passwordResetOtp: {
+      type: String,
+      select: false
+    },
+    passwordResetOtpExpires: {
+      type: Date,
+      select: false
+    },
+    passwordResetToken: {
+      type: String,
+      select: false
+    },
+    passwordResetTokenExpires: {
+      type: Date,
+      select: false
+    },
     passwordSet: {
       type: Boolean,
       default: false
@@ -109,8 +125,37 @@ userSchema.methods.generateSetupToken = function () {
   return token
 }
 
+userSchema.methods.generatePasswordResetOtp = function () {
+  const code = String(crypto.randomInt(100000, 1000000))
+  this.passwordResetOtp = crypto.createHash('sha256').update(code).digest('hex')
+  this.passwordResetOtpExpires = Date.now() + 10 * 60 * 1000 // 10 minutos
+  this.passwordResetToken = undefined
+  this.passwordResetTokenExpires = undefined
+  return code
+}
+
+userSchema.methods.generatePasswordResetToken = function () {
+  const token = crypto.randomBytes(32).toString('hex')
+  this.passwordResetToken = crypto.createHash('sha256').update(token).digest('hex')
+  this.passwordResetTokenExpires = Date.now() + 15 * 60 * 1000 // 15 minutos
+  this.passwordResetOtp = undefined
+  this.passwordResetOtpExpires = undefined
+  return token
+}
+
+userSchema.methods.clearPasswordResetFields = function () {
+  this.passwordResetOtp = undefined
+  this.passwordResetOtpExpires = undefined
+  this.passwordResetToken = undefined
+  this.passwordResetTokenExpires = undefined
+}
+
 userSchema.index({ role: 1 })
 userSchema.index({ 'projectMemberships.project': 1 })
+userSchema.index(
+  { firstName: 'text', lastName: 'text', email: 'text' },
+  { name: 'user_crm_text', weights: { firstName: 5, lastName: 5, email: 10 } }
+)
 
 const User = mongoose.model('User', userSchema)
 

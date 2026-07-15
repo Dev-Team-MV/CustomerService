@@ -3,6 +3,12 @@ import Activity from '../models/Activity.js'
 import ActivityColumn from '../models/ActivityColumn.js'
 import Lead from '../models/Lead.js'
 import { enrichPayloadsForCrm } from '../utils/crmHelpers.js'
+import {
+  buildCrmAlertKey,
+  CRM_NOTIFICATION_TYPES,
+  getCrmReadAlertKeysForUser,
+  markCrmAlertAsRead
+} from '../services/crmNotificationService.js'
 
 const STALE_LEAD_DAYS = 7
 const UPCOMING_ACTIVITY_DAYS = 3
@@ -34,7 +40,7 @@ export async function computeCrmAlerts(userId) {
 
   const doneColumnIds = await ActivityColumn.distinct('_id', { key: 'done' })
 
-  const [overduePayloads, upcomingActivities, staleLeads] = await Promise.all([
+  const [overduePayloads, upcomingActivities, staleLeads, readKeys] = await Promise.all([
     Payload.find({
       status: 'pending',
       date: { $lt: todayStart }
@@ -61,64 +67,72 @@ export async function computeCrmAlerts(userId) {
       .populate('assignedTo', 'firstName lastName email')
       .sort({ updatedAt: 1 })
       .limit(100)
-      .lean()
+      .lean(),
+    getCrmReadAlertKeysForUser(userId)
   ])
 
+  const readKeySet = new Set(readKeys)
   const enrichedPayments = await enrichPayloadsForCrm(overduePayloads)
 
-  const overduePayments = enrichedPayments.map((p) => ({
-    type: 'overdue_payment',
-    id: String(p._id),
-    title: 'Pago vencido',
-    message: `${p.clientName || 'Cliente'} — ${p.unitLabel || 'Unidad'} — $${Number(p.amount || 0).toLocaleString('en-US')}`,
-    dueDate: p.date,
-    payload: {
-      payloadId: p._id,
-      amount: p.amount,
-      status: p.status,
-      clientName: p.clientName,
-      unitLabel: p.unitLabel,
-      projectId: p.projectId,
-      projectName: p.projectName
-    }
-  }))
+  const overduePayments = enrichedPayments
+    .map((p) => ({
+      type: 'overdue_payment',
+      id: buildCrmAlertKey('overdue_payment', p._id),
+      title: 'Pago vencido',
+      message: `${p.clientName || 'Cliente'} — ${p.unitLabel || 'Unidad'} — $${Number(p.amount || 0).toLocaleString('en-US')}`,
+      dueDate: p.date,
+      payload: {
+        payloadId: p._id,
+        amount: p.amount,
+        status: p.status,
+        clientName: p.clientName,
+        unitLabel: p.unitLabel,
+        projectId: p.projectId,
+        projectName: p.projectName
+      }
+    }))
+    .filter((alert) => !readKeySet.has(alert.id))
 
-  const upcomingActivityAlerts = upcomingActivities.map((a) => ({
-    type: 'upcoming_activity',
-    id: String(a._id),
-    title: a.title,
-    message: a.contact?.name
-      ? `Vence pronto — contacto: ${a.contact.name}`
-      : 'Actividad con fecha límite próxima',
-    dueDate: a.dueDate,
-    payload: {
-      activityId: a._id,
-      projectId: a.projectId?._id || a.projectId,
-      projectName: a.projectId?.title?.en || a.projectId?.name || null,
-      priority: a.priority
-    }
-  }))
+  const upcomingActivityAlerts = upcomingActivities
+    .map((a) => ({
+      type: 'upcoming_activity',
+      id: buildCrmAlertKey('upcoming_activity', a._id),
+      title: a.title,
+      message: a.contact?.name
+        ? `Vence pronto — contacto: ${a.contact.name}`
+        : 'Actividad con fecha límite próxima',
+      dueDate: a.dueDate,
+      payload: {
+        activityId: a._id,
+        projectId: a.projectId?._id || a.projectId,
+        projectName: a.projectId?.title?.en || a.projectId?.name || null,
+        priority: a.priority
+      }
+    }))
+    .filter((alert) => !readKeySet.has(alert.id))
 
-  const staleLeadAlerts = staleLeads.map((lead) => ({
-    type: 'stale_lead',
-    id: String(lead._id),
-    title: lead.name,
-    message: `Sin movimiento desde ${new Date(lead.updatedAt).toISOString().split('T')[0]} — etapa: ${lead.stage}`,
-    dueDate: lead.updatedAt,
-    payload: {
-      leadId: lead._id,
-      stage: lead.stage,
-      source: lead.source,
-      projectId: lead.projectId?._id || lead.projectId,
-      projectName: lead.projectId?.title?.en || lead.projectId?.name || null,
-      assignedTo: lead.assignedTo
-        ? {
-            _id: lead.assignedTo._id,
-            name: [lead.assignedTo.firstName, lead.assignedTo.lastName].filter(Boolean).join(' ')
-          }
-        : null
-    }
-  }))
+  const staleLeadAlerts = staleLeads
+    .map((lead) => ({
+      type: 'stale_lead',
+      id: buildCrmAlertKey('stale_lead', lead._id),
+      title: lead.name,
+      message: `Sin movimiento desde ${new Date(lead.updatedAt).toISOString().split('T')[0]} — etapa: ${lead.stage}`,
+      dueDate: lead.updatedAt,
+      payload: {
+        leadId: lead._id,
+        stage: lead.stage,
+        source: lead.source,
+        projectId: lead.projectId?._id || lead.projectId,
+        projectName: lead.projectId?.title?.en || lead.projectId?.name || null,
+        assignedTo: lead.assignedTo
+          ? {
+              _id: lead.assignedTo._id,
+              name: [lead.assignedTo.firstName, lead.assignedTo.lastName].filter(Boolean).join(' ')
+            }
+          : null
+      }
+    }))
+    .filter((alert) => !readKeySet.has(alert.id))
 
   const alerts = [...overduePayments, ...upcomingActivityAlerts, ...staleLeadAlerts]
 
@@ -155,6 +169,25 @@ export const getCrmNotificationsCount = async (req, res) => {
   try {
     const data = await computeCrmAlerts(req.user._id)
     res.json({ count: data.counts.total })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const markCrmNotificationAsRead = async (req, res) => {
+  try {
+    const { alertType, entityId } = req.params
+
+    if (!CRM_NOTIFICATION_TYPES.includes(alertType)) {
+      return res.status(400).json({ message: 'Invalid alert type' })
+    }
+
+    await markCrmAlertAsRead(req.user._id, alertType, entityId)
+
+    res.json({
+      status: 'OK',
+      message: 'CRM notification marked as read'
+    })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }

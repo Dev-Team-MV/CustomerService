@@ -17,6 +17,8 @@ import {
   addActivityThreadMessage
 } from '../controllers/activityController.js'
 import { protect, admin } from '../middleware/authMiddleware.js'
+import { logAction } from '../middleware/logAction.js'
+import { fetchActivity } from '../utils/auditEntityFetchers.js'
 
 const router = express.Router()
 
@@ -323,7 +325,16 @@ router.get('/board', protect, getActivityBoard)
 router
   .route('/')
   .get(protect, getActivities)
-  .post(protect, admin, createActivity)
+  .post(
+    protect,
+    admin,
+    logAction({
+      action: 'created',
+      entity: 'Activity',
+      getEntityId: (_, body) => body?._id
+    }),
+    createActivity
+  )
 
 /**
  * @swagger
@@ -458,8 +469,23 @@ router
 router
   .route('/:id')
   .get(protect, getActivityById)
-  .put(protect, admin, updateActivity)
-  .delete(protect, admin, deleteActivity)
+  .put(
+    protect,
+    admin,
+    logAction({ action: 'updated', entity: 'Activity', fetchBefore: fetchActivity }),
+    updateActivity
+  )
+  .delete(
+    protect,
+    admin,
+    logAction({
+      action: 'deleted',
+      entity: 'Activity',
+      fetchBefore: fetchActivity,
+      buildAfter: () => null
+    }),
+    deleteActivity
+  )
 
 /**
  * @swagger
@@ -493,7 +519,21 @@ router
  *       200:
  *         description: Activity moved
  */
-router.patch('/:id/move', protect, admin, moveActivity)
+router.patch(
+  '/:id/move',
+  protect,
+  admin,
+  logAction({
+    action: 'updated',
+    entity: 'Activity',
+    fetchBefore: fetchActivity,
+    buildAfter: (_, body) => ({
+      columnId: body?.columnId,
+      position: body?.position
+    })
+  }),
+  moveActivity
+)
 
 /**
  * @swagger

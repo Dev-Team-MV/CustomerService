@@ -4,20 +4,71 @@ import mongoose from 'mongoose'
 import User from '../models/User.js'
 import Project from '../models/Project.js'
 import { sendSMSWithValidation } from '../services/twilioService.js'
+import { sendPasswordResetOtpEmail, isEmailConfigured } from '../services/emailService.js'
 import { resolveFrontendBaseUrl } from '../services/resolveFrontendBaseUrl.js'
 import { resolveRoleForNewUser } from '../utils/roles.js'
 import { buildAuthLoginResponse, buildAuthUserPayload } from '../utils/authUserPayload.js'
 import { notifyUserCreatedByAdmin } from '../utils/notificationTriggers.js'
+import { getClientIp, writeAuditLog } from '../middleware/logAction.js'
+import { generateToken } from '../utils/jwtUtils.js'
+import { isValidObjectId } from '../utils/crmHelpers.js'
 
-const generateToken = (userOrId) => {
-  const payload =
-    userOrId && typeof userOrId === 'object'
-      ? { id: String(userOrId._id || userOrId.id), role: userOrId.role }
-      : { id: String(userOrId) }
+const IMPERSONATION_BLOCKED_ROLES = new Set(['superadmin', 'owner'])
 
-  return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: '30d'
+const FORGOT_PASSWORD_GENERIC_MESSAGE =
+  'If an account with that email exists, a verification code has been sent.'
+
+const normalizeEmail = (email) => String(email || '').trim().toLowerCase()
+
+const hashResetValue = (value) =>
+  crypto.createHash('sha256').update(String(value).trim()).digest('hex')
+
+function resolvePasswordResetChannel (requestedChannel, user) {
+  const channel = requestedChannel === 'email' || requestedChannel === 'sms'
+    ? requestedChannel
+    : (user.phoneNumber ? 'sms' : 'email')
+
+  if (channel === 'sms' && !user.phoneNumber) {
+    return { channel: 'email', fallbackFromSms: true }
+  }
+  if (channel === 'email' && !isEmailConfigured()) {
+    if (user.phoneNumber) {
+      return { channel: 'sms', fallbackFromEmail: true }
+    }
+    return { channel: 'email', unavailable: true }
+  }
+  return { channel }
+}
+
+async function sendPasswordResetOtp (user, channel) {
+  const code = user.generatePasswordResetOtp()
+  await user.save()
+
+  if (channel === 'sms') {
+    const message = `Hi ${user.firstName}, your password reset verification code is: ${code}. It expires in 10 minutes.`
+    await sendSMSWithValidation(user.phoneNumber, message)
+    return { channel: 'sms', maskedDestination: maskPhone(user.phoneNumber) }
+  }
+
+  await sendPasswordResetOtpEmail({
+    to: user.email,
+    firstName: user.firstName,
+    code
   })
+  return { channel: 'email', maskedDestination: maskEmail(user.email) }
+}
+
+function maskEmail (email) {
+  const [local, domain] = String(email).split('@')
+  if (!local || !domain) return '***'
+  const visible = local.length <= 2 ? local[0] : `${local.slice(0, 2)}***`
+  return `${visible}@${domain}`
+}
+
+function maskPhone (phone) {
+  const digits = String(phone).replace(/\D/g, '')
+  if (digits.length < 4) return '***'
+  return `***${digits.slice(-4)}`
 }
 
 export const register = async (req, res) => {
@@ -172,6 +223,14 @@ export const login = async (req, res) => {
         user.passwordSet = true
         await user.save()
       }
+      writeAuditLog({
+        userId: user._id,
+        action: 'login',
+        entity: 'Client',
+        entityId: user._id,
+        changes: { before: null, after: { role: user.role } },
+        ip: getClientIp(req)
+      })
       res.json(buildAuthLoginResponse(user, generateToken(user)))
     } else {
       res.status(401).json({ message: 'Invalid credentials' })
@@ -220,6 +279,14 @@ export const loginAdmin = async (req, res) => {
         user.passwordSet = true
         await user.save()
       }
+      writeAuditLog({
+        userId: user._id,
+        action: 'login',
+        entity: 'Client',
+        entityId: user._id,
+        changes: { before: null, after: { role: user.role } },
+        ip: getClientIp(req)
+      })
       res.json(buildAuthLoginResponse(user, generateToken(user)))
     } else {
       res.status(401).json({ message: 'Invalid credentials' })
@@ -244,10 +311,20 @@ export const getProfile = async (req, res) => {
           slug: m.project?.slug
         }))
       })
-      res.json({
+
+      const response = {
         ...userPayload,
         user: userPayload
-      })
+      }
+
+      if (req.isImpersonating && req.impersonatedBy) {
+        response.impersonation = {
+          active: true,
+          impersonatedBy: buildAuthUserPayload(req.impersonatedBy)
+        }
+      }
+
+      res.json(response)
     } else {
       res.status(404).json({ message: 'User not found' })
     }
@@ -256,8 +333,139 @@ export const getProfile = async (req, res) => {
   }
 }
 
+export const startImpersonation = async (req, res) => {
+  try {
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Only superadmin can impersonate users' })
+    }
+
+    if (req.isImpersonating) {
+      return res.status(400).json({ message: 'Stop current impersonation before starting a new one' })
+    }
+
+    const { userId } = req.params
+    if (!isValidObjectId(userId)) {
+      return res.status(400).json({ message: 'Invalid user id' })
+    }
+
+    if (String(userId) === String(req.user._id)) {
+      return res.status(400).json({ message: 'Cannot impersonate yourself' })
+    }
+
+    const targetUser = await User.findOne({
+      _id: userId,
+      isActive: { $ne: false }
+    })
+      .populate('lots')
+      .populate('projectMemberships.project', 'name slug phase type')
+
+    if (!targetUser) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    if (IMPERSONATION_BLOCKED_ROLES.has(targetUser.role)) {
+      return res.status(403).json({ message: 'Cannot impersonate this user role' })
+    }
+
+    const token = generateToken(targetUser, { impersonatedBy: req.user._id })
+    const userPayload = buildAuthUserPayload(targetUser, {
+      projectMemberships: (targetUser.projectMemberships || []).map((m) => ({
+        project: m.project?._id || m.project,
+        membershipRole: m.role || 'resident',
+        name: m.project?.name,
+        slug: m.project?.slug
+      }))
+    })
+    const impersonatedByPayload = buildAuthUserPayload(req.user)
+
+    writeAuditLog({
+      userId: req.user._id,
+      action: 'impersonation_started',
+      entity: 'Client',
+      entityId: targetUser._id,
+      changes: {
+        before: null,
+        after: {
+          targetUserId: targetUser._id,
+          targetRole: targetUser.role,
+          targetEmail: targetUser.email
+        }
+      },
+      ip: getClientIp(req)
+    })
+
+    res.json({
+      ...userPayload,
+      token,
+      user: userPayload,
+      impersonation: {
+        active: true,
+        impersonatedBy: impersonatedByPayload
+      }
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const stopImpersonation = async (req, res) => {
+  try {
+    if (!req.isImpersonating || !req.impersonatedBy) {
+      return res.status(400).json({ message: 'Not currently impersonating a user' })
+    }
+
+    const superadmin = await User.findById(req.impersonatedBy._id)
+      .populate('lots')
+      .populate('projectMemberships.project', 'name slug phase type')
+
+    if (!superadmin || superadmin.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Original superadmin session is no longer valid' })
+    }
+
+    writeAuditLog({
+      userId: superadmin._id,
+      action: 'impersonation_stopped',
+      entity: 'Client',
+      entityId: req.user._id,
+      changes: {
+        before: {
+          impersonatedUserId: req.user._id,
+          impersonatedRole: req.user.role
+        },
+        after: null
+      },
+      ip: getClientIp(req)
+    })
+
+    const token = generateToken(superadmin)
+    const userPayload = buildAuthUserPayload(superadmin, {
+      projectMemberships: (superadmin.projectMemberships || []).map((m) => ({
+        project: m.project?._id || m.project,
+        membershipRole: m.role || 'resident',
+        name: m.project?.name,
+        slug: m.project?.slug
+      }))
+    })
+
+    res.json({
+      ...userPayload,
+      token,
+      user: userPayload,
+      impersonation: {
+        active: false
+      }
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 export const changePassword = async (req, res) => {
   try {
+    if (req.isImpersonating) {
+      return res.status(403).json({ message: 'Cannot change password while impersonating a user' })
+    }
+
     const { currentPassword, newPassword } = req.body
 
     if (!currentPassword || !newPassword) {
@@ -447,6 +655,142 @@ export const sendSetupPasswordLink = async (req, res) => {
       email: user.email,
       phoneNumber: user.phoneNumber,
       setupLink // por si el admin necesita copiarlo (ej. si SMS falla o para pruebas)
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+/**
+ * Paso 1 — solicitar recuperación de contraseña.
+ * Body: { email, channel?: 'sms' | 'email' }
+ */
+export const requestPasswordReset = async (req, res) => {
+  try {
+    const email = normalizeEmail(req.body?.email)
+    const requestedChannel = req.body?.channel
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' })
+    }
+    if (requestedChannel && requestedChannel !== 'sms' && requestedChannel !== 'email') {
+      return res.status(400).json({ message: 'channel must be sms or email' })
+    }
+
+    const user = await User.findOne({ email, isActive: { $ne: false } })
+      .select('+passwordResetOtp +passwordResetOtpExpires +passwordResetToken +passwordResetTokenExpires')
+
+    if (!user) {
+      return res.status(200).json({
+        message: FORGOT_PASSWORD_GENERIC_MESSAGE
+      })
+    }
+
+    const { channel, fallbackFromSms, fallbackFromEmail, unavailable } =
+      resolvePasswordResetChannel(requestedChannel, user)
+
+    if (unavailable) {
+      return res.status(503).json({
+        message: 'Password reset via email is not available. Contact support or try SMS if you have a phone on file.'
+      })
+    }
+
+    try {
+      const delivery = await sendPasswordResetOtp(user, channel)
+      return res.status(200).json({
+        message: FORGOT_PASSWORD_GENERIC_MESSAGE,
+        channel: delivery.channel,
+        maskedDestination: delivery.maskedDestination,
+        ...(fallbackFromSms && { note: 'SMS unavailable for this account; code sent via email.' }),
+        ...(fallbackFromEmail && { note: 'Email unavailable; code sent via SMS.' })
+      })
+    } catch (deliveryError) {
+      console.error('Password reset delivery error:', deliveryError.message)
+      return res.status(502).json({
+        message: 'Could not send verification code. Please try again later or use the other channel.',
+        error: deliveryError.message
+      })
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+/**
+ * Paso 2 — verificar código OTP (2FA).
+ * Body: { email, code }
+ */
+export const verifyPasswordResetCode = async (req, res) => {
+  try {
+    const email = normalizeEmail(req.body?.email)
+    const code = String(req.body?.code || '').trim()
+
+    if (!email || !code) {
+      return res.status(400).json({ message: 'Email and code are required' })
+    }
+
+    const hashedCode = hashResetValue(code)
+    const user = await User.findOne({
+      email,
+      passwordResetOtp: hashedCode,
+      passwordResetOtpExpires: { $gt: Date.now() },
+      isActive: { $ne: false }
+    }).select('+passwordResetOtp +passwordResetOtpExpires +passwordResetToken +passwordResetTokenExpires')
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired verification code' })
+    }
+
+    const resetToken = user.generatePasswordResetToken()
+    await user.save()
+
+    return res.status(200).json({
+      message: 'Verification code accepted. You can now set a new password.',
+      resetToken,
+      expiresInMinutes: 15
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+/**
+ * Paso 3 — establecer nueva contraseña con resetToken.
+ * Body: { resetToken, password }
+ */
+export const resetPassword = async (req, res) => {
+  try {
+    const resetToken = String(req.body?.resetToken || '').trim()
+    const password = req.body?.password
+
+    if (!resetToken || !password) {
+      return res.status(400).json({ message: 'resetToken and password are required' })
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' })
+    }
+
+    const hashedToken = hashResetValue(resetToken)
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetTokenExpires: { $gt: Date.now() },
+      isActive: { $ne: false }
+    }).select('+passwordResetToken +passwordResetTokenExpires +password +setupToken +setupTokenExpires')
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset token' })
+    }
+
+    user.password = password
+    user.passwordSet = true
+    user.setupToken = undefined
+    user.setupTokenExpires = undefined
+    user.clearPasswordResetFields()
+    await user.save()
+
+    return res.status(200).json({
+      message: 'Password reset successfully. You can now login.',
+      ...buildAuthLoginResponse(user, generateToken(user))
     })
   } catch (error) {
     res.status(500).json({ message: error.message })
