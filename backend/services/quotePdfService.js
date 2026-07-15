@@ -135,6 +135,11 @@ function renderQuoteBody(doc, payload) {
       'Building',
       building?.name || String(quote?.buildingId || '-')
     )
+    drawKeyValueLine(
+      doc,
+      'Finish',
+      quote?.selectedRenderType === 'upgrade' ? 'Upgrade' : 'Basic'
+    )
   } else {
     drawKeyValueLine(doc, 'Lot', lot?.number != null ? String(lot.number) : String(quote?.lotId || '-'))
     drawKeyValueLine(doc, 'Model', model?.model || model?.modelNumber || String(quote?.modelId || '-'))

@@ -66,6 +66,23 @@ const quoteSchema = new mongoose.Schema(
       default: null,
       index: true
     },
+    /** Apartment finish: basic vs upgrade (mirrors Apartment.selectedRenderType) */
+    selectedRenderType: {
+      type: String,
+      enum: ['basic', 'upgrade'],
+      default: 'basic'
+    },
+    /** Lot/house option selections (balcony, storage, upgrade ids, etc.) */
+    selectedOptions: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
+    },
+    /** Optional deck selection when quoting with deck-linked facade */
+    deckId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Deck',
+      default: null
+    },
     totalPrice: {
       type: Number,
       required: true,

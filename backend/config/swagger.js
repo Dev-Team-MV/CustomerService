@@ -2200,6 +2200,16 @@ const options = {
             facadeId: { type: 'string', nullable: true },
             buildingId: { type: 'string', nullable: true },
             apartmentId: { type: 'string', nullable: true, description: 'Required for apartment quotes (XOR with lotId)' },
+            selectedRenderType: {
+              type: 'string',
+              enum: ['basic', 'upgrade'],
+              description: 'Apartment finish selection. Persisted on the quote (not on apartment until convert-to-sale).'
+            },
+            selectedOptions: {
+              type: 'object',
+              description: 'Lot/house option selections (balcony, storage, etc.)'
+            },
+            deckId: { type: 'string', nullable: true },
             totalPrice: { type: 'number' },
             downPayment: { type: 'number' },
             downPaymentPercentage: { type: 'number' },
@@ -2237,6 +2247,9 @@ const options = {
             facadeId: { type: 'string', nullable: true },
             buildingId: { type: 'string', nullable: true, description: 'Optional if apartment already has building' },
             apartmentId: { type: 'string', nullable: true },
+            selectedRenderType: { type: 'string', enum: ['basic', 'upgrade'] },
+            selectedOptions: { type: 'object' },
+            deckId: { type: 'string', nullable: true },
             totalPrice: { type: 'number' },
             downPayment: { type: 'number' },
             interestRate: { type: 'number', description: 'Annual interest rate %' },
@@ -2261,6 +2274,9 @@ const options = {
             facadeId: { type: 'string', nullable: true },
             buildingId: { type: 'string', nullable: true },
             apartmentId: { type: 'string', nullable: true },
+            selectedRenderType: { type: 'string', enum: ['basic', 'upgrade'] },
+            selectedOptions: { type: 'object' },
+            deckId: { type: 'string', nullable: true },
             totalPrice: { type: 'number' },
             downPayment: { type: 'number' },
             interestRate: { type: 'number' },

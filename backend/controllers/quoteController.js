@@ -21,12 +21,18 @@ const QUOTE_POPULATE = [
   { path: 'modelId', select: 'model modelNumber price' },
   { path: 'facadeId', select: 'title price' },
   { path: 'buildingId', select: 'name project' },
-  { path: 'apartmentId', select: 'apartmentNumber floorNumber price status building apartmentModel' },
+  {
+    path: 'apartmentId',
+    select: 'apartmentNumber floorNumber price status building apartmentModel selectedRenderType'
+  },
   { path: 'leadId', select: 'name email phone stage' },
   { path: 'clientId', select: 'firstName lastName email phoneNumber' },
   { path: 'createdBy', select: 'firstName lastName email' },
   { path: 'convertedToPropertyId', select: 'price status' },
-  { path: 'convertedToApartmentId', select: 'apartmentNumber floorNumber price status' }
+  {
+    path: 'convertedToApartmentId',
+    select: 'apartmentNumber floorNumber price status selectedRenderType'
+  }
 ]
 
 /** Normalize optional ObjectId from front ("" / null / undefined → null) */
@@ -44,6 +50,28 @@ function optionalObjectId(value, fieldName) {
 function optionalBalloonMonth(value) {
   if (value == null || value === '' || Number(value) < 1) return null
   return Number(value)
+}
+
+function normalizeSelectedRenderType(value) {
+  if (value == null || value === '') return 'basic'
+  const normalized = String(value).trim().toLowerCase()
+  if (normalized === 'upgrade') return 'upgrade'
+  if (normalized === 'basic') return 'basic'
+  return { error: 'selectedRenderType must be basic or upgrade' }
+}
+
+function normalizeSelectedOptions(value) {
+  if (value == null || value === '') return {}
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value)
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}
+    } catch {
+      return {}
+    }
+  }
+  if (typeof value === 'object' && !Array.isArray(value)) return value
+  return {}
 }
 
 async function buildQuotePdfPayload(quote) {
@@ -229,6 +257,12 @@ export const createQuote = async (req, res) => {
       return res.status(400).json({ message: `Invalid status. Allowed: ${QUOTE_STATUSES.join(', ')}` })
     }
 
+    const renderType = normalizeSelectedRenderType(req.body.selectedRenderType)
+    if (renderType.error) return res.status(400).json({ message: renderType.error })
+
+    const deckNorm = optionalObjectId(req.body.deckId, 'deckId')
+    if (deckNorm.error) return res.status(400).json({ message: deckNorm.error })
+
     let scheduleResult
     try {
       scheduleResult = generateSchedule(
@@ -256,6 +290,9 @@ export const createQuote = async (req, res) => {
       facadeId: target.facadeId,
       buildingId: target.buildingId,
       apartmentId: target.apartmentId,
+      selectedRenderType: target.apartmentId ? renderType : 'basic',
+      selectedOptions: normalizeSelectedOptions(req.body.selectedOptions),
+      deckId: deckNorm.value,
       status: status || 'draft',
       validUntil: validUntil ? new Date(validUntil) : null,
       termsAndConditions: termsAndConditions || '',
@@ -422,6 +459,21 @@ export const updateQuote = async (req, res) => {
     if (validUntil !== undefined) quote.validUntil = validUntil ? new Date(validUntil) : null
     if (termsAndConditions !== undefined) quote.termsAndConditions = termsAndConditions
     if (notes !== undefined) quote.notes = notes
+
+    if (req.body.selectedRenderType !== undefined) {
+      const renderType = normalizeSelectedRenderType(req.body.selectedRenderType)
+      if (renderType.error) return res.status(400).json({ message: renderType.error })
+      quote.selectedRenderType = renderType
+    }
+    if (req.body.selectedOptions !== undefined) {
+      quote.selectedOptions = normalizeSelectedOptions(req.body.selectedOptions)
+      quote.markModified('selectedOptions')
+    }
+    if (req.body.deckId !== undefined) {
+      const deckNorm = optionalObjectId(req.body.deckId, 'deckId')
+      if (deckNorm.error) return res.status(400).json({ message: deckNorm.error })
+      quote.deckId = deckNorm.value
+    }
 
     if (
       req.body.lotId !== undefined ||
@@ -618,7 +670,7 @@ export const convertQuoteToSale = async (req, res) => {
       return res.status(400).json({ message: 'Expired quotes cannot be converted' })
     }
 
-    const { propertyId, apartmentId: convertedApartmentId } = req.body
+    const { propertyId, apartmentId: convertedApartmentId, applyApartmentSale } = req.body
     if (propertyId) {
       if (!isValidObjectId(propertyId)) {
         return res.status(400).json({ message: 'Invalid propertyId' })
@@ -627,6 +679,10 @@ export const convertQuoteToSale = async (req, res) => {
       if (!propertyExists) return res.status(404).json({ message: 'Property not found' })
       quote.convertedToPropertyId = propertyId
     }
+
+    let updatedApartment = null
+    const isApartmentQuote = Boolean(quote.apartmentId)
+
     if (convertedApartmentId) {
       const aptNorm = optionalObjectId(convertedApartmentId, 'apartmentId')
       if (aptNorm.error) return res.status(400).json({ message: aptNorm.error })
@@ -635,13 +691,53 @@ export const convertQuoteToSale = async (req, res) => {
       quote.convertedToApartmentId = aptNorm.value
     }
 
+    // Apply quoted options to the apartment sale when converting an apartment quote
+    // (selectedRenderType basic/upgrade, negotiated price, client assignment).
+    const shouldApplyApartment =
+      isApartmentQuote &&
+      applyApartmentSale !== false &&
+      (convertedApartmentId || quote.apartmentId)
+
+    if (shouldApplyApartment) {
+      const targetApartmentId = quote.convertedToApartmentId || quote.apartmentId
+      const apartment = await Apartment.findById(targetApartmentId)
+      if (!apartment) {
+        return res.status(404).json({ message: 'Apartment not found for quote conversion' })
+      }
+
+      apartment.selectedRenderType = quote.selectedRenderType === 'upgrade' ? 'upgrade' : 'basic'
+      apartment.price = Number(quote.totalPrice) || apartment.price
+      apartment.initialPayment = Number(quote.downPayment) || 0
+      apartment.pending = Math.max(0, apartment.price - apartment.initialPayment)
+      if (quote.clientId) {
+        const clientIdStr = String(quote.clientId)
+        const existingUsers = (apartment.users || []).map((id) => String(id))
+        if (!existingUsers.includes(clientIdStr)) {
+          apartment.users = [...(apartment.users || []), quote.clientId]
+        }
+      }
+      if (apartment.status === 'available') {
+        apartment.status = 'pending'
+      }
+      await apartment.save()
+      quote.convertedToApartmentId = apartment._id
+      updatedApartment = apartment
+    }
+
     quote.status = 'converted'
     await quote.save()
     await quote.populate(QUOTE_POPULATE)
 
-    const isApartmentQuote = Boolean(quote.apartmentId)
+    if (updatedApartment) {
+      await updatedApartment.populate([
+        { path: 'apartmentModel', select: 'name modelNumber' },
+        { path: 'users', select: 'firstName lastName email' }
+      ])
+    }
+
     res.json({
       quote,
+      apartment: updatedApartment,
       propertyCreateHint:
         propertyId || isApartmentQuote
           ? null
@@ -651,20 +747,27 @@ export const convertQuoteToSale = async (req, res) => {
               model: quote.modelId,
               facade: quote.facadeId,
               user: quote.clientId,
+              users: quote.clientId ? [quote.clientId] : [],
               initialPayment: quote.downPayment,
+              price: quote.totalPrice,
+              selectedOptions: quote.selectedOptions || {},
+              deckId: quote.deckId || null,
               quoteId: quote._id
             },
-      apartmentSaleHint:
-        convertedApartmentId || !isApartmentQuote
-          ? null
-          : {
-              projectId: quote.projectId,
-              buildingId: quote.buildingId,
-              apartmentId: quote.apartmentId,
-              user: quote.clientId,
-              initialPayment: quote.downPayment,
-              quoteId: quote._id
-            }
+      apartmentSaleHint: !isApartmentQuote
+        ? null
+        : {
+            projectId: quote.projectId,
+            buildingId: quote.buildingId,
+            apartmentId: quote.apartmentId,
+            user: quote.clientId,
+            users: quote.clientId ? [quote.clientId] : [],
+            initialPayment: quote.downPayment,
+            price: quote.totalPrice,
+            selectedRenderType: quote.selectedRenderType || 'basic',
+            quoteId: quote._id,
+            applied: Boolean(updatedApartment)
+          }
     })
   } catch (error) {
     res.status(500).json({ message: error.message })
