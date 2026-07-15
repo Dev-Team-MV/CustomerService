@@ -3,6 +3,8 @@ import path from 'path'
 import multer from 'multer'
 import Document, { DOCUMENT_CATEGORIES } from '../models/Document.js'
 import Project from '../models/Project.js'
+import Property from '../models/Property.js'
+import Apartment from '../models/Apartment.js'
 import { isValidObjectId, parsePagination, buildPaginationMeta } from '../utils/crmHelpers.js'
 import { uploadFile, deleteFile } from '../services/storageService.js'
 import { scanExpiringDocuments } from '../services/documentExpiryScheduler.js'
@@ -10,12 +12,40 @@ import { scanExpiringDocuments } from '../services/documentExpiryScheduler.js'
 const DOCUMENT_POPULATE = [
   { path: 'uploadedBy', select: 'firstName lastName email' },
   { path: 'projectId', select: 'name slug title' },
-  { path: 'propertyId', select: 'price status' },
-  { path: 'apartmentId', select: 'number unit' },
+  { path: 'propertyId', select: 'price status lot model' },
+  { path: 'apartmentId', select: 'apartmentNumber floorNumber' },
   { path: 'clientId', select: 'firstName lastName email' },
   { path: 'leadId', select: 'name email phone' },
   { path: 'previousVersion', select: 'title version fileUrl' }
 ]
+
+/**
+ * Normalize optional ObjectId from JSON or multipart FormData.
+ * Accepts string id, { _id }, and empty/"null"/"undefined" → null.
+ */
+function normalizeOptionalObjectId(value, fieldName) {
+  if (value == null || value === '' || value === 'null' || value === 'undefined') {
+    return { value: null }
+  }
+  if (typeof value === 'object' && value._id != null) {
+    value = value._id
+  }
+  const id = String(value).trim()
+  if (!id) return { value: null }
+  if (!isValidObjectId(id)) {
+    return { error: `Invalid ${fieldName}` }
+  }
+  return { value: id }
+}
+
+function pickBodyRef(body, ...keys) {
+  for (const key of keys) {
+    if (body[key] !== undefined && body[key] !== null && body[key] !== '') {
+      return body[key]
+    }
+  }
+  return undefined
+}
 
 const memoryStorage = multer.memoryStorage()
 const DEFAULT_MAX_UPLOAD_MB = 50
@@ -83,11 +113,6 @@ export const createDocument = async (req, res) => {
       title,
       description,
       category,
-      propertyId,
-      apartmentId,
-      clientId,
-      leadId,
-      projectId,
       tags,
       expiresAt,
       thumbnailUrl,
@@ -96,18 +121,48 @@ export const createDocument = async (req, res) => {
       fileSize: bodyFileSize
     } = req.body
 
+    // Accept aliases used elsewhere in the API / FormData field names
+    const projectIdRaw = pickBodyRef(req.body, 'projectId', 'project')
+    const propertyIdRaw = pickBodyRef(req.body, 'propertyId', 'property')
+    const apartmentIdRaw = pickBodyRef(req.body, 'apartmentId', 'apartment')
+    const clientIdRaw = pickBodyRef(req.body, 'clientId', 'client', 'userId', 'user')
+    const leadIdRaw = pickBodyRef(req.body, 'leadId', 'lead')
+
     if (!title?.trim()) return res.status(400).json({ message: 'Title is required' })
     if (!DOCUMENT_CATEGORIES.includes(category)) {
       return res.status(400).json({
         message: `category must be one of: ${DOCUMENT_CATEGORIES.join(', ')}`
       })
     }
-    if (!isValidObjectId(projectId)) {
-      return res.status(400).json({ message: 'Valid projectId is required' })
-    }
 
-    const projectExists = await Project.exists({ _id: projectId })
+    const projectIdNorm = normalizeOptionalObjectId(projectIdRaw, 'projectId')
+    if (projectIdNorm.error || !projectIdNorm.value) {
+      return res.status(400).json({ message: projectIdNorm.error || 'Valid projectId is required' })
+    }
+    const propertyIdNorm = normalizeOptionalObjectId(propertyIdRaw, 'propertyId')
+    if (propertyIdNorm.error) return res.status(400).json({ message: propertyIdNorm.error })
+    const apartmentIdNorm = normalizeOptionalObjectId(apartmentIdRaw, 'apartmentId')
+    if (apartmentIdNorm.error) return res.status(400).json({ message: apartmentIdNorm.error })
+    const clientIdNorm = normalizeOptionalObjectId(clientIdRaw, 'clientId')
+    if (clientIdNorm.error) return res.status(400).json({ message: clientIdNorm.error })
+    const leadIdNorm = normalizeOptionalObjectId(leadIdRaw, 'leadId')
+    if (leadIdNorm.error) return res.status(400).json({ message: leadIdNorm.error })
+
+    const projectExists = await Project.exists({ _id: projectIdNorm.value })
     if (!projectExists) return res.status(404).json({ message: 'Project not found' })
+
+    if (propertyIdNorm.value) {
+      const propertyExists = await Property.exists({ _id: propertyIdNorm.value })
+      if (!propertyExists) {
+        return res.status(404).json({ message: 'Property not found', propertyId: propertyIdNorm.value })
+      }
+    }
+    if (apartmentIdNorm.value) {
+      const apartmentExists = await Apartment.exists({ _id: apartmentIdNorm.value })
+      if (!apartmentExists) {
+        return res.status(404).json({ message: 'Apartment not found', apartmentId: apartmentIdNorm.value })
+      }
+    }
 
     let fileMeta
     if (req.file) {
@@ -138,11 +193,11 @@ export const createDocument = async (req, res) => {
       category,
       ...fileMeta,
       thumbnailUrl: thumbnailUrl || null,
-      propertyId: propertyId || null,
-      apartmentId: apartmentId || null,
-      clientId: clientId || null,
-      leadId: leadId || null,
-      projectId,
+      propertyId: propertyIdNorm.value,
+      apartmentId: apartmentIdNorm.value,
+      clientId: clientIdNorm.value,
+      leadId: leadIdNorm.value,
+      projectId: projectIdNorm.value,
       tags: Array.isArray(parsedTags) ? parsedTags : [],
       version: 1,
       uploadedBy: req.user._id,
@@ -208,11 +263,7 @@ export const updateDocument = async (req, res) => {
       category,
       tags,
       expiresAt,
-      thumbnailUrl,
-      propertyId,
-      apartmentId,
-      clientId,
-      leadId
+      thumbnailUrl
     } = req.body
 
     if (title !== undefined) doc.title = String(title).trim()
@@ -230,10 +281,60 @@ export const updateDocument = async (req, res) => {
       doc.expiresAt = expiresAt ? new Date(expiresAt) : null
     }
     if (thumbnailUrl !== undefined) doc.thumbnailUrl = thumbnailUrl
-    if (propertyId !== undefined) doc.propertyId = propertyId || null
-    if (apartmentId !== undefined) doc.apartmentId = apartmentId || null
-    if (clientId !== undefined) doc.clientId = clientId || null
-    if (leadId !== undefined) doc.leadId = leadId || null
+
+    if (
+      req.body.propertyId !== undefined ||
+      req.body.property !== undefined
+    ) {
+      const norm = normalizeOptionalObjectId(
+        pickBodyRef(req.body, 'propertyId', 'property'),
+        'propertyId'
+      )
+      if (norm.error) return res.status(400).json({ message: norm.error })
+      if (norm.value) {
+        const exists = await Property.exists({ _id: norm.value })
+        if (!exists) return res.status(404).json({ message: 'Property not found' })
+      }
+      doc.propertyId = norm.value
+    }
+
+    if (
+      req.body.apartmentId !== undefined ||
+      req.body.apartment !== undefined
+    ) {
+      const norm = normalizeOptionalObjectId(
+        pickBodyRef(req.body, 'apartmentId', 'apartment'),
+        'apartmentId'
+      )
+      if (norm.error) return res.status(400).json({ message: norm.error })
+      if (norm.value) {
+        const exists = await Apartment.exists({ _id: norm.value })
+        if (!exists) return res.status(404).json({ message: 'Apartment not found' })
+      }
+      doc.apartmentId = norm.value
+    }
+
+    if (
+      req.body.clientId !== undefined ||
+      req.body.client !== undefined ||
+      req.body.userId !== undefined
+    ) {
+      const norm = normalizeOptionalObjectId(
+        pickBodyRef(req.body, 'clientId', 'client', 'userId'),
+        'clientId'
+      )
+      if (norm.error) return res.status(400).json({ message: norm.error })
+      doc.clientId = norm.value
+    }
+
+    if (req.body.leadId !== undefined || req.body.lead !== undefined) {
+      const norm = normalizeOptionalObjectId(
+        pickBodyRef(req.body, 'leadId', 'lead'),
+        'leadId'
+      )
+      if (norm.error) return res.status(400).json({ message: norm.error })
+      doc.leadId = norm.value
+    }
 
     await doc.save()
     await doc.populate(DOCUMENT_POPULATE)
