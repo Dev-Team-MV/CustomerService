@@ -97,6 +97,8 @@ function renderQuoteBody(doc, payload) {
     lot,
     model,
     facade,
+    building,
+    apartment,
     lead,
     client,
     termsAndConditions
@@ -116,11 +118,29 @@ function renderQuoteBody(doc, payload) {
   drawKeyValueLine(doc, 'Valid Until', formatDate(quote?.validUntil))
   drawKeyValueLine(doc, 'Created', formatDate(quote?.createdAt))
 
-  drawSectionTitle(doc, 'Property Details', brand.primary)
-  drawKeyValueLine(doc, 'Lot', lot?.number != null ? String(lot.number) : String(quote?.lotId || '-'))
-  drawKeyValueLine(doc, 'Model', model?.model || model?.modelNumber || String(quote?.modelId || '-'))
-  if (facade?.title || quote?.facadeId) {
-    drawKeyValueLine(doc, 'Facade', facade?.title || String(quote.facadeId))
+  drawSectionTitle(doc, 'Unit Details', brand.primary)
+  if (apartment || quote?.apartmentId) {
+    drawKeyValueLine(
+      doc,
+      'Apartment',
+      apartment?.apartmentNumber != null
+        ? String(apartment.apartmentNumber)
+        : String(quote.apartmentId)
+    )
+    if (apartment?.floorNumber != null) {
+      drawKeyValueLine(doc, 'Floor', String(apartment.floorNumber))
+    }
+    drawKeyValueLine(
+      doc,
+      'Building',
+      building?.name || String(quote?.buildingId || '-')
+    )
+  } else {
+    drawKeyValueLine(doc, 'Lot', lot?.number != null ? String(lot.number) : String(quote?.lotId || '-'))
+    drawKeyValueLine(doc, 'Model', model?.model || model?.modelNumber || String(quote?.modelId || '-'))
+    if (facade?.title || quote?.facadeId) {
+      drawKeyValueLine(doc, 'Facade', facade?.title || String(quote.facadeId))
+    }
   }
 
   drawSectionTitle(doc, 'Client / Lead', brand.primary)

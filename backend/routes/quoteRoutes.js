@@ -101,6 +101,12 @@ router.get('/by-lead/:leadId', getQuotesByLead)
  *         name: lotId
  *         schema: { type: string }
  *       - in: query
+ *         name: buildingId
+ *         schema: { type: string }
+ *       - in: query
+ *         name: apartmentId
+ *         schema: { type: string }
+ *       - in: query
  *         name: status
  *         schema:
  *           type: string
@@ -115,7 +121,7 @@ router.get('/by-lead/:leadId', getQuotesByLead)
  *       200:
  *         description: Paginated quotes
  *   post:
- *     summary: Create a quote with amortization schedule
+ *     summary: Create a quote (lot OR apartment) with amortization schedule
  *     tags: [Quotes]
  *     security:
  *       - bearerAuth: []
@@ -125,6 +131,31 @@ router.get('/by-lead/:leadId', getQuotesByLead)
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/QuoteCreate'
+ *           examples:
+ *             lotQuote:
+ *               summary: Lot-based quote
+ *               value:
+ *                 projectId: 69a73ce5b20401b061da6451
+ *                 lotId: 69a73ce5b20401b061da6452
+ *                 modelId: 69a73ce5b20401b061da6453
+ *                 clientId: 698c91e893a47a1c786a6d4b
+ *                 totalPrice: 250000
+ *                 downPayment: 50000
+ *                 interestRate: 8
+ *                 termMonths: 60
+ *             apartmentQuote:
+ *               summary: Apartment-based quote (no lotId)
+ *               value:
+ *                 projectId: 69b9b2188186434073c6b13d
+ *                 buildingId: 69bc65b85720650a73c7259e
+ *                 apartmentId: 69bc70554857c845306adc0c
+ *                 clientId: 698c91e893a47a1c786a6d4b
+ *                 totalPrice: 200
+ *                 downPayment: 0
+ *                 interestRate: 5
+ *                 termMonths: 5
+ *                 amortizationMethod: fixed
+ *                 status: draft
  *     responses:
  *       201:
  *         description: Created

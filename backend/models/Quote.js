@@ -36,10 +36,12 @@ const quoteSchema = new mongoose.Schema(
       required: true,
       index: true
     },
+    /** Lot-based quote (Phase 1 / residential lots) */
     lotId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Lot',
-      required: true
+      default: null,
+      index: true
     },
     modelId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -50,6 +52,19 @@ const quoteSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Facade',
       default: null
+    },
+    /** Apartment-based quote (Phase 2 / buildings) */
+    buildingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Building',
+      default: null,
+      index: true
+    },
+    apartmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Apartment',
+      default: null,
+      index: true
     },
     totalPrice: {
       type: Number,
@@ -124,6 +139,11 @@ const quoteSchema = new mongoose.Schema(
       ref: 'Property',
       default: null
     },
+    convertedToApartmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Apartment',
+      default: null
+    },
     pdfUrl: {
       type: String,
       trim: true,
@@ -153,8 +173,19 @@ const quoteSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
+quoteSchema.pre('validate', function (next) {
+  const hasLot = this.lotId != null
+  const hasApartment = this.apartmentId != null
+  if (hasLot === hasApartment) {
+    next(new Error('Exactly one of lotId or apartmentId is required'))
+  } else {
+    next()
+  }
+})
+
 quoteSchema.index({ projectId: 1, status: 1, createdAt: -1 })
 quoteSchema.index({ leadId: 1, createdAt: -1 })
+quoteSchema.index({ apartmentId: 1, createdAt: -1 })
 quoteSchema.index({ validUntil: 1, status: 1 })
 
 export default mongoose.model('Quote', quoteSchema)

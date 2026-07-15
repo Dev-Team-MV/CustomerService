@@ -3,6 +3,8 @@ import Project from '../models/Project.js'
 import Lot from '../models/Lot.js'
 import Model from '../models/Model.js'
 import Facade from '../models/Facade.js'
+import Building from '../models/Building.js'
+import Apartment from '../models/Apartment.js'
 import Lead from '../models/Lead.js'
 import User from '../models/User.js'
 import Property from '../models/Property.js'
@@ -18,11 +20,31 @@ const QUOTE_POPULATE = [
   { path: 'lotId', select: 'number price status' },
   { path: 'modelId', select: 'model modelNumber price' },
   { path: 'facadeId', select: 'title price' },
+  { path: 'buildingId', select: 'name project' },
+  { path: 'apartmentId', select: 'apartmentNumber floorNumber price status building apartmentModel' },
   { path: 'leadId', select: 'name email phone stage' },
   { path: 'clientId', select: 'firstName lastName email phoneNumber' },
   { path: 'createdBy', select: 'firstName lastName email' },
-  { path: 'convertedToPropertyId', select: 'price status' }
+  { path: 'convertedToPropertyId', select: 'price status' },
+  { path: 'convertedToApartmentId', select: 'apartmentNumber floorNumber price status' }
 ]
+
+/** Normalize optional ObjectId from front ("" / null / undefined → null) */
+function optionalObjectId(value, fieldName) {
+  if (value == null || value === '' || value === 'null' || value === 'undefined') {
+    return { value: null }
+  }
+  if (typeof value === 'object' && value._id != null) value = value._id
+  const id = String(value).trim()
+  if (!id) return { value: null }
+  if (!isValidObjectId(id)) return { error: `Invalid ${fieldName}` }
+  return { value: id }
+}
+
+function optionalBalloonMonth(value) {
+  if (value == null || value === '' || Number(value) < 1) return null
+  return Number(value)
+}
 
 async function buildQuotePdfPayload(quote) {
   const populated =
@@ -37,6 +59,8 @@ async function buildQuotePdfPayload(quote) {
     lot: doc.lotId && typeof doc.lotId === 'object' ? doc.lotId : null,
     model: doc.modelId && typeof doc.modelId === 'object' ? doc.modelId : null,
     facade: doc.facadeId && typeof doc.facadeId === 'object' ? doc.facadeId : null,
+    building: doc.buildingId && typeof doc.buildingId === 'object' ? doc.buildingId : null,
+    apartment: doc.apartmentId && typeof doc.apartmentId === 'object' ? doc.apartmentId : null,
     lead: doc.leadId && typeof doc.leadId === 'object' ? doc.leadId : null,
     client: doc.clientId && typeof doc.clientId === 'object' ? doc.clientId : null,
     termsAndConditions: doc.termsAndConditions
@@ -57,15 +81,99 @@ function applyScheduleToQuote(quote, scheduleResult) {
   quote.balloonMonth = scheduleResult.balloonMonth
 }
 
+/**
+ * Resolve lot OR apartment target. Returns { error, status } or resolved ids.
+ */
+async function resolveQuoteTarget({
+  projectId,
+  lotId,
+  modelId,
+  facadeId,
+  buildingId,
+  apartmentId
+}) {
+  const lotNorm = optionalObjectId(lotId, 'lotId')
+  if (lotNorm.error) return { error: lotNorm.error, status: 400 }
+  const apartmentNorm = optionalObjectId(apartmentId, 'apartmentId')
+  if (apartmentNorm.error) return { error: apartmentNorm.error, status: 400 }
+  const buildingNorm = optionalObjectId(buildingId, 'buildingId')
+  if (buildingNorm.error) return { error: buildingNorm.error, status: 400 }
+  const modelNorm = optionalObjectId(modelId, 'modelId')
+  if (modelNorm.error) return { error: modelNorm.error, status: 400 }
+  const facadeNorm = optionalObjectId(facadeId, 'facadeId')
+  if (facadeNorm.error) return { error: facadeNorm.error, status: 400 }
+
+  const hasLot = Boolean(lotNorm.value)
+  const hasApartment = Boolean(apartmentNorm.value)
+
+  if (hasLot === hasApartment) {
+    return {
+      error: 'Provide exactly one of lotId (lot quote) or apartmentId (apartment quote)',
+      status: 400
+    }
+  }
+
+  if (hasLot) {
+    const lotExists = await Lot.exists({ _id: lotNorm.value })
+    if (!lotExists) return { error: 'Lot not found', status: 404 }
+    if (modelNorm.value && !(await Model.exists({ _id: modelNorm.value }))) {
+      return { error: 'Model not found', status: 404 }
+    }
+    if (facadeNorm.value && !(await Facade.exists({ _id: facadeNorm.value }))) {
+      return { error: 'Facade not found', status: 404 }
+    }
+    return {
+      lotId: lotNorm.value,
+      modelId: modelNorm.value,
+      facadeId: facadeNorm.value,
+      buildingId: null,
+      apartmentId: null
+    }
+  }
+
+  // Apartment quote
+  const apartment = await Apartment.findById(apartmentNorm.value)
+    .select('building apartmentModel')
+    .lean()
+  if (!apartment) return { error: 'Apartment not found', status: 404 }
+
+  let resolvedBuildingId = buildingNorm.value || (apartment.building ? String(apartment.building) : null)
+  if (!resolvedBuildingId) {
+    return { error: 'Apartment has no building; buildingId is required', status: 400 }
+  }
+
+  const building = await Building.findById(resolvedBuildingId).select('project').lean()
+  if (!building) return { error: 'Building not found', status: 404 }
+
+  if (String(building.project) !== String(projectId)) {
+    return { error: 'Building does not belong to this project', status: 400 }
+  }
+
+  if (
+    apartment.building &&
+    String(apartment.building) !== String(resolvedBuildingId)
+  ) {
+    return { error: 'Apartment does not belong to the given building', status: 400 }
+  }
+
+  return {
+    lotId: null,
+    modelId: null,
+    facadeId: null,
+    buildingId: resolvedBuildingId,
+    apartmentId: apartmentNorm.value
+  }
+}
+
 export const createQuote = async (req, res) => {
   try {
     const {
-      leadId,
-      clientId,
       projectId,
       lotId,
       modelId,
       facadeId,
+      buildingId,
+      apartmentId,
       totalPrice,
       downPayment,
       interestRate,
@@ -80,12 +188,16 @@ export const createQuote = async (req, res) => {
       status
     } = req.body
 
-    if (!isValidObjectId(projectId)) {
-      return res.status(400).json({ message: 'Valid projectId is required' })
+    const projectNorm = optionalObjectId(projectId, 'projectId')
+    if (projectNorm.error || !projectNorm.value) {
+      return res.status(400).json({ message: projectNorm.error || 'Valid projectId is required' })
     }
-    if (!isValidObjectId(lotId)) {
-      return res.status(400).json({ message: 'Valid lotId is required' })
-    }
+
+    const leadNorm = optionalObjectId(req.body.leadId, 'leadId')
+    if (leadNorm.error) return res.status(400).json({ message: leadNorm.error })
+    const clientNorm = optionalObjectId(req.body.clientId, 'clientId')
+    if (clientNorm.error) return res.status(400).json({ message: clientNorm.error })
+
     if (totalPrice == null || !Number.isFinite(Number(totalPrice))) {
       return res.status(400).json({ message: 'totalPrice is required' })
     }
@@ -93,23 +205,23 @@ export const createQuote = async (req, res) => {
       return res.status(400).json({ message: 'termMonths must be >= 1' })
     }
 
-    const [projectExists, lotExists] = await Promise.all([
-      Project.exists({ _id: projectId }),
-      Lot.exists({ _id: lotId })
-    ])
+    const projectExists = await Project.exists({ _id: projectNorm.value })
     if (!projectExists) return res.status(404).json({ message: 'Project not found' })
-    if (!lotExists) return res.status(404).json({ message: 'Lot not found' })
 
-    if (modelId && !(await Model.exists({ _id: modelId }))) {
-      return res.status(404).json({ message: 'Model not found' })
-    }
-    if (facadeId && !(await Facade.exists({ _id: facadeId }))) {
-      return res.status(404).json({ message: 'Facade not found' })
-    }
-    if (leadId && !(await Lead.exists({ _id: leadId }))) {
+    const target = await resolveQuoteTarget({
+      projectId: projectNorm.value,
+      lotId,
+      modelId,
+      facadeId,
+      buildingId,
+      apartmentId
+    })
+    if (target.error) return res.status(target.status).json({ message: target.error })
+
+    if (leadNorm.value && !(await Lead.exists({ _id: leadNorm.value }))) {
       return res.status(404).json({ message: 'Lead not found' })
     }
-    if (clientId && !(await User.exists({ _id: clientId }))) {
+    if (clientNorm.value && !(await User.exists({ _id: clientNorm.value }))) {
       return res.status(404).json({ message: 'Client not found' })
     }
 
@@ -127,7 +239,7 @@ export const createQuote = async (req, res) => {
         {
           method: amortizationMethod === 'declining' ? 'declining' : 'fixed',
           balloonAmount: balloonAmount || 0,
-          balloonMonth: balloonMonth || null,
+          balloonMonth: optionalBalloonMonth(balloonMonth),
           startDate: startDate || undefined
         }
       )
@@ -136,12 +248,14 @@ export const createQuote = async (req, res) => {
     }
 
     const quote = new Quote({
-      leadId: leadId || null,
-      clientId: clientId || null,
-      projectId,
-      lotId,
-      modelId: modelId || null,
-      facadeId: facadeId || null,
+      leadId: leadNorm.value,
+      clientId: clientNorm.value,
+      projectId: projectNorm.value,
+      lotId: target.lotId,
+      modelId: target.modelId,
+      facadeId: target.facadeId,
+      buildingId: target.buildingId,
+      apartmentId: target.apartmentId,
       status: status || 'draft',
       validUntil: validUntil ? new Date(validUntil) : null,
       termsAndConditions: termsAndConditions || '',
@@ -184,7 +298,7 @@ export const generateQuotePreview = async (req, res) => {
         {
           method: amortizationMethod === 'declining' ? 'declining' : 'fixed',
           balloonAmount: balloonAmount || 0,
-          balloonMonth: balloonMonth || null,
+          balloonMonth: optionalBalloonMonth(balloonMonth),
           startDate: startDate || undefined
         }
       )
@@ -200,7 +314,7 @@ export const generateQuotePreview = async (req, res) => {
 export const getQuotes = async (req, res) => {
   try {
     const filter = {}
-    for (const key of ['projectId', 'leadId', 'clientId', 'lotId']) {
+    for (const key of ['projectId', 'leadId', 'clientId', 'lotId', 'buildingId', 'apartmentId']) {
       if (req.query[key]) {
         if (!isValidObjectId(req.query[key])) {
           return res.status(400).json({ message: `Invalid ${key}` })
@@ -285,13 +399,50 @@ export const updateQuote = async (req, res) => {
       quote.status = status
     }
 
-    if (leadId !== undefined) quote.leadId = leadId || null
-    if (clientId !== undefined) quote.clientId = clientId || null
-    if (modelId !== undefined) quote.modelId = modelId || null
-    if (facadeId !== undefined) quote.facadeId = facadeId || null
+    if (leadId !== undefined) {
+      const norm = optionalObjectId(leadId, 'leadId')
+      if (norm.error) return res.status(400).json({ message: norm.error })
+      quote.leadId = norm.value
+    }
+    if (clientId !== undefined) {
+      const norm = optionalObjectId(clientId, 'clientId')
+      if (norm.error) return res.status(400).json({ message: norm.error })
+      quote.clientId = norm.value
+    }
+    if (modelId !== undefined) {
+      const norm = optionalObjectId(modelId, 'modelId')
+      if (norm.error) return res.status(400).json({ message: norm.error })
+      quote.modelId = norm.value
+    }
+    if (facadeId !== undefined) {
+      const norm = optionalObjectId(facadeId, 'facadeId')
+      if (norm.error) return res.status(400).json({ message: norm.error })
+      quote.facadeId = norm.value
+    }
     if (validUntil !== undefined) quote.validUntil = validUntil ? new Date(validUntil) : null
     if (termsAndConditions !== undefined) quote.termsAndConditions = termsAndConditions
     if (notes !== undefined) quote.notes = notes
+
+    if (
+      req.body.lotId !== undefined ||
+      req.body.apartmentId !== undefined ||
+      req.body.buildingId !== undefined
+    ) {
+      const target = await resolveQuoteTarget({
+        projectId: quote.projectId,
+        lotId: req.body.lotId !== undefined ? req.body.lotId : quote.lotId,
+        modelId: req.body.modelId !== undefined ? req.body.modelId : quote.modelId,
+        facadeId: req.body.facadeId !== undefined ? req.body.facadeId : quote.facadeId,
+        buildingId: req.body.buildingId !== undefined ? req.body.buildingId : quote.buildingId,
+        apartmentId: req.body.apartmentId !== undefined ? req.body.apartmentId : quote.apartmentId
+      })
+      if (target.error) return res.status(target.status).json({ message: target.error })
+      quote.lotId = target.lotId
+      quote.modelId = target.modelId
+      quote.facadeId = target.facadeId
+      quote.buildingId = target.buildingId
+      quote.apartmentId = target.apartmentId
+    }
 
     const needsRecalc =
       totalPrice !== undefined ||
@@ -318,7 +469,9 @@ export const updateQuote = async (req, res) => {
             balloonAmount:
               balloonAmount !== undefined ? balloonAmount : quote.balloonAmount,
             balloonMonth:
-              balloonMonth !== undefined ? balloonMonth : quote.balloonMonth,
+              balloonMonth !== undefined
+                ? optionalBalloonMonth(balloonMonth)
+                : quote.balloonMonth,
             startDate: startDate || undefined
           }
         )
@@ -465,7 +618,7 @@ export const convertQuoteToSale = async (req, res) => {
       return res.status(400).json({ message: 'Expired quotes cannot be converted' })
     }
 
-    const { propertyId } = req.body
+    const { propertyId, apartmentId: convertedApartmentId } = req.body
     if (propertyId) {
       if (!isValidObjectId(propertyId)) {
         return res.status(400).json({ message: 'Invalid propertyId' })
@@ -474,24 +627,44 @@ export const convertQuoteToSale = async (req, res) => {
       if (!propertyExists) return res.status(404).json({ message: 'Property not found' })
       quote.convertedToPropertyId = propertyId
     }
+    if (convertedApartmentId) {
+      const aptNorm = optionalObjectId(convertedApartmentId, 'apartmentId')
+      if (aptNorm.error) return res.status(400).json({ message: aptNorm.error })
+      const apartmentExists = await Apartment.exists({ _id: aptNorm.value })
+      if (!apartmentExists) return res.status(404).json({ message: 'Apartment not found' })
+      quote.convertedToApartmentId = aptNorm.value
+    }
 
     quote.status = 'converted'
     await quote.save()
     await quote.populate(QUOTE_POPULATE)
 
+    const isApartmentQuote = Boolean(quote.apartmentId)
     res.json({
       quote,
-      propertyCreateHint: propertyId
-        ? null
-        : {
-            projectId: quote.projectId,
-            lot: quote.lotId,
-            model: quote.modelId,
-            facade: quote.facadeId,
-            user: quote.clientId,
-            initialPayment: quote.downPayment,
-            quoteId: quote._id
-          }
+      propertyCreateHint:
+        propertyId || isApartmentQuote
+          ? null
+          : {
+              projectId: quote.projectId,
+              lot: quote.lotId,
+              model: quote.modelId,
+              facade: quote.facadeId,
+              user: quote.clientId,
+              initialPayment: quote.downPayment,
+              quoteId: quote._id
+            },
+      apartmentSaleHint:
+        convertedApartmentId || !isApartmentQuote
+          ? null
+          : {
+              projectId: quote.projectId,
+              buildingId: quote.buildingId,
+              apartmentId: quote.apartmentId,
+              user: quote.clientId,
+              initialPayment: quote.downPayment,
+              quoteId: quote._id
+            }
     })
   } catch (error) {
     res.status(500).json({ message: error.message })
