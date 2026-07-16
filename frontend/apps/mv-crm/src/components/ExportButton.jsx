@@ -52,7 +52,7 @@ const ExportButton = ({
   const setFormat = onExternalFormatChange || setInternalFormat
 
   // ✅ Label con fallback
-  const buttonLabel = label || t('reports.exportButton', 'Exportar')
+  const buttonLabel = label || t('exportButton', 'Exportar')
 
   const handleOpenModal = () => {
     const initialFilters = {}
@@ -85,7 +85,7 @@ const ExportButton = ({
       if (filter.required && !modalFilters[filter.field]) {
         return { 
           valid: false, 
-          message: t('reports.validation.required', { field: filter.label })
+          message: t('validation.required', { field: filter.label })
         }
       }
     }
@@ -120,7 +120,7 @@ const ExportButton = ({
 
       setSnackbar({
         open: true,
-        message: t('reports.success.exported', { format: format.toUpperCase() }),
+        message: t('success.exported', { format: format.toUpperCase() }),
         severity: 'success'
       })
 
@@ -128,10 +128,10 @@ const ExportButton = ({
       setModalOpen(false)
     } catch (err) {
       console.error('Error exporting:', err)
-      const errorMsg = err.response?.data?.message || err.message || t('reports.errors.exportFailed')
+      const errorMsg = err.response?.data?.message || err.message || t('errors.exportFailed')
       setSnackbar({
         open: true,
-        message: `${t('reports.errors.prefix')} ${errorMsg}`,
+        message: `${t('errors.prefix')} ${errorMsg}`,
         severity: 'error'
       })
       if (onError) onError(err)
@@ -195,7 +195,7 @@ const ExportButton = ({
           ...sx
         }}
       >
-        {loading ? t('reports.exporting') : buttonLabel}
+        {loading ? t('exporting') : buttonLabel}
       </Button>
 
       {withModal && (
@@ -252,7 +252,7 @@ const ExportButton = ({
                   }}
                 >
                   <Typography variant="body2" fontWeight={600}>
-                    {t('reports.requiredFieldsNote')}
+                    {t('requiredFieldsNote')}
                   </Typography>
                 </Alert>
               )}
@@ -271,7 +271,7 @@ const ExportButton = ({
                         InputLabelProps={{ shrink: true }}
                         required={filter.required}
                         error={filter.required && !modalFilters[filter.field]}
-                        helperText={filter.required && !modalFilters[filter.field] ? t('reports.validation.requiredShort') : ''}
+                        helperText={filter.required && !modalFilters[filter.field] ? t('validation.requiredShort') : ''}
                         fullWidth
                         sx={{
                           '& .MuiInputBase-input': {
@@ -308,7 +308,7 @@ const ExportButton = ({
                             '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ececec' }
                           }}
                         >
-                          <MenuItem value="">{filter.placeholder || t('common.all')}</MenuItem>
+                          <MenuItem value="">{filter.placeholder || t('common:all')}</MenuItem>
                           {filter.options.map(option => (
                             <MenuItem key={option.value} value={option.value}>
                               {option.render ? option.render(option) : option.label}
@@ -335,7 +335,7 @@ const ExportButton = ({
                       mb: 1.5
                     }}
                   >
-                    {t('reports.formatSelector.title')}
+                    {t('formatSelector.title')}
                   </Typography>
                   <Box display="flex" gap={1}>
                     <Chip
@@ -382,7 +382,7 @@ const ExportButton = ({
                 letterSpacing: '0.5px'
               }}
             >
-              {t('common.clearFilters')}
+              {t('common:clearFilters')}
             </Button>
             <Box sx={{ flex: 1 }} />
             <Button
@@ -396,7 +396,7 @@ const ExportButton = ({
                 letterSpacing: '0.5px'
               }}
             >
-              {t('common.cancel')}
+              {t('common:cancel')}
             </Button>
             <Button
               onClick={handleExportWithModal}
@@ -413,7 +413,7 @@ const ExportButton = ({
                 '&:hover': { bgcolor: '#333' }
               }}
             >
-              {loading ? t('reports.exporting') : t('reports.exportFormat', { format: format.toUpperCase() })}
+              {loading ? t('exporting') : t('exportFormat', { format: format.toUpperCase() })}
             </Button>
           </DialogActions>
         </Dialog>

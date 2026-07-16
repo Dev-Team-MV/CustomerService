@@ -1,4 +1,5 @@
-// /shared/components/Login/LoginForm.jsx
+// /Users/oficina/MV-CRM/CustomerService/frontend/shared/components/Login/LoginForm.jsx
+
 import { useState } from 'react'
 import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom'
 import {
@@ -19,7 +20,8 @@ import {
   KeyboardArrowRight, 
   Email,
   Phone,
-  Gavel
+  Gavel,
+  LockReset
 } from '@mui/icons-material'
 import { useAuth } from '../../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -27,6 +29,9 @@ import { useTranslation } from 'react-i18next'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import LanguageSwitcher from '../LanguageSwitcher'
+
+// ✅ NUEVO: Import del modal de recuperación
+import ForgotPasswordModal from './ForgotPasswordModal'
 
 const LoginForm = ({ brandColors }) => {
   const [loginMethod, setLoginMethod] = useState('email')
@@ -37,6 +42,9 @@ const LoginForm = ({ brandColors }) => {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [focusedField, setFocusedField] = useState(null)
+  
+  // ✅ NUEVO: Estado para el modal de recuperación
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
   
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -61,36 +69,35 @@ const LoginForm = ({ brandColors }) => {
       ? email
       : `+${phoneNumber}`
 
-// Línea 64-76
-const result = await login(credentials, password)
+    const result = await login(credentials, password)
 
-if (result.success) {
-  navigate(from, { replace: true })
-} else {
-  if (result.noProjects) {
-    setError(t('noProjectsAccess', 'No tienes acceso a ningún proyecto. Contacta al administrador.'))
-  } else if (result.requiresPasswordSetup) {
-    setError(t('passwordNotSet'))
-  } else {
-    setError(result.error || t('loginFailed'))
-  }
-}
+    if (result.success) {
+      navigate(from, { replace: true })
+    } else {
+      if (result.noProjects) {
+        setError(t('noProjectsAccess', 'No tienes acceso a ningún proyecto. Contacta al administrador.'))
+      } else if (result.requiresPasswordSetup) {
+        setError(t('passwordNotSet'))
+      } else {
+        setError(result.error || t('loginFailed'))
+      }
+    }
     
     setLoading(false)
   }
 
   return (
-<Box
-  sx={{
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    p: 4,
-    height: '100%'
-  }}
->
+    <Box
+      sx={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        p: 4,
+        height: '100%'
+      }}
+    >
       {/* Language Switcher - Top Right */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -184,16 +191,16 @@ if (result.success) {
               onChange={handleLoginMethodChange}
               aria-label="login method"
               sx={{
-    '& .MuiToggleButton-root': {
-      px: 3,              // Agregar padding horizontal
-      py: 1.5,            // Agregar padding vertical
-      minWidth: '140px',  // Ancho mínimo para cada botón
-      borderRadius: 3,
-      border: '2px solid #e0e0e0',
-      fontFamily: '"DM Sans", sans-serif',
-      fontWeight: 600,
-      letterSpacing: '0.5px',
-      color: '#706f6f',
+                '& .MuiToggleButton-root': {
+                  px: 3,
+                  py: 1.5,
+                  minWidth: '140px',
+                  borderRadius: 3,
+                  border: '2px solid #e0e0e0',
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontWeight: 600,
+                  letterSpacing: '0.5px',
+                  color: '#706f6f',
                   '&.Mui-selected': {
                     bgcolor: brandColors.primary,
                     color: 'white',
@@ -381,6 +388,28 @@ if (result.success) {
               />
             </motion.div>
 
+            {/* ✅ NUEVO: Forgot Password Link */}
+            <Box sx={{ mb: 3, textAlign: 'right' }}>
+              <Button
+                onClick={() => setForgotPasswordOpen(true)}
+                startIcon={<LockReset sx={{ fontSize: 16 }} />}
+                sx={{
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontSize: '0.8rem',
+                  textTransform: 'none',
+                  color: brandColors.primary,
+                  fontWeight: 600,
+                  p: 0,
+                  '&:hover': {
+                    color: brandColors.secondary,
+                    bgcolor: 'transparent'
+                  }
+                }}
+              >
+                {t('forgotPassword', '¿Olvidaste tu contraseña?')}
+              </Button>
+            </Box>
+
             {/* Terms and Conditions */}
             <Box 
               sx={{ 
@@ -490,6 +519,13 @@ if (result.success) {
           </Box>
         </motion.div>
       </Box>
+
+      {/* ✅ NUEVO: Forgot Password Modal */}
+      <ForgotPasswordModal
+        open={forgotPasswordOpen}
+        onClose={() => setForgotPasswordOpen(false)}
+        brandColors={brandColors}
+      />
     </Box>
   )
 }

@@ -1,3 +1,4 @@
+// /Users/oficina/MV-CRM/CustomerService/frontend/apps/sheperd/src/App.jsx
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { AuthProvider, useAuth } from '@shared/context/AuthContext'
@@ -5,12 +6,10 @@ import ProtectedRoute from '@shared/components/ProtectedRoute'
 import Layout from '@shared/components/LayoutComponents/Layout'
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 
-// Menús y logo
+// Menús
 import { privateMenuItems, publicMenuItems } from './Constants/MenuItems'
-import logoSheperd from './assets/react.svg'
 
 // Páginas Sheperd
-import Login from './Pages/Login'
 import Dashboard from './Pages/Dashboard'
 import Profile from './Pages/Profile'
 import Residents from './Pages/Residents'
@@ -31,6 +30,9 @@ import Register from './Pages/Register'
 
 import theme from './theme'
 
+// Componente compartido
+import UniversalLogin from '@shared/components/Login/UniversalLogin'
+
 const DynamicLayoutWrapper = ({ children }) => {
   const { user } = useAuth()
   const publicView = !user
@@ -39,7 +41,6 @@ const DynamicLayoutWrapper = ({ children }) => {
       publicView={publicView}
       menuItems={publicView ? publicMenuItems : privateMenuItems}
       publicMenuItems={publicMenuItems}
-      logoSrc={logoSheperd}
     >
       {children || <Outlet />}
     </Layout>
@@ -53,9 +54,9 @@ function App() {
       <AuthProvider projectSlug="sheperd">
         <Routes>
           {/* Auth Routes */}
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<UniversalLogin />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-          <Route path="/register" element={<Register />} />
+          
           <Route path="/setup-password/:token" element={<Register />} />
 
           {/* Public Routes */}
@@ -65,13 +66,10 @@ function App() {
                 publicView={true}
                 menuItems={publicMenuItems}
                 publicMenuItems={publicMenuItems}
-                logoSrc={logoSheperd}
               />
             }
           >
             <Route path="/explore/properties" element={<GetYourQuote />} />
-            {/* <Route path="/explore/amenities" element={<AmenitiesPublic />} /> */}
-            {/* Agrega aquí tus rutas públicas */}
           </Route>
 
           {/* Hybrid Routes */}
@@ -88,7 +86,6 @@ function App() {
                   publicView={false}
                   menuItems={privateMenuItems}
                   publicMenuItems={publicMenuItems}
-                  logoSrc={logoSheperd}
                 />
               }
             >
@@ -105,7 +102,6 @@ function App() {
               <Route path="/payloads" element={<Payloads />} />
               <Route path="/my-apartment" element={<MyApartment />} />
               <Route path="/family-group" element={<FamilyGroup />} />
-              {/* Agrega aquí el resto de tus rutas privadas */}
             </Route>
           </Route>
 

@@ -1,3 +1,4 @@
+// /Users/oficina/MV-CRM/CustomerService/frontend/shared/hooks/useProjects.js
 
 import { useState, useEffect, useCallback } from 'react'
 import projectService from '@shared/services/projectService'
@@ -13,20 +14,32 @@ export function useProjects() {
 
   // Fetch all projects
   useEffect(() => {
+    console.log('🔄 Fetching projects...')
     projectService.getAll()
       .then(data => {
+        console.log('✅ Projects loaded:', data.length, 'projects')
         setProjects(data)
         setFiltered(data)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch(err => {
+        console.error('❌ Error fetching projects:', err)
+        setLoading(false)
+      })
   }, [])
 
-  // Fetch global balance
+  // ✅ Fetch global balance - CON LOGS
   useEffect(() => {
+    console.log('💰 Fetching balance from /crm/balance...')
     crmService.getBalance()
-      .then(d => setAllBalance(d))
-      .catch(() => {})
+      .then(d => {
+        console.log('✅ Balance loaded:', d)
+        setAllBalance(d)
+      })
+      .catch(err => {
+        console.error('❌ Error fetching balance:', err)
+        console.error('Error details:', err.response?.data || err.message)
+      })
   }, [])
 
   // Filter projects by search
@@ -74,22 +87,22 @@ export function useProjects() {
       setProjects(prev => prev.filter(p => p._id !== id))
       setFiltered(prev => prev.filter(p => p._id !== id))
     } catch (e) {
+      console.error('❌ Error deleting project:', e)
       alert('Error deleting project')
     }
   }, [])
 
   return {
-    projects,      // Todos los proyectos
-    filtered,      // Proyectos filtrados por búsqueda
-    loading,       // Estado de carga
-    search,        // Texto de búsqueda
-    setSearch,     // Setter para búsqueda
-    allBalance,    // Balance global de todos los proyectos
-    handleProjectCreated, // Crear/actualizar proyecto
-    handleDelete,         // Eliminar proyecto
+    projects,
+    filtered,
+    loading,
+    search,
+    setSearch,
+    allBalance,
+    handleProjectCreated,
+    handleDelete,
   }
 }
-
 
 // ─────────────────────────────────────────────────────────────
 // useProjectConfig — configuración de un solo proyecto
@@ -102,6 +115,8 @@ const initialConfig = {
   description: { en: '', es: '' },
   fullDescription: { en: '', es: '' },
   image: '',
+  logo: '',
+  brandColors: [],
   gallery: [],
   features: { en: [], es: [] },
   status: '',
@@ -127,9 +142,23 @@ function normalizeLangField(field) {
   return { en: '', es: '' }
 }
 
+function normalizeBrandColors(brandColors) {
+  if (!Array.isArray(brandColors)) return []
+  return brandColors.map(color => {
+    if (typeof color === 'object' && color !== null) {
+      return {
+        key: color.key || 'color',
+        value: color.value || '#000000'
+      }
+    }
+    return { key: 'color', value: color }
+  })
+}
+
 export function useProjectConfig(projectId) {
   const [form, setForm] = useState(initialConfig)
   const [mainImage, setMainImage] = useState('')
+  const [logo, setLogo] = useState('')
   const [gallery, setGallery] = useState([])
   const [videos, setVideos] = useState([])
   const [loading, setLoading] = useState(false)
@@ -137,32 +166,40 @@ export function useProjectConfig(projectId) {
   useEffect(() => {
     const fetchProject = async () => {
       setLoading(true)
-      const projects = await projectService.getAll()
-      const project = Array.isArray(projects)
-        ? projects.find(p => p._id === projectId)
-        : null
-      if (project) {
-        setForm({
-          slug: project.slug || '',
-          phase: project.phase || '',
-          title: normalizeLangField(project.title),
-          subtitle: normalizeLangField(project.subtitle),
-          description: normalizeLangField(project.description),
-          fullDescription: normalizeLangField(project.fullDescription),
-          image: project.image || '',
-          gallery: Array.isArray(project.gallery) ? project.gallery : [],
-          features: project.features || { en: [], es: [] },
-          status: project.status || '',
-          externalUrl: project.externalUrl || '',
-          location: project.location || '',
-          area: project.area || '',
-          videos: Array.isArray(project.videos) ? project.videos : [],
-        })
-        setMainImage(project.image || '')
-        setGallery(Array.isArray(project.gallery) ? project.gallery : [])
-        setVideos(Array.isArray(project.videos) ? project.videos : [])
+      try {
+        const projects = await projectService.getAll()
+        const project = Array.isArray(projects)
+          ? projects.find(p => p._id === projectId)
+          : null
+        if (project) {
+          setForm({
+            slug: project.slug || '',
+            phase: project.phase || '',
+            title: normalizeLangField(project.title),
+            subtitle: normalizeLangField(project.subtitle),
+            description: normalizeLangField(project.description),
+            fullDescription: normalizeLangField(project.fullDescription),
+            image: project.image || '',
+            logo: project.logo || '',
+            brandColors: normalizeBrandColors(project.brandColors),
+            gallery: Array.isArray(project.gallery) ? project.gallery : [],
+            features: project.features || { en: [], es: [] },
+            status: project.status || '',
+            externalUrl: project.externalUrl || '',
+            location: project.location || '',
+            area: project.area || '',
+            videos: Array.isArray(project.videos) ? project.videos : [],
+          })
+          setMainImage(project.image || '')
+          setLogo(project.logo || '')
+          setGallery(Array.isArray(project.gallery) ? project.gallery : [])
+          setVideos(Array.isArray(project.videos) ? project.videos : [])
+        }
+      } catch (error) {
+        console.error('Error fetching project:', error)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
     fetchProject()
   }, [projectId])
@@ -189,6 +226,24 @@ export function useProjectConfig(projectId) {
         console.error('Error uploading main image:', error)
       }
     }
+  }, [handleChange])
+
+  const handleLogoUpload = useCallback(async (e) => {
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0]
+      try {
+        const url = await uploadService.uploadImage(file, 'projects/logos', '', true)
+        setLogo(url)
+        handleChange('logo', url)
+      } catch (error) {
+        console.error('Error uploading logo:', error)
+      }
+    }
+  }, [handleChange])
+
+  const handleLogoRemove = useCallback(() => {
+    setLogo('')
+    handleChange('logo', '')
   }, [handleChange])
 
   const handleGalleryUpload = useCallback(async (e) => {
@@ -242,21 +297,25 @@ export function useProjectConfig(projectId) {
         {
           ...form,
           image: mainImage,
+          logo,
           gallery,
           videos,
         }
       )
     } catch (error) {
       console.error('Error saving configuration:', error)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
-  }, [form, mainImage, gallery, videos, projectId])
+  }, [form, mainImage, logo, gallery, videos, projectId])
 
   return {
     form,
     setForm,
     mainImage,
     setMainImage,
+    logo,
+    setLogo,
     gallery,
     setGallery,
     videos,
@@ -266,6 +325,8 @@ export function useProjectConfig(projectId) {
     handleChange,
     handleLangChange,
     handleImageUpload,
+    handleLogoUpload,
+    handleLogoRemove,
     handleGalleryUpload,
     handleGalleryRemove,
     handleVideoUpload,

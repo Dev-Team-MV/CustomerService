@@ -73,5 +73,75 @@
       "vendido": "Sold",
       "perdido": "Lost"
     }
+  },
+  
+  "appointments": {
+    "title": "Appointments Report",
+    "description": "Export scheduled and completed appointments",
+    "exportButton": "Export Appointments",
+    "filters": {
+      "dateFrom": "From",
+      "dateTo": "To",
+      "project": "Project",
+      "agent": "Agent",
+      "status": "Status",
+      "allStatuses": "All statuses"
+    },
+    "statuses": {
+      "pendiente": "Pending",
+      "confirmada": "Confirmed",
+      "completada": "Completed",
+      "cancelada": "Cancelled"
+    }
+  },
+  
+  "activities": {
+    "title": "Activities Report",
+    "description": "Export team activities and tasks",
+    "exportButton": "Export Activities",
+    "filters": {
+      "dateFrom": "From",
+      "dateTo": "To",
+      "project": "Project",
+      "agent": "Agent",
+      "type": "Type",
+      "allTypes": "All types"
+    }
+  },
+  
+  "campaigns": {
+    "title": "Campaigns Report",
+    "description": "Export marketing campaigns and their results",
+    "exportButton": "Export Campaigns",
+    "filters": {
+      "dateFrom": "From",
+      "dateTo": "To",
+      "project": "Project",
+      "status": "Status",
+      "allStatuses": "All statuses"
+    },
+    "statuses": {
+      "borrador": "Draft",
+      "programada": "Scheduled",
+      "enviando": "Sending",
+      "completada": "Completed",
+      "fallida": "Failed"
+    }
+  },
+  
+  "audit": {
+    "title": "Audit Report",
+    "description": "Export system activity log",
+    "exportButton": "Export Audit",
+    "filters": {
+      "dateFrom": "From",
+      "dateTo": "To",
+      "entity": "Entity",
+      "action": "Action",
+      "user": "User",
+      "allEntities": "All entities",
+      "allActions": "All actions",
+      "allUsers": "All users"
+    }
   }
 }

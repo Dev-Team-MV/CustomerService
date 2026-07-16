@@ -1,6 +1,7 @@
+// apps/mv-crm/src/components/activities/ActivityCard.jsx
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, Chip, Avatar, IconButton } from '@mui/material'
-import { AccessTime, Person, MoreVert } from '@mui/icons-material'
+import { Box, Typography, Chip, Avatar, IconButton, Tooltip } from '@mui/material'
+import { AccessTime, Person, MoreVert, Business, SubdirectoryArrowRight } from '@mui/icons-material'
 import { ACTIVITY_PRIORITIES } from '../../constants/hooks/useActivities'
 
 const formatDate = (date) => {
@@ -23,6 +24,20 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
   const dueInfo = formatDate(activity.dueDate)
   const assignee = activity.assignedTo
   const contact = activity.contact
+
+  // ✅ NUEVO: Obtener proyectos relacionados
+  const getRelatedProjects = () => {
+    if (!activity.relatedProjects || activity.relatedProjects.length === 0) return []
+    
+    return activity.relatedProjects.map(project => {
+      if (typeof project === 'object') {
+        return project.name || project.title?.es || project.title?.en || 'Proyecto'
+      }
+      return 'Proyecto'
+    })
+  }
+
+  const relatedProjects = getRelatedProjects()
 
   return (
     <Box
@@ -54,7 +69,10 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
               sx={{ 
                 fontSize: '0.65rem',
                 height: 20,
-                bgcolor: '#f5f5f5',
+                bgcolor: tag === 'automation' ? '#f3e5f5' : 
+                         tag === 'nota' ? '#fff3e0' : '#f5f5f5',
+                color: tag === 'automation' ? '#9c27b0' :
+                       tag === 'nota' ? '#f57c00' : '#666',
                 fontWeight: 500
               }}
             />
@@ -75,6 +93,41 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
           <MoreVert fontSize="small" />
         </IconButton>
       </Box>
+
+      {/* ✅ NUEVO: Proyectos relacionados */}
+      {relatedProjects.length > 0 && (
+        <Box display="flex" gap={0.5} flexWrap="wrap" mb={1}>
+          {relatedProjects.map((projectName, idx) => (
+            <Tooltip key={idx} title="Proyecto relacionado">
+              <Box 
+                display="flex" 
+                alignItems="center" 
+                gap={0.5}
+                px={1}
+                py={0.3}
+                bgcolor="#e3f2fd"
+                borderRadius={0.5}
+                sx={{
+                  border: '1px solid #2196f330'
+                }}
+              >
+                <Business sx={{ fontSize: 12, color: '#2196f3' }} />
+                <Typography
+                  sx={{
+                    fontSize: '0.6rem',
+                    color: '#1976d2',
+                    fontWeight: 500,
+                    fontFamily: '"Courier New", monospace',
+                    letterSpacing: '0.3px'
+                  }}
+                >
+                  {projectName}
+                </Typography>
+              </Box>
+            </Tooltip>
+          ))}
+        </Box>
+      )}
 
       {/* Título */}
       <Typography 
@@ -109,7 +162,7 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
         </Typography>
       )}
 
-      {/* Contacto */}
+      {/* ✅ MEJORADO: Contacto con más información */}
       {contact && (
         <Box 
           display="flex" 
@@ -130,15 +183,26 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
             >
               {contact.name}
             </Typography>
-            {contact.phone && (
-              <Typography 
-                variant="caption" 
-                sx={{ fontSize: '0.6rem', color: '#ff9800' }}
-                noWrap
-              >
-                {contact.phone}
-              </Typography>
-            )}
+            <Box display="flex" gap={1} flexWrap="wrap">
+              {contact.phone && (
+                <Typography 
+                  variant="caption" 
+                  sx={{ fontSize: '0.6rem', color: '#ff9800' }}
+                  noWrap
+                >
+                  📱 {contact.phone}
+                </Typography>
+              )}
+              {contact.email && (
+                <Typography 
+                  variant="caption" 
+                  sx={{ fontSize: '0.6rem', color: '#ff9800' }}
+                  noWrap
+                >
+                  ✉️ {contact.email}
+                </Typography>
+              )}
+            </Box>
           </Box>
         </Box>
       )}
@@ -155,7 +219,32 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
         </Box>
       )}
 
-      {/* Footer: Fecha + Prioridad + Subtareas */}
+      {/* ✅ NUEVO: Subtareas con más detalle */}
+      {activity.subtasks && activity.subtasks.length > 0 && (
+        <Box 
+          display="flex" 
+          alignItems="center" 
+          gap={1} 
+          mb={1}
+          p={0.8}
+          bgcolor="#f5f5f5"
+          borderRadius={1}
+        >
+          <SubdirectoryArrowRight sx={{ fontSize: 14, color: '#666' }} />
+          <Typography 
+            variant="caption" 
+            sx={{ 
+              fontSize: '0.65rem',
+              color: '#666',
+              fontWeight: 500
+            }}
+          >
+            {activity.subtasks.filter(s => s.completed).length} de {activity.subtasks.length} subtareas completadas
+          </Typography>
+        </Box>
+      )}
+
+      {/* Footer: Fecha + Prioridad */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mt={1.5}>
         <Box display="flex" alignItems="center" gap={1}>
           {dueInfo ? (
@@ -166,19 +255,6 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
               </Typography>
             </Box>
           ) : null}
-          
-          {activity.subtasks && activity.subtasks.length > 0 && (
-            <Chip
-              label={`${activity.subtasks.filter(s => s.completed).length}/${activity.subtasks.length}`}
-              size="small"
-              sx={{
-                fontSize: '0.65rem',
-                height: 18,
-                bgcolor: '#f0f4f0',
-                color: '#666'
-              }}
-            />
-          )}
         </Box>
         
         <Chip

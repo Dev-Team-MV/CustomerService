@@ -1,0 +1,94 @@
+{
+  "title": "Documentos",
+  "titleBold": "Gestión",
+  "topbarLabel": "Centro de Documentos",
+  "subtitle": "Administra contratos, escrituras, seguros y más",
+  "searchPlaceholder": "Buscar por título o etiquetas...",
+  "uploadDocument": "Subir Documento",
+  "empty": "No se encontraron documentos",
+
+  "filters": {
+    "category": "Categoría",
+    "allCategories": "Todas las categorías",
+    "project": "Proyecto",
+    "allProjects": "Todos los proyectos",
+    "clients": "Clientes",
+    "allClients": "Todos los clientes"
+  },
+
+  "status": {
+    "valid": "Vigente",
+    "expiringSoon": "Por vencer",
+    "expired": "Vencido",
+    "archived": "Archivado"
+  },
+
+  "categories": {
+    "contract": "Contrato",
+    "id_document": "Identificación",
+    "deed": "Escritura",
+    "appraisal": "Avalúo",
+    "receipt": "Recibo",
+    "insurance": "Seguro",
+    "permit": "Permiso",
+    "blueprint": "Plano",
+    "other": "Otro"
+  },
+
+  "form": {
+    "title": "Título del documento",
+    "titlePlaceholder": "Ej: Contrato de compraventa",
+    "category": "Categoría",
+    "project": "Proyecto",
+    "tags": "Etiquetas",
+    "tagsPlaceholder": "firmado, original, 2024",
+    "tagsHelper": "Separadas por coma",
+    "expiresAt": "Fecha de vencimiento",
+    "expiresAtHelper": "Para documentos con vencimiento (seguros, permisos)"
+  },
+
+  "upload": {
+    "title": "Subir Nuevo Documento",
+    "dragDrop": "Arrastra archivos aquí o haz clic para seleccionar",
+    "filesSelected": "archivo(s) seleccionado(s)",
+    "linkToPerson": "Vincular a persona",
+    "none": "Ninguno",
+    "lead": "Lead",
+    "client": "Cliente",
+    "selectLead": "Seleccionar Lead",
+    "noLead": "Sin lead",
+    "selectClient": "Seleccionar Cliente",
+    "noClient": "Sin cliente",
+    "linkToResource": "Vincular a",
+    "clientResource": "del cliente",
+    "unspecified": "Sin especificar",
+    "noResourcesFound": "No se encontraron recursos para este cliente en este proyecto",
+    "noResourcesAssigned": "El cliente no tiene recursos asignados en este proyecto.",
+    "uploading": "Subiendo..."
+  },
+
+  "actions": {
+    "preview": "Vista previa",
+    "history": "Historial",
+    "archive": "Archivar",
+    "delete": "Eliminar",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "download": "Descargar",
+    "openInNewTab": "Abrir en nueva pestaña",
+    "newVersion": "Nueva Versión"
+  },
+
+  "viewer": {
+    "defaultTitle": "Documento",
+    "errorLoading": "Error al cargar la vista previa",
+    "noPreviewAvailable": "Vista previa no disponible para este tipo de archivo",
+    "noFileAvailable": "No hay archivo disponible para previsualizar"
+  },
+
+  "history": {
+    "title": "Historial de Versiones",
+    "version": "Versión",
+    "uploadedBy": "Subido por"
+  }
+}

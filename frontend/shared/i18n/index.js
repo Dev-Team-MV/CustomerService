@@ -40,6 +40,13 @@ import enLeads from './locales/en/leads.json'
 import enAgents from './locales/en/agents.json'
 import enReports from './locales/en/reports.json'
 import enPayments from './locales/en/payments.json'
+import enAppointments from './locales/en/appointments.json'
+import enAutomation from './locales/en/automations.json'
+import enSearch from './locales/en/search.json'
+import enCampaign from './locales/en/campaign.json'
+import enComissions from './locales/en/commissions.json'
+import enQuoteCrm from './locales/en/quoteCrm.json'
+import enDocuments from './locales/en/documents.json'
 // ES
 import esCommon from './locales/es/common.json'
 import esAuth from './locales/es/auth.json'
@@ -78,6 +85,13 @@ import esLeads from './locales/es/leads.json'
 import esAgents from './locales/es/agents.json'
 import esReports from './locales/es/reports.json'
 import esPayments from './locales/es/payments.json'
+import esAppointments from './locales/es/appointments.json'
+import esAutomation from './locales/es/automations.json'
+import esSearch from './locales/es/search.json'
+import esCampaign from './locales/es/campaign.json'
+import esComissions from './locales/es/commissions.json'
+import esQuoteCrm from './locales/es/quoteCrm.json'
+import esDocuments from './locales/es/documents.json'
 
 i18n
     .use(LanguageDetector)
@@ -122,7 +136,14 @@ i18n
                 leads: enLeads,
                 agents: enAgents,
                 reports: enReports,
-                payments: enPayments
+                payments: enPayments,
+                appointments: enAppointments,
+                automation: enAutomation,
+                search: enSearch,
+                campaign: enCampaign,
+                commissions: enComissions,
+                quoteCrm: enQuoteCrm,
+                documents: enDocuments
             },
             es: {
                 common: esCommon,
@@ -162,7 +183,15 @@ i18n
                 leads: esLeads,
                 agents: esAgents,
                 reports: esReports,
-                payments: esPayments
+                payments: esPayments,
+                appointments: esAppointments,
+                automation: esAutomation,
+                search: esSearch,
+                campaign: esCampaign,
+                commissions: esComissions,
+                quoteCrm: esQuoteCrm,
+                documents: esDocuments
+
             },
         },
         fallbackLng: 'en',
@@ -204,7 +233,14 @@ i18n
             'leads',
             'agents',
             'reports',
-            'payments'
+            'payments',
+            'appointments',
+            'automation',
+            'search',
+            'campaign',
+            'commissions',
+            'quoteCrm',
+            'documents'
         ],
         interpolation: {
             escapeValue: false,

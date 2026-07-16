@@ -1,3 +1,4 @@
+// apps/mv-crm/src/components/activities/KanbanColumn.jsx
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, IconButton, Chip, Tooltip } from '@mui/material'
 import { Add, MoreVert } from '@mui/icons-material'
@@ -15,6 +16,29 @@ const KanbanColumn = ({
 }) => {
   const { t } = useTranslation('activities')
   const color = column.color || '#757575'
+
+  // ✅ Mapeo con ruta completa: namespace + activities + columns + key
+  const COLUMN_KEYS = {
+    'backlog': 'activities.columns.backlog',
+    'todo': 'activities.columns.todo',
+    'in_progress': 'activities.columns.inProgress',
+    'done': 'activities.columns.done',
+    'aprobado': 'activities.columns.approved'
+  }
+
+  // ✅ Obtener nombre traducido con fallback
+  const getColumnName = () => {
+    const translationKey = COLUMN_KEYS[column.key]
+    if (translationKey) {
+      const translated = t(translationKey)
+      // Si la traducción no existe, t() devuelve la misma clave
+      if (translated !== translationKey) {
+        return translated
+      }
+    }
+    // Fallback: usar column.name del backend
+    return column.name
+  }
 
   return (
     <Box
@@ -48,7 +72,7 @@ const KanbanColumn = ({
           <Box display="flex" alignItems="center" gap={1} flex={1} minWidth={0}>
             <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color, flexShrink: 0 }} />
             <Typography variant="subtitle2" fontWeight={700} noWrap>
-              {column.name}
+              {getColumnName()}
             </Typography>
             <Chip
               label={activities.length}

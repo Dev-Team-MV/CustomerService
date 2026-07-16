@@ -1,0 +1,49 @@
+{
+  "title": "Automatizaciones",
+  "titleBold": "CRM",
+  "topbarLabel": "Reglas automáticas",
+  "subtitle": "Configura reglas para automatizar acciones en tu CRM",
+  "createAutomation": "Nueva automatización",
+  "editTitle": "Editar automatización",
+  "createTitle": "Nueva automatización",
+  "total": "total",
+  "active": "activas",
+  "inactive": "inactiva",
+  "enable": "Activar",
+  "disable": "Desactivar",
+  "edit": "Editar",
+  "delete": "Eliminar",
+  "test": "Probar",
+  "conditions": "Condiciones",
+  "lastRun": "Última ejecución",
+  "testMatched": "✅ Test exitoso: Coincidencia encontrada",
+  "testNotMatched": "ℹ️ Test ejecutado: Sin coincidencia",
+  
+  "empty": {
+    "title": "No hay automatizaciones",
+    "description": "Crea tu primera regla para automatizar acciones en el CRM"
+  },
+  
+  "form": {
+    "name": "Nombre",
+    "trigger": "Trigger (evento disparador)",
+    "action": "Acción",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "saving": "Guardando..."
+  },
+  
+  "triggers": {
+    "lead_stage_changed": "Cambio de stage en lead",
+    "payment_overdue": "Pago vencido",
+    "appointment_created": "Cita creada",
+    "inactivity_7days": "Inactividad de 7 días"
+  },
+  
+  "actions": {
+    "send_sms": "Enviar SMS",
+    "create_activity": "Crear actividad",
+    "notify_agent": "Notificar asesor"
+  }
+}

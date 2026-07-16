@@ -1,12 +1,13 @@
 {
-  "title": "Ventas & Leads",
+  "title": "Ventas",
+  "titleBold": "& Leads",
   "description": "Gestiona tu pipeline de ventas y convierte leads en clientes",
   "newLead": "Nuevo Lead",
   "editLead": "Editar Lead",
   "convert": "Convertir a Cliente",
   "convertTitle": "Convertir Lead a Cliente",
-  "deleteConfirm": "¿Estás seguro de eliminar este lead?",
-  "searchPlaceholder": "Buscar por nombre, email o teléfono...",
+  "deleteConfirm": "¿Seguro que deseas eliminar este lead?",
+  "searchPlaceholder": "Buscar por nombre, correo o teléfono...",
   "noLeads": "Sin leads",
   "addLead": "Agregar lead",
   "exportButton": "Exportar Leads",
@@ -25,10 +26,10 @@
     "toDate": "Hasta",
     "project": "Proyecto",
     "allProjects": "Todos los proyectos",
-    "stage": "Stage",
-    "allStages": "Todos los stages",
-    "assignedTo": "Agente asignado",
-    "allAgents": "Todos los agentes"
+    "stage": "Etapa",
+    "allStages": "Todas las etapas",
+    "assignedTo": "Asesor asignado",
+    "allAgents": "Todos los asesores"
   },
   
   "source": {
@@ -41,16 +42,46 @@
   "form": {
     "name": "Nombre completo",
     "namePlaceholder": "Ej: Juan Pérez",
-    "email": "Email",
+    "email": "Correo",
     "phone": "Teléfono",
     "project": "Proyecto de interés",
     "assignedTo": "Asesor asignado",
-    "stage": "Stage",
+    "stage": "Etapa",
     "source": "Fuente",
     "notes": "Notas",
     "notesPlaceholder": "Detalles adicionales sobre el lead...",
     "cancel": "Cancelar",
     "create": "Crear",
     "update": "Actualizar"
+  },
+
+  "score": {
+    "title": "Lead Score",
+    "breakdown": "Desglose",
+    "noFactors": "Sin factores aplicables",
+    "autoCalculated": "Calculado automáticamente",
+    "outOf": "/ 100",
+    
+    "levels": {
+      "cold": "Frío",
+      "warm": "Tibio",
+      "hot": "Caliente"
+    },
+    
+    "factors": {
+      "source": "Fuente: {{source}}",
+      "freshDays_one": "{{days}} día (fresco)",
+      "freshDays_other": "{{days}} días (fresco)",
+      "recentDays": "{{days}} días (reciente)",
+      "days": "{{days}} días",
+      "stuck": "Estancado {{days}} días en {{stage}}",
+      "appointment": "Cita programada",
+      "smsResponded": "Respondió SMS"
+    },
+    
+    "points": {
+      "plus": "+{{points}}",
+      "minus": "{{points}}"
+    }
   }
 }

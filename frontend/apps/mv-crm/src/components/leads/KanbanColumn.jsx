@@ -1,121 +1,189 @@
 // apps/mv-crm/src/components/leads/KanbanColumn.jsx
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, IconButton, Chip, Tooltip } from '@mui/material'
-import { Add } from '@mui/icons-material'
+import { Box, Typography, IconButton, Tooltip, Badge } from '@mui/material'
+import { Add, DragIndicator } from '@mui/icons-material'
 import LeadCard from './LeadCard'
 
 const KanbanColumn = ({ 
   column,
   leads, 
   onLeadClick, 
-  onLeadMenuClick,
+  onMenuClick,
   onAddClick,
   onDragStart,
-  onDrop
+  onDrop,
+  onScoreUpdate
 }) => {
   const { t } = useTranslation('leads')
-  const color = column.color || '#757575'
+  const [dragOver, setDragOver] = useState(false)
 
-  // ✅ Traducir el nombre del stage usando el key como clave
-  // Fallback al nombre original si no existe la traducción
-  const translatedName = t(`stages.${column.key}`, column.name)
+  // ✅ NUEVO: Mapeo de column keys a traducciones
+  const COLUMN_KEYS = {
+    'nuevo': 'stages.nuevo',
+    'contactado': 'stages.contactado',
+    'visita_agendada': 'stages.visita_agendada',
+    'propuesta': 'stages.propuesta',
+    'vendido': 'stages.vendido',
+    'perdido': 'stages.perdido'
+  }
+
+  // ✅ NUEVO: Obtener nombre traducido o usar el nombre original como fallback
+  const getColumnName = () => {
+    const translationKey = COLUMN_KEYS[column.key]
+    if (translationKey) {
+      const translated = t(translationKey)
+      // Si la traducción no existe, t() devuelve la misma clave
+      if (translated !== translationKey) {
+        return translated
+      }
+    }
+    // Fallback: usar column.name
+    return column.name
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    setDragOver(true)
+  }
+
+  const handleDragLeave = () => {
+    setDragOver(false)
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    setDragOver(false)
+    onDrop?.(column.key)
+  }
 
   return (
     <Box
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => {
-        e.preventDefault()
-        onDrop?.(column.key)
-      }}
       sx={{
-        flex: '0 0 280px',
-        minWidth: 280,
-        maxWidth: 280,
+        minWidth: 320,
+        maxWidth: 320,
+        flexShrink: 0,
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: '#f8f9fa',
-        borderRadius: 3,
         height: '100%',
-        overflow: 'hidden'
+        bgcolor: dragOver ? '#e3f2fd' : '#f5f5f5',
+        borderRadius: 2,
+        p: 2,
+        transition: 'all 0.2s ease',
+        border: dragOver ? '2px dashed #2196f3' : '2px solid transparent'
       }}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
     >
       {/* Header */}
-      <Box 
-        sx={{ 
-          p: 2, 
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          mb: 2,
           pb: 1.5,
-          borderBottom: '2px solid',
-          borderColor: color
+          borderBottom: `2px solid ${column.color}`
         }}
       >
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Box display="flex" alignItems="center" gap={1} flex={1} minWidth={0}>
-            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color, flexShrink: 0 }} />
-            <Typography variant="subtitle2" fontWeight={700} noWrap>
-              {translatedName}
-            </Typography>
-            <Chip
-              label={leads.length}
-              size="small"
-              sx={{
-                height: 20,
-                fontSize: '0.7rem',
-                fontWeight: 600,
-                bgcolor: `${color}20`,
-                color: color,
-                flexShrink: 0
-              }}
-            />
-          </Box>
-          
-          <Tooltip title={t('addLead')}>
-            <IconButton 
-              size="small" 
-              onClick={onAddClick}
-              sx={{ bgcolor: `${color}15`, '&:hover': { bgcolor: `${color}25` } }}
-            >
-              <Add sx={{ fontSize: 18, color: color }} />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
-
-      {/* Cards */}
-      <Box 
-        sx={{ 
-          flex: 1, 
-          overflowY: 'auto', 
-          p: 1.5,
-          '&::-webkit-scrollbar': { width: 6 },
-          '&::-webkit-scrollbar-thumb': { bgcolor: '#ccc', borderRadius: 3 }
-        }}
-      >
-        {leads.length === 0 ? (
-          <Box 
-            sx={{ 
-              p: 3, 
-              textAlign: 'center',
-              border: '2px dashed #e0e0e0',
-              borderRadius: 2,
-              color: '#9e9e9e'
+        <Box display="flex" alignItems="center" gap={1}>
+          <Box
+            sx={{
+              width: 12,
+              height: 12,
+              borderRadius: '50%',
+              bgcolor: column.color
+            }}
+          />
+          <Typography
+            sx={{
+              fontFamily: '"Courier New", monospace',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
+              color: '#000'
             }}
           >
-            <Typography variant="caption">{t('noLeads')}</Typography>
+            {getColumnName()}
+          </Typography>
+          <Badge
+            badgeContent={leads.length}
+            sx={{
+              '& .MuiBadge-badge': {
+                bgcolor: column.color,
+                color: '#fff',
+                fontFamily: '"Courier New", monospace',
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                height: 18,
+                minWidth: 18,
+                padding: '0 4px'
+              }
+            }}
+          />
+        </Box>
+
+        <Tooltip title={t('addLead', 'Agregar lead')}>
+          <IconButton
+            size="small"
+            onClick={onAddClick}
+            sx={{
+              color: '#000',
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.05)' }
+            }}
+          >
+            <Add fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+
+      {/* Leads */}
+      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+        {leads.map(lead => (
+          <Box
+            key={lead._id}
+            draggable
+            onDragStart={() => onDragStart?.(lead)}
+            sx={{
+              cursor: 'grab',
+              '&:active': {
+                cursor: 'grabbing'
+              }
+            }}
+          >
+            <LeadCard
+              lead={lead}
+              onClick={onLeadClick}
+              onMenuClick={onMenuClick}
+              onScoreUpdate={onScoreUpdate}
+            />
           </Box>
-        ) : (
-          leads.map(lead => (
-            <Box
-              key={lead._id}
-              draggable
-              onDragStart={() => onDragStart?.(lead)}
+        ))}
+
+        {leads.length === 0 && (
+          <Box
+            sx={{
+              p: 4,
+              textAlign: 'center',
+              border: '2px dashed #e0e0e0',
+              borderRadius: 1,
+              bgcolor: '#fafafa'
+            }}
+          >
+            <DragIndicator sx={{ fontSize: 32, color: '#ccc', mb: 1 }} />
+            <Typography
+              sx={{
+                fontFamily: '"Courier New", monospace',
+                fontSize: '0.7rem',
+                color: '#888',
+                letterSpacing: '0.5px'
+              }}
             >
-              <LeadCard
-                lead={lead}
-                onClick={onLeadClick}
-                onMenuClick={onLeadMenuClick}
-              />
-            </Box>
-          ))
+              {t('noLeads', 'Sin leads')}
+            </Typography>
+          </Box>
         )}
       </Box>
     </Box>

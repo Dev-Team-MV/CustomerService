@@ -84,5 +84,121 @@
   "uploading": "Uploading...",
   "uploadAll": "Upload All",
   "back": "Back",
-  "new": "NEW" 
+  "new": "NEW" ,
+
+  "notifications": {
+    "title": "Notifications",
+    "paymentReceived": "Payment received",
+    "paymentReceivedDesc": "Your payment has been processed.",
+    "newMessage": "New message",
+    "newMessageDesc": "You have a new message from admin.",
+    "documentApproved": "Document approved",
+    "documentApprovedDesc": "Your document was approved.",
+    "creator": {
+      "title": "Create Notification",
+      "close": "Close",
+      "recipients": "Recipients",
+      "modeGeneral": "General (all users)",
+      "modeRole": "By Role",
+      "modeUser": "Specific User",
+      "modeMultipleUsers": "Multiple Users",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Notification title",
+      "bodyLabel": "Message",
+      "bodyPlaceholder": "Notification content (optional)",
+      "typeLabel": "Type",
+      "typeInfo": "Information",
+      "typeWarn": "Warning",
+      "typeError": "Error",
+      "typeCustom": "Custom",
+      "audienceLabel": "Audience",
+      "roleSuperadmin": "Super Administrator",
+      "roleAdmin": "Administrator",
+      "roleOwner": "Owner",
+      "roleUser": "User",
+      "rolesLabel": "Roles",
+      "rolesPlaceholder": "Select roles",
+      "userLabel": "User",
+      "usersLabel": "Users",
+      "userPlaceholder": "Select a user",
+      "usersPlaceholder": "Select users",
+      "preview": "Preview:",
+      "titleExample": "Example title",
+      "cancel": "Cancel",
+      "send": "Send Notification",
+      "sending": "Sending..."
+    }
+  },
+
+  "variables": {
+    "title": "Message Variables",
+    "description": "Variables are used in message templates with the format {{name}}. The path indicates where the value is obtained from.",
+    "addNew": "New Variable",
+    "editTitle": "Edit Variable",
+    "createTitle": "New Variable",
+    "empty": "No variables in this category",
+    "createFirst": "Create first variable",
+    "saveProjectFirst": "Save the project first to manage variables.",
+    
+    "name": "Name",
+    "nameHelper": "Only letters, numbers and _. Must start with a letter.",
+    "path": "Path",
+    "pathHelper": "Path to get the value (e.g.: user.firstName, client.email, lot.number)",
+    "currentPath": "Current path",
+    "category": "Category",
+    "categoryAutoSet": "(auto-set by the selected category)",
+    
+    "modeBuilder": "Visual",
+    "modeManual": "Manual",
+    
+    "selectCategory": "Select a category",
+    "selectField": "Select a field",
+    "noRoots": "No categories available",
+    "noSegments": "No fields available at this level",
+    
+    "selectedPath": "Selected path",
+    "useThisPath": "Use this path",
+    "backToRoots": "Back to categories",
+    "back": "Back",
+    
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "create": "Create",
+    "update": "Update",
+    
+    "availableVariables": "Available variables",
+    "clickToInsert": "Click on a variable to insert it into the message",
+    "loading": "Loading variables...",
+    "noVariablesForProject": "No variables for this project",
+    "noVariablesYet": "No variables defined for this project",
+    "goToConfig": "Go to project configuration to create variables",
+    "total": "variables",
+    
+    "copyVariable": "Copy variable",
+    "editVariable": "Edit",
+    "deleteVariable": "Delete",
+    "confirmDelete": "Delete variable \"{{name}}\"? This action cannot be undone.",
+    "errorSaving": "Error saving variable",
+    "errorNameRequired": "Name is required",
+    "errorPathRequired": "Path is required",
+    "errorCategoryRequired": "Category is required",
+    
+    "categories": {
+      "all": "All",
+      "Usuario": "User",
+      "Cliente": "Client",
+      "Proyecto": "Project",
+      "Lote": "Lot",
+      "Edificio": "Building",
+      "Apartamento": "Apartment",
+      "ApartamentoModelo": "Apt Model",
+      "Pago": "Payment",
+      "Custom": "Custom"
+    },
+    
+    "chipTypes": {
+      "ref": "ref",
+      "value": "value"
+    }
+  }
 }
