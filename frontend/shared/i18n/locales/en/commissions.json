@@ -93,7 +93,20 @@
     "noStructures": "No structures configured",
     "createFirst": "Create the first commission structure for this project",
     "empty": "No structures configured for this project",
-    "confirmDelete": "Are you sure you want to delete this structure?"
+    "confirmDelete": "Are you sure you want to delete this structure?",
+        "bonusRules": "Bonification Rules",
+    "addBonusRule": "Add Bonification Rule",
+    "bonusType": "Bonification Type",
+    "noBonusRules": "No bonification rules configured",
+    "bonusName": "Bonification Name",
+    "minSaleAmount": "Minimum Sale Amount",
+    "maxSaleAmount": "Maximum Sale Amount",
+    "bonusValue": "Bonification Value",
+    "bonusTypes": {
+      "flat": "Flat Amount",
+      "percentage": "Percentage",
+      "tiered": "Tiered"
+    }
   },
   "errors": {
     "updateFailed": "Update failed",

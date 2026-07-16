@@ -26,6 +26,7 @@ import { useAppointments } from '../constants/hooks/useAppointments'
 import { useProjects } from '@shared/hooks/useProjects'
 import { useCrmAgents } from '../constants/hooks/useCrmAgents'
 import { useAuth } from '@shared/context/AuthContext'
+import ClientDocuments from '../components/clients/ClientDocuments'
 
 function TabPanel({ children, value, index }) {
   return (
@@ -221,6 +222,7 @@ export default function ClientDetail() {
               icon={<History sx={{ fontSize: 16 }} />} 
               iconPosition="start" 
             />
+            <Tab label={t('tabs.documents', 'Documentos')} />
           </Tabs>
 
           {/* TAB 1: OVERVIEW */}
@@ -271,6 +273,17 @@ export default function ClientDetail() {
                 entityId={client._id}
                 entityName={clientName}
               />
+            </Box>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={5}>
+            <Box sx={{ p: 3 }}>
+              {/* <AuditLogTab 
+                entity="Client" 
+                entityId={client._id}
+                entityName={clientName}
+              /> */}
+              <ClientDocuments clientId={client._id} clientName={clientName} />
             </Box>
           </TabPanel>
         </Paper>

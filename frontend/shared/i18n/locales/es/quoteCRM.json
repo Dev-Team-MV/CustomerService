@@ -5,7 +5,7 @@
   "subtitle": "Crea, envía y convierte cotizaciones con tablas de amortización",
   
   "total": "Total",
-  "active": "Activas",
+  "active": "Convertidas o Enviadas",
   "createQuote": "Nueva Cotización",
   "confirmDelete": "¿Estás seguro de eliminar esta cotización?",
   "confirmConvert": "¿Convertir esta cotización a venta?",

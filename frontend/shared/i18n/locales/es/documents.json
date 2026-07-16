@@ -11,7 +11,9 @@
     "category": "Categoría",
     "allCategories": "Todas las categorías",
     "project": "Proyecto",
-    "allProjects": "Todos los proyectos"
+    "allProjects": "Todos los proyectos",
+    "clients": "Clientes",
+    "allClients": "Todos los clientes"
   },
 
   "status": {

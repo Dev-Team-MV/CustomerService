@@ -93,7 +93,20 @@
     "noStructures": "No hay estructuras configuradas",
     "createFirst": "Crea la primera estructura de comisión para este proyecto",
     "empty": "No hay estructuras configuradas para este proyecto",
-    "confirmDelete": "¿Estás seguro de eliminar esta estructura?"
+    "confirmDelete": "¿Estás seguro de eliminar esta estructura?",
+    "bonusRules": "Reglas de Bonificación",
+    "addBonusRule": "Agregar Regla de Bonificación",
+    "bonusType": "Tipo de Bonificación",
+    "noBonusRules": "No hay reglas de bonificación configuradas",
+    "bonusName": "Nombre de la Bonificación",
+    "minSaleAmount": "Monto de Venta Mínimo",
+    "maxSaleAmount": "Monto de Venta Máximo",
+    "bonusValue": "Monto de Bonificación",
+    "bonusTypes": {
+      "flat": "Monto Fijo",
+      "percentage": "Porcentaje",
+      "tiered": "Por Niveles"
+    }
   },
   "errors": {
     "updateFailed": "Error al actualizar",

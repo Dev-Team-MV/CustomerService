@@ -23,6 +23,7 @@ export default function DocumentUploadModal({
   defaultLeadId,
   defaultPropertyId,
   defaultApartmentId,
+  defaultFiles = [], // ✅ Prop para recibir archivos del Drag & Drop
   onUploadSuccess 
 }) {
   const { t } = useTranslation('documents')
@@ -116,21 +117,31 @@ export default function DocumentUploadModal({
     fetchResources()
   }, [formData.projectId, formData.clientId, selectedProjectConfig, selectedClient])
 
-  // Inicializar estados basados en props por defecto
+  // ✅ Inicializar estados basados en props por defecto y manejar defaultFiles (Drag & Drop)
   useEffect(() => {
-    if (defaultLeadId) setLinkType('lead')
-    else if (defaultClientId) setLinkType('client')
-    else setLinkType('none')
+    if (open) {
+      if (defaultLeadId) setLinkType('lead')
+      else if (defaultClientId) setLinkType('client')
+      else setLinkType('none')
 
-    setFormData(prev => ({
-      ...prev,
-      projectId: defaultProjectId || prev.projectId,
-      clientId: defaultClientId || '',
-      leadId: defaultLeadId || '',
-      propertyId: defaultPropertyId || '',
-      apartmentId: defaultApartmentId || ''
-    }))
-  }, [defaultProjectId, defaultClientId, defaultLeadId, defaultPropertyId, defaultApartmentId])
+      setFormData(prev => ({
+        ...prev,
+        projectId: defaultProjectId || prev.projectId,
+        clientId: defaultClientId || '',
+        leadId: defaultLeadId || '',
+        propertyId: defaultPropertyId || '',
+        apartmentId: defaultApartmentId || '',
+        // ✅ Si hay archivos por defecto y no hay título, usar el nombre del primero
+        title: !prev.title && defaultFiles?.length > 0 ? defaultFiles[0].name : prev.title
+      }))
+      
+      // ✅ Pre-cargar archivos si vienen del Drag & Drop
+      setFiles(defaultFiles || [])
+    } else {
+      // Limpiar al cerrar el modal
+      setFiles([])
+    }
+  }, [open, defaultProjectId, defaultClientId, defaultLeadId, defaultPropertyId, defaultApartmentId, defaultFiles])
 
   const handleDrop = (e) => {
     e.preventDefault()

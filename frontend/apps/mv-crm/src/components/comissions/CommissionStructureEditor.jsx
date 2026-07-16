@@ -55,14 +55,27 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
   const handleChange = (field, value) => setFormData(prev => ({ ...prev, [field]: value }))
 
   // ─── Manejo de Tiers ───
+  // ─── Manejo de Tiers CORREGIDO ───
   const handleTierChange = (index, field, value) => {
     const newTiers = [...formData.tiers]
-    newTiers[index][field] = Number(value)
+    // Si es maxAmount y el valor está vacío, lo dejamos como string vacío para que el input no muestre "0"
+    if (field === 'maxAmount' && value === '') {
+      newTiers[index][field] = ''
+    } else {
+      newTiers[index][field] = Number(value)
+    }
     setFormData(prev => ({ ...prev, tiers: newTiers }))
   }
-  const addTier = () => setFormData(prev => ({ ...prev, tiers: [...prev.tiers, { minAmount: 0, maxAmount: 0, rate: 0 }] }))
-  const removeTier = (index) => setFormData(prev => ({ ...prev, tiers: prev.tiers.filter((_, i) => i !== index) }))
 
+  const addTier = () => setFormData(prev => ({ 
+    ...prev, 
+    tiers: [...prev.tiers, { minAmount: 0, maxAmount: '', rate: 0 }] // maxAmount inicia vacío
+  }))
+  
+  const removeTier = (index) => setFormData(prev => ({ 
+    ...prev, 
+    tiers: prev.tiers.filter((_, i) => i !== index) 
+  }))
   // ─── Manejo de Bonus Rules ───
   const handleBonusRuleChange = (index, field, value) => {
     const newRules = [...formData.bonusRules]
@@ -87,9 +100,20 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
       // Limpiar campos que no aplican según el tipo
       if (payload.type !== 'flat') payload.flatAmount = 0
       if (payload.type !== 'percentage') payload.percentageRate = 0
-      if (payload.type !== 'tiered') payload.tiers = []
       
-      // Asegurar que bonusRules sea un array válido (incluso vacío)
+      // ✅ CORRECCIÓN CRÍTICA PARA TIERED:
+      if (payload.type === 'tiered') {
+        payload.tiers = payload.tiers.map(tier => ({
+          minAmount: Number(tier.minAmount) || 0,
+          // Si maxAmount es 0, '' o null, lo enviamos como null (sin techo)
+          maxAmount: (!tier.maxAmount || tier.maxAmount === 0 || tier.maxAmount === '') ? null : Number(tier.maxAmount),
+          rate: Number(tier.rate) || 0
+        }))
+      } else {
+        payload.tiers = []
+      }
+      
+      // Asegurar que bonusRules sea un array válido
       if (!Array.isArray(payload.bonusRules)) payload.bonusRules = []
 
       if (isEdit) {

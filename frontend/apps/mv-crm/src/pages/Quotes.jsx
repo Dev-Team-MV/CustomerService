@@ -81,7 +81,7 @@ export default function Quotes() {
     onDownload: handleDownload
   })
 
-  const activeCount = quotes.filter(q => q.status === 'accepted' || q.status === 'sent').length
+  const activeCount = quotes.filter(q => q.status === 'converted' || q.status === 'sent').length
 
   return (
     <PageLayout
@@ -94,7 +94,7 @@ export default function Quotes() {
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
           <Box display="flex" gap={1} alignItems="center">
             <Chip label={`${quotes.length} ${t('total', 'Total')}`} size="small" sx={{ bgcolor: '#000', color: '#fff', fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 600 }} />
-            <Chip label={`${activeCount} ${t('active', 'Activas')}`} size="small" sx={{ bgcolor: '#4caf50', color: '#fff', fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 600 }} />
+            <Chip label={`${activeCount} ${t('active', 'Convertidas o Enviadas')}`} size="small" sx={{ bgcolor: '#4caf50', color: '#fff', fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 600 }} />
           </Box>
           <Button variant="contained" startIcon={<Add />} onClick={handleCreate} sx={{ borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
             {t('createQuote', 'Nueva Cotización')}

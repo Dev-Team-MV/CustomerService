@@ -11,7 +11,9 @@
     "category": "Category",
     "allCategories": "All categories",
     "project": "Project",
-    "allProjects": "All projects"
+    "allProjects": "All projects",
+    "clients": "Clients",
+    "allClients": "All clients"
   },
 
   "status": {

@@ -5,7 +5,7 @@
   "subtitle": "Create, send, and convert quotes with amortization schedules",
   
   "total": "Total",
-  "active": "Active",
+  "active": "Converted or Sent",
   "createQuote": "New Quote",
   "confirmDelete": "Are you sure you want to delete this quote?",
   "confirmConvert": "Convert this quote to a sale?",
