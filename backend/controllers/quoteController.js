@@ -17,6 +17,7 @@ import { sendEmail, isEmailConfigured } from '../services/emailService.js'
 import { sendSMSWithValidation } from '../services/twilioService.js'
 import { resolveApartmentSalePrice } from '../services/apartmentPricingService.js'
 import { normalizeHouseOptions } from '../utils/houseOptions.js'
+import { resolveSaleOwnerIds } from '../services/ensureLeadUserService.js'
 
 const QUOTE_POPULATE = [
   { path: 'projectId', select: 'name slug title logo brandColors' },
@@ -743,6 +744,27 @@ export const convertQuoteToSale = async (req, res) => {
       applyApartmentSale !== false &&
       (convertedApartmentId || quote.apartmentId)
 
+    // Resolve owner: clientId, or convert/link lead → User when quote was for a lead only
+    const ownersResolved = await resolveSaleOwnerIds({
+      ownerIds: quote.clientId ? [quote.clientId] : [],
+      leadId: quote.clientId ? null : (quote.leadId || null),
+      quoteId: quote._id,
+      autoConvertLead: true,
+      sendSms: true,
+      actor: req.user
+    })
+    if (!ownersResolved.ok && (quote.clientId || quote.leadId)) {
+      return res.status(ownersResolved.status).json({
+        message: ownersResolved.message,
+        leadId: ownersResolved.leadId,
+        userId: ownersResolved.userId
+      })
+    }
+    const ownerUserId = ownersResolved.ok ? ownersResolved.ownerIds[0] : null
+    if (ownerUserId && !quote.clientId) {
+      quote.clientId = ownerUserId
+    }
+
     if (shouldApplyApartment) {
       const targetApartmentId = quote.convertedToApartmentId || quote.apartmentId
       const apartment = await Apartment.findById(targetApartmentId)
@@ -765,11 +787,11 @@ export const convertQuoteToSale = async (req, res) => {
         .lean()
       const pricing = resolveApartmentSalePrice(apartment, model, apartment.selectedRenderType)
       apartment.pending = Math.max(0, pricing.listPrice - apartment.initialPayment)
-      if (quote.clientId) {
-        const clientIdStr = String(quote.clientId)
+      if (ownerUserId) {
+        const clientIdStr = String(ownerUserId)
         const existingUsers = (apartment.users || []).map((id) => String(id))
         if (!existingUsers.includes(clientIdStr)) {
-          apartment.users = [...(apartment.users || []), quote.clientId]
+          apartment.users = [...(apartment.users || []), ownerUserId]
         }
       }
       if (apartment.status === 'available') {
@@ -794,6 +816,7 @@ export const convertQuoteToSale = async (req, res) => {
     res.json({
       quote,
       apartment: updatedApartment,
+      leadConversions: ownersResolved.ok ? ownersResolved.conversions : [],
       propertyCreateHint:
         propertyId || isApartmentQuote
           ? null
@@ -802,8 +825,10 @@ export const convertQuoteToSale = async (req, res) => {
               lot: quote.lotId,
               model: quote.modelId,
               facade: quote.facadeId,
-              user: quote.clientId,
-              users: quote.clientId ? [quote.clientId] : [],
+              user: ownerUserId,
+              users: ownerUserId ? [ownerUserId] : [],
+              userId: ownerUserId,
+              leadId: quote.leadId || null,
               initialPayment: quote.downPayment,
               price: quote.totalPrice,
               hasBalcony: quote.hasBalcony === true,
@@ -819,8 +844,10 @@ export const convertQuoteToSale = async (req, res) => {
             projectId: quote.projectId,
             buildingId: quote.buildingId,
             apartmentId: quote.apartmentId,
-            user: quote.clientId,
-            users: quote.clientId ? [quote.clientId] : [],
+            user: ownerUserId,
+            users: ownerUserId ? [ownerUserId] : [],
+            userId: ownerUserId,
+            leadId: quote.leadId || null,
             initialPayment: quote.downPayment,
             price: quote.totalPrice,
             selectedRenderType: quote.selectedRenderType || 'basic',

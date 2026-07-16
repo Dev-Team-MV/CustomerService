@@ -14,6 +14,7 @@ import { hydrateUrlsInObject } from '../services/urlResolverService.js'
 import { evaluateProjectPricing } from '../services/projectPricingEngine.js'
 import { notifyPropertyAssigned } from '../utils/notificationTriggers.js'
 import { normalizeHouseOptions } from '../utils/houseOptions.js'
+import { resolveSaleOwnerIds } from '../services/ensureLeadUserService.js'
 
 const BLOCKED_BUILDING_AVAILABILITY_STATUSES = ['reserved', 'assigned', 'sold', 'disabled']
 
@@ -998,21 +999,36 @@ export const getPropertyQuotePreview = async (req, res) => {
 export const createProperty = async (req, res) => {
   try {
     const {
-      projectId, project, lot, model, facade, user, users, initialPayment,
+      projectId, project, lot, model, facade, user, users, userId, leadId,
+      initialPayment,
       quoteId,
       price: requestedPrice, pending: requestedPending
     } = req.body
     let projId = projectId || project
 
-    // Normalize owners: accept single user or users array
-    const ownerIds = users && Array.isArray(users) && users.length > 0
+    // Normalize owners: accept user / users / userId (CRM often sends leadId as userId)
+    const rawOwnerIds = users && Array.isArray(users) && users.length > 0
       ? users
-      : user
-        ? [user]
+      : (user || userId)
+        ? [user || userId]
         : []
-    if (ownerIds.length === 0) {
-      return res.status(400).json({ message: 'At least one owner (user or users) is required' })
+
+    const ownersResolved = await resolveSaleOwnerIds({
+      ownerIds: rawOwnerIds,
+      leadId: leadId || null,
+      quoteId: quoteId || null,
+      autoConvertLead: true,
+      sendSms: true,
+      actor: req.user
+    })
+    if (!ownersResolved.ok) {
+      return res.status(ownersResolved.status).json({
+        message: ownersResolved.message,
+        leadId: ownersResolved.leadId,
+        userId: ownersResolved.userId
+      })
     }
+    const ownerIds = ownersResolved.ownerIds
 
     // Merge options from linked quote when CRM convert only sends selectedOptions / price
     let optionSource = { ...req.body }

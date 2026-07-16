@@ -2,9 +2,6 @@ import mongoose from 'mongoose'
 import Lead, { LEAD_STAGES, LEAD_SOURCES } from '../models/Lead.js'
 import User from '../models/User.js'
 import Project from '../models/Project.js'
-import { sendSMSWithValidation } from '../services/twilioService.js'
-import { resolveFrontendBaseUrl } from '../services/resolveFrontendBaseUrl.js'
-import { notifyUserCreatedByAdmin } from '../utils/notificationTriggers.js'
 import {
   runAutomationEngineAsync
 } from '../services/automationEngine.js'
@@ -12,6 +9,7 @@ import {
   touchLeadStage,
   updateLeadScore
 } from '../services/leadScoringService.js'
+import { ensureLeadConvertedToUser } from '../services/ensureLeadUserService.js'
 import { createPendingCommissionFromLead } from './commissionController.js'
 
 const POPULATE_FIELDS = [
@@ -19,13 +17,6 @@ const POPULATE_FIELDS = [
   { path: 'assignedTo', select: 'firstName lastName email' },
   { path: 'convertedToUserId', select: 'firstName lastName email phoneNumber' }
 ]
-
-function splitName(name) {
-  const parts = (name || '').trim().split(/\s+/)
-  const firstName = parts[0] || 'Lead'
-  const lastName = parts.slice(1).join(' ') || '-'
-  return { firstName, lastName }
-}
 
 function buildLeadFilter(query) {
   const { projectId, stage, assignedTo, fromDate, toDate } = query
@@ -244,69 +235,21 @@ export const convertLead = async (req, res) => {
       return res.status(400).json({ message: 'Lead already converted to user' })
     }
 
-    if (!lead.email) {
-      return res.status(400).json({ message: 'Lead email is required to convert to user' })
-    }
-
-    if (!lead.phone) {
-      return res.status(400).json({ message: 'Lead phone is required to convert to user' })
-    }
-
-    const existingUser = await User.findOne({ email: lead.email.toLowerCase() })
-    if (existingUser) {
-      return res.status(400).json({
-        message: 'A user with this email already exists',
-        userId: existingUser._id
+    const result = await ensureLeadConvertedToUser(lead, {
+      sendSms: true,
+      actor: req.user,
+      markVendido: true,
+      linkExistingEmail: false
+    })
+    if (!result.ok) {
+      return res.status(result.status).json({
+        message: result.message,
+        userId: result.userId
       })
     }
 
-    const { firstName, lastName } = splitName(lead.name)
-
-    const userData = {
-      firstName,
-      lastName,
-      email: lead.email,
-      phoneNumber: lead.phone,
-      role: 'user'
-    }
-
-    if (lead.projectId) {
-      userData.projectMemberships = [{ project: lead.projectId, role: 'resident' }]
-    }
-
-    const user = new User(userData)
-    const setupToken = user.generateSetupToken()
-    await user.save()
-
-    notifyUserCreatedByAdmin({ user })
-
-    let smsSent = false
-    let setupLink = null
-
-    try {
-      const frontendUrl = await resolveFrontendBaseUrl(lead.projectId)
-      setupLink = `${frontendUrl}/setup-password/${setupToken}`
-      const message = `Hi ${firstName}, your account has been created. Please set your password by visiting this link: ${setupLink}`
-      await sendSMSWithValidation(lead.phone, message)
-      smsSent = true
-    } catch (smsError) {
-      console.error('Error sending setup SMS for converted lead:', smsError.message)
-    }
-
-    const previousStage = lead.stage
-    lead.convertedToUserId = user._id
-    lead.stage = 'vendido'
-    if (previousStage !== 'vendido') {
-      touchLeadStage(lead)
-    }
-    await updateLeadScore(lead)
     await lead.populate(POPULATE_FIELDS)
-
-    runAutomationEngineAsync('lead_stage_changed', {
-      lead: lead.toObject(),
-      previousStage,
-      actor: req.user
-    })
+    const user = result.user
 
     // Auto-generate pending commission when converting to sale
     let commission = null
@@ -346,8 +289,8 @@ export const convertLead = async (req, res) => {
         phoneNumber: user.phoneNumber,
         role: user.role
       },
-      smsSent,
-      setupLink: smsSent ? undefined : setupLink,
+      smsSent: result.smsSent,
+      setupLink: result.setupLink,
       commission
     })
   } catch (error) {
