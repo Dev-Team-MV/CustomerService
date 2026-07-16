@@ -13,6 +13,7 @@ import { getVisiblePropertyIdsForUser, canUserAccessProperty } from '../utils/pr
 import { hydrateUrlsInObject } from '../services/urlResolverService.js'
 import { evaluateProjectPricing } from '../services/projectPricingEngine.js'
 import { notifyPropertyAssigned } from '../utils/notificationTriggers.js'
+import { normalizeHouseOptions } from '../utils/houseOptions.js'
 
 const BLOCKED_BUILDING_AVAILABILITY_STATUSES = ['reserved', 'assigned', 'sold', 'disabled']
 
@@ -998,7 +999,7 @@ export const createProperty = async (req, res) => {
   try {
     const {
       projectId, project, lot, model, facade, user, users, initialPayment,
-      hasBalcony, modelType, hasStorage, selectedOptions, quoteId,
+      quoteId,
       price: requestedPrice, pending: requestedPending
     } = req.body
     let projId = projectId || project
@@ -1013,6 +1014,41 @@ export const createProperty = async (req, res) => {
       return res.status(400).json({ message: 'At least one owner (user or users) is required' })
     }
 
+    // Merge options from linked quote when CRM convert only sends selectedOptions / price
+    let optionSource = { ...req.body }
+    if (quoteId && mongoose.Types.ObjectId.isValid(String(quoteId))) {
+      const quote = await Quote.findById(quoteId)
+        .select('hasBalcony hasStorage modelType selectedOptions facadeId deckId')
+        .lean()
+      if (quote) {
+        optionSource = {
+          hasBalcony: req.body.hasBalcony !== undefined ? req.body.hasBalcony : quote.hasBalcony,
+          hasStorage: req.body.hasStorage !== undefined ? req.body.hasStorage : quote.hasStorage,
+          modelType: req.body.modelType !== undefined ? req.body.modelType : quote.modelType,
+          selectedOptions: {
+            ...(quote.selectedOptions && typeof quote.selectedOptions === 'object'
+              ? quote.selectedOptions
+              : {}),
+            ...(req.body.selectedOptions && typeof req.body.selectedOptions === 'object'
+              ? req.body.selectedOptions
+              : {})
+          },
+          balconyId: req.body.balconyId,
+          storageId: req.body.storageId,
+          upgradeId: req.body.upgradeId,
+          modelBalconyId: req.body.modelBalconyId,
+          modelStorageId: req.body.modelStorageId,
+          modelUpgradeId: req.body.modelUpgradeId,
+          hasModelBalcony: req.body.hasModelBalcony,
+          hasModelStorage: req.body.hasModelStorage,
+          hasModelUpgrade: req.body.hasModelUpgrade
+        }
+      }
+    }
+
+    const houseOptions = normalizeHouseOptions(optionSource)
+    const { hasBalcony, hasStorage, modelType, selectedOptions } = houseOptions
+
     const firstOwner = ownerIds[0]
     const resolved = await resolvePropertyPricing({
       projectId,
@@ -1021,10 +1057,10 @@ export const createProperty = async (req, res) => {
       model,
       facade,
       initialPayment,
-      hasBalcony: hasBalcony === true,
-      modelType: modelType || 'basic',
-      hasStorage: hasStorage === true,
-      selectedOptions: selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {},
+      hasBalcony,
+      modelType,
+      hasStorage,
+      selectedOptions,
       enforceLotAvailability: true,
       firstOwner
     })
@@ -1084,10 +1120,10 @@ export const createProperty = async (req, res) => {
       pending: pendingAmount,
       initialPayment: initialPaymentAmount,
       status: 'pending',
-      hasBalcony: hasBalcony === true,
-      modelType: modelType || 'basic',
-      hasStorage: hasStorage === true,
-      selectedOptions: selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {}
+      hasBalcony,
+      modelType,
+      hasStorage,
+      selectedOptions
     })
 
     await assignBuildingToProperty({

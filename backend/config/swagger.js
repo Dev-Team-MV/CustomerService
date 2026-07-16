@@ -2230,8 +2230,11 @@ const options = {
             },
             selectedOptions: {
               type: 'object',
-              description: 'Lot/house option selections (balcony, storage, etc.)'
+              description: 'Lot/house option selections (balconyId, storageId, upgradeId, etc.)'
             },
+            hasBalcony: { type: 'boolean', description: 'House quote: balcony selected' },
+            hasStorage: { type: 'boolean', description: 'House quote: storage selected' },
+            modelType: { type: 'string', enum: ['basic', 'upgrade'], description: 'House quote: model finish' },
             deckId: { type: 'string', nullable: true },
             totalPrice: { type: 'number' },
             downPayment: { type: 'number' },
@@ -2272,6 +2275,9 @@ const options = {
             apartmentId: { type: 'string', nullable: true },
             selectedRenderType: { type: 'string', enum: ['basic', 'upgrade'] },
             selectedOptions: { type: 'object' },
+            hasBalcony: { type: 'boolean' },
+            hasStorage: { type: 'boolean' },
+            modelType: { type: 'string', enum: ['basic', 'upgrade'] },
             deckId: { type: 'string', nullable: true },
             totalPrice: { type: 'number' },
             downPayment: { type: 'number' },
@@ -2299,6 +2305,9 @@ const options = {
             apartmentId: { type: 'string', nullable: true },
             selectedRenderType: { type: 'string', enum: ['basic', 'upgrade'] },
             selectedOptions: { type: 'object' },
+            hasBalcony: { type: 'boolean' },
+            hasStorage: { type: 'boolean' },
+            modelType: { type: 'string', enum: ['basic', 'upgrade'] },
             deckId: { type: 'string', nullable: true },
             totalPrice: { type: 'number' },
             downPayment: { type: 'number' },

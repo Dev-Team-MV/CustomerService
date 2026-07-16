@@ -16,6 +16,7 @@ import { uploadFile } from '../services/storageService.js'
 import { sendEmail, isEmailConfigured } from '../services/emailService.js'
 import { sendSMSWithValidation } from '../services/twilioService.js'
 import { resolveApartmentSalePrice } from '../services/apartmentPricingService.js'
+import { normalizeHouseOptions } from '../utils/houseOptions.js'
 
 const QUOTE_POPULATE = [
   { path: 'projectId', select: 'name slug title logo brandColors' },
@@ -262,6 +263,8 @@ export const createQuote = async (req, res) => {
     const deckNorm = optionalObjectId(req.body.deckId, 'deckId')
     if (deckNorm.error) return res.status(400).json({ message: deckNorm.error })
 
+    const houseOptions = normalizeHouseOptions(req.body)
+
     let resolvedTotalPrice = totalPrice
     if (
       (resolvedTotalPrice == null || resolvedTotalPrice === '') &&
@@ -307,7 +310,10 @@ export const createQuote = async (req, res) => {
       buildingId: target.buildingId,
       apartmentId: target.apartmentId,
       selectedRenderType: target.apartmentId ? renderType : 'basic',
-      selectedOptions: normalizeSelectedOptions(req.body.selectedOptions),
+      selectedOptions: houseOptions.selectedOptions,
+      hasBalcony: target.lotId ? houseOptions.hasBalcony : false,
+      hasStorage: target.lotId ? houseOptions.hasStorage : false,
+      modelType: target.lotId ? houseOptions.modelType : 'basic',
       deckId: deckNorm.value,
       status: status || 'draft',
       validUntil: validUntil ? new Date(validUntil) : null,
@@ -481,8 +487,31 @@ export const updateQuote = async (req, res) => {
       if (renderType.error) return res.status(400).json({ message: renderType.error })
       quote.selectedRenderType = renderType
     }
-    if (req.body.selectedOptions !== undefined) {
-      quote.selectedOptions = normalizeSelectedOptions(req.body.selectedOptions)
+    if (req.body.selectedOptions !== undefined ||
+      req.body.hasBalcony !== undefined ||
+      req.body.hasStorage !== undefined ||
+      req.body.modelType !== undefined ||
+      req.body.modelBalconyId !== undefined ||
+      req.body.modelStorageId !== undefined ||
+      req.body.modelUpgradeId !== undefined
+    ) {
+      const houseOptions = normalizeHouseOptions({
+        ...req.body,
+        selectedOptions:
+          req.body.selectedOptions !== undefined
+            ? req.body.selectedOptions
+            : quote.selectedOptions,
+        hasBalcony:
+          req.body.hasBalcony !== undefined ? req.body.hasBalcony : quote.hasBalcony,
+        hasStorage:
+          req.body.hasStorage !== undefined ? req.body.hasStorage : quote.hasStorage,
+        modelType:
+          req.body.modelType !== undefined ? req.body.modelType : quote.modelType
+      })
+      quote.selectedOptions = houseOptions.selectedOptions
+      quote.hasBalcony = houseOptions.hasBalcony
+      quote.hasStorage = houseOptions.hasStorage
+      quote.modelType = houseOptions.modelType
       quote.markModified('selectedOptions')
     }
     if (req.body.deckId !== undefined) {
@@ -777,6 +806,9 @@ export const convertQuoteToSale = async (req, res) => {
               users: quote.clientId ? [quote.clientId] : [],
               initialPayment: quote.downPayment,
               price: quote.totalPrice,
+              hasBalcony: quote.hasBalcony === true,
+              hasStorage: quote.hasStorage === true,
+              modelType: quote.modelType || 'basic',
               selectedOptions: quote.selectedOptions || {},
               deckId: quote.deckId || null,
               quoteId: quote._id
