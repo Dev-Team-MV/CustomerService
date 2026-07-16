@@ -40,6 +40,10 @@ import commissionRoutes from './routes/commissionRoutes.js'
 import commissionStructureRoutes from './routes/commissionStructureRoutes.js'
 import documentRoutes from './routes/documentRoutes.js'
 import quoteRoutes from './routes/quoteRoutes.js'
+import referralRoutes from './routes/referralRoutes.js'
+import onboardingRoutes from './routes/onboardingRoutes.js'
+import warrantyRoutes from './routes/warrantyRoutes.js'
+import surveyRoutes from './routes/surveyRoutes.js'
 import { startBackupScheduler } from './services/backupScheduler.js'
 import { startLeadScoringScheduler } from './services/leadScoringScheduler.js'
 import { startDocumentExpiryScheduler } from './services/documentExpiryScheduler.js'
@@ -136,6 +140,10 @@ app.use('/api/commissions', commissionRoutes)
 app.use('/api/commission-structures', commissionStructureRoutes)
 app.use('/api/documents', documentRoutes)
 app.use('/api/quotes', quoteRoutes)
+app.use('/api/referrals', referralRoutes)
+app.use('/api/onboarding', onboardingRoutes)
+app.use('/api/warranties', warrantyRoutes)
+app.use('/api/surveys', surveyRoutes)
 
 // Start automatic GCS backup scheduler (if enabled)
 startBackupScheduler()

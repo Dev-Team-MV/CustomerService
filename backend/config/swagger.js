@@ -1600,7 +1600,7 @@ const options = {
             name: { type: 'string' },
             trigger: {
               type: 'string',
-              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days']
+              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days', 'referral_converted', 'warranty_submitted', 'onboarding_completed']
             },
             condition: { $ref: '#/components/schemas/AutomationCondition' },
             action: {
@@ -1621,7 +1621,7 @@ const options = {
             name: { type: 'string' },
             trigger: {
               type: 'string',
-              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days']
+              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days', 'referral_converted', 'warranty_submitted', 'onboarding_completed']
             },
             condition: { $ref: '#/components/schemas/AutomationCondition' },
             action: {
@@ -1638,7 +1638,7 @@ const options = {
             name: { type: 'string' },
             trigger: {
               type: 'string',
-              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days']
+              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days', 'referral_converted', 'warranty_submitted', 'onboarding_completed']
             },
             condition: { $ref: '#/components/schemas/AutomationCondition' },
             action: {
