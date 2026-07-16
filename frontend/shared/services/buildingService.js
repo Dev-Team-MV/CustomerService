@@ -249,7 +249,8 @@ const buildingService = {
         users: apartmentData.users || [],
         status: apartmentData.status || 'available',
         floorPlanPolygonId: apartmentData.floorPlanPolygonId || null,
-        selectedRenderType: apartmentData.selectedRenderType || null
+        selectedRenderType: apartmentData.selectedRenderType || null,
+        upgradePrice: Number(apartmentData.upgradePrice) || 0
       }
       const response = await api.post('/apartments', payload)
       return response.data

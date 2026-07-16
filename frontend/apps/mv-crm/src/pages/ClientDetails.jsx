@@ -10,15 +10,23 @@ import {
   Paper,
   CircularProgress,
   Alert,
-  IconButton
+  IconButton,
+  Button
 } from '@mui/material'
-import { ArrowBack } from '@mui/icons-material'
+import { ArrowBack, Event, History } from '@mui/icons-material'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
 import ClientOverview from '../components/clients/ClientOverview'
 import ClientPaymentsTable from '../components/clients/ClientPaymentsTable'
 import ClientTimeline from '../components/clients/ClientTimeline'
 import ClientNotes from '../components/clients/ClientNotes'
+import AppointmentModal from '../components/appointments/AppointmentModal'
+import AuditLogTab from '../components/clients/AuditLogTab'
 import clientDetailService from '../services/clientDetailService'
+import { useAppointments } from '../constants/hooks/useAppointments'
+import { useProjects } from '@shared/hooks/useProjects'
+import { useCrmAgents } from '../constants/hooks/useCrmAgents'
+import { useAuth } from '@shared/context/AuthContext'
+import ClientDocuments from '../components/clients/ClientDocuments'
 
 function TabPanel({ children, value, index }) {
   return (
@@ -31,7 +39,11 @@ function TabPanel({ children, value, index }) {
 export default function ClientDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { t } = useTranslation('clients')
+  const { t } = useTranslation('residents') // ✅ Cambiado a 'residents'
+  const { user } = useAuth()
+  const { createAppointment } = useAppointments()
+  const { projects } = useProjects()
+  const { agents } = useCrmAgents()
 
   const [tabValue, setTabValue] = useState(0)
   const [client, setClient] = useState(null)
@@ -40,6 +52,7 @@ export default function ClientDetail() {
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [appointmentModalOpen, setAppointmentModalOpen] = useState(false)
 
   useEffect(() => {
     const loadClientDetail = async () => {
@@ -52,7 +65,7 @@ export default function ClientDetail() {
         setActivities(data.activities || [])
         setNotes(data.notes || [])
       } catch (err) {
-        setError(err.response?.data?.message || 'Error al cargar cliente')
+        setError(err.response?.data?.message || t('clients.errorLoading', 'Error al cargar cliente'))
       } finally {
         setLoading(false)
       }
@@ -62,6 +75,15 @@ export default function ClientDetail() {
 
   const handleNoteAdded = (newNote) => {
     setNotes(prev => [newNote, ...prev])
+  }
+
+  const handleScheduleAppointment = () => {
+    setAppointmentModalOpen(true)
+  }
+
+  const handleSaveAppointment = async (id, data) => {
+    await createAppointment(data)
+    setAppointmentModalOpen(false)
   }
 
   if (loading) {
@@ -78,20 +100,23 @@ export default function ClientDetail() {
     return (
       <PageLayout>
         <Alert severity="error" sx={{ m: 3 }}>
-          {error || 'Cliente no encontrado'}
+          {error || t('clients.notFound', 'Cliente no encontrado')}
         </Alert>
       </PageLayout>
     )
   }
 
+  const clientName = `${client.firstName || ''} ${client.lastName || ''}`.trim() || client.email || t('clients.client', 'Cliente')
+
   return (
     <PageLayout>
       <Box sx={{ p: 3 }}>
-        {/* Header con botón de regreso */}
+        {/* Header */}
         <Box mb={3} display="flex" alignItems="center" gap={2}>
           <IconButton onClick={() => navigate('/clients')} sx={{ bgcolor: '#f5f5f5' }}>
             <ArrowBack />
           </IconButton>
+          
           <Box flex={1}>
             <Typography
               sx={{
@@ -128,10 +153,31 @@ export default function ClientDetail() {
                   textTransform: 'uppercase'
                 }}
               >
-                {client.isActive ? 'Activo' : 'Inactivo'}
+                {client.isActive ? t('clients.activeStatus', 'Activo') : t('clients.inactiveStatus', 'Inactivo')}
               </Typography>
             </Box>
           </Box>
+
+          {/* Botón agendar cita */}
+          <Button
+            variant="outlined"
+            startIcon={<Event />}
+            onClick={handleScheduleAppointment}
+            sx={{
+              fontFamily: '"Courier New", monospace',
+              fontSize: '0.75rem',
+              textTransform: 'none',
+              letterSpacing: '0.5px',
+              borderColor: '#4caf50',
+              color: '#4caf50',
+              '&:hover': {
+                borderColor: '#388e3c',
+                bgcolor: '#e8f5e9'
+              }
+            }}
+          >
+            {t('clients.scheduleAppointment', 'Agendar cita')}
+          </Button>
         </Box>
 
         {/* Tabs */}
@@ -146,6 +192,8 @@ export default function ClientDetail() {
           <Tabs
             value={tabValue}
             onChange={(e, newValue) => setTabValue(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
             sx={{
               borderBottom: '1px solid #ececec',
               '& .MuiTab-root': {
@@ -165,10 +213,16 @@ export default function ClientDetail() {
               }
             }}
           >
-            <Tab label="Overview" />
-            <Tab label="Pagos" />
-            <Tab label="Actividades" />
-            <Tab label="Notas" />
+            <Tab label={t('tabs.overview', 'Overview')} />
+            <Tab label={t('tabs.payments', 'Pagos')} />
+            <Tab label={t('tabs.activities', 'Actividades')} />
+            <Tab label={t('tabs.notes', 'Notas')} />
+            <Tab 
+              label={t('tabs.history', 'Historial')} 
+              icon={<History sx={{ fontSize: 16 }} />} 
+              iconPosition="start" 
+            />
+            <Tab label={t('tabs.documents', 'Documentos')} />
           </Tabs>
 
           {/* TAB 1: OVERVIEW */}
@@ -196,7 +250,7 @@ export default function ClientDetail() {
                   mb: 2
                 }}
               >
-                Historial de actividades ({activities.length})
+                {t('timeline.title', 'Historial de actividades')} ({activities.length})
               </Typography>
               <ClientTimeline activities={activities} />
             </Box>
@@ -210,8 +264,43 @@ export default function ClientDetail() {
               onNoteAdded={handleNoteAdded}
             />
           </TabPanel>
+
+          {/* TAB 5: HISTORIAL DE CAMBIOS */}
+          <TabPanel value={tabValue} index={4}>
+            <Box sx={{ p: 3 }}>
+              <AuditLogTab 
+                entity="Client" 
+                entityId={client._id}
+                entityName={clientName}
+              />
+            </Box>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={5}>
+            <Box sx={{ p: 3 }}>
+              {/* <AuditLogTab 
+                entity="Client" 
+                entityId={client._id}
+                entityName={clientName}
+              /> */}
+              <ClientDocuments clientId={client._id} clientName={clientName} />
+            </Box>
+          </TabPanel>
         </Paper>
       </Box>
+
+      {/* Modal de cita */}
+      <AppointmentModal
+        open={appointmentModalOpen}
+        onClose={() => setAppointmentModalOpen(false)}
+        onSave={handleSaveAppointment}
+        prefillData={{
+          clientId: client._id,
+          assignedTo: user?._id
+        }}
+        projects={projects}
+        agents={agents}
+      />
     </PageLayout>
   )
 }

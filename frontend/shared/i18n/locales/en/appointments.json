@@ -1,0 +1,96 @@
+{
+  "title": "Calendar",
+  "titleBold": "CRM",
+  "topbarLabel": "Appointment management",
+  "subtitle": "Schedule and manage your appointments with clients and leads",
+  "createAppointment": "New appointment",
+  "editTitle": "Edit appointment",
+  "createTitle": "New appointment",
+  "scheduleAppointment": "Schedule appointment",
+  "confirmDelete": "Are you sure you want to delete this appointment?",
+  
+  "calendar": {
+    "today": "Today",
+    "month": "Month",
+    "week": "Week",
+    "day": "Day"
+  },
+  
+  "form": {
+    "title": "Title",
+    "type": "Type",
+    "status": "Status",
+    "duration": "Duration (min)",
+    "date": "Date",
+    "time": "Time",
+    "startDate": "Start date",
+    "startTime": "Start time",
+    "endDate": "End date",
+    "endTime": "End time",
+    "leadName": "Lead",
+    "clientName": "Client",
+    "agentName": "Agent",
+    "projectName": "Project",
+    "location": "Location",
+    "description": "Description",
+    "notes": "Notes",
+    "assignedTo": "Assigned agent",
+    "project": "Project",
+    "contact": "Contact",
+    "selectLead": "Select lead",
+    "selectClient": "Select client",
+    "cancel": "Cancel",
+    "create": "Create",
+    "update": "Update",
+    "delete": "Delete",
+    "saving": "Saving..."
+  },
+  
+  "types": {
+    "visita": "Visit",
+    "llamada": "Call",
+    "reunion": "Meeting"
+  },
+  
+  "statuses": {
+    "pendiente": "Pending",
+    "confirmada": "Confirmed",
+    "completada": "Completed",
+    "cancelada": "Cancelled"
+  },
+  
+  "contact": {
+    "title": "Contact",
+    "lead": "Lead",
+    "client": "Client"
+  },
+  
+  "dateTime": {
+    "startTitle": "Start date and time",
+    "endTitle": "End date and time (optional)",
+    "autoEndHint": "If you don't specify an end time, it will be automatically calculated 1 hour after the start"
+  },
+  
+  "duration": {
+    "label": "Duration",
+    "minutes": "{{count}} minute",
+    "minutes_plural": "{{count}} minutes",
+    "hours": "{{count}} hour",
+    "hours_plural": "{{count}} hours",
+    "hoursMinutes": "{{hours}}h {{minutes}}min",
+    "valid": "Duration: {{formatted}}",
+    "minError": "Minimum duration is 1 hour. Current duration: {{minutes}} minutes",
+    "maxError": "Maximum duration is 23 hours 59 minutes. A full day is not allowed."
+  },
+  
+  "validation": {
+    "titleRequired": "Title is required",
+    "typeRequired": "Type is required",
+    "startDateRequired": "Start date and time are required",
+    "projectRequired": "Project is required",
+    "assignedToRequired": "Assigned agent is required",
+    "contactRequired": "You must select a Lead or a Client",
+    "saveError": "Error saving appointment",
+    "deleteError": "Error deleting appointment"
+  }
+}

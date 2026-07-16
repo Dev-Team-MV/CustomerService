@@ -1,5 +1,6 @@
 {
-  "title": "Sales & Leads",
+  "title": "Sales",
+  "titleBold": "& Leads",
   "description": "Manage your sales pipeline and convert leads into customers",
   "newLead": "New Lead",
   "editLead": "Edit Lead",
@@ -52,5 +53,35 @@
     "cancel": "Cancel",
     "create": "Create",
     "update": "Update"
+  },
+
+  "score": {
+    "title": "Lead Score",
+    "breakdown": "Breakdown",
+    "noFactors": "No applicable factors",
+    "autoCalculated": "Automatically calculated",
+    "outOf": "/ 100",
+    
+    "levels": {
+      "cold": "Cold",
+      "warm": "Warm",
+      "hot": "Hot"
+    },
+    
+    "factors": {
+      "source": "Source: {{source}}",
+      "freshDays_one": "{{days}} day (fresh)",
+      "freshDays_other": "{{days}} days (fresh)",
+      "recentDays": "{{days}} days (recent)",
+      "days": "{{days}} days",
+      "stuck": "Stuck {{days}} days in {{stage}}",
+      "appointment": "Appointment scheduled",
+      "smsResponded": "Responded to SMS"
+    },
+    
+    "points": {
+      "plus": "+{{points}}",
+      "minus": "{{points}}"
+    }
   }
 }

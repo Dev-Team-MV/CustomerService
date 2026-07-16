@@ -1,3 +1,4 @@
+// apps/mv-crm/src/components/activities/ActivityDetails.jsx
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -11,7 +12,8 @@ import {
   Button,
   Paper,
   TextField,
-  CircularProgress
+  CircularProgress,
+  Tooltip
 } from '@mui/material'
 import { 
   Close, 
@@ -22,7 +24,8 @@ import {
   Label,
   Send,
   Person,
-  Phone
+  Phone,
+  Business
 } from '@mui/icons-material'
 import { ACTIVITY_PRIORITIES } from '../../constants/hooks/useActivities'
 import SubActivityList from './SubActivityList'
@@ -73,6 +76,24 @@ const ActivityDetails = ({
   const assignee = currentActivity.assignedTo
   const contact = currentActivity.contact
   const creator = currentActivity.createdBy
+
+  // ✅ NUEVO: Obtener proyectos relacionados
+  const getRelatedProjects = () => {
+    if (!currentActivity.relatedProjects || currentActivity.relatedProjects.length === 0) return []
+    
+    return currentActivity.relatedProjects.map(project => {
+      if (typeof project === 'object') {
+        return {
+          id: project._id,
+          name: project.name || project.title?.es || project.title?.en || 'Proyecto',
+          phase: project.phase || null
+        }
+      }
+      return { id: project, name: 'Proyecto', phase: null }
+    })
+  }
+
+  const relatedProjects = getRelatedProjects()
 
   const handleRefreshActivity = async () => {
     if (!currentActivity?._id) return
@@ -166,7 +187,7 @@ const ActivityDetails = ({
       {/* Content - Scrollable */}
       <Box sx={{ p: 2, overflowY: 'auto', flex: 1 }}>
         {/* Prioridad y Tags */}
-        <Box display="flex" gap={1} mb={3} flexWrap="wrap">
+        <Box display="flex" gap={1} mb={2} flexWrap="wrap">
           <Chip
             label={t(`activities.priority.${priority?.id}`) || t('activities.priority.medium')}
             sx={{
@@ -182,9 +203,52 @@ const ActivityDetails = ({
               size="small"
               icon={<Label sx={{ fontSize: 14 }} />}
               variant="outlined"
+              sx={{
+                borderColor: tag === 'automation' ? '#9c27b0' : 
+                             tag === 'nota' ? '#ff9800' : undefined,
+                color: tag === 'automation' ? '#9c27b0' :
+                       tag === 'nota' ? '#ff9800' : undefined
+              }}
             />
           ))}
         </Box>
+
+        {/* ✅ NUEVO: Proyectos Relacionados */}
+        {relatedProjects.length > 0 && (
+          <Box mb={3}>
+            <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
+              {t('activities.details.relatedProjects', 'Proyectos Relacionados')}
+            </Typography>
+            <Box display="flex" flexDirection="column" gap={1}>
+              {relatedProjects.map((project) => (
+                <Paper
+                  key={project.id}
+                  variant="outlined"
+                  sx={{
+                    p: 1.5,
+                    borderRadius: 2,
+                    bgcolor: '#e3f2fd',
+                    borderColor: '#2196f3'
+                  }}
+                >
+                  <Box display="flex" alignItems="center" gap={1.5}>
+                    <Business sx={{ fontSize: 20, color: '#2196f3' }} />
+                    <Box flex={1}>
+                      <Typography fontWeight={600} sx={{ color: '#1976d2', fontSize: '0.9rem' }}>
+                        {project.name}
+                      </Typography>
+                      {project.phase && (
+                        <Typography variant="caption" sx={{ color: '#2196f3' }}>
+                          Fase: {project.phase}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                </Paper>
+              ))}
+            </Box>
+          </Box>
+        )}
 
         {/* Descripción */}
         {currentActivity.description && (

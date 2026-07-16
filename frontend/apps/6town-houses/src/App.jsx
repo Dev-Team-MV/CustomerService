@@ -1,3 +1,4 @@
+// /Users/oficina/MV-CRM/CustomerService/frontend/apps/6town-houses/src/App.jsx
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { AuthProvider, useAuth } from '@shared/context/AuthContext'
@@ -5,12 +6,10 @@ import ProtectedRoute from '@shared/components/ProtectedRoute'
 import Layout from '@shared/components/LayoutComponents/Layout'
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 
-// Menús y logo
+// Menús
 import { privateMenuItems, publicMenuItems } from './Constants/MenuItems'
-import logo6TownHouses from './assets/react.svg'
 
 // Páginas 6Town Houses
-import Login from './Pages/login'
 import Dashboard from './Pages/Dashboard'
 import NotFound from './Pages/NotFound'
 import ConfigurationManager from './Pages/ConfigurationManager'
@@ -25,7 +24,6 @@ import TermsAndCondition from './Pages/TermsAndConditions'
 import CatalogConfig from './Pages/CtalogConfig'
 import Buildings from './Pages/Buildings'
 import BuildingDetails from './Pages/BuildingDetails'
-// import GetYourQuote from './Pages/GetYourQuote'
 import GetYourQuote from './Components/quote/GetYourQuote'
 import Lots from './Pages/Lots'
 import Models from './Pages/Models'
@@ -36,6 +34,9 @@ import FamilyGroup from './Pages/FamilyGropu'
 
 import theme from './theme'
 
+// Componente compartido
+import UniversalLogin from '@shared/components/Login/UniversalLogin'
+
 const DynamicLayoutWrapper = ({ children }) => {
   const { user } = useAuth()
   const publicView = !user
@@ -44,7 +45,6 @@ const DynamicLayoutWrapper = ({ children }) => {
       publicView={publicView}
       menuItems={publicView ? publicMenuItems : privateMenuItems}
       publicMenuItems={publicMenuItems}
-      logoSrc={logo6TownHouses}
     >
       {children || <Outlet />}
     </Layout>
@@ -58,8 +58,8 @@ function App() {
       <AuthProvider projectSlug="6town-houses">
         <Routes>
           {/* Auth Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<UniversalLogin />} />
+
           <Route path="/setup-password/:token" element={<Register />} />
           <Route path="/terms-and-conditions" element={<TermsAndCondition />} />
 
@@ -70,7 +70,6 @@ function App() {
                 publicView={true}
                 menuItems={publicMenuItems}
                 publicMenuItems={publicMenuItems}
-                logoSrc={logo6TownHouses}
               />
             }
           >
@@ -81,11 +80,8 @@ function App() {
 
           {/* Hybrid Routes */}
           <Route element={<DynamicLayoutWrapper />}>
-            {/* <Route path="/explore/news" element={<NewsFeed />} /> */}
-            {/* <Route path="/explore/news/:id" element={<NewsDetails />} /> */}
-             <Route path="/news" element={<NewsFeed />} />
+            <Route path="/news" element={<NewsFeed />} />
             <Route path="/news/:id" element={<NewsDetails />} />
-
           </Route>
 
           {/* Protected Routes */}
@@ -96,7 +92,6 @@ function App() {
                   publicView={false}
                   menuItems={privateMenuItems}
                   publicMenuItems={publicMenuItems}
-                  logoSrc={logo6TownHouses}
                 />
               }
             >
@@ -117,8 +112,6 @@ function App() {
               <Route path="/payloads" element={<Payloads />} />
               <Route path="/my-property" element={<MyProperty />} />
               <Route path="/family-groups" element={<FamilyGroup />} />
-
-              {/* Agrega aquí el resto de tus rutas privadas */}
             </Route>
           </Route>
 

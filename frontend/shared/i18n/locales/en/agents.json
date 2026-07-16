@@ -19,7 +19,14 @@
     "leads": "Leads",
     "activities": "Activities",
     "clients": "Clients",
-    "actions": "Actions"
+    "target": "Monthly Target",
+    "actions": "Actions",
+    "converted": "converted",
+    "thisMonth": "this month",
+    "ofTotal": "of {{total}} total",
+    "viewMetrics": "View detailed metrics",
+    "setTarget": "Set monthly target",
+    "noTarget": "No target"
   },
   
   "empty": {
@@ -51,6 +58,28 @@
     
     "contactInfo": {
       "title": "Contact Information"
+    },
+
+    "progress": {
+      "title": "Monthly Progress vs Target",
+      "subtitle": "Current month objectives comparison",
+      "metrics": {
+        "leads": "Leads",
+        "conversions": "Conversions",
+        "appointments": "Appointments",
+        "smsCount": "SMS"
+      },
+      "noTargets": "No targets configured for this month",
+      "setTargetsHint": "Set agent targets to see progress",
+      "completed": "Completed",
+      "ofTarget": "of {{target}}",
+      "exceeded": "Target exceeded!",
+      "legend": {
+        "behind": "Behind (<50%)",
+        "progress": "In progress (50-80%)",
+        "good": "Good progress (80-100%)",
+        "exceeded": "Exceeded (>100%)"
+      }
     }
   },
   
@@ -63,5 +92,51 @@
       "vendido": "Sold",
       "perdido": "Lost"
     }
+  },
+
+  "targets": {
+    "title": "Set Monthly Target",
+    "subtitle": "Set monthly objectives for the agent",
+    "month": "Month",
+    "year": "Year",
+    "currentProgress": "Current Progress",
+    "setTargets": "Set Targets",
+    "leads": "Leads generated",
+    "leadsHelper": "Total leads assigned to the agent",
+    "conversions": "Conversions",
+    "conversionsHelper": "Leads converted to clients",
+    "appointments": "Appointments scheduled",
+    "appointmentsHelper": "Total scheduled appointments",
+    "smsCount": "SMS sent",
+    "smsCountHelper": "Total SMS sent",
+    "cancel": "Cancel",
+    "save": "Save targets",
+    "saving": "Saving...",
+    "savedSuccess": "Targets saved successfully!",
+    "validation": {
+      "atLeastOne": "You must set at least one target",
+      "saveError": "Error saving targets"
+    },
+    "metrics": {
+      "leads": "Leads",
+      "conversions": "Conversions",
+      "appointments": "Appointments",
+      "smsCount": "SMS"
+    }
+  },
+
+  "months": {
+    "1": "January",
+    "2": "February",
+    "3": "March",
+    "4": "April",
+    "5": "May",
+    "6": "June",
+    "7": "July",
+    "8": "August",
+    "9": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December"
   }
 }

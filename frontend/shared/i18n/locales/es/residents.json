@@ -1,44 +1,14 @@
 {
   "title": "Residentes",
   "subtitle": "Gestiona las cuentas e información de los residentes",
-  "stats": {
-    "total": "Usuarios Totales",
-    "superadmins": "Super Administradores",
-    "admins": "Administradores",
-    "residents": "Residentes"
+  
+  "tabs": {
+    "overview": "Overview",
+    "payments": "Pagos",
+    "activities": "Actividades",
+    "notes": "Notas",
+    "history": "Historial"
   },
-  "table": {
-    "name": "NOMBRE",
-    "email": "CORREO",
-    "phone": "TELÉFONO",
-    "role": "ROL",
-    "properties": "PROPIEDADES",
-    "actions": "ACCIONES"
-  },
-  "role": {
-    "superadmin": "Super Administrador",
-    "admin": "Administrador",
-    "user": "Residente",
-    "owner": "Owner"
-  },
-  "actions": {
-    "add": "Agregar Usuario",
-    "edit": "Editar",
-    "delete": "Eliminar",
-    "sendSMS": "Enviar SMS para configurar contraseña"
-  },
-  "empty": {
-    "title": "Aún no hay residentes",
-    "description": "Comienza invitando a tu primer residente",
-    "action": "Agregar Primer Residente"
-  },
-  "snackbar": {
-    "smsSent": "SMS de configuración de contraseña enviado exitosamente a {{phone}}",
-    "smsUnavailable": "Servicio de SMS no disponible. ¡Enlace copiado al portapapeles!",
-    "noPhone": "El usuario no tiene un número de teléfono registrado",
-    "smsError": "No se pudo enviar el SMS de configuración de contraseña"
-  },
-  "confirmDelete": "¿Seguro que deseas eliminar este usuario?",
 
   "clients": {
     "title": "Clientes",
@@ -64,10 +34,60 @@
     "activeStatus": "Activo",
     "inactiveStatus": "Inactivo",
     "confirmDelete": "¿Eliminar {{name}}?",
-    "projects":"Proyectos"
+    "projects": "Proyectos",
+    "scheduleAppointment": "Agendar cita",
+    "notFound": "Cliente no encontrado",
+    "errorLoading": "Error al cargar cliente",
+        "sendMessage": "Enviar Mensaje",
+    "exportClients": "Exportar Clientes"
   },
 
-    "dialog": {
+  "stats": {
+    "total": "Usuarios Totales",
+    "superadmins": "Super Administradores",
+    "admins": "Administradores",
+    "residents": "Residentes"
+  },
+
+  "table": {
+    "name": "NOMBRE",
+    "email": "CORREO",
+    "phone": "TELÉFONO",
+    "role": "ROL",
+    "properties": "PROPIEDADES",
+    "actions": "ACCIONES"
+  },
+
+  "role": {
+    "superadmin": "Super Administrador",
+    "admin": "Administrador",
+    "user": "Residente",
+    "owner": "Owner"
+  },
+
+  "actions": {
+    "add": "Agregar Usuario",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "sendSMS": "Enviar SMS para configurar contraseña"
+  },
+
+  "empty": {
+    "title": "Aún no hay residentes",
+    "description": "Comienza invitando a tu primer residente",
+    "action": "Agregar Primer Residente"
+  },
+
+  "snackbar": {
+    "smsSent": "SMS de configuración de contraseña enviado exitosamente a {{phone}}",
+    "smsUnavailable": "Servicio de SMS no disponible. ¡Enlace copiado al portapapeles!",
+    "noPhone": "El usuario no tiene un número de teléfono registrado",
+    "smsError": "No se pudo enviar el SMS de configuración de contraseña"
+  },
+
+  "confirmDelete": "¿Seguro que deseas eliminar este usuario?",
+
+  "dialog": {
     "editUser": "Editar Residente",
     "inviteNewUser": "Invitar Nuevo Residente",
     "invitationMessage": "Invita a un nuevo residente completando el formulario a continuación. Recibirán un correo electrónico/SMS para configurar su contraseña.",
@@ -85,9 +105,187 @@
       "superadmin": "Super Administrador",
       "owner": "Owner"
     },
-        "cancel": "Cancelar",
+    "cancel": "Cancelar",
     "save": "Guardar",
     "sendInvitation": "Enviar Invitación",
     "update": "Actualizar Residente"
+  },
+
+  "overview": {
+    "personalInfo": "Información Personal",
+    "relatedProjects": "Proyectos Relacionados",
+    "project": "Proyecto {{number}}",
+    "totalProperties": "Total Propiedades",
+    "totalValue": "Valor Total",
+    "paid": "Pagado",
+    "pending": "Pendiente",
+    "properties": "Propiedades",
+    "noProperties": "No tiene propiedades asignadas",
+    "property": "propiedad",
+    "propertiesPlural": "propiedades",
+    "apartment": "Apto {{number}}",
+    "lot": "Lote {{number}}",
+    "floor": "Piso {{number}}",
+    "sold": "Vendido",
+    "pendingStatus": "Pendiente",
+    "price": "Precio",
+    "pendingAmount": "Pendiente",
+    "paidAmount": "Pagado",
+    "paymentProgress": "Progreso de pago"
+  },
+
+  "payments": {
+    "title": "Pagos",
+    "filterStatus": "Estado",
+    "all": "Todos",
+    "statusPending": "Pendiente",
+    "statusSigned": "Firmado",
+    "statusRejected": "Rechazado",
+    "paymentsCount": "pago",
+    "paymentsCountPlural": "pagos",
+    "empty": {
+      "title": "Sin pagos",
+      "description": "Este cliente no tiene pagos registrados"
+    },
+    "showing": "Mostrando",
+    "of": "de",
+    "rowsPerPage": "Filas por página",
+    "project": "Proyecto",
+    "unit": "Unidad",
+    "type": "Tipo",
+    "typeInitialDownPayment": "Cuota inicial",
+    "typeComplementaryDownPayment": "Cuota complementaria",
+    "typeMonthlyPayment": "Cuota mensual",
+    "typeFinalPayment": "Cuota final",
+    "typeDefault": "Pago",
+    "amount": "Monto",
+    "date": "Fecha",
+    "dueDate": "Vencimiento",
+    "overdue": "Vencido",
+    "status": "Estado",
+    "notes": "Notas"
+  },
+
+  "timeline": {
+    "title": "Historial de Actividades",
+    "noActivities": "No hay actividades registradas",
+    "noTitle": "Sin título",
+    "assignedTo": "Asignado",
+    "createdBy": "Creado por",
+    "priority": {
+      "high": "Alta",
+      "medium": "Media",
+      "low": "Baja"
+    },
+    "activityTypes": {
+      "payment": "Pago",
+      "document": "Documento",
+      "note": "Nota",
+      "appointment": "Cita",
+      "sms": "SMS",
+      "email": "Email",
+      "automation": "Automatización"
+    }
+  },
+
+  "notes": {
+    "title": "Notas",
+    "addNote": "Agregar Nota",
+    "addNew": "Agregar nueva nota",
+    "placeholder": "Escribe aquí la nota interna...",
+    "save": "Guardar nota",
+    "saving": "Guardando...",
+    "clear": "Limpiar",
+    "noNotes": "No hay notas",
+    "noNotesRegistered": "No hay notas registradas",
+    "noTitle": "Sin título",
+    "history": "Historial de notas",
+    "success": "Nota agregada exitosamente",
+    "error": "Error al agregar nota",
+    "noteTitle": "Título (opcional)",
+    "content": "Contenido de la nota",
+    "project": "Proyecto (opcional)",
+    "noProject": "Sin proyecto",
+    "delete": "Eliminar",
+    "confirmDelete": "¿Eliminar esta nota?",
+    "assignedTo": "Asignado",
+    "createdBy": "Creado por",
+    "column": "Columna"
+  },
+
+"audit": {
+  "title": "Auditoría",
+  "titleBold": "Sistema",
+  "topbarLabel": "Registro de actividad",
+  "subtitle": "Registro global de actividad del sistema",
+  "globalSubtitle": "Registro global de actividad del sistema",
+  "errorLoading": "Error al cargar el audit log",
+  
+  "accessDeniedTitle": "Acceso denegado",
+  "accessDeniedMessage": "Solo los super administradores pueden acceder al audit log del sistema.",
+  
+  "historyTitle": "Historial de cambios",
+  "refresh": "Actualizar",
+  "filters": "Filtros",
+  "filterAction": "Acción",
+  "allActions": "Todas",
+  "allEntities": "Todas",
+  "dateFrom": "Desde",
+  "dateTo": "Hasta",
+  "clearFilters": "Limpiar",
+  "applyFilters": "Aplicar",
+  "noLogs": "No hay registros de actividad",
+  "showing": "Mostrando",
+  "of": "de",
+  "entries": "registros",
+  "entityLabel": "Entidad",
+  "user": "Usuario",
+  "action": "Acción",
+  "entity": "Entidad",
+  "changes": "Cambios",
+  "timestamp": "Fecha",
+  "detailsTitle": "Detalles del cambio",
+  "ip": "IP",
+  "date": "Fecha",
+  "modifiedFields": "Campos modificados",
+  "before": "Antes",
+  "after": "Después",
+  "fullData": "Datos completos (JSON)",
+  "noChanges": "Sin cambios",
+  "system": "Sistema",
+  "clickToSeeDetails": "Click para ver detalles",
+  
+  "totalRecords": "registros totales",
+  "pages": "páginas",
+  "activeFilters": "filtros activos",
+  "page": "Página",
+  
+  "entityId": "ID de entidad",
+  "entityIdPlaceholder": "Ej: 69a73ce5b20401b061da6451",
+  "userId": "ID de usuario",
+  "userIdPlaceholder": "Ej: 695ec1a01b94d9903358a0db",
+  
+  "entities": {
+    "Lead": "Lead",
+    "Client": "Cliente",
+    "Activity": "Actividad",
+    "Appointment": "Cita",
+    "Campaign": "Campaña"
+  },
+  
+  "time": {
+    "now": "Ahora",
+    "minutesAgo": "Hace {{count}}m",
+    "hoursAgo": "Hace {{count}}h",
+    "daysAgo": "Hace {{count}}d"
+  },
+  "actions": {
+    "created": "Creado",
+    "updated": "Actualizado",
+    "deleted": "Eliminado",
+    "stage_changed": "Cambio de etapa",
+    "sms_sent": "SMS enviado",
+    "login": "Login"
   }
+}
 }

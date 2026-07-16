@@ -1,0 +1,94 @@
+{
+  "title": "Documents",
+  "titleBold": "Management",
+  "topbarLabel": "Document Center",
+  "subtitle": "Manage contracts, deeds, insurance, and more",
+  "searchPlaceholder": "Search by title or tags...",
+  "uploadDocument": "Upload Document",
+  "empty": "No documents found",
+
+  "filters": {
+    "category": "Category",
+    "allCategories": "All categories",
+    "project": "Project",
+    "allProjects": "All projects",
+    "clients": "Clients",
+    "allClients": "All clients"
+  },
+
+  "status": {
+    "valid": "Valid",
+    "expiringSoon": "Expiring soon",
+    "expired": "Expired",
+    "archived": "Archived"
+  },
+
+  "categories": {
+    "contract": "Contract",
+    "id_document": "ID Document",
+    "deed": "Deed",
+    "appraisal": "Appraisal",
+    "receipt": "Receipt",
+    "insurance": "Insurance",
+    "permit": "Permit",
+    "blueprint": "Blueprint",
+    "other": "Other"
+  },
+
+  "form": {
+    "title": "Document title",
+    "titlePlaceholder": "E.g., Purchase agreement",
+    "category": "Category",
+    "project": "Project",
+    "tags": "Tags",
+    "tagsPlaceholder": "signed, original, 2024",
+    "tagsHelper": "Comma separated",
+    "expiresAt": "Expiration date",
+    "expiresAtHelper": "For documents with expiration (insurance, permits)"
+  },
+
+  "upload": {
+    "title": "Upload New Document",
+    "dragDrop": "Drag files here or click to select",
+    "filesSelected": "file(s) selected",
+    "linkToPerson": "Link to person",
+    "none": "None",
+    "lead": "Lead",
+    "client": "Client",
+    "selectLead": "Select Lead",
+    "noLead": "No lead",
+    "selectClient": "Select Client",
+    "noClient": "No client",
+    "linkToResource": "Link to",
+    "clientResource": "'s resource",
+    "unspecified": "Unspecified",
+    "noResourcesFound": "No resources found for this client in this project",
+    "noResourcesAssigned": "The client has no resources assigned in this project.",
+    "uploading": "Uploading..."
+  },
+
+  "actions": {
+    "preview": "Preview",
+    "history": "History",
+    "archive": "Archive",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "close": "Close",
+    "download": "Download",
+    "openInNewTab": "Open in new tab",
+    "newVersion": "New Version"
+  },
+
+  "viewer": {
+    "defaultTitle": "Document",
+    "errorLoading": "Error loading preview",
+    "noPreviewAvailable": "Preview not available for this file type",
+    "noFileAvailable": "No file available to preview"
+  },
+
+  "history": {
+    "title": "Version History",
+    "version": "Version",
+    "uploadedBy": "Uploaded by"
+  }
+}

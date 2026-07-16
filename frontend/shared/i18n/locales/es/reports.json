@@ -5,7 +5,7 @@
   "exportButton": "Exportar",
   "exporting": "Exportando...",
   "exportFormat": "Exportar {{format}}",
-  "requiredFieldsNote": "Campos obligatorios marcados con *",
+  "requiredFieldsNote": "Los campos obligatorios están marcados con *",
   
   "formatSelector": {
     "title": "Formato de exportación",
@@ -14,11 +14,11 @@
   
   "validation": {
     "required": "{{field}} es obligatorio",
-    "requiredShort": "Requerido"
+    "requiredShort": "Obligatorio"
   },
   
   "success": {
-    "exported": "✅ Exportado a {{format}} exitosamente"
+    "exported": "✅ Exportado exitosamente a {{format}}"
   },
   
   "errors": {
@@ -33,7 +33,7 @@
   
   "clients": {
     "title": "Reporte de Clientes",
-    "description": "Exporta la lista completa de clientes con sus datos de contacto",
+    "description": "Exporta la lista completa de clientes con su información de contacto",
     "exportButton": "Exportar Clientes",
     "filters": {
       "project": "Filtrar por proyecto"
@@ -54,16 +54,16 @@
   
   "leads": {
     "title": "Reporte de Leads",
-    "description": "Exporta leads filtrados por stage, agente o proyecto",
+    "description": "Exporta leads filtrados por etapa, agente o proyecto",
     "exportButton": "Exportar Leads",
     "filters": {
       "fromDate": "Desde",
       "toDate": "Hasta",
       "project": "Proyecto",
-      "stage": "Stage",
-      "assignedTo": "Agente asignado",
-      "allStages": "Todos los stages",
-      "allAgents": "Todos los agentes"
+      "stage": "Etapa",
+      "assignedTo": "Asesor asignado",
+      "allStages": "Todas las etapas",
+      "allAgents": "Todos los asesores"
     },
     "stages": {
       "nuevo": "Nuevo",
@@ -72,6 +72,76 @@
       "propuesta": "Propuesta",
       "vendido": "Vendido",
       "perdido": "Perdido"
+    }
+  },
+  
+  "appointments": {
+    "title": "Reporte de Citas",
+    "description": "Exporta citas programadas y completadas",
+    "exportButton": "Exportar Citas",
+    "filters": {
+      "dateFrom": "Desde",
+      "dateTo": "Hasta",
+      "project": "Proyecto",
+      "agent": "Agente",
+      "status": "Estado",
+      "allStatuses": "Todos los estados"
+    },
+    "statuses": {
+      "pendiente": "Pendiente",
+      "confirmada": "Confirmada",
+      "completada": "Completada",
+      "cancelada": "Cancelada"
+    }
+  },
+  
+  "activities": {
+    "title": "Reporte de Actividades",
+    "description": "Exporta actividades y tareas del equipo",
+    "exportButton": "Exportar Actividades",
+    "filters": {
+      "dateFrom": "Desde",
+      "dateTo": "Hasta",
+      "project": "Proyecto",
+      "agent": "Agente",
+      "type": "Tipo",
+      "allTypes": "Todos los tipos"
+    }
+  },
+  
+  "campaigns": {
+    "title": "Reporte de Campañas",
+    "description": "Exporta campañas de marketing y sus resultados",
+    "exportButton": "Exportar Campañas",
+    "filters": {
+      "dateFrom": "Desde",
+      "dateTo": "Hasta",
+      "project": "Proyecto",
+      "status": "Estado",
+      "allStatuses": "Todos los estados"
+    },
+    "statuses": {
+      "borrador": "Borrador",
+      "programada": "Programada",
+      "enviando": "Enviando",
+      "completada": "Completada",
+      "fallida": "Fallida"
+    }
+  },
+  
+  "audit": {
+    "title": "Reporte de Auditoría",
+    "description": "Exporta el registro de actividad del sistema",
+    "exportButton": "Exportar Auditoría",
+    "filters": {
+      "dateFrom": "Desde",
+      "dateTo": "Hasta",
+      "entity": "Entidad",
+      "action": "Acción",
+      "user": "Usuario",
+      "allEntities": "Todas las entidades",
+      "allActions": "Todas las acciones",
+      "allUsers": "Todos los usuarios"
     }
   }
 }

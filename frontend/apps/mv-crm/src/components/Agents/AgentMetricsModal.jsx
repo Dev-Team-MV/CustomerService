@@ -1,5 +1,5 @@
-// apps/mv-crm/src/components/agents/AgentMetricsModal.jsx
-import { useState, useEffect } from 'react'
+// apps/mv-crm/src/components/Agents/AgentMetricsModal.jsx
+import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -12,7 +12,9 @@ import {
   Chip,
   Divider,
   LinearProgress,
-  CircularProgress
+  CircularProgress,
+  Paper,
+  Tooltip
 } from '@mui/material'
 import {
   Close,
@@ -22,14 +24,292 @@ import {
   CheckCircle,
   Email,
   Phone,
-  CalendarMonth
+  CalendarMonth,
+  Flag,
+  Warning
 } from '@mui/icons-material'
 import crmAgentsService from '../../services/crmAgentsService'
 import { LEAD_STAGES, STAGE_COLORS } from '../../services/leadService'
 
+// ═══════════════════════════════════════════════════════════════
+// COMPONENTE: Gráfica de progreso mensual
+// ═══════════════════════════════════════════════════════════════
+
+const ProgressChart = ({ targets, t }) => {
+  // Métricas a mostrar en la gráfica
+  const metrics = useMemo(() => {
+    if (!targets?.targets) return []
+    
+    const metricKeys = ['leads', 'conversions', 'appointments', 'smsCount']
+    
+    return metricKeys
+      .map(key => {
+        const target = targets.targets[key] || 0
+        const progress = targets.progress?.[key] || 0
+        const completion = targets.completion?.[key] || 0
+        
+        return {
+          key,
+          label: t(`metrics.progress.metrics.${key}`, key),
+          target,
+          progress,
+          completion,
+          percent: target > 0 ? (progress / target) * 100 : 0
+        }
+      })
+      .filter(m => m.target > 0) // Solo mostrar métricas con meta configurada
+  }, [targets, t])
+
+  // Determinar color según el porcentaje
+  const getBarColor = (percent) => {
+    if (percent >= 100) return '#4caf50' // verde - superada
+    if (percent >= 80) return '#2196f3' // azul - buen progreso
+    if (percent >= 50) return '#ff9800' // naranja - en progreso
+    return '#f44336' // rojo - por debajo
+  }
+
+  // Determinar estado
+  const getStatus = (percent) => {
+    if (percent >= 100) return { color: '#4caf50', label: t('metrics.progress.exceeded') }
+    if (percent >= 80) return { color: '#2196f3', label: `${percent.toFixed(0)}%` }
+    if (percent >= 50) return { color: '#ff9800', label: `${percent.toFixed(0)}%` }
+    return { color: '#f44336', label: `${percent.toFixed(0)}%` }
+  }
+
+  if (metrics.length === 0) {
+    return (
+      <Paper
+        elevation={0}
+        sx={{
+          p: 3,
+          bgcolor: '#fafafa',
+          border: '1px dashed #ccc',
+          borderRadius: 1,
+          textAlign: 'center'
+        }}
+      >
+        <Flag sx={{ fontSize: 32, color: '#ccc', mb: 1 }} />
+        <Typography
+          sx={{
+            fontFamily: '"Courier New", monospace',
+            fontSize: '0.75rem',
+            color: '#888'
+          }}
+        >
+          {t('metrics.progress.noTargets')}
+        </Typography>
+        <Typography
+          variant="caption"
+          sx={{ color: '#aaa', display: 'block', mt: 0.5 }}
+        >
+          {t('metrics.progress.setTargetsHint')}
+        </Typography>
+      </Paper>
+    )
+  }
+
+  // Calcular el valor máximo para escalar las barras
+  const maxValue = Math.max(...metrics.map(m => Math.max(m.target, m.progress)), 1)
+
+  return (
+    <Box>
+      {/* Título */}
+      <Box display="flex" alignItems="center" gap={1} mb={2}>
+        <TrendingUp sx={{ fontSize: 20, color: '#1976d2' }} />
+        <Box>
+          <Typography
+            sx={{
+              fontFamily: '"Courier New", monospace',
+              fontSize: '0.7rem',
+              color: '#888',
+              letterSpacing: '1.5px',
+              textTransform: 'uppercase',
+              fontWeight: 700
+            }}
+          >
+            {t('metrics.progress.title')}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {t('metrics.progress.subtitle')}
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Gráfica de barras */}
+      <Box
+        sx={{
+          p: 2,
+          bgcolor: '#fafafa',
+          border: '1px solid #e0e0e0',
+          borderRadius: 1
+        }}
+      >
+        {metrics.map((metric) => {
+          const barColor = getBarColor(metric.percent)
+          const status = getStatus(metric.percent)
+          const progressWidth = (metric.progress / maxValue) * 100
+          const targetWidth = (metric.target / maxValue) * 100
+          
+          return (
+            <Box key={metric.key} sx={{ mb: 2.5, '&:last-child': { mb: 0 } }}>
+              {/* Header de la métrica */}
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Flag sx={{ fontSize: 14, color: barColor }} />
+                  <Typography
+                    sx={{
+                      fontFamily: '"Helvetica Neue", sans-serif',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      color: '#000'
+                    }}
+                  >
+                    {metric.label}
+                  </Typography>
+                </Box>
+                <Chip
+                  label={status.label}
+                  size="small"
+                  sx={{
+                    bgcolor: `${status.color}15`,
+                    color: status.color,
+                    fontWeight: 700,
+                    fontSize: '0.7rem',
+                    height: 22
+                  }}
+                />
+              </Box>
+
+              {/* Barras superpuestas */}
+              <Box sx={{ position: 'relative', height: 24, mb: 0.5 }}>
+                {/* Barra de fondo (meta) */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    height: '100%',
+                    width: `${targetWidth}%`,
+                    bgcolor: '#e0e0e0',
+                    borderRadius: 1,
+                    border: '1px dashed #bdbdbd'
+                  }}
+                />
+                
+                {/* Barra de progreso */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    height: '100%',
+                    width: `${Math.min(progressWidth, 100)}%`,
+                    bgcolor: barColor,
+                    borderRadius: 1,
+                    transition: 'width 0.5s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    pr: 1,
+                    overflow: 'hidden'
+                  }}
+                >
+                  {progressWidth > 15 && (
+                    <Typography
+                      sx={{
+                        color: '#fff',
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        fontFamily: '"Courier New", monospace'
+                      }}
+                    >
+                      {metric.progress}
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+
+              {/* Labels */}
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontFamily: '"Courier New", monospace',
+                    fontSize: '0.65rem',
+                    color: '#666'
+                  }}
+                >
+                  {t('metrics.progress.completed')}: <strong>{metric.progress}</strong>
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontFamily: '"Courier New", monospace',
+                    fontSize: '0.65rem',
+                    color: '#888'
+                  }}
+                >
+                  {t('metrics.progress.ofTarget', { target: metric.target })}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        })}
+      </Box>
+
+      {/* Leyenda */}
+      <Box
+        sx={{
+          mt: 2,
+          p: 1.5,
+          bgcolor: '#fff',
+          border: '1px solid #e0e0e0',
+          borderRadius: 1,
+          display: 'flex',
+          gap: 2,
+          flexWrap: 'wrap',
+          justifyContent: 'center'
+        }}
+      >
+        {[
+          { color: '#f44336', label: t('metrics.progress.legend.behind') },
+          { color: '#ff9800', label: t('metrics.progress.legend.progress') },
+          { color: '#2196f3', label: t('metrics.progress.legend.good') },
+          { color: '#4caf50', label: t('metrics.progress.legend.exceeded') }
+        ].map(item => (
+          <Box key={item.color} display="flex" alignItems="center" gap={0.5}>
+            <Box
+              sx={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                bgcolor: item.color
+              }}
+            />
+            <Typography
+              sx={{
+                fontFamily: '"Courier New", monospace',
+                fontSize: '0.6rem',
+                color: '#666'
+              }}
+            >
+              {item.label}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COMPONENTE PRINCIPAL
+// ═══════════════════════════════════════════════════════════════
+
 const AgentMetricsModal = ({ open, onClose, agent }) => {
   const { t } = useTranslation('agents')
   const [metrics, setMetrics] = useState(null)
+  const [targets, setTargets] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -43,8 +323,13 @@ const AgentMetricsModal = ({ open, onClose, agent }) => {
     setLoading(true)
     setError(null)
     try {
-      const data = await crmAgentsService.getMetrics(agent._id)
-      setMetrics(data)
+      // Cargar métricas y targets en paralelo
+      const [metricsData, targetsData] = await Promise.all([
+        crmAgentsService.getMetrics(agent._id),
+        crmAgentsService.getTargets(agent._id)
+      ])
+      setMetrics(metricsData)
+      setTargets(targetsData)
     } catch (err) {
       setError(err.response?.data?.message || t('metrics.errorLoading'))
     } finally {
@@ -189,9 +474,7 @@ const AgentMetricsModal = ({ open, onClose, agent }) => {
             </Box>
           ) : metrics ? (
             <>
-              {/* ═══════════════════════════════════════════════════════
-                  KPIs PRINCIPALES
-                  ═══════════════════════════════════════════════════════ */}
+              {/* KPIs PRINCIPALES */}
               <Box
                 sx={{
                   display: 'grid',
@@ -201,14 +484,7 @@ const AgentMetricsModal = ({ open, onClose, agent }) => {
                 }}
               >
                 {/* Total Leads */}
-                <Box
-                  sx={{
-                    p: 2,
-                    bgcolor: '#fff3e0',
-                    border: '1px solid #ffe0b2',
-                    borderRadius: 1
-                  }}
-                >
+                <Box sx={{ p: 2, bgcolor: '#fff3e0', border: '1px solid #ffe0b2', borderRadius: 1 }}>
                   <Box display="flex" alignItems="center" gap={1} mb={1}>
                     <TrendingUp sx={{ fontSize: 18, color: '#f57c00' }} />
                     <Typography
@@ -238,14 +514,7 @@ const AgentMetricsModal = ({ open, onClose, agent }) => {
                 </Box>
 
                 {/* Leads Convertidos */}
-                <Box
-                  sx={{
-                    p: 2,
-                    bgcolor: '#e8f5e9',
-                    border: '1px solid #c8e6c9',
-                    borderRadius: 1
-                  }}
-                >
+                <Box sx={{ p: 2, bgcolor: '#e8f5e9', border: '1px solid #c8e6c9', borderRadius: 1 }}>
                   <Box display="flex" alignItems="center" gap={1} mb={1}>
                     <CheckCircle sx={{ fontSize: 18, color: '#2e7d32' }} />
                     <Typography
@@ -286,14 +555,7 @@ const AgentMetricsModal = ({ open, onClose, agent }) => {
                 </Box>
 
                 {/* Actividades del mes */}
-                <Box
-                  sx={{
-                    p: 2,
-                    bgcolor: '#e3f2fd',
-                    border: '1px solid #bbdefb',
-                    borderRadius: 1
-                  }}
-                >
+                <Box sx={{ p: 2, bgcolor: '#e3f2fd', border: '1px solid #bbdefb', borderRadius: 1 }}>
                   <Box display="flex" alignItems="center" gap={1} mb={1}>
                     <Assignment sx={{ fontSize: 18, color: '#1976d2' }} />
                     <Typography
@@ -334,14 +596,7 @@ const AgentMetricsModal = ({ open, onClose, agent }) => {
                 </Box>
 
                 {/* Clientes atendidos */}
-                <Box
-                  sx={{
-                    p: 2,
-                    bgcolor: '#f3e5f5',
-                    border: '1px solid #e1bee7',
-                    borderRadius: 1
-                  }}
-                >
+                <Box sx={{ p: 2, bgcolor: '#f3e5f5', border: '1px solid #e1bee7', borderRadius: 1 }}>
                   <Box display="flex" alignItems="center" gap={1} mb={1}>
                     <People sx={{ fontSize: 18, color: '#7b1fa2' }} />
                     <Typography
@@ -384,9 +639,14 @@ const AgentMetricsModal = ({ open, onClose, agent }) => {
 
               <Divider sx={{ my: 3 }} />
 
-              {/* ═══════════════════════════════════════════════════════
-                  PIPELINE DE LEADS POR STAGE
-                  ═══════════════════════════════════════════════════════ */}
+              {/* ✅ NUEVA SECCIÓN: Gráfica de progreso mensual vs meta */}
+              <Box mb={3}>
+                <ProgressChart targets={targets} t={t} />
+              </Box>
+
+              <Divider sx={{ my: 3 }} />
+
+              {/* PIPELINE DE LEADS POR STAGE */}
               <Box mb={3}>
                 <Typography
                   sx={{
@@ -467,9 +727,7 @@ const AgentMetricsModal = ({ open, onClose, agent }) => {
 
               <Divider sx={{ my: 3 }} />
 
-              {/* ═══════════════════════════════════════════════════════
-                  INFORMACIÓN DE CONTACTO
-                  ═══════════════════════════════════════════════════════ */}
+              {/* INFORMACIÓN DE CONTACTO */}
               <Box>
                 <Typography
                   sx={{

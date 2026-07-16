@@ -37,7 +37,7 @@ export const privateMenuItems = [
         roles: ["superadmin", "admin"],
     },
     {
-        textKey: "navigation:menu.myapartment",
+        textKey: "navigation:menu.myApartment",
         icon: MeetingRoomIcon,
         path: "/my-apartment",
         roles: ["superadmin", "admin", "user"],

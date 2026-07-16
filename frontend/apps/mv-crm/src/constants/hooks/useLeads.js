@@ -119,9 +119,10 @@ export const useLeads = () => {
     }
   }
 
-  const convertToCustomer = async (id) => {
+  const convertToCustomer = async (id, conversionData = {}) => {
     try {
-      const result = await leadService.convertToCustomer(id)
+      // ✅ Pasamos el conversionData al servicio
+      const result = await leadService.convertToCustomer(id, conversionData)
       setLeads(prev => prev.filter(l => l._id !== id))
       return result
     } catch (err) {

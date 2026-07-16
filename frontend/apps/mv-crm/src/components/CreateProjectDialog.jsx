@@ -1,12 +1,16 @@
+// apps/mv-crm/src/components/projects/CreateProjectDialog.jsx
 import { useState, useEffect } from 'react'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, Box, Typography,
   Tabs, Tab, Divider, Grid, Chip, IconButton, Stack, Paper
 } from '@mui/material'
-import { AddPhotoAlternate, Delete, Add, Save, Cancel, CropSquare, LocationOn } from '@mui/icons-material'
+import { AddPhotoAlternate, Delete, Add, Save, Cancel, CropSquare, LocationOn, Palette } from '@mui/icons-material'
 import projectService from '@shared/services/projectService'
 import uploadService from '@shared/services/uploadService'
 import { useTranslation } from 'react-i18next'
+
+// ✅ NUEVO: Import del gestor de variables
+import ProjectVariablesManager from '@shared/components/ProjectVariablesManager'
 
 const PROJECT_TYPES = [
   { value: 'residential_lots', label: 'Residential Lots' },
@@ -44,9 +48,37 @@ const GalleryThumb = ({ url, onRemove }) => (
   </Box>
 )
 
+const ColorChip = ({ color, onRemove }) => (
+  <Chip
+    label={`${color.key}: ${color.value}`}
+    onDelete={onRemove}
+    sx={{
+      bgcolor: 'rgba(0,0,0,0.08)',
+      fontWeight: 600,
+      '& .MuiChip-label': {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1
+      }
+    }}
+    avatar={
+      <Box
+        sx={{
+          width: 24,
+          height: 24,
+          borderRadius: '50%',
+          bgcolor: color.value,
+          border: '2px solid rgba(0,0,0,0.1)',
+          ml: 0.5
+        }}
+      />
+    }
+  />
+)
+
 export default function CreateProjectDialog({ open, onClose, onCreated, initialData = null, editMode = false }) {
   const [langTab, setLangTab] = useState('en')
-    const { t } = useTranslation('project')
+  const { t } = useTranslation('project')
 
   const [form, setForm] = useState({
     name: '',
@@ -61,6 +93,8 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
     fullDescription: { en: '', es: '' },
     features: { en: [], es: [] },
     image: '',
+    logo: '',
+    brandColors: [],
     gallery: [],
     externalUrl: '',
     location: '',
@@ -68,11 +102,13 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
     videos: [],
   })
   const [featureInput, setFeatureInput] = useState('')
+  const [colorInput, setColorInput] = useState('')
   const [mainImage, setMainImage] = useState('')
+  const [logo, setLogo] = useState('')
   const [gallery, setGallery] = useState([])
   const [videos, setVideos] = useState([])
   const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (initialData) {
@@ -92,6 +128,8 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
           es: initialData.features?.es || [],
         },
         image: initialData.image || '',
+        logo: initialData.logo || '',
+        brandColors: Array.isArray(initialData.brandColors) ? initialData.brandColors : [],
         gallery: initialData.gallery || [],
         externalUrl: initialData.externalUrl || '',
         location: initialData.location || '',
@@ -99,6 +137,7 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
         videos: initialData.videos || [],
       })
       setMainImage(initialData.image || '')
+      setLogo(initialData.logo || '')
       setGallery(initialData.gallery || [])
       setVideos(initialData.videos || [])
     } else {
@@ -115,6 +154,8 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
         fullDescription: { en: '', es: '' },
         features: { en: [], es: [] },
         image: '',
+        logo: '',
+        brandColors: [],
         gallery: [],
         externalUrl: '',
         location: '',
@@ -122,11 +163,13 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
         videos: [],
       })
       setMainImage('')
+      setLogo('')
       setGallery([])
       setVideos([])
     }
     setLangTab('en')
     setFeatureInput('')
+    setColorInput('')
     setError('')
   }, [initialData, open])
 
@@ -136,7 +179,6 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
     [field]: { ...prev[field], [lang]: value }
   }))
 
-  // Features
   const handleAddFeature = () => {
     if (featureInput.trim()) {
       handleLangChange('features', langTab, [...form.features[langTab], featureInput.trim()])
@@ -154,7 +196,6 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
     handleLangChange('features', langTab, newArr)
   }
 
-  // Main image
   const handleImageUpload = async (e) => {
     if (e.target.files?.[0]) {
       setLoading(true)
@@ -173,7 +214,56 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
     handleChange('image', '')
   }
 
-  // Gallery
+  const handleLogoUpload = async (e) => {
+    if (e.target.files?.[0]) {
+      setLoading(true)
+      try {
+        const url = await uploadService.uploadImage(e.target.files[0], 'projects/logos')
+        setLogo(url)
+        handleChange('logo', url)
+      } catch {
+        setError('Error uploading logo')
+      }
+      setLoading(false)
+    }
+  }
+  const handleLogoRemove = () => {
+    setLogo('')
+    handleChange('logo', '')
+  }
+
+  const handleAddColor = () => {
+    if (!colorInput.trim()) return
+    
+    let key, value
+    if (colorInput.includes(':')) {
+      const parts = colorInput.split(':').map(s => s.trim())
+      key = parts[0]
+      value = parts[1]
+    } else {
+      key = `color-${form.brandColors.length + 1}`
+      value = colorInput.trim()
+    }
+    
+    if (!value.startsWith('#') && !value.startsWith('rgb')) {
+      value = `#${value}`
+    }
+    
+    const newColor = { key, value }
+    handleChange('brandColors', [...form.brandColors, newColor])
+    setColorInput('')
+  }
+  const handleColorKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleAddColor()
+    }
+  }
+  const handleRemoveColor = idx => {
+    const newArr = form.brandColors.filter((_, i) => i !== idx)
+    handleChange('brandColors', newArr)
+  }
+
   const handleGalleryUpload = async (e) => {
     if (e.target.files?.length) {
       setLoading(true)
@@ -193,7 +283,6 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
     handleChange('gallery', newGallery)
   }
 
-  // Videos
   const handleVideoUpload = async (e) => {
     if (e.target.files?.length) {
       setLoading(true)
@@ -230,6 +319,8 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
         fullDescription: form.fullDescription,
         features: form.features,
         image: form.image,
+        logo: form.logo,
+        brandColors: form.brandColors,
         gallery: form.gallery,
         externalUrl: form.externalUrl,
         location: form.location,
@@ -259,366 +350,545 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
       setLoading(false)
     }
   }
-return (
-  <Dialog
-    open={open}
-    onClose={onClose}
-    maxWidth={false}
-    PaperProps={{
-      sx: {
-        width: '100%',
-        maxWidth: '1200px',
-        borderRadius: 3,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-        background: '#fff'
-      }
-    }}
-  >
-    <DialogTitle sx={{
-      fontWeight: 700,
-      fontFamily: '"Poppins", sans-serif',
-      color: '#111',
-      background: '#fff',
-      borderBottom: '1px solid #222',
-      px: 4, py: 3
-    }}>
-      {editMode ? t('modal.editTitle') : t('modal.createTitle')}
-    </DialogTitle>
-    <DialogContent sx={{ background: '#fff', px: 4, py: 3 }}>
-      <Tabs
-        value={langTab}
-        onChange={(_, v) => setLangTab(v)}
-        sx={{
-          mb: 3,
-          '& .MuiTab-root': {
-            fontWeight: 600,
-            fontFamily: '"Poppins", sans-serif',
-            fontSize: "1rem",
-            textTransform: "none",
-            color: '#222'
-          },
-          '& .MuiTabs-indicator': { background: '#222' }
-        }}
-      >
-        {LANGS.map(l => <Tab key={l.code} value={l.code} label={t(`modal.lang.${l.code}`)} />)}
-      </Tabs>
-      <Divider sx={{ mb: 3, borderColor: '#222' }} />
 
-      <Grid container spacing={4}>
-        {/* Columna izquierda: Información general y detalles */}
-        <Grid item xs={12} md={7}>
-          <Paper elevation={0} sx={{
-            p: 3, mb: 4, borderRadius: 3,
-            border: '1px solid #222',
-            background: '#fff',
-            boxShadow: 'none'
-          }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#111', mb: 2 }}>
-              {t('modal.generalInfo')}
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label={t('modal.title', { lang: t(`modal.lang.${langTab}`) })}
-                  fullWidth
-                  value={form.title[langTab]}
-                  onChange={e => handleLangChange('title', langTab, e.target.value)}
-                  InputLabelProps={{ style: { color: '#222' } }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label={t('modal.subtitle', { lang: t(`modal.lang.${langTab}`) })}
-                  fullWidth
-                  value={form.subtitle[langTab]}
-                  onChange={e => handleLangChange('subtitle', langTab, e.target.value)}
-                  InputLabelProps={{ style: { color: '#222' } }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label={t('modal.shortDescription', { lang: t(`modal.lang.${langTab}`) })}
-                  fullWidth
-                  value={form.description[langTab]}
-                  onChange={e => handleLangChange('description', langTab, e.target.value)}
-                  InputLabelProps={{ style: { color: '#222' } }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label={t('modal.fullDescription', { lang: t(`modal.lang.${langTab}`) })}
-                  fullWidth
-                  multiline
-                  minRows={2}
-                  value={form.fullDescription[langTab]}
-                  onChange={e => handleLangChange('fullDescription', langTab, e.target.value)}
-                  InputLabelProps={{ style: { color: '#222' } }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: '#222' }}>
-                  {t('modal.features', { lang: t(`modal.lang.${langTab}`) })}
-                </Typography>
-                <Stack direction="row" spacing={1} mb={1}>
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth={false}
+      PaperProps={{
+        sx: {
+          width: '100%',
+          maxWidth: '1200px',
+          borderRadius: 3,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+          background: '#fff'
+        }
+      }}
+    >
+      <DialogTitle sx={{
+        fontWeight: 700,
+        fontFamily: '"Poppins", sans-serif',
+        color: '#111',
+        background: '#fff',
+        borderBottom: '1px solid #222',
+        px: 4, py: 3
+      }}>
+        {editMode ? t('modal.editTitle') : t('modal.createTitle')}
+      </DialogTitle>
+      <DialogContent sx={{ background: '#fff', px: 4, py: 3 }}>
+        <Tabs
+          value={langTab}
+          onChange={(_, v) => setLangTab(v)}
+          sx={{
+            mb: 3,
+            '& .MuiTab-root': {
+              fontWeight: 600,
+              fontFamily: '"Poppins", sans-serif',
+              fontSize: "1rem",
+              textTransform: "none",
+              color: '#222'
+            },
+            '& .MuiTabs-indicator': { background: '#222' }
+          }}
+        >
+          {LANGS.map(l => <Tab key={l.code} value={l.code} label={t(`modal.lang.${l.code}`)} />)}
+        </Tabs>
+        <Divider sx={{ mb: 3, borderColor: '#222' }} />
+
+        <Grid container spacing={4}>
+          {/* Columna izquierda: Información general y detalles */}
+          <Grid item xs={12} md={7}>
+            <Paper elevation={0} sx={{
+              p: 3, mb: 4, borderRadius: 3,
+              border: '1px solid #222',
+              background: '#fff',
+              boxShadow: 'none'
+            }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#111', mb: 2 }}>
+                {t('modal.generalInfo')}
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
                   <TextField
-                    value={featureInput}
-                    onChange={e => setFeatureInput(e.target.value)}
-                    onKeyDown={handleFeatureKeyDown}
-                    label={t('modal.addFeature')}
-                    size="small"
-                    sx={{ flex: 1 }}
+                    label={t('modal.title', { lang: t(`modal.lang.${langTab}`) })}
+                    fullWidth
+                    value={form.title[langTab]}
+                    onChange={e => handleLangChange('title', langTab, e.target.value)}
                     InputLabelProps={{ style: { color: '#222' } }}
                   />
-                  <IconButton onClick={handleAddFeature} sx={{ color: '#222', bgcolor: '#f5f5f5', border: '1px solid #222' }}>
-                    <Add />
-                  </IconButton>
-                </Stack>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {form.features[langTab].map((f, idx) => (
-                    <Chip
-                      key={idx}
-                      label={f}
-                      onDelete={() => handleRemoveFeature(idx)}
-                      sx={{ bgcolor: '#222', color: '#fff', fontWeight: 600 }}
-                    />
-                  ))}
-                </Box>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label={t('modal.projectName')}
-                  fullWidth
-                  value={form.name}
-                  onChange={e => handleChange('name', e.target.value)}
-                  InputLabelProps={{ style: { color: '#222' } }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label={t('modal.slug')}
-                  fullWidth
-                  value={form.slug}
-                  onChange={e => handleChange('slug', e.target.value)}
-                  helperText={t('modal.slugHelper')}
-                  InputLabelProps={{ style: { color: '#222' } }}
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-
-          <Paper elevation={0} sx={{
-            p: 3, borderRadius: 3,
-            border: '1px solid #222',
-            background: '#fff',
-            boxShadow: 'none'
-          }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#111', mb: 2 }}>
-              {t('modal.propertyDetails')}
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  label={t('modal.phase')}
-                  fullWidth
-                  value={form.phase}
-                  onChange={e => handleChange('phase', e.target.value)}
-                  InputLabelProps={{ style: { color: '#222' } }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  label={t('modal.status')}
-                  fullWidth
-                  value={form.status}
-                  onChange={e => handleChange('status', e.target.value)}
-                  InputLabelProps={{ style: { color: '#222' } }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  label={t('modal.type')}
-                  fullWidth
-                  value={form.type}
-                  onChange={e => handleChange('type', e.target.value)}
-                  select
-                  InputLabelProps={{ style: { color: '#222' } }}
-                >
-                  {PROJECT_TYPES.map(opt => (
-                    <MenuItem key={opt.value} value={opt.value}>
-                      {t(`modal.projectTypes.${opt.value}`)}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid item xs={12} sm={8}>
-                <TextField
-                  label={t('modal.externalUrl')}
-                  fullWidth
-                  value={form.externalUrl}
-                  onChange={e => handleChange('externalUrl', e.target.value)}
-                  InputLabelProps={{ style: { color: '#222' } }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={8}>
-                <TextField
-                  label={t('modal.location')}
-                  fullWidth
-                  value={form.location}
-                  onChange={e => handleChange('location', e.target.value)}
-                  InputProps={{ endAdornment: <LocationOn sx={{ color: '#222' }} /> }}
-                  InputLabelProps={{ style: { color: '#222' } }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  label={t('modal.area')}
-                  fullWidth
-                  value={form.area}
-                  onChange={e => handleChange('area', e.target.value)}
-                  InputProps={{ endAdornment: <CropSquare sx={{ color: '#222' }} /> }}
-                  InputLabelProps={{ style: { color: '#222' } }}
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
-
-        {/* Columna derecha: Media */}
-        <Grid item xs={12} md={5}>
-          <Paper elevation={0} sx={{
-            p: 3, borderRadius: 3,
-            border: '1px solid #222',
-            background: '#fff',
-            boxShadow: 'none'
-          }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#111', mb: 2 }}>
-              {t('modal.mediaAssets')}
-            </Typography>
-            <Box mb={2}>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: '#222' }}>
-                {t('modal.mainImage')}
-              </Typography>
-              {mainImage ? (
-                <Box sx={{ position: 'relative', width: '100%', maxWidth: 180, height: 120, mb: 1 }}>
-                  <img src={mainImage} alt="Main image preview" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, border: '1px solid #222' }} />
-                  <IconButton
-                    size="small"
-                    onClick={handleMainImageRemove}
-                    sx={{ position: 'absolute', top: 4, right: 4, bgcolor: '#fff', color: '#222', boxShadow: 1 }}
-                  >
-                    <Delete fontSize="small" />
-                  </IconButton>
-                </Box>
-              ) : (
-                <Box sx={{
-                  border: '1.5px solid #222',
-                  borderRadius: 2,
-                  bgcolor: '#fff',
-                  height: 120,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mb: 1
-                }}>
-                  <Button component="label" variant="text" sx={{ color: '#222', fontWeight: 600 }}>
-                    <AddPhotoAlternate sx={{ mr: 1 }} /> {t('modal.upload')}
-                    <input type="file" accept="image/*" hidden onChange={handleImageUpload} />
-                  </Button>
-                </Box>
-              )}
-            </Box>
-            <Box mb={2}>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: '#222' }}>
-                {t('modal.gallery')}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                {gallery.map((url, idx) => (
-                  <GalleryThumb key={url} url={url} onRemove={() => handleGalleryRemove(idx)} />
-                ))}
-                <Box sx={{
-                  width: 70, height: 70, border: '1.5px solid #222', borderRadius: 2, bgcolor: '#fff',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1
-                }}>
-                  <Button component="label" variant="text" sx={{ color: '#222', fontWeight: 600, minWidth: 0, p: 0 }}>
-                    <AddPhotoAlternate />
-                    <input type="file" accept="image/*" hidden multiple onChange={handleGalleryUpload} />
-                  </Button>
-                </Box>
-              </Box>
-            </Box>
-            <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: '#222' }}>
-                {t('modal.videos')}
-              </Typography>
-              <Stack direction="row" spacing={1} mb={1}>
-                <Button
-                  component="label"
-                  variant="outlined"
-                  sx={{ color: '#222', borderColor: '#222', fontWeight: 600 }}
-                >
-                  {t('modal.uploadVideo')}
-                  <input
-                    type="file"
-                    accept="video/*"
-                    hidden
-                    multiple
-                    onChange={handleVideoUpload}
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label={t('modal.subtitle', { lang: t(`modal.lang.${langTab}`) })}
+                    fullWidth
+                    value={form.subtitle[langTab]}
+                    onChange={e => handleLangChange('subtitle', langTab, e.target.value)}
+                    InputLabelProps={{ style: { color: '#222' } }}
                   />
-                </Button>
-              </Stack>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {videos.map((v, idx) => (
-                  <Box key={idx} sx={{ position: 'relative', width: 120, height: 120 }}>
-                    <video
-                      src={v}
-                      controls
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        borderRadius: 8,
-                        border: '1px solid #222',
-                      }}
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label={t('modal.shortDescription', { lang: t(`modal.lang.${langTab}`) })}
+                    fullWidth
+                    value={form.description[langTab]}
+                    onChange={e => handleLangChange('description', langTab, e.target.value)}
+                    InputLabelProps={{ style: { color: '#222' } }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label={t('modal.fullDescription', { lang: t(`modal.lang.${langTab}`) })}
+                    fullWidth
+                    multiline
+                    minRows={2}
+                    value={form.fullDescription[langTab]}
+                    onChange={e => handleLangChange('fullDescription', langTab, e.target.value)}
+                    InputLabelProps={{ style: { color: '#222' } }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: '#222' }}>
+                    {t('modal.features', { lang: t(`modal.lang.${langTab}`) })}
+                  </Typography>
+                  <Stack direction="row" spacing={1} mb={1}>
+                    <TextField
+                      value={featureInput}
+                      onChange={e => setFeatureInput(e.target.value)}
+                      onKeyDown={handleFeatureKeyDown}
+                      label={t('modal.addFeature')}
+                      size="small"
+                      sx={{ flex: 1 }}
+                      InputLabelProps={{ style: { color: '#222' } }}
                     />
+                    <IconButton onClick={handleAddFeature} sx={{ color: '#222', bgcolor: '#f5f5f5', border: '1px solid #222' }}>
+                      <Add />
+                    </IconButton>
+                  </Stack>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {form.features[langTab].map((f, idx) => (
+                      <Chip
+                        key={idx}
+                        label={f}
+                        onDelete={() => handleRemoveFeature(idx)}
+                        sx={{ bgcolor: '#222', color: '#fff', fontWeight: 600 }}
+                      />
+                    ))}
+                  </Box>
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label={t('modal.projectName')}
+                    fullWidth
+                    value={form.name}
+                    onChange={e => handleChange('name', e.target.value)}
+                    InputLabelProps={{ style: { color: '#222' } }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label={t('modal.slug')}
+                    fullWidth
+                    value={form.slug}
+                    onChange={e => handleChange('slug', e.target.value)}
+                    helperText={t('modal.slugHelper')}
+                    InputLabelProps={{ style: { color: '#222' } }}
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
+
+            <Paper elevation={0} sx={{
+              p: 3, borderRadius: 3,
+              border: '1px solid #222',
+              background: '#fff',
+              boxShadow: 'none'
+            }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#111', mb: 2 }}>
+                {t('modal.propertyDetails')}
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    label={t('modal.phase')}
+                    fullWidth
+                    value={form.phase}
+                    onChange={e => handleChange('phase', e.target.value)}
+                    InputLabelProps={{ style: { color: '#222' } }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    label={t('modal.status')}
+                    fullWidth
+                    value={form.status}
+                    onChange={e => handleChange('status', e.target.value)}
+                    InputLabelProps={{ style: { color: '#222' } }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    label={t('modal.type')}
+                    fullWidth
+                    value={form.type}
+                    onChange={e => handleChange('type', e.target.value)}
+                    select
+                    InputLabelProps={{ style: { color: '#222' } }}
+                  >
+                    {PROJECT_TYPES.map(opt => (
+                      <MenuItem key={opt.value} value={opt.value}>
+                        {t(`modal.projectTypes.${opt.value}`)}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+                <Grid item xs={12} sm={8}>
+                  <TextField
+                    label={t('modal.externalUrl')}
+                    fullWidth
+                    value={form.externalUrl}
+                    onChange={e => handleChange('externalUrl', e.target.value)}
+                    InputLabelProps={{ style: { color: '#222' } }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={8}>
+                  <TextField
+                    label={t('modal.location')}
+                    fullWidth
+                    value={form.location}
+                    onChange={e => handleChange('location', e.target.value)}
+                    InputProps={{ endAdornment: <LocationOn sx={{ color: '#222' }} /> }}
+                    InputLabelProps={{ style: { color: '#222' } }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    label={t('modal.area')}
+                    fullWidth
+                    value={form.area}
+                    onChange={e => handleChange('area', e.target.value)}
+                    InputProps={{ endAdornment: <CropSquare sx={{ color: '#222' }} /> }}
+                    InputLabelProps={{ style: { color: '#222' } }}
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
+          </Grid>
+
+          {/* Columna derecha: Media */}
+          <Grid item xs={12} md={5}>
+            <Paper elevation={0} sx={{
+              p: 3, borderRadius: 3,
+              border: '1px solid #222',
+              background: '#fff',
+              boxShadow: 'none'
+            }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#111', mb: 2 }}>
+                {t('modal.mediaAssets')}
+              </Typography>
+
+              {/* Main Image */}
+              <Box mb={2}>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: '#222' }}>
+                  {t('modal.mainImage')}
+                </Typography>
+                {mainImage ? (
+                  <Box sx={{ position: 'relative', width: '100%', maxWidth: 180, height: 120, mb: 1 }}>
+                    <img src={mainImage} alt="Main image preview" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, border: '1px solid #222' }} />
                     <IconButton
                       size="small"
-                      onClick={() => handleRemoveVideo(idx)}
-                      sx={{
-                        position: 'absolute',
-                        top: 4,
-                        right: 4,
-                        bgcolor: '#fff',
-                        color: '#222',
-                        boxShadow: 1
-                      }}
+                      onClick={handleMainImageRemove}
+                      sx={{ position: 'absolute', top: 4, right: 4, bgcolor: '#fff', color: '#222', boxShadow: 1 }}
                     >
                       <Delete fontSize="small" />
                     </IconButton>
                   </Box>
+                ) : (
+                  <Box sx={{
+                    border: '1.5px solid #222',
+                    borderRadius: 2,
+                    bgcolor: '#fff',
+                    height: 120,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 1
+                  }}>
+                    <Button component="label" variant="text" sx={{ color: '#222', fontWeight: 600 }}>
+                      <AddPhotoAlternate sx={{ mr: 1 }} /> {t('modal.upload')}
+                      <input type="file" accept="image/*" hidden onChange={handleImageUpload} />
+                    </Button>
+                  </Box>
+                )}
+              </Box>
+
+              {/* Logo */}
+              <Box mb={2}>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: '#222' }}>
+                  Logo
+                </Typography>
+                {logo ? (
+                  <Box sx={{ position: 'relative', width: '100%', maxWidth: 180, height: 100, mb: 1 }}>
+                    <img 
+                      src={logo} 
+                      alt="Logo preview" 
+                      style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        objectFit: 'contain', 
+                        borderRadius: 8, 
+                        border: '1px solid #222',
+                        background: '#f5f5f5'
+                      }} 
+                    />
+                    <IconButton
+                      size="small"
+                      onClick={handleLogoRemove}
+                      sx={{ position: 'absolute', top: 4, right: 4, bgcolor: '#fff', color: '#222', boxShadow: 1 }}
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </Box>
+                ) : (
+                  <Box sx={{
+                    border: '1.5px dashed #222',
+                    borderRadius: 2,
+                    bgcolor: '#fff',
+                    height: 100,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 1
+                  }}>
+                    <Button component="label" variant="text" sx={{ color: '#222', fontWeight: 600 }}>
+                      <AddPhotoAlternate sx={{ mr: 1 }} /> Upload Logo
+                      <input type="file" accept="image/*" hidden onChange={handleLogoUpload} />
+                    </Button>
+                  </Box>
+                )}
+              </Box>
+
+              {/* Gallery */}
+              <Box mb={2}>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: '#222' }}>
+                  {t('modal.gallery')}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {gallery.map((url, idx) => (
+                    <GalleryThumb key={url} url={url} onRemove={() => handleGalleryRemove(idx)} />
+                  ))}
+                  <Box sx={{
+                    width: 70, height: 70, border: '1.5px solid #222', borderRadius: 2, bgcolor: '#fff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1
+                  }}>
+                    <Button component="label" variant="text" sx={{ color: '#222', fontWeight: 600, minWidth: 0, p: 0 }}>
+                      <AddPhotoAlternate />
+                      <input type="file" accept="image/*" hidden multiple onChange={handleGalleryUpload} />
+                    </Button>
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* Videos */}
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: '#222' }}>
+                  {t('modal.videos')}
+                </Typography>
+                <Stack direction="row" spacing={1} mb={1}>
+                  <Button
+                    component="label"
+                    variant="outlined"
+                    sx={{ color: '#222', borderColor: '#222', fontWeight: 600 }}
+                  >
+                    {t('modal.uploadVideo')}
+                    <input
+                      type="file"
+                      accept="video/*"
+                      hidden
+                      multiple
+                      onChange={handleVideoUpload}
+                    />
+                  </Button>
+                </Stack>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  {videos.map((v, idx) => (
+                    <Box key={idx} sx={{ position: 'relative', width: 120, height: 120 }}>
+                      <video
+                        src={v}
+                        controls
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          borderRadius: 8,
+                          border: '1px solid #222',
+                        }}
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRemoveVideo(idx)}
+                        sx={{
+                          position: 'absolute',
+                          top: 4,
+                          right: 4,
+                          bgcolor: '#fff',
+                          color: '#222',
+                          boxShadow: 1
+                        }}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            </Paper>
+          </Grid>
+
+          {/* Brand Colors - Fila completa debajo */}
+          <Grid item xs={12}>
+            <Paper elevation={0} sx={{
+              p: 3, borderRadius: 3,
+              border: '1px solid #222',
+              background: '#fff',
+              boxShadow: 'none'
+            }}>
+              <Typography variant="subtitle1" sx={{ 
+                fontWeight: 700, 
+                color: '#111', 
+                mb: 2,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}>
+                <Palette fontSize="small" /> {t('modal.brandColors', 'Brand Colors')}
+              </Typography>
+              
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                {t('modal.brandColorsHelper', 'Format: "key:color" (e.g.: "primary:#333F1F") or just color (e.g.: "#333F1F")')}
+              </Typography>
+              
+              <Stack direction="row" spacing={1} mb={2}>
+                <TextField
+                  value={colorInput}
+                  onChange={e => setColorInput(e.target.value)}
+                  onKeyDown={handleColorKeyDown}
+                  label={t('modal.addBrandColor', 'Add brand color')}
+                  placeholder="primary:#333F1F"
+                  size="small"
+                  sx={{ 
+                    flex: 1,
+                    '& .MuiInputLabel-root': { color: '#222' }
+                  }}
+                  InputLabelProps={{ style: { color: '#222' } }}
+                />
+                <IconButton 
+                  onClick={handleAddColor} 
+                  sx={{ 
+                    color: '#222', 
+                    bgcolor: '#f5f5f5', 
+                    border: '1px solid #222' 
+                  }}
+                >
+                  <Add />
+                </IconButton>
+              </Stack>
+              
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                {form.brandColors?.map((color, idx) => (
+                  <ColorChip
+                    key={idx}
+                    color={color}
+                    onRemove={() => handleRemoveColor(idx)}
+                  />
                 ))}
               </Box>
-            </Box>
-          </Paper>
+
+              {/* Preview de colores */}
+              {form.brandColors?.length > 0 && (
+                <Box sx={{ p: 2, bgcolor: '#f5f5f5', borderRadius: 2 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 600, color: '#222', mb: 1, display: 'block' }}>
+                    {t('modal.colorPreview', 'Color Preview')}
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    {form.brandColors.map((color, idx) => (
+                      <Box 
+                        key={idx}
+                        sx={{
+                          width: 80,
+                          height: 80,
+                          borderRadius: 2,
+                          bgcolor: color.value,
+                          border: '2px solid #222',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#fff',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                          gap: 0.5
+                        }}
+                      >
+                        <Typography 
+                          variant="caption" 
+                          sx={{ 
+                            fontWeight: 700, 
+                            color: '#fff',
+                            textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                            fontSize: '0.75rem'
+                          }}
+                        >
+                          {color.key}
+                        </Typography>
+                        <Typography 
+                          variant="caption" 
+                          sx={{ 
+                            color: '#fff',
+                            textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                            fontSize: '0.65rem'
+                          }}
+                        >
+                          {color.value}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+            </Paper>
+          </Grid>
+
+          {/* ✅ NUEVO: Variables de Mensaje - Solo visible en modo edición */}
+          {editMode && initialData?._id && (
+            <Grid item xs={12}>
+              <ProjectVariablesManager 
+                projectId={initialData._id}
+                disabled={false}
+                variant="dialog"
+              />
+            </Grid>
+          )}
         </Grid>
-      </Grid>
-      {error && (
-        <Typography color="error" sx={{ mt: 2 }}>{error}</Typography>
-      )}
-    </DialogContent>
-    <DialogActions sx={{ px: 4, pb: 3, background: '#fff', borderTop: '1px solid #222' }}>
-      <Button onClick={onClose} disabled={loading} startIcon={<Cancel />} sx={{ color: '#222' }}>
-        {t('modal.cancel')}
-      </Button>
-      <Button
-        onClick={handleSubmit}
-        variant="contained"
-        disabled={loading}
-        startIcon={<Save />}
-        sx={{ bgcolor: '#111', color: '#fff', fontWeight: 700, px: 3, boxShadow: 'none', '&:hover': { bgcolor: '#222' } }}
-      >
-        {editMode ? t('modal.save') : t('modal.create')}
-      </Button>
-    </DialogActions>
-  </Dialog>
-)
+        {error && (
+          <Typography color="error" sx={{ mt: 2 }}>{error}</Typography>
+        )}
+      </DialogContent>
+      <DialogActions sx={{ px: 4, pb: 3, background: '#fff', borderTop: '1px solid #222' }}>
+        <Button onClick={onClose} disabled={loading} startIcon={<Cancel />} sx={{ color: '#222' }}>
+          {t('modal.cancel')}
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          disabled={loading}
+          startIcon={<Save />}
+          sx={{ bgcolor: '#111', color: '#fff', fontWeight: 700, px: 3, boxShadow: 'none', '&:hover': { bgcolor: '#222' } }}
+        >
+          {editMode ? t('modal.save') : t('modal.create')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
 }

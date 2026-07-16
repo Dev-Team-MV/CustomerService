@@ -16,6 +16,9 @@ import { useResidents } from '@shared/hooks/useResidents'
 import ResidentDialog from '../../../../shared/components/Modals/ResidentDialog'
 
 import DashboardMap from '../components/DashboardMap'
+import MapInventory from '../components/MapInventory'
+
+
 import StatsCards from '../components/statscard'
 import Loader from '../components/Loader'
 import RecentPayloadsPanel from '../components/RecentPayloadsPanel'
@@ -204,7 +207,7 @@ const Dashboard = () => {
       </motion.div>
 
       {/* ── STATS (admin only) ── */}
-      {isAdmin && (
+      {/* {isAdmin && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -214,7 +217,7 @@ const Dashboard = () => {
             <StatsCards stats={statsCards} loading={loading} />
           </Box>
         </motion.div>
-      )}
+      )} */}
 
       {/* ── MAP SECTION ── */}
       <motion.div
@@ -231,7 +234,7 @@ const Dashboard = () => {
           dividerColor={C.border}
           primaryColor={C.dark}
         >
-          <DashboardMap />
+          <MapInventory />
         </PageSection>
       </motion.div>
 

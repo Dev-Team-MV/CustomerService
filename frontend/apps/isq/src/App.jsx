@@ -1,3 +1,4 @@
+// /Users/oficina/MV-CRM/CustomerService/frontend/apps/isq/src/App.jsx
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { AuthProvider, useAuth } from '@shared/context/AuthContext'
@@ -5,12 +6,10 @@ import ProtectedRoute from '@shared/components/ProtectedRoute'
 import Layout from '@shared/components/LayoutComponents/Layout'
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 
-// Menús y logo
+// Menús
 import { privateMenuItems, publicMenuItems } from './Constants/MenuItems'
-import logoISQ from './assets/react.svg' // Cambia por el logo real
 
 // Páginas ISQ
-import Login from './Pages/Login'
 import Dashboard from './Pages/Dashboard'
 import Profile from './Pages/Profile'
 import Residents from './Pages/Residents'
@@ -32,9 +31,10 @@ import AmenitiesPublic from './Pages/Amenities/AmenitiesPublic'
 import AmenitiesPrivate from './Pages/Amenities/AmenitiesPrivate'
 import Register from './Pages/Register'
 
-// ...agrega aquí el resto de tus páginas privadas
+import theme from './theme'
 
-import theme from './theme' // Usa SIEMPRE el theme extendido
+// Componente compartido
+import UniversalLogin from '@shared/components/Login/UniversalLogin'
 
 const DynamicLayoutWrapper = ({ children }) => {
   const { user } = useAuth()
@@ -44,7 +44,6 @@ const DynamicLayoutWrapper = ({ children }) => {
       publicView={publicView}
       menuItems={publicView ? publicMenuItems : privateMenuItems}
       publicMenuItems={publicMenuItems}
-      logoSrc={logoISQ}
     >
       {children || <Outlet />}
     </Layout>
@@ -58,9 +57,9 @@ function App() {
       <AuthProvider projectSlug="isq">
         <Routes>
           {/* Auth Routes */}
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<UniversalLogin />} />
           <Route path="/terms-and-conditions" element={<TermsAndCondition />} />
-          <Route path="/register" element={<Register />} />
+          
           <Route path="/setup-password/:token" element={<Register />} />
 
           {/* Public Routes */}
@@ -69,13 +68,11 @@ function App() {
               <Layout
                 publicView={true}
                 menuItems={publicMenuItems}
-                logoSrc={logoISQ}
               />
             }
           >
             <Route path="/explore/amenities" element={<AmenitiesPublic />} />
             <Route path="/explore/properties" element={<GetYourQuote />} />
-            {/* Agrega aquí tus rutas públicas si las tienes */}
           </Route>
 
           {/* Hybrid Routes */}
@@ -92,7 +89,6 @@ function App() {
                   publicView={false}
                   menuItems={privateMenuItems}
                   publicMenuItems={publicMenuItems}
-                  logoSrc={logoISQ}
                 />
               }
             >
@@ -109,10 +105,8 @@ function App() {
               <Route path="/payloads" element={<Payloads />} />
               <Route path="/master-plan" element={<MasterPlanPage />} />
               <Route path="/my-apartment" element={<MyApartment />} />
-              <Route path="/family-group" element={<FamilyGroup />} /> 
+              <Route path="/family-group" element={<FamilyGroup />} />
               <Route path="/amenities" element={<AmenitiesPrivate />} />
-
-              {/* Agrega aquí el resto de tus rutas privadas ISQ */}
             </Route>
           </Route>
 
