@@ -29,7 +29,13 @@ const satisfactionSurveySchema = new mongoose.Schema(
     propertyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Property',
-      required: [true, 'propertyId is required'],
+      default: null,
+      index: true
+    },
+    apartmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Apartment',
+      default: null,
       index: true
     },
     clientId: {
@@ -72,8 +78,19 @@ const satisfactionSurveySchema = new mongoose.Schema(
   }
 )
 
+satisfactionSurveySchema.pre('validate', function validateUnit(next) {
+  if (!this.propertyId && !this.apartmentId) {
+    return next(new Error('Either propertyId or apartmentId is required'))
+  }
+  if (this.propertyId && this.apartmentId) {
+    return next(new Error('Provide only one of propertyId or apartmentId'))
+  }
+  next()
+})
+
 satisfactionSurveySchema.index({ projectId: 1, type: 1 })
 satisfactionSurveySchema.index({ propertyId: 1, type: 1 })
+satisfactionSurveySchema.index({ apartmentId: 1, type: 1 })
 
 const SatisfactionSurvey = mongoose.model('SatisfactionSurvey', satisfactionSurveySchema)
 

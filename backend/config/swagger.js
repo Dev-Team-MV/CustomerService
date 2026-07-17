@@ -2443,7 +2443,8 @@ const options = {
           type: 'object',
           properties: {
             _id: { type: 'string' },
-            propertyId: { type: 'string' },
+            propertyId: { type: 'string', nullable: true },
+            apartmentId: { type: 'string', nullable: true },
             clientId: { type: 'string' },
             projectId: { type: 'string' },
             items: {
@@ -2457,9 +2458,11 @@ const options = {
         },
         OnboardingChecklistCreate: {
           type: 'object',
-          required: ['propertyId', 'clientId', 'projectId'],
+          required: ['clientId', 'projectId'],
+          description: 'Provide exactly one of propertyId or apartmentId',
           properties: {
-            propertyId: { type: 'string' },
+            propertyId: { type: 'string', nullable: true, description: 'For lot/house units. Mutually exclusive with apartmentId' },
+            apartmentId: { type: 'string', nullable: true, description: 'For apartment units. Mutually exclusive with propertyId' },
             clientId: { type: 'string' },
             projectId: { type: 'string' },
             items: {
@@ -2472,7 +2475,8 @@ const options = {
           type: 'object',
           properties: {
             _id: { type: 'string' },
-            propertyId: { type: 'string' },
+            propertyId: { type: 'string', nullable: true },
+            apartmentId: { type: 'string', nullable: true },
             clientId: { type: 'string' },
             projectId: { type: 'string' },
             category: {
@@ -2496,9 +2500,11 @@ const options = {
         },
         WarrantyClaimCreate: {
           type: 'object',
-          required: ['propertyId', 'projectId', 'category', 'description'],
+          required: ['projectId', 'category', 'description'],
+          description: 'Provide exactly one of propertyId or apartmentId',
           properties: {
-            propertyId: { type: 'string' },
+            propertyId: { type: 'string', nullable: true, description: 'For lot/house units. Mutually exclusive with apartmentId' },
+            apartmentId: { type: 'string', nullable: true, description: 'For apartment units. Mutually exclusive with propertyId' },
             clientId: { type: 'string', description: 'Solo admin; usuarios usan su propio id' },
             projectId: { type: 'string' },
             category: {
@@ -2522,7 +2528,8 @@ const options = {
           type: 'object',
           properties: {
             _id: { type: 'string' },
-            propertyId: { type: 'string' },
+            propertyId: { type: 'string', nullable: true },
+            apartmentId: { type: 'string', nullable: true },
             clientId: { type: 'string' },
             projectId: { type: 'string' },
             type: {
@@ -2541,9 +2548,11 @@ const options = {
         },
         SatisfactionSurveyCreate: {
           type: 'object',
-          required: ['propertyId', 'projectId', 'type'],
+          required: ['projectId', 'type'],
+          description: 'Provide exactly one of propertyId or apartmentId',
           properties: {
-            propertyId: { type: 'string' },
+            propertyId: { type: 'string', nullable: true, description: 'For lot/house units. Mutually exclusive with apartmentId' },
+            apartmentId: { type: 'string', nullable: true, description: 'For apartment units. Mutually exclusive with propertyId' },
             clientId: { type: 'string', description: 'Solo admin; usuarios usan su propio id' },
             projectId: { type: 'string' },
             type: {

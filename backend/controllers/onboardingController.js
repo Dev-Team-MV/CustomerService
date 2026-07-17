@@ -8,6 +8,7 @@ import { runAutomationEngineAsync } from '../services/automationEngine.js'
 
 const POPULATE = [
   { path: 'propertyId', select: 'price status lot model' },
+  { path: 'apartmentId', select: 'apartmentNumber floorNumber building status' },
   { path: 'clientId', select: 'firstName lastName email phoneNumber' },
   { path: 'projectId', select: 'name slug title' },
   { path: 'items.completedBy', select: 'firstName lastName email' },
@@ -16,6 +17,28 @@ const POPULATE = [
 
 function isAdminUser(user) {
   return isStaffRole(user?.role)
+}
+
+function resolveUnitRefs({ propertyId, apartmentId }) {
+  const hasProperty = propertyId != null && propertyId !== ''
+  const hasApartment = apartmentId != null && apartmentId !== ''
+
+  if (!hasProperty && !hasApartment) {
+    return { error: 'Either propertyId or apartmentId is required' }
+  }
+  if (hasProperty && hasApartment) {
+    return { error: 'Provide only one of propertyId or apartmentId' }
+  }
+  if (hasProperty && !isValidObjectId(propertyId)) {
+    return { error: 'Invalid propertyId' }
+  }
+  if (hasApartment && !isValidObjectId(apartmentId)) {
+    return { error: 'Invalid apartmentId' }
+  }
+  return {
+    propertyId: hasProperty ? propertyId : null,
+    apartmentId: hasApartment ? apartmentId : null
+  }
 }
 
 function deriveStatus(items = []) {
@@ -29,7 +52,7 @@ function deriveStatus(items = []) {
 export const getChecklists = async (req, res) => {
   try {
     const filter = {}
-    for (const key of ['projectId', 'propertyId', 'clientId']) {
+    for (const key of ['projectId', 'propertyId', 'apartmentId', 'clientId']) {
       if (req.query[key]) {
         if (!isValidObjectId(req.query[key])) {
           return res.status(400).json({ message: `Invalid ${key}` })
@@ -102,12 +125,38 @@ export const getChecklistByProperty = async (req, res) => {
   }
 }
 
+export const getChecklistByApartment = async (req, res) => {
+  try {
+    const { apartmentId } = req.params
+    if (!isValidObjectId(apartmentId)) {
+      return res.status(400).json({ message: 'Invalid apartmentId' })
+    }
+
+    const filter = { apartmentId }
+    if (!isAdminUser(req.user)) {
+      filter.clientId = req.user._id
+    } else if (req.query.clientId) {
+      if (!isValidObjectId(req.query.clientId)) {
+        return res.status(400).json({ message: 'Invalid clientId' })
+      }
+      filter.clientId = req.query.clientId
+    }
+
+    const checklist = await OnboardingChecklist.findOne(filter).populate(POPULATE)
+    if (!checklist) return res.status(404).json({ message: 'Onboarding checklist not found' })
+    res.json(checklist)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 export const createChecklist = async (req, res) => {
   try {
-    const { propertyId, clientId, projectId, items } = req.body
+    const { propertyId, apartmentId, clientId, projectId, items } = req.body
 
-    if (!propertyId || !isValidObjectId(propertyId)) {
-      return res.status(400).json({ message: 'Valid propertyId is required' })
+    const unit = resolveUnitRefs({ propertyId, apartmentId })
+    if (unit.error) {
+      return res.status(400).json({ message: unit.error })
     }
     if (!clientId || !isValidObjectId(clientId)) {
       return res.status(400).json({ message: 'Valid clientId is required' })
@@ -116,13 +165,17 @@ export const createChecklist = async (req, res) => {
       return res.status(400).json({ message: 'Valid projectId is required' })
     }
 
-    const existing = await OnboardingChecklist.findOne({ propertyId, clientId })
+    const unitFilter = unit.propertyId
+      ? { propertyId: unit.propertyId }
+      : { apartmentId: unit.apartmentId }
+    const existing = await OnboardingChecklist.findOne({ ...unitFilter, clientId })
     if (existing) {
-      return res.status(400).json({ message: 'Checklist already exists for this property and client' })
+      return res.status(400).json({ message: 'Checklist already exists for this unit and client' })
     }
 
     const checklist = await OnboardingChecklist.create({
-      propertyId,
+      propertyId: unit.propertyId,
+      apartmentId: unit.apartmentId,
       clientId,
       projectId,
       items: Array.isArray(items) && items.length ? items : buildDefaultOnboardingItems(),
@@ -133,7 +186,7 @@ export const createChecklist = async (req, res) => {
     res.status(201).json(populated)
   } catch (error) {
     if (error.code === 11000) {
-      return res.status(400).json({ message: 'Checklist already exists for this property and client' })
+      return res.status(400).json({ message: 'Checklist already exists for this unit and client' })
     }
     res.status(500).json({ message: error.message })
   }

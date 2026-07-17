@@ -26,7 +26,13 @@ const warrantyClaimSchema = new mongoose.Schema(
     propertyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Property',
-      required: [true, 'propertyId is required'],
+      default: null,
+      index: true
+    },
+    apartmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Apartment',
+      default: null,
       index: true
     },
     clientId: {
@@ -92,8 +98,19 @@ const warrantyClaimSchema = new mongoose.Schema(
   }
 )
 
+warrantyClaimSchema.pre('validate', function validateUnit(next) {
+  if (!this.propertyId && !this.apartmentId) {
+    return next(new Error('Either propertyId or apartmentId is required'))
+  }
+  if (this.propertyId && this.apartmentId) {
+    return next(new Error('Provide only one of propertyId or apartmentId'))
+  }
+  next()
+})
+
 warrantyClaimSchema.index({ projectId: 1, status: 1 })
 warrantyClaimSchema.index({ propertyId: 1, createdAt: -1 })
+warrantyClaimSchema.index({ apartmentId: 1, createdAt: -1 })
 
 const WarrantyClaim = mongoose.model('WarrantyClaim', warrantyClaimSchema)
 

@@ -5,6 +5,7 @@ import { isValidObjectId } from '../utils/crmHelpers.js'
 
 const POPULATE = [
   { path: 'propertyId', select: 'price status lot model' },
+  { path: 'apartmentId', select: 'apartmentNumber floorNumber building status' },
   { path: 'clientId', select: 'firstName lastName email phoneNumber' },
   { path: 'projectId', select: 'name slug title' }
 ]
@@ -13,10 +14,32 @@ function isAdminUser(user) {
   return isStaffRole(user?.role)
 }
 
+function resolveUnitRefs({ propertyId, apartmentId }) {
+  const hasProperty = propertyId != null && propertyId !== ''
+  const hasApartment = apartmentId != null && apartmentId !== ''
+
+  if (!hasProperty && !hasApartment) {
+    return { error: 'Either propertyId or apartmentId is required' }
+  }
+  if (hasProperty && hasApartment) {
+    return { error: 'Provide only one of propertyId or apartmentId' }
+  }
+  if (hasProperty && !isValidObjectId(propertyId)) {
+    return { error: 'Invalid propertyId' }
+  }
+  if (hasApartment && !isValidObjectId(apartmentId)) {
+    return { error: 'Invalid apartmentId' }
+  }
+  return {
+    propertyId: hasProperty ? propertyId : null,
+    apartmentId: hasApartment ? apartmentId : null
+  }
+}
+
 export const getSurveys = async (req, res) => {
   try {
     const filter = {}
-    for (const key of ['projectId', 'propertyId', 'clientId']) {
+    for (const key of ['projectId', 'propertyId', 'apartmentId', 'clientId']) {
       if (req.query[key]) {
         if (!isValidObjectId(req.query[key])) {
           return res.status(400).json({ message: `Invalid ${key}` })
@@ -68,6 +91,7 @@ export const createSurvey = async (req, res) => {
   try {
     const {
       propertyId,
+      apartmentId,
       clientId,
       projectId,
       type,
@@ -76,8 +100,9 @@ export const createSurvey = async (req, res) => {
       npsScore
     } = req.body
 
-    if (!propertyId || !isValidObjectId(propertyId)) {
-      return res.status(400).json({ message: 'Valid propertyId is required' })
+    const unit = resolveUnitRefs({ propertyId, apartmentId })
+    if (unit.error) {
+      return res.status(400).json({ message: unit.error })
     }
     if (!projectId || !isValidObjectId(projectId)) {
       return res.status(400).json({ message: 'Valid projectId is required' })
@@ -109,7 +134,8 @@ export const createSurvey = async (req, res) => {
     }
 
     const survey = await SatisfactionSurvey.create({
-      propertyId,
+      propertyId: unit.propertyId,
+      apartmentId: unit.apartmentId,
       clientId: resolvedClientId,
       projectId,
       type,

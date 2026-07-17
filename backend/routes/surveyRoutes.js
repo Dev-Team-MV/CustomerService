@@ -56,6 +56,9 @@ router.get('/stats/:projectId', protect, admin, getSurveyStats)
  *         name: propertyId
  *         schema: { type: string }
  *       - in: query
+ *         name: apartmentId
+ *         schema: { type: string }
+ *       - in: query
  *         name: clientId
  *         schema: { type: string }
  *       - in: query

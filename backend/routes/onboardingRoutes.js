@@ -3,6 +3,7 @@ import {
   getChecklists,
   getChecklistById,
   getChecklistByProperty,
+  getChecklistByApartment,
   createChecklist,
   updateChecklist,
   completeChecklistItem,
@@ -27,6 +28,9 @@ const router = express.Router()
  *         schema: { type: string }
  *       - in: query
  *         name: propertyId
+ *         schema: { type: string }
+ *       - in: query
+ *         name: apartmentId
  *         schema: { type: string }
  *       - in: query
  *         name: clientId
@@ -98,6 +102,35 @@ router.post('/', protect, admin, createChecklist)
  *         description: Not found
  */
 router.get('/property/:propertyId', protect, getChecklistByProperty)
+
+/**
+ * @swagger
+ * /api/onboarding/apartment/{apartmentId}:
+ *   get:
+ *     summary: Get checklist by apartment
+ *     tags: [Onboarding]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: apartmentId
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: clientId
+ *         schema: { type: string }
+ *         description: Admin only; users are scoped to themselves
+ *     responses:
+ *       200:
+ *         description: Checklist found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/OnboardingChecklist'
+ *       404:
+ *         description: Not found
+ */
+router.get('/apartment/:apartmentId', protect, getChecklistByApartment)
 
 /**
  * @swagger

@@ -94,7 +94,13 @@ const onboardingChecklistSchema = new mongoose.Schema(
     propertyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Property',
-      required: [true, 'propertyId is required'],
+      default: null,
+      index: true
+    },
+    apartmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Apartment',
+      default: null,
       index: true
     },
     clientId: {
@@ -133,7 +139,24 @@ const onboardingChecklistSchema = new mongoose.Schema(
   }
 )
 
-onboardingChecklistSchema.index({ propertyId: 1, clientId: 1 }, { unique: true })
+onboardingChecklistSchema.pre('validate', function validateUnit(next) {
+  if (!this.propertyId && !this.apartmentId) {
+    return next(new Error('Either propertyId or apartmentId is required'))
+  }
+  if (this.propertyId && this.apartmentId) {
+    return next(new Error('Provide only one of propertyId or apartmentId'))
+  }
+  next()
+})
+
+onboardingChecklistSchema.index(
+  { propertyId: 1, clientId: 1 },
+  { unique: true, partialFilterExpression: { propertyId: { $type: 'objectId' } } }
+)
+onboardingChecklistSchema.index(
+  { apartmentId: 1, clientId: 1 },
+  { unique: true, partialFilterExpression: { apartmentId: { $type: 'objectId' } } }
+)
 onboardingChecklistSchema.index({ projectId: 1, status: 1 })
 
 export function buildDefaultOnboardingItems() {
