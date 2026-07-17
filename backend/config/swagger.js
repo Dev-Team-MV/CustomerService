@@ -2336,6 +2336,248 @@ const options = {
             balloonMonth: { type: 'integer' },
             startDate: { type: 'string', format: 'date' }
           }
+        },
+        LocalizedString: {
+          type: 'object',
+          properties: {
+            en: { type: 'string' },
+            es: { type: 'string' }
+          }
+        },
+        ReferralProgram: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            projectId: { type: 'string' },
+            name: { type: 'string' },
+            rewardPerReferral: { type: 'number' },
+            rewardType: { type: 'string', enum: ['cash', 'payment_credit', 'amenity_access'] },
+            isActive: { type: 'boolean' },
+            termsAndConditions: { $ref: '#/components/schemas/LocalizedString' },
+            maxReferralsPerUser: { type: 'integer', nullable: true },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        ReferralProgramCreate: {
+          type: 'object',
+          required: ['projectId', 'name', 'rewardPerReferral'],
+          properties: {
+            projectId: { type: 'string' },
+            name: { type: 'string' },
+            rewardPerReferral: { type: 'number' },
+            rewardType: { type: 'string', enum: ['cash', 'payment_credit', 'amenity_access'] },
+            isActive: { type: 'boolean' },
+            termsAndConditions: { $ref: '#/components/schemas/LocalizedString' },
+            maxReferralsPerUser: { type: 'integer', nullable: true }
+          }
+        },
+        Referral: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            referrerId: { type: 'string' },
+            referredLeadId: { type: 'string', nullable: true },
+            referredName: { type: 'string' },
+            referredPhone: { type: 'string' },
+            referredEmail: { type: 'string' },
+            projectId: { type: 'string' },
+            status: {
+              type: 'string',
+              enum: ['pending', 'contacted', 'qualified', 'converted', 'reward_pending', 'reward_paid', 'expired']
+            },
+            rewardType: { type: 'string', enum: ['cash', 'payment_credit', 'amenity_access'] },
+            rewardAmount: { type: 'number' },
+            rewardPaidAt: { type: 'string', format: 'date-time', nullable: true },
+            conversionPropertyId: { type: 'string', nullable: true },
+            referralCode: { type: 'string' },
+            notes: { type: 'string' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        ReferralSubmit: {
+          type: 'object',
+          required: ['projectId', 'referredName'],
+          properties: {
+            projectId: { type: 'string' },
+            referredName: { type: 'string' },
+            referredPhone: { type: 'string' },
+            referredEmail: { type: 'string' },
+            notes: { type: 'string' }
+          }
+        },
+        ReferralConvert: {
+          type: 'object',
+          required: ['propertyId'],
+          properties: {
+            propertyId: { type: 'string' }
+          }
+        },
+        ReferralStats: {
+          type: 'object',
+          properties: {
+            projectId: { type: 'string' },
+            total: { type: 'integer' },
+            uniqueReferrers: { type: 'integer' },
+            byStatus: { type: 'object', additionalProperties: { type: 'integer' } },
+            rewardsPaid: { type: 'number' },
+            rewardsPending: { type: 'number' },
+            totalRewardAmount: { type: 'number' }
+          }
+        },
+        OnboardingChecklistItem: {
+          type: 'object',
+          properties: {
+            key: { type: 'string' },
+            label_en: { type: 'string' },
+            label_es: { type: 'string' },
+            completed: { type: 'boolean' },
+            completedAt: { type: 'string', format: 'date-time', nullable: true },
+            completedBy: { type: 'string', nullable: true },
+            notes: { type: 'string' },
+            requiredDocumentId: { type: 'string', nullable: true }
+          }
+        },
+        OnboardingChecklist: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            propertyId: { type: 'string' },
+            clientId: { type: 'string' },
+            projectId: { type: 'string' },
+            items: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/OnboardingChecklistItem' }
+            },
+            status: { type: 'string', enum: ['not_started', 'in_progress', 'completed'] },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        OnboardingChecklistCreate: {
+          type: 'object',
+          required: ['propertyId', 'clientId', 'projectId'],
+          properties: {
+            propertyId: { type: 'string' },
+            clientId: { type: 'string' },
+            projectId: { type: 'string' },
+            items: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/OnboardingChecklistItem' }
+            }
+          }
+        },
+        WarrantyClaim: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            propertyId: { type: 'string' },
+            clientId: { type: 'string' },
+            projectId: { type: 'string' },
+            category: {
+              type: 'string',
+              enum: ['structural', 'plumbing', 'electrical', 'finish', 'appliance', 'landscaping', 'other']
+            },
+            description: { type: 'string' },
+            photoUrls: { type: 'array', items: { type: 'string' } },
+            priority: { type: 'string', enum: ['low', 'medium', 'high', 'emergency'] },
+            status: {
+              type: 'string',
+              enum: ['submitted', 'under_review', 'approved', 'in_progress', 'resolved', 'rejected']
+            },
+            assignedContractor: { type: 'string' },
+            resolution: { type: 'string' },
+            resolvedAt: { type: 'string', format: 'date-time', nullable: true },
+            satisfactionRating: { type: 'integer', minimum: 1, maximum: 5, nullable: true },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        WarrantyClaimCreate: {
+          type: 'object',
+          required: ['propertyId', 'projectId', 'category', 'description'],
+          properties: {
+            propertyId: { type: 'string' },
+            clientId: { type: 'string', description: 'Solo admin; usuarios usan su propio id' },
+            projectId: { type: 'string' },
+            category: {
+              type: 'string',
+              enum: ['structural', 'plumbing', 'electrical', 'finish', 'appliance', 'landscaping', 'other']
+            },
+            description: { type: 'string' },
+            photoUrls: { type: 'array', items: { type: 'string' } },
+            priority: { type: 'string', enum: ['low', 'medium', 'high', 'emergency'] }
+          }
+        },
+        SurveyResponseItem: {
+          type: 'object',
+          properties: {
+            question: { type: 'string' },
+            rating: { type: 'integer', minimum: 1, maximum: 5, nullable: true },
+            comment: { type: 'string' }
+          }
+        },
+        SatisfactionSurvey: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            propertyId: { type: 'string' },
+            clientId: { type: 'string' },
+            projectId: { type: 'string' },
+            type: {
+              type: 'string',
+              enum: ['post_sale', 'post_construction', 'post_warranty', 'annual']
+            },
+            responses: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/SurveyResponseItem' }
+            },
+            overallRating: { type: 'integer', minimum: 1, maximum: 5, nullable: true },
+            npsScore: { type: 'integer', minimum: 0, maximum: 10, nullable: true },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        SatisfactionSurveyCreate: {
+          type: 'object',
+          required: ['propertyId', 'projectId', 'type'],
+          properties: {
+            propertyId: { type: 'string' },
+            clientId: { type: 'string', description: 'Solo admin; usuarios usan su propio id' },
+            projectId: { type: 'string' },
+            type: {
+              type: 'string',
+              enum: ['post_sale', 'post_construction', 'post_warranty', 'annual']
+            },
+            responses: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/SurveyResponseItem' }
+            },
+            overallRating: { type: 'integer', minimum: 1, maximum: 5 },
+            npsScore: { type: 'integer', minimum: 0, maximum: 10 }
+          }
+        },
+        SurveyStats: {
+          type: 'object',
+          properties: {
+            projectId: { type: 'string' },
+            total: { type: 'integer' },
+            avgOverallRating: { type: 'number', nullable: true },
+            avgNps: { type: 'number', nullable: true },
+            byType: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  type: { type: 'string' },
+                  count: { type: 'integer' },
+                  avgOverallRating: { type: 'number', nullable: true },
+                  avgNps: { type: 'number', nullable: true }
+                }
+              }
+            }
+          }
         }
       }
     }
