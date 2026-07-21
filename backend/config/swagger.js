@@ -2595,10 +2595,62 @@ const options = {
             priority: { type: 'string', enum: ['low', 'medium', 'high', 'emergency'] }
           }
         },
+        SurveyTemplateQuestion: {
+          type: 'object',
+          required: ['key'],
+          properties: {
+            key: { type: 'string', description: 'Unique key inside the template (e.g. q1)' },
+            text_en: { type: 'string' },
+            text_es: { type: 'string' }
+          }
+        },
+        SurveyTemplate: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            projectId: { type: 'string' },
+            type: {
+              type: 'string',
+              enum: ['post_sale', 'post_construction', 'post_warranty', 'annual']
+            },
+            name: { type: 'string' },
+            questions: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/SurveyTemplateQuestion' }
+            },
+            isActive: { type: 'boolean' },
+            createdBy: { type: 'string', nullable: true },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        SurveyTemplateCreate: {
+          type: 'object',
+          required: ['projectId', 'type', 'name', 'questions'],
+          properties: {
+            projectId: { type: 'string' },
+            type: {
+              type: 'string',
+              enum: ['post_sale', 'post_construction', 'post_warranty', 'annual']
+            },
+            name: { type: 'string' },
+            questions: {
+              type: 'array',
+              minItems: 1,
+              items: { $ref: '#/components/schemas/SurveyTemplateQuestion' }
+            },
+            isActive: { type: 'boolean' }
+          }
+        },
         SurveyResponseItem: {
           type: 'object',
           properties: {
-            question: { type: 'string' },
+            questionKey: {
+              type: 'string',
+              nullable: true,
+              description: 'Template question key. Users answer by sending questionKey + rating/comment'
+            },
+            question: { type: 'string', description: 'Question text snapshot (set by backend from template)' },
             rating: { type: 'integer', minimum: 1, maximum: 5, nullable: true },
             comment: { type: 'string' }
           }
@@ -2611,6 +2663,7 @@ const options = {
             apartmentId: { type: 'string', nullable: true },
             clientId: { type: 'string' },
             projectId: { type: 'string' },
+            templateId: { type: 'string', nullable: true },
             type: {
               type: 'string',
               enum: ['post_sale', 'post_construction', 'post_warranty', 'annual']
@@ -2627,16 +2680,20 @@ const options = {
         },
         SatisfactionSurveyCreate: {
           type: 'object',
-          required: ['projectId', 'type'],
-          description: 'Provide exactly one of propertyId or apartmentId',
+          description:
+            'Provide exactly one of propertyId or apartmentId. Users must send templateId; ' +
+            'projectId and type are derived from the template. Answers go in responses as ' +
+            '{ questionKey, rating, comment }. Free-form (no templateId) is admin-only.',
           properties: {
             propertyId: { type: 'string', nullable: true, description: 'For lot/house units. Mutually exclusive with apartmentId' },
             apartmentId: { type: 'string', nullable: true, description: 'For apartment units. Mutually exclusive with propertyId' },
             clientId: { type: 'string', description: 'Solo admin; usuarios usan su propio id' },
-            projectId: { type: 'string' },
+            templateId: { type: 'string', description: 'Required for non-admin users' },
+            projectId: { type: 'string', description: 'Required only for admin free-form surveys' },
             type: {
               type: 'string',
-              enum: ['post_sale', 'post_construction', 'post_warranty', 'annual']
+              enum: ['post_sale', 'post_construction', 'post_warranty', 'annual'],
+              description: 'Required only for admin free-form surveys'
             },
             responses: {
               type: 'array',
@@ -2648,6 +2705,7 @@ const options = {
         },
         SurveyStats: {
           type: 'object',
+          description: 'Admin-only aggregated results; users never see these numbers',
           properties: {
             projectId: { type: 'string' },
             total: { type: 'integer' },
@@ -2662,6 +2720,18 @@ const options = {
                   count: { type: 'integer' },
                   avgOverallRating: { type: 'number', nullable: true },
                   avgNps: { type: 'number', nullable: true }
+                }
+              }
+            },
+            byQuestion: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  questionKey: { type: 'string', nullable: true },
+                  question: { type: 'string' },
+                  count: { type: 'integer' },
+                  avgRating: { type: 'number', nullable: true }
                 }
               }
             }

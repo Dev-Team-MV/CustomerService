@@ -4,6 +4,12 @@ export const SURVEY_TYPES = ['post_sale', 'post_construction', 'post_warranty', 
 
 const surveyResponseSchema = new mongoose.Schema(
   {
+    /** Question key from the SurveyTemplate (null on legacy free-form surveys) */
+    questionKey: {
+      type: String,
+      trim: true,
+      default: null
+    },
     question: {
       type: String,
       required: true,
@@ -54,6 +60,12 @@ const satisfactionSurveySchema = new mongoose.Schema(
       type: String,
       enum: SURVEY_TYPES,
       required: [true, 'type is required'],
+      index: true
+    },
+    templateId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'SurveyTemplate',
+      default: null,
       index: true
     },
     responses: {
