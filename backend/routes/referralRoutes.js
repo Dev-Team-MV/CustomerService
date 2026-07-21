@@ -252,8 +252,9 @@ router.get('/stats/:projectId', protect, admin, getReferralStats)
  *               referredName: { type: string }
  *               referredPhone: { type: string }
  *               referredEmail: { type: string }
- *               rewardType: { type: string, enum: [cash, payment_credit, amenity_access] }
+ *               rewardType: { type: string, enum: [cash, property_discount] }
  *               rewardAmount: { type: number }
+ *               discountPercent: { type: number }
  *               status: { type: string }
  *               notes: { type: string }
  *     responses:
@@ -272,7 +273,7 @@ router.post('/', protect, admin, createReferral)
  * /api/referrals/{id}/convert:
  *   post:
  *     summary: Convert referral to sale (Admin)
- *     description: Sets status to converted, links property, fires referral_converted automation.
+ *     description: Sets status to converted, links sold property or apartment, fires referral_converted automation.
  *     tags: [Referrals]
  *     security:
  *       - bearerAuth: []
@@ -301,7 +302,13 @@ router.post('/:id/convert', protect, admin, convertReferral)
  * @swagger
  * /api/referrals/{id}/approve-reward:
  *   post:
- *     summary: Approve and mark reward as paid (Admin)
+ *     summary: Approve reward (Admin)
+ *     description: |
+ *       Cash: only allowed when the referrer has fully paid all their units (no pending balance); marks reward_paid.
+ *       property_discount: requires discountBase (original_100|after_first_10) and the referrer's
+ *       rewardPropertyId or rewardApartmentId. discountPercent is configured per project on the
+ *       referral program and can be overridden in the request. Creates a signed Payload type
+ *       "referral bonus" (UI label: Bonificación por referido) and reduces unit pending.
  *     tags: [Referrals]
  *     security:
  *       - bearerAuth: []
@@ -314,13 +321,10 @@ router.post('/:id/convert', protect, admin, convertReferral)
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               rewardAmount: { type: number }
- *               rewardType: { type: string, enum: [cash, payment_credit, amenity_access] }
+ *             $ref: '#/components/schemas/ReferralApproveReward'
  *     responses:
  *       200:
- *         description: Reward marked paid
+ *         description: Reward approved
  *         content:
  *           application/json:
  *             schema:
@@ -374,8 +378,9 @@ router.post('/:id/approve-reward', protect, admin, approveReward)
  *               status:
  *                 type: string
  *                 enum: [pending, contacted, qualified, converted, reward_pending, reward_paid, expired]
- *               rewardType: { type: string, enum: [cash, payment_credit, amenity_access] }
+ *               rewardType: { type: string, enum: [cash, property_discount] }
  *               rewardAmount: { type: number }
+ *               discountPercent: { type: number }
  *               referredLeadId: { type: string }
  *               notes: { type: string }
  *     responses:

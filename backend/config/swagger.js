@@ -960,10 +960,17 @@ const options = {
                 'complementary down payment',
                 'monthly payment',
                 'additional payment',
-                'closing payment'
-              ]
+                'closing payment',
+                'referral bonus'
+              ],
+              description: 'referral bonus should be shown in UI as "Bonificación por referido"'
             },
             notes: { type: 'string' },
+            referralId: {
+              type: 'string',
+              nullable: true,
+              description: 'Linked Referral when type is referral bonus'
+            },
             processedBy: { type: 'string' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
@@ -2350,8 +2357,20 @@ const options = {
             _id: { type: 'string' },
             projectId: { type: 'string' },
             name: { type: 'string' },
-            rewardPerReferral: { type: 'number' },
-            rewardType: { type: 'string', enum: ['cash', 'payment_credit', 'amenity_access'] },
+            rewardPerReferral: {
+              type: 'number',
+              description: 'Cash amount when rewardType is cash'
+            },
+            rewardType: {
+              type: 'string',
+              enum: ['cash', 'property_discount'],
+              description: 'Legacy payment_credit/amenity_access may still appear on old documents'
+            },
+            discountPercent: {
+              type: 'number',
+              nullable: true,
+              description: 'Percent of referrer unit value when rewardType is property_discount'
+            },
             isActive: { type: 'boolean' },
             termsAndConditions: { $ref: '#/components/schemas/LocalizedString' },
             maxReferralsPerUser: { type: 'integer', nullable: true },
@@ -2361,12 +2380,14 @@ const options = {
         },
         ReferralProgramCreate: {
           type: 'object',
-          required: ['projectId', 'name', 'rewardPerReferral'],
+          required: ['projectId', 'name'],
+          description: 'Use cash (rewardPerReferral) or property_discount (discountPercent). Exclusive.',
           properties: {
             projectId: { type: 'string' },
             name: { type: 'string' },
             rewardPerReferral: { type: 'number' },
-            rewardType: { type: 'string', enum: ['cash', 'payment_credit', 'amenity_access'] },
+            rewardType: { type: 'string', enum: ['cash', 'property_discount'] },
+            discountPercent: { type: 'number', minimum: 0, maximum: 100 },
             isActive: { type: 'boolean' },
             termsAndConditions: { $ref: '#/components/schemas/LocalizedString' },
             maxReferralsPerUser: { type: 'integer', nullable: true }
@@ -2386,10 +2407,41 @@ const options = {
               type: 'string',
               enum: ['pending', 'contacted', 'qualified', 'converted', 'reward_pending', 'reward_paid', 'expired']
             },
-            rewardType: { type: 'string', enum: ['cash', 'payment_credit', 'amenity_access'] },
-            rewardAmount: { type: 'number' },
+            rewardType: {
+              type: 'string',
+              enum: ['cash', 'property_discount', 'payment_credit', 'amenity_access']
+            },
+            rewardAmount: {
+              type: 'number',
+              description: 'Cash amount, or computed discount dollars after approval'
+            },
+            discountPercent: { type: 'number', nullable: true },
+            discountBase: {
+              type: 'string',
+              nullable: true,
+              enum: ['original_100', 'after_first_10'],
+              description: 'Admin-selected base: 100% of unit price, or 90% after a prior 10% discount'
+            },
+            discountBaseAmount: { type: 'number', nullable: true },
+            discountAmount: { type: 'number', nullable: true },
             rewardPaidAt: { type: 'string', format: 'date-time', nullable: true },
             conversionPropertyId: { type: 'string', nullable: true },
+            conversionApartmentId: { type: 'string', nullable: true },
+            rewardPropertyId: {
+              type: 'string',
+              nullable: true,
+              description: 'Referrer property that received the discount credit'
+            },
+            rewardApartmentId: {
+              type: 'string',
+              nullable: true,
+              description: 'Referrer apartment that received the discount credit'
+            },
+            rewardPayloadId: {
+              type: 'string',
+              nullable: true,
+              description: 'Signed Payload of type referral bonus'
+            },
             referralCode: { type: 'string' },
             notes: { type: 'string' },
             createdAt: { type: 'string', format: 'date-time' },
@@ -2409,9 +2461,31 @@ const options = {
         },
         ReferralConvert: {
           type: 'object',
-          required: ['propertyId'],
+          description: 'Provide exactly one of propertyId or apartmentId for the referred sale',
           properties: {
-            propertyId: { type: 'string' }
+            propertyId: { type: 'string' },
+            apartmentId: { type: 'string' }
+          }
+        },
+        ReferralApproveReward: {
+          type: 'object',
+          description:
+            'Cash: only allowed when the referrer has no pending balance on any unit; optional rewardAmount. ' +
+            'property_discount: require discountBase + rewardPropertyId or rewardApartmentId; discountPercent ' +
+            'falls back to the project referral program when omitted. Creates a signed Payload type ' +
+            '"referral bonus" (display as Bonificación por referido).',
+          properties: {
+            rewardType: { type: 'string', enum: ['cash', 'property_discount'] },
+            rewardAmount: { type: 'number' },
+            discountPercent: {
+              type: 'number',
+              minimum: 0,
+              maximum: 100,
+              description: 'Optional override; defaults to the percent configured on the project program'
+            },
+            discountBase: { type: 'string', enum: ['original_100', 'after_first_10'] },
+            rewardPropertyId: { type: 'string' },
+            rewardApartmentId: { type: 'string' }
           }
         },
         ReferralStats: {
@@ -2421,6 +2495,11 @@ const options = {
             total: { type: 'integer' },
             uniqueReferrers: { type: 'integer' },
             byStatus: { type: 'object', additionalProperties: { type: 'integer' } },
+            cashPaid: { type: 'number', description: 'Sum of cash rewards marked reward_paid' },
+            discountsPaid: {
+              type: 'number',
+              description: 'Sum of property_discount amounts marked reward_paid'
+            },
             rewardsPaid: { type: 'number' },
             rewardsPending: { type: 'number' },
             totalRewardAmount: { type: 'number' }

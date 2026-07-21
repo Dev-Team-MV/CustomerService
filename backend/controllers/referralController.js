@@ -1,18 +1,29 @@
 import crypto from 'crypto'
 import mongoose from 'mongoose'
 import Referral, { REFERRAL_STATUSES } from '../models/Referral.js'
-import ReferralProgram, { REFERRAL_REWARD_TYPES } from '../models/ReferralProgram.js'
+import ReferralProgram, {
+  REFERRAL_REWARD_TYPES,
+  REFERRAL_PROGRAM_REWARD_TYPES,
+  REFERRAL_DISCOUNT_BASES
+} from '../models/ReferralProgram.js'
 import Lead from '../models/Lead.js'
 import User from '../models/User.js'
+import Property from '../models/Property.js'
+import Apartment from '../models/Apartment.js'
 import { isStaffRole } from '../utils/roles.js'
 import { isValidObjectId } from '../utils/crmHelpers.js'
 import { runAutomationEngineAsync } from '../services/automationEngine.js'
+import { applyPropertyDiscountReward } from '../services/referralRewardService.js'
 
 const POPULATE = [
   { path: 'referrerId', select: 'firstName lastName email phoneNumber' },
   { path: 'referredLeadId', select: 'name phone email stage source' },
   { path: 'projectId', select: 'name slug title' },
-  { path: 'conversionPropertyId', select: 'price status lot' }
+  { path: 'conversionPropertyId', select: 'price status lot' },
+  { path: 'conversionApartmentId', select: 'apartmentNumber floorNumber building status price' },
+  { path: 'rewardPropertyId', select: 'price status pending lot' },
+  { path: 'rewardApartmentId', select: 'apartmentNumber floorNumber building status price pending' },
+  { path: 'rewardPayloadId', select: 'amount type status notes date' }
 ]
 
 function generateReferralCode() {
@@ -34,6 +45,115 @@ function isAdminUser(user) {
 
 async function getActiveProgram(projectId) {
   return ReferralProgram.findOne({ projectId, isActive: true }).sort({ createdAt: -1 })
+}
+
+/** True when the referrer still owes money on any of their units */
+async function referrerHasOutstandingDebt(referrerId) {
+  const [property, apartment] = await Promise.all([
+    Property.exists({ users: referrerId, pending: { $gt: 0 } }),
+    Apartment.exists({ users: referrerId, pending: { $gt: 0 } })
+  ])
+  return Boolean(property || apartment)
+}
+
+function resolveConversionUnit({ propertyId, apartmentId, conversionPropertyId, conversionApartmentId }) {
+  const propId = propertyId ?? conversionPropertyId
+  const aptId = apartmentId ?? conversionApartmentId
+  const hasProperty = propId != null && propId !== ''
+  const hasApartment = aptId != null && aptId !== ''
+
+  if (!hasProperty && !hasApartment) {
+    return { error: 'Either propertyId or apartmentId is required for conversion' }
+  }
+  if (hasProperty && hasApartment) {
+    return { error: 'Provide only one of propertyId or apartmentId' }
+  }
+  if (hasProperty && !isValidObjectId(propId)) {
+    return { error: 'Invalid propertyId' }
+  }
+  if (hasApartment && !isValidObjectId(aptId)) {
+    return { error: 'Invalid apartmentId' }
+  }
+  return {
+    conversionPropertyId: hasProperty ? propId : null,
+    conversionApartmentId: hasApartment ? aptId : null
+  }
+}
+
+function resolveRewardUnit({ rewardPropertyId, rewardApartmentId }) {
+  const hasProperty = rewardPropertyId != null && rewardPropertyId !== ''
+  const hasApartment = rewardApartmentId != null && rewardApartmentId !== ''
+
+  if (!hasProperty && !hasApartment) {
+    return { error: 'Either rewardPropertyId or rewardApartmentId is required for property_discount' }
+  }
+  if (hasProperty && hasApartment) {
+    return { error: 'Provide only one of rewardPropertyId or rewardApartmentId' }
+  }
+  if (hasProperty && !isValidObjectId(rewardPropertyId)) {
+    return { error: 'Invalid rewardPropertyId' }
+  }
+  if (hasApartment && !isValidObjectId(rewardApartmentId)) {
+    return { error: 'Invalid rewardApartmentId' }
+  }
+  return {
+    rewardPropertyId: hasProperty ? rewardPropertyId : null,
+    rewardApartmentId: hasApartment ? rewardApartmentId : null
+  }
+}
+
+function programRewardSnapshot(program, overrides = {}) {
+  const rewardType = overrides.rewardType || program?.rewardType || 'cash'
+  if (rewardType === 'property_discount') {
+    return {
+      rewardType,
+      rewardAmount: 0,
+      discountPercent:
+        overrides.discountPercent != null
+          ? Number(overrides.discountPercent)
+          : program?.discountPercent ?? null
+    }
+  }
+  return {
+    rewardType: 'cash',
+    rewardAmount:
+      overrides.rewardAmount != null
+        ? Number(overrides.rewardAmount)
+        : program?.rewardPerReferral || 0,
+    discountPercent: null
+  }
+}
+
+function validateProgramRewardBody({ rewardType, rewardPerReferral, discountPercent }, { isUpdate = false } = {}) {
+  if (rewardType !== undefined) {
+    if (!REFERRAL_PROGRAM_REWARD_TYPES.includes(rewardType)) {
+      return {
+        error: `Invalid rewardType. Allowed for programs: ${REFERRAL_PROGRAM_REWARD_TYPES.join(', ')}`
+      }
+    }
+  }
+
+  const type = rewardType || (isUpdate ? undefined : 'cash')
+
+  if (type === 'cash' || (isUpdate && rewardPerReferral !== undefined && type !== 'property_discount')) {
+    if (rewardPerReferral != null && Number(rewardPerReferral) < 0) {
+      return { error: 'rewardPerReferral must be a non-negative number' }
+    }
+  }
+
+  if (type === 'property_discount') {
+    if (discountPercent == null || Number(discountPercent) <= 0 || Number(discountPercent) > 100) {
+      return { error: 'discountPercent (0-100] is required for property_discount' }
+    }
+  }
+
+  if (isUpdate && discountPercent !== undefined && discountPercent != null) {
+    if (Number(discountPercent) < 0 || Number(discountPercent) > 100) {
+      return { error: 'discountPercent must be between 0 and 100' }
+    }
+  }
+
+  return { error: null }
 }
 
 // ─── Referral Program CRUD ───────────────────────────────────────────────────
@@ -80,6 +200,7 @@ export const createReferralProgram = async (req, res) => {
       name,
       rewardPerReferral,
       rewardType,
+      discountPercent,
       isActive,
       termsAndConditions,
       maxReferralsPerUser
@@ -91,20 +212,28 @@ export const createReferralProgram = async (req, res) => {
     if (!name?.trim()) {
       return res.status(400).json({ message: 'name is required' })
     }
-    if (rewardPerReferral == null || Number(rewardPerReferral) < 0) {
-      return res.status(400).json({ message: 'rewardPerReferral must be a non-negative number' })
+
+    const resolvedType = rewardType || 'cash'
+    const validation = validateProgramRewardBody({
+      rewardType: resolvedType,
+      rewardPerReferral,
+      discountPercent
+    })
+    if (validation.error) {
+      return res.status(400).json({ message: validation.error })
     }
-    if (rewardType && !REFERRAL_REWARD_TYPES.includes(rewardType)) {
-      return res.status(400).json({
-        message: `Invalid rewardType. Allowed: ${REFERRAL_REWARD_TYPES.join(', ')}`
-      })
+
+    if (resolvedType === 'cash' && (rewardPerReferral == null || Number(rewardPerReferral) < 0)) {
+      return res.status(400).json({ message: 'rewardPerReferral must be a non-negative number' })
     }
 
     const program = await ReferralProgram.create({
       projectId,
       name: name.trim(),
-      rewardPerReferral: Number(rewardPerReferral),
-      rewardType: rewardType || 'cash',
+      rewardPerReferral: resolvedType === 'cash' ? Number(rewardPerReferral) : Number(rewardPerReferral) || 0,
+      rewardType: resolvedType,
+      discountPercent:
+        resolvedType === 'property_discount' ? Number(discountPercent) : null,
       isActive: isActive !== undefined ? Boolean(isActive) : true,
       termsAndConditions: {
         en: termsAndConditions?.en || '',
@@ -129,20 +258,39 @@ export const updateReferralProgram = async (req, res) => {
       name,
       rewardPerReferral,
       rewardType,
+      discountPercent,
       isActive,
       termsAndConditions,
       maxReferralsPerUser
     } = req.body
 
+    const nextType = rewardType !== undefined ? rewardType : program.rewardType
+    const validation = validateProgramRewardBody(
+      {
+        rewardType: nextType,
+        rewardPerReferral:
+          rewardPerReferral !== undefined ? rewardPerReferral : program.rewardPerReferral,
+        discountPercent:
+          discountPercent !== undefined ? discountPercent : program.discountPercent
+      },
+      { isUpdate: true }
+    )
+    if (validation.error) {
+      return res.status(400).json({ message: validation.error })
+    }
+
     if (name !== undefined) program.name = name.trim()
+    if (rewardType !== undefined) program.rewardType = rewardType
     if (rewardPerReferral !== undefined) program.rewardPerReferral = Number(rewardPerReferral)
-    if (rewardType !== undefined) {
-      if (!REFERRAL_REWARD_TYPES.includes(rewardType)) {
-        return res.status(400).json({
-          message: `Invalid rewardType. Allowed: ${REFERRAL_REWARD_TYPES.join(', ')}`
-        })
-      }
-      program.rewardType = rewardType
+    if (discountPercent !== undefined) {
+      program.discountPercent =
+        discountPercent == null ? null : Number(discountPercent)
+    }
+    if (program.rewardType === 'cash') {
+      program.discountPercent = null
+    }
+    if (program.rewardType === 'property_discount' && program.discountPercent == null) {
+      return res.status(400).json({ message: 'discountPercent is required for property_discount' })
     }
     if (isActive !== undefined) program.isActive = Boolean(isActive)
     if (termsAndConditions !== undefined) {
@@ -200,7 +348,6 @@ export const getReferrals = async (req, res) => {
       filter.referrerId = req.query.referrerId
     }
 
-    // Non-staff users only see their own referrals
     if (!isAdminUser(req.user)) {
       filter.referrerId = req.user._id
     }
@@ -242,6 +389,7 @@ export const createReferral = async (req, res) => {
       projectId,
       rewardType,
       rewardAmount,
+      discountPercent,
       notes,
       status
     } = req.body
@@ -261,9 +409,19 @@ export const createReferral = async (req, res) => {
       return res.status(400).json({ message: 'Invalid referrerId' })
     }
 
-    const program = await getActiveProgram(projectId)
+    if (rewardType && !REFERRAL_REWARD_TYPES.includes(rewardType)) {
+      return res.status(400).json({
+        message: `Invalid rewardType. Allowed: ${REFERRAL_REWARD_TYPES.join(', ')}`
+      })
+    }
 
-    // Unified with /submit: manual creation also feeds the CRM with a Lead
+    const program = await getActiveProgram(projectId)
+    const snapshot = programRewardSnapshot(program, {
+      rewardType,
+      rewardAmount,
+      discountPercent
+    })
+
     const referrer =
       String(resolvedReferrerId) === String(req.user._id)
         ? req.user
@@ -292,8 +450,9 @@ export const createReferral = async (req, res) => {
       referredEmail: referredEmail?.trim()?.toLowerCase() || '',
       projectId,
       status: status && isAdminUser(req.user) ? status : 'pending',
-      rewardType: rewardType || program?.rewardType || 'cash',
-      rewardAmount: rewardAmount != null ? Number(rewardAmount) : program?.rewardPerReferral || 0,
+      rewardType: snapshot.rewardType,
+      rewardAmount: snapshot.rewardAmount,
+      discountPercent: snapshot.discountPercent,
       referralCode: await createUniqueReferralCode(),
       notes: notes?.trim() || ''
     })
@@ -317,6 +476,7 @@ export const updateReferral = async (req, res) => {
       status,
       rewardType,
       rewardAmount,
+      discountPercent,
       notes,
       referredLeadId
     } = req.body
@@ -342,6 +502,10 @@ export const updateReferral = async (req, res) => {
       referral.rewardType = rewardType
     }
     if (rewardAmount !== undefined) referral.rewardAmount = Number(rewardAmount)
+    if (discountPercent !== undefined) {
+      referral.discountPercent =
+        discountPercent == null ? null : Number(discountPercent)
+    }
     if (referredLeadId !== undefined) {
       if (referredLeadId && !isValidObjectId(referredLeadId)) {
         return res.status(400).json({ message: 'Invalid referredLeadId' })
@@ -414,6 +578,8 @@ export const submitReferral = async (req, res) => {
         : `Referral from user ${req.user._id}`
     })
 
+    const snapshot = programRewardSnapshot(program)
+
     const referral = await Referral.create({
       referrerId: req.user._id,
       referredLeadId: lead._id,
@@ -422,8 +588,9 @@ export const submitReferral = async (req, res) => {
       referredEmail: referredEmail?.trim()?.toLowerCase() || '',
       projectId,
       status: 'pending',
-      rewardType: program.rewardType,
-      rewardAmount: program.rewardPerReferral,
+      rewardType: snapshot.rewardType,
+      rewardAmount: snapshot.rewardAmount,
+      discountPercent: snapshot.discountPercent,
       referralCode: await createUniqueReferralCode(),
       notes: notes?.trim() || ''
     })
@@ -437,9 +604,9 @@ export const submitReferral = async (req, res) => {
 
 export const convertReferral = async (req, res) => {
   try {
-    const { propertyId } = req.body
-    if (!propertyId || !isValidObjectId(propertyId)) {
-      return res.status(400).json({ message: 'Valid propertyId is required' })
+    const unit = resolveConversionUnit(req.body)
+    if (unit.error) {
+      return res.status(400).json({ message: unit.error })
     }
 
     const referral = await Referral.findById(req.params.id)
@@ -453,7 +620,8 @@ export const convertReferral = async (req, res) => {
     }
 
     referral.status = 'converted'
-    referral.conversionPropertyId = propertyId
+    referral.conversionPropertyId = unit.conversionPropertyId
+    referral.conversionApartmentId = unit.conversionApartmentId
     await referral.save()
 
     if (referral.referredLeadId) {
@@ -488,11 +656,6 @@ export const approveReward = async (req, res) => {
       })
     }
 
-    referral.status = 'reward_paid'
-    referral.rewardPaidAt = new Date()
-    if (req.body.rewardAmount != null) {
-      referral.rewardAmount = Number(req.body.rewardAmount)
-    }
     if (req.body.rewardType) {
       if (!REFERRAL_REWARD_TYPES.includes(req.body.rewardType)) {
         return res.status(400).json({
@@ -501,6 +664,79 @@ export const approveReward = async (req, res) => {
       }
       referral.rewardType = req.body.rewardType
     }
+
+    const rewardType = referral.rewardType || 'cash'
+
+    if (rewardType === 'property_discount') {
+      const unit = resolveRewardUnit(req.body)
+      if (unit.error) {
+        return res.status(400).json({ message: unit.error })
+      }
+
+      const discountBase = req.body.discountBase
+      if (!REFERRAL_DISCOUNT_BASES.includes(discountBase)) {
+        return res.status(400).json({
+          message: `discountBase is required for property_discount. Allowed: ${REFERRAL_DISCOUNT_BASES.join(', ')}`
+        })
+      }
+
+      // Percent: request override → referral snapshot → project program config
+      let discountPercent =
+        req.body.discountPercent != null
+          ? Number(req.body.discountPercent)
+          : referral.discountPercent
+
+      if (discountPercent == null) {
+        const program = await getActiveProgram(referral.projectId)
+        discountPercent = program?.discountPercent ?? null
+      }
+
+      if (discountPercent == null) {
+        return res.status(400).json({
+          message:
+            'discountPercent is not configured. Set it on the project referral program or send it in the request'
+        })
+      }
+
+      try {
+        await applyPropertyDiscountReward({
+          referral,
+          rewardPropertyId: unit.rewardPropertyId,
+          rewardApartmentId: unit.rewardApartmentId,
+          discountBase,
+          discountPercent,
+          actor: req.user
+        })
+      } catch (error) {
+        return res.status(error.statusCode || 500).json({ message: error.message })
+      }
+
+      const populated = await Referral.findById(referral._id).populate(POPULATE)
+      return res.json(populated)
+    }
+
+    // cash: only allowed when the referrer has no outstanding debt on any unit
+    if (rewardType === 'cash') {
+      const hasDebt = await referrerHasOutstandingDebt(
+        referral.referrerId._id || referral.referrerId
+      )
+      if (hasDebt) {
+        return res.status(400).json({
+          message:
+            'Cash reward is only allowed when the referrer has fully paid their units. Use property_discount instead'
+        })
+      }
+    }
+
+    referral.status = 'reward_paid'
+    referral.rewardPaidAt = new Date()
+    if (req.body.rewardAmount != null) {
+      referral.rewardAmount = Number(req.body.rewardAmount)
+    }
+    referral.discountBase = undefined
+    referral.discountBaseAmount = undefined
+    referral.discountAmount = undefined
+    referral.markModified('discountBase')
     await referral.save()
 
     const populated = await Referral.findById(referral._id).populate(POPULATE)
@@ -559,6 +795,34 @@ export const getReferralStats = async (req, res) => {
             _id: null,
             total: { $sum: 1 },
             uniqueReferrers: { $addToSet: '$referrerId' },
+            cashPaid: {
+              $sum: {
+                $cond: [
+                  {
+                    $and: [
+                      { $eq: ['$status', 'reward_paid'] },
+                      { $eq: ['$rewardType', 'cash'] }
+                    ]
+                  },
+                  '$rewardAmount',
+                  0
+                ]
+              }
+            },
+            discountsPaid: {
+              $sum: {
+                $cond: [
+                  {
+                    $and: [
+                      { $eq: ['$status', 'reward_paid'] },
+                      { $eq: ['$rewardType', 'property_discount'] }
+                    ]
+                  },
+                  { $ifNull: ['$discountAmount', '$rewardAmount'] },
+                  0
+                ]
+              }
+            },
             rewardsPaid: {
               $sum: {
                 $cond: [{ $eq: ['$status', 'reward_paid'] }, '$rewardAmount', 0]
@@ -566,7 +830,11 @@ export const getReferralStats = async (req, res) => {
             },
             rewardsPending: {
               $sum: {
-                $cond: [{ $eq: ['$status', 'reward_pending'] }, '$rewardAmount', 0]
+                $cond: [
+                  { $in: ['$status', ['reward_pending', 'converted']] },
+                  '$rewardAmount',
+                  0
+                ]
               }
             }
           }
@@ -584,6 +852,8 @@ export const getReferralStats = async (req, res) => {
     const summary = totals[0] || {
       total: 0,
       uniqueReferrers: [],
+      cashPaid: 0,
+      discountsPaid: 0,
       rewardsPaid: 0,
       rewardsPending: 0
     }
@@ -593,6 +863,8 @@ export const getReferralStats = async (req, res) => {
       total: summary.total,
       uniqueReferrers: summary.uniqueReferrers?.length || 0,
       byStatus: statusMap,
+      cashPaid: summary.cashPaid || 0,
+      discountsPaid: summary.discountsPaid || 0,
       rewardsPaid: summary.rewardsPaid || 0,
       rewardsPending: summary.rewardsPending || 0,
       totalRewardAmount

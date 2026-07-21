@@ -93,7 +93,7 @@ const router = express.Router()
  *                 description: Only admins can set signed; users default to pending.
  *               type:
  *                 type: string
- *                 enum: [initial down payment, complementary down payment, monthly payment, additional payment, closing payment]
+ *                 enum: [initial down payment, complementary down payment, monthly payment, additional payment, closing payment, referral bonus]
  *               notes:
  *                 type: string
  *               folder:
