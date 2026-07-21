@@ -235,6 +235,7 @@ router.get('/stats/:projectId', protect, admin, getReferralStats)
  *                 $ref: '#/components/schemas/Referral'
  *   post:
  *     summary: Create referral manually (Admin)
+ *     description: Also creates a CRM Lead (source referido) linked via referredLeadId, same as /submit. Active program is optional; its reward is used when rewardType/rewardAmount are omitted.
  *     tags: [Referrals]
  *     security:
  *       - bearerAuth: []

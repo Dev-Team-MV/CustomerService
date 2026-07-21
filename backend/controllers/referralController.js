@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 import Referral, { REFERRAL_STATUSES } from '../models/Referral.js'
 import ReferralProgram, { REFERRAL_REWARD_TYPES } from '../models/ReferralProgram.js'
 import Lead from '../models/Lead.js'
+import User from '../models/User.js'
 import { isStaffRole } from '../utils/roles.js'
 import { isValidObjectId } from '../utils/crmHelpers.js'
 import { runAutomationEngineAsync } from '../services/automationEngine.js'
@@ -261,8 +262,31 @@ export const createReferral = async (req, res) => {
     }
 
     const program = await getActiveProgram(projectId)
+
+    // Unified with /submit: manual creation also feeds the CRM with a Lead
+    const referrer =
+      String(resolvedReferrerId) === String(req.user._id)
+        ? req.user
+        : await User.findById(resolvedReferrerId).select('firstName lastName')
+    const referrerLabel = referrer
+      ? `${referrer.firstName || ''} ${referrer.lastName || ''}`.trim() || `user ${resolvedReferrerId}`
+      : `user ${resolvedReferrerId}`
+
+    const lead = await Lead.create({
+      name: referredName.trim(),
+      phone: referredPhone?.trim() || '',
+      email: referredEmail?.trim()?.toLowerCase() || undefined,
+      source: 'referido',
+      projectId,
+      stage: 'nuevo',
+      notes: notes?.trim()
+        ? `Referral from ${referrerLabel}: ${notes.trim()}`
+        : `Referral from ${referrerLabel}`
+    })
+
     const referral = await Referral.create({
       referrerId: resolvedReferrerId,
+      referredLeadId: lead._id,
       referredName: referredName.trim(),
       referredPhone: referredPhone?.trim() || '',
       referredEmail: referredEmail?.trim()?.toLowerCase() || '',
