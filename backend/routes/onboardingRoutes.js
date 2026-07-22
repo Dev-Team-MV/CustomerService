@@ -51,7 +51,12 @@ const router = express.Router()
  *                 $ref: '#/components/schemas/OnboardingChecklist'
  *   post:
  *     summary: Create onboarding checklist (Admin)
- *     description: Creates checklist with default items if items not provided.
+ *     description: >
+ *       Creates checklist with default items if items not provided.
+ *       Also auto-assigns the project's active post_sale survey template to the same
+ *       client + propertyId/apartmentId as a pending SatisfactionSurvey (empty ratings).
+ *       Client completes it later via PUT /api/surveys/{id}. If no active post_sale template
+ *       exists, onboarding still succeeds and postSaleSurvey is null.
  *     tags: [Onboarding]
  *     security:
  *       - bearerAuth: []
@@ -63,11 +68,22 @@ const router = express.Router()
  *             $ref: '#/components/schemas/OnboardingChecklistCreate'
  *     responses:
  *       201:
- *         description: Checklist created
+ *         description: Checklist created (includes postSaleSurvey when a template exists)
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/OnboardingChecklist'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/OnboardingChecklist'
+ *                 - type: object
+ *                   properties:
+ *                     postSaleSurvey:
+ *                       nullable: true
+ *                       description: Pending post_sale survey linked to the same unit/client
+ *                       allOf:
+ *                         - $ref: '#/components/schemas/SatisfactionSurvey'
+ *                     postSaleSurveyNote:
+ *                       type: string
+ *                       description: Present when survey was skipped or already existed
  *       400:
  *         description: Already exists or validation error
  */

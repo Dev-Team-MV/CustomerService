@@ -2,6 +2,8 @@ import OnboardingChecklist, {
   ONBOARDING_STATUSES,
   buildDefaultOnboardingItems
 } from '../models/OnboardingChecklist.js'
+import SatisfactionSurvey from '../models/SatisfactionSurvey.js'
+import SurveyTemplate from '../models/SurveyTemplate.js'
 import { isStaffRole } from '../utils/roles.js'
 import { isValidObjectId } from '../utils/crmHelpers.js'
 import { runAutomationEngineAsync } from '../services/automationEngine.js'
@@ -13,6 +15,14 @@ const POPULATE = [
   { path: 'projectId', select: 'name slug title' },
   { path: 'items.completedBy', select: 'firstName lastName email' },
   { path: 'items.requiredDocumentId', select: 'title category fileUrl' }
+]
+
+const SURVEY_POPULATE = [
+  { path: 'propertyId', select: 'price status lot model' },
+  { path: 'apartmentId', select: 'apartmentNumber floorNumber building status' },
+  { path: 'clientId', select: 'firstName lastName email phoneNumber' },
+  { path: 'projectId', select: 'name slug title' },
+  { path: 'templateId', select: 'name type questions isActive' }
 ]
 
 function isAdminUser(user) {
@@ -47,6 +57,66 @@ function deriveStatus(items = []) {
   if (completedCount === 0) return 'not_started'
   if (completedCount === items.length) return 'completed'
   return 'in_progress'
+}
+
+function questionSnapshot(question) {
+  return question.text_es?.trim() || question.text_en?.trim() || question.key
+}
+
+/**
+ * Assigns the project's active post_sale survey template to the client+unit.
+ * Creates a pending SatisfactionSurvey (empty ratings) the client can complete via PUT.
+ * Does not fail onboarding if no template exists.
+ */
+async function assignPostSaleSurvey({ propertyId, apartmentId, clientId, projectId }) {
+  const template = await SurveyTemplate.findOne({
+    projectId,
+    type: 'post_sale',
+    isActive: true
+  }).sort({ createdAt: -1 })
+
+  if (!template) {
+    return {
+      survey: null,
+      skipped: 'No active post_sale survey template for this project'
+    }
+  }
+
+  const unitFilter = propertyId
+    ? { propertyId }
+    : { apartmentId }
+
+  const existing = await SatisfactionSurvey.findOne({
+    clientId,
+    templateId: template._id,
+    ...unitFilter
+  })
+  if (existing) {
+    const populated = await SatisfactionSurvey.findById(existing._id).populate(SURVEY_POPULATE)
+    return { survey: populated, alreadyExisted: true }
+  }
+
+  const responses = (template.questions || []).map((q) => ({
+    questionKey: q.key,
+    question: questionSnapshot(q),
+    rating: null,
+    comment: ''
+  }))
+
+  const survey = await SatisfactionSurvey.create({
+    propertyId: propertyId || null,
+    apartmentId: apartmentId || null,
+    clientId,
+    projectId,
+    templateId: template._id,
+    type: 'post_sale',
+    responses,
+    overallRating: null,
+    npsScore: null
+  })
+
+  const populated = await SatisfactionSurvey.findById(survey._id).populate(SURVEY_POPULATE)
+  return { survey: populated, alreadyExisted: false }
 }
 
 export const getChecklists = async (req, res) => {
@@ -183,7 +253,32 @@ export const createChecklist = async (req, res) => {
     })
 
     const populated = await OnboardingChecklist.findById(checklist._id).populate(POPULATE)
-    res.status(201).json(populated)
+
+    // First post-sale satisfaction survey for this unit+client (same propertyId/apartmentId)
+    let postSaleSurvey = null
+    let postSaleSurveyNote = null
+    try {
+      const assigned = await assignPostSaleSurvey({
+        propertyId: unit.propertyId,
+        apartmentId: unit.apartmentId,
+        clientId,
+        projectId
+      })
+      postSaleSurvey = assigned.survey
+      if (assigned.skipped) postSaleSurveyNote = assigned.skipped
+      else if (assigned.alreadyExisted) {
+        postSaleSurveyNote = 'post_sale survey already existed for this unit and client'
+      }
+    } catch (surveyError) {
+      console.error('Auto-assign post_sale survey on onboarding create failed:', surveyError.message)
+      postSaleSurveyNote = `Failed to assign post_sale survey: ${surveyError.message}`
+    }
+
+    const payload = populated.toObject()
+    payload.postSaleSurvey = postSaleSurvey
+    if (postSaleSurveyNote) payload.postSaleSurveyNote = postSaleSurveyNote
+
+    res.status(201).json(payload)
   } catch (error) {
     if (error.code === 11000) {
       return res.status(400).json({ message: 'Checklist already exists for this unit and client' })

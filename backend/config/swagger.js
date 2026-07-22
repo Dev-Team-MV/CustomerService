@@ -2532,13 +2532,22 @@ const options = {
             },
             status: { type: 'string', enum: ['not_started', 'in_progress', 'completed'] },
             createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' }
+            updatedAt: { type: 'string', format: 'date-time' },
+            postSaleSurvey: {
+              nullable: true,
+              description: 'Only on create: pending post_sale survey for same unit/client',
+              allOf: [{ $ref: '#/components/schemas/SatisfactionSurvey' }]
+            },
+            postSaleSurveyNote: {
+              type: 'string',
+              description: 'Only on create: why survey was skipped or reused'
+            }
           }
         },
         OnboardingChecklistCreate: {
           type: 'object',
           required: ['clientId', 'projectId'],
-          description: 'Provide exactly one of propertyId or apartmentId',
+          description: 'Provide exactly one of propertyId or apartmentId. On create, also assigns active post_sale survey for the same unit.',
           properties: {
             propertyId: { type: 'string', nullable: true, description: 'For lot/house units. Mutually exclusive with apartmentId' },
             apartmentId: { type: 'string', nullable: true, description: 'For apartment units. Mutually exclusive with propertyId' },
