@@ -14,6 +14,19 @@ export const isSuperadminRole = (role) => role === 'superadmin'
 export const isOwnerRole = (role) => role === 'owner'
 
 /**
+ * Quién puede fijar/cambiar la contraseña de otro usuario (PUT /users/:id con password).
+ * - superadmin (y owner): cualquiera
+ * - admin: solo la propia o usuarios con role `user`
+ * - user: solo la propia
+ */
+export const canChangePasswordFor = (actorRole, targetRole, { isSelf = false } = {}) => {
+  if (isSelf) return true
+  if (actorRole === 'superadmin' || actorRole === 'owner') return true
+  if (actorRole === 'admin') return targetRole === 'user'
+  return false
+}
+
+/**
  * Rol permitido al crear usuario.
  * - Registro público: siempre `user`.
  * - Admin creando (skipPasswordSetup): según quién crea.

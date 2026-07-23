@@ -1,7 +1,7 @@
 import User from '../models/User.js'
 import Project from '../models/Project.js'
 import { getProjectIdsForUser, canUserAccessProject } from '../utils/projectAccess.js'
-import { isStaffRole } from '../utils/roles.js'
+import { isStaffRole, canChangePasswordFor } from '../utils/roles.js'
 import Property from '../models/Property.js'
 import Apartment from '../models/Apartment.js'
 import Building from '../models/Building.js'
@@ -319,8 +319,10 @@ export const updateUser = async (req, res) => {
     }
 
     if (req.body.password) {
-      if (!isSelf && !isStaff) {
-        return res.status(403).json({ message: 'Not authorized to change password for this user' })
+      if (!canChangePasswordFor(req.user.role, user.role, { isSelf })) {
+        return res.status(403).json({
+          message: 'Not authorized to change password for this user'
+        })
       }
       user.password = req.body.password
     }
