@@ -1,5 +1,5 @@
 import express from 'express'
-import { register, login, loginAdmin, getProfile, changePassword, setupPassword, verifySetupToken, sendSetupPasswordLink, requestPasswordReset, verifyPasswordResetCode, resetPassword, startImpersonation, stopImpersonation } from '../controllers/authController.js'
+import { register, login, loginAdmin, getProfile, changePassword, completeRequiredPassword, setupPassword, verifySetupToken, sendSetupPasswordLink, requestPasswordReset, verifyPasswordResetCode, resetPassword, startImpersonation, stopImpersonation } from '../controllers/authController.js'
 import { protect, admin, superadmin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -40,6 +40,9 @@ const router = express.Router()
  *               phoneNumber:
  *                 type: string
  *                 description: Required if skipPasswordSetup is true (for SMS)
+ *               country:
+ *                 type: string
+ *                 description: País del usuario
  *               birthday:
  *                 type: string
  *                 format: date
@@ -268,6 +271,43 @@ router.post('/impersonate/:userId', protect, superadmin, startImpersonation)
  *         description: User not found
  */
 router.put('/change-password', protect, changePassword)
+
+/**
+ * @swagger
+ * /api/auth/complete-required-password:
+ *   put:
+ *     summary: Set a new password when mustChangePassword is true (no current password required)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     description: |
+ *       Solo válido si el usuario tiene mustChangePassword=true (contraseña temporal asignada por admin).
+ *       La seguridad viene del JWT obtenido al autenticarse con la contraseña temporal.
+ *       Para cambios voluntarios use PUT /auth/change-password (requiere currentPassword).
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - newPassword
+ *             properties:
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 6
+ *                 description: Nueva contraseña (debe ser distinta a la temporal)
+ *     responses:
+ *       200:
+ *         description: Password updated; returns auth payload with mustChangePassword false
+ *       400:
+ *         description: Missing/short password or same as temporary password
+ *       403:
+ *         description: mustChangePassword is false, or impersonating
+ *       404:
+ *         description: User not found
+ */
+router.put('/complete-required-password', protect, completeRequiredPassword)
 
 /**
  * @swagger

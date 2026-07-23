@@ -73,7 +73,7 @@ function maskPhone (phone) {
 
 export const register = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, phoneNumber, birthday, role, skipPasswordSetup, projectId } = req.body
+    const { firstName, lastName, email, password, phoneNumber, country, birthday, role, skipPasswordSetup, projectId } = req.body
 
     const userExists = await User.findOne({ email })
 
@@ -82,83 +82,73 @@ export const register = async (req, res) => {
     }
 
     let currentUser = null
+    const hasBearer = Boolean(req.headers.authorization?.startsWith('Bearer'))
 
-    // Si skipPasswordSetup es true, requiere autenticación de admin
-    if (skipPasswordSetup) {
-      let token
-
-      if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        try {
-          token = req.headers.authorization.split(' ')[1]
-          const decoded = jwt.verify(token, process.env.JWT_SECRET)
-          currentUser = await User.findById(decoded.id).select('-password')
-        } catch (error) {
+    if (hasBearer) {
+      try {
+        const token = req.headers.authorization.split(' ')[1]
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        currentUser = await User.findById(decoded.id).select('-password')
+      } catch (error) {
+        if (skipPasswordSetup) {
           return res.status(401).json({ message: 'Invalid or expired token' })
         }
       }
+    }
 
+    const isStaffCreator =
+      currentUser &&
+      (currentUser.role === 'admin' || currentUser.role === 'superadmin')
+
+    // Admin creando usuario sin contraseña → flujo SMS / setup link
+    if (skipPasswordSetup) {
       if (!currentUser) {
         return res.status(401).json({ message: 'Authentication required to create users without password' })
       }
-
-      if (currentUser.role !== 'admin' && currentUser.role !== 'superadmin') {
+      if (!isStaffCreator) {
         return res.status(403).json({ message: 'Admin access required to create users without password' })
       }
-
       if (!phoneNumber) {
         return res.status(400).json({ message: 'Phone number is required when skipPasswordSetup is true' })
       }
-    }
 
-    // Si es admin creando usuario y skipPasswordSetup es true, crear sin contraseña
-    const isAdminCreating = skipPasswordSetup
-    const creatorRole = isAdminCreating ? currentUser?.role : null
-    const assignedRole = resolveRoleForNewUser(creatorRole, role)
-
-    let userData = {
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-      birthday,
-      role: assignedRole
-    }
-
-    if (projectId) {
-      const exists = await Project.exists({ _id: projectId })
-      if (!exists) {
-        return res.status(404).json({ message: 'Project not found' })
+      const assignedRole = resolveRoleForNewUser(currentUser.role, role)
+      const userData = {
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        country,
+        birthday,
+        role: assignedRole,
+        passwordSet: false,
+        mustChangePassword: false
       }
-      userData.projectMemberships = [{ project: projectId, role: 'resident' }]
-    }
 
-    // Si no es admin creando usuario, requiere contraseña
-    if (!isAdminCreating) {
-      if (!password) {
-        return res.status(400).json({ message: 'Password is required' })
+      if (projectId) {
+        const exists = await Project.exists({ _id: projectId })
+        if (!exists) {
+          return res.status(404).json({ message: 'Project not found' })
+        }
+        userData.projectMemberships = [{ project: projectId, role: 'resident' }]
       }
-      userData.password = password
-      userData.passwordSet = true
-    } else {
-      // Admin creando usuario sin contraseña - generar setup token
+
       const user = new User(userData)
       const setupToken = user.generateSetupToken()
       await user.save()
 
       notifyUserCreatedByAdmin({ user })
 
-      // Enviar SMS con el link de setup
       if (phoneNumber) {
         try {
           const frontendUrl = await resolveFrontendBaseUrl(projectId)
           const setupLink = `${frontendUrl}/setup-password/${setupToken}`
           const message = `Hi ${firstName}, your account has been created. Please set your password by visiting this link: ${setupLink}`
-          
+
           console.log('Sending SMS to:', phoneNumber)
           // await sendSMSWithValidation(phoneNumber, message)
         } catch (smsError) {
           console.error('Error sending setup SMS:', smsError.message)
-          // No fallar la creación del usuario si falla el SMS
         }
       }
 
@@ -168,10 +158,81 @@ export const register = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         phoneNumber: user.phoneNumber,
+        country: user.country,
         role: user.role,
+        passwordSet: false,
+        mustChangePassword: false,
+        requiresPasswordSetup: true,
         message: 'User created successfully. Setup link sent via SMS.',
         setupToken: setupToken // Solo para desarrollo/testing, remover en producción
       })
+    }
+
+    if (!password) {
+      return res.status(400).json({ message: 'Password is required' })
+    }
+
+    // Admin autenticado asigna contraseña temporal → usuario debe cambiarla al entrar
+    if (isStaffCreator) {
+      const assignedRole = resolveRoleForNewUser(currentUser.role, role)
+      const userData = {
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        country,
+        birthday,
+        role: assignedRole,
+        password,
+        passwordSet: true,
+        mustChangePassword: true
+      }
+
+      if (projectId) {
+        const exists = await Project.exists({ _id: projectId })
+        if (!exists) {
+          return res.status(404).json({ message: 'Project not found' })
+        }
+        userData.projectMemberships = [{ project: projectId, role: 'resident' }]
+      }
+
+      const user = await User.create(userData)
+      notifyUserCreatedByAdmin({ user })
+
+      return res.status(201).json({
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        country: user.country,
+        role: user.role,
+        passwordSet: true,
+        mustChangePassword: true,
+        message: 'User created successfully with temporary password. User must change it on next login.'
+      })
+    }
+
+    // Registro público: contraseña definitiva, sin forzar cambio
+    const userData = {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      country,
+      birthday,
+      role: resolveRoleForNewUser(null, role),
+      password,
+      passwordSet: true,
+      mustChangePassword: false
+    }
+
+    if (projectId) {
+      const exists = await Project.exists({ _id: projectId })
+      if (!exists) {
+        return res.status(404).json({ message: 'Project not found' })
+      }
+      userData.projectMemberships = [{ project: projectId, role: 'resident' }]
     }
 
     const user = await User.create(userData)
@@ -491,9 +552,67 @@ export const changePassword = async (req, res) => {
     // Actualizar la contraseña
     user.password = newPassword
     user.passwordSet = true
+    user.mustChangePassword = false
     await user.save()
 
-    res.json({ message: 'Password changed successfully' })
+    res.json({
+      message: 'Password changed successfully',
+      mustChangePassword: false
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+/**
+ * Cambio obligatorio tras contraseña temporal asignada por admin.
+ * Seguro porque: requiere JWT válido (ya autenticó con la temp) y solo si mustChangePassword=true.
+ * Body: { newPassword }
+ */
+export const completeRequiredPassword = async (req, res) => {
+  try {
+    if (req.isImpersonating) {
+      return res.status(403).json({ message: 'Cannot change password while impersonating a user' })
+    }
+
+    const newPassword = req.body?.newPassword || req.body?.password
+
+    if (!newPassword) {
+      return res.status(400).json({ message: 'newPassword is required' })
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters long' })
+    }
+
+    const user = await User.findById(req.user._id).select('+password')
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    if (!user.mustChangePassword) {
+      return res.status(403).json({
+        message: 'Password change without current password is only allowed when mustChangePassword is true. Use /auth/change-password instead.'
+      })
+    }
+
+    if (user.password && await user.matchPassword(newPassword)) {
+      return res.status(400).json({
+        message: 'New password must be different from the temporary password'
+      })
+    }
+
+    user.password = newPassword
+    user.passwordSet = true
+    user.mustChangePassword = false
+    await user.save()
+
+    res.json({
+      message: 'Password updated successfully',
+      mustChangePassword: false,
+      ...buildAuthLoginResponse(user, generateToken(user))
+    })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -528,6 +647,7 @@ export const setupPassword = async (req, res) => {
     // Establecer la contraseña
     user.password = password
     user.passwordSet = true
+    user.mustChangePassword = false
     user.setupToken = undefined
     user.setupTokenExpires = undefined
     await user.save()
@@ -783,6 +903,7 @@ export const resetPassword = async (req, res) => {
 
     user.password = password
     user.passwordSet = true
+    user.mustChangePassword = false
     user.setupToken = undefined
     user.setupTokenExpires = undefined
     user.clearPasswordResetFields()

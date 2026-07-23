@@ -88,12 +88,18 @@ const router = express.Router()
  *                 type: string
  *               user:
  *                 type: string
- *                 description: Single owner (use users for multiple)
+ *                 description: Single owner user ID (use users for multiple). May also be a leadId — backend resolves/converts lead → user.
+ *               userId:
+ *                 type: string
+ *                 description: Alias for user (CRM convert often sends userId)
  *               users:
  *                 type: array
  *                 items:
  *                   type: string
- *                 description: Owner user IDs (at least one of user or users required)
+ *                 description: Owner user IDs, or lead IDs (auto-resolved to users). At least one of user/userId/users/leadId required.
+ *               leadId:
+ *                 type: string
+ *                 description: Optional CRM lead. If owners are missing or are lead IDs, converts/links the lead to a User and assigns that user.
  *               initialPayment:
  *                 type: number
  *                 description: Initial payment amount
@@ -105,7 +111,7 @@ const router = express.Router()
  *                 description: Optional outstanding balance. Defaults to price minus initialPayment when price is overridden.
  *               quoteId:
  *                 type: string
- *                 description: Optional. Required if the matching building is quote-locked.
+ *                 description: Optional. Links quote options/price; required if the matching building is quote-locked.
  *     responses:
  *       201:
  *         description: Property created (9 phases will be automatically created)

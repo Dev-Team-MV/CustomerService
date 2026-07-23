@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    country: {
+      type: String,
+      trim: true
+    },
     birthday: {
       type: Date
     },
@@ -76,6 +80,14 @@ const userSchema = new mongoose.Schema(
       select: false
     },
     passwordSet: {
+      type: Boolean,
+      default: false
+    },
+    /**
+     * true cuando un admin asignó la contraseña (temporal).
+     * El usuario debe cambiarla en el próximo acceso; no se limpia solo por hashear.
+     */
+    mustChangePassword: {
       type: Boolean,
       default: false
     },

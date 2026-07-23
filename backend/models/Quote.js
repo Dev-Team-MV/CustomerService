@@ -77,6 +77,20 @@ const quoteSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: {}
     },
+    /** House finish / options flags (mirrors Property) */
+    modelType: {
+      type: String,
+      enum: ['basic', 'upgrade'],
+      default: 'basic'
+    },
+    hasBalcony: {
+      type: Boolean,
+      default: false
+    },
+    hasStorage: {
+      type: Boolean,
+      default: false
+    },
     /** Optional deck selection when quoting with deck-linked facade */
     deckId: {
       type: mongoose.Schema.Types.ObjectId,

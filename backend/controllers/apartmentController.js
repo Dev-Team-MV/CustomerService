@@ -210,7 +210,7 @@ export const getApartmentById = async (req, res) => {
         path: 'apartmentModel',
         populate: { path: 'building', select: 'name section floors project' }
       })
-      .populate('users', 'firstName lastName email phoneNumber birthday')
+      .populate('users', 'firstName lastName email phoneNumber country birthday')
       .populate({
         path: 'parkingSpots',
         select: 'building floorNumber code spotType status apartment notes createdAt updatedAt',

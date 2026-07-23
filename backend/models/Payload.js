@@ -40,13 +40,21 @@ const payloadSchema = new mongoose.Schema(
         'complementary down payment',
         'monthly payment',
         'additional payment',
-        'closing payment'
+        'closing payment',
+        'referral bonus'
       ],
       trim: true
     },
     notes: {
       type: String,
       trim: true
+    },
+    /** Links a referral-bonus payload to its Referral (idempotency) */
+    referralId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Referral',
+      default: null,
+      index: true
     },
     processedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -73,6 +81,13 @@ payloadSchema.index({ apartment: 1 })
 payloadSchema.index({ property: 1, date: -1 })
 payloadSchema.index({ apartment: 1, date: -1 })
 payloadSchema.index({ status: 1, date: -1 })
+payloadSchema.index(
+  { referralId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { referralId: { $type: 'objectId' } }
+  }
+)
 
 const Payload = mongoose.model('Payload', payloadSchema)
 
