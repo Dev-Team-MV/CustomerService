@@ -564,6 +564,60 @@ export const changePassword = async (req, res) => {
   }
 }
 
+/**
+ * Cambio obligatorio tras contraseña temporal asignada por admin.
+ * Seguro porque: requiere JWT válido (ya autenticó con la temp) y solo si mustChangePassword=true.
+ * Body: { newPassword }
+ */
+export const completeRequiredPassword = async (req, res) => {
+  try {
+    if (req.isImpersonating) {
+      return res.status(403).json({ message: 'Cannot change password while impersonating a user' })
+    }
+
+    const newPassword = req.body?.newPassword || req.body?.password
+
+    if (!newPassword) {
+      return res.status(400).json({ message: 'newPassword is required' })
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters long' })
+    }
+
+    const user = await User.findById(req.user._id).select('+password')
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    if (!user.mustChangePassword) {
+      return res.status(403).json({
+        message: 'Password change without current password is only allowed when mustChangePassword is true. Use /auth/change-password instead.'
+      })
+    }
+
+    if (user.password && await user.matchPassword(newPassword)) {
+      return res.status(400).json({
+        message: 'New password must be different from the temporary password'
+      })
+    }
+
+    user.password = newPassword
+    user.passwordSet = true
+    user.mustChangePassword = false
+    await user.save()
+
+    res.json({
+      message: 'Password updated successfully',
+      mustChangePassword: false,
+      ...buildAuthLoginResponse(user, generateToken(user))
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 export const setupPassword = async (req, res) => {
   try {
     const { token } = req.params
