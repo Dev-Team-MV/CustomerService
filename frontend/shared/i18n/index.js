@@ -47,6 +47,8 @@ import enCampaign from './locales/en/campaign.json'
 import enComissions from './locales/en/commissions.json'
 import enQuoteCrm from './locales/en/quoteCrm.json'
 import enDocuments from './locales/en/documents.json'
+import enReferrals from './locales/en/referrals.json'
+import enPostSale from './locales/en/postSale.json'
 // ES
 import esCommon from './locales/es/common.json'
 import esAuth from './locales/es/auth.json'
@@ -92,6 +94,8 @@ import esCampaign from './locales/es/campaign.json'
 import esComissions from './locales/es/commissions.json'
 import esQuoteCrm from './locales/es/quoteCrm.json'
 import esDocuments from './locales/es/documents.json'
+import esReferrals from './locales/es/referrals.json'
+import esPostSale from './locales/es/postSale.json'
 
 i18n
     .use(LanguageDetector)
@@ -143,7 +147,9 @@ i18n
                 campaign: enCampaign,
                 commissions: enComissions,
                 quoteCrm: enQuoteCrm,
-                documents: enDocuments
+                documents: enDocuments,
+                referrals: enReferrals,
+                postSale: enPostSale
             },
             es: {
                 common: esCommon,
@@ -190,7 +196,9 @@ i18n
                 campaign: esCampaign,
                 commissions: esComissions,
                 quoteCrm: esQuoteCrm,
-                documents: esDocuments
+                documents: esDocuments,
+                referrals: esReferrals,
+                postSale: esPostSale
 
             },
         },
@@ -240,7 +248,9 @@ i18n
             'campaign',
             'commissions',
             'quoteCrm',
-            'documents'
+            'documents',
+            'referrals',
+            'postSale'
         ],
         interpolation: {
             escapeValue: false,

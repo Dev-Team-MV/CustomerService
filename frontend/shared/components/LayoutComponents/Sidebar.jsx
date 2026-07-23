@@ -33,6 +33,8 @@ const NAV = [
   { key: 'comissions', labelKey: 'comissions', icon: AutoAwesome, path: '/comissions' },
   { key: 'quote', labelKey: 'quote', icon: AutoAwesome, path: '/quote' },
   { key: 'documents', labelKey: 'documents', icon: AutoAwesome, path: '/documents' },
+  { key: 'post-sale', labelKey: 'post-sale', icon: AutoAwesome, path: '/post-sale' },
+  { key: 'referrals', labelKey: 'referrals', icon: AutoAwesome, path: '/referrals' },
   { key: 'audit', labelKey: 'audit', icon: History, path: '/audit' },
   { key: 'projects', labelKey: 'projects', icon: FolderOpen, path: '/projects' },
   { key: 'sales', labelKey: 'sales', icon: TrendingUp, path: '/sales' },

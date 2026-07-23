@@ -19,6 +19,7 @@ import {
   AccountBalance as AccountBalanceIcon,
     MeetingRoom as MeetingRoomIcon,
     Apartment as ApartmentIcon,
+      RateReview as SurveyIcon, 
 } from "@mui/icons-material"
 // Menú privado (usuarios autenticados)
 export const privateMenuItems = [
@@ -57,6 +58,12 @@ export const privateMenuItems = [
     icon: PeopleIcon,
     path: "/residents",
     roles: ["superadmin", "admin", "owner"],
+  },
+    {
+    textKey: "navigation:menu.surveys",
+    icon: SurveyIcon,
+    path: "/survey",
+    roles: ["superadmin", "admin", "user"],
   },
     {
       textKey: "navigation:menu.news",

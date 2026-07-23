@@ -1,3 +1,4 @@
+///Users/oficina/MV-CRM/CustomerService/frontend/shared/config/resourceConfig.js
 // ── LAKEWOOD BUSINESS CONSTANTS ────────────────────────────────
 export const MODEL_10_ID = '6977c7bbd1f24768968719de'
 

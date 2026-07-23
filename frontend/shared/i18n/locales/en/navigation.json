@@ -29,7 +29,9 @@
         "building": "Houses",
         "lots": "Lots",
         "catalogConfig": "Catalog Config",
-        "agents":"Agents"
+        "agents":"Agents",
+        "warranties":"Warranties",
+        "surveys":"Surveys"
        
     },
     "tooltips": {

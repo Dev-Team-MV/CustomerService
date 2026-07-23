@@ -1,3 +1,4 @@
+///Users/oficina/MV-CRM/CustomerService/frontend/apps/lakewood-p1/src/components/MapInventory.jsx
 import { Box, Paper, Typography, IconButton, Grid } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'

@@ -31,7 +31,8 @@
         "clubHouse": "Club House",
         "clubHouseDesc": "View club house",
         "newsFeed": "News Feed",
-        "newsFeedDesc": "Latest updates"
+        "newsFeedDesc": "Latest updates",
+        "referrals": "Referrals"
     },
     "masterPlan": {
         "title": "Project View",

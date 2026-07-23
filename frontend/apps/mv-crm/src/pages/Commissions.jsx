@@ -1,4 +1,3 @@
-// apps/mv-crm/src/pages/Commissions.jsx
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, TextField, Button, FormControl, InputLabel, Select, MenuItem, Grid, Paper, Tabs, Tab, Typography, CircularProgress } from '@mui/material'
@@ -32,11 +31,22 @@ export default function Commissions() {
   const [selectedStructure, setSelectedStructure] = useState(null)
   const [structureEditorOpen, setStructureEditorOpen] = useState(false)
 
+  // ✅ CAMBIO: Reemplazamos onDispute por onDelete
   const columns = useCommissionColumns({
     t,
     onView: (row) => { setSelectedCommission(row); setModalAction('view'); setModalOpen(true) },
     onApprove: (row) => { setSelectedCommission(row); setModalAction('approve'); setModalOpen(true) },
-    onDispute: (row) => { setSelectedCommission(row); setModalAction('dispute'); setModalOpen(true) },
+    onDelete: async (row) => {
+      if (window.confirm(t('actions.confirmDelete', '¿Estás seguro de que deseas eliminar esta comisión? Esta acción no se puede deshacer.'))) {
+        try {
+          await commissionService.deleteCommission(row._id)
+          refresh(pagination.page)
+        } catch (err) {
+          console.error('Error deleting commission:', err)
+          alert(t('errors.deleteFailed', 'Error al eliminar la comisión'))
+        }
+      }
+    },
     onMarkPaid: (row) => { setSelectedCommission(row); setModalAction('markPaid'); setModalOpen(true) }
   })
 

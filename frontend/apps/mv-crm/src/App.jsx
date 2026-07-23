@@ -26,6 +26,8 @@ import Audit from './pages/AuditLog'
 import Commissions from './pages/Commissions'
 import Documents from './pages/Documents'
 import Quote from './pages/Quotes'
+import PostSale from './pages/PostSale'
+import Referrals from './pages/Referrals'
 
 const theme = createTheme({
   palette: {
@@ -107,6 +109,18 @@ export default function App() {
           <Route path="/audit" element={
             <ProtectedRoute requiredRole="admin">
               <Audit />
+            </ProtectedRoute> 
+          }
+          />
+          <Route path="/post-sale" element={
+            <ProtectedRoute requiredRole="admin">
+              <PostSale />
+            </ProtectedRoute> 
+          }
+          />
+          <Route path="/referrals" element={
+            <ProtectedRoute requiredRole="admin">
+              <Referrals />
             </ProtectedRoute> 
           }
           />

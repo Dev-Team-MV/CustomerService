@@ -29,6 +29,11 @@ import MapInventoryPage from './pages/MapInventoryPage'
 import UploadTracker from './pages/UploadTracker'
 import UploadsManager from './pages/UploadsManager'
 
+// ✅ 1. Importar la nueva página de encuestas del shared
+import CustomerSurveyPage from '@shared/components/CustomerSurveyPage'
+import CustomerWarrantyPage from '@shared/components/Warranties/CustomerWarrantyPage'
+import ForcePasswordChange from '@shared/components/Login/ForcePasswordChange'
+
 // Footer local
 import TypingFooter from './components/Footer'
 
@@ -66,10 +71,8 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider projectSlug="lakewood">
-         {/* <ImpersonationBanner /> */}
          
         <Routes>
-
           {/* Auth Routes */}
           <Route 
             path="/login" 
@@ -118,6 +121,11 @@ function App() {
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/my-property" element={<MyProperty />} />
+              
+              {/* ✅ 2. Agregar la ruta de la encuesta */}
+              <Route path="/survey" element={<CustomerSurveyPage />} />
+              <Route path="/warranties" element={<CustomerWarrantyPage />} />
+              
               <Route path="/amenities" element={<AmenitiesPrivate />} />
               <Route path="/master-plan/inventory" element={<MasterPlanManager />} />
               <Route path="/configurations" element={<SharedConfigurationPage />} />
@@ -136,8 +144,11 @@ function App() {
               <Route path="/map-inventory" element={<MapInventoryPage />} />
               <Route path="/upload-tracker" element={<UploadTracker />} />
               <Route path="/uploads-manager" element={<UploadsManager />} />
+
+              <Route path="/auth/force-password-change" element={<ForcePasswordChange />} />
             </Route>
           </Route>
+          
           <Route path="*" element={<SharedNotFoundPage />} />
         </Routes>
       </AuthProvider>

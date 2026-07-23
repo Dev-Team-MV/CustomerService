@@ -28,6 +28,8 @@ import Properties from './Pages/Properties'
 
 // Componente compartido de login
 import UniversalLogin from '@shared/components/Login/UniversalLogin'
+import CustomerSurveyPage from '@shared/components/CustomerSurveyPage'
+import ForcePasswordChange from '@shared/components/Login/ForcePasswordChange'
 
 // Configuración de noticias
 import { getNewsConfig } from '@shared/config/newsConfig'
@@ -113,7 +115,9 @@ function App() {
               <Route path="/configurations" element={<SharedConfigurationPage />} />
               <Route path="/payloads" element={<Payloads />} />
               <Route path="/properties" element={<Properties />} />
+              <Route path="/survey" element={<CustomerSurveyPage />} />
               <Route path="/master-plan" element={<MasterPlanPage projectId={projectId} />} />
+              <Route path="/auth/force-password-change" element={<ForcePasswordChange />} />
               <Route 
                 path="/buildings" 
                 element={

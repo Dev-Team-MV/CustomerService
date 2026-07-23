@@ -50,6 +50,24 @@ export const authService = {
     return response.data
   },
 
+   /**
+   * Establecer nueva contraseña cuando mustChangePassword es true 
+   * (NO requiere currentPassword)
+   * @param {string} newPassword - La nueva contraseña
+   * @returns {Promise<Object>} Respuesta con el nuevo payload de autenticación
+   */
+  completeRequiredPassword: async (newPassword) => {
+    try {
+      const response = await api.put('/auth/complete-required-password', {
+        newPassword
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error completing required password change:', error)
+      throw error
+    }
+  },
+
   // ═══════════════════════════════════════════════════════════════
   // ✅ RECUPERACIÓN DE CONTRASEÑA
   // ═══════════════════════════════════════════════════════════════

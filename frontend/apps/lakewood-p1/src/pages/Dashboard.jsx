@@ -1,10 +1,10 @@
-import { useCallback, useMemo }  from 'react'
+import { useCallback, useMemo, useState }  from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Chip } from '@mui/material'
 import {
   HomeWork, TrendingUp, AttachMoney, Inbox,
-  Business, PersonAdd, BarChart, Deck, Article
+  Business, PersonAdd, BarChart, Deck, Article, GroupAdd
 } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import { useAuth } from '@shared/context/AuthContext'
@@ -24,6 +24,7 @@ import Loader from '../components/Loader'
 import RecentPayloadsPanel from '../components/RecentPayloadsPanel'
 import { getLakewoodProjectId } from '../utils/projectId'
 import PageSection from '@shared/components/PageSection'
+import SubmitReferralModal from '@shared/components/referrals/SubmitReferralModal'
 
 // ─── colors ────────────────────────────────────────────────────────────────────
 const C = {
@@ -67,6 +68,8 @@ const Dashboard = () => {
   // ── stats ───────────────────────────────────────────────────
   const stats = useDashboardStats(lots)
 
+  const [referralModalOpen, setReferralModalOpen] = useState(false)
+
   const {
     openDialog, selectedUser, formData, setFormData,
     handleOpenDialog, handleCloseDialog, handleSubmit,
@@ -77,15 +80,37 @@ const Dashboard = () => {
   // ── quick actions ───────────────────────────────────────────
   const adminActions = useMemo(() => [
     { icon: <Business />,  label: t('quickActions.addProperty'), description: t('quickActions.addPropertyDesc'), color: C.dark,   bgColor: '#e8f5ee', onClick: () => navigate('/properties/select') },
+        { 
+      icon: <GroupAdd />,  
+      label: t('quickActions.referrals'), 
+      description: t('quickActions.referralsDesc'), 
+      color: C.dark,   
+      bgColor: '#e8f5ee', 
+      onClick: () => setReferralModalOpen(true) 
+    },
     { icon: <PersonAdd />, label: t('quickActions.inviteUser'),  description: t('quickActions.inviteUserDesc'),  color: C.green,  bgColor: '#f0f7e8', onClick: () => handleOpenDialog() },
     { icon: <BarChart />,  label: t('quickActions.analytics'),   description: t('quickActions.analyticsDesc'),   color: C.orange, bgColor: '#fff5e6', onClick: () => navigate('/analytics') },
     { icon: <Deck />,      label: t('quickActions.amenities'),   description: t('quickActions.amenitiesDesc'),   color: C.green,  bgColor: '#f0f7e8', onClick: () => navigate('/amenities') },
     { icon: <Article />,   label: t('quickActions.manageNews'),  description: t('quickActions.manageNewsDesc'),  color: C.orange, bgColor: '#fff5e6', onClick: () => navigate('/admin/news') },
   ], [t, navigate, handleOpenDialog])
 
-  const userActions = useMemo(() => [
+  // const userActions = useMemo(() => [
+  //   { icon: <Deck />,    label: t('quickActions.amenities'), description: t('quickActions.amenitiesDesc'), color: C.green,  bgColor: '#f0f7e8', onClick: () => navigate('/amenities') },
+  //   { icon: <Article />, label: t('quickActions.newsFeed'),  description: t('quickActions.newsFeedDesc'),  color: C.orange, bgColor: '#fff5e6', onClick: () => navigate('/explore/news') },
+  // ], [t, navigate])
+    const userActions = useMemo(() => [
     { icon: <Deck />,    label: t('quickActions.amenities'), description: t('quickActions.amenitiesDesc'), color: C.green,  bgColor: '#f0f7e8', onClick: () => navigate('/amenities') },
     { icon: <Article />, label: t('quickActions.newsFeed'),  description: t('quickActions.newsFeedDesc'),  color: C.orange, bgColor: '#fff5e6', onClick: () => navigate('/explore/news') },
+    
+    // ✅ ACCIÓN DE REFERIDOS: Abre el modal directamente
+    { 
+      icon: <GroupAdd />,  
+      label: t('quickActions.referrals'), 
+      description: t('quickActions.referralsDesc'), 
+      color: C.dark,   
+      bgColor: '#e8f5ee', 
+      onClick: () => setReferralModalOpen(true) 
+    },
   ], [t, navigate])
 
   // ── stats cards ─────────────────────────────────────────────
@@ -376,6 +401,17 @@ const Dashboard = () => {
         e164Value={e164Value}
         displayVal={displayVal}
         isPhoneValid={isPhoneValid}
+      />
+
+            {/* ✅ MODAL DE ENVÍO DE REFERIDOS (Modo Customer) */}
+      <SubmitReferralModal
+        open={referralModalOpen}
+        onClose={() => setReferralModalOpen(false)}
+        mode="customer" // 👈 Esto asegura que use el .env y oculte selectores de admin
+        onSuccess={() => {
+          // Opcional: Mostrar notificación de éxito o recargar datos si es necesario
+          setReferralModalOpen(false)
+        }}
       />
     </Box>
   )

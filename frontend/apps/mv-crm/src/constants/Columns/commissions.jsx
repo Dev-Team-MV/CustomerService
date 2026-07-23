@@ -1,18 +1,17 @@
-// apps/mv-crm/src/constants/Columns/commissions.jsx
 import { Box, Typography, Chip, IconButton, Tooltip } from '@mui/material'
-import { Visibility, CheckCircle, Payment, ReportProblem } from '@mui/icons-material'
+import { Visibility, CheckCircle, Payment, Delete } from '@mui/icons-material'
 
 const getStatusConfig = (status, t) => {
   const configs = {
-    pending: { label: t('status.pending', 'Pendiente'), color: '#ff9800', bg: '#fff3e0', icon: <ReportProblem sx={{ fontSize: 14 }} /> },
-    approved: { label: t('status.approved', 'Aprobado'), color: '#2196f3', bg: '#e3f2fd', icon: <CheckCircle sx={{ fontSize: 14 }} /> },
-    paid: { label: t('status.paid', 'Pagado'), color: '#4caf50', bg: '#e8f5e9', icon: <Payment sx={{ fontSize: 14 }} /> },
-    disputed: { label: t('status.disputed', 'Disputado'), color: '#f44336', bg: '#ffebee', icon: <ReportProblem sx={{ fontSize: 14 }} /> }
+    pending: { label: t('status.pending', 'Pendiente'), color: '#ff9800', bg: '#fff3e0' },
+    approved: { label: t('status.approved', 'Aprobado'), color: '#2196f3', bg: '#e3f2fd' },
+    paid: { label: t('status.paid', 'Pagado'), color: '#4caf50', bg: '#e8f5e9' },
+    disputed: { label: t('status.disputed', 'Disputado'), color: '#f44336', bg: '#ffebee' }
   }
   return configs[status] || configs.pending
 }
 
-export const useCommissionColumns = ({ t, onView, onApprove, onDispute, onMarkPaid }) => [
+export const useCommissionColumns = ({ t, onView, onApprove, onDelete, onMarkPaid }) => [
   {
     field: 'date',
     headerName: t('table.date', 'Fecha'),
@@ -28,7 +27,6 @@ export const useCommissionColumns = ({ t, onView, onApprove, onDispute, onMarkPa
     headerName: t('table.agent', 'Agente'),
     minWidth: 180,
     renderCell: ({ row }) => {
-      // ✅ CORRECCIÓN: El backend devuelve agentId como un objeto populado
       const agent = row.agentId
       const agentName = agent && typeof agent === 'object' 
         ? `${agent.firstName || ''} ${agent.lastName || ''}`.trim() || agent.email 
@@ -46,7 +44,6 @@ export const useCommissionColumns = ({ t, onView, onApprove, onDispute, onMarkPa
     headerName: t('table.project', 'Proyecto'),
     minWidth: 150,
     renderCell: ({ row }) => {
-      // ✅ CORRECCIÓN: El backend devuelve projectId como un objeto populado
       const project = row.projectId
       const projectName = project && typeof project === 'object'
         ? project.name || (project.title && (project.title.es || project.title.en))
@@ -80,7 +77,6 @@ export const useCommissionColumns = ({ t, onView, onApprove, onDispute, onMarkPa
       const config = getStatusConfig(row.status, t)
       return (
         <Chip
-          icon={config.icon}
           label={config.label}
           size="small"
           sx={{ bgcolor: config.bg, color: config.color, fontWeight: 600, fontSize: '0.7rem', height: 24 }}
@@ -107,9 +103,10 @@ export const useCommissionColumns = ({ t, onView, onApprove, onDispute, onMarkPa
                 <CheckCircle sx={{ fontSize: 18, color: '#4caf50' }} />
               </IconButton>
             </Tooltip>
-            <Tooltip title={t('actions.dispute', 'Disputar')}>
-              <IconButton size="small" onClick={() => onDispute(row)}>
-                <ReportProblem sx={{ fontSize: 18, color: '#f44336' }} />
+            {/* ✅ CAMBIO: Botón de Eliminar en lugar de Disputar */}
+            <Tooltip title={t('actions.delete', 'Eliminar')}>
+              <IconButton size="small" onClick={() => onDelete(row)}>
+                <Delete sx={{ fontSize: 18, color: '#f44336' }} />
               </IconButton>
             </Tooltip>
           </>

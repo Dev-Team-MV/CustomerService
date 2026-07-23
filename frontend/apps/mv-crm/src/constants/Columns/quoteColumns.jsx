@@ -2,7 +2,6 @@
 import { Box, Typography, Chip, IconButton, Tooltip } from '@mui/material'
 import { Edit, Delete, PictureAsPdf, ShoppingCart, Send } from '@mui/icons-material'
 
-// ✅ Asegúrate de que onSend esté aquí desestructurado
 export const useQuoteColumns = ({ t, onEdit, onDelete, onSend, onConvert, onDownload }) => {
   const getStatusConfig = (status) => {
     const map = {
@@ -85,45 +84,65 @@ export const useQuoteColumns = ({ t, onEdit, onDelete, onSend, onConvert, onDown
     {
       field: 'actions',
       headerName: t('table.actions', 'Acciones'),
-      minWidth: 200,
+      minWidth: 150,
       align: 'center',
-      renderCell: ({ row }) => (
-        <Box display="flex" gap={0.5} justifyContent="center">
-          <Tooltip title={t('actions.edit', 'Editar')}>
-            <IconButton size="small" onClick={() => onEdit?.(row)}>
-              <Edit fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          
-          {row.status !== 'converted' && row.status !== 'expired' && (
-            <>
-              {/* ✅ Aquí se usa onSend?.(row) de forma segura */}
-              <Tooltip title={t('actions.send', 'Enviar')}>
-                <IconButton size="small" onClick={() => onSend?.(row)} sx={{ color: '#1976d2' }}>
-                  <Send fontSize="small" />
+      renderCell: ({ row }) => {
+        // ✅ Si ya está convertida, SOLO mostrar el botón de PDF
+        if (row.status === 'converted') {
+          return (
+            <Tooltip title={t('actions.downloadPdf', 'Descargar PDF')}>
+              <IconButton size="small" onClick={() => onDownload?.(row)} sx={{ color: '#f44336' }}>
+                <PictureAsPdf fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )
+        }
+
+        // Para el resto de estados, mostramos las acciones normales
+        // (Ocultamos editar/eliminar/enviar/convertir si está expirada)
+        const isExpired = row.status === 'expired'
+
+        return (
+          <Box display="flex" gap={0.5} justifyContent="center">
+            {!isExpired && (
+              <Tooltip title={t('actions.edit', 'Editar')}>
+                <IconButton size="small" onClick={() => onEdit?.(row)}>
+                  <Edit fontSize="small" />
                 </IconButton>
               </Tooltip>
-              <Tooltip title={t('actions.convertToSale', 'Convertir a Venta')}>
-                <IconButton size="small" onClick={() => onConvert?.(row)} sx={{ color: '#4caf50' }}>
-                  <ShoppingCart fontSize="small" />
+            )}
+            
+            {!isExpired && (
+              <>
+                <Tooltip title={t('actions.send', 'Enviar')}>
+                  <IconButton size="small" onClick={() => onSend?.(row)} sx={{ color: '#1976d2' }}>
+                    <Send fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title={t('actions.convertToSale', 'Convertir a Venta')}>
+                  <IconButton size="small" onClick={() => onConvert?.(row)} sx={{ color: '#4caf50' }}>
+                    <ShoppingCart fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </>
+            )}
+            
+            <Tooltip title={t('actions.downloadPdf', 'Descargar PDF')}>
+              <IconButton size="small" onClick={() => onDownload?.(row)} sx={{ color: '#f44336' }}>
+                <PictureAsPdf fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            
+            {!isExpired && (
+              <Tooltip title={t('actions.delete', 'Eliminar')}>
+                <IconButton size="small" onClick={() => onDelete?.(row._id)} sx={{ color: '#9e9e9e' }}>
+                  <Delete fontSize="small" />
                 </IconButton>
               </Tooltip>
-            </>
-          )}
-          
-          <Tooltip title={t('actions.downloadPdf', 'Descargar PDF')}>
-            <IconButton size="small" onClick={() => onDownload?.(row)} sx={{ color: '#f44336' }}>
-              <PictureAsPdf fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          
-          <Tooltip title={t('actions.delete', 'Eliminar')}>
-            <IconButton size="small" onClick={() => onDelete?.(row._id)} sx={{ color: '#9e9e9e' }}>
-              <Delete fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      )
+            )}
+          </Box>
+        )
+      }
     }
   ]
 }
