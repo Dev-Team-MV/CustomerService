@@ -308,6 +308,9 @@ export const updateUser = async (req, res) => {
       if (isStaff || isSelf) {
         user.email = req.body.email || user.email
         user.phoneNumber = req.body.phoneNumber || user.phoneNumber
+        if (req.body.country !== undefined) {
+          user.country = req.body.country
+        }
         user.birthday = req.body.birthday || user.birthday
       }
       
@@ -326,6 +329,7 @@ export const updateUser = async (req, res) => {
         lastName: updatedUser.lastName,
         email: updatedUser.email,
         phoneNumber: updatedUser.phoneNumber,
+        country: updatedUser.country,
         birthday: updatedUser.birthday,
         role: updatedUser.role
       })

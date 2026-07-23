@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    country: {
+      type: String,
+      trim: true
+    },
     birthday: {
       type: Date
     },

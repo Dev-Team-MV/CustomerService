@@ -20,6 +20,7 @@ export const buildAuthUserPayload = (user, extra = {}) => {
     lastName: user.lastName,
     email: user.email,
     phoneNumber: user.phoneNumber,
+    country: user.country,
     birthday: user.birthday,
     role: appRole,
     lots: user.lots || [],

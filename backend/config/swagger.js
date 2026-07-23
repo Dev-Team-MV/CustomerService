@@ -60,6 +60,7 @@ const options = {
             lastName: { type: 'string' },
             email: { type: 'string', format: 'email' },
             phoneNumber: { type: 'string' },
+            country: { type: 'string', description: 'País del usuario' },
             birthday: { type: 'string', format: 'date' },
             role: { type: 'string', enum: ['superadmin', 'admin', 'owner', 'user'] },
             lots: { type: 'array', items: { type: 'string' } },

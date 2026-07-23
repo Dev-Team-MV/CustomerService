@@ -73,7 +73,7 @@ function maskPhone (phone) {
 
 export const register = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, phoneNumber, birthday, role, skipPasswordSetup, projectId } = req.body
+    const { firstName, lastName, email, password, phoneNumber, country, birthday, role, skipPasswordSetup, projectId } = req.body
 
     const userExists = await User.findOne({ email })
 
@@ -120,6 +120,7 @@ export const register = async (req, res) => {
       lastName,
       email,
       phoneNumber,
+      country,
       birthday,
       role: assignedRole
     }
@@ -168,6 +169,7 @@ export const register = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         phoneNumber: user.phoneNumber,
+        country: user.country,
         role: user.role,
         message: 'User created successfully. Setup link sent via SMS.',
         setupToken: setupToken // Solo para desarrollo/testing, remover en producción
