@@ -95,6 +95,7 @@ export async function ensureLeadConvertedToUser(
     lastName,
     email,
     phoneNumber: lead.phone,
+    country: lead.country,
     role: 'user'
   }
   if (lead.projectId) {

@@ -73,6 +73,7 @@ const RECORRIDO_NODES = {
       { key: 'name', type: 'scalar', label: L('Nombre', 'Name') },
       { key: 'phone', type: 'scalar', label: L('Teléfono', 'Phone') },
       { key: 'email', type: 'scalar', label: L('Correo', 'Email') },
+      { key: 'country', type: 'scalar', label: L('País', 'Country') },
       { key: 'source', type: 'scalar', label: L('Origen', 'Source') },
       { key: 'stage', type: 'scalar', label: L('Etapa', 'Stage') },
       { key: 'notes', type: 'scalar', label: L('Notas', 'Notes') },

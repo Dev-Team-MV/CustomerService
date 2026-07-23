@@ -1146,6 +1146,7 @@ const options = {
             name: { type: 'string' },
             phone: { type: 'string' },
             email: { type: 'string', format: 'email' },
+            country: { type: 'string', description: 'País del lead' },
             source: { type: 'string', enum: ['web', 'referido', 'visita', 'llamada'] },
             projectId: { type: 'object', description: 'Populated Project ref' },
             stage: {
@@ -1177,6 +1178,7 @@ const options = {
             name: { type: 'string' },
             phone: { type: 'string' },
             email: { type: 'string', format: 'email' },
+            country: { type: 'string', description: 'País del lead' },
             source: { type: 'string', enum: ['web', 'referido', 'visita', 'llamada'] },
             projectId: { type: 'string' },
             stage: {
@@ -1193,6 +1195,7 @@ const options = {
             name: { type: 'string' },
             phone: { type: 'string' },
             email: { type: 'string', format: 'email' },
+            country: { type: 'string', description: 'País del lead' },
             source: { type: 'string', enum: ['web', 'referido', 'visita', 'llamada'] },
             projectId: { type: 'string' },
             stage: {
@@ -1216,6 +1219,7 @@ const options = {
                 lastName: { type: 'string' },
                 email: { type: 'string' },
                 phoneNumber: { type: 'string' },
+                country: { type: 'string' },
                 role: { type: 'string' }
               }
             },
