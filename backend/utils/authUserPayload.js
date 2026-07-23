@@ -23,6 +23,8 @@ export const buildAuthUserPayload = (user, extra = {}) => {
     country: user.country,
     birthday: user.birthday,
     role: appRole,
+    passwordSet: Boolean(user.passwordSet),
+    mustChangePassword: Boolean(user.mustChangePassword),
     lots: user.lots || [],
     projectMemberships: extra.projectMemberships ?? projectMemberships,
     projectId: extra.projectId !== undefined ? extra.projectId : projectId,

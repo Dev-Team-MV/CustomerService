@@ -325,6 +325,8 @@ export const updateUser = async (req, res) => {
         })
       }
       user.password = req.body.password
+      // Admin/staff asigna clave temporal; el usuario elige la suya → no forzar cambio
+      user.mustChangePassword = !isSelf
     }
 
     const updatedUser = await user.save()
@@ -337,7 +339,9 @@ export const updateUser = async (req, res) => {
       phoneNumber: updatedUser.phoneNumber,
       country: updatedUser.country,
       birthday: updatedUser.birthday,
-      role: updatedUser.role
+      role: updatedUser.role,
+      passwordSet: updatedUser.passwordSet,
+      mustChangePassword: updatedUser.mustChangePassword
     })
   } catch (error) {
     res.status(500).json({ message: error.message })

@@ -63,6 +63,11 @@ const options = {
             country: { type: 'string', description: 'País del usuario' },
             birthday: { type: 'string', format: 'date' },
             role: { type: 'string', enum: ['superadmin', 'admin', 'owner', 'user'] },
+            passwordSet: { type: 'boolean', description: 'Si el usuario ya tiene contraseña configurada' },
+            mustChangePassword: {
+              type: 'boolean',
+              description: 'true si un admin asignó contraseña temporal y el usuario debe cambiarla'
+            },
             lots: { type: 'array', items: { type: 'string' } },
             projectMemberships: {
               type: 'array',

@@ -84,6 +84,14 @@ const userSchema = new mongoose.Schema(
       default: false
     },
     /**
+     * true cuando un admin asignó la contraseña (temporal).
+     * El usuario debe cambiarla en el próximo acceso; no se limpia solo por hashear.
+     */
+    mustChangePassword: {
+      type: Boolean,
+      default: false
+    },
+    /**
      * Acceso explícito a proyectos (opcional). Se combina con el que ya deriva de
      * Property / Apartment (dueño o share). Útil para permisos sin duplicar usuarios.
      */
