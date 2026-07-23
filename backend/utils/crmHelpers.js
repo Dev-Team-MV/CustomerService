@@ -299,7 +299,7 @@ export async function resolveClientFromPayload(payload) {
   const doc = payload?.toObject ? payload.toObject() : payload
   if (!doc) return null
 
-  const userSelect = 'firstName lastName email phoneNumber'
+  const userSelect = 'firstName lastName email phoneNumber country'
 
   if (doc.property) {
     const property = await Property.findById(doc.property)
@@ -323,7 +323,7 @@ export async function resolveClientFromPayload(payload) {
 export async function assertClientExists(userId) {
   if (!isValidObjectId(userId)) return null
   return User.findOne({ _id: userId, isActive: { $ne: false } })
-    .select('firstName lastName email phoneNumber birthday role projectMemberships createdAt updatedAt')
+    .select('firstName lastName email phoneNumber country birthday role projectMemberships createdAt updatedAt')
     .lean()
 }
 

@@ -40,6 +40,9 @@ const router = express.Router()
  *               phoneNumber:
  *                 type: string
  *                 description: Required if skipPasswordSetup is true (for SMS)
+ *               country:
+ *                 type: string
+ *                 description: País del usuario
  *               birthday:
  *                 type: string
  *                 format: date

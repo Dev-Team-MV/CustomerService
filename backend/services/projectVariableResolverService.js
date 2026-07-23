@@ -96,7 +96,7 @@ export async function buildRecipientContext({ projectId, userId, leadId } = {}) 
 
   if (userId && mongoose.Types.ObjectId.isValid(userId)) {
     const user = await User.findById(userId)
-      .select('firstName lastName email phoneNumber role birthday isActive')
+      .select('firstName lastName email phoneNumber country role birthday isActive')
       .lean()
 
     if (user) {

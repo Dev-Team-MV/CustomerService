@@ -14,6 +14,7 @@ const RECORRIDO_NODES = {
       { key: 'lastName', type: 'scalar', label: L('Apellido', 'Last name') },
       { key: 'email', type: 'scalar', label: L('Correo', 'Email') },
       { key: 'phoneNumber', type: 'scalar', label: L('Teléfono', 'Phone') },
+      { key: 'country', type: 'scalar', label: L('País', 'Country') },
       { key: 'role', type: 'scalar', label: L('Rol', 'Role') },
       { key: 'birthday', type: 'scalar', label: L('Fecha de nacimiento', 'Birthday') },
       { key: 'isActive', type: 'scalar', label: L('Activo', 'Active') }

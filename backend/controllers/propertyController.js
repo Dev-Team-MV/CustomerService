@@ -581,7 +581,7 @@ export const getPropertyById = async (req, res) => {
       .populate('project', 'name slug')
       .populate('lot', 'number price')
       .populate('model', 'model modelNumber price bedrooms bathrooms sqft images blueprints description balconies upgrades floors')
-      .populate('users', 'firstName lastName email phoneNumber birthday')
+      .populate('users', 'firstName lastName email phoneNumber country birthday')
       .populate({
         path: 'payloads',
         options: { sort: { date: -1 } }
