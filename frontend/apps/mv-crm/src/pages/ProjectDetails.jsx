@@ -3,13 +3,15 @@ import { useState } from 'react'
 import { Box, Typography, Chip, Grid, Paper, Divider, Stack, Button, Skeleton, Tabs, Tab } from '@mui/material'
 import { 
   LocationOn, CropSquare, ArrowBack, Image, CalendarToday, Tag, 
-  CheckCircleOutline, LinkOutlined, Palette, PhotoCamera, Description 
+  CheckCircleOutline, LinkOutlined, Palette, PhotoCamera, Description, Map
 } from '@mui/icons-material'
 import { useParams, useNavigate } from 'react-router-dom'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
 import { useTranslation } from 'react-i18next'
 import { useProjects } from '@shared/hooks/useProjects'
-import ProjectDocuments from '../components/documents/ProjectDocuments' // ✅ NUEVO: Importar componente de documentos
+import ProjectDocuments from '../components/documents/ProjectDocuments'
+import ProjectInventory from '../components/ProjectInventory'
+import MapInventory from '../components/MapInventory' // ✅ NUEVO: Importar MapInventory
 
 function normalizeLangField(field) {
   if (typeof field === 'object' && field !== null && field._id) return { en: '', es: '' }
@@ -18,7 +20,6 @@ function normalizeLangField(field) {
   return { en: '', es: '' }
 }
 
-// ✅ NUEVO: Helper para manejar el contenido de las pestañas
 function TabPanel({ children, value, index }) {
   return (
     <Box role="tabpanel" hidden={value !== index} sx={{ mt: value === index ? 0 : 0 }}>
@@ -96,7 +97,7 @@ export default function ProjectDetails() {
   const navigate = useNavigate()
   const [selectedImg, setSelectedImg] = useState(null)
   const [lang, setLang] = useState('en')
-  const [activeTab, setActiveTab] = useState(0) // ✅ NUEVO: Estado para las pestañas principales
+  const [activeTab, setActiveTab] = useState(0)
 
   const { projects, loading } = useProjects()
   const project = projects.find(p => p._id === id)
@@ -182,7 +183,7 @@ export default function ProjectDetails() {
         </Box>
       </Box>
 
-      {/* ✅ NUEVO: Tabs Principales (Información / Documentos) */}
+      {/* ── TABS PRINCIPALES ── */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs
           value={activeTab}
@@ -198,12 +199,12 @@ export default function ProjectDetails() {
         >
           <Tab icon={<PhotoCamera sx={{ mr: 1, fontSize: 18 }} />} iconPosition="start" label={t('tabs.info', 'Información')} />
           <Tab icon={<Description sx={{ mr: 1, fontSize: 18 }} />} iconPosition="start" label={t('tabs.documents', 'Documentos')} />
+          <Tab icon={<Map sx={{ mr: 1, fontSize: 18 }} />} iconPosition="start" label={t('tabs.inventory', 'Inventario')} />
         </Tabs>
       </Box>
 
       {/* ── TAB 0: INFORMACIÓN DEL PROYECTO ── */}
       <TabPanel value={activeTab} index={0}>
-        {/* Lang Tabs (solo visible en la pestaña de información) */}
         <Box sx={{ mb: 3 }}>
           <Tabs value={lang} onChange={(_, v) => setLang(v)} sx={{ borderBottom: '1px solid #ececec', '& .MuiTab-root': { fontFamily: '"Courier New", monospace', fontSize: '0.72rem', letterSpacing: 2, textTransform: 'uppercase', fontWeight: 600, color: '#aaa', minWidth: 100 }, '& .Mui-selected': { color: '#4a7c59 !important' }, '& .MuiTabs-indicator': { bgcolor: '#4a7c59', height: 2 } }}>
             {LANGS.map(l => <Tab key={l.code} value={l.code} label={l.label} />)}
@@ -211,7 +212,6 @@ export default function ProjectDetails() {
         </Box>
 
         <Grid container spacing={4}>
-          {/* ── LEFT ── */}
           <Grid item xs={12} md={7}>
             <Stack spacing={3}>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
@@ -291,7 +291,6 @@ export default function ProjectDetails() {
             </Stack>
           </Grid>
 
-          {/* ── RIGHT: MEDIA ── */}
           <Grid item xs={12} md={5}>
             <Stack spacing={3}>
               <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #e0e0e0', bgcolor: '#fafcf9' }}>
@@ -347,9 +346,18 @@ export default function ProjectDetails() {
         </Grid>
       </TabPanel>
 
-      {/* ✅ NUEVO: TAB 1: DOCUMENTOS DEL PROYECTO */}
+      {/* ── TAB 1: DOCUMENTOS DEL PROYECTO ── */}
       <TabPanel value={activeTab} index={1}>
         <ProjectDocuments projectId={project._id} projectName={project.name} />
+      </TabPanel>
+
+      {/* ── TAB 2: INVENTARIO (MapInventory para Lakewood, ProjectInventory para los demás) ── */}
+      <TabPanel value={activeTab} index={2}>
+        {project.slug === 'lakewood' ? (
+          <MapInventory projectId={project._id} projectName={project.name} />
+        ) : (
+          <ProjectInventory projectId={project._id} projectName={project.name} />
+        )}
       </TabPanel>
 
     </PageLayout>

@@ -1,0 +1,86 @@
+{
+  "page": {
+    "title": "Programa de Referidos",
+    "subtitle": "Gestión de referidos, recompensas y configuración del programa"
+  },
+  "stats": {
+    "total": "Total Referidos",
+    "conversionRate": "Tasa de Conversión",
+    "rewardsPaid": "Recompensas Pagadas",
+    "topReferrers": "Top Referidores",
+    "allProjects": "Todos los Proyectos"
+  },
+  "columns": {
+    "referrer": "Recomendador",
+    "referred": "Referido",
+    "project": "Proyecto",
+    "status": "Estado",
+    "reward": "Recompensa",
+    "actions": "Acciones"
+  },
+  "statuses": {
+    "all": "Todos",
+    "pending": "Pendiente",
+    "contacted": "Contactado",
+    "qualified": "Calificado",
+    "converted": "Convertido",
+    "reward_pending": "Recompensa Pendiente",
+    "reward_paid": "Recompensa Pagada",
+    "expired": "Expirado"
+  },
+  "actions": {
+    "convert": "Marcar como Venta",
+    "approveReward": "Aprobar Recompensa",
+    "delete": "Eliminar",
+    "view": "Ver Detalles",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "saving": "Procesando...",
+    "submit": "Enviar Referido"
+  },
+  "program": {
+    "title": "Configuración del Programa",
+    "name": "Nombre del Programa",
+    "rewardPerReferral": "Recompensa por Referido",
+    "rewardType": "Tipo de Recompensa",
+    "isActive": "Programa Activo",
+    "maxReferrals": "Máx. Referidos por Usuario",
+    "terms": "Términos y Condiciones (ES)",
+    "termsEn": "Términos y Condiciones (EN)",
+    "createNew": "Crear Nuevo Programa",
+    "edit": "Editar Programa",
+    "create": "Crear Programa de Referidos"
+  },
+  "leaderboard": {
+    "title": "Tabla de Líderes",
+    "referrals": "Referidos",
+    "earned": "Ganado"
+  },
+  "modal": {
+    "submitTitle": "Enviar un Referido",
+    "createTitle": "Crear Referido (Admin)"
+  },
+  "fields": {
+    "project": "Proyecto",
+    "referrer": "Cliente Referidor",
+    "referredName": "Nombre del Referido",
+    "referredPhone": "Teléfono del Referido",
+    "referredEmail": "Email del Referido (Opcional)",
+    "rewardType": "Tipo de Recompensa",
+    "rewardPerReferral": "Monto de Recompensa",
+    "discountPercent": "Porcentaje de Descuento (%)",
+    "notes": "Notas Adicionales"
+  },
+  "errors": {
+    "projectRequired": "El proyecto es obligatorio",
+    "referrerRequired": "Debes seleccionar un cliente referidor",
+    "contactRequired": "Nombre y teléfono del referido son obligatorios",
+    "submitFailed": "Error al enviar el referido"
+  },
+  "warnings": {
+    "noReferrers": "No hay clientes asignados a este proyecto"
+  },
+  "common": {
+    "select": "Seleccionar..."
+  }
+}

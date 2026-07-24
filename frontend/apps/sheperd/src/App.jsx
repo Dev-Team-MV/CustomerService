@@ -32,6 +32,9 @@ import theme from './theme'
 
 // Componente compartido
 import UniversalLogin from '@shared/components/Login/UniversalLogin'
+import CustomerSurveyPage from '@shared/components/CustomerSurveyPage'
+import CustomerWarrantyPage from '@shared/components/Warranties/CustomerWarrantyPage'
+import ForcePasswordChange from '@shared/components/Login/ForcePasswordChange'
 
 const DynamicLayoutWrapper = ({ children }) => {
   const { user } = useAuth()
@@ -102,6 +105,9 @@ function App() {
               <Route path="/payloads" element={<Payloads />} />
               <Route path="/my-apartment" element={<MyApartment />} />
               <Route path="/family-group" element={<FamilyGroup />} />
+              <Route path="/survey" element={<CustomerSurveyPage />} />
+              <Route path="/warranties" element={<CustomerWarrantyPage />} />
+              <Route path="/auth/force-password-change" element={<ForcePasswordChange />} />
             </Route>
           </Route>
 

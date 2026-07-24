@@ -1,14 +1,15 @@
 import { Box, Grid, CircularProgress, Avatar, Typography, Chip } from '@mui/material'
 import { useAuth } from '@shared/context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useState } from 'react' // ✅ Agregado useState
 import { 
   Dashboard as DashboardIcon, 
   Home, 
   RequestQuote, 
   People, 
   Newspaper,
-  Settings
+  Settings,
+  GroupAdd // ✅ Agregado icono de referidos
 } from '@mui/icons-material'
 import { useTheme } from '@mui/material/styles'
 import DashboardHeader from '@shared/components/Dashboard/DashboardHeader'
@@ -20,6 +21,7 @@ import { useMasterPlan } from '@shared/hooks/useMasterPlan'
 import useFetch from '@shared/hooks/useFetch'
 import api from '@shared/services/api'
 import { useTranslation } from 'react-i18next'
+import SubmitReferralModal from '@shared/components/referrals/SubmitReferralModal' // ✅ Importar modal
 
 const PayloadRow = ({ payload, navigate, t }) => {
   const statusColors = {
@@ -30,13 +32,11 @@ const PayloadRow = ({ payload, navigate, t }) => {
   
   const colors = statusColors[payload.status] || statusColors.pending
   
-  // Extraer datos de apartment (estructura de Sheperd)
   const apartment = payload.apartment
   const apartmentModel = apartment?.apartmentModel
   const apartmentNumber = apartment?.apartmentNumber
   const customer = apartment?.users?.[0]
 
-  // Construir el label del apartamento
   const apartmentLabel = apartmentModel?.name && apartmentNumber
     ? `${apartmentModel.name} - ${apartmentNumber}`
     : apartmentModel?.name || t('dashboard:recentQuotes.property')
@@ -135,6 +135,9 @@ const Dashboard = () => {
   const { t } = useTranslation(['common', 'dashboard'])
   const projectId = import.meta.env.VITE_PROJECT_ID
   const { masterPlanData, loading, fetchMasterPlan } = useMasterPlan()
+  
+  // ✅ Estado para controlar el modal de referidos
+  const [referralModalOpen, setReferralModalOpen] = useState(false)
  
   useEffect(() => {
     if (projectId) {
@@ -191,6 +194,15 @@ const Dashboard = () => {
       bgColor: '#FF8C4215',
       onClick: () => navigate('/news')
     },
+    // ✅ ACCIÓN DE REFERIDOS PARA ADMIN
+    {
+      label: t('dashboard:quickActions.referrals', 'Referidos'),
+      description: t('dashboard:quickActions.referralsDesc', 'Invita a un amigo y gana recompensas'),
+      icon: <GroupAdd />,
+      color: '#43A047',
+      bgColor: '#43A04715',
+      onClick: () => setReferralModalOpen(true)
+    },
     {
       label: t('dashboard:quickActions.configuration', 'Configuration'),
       description: t('dashboard:quickActions.configurationDesc', 'System settings'),
@@ -217,6 +229,15 @@ const Dashboard = () => {
       color: '#FF8C42',
       bgColor: '#FF8C4215',
       onClick: () => navigate('/news')
+    },
+    // ✅ ACCIÓN DE REFERIDOS PARA USUARIO
+    {
+      label: t('dashboard:quickActions.referrals', 'Referidos'),
+      description: t('dashboard:quickActions.referralsDesc', 'Invita a un amigo y gana recompensas'),
+      icon: <GroupAdd />,
+      color: '#43A047',
+      bgColor: '#43A04715',
+      onClick: () => setReferralModalOpen(true)
     }
   ]
  
@@ -256,27 +277,11 @@ const Dashboard = () => {
         <Grid item xs={12} lg={8}>
           <DashboardMapPanel title={t('dashboard:masterPlan.title', 'Master Plan')}>
             {loading ? (
-              <Box
-                sx={{
-                  height: 400,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
+              <Box sx={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <CircularProgress size={48} sx={{ color: theme.palette.primary.main }} />
               </Box>
             ) : masterPlanData?.masterPlanImage ? (
-              <Box
-                sx={{
-                  width: '100%',
-                  position: 'relative',
-                  bgcolor: '#f5f5f5',
-                  borderRadius: 2,
-                  overflow: 'hidden',
-                  minHeight: 400
-                }}
-              >
+              <Box sx={{ width: '100%', position: 'relative', bgcolor: '#f5f5f5', borderRadius: 2, overflow: 'hidden', minHeight: 400 }}>
                 <PolygonImagePreview
                   imageUrl={masterPlanData.masterPlanImage}
                   polygons={previewPolygons}
@@ -288,17 +293,7 @@ const Dashboard = () => {
                 />
               </Box>
             ) : (
-              <Box
-                sx={{
-                  height: 400,
-                  borderRadius: 3,
-                  bgcolor: '#fff7ed',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '2px dashed #fed7aa'
-                }}
-              >
+              <Box sx={{ height: 400, borderRadius: 3, bgcolor: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px dashed #fed7aa' }}>
                 <Box textAlign="center">
                   <Home sx={{ fontSize: 64, color: '#fdba74', mb: 2 }} />
                   <Box sx={{ color: '#c2410c', fontSize: '0.95rem', fontWeight: 500 }}>
@@ -337,6 +332,17 @@ const Dashboard = () => {
           </Grid>
         </Grid>
       )}
+
+      {/* ✅ MODAL DE CREACIÓN DE REFERIDOS (Modo Customer) */}
+      <SubmitReferralModal
+        open={referralModalOpen}
+        onClose={() => setReferralModalOpen(false)}
+        mode="customer" // ✅ Esto asegura que use el .env y oculte los selectores de admin
+        onSuccess={() => {
+          setReferralModalOpen(false)
+          // Opcional: Aquí podrías disparar un Snackbar de éxito si lo deseas
+        }}
+      />
     </Box>
   )
 }

@@ -16,6 +16,8 @@ import {
   Groups as GroupsIcon,
   Pool as PoolIcon,
   GridOn as GridOnIcon,
+  RateReview as SurveyIcon, 
+  ReportProblem as ReportProblemIcon,
 } from "@mui/icons-material"
 
 export const privateMenuItems = [
@@ -115,8 +117,19 @@ export const privateMenuItems = [
     path: "/family-group",
     roles: ["superadmin", "admin", "user"],
   },
-  // En privateMenuItems o donde corresponda:
-
+  // ✅ 2. Agregada la opción de menú para Encuestas
+  {
+    textKey: "navigation:menu.surveys",
+    icon: SurveyIcon,
+    path: "/survey",
+    roles: ["superadmin", "admin", "user"],
+  },
+  {
+    textKey: "navigation:menu.warranties",
+    icon: ReportProblemIcon,
+    path: "/warranties",
+    roles: ["superadmin", "admin", "user"],
+  },
   {
     textKey: "navigation:menu.uploadTracker",
     icon: GridOnIcon,

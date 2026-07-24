@@ -8,7 +8,10 @@ import {
     AccountBalance as AccountBalanceIcon,
     Map as MapIcon,
     MeetingRoom as MeetingRoomIcon,
-    Group as GroupIcon
+    Group as GroupIcon,
+    RateReview as SurveyIcon,
+    Build as BuildIcon,
+    ReportProblem as ReportProblemIcon, // ✅ Nuevo ícono para garantías
 } from "@mui/icons-material"
 
 export const privateMenuItems = [
@@ -31,6 +34,18 @@ export const privateMenuItems = [
         roles: ["superadmin", "admin"],
     },
     {
+        textKey: "navigation:menu.surveys",
+        icon: SurveyIcon,
+        path: "/survey",
+        roles: ["superadmin", "admin", "user"],
+    },
+    {
+        textKey: "navigation:menu.warranties",
+        icon: ReportProblemIcon, // ✅ Reemplazado BuildIcon por ReportProblemIcon
+        path: "/warranties",
+        roles: ["superadmin", "admin", "user"],
+    },
+    {
         textKey: "navigation:menu.buildings",
         icon: ApartmentIcon,
         path: "/buildings",
@@ -49,11 +64,11 @@ export const privateMenuItems = [
         roles: ["superadmin", "admin", "user"],
     },
     {
-    textKey: "navigation:menu.amenities",
-    icon: MapIcon,
-    path: "/amenities",
-    roles: ["superadmin", "admin", "user"],
-},
+        textKey: "navigation:menu.amenities",
+        icon: MapIcon,
+        path: "/amenities",
+        roles: ["superadmin", "admin", "user"],
+    },
     {
         textKey: "navigation:menu.masterPlan",
         icon: MapIcon,

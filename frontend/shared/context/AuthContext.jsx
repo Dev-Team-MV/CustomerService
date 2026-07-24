@@ -134,6 +134,12 @@ export const AuthProvider = ({ children, projectSlug }) => {
     if (token) {
       if (userData) {
         const parsedUser = JSON.parse(userData)
+        
+              if (parsedUser.mustChangePassword === true) {
+        console.log('⚠️ User must change password on first login')
+        // No redirigir aquí, el ProtectedRoute lo manejará
+      }
+      
         if (parsedUser.projects) {
           if (projectSlug && !validateProjectAccess(parsedUser.projects, projectSlug)) {
             console.error(`⛔ Cached user cannot access ${projectSlug}`)

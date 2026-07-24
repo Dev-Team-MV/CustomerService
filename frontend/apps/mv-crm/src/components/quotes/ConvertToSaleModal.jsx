@@ -35,8 +35,11 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
       
       const existingPropertyId = getId(quote.propertyId)
       const existingApartmentId = getId(quote.apartmentId)
-      const clientId = getId(quote.clientId)
+      
+      const userId = getId(quote.clientId) || getId(quote.leadId)
       const projectId = getId(quote.projectId)
+      const leadId = getId(quote.leadId)
+      const quoteId = quote._id
 
       // ==========================================
       // CASO 1: YA ES UNA PROPIEDAD (LOTE/CASA)
@@ -47,37 +50,36 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
       // ==========================================
       // CASO 2: ES UN APARTAMENTO (H Tower, Phase 2, ISQ)
       // ==========================================
-      else {
-        // Extraemos los datos del apartamento, ya sea del objeto populado o de campos sueltos
+      else if (existingApartmentId || (getId(quote.apartmentModelId) || getId(quote.apartmentId?.apartmentModel))) {
         const aptObj = typeof quote.apartmentId === 'object' ? quote.apartmentId : {}
         const aptModelId = getId(aptObj.apartmentModel) || getId(quote.apartmentModelId)
         const floorNum = aptObj.floorNumber || quote.floorNumber
         const aptNum = aptObj.apartmentNumber || quote.apartmentNumber
         const bldgId = getId(aptObj.building) || getId(quote.buildingId)
 
-        if (aptModelId && floorNum && aptNum && clientId && projectId) {
+        if (aptModelId && floorNum && aptNum && userId && projectId) {
           const aptPayload = {
             projectId,
             ...(bldgId ? { buildingId: bldgId } : {}),
             apartmentModelId: aptModelId,
             floorNumber: Number(floorNum),
             apartmentNumber: String(aptNum),
-            user: clientId,
-            users: [clientId],
+            user: userId,
+            users: [userId],
+            leadId: leadId || undefined,       // ✅ Agregado para conversión Lead -> User
+            quoteId: quoteId,                  // ✅ Agregado para ligar la cotización
             price: quote.totalPrice || 0,
             initialPayment: quote.downPayment || 0,
-            status: 'pending', // O 'sold' según tu regla de negocio
+            status: 'pending',
             selectedRenderType: quote.selectedRenderType || 'basic'
           }
 
           try {
             if (existingApartmentId) {
-              // ✅ ACTUALIZAR el apartamento existente para asignarle el cliente y los precios
               console.log('📤 Actualizando apartamento existente:', existingApartmentId, aptPayload)
               await buildingService.updateApartment(existingApartmentId, aptPayload)
               payload.apartmentId = existingApartmentId
             } else {
-              // ✅ CREAR un nuevo apartamento si la cotización no lo tenía guardado aún
               console.log('📤 Creando nuevo apartamento:', aptPayload)
               const newApartment = await buildingService.createApartment(aptPayload)
               payload.apartmentId = newApartment._id
@@ -85,50 +87,71 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
           } catch (createErr) {
             console.error('Error auto-creating/updating apartment:', createErr)
             const errMsg = createErr.response?.data?.message || 'Error al asignar/crear el apartamento.'
-            setHint(errMsg)
-            return // Detenemos la ejecución para no convertir la quote sin asignar la propiedad
+            setError(errMsg)
+            return
           }
-        } 
-        // ==========================================
-        // CASO 3: FALLBACK A LOTE/CASA (6Town, LakeWood)
-        // ==========================================
-        else {
-          const lotId = getId(quote.lotId)
-          const modelId = getId(quote.modelId)
-          const buildingId = getId(quote.buildingId)
-          const facadeId = getId(quote.facadeId) || getId(quote.facade)
-
-          if (lotId && modelId && clientId && projectId) {
-            try {
-              const newProperty = await propertyService.createProperty({
-                projectId,
-                ...(buildingId ? { buildingId } : {}),
-                lot: lotId,
-                model: modelId,
-                facade: facadeId || undefined,
-                userId: clientId,
-                users: [clientId],
-                initialPayment: quote.downPayment || 0,
-                price: quote.totalPrice || 0,
-                status: 'pending',
-                selectedOptions: quote.selectedOptions || {},
-                selectedRenderType: quote.selectedRenderType || 'basic'
-              })
-              payload.propertyId = newProperty._id
-            } catch (createErr) {
-              console.error('Error auto-creating property:', createErr)
-              const errMsg = createErr.response?.data?.message || 'Error al crear la propiedad automáticamente.'
-              setHint(errMsg)
-              return
-            }
-          }
+        } else {
+          setError('Faltan datos del apartamento: modelo, piso, número o usuario/proyecto')
+          return
         }
+      } 
+      // ==========================================
+      // CASO 3: FALLBACK A LOTE/CASA (6Town, LakeWood)
+      // ==========================================
+      else {
+        const lotId = getId(quote.lotId)
+        const modelId = getId(quote.modelId)
+        const buildingId = getId(quote.buildingId)
+        const facadeId = getId(quote.facadeId) || getId(quote.facade)
+
+        if (lotId && modelId && userId && projectId) {
+          try {
+            // ✅ PAYLOAD ACTUALIZADO SEGÚN REQUERIMIENTO
+            const propertyPayload = {
+              projectId,
+              ...(buildingId ? { buildingId } : {}),
+              lot: lotId,
+              model: modelId,
+              facade: facadeId || undefined,
+              userId: userId,
+              leadId: leadId || undefined,  // ✅ Clave para que el backend haga la conversión
+              quoteId: quoteId,             // ✅ Clave para ligar la cotización y sus opciones
+              price: quote.totalPrice || 0,
+              initialPayment: quote.downPayment || 0,
+              status: 'pending',
+              selectedOptions: quote.selectedOptions || {},
+              modelType: quote.modelType || (quote.hasModelUpgrade ? 'upgrade' : 'basic'),
+              hasBalcony: quote.hasBalcony || false,
+              hasStorage: quote.hasStorage || false
+            }
+
+            console.log('📤 Creando nueva propiedad con payload de conversión:', propertyPayload)
+            const newProperty = await propertyService.createProperty(propertyPayload)
+            
+            payload.propertyId = newProperty._id
+          } catch (createErr) {
+            console.error('Error auto-creating property:', createErr)
+            const errMsg = createErr.response?.data?.message || 'Error al crear la propiedad automáticamente.'
+            setError(errMsg)
+            return
+          }
+        } else {
+          setError('Faltan datos de la propiedad: lote, modelo o usuario/proyecto')
+          return
+        }
+      }
+
+      // ==========================================
+      // VALIDACIÓN FINAL: Verificar que payload tenga datos
+      // ==========================================
+      if (!payload.propertyId && !payload.apartmentId) {
+        setError('No se pudo determinar la propiedad o apartamento a asignar. Verifica los datos de la cotización.')
+        return
       }
 
       // ==========================================
       // PASO FINAL: CONVERTIR LA COTIZACIÓN
       // ==========================================
-      // Si llegamos aquí, payload ya tiene apartmentId o propertyId correctamente asignado y actualizado
       console.log('📤 Convirtiendo cotización con payload:', payload)
       const res = await quoteService.convertToSale(quote._id, payload)
       
@@ -142,6 +165,7 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
         onClose()
       }
     } catch (err) {
+      console.error('Error en handleConvert:', err)
       setError(err.response?.data?.message || t('errors.convertFailed', 'Error al convertir'))
     } finally {
       setLoading(false)
@@ -150,10 +174,20 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
 
   if (!quote) return null
 
+  // ✅ Lógica de nombre: Cliente registrado o Lead
   const clientObj = typeof quote.clientId === 'object' ? quote.clientId : null
-  const clientName = clientObj 
-    ? `${clientObj.firstName || ''} ${clientObj.lastName || ''}`.trim() 
-    : (quote.leadId?.name || (typeof quote.leadId === 'object' ? quote.leadId.name : '') || 'N/A')
+  const leadObj = typeof quote.leadId === 'object' ? quote.leadId : null
+
+  let personName = 'N/A'
+  if (clientObj) {
+    personName = `${clientObj.firstName || ''} ${clientObj.lastName || ''}`.trim()
+  } else if (leadObj) {
+    personName = leadObj.name || 'N/A'
+  }
+
+  if (!personName || personName === 'N/A') {
+    personName = leadObj?.name || clientObj?.email || leadObj?.email || 'N/A'
+  }
 
   const hasPropertyData = getId(quote.propertyId) || getId(quote.apartmentId) || (getId(quote.lotId) && getId(quote.modelId)) || (getId(quote.apartmentModelId) && quote.floorNumber)
 
@@ -165,8 +199,8 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
       </DialogTitle>
       <DialogContent dividers>
         <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" color="text.secondary">{t('convertToSale.client', 'Cliente')}</Typography>
-          <Typography fontWeight={600}>{clientName}</Typography>
+          <Typography variant="subtitle2" color="text.secondary">{t('convertToSale.client', 'Cliente / Lead')}</Typography>
+          <Typography fontWeight={600}>{personName}</Typography>
         </Box>
         
         <Box sx={{ mb: 3 }}>

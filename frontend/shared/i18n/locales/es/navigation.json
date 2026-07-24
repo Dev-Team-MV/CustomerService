@@ -28,7 +28,10 @@
         "uploadTracker": "Rastreador de Subidas",
         "catalogConfig": "Configuración de Catálogo",
         "building": "Casas",
-        "lots": "Lotes"
+        "lots": "Lotes",
+        "agents":"Agentes",
+        "warranties":"Garantías",
+        "surveys":"Encuestas"
           },
     "tooltips": {
         "openMenu": "Abrir menú",

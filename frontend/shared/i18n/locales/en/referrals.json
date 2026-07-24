@@ -1,0 +1,86 @@
+{
+  "page": {
+    "title": "Referral Program",
+    "subtitle": "Management of referrals, rewards, and program configuration"
+  },
+  "stats": {
+    "total": "Total Referrals",
+    "conversionRate": "Conversion Rate",
+    "rewardsPaid": "Rewards Paid",
+    "topReferrers": "Top Referrers",
+    "allProjects": "All Projects"
+  },
+  "columns": {
+    "referrer": "Referrer",
+    "referred": "Referred",
+    "project": "Project",
+    "status": "Status",
+    "reward": "Reward",
+    "actions": "Actions"
+  },
+  "statuses": {
+    "all": "All",
+    "pending": "Pending",
+    "contacted": "Contacted",
+    "qualified": "Qualified",
+    "converted": "Converted",
+    "reward_pending": "Reward Pending",
+    "reward_paid": "Reward Paid",
+    "expired": "Expired"
+  },
+  "actions": {
+    "convert": "Mark as Sale",
+    "approveReward": "Approve Reward",
+    "delete": "Delete",
+    "view": "View Details",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saving": "Processing...",
+    "submit": "Submit Referral"
+  },
+  "program": {
+    "title": "Program Configuration",
+    "name": "Program Name",
+    "rewardPerReferral": "Reward per Referral",
+    "rewardType": "Reward Type",
+    "isActive": "Active Program",
+    "maxReferrals": "Max Referrals per User",
+    "terms": "Terms and Conditions (ES)",
+    "termsEn": "Terms and Conditions (EN)",
+    "createNew": "Create New Program",
+    "edit": "Edit Program",
+    "create": "Create Referral Program"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "referrals": "Referrals",
+    "earned": "Earned"
+  },
+  "modal": {
+    "submitTitle": "Submit a Referral",
+    "createTitle": "Create Referral (Admin)"
+  },
+  "fields": {
+    "project": "Project",
+    "referrer": "Referring Client",
+    "referredName": "Referred Name",
+    "referredPhone": "Referred Phone",
+    "referredEmail": "Referred Email (Optional)",
+    "rewardType": "Reward Type",
+    "rewardPerReferral": "Reward Amount",
+    "discountPercent": "Discount Percentage (%)",
+    "notes": "Additional Notes"
+  },
+  "errors": {
+    "projectRequired": "Project is required",
+    "referrerRequired": "You must select a referring client",
+    "contactRequired": "Referred name and phone are required",
+    "submitFailed": "Error submitting referral"
+  },
+  "warnings": {
+    "noReferrers": "There are no clients assigned to this project"
+  },
+  "common": {
+    "select": "Select..."
+  }
+}

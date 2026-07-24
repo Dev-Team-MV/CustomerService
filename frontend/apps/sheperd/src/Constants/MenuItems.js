@@ -10,7 +10,9 @@ import {
     MeetingRoom as MeetingRoomIcon,
     Group as GroupIcon,
     RequestQuote as RequestQuoteIcon,
-    Business as BusinessIcon
+    Business as BusinessIcon,
+      RateReview as SurveyIcon, 
+    ReportProblem as ReportProblemIcon,
 } from "@mui/icons-material"
 
 export const privateMenuItems = [
@@ -78,6 +80,18 @@ export const privateMenuItems = [
   textKey: 'navigation:menu.familyGroup',
   icon: GroupIcon,
   path: '/family-group',
+  roles: ['superadmin', 'admin', 'user']
+},
+{
+  textKey: 'navigation:menu.warranties',
+  icon: ReportProblemIcon,
+  path: '/warranties',
+  roles: ['superadmin', 'admin', 'user']
+},
+{
+  textKey: 'navigation:menu.surveys',
+  icon: SurveyIcon,
+  path: '/survey',
   roles: ['superadmin', 'admin', 'user']
 }
 ]

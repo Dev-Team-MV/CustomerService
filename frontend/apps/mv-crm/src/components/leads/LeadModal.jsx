@@ -30,6 +30,7 @@ import {
 import { useProjects } from '@shared/hooks/useProjects'
 import { useResidents } from '@shared/hooks/useResidents'
 import { LEAD_STAGES, STAGE_COLORS } from '../../services/leadService'
+import SharedPhoneInput from '@shared/constants/SharedPhoneInput' // ✅ Agregar import
 
 const LEAD_SOURCES = [
   { id: 'web', label: 'Web' },
@@ -102,14 +103,19 @@ const LeadModal = ({
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
-
   const handleSave = async () => {
     if (!formData.name.trim()) return
     
     setSaving(true)
     try {
+      // ✅ CORRECCIÓN: Asegurar que el teléfono siempre tenga el '+' al inicio
+      const formattedPhone = formData.phone && !formData.phone.startsWith('+') 
+        ? `+${formData.phone}` 
+        : formData.phone
+
       const payload = {
         ...formData,
+        phone: formattedPhone, // <-- Usamos el teléfono ya formateado
         projectId: formData.projectId || undefined,
         assignedTo: formData.assignedTo || undefined
       }
@@ -162,7 +168,7 @@ const LeadModal = ({
           />
 
           {/* Email y Teléfono */}
-          <Box display="flex" gap={2}>
+         <Box display="flex" gap={2}>
             <TextField
               label={t('form.email')}
               value={formData.email}
@@ -177,19 +183,22 @@ const LeadModal = ({
                 )
               }}
             />
-            <TextField
-              label={t('form.phone')}
-              value={formData.phone}
-              onChange={(e) => handleChange('phone', e.target.value)}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Phone />
-                  </InputAdornment>
-                )
-              }}
-            />
+            
+            {/* ✅ NUEVO INPUT DE TELÉFONO REUTILIZABLE */}
+<SharedPhoneInput
+  label={t('form.phone')}
+  value={formData.phone}
+  onChange={(value) => handleChange('phone', value)}
+  country="us"
+  inputStyle={{
+    height: '56px', // Misma altura que TextField de MUI
+    fontSize: '16px',
+    borderRadius: '4px'
+  }}
+  containerStyle={{
+    width: '100%'
+  }}
+/>
           </Box>
 
           {/* Proyecto y Asesor */}

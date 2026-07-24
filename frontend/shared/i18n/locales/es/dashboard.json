@@ -31,7 +31,8 @@
         "clubHouse": "Club House",
         "clubHouseDesc": "Ver club house",
         "newsFeed": "Noticias",
-        "newsFeedDesc": "Últimas novedades"
+        "newsFeedDesc": "Últimas novedades",
+        "referrals": "Referidos"
     },
     "masterPlan": {
         "title": "Vista del Proyecto",
