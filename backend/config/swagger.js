@@ -2412,6 +2412,7 @@ const options = {
             referredName: { type: 'string' },
             referredPhone: { type: 'string' },
             referredEmail: { type: 'string' },
+            referredCountry: { type: 'string', description: 'País del referido (se copia al Lead y luego al User)' },
             projectId: { type: 'string' },
             status: {
               type: 'string',
@@ -2466,6 +2467,7 @@ const options = {
             referredName: { type: 'string' },
             referredPhone: { type: 'string' },
             referredEmail: { type: 'string' },
+            referredCountry: { type: 'string', description: 'País del referido' },
             notes: { type: 'string' }
           }
         },
