@@ -252,6 +252,7 @@ router.get('/stats/:projectId', protect, admin, getReferralStats)
  *               referredName: { type: string }
  *               referredPhone: { type: string }
  *               referredEmail: { type: string }
+ *               referredCountry: { type: string, description: País del referido }
  *               rewardType: { type: string, enum: [cash, property_discount] }
  *               rewardAmount: { type: number }
  *               discountPercent: { type: number }
@@ -375,6 +376,7 @@ router.post('/:id/approve-reward', protect, admin, approveReward)
  *               referredName: { type: string }
  *               referredPhone: { type: string }
  *               referredEmail: { type: string }
+ *               referredCountry: { type: string, description: País del referido }
  *               status:
  *                 type: string
  *                 enum: [pending, contacted, qualified, converted, reward_pending, reward_paid, expired]

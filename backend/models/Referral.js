@@ -45,6 +45,11 @@ const referralSchema = new mongoose.Schema(
       default: '',
       match: [/^\S+@\S+\.\S+$|^$/, 'Please enter a valid email']
     },
+    referredCountry: {
+      type: String,
+      trim: true,
+      default: ''
+    },
     projectId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Project',

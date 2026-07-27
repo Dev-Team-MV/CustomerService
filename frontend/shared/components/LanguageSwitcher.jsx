@@ -18,43 +18,45 @@ const LanguageSwitcher = ({ variant = 'default' }) => {
     if (code !== currentLang) i18n.changeLanguage(code)
   }
 
-  // Sidebar keeps the compact box style (theme-aware)
+  // Sidebar: full-width pill that fits the sidebar aesthetic
   if (variant === 'sidebar') {
-    const chipTheme = theme.palette.chipLanguageSwitcher || {}
     const current = languages.find(l => l.code === currentLang) || languages[0]
-    const handleToggle = () => {
-      const idx = languages.findIndex(l => l.code === currentLang)
-      i18n.changeLanguage(languages[(idx + 1) % languages.length].code)
-    }
+    const next = languages[(languages.findIndex(l => l.code === currentLang) + 1) % languages.length]
+    const handleToggle = () => i18n.changeLanguage(next.code)
     return (
-      <Tooltip title={`Language: ${current.label}`} placement="bottom">
+      <Tooltip title={`Language: ${current.label}`} placement="right">
         <Box
           onClick={handleToggle}
           sx={{
-            width: 40, height: 40,
-            borderRadius: 2.5,
-            bgcolor: chipTheme.bg || theme.palette.action.hover,
-            border: `2px solid ${chipTheme.border || theme.palette.divider}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: '100%',
+            py: 1,
+            px: 2,
+            borderRadius: 2,
+            bgcolor: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             cursor: 'pointer',
-            transition: 'all 0.3s ease',
+            transition: 'all 0.25s ease',
             '&:hover': {
-              bgcolor: theme.palette.primary.main,
-              borderColor: theme.palette.primary.main,
-              '& .lang-label': { color: theme.palette.primary.contrastText },
+              bgcolor: 'rgba(255,255,255,0.12)',
+              borderColor: 'rgba(255,255,255,0.2)',
             },
           }}
         >
-          <Box
-            className="lang-label"
-            sx={{
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              fontFamily: '"DM Sans", sans-serif',
-              color: chipTheme.color || theme.palette.text.primary,
-              transition: 'color 0.3s',
-            }}
-          >
+          <Box sx={{
+            fontSize: '0.7rem', fontWeight: 600,
+            fontFamily: '"Courier New", monospace',
+            color: 'rgba(255,255,255,0.5)',
+            letterSpacing: '1.5px', textTransform: 'uppercase',
+          }}>
+            Idioma
+          </Box>
+          <Box sx={{
+            fontSize: '0.75rem', fontWeight: 800,
+            fontFamily: '"DM Sans", sans-serif',
+            color: '#fff',
+            letterSpacing: '0.5px',
+          }}>
             {current.label}
           </Box>
         </Box>
