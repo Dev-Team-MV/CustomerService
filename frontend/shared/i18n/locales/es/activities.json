@@ -24,6 +24,13 @@
     "columnNameDefault": "Nombre de columna",
     "keyHelperText": "Identificador único (se genera automáticamente)",
     "orderHelperText": "Posición de la columna (0 = primera)",
+    "columns": {
+      "backlog": "Backlog",
+      "todo": "Por hacer",
+      "inProgress": "En progreso",
+      "done": "Hecho",
+      "approved": "Aprobado"
+    },
     "form": {
       "title": "Título",
       "titlePlaceholder": "Ej: Llamar al cliente",
@@ -104,6 +111,7 @@
     "details": {
       "associatedContact": "Contacto asociado",
       "createdBy": "Creado por",
+      "relatedProjects": "Proyectos relacionados",
       "comments": "Comentarios",
       "noComments": "Sin comentarios",
       "writeComment": "Escribe un comentario..."

@@ -17,7 +17,7 @@ import clientDetailService from '../../services/clientDetailService'
 import { useClientPaymentColumns } from '../../constants/Columns/clientPayments'
 
 const ClientPaymentsTable = ({ clientId }) => {
-  const { t } = useTranslation('clients')
+  const { t } = useTranslation('residents')
   const [payments, setPayments] = useState([])
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
   const [loading, setLoading] = useState(true)
@@ -68,7 +68,7 @@ const ClientPaymentsTable = ({ clientId }) => {
       <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
         <FormControl size="small" sx={{ minWidth: 150 }}>
           <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
-            {t('clients.payments.filterStatus', 'Estado')}
+            {t('payments.filterStatus')}
           </InputLabel>
           <Select
             value={statusFilter}
@@ -76,7 +76,7 @@ const ClientPaymentsTable = ({ clientId }) => {
               setStatusFilter(e.target.value)
               setPagination(prev => ({ ...prev, page: 1 }))
             }}
-            label={t('clients.payments.filterStatus', 'Estado')}
+            label={t('payments.filterStatus')}
             sx={{
               fontFamily: '"Courier New", monospace',
               fontSize: '0.75rem',
@@ -84,10 +84,10 @@ const ClientPaymentsTable = ({ clientId }) => {
               '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ececec' }
             }}
           >
-            <MenuItem value="">{t('clients.payments.all', 'Todos')}</MenuItem>
-            <MenuItem value="pending">{t('clients.payments.statusPending', 'Pendiente')}</MenuItem>
-            <MenuItem value="signed">{t('clients.payments.statusSigned', 'Firmado')}</MenuItem>
-            <MenuItem value="rejected">{t('clients.payments.statusRejected', 'Rechazado')}</MenuItem>
+            <MenuItem value="">{t('payments.all')}</MenuItem>
+            <MenuItem value="pending">{t('payments.statusPending')}</MenuItem>
+            <MenuItem value="signed">{t('payments.statusSigned')}</MenuItem>
+            <MenuItem value="rejected">{t('payments.statusRejected')}</MenuItem>
           </Select>
         </FormControl>
 
@@ -99,8 +99,7 @@ const ClientPaymentsTable = ({ clientId }) => {
             letterSpacing: '0.5px'
           }}
         >
-          {pagination.total} {t('clients.payments.paymentsCount', 'pago')}
-          {pagination.total !== 1 ? 's' : ''}
+          {pagination.total} {pagination.total !== 1 ? t('payments.paymentsCountPlural') : t('payments.paymentsCount')}
         </Typography>
       </Box>
 
@@ -112,8 +111,8 @@ const ClientPaymentsTable = ({ clientId }) => {
         emptyState={
           <EmptyState
             icon={Payment}
-            title={t('clients.payments.empty.title', 'Sin pagos')}
-            description={t('clients.payments.empty.description', 'Este cliente no tiene pagos registrados')}
+            title={t('payments.empty.title')}
+            description={t('payments.empty.description')}
           />
         }
         stickyHeader
@@ -141,9 +140,9 @@ const ClientPaymentsTable = ({ clientId }) => {
               letterSpacing: '0.5px'
             }}
           >
-            Mostrando {((pagination.page - 1) * pagination.limit) + 1} -{' '}
-            {Math.min(pagination.page * pagination.limit, pagination.total)} de{' '}
-            {pagination.total} pagos
+            {t('payments.showing')} {((pagination.page - 1) * pagination.limit) + 1} -{' '}
+            {Math.min(pagination.page * pagination.limit, pagination.total)} {t('payments.of')}{' '}
+            {pagination.total} {pagination.total !== 1 ? t('payments.paymentsCountPlural') : t('payments.paymentsCount')}
           </Typography>
 
           <TablePagination
@@ -154,7 +153,7 @@ const ClientPaymentsTable = ({ clientId }) => {
             rowsPerPage={pagination.limit}
             onRowsPerPageChange={(e) => setPagination(prev => ({ ...prev, limit: parseInt(e.target.value), page: 1 }))}
             rowsPerPageOptions={[10, 20, 50]}
-            labelRowsPerPage={t('clients.payments.rowsPerPage', 'Filas por página')}
+            labelRowsPerPage={t('payments.rowsPerPage')}
             labelDisplayedRows={() => ''}
             sx={{
               '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {

@@ -7,6 +7,8 @@ import {
   deleteAppointment
 } from '../controllers/appointmentController.js'
 import { protect, superadmin } from '../middleware/authMiddleware.js'
+import { logAction } from '../middleware/logAction.js'
+import { fetchAppointment } from '../utils/auditEntityFetchers.js'
 
 const router = express.Router()
 
@@ -76,7 +78,15 @@ router.use(protect, superadmin)
  *         description: Invalid payload
  * */
 router.get('/', getAppointments)
-router.post('/', createAppointment)
+router.post(
+  '/',
+  logAction({
+    action: 'created',
+    entity: 'Appointment',
+    getEntityId: (_, body) => body?._id
+  }),
+  createAppointment
+)
 
 /**
  * @swagger
@@ -105,7 +115,16 @@ router.post('/', createAppointment)
  *             schema:
  *               $ref: '#/components/schemas/Appointment'
  * */
-router.put('/:id/status', updateAppointmentStatus)
+router.put(
+  '/:id/status',
+  logAction({
+    action: 'updated',
+    entity: 'Appointment',
+    fetchBefore: fetchAppointment,
+    buildAfter: (_, body) => ({ status: body?.status })
+  }),
+  updateAppointmentStatus
+)
 
 /**
  * @swagger
@@ -147,7 +166,20 @@ router.put('/:id/status', updateAppointmentStatus)
  *       200:
  *         description: Appointment deleted
  */
-router.put('/:id', updateAppointment)
-router.delete('/:id', deleteAppointment)
+router.put(
+  '/:id',
+  logAction({ action: 'updated', entity: 'Appointment', fetchBefore: fetchAppointment }),
+  updateAppointment
+)
+router.delete(
+  '/:id',
+  logAction({
+    action: 'deleted',
+    entity: 'Appointment',
+    fetchBefore: fetchAppointment,
+    buildAfter: () => null
+  }),
+  deleteAppointment
+)
 
 export default router

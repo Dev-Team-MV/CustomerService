@@ -1,16 +1,15 @@
-import { ThemeProvider, createTheme } from '@mui/material/styles'
+// /Users/oficina/MV-CRM/CustomerService/frontend/apps/lakewood-f2/src/App.jsx
+import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { AuthProvider, useAuth } from '@shared/context/AuthContext'
 import ProtectedRoute from '@shared/components/ProtectedRoute'
 import Layout from '@shared/components/LayoutComponents/Layout'
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 
-// Menús y logo
+// Menús
 import { privateMenuItems, publicMenuItems } from './Constants/MenuItems'
-import logoPhase2 from './assets/react.svg' // Cambia por el logo real
 
 // Pages
-import Login from './Pages/LoginPhase2'
 import Dashboard from './Pages/Dashboard'
 import Residents from './Pages/Residents'
 import NotFound from './Pages/NotFound'
@@ -31,15 +30,15 @@ import AmenitiesPrivate from './Pages/Amenities/AmenitiesPrivate'
 import AmenitiesPublic from './Pages/Amenities/AmenitiesPublic'
 import AgoraManager from './Pages/AgoraManager'
 import TermsAndCondition from './Pages/TermsAndCondition'
-import theme from './theme'
 import Register from './Pages/Register'
 
-// const theme = createTheme({
-//   palette: {
-//     primary: { main: '#1a237e' },
-//     secondary: { main: '#43a047' },
-//   },
-// })
+import theme from './theme'
+
+// Componente compartido
+import UniversalLogin from '@shared/components/Login/UniversalLogin'
+import CustomerSurveyPage from '@shared/components/CustomerSurveyPage'
+import CustomerWarrantyPage from '@shared/components/Warranties/CustomerWarrantyPage'
+import ForcePasswordChange from '@shared/components/Login/ForcePasswordChange'
 
 const DynamicLayoutWrapper = ({ children }) => {
   const { user } = useAuth()
@@ -49,7 +48,6 @@ const DynamicLayoutWrapper = ({ children }) => {
       publicView={publicView}
       menuItems={publicView ? publicMenuItems : privateMenuItems}
       publicMenuItems={publicMenuItems}
-      logoSrc={logoPhase2}
     >
       {children || <Outlet />}
     </Layout>
@@ -63,9 +61,9 @@ function App() {
       <AuthProvider projectSlug="lakewood-f2">
         <Routes>
           {/* Auth Routes */}
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<UniversalLogin />} />
           <Route path="/terms-and-conditions" element={<TermsAndCondition />} />
-          <Route path="/register" element={<Register />} />
+          
           <Route path="/setup-password/:token" element={<Register />} />
 
           {/* Public Routes */}
@@ -74,7 +72,6 @@ function App() {
               <Layout
                 publicView={true}
                 menuItems={publicMenuItems}
-                logoSrc={logoPhase2}
               />
             }
           >
@@ -96,7 +93,6 @@ function App() {
                   publicView={false}
                   menuItems={privateMenuItems}
                   publicMenuItems={publicMenuItems}
-                  logoSrc={logoPhase2}
                 />
               }
             >
@@ -117,6 +113,10 @@ function App() {
               <Route path="/news/:id" element={<NewsDetails />} />
               <Route path="/amenities" element={<AmenitiesPrivate />} />
               <Route path="/quote" element={<GetYourQuote />} />
+
+              <Route path="/survey" element={<CustomerSurveyPage />} />
+              <Route path="/warranties" element={<CustomerWarrantyPage />} />
+              <Route path="/auth/force-password-change" element={<ForcePasswordChange />} />
             </Route>
           </Route>
 

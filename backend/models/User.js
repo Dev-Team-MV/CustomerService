@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    country: {
+      type: String,
+      trim: true
+    },
     birthday: {
       type: Date
     },
@@ -59,7 +63,31 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false
     },
+    passwordResetOtp: {
+      type: String,
+      select: false
+    },
+    passwordResetOtpExpires: {
+      type: Date,
+      select: false
+    },
+    passwordResetToken: {
+      type: String,
+      select: false
+    },
+    passwordResetTokenExpires: {
+      type: Date,
+      select: false
+    },
     passwordSet: {
+      type: Boolean,
+      default: false
+    },
+    /**
+     * true cuando un admin asignó la contraseña (temporal).
+     * El usuario debe cambiarla en el próximo acceso; no se limpia solo por hashear.
+     */
+    mustChangePassword: {
       type: Boolean,
       default: false
     },
@@ -107,6 +135,31 @@ userSchema.methods.generateSetupToken = function () {
   this.setupToken = crypto.createHash('sha256').update(token).digest('hex')
   this.setupTokenExpires = Date.now() + 48 * 60 * 60 * 1000 // 48 horas
   return token
+}
+
+userSchema.methods.generatePasswordResetOtp = function () {
+  const code = String(crypto.randomInt(100000, 1000000))
+  this.passwordResetOtp = crypto.createHash('sha256').update(code).digest('hex')
+  this.passwordResetOtpExpires = Date.now() + 10 * 60 * 1000 // 10 minutos
+  this.passwordResetToken = undefined
+  this.passwordResetTokenExpires = undefined
+  return code
+}
+
+userSchema.methods.generatePasswordResetToken = function () {
+  const token = crypto.randomBytes(32).toString('hex')
+  this.passwordResetToken = crypto.createHash('sha256').update(token).digest('hex')
+  this.passwordResetTokenExpires = Date.now() + 15 * 60 * 1000 // 15 minutos
+  this.passwordResetOtp = undefined
+  this.passwordResetOtpExpires = undefined
+  return token
+}
+
+userSchema.methods.clearPasswordResetFields = function () {
+  this.passwordResetOtp = undefined
+  this.passwordResetOtpExpires = undefined
+  this.passwordResetToken = undefined
+  this.passwordResetTokenExpires = undefined
 }
 
 userSchema.index({ role: 1 })

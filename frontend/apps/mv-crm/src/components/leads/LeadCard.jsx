@@ -1,7 +1,14 @@
 // apps/mv-crm/src/components/leads/LeadCard.jsx
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, Chip, Avatar, IconButton } from '@mui/material'
-import { Phone, Email, MoreVert, CalendarToday } from '@mui/icons-material'
+import { Box, Typography, Chip, Avatar, IconButton, Tooltip } from '@mui/material'
+import { Phone, Email, MoreVert, CalendarToday, Event, Sms } from '@mui/icons-material'
+import AppointmentModal from '../appointments/AppointmentModal'
+import ScoreBadge from './ScoreBadge'
+import { useAppointments } from '../../constants/hooks/useAppointments'
+import { useProjects } from '@shared/hooks/useProjects'
+import { useCrmAgents } from '../../constants/hooks/useCrmAgents'
+import leadService from '../../services/leadService'
 
 const formatDate = (dateString) => {
   if (!dateString) return null
@@ -16,8 +23,14 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
 }
 
-const LeadCard = ({ lead, onClick, onMenuClick, isDragging }) => {
+const LeadCard = ({ lead, onClick, onMenuClick, isDragging, onScoreUpdate }) => {
   const { t } = useTranslation('leads')
+  const { createAppointment } = useAppointments()
+  const { projects } = useProjects()
+  const { agents } = useCrmAgents()
+  
+  const [appointmentModalOpen, setAppointmentModalOpen] = useState(false)
+  const [smsMarking, setSmsMarking] = useState(false)
 
   // Obtener nombre del proyecto
   const projectName = lead.projectId?.name || 
@@ -30,120 +43,196 @@ const LeadCard = ({ lead, onClick, onMenuClick, isDragging }) => {
     ? `${lead.assignedTo.firstName || ''} ${lead.assignedTo.lastName || ''}`.trim()
     : null
 
+  const handleScheduleAppointment = (e) => {
+    e.stopPropagation()
+    setAppointmentModalOpen(true)
+  }
+
+  const handleSaveAppointment = async (id, data) => {
+    await createAppointment(data)
+    setAppointmentModalOpen(false)
+  }
+
+  // ✅ NUEVO: Marcar SMS como respondido
+  const handleMarkSmsResponded = async (e) => {
+    e.stopPropagation()
+    
+    if (lead.smsResponded) return // Ya está marcado
+    
+    setSmsMarking(true)
+    try {
+      await leadService.markSmsResponded(lead._id)
+      // Actualizar localmente
+      lead.smsResponded = true
+      // Notificar al padre para actualizar score
+      onScoreUpdate?.(lead._id)
+    } catch (err) {
+      console.error('Error marking SMS as responded:', err)
+    } finally {
+      setSmsMarking(false)
+    }
+  }
+
   return (
-    <Box
-      onClick={() => onClick?.(lead)}
-      sx={{
-        bgcolor: 'white',
-        borderRadius: 2,
-        p: 2,
-        mb: 1.5,
-        cursor: 'pointer',
-        border: '1px solid #e0e0e0',
-        boxShadow: isDragging ? '0 8px 24px rgba(0,0,0,0.15)' : '0 1px 3px rgba(0,0,0,0.08)',
-        transition: 'all 0.2s ease',
-        transform: isDragging ? 'rotate(3deg)' : 'none',
-        '&:hover': {
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-          borderColor: '#bdbdbd'
-        }
-      }}
-    >
-      {/* Header: Nombre + Menú */}
-      <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
-        <Typography 
-          variant="subtitle2" 
-          fontWeight={600} 
-          sx={{ 
-            flex: 1,
-            lineHeight: 1.3,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden'
-          }}
-        >
-          {lead.name}
-        </Typography>
-        <IconButton 
-          size="small" 
-          onClick={(e) => { e.stopPropagation(); onMenuClick?.(e, lead) }}
-          sx={{ mt: -0.5, mr: -0.5 }}
-        >
-          <MoreVert fontSize="small" />
-        </IconButton>
-      </Box>
-
-      {/* Proyecto */}
-      {projectName && (
-        <Box mb={1}>
-          <Chip
-            label={projectName}
-            size="small"
+    <>
+      <Box
+        onClick={() => onClick?.(lead)}
+        sx={{
+          bgcolor: 'white',
+          borderRadius: 2,
+          p: 2,
+          mb: 1.5,
+          cursor: 'pointer',
+          border: '1px solid #e0e0e0',
+          boxShadow: isDragging ? '0 8px 24px rgba(0,0,0,0.15)' : '0 1px 3px rgba(0,0,0,0.08)',
+          transition: 'all 0.2s ease',
+          transform: isDragging ? 'rotate(3deg)' : 'none',
+          '&:hover': {
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            borderColor: '#bdbdbd'
+          }
+        }}
+      >
+        {/* Header: Nombre + Score + Acciones */}
+        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1} gap={1}>
+          <Typography 
+            variant="subtitle2" 
+            fontWeight={600} 
             sx={{ 
-              fontSize: '0.65rem',
-              height: 20,
-              bgcolor: '#e3f2fd',
-              color: '#1976d2',
-              fontWeight: 500
+              flex: 1,
+              lineHeight: 1.3,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
             }}
-          />
-        </Box>
-      )}
+          >
+            {lead.name}
+          </Typography>
 
-      {/* Teléfono y Email */}
-      <Box display="flex" flexDirection="column" gap={0.5} mb={1}>
-        {lead.phone && (
-          <Box display="flex" alignItems="center" gap={0.5}>
-            <Phone sx={{ fontSize: 14, color: '#757575' }} />
-            <Typography variant="caption" color="text.secondary">
-              {lead.phone}
+          {/* ✅ NUEVO: Score Badge */}
+          <ScoreBadge lead={lead} size="small" />
+        </Box>
+
+        {/* Proyecto */}
+        {projectName && (
+          <Box mb={1}>
+            <Chip
+              label={projectName}
+              size="small"
+              sx={{ 
+                fontSize: '0.65rem',
+                height: 20,
+                bgcolor: '#e3f2fd',
+                color: '#1976d2',
+                fontWeight: 500
+              }}
+            />
+          </Box>
+        )}
+
+        {/* Teléfono y Email */}
+        <Box display="flex" flexDirection="column" gap={0.5} mb={1}>
+          {lead.phone && (
+            <Box display="flex" alignItems="center" gap={0.5}>
+              <Phone sx={{ fontSize: 14, color: '#757575' }} />
+              <Typography variant="caption" color="text.secondary">
+                {lead.phone}
+              </Typography>
+              {/* ✅ NUEVO: Botón marcar SMS respondido */}
+              {!lead.smsResponded ? (
+                <Tooltip title="Marcar SMS respondido (+15 puntos)">
+                  <IconButton
+                    size="small"
+                    onClick={handleMarkSmsResponded}
+                    disabled={smsMarking}
+                    sx={{
+                      ml: 'auto',
+                      color: '#888',
+                      '&:hover': { color: '#00bcd4', bgcolor: '#e0f7fa' }
+                    }}
+                  >
+                    <Sms sx={{ fontSize: 14 }} />
+                  </IconButton>
+                </Tooltip>
+              ) : (
+                <Tooltip title="SMS respondido ✓">
+                  <Sms sx={{ fontSize: 14, color: '#00bcd4', ml: 'auto' }} />
+                </Tooltip>
+              )}
+            </Box>
+          )}
+          {lead.email && (
+            <Box display="flex" alignItems="center" gap={0.5}>
+              <Email sx={{ fontSize: 14, color: '#757575' }} />
+              <Typography variant="caption" color="text.secondary" noWrap>
+                {lead.email}
+              </Typography>
+            </Box>
+          )}
+        </Box>
+
+        {/* Asesor asignado */}
+        {lead.assignedTo && (
+          <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <Avatar sx={{ width: 20, height: 20, fontSize: 10, bgcolor: '#2196f3' }}>
+              {lead.assignedTo.firstName?.charAt(0) || '?'}
+            </Avatar>
+            <Typography variant="caption" color="text.secondary" noWrap sx={{ flex: 1 }}>
+              {assigneeName}
             </Typography>
           </Box>
         )}
-        {lead.email && (
+
+        {/* Footer: Fecha + Acciones */}
+        <Box display="flex" justifyContent="space-between" alignItems="center" mt={1.5}>
           <Box display="flex" alignItems="center" gap={0.5}>
-            <Email sx={{ fontSize: 14, color: '#757575' }} />
-            <Typography variant="caption" color="text.secondary" noWrap>
-              {lead.email}
+            <CalendarToday sx={{ fontSize: 14, color: '#9e9e9e' }} />
+            <Typography variant="caption" sx={{ color: '#9e9e9e' }}>
+              {formatDate(lead.createdAt)}
             </Typography>
           </Box>
-        )}
+          
+          <Box display="flex" alignItems="center" gap={0.5}>
+            {/* Botón agendar cita */}
+            <Tooltip title={t('scheduleAppointment', 'Agendar cita')}>
+              <IconButton
+                size="small"
+                onClick={handleScheduleAppointment}
+                sx={{
+                  color: '#888',
+                  '&:hover': { color: '#4caf50', bgcolor: '#e8f5e9' }
+                }}
+              >
+                <Event sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+
+            <IconButton 
+              size="small" 
+              onClick={(e) => { e.stopPropagation(); onMenuClick?.(e, lead) }}
+              sx={{ mt: -0.5, mr: -0.5 }}
+            >
+              <MoreVert fontSize="small" />
+            </IconButton>
+          </Box>
+        </Box>
       </Box>
 
-      {/* Asesor asignado */}
-      {lead.assignedTo && (
-        <Box display="flex" alignItems="center" gap={1} mb={1}>
-          <Avatar sx={{ width: 20, height: 20, fontSize: 10, bgcolor: '#2196f3' }}>
-            {lead.assignedTo.firstName?.charAt(0) || '?'}
-          </Avatar>
-          <Typography variant="caption" color="text.secondary" noWrap sx={{ flex: 1 }}>
-            {assigneeName}
-          </Typography>
-        </Box>
-      )}
-
-      {/* Footer: Fecha + Source */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mt={1.5}>
-        <Box display="flex" alignItems="center" gap={0.5}>
-          <CalendarToday sx={{ fontSize: 14, color: '#9e9e9e' }} />
-          <Typography variant="caption" sx={{ color: '#9e9e9e' }}>
-            {formatDate(lead.createdAt)}
-          </Typography>
-        </Box>
-        
-        <Chip
-          label={t(`source.${lead.source}`) || lead.source}
-          size="small"
-          sx={{
-            fontSize: '0.65rem',
-            height: 18,
-            bgcolor: '#f5f5f5',
-            color: '#666'
-          }}
-        />
-      </Box>
-    </Box>
+      {/* Modal de cita */}
+      <AppointmentModal
+        open={appointmentModalOpen}
+        onClose={() => setAppointmentModalOpen(false)}
+        onSave={handleSaveAppointment}
+        prefillData={{
+          leadId: lead._id,
+          projectId: lead.projectId?._id || lead.projectId,
+          assignedTo: lead.assignedTo?._id || lead.assignedTo
+        }}
+        projects={projects}
+        agents={agents}
+      />
+    </>
   )
 }
 

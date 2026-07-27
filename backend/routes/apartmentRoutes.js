@@ -137,6 +137,10 @@ const router = express.Router()
  *                   type: string
  *               price:
  *                 type: number
+ *                 description: Basic list price (falls back to apartmentModel.basePrice)
+ *               upgradePrice:
+ *                 type: number
+ *                 description: Absolute upgrade list price (falls back to apartmentModel.upgradePrice)
  *               initialPayment:
  *                 type: number
  *           examples:
@@ -151,6 +155,7 @@ const router = express.Router()
  *                 selectedRenderType: basic
  *                 user: 65f1a2b3c4d5e6f7890a3001
  *                 price: 250000
+ *                 upgradePrice: 310000
  *                 initialPayment: 20000
  *             createApartmentWithMultipleOwners:
  *               summary: Create apartment with multiple owners

@@ -1,6 +1,6 @@
 import express from 'express'
-import { register, login, loginAdmin, getProfile, changePassword, setupPassword, verifySetupToken, sendSetupPasswordLink } from '../controllers/authController.js'
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { register, login, loginAdmin, getProfile, changePassword, completeRequiredPassword, setupPassword, verifySetupToken, sendSetupPasswordLink, requestPasswordReset, verifyPasswordResetCode, resetPassword, startImpersonation, stopImpersonation } from '../controllers/authController.js'
+import { protect, admin, superadmin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -40,6 +40,9 @@ const router = express.Router()
  *               phoneNumber:
  *                 type: string
  *                 description: Required if skipPasswordSetup is true (for SMS)
+ *               country:
+ *                 type: string
+ *                 description: País del usuario
  *               birthday:
  *                 type: string
  *                 format: date
@@ -177,6 +180,55 @@ router.get('/profile', protect, getProfile)
 
 /**
  * @swagger
+ * /api/auth/impersonate/stop:
+ *   post:
+ *     summary: Stop impersonation and restore superadmin session
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Superadmin token restored
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ImpersonationAuthResponse'
+ *       400:
+ *         description: Not currently impersonating
+ */
+router.post('/impersonate/stop', protect, stopImpersonation)
+
+/**
+ * @swagger
+ * /api/auth/impersonate/{userId}:
+ *   post:
+ *     summary: Start impersonating a user (Superadmin only)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Impersonation token and target user payload
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ImpersonationAuthResponse'
+ *       400:
+ *         description: Invalid user or already impersonating
+ *       403:
+ *         description: Not superadmin or target role not allowed
+ *       404:
+ *         description: User not found
+ */
+router.post('/impersonate/:userId', protect, superadmin, startImpersonation)
+
+/**
+ * @swagger
  * /api/auth/change-password:
  *   put:
  *     summary: Change user password
@@ -219,6 +271,43 @@ router.get('/profile', protect, getProfile)
  *         description: User not found
  */
 router.put('/change-password', protect, changePassword)
+
+/**
+ * @swagger
+ * /api/auth/complete-required-password:
+ *   put:
+ *     summary: Set a new password when mustChangePassword is true (no current password required)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     description: |
+ *       Solo válido si el usuario tiene mustChangePassword=true (contraseña temporal asignada por admin).
+ *       La seguridad viene del JWT obtenido al autenticarse con la contraseña temporal.
+ *       Para cambios voluntarios use PUT /auth/change-password (requiere currentPassword).
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - newPassword
+ *             properties:
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 6
+ *                 description: Nueva contraseña (debe ser distinta a la temporal)
+ *     responses:
+ *       200:
+ *         description: Password updated; returns auth payload with mustChangePassword false
+ *       400:
+ *         description: Missing/short password or same as temporary password
+ *       403:
+ *         description: mustChangePassword is false, or impersonating
+ *       404:
+ *         description: User not found
+ */
+router.put('/complete-required-password', protect, completeRequiredPassword)
 
 /**
  * @swagger
@@ -313,5 +402,106 @@ router.get('/verify-setup-token/:token', verifySetupToken)
  * (si no existe membresía explícita en `projectMemberships`, se agrega automáticamente).
  */
 router.post('/admin/send-setup-password-link', protect, admin, sendSetupPasswordLink)
+
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Solicitar recuperación de contraseña (envía código 2FA)
+ *     description: |
+ *       El usuario ingresa su correo. Si existe una cuenta activa, se envía un código de 6 dígitos
+ *       por SMS o email (canal configurable). La respuesta es genérica para no revelar si el email existe.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               channel:
+ *                 type: string
+ *                 enum: [sms, email]
+ *                 description: Canal preferido. Por defecto SMS si hay teléfono; si no, email.
+ *     responses:
+ *       200:
+ *         description: Solicitud procesada (código enviado si la cuenta existe)
+ *       400:
+ *         description: Email inválido o canal incorrecto
+ *       502:
+ *         description: No se pudo enviar el código
+ *       503:
+ *         description: Canal email no configurado y sin SMS disponible
+ */
+router.post('/forgot-password', requestPasswordReset)
+
+/**
+ * @swagger
+ * /api/auth/forgot-password/verify:
+ *   post:
+ *     summary: Verificar código 2FA de recuperación de contraseña
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, code]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               code:
+ *                 type: string
+ *                 example: '123456'
+ *                 description: Código de 6 dígitos recibido por SMS o email
+ *     responses:
+ *       200:
+ *         description: Código válido; devuelve resetToken para el paso final
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string }
+ *                 resetToken: { type: string }
+ *                 expiresInMinutes: { type: integer, example: 15 }
+ *       400:
+ *         description: Código inválido o expirado
+ */
+router.post('/forgot-password/verify', verifyPasswordResetCode)
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Establecer nueva contraseña tras verificar el código 2FA
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [resetToken, password]
+ *             properties:
+ *               resetToken:
+ *                 type: string
+ *                 description: Token devuelto por POST /api/auth/forgot-password/verify
+ *               password:
+ *                 type: string
+ *                 minLength: 6
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada; incluye JWT para login inmediato
+ *       400:
+ *         description: Token inválido/expirado o contraseña muy corta
+ */
+router.post('/reset-password', resetPassword)
 
 export default router

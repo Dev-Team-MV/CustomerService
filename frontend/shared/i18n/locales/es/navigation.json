@@ -28,8 +28,11 @@
         "uploadTracker": "Rastreador de Subidas",
         "catalogConfig": "Configuración de Catálogo",
         "building": "Casas",
-        "lots": "Lotes"
-    },
+        "lots": "Lotes",
+        "agents":"Agentes",
+        "warranties":"Garantías",
+        "surveys":"Encuestas"
+          },
     "tooltips": {
         "openMenu": "Abrir menú",
         "closeMenu": "Cerrar menú",
@@ -67,10 +70,48 @@
   "settings": "Configuración",
   "quickStats": "Estadísticas rápidas",
   "signOut": "Cerrar sesión",
-        
+  "calendar":"Calendario",
+   "documents":"Documentos",
+ "quote":"Cotización",
+ "comissions":"Comisiones",
+          "audit": "Registros de Auditoría",
+    "sales":"Ventas",
+     "automations":"Automatizaciones",
+ "campaigns":"Campañas",
         "agents":"Agentes",
         "reports":"Reportes",
-        "payments":"Pagos"
-        
-        
+        "payments":"Pagos",
+  "title": "Alertas",
+  "bell": {
+    "tooltip": "Notificaciones"
+  },
+  "tabs": {
+    "all": "Todas",
+    "overduePayments": "Pagos vencidos",
+    "upcomingActivities": "Actividades próximas",
+    "staleLeads": "Leads estancados"
+  },
+  "markAllRead": "Marcar todas",
+  "empty": "No hay alertas",
+  "time": {
+    "overdue": "Vencido",
+    "today": "Hoy",
+    "tomorrow": "Mañana",
+    "inDays": "En {{days}} días"
+  },
+  "footer": {
+    "updateInfo": "Actualizado cada 5 minutos"
+  },
+
+    "alerts": {
+    "overduePayment": "Overdue payment",
+    "upcomingActivity": "Upcoming activity",
+    "staleLead": "Stale lead",
+    "status": {
+      "pending": "Pending",
+      "signed": "Signed",
+      "rejected": "Rejected"
+    }
+  }
+
 }

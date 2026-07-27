@@ -1,0 +1,118 @@
+{
+  "title": "Comisiones",
+  "titleBold": "Ventas",
+  "topbarLabel": "Gestión de Comisiones",
+  "subtitle": "Administra, aprueba y realiza seguimiento de los pagos de comisiones",
+  "tabs": {
+    "commissions": "Comisiones",
+    "structures": "Estructuras"
+  },
+  "stats": {
+    "totalPending": "Pendiente Total",
+    "paidThisMonth": "Pagado Este Mes",
+    "avgRate": "Tasa Promedio",
+    "topEarner": "Agente Destacado"
+  },
+  "filters": {
+    "search": "Buscar por agente o proyecto...",
+    "project": "Proyecto",
+    "allProjects": "Todos los proyectos",
+    "agent": "Agente",
+    "allAgents": "Todos los agentes",
+    "status": "Estado",
+    "allStatuses": "Todos los estados"
+  },
+  "table": {
+    "date": "Fecha",
+    "agent": "Agente",
+    "project": "Proyecto",
+    "amounts": "Monto / Comisión",
+    "status": "Estado",
+    "actions": "Acciones"
+  },
+  "status": {
+    "pending": "Pendiente",
+    "approved": "Aprobado",
+    "paid": "Pagado",
+    "disputed": "Disputado"
+  },
+  "actions": {
+    "view": "Ver",
+    "approve": "Aprobar",
+    "dispute": "Disputar",
+    "confirmDispute": "Confirmar Disputa",
+    "markPaid": "Marcar Pagado",
+    "close": "Cerrar",
+    "refresh": "Actualizar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "edit": "Editar"
+  },
+  "detail": {
+    "title": "Detalle de Comisión",
+    "editTitle": "Editar Comisión",
+    "disputeTitle": "Disputar Comisión",
+    "status": "Estado",
+    "agent": "Agente",
+    "project": "Proyecto",
+    "saleAmount": "Monto de Venta",
+    "commissionAmount": "Monto de Comisión",
+    "overrideRate": "Tasa Personalizada (%)",
+    "overrideAmount": "Monto Personalizado ($)",
+    "splits": "Divisiones (Splits)",
+    "notes": "Notas",
+    "disputeReason": "Motivo de la disputa"
+  },
+  "structures": {
+    "listTitle": "Estructuras de Comisión del Proyecto",
+    "create": "Nueva Estructura",
+    "edit": "Editar Estructura",
+    "name": "Nombre de la regla",
+    "type": "Tipo de cálculo",
+    "types": {
+      "flat": "Monto Fijo",
+      "percentage": "Porcentaje",
+      "tiered": "Por Niveles"
+    },
+    "flatAmount": "Monto Fijo ($)",
+    "percentageRate": "Porcentaje (%)",
+    "tiers": "Niveles",
+    "addTier": "Agregar Nivel",
+    "minAmount": "Mínimo",
+    "maxAmount": "Máximo",
+    "rate": "Tasa (%)",
+    "isDefault": "Predeterminada",
+    "yes": "Sí",
+    "selectProject": "Seleccionar proyecto...",
+    "viewingFor": "Viendo estructuras para",
+    "selectToView": "Selecciona un proyecto para ver sus estructuras",
+    "selectProjectFirst": "Selecciona un proyecto primero",
+    "selectProjectToManage": "Debes seleccionar un proyecto para gestionar sus estructuras de comisión",
+    "noStructures": "No hay estructuras configuradas",
+    "createFirst": "Crea la primera estructura de comisión para este proyecto",
+    "empty": "No hay estructuras configuradas para este proyecto",
+    "confirmDelete": "¿Estás seguro de eliminar esta estructura?",
+    "bonusRules": "Reglas de Bonificación",
+    "addBonusRule": "Agregar Regla de Bonificación",
+    "bonusType": "Tipo de Bonificación",
+    "noBonusRules": "No hay reglas de bonificación configuradas",
+    "bonusName": "Nombre de la Bonificación",
+    "minSaleAmount": "Monto de Venta Mínimo",
+    "maxSaleAmount": "Monto de Venta Máximo",
+    "bonusValue": "Monto de Bonificación",
+    "bonusTypes": {
+      "flat": "Monto Fijo",
+      "percentage": "Porcentaje",
+      "tiered": "Por Niveles"
+    }
+  },
+  "errors": {
+    "updateFailed": "Error al actualizar",
+    "actionFailed": "Error al ejecutar la acción",
+    "saveFailed": "Error al guardar",
+    "deleteFailed": "Error al eliminar"
+  },
+  "empty": "No se encontraron comisiones con los filtros actuales"
+}

@@ -7,6 +7,8 @@ import {
   getCampaignStatsById
 } from '../controllers/campaignController.js'
 import { protect, superadmin } from '../middleware/authMiddleware.js'
+import { logAction } from '../middleware/logAction.js'
+import { fetchCampaign } from '../utils/auditEntityFetchers.js'
 
 const router = express.Router()
 
@@ -73,7 +75,15 @@ router.use(protect, superadmin)
  *         description: Template or project not found
  */
 router.get('/', getCampaigns)
-router.post('/', createCampaign)
+router.post(
+  '/',
+  logAction({
+    action: 'created',
+    entity: 'Campaign',
+    getEntityId: (_, body) => body?._id
+  }),
+  createCampaign
+)
 
 /**
  * @swagger
@@ -125,7 +135,17 @@ router.post('/:id/preview', previewCampaign)
  *       404:
  *         description: Campaign or template not found
  */
-router.post('/:id/send', sendCampaign)
+router.post(
+  '/:id/send',
+  logAction({
+    action: 'sms_sent',
+    entity: 'Campaign',
+    fetchBefore: fetchCampaign,
+    getEntityId: (req, body) => body?.campaignId || req.params.id,
+    buildAfter: (_, body) => ({ status: body?.status, stats: body?.stats })
+  }),
+  sendCampaign
+)
 
 /**
  * @swagger

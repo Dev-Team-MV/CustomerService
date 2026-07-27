@@ -35,6 +35,18 @@ const apartmentModelSchema = new mongoose.Schema(
       required: [true, 'Number of bathrooms is required'],
       min: 0
     },
+    /** Default list price for basic finish (units may override via Apartment.price) */
+    basePrice: {
+      type: Number,
+      min: 0,
+      default: null
+    },
+    /** Default list price for upgrade finish (units may override via Apartment.upgradePrice) */
+    upgradePrice: {
+      type: Number,
+      min: 0,
+      default: null
+    },
     apartmentCount: {
       type: Number,
       min: 0,

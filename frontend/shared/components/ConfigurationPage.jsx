@@ -1,15 +1,19 @@
+// apps/mv-crm/src/pages/ConfigurationPage.jsx
 import { useState } from 'react'
 import {
   Box, Chip, Container, Paper, Typography, Button, Tabs, Tab, Divider, Grid, TextField, IconButton, Stack
 } from '@mui/material'
 import {
-  Settings, AddPhotoAlternate, Delete, LocationOn, CropSquare, Add, Save, Edit, Cancel,
+  Settings, AddPhotoAlternate, Delete, LocationOn, CropSquare, Add, Save, Edit, Cancel, Palette
 } from '@mui/icons-material'
 import PageHeader from '@shared/components/PageHeader'
 import { useTranslation } from 'react-i18next'
 import ImagePreview from '@shared/components/ImgPreview'
 import { useProjectConfig } from '@shared/hooks/useProjects'
 import { useTheme } from '@mui/material/styles'
+
+// ✅ NUEVO: Import del gestor de variables
+import ProjectVariablesManager from '@shared/components/ProjectVariablesManager'
 
 const LANGS = [
   { code: 'en', label: 'English' },
@@ -45,12 +49,43 @@ const GalleryThumb = ({ url, onRemove }) => {
   )
 }
 
+const ColorChip = ({ color, onRemove }) => {
+  return (
+    <Chip
+      label={`${color.key}: ${color.value}`}
+      onDelete={onRemove}
+      sx={{
+        bgcolor: 'rgba(0,0,0,0.08)',
+        fontWeight: 600,
+        '& .MuiChip-label': {
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }
+      }}
+      avatar={
+        <Box
+          sx={{
+            width: 24,
+            height: 24,
+            borderRadius: '50%',
+            bgcolor: color.value,
+            border: '2px solid rgba(0,0,0,0.1)',
+            ml: 0.5
+          }}
+        />
+      }
+    />
+  )
+}
+
 const ConfigurationPage = () => {
   const theme = useTheme()
   const [isEditing, setIsEditing] = useState(false)
   const [langTab, setLangTab] = useState('en')
   const [featureInput, setFeatureInput] = useState('')
   const [videoInput, setVideoInput] = useState('')
+  const [colorInput, setColorInput] = useState('')
   const { t } = useTranslation(['configuration', 'common'])
   const PROJECT_ID = import.meta.env.VITE_PROJECT_ID
 
@@ -59,6 +94,7 @@ const ConfigurationPage = () => {
     setForm,
     mainImage,
     setMainImage,
+    logo,
     gallery,
     setGallery,
     videos,
@@ -67,6 +103,8 @@ const ConfigurationPage = () => {
     handleChange,
     handleLangChange,
     handleImageUpload,
+    handleLogoUpload,
+    handleLogoRemove,
     handleGalleryUpload,
     handleGalleryRemove,
     handleVideoUpload,
@@ -106,6 +144,40 @@ const ConfigurationPage = () => {
       e.preventDefault()
       handleAddVideo()
     }
+  }
+
+  const handleAddColor = () => {
+    if (!colorInput.trim()) return
+    
+    let key, value
+    if (colorInput.includes(':')) {
+      const parts = colorInput.split(':').map(s => s.trim())
+      key = parts[0]
+      value = parts[1]
+    } else {
+      key = `color-${form.brandColors.length + 1}`
+      value = colorInput.trim()
+    }
+    
+    if (!value.startsWith('#') && !value.startsWith('rgb')) {
+      value = `#${value}`
+    }
+    
+    const newColor = { key, value }
+    handleChange('brandColors', [...form.brandColors, newColor])
+    setColorInput('')
+  }
+
+  const handleColorKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleAddColor()
+    }
+  }
+
+  const handleRemoveColor = idx => {
+    const newArr = form.brandColors.filter((_, i) => i !== idx)
+    handleChange('brandColors', newArr)
   }
 
   const handleCancel = () => {
@@ -348,6 +420,8 @@ const ConfigurationPage = () => {
               }}>
                 <AddPhotoAlternate fontSize="small" /> {t('configuration:mediaAssets')}
               </Typography>
+              
+              {/* Main Image */}
               <Box mb={2}>
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
                   {t('configuration:mainImage')}
@@ -384,6 +458,46 @@ const ConfigurationPage = () => {
                   )
                 )}
               </Box>
+
+              {/* Logo */}
+              <Box mb={2}>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  Logo
+                </Typography>
+                {logo ? (
+                  <ImagePreview
+                    src={logo}
+                    alt="Logo preview"
+                    onDelete={isEditing ? handleLogoRemove : undefined}
+                    showSwitch={false}
+                    imgSx={{ height: 100 }}
+                    sx={{ mb: 1 }}
+                  />
+                ) : (
+                  isEditing && (
+                    <Box sx={{
+                      border: `1.5px dashed ${theme.palette.cardBorder || '#e0e0e0'}`,
+                      borderRadius: 2,
+                      bgcolor: theme.palette.cardBg || '#fafafa',
+                      height: 100,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mb: 1
+                    }}>
+                      <Button component="label" variant="text" sx={{
+                        color: theme.palette.secondary.main,
+                        fontWeight: 600
+                      }}>
+                        <AddPhotoAlternate sx={{ mr: 1 }} /> Upload Logo
+                        <input type="file" accept="image/*" hidden onChange={handleLogoUpload} />
+                      </Button>
+                    </Box>
+                  )
+                )}
+              </Box>
+
+              {/* Gallery */}
               <Box mb={2}>
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
                   {t('configuration:gallery')}
@@ -416,6 +530,8 @@ const ConfigurationPage = () => {
                   )}
                 </Box>
               </Box>
+
+              {/* Videos */}
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
                   {t('configuration:videos')}
@@ -472,6 +588,63 @@ const ConfigurationPage = () => {
                 </Box>
               </Box>
             </Paper>
+
+            {/* Brand Colors */}
+            <Paper elevation={0} sx={{
+              p: 3, mt: 3, borderRadius: 3,
+              border: `1px solid ${theme.palette.cardBorder || '#e0e0e0'}`,
+              background: theme.palette.cardBg || '#fafafa'
+            }}>
+              <Typography variant="subtitle1" sx={{
+                fontWeight: 700,
+                color: theme.palette.secondary.main,
+                mb: 2,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}>
+                <Palette fontSize="small" /> Brand Colors
+              </Typography>
+              
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                Format: "key:color" (ej: "primary:#333F1F") or just color (ej: "#333F1F")
+              </Typography>
+              
+              <Stack direction="row" spacing={1} mb={2}>
+                <TextField
+                  value={colorInput}
+                  onChange={e => setColorInput(e.target.value)}
+                  onKeyDown={handleColorKeyDown}
+                  label="Add brand color"
+                  placeholder="primary:#333F1F"
+                  size="small"
+                  disabled={!isEditing}
+                  sx={{ flex: 1 }}
+                />
+                <IconButton onClick={handleAddColor} color="primary" disabled={!isEditing}>
+                  <Add />
+                </IconButton>
+              </Stack>
+              
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {form.brandColors?.map((color, idx) => (
+                  <ColorChip
+                    key={idx}
+                    color={color}
+                    onRemove={isEditing ? () => handleRemoveColor(idx) : undefined}
+                  />
+                ))}
+              </Box>
+            </Paper>
+          </Grid>
+
+          {/* ✅ NUEVO: Variables de Mensaje - Fila completa debajo */}
+          <Grid item xs={12}>
+            <ProjectVariablesManager 
+              projectId={PROJECT_ID}
+              disabled={!isEditing}
+              variant="page"
+            />
           </Grid>
         </Grid>
       </Container>

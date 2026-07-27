@@ -5,7 +5,6 @@ const crmAgentsService = {
   /**
    * GET /api/crm/agents
    * Lista todos los agentes activos (admin y superadmin)
-   * @returns {Promise<{ agents: Array, total: number }>}
    */
   getAll: async () => {
     const res = await api.get('/crm/agents')
@@ -17,9 +16,7 @@ const crmAgentsService = {
 
   /**
    * GET /api/crm/agents/:id/metrics
-   * Obtiene métricas de rendimiento de un agente específico (mes actual)
-   * @param {string} agentId - ID del agente
-   * @returns {Promise<Object>} Métricas del agente (leads, activities, clientsServed, period)
+   * Métricas de rendimiento de un agente específico (mes actual)
    */
   getMetrics: async (agentId) => {
     const res = await api.get(`/crm/agents/${agentId}/metrics`)
@@ -27,10 +24,7 @@ const crmAgentsService = {
   },
 
   /**
-   * GET /api/crm/agents/:id/metrics
-   * Versión con manejo de error para usar en hooks
-   * @param {string} agentId - ID del agente
-   * @returns {Promise<Object|null>}
+   * GET /api/crm/agents/:id/metrics - versión segura para hooks
    */
   getMetricsSafe: async (agentId) => {
     try {
@@ -40,6 +34,43 @@ const crmAgentsService = {
       console.error('[CRM Agents] Error fetching metrics:', error)
       return null
     }
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // ✅ NUEVOS MÉTODOS PARA TARGETS (METAS)
+  // ═══════════════════════════════════════════════════════════════
+
+  /**
+   * GET /api/crm/agents/:id/targets
+   * Obtener metas y progreso de un agente para un mes específico
+   * @param {string} agentId - ID del agente
+   * @param {Object} options - { month, year } (opcionales, default: mes actual)
+   * @returns {Promise<Object|null>}
+   */
+  getTargets: async (agentId, options = {}) => {
+    try {
+      const params = {}
+      if (options.month) params.month = options.month
+      if (options.year) params.year = options.year
+      
+      const res = await api.get(`/crm/agents/${agentId}/targets`, { params })
+      return res.data
+    } catch (error) {
+      console.error('[CRM Agents] Error fetching targets:', error)
+      return null
+    }
+  },
+
+  /**
+   * POST /api/crm/agents/:id/targets
+   * Crear o actualizar metas mensuales de un agente
+   * @param {string} agentId - ID del agente
+   * @param {Object} data - { month, year, leads, conversions, appointments, smsCount }
+   * @returns {Promise<Object>} Respuesta con targets + progress + completion actualizados
+   */
+  setTargets: async (agentId, data) => {
+    const res = await api.post(`/crm/agents/${agentId}/targets`, data)
+    return res.data
   }
 }
 

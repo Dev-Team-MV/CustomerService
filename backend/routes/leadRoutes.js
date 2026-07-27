@@ -9,6 +9,8 @@ import {
   convertLead
 } from '../controllers/leadController.js'
 import { protect, superadmin } from '../middleware/authMiddleware.js'
+import { logAction } from '../middleware/logAction.js'
+import { fetchLead } from '../utils/auditEntityFetchers.js'
 
 const router = express.Router()
 
@@ -92,7 +94,15 @@ router.use(protect, superadmin)
  *         description: Not authorized as superadmin
  */
 router.get('/', getLeads)
-router.post('/', createLead)
+router.post(
+  '/',
+  logAction({
+    action: 'created',
+    entity: 'Lead',
+    getEntityId: (_, body) => body?._id
+  }),
+  createLead
+)
 
 /**
  * @swagger
@@ -135,7 +145,16 @@ router.post('/', createLead)
  *       404:
  *         description: Lead not found
  */
-router.put('/:id/stage', updateLeadStage)
+router.put(
+  '/:id/stage',
+  logAction({
+    action: 'stage_changed',
+    entity: 'Lead',
+    fetchBefore: fetchLead,
+    buildAfter: (_, body) => ({ stage: body?.stage, lostReason: body?.lostReason })
+  }),
+  updateLeadStage
+)
 
 /**
  * @swagger
@@ -222,14 +241,27 @@ router.put('/:id/sms-responded', markLeadSmsResponded)
  *       404:
  *         description: Lead not found
  */
-router.put('/:id', updateLead)
-router.delete('/:id', deleteLead)
+router.put(
+  '/:id',
+  logAction({ action: 'updated', entity: 'Lead', fetchBefore: fetchLead }),
+  updateLead
+)
+router.delete(
+  '/:id',
+  logAction({
+    action: 'deleted',
+    entity: 'Lead',
+    fetchBefore: fetchLead,
+    buildAfter: () => null
+  }),
+  deleteLead
+)
 
 /**
  * @swagger
  * /api/crm/leads/{id}/convert:
  *   post:
- *     summary: Convert lead to User and send setup-password SMS
+ *     summary: Convert lead to User, send setup SMS, and optionally create pending Commission
  *     tags: [CRM Leads]
  *     security:
  *       - bearerAuth: []
@@ -238,9 +270,35 @@ router.delete('/:id', deleteLead)
  *         name: id
  *         required: true
  *         schema: { type: string }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               saleAmount:
+ *                 type: number
+ *                 description: If provided (and lead has assignedTo + projectId), creates a pending Commission
+ *               structureId:
+ *                 type: string
+ *               overrideRate:
+ *                 type: number
+ *               overrideAmount:
+ *                 type: number
+ *               splits:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     agentId: { type: string }
+ *                     percentage: { type: number }
+ *               propertyId:
+ *                 type: string
+ *               commissionNotes:
+ *                 type: string
  *     responses:
  *       201:
- *         description: Lead converted to client user
+ *         description: Lead converted to client user (commission included when saleAmount provided)
  *         content:
  *           application/json:
  *             schema:
@@ -250,6 +308,15 @@ router.delete('/:id', deleteLead)
  *       404:
  *         description: Lead not found
  */
-router.post('/:id/convert', convertLead)
+router.post(
+  '/:id/convert',
+  logAction({
+    action: 'updated',
+    entity: 'Lead',
+    fetchBefore: fetchLead,
+    getEntityId: (req, body) => body?.lead?._id || req.params.id
+  }),
+  convertLead
+)
 
 export default router

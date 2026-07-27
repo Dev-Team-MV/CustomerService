@@ -2,20 +2,44 @@
 import { Box, Typography, Chip } from '@mui/material'
 import { CheckCircle, PendingActions, Warning } from '@mui/icons-material'
 
-const getPaymentTypeLabel = (type) => {
-  const labels = {
-    'initial down payment': 'Cuota inicial',
-    'complementary down payment': 'Cuota complementaria',
-    'monthly payment': 'Cuota mensual',
-    'final payment': 'Cuota final'
+// ═══════════════════════════════════════════════════════════════
+// HELPER: Tipo de pago con traducción
+// ═══════════════════════════════════════════════════════════════
+
+const getPaymentTypeLabel = (type, t) => {
+  const typeKeyMap = {
+    'initial down payment': 'payments.typeInitialDownPayment',
+    'complementary down payment': 'payments.typeComplementaryDownPayment',
+    'monthly payment': 'payments.typeMonthlyPayment',
+    'final payment': 'payments.typeFinalPayment'
   }
-  return labels[type] || type || 'Pago'
+  
+  const key = typeKeyMap[type?.toLowerCase()]
+  return key ? t(key) : (type || t('payments.typeDefault', 'Pago'))
 }
+
+// ═══════════════════════════════════════════════════════════════
+// HELPER: Formatear fecha
+// ═══════════════════════════════════════════════════════════════
+
+const formatDate = (dateString) => {
+  if (!dateString) return '-'
+  const date = new Date(dateString)
+  return date.toLocaleDateString('es-ES', { 
+    day: '2-digit', 
+    month: 'short', 
+    year: '2-digit' 
+  })
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HOOK DE COLUMNAS
+// ═══════════════════════════════════════════════════════════════
 
 export const useClientPaymentColumns = ({ t }) => [
   {
     field: 'projectName',
-    headerName: t('clients.payments.project', 'Proyecto'),
+    headerName: t('payments.project', 'Proyecto'),
     minWidth: 140,
     renderCell: ({ row }) => (
       <Typography
@@ -32,7 +56,7 @@ export const useClientPaymentColumns = ({ t }) => [
   },
   {
     field: 'unitLabel',
-    headerName: t('clients.payments.unit', 'Unidad'),
+    headerName: t('payments.unit', 'Unidad'),
     minWidth: 100,
     renderCell: ({ row }) => (
       <Typography
@@ -49,11 +73,11 @@ export const useClientPaymentColumns = ({ t }) => [
   },
   {
     field: 'type',
-    headerName: t('clients.payments.type', 'Tipo'),
-    minWidth: 140,
+    headerName: t('payments.type', 'Tipo'),
+    minWidth: 160,
     renderCell: ({ row }) => (
       <Chip
-        label={getPaymentTypeLabel(row.type)}
+        label={getPaymentTypeLabel(row.type, t)}
         size="small"
         sx={{
           bgcolor: '#f5f5f5',
@@ -68,7 +92,7 @@ export const useClientPaymentColumns = ({ t }) => [
   },
   {
     field: 'amount',
-    headerName: t('clients.payments.amount', 'Monto'),
+    headerName: t('payments.amount', 'Monto'),
     minWidth: 110,
     align: 'right',
     renderCell: ({ row }) => (
@@ -87,7 +111,7 @@ export const useClientPaymentColumns = ({ t }) => [
   },
   {
     field: 'date',
-    headerName: t('clients.payments.date', 'Fecha'),
+    headerName: t('payments.date', 'Fecha'),
     minWidth: 100,
     renderCell: ({ row }) => (
       <Typography
@@ -98,13 +122,13 @@ export const useClientPaymentColumns = ({ t }) => [
           letterSpacing: '0.5px'
         }}
       >
-        {row.date ? new Date(row.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: '2-digit' }) : '-'}
+        {formatDate(row.date)}
       </Typography>
     )
   },
   {
     field: 'dueDate',
-    headerName: t('clients.payments.dueDate', 'Vencimiento'),
+    headerName: t('payments.dueDate', 'Vencimiento'),
     minWidth: 130,
     renderCell: ({ row }) => (
       <Box>
@@ -117,7 +141,7 @@ export const useClientPaymentColumns = ({ t }) => [
             letterSpacing: '0.5px'
           }}
         >
-          {row.dueDate ? new Date(row.dueDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: '2-digit' }) : '-'}
+          {formatDate(row.dueDate)}
         </Typography>
         {row.isOverdue && (
           <Typography
@@ -130,7 +154,7 @@ export const useClientPaymentColumns = ({ t }) => [
               mt: 0.3
             }}
           >
-            ● Vencido
+            ● {t('payments.overdue', 'Vencido')}
           </Typography>
         )}
       </Box>
@@ -138,24 +162,24 @@ export const useClientPaymentColumns = ({ t }) => [
   },
   {
     field: 'status',
-    headerName: t('clients.payments.status', 'Estado'),
+    headerName: t('payments.status', 'Estado'),
     minWidth: 110,
     renderCell: ({ row }) => {
       const config = {
         pending: {
-          label: t('clients.payments.statusPending', 'Pendiente'),
+          label: t('payments.statusPending', 'Pendiente'),
           color: '#1976d2',
           bgColor: '#e3f2fd',
           icon: <PendingActions sx={{ fontSize: 14 }} />
         },
         signed: {
-          label: t('clients.payments.statusSigned', 'Firmado'),
+          label: t('payments.statusSigned', 'Firmado'),
           color: '#2e7d32',
           bgColor: '#e8f5e9',
           icon: <CheckCircle sx={{ fontSize: 14 }} />
         },
         rejected: {
-          label: t('clients.payments.statusRejected', 'Rechazado'),
+          label: t('payments.statusRejected', 'Rechazado'),
           color: '#d32f2f',
           bgColor: '#ffebee',
           icon: <Warning sx={{ fontSize: 14 }} />
@@ -184,7 +208,7 @@ export const useClientPaymentColumns = ({ t }) => [
   },
   {
     field: 'notes',
-    headerName: t('clients.payments.notes', 'Notas'),
+    headerName: t('payments.notes', 'Notas'),
     minWidth: 150,
     renderCell: ({ row }) => (
       <Typography
@@ -205,3 +229,5 @@ export const useClientPaymentColumns = ({ t }) => [
     )
   }
 ]
+
+export default useClientPaymentColumns

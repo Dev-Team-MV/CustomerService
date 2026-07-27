@@ -1,0 +1,95 @@
+{
+  "title": "SMS Campaigns",
+  "titleBold": "CRM",
+  "topbarLabel": "Campaign management",
+  "subtitle": "Bulk message sending",
+  "filters": "Filters",
+  "status": "Status",
+  "project": "Project",
+  "all": "All",
+  "createCampaign": "New campaign",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "send": "Send",
+  "refresh": "Refresh",
+  "back": "Back",
+  "continue": "Continue",
+  "preview": "Preview",
+  "createAndPreview": "Create and preview",
+  "sendNow": "Send now",
+  "editTitle": "Edit campaign",
+  "createTitle": "New campaign",
+  "readyToSend": "Ready to send?",
+  "sendConfirmation": "SMS will be sent to all preview recipients",
+  "sending": "Sending...",
+  "completed": "Completed",
+  "failed": "Failed",
+  "messagesSent": "messages sent",
+  "total": "Total",
+  "sent": "Sent",
+  "failedCount": "Failed",
+  "recipients": "recipients",
+  "allProjects": "All projects",
+  "allStages": "All stages",
+  "loadingTemplates": "Loading templates...",
+  "noTemplates": "No templates available",
+  "campaignCompleted": "✅ Campaign completed successfully",
+  "campaignFailed": "❌ Campaign failed",
+  "retrySend": "Retry sending",
+  "resendCampaign": "Resend campaign",
+  "resend": "Resend",
+  "sendAgainConfirm": "Are you sure you want to send this campaign again?",
+  "deleteConfirm": {
+    "title": "Delete campaign?",
+    "message": "This action cannot be undone. The campaign will be permanently deleted."
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "templateRequired": "Template is required",
+    "audienceRequired": "Audience type is required"
+  },
+  "form": {
+    "name": "Name",
+    "template": "Template",
+    "audience": "Audience",
+    "audienceType": "Audience type",
+    "project": "Project",
+    "stage": "Stage"
+  },
+  "audience": {
+    "leads": "Leads",
+    "clients": "Clients"
+  },
+  "table": {
+    "name": "Name",
+    "status": "Status",
+    "audience": "Audience",
+    "stats": "Statistics",
+    "date": "Date",
+    "actions": "Actions",
+    "phone": "Phone",
+    "message": "Message"
+  },
+  "statusLabels": {
+    "borrador": "Draft",
+    "programada": "Scheduled",
+    "enviando": "Sending",
+    "completada": "Completed",
+    "fallida": "Failed"
+  },
+  "stats": {
+    "total": "total",
+    "sent": "sent",
+    "failed": "failed"
+  },
+  "steps": {
+    "configuration": "Configuration",
+    "preview": "Preview",
+    "send": "Send",
+    "template":"Template"
+  },
+  "errors": {
+    "campaignIdNotFound": "Campaign ID not found"
+  }
+}

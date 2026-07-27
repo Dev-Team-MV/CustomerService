@@ -1,7 +1,7 @@
 import User from '../models/User.js'
 import Project from '../models/Project.js'
 import { getProjectIdsForUser, canUserAccessProject } from '../utils/projectAccess.js'
-import { isStaffRole } from '../utils/roles.js'
+import { isStaffRole, canChangePasswordFor } from '../utils/roles.js'
 import Property from '../models/Property.js'
 import Apartment from '../models/Apartment.js'
 import Building from '../models/Building.js'
@@ -294,44 +294,55 @@ export const updateUser = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to update this user' })
     }
 
-    if (req.body.role !== undefined) {
+    const user = await User.findById(req.params.id)
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    // El front suele reenviar role en el formulario; solo bloquear si intenta cambiarlo.
+    if (req.body.role !== undefined && String(req.body.role) !== String(user.role)) {
       return res.status(400).json({
         message: 'Role cannot be changed via this endpoint. Use admin scripts or database procedures.'
       })
     }
 
-    const user = await User.findById(req.params.id)
-
-    if (user) {
-      user.firstName = req.body.firstName || user.firstName
-      user.lastName = req.body.lastName || user.lastName
-      if (isStaff || isSelf) {
-        user.email = req.body.email || user.email
-        user.phoneNumber = req.body.phoneNumber || user.phoneNumber
-        user.birthday = req.body.birthday || user.birthday
+    user.firstName = req.body.firstName || user.firstName
+    user.lastName = req.body.lastName || user.lastName
+    if (isStaff || isSelf) {
+      user.email = req.body.email || user.email
+      user.phoneNumber = req.body.phoneNumber || user.phoneNumber
+      if (req.body.country !== undefined) {
+        user.country = req.body.country
       }
-      
-      if (req.body.password) {
-        if (!isSelf && !isStaff) {
-          return res.status(403).json({ message: 'Not authorized to change password for this user' })
-        }
-        user.password = req.body.password
-      }
-
-      const updatedUser = await user.save()
-
-      res.json({
-        _id: updatedUser._id,
-        firstName: updatedUser.firstName,
-        lastName: updatedUser.lastName,
-        email: updatedUser.email,
-        phoneNumber: updatedUser.phoneNumber,
-        birthday: updatedUser.birthday,
-        role: updatedUser.role
-      })
-    } else {
-      res.status(404).json({ message: 'User not found' })
+      user.birthday = req.body.birthday || user.birthday
     }
+
+    if (req.body.password) {
+      if (!canChangePasswordFor(req.user.role, user.role, { isSelf })) {
+        return res.status(403).json({
+          message: 'Not authorized to change password for this user'
+        })
+      }
+      user.password = req.body.password
+      // Admin/staff asigna clave temporal; el usuario elige la suya → no forzar cambio
+      user.mustChangePassword = !isSelf
+    }
+
+    const updatedUser = await user.save()
+
+    res.json({
+      _id: updatedUser._id,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+      email: updatedUser.email,
+      phoneNumber: updatedUser.phoneNumber,
+      country: updatedUser.country,
+      birthday: updatedUser.birthday,
+      role: updatedUser.role,
+      passwordSet: updatedUser.passwordSet,
+      mustChangePassword: updatedUser.mustChangePassword
+    })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }

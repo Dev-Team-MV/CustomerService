@@ -3,16 +3,29 @@ import path from 'path'
 
 const IMAGE_MIMES = /^image\/(jpeg|jpg|png|gif|webp)$/
 const JPEG_MIME = 'image/jpeg'
+const PNG_MIME = 'image/png'
+const WEBP_MIME = 'image/webp'
 const JPG_EXT = '.jpg'
+const PNG_EXT = '.png'
+const WEBP_EXT = '.webp'
 
 /** Max width for resize (keeps aspect ratio). No resize if under this. */
 const MAX_WIDTH = 2560
 /** JPEG quality for conversion and optimization (0-100). */
 const JPEG_QUALITY = 85
+const PNG_COMPRESSION = 9
+const WEBP_QUALITY = 85
+
+function detectImageFormat (ext, mimeType) {
+  if (/\.png$/i.test(ext) || mimeType === 'image/png') return 'png'
+  if (/\.webp$/i.test(ext) || mimeType === 'image/webp') return 'webp'
+  if (/\.gif$/i.test(ext) || mimeType === 'image/gif') return 'gif'
+  return 'jpeg'
+}
 
 /**
- * Optimize image buffer and convert PNG (and other raster formats) to JPG.
- * Non-image buffers (PDF, video) are returned unchanged.
+ * Optimize image buffer for upload. Preserves PNG/WebP/GIF formats (and transparency).
+ * JPEG inputs are optimized as JPEG.
  *
  * @param {Buffer} buffer - File buffer
  * @param {string} originalName - Original file name (for extension)
@@ -42,15 +55,41 @@ export async function processImageForUpload (buffer, originalName, mimeType) {
       pipeline = pipeline.resize(MAX_WIDTH, null, { withoutEnlargement: true })
     }
 
-    const isPngOrWebpOrGif = /\.(png|webp|gif)$/i.test(ext) || /image\/(png|webp|gif)/.test(mimeType)
-    pipeline = pipeline.jpeg({ quality: JPEG_QUALITY, mozjpeg: true })
-    const outBuffer = await pipeline.toBuffer()
-    const outExt = (isPngOrWebpOrGif || ext === '.jpg' || ext === '.jpeg') ? JPG_EXT : ext
+    const format = detectImageFormat(ext, mimeType)
+    let outBuffer
+    let outMime
+    let outExt
+
+    if (format === 'png') {
+      outBuffer = await pipeline.png({ compressionLevel: PNG_COMPRESSION }).toBuffer()
+      outMime = PNG_MIME
+      outExt = PNG_EXT
+    } else if (format === 'webp') {
+      outBuffer = await pipeline.webp({ quality: WEBP_QUALITY }).toBuffer()
+      outMime = WEBP_MIME
+      outExt = WEBP_EXT
+    } else if (format === 'gif') {
+      // Static GIFs with alpha → PNG; otherwise JPEG for smaller size
+      if (metadata.hasAlpha) {
+        outBuffer = await pipeline.png({ compressionLevel: PNG_COMPRESSION }).toBuffer()
+        outMime = PNG_MIME
+        outExt = PNG_EXT
+      } else {
+        outBuffer = await pipeline.jpeg({ quality: JPEG_QUALITY, mozjpeg: true }).toBuffer()
+        outMime = JPEG_MIME
+        outExt = JPG_EXT
+      }
+    } else {
+      outBuffer = await pipeline.jpeg({ quality: JPEG_QUALITY, mozjpeg: true }).toBuffer()
+      outMime = JPEG_MIME
+      outExt = JPG_EXT
+    }
+
     return {
       buffer: outBuffer,
-      mimeType: JPEG_MIME,
+      mimeType: outMime,
       size: outBuffer.length,
-      extension: outExt.startsWith('.') ? outExt : `.${outExt}`
+      extension: outExt
     }
   } catch (err) {
     console.error('Image processing error, uploading original:', err.message)

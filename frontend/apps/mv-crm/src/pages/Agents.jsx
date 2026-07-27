@@ -1,4 +1,4 @@
-// apps/mv-crm/src/pages/jsx
+// apps/mv-crm/src/pages/Agents.jsx
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography } from '@mui/material'
@@ -8,19 +8,27 @@ import StatsStrip from '@shared/components/LayoutComponents/StatsStrip'
 import DataTable from '@shared/components/table/DataTable'
 import EmptyState from '@shared/components/table/EmptyState'
 import AgentMetricsModal from '../components/Agents/AgentMetricsModal'
+import TargetSetterModal from '../components/Agents/TargetSetterModal' // ✅ NUEVO
 import { useAgents } from '../constants/hooks/useAgents'
 import { useAgentColumns } from '../constants/Columns/agents'
 import { People } from '@mui/icons-material'
 
 export default function Agents() {
   const { t } = useTranslation('agents')
-  const { agents, loading, stats } = useAgents()
+  const { agents, loading, stats, refresh } = useAgents()
   const [selectedAgent, setSelectedAgent] = useState(null)
+  const [targetAgent, setTargetAgent] = useState(null) // ✅ NUEVO
 
   const columns = useAgentColumns({
     t,
-    onViewMetrics: (agent) => setSelectedAgent(agent)
+    onViewMetrics: (agent) => setSelectedAgent(agent),
+    onSetTarget: (agent) => setTargetAgent(agent) // ✅ NUEVO
   })
+
+  // ✅ Callback cuando se guardan las metas exitosamente
+  const handleTargetSuccess = () => {
+    refresh() // Refrescar la lista de agentes con las nuevas metas
+  }
 
   return (
     <PageLayout
@@ -61,10 +69,19 @@ export default function Agents() {
         />
       </motion.div>
 
+      {/* Modal de métricas detalladas */}
       <AgentMetricsModal
         open={Boolean(selectedAgent)}
         onClose={() => setSelectedAgent(null)}
         agent={selectedAgent}
+      />
+
+      {/* ✅ NUEVO: Modal para fijar metas */}
+      <TargetSetterModal
+        open={Boolean(targetAgent)}
+        onClose={() => setTargetAgent(null)}
+        agent={targetAgent}
+        onSuccess={handleTargetSuccess}
       />
     </PageLayout>
   )

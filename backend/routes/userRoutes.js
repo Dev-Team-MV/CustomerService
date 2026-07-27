@@ -137,6 +137,9 @@ router.get('/me/projects', protect, getMyProjects)
  *                 type: string
  *               phoneNumber:
  *                 type: string
+ *               country:
+ *                 type: string
+ *                 description: País del usuario
  *               birthday:
  *                 type: string
  *                 format: date

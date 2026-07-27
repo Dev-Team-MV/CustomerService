@@ -1,37 +1,41 @@
 import { sendSMSWithValidation } from '../services/twilioService.js'
 import SMSTemplate from '../models/SMSTemplate.js'
 import { notifySmsMessage } from '../utils/notificationTriggers.js'
+import { buildMessageFromTemplate } from '../services/templateRenderService.js'
+import { resolveVariablesForSend } from '../services/projectVariableResolverService.js'
 
-const getTemplateValue = (variables, key) => {
-  if (!variables || typeof variables !== 'object') return undefined
-
-  return key.split('.').reduce((accumulator, currentKey) => {
-    if (accumulator === null || accumulator === undefined) return undefined
-    return accumulator[currentKey]
-  }, variables)
-}
-
-const buildMessageFromTemplate = (template, variables = {}) => {
-  if (!template || typeof template !== 'string') {
-    throw new Error('Template must be a non-empty string')
-  }
-
-  const missingVariables = new Set()
-  const renderedMessage = template.replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, (_match, key) => {
-    const value = getTemplateValue(variables, key)
-
-    if (value === undefined || value === null) {
-      missingVariables.add(key)
-      return ''
-    }
-
-    return String(value)
+async function mergeSendVariables({
+  projectId,
+  templateProjectId,
+  userId,
+  leadId,
+  manualVariables = {}
+}) {
+  const { effectiveProjectId, variables } = await resolveVariablesForSend({
+    projectId,
+    templateProjectId,
+    userId,
+    leadId,
+    manualVariables
   })
 
-  return {
-    renderedMessage,
-    missingVariables: [...missingVariables]
+  return { effectiveProjectId, variables }
+}
+
+function handleTwilioError(error, res) {
+  if (error.message.includes('Twilio client not initialized')) {
+    return res.status(503).json({
+      success: false,
+      message: 'SMS service is not configured. Please configure Twilio credentials in environment variables.',
+      error: 'Twilio client not initialized. Please check your credentials.',
+      requiredEnvVars: [
+        'TWILIO_ACCOUNT_SID',
+        'TWILIO_AUTH_TOKEN',
+        'TWILIO_PHONE_FROM'
+      ]
+    })
   }
+  return null
 }
 
 /**
@@ -42,9 +46,9 @@ export const sendSMS = async (req, res) => {
     const { to, message } = req.body
 
     if (!to || !message) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'Phone number (to) and message are required' 
+        message: 'Phone number (to) and message are required'
       })
     }
 
@@ -63,23 +67,12 @@ export const sendSMS = async (req, res) => {
       data: result
     })
   } catch (error) {
-    // Check if it's a Twilio configuration error
-    if (error.message.includes('Twilio client not initialized')) {
-      return res.status(503).json({ 
-        success: false,
-        message: 'SMS service is not configured. Please configure Twilio credentials in environment variables.',
-        error: 'Twilio client not initialized. Please check your credentials.',
-        requiredEnvVars: [
-          'TWILIO_ACCOUNT_SID',
-          'TWILIO_AUTH_TOKEN',
-          'TWILIO_PHONE_FROM'
-        ]
-      })
-    }
-    
-    res.status(500).json({ 
+    const twilioResponse = handleTwilioError(error, res)
+    if (twilioResponse) return twilioResponse
+
+    res.status(500).json({
       success: false,
-      message: error.message 
+      message: error.message
     })
   }
 }
@@ -89,7 +82,7 @@ export const sendSMS = async (req, res) => {
  */
 export const sendSMSTemplate = async (req, res) => {
   try {
-    const { to, template, variables = {} } = req.body
+    const { to, template, variables = {}, projectId, userId, leadId } = req.body
 
     if (!to || !template) {
       return res.status(400).json({
@@ -98,13 +91,22 @@ export const sendSMSTemplate = async (req, res) => {
       })
     }
 
-    const { renderedMessage, missingVariables } = buildMessageFromTemplate(template, variables)
+    const { effectiveProjectId, variables: mergedVariables } = await mergeSendVariables({
+      projectId,
+      userId,
+      leadId,
+      manualVariables: variables
+    })
+
+    const { renderedMessage, missingVariables } = buildMessageFromTemplate(template, mergedVariables)
 
     if (missingVariables.length > 0) {
       return res.status(400).json({
         success: false,
         message: 'Missing values for one or more template variables',
-        missingVariables
+        missingVariables,
+        projectId: effectiveProjectId,
+        resolvedVariables: mergedVariables
       })
     }
 
@@ -114,7 +116,7 @@ export const sendSMSTemplate = async (req, res) => {
       to,
       message: renderedMessage,
       actor: req.user,
-      userId: req.body.userId
+      userId: req.body.userId || userId
     })
 
     res.status(200).json({
@@ -122,22 +124,14 @@ export const sendSMSTemplate = async (req, res) => {
       message: 'Template SMS sent successfully',
       data: {
         ...result,
-        renderedMessage
+        renderedMessage,
+        projectId: effectiveProjectId,
+        resolvedVariables: mergedVariables
       }
     })
   } catch (error) {
-    if (error.message.includes('Twilio client not initialized')) {
-      return res.status(503).json({
-        success: false,
-        message: 'SMS service is not configured. Please configure Twilio credentials in environment variables.',
-        error: 'Twilio client not initialized. Please check your credentials.',
-        requiredEnvVars: [
-          'TWILIO_ACCOUNT_SID',
-          'TWILIO_AUTH_TOKEN',
-          'TWILIO_PHONE_FROM'
-        ]
-      })
-    }
+    const twilioResponse = handleTwilioError(error, res)
+    if (twilioResponse) return twilioResponse
 
     res.status(500).json({
       success: false,
@@ -151,7 +145,7 @@ export const sendSMSTemplate = async (req, res) => {
  */
 export const sendSMSByTemplateId = async (req, res) => {
   try {
-    const { to, templateId, variables = {} } = req.body
+    const { to, templateId, variables = {}, projectId, userId, leadId } = req.body
 
     if (!to || !templateId) {
       return res.status(400).json({
@@ -175,7 +169,18 @@ export const sendSMSByTemplateId = async (req, res) => {
       })
     }
 
-    const { renderedMessage, missingVariables } = buildMessageFromTemplate(storedTemplate.template, variables)
+    const { effectiveProjectId, variables: mergedVariables } = await mergeSendVariables({
+      projectId,
+      templateProjectId: storedTemplate.projectId,
+      userId,
+      leadId,
+      manualVariables: variables
+    })
+
+    const { renderedMessage, missingVariables } = buildMessageFromTemplate(
+      storedTemplate.template,
+      mergedVariables
+    )
 
     if (missingVariables.length > 0) {
       return res.status(400).json({
@@ -184,7 +189,9 @@ export const sendSMSByTemplateId = async (req, res) => {
         missingVariables,
         templateId: storedTemplate._id,
         templateName: storedTemplate.name,
-        requiredPlaceholders: storedTemplate.placeholders || []
+        requiredPlaceholders: storedTemplate.placeholders || [],
+        projectId: effectiveProjectId,
+        resolvedVariables: mergedVariables
       })
     }
 
@@ -194,7 +201,7 @@ export const sendSMSByTemplateId = async (req, res) => {
       to,
       message: renderedMessage,
       actor: req.user,
-      userId: req.body.userId
+      userId: req.body.userId || userId
     })
 
     res.status(200).json({
@@ -204,22 +211,14 @@ export const sendSMSByTemplateId = async (req, res) => {
         ...result,
         templateId: storedTemplate._id,
         templateName: storedTemplate.name,
-        renderedMessage
+        renderedMessage,
+        projectId: effectiveProjectId,
+        resolvedVariables: mergedVariables
       }
     })
   } catch (error) {
-    if (error.message.includes('Twilio client not initialized')) {
-      return res.status(503).json({
-        success: false,
-        message: 'SMS service is not configured. Please configure Twilio credentials in environment variables.',
-        error: 'Twilio client not initialized. Please check your credentials.',
-        requiredEnvVars: [
-          'TWILIO_ACCOUNT_SID',
-          'TWILIO_AUTH_TOKEN',
-          'TWILIO_PHONE_FROM'
-        ]
-      })
-    }
+    const twilioResponse = handleTwilioError(error, res)
+    if (twilioResponse) return twilioResponse
 
     res.status(500).json({
       success: false,
@@ -233,7 +232,7 @@ export const sendSMSByTemplateId = async (req, res) => {
  */
 export const previewSMSByTemplateId = async (req, res) => {
   try {
-    const { templateId, variables = {} } = req.body
+    const { templateId, variables = {}, projectId, userId, leadId } = req.body
 
     if (!templateId) {
       return res.status(400).json({
@@ -250,7 +249,18 @@ export const previewSMSByTemplateId = async (req, res) => {
       })
     }
 
-    const { renderedMessage, missingVariables } = buildMessageFromTemplate(storedTemplate.template, variables)
+    const { effectiveProjectId, variables: mergedVariables } = await mergeSendVariables({
+      projectId,
+      templateProjectId: storedTemplate.projectId,
+      userId,
+      leadId,
+      manualVariables: variables
+    })
+
+    const { renderedMessage, missingVariables } = buildMessageFromTemplate(
+      storedTemplate.template,
+      mergedVariables
+    )
 
     res.status(200).json({
       success: true,
@@ -261,7 +271,9 @@ export const previewSMSByTemplateId = async (req, res) => {
         isActive: storedTemplate.isActive,
         renderedMessage,
         missingVariables,
-        requiredPlaceholders: storedTemplate.placeholders || []
+        requiredPlaceholders: storedTemplate.placeholders || [],
+        projectId: effectiveProjectId,
+        resolvedVariables: mergedVariables
       }
     })
   } catch (error) {

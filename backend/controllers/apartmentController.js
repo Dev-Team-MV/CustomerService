@@ -5,6 +5,10 @@ import Building from '../models/Building.js'
 import User from '../models/User.js'
 import Phase from '../models/Phase.js'
 import { getVisibleApartmentIdsForUser, canUserAccessApartment } from '../utils/propertyVisibility.js'
+import {
+  resolveApartmentSalePrice,
+  normalizeRenderType
+} from '../services/apartmentPricingService.js'
 
 function toIdStr(val) {
   if (val == null) return ''
@@ -142,7 +146,7 @@ export const getAllApartments = async (req, res) => {
     }
 
     const apartments = await Apartment.find(filter)
-      .populate('apartmentModel', 'name modelNumber floorPlan sqft bedrooms bathrooms')
+      .populate('apartmentModel', 'name modelNumber floorPlan sqft bedrooms bathrooms basePrice upgradePrice')
       .populate({
         path: 'apartmentModel',
         populate: { path: 'building', select: 'name section floors project' }
@@ -201,12 +205,12 @@ export const getAllApartments = async (req, res) => {
 export const getApartmentById = async (req, res) => {
   try {
     const apartment = await Apartment.findById(req.params.id)
-      .populate('apartmentModel', 'name modelNumber floorPlan sqft bedrooms bathrooms')
+      .populate('apartmentModel', 'name modelNumber floorPlan sqft bedrooms bathrooms basePrice upgradePrice')
       .populate({
         path: 'apartmentModel',
         populate: { path: 'building', select: 'name section floors project' }
       })
-      .populate('users', 'firstName lastName email phoneNumber birthday')
+      .populate('users', 'firstName lastName email phoneNumber country birthday')
       .populate({
         path: 'parkingSpots',
         select: 'building floorNumber code spotType status apartment notes createdAt updatedAt',
@@ -283,15 +287,16 @@ export const getApartmentQuote = async (req, res) => {
       }
 
       const apartment = await Apartment.findById(apartmentId)
-        .populate('apartmentModel', 'name modelNumber bedrooms bathrooms sqft building')
+        .populate('apartmentModel', 'name modelNumber bedrooms bathrooms sqft building basePrice upgradePrice')
 
       if (!apartment) {
         return res.status(404).json({ message: 'Apartment not found' })
       }
 
-      const basePrice = Number(apartment.price || 0)
-      const pending = basePrice - normalizedInitialPayment
-      const renderType = selectedRenderType || apartment.selectedRenderType || 'basic'
+      const renderType = normalizeRenderType(selectedRenderType || apartment.selectedRenderType)
+      const pricing = resolveApartmentSalePrice(apartment, apartment.apartmentModel, renderType)
+      const listPrice = Number(price != null && price !== '' ? price : pricing.listPrice)
+      const pending = listPrice - normalizedInitialPayment
 
       return res.json({
         apartmentId: apartment._id,
@@ -300,8 +305,15 @@ export const getApartmentQuote = async (req, res) => {
         floorNumber: apartment.floorNumber,
         apartmentNumber: apartment.apartmentNumber,
         selectedRenderType: renderType,
+        pricing: {
+          basePrice: pricing.basePrice,
+          upgradePrice: pricing.upgradePrice,
+          upgradePremium: pricing.upgradePremium,
+          listPrice,
+          priceSource: price != null && price !== '' ? 'request.price' : pricing.priceSource
+        },
         totals: {
-          price: basePrice,
+          price: listPrice,
           initialPayment: normalizedInitialPayment,
           pending
         }
@@ -335,9 +347,10 @@ export const getApartmentQuote = async (req, res) => {
 
       const existingApartment = await Apartment.findOne(filter)
       if (existingApartment) {
-        const basePrice = Number(existingApartment.price || 0)
-        const pending = basePrice - normalizedInitialPayment
-        const renderType = selectedRenderType || existingApartment.selectedRenderType || 'basic'
+        const renderType = normalizeRenderType(selectedRenderType || existingApartment.selectedRenderType)
+        const pricing = resolveApartmentSalePrice(existingApartment, modelExists, renderType)
+        const listPrice = Number(price != null && price !== '' ? price : pricing.listPrice)
+        const pending = listPrice - normalizedInitialPayment
         return res.json({
           apartmentId: existingApartment._id,
           building: existingApartment.building,
@@ -345,8 +358,15 @@ export const getApartmentQuote = async (req, res) => {
           floorNumber: existingApartment.floorNumber,
           apartmentNumber: existingApartment.apartmentNumber,
           selectedRenderType: renderType,
+          pricing: {
+            basePrice: pricing.basePrice,
+            upgradePrice: pricing.upgradePrice,
+            upgradePremium: pricing.upgradePremium,
+            listPrice,
+            priceSource: price != null && price !== '' ? 'request.price' : pricing.priceSource
+          },
           totals: {
-            price: basePrice,
+            price: listPrice,
             initialPayment: normalizedInitialPayment,
             pending
           }
@@ -354,11 +374,20 @@ export const getApartmentQuote = async (req, res) => {
       }
     }
 
-    const basePrice = Number(price ?? 0)
-    if (!Number.isFinite(basePrice) || basePrice < 0) {
-      return res.status(400).json({ message: 'price is required (>= 0) when apartment is not found by apartmentId or floor/apartmentNumber' })
+    const renderType = normalizeRenderType(selectedRenderType)
+    const pricing = resolveApartmentSalePrice(
+      { price: price ?? modelExists.basePrice, upgradePrice: req.body.upgradePrice },
+      modelExists,
+      renderType
+    )
+    const listPrice = Number(price != null && price !== '' ? price : pricing.listPrice)
+    if (!Number.isFinite(listPrice) || listPrice < 0) {
+      return res.status(400).json({
+        message:
+          'price is required (>= 0) when apartment is not found and model has no basePrice/upgradePrice'
+      })
     }
-    const pending = basePrice - normalizedInitialPayment
+    const pending = listPrice - normalizedInitialPayment
 
     return res.json({
       apartmentId: null,
@@ -366,9 +395,16 @@ export const getApartmentQuote = async (req, res) => {
       apartmentModel: modelExists,
       floorNumber: floorNumber != null && floorNumber !== '' ? Number(floorNumber) : null,
       apartmentNumber: apartmentNumber != null && apartmentNumber !== '' ? String(apartmentNumber) : null,
-      selectedRenderType: selectedRenderType || 'basic',
+      selectedRenderType: renderType,
+      pricing: {
+        basePrice: pricing.basePrice,
+        upgradePrice: pricing.upgradePrice,
+        upgradePremium: pricing.upgradePremium,
+        listPrice,
+        priceSource: price != null && price !== '' ? 'request.price' : pricing.priceSource
+      },
       totals: {
-        price: basePrice,
+        price: listPrice,
         initialPayment: normalizedInitialPayment,
         pending
       }
@@ -394,6 +430,7 @@ export const createApartment = async (req, res) => {
       user,
       users,
       price,
+      upgradePrice,
       initialPayment
     } = req.body
 
@@ -433,9 +470,32 @@ export const createApartment = async (req, res) => {
       return res.status(400).json({ message: 'Apartment number already exists for this model' })
     }
 
-    const priceVal = price ?? 0
+    const renderType = normalizeRenderType(selectedRenderType)
+    const resolvedUpgrade =
+      upgradePrice != null && upgradePrice !== ''
+        ? Number(upgradePrice)
+        : modelExists.upgradePrice != null
+          ? Number(modelExists.upgradePrice)
+          : null
+    const priceVal =
+      price != null && price !== ''
+        ? Number(price)
+        : modelExists.basePrice != null
+          ? Number(modelExists.basePrice)
+          : 0
+    if (!Number.isFinite(priceVal) || priceVal < 0) {
+      return res.status(400).json({ message: 'price must be a number >= 0 (or set apartmentModel.basePrice)' })
+    }
+    const upgradeVal =
+      resolvedUpgrade != null && Number.isFinite(resolvedUpgrade) ? resolvedUpgrade : null
+    const salePricing = resolveApartmentSalePrice(
+      { price: priceVal, upgradePrice: upgradeVal },
+      modelExists,
+      renderType
+    )
+    const salePrice = salePricing.listPrice
     const initialVal = initialPayment || 0
-    const pendingVal = priceVal - initialVal
+    const pendingVal = salePrice - initialVal
 
     const apartment = await Apartment.create({
       apartmentModel: modelId,
@@ -445,10 +505,11 @@ export const createApartment = async (req, res) => {
       floorPlanPolygonId: normalizePolygonId(floorPlanPolygonId),
       interiorRendersBasic: interiorRendersBasic || [],
       interiorRendersUpgrade: interiorRendersUpgrade || [],
-      selectedRenderType: selectedRenderType || 'basic',
+      selectedRenderType: renderType,
       polygon: polygon || [],
       users: ownerIds,
       price: priceVal,
+      upgradePrice: upgradeVal,
       pending: pendingVal,
       initialPayment: initialVal,
       status: ownerIds.length > 0 ? 'pending' : 'available'
@@ -459,7 +520,7 @@ export const createApartment = async (req, res) => {
     }
 
     const populated = await Apartment.findById(apartment._id)
-      .populate('apartmentModel', 'name modelNumber floorPlan sqft bedrooms bathrooms')
+      .populate('apartmentModel', 'name modelNumber floorPlan sqft bedrooms bathrooms basePrice upgradePrice')
       .populate({
         path: 'apartmentModel',
         populate: { path: 'building', select: 'name section floors project' }
@@ -492,7 +553,7 @@ export const createApartment = async (req, res) => {
 
 const ALLOWED_APARTMENT_UPDATES = [
   'floorNumber', 'apartmentNumber', 'interiorRendersBasic', 'interiorRendersUpgrade',
-  'selectedRenderType', 'polygon', 'users', 'price', 'pending', 'initialPayment', 'status', 'saleDate',
+  'selectedRenderType', 'polygon', 'users', 'price', 'upgradePrice', 'pending', 'initialPayment', 'status', 'saleDate',
   'floorPlanPolygonId'
 ]
 
@@ -514,15 +575,40 @@ export const updateApartment = async (req, res) => {
     for (const key of ALLOWED_APARTMENT_UPDATES) {
       if (key === 'floorPlanPolygonId') continue
       if (req.body[key] !== undefined) {
-        apartment[key] = req.body[key]
+        if (key === 'upgradePrice') {
+          apartment.upgradePrice =
+            req.body.upgradePrice === null || req.body.upgradePrice === ''
+              ? null
+              : Number(req.body.upgradePrice)
+        } else if (key === 'selectedRenderType') {
+          apartment.selectedRenderType = normalizeRenderType(req.body.selectedRenderType)
+        } else {
+          apartment[key] = req.body[key]
+        }
       }
     }
 
-    const modelForUpdate = await ApartmentModel.findById(apartment.apartmentModel).select('building')
+    const modelForUpdate = await ApartmentModel.findById(apartment.apartmentModel).select(
+      'building basePrice upgradePrice'
+    )
     if (!modelForUpdate) {
       return res.status(404).json({ message: 'Apartment model not found' })
     }
     apartment.building = modelForUpdate.building
+
+    // Recalculate pending from effective sale price when pricing fields change and pending not explicit
+    const pricingTouched =
+      req.body.price !== undefined ||
+      req.body.upgradePrice !== undefined ||
+      req.body.selectedRenderType !== undefined ||
+      req.body.initialPayment !== undefined
+    if (pricingTouched && req.body.pending === undefined) {
+      const pricing = resolveApartmentSalePrice(apartment, modelForUpdate, apartment.selectedRenderType)
+      apartment.pending = Math.max(
+        0,
+        Number(pricing.listPrice) - Number(apartment.initialPayment || 0)
+      )
+    }
 
     const placementValidation = await validateApartmentPlacement({
       buildingId: apartment.building,
@@ -540,7 +626,7 @@ export const updateApartment = async (req, res) => {
     }
 
     const populated = await Apartment.findById(apartment._id)
-      .populate('apartmentModel', 'name modelNumber floorPlan sqft bedrooms bathrooms')
+      .populate('apartmentModel', 'name modelNumber floorPlan sqft bedrooms bathrooms basePrice upgradePrice')
       .populate({
         path: 'apartmentModel',
         populate: { path: 'building', select: 'name section floors project' }

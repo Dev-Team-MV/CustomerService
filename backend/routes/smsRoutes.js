@@ -89,10 +89,19 @@ router.post('/send', protect, admin, sendSMS)
  *               variables:
  *                 type: object
  *                 additionalProperties: true
- *                 description: Key-value data used to replace placeholders
+ *                 description: Manual overrides merged with auto-resolved ProjectVariable values
  *                 example:
  *                   name: "Juan"
  *                   code: "123456"
+ *               projectId:
+ *                 type: string
+ *                 description: Project used to resolve ProjectVariable definitions
+ *               userId:
+ *                 type: string
+ *                 description: Recipient user used to build recorrido context
+ *               leadId:
+ *                 type: string
+ *                 description: Recipient lead used to build recorrido context
  *     responses:
  *       200:
  *         description: Template SMS sent successfully
@@ -132,11 +141,22 @@ router.post('/send-template', protect, admin, sendSMSTemplate)
  *               variables:
  *                 type: object
  *                 additionalProperties: true
- *                 description: Data used to replace template placeholders
+ *                 description: |
+ *                   Overrides manuales. Si se envía `userId` (y `projectId` efectivo), el backend
+ *                   resuelve automáticamente `ProjectVariable` (user, lot, building, apartment, etc.).
  *                 example:
- *                   name: "Juan"
- *                   amount: "$1,250"
- *                   dueDate: "2026-05-25"
+ *                   firstName: "Juan"
+ *                   apartmentNumber: "1204"
+ *                   buildingName: "Torre A"
+ *               projectId:
+ *                 type: string
+ *                 description: Project used to resolve variables (fallback after template.projectId)
+ *               userId:
+ *                 type: string
+ *                 description: Recipient user for recorrido context
+ *               leadId:
+ *                 type: string
+ *                 description: Recipient lead for recorrido context
  *     responses:
  *       200:
  *         description: Template SMS sent successfully
@@ -173,11 +193,19 @@ router.post('/send-by-template', protect, admin, sendSMSByTemplateId)
  *               variables:
  *                 type: object
  *                 additionalProperties: true
- *                 description: Data used to replace template placeholders
+ *                 description: |
+ *                   Overrides manuales. Si se envía `userId` (y `projectId` efectivo), el backend
+ *                   resuelve automáticamente `ProjectVariable` (user, lot, building, apartment, etc.).
  *                 example:
- *                   name: "Juan"
- *                   amount: "$1,250"
- *                   dueDate: "2026-05-25"
+ *                   firstName: "Juan"
+ *                   apartmentNumber: "1204"
+ *                   buildingName: "Torre A"
+ *               projectId:
+ *                 type: string
+ *               userId:
+ *                 type: string
+ *               leadId:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Template preview generated successfully

@@ -12,6 +12,8 @@ import {
   Map as MapIcon,
   MeetingRoom as MeetingRoomIcon,
   Groups as GroupsIcon,
+  RateReview as SurveyIcon, 
+  ReportProblem as ReportProblemIcon,
 } from "@mui/icons-material"
 
 export const privateMenuItems = [
@@ -70,7 +72,7 @@ export const privateMenuItems = [
     roles: ["superadmin", "admin"],
   },
   {
-    textKey: "navigation:menu.myapartment",
+    textKey: "navigation:menu.myApartment",
     icon: MeetingRoomIcon,
     path: "/my-apartment",
     roles: ["superadmin", "admin", "user"],
@@ -79,6 +81,18 @@ export const privateMenuItems = [
     textKey: "navigation:menu.familyGroup",
     icon: GroupsIcon,
     path: "/family-group",
+    roles: ["superadmin", "admin", "user"],
+  },
+    {
+    textKey: "navigation:menu.surveys",
+    icon: SurveyIcon,
+    path: "/survey",
+    roles: ["superadmin", "admin", "user"],
+  },
+  {
+    textKey: "navigation:menu.warranties",
+    icon: ReportProblemIcon,
+    path: "/warranties",
     roles: ["superadmin", "admin", "user"],
   },
   {
