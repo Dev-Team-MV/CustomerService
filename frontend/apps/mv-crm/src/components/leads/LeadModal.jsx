@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/leads/LeadModal.jsx
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -30,7 +29,10 @@ import {
 import { useProjects } from '@shared/hooks/useProjects'
 import { useResidents } from '@shared/hooks/useResidents'
 import { LEAD_STAGES, STAGE_COLORS } from '../../services/leadService'
-import SharedPhoneInput from '@shared/constants/SharedPhoneInput' // ✅ Agregar import
+
+// ✅ Importar el autocompletado de Google Places
+import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
+import SharedPhoneInput from '@shared/constants/SharedPhoneInput'
 
 const LEAD_SOURCES = [
   { id: 'web', label: 'Web' },
@@ -43,6 +45,7 @@ const initialFormData = {
   name: '',
   email: '',
   phone: '',
+  country: '', // ✅ Nuevo campo
   stage: 'nuevo',
   projectId: null,
   assignedTo: null,
@@ -67,7 +70,6 @@ const LeadModal = ({
     smsProjectId: import.meta.env.VITE_PROJECT_ID 
   })
 
-  // Filtrar solo admins y superadmins
   const adminUserOptions = users
     .filter(u => u.role === 'admin' || u.role === 'superadmin')
     .map(u => ({
@@ -87,6 +89,7 @@ const LeadModal = ({
         name: lead.name || '',
         email: lead.email || '',
         phone: lead.phone || '',
+        country: lead.country || '', // ✅ Cargar país al editar
         stage: lead.stage || 'nuevo',
         projectId: lead.projectId?._id || lead.projectId || null,
         assignedTo: lead.assignedTo?._id || lead.assignedTo || null,
@@ -94,28 +97,33 @@ const LeadModal = ({
         notes: lead.notes || ''
       })
     } else {
-      setFormData({
-        ...initialFormData
-      })
+      setFormData({ ...initialFormData })
     }
   }, [lead, open])
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
+
+  // ✅ Manejador específico para el autocompletado de Google
+  const handleCountryChange = (newValue) => {
+    const countryName = newValue ? newValue.label : ''
+    handleChange('country', countryName)
+  }
+
   const handleSave = async () => {
     if (!formData.name.trim()) return
     
     setSaving(true)
     try {
-      // ✅ CORRECCIÓN: Asegurar que el teléfono siempre tenga el '+' al inicio
       const formattedPhone = formData.phone && !formData.phone.startsWith('+') 
         ? `+${formData.phone}` 
         : formData.phone
 
       const payload = {
         ...formData,
-        phone: formattedPhone, // <-- Usamos el teléfono ya formateado
+        phone: formattedPhone,
+        country: formData.country || undefined, // ✅ Incluir en payload
         projectId: formData.projectId || undefined,
         assignedTo: formData.assignedTo || undefined
       }
@@ -130,13 +138,7 @@ const LeadModal = ({
   }
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="md" 
-      fullWidth
-      PaperProps={{ sx: { borderRadius: 3 } }}
-    >
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
       <DialogTitle>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6" fontWeight={700}>
@@ -168,7 +170,7 @@ const LeadModal = ({
           />
 
           {/* Email y Teléfono */}
-         <Box display="flex" gap={2}>
+          <Box display="flex" gap={2}>
             <TextField
               label={t('form.email')}
               value={formData.email}
@@ -184,21 +186,56 @@ const LeadModal = ({
               }}
             />
             
-            {/* ✅ NUEVO INPUT DE TELÉFONO REUTILIZABLE */}
-<SharedPhoneInput
-  label={t('form.phone')}
-  value={formData.phone}
-  onChange={(value) => handleChange('phone', value)}
-  country="us"
-  inputStyle={{
-    height: '56px', // Misma altura que TextField de MUI
-    fontSize: '16px',
-    borderRadius: '4px'
-  }}
-  containerStyle={{
-    width: '100%'
-  }}
-/>
+            <SharedPhoneInput
+              label={t('form.phone')}
+              value={formData.phone}
+              onChange={(value) => handleChange('phone', value)}
+              country="us"
+              inputStyle={{ height: '56px', fontSize: '16px', borderRadius: '4px' }}
+              containerStyle={{ width: '100%' }}
+            />
+          </Box>
+
+          {/* ✅ NUEVO: Campo de País */}
+          <Box>
+            <Typography variant="caption" sx={{ mb: 0.5, display: 'block', color: 'text.secondary', fontFamily: '"DM Sans", sans-serif' }}>
+              {t('form.country', 'País')}
+            </Typography>
+            <GooglePlacesAutocomplete
+              apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+              selectProps={{
+                value: formData.country ? { label: formData.country, value: formData.country } : null,
+                onChange: handleCountryChange,
+                placeholder: t('form.selectCountry', 'Selecciona un país...'),
+                styles: {
+                  control: (provided) => ({
+                    ...provided,
+                    borderRadius: 4,
+                    border: '1px solid rgba(0, 0, 0, 0.23)',
+                    fontFamily: '"DM Sans", sans-serif',
+                    minHeight: 56,
+                    boxShadow: 'none',
+                    '&:hover': { borderColor: 'rgba(0, 0, 0, 0.87)' },
+                    padding: '0 14px',
+                    '& .MuiInputBase-input': { padding: '16.5px 14px' }
+                  }),
+                  menu: (provided) => ({
+                    ...provided,
+                    fontFamily: '"DM Sans", sans-serif',
+                    borderRadius: 4,
+                    marginTop: 8,
+                    zIndex: 9999,
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    fontFamily: '"DM Sans", sans-serif',
+                    backgroundColor: state.isSelected ? '#1976d2' : state.isFocused ? '#f5f5f5' : 'white',
+                    color: state.isSelected ? 'white' : 'black',
+                  })
+                }
+              }}
+              autocompletionRequest={{ types: ['country'] }}
+            />
           </Box>
 
           {/* Proyecto y Asesor */}

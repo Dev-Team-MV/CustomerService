@@ -9,7 +9,9 @@ import referralService from '@shared/services/referralService'
 import { useProjects } from '@shared/hooks/useProjects'
 import { useResidents } from '@shared/hooks/useResidents'
 
-import SharedPhoneInput from '@shared/constants/SharedPhoneInput' // Ajusta la ruta si es necesario
+// ✅ Importar el autocompletado de Google Places
+import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
+import SharedPhoneInput from '@shared/constants/SharedPhoneInput'
 
 export default function SubmitReferralModal({ open, onClose, onSuccess, mode = 'customer' }) {
   const { t } = useTranslation('referrals')
@@ -24,6 +26,8 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
     referredName: '',
     referredPhone: '',
     referredEmail: '',
+    country: '', // ✅ Mantenemos 'country' en el estado interno del formulario
+    
     notes: '',
     rewardType: 'cash',
     rewardPerReferral: 0,
@@ -50,6 +54,7 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
         referredName: '', 
         referredPhone: '', 
         referredEmail: '', 
+        country: '', // ✅ Resetear campo
         notes: '',
         rewardType: 'cash', 
         rewardPerReferral: 0, 
@@ -63,10 +68,15 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  // ✅ Manejador específico para el autocompletado de Google
+  const handleCountryChange = (newValue) => {
+    const countryName = newValue ? newValue.label : ''
+    handleChange('country', countryName)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    // Validaciones usando las claves del JSON
     if (!projectId) return setError(t('errors.projectRequired'))
     if (mode === 'crm' && !referrerId) return setError(t('errors.referrerRequired'))
     if (!formData.referredName || !formData.referredPhone) return setError(t('errors.contactRequired'))
@@ -85,6 +95,7 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
           referredName: formData.referredName,
           referredPhone: formattedPhone,
           referredEmail: formData.referredEmail || undefined,
+          referredCountry: formData.country || undefined, // ✅ CORREGIDO: Nombre exacto que espera el backend
           notes: formData.notes || undefined
         })
       } else {
@@ -94,6 +105,7 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
           referredName: formData.referredName,
           referredPhone: formattedPhone,
           referredEmail: formData.referredEmail || undefined,
+          referredCountry: formData.country || undefined, // ✅ CORREGIDO: Nombre exacto que espera el backend
           notes: formData.notes || undefined,
           rewardType: formData.rewardType
         }
@@ -190,6 +202,48 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
               value={formData.referredEmail} 
               onChange={(e) => handleChange('referredEmail', e.target.value)} 
             />
+
+            {/* ✅ Campo de País */}
+            <Box>
+              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', color: 'text.secondary', fontFamily: '"DM Sans", sans-serif' }}>
+                {t('fields.country', 'País')}
+              </Typography>
+              <GooglePlacesAutocomplete
+                apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+                selectProps={{
+                  value: formData.country ? { label: formData.country, value: formData.country } : null,
+                  onChange: handleCountryChange,
+                  placeholder: t('fields.selectCountry', 'Selecciona un país...'),
+                  styles: {
+                    control: (provided) => ({
+                      ...provided,
+                      borderRadius: 4,
+                      border: '1px solid rgba(0, 0, 0, 0.23)',
+                      fontFamily: '"DM Sans", sans-serif',
+                      minHeight: 40, // Tamaño small de MUI
+                      boxShadow: 'none',
+                      '&:hover': { borderColor: 'rgba(0, 0, 0, 0.87)' },
+                      padding: '0 8px',
+                      '& .MuiInputBase-input': { padding: '8px 6px' }
+                    }),
+                    menu: (provided) => ({
+                      ...provided,
+                      fontFamily: '"DM Sans", sans-serif',
+                      borderRadius: 4,
+                      marginTop: 4,
+                      zIndex: 9999,
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      fontFamily: '"DM Sans", sans-serif',
+                      backgroundColor: state.isSelected ? '#1976d2' : state.isFocused ? '#f5f5f5' : 'white',
+                      color: state.isSelected ? 'white' : 'black',
+                    })
+                  }
+                }}
+                autocompletionRequest={{ types: ['country'] }}
+              />
+            </Box>
 
             {mode === 'crm' && (
               <>

@@ -36,7 +36,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "saving": "Processing...",
-    "submit": "Submit Referral"
+    "submit": "Submit Referral",
+    "createReferral": "Create Referral"
   },
   "program": {
     "title": "Program Configuration",
@@ -82,5 +83,9 @@
   },
   "common": {
     "select": "Select..."
+  },
+    "filters": {
+    "allProjects": "All Projects",
+    "allStatuses": "All Statuses"
   }
 }

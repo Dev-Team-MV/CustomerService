@@ -36,7 +36,8 @@
     "save": "Guardar",
     "cancel": "Cancelar",
     "saving": "Procesando...",
-    "submit": "Enviar Referido"
+    "submit": "Enviar Referido",
+    "createReferral": "Crear Referido"
   },
   "program": {
     "title": "Configuración del Programa",
@@ -62,7 +63,7 @@
   },
   "fields": {
     "project": "Proyecto",
-    "referrer": "Cliente Referidor",
+    "referrer": "Cliente Recomendador",
     "referredName": "Nombre del Referido",
     "referredPhone": "Teléfono del Referido",
     "referredEmail": "Email del Referido (Opcional)",
@@ -73,7 +74,7 @@
   },
   "errors": {
     "projectRequired": "El proyecto es obligatorio",
-    "referrerRequired": "Debes seleccionar un cliente referidor",
+    "referrerRequired": "Debes seleccionar un cliente recomendador",
     "contactRequired": "Nombre y teléfono del referido son obligatorios",
     "submitFailed": "Error al enviar el referido"
   },
@@ -82,5 +83,9 @@
   },
   "common": {
     "select": "Seleccionar..."
+  },
+  "filters": {
+    "allProjects": "Todos los Proyectos",
+    "allStatuses": "Todos los Estados"
   }
 }

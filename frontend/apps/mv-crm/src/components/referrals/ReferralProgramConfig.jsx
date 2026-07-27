@@ -135,9 +135,9 @@ export default function ReferralProgramConfig({ projects }) {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <FormControl size="small" sx={{ minWidth: 250 }}>
-          <InputLabel>{t('filters.project', 'Filtrar por Proyecto')}</InputLabel>
-          <Select value={selectedProject} onChange={(e) => setSelectedProject(e.target.value)} label={t('filters.project', 'Filtrar por Proyecto')}>
-            <MenuItem value="">{t('filters.all', 'Todos los Proyectos')}</MenuItem>
+          <InputLabel>{t('filters.allProjects', 'Filtrar por Proyecto')}</InputLabel>
+          <Select value={selectedProject} onChange={(e) => setSelectedProject(e.target.value)} label={t('filters.allProjects', 'Filtrar por Proyecto')}>
+            <MenuItem value="">{t('filters.allProjects', 'Todos los Proyectos')}</MenuItem>
             {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
           </Select>
         </FormControl>
