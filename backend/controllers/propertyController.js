@@ -7,11 +7,14 @@ import Project from '../models/Project.js'
 import User from '../models/User.js'
 import Phase from '../models/Phase.js'
 import Building from '../models/Building.js'
+import Quote from '../models/Quote.js'
 import { normalizeImageArray } from '../utils/imageUtils.js'
 import { getVisiblePropertyIdsForUser, canUserAccessProperty } from '../utils/propertyVisibility.js'
 import { hydrateUrlsInObject } from '../services/urlResolverService.js'
 import { evaluateProjectPricing } from '../services/projectPricingEngine.js'
 import { notifyPropertyAssigned } from '../utils/notificationTriggers.js'
+import { normalizeHouseOptions } from '../utils/houseOptions.js'
+import { resolveSaleOwnerIds } from '../services/ensureLeadUserService.js'
 
 const BLOCKED_BUILDING_AVAILABILITY_STATUSES = ['reserved', 'assigned', 'sold', 'disabled']
 
@@ -578,7 +581,7 @@ export const getPropertyById = async (req, res) => {
       .populate('project', 'name slug')
       .populate('lot', 'number price')
       .populate('model', 'model modelNumber price bedrooms bathrooms sqft images blueprints description balconies upgrades floors')
-      .populate('users', 'firstName lastName email phoneNumber birthday')
+      .populate('users', 'firstName lastName email phoneNumber country birthday')
       .populate({
         path: 'payloads',
         options: { sort: { date: -1 } }
@@ -760,6 +763,57 @@ const resolvePropertyPricing = async ({
         : null
     }
   }
+}
+
+/**
+ * Final sale amounts on create: calculated lot/model pricing, optional quote, then explicit body.price (CRM/quote UI).
+ */
+async function resolveCreateSaleAmounts({ calculated, body, quoteId, projectId, lotId }) {
+  let totalPrice = Number(calculated.totalPrice) || 0
+  let initialPaymentAmount = Number(calculated.initialPayment) || 0
+  let pendingAmount = Number(calculated.pending) || 0
+  let pricingSource = 'calculated'
+
+  if (quoteId && mongoose.Types.ObjectId.isValid(String(quoteId))) {
+    const quote = await Quote.findById(quoteId)
+      .select('totalPrice downPayment projectId lotId')
+      .lean()
+    if (quote) {
+      const projectMatch = !projectId || !quote.projectId || sameId(quote.projectId, projectId)
+      const lotMatch = !lotId || !quote.lotId || sameId(quote.lotId, lotId)
+      if (projectMatch && lotMatch) {
+        totalPrice = Number(quote.totalPrice) || totalPrice
+        initialPaymentAmount =
+          body.initialPayment !== undefined && body.initialPayment !== null && body.initialPayment !== ''
+            ? Number(body.initialPayment) || 0
+            : Number(quote.downPayment) || initialPaymentAmount
+        pendingAmount = Math.max(0, totalPrice - initialPaymentAmount)
+        pricingSource = 'quote'
+      }
+    }
+  }
+
+  if (body.price !== undefined && body.price !== null && body.price !== '') {
+    const explicitPrice = Number(body.price)
+    if (Number.isFinite(explicitPrice) && explicitPrice >= 0) {
+      totalPrice = explicitPrice
+      if (body.initialPayment !== undefined && body.initialPayment !== null && body.initialPayment !== '') {
+        initialPaymentAmount = Number(body.initialPayment) || 0
+      }
+      if (body.pending !== undefined && body.pending !== null && body.pending !== '') {
+        const explicitPending = Number(body.pending)
+        pendingAmount =
+          Number.isFinite(explicitPending) && explicitPending >= 0
+            ? explicitPending
+            : Math.max(0, totalPrice - initialPaymentAmount)
+      } else {
+        pendingAmount = Math.max(0, totalPrice - initialPaymentAmount)
+      }
+      pricingSource = 'explicit'
+    }
+  }
+
+  return { totalPrice, initialPaymentAmount, pendingAmount, pricingSource }
 }
 
 export const getPropertyQuote = async (req, res) => {
@@ -945,20 +999,71 @@ export const getPropertyQuotePreview = async (req, res) => {
 export const createProperty = async (req, res) => {
   try {
     const {
-      projectId, project, lot, model, facade, user, users, initialPayment,
-      hasBalcony, modelType, hasStorage, selectedOptions, quoteId
+      projectId, project, lot, model, facade, user, users, userId, leadId,
+      initialPayment,
+      quoteId,
+      price: requestedPrice, pending: requestedPending
     } = req.body
     let projId = projectId || project
 
-    // Normalize owners: accept single user or users array
-    const ownerIds = users && Array.isArray(users) && users.length > 0
+    // Normalize owners: accept user / users / userId (CRM often sends leadId as userId)
+    const rawOwnerIds = users && Array.isArray(users) && users.length > 0
       ? users
-      : user
-        ? [user]
+      : (user || userId)
+        ? [user || userId]
         : []
-    if (ownerIds.length === 0) {
-      return res.status(400).json({ message: 'At least one owner (user or users) is required' })
+
+    const ownersResolved = await resolveSaleOwnerIds({
+      ownerIds: rawOwnerIds,
+      leadId: leadId || null,
+      quoteId: quoteId || null,
+      autoConvertLead: true,
+      sendSms: true,
+      actor: req.user
+    })
+    if (!ownersResolved.ok) {
+      return res.status(ownersResolved.status).json({
+        message: ownersResolved.message,
+        leadId: ownersResolved.leadId,
+        userId: ownersResolved.userId
+      })
     }
+    const ownerIds = ownersResolved.ownerIds
+
+    // Merge options from linked quote when CRM convert only sends selectedOptions / price
+    let optionSource = { ...req.body }
+    if (quoteId && mongoose.Types.ObjectId.isValid(String(quoteId))) {
+      const quote = await Quote.findById(quoteId)
+        .select('hasBalcony hasStorage modelType selectedOptions facadeId deckId')
+        .lean()
+      if (quote) {
+        optionSource = {
+          hasBalcony: req.body.hasBalcony !== undefined ? req.body.hasBalcony : quote.hasBalcony,
+          hasStorage: req.body.hasStorage !== undefined ? req.body.hasStorage : quote.hasStorage,
+          modelType: req.body.modelType !== undefined ? req.body.modelType : quote.modelType,
+          selectedOptions: {
+            ...(quote.selectedOptions && typeof quote.selectedOptions === 'object'
+              ? quote.selectedOptions
+              : {}),
+            ...(req.body.selectedOptions && typeof req.body.selectedOptions === 'object'
+              ? req.body.selectedOptions
+              : {})
+          },
+          balconyId: req.body.balconyId,
+          storageId: req.body.storageId,
+          upgradeId: req.body.upgradeId,
+          modelBalconyId: req.body.modelBalconyId,
+          modelStorageId: req.body.modelStorageId,
+          modelUpgradeId: req.body.modelUpgradeId,
+          hasModelBalcony: req.body.hasModelBalcony,
+          hasModelStorage: req.body.hasModelStorage,
+          hasModelUpgrade: req.body.hasModelUpgrade
+        }
+      }
+    }
+
+    const houseOptions = normalizeHouseOptions(optionSource)
+    const { hasBalcony, hasStorage, modelType, selectedOptions } = houseOptions
 
     const firstOwner = ownerIds[0]
     const resolved = await resolvePropertyPricing({
@@ -968,10 +1073,10 @@ export const createProperty = async (req, res) => {
       model,
       facade,
       initialPayment,
-      hasBalcony: hasBalcony === true,
-      modelType: modelType || 'basic',
-      hasStorage: hasStorage === true,
-      selectedOptions: selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {},
+      hasBalcony,
+      modelType,
+      hasStorage,
+      selectedOptions,
       enforceLotAvailability: true,
       firstOwner
     })
@@ -991,7 +1096,26 @@ export const createProperty = async (req, res) => {
       return res.status(buildingValidation.status).json({ message: buildingValidation.message })
     }
 
-    const { totalPrice, initialPayment: initialPaymentAmount, pending: pendingAmount } = resolved.data.prices
+    const { totalPrice: calculatedTotal, initialPayment: calculatedInitial, pending: calculatedPending } =
+      resolved.data.prices
+
+    const saleAmounts = await resolveCreateSaleAmounts({
+      calculated: {
+        totalPrice: calculatedTotal,
+        initialPayment: calculatedInitial,
+        pending: calculatedPending
+      },
+      body: {
+        price: requestedPrice,
+        pending: requestedPending,
+        initialPayment
+      },
+      quoteId,
+      projectId: projId,
+      lotId: lot
+    })
+
+    const { totalPrice, initialPayment: initialPaymentAmount, pendingAmount } = saleAmounts
     if (initialPaymentAmount > totalPrice) {
       return res.status(400).json({
         message: 'initialPayment cannot be greater than totalPrice',
@@ -1012,10 +1136,10 @@ export const createProperty = async (req, res) => {
       pending: pendingAmount,
       initialPayment: initialPaymentAmount,
       status: 'pending',
-      hasBalcony: hasBalcony === true,
-      modelType: modelType || 'basic',
-      hasStorage: hasStorage === true,
-      selectedOptions: selectedOptions && typeof selectedOptions === 'object' ? selectedOptions : {}
+      hasBalcony,
+      modelType,
+      hasStorage,
+      selectedOptions
     })
 
     await assignBuildingToProperty({

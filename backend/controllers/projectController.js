@@ -189,11 +189,23 @@ export const getProjectBySlug = async (req, res) => {
   }
 }
 
+function normalizeBrandColors (colors) {
+  if (!Array.isArray(colors)) return []
+  return colors
+    .map((item) => {
+      const key = typeof item?.key === 'string' ? item.key.trim().toLowerCase() : ''
+      const value = typeof item?.value === 'string' ? item.value.trim() : ''
+      if (!key || !value) return null
+      return { key, value }
+    })
+    .filter(Boolean)
+}
+
 const pickProjectFields = (body) => {
   const allowed = [
     'name', 'slug', 'phase', 'title', 'subtitle', 'description', 'fullDescription',
-    'image', 'gallery', 'features', 'type', 'facadeEnabled', 'status', 'isActive',
-    'externalUrl', 'location', 'area', 'videos', 'outdoorAmenitySections'
+    'image', 'logo', 'brandColors', 'gallery', 'features', 'type', 'facadeEnabled',
+    'status', 'isActive', 'externalUrl', 'location', 'area', 'videos', 'outdoorAmenitySections'
   ]
   const data = {}
   for (const key of allowed) {
@@ -220,6 +232,9 @@ export const createProject = async (req, res) => {
     data.status = data.status || 'active'
     if (data.outdoorAmenitySections !== undefined) {
       data.outdoorAmenitySections = await normalizeOutdoorAmenitySections(data.outdoorAmenitySections)
+    }
+    if (data.brandColors !== undefined) {
+      data.brandColors = normalizeBrandColors(data.brandColors)
     }
     const project = await Project.create(data)
     res.status(201).json(project)
@@ -252,6 +267,9 @@ export const updateProject = async (req, res) => {
     }
     if (data.outdoorAmenitySections !== undefined) {
       data.outdoorAmenitySections = await normalizeOutdoorAmenitySections(data.outdoorAmenitySections)
+    }
+    if (data.brandColors !== undefined) {
+      data.brandColors = normalizeBrandColors(data.brandColors)
     }
     Object.assign(project, data)
     await project.save()

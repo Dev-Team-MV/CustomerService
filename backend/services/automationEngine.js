@@ -39,10 +39,16 @@ function projectIdFromContext(context) {
   const lead = context.lead
   const appointment = context.appointment
   const payload = context.enrichedPayload || context.payload
+  const referral = context.referral
+  const warranty = context.warranty
+  const onboarding = context.onboarding
 
   if (lead?.projectId) return String(lead.projectId._id || lead.projectId)
   if (appointment?.projectId) return String(appointment.projectId._id || appointment.projectId)
   if (payload?.projectId) return String(payload.projectId)
+  if (referral?.projectId) return String(referral.projectId._id || referral.projectId)
+  if (warranty?.projectId) return String(warranty.projectId._id || warranty.projectId)
+  if (onboarding?.projectId) return String(onboarding.projectId._id || onboarding.projectId)
   return null
 }
 
@@ -191,6 +197,15 @@ function resolveNotifyUserId(automation, context) {
   if (context.appointment?.assignedTo) {
     return context.appointment.assignedTo._id || context.appointment.assignedTo
   }
+  if (context.referral?.referrerId) {
+    return context.referral.referrerId._id || context.referral.referrerId
+  }
+  if (context.warranty?.clientId) {
+    return context.warranty.clientId._id || context.warranty.clientId
+  }
+  if (context.onboarding?.clientId) {
+    return context.onboarding.clientId._id || context.onboarding.clientId
+  }
   if (automation.createdBy) return automation.createdBy
   if (context.actor?._id) return context.actor._id
   return null
@@ -200,6 +215,7 @@ function resolvePhone(context) {
   if (context.lead?.phone) return context.lead.phone
   if (context.client?.phoneNumber) return context.client.phoneNumber
   if (context.appointment?.leadId?.phone) return context.appointment.leadId.phone
+  if (context.referral?.referredPhone) return context.referral.referredPhone
   return null
 }
 
@@ -459,6 +475,55 @@ export async function buildTestContext(automation, sample = {}) {
         )
       }
       return { appointment, actor: sample.actor }
+    }
+    case 'referral_converted': {
+      const Referral = (await import('../models/Referral.js')).default
+      const filter = projectId && !sample.referralId ? { projectId } : {}
+      const referral = sample.referralId
+        ? await Referral.findById(sample.referralId).lean()
+        : await Referral.findOne(filter).sort({ updatedAt: -1 }).lean()
+      if (!referral) {
+        throw new Error(
+          projectId
+            ? `No hay referidos de prueba en el proyecto ${projectId}`
+            : 'No hay referidos disponibles para el contexto de prueba'
+        )
+      }
+      return { referral, actor: sample.actor }
+    }
+    case 'warranty_submitted': {
+      const WarrantyClaim = (await import('../models/WarrantyClaim.js')).default
+      const filter = projectId && !sample.warrantyId ? { projectId } : {}
+      const warranty = sample.warrantyId
+        ? await WarrantyClaim.findById(sample.warrantyId).lean()
+        : await WarrantyClaim.findOne(filter).sort({ createdAt: -1 }).lean()
+      if (!warranty) {
+        throw new Error(
+          projectId
+            ? `No hay garantías de prueba en el proyecto ${projectId}`
+            : 'No hay garantías disponibles para el contexto de prueba'
+        )
+      }
+      return { warranty, actor: sample.actor }
+    }
+    case 'onboarding_completed': {
+      const OnboardingChecklist = (await import('../models/OnboardingChecklist.js')).default
+      const filter = projectId && !sample.onboardingId
+        ? { projectId, status: 'completed' }
+        : sample.onboardingId
+          ? {}
+          : { status: 'completed' }
+      const onboarding = sample.onboardingId
+        ? await OnboardingChecklist.findById(sample.onboardingId).lean()
+        : await OnboardingChecklist.findOne(filter).sort({ updatedAt: -1 }).lean()
+      if (!onboarding) {
+        throw new Error(
+          projectId
+            ? `No hay checklists de onboarding completados en el proyecto ${projectId}`
+            : 'No hay checklists de onboarding completados para el contexto de prueba'
+        )
+      }
+      return { onboarding, actor: sample.actor }
     }
     default:
       return sample

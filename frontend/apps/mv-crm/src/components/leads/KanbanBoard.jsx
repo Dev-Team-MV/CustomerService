@@ -13,7 +13,8 @@ const KanbanBoard = ({
   onEditLead,
   onDeleteLead,
   onMoveLead,
-  onConvertLead
+  onConvertLead,
+  onScoreUpdate
 }) => {
   const { t } = useTranslation('leads')
   const [draggedLead, setDraggedLead] = useState(null)
@@ -65,10 +66,11 @@ const KanbanBoard = ({
           column={stage}
           leads={groupedByStage[stage.key] || []}
           onLeadClick={onLeadClick}
-          onLeadMenuClick={handleLeadMenuClick}
-          onAddClick={() => onAddLead?.(stage.key)}
+          onAddClick={() => onAddLead(stage.key)}
+          onMenuClick={handleLeadMenuClick}
           onDragStart={handleDragStart}
           onDrop={handleDrop}
+          onScoreUpdate={onScoreUpdate}
         />
       ))}
 

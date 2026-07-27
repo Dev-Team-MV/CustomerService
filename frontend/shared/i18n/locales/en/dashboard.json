@@ -3,6 +3,7 @@
     "overviewSubtitle": "Your Dashboard Overview",
     "propertyMap": "Property Map",
     "title": "6 Town Houses",
+    "titleMV":"All",
     "subtitle": "Control Panel",
     "quickActions": {
         "title": "Quick Actions",
@@ -30,7 +31,8 @@
         "clubHouse": "Club House",
         "clubHouseDesc": "View club house",
         "newsFeed": "News Feed",
-        "newsFeedDesc": "Latest updates"
+        "newsFeedDesc": "Latest updates",
+        "referrals": "Referrals"
     },
     "masterPlan": {
         "title": "Project View",

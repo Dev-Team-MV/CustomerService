@@ -60,8 +60,14 @@ const options = {
             lastName: { type: 'string' },
             email: { type: 'string', format: 'email' },
             phoneNumber: { type: 'string' },
+            country: { type: 'string', description: 'País del usuario' },
             birthday: { type: 'string', format: 'date' },
             role: { type: 'string', enum: ['superadmin', 'admin', 'owner', 'user'] },
+            passwordSet: { type: 'boolean', description: 'Si el usuario ya tiene contraseña configurada' },
+            mustChangePassword: {
+              type: 'boolean',
+              description: 'true si un admin asignó contraseña temporal y el usuario debe cambiarla'
+            },
             lots: { type: 'array', items: { type: 'string' } },
             projectMemberships: {
               type: 'array',
@@ -78,6 +84,27 @@ const options = {
             updatedAt: { type: 'string', format: 'date-time' }
           }
         },
+        ImpersonationState: {
+          type: 'object',
+          properties: {
+            active: { type: 'boolean' },
+            impersonatedBy: { $ref: '#/components/schemas/User' }
+          }
+        },
+        ImpersonationAuthResponse: {
+          type: 'object',
+          description: 'Login-like payload when starting or stopping impersonation',
+          properties: {
+            token: { type: 'string' },
+            user: { $ref: '#/components/schemas/User' },
+            impersonation: { $ref: '#/components/schemas/ImpersonationState' },
+            _id: { type: 'string' },
+            firstName: { type: 'string' },
+            lastName: { type: 'string' },
+            email: { type: 'string' },
+            role: { type: 'string' }
+          }
+        },
         MyProjectsResponse: {
           type: 'array',
           description: 'Lista de proyectos accesibles para el usuario actual',
@@ -89,6 +116,22 @@ const options = {
               slug: { type: 'string' },
               phase: { type: 'string', description: 'Ej. I, II' },
               type: { type: 'string', enum: ['residential_lots', 'apartments', 'other'] }
+            }
+          }
+        },
+        BrandColorItem: {
+          type: 'object',
+          required: ['key', 'value'],
+          properties: {
+            key: {
+              type: 'string',
+              description: 'Color role (e.g. primary, secondary, accent, gradient)',
+              example: 'primary'
+            },
+            value: {
+              type: 'string',
+              description: 'Hex, rgb/rgba, or CSS gradient',
+              example: '#333F1F'
             }
           }
         },
@@ -117,6 +160,12 @@ const options = {
               properties: { en: { type: 'string' }, es: { type: 'string' } }
             },
             image: { type: 'string', description: 'Main image URL' },
+            logo: { type: 'string', description: 'Project logo URL' },
+            brandColors: {
+              type: 'array',
+              description: 'Brand palette entries (primary, secondary, accent, gradient, etc.)',
+              items: { $ref: '#/components/schemas/BrandColorItem' }
+            },
             gallery: { type: 'array', items: { type: 'string' }, description: 'Gallery image URLs' },
             features: {
               type: 'object',
@@ -728,6 +777,16 @@ const options = {
             sqft: { type: 'number' },
             bedrooms: { type: 'number' },
             bathrooms: { type: 'number' },
+            basePrice: {
+              type: 'number',
+              nullable: true,
+              description: 'Default basic list price for units of this typology'
+            },
+            upgradePrice: {
+              type: 'number',
+              nullable: true,
+              description: 'Default upgrade list price (absolute). Unit can override.'
+            },
             apartmentCount: { type: 'number' },
             status: { type: 'string', enum: ['active', 'inactive'] }
           }
@@ -735,7 +794,7 @@ const options = {
         Apartment: {
           type: 'object',
           description:
-            'Unidad vendible en torre. POST /api/apartments requiere apartmentModelId, floorNumber, apartmentNumber, price. pending = price - initialPayment.',
+            'Unidad vendible en torre. price = basic; upgradePrice = override del total con upgrade (si null hereda ApartmentModel.upgradePrice).',
           properties: {
             _id: { type: 'string' },
             building: { type: 'string' },
@@ -744,7 +803,12 @@ const options = {
             apartmentNumber: { type: 'string' },
             floorPlanPolygonId: { type: 'string', nullable: true },
             users: { type: 'array', items: { type: 'string' }, description: 'Dueños' },
-            price: { type: 'number' },
+            price: { type: 'number', description: 'Basic list price' },
+            upgradePrice: {
+              type: 'number',
+              nullable: true,
+              description: 'Absolute upgrade list price; null inherits model.upgradePrice'
+            },
             pending: { type: 'number' },
             initialPayment: { type: 'number' },
             status: { type: 'string', enum: ['available', 'pending', 'sold', 'cancelled'] },
@@ -753,7 +817,7 @@ const options = {
         },
         ApartmentCreateBody: {
           type: 'object',
-          required: ['apartmentModelId', 'floorNumber', 'apartmentNumber', 'price'],
+          required: ['apartmentModelId', 'floorNumber', 'apartmentNumber'],
           properties: {
             apartmentModelId: { type: 'string' },
             apartmentModel: { type: 'string' },
@@ -767,7 +831,15 @@ const options = {
             polygon: { type: 'array', items: { type: 'object', properties: { x: { type: 'number' }, y: { type: 'number' } } } },
             user: { type: 'string' },
             users: { type: 'array', items: { type: 'string' } },
-            price: { type: 'number' },
+            price: {
+              type: 'number',
+              description: 'Basic price. If omitted, uses apartmentModel.basePrice'
+            },
+            upgradePrice: {
+              type: 'number',
+              nullable: true,
+              description: 'Absolute upgrade price. If omitted, uses apartmentModel.upgradePrice'
+            },
             initialPayment: { type: 'number' }
           }
         },
@@ -894,10 +966,17 @@ const options = {
                 'complementary down payment',
                 'monthly payment',
                 'additional payment',
-                'closing payment'
-              ]
+                'closing payment',
+                'referral bonus'
+              ],
+              description: 'referral bonus should be shown in UI as "Bonificación por referido"'
             },
             notes: { type: 'string' },
+            referralId: {
+              type: 'string',
+              nullable: true,
+              description: 'Linked Referral when type is referral bonus'
+            },
             processedBy: { type: 'string' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
@@ -1067,6 +1146,7 @@ const options = {
             name: { type: 'string' },
             phone: { type: 'string' },
             email: { type: 'string', format: 'email' },
+            country: { type: 'string', description: 'País del lead' },
             source: { type: 'string', enum: ['web', 'referido', 'visita', 'llamada'] },
             projectId: { type: 'object', description: 'Populated Project ref' },
             stage: {
@@ -1098,6 +1178,7 @@ const options = {
             name: { type: 'string' },
             phone: { type: 'string' },
             email: { type: 'string', format: 'email' },
+            country: { type: 'string', description: 'País del lead' },
             source: { type: 'string', enum: ['web', 'referido', 'visita', 'llamada'] },
             projectId: { type: 'string' },
             stage: {
@@ -1114,6 +1195,7 @@ const options = {
             name: { type: 'string' },
             phone: { type: 'string' },
             email: { type: 'string', format: 'email' },
+            country: { type: 'string', description: 'País del lead' },
             source: { type: 'string', enum: ['web', 'referido', 'visita', 'llamada'] },
             projectId: { type: 'string' },
             stage: {
@@ -1137,11 +1219,17 @@ const options = {
                 lastName: { type: 'string' },
                 email: { type: 'string' },
                 phoneNumber: { type: 'string' },
+                country: { type: 'string' },
                 role: { type: 'string' }
               }
             },
             smsSent: { type: 'boolean' },
-            setupLink: { type: 'string', description: 'Present only when SMS failed' }
+            setupLink: { type: 'string', description: 'Present only when SMS failed' },
+            commission: {
+              nullable: true,
+              description: 'Pending commission when saleAmount was provided on convert',
+              allOf: [{ $ref: '#/components/schemas/Commission' }]
+            }
           }
         },
         CrmClientProperty: {
@@ -1339,6 +1427,127 @@ const options = {
             }
           }
         },
+        AuditLogEntry: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            userId: {
+              type: 'object',
+              description: 'Populated User ref (who performed the action)',
+              properties: {
+                _id: { type: 'string' },
+                firstName: { type: 'string' },
+                lastName: { type: 'string' },
+                email: { type: 'string' },
+                role: { type: 'string' }
+              }
+            },
+            action: {
+              type: 'string',
+              enum: [
+                'created',
+                'updated',
+                'deleted',
+                'stage_changed',
+                'sms_sent',
+                'login',
+                'impersonation_started',
+                'impersonation_stopped'
+              ]
+            },
+            entity: {
+              type: 'string',
+              enum: ['Lead', 'Client', 'Activity', 'Appointment', 'Campaign']
+            },
+            entityId: { type: 'string' },
+            changes: {
+              type: 'object',
+              properties: {
+                before: { type: 'object', nullable: true, additionalProperties: true },
+                after: { type: 'object', nullable: true, additionalProperties: true }
+              }
+            },
+            ip: { type: 'string', nullable: true },
+            timestamp: { type: 'string', format: 'date-time' }
+          }
+        },
+        CrmAuditLogsPaginated: {
+          type: 'object',
+          properties: {
+            logs: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/AuditLogEntry' }
+            },
+            pagination: { $ref: '#/components/schemas/PaginationMeta' }
+          }
+        },
+        AgentTargetMetrics: {
+          type: 'object',
+          description: 'Monthly target or progress counters per metric',
+          properties: {
+            leads: { type: 'number' },
+            conversions: { type: 'number' },
+            appointments: { type: 'number' },
+            smsCount: { type: 'number' }
+          }
+        },
+        AgentTargetCompletion: {
+          type: 'object',
+          nullable: true,
+          description: 'Completion percentage per metric; null when no target is set for that metric',
+          properties: {
+            leads: { type: 'number', nullable: true, description: 'Percentage (0–100+)' },
+            conversions: { type: 'number', nullable: true },
+            appointments: { type: 'number', nullable: true },
+            smsCount: { type: 'number', nullable: true }
+          }
+        },
+        AgentTargetUpsertRequest: {
+          type: 'object',
+          description: 'Accepts flat fields or nested targets object',
+          properties: {
+            month: { type: 'integer', minimum: 1, maximum: 12 },
+            year: { type: 'integer' },
+            leads: { type: 'number', minimum: 0 },
+            conversions: { type: 'number', minimum: 0 },
+            appointments: { type: 'number', minimum: 0 },
+            smsCount: { type: 'number', minimum: 0 },
+            targets: { $ref: '#/components/schemas/AgentTargetMetrics' }
+          }
+        },
+        CrmAgentTargetsResponse: {
+          type: 'object',
+          properties: {
+            agent: {
+              type: 'object',
+              properties: {
+                _id: { type: 'string' },
+                firstName: { type: 'string' },
+                lastName: { type: 'string' },
+                email: { type: 'string' },
+                phoneNumber: { type: 'string' },
+                role: { type: 'string' }
+              }
+            },
+            agentId: { type: 'string' },
+            month: { type: 'integer', minimum: 1, maximum: 12 },
+            year: { type: 'integer' },
+            targets: {
+              allOf: [{ $ref: '#/components/schemas/AgentTargetMetrics' }],
+              nullable: true,
+              description: 'Configured targets; null if none set for the month'
+            },
+            progress: { $ref: '#/components/schemas/AgentTargetMetrics' },
+            completion: { $ref: '#/components/schemas/AgentTargetCompletion' },
+            period: {
+              type: 'object',
+              properties: {
+                start: { type: 'string', format: 'date-time' },
+                end: { type: 'string', format: 'date-time' }
+              }
+            }
+          }
+        },
         CrmExportResult: {
           type: 'object',
           description: 'JSON export response (format=json). format=csv returns text/csv file.',
@@ -1408,7 +1617,7 @@ const options = {
             name: { type: 'string' },
             trigger: {
               type: 'string',
-              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days']
+              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days', 'referral_converted', 'warranty_submitted', 'onboarding_completed']
             },
             condition: { $ref: '#/components/schemas/AutomationCondition' },
             action: {
@@ -1429,7 +1638,7 @@ const options = {
             name: { type: 'string' },
             trigger: {
               type: 'string',
-              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days']
+              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days', 'referral_converted', 'warranty_submitted', 'onboarding_completed']
             },
             condition: { $ref: '#/components/schemas/AutomationCondition' },
             action: {
@@ -1446,7 +1655,7 @@ const options = {
             name: { type: 'string' },
             trigger: {
               type: 'string',
-              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days']
+              enum: ['lead_stage_changed', 'payment_overdue', 'appointment_created', 'inactivity_7days', 'referral_converted', 'warranty_submitted', 'onboarding_completed']
             },
             condition: { $ref: '#/components/schemas/AutomationCondition' },
             action: {
@@ -1755,6 +1964,795 @@ const options = {
             smsResponded: {
               type: 'boolean',
               description: 'Set true when the lead replied to an outbound SMS'
+            }
+          }
+        },
+        CommissionSplit: {
+          type: 'object',
+          properties: {
+            agentId: { type: 'string' },
+            percentage: { type: 'number' },
+            amount: { type: 'number' }
+          }
+        },
+        Commission: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            propertyId: { type: 'string', nullable: true },
+            projectId: { type: 'string' },
+            agentId: { type: 'string' },
+            leadId: { type: 'string', nullable: true },
+            saleAmount: { type: 'number' },
+            commissionRate: { type: 'number' },
+            commissionAmount: { type: 'number' },
+            bonusAmount: { type: 'number' },
+            splitWith: { type: 'array', items: { $ref: '#/components/schemas/CommissionSplit' } },
+            status: { type: 'string', enum: ['pending', 'approved', 'paid', 'disputed'] },
+            paidAt: { type: 'string', format: 'date-time', nullable: true },
+            approvedBy: { type: 'string', nullable: true },
+            structureId: { type: 'string', nullable: true },
+            notes: { type: 'string' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        CommissionCreate: {
+          type: 'object',
+          required: ['projectId', 'agentId', 'saleAmount'],
+          properties: {
+            propertyId: { type: 'string' },
+            projectId: { type: 'string' },
+            agentId: { type: 'string' },
+            leadId: { type: 'string' },
+            saleAmount: { type: 'number' },
+            structureId: { type: 'string' },
+            overrideRate: { type: 'number' },
+            overrideAmount: { type: 'number' },
+            splits: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  agentId: { type: 'string' },
+                  percentage: { type: 'number' }
+                }
+              }
+            },
+            notes: { type: 'string' }
+          }
+        },
+        CommissionUpdate: {
+          type: 'object',
+          properties: {
+            saleAmount: { type: 'number' },
+            structureId: { type: 'string' },
+            overrideRate: { type: 'number' },
+            overrideAmount: { type: 'number' },
+            splits: { type: 'array', items: { type: 'object' } },
+            notes: { type: 'string' },
+            propertyId: { type: 'string' },
+            status: { type: 'string', enum: ['pending', 'disputed'] }
+          }
+        },
+        CommissionCalculateRequest: {
+          type: 'object',
+          required: ['saleAmount'],
+          properties: {
+            saleAmount: { type: 'number' },
+            projectId: { type: 'string' },
+            structureId: { type: 'string' },
+            overrideRate: { type: 'number' },
+            overrideAmount: { type: 'number' },
+            primaryAgentId: { type: 'string' },
+            splits: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  agentId: { type: 'string' },
+                  percentage: { type: 'number' }
+                }
+              }
+            }
+          }
+        },
+        CommissionCalculateResult: {
+          type: 'object',
+          properties: {
+            saleAmount: { type: 'number' },
+            commissionRate: { type: 'number' },
+            commissionAmount: { type: 'number' },
+            bonusAmount: { type: 'number' },
+            totalPayout: { type: 'number' },
+            bonusesApplied: { type: 'array', items: { type: 'object' } },
+            splitWith: { type: 'array', items: { $ref: '#/components/schemas/CommissionSplit' } },
+            structureType: { type: 'string', nullable: true }
+          }
+        },
+        CommissionStructureTier: {
+          type: 'object',
+          properties: {
+            minAmount: { type: 'number' },
+            maxAmount: { type: 'number', nullable: true },
+            rate: { type: 'number', description: 'Percentage rate for this tier' }
+          }
+        },
+        CommissionBonusRule: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            bonusType: {
+              type: 'string',
+              enum: ['flat', 'percentage_of_sale', 'percentage_of_commission']
+            },
+            value: { type: 'number' },
+            minSaleAmount: { type: 'number' },
+            maxSaleAmount: { type: 'number', nullable: true }
+          }
+        },
+        CommissionStructure: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            projectId: { type: 'string' },
+            name: { type: 'string' },
+            type: { type: 'string', enum: ['flat', 'percentage', 'tiered'] },
+            flatAmount: { type: 'number' },
+            percentageRate: { type: 'number' },
+            tiers: { type: 'array', items: { $ref: '#/components/schemas/CommissionStructureTier' } },
+            bonusRules: { type: 'array', items: { $ref: '#/components/schemas/CommissionBonusRule' } },
+            isDefault: { type: 'boolean' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        CommissionStructureCreate: {
+          type: 'object',
+          required: ['projectId', 'name', 'type'],
+          properties: {
+            projectId: { type: 'string' },
+            name: { type: 'string' },
+            type: { type: 'string', enum: ['flat', 'percentage', 'tiered'] },
+            flatAmount: { type: 'number' },
+            percentageRate: { type: 'number' },
+            tiers: { type: 'array', items: { $ref: '#/components/schemas/CommissionStructureTier' } },
+            bonusRules: { type: 'array', items: { $ref: '#/components/schemas/CommissionBonusRule' } },
+            isDefault: { type: 'boolean' }
+          }
+        },
+        CommissionStructureUpdate: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            type: { type: 'string', enum: ['flat', 'percentage', 'tiered'] },
+            flatAmount: { type: 'number' },
+            percentageRate: { type: 'number' },
+            tiers: { type: 'array', items: { $ref: '#/components/schemas/CommissionStructureTier' } },
+            bonusRules: { type: 'array', items: { $ref: '#/components/schemas/CommissionBonusRule' } },
+            isDefault: { type: 'boolean' }
+          }
+        },
+        Document: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            title: { type: 'string' },
+            description: { type: 'string' },
+            category: {
+              type: 'string',
+              enum: ['contract', 'id_document', 'deed', 'appraisal', 'receipt', 'insurance', 'permit', 'blueprint', 'other']
+            },
+            fileUrl: { type: 'string' },
+            thumbnailUrl: { type: 'string', nullable: true },
+            mimeType: { type: 'string' },
+            fileSize: { type: 'number' },
+            propertyId: { type: 'string', nullable: true },
+            apartmentId: { type: 'string', nullable: true },
+            clientId: { type: 'string', nullable: true },
+            leadId: { type: 'string', nullable: true },
+            projectId: { type: 'string' },
+            tags: { type: 'array', items: { type: 'string' } },
+            version: { type: 'integer' },
+            previousVersion: { type: 'string', nullable: true },
+            uploadedBy: { type: 'string' },
+            expiresAt: { type: 'string', format: 'date-time', nullable: true },
+            isArchived: { type: 'boolean' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        DocumentCreate: {
+          type: 'object',
+          required: ['title', 'category', 'projectId', 'fileUrl'],
+          properties: {
+            title: { type: 'string' },
+            description: { type: 'string' },
+            category: {
+              type: 'string',
+              enum: ['contract', 'id_document', 'deed', 'appraisal', 'receipt', 'insurance', 'permit', 'blueprint', 'other']
+            },
+            fileUrl: { type: 'string' },
+            mimeType: { type: 'string' },
+            fileSize: { type: 'number' },
+            thumbnailUrl: { type: 'string' },
+            propertyId: { type: 'string' },
+            apartmentId: { type: 'string' },
+            clientId: { type: 'string' },
+            leadId: { type: 'string' },
+            projectId: { type: 'string' },
+            tags: { type: 'array', items: { type: 'string' } },
+            expiresAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        DocumentUpdate: {
+          type: 'object',
+          properties: {
+            title: { type: 'string' },
+            description: { type: 'string' },
+            category: { type: 'string' },
+            tags: { type: 'array', items: { type: 'string' } },
+            expiresAt: { type: 'string', format: 'date-time', nullable: true },
+            thumbnailUrl: { type: 'string' },
+            propertyId: { type: 'string', nullable: true },
+            apartmentId: { type: 'string', nullable: true },
+            clientId: { type: 'string', nullable: true },
+            leadId: { type: 'string', nullable: true }
+          }
+        },
+        QuoteScheduleItem: {
+          type: 'object',
+          properties: {
+            monthNumber: { type: 'integer' },
+            date: { type: 'string', format: 'date-time' },
+            principal: { type: 'number' },
+            interest: { type: 'number' },
+            payment: { type: 'number' },
+            balance: { type: 'number' },
+            isBalloon: { type: 'boolean' }
+          }
+        },
+        AmortizationSchedule: {
+          type: 'object',
+          properties: {
+            totalPrice: { type: 'number' },
+            downPayment: { type: 'number' },
+            downPaymentPercentage: { type: 'number' },
+            financedAmount: { type: 'number' },
+            interestRate: { type: 'number' },
+            termMonths: { type: 'integer' },
+            monthlyPayment: { type: 'number' },
+            method: { type: 'string', enum: ['fixed', 'declining'] },
+            balloonAmount: { type: 'number' },
+            balloonMonth: { type: 'integer', nullable: true },
+            schedule: { type: 'array', items: { $ref: '#/components/schemas/QuoteScheduleItem' } }
+          }
+        },
+        Quote: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            leadId: { type: 'string', nullable: true },
+            clientId: { type: 'string', nullable: true },
+            projectId: { type: 'string' },
+            lotId: { type: 'string', nullable: true, description: 'Required for lot quotes (XOR with apartmentId)' },
+            modelId: { type: 'string', nullable: true },
+            facadeId: { type: 'string', nullable: true },
+            buildingId: { type: 'string', nullable: true },
+            apartmentId: { type: 'string', nullable: true, description: 'Required for apartment quotes (XOR with lotId)' },
+            selectedRenderType: {
+              type: 'string',
+              enum: ['basic', 'upgrade'],
+              description: 'Apartment finish selection. Persisted on the quote (not on apartment until convert-to-sale).'
+            },
+            selectedOptions: {
+              type: 'object',
+              description: 'Lot/house option selections (balconyId, storageId, upgradeId, etc.)'
+            },
+            hasBalcony: { type: 'boolean', description: 'House quote: balcony selected' },
+            hasStorage: { type: 'boolean', description: 'House quote: storage selected' },
+            modelType: { type: 'string', enum: ['basic', 'upgrade'], description: 'House quote: model finish' },
+            deckId: { type: 'string', nullable: true },
+            totalPrice: { type: 'number' },
+            downPayment: { type: 'number' },
+            downPaymentPercentage: { type: 'number' },
+            financedAmount: { type: 'number' },
+            interestRate: { type: 'number' },
+            termMonths: { type: 'integer' },
+            monthlyPayment: { type: 'number' },
+            amortizationMethod: { type: 'string', enum: ['fixed', 'declining'] },
+            balloonAmount: { type: 'number' },
+            balloonMonth: { type: 'integer', nullable: true },
+            schedule: { type: 'array', items: { $ref: '#/components/schemas/QuoteScheduleItem' } },
+            status: { type: 'string', enum: ['draft', 'sent', 'accepted', 'expired', 'converted'] },
+            validUntil: { type: 'string', format: 'date-time', nullable: true },
+            convertedToPropertyId: { type: 'string', nullable: true },
+            convertedToApartmentId: { type: 'string', nullable: true },
+            pdfUrl: { type: 'string', nullable: true },
+            sentVia: { type: 'string', enum: ['email', 'sms', 'both', 'download', 'none'] },
+            termsAndConditions: { type: 'string' },
+            notes: { type: 'string' },
+            createdBy: { type: 'string' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        QuoteCreate: {
+          type: 'object',
+          required: ['projectId', 'totalPrice', 'termMonths'],
+          description: 'Provide exactly one of lotId (lot quote) or apartmentId (apartment quote). Empty strings are treated as null.',
+          properties: {
+            leadId: { type: 'string', nullable: true },
+            clientId: { type: 'string', nullable: true },
+            projectId: { type: 'string' },
+            lotId: { type: 'string', nullable: true },
+            modelId: { type: 'string', nullable: true },
+            facadeId: { type: 'string', nullable: true },
+            buildingId: { type: 'string', nullable: true, description: 'Optional if apartment already has building' },
+            apartmentId: { type: 'string', nullable: true },
+            selectedRenderType: { type: 'string', enum: ['basic', 'upgrade'] },
+            selectedOptions: { type: 'object' },
+            hasBalcony: { type: 'boolean' },
+            hasStorage: { type: 'boolean' },
+            modelType: { type: 'string', enum: ['basic', 'upgrade'] },
+            deckId: { type: 'string', nullable: true },
+            totalPrice: { type: 'number' },
+            downPayment: { type: 'number' },
+            interestRate: { type: 'number', description: 'Annual interest rate %' },
+            termMonths: { type: 'integer' },
+            amortizationMethod: { type: 'string', enum: ['fixed', 'declining'] },
+            balloonAmount: { type: 'number' },
+            balloonMonth: { type: 'integer', nullable: true },
+            startDate: { type: 'string', format: 'date' },
+            validUntil: { type: 'string', format: 'date-time' },
+            termsAndConditions: { type: 'string' },
+            notes: { type: 'string' },
+            status: { type: 'string', enum: ['draft', 'sent', 'accepted'] }
+          }
+        },
+        QuoteUpdate: {
+          type: 'object',
+          properties: {
+            leadId: { type: 'string', nullable: true },
+            clientId: { type: 'string', nullable: true },
+            lotId: { type: 'string', nullable: true },
+            modelId: { type: 'string', nullable: true },
+            facadeId: { type: 'string', nullable: true },
+            buildingId: { type: 'string', nullable: true },
+            apartmentId: { type: 'string', nullable: true },
+            selectedRenderType: { type: 'string', enum: ['basic', 'upgrade'] },
+            selectedOptions: { type: 'object' },
+            hasBalcony: { type: 'boolean' },
+            hasStorage: { type: 'boolean' },
+            modelType: { type: 'string', enum: ['basic', 'upgrade'] },
+            deckId: { type: 'string', nullable: true },
+            totalPrice: { type: 'number' },
+            downPayment: { type: 'number' },
+            interestRate: { type: 'number' },
+            termMonths: { type: 'integer' },
+            amortizationMethod: { type: 'string', enum: ['fixed', 'declining'] },
+            balloonAmount: { type: 'number' },
+            balloonMonth: { type: 'integer', nullable: true },
+            startDate: { type: 'string', format: 'date' },
+            validUntil: { type: 'string', format: 'date-time', nullable: true },
+            termsAndConditions: { type: 'string' },
+            notes: { type: 'string' },
+            status: { type: 'string', enum: ['draft', 'sent', 'accepted', 'expired'] }
+          }
+        },
+        QuotePreviewRequest: {
+          type: 'object',
+          required: ['totalPrice', 'termMonths'],
+          properties: {
+            totalPrice: { type: 'number' },
+            downPayment: { type: 'number' },
+            interestRate: { type: 'number' },
+            termMonths: { type: 'integer' },
+            amortizationMethod: { type: 'string', enum: ['fixed', 'declining'] },
+            balloonAmount: { type: 'number' },
+            balloonMonth: { type: 'integer' },
+            startDate: { type: 'string', format: 'date' }
+          }
+        },
+        LocalizedString: {
+          type: 'object',
+          properties: {
+            en: { type: 'string' },
+            es: { type: 'string' }
+          }
+        },
+        ReferralProgram: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            projectId: { type: 'string' },
+            name: { type: 'string' },
+            rewardPerReferral: {
+              type: 'number',
+              description: 'Cash amount when rewardType is cash'
+            },
+            rewardType: {
+              type: 'string',
+              enum: ['cash', 'property_discount'],
+              description: 'Legacy payment_credit/amenity_access may still appear on old documents'
+            },
+            discountPercent: {
+              type: 'number',
+              nullable: true,
+              description: 'Percent of referrer unit value when rewardType is property_discount'
+            },
+            isActive: { type: 'boolean' },
+            termsAndConditions: { $ref: '#/components/schemas/LocalizedString' },
+            maxReferralsPerUser: { type: 'integer', nullable: true },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        ReferralProgramCreate: {
+          type: 'object',
+          required: ['projectId', 'name'],
+          description: 'Use cash (rewardPerReferral) or property_discount (discountPercent). Exclusive.',
+          properties: {
+            projectId: { type: 'string' },
+            name: { type: 'string' },
+            rewardPerReferral: { type: 'number' },
+            rewardType: { type: 'string', enum: ['cash', 'property_discount'] },
+            discountPercent: { type: 'number', minimum: 0, maximum: 100 },
+            isActive: { type: 'boolean' },
+            termsAndConditions: { $ref: '#/components/schemas/LocalizedString' },
+            maxReferralsPerUser: { type: 'integer', nullable: true }
+          }
+        },
+        Referral: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            referrerId: { type: 'string' },
+            referredLeadId: { type: 'string', nullable: true },
+            referredName: { type: 'string' },
+            referredPhone: { type: 'string' },
+            referredEmail: { type: 'string' },
+            projectId: { type: 'string' },
+            status: {
+              type: 'string',
+              enum: ['pending', 'contacted', 'qualified', 'converted', 'reward_pending', 'reward_paid', 'expired']
+            },
+            rewardType: {
+              type: 'string',
+              enum: ['cash', 'property_discount', 'payment_credit', 'amenity_access']
+            },
+            rewardAmount: {
+              type: 'number',
+              description: 'Cash amount, or computed discount dollars after approval'
+            },
+            discountPercent: { type: 'number', nullable: true },
+            discountBase: {
+              type: 'string',
+              nullable: true,
+              enum: ['original_100', 'after_first_10'],
+              description: 'Admin-selected base: 100% of unit price, or 90% after a prior 10% discount'
+            },
+            discountBaseAmount: { type: 'number', nullable: true },
+            discountAmount: { type: 'number', nullable: true },
+            rewardPaidAt: { type: 'string', format: 'date-time', nullable: true },
+            conversionPropertyId: { type: 'string', nullable: true },
+            conversionApartmentId: { type: 'string', nullable: true },
+            rewardPropertyId: {
+              type: 'string',
+              nullable: true,
+              description: 'Referrer property that received the discount credit'
+            },
+            rewardApartmentId: {
+              type: 'string',
+              nullable: true,
+              description: 'Referrer apartment that received the discount credit'
+            },
+            rewardPayloadId: {
+              type: 'string',
+              nullable: true,
+              description: 'Signed Payload of type referral bonus'
+            },
+            referralCode: { type: 'string' },
+            notes: { type: 'string' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        ReferralSubmit: {
+          type: 'object',
+          required: ['projectId', 'referredName'],
+          properties: {
+            projectId: { type: 'string' },
+            referredName: { type: 'string' },
+            referredPhone: { type: 'string' },
+            referredEmail: { type: 'string' },
+            notes: { type: 'string' }
+          }
+        },
+        ReferralConvert: {
+          type: 'object',
+          description: 'Provide exactly one of propertyId or apartmentId for the referred sale',
+          properties: {
+            propertyId: { type: 'string' },
+            apartmentId: { type: 'string' }
+          }
+        },
+        ReferralApproveReward: {
+          type: 'object',
+          description:
+            'Cash: only allowed when the referrer has no pending balance on any unit; optional rewardAmount. ' +
+            'property_discount: require discountBase + rewardPropertyId or rewardApartmentId; discountPercent ' +
+            'falls back to the project referral program when omitted. Creates a signed Payload type ' +
+            '"referral bonus" (display as Bonificación por referido).',
+          properties: {
+            rewardType: { type: 'string', enum: ['cash', 'property_discount'] },
+            rewardAmount: { type: 'number' },
+            discountPercent: {
+              type: 'number',
+              minimum: 0,
+              maximum: 100,
+              description: 'Optional override; defaults to the percent configured on the project program'
+            },
+            discountBase: { type: 'string', enum: ['original_100', 'after_first_10'] },
+            rewardPropertyId: { type: 'string' },
+            rewardApartmentId: { type: 'string' }
+          }
+        },
+        ReferralStats: {
+          type: 'object',
+          properties: {
+            projectId: { type: 'string' },
+            total: { type: 'integer' },
+            uniqueReferrers: { type: 'integer' },
+            byStatus: { type: 'object', additionalProperties: { type: 'integer' } },
+            cashPaid: { type: 'number', description: 'Sum of cash rewards marked reward_paid' },
+            discountsPaid: {
+              type: 'number',
+              description: 'Sum of property_discount amounts marked reward_paid'
+            },
+            rewardsPaid: { type: 'number' },
+            rewardsPending: { type: 'number' },
+            totalRewardAmount: { type: 'number' }
+          }
+        },
+        OnboardingChecklistItem: {
+          type: 'object',
+          properties: {
+            key: { type: 'string' },
+            label_en: { type: 'string' },
+            label_es: { type: 'string' },
+            completed: { type: 'boolean' },
+            completedAt: { type: 'string', format: 'date-time', nullable: true },
+            completedBy: { type: 'string', nullable: true },
+            notes: { type: 'string' },
+            requiredDocumentId: { type: 'string', nullable: true }
+          }
+        },
+        OnboardingChecklist: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            propertyId: { type: 'string', nullable: true },
+            apartmentId: { type: 'string', nullable: true },
+            clientId: { type: 'string' },
+            projectId: { type: 'string' },
+            items: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/OnboardingChecklistItem' }
+            },
+            status: { type: 'string', enum: ['not_started', 'in_progress', 'completed'] },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+            postSaleSurvey: {
+              nullable: true,
+              description: 'Only on create: pending post_sale survey for same unit/client',
+              allOf: [{ $ref: '#/components/schemas/SatisfactionSurvey' }]
+            },
+            postSaleSurveyNote: {
+              type: 'string',
+              description: 'Only on create: why survey was skipped or reused'
+            }
+          }
+        },
+        OnboardingChecklistCreate: {
+          type: 'object',
+          required: ['clientId', 'projectId'],
+          description: 'Provide exactly one of propertyId or apartmentId. On create, also assigns active post_sale survey for the same unit.',
+          properties: {
+            propertyId: { type: 'string', nullable: true, description: 'For lot/house units. Mutually exclusive with apartmentId' },
+            apartmentId: { type: 'string', nullable: true, description: 'For apartment units. Mutually exclusive with propertyId' },
+            clientId: { type: 'string' },
+            projectId: { type: 'string' },
+            items: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/OnboardingChecklistItem' }
+            }
+          }
+        },
+        WarrantyClaim: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            propertyId: { type: 'string', nullable: true },
+            apartmentId: { type: 'string', nullable: true },
+            clientId: { type: 'string' },
+            projectId: { type: 'string' },
+            category: {
+              type: 'string',
+              enum: ['structural', 'plumbing', 'electrical', 'finish', 'appliance', 'landscaping', 'other']
+            },
+            description: { type: 'string' },
+            photoUrls: { type: 'array', items: { type: 'string' } },
+            priority: { type: 'string', enum: ['low', 'medium', 'high', 'emergency'] },
+            status: {
+              type: 'string',
+              enum: ['submitted', 'under_review', 'approved', 'in_progress', 'resolved', 'rejected']
+            },
+            assignedContractor: { type: 'string' },
+            resolution: { type: 'string' },
+            resolvedAt: { type: 'string', format: 'date-time', nullable: true },
+            satisfactionRating: { type: 'integer', minimum: 1, maximum: 5, nullable: true },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        WarrantyClaimCreate: {
+          type: 'object',
+          required: ['projectId', 'category', 'description'],
+          description: 'Provide exactly one of propertyId or apartmentId',
+          properties: {
+            propertyId: { type: 'string', nullable: true, description: 'For lot/house units. Mutually exclusive with apartmentId' },
+            apartmentId: { type: 'string', nullable: true, description: 'For apartment units. Mutually exclusive with propertyId' },
+            clientId: { type: 'string', description: 'Solo admin; usuarios usan su propio id' },
+            projectId: { type: 'string' },
+            category: {
+              type: 'string',
+              enum: ['structural', 'plumbing', 'electrical', 'finish', 'appliance', 'landscaping', 'other']
+            },
+            description: { type: 'string' },
+            photoUrls: { type: 'array', items: { type: 'string' } },
+            priority: { type: 'string', enum: ['low', 'medium', 'high', 'emergency'] }
+          }
+        },
+        SurveyTemplateQuestion: {
+          type: 'object',
+          required: ['key'],
+          properties: {
+            key: { type: 'string', description: 'Unique key inside the template (e.g. q1)' },
+            text_en: { type: 'string' },
+            text_es: { type: 'string' }
+          }
+        },
+        SurveyTemplate: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            projectId: { type: 'string' },
+            type: {
+              type: 'string',
+              enum: ['post_sale', 'post_construction', 'post_warranty', 'annual']
+            },
+            name: { type: 'string' },
+            questions: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/SurveyTemplateQuestion' }
+            },
+            isActive: { type: 'boolean' },
+            createdBy: { type: 'string', nullable: true },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        SurveyTemplateCreate: {
+          type: 'object',
+          required: ['projectId', 'type', 'name', 'questions'],
+          properties: {
+            projectId: { type: 'string' },
+            type: {
+              type: 'string',
+              enum: ['post_sale', 'post_construction', 'post_warranty', 'annual']
+            },
+            name: { type: 'string' },
+            questions: {
+              type: 'array',
+              minItems: 1,
+              items: { $ref: '#/components/schemas/SurveyTemplateQuestion' }
+            },
+            isActive: { type: 'boolean' }
+          }
+        },
+        SurveyResponseItem: {
+          type: 'object',
+          properties: {
+            questionKey: {
+              type: 'string',
+              nullable: true,
+              description: 'Template question key. Users answer by sending questionKey + rating/comment'
+            },
+            question: { type: 'string', description: 'Question text snapshot (set by backend from template)' },
+            rating: { type: 'integer', minimum: 1, maximum: 5, nullable: true },
+            comment: { type: 'string' }
+          }
+        },
+        SatisfactionSurvey: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            propertyId: { type: 'string', nullable: true },
+            apartmentId: { type: 'string', nullable: true },
+            clientId: { type: 'string' },
+            projectId: { type: 'string' },
+            templateId: { type: 'string', nullable: true },
+            type: {
+              type: 'string',
+              enum: ['post_sale', 'post_construction', 'post_warranty', 'annual']
+            },
+            responses: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/SurveyResponseItem' }
+            },
+            overallRating: { type: 'integer', minimum: 1, maximum: 5, nullable: true },
+            npsScore: { type: 'integer', minimum: 0, maximum: 10, nullable: true },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        SatisfactionSurveyCreate: {
+          type: 'object',
+          description:
+            'Provide exactly one of propertyId or apartmentId. Users must send templateId; ' +
+            'projectId and type are derived from the template. Answers go in responses as ' +
+            '{ questionKey, rating, comment }. Free-form (no templateId) is admin-only.',
+          properties: {
+            propertyId: { type: 'string', nullable: true, description: 'For lot/house units. Mutually exclusive with apartmentId' },
+            apartmentId: { type: 'string', nullable: true, description: 'For apartment units. Mutually exclusive with propertyId' },
+            clientId: { type: 'string', description: 'Solo admin; usuarios usan su propio id' },
+            templateId: { type: 'string', description: 'Required for non-admin users' },
+            projectId: { type: 'string', description: 'Required only for admin free-form surveys' },
+            type: {
+              type: 'string',
+              enum: ['post_sale', 'post_construction', 'post_warranty', 'annual'],
+              description: 'Required only for admin free-form surveys'
+            },
+            responses: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/SurveyResponseItem' }
+            },
+            overallRating: { type: 'integer', minimum: 1, maximum: 5 },
+            npsScore: { type: 'integer', minimum: 0, maximum: 10 }
+          }
+        },
+        SurveyStats: {
+          type: 'object',
+          description: 'Admin-only aggregated results; users never see these numbers',
+          properties: {
+            projectId: { type: 'string' },
+            total: { type: 'integer' },
+            avgOverallRating: { type: 'number', nullable: true },
+            avgNps: { type: 'number', nullable: true },
+            byType: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  type: { type: 'string' },
+                  count: { type: 'integer' },
+                  avgOverallRating: { type: 'number', nullable: true },
+                  avgNps: { type: 'number', nullable: true }
+                }
+              }
+            },
+            byQuestion: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  questionKey: { type: 'string', nullable: true },
+                  question: { type: 'string' },
+                  count: { type: 'integer' },
+                  avgRating: { type: 'number', nullable: true }
+                }
+              }
             }
           }
         }

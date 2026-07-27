@@ -1,3 +1,4 @@
+///Users/oficina/MV-CRM/CustomerService/frontend/apps/lakewood-p1/src/components/MapInventory.jsx
 import { Box, Paper, Typography, IconButton, Grid } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
@@ -109,6 +110,8 @@ const MapInventory = () => {
   const [mapUrl, setMapUrl] = useState(map)
   const mapRef = useRef(null)
 
+    const isAdmin   = user?.role === 'admin' || user?.role === 'superadmin'
+
   useEffect(() => {
     fetchLots()
     fetchMasterPlanImages()
@@ -200,10 +203,12 @@ const MapInventory = () => {
 
   return (
     <Box>
+      {isAdmin && (
       <Paper sx={{ p: 2, mb: 2, borderRadius: 3 }}>
         <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#333F1F' }}>
           {t('lots:mapInventory.title')}
         </Typography>
+        
         <Grid container spacing={2}>
           {COUNTER_COLORS.map((colorKey) => {
             const colorData = LOT_COLORS[colorKey]
@@ -232,7 +237,7 @@ const MapInventory = () => {
           })}
         </Grid>
       </Paper>
-
+      )}
       <Box
         ref={mapRef}
         onMouseDown={handleMouseDown}

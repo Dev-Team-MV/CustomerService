@@ -1,0 +1,49 @@
+{
+  "title": "Automations",
+  "titleBold": "CRM",
+  "topbarLabel": "Automatic rules",
+  "subtitle": "Configure rules to automate actions in your CRM",
+  "createAutomation": "New automation",
+  "editTitle": "Edit automation",
+  "createTitle": "New automation",
+  "total": "total",
+  "active": "active",
+  "inactive": "inactive",
+  "enable": "Enable",
+  "disable": "Disable",
+  "edit": "Edit",
+  "delete": "Delete",
+  "test": "Test",
+  "conditions": "Conditions",
+  "lastRun": "Last run",
+  "testMatched": "✅ Test successful: Match found",
+  "testNotMatched": "️ Test executed: No match",
+  
+  "empty": {
+    "title": "No automations",
+    "description": "Create your first rule to automate actions in the CRM"
+  },
+  
+  "form": {
+    "name": "Name",
+    "trigger": "Trigger (event)",
+    "action": "Action",
+    "cancel": "Cancel",
+    "create": "Create",
+    "update": "Update",
+    "saving": "Saving..."
+  },
+  
+  "triggers": {
+    "lead_stage_changed": "Lead stage changed",
+    "payment_overdue": "Payment overdue",
+    "appointment_created": "Appointment created",
+    "inactivity_7days": "7 days inactivity"
+  },
+  
+  "actions": {
+    "send_sms": "Send SMS",
+    "create_activity": "Create activity",
+    "notify_agent": "Notify agent"
+  }
+}

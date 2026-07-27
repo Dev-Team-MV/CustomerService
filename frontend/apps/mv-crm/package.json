@@ -10,6 +10,11 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@fullcalendar/core": "^6.1.21",
+    "@fullcalendar/daygrid": "^6.1.21",
+    "@fullcalendar/interaction": "^6.1.21",
+    "@fullcalendar/react": "^6.1.21",
+    "@fullcalendar/timegrid": "^6.1.21",
     "@mui/icons-material": "^6.5.0",
     "@mui/material": "^6.5.0",
     "@mui/x-charts": "^7.29.1",
@@ -23,8 +28,12 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-i18next": "^16.5.5",
+    "konva": "^9.3.22",
+    "react-google-places-autocomplete": "^4.1.0",
+    "react-konva": "^18.2.10",
     "react-phone-input-2": "^2.15.1",
-    "react-router-dom": "^6.28.0"
+    "react-router-dom": "^6.28.0",
+    "use-image": "^1.1.4"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",

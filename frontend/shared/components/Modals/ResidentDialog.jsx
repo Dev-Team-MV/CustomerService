@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   Box,
   Typography,
@@ -12,6 +13,9 @@ import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@mui/material/styles'
+
+// ✅ 1. Importar el autocompletado de Google Places
+import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
 
 import ModalWrapper from '../../constants/ModalWrapper'
 import PrimaryButton from '../../constants/PrimaryButton'
@@ -49,6 +53,20 @@ const ResidentDialog = ({
     "& .MuiFormHelperText-root": { fontFamily: '"DM Sans", sans-serif' }
   }
 
+  // ✅ 2. Manejador específico para el autocompletado de Google
+  const handleCountryChange = (newValue) => {
+    // Google Places devuelve un objeto { label: "Colombia", value: { description: "Colombia", place_id: "..." } }
+    // O puede ser null si el usuario borra el campo.
+    const countryName = newValue ? newValue.label : ''
+    handleFieldChange('country', countryName)
+  }
+
+  // ✅ 3. Wrapper para el envío que incluye el log del payload
+  const handleSubmit = () => {
+    console.log('📦 PAYLOAD COMPLETO A ENVIAR:', JSON.stringify(formData, null, 2))
+    onSubmit() 
+  }
+
   // ── Actions ───────────────────────────────────────────────
   const modalActions = (
     <>
@@ -73,7 +91,7 @@ const ResidentDialog = ({
       </Button>
 
       <PrimaryButton
-        onClick={onSubmit}
+        onClick={handleSubmit}
         disabled={!isFormValid}
         startIcon={<PersonAdd />}
       >
@@ -81,6 +99,11 @@ const ResidentDialog = ({
       </PrimaryButton>
     </>
   )
+
+  // ✅ 4. Validación robusta para asegurar que el valor sea un string válido
+  const countryValue = typeof formData.country === 'string' 
+    ? formData.country 
+    : (formData.country?.label || '')
 
   // ── Render ────────────────────────────────────────────────
   return (
@@ -99,8 +122,8 @@ const ResidentDialog = ({
         sx={{
           mb: 2,
           borderRadius: 3,
-          bgcolor: theme.palette.secondary.main + "14", // 8% opacity
-          border: `1px solid ${theme.palette.secondary.main}4D`, // 30% opacity
+          bgcolor: theme.palette.secondary.main + "14",
+          border: `1px solid ${theme.palette.secondary.main}4D`,
           fontFamily: '"DM Sans", sans-serif',
           "& .MuiAlert-icon": { color: theme.palette.secondary.main }
         }}
@@ -151,24 +174,17 @@ const ResidentDialog = ({
         {/* Phone */}
         <Grid item xs={12} sm={6}>
           <Box>
-            <Typography
-              variant="caption"
-              sx={{
-                mb: 0.5,
-                display: "block",
-                color: theme.palette.text.secondary,
-                fontFamily: '"DM Sans", sans-serif'
-              }}
-            >
-              {t('dialog.phoneNumber')} *
-            </Typography>
             <PhoneInput
               country="us"
               onlyCountries={ONLY_COUNTRIES}
               preferredCountries={PREFERRED_COUNTRIES}
               value={formData.phoneNumber}
               onChange={handlePhoneChange}
-              inputProps={{ name: "phone", required: true }}
+              inputProps={{ 
+                name: "phone", 
+                required: true,
+                autoFocus: false
+              }}
               containerStyle={{ width: "100%" }}
               inputStyle={{
                 width: "100%",
@@ -177,7 +193,8 @@ const ResidentDialog = ({
                 border: `2px solid ${theme.palette.divider}`,
                 borderRadius: 12,
                 fontFamily: '"DM Sans", sans-serif',
-                transition: "all 0.3s"
+                transition: "all 0.3s",
+                paddingLeft: "60px"
               }}
               buttonStyle={{
                 border: `2px solid ${theme.palette.divider}`,
@@ -190,31 +207,97 @@ const ResidentDialog = ({
                 fontFamily: '"DM Sans", sans-serif'
               }}
             />
-
+            <Typography
+              variant="caption"
+              sx={{
+                mt: 0.5,
+                display: "block",
+                color: theme.palette.text.secondary,
+                fontFamily: '"DM Sans", sans-serif'
+              }}
+            >
+              {t('dialog.phoneNumber')} *
+            </Typography>
             {e164Value && (
               <Box display="flex" justifyContent="space-between" mt={0.5}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontFamily: '"DM Sans", sans-serif',
-                    color: theme.palette.text.secondary
-                  }}
-                >
+                <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', color: theme.palette.text.secondary }}>
                   {displayVal}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontFamily: '"DM Sans", sans-serif',
-                    fontWeight: 700,
-                    color: isPhoneValid ? theme.palette.secondary.main : theme.palette.error.main
-                  }}
-                >
+                <Typography variant="caption" sx={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, color: isPhoneValid ? theme.palette.secondary.main : theme.palette.error.main }}>
                   E.164: {e164Value}
                 </Typography>
               </Box>
             )}
           </Box>
+        </Grid>
+
+        {/* ✅ NUEVO: Country con Google Places Autocomplete */}
+        <Grid item xs={12} sm={6}>
+          <GooglePlacesAutocomplete
+            apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+            selectProps={{
+              // ✅ Usamos countryValue que garantiza el formato correcto { label, value }
+              value: countryValue ? { label: countryValue, value: countryValue } : null,
+              onChange: handleCountryChange,
+              placeholder: t('dialog.selectCountry', 'Selecciona un país...'),
+              styles: {
+                control: (provided) => ({
+                  ...provided,
+                  borderRadius: 12,
+                  border: `2px solid ${theme.palette.divider}`,
+                  fontFamily: '"DM Sans", sans-serif',
+                  minHeight: 56,
+                  boxShadow: 'none',
+                  '&:hover': {
+                    borderColor: theme.palette.secondary.main,
+                  },
+                  padding: '0 14px',
+                  '& .MuiInputBase-input': {
+                    padding: '16.5px 14px',
+                  }
+                }),
+                placeholder: (provided) => ({
+                  ...provided,
+                  color: theme.palette.text.secondary,
+                }),
+                menu: (provided) => ({
+                  ...provided,
+                  fontFamily: '"DM Sans", sans-serif',
+                  borderRadius: 12,
+                  marginTop: 8,
+                  zIndex: 9999,
+                }),
+                option: (provided, state) => ({
+                  ...provided,
+                  fontFamily: '"DM Sans", sans-serif',
+                  backgroundColor: state.isSelected ? theme.palette.primary.main : state.isFocused ? theme.palette.action.hover : 'white',
+                  color: state.isSelected ? 'white' : 'black',
+                  '&:active': {
+                    backgroundColor: theme.palette.primary.main,
+                  }
+                }),
+                singleValue: (provided) => ({
+                  ...provided,
+                  fontFamily: '"DM Sans", sans-serif',
+                })
+              }
+            }}
+            autocompletionRequest={{
+              types: ['country']
+            }}
+            className="country-autocomplete"
+          />
+          <Typography
+            variant="caption"
+            sx={{
+              mt: 0.5,
+              display: "block",
+              color: theme.palette.text.secondary,
+              fontFamily: '"DM Sans", sans-serif'
+            }}
+          >
+            {t('dialog.country', 'País')}
+          </Typography>
         </Grid>
 
         {/* Birthday */}
@@ -262,7 +345,7 @@ const ResidentDialog = ({
               fullWidth
               type="password"
               label={t('dialog.newPassword')}
-              value={formData.password}
+              value={formData.password || ''}
               onChange={(e) => handleFieldChange('password', e.target.value)}
               helperText={t('dialog.passwordHelper')}
               sx={fieldSx}
@@ -275,4 +358,4 @@ const ResidentDialog = ({
   )
 }
 
-export default ResidentDialog
+export default ResidentDialog 

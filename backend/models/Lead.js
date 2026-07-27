@@ -28,6 +28,10 @@ const leadSchema = new mongoose.Schema(
       trim: true,
       match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email']
     },
+    country: {
+      type: String,
+      trim: true
+    },
     source: {
       type: String,
       enum: LEAD_SOURCES,

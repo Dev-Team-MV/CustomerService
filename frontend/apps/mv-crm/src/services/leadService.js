@@ -59,9 +59,16 @@ const leadService = {
   },
 
   // POST /api/crm/leads/:id/convert
-  convertToCustomer: async (id) => {
-    const res = await api.post(`/crm/leads/${id}/convert`)
-    return res.data // { lead, user, smsSent, setupLink }
+  convertToCustomer: async (id, data = {}) => {
+    // ✅ Ahora acepta y envía el body con saleAmount, propertyId, etc.
+    const res = await api.post(`/crm/leads/${id}/convert`, data)
+    return res.data
+  },
+
+
+    markSmsResponded: async (id) => {
+    const res = await api.put(`/crm/leads/${id}/sms-responded`, { smsResponded: true })
+    return res.data
   }
 }
 

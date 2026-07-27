@@ -1,0 +1,80 @@
+{
+  "title": "Cotizaciones",
+  "titleBold": "Ventas",
+  "topbarLabel": "Gestión de Cotizaciones",
+  "subtitle": "Crea, envía y convierte cotizaciones con tablas de amortización",
+  
+  "total": "Total",
+  "active": "Convertidas o Enviadas",
+  "createQuote": "Nueva Cotización",
+  "confirmDelete": "¿Estás seguro de eliminar esta cotización?",
+  "confirmConvert": "¿Convertir esta cotización a venta?",
+  "none": "Ninguno",
+  
+  "form": {
+    "lead": "Lead",
+    "client": "Cliente",
+    "project": "Proyecto",
+    "lot": "Lote",
+    "model": "Modelo",
+    "building": "Edificio",
+    "apartment": "Apartamento",
+    "totalPrice": "Precio Total",
+    "downPayment": "Enganche / Cuota Inicial",
+    "interestRate": "Tasa de Interés Anual",
+    "termMonths": "Plazo (meses)",
+    "amortizationMethod": "Método de Amortización",
+    "fixed": "Cuota Fija",
+    "declining": "Cuota Decreciente",
+    "notes": "Notas Adicionales"
+  },
+
+  "table": {
+    "date": "Fecha",
+    "client": "Cliente",
+    "project": "Proyecto",
+    "totalPrice": "Precio Total",
+    "status": "Estado",
+    "actions": "Acciones",
+    "month": "Mes",
+    "payment": "Cuota",
+    "principal": "Capital",
+    "interest": "Interés",
+    "balance": "Saldo"
+  },
+
+  "status": {
+    "draft": "Borrador",
+    "sent": "Enviado",
+    "accepted": "Aceptado",
+    "expired": "Expirado",
+    "converted": "Convertido"
+  },
+
+  "actions": {
+    "edit": "Editar",
+    "convertToSale": "Convertir a Venta",
+    "downloadPdf": "Descargar PDF",
+    "delete": "Eliminar"
+  },
+
+  "summary": {
+    "financedAmount": "Monto a Financiar",
+    "monthlyPayment": "Cuota Mensual",
+    "totalInterest": "Interés Total"
+  },
+
+  "empty": {
+    "title": "No hay cotizaciones",
+    "description": "No se encontraron cotizaciones"
+  },
+
+  "editTitle": "Editar Cotización",
+  "createTitle": "Nueva Cotización",
+  "back": "Atrás",
+  "cancel": "Cancelar",
+  "next": "Siguiente",
+  "saving": "Guardando...",
+  "update": "Actualizar",
+  "create": "Crear"
+}

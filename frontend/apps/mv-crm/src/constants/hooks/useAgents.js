@@ -13,11 +13,14 @@ export const useAgents = () => {
     try {
       const { agents: agentsData } = await crmAgentsService.getAll()
       
-      // Cargar métricas de cada agente en paralelo
+      // ✅ Cargar métricas Y targets de cada agente en paralelo
       const agentsWithMetrics = await Promise.all(
         agentsData.map(async (agent) => {
-          const metrics = await crmAgentsService.getMetricsSafe(agent._id)
-          return { ...agent, metrics }
+          const [metrics, targets] = await Promise.all([
+            crmAgentsService.getMetricsSafe(agent._id),
+            crmAgentsService.getTargets(agent._id)
+          ])
+          return { ...agent, metrics, targets }
         })
       )
       

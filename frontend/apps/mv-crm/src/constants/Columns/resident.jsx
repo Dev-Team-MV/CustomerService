@@ -171,11 +171,11 @@ export const useClientColumns = ({
           </span>
         </Tooltip>
 
-        {/* Edit */}
+        {/* Edit - ✅ AGREGAR e.stopPropagation() */}
         <Tooltip title={t('clients.edit')}>
           <IconButton
             size="small"
-            onClick={() => onEdit(row)}
+            onClick={(e) => { e.stopPropagation(); onEdit(row) }}
             sx={{ color: '#aaa', borderRadius: 0, '&:hover': { color: '#000', background: '#f5f5f5' } }}
           >
             <Edit sx={{ fontSize: 15 }} />

@@ -1,13 +1,17 @@
-import { useState, useEffect } from 'react'
-import { Box, Typography, IconButton, Badge, Tooltip } from '@mui/material'
-import { Notifications as NotificationsIcon, AddCircle as AddCircleIcon } from '@mui/icons-material'
+// apps/mv-crm/src/components/layout/PageLayout.jsx
+import { useState, useEffect, useCallback } from 'react'
+import { Box, Typography, IconButton, Tooltip, Drawer, useMediaQuery, useTheme } from '@mui/material'
+import { AddCircle as AddCircleIcon, Search, Menu as MenuIcon } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import Sidebar from './Sidebar'
-import NotificationsDrawer from '@shared/components/LayoutComponents/NotificationsDrawer'
+import NotificationBell from '../../../apps/mv-crm/src/components/notifications/NotificationBell'
+import NotificationsDrawer from '../../../apps/mv-crm/src/components/notifications/NotificationsDrawer'
+import GlobalSearch from '../../../apps/mv-crm/src/components/GlobalSearch'
 import NotificationCreatorModal from '@shared/components/Notifications/NotificationCreatorModal'
-import useNotifications from '@shared/hooks/useNotifications'
-import { useAuth } from '../../context/AuthContext'
-import api from '../../services/api'
+import useCrmNotifications from '../../../apps/mv-crm/src/constants/hooks/useCrmNotifications'
+import { useKeyboardShortcut } from '../../../apps/mv-crm/src/constants/hooks/useKeyboardShortcut'
+import { useAuth } from '@shared/context/AuthContext'
+import api from '@shared/services/api'
 import { useTranslation } from 'react-i18next'
 
 export default function PageLayout({
@@ -20,21 +24,45 @@ export default function PageLayout({
 }) {
   const { t } = useTranslation('common')
   const { user } = useAuth()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  
   const [currentTime, setCurrentTime] = useState(new Date())
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [notificationCreatorOpen, setNotificationCreatorOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false) // ✅ NUEVO
   const [users, setUsers] = useState([])
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
 
   const {
-    notifications,
-    refresh,
-    markNotificationAsRead,
-    markAllNotificationsAsRead
-  } = useNotifications({ enabled: Boolean(user) })
+    unreadCount,
+    alerts,
+    byType,
+    counts,
+    loading,
+    error,
+    fetchAlerts,
+    markAsRead,
+    markAllAsRead,
+    isRead,
+    isMarkingAsRead
+  } = useCrmNotifications({ enabled: Boolean(user) })
 
-  // Cargar usuarios cuando se abre el modal de crear notificación
+  // Shortcut Cmd+K / Ctrl+K para abrir búsqueda
+  const handleOpenSearch = useCallback(() => {
+    setSearchOpen(true)
+  }, [])
+
+  useKeyboardShortcut('k', handleOpenSearch, { metaKey: true })
+  useKeyboardShortcut('k', handleOpenSearch, { ctrlKey: true })
+
+  // ✅ NUEVO: Cerrar menú móvil al cambiar de ruta
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [window.location.pathname])
+
   useEffect(() => {
     if (notificationCreatorOpen && isAdmin && users.length === 0) {
       api.get('/users')
@@ -48,19 +76,12 @@ export default function PageLayout({
     return () => clearInterval(timer)
   }, [])
 
-  useEffect(() => {
-    if (notificationsOpen && user) {
-      refresh()
-    }
-  }, [notificationsOpen, user, refresh])
-
   const formatTime = (d) => d.toLocaleTimeString('en-US', {
     hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
 
   const handleNotificationCreated = (notification) => {
     console.log('✅ Notificación creada:', notification)
-    refresh()
   }
 
   return (
@@ -84,10 +105,29 @@ export default function PageLayout({
         }}
       />
 
-      {/* Sidebar */}
+      {/* Sidebar - Solo desktop */}
       <Box sx={{ display: { xs: 'none', md: 'flex' }, zIndex: 10, position: 'relative', flexShrink: 0 }}>
         <Sidebar stats={sidebarStats} />
       </Box>
+
+      {/* ✅ NUEVO: Drawer móvil */}
+      <Drawer
+        anchor="left"
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        ModalProps={{
+          keepMounted: true, // Mejor performance en móvil
+        }}
+        PaperProps={{
+          sx: {
+            width: 260,
+            bgcolor: '#0a0a0a',
+            borderRight: '1px solid #1a1a1a'
+          }
+        }}
+      >
+        <Sidebar stats={sidebarStats} onNavigate={() => setMobileMenuOpen(false)} />
+      </Drawer>
 
       {/* Main */}
       <Box sx={{
@@ -108,24 +148,52 @@ export default function PageLayout({
         >
           <Box sx={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            px: { xs: 3, md: 5 }, py: 2.5,
+            px: { xs: 2, md: 5 }, py: 2,
             borderBottom: '1px solid #ececec',
             background: '#fff',
             zIndex: 5,
           }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ width: 16, height: 1, bgcolor: '#ccc' }} />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              {/* ✅ NUEVO: Botón hamburguesa - Solo móvil */}
+              <IconButton
+                onClick={() => setMobileMenuOpen(true)}
+                sx={{ 
+                  display: { xs: 'flex', md: 'none' },
+                  color: '#000',
+                  p: 0.75
+                }}
+              >
+                <MenuIcon sx={{ fontSize: 22 }} />
+              </IconButton>
+
+              <Box sx={{ width: { xs: 0, md: 16 }, height: 1, bgcolor: '#ccc', display: { xs: 'none', md: 'block' } }} />
               <Typography sx={{
                 fontFamily: '"Courier New", monospace',
-                fontSize: '0.62rem', color: '#000000ff',
-                letterSpacing: '2px', textTransform: 'uppercase'
+                fontSize: { xs: '0.55rem', md: '0.62rem' },
+                color: '#000',
+                letterSpacing: '2px',
+                textTransform: 'uppercase'
               }}>
                 {topbarLabel}
               </Typography>
             </Box>
 
-            {/* ✅ NUEVO: Botón de notificaciones + reloj */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {/* NOTIFICACIONES + BÚSQUEDA + RELOJ */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, md: 2 } }}>
+              {/* Botón de búsqueda */}
+              <Tooltip title="Buscar (⌘K)" placement="bottom">
+                <IconButton
+                  onClick={handleOpenSearch}
+                  sx={{
+                    color: '#000',
+                    '&:hover': { bgcolor: 'rgba(0,0,0,0.05)' },
+                    p: { xs: 0.75, md: 1 }
+                  }}
+                >
+                  <Search sx={{ fontSize: { xs: 18, md: 20 } }} />
+                </IconButton>
+              </Tooltip>
+
               {/* Botón de crear notificación (solo admins) */}
               {isAdmin && (
                 <Tooltip title="Crear Notificación" placement="bottom">
@@ -133,7 +201,9 @@ export default function PageLayout({
                     onClick={() => setNotificationCreatorOpen(true)}
                     sx={{
                       color: '#000',
-                      '&:hover': { bgcolor: 'rgba(0,0,0,0.05)' }
+                      '&:hover': { bgcolor: 'rgba(0,0,0,0.05)' },
+                      display: { xs: 'none', md: 'flex' },
+                      p: { xs: 0.75, md: 1 }
                     }}
                   >
                     <AddCircleIcon sx={{ fontSize: 20 }} />
@@ -141,35 +211,19 @@ export default function PageLayout({
                 </Tooltip>
               )}
 
-              {/* Botón de ver notificaciones */}
-              <Tooltip title="Notificaciones" placement="bottom">
-                <IconButton
-                  onClick={() => setNotificationsOpen(true)}
-                  sx={{
-                    color: '#000',
-                    '&:hover': { bgcolor: 'rgba(0,0,0,0.05)' }
-                  }}
-                >
-                  <Badge 
-                    badgeContent={notifications.filter(n => !n.read).length} 
-                    color="error"
-                    sx={{
-                      '& .MuiBadge-badge': {
-                        fontFamily: '"Courier New", monospace',
-                        fontSize: '0.65rem',
-                        fontWeight: 700
-                      }
-                    }}
-                  >
-                    <NotificationsIcon sx={{ fontSize: 20 }} />
-                  </Badge>
-                </IconButton>
-              </Tooltip>
+              {/* NOTIFICATION BELL DEL CRM */}
+              <NotificationBell
+                unreadCount={unreadCount}
+                onClick={() => setNotificationsOpen(true)}
+              />
 
-              {/* Reloj */}
+              {/* Reloj - Solo desktop */}
               <Typography sx={{
                 fontFamily: '"Courier New", monospace',
-                fontSize: '0.7rem', color: '#000000ff', letterSpacing: '2px'
+                fontSize: '0.7rem',
+                color: '#000',
+                letterSpacing: '2px',
+                display: { xs: 'none', md: 'block' }
               }}>
                 {formatTime(currentTime)}
               </Typography>
@@ -186,7 +240,7 @@ export default function PageLayout({
           flexDirection: 'column',
         }}>
           {/* Page content */}
-          <Box sx={{ p: { xs: 3, md: 5 }, flex: 1 }}>
+          <Box sx={{ p: { xs: 2, md: 5 }, flex: 1 }}>
 
             {/* Title block */}
             {title && (
@@ -195,11 +249,11 @@ export default function PageLayout({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
               >
-                <Box sx={{ mb: 5 }}>
+                <Box sx={{ mb: { xs: 3, md: 5 } }}>
                   <Typography sx={{
                     fontFamily: '"Helvetica Neue", Arial, sans-serif',
                     fontWeight: 200,
-                    fontSize: 'clamp(1.8rem, 3vw, 2.6rem)',
+                    fontSize: 'clamp(1.5rem, 3vw, 2.6rem)',
                     color: '#000', letterSpacing: '-0.04em', lineHeight: 1
                   }}>
                     {title}{' '}
@@ -214,7 +268,7 @@ export default function PageLayout({
                       </motion.div>
                       <Typography sx={{
                         fontFamily: '"Courier New", monospace',
-                        fontSize: '0.62rem', color: '#000000ff',
+                        fontSize: '0.62rem', color: '#000',
                         letterSpacing: '1.5px', textTransform: 'uppercase'
                       }}>
                         {subtitle}
@@ -239,7 +293,7 @@ export default function PageLayout({
           {/* Footer */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1 }}>
             <Box sx={{
-              px: { xs: 3, md: 5 }, py: 2,
+              px: { xs: 2, md: 5 }, py: 2,
               borderTop: '1px solid #ececec',
               background: '#fff',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -264,18 +318,29 @@ export default function PageLayout({
         </Box>
       </Box>
 
-      {/* ✅ NUEVO: Drawer de notificaciones */}
+      {/* NOTIFICATIONS DRAWER DEL CRM */}
       <NotificationsDrawer
         open={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
-        notifications={notifications}
-        onMarkAsRead={markNotificationAsRead}
-        onMarkAllAsRead={markAllNotificationsAsRead}
-        onCreateNotification={() => setNotificationCreatorOpen(true)}
-        isAdmin={isAdmin}
+        alerts={alerts}
+        byType={byType}
+        counts={counts}
+        loading={loading}
+        error={error}
+        onFetchAlerts={fetchAlerts}
+        onMarkAsRead={markAsRead}
+        onMarkAllAsRead={markAllAsRead}
+        isRead={isRead}
+        isMarkingAsRead={isMarkingAsRead}
       />
 
-      {/* ✅ NUEVO: Modal de crear notificación */}
+      {/* GLOBAL SEARCH MODAL */}
+      <GlobalSearch
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+      />
+
+      {/* Modal de crear notificación (del shared, solo admins) */}
       {isAdmin && (
         <NotificationCreatorModal
           open={notificationCreatorOpen}

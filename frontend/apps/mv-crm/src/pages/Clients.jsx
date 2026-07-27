@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   Box, Button, Typography, TextField, InputAdornment, Snackbar, Alert
 } from '@mui/material'
-import { Search, Send } from '@mui/icons-material'
+import { Search, Send, History } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import DataTable from '@shared/components/table/DataTable'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
@@ -13,16 +13,18 @@ import ResidentDialog from '@shared/components/Modals/ResidentDialog'
 import { useTranslation } from 'react-i18next'
 import { useResidents } from '@shared/hooks/useResidents'
 import { useClientColumns } from '../constants/Columns/resident'
-import { useProjects } from '@shared/hooks/useProjects' // ✅ NUEVO
+import { useProjects } from '@shared/hooks/useProjects'
 import BroadcastMessageModal from '../components/BroadcastMessageModal'
 import smsService from '../services/smsService'
 import ExportButton from '../components/ExportButton'
 import crmReportsService from '../services/crmReportsService'
+import { useAuth } from '@shared/context/AuthContext'
 
 export default function Clients() {
   const { t } = useTranslation('residents')
   const navigate = useNavigate()
-  const { projects } = useProjects() // ✅ NUEVO
+  const { user } = useAuth()
+  const { projects } = useProjects()
 
   const {
     users, loading, stats,
@@ -62,12 +64,12 @@ export default function Clients() {
 
   const [broadcastModalOpen, setBroadcastModalOpen] = useState(false)
 
-  // Handler real para envío masivo con soporte de templates
+  // Handler para envío masivo
   const handleSendBroadcast = async (data, onProgress) => {
-    const { content, recipients, channels, sendToAll, hasTemplateVariables } = data
+    const { content, recipients, channels, sendToAll, hasTemplateVariables, projectId } = data
 
     if (!channels.sms) {
-      alert('Envío de email aún no implementado')
+      alert(t('broadcast.emailNotImplemented'))
       return { success: [], failed: [] }
     }
 
@@ -78,7 +80,7 @@ export default function Clients() {
     const usersWithPhone = targetUsers.filter(u => u.phoneNumber?.startsWith('+'))
 
     if (usersWithPhone.length === 0) {
-      alert('Ningún destinatario tiene número de teléfono válido')
+      alert(t('broadcast.noValidPhone'))
       return { success: [], failed: [] }
     }
 
@@ -89,25 +91,33 @@ export default function Clients() {
         results = await smsService.sendBulkTemplate(
           usersWithPhone,
           content,
-          (user) => ({
-            firstName: user.firstName || '',
-            lastName: user.lastName || '',
-            email: user.email || '',
-            phoneNumber: user.phoneNumber || ''
-          }),
-          onProgress
+          (user) => {
+            if (projectId) {
+              return {}
+            }
+            
+            return {
+              firstName: user.firstName || '',
+              lastName: user.lastName || '',
+              email: user.email || '',
+              phoneNumber: user.phoneNumber || ''
+            }
+          },
+          onProgress,
+          { projectId }
         )
       } else {
         results = await smsService.sendBulk(
           usersWithPhone,
           content,
-          onProgress
+          onProgress,
+          { projectId }
         )
       }
 
       return results
     } catch (err) {
-      console.error('Error en envío masivo:', err)
+      console.error(t('broadcast.error'), err)
       throw err
     }
   }
@@ -120,6 +130,8 @@ export default function Clients() {
   const activeCount = users.filter(c => c.isActive).length
   const adminCount = users.filter(c => ['admin', 'superadmin'].includes(c.role)).length
   const withLotsCount = users.filter(c => c.lots?.length > 0).length
+
+  const isSuperAdmin = user?.role === 'superadmin'
 
   return (
     <PageLayout
@@ -135,9 +147,7 @@ export default function Clients() {
         { label: t('clients.withLots'), value: withLotsCount },
       ]} />
 
-      {/* ═══════════════════════════════════════════════════════════
-          BOTONES DE ACCIÓN
-          ═══════════════════════════════════════════════════════════ */}
+      {/* BOTONES DE ACCIÓN */}
       <Box display="flex" gap={2} mb={2} flexWrap="wrap">
         <Button
           variant="contained"
@@ -152,21 +162,20 @@ export default function Clients() {
           startIcon={<Send />}
           onClick={() => setBroadcastModalOpen(true)}
         >
-          Enviar mensaje
+          {t('clients.sendMessage')}
         </Button>
 
-        {/* ✅ ACTUALIZADO: ExportButton con modal y filtro de proyecto */}
         <ExportButton
-          label="Exportar Clientes"
+          label={t('clients.exportClients')}
           exportFn={crmReportsService.exportClients}
           withModal={true}
           disabled={users.length === 0}
           filters={[
             {
               field: 'projectId',
-              label: 'Proyecto',
+              label: t('export.project'),
               type: 'select',
-              placeholder: 'Todos los proyectos',
+              placeholder: t('export.allProjects'),
               required: false,
               options: projects.map(p => ({ value: p._id, label: p.name }))
             }
@@ -207,7 +216,7 @@ export default function Clients() {
           />
           {search && (
             <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.62rem', color: '#aaa', letterSpacing: '1.5px' }}>
-              {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+              {t('clients.results', { count: filtered.length, defaultValue: `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''}` })}
             </Typography>
           )}
         </Box>
@@ -225,10 +234,10 @@ export default function Clients() {
         open={broadcastModalOpen}
         onClose={() => setBroadcastModalOpen(false)}
         users={users}
+        projects={projects}
         onSend={handleSendBroadcast}
       />
 
-      {/* Snackbar para acciones generales */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

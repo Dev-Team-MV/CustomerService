@@ -1,0 +1,13 @@
+{
+  "placeholder": "Buscar clientes, leads, actividades...",
+  "noResults": "No se encontraron resultados",
+  "minChars": "Escribe al menos 2 caracteres para buscar",
+  "shortcut": "para abrir búsqueda",
+  "noTitle": "Sin título",
+  "sections": {
+    "clients": "Clientes",
+    "leads": "Leads",
+    "activities": "Actividades",
+    "projects": "Proyectos"
+  }
+}

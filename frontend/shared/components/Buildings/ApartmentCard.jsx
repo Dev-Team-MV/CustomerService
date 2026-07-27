@@ -1,8 +1,9 @@
 import { Card, CardContent, Typography, Box, Button, Chip } from '@mui/material'
-import { Home, LocationOn, Domain, AttachMoney } from '@mui/icons-material'
+import { Home, LocationOn, Domain } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import { useTheme } from '@mui/material/styles'
 import { useTranslation } from 'react-i18next'
+
 const ApartmentCard = ({ apartment, modelName, onEdit }) => {
   const theme = useTheme()
   const { t } = useTranslation(['buildings', 'common'])
@@ -17,14 +18,16 @@ const ApartmentCard = ({ apartment, modelName, onEdit }) => {
     return statusMap[status] || theme.palette.info.main
   }
 
+  // ✅ NUEVO: Determinar el precio a mostrar según el tipo de render seleccionado
+  const isUpgrade = apartment.selectedRenderType === 'upgrade'
+  const displayPrice = isUpgrade ? (apartment.upgradePrice || apartment.price) : apartment.price
+  const basePrice = isUpgrade ? apartment.price : null
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.6,
-        type: "spring",
-      }}
+      transition={{ duration: 0.6, type: "spring" }}
       whileHover={{ scale: 1.02 }}
       style={{ height: '100%', width: '100%' }}
     >
@@ -49,17 +52,7 @@ const ApartmentCard = ({ apartment, modelName, onEdit }) => {
           }
         }}
       >
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 4,
-            background: theme.palette.gradientSecondary,
-            transition: "all 0.3s ease",
-          }}
-        />
+        <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: theme.palette.gradientSecondary, transition: "all 0.3s ease" }} />
 
         {apartment.status && (
           <Chip
@@ -81,183 +74,63 @@ const ApartmentCard = ({ apartment, modelName, onEdit }) => {
           />
         )}
 
-        <CardContent
-          sx={{
-            p: { xs: 2.5, sm: 3 },
-            pt: 3.5,
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
+        <CardContent sx={{ p: { xs: 2.5, sm: 3 }, pt: 3.5, flex: 1, display: "flex", flexDirection: "column" }}>
           <Box display="flex" flexDirection="column" alignItems="center" gap={2} mb={3}>
-            <motion.div
-              whileHover={{
-                scale: [1, 1.05, 1],
-                rotate: [0, 3, -3, 0],
-              }}
-              transition={{ duration: 0.6 }}
-            >
-              <Box
-                sx={{
-                  width: { xs: 64, sm: 70 },
-                  height: { xs: 64, sm: 70 },
-                  borderRadius: '50%',
-                  background: theme.palette.gradientSecondary,
-                  boxShadow: theme.palette.avatarShadow,
-                  border: "3px solid white",
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+            <motion.div whileHover={{ scale: [1, 1.05, 1], rotate: [0, 3, -3, 0], transition: { duration: 0.6 } }}>
+              <Box sx={{ width: { xs: 64, sm: 70 }, height: { xs: 64, sm: 70 }, borderRadius: '50%', background: theme.palette.gradientSecondary, boxShadow: theme.palette.avatarShadow, border: "3px solid white", display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Home sx={{ fontSize: 32, color: "white" }} />
               </Box>
             </motion.div>
 
             <Box textAlign="center">
-              <Typography
-                variant="h6"
-                sx={{
-                  fontFamily: '"DM Sans", sans-serif',
-                  color: theme.palette.primary.main,
-                  fontWeight: 700,
-                  fontSize: { xs: "1.1rem", sm: "1.25rem" },
-                  letterSpacing: "0.5px",
-                  mb: 0.5
-                }}
-              >
-                    {t('buildings:apartmentNumber', 'Depto')} #{apartment.apartmentNumber}
-
+              <Typography variant="h6" sx={{ fontFamily: '"DM Sans", sans-serif', color: theme.palette.primary.main, fontWeight: 700, fontSize: { xs: "1.1rem", sm: "1.25rem" }, letterSpacing: "0.5px", mb: 0.5 }}>
+                {t('buildings:apartmentNumber', 'Depto')} #{apartment.apartmentNumber}
               </Typography>
               <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
                 <LocationOn sx={{ fontSize: 16, color: theme.palette.secondary.main }} />
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "#706f6f",
-                    fontWeight: 600,
-                    fontFamily: '"DM Sans", sans-serif',
-                    fontSize: "0.75rem",
-                  }}
-                >
+                <Typography variant="caption" sx={{ color: "#706f6f", fontWeight: 600, fontFamily: '"DM Sans", sans-serif', fontSize: "0.75rem" }}>
                  {t('buildings:floor', 'Piso')} {apartment.floorNumber || 'N/A'}
                 </Typography>
               </Box>
             </Box>
           </Box>
 
-          <Box
-            sx={{
-              width: 40,
-              height: 2,
-              bgcolor: theme.palette.secondary.main,
-              mx: "auto",
-              mb: 2.5,
-              opacity: 0.8,
-            }}
-          />
+          <Box sx={{ width: 40, height: 2, bgcolor: theme.palette.secondary.main, mx: "auto", mb: 2.5, opacity: 0.8 }} />
 
-          <Box
-            sx={{
-              p: 2,
-              borderRadius: 2,
-              bgcolor: theme.palette.cardBg,
-              border: `1px solid ${theme.palette.cardBorder}`,
-              mb: 2.5,
-            }}
-          >
+          <Box sx={{ p: 2, borderRadius: 2, bgcolor: theme.palette.cardBg, border: `1px solid ${theme.palette.cardBorder}`, mb: 2.5 }}>
             <Box display="flex" alignItems="center" justifyContent="center" gap={1} mb={0.5}>
               <Domain sx={{ fontSize: 18, color: theme.palette.chipAdmin.color }} />
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "#706f6f",
-                  fontWeight: 600,
-                  fontFamily: '"DM Sans", sans-serif',
-                  fontSize: "0.7rem",
-                  textTransform: "uppercase",
-                  letterSpacing: "1px",
-                }}
-              >
+              <Typography variant="caption" sx={{ color: "#706f6f", fontWeight: 600, fontFamily: '"DM Sans", sans-serif', fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "1px" }}>
                 {t('buildings:model', 'Modelo')}
               </Typography>
             </Box>
-            <Typography
-              variant="body1"
-              sx={{
-                color: theme.palette.primary.main,
-                fontWeight: 700,
-                fontFamily: '"DM Sans", sans-serif',
-                fontSize: "1rem",
-                textAlign: 'center'
-              }}
-            >
+            <Typography variant="body1" sx={{ color: theme.palette.primary.main, fontWeight: 700, fontFamily: '"DM Sans", sans-serif', fontSize: "1rem", textAlign: 'center' }}>
               {modelName || 'N/A'}
             </Typography>
           </Box>
 
-          <Box
-            sx={{
-              p: 2,
-              borderRadius: 3,
-              background: `linear-gradient(135deg, ${theme.palette.secondary.main}14 0%, ${theme.palette.primary.main}14 100%)`,
-              border: `1px solid ${theme.palette.secondary.main}33`,
-              mb: 2.5,
-            }}
-          >
+          {/* ✅ NUEVO: Caja de precios que responde al tipo de render */}
+          <Box sx={{ p: 2, borderRadius: 3, background: `linear-gradient(135deg, ${theme.palette.secondary.main}14 0%, ${theme.palette.primary.main}14 100%)`, border: `1px solid ${theme.palette.secondary.main}33`, mb: 2.5 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
               <Box flex={1}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "#706f6f",
-                    fontWeight: 600,
-                    fontFamily: '"DM Sans", sans-serif',
-                    display: "block",
-                    fontSize: "0.65rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                  }}
-                >
-                  {t('buildings:price', 'Precio')}
+                <Typography variant="caption" sx={{ color: "#706f6f", fontWeight: 600, fontFamily: '"DM Sans", sans-serif', display: "block", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "1px" }}>
+                  {t('buildings:price', 'Precio')} {isUpgrade && `(${t('buildings:upgrade', 'Upgrade')})`}
                 </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    color: theme.palette.primary.main,
-                    fontWeight: 700,
-                    fontFamily: '"DM Sans", sans-serif',
-                    fontSize: "1.1rem",
-                  }}
-                >
-                  ${apartment.price?.toLocaleString() || '0'}
+                <Typography variant="h6" sx={{ color: theme.palette.primary.main, fontWeight: 700, fontFamily: '"DM Sans", sans-serif', fontSize: "1.1rem" }}>
+                  ${displayPrice?.toLocaleString() || '0'}
                 </Typography>
+                {/* ✅ Mostrar precio base tachado si es upgrade */}
+                {basePrice && (
+                  <Typography variant="caption" sx={{ color: theme.palette.text.secondary, textDecoration: 'line-through', fontFamily: '"DM Sans", sans-serif', display: 'block', mt: 0.5 }}>
+                    ${basePrice?.toLocaleString() || '0'}
+                  </Typography>
+                )}
               </Box>
               <Box flex={1} textAlign="right">
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "#706f6f",
-                    fontWeight: 600,
-                    fontFamily: '"DM Sans", sans-serif',
-                    display: "block",
-                    fontSize: "0.65rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                  }}
-                >
+                <Typography variant="caption" sx={{ color: "#706f6f", fontWeight: 600, fontFamily: '"DM Sans", sans-serif', display: "block", fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "1px" }}>
                   {t('buildings:pending', 'Pendiente')}
                 </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    color: theme.palette.warning.main,
-                    fontWeight: 700,
-                    fontFamily: '"DM Sans", sans-serif',
-                    fontSize: "1.1rem",
-                  }}
-                >
+                <Typography variant="h6" sx={{ color: theme.palette.warning.main, fontWeight: 700, fontFamily: '"DM Sans", sans-serif', fontSize: "1.1rem" }}>
                   ${apartment.pending?.toLocaleString() || '0'}
                 </Typography>
               </Box>
@@ -295,12 +168,8 @@ const ApartmentCard = ({ apartment, modelName, onEdit }) => {
               },
               "&:hover": {
                 bgcolor: theme.palette.secondary.main,
-                "&::before": {
-                  left: 0,
-                },
-                "& .button-text": {
-                  color: "white",
-                },
+                "&::before": { left: 0 },
+                "& .button-text": { color: "white" },
               },
               "& .button-text": {
                 position: "relative",

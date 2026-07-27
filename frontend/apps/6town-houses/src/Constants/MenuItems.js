@@ -7,7 +7,9 @@ import {
   Business as BusinessIcon,
   RequestQuote as RequestQuoteIcon,
   Map as MapIcon,
-  Group as GroupIcon
+  Group as GroupIcon,
+  RateReview as SurveyIcon,
+  ReportProblem as ReportProblemIcon,
 } from "@mui/icons-material"
 
 export const privateMenuItems = [
@@ -28,6 +30,18 @@ export const privateMenuItems = [
     icon: BusinessIcon,
     path: '/buildings',
     roles: ['superadmin', 'admin']
+  },
+  {
+    textKey: 'navigation:menu.surveys',
+    icon: SurveyIcon,
+    path: '/survey',
+    roles: ['superadmin', 'admin', 'user']
+  },
+  {
+    textKey: 'navigation:menu.warranties',
+    icon: ReportProblemIcon,
+    path: '/warranties',
+    roles: ['superadmin', 'admin', 'user']
   },
   {
     textKey: 'navigation:menu.lots',

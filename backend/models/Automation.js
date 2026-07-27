@@ -4,7 +4,10 @@ export const AUTOMATION_TRIGGERS = [
   'lead_stage_changed',
   'payment_overdue',
   'appointment_created',
-  'inactivity_7days'
+  'inactivity_7days',
+  'referral_converted',
+  'warranty_submitted',
+  'onboarding_completed'
 ]
 
 export const AUTOMATION_ACTIONS = ['send_sms', 'create_activity', 'notify_agent']

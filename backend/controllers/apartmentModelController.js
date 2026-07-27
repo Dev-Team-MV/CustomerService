@@ -52,7 +52,7 @@ export const getApartmentModelById = async (req, res) => {
 
 export const createApartmentModel = async (req, res) => {
   try {
-    const { buildingId, building, name, modelNumber, floorPlan, sqft, bedrooms, bathrooms, apartmentCount } = req.body
+    const { buildingId, building, name, modelNumber, floorPlan, sqft, bedrooms, bathrooms, apartmentCount, basePrice, upgradePrice } = req.body
     const buildId = buildingId || building
     if (!buildId) {
       return res.status(400).json({ message: 'buildingId (or building) is required' })
@@ -71,7 +71,9 @@ export const createApartmentModel = async (req, res) => {
       sqft: sqft || 0,
       bedrooms: bedrooms || 0,
       bathrooms: bathrooms || 0,
-      apartmentCount: apartmentCount || 0
+      apartmentCount: apartmentCount || 0,
+      basePrice: basePrice != null && basePrice !== '' ? Number(basePrice) : null,
+      upgradePrice: upgradePrice != null && upgradePrice !== '' ? Number(upgradePrice) : null
     })
 
     res.status(201).json(model)
@@ -87,7 +89,7 @@ export const updateApartmentModel = async (req, res) => {
       return res.status(404).json({ message: 'Apartment model not found' })
     }
 
-    const { name, modelNumber, floorPlan, sqft, bedrooms, bathrooms, apartmentCount, status } = req.body
+    const { name, modelNumber, floorPlan, sqft, bedrooms, bathrooms, apartmentCount, status, basePrice, upgradePrice } = req.body
     if (name != null) model.name = name
     if (modelNumber != null) model.modelNumber = modelNumber
     if (floorPlan != null) model.floorPlan = floorPlan
@@ -96,6 +98,14 @@ export const updateApartmentModel = async (req, res) => {
     if (bathrooms != null) model.bathrooms = bathrooms
     if (apartmentCount != null) model.apartmentCount = apartmentCount
     if (status != null) model.status = status
+    if (basePrice !== undefined) {
+      model.basePrice =
+        basePrice === null || basePrice === '' ? null : Number(basePrice)
+    }
+    if (upgradePrice !== undefined) {
+      model.upgradePrice =
+        upgradePrice === null || upgradePrice === '' ? null : Number(upgradePrice)
+    }
 
     await model.save()
     res.json(model)
