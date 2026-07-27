@@ -13,6 +13,7 @@ import { useKeyboardShortcut } from '../../../apps/mv-crm/src/constants/hooks/us
 import { useAuth } from '@shared/context/AuthContext'
 import api from '@shared/services/api'
 import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from '../LanguageSwitcher'
 
 export default function PageLayout({
   title,
@@ -180,6 +181,9 @@ export default function PageLayout({
 
             {/* NOTIFICACIONES + BÚSQUEDA + RELOJ */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, md: 2 } }}>
+              {/* Language Switcher */}
+              <LanguageSwitcher />
+
               {/* Botón de búsqueda */}
               <Tooltip title="Buscar (⌘K)" placement="bottom">
                 <IconButton
