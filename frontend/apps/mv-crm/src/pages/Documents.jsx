@@ -1,3 +1,4 @@
+// apps/mv-crm/src/pages/Documents.jsx
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { 
@@ -18,9 +19,8 @@ import VersionHistoryDrawer from '../components/documents/VersionHistoryDrawer'
 import documentService from '../services/documentService'
 import { useProjects } from '@shared/hooks/useProjects'
 import { useResidents } from '@shared/hooks/useResidents'
-import { useDocuments } from '../constants/hooks/useDocuments' // ✅ Hook integrado
+import { useDocuments } from '../constants/hooks/useDocuments'
 
-// Helper para iconos según tipo de archivo
 const getFileIcon = (mimeType) => {
   if (mimeType?.includes('image')) return <Image sx={{ color: '#4caf50' }} />
   if (mimeType === 'application/pdf') return <PictureAsPdf sx={{ color: '#f44336' }} />
@@ -37,19 +37,9 @@ export default function Documents() {
   const [viewerOpen, setViewerOpen] = useState(false)
   const [selectedDoc, setSelectedDoc] = useState(null)
   const [historyOpen, setHistoryOpen] = useState(false)
-  const [initialFiles, setInitialFiles] = useState([]) // ✅ Para Drag & Drop
+  const [initialFiles, setInitialFiles] = useState([])
 
-  // ✅ Integración del hook useDocuments
-  const { 
-    documents, 
-    loading, 
-    error, 
-    filters, 
-    search, 
-    setSearch, 
-    updateFilter, 
-    refetch 
-  } = useDocuments({ includeArchived: false })
+  const { documents, loading, error, filters, search, setSearch, updateFilter, refetch } = useDocuments({ includeArchived: false })
 
   const handleArchive = async (doc) => {
     if (window.confirm(t('actions.archive') + '?')) {
@@ -65,11 +55,7 @@ export default function Documents() {
     }
   }
 
-  // ✅ Manejadores de Drag & Drop
-  const handleDragOver = (e) => {
-    e.preventDefault()
-  }
-
+  const handleDragOver = (e) => e.preventDefault()
   const handleDrop = (e) => {
     e.preventDefault()
     const files = Array.from(e.dataTransfer.files)
@@ -89,31 +75,40 @@ export default function Documents() {
 
   const hasActiveFilters = filters.category || filters.projectId || filters.clientId || filters.tags || search
 
+  const unifiedButtonSx = {
+    borderRadius: 0,
+    textTransform: 'none',
+    fontFamily: '"Courier New", monospace',
+    fontSize: '0.75rem',
+    letterSpacing: '0.5px',
+    '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' }
+  }
+
   return (
     <PageLayout title={t('title')} titleBold={t('titleBold')} topbarLabel={t('topbarLabel')} subtitle={t('subtitle')}>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         
-        {/* ✅ Zona Global de Drag & Drop */}
         <Paper 
           sx={{ 
-            p: 4, mb: 3, borderRadius: 2, border: '2px dashed #ccc', 
+            p: 4, mb: 3, borderRadius: 0, border: '2px dashed #ccc', 
             textAlign: 'center', cursor: 'pointer', bgcolor: '#fafafa',
             transition: 'all 0.2s',
-            '&:hover': { borderColor: '#1976d2', bgcolor: '#f0f7ff' }
+            '&:hover': { borderColor: '#000', bgcolor: '#f5f5f5' }
           }}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onClick={() => { setInitialFiles([]); setUploadOpen(true) }}
         >
-          <CloudUpload sx={{ fontSize: 48, color: '#1976d2', mb: 1 }} />
-          <Typography variant="h6" fontWeight={600}>{t('upload.dragDropGlobal', 'Arrastra y suelta archivos aquí o haz clic para subir')}</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          <CloudUpload sx={{ fontSize: 48, color: '#000', mb: 1 }} />
+          <Typography variant="h6" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
+            {t('upload.dragDrop', 'Arrastra y suelta archivos aquí o haz clic para subir')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontFamily: '"Courier New", monospace' }}>
             {t('upload.supportedFormats', 'PDF, JPG, PNG hasta 10MB')}
           </Typography>
         </Paper>
 
-        <Paper sx={{ p: 3, borderRadius: 2, border: '1px solid #ececec' }}>
-          {/* Toolbar */}
+        <Paper sx={{ p: 3, borderRadius: 0, border: '1px solid #ececec' }}>
           <Box display="flex" flexDirection="column" gap={2} mb={3}>
             <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
               <TextField
@@ -121,27 +116,28 @@ export default function Documents() {
                 placeholder={t('searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                InputProps={{ startAdornment: <Search sx={{ color: '#aaa', mr: 1 }} /> }}
+                InputProps={{ 
+                  startAdornment: <Search sx={{ color: '#aaa', mr: 1 }} />,
+                  sx: { '& .MuiOutlinedInput-root': { borderRadius: 0 } }
+                }}
                 sx={{ minWidth: 250, flexGrow: 1 }}
               />
               
               <Box display="flex" gap={1} alignItems="center">
-                {/* ✅ Toggle de Vista Corregido */}
-                <ToggleButtonGroup value={viewMode} exclusive onChange={(e, val) => val && setViewMode(val)} size="small">
+                <ToggleButtonGroup value={viewMode} exclusive onChange={(e, val) => val && setViewMode(val)} size="small" sx={{ '& .MuiToggleButton-root': { borderRadius: 0, border: '1px solid #000', fontFamily: '"Courier New", monospace', fontSize: '0.7rem' } }}>
                   <ToggleButton value="grid"><GridOn fontSize="small" /></ToggleButton>
                   <ToggleButton value="list"><ViewList fontSize="small" /></ToggleButton>
                 </ToggleButtonGroup>
-                <Button variant="contained" startIcon={<Add />} onClick={() => { setInitialFiles([]); setUploadOpen(true) }}>
+                <Button variant="contained" startIcon={<Add />} onClick={() => { setInitialFiles([]); setUploadOpen(true) }} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
                   {t('uploadDocument')}
                 </Button>
               </Box>
             </Box>
 
-            {/* ✅ Filtros Avanzados */}
             <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
               <FormControl size="small" sx={{ minWidth: 150 }}>
-                <InputLabel>{t('filters.category')}</InputLabel>
-                <Select value={filters.category || ''} onChange={(e) => updateFilter('category', e.target.value)} label={t('filters.category')}>
+                <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('filters.category')}</InputLabel>
+                <Select value={filters.category || ''} onChange={(e) => updateFilter('category', e.target.value)} label={t('filters.category')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}>
                   <MenuItem value="">{t('filters.allCategories')}</MenuItem>
                   {['contract', 'id_document', 'deed', 'appraisal', 'receipt', 'insurance', 'permit', 'blueprint', 'other'].map(c => (
                     <MenuItem key={c} value={c}>{t(`categories.${c}`)}</MenuItem>
@@ -150,20 +146,18 @@ export default function Documents() {
               </FormControl>
 
               <FormControl size="small" sx={{ minWidth: 150 }}>
-                <InputLabel>{t('filters.project')}</InputLabel>
-                <Select value={filters.projectId || ''} onChange={(e) => updateFilter('projectId', e.target.value)} label={t('filters.project')}>
+                <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('filters.project')}</InputLabel>
+                <Select value={filters.projectId || ''} onChange={(e) => updateFilter('projectId', e.target.value)} label={t('filters.project')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}>
                   <MenuItem value="">{t('filters.allProjects')}</MenuItem>
                   {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
                 </Select>
               </FormControl>
 
               <FormControl size="small" sx={{ minWidth: 150 }}>
-                <InputLabel>{t('filters.client')}</InputLabel>
-                <Select value={filters.clientId || ''} onChange={(e) => updateFilter('clientId', e.target.value)} label={t('filters.client')}>
+                <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('filters.clients')}</InputLabel>
+                <Select value={filters.clientId || ''} onChange={(e) => updateFilter('clientId', e.target.value)} label={t('filters.clients')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}>
                   <MenuItem value="">{t('filters.allClients')}</MenuItem>
-                  {clients.map(c => (
-                    <MenuItem key={c._id} value={c._id}>{c.firstName} {c.lastName}</MenuItem>
-                  ))}
+                  {clients.map(c => <MenuItem key={c._id} value={c._id}>{c.firstName} {c.lastName}</MenuItem>)}
                 </Select>
               </FormControl>
 
@@ -172,28 +166,26 @@ export default function Documents() {
                 placeholder={t('filters.tags', 'Etiquetas')}
                 value={filters.tags || ''}
                 onChange={(e) => updateFilter('tags', e.target.value)}
-                sx={{ minWidth: 150 }}
+                sx={{ minWidth: 150, '& .MuiOutlinedInput-root': { borderRadius: 0 } }}
               />
               
               {hasActiveFilters && (
-                <Button size="small" variant="outlined" color="error" onClick={clearAllFilters}>
+                <Button size="small" variant="outlined" color="error" onClick={clearAllFilters} sx={{ ...unifiedButtonSx, border: '1px solid #f44336', color: '#f44336', '&:hover': { bgcolor: '#ffebee', borderColor: '#d32f2f', color: '#d32f2f', boxShadow: '4px 4px 0px rgba(244,67,54,0.12)' } }}>
                   {t('filters.clear', 'Limpiar')}
                 </Button>
               )}
             </Box>
           </Box>
 
-          {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
+          {error && <Typography color="error" sx={{ mb: 2, fontFamily: '"Courier New", monospace' }}>{error}</Typography>}
 
-          {/* Content */}
           {loading ? (
             <Box display="flex" justifyContent="center" py={8}><CircularProgress /></Box>
           ) : documents.length === 0 ? (
             <Box textAlign="center" py={8} color="text.secondary">
-              <Typography>{t('empty')}</Typography>
+              <Typography sx={{ fontFamily: '"Courier New", monospace' }}>{t('empty')}</Typography>
             </Box>
           ) : viewMode === 'grid' ? (
-            // ✅ Vista Grid
             <Grid container spacing={2}>
               {documents.map(doc => (
                 <Grid item xs={12} sm={6} md={4} lg={3} key={doc._id}>
@@ -208,14 +200,13 @@ export default function Documents() {
               ))}
             </Grid>
           ) : (
-            // ✅ Vista Lista
             <List sx={{ width: '100%' }}>
               {documents.map((doc, index) => (
                 <Box key={doc._id}>
                   <ListItem 
                     sx={{ 
-                      px: 2, py: 1.5, borderRadius: 1, 
-                      '&:hover': { bgcolor: '#f5f5f5' },
+                      px: 2, py: 1.5, borderRadius: 0, border: '1px solid transparent',
+                      '&:hover': { bgcolor: '#f5f5f5', borderColor: '#ececec' },
                       cursor: 'pointer'
                     }}
                     onClick={() => { setSelectedDoc(doc); setViewerOpen(true) }}
@@ -225,34 +216,28 @@ export default function Documents() {
                     </ListItemIcon>
                     <ListItemText 
                       primary={
-                        <Typography fontWeight={600} sx={{ fontSize: '0.9rem' }}>
+                        <Typography fontWeight={600} sx={{ fontSize: '0.9rem', fontFamily: '"Helvetica Neue", sans-serif' }}>
                           {doc.title}
                           {doc.version > 1 && (
-                            <Chip label={`v${doc.version}`} size="small" sx={{ ml: 1, height: 20, fontSize: '0.65rem', verticalAlign: 'middle' }} />
+                            <Chip label={`v${doc.version}`} size="small" sx={{ ml: 1, height: 20, fontSize: '0.65rem', verticalAlign: 'middle', borderRadius: 0, fontFamily: '"Courier New", monospace' }} />
                           )}
                         </Typography>
                       }
                       secondary={
                         <Box display="flex" gap={1} flexWrap="wrap" mt={0.5}>
-                          <Chip label={t(`categories.${doc.category}`)} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />
-                          {doc.projectId && <Chip label={doc.projectId.name || doc.projectId.title?.es} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
-                          {doc.clientId && <Chip label={`${doc.clientId.firstName} ${doc.clientId.lastName}`} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
+                          <Chip label={t(`categories.${doc.category}`)} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem', borderRadius: 0, fontFamily: '"Courier New", monospace' }} />
+                          {doc.projectId && <Chip label={doc.projectId.name || doc.projectId.title?.es} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem', borderRadius: 0, fontFamily: '"Courier New", monospace' }} />}
+                          {doc.clientId && <Chip label={`${doc.clientId.firstName} ${doc.clientId.lastName}`} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem', borderRadius: 0, fontFamily: '"Courier New", monospace' }} />}
                           {doc.tags?.map(tag => (
-                            <Chip key={tag} label={`#${tag}`} size="small" sx={{ height: 20, fontSize: '0.65rem', bgcolor: '#f5f5f5' }} />
+                            <Chip key={tag} label={`#${tag}`} size="small" sx={{ height: 20, fontSize: '0.65rem', bgcolor: '#f5f5f5', borderRadius: 0, fontFamily: '"Courier New", monospace' }} />
                           ))}
                         </Box>
                       }
                     />
                     <Box display="flex" gap={0.5}>
-                      <IconButton size="small" onClick={(e) => { e.stopPropagation(); setSelectedDoc(doc); setHistoryOpen(true) }} title="Historial">
-                        <History fontSize="small" />
-                      </IconButton>
-                      <IconButton size="small" color="warning" onClick={(e) => { e.stopPropagation(); handleArchive(doc) }} title="Archivar">
-                        <Archive fontSize="small" />
-                      </IconButton>
-                      <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); handleDelete(doc) }} title="Eliminar">
-                        <Delete fontSize="small" />
-                      </IconButton>
+                      <IconButton size="small" onClick={(e) => { e.stopPropagation(); setSelectedDoc(doc); setHistoryOpen(true) }} title="Historial"><History fontSize="small" /></IconButton>
+                      <IconButton size="small" color="warning" onClick={(e) => { e.stopPropagation(); handleArchive(doc) }} title="Archivar"><Archive fontSize="small" /></IconButton>
+                      <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); handleDelete(doc) }} title="Eliminar"><Delete fontSize="small" /></IconButton>
                     </Box>
                   </ListItem>
                   {index < documents.length - 1 && <Divider />}
@@ -263,26 +248,9 @@ export default function Documents() {
         </Paper>
       </motion.div>
 
-      {/* ✅ Modal de subida con soporte para archivos pre-cargados */}
-      <DocumentUploadModal 
-        open={uploadOpen} 
-        onClose={() => { setUploadOpen(false); setInitialFiles([]) }} 
-        onUploadSuccess={refetch}
-        defaultFiles={initialFiles} 
-      />
-      
-      <DocumentViewer 
-        open={viewerOpen} 
-        onClose={() => setViewerOpen(false)} 
-        document={selectedDoc} 
-      />
-      
-      <VersionHistoryDrawer 
-        open={historyOpen} 
-        onClose={() => setHistoryOpen(false)} 
-        document={selectedDoc} 
-        onUploadSuccess={refetch}
-      />
+      <DocumentUploadModal open={uploadOpen} onClose={() => { setUploadOpen(false); setInitialFiles([]) }} onUploadSuccess={refetch} defaultFiles={initialFiles} />
+      <DocumentViewer open={viewerOpen} onClose={() => setViewerOpen(false)} document={selectedDoc} />
+      <VersionHistoryDrawer open={historyOpen} onClose={() => setHistoryOpen(false)} document={selectedDoc} onUploadSuccess={refetch} />
     </PageLayout>
   )
 }

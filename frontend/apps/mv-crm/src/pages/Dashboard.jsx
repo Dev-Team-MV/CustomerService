@@ -24,7 +24,6 @@ export default function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const { t } = useTranslation('dashboard')
 
-  // ── Resident hook for quick user creation (SMS con proyecto CRM si VITE_PROJECT_ID está en el build)
   const {
     openDialog,
     handleOpenDialog,
@@ -43,7 +42,6 @@ export default function Dashboard() {
     handleCloseSnackbar,
   } = useResidents(null, { smsProjectId: import.meta.env.VITE_PROJECT_ID })
 
-  // ── Projects hook ──
   const {
     projects,
     filtered,
@@ -55,13 +53,8 @@ export default function Dashboard() {
     handleDelete,
   } = useProjects()
 
-  // ── Modal state for project creation/edit ──
   const projectModal = useModalState()
-
-  // ── Selected project for detail panel ──
   const [selectedProject, setSelectedProject] = useState(null)
-
-  // ── Client counts for each project ──
   const [clientCounts, setClientCounts] = useState({})
 
   useEffect(() => {
@@ -69,7 +62,6 @@ export default function Dashboard() {
     return () => clearInterval(timer)
   }, [])
 
-  // ── Fetch clients per project ──
   useEffect(() => {
     if (!projects.length) return
     const fetchAllClients = async () => {
@@ -86,25 +78,22 @@ export default function Dashboard() {
     fetchAllClients()
   }, [projects])
 
-  // ── Helpers ──
   const getProjectBalance = (projectId) =>
     allBalance?.byProject?.find(b => b.projectId === projectId) ?? null
 
   const handleOpenProject = () => {
     const token = localStorage.getItem('token')
     let url = selectedProject?.externalUrl
-  
-    // Si no hay externalUrl, usa una URL local por defecto según el slug
-// /apps/mv-crm/src/pages/Dashboard.jsx línea 98-104
-if (!url) {
-  if (selectedProject?.slug === 'lakewood') {
-    url = 'http://localhost:5173'  // lakewood-p1
-  } else if (selectedProject?.slug === 'lakewood-f2') {
-    url = 'http://localhost:5175'  // phase-2 ✅ CORREGIDO
-  } else {
-    url = 'http://localhost:5173' // fallback
-  }
-}
+
+    if (!url) {
+      if (selectedProject?.slug === 'lakewood') {
+        url = 'http://localhost:5173'
+      } else if (selectedProject?.slug === 'lakewood-f2') {
+        url = 'http://localhost:5175'
+      } else {
+        url = 'http://localhost:5173'
+      }
+    }
   
     window.open(`${url}/dashboard?token=${token}`, '_blank')
   }
@@ -128,13 +117,11 @@ if (!url) {
         { label: t('sidebarStats.clients'), value: totalClients }
       ]}
     >
-      {/* ── Quick Actions Panel ── */}
       <QuickActionsPanel
         onCreateProject={() => projectModal.openModal()}
         onCreateUser={() => handleOpenDialog()}
       />
 
-      {/* ── Modal para crear/editar proyecto ── */}
       <CreateProjectDialog
         open={projectModal.open}
         onClose={projectModal.closeModal}
@@ -143,7 +130,6 @@ if (!url) {
         editMode={!!projectModal.data}
       />
 
-      {/* ── Modal para crear usuario (cliente) ── */}
       <ResidentDialog
         open={openDialog}
         onClose={handleCloseDialog}
@@ -159,6 +145,7 @@ if (!url) {
         isPhoneValid={isPhoneValid}
       />
 
+      {/* ✅ CORREGIDO: Alert sin borderRadius */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
@@ -168,13 +155,15 @@ if (!url) {
         <Alert
           onClose={handleCloseSnackbar}
           severity={snackbar.severity}
-          sx={{ fontFamily: '"Helvetica Neue", sans-serif', borderRadius: 2 }}
+          sx={{
+            fontFamily: '"Helvetica Neue", sans-serif',
+            borderRadius: 0 // ✅ Bordes afilados
+          }}
         >
           {snackbar.message}
         </Alert>
       </Snackbar>
 
-      {/* ── Stats strip — datos reales ── */}
       <StatsStrip stats={[
         { label: t('sidebarStats.projects'), value: projects.length },
         { label: t('metrics.totalClients'), value: totalClients },
@@ -182,17 +171,27 @@ if (!url) {
         { label: t('metrics.totalPending'), value: allBalance?.global?.totalPending ?? 0, prefix: '$', format: 'currency' },
       ]} />
 
-      {/* ── Split view ── */}
       <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start', flexWrap: { xs: 'wrap', lg: 'nowrap' } }}>
         {/* Left: project list */}
         <Box sx={{
-          flex: '0 0 320px', minWidth: 0,
-          maxHeight: 'calc(100vh - 240px)', overflowY: 'auto', pr: 1,
-          '&::-webkit-scrollbar': { width: 6 },
-          '&::-webkit-scrollbar-track': { background: '#f5f5f5' },
-          '&::-webkit-scrollbar-thumb': { background: '#ddd', borderRadius: 3 },
+          flex: '0 0 320px',
+          minWidth: 0,
+          maxHeight: 'calc(100vh - 240px)',
+          overflowY: 'auto',
+          pr: 1,
+          // ✅ Scrollbar minimalista y cuadrado
+          '&::-webkit-scrollbar': { width: 4 },
+          '&::-webkit-scrollbar-track': { background: 'transparent' },
+          '&::-webkit-scrollbar-thumb': { background: '#ddd' }, // ✅ Sin borderRadius
         }}>
-          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 2 }}>
+          <Typography sx={{
+            fontFamily: '"Courier New", monospace',
+            fontSize: '0.6rem',
+            color: '#aaa',
+            letterSpacing: '2px',
+            textTransform: 'uppercase',
+            mb: 2
+          }}>
             {t('selectProject')}
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -231,14 +230,34 @@ if (!url) {
                 <Box sx={{ border: '1px solid #e8e8e8', background: '#fff' }}>
                   {/* Header */}
                   <Box sx={{ p: '28px 32px', display: 'flex', alignItems: 'center', gap: 2, borderBottom: '1px solid #f0f0f0' }}>
-                    <Avatar sx={{ width: 48, height: 48, bgcolor: '#000', borderRadius: 0, fontSize: '1rem', fontWeight: 700, fontFamily: '"Courier New", monospace' }}>
+                    <Avatar sx={{
+                      width: 48,
+                      height: 48,
+                      bgcolor: '#000',
+                      borderRadius: 0, // ✅ Ya estaba bien
+                      fontSize: '1rem',
+                      fontWeight: 700,
+                      fontFamily: '"Courier New", monospace'
+                    }}>
                       {selectedProject.name?.substring(0, 2).toUpperCase()}
                     </Avatar>
                     <Box>
-                      <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 600, fontSize: '1.4rem', color: '#000', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+                      <Typography sx={{
+                        fontFamily: '"Helvetica Neue", sans-serif',
+                        fontWeight: 600,
+                        fontSize: '1.4rem',
+                        color: '#000',
+                        letterSpacing: '-0.03em',
+                        lineHeight: 1.1
+                      }}>
                         {selectedProject.name}
                       </Typography>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.62rem', color: '#000000ff', letterSpacing: '1px' }}>
+                      <Typography sx={{
+                        fontFamily: '"Courier New", monospace',
+                        fontSize: '0.62rem',
+                        color: '#aaa',
+                        letterSpacing: '1px'
+                      }}>
                         /{selectedProject.slug}
                       </Typography>
                     </Box>
@@ -246,27 +265,61 @@ if (!url) {
 
                   <Divider sx={{ borderColor: '#f5f5f5' }} />
 
-                  {/* Metrics grid — datos reales */}
+                  {/* Metrics grid */}
                   <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1px solid #f0f0f0' }}>
                     {/* Clients */}
                     <Box sx={{ p: '24px 28px', borderRight: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0' }}>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
+                      <Typography sx={{
+                        fontFamily: '"Courier New", monospace',
+                        fontSize: '0.58rem',
+                        color: '#aaa',
+                        letterSpacing: '2px',
+                        textTransform: 'uppercase',
+                        mb: 1.5
+                      }}>
                         {t('metrics.totalClients')}
                       </Typography>
-                      <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: '#000', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>
+                      <Typography sx={{
+                        fontFamily: '"Helvetica Neue", sans-serif',
+                        fontWeight: 200,
+                        fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
+                        color: '#000',
+                        letterSpacing: '-0.04em',
+                        lineHeight: 1,
+                        mb: 1
+                      }}>
                         <Counter to={selectedClients} duration={1.1} />
                       </Typography>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff' }}>
+                      <Typography sx={{
+                        fontFamily: '"Courier New", monospace',
+                        fontSize: '0.58rem',
+                        color: '#aaa'
+                      }}>
                         {t('metrics.registeredOwners')}
                       </Typography>
                     </Box>
 
                     {/* Collected */}
                     <Box sx={{ p: '24px 28px', borderBottom: '1px solid #f0f0f0' }}>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
+                      <Typography sx={{
+                        fontFamily: '"Courier New", monospace',
+                        fontSize: '0.58rem',
+                        color: '#aaa',
+                        letterSpacing: '2px',
+                        textTransform: 'uppercase',
+                        mb: 1.5
+                      }}>
                         {t('metrics.totalCollected')}
                       </Typography>
-                      <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: '#4a7c59', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>
+                      <Typography sx={{
+                        fontFamily: '"Helvetica Neue", sans-serif',
+                        fontWeight: 200,
+                        fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
+                        color: '#4a7c59', // ✅ Mantenemos verde semántico para "recaudado"
+                        letterSpacing: '-0.04em',
+                        lineHeight: 1,
+                        mb: 1
+                      }}>
                         <Counter
                           to={Math.round((selectedBalance?.totalCollected ?? 0) / 1000)}
                           prefix="$"
@@ -274,17 +327,36 @@ if (!url) {
                           duration={1.1}
                         />
                       </Typography>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff' }}>
+                      <Typography sx={{
+                        fontFamily: '"Courier New", monospace',
+                        fontSize: '0.58rem',
+                        color: '#aaa'
+                      }}>
                         {formatCurrency(selectedBalance?.totalCollected ?? 0)}
                       </Typography>
                     </Box>
 
                     {/* Pending */}
                     <Box sx={{ p: '24px 28px', borderRight: '1px solid #f0f0f0' }}>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
+                      <Typography sx={{
+                        fontFamily: '"Courier New", monospace',
+                        fontSize: '0.58rem',
+                        color: '#aaa',
+                        letterSpacing: '2px',
+                        textTransform: 'uppercase',
+                        mb: 1.5
+                      }}>
                         {t('metrics.totalPending')}
                       </Typography>
-                      <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: '#c0842a', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>
+                      <Typography sx={{
+                        fontFamily: '"Helvetica Neue", sans-serif',
+                        fontWeight: 200,
+                        fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
+                        color: '#c0842a', // ✅ Mantenemos naranja semántico para "pendiente"
+                        letterSpacing: '-0.04em',
+                        lineHeight: 1,
+                        mb: 1
+                      }}>
                         <Counter
                           to={Math.round((selectedBalance?.totalPending ?? 0) / 1000)}
                           prefix="$"
@@ -292,22 +364,58 @@ if (!url) {
                           duration={1.1}
                         />
                       </Typography>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff' }}>
+                      <Typography sx={{
+                        fontFamily: '"Courier New", monospace',
+                        fontSize: '0.58rem',
+                        color: '#aaa'
+                      }}>
                         {formatCurrency(selectedBalance?.totalPending ?? 0)}
                       </Typography>
                     </Box>
 
                     {/* Phase / Status */}
                     <Box sx={{ p: '24px 28px' }}>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
+                      <Typography sx={{
+                        fontFamily: '"Courier New", monospace',
+                        fontSize: '0.58rem',
+                        color: '#aaa',
+                        letterSpacing: '2px',
+                        textTransform: 'uppercase',
+                        mb: 1.5
+                      }}>
                         {t('metrics.phase')}
                       </Typography>
-                      <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: '#000', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>
+                      <Typography sx={{
+                        fontFamily: '"Helvetica Neue", sans-serif',
+                        fontWeight: 200,
+                        fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
+                        color: '#000',
+                        letterSpacing: '-0.04em',
+                        lineHeight: 1,
+                        mb: 1
+                      }}>
                         {selectedProject.phase ?? '—'}
                       </Typography>
-                      <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, px: 1, py: 0.3, border: '1px solid #e0e0e0' }}>
-                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: selectedProject.isActive ? '#4a7c59' : '#000000ff' }} />
-                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#555', letterSpacing: '1px' }}>
+                      <Box sx={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        px: 1,
+                        py: 0.3,
+                        border: '1px solid #e0e0e0'
+                      }}>
+                        <Box sx={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: '50%', // ✅ El punto sí puede ser redondo (es un indicador)
+                          bgcolor: selectedProject.isActive ? '#4a7c59' : '#000'
+                        }} />
+                        <Typography sx={{
+                          fontFamily: '"Courier New", monospace',
+                          fontSize: '0.58rem',
+                          color: '#555',
+                          letterSpacing: '1px'
+                        }}>
                           {selectedProject.status?.toUpperCase() ?? 'N/A'}
                         </Typography>
                       </Box>
@@ -318,9 +426,22 @@ if (!url) {
                   <motion.div whileHover={{ backgroundColor: '#111' }} whileTap={{ scale: 0.99 }}>
                     <Box
                       onClick={handleOpenProject}
-                      sx={{ p: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#000', cursor: 'pointer' }}
+                      sx={{
+                        p: '20px 32px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        background: '#000',
+                        cursor: 'pointer'
+                      }}
                     >
-                      <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 400, fontSize: '0.9rem', color: '#fff', letterSpacing: '0.5px' }}>
+                      <Typography sx={{
+                        fontFamily: '"Helvetica Neue", sans-serif',
+                        fontWeight: 400,
+                        fontSize: '0.9rem',
+                        color: '#fff',
+                        letterSpacing: '0.5px'
+                      }}>
                         {t('openDashboard')}
                       </Typography>
                       <motion.div animate={{ x: [0, 5, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}>
@@ -332,8 +453,20 @@ if (!url) {
               </motion.div>
             ) : (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="empty">
-                <Box sx={{ border: '1px solid #f0f0f0', p: '60px 40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#ccc', letterSpacing: '2px', textTransform: 'uppercase' }}>
+                <Box sx={{
+                  border: '1px solid #f0f0f0',
+                  p: '60px 40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Typography sx={{
+                    fontFamily: '"Courier New", monospace',
+                    fontSize: '0.65rem',
+                    color: '#ccc',
+                    letterSpacing: '2px',
+                    textTransform: 'uppercase'
+                  }}>
                     {t('empty')}
                   </Typography>
                 </Box>

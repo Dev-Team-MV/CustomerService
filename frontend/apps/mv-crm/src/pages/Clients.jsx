@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   Box, Button, Typography, TextField, InputAdornment, Snackbar, Alert
 } from '@mui/material'
-import { Search, Send, History } from '@mui/icons-material'
+import { Search, Send } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import DataTable from '@shared/components/table/DataTable'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
@@ -86,35 +86,20 @@ export default function Clients() {
 
     try {
       let results
-
       if (hasTemplateVariables) {
         results = await smsService.sendBulkTemplate(
-          usersWithPhone,
-          content,
-          (user) => {
-            if (projectId) {
-              return {}
-            }
-            
-            return {
-              firstName: user.firstName || '',
-              lastName: user.lastName || '',
-              email: user.email || '',
-              phoneNumber: user.phoneNumber || ''
-            }
+          usersWithPhone, content,
+          (user) => projectId ? {} : {
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            email: user.email || '',
+            phoneNumber: user.phoneNumber || ''
           },
-          onProgress,
-          { projectId }
+          onProgress, { projectId }
         )
       } else {
-        results = await smsService.sendBulk(
-          usersWithPhone,
-          content,
-          onProgress,
-          { projectId }
-        )
+        results = await smsService.sendBulk(usersWithPhone, content, onProgress, { projectId })
       }
-
       return results
     } catch (err) {
       console.error(t('broadcast.error'), err)
@@ -131,8 +116,6 @@ export default function Clients() {
   const adminCount = users.filter(c => ['admin', 'superadmin'].includes(c.role)).length
   const withLotsCount = users.filter(c => c.lots?.length > 0).length
 
-  const isSuperAdmin = user?.role === 'superadmin'
-
   return (
     <PageLayout
       title={t('clients.title')}
@@ -147,40 +130,93 @@ export default function Clients() {
         { label: t('clients.withLots'), value: withLotsCount },
       ]} />
 
-      {/* BOTONES DE ACCIÓN */}
-      <Box display="flex" gap={2} mb={2} flexWrap="wrap">
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => handleOpenDialog()}
-        >
-          + {t('clients.addClient')}
-        </Button>
+      {/* ✅ BARRA DE HERRAMIENTAS: Filtros a la izquierda, Acciones a la derecha */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        
+        {/* Izquierda: Buscador */}
+        <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', letterSpacing: '1px', textTransform: 'uppercase' }}>
+            {t('clients.search') || 'Buscar'}:
+          </Typography>
+          <TextField
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('clients.searchPlaceholder')}
+            size="small"
+            sx={{ 
+              width: 320,
+              '& .MuiOutlinedInput-root': { borderRadius: 0 } // ✅ Forzar bordes afilados
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ fontSize: 18, color: '#888' }} />
+                </InputAdornment>
+              )
+            }}
+          />
+          {search && (
+            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.62rem', color: '#888', letterSpacing: '1px' }}>
+              {filtered.length} {t('clients.resultsFound') || 'resultados'}
+            </Typography>
+          )}
+        </Box>
 
-        <Button
-          variant="outlined"
-          startIcon={<Send />}
-          onClick={() => setBroadcastModalOpen(true)}
-        >
-          {t('clients.sendMessage')}
-        </Button>
+        {/* Derecha: Botones de Acción */}
+        <Box display="flex" gap={2} flexWrap="wrap">
+          <Button
+            variant="contained"
+            onClick={() => handleOpenDialog()}
+            sx={{
+              borderRadius: 0,
+              textTransform: 'none',
+              fontFamily: '"Courier New", monospace',
+              fontSize: '0.75rem',
+              letterSpacing: '0.5px',
+              bgcolor: '#000',
+              color: '#fff',
+              '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } // ✅ Hover unificado
+            }}
+          >
+            + {t('clients.addClient')}
+          </Button>
 
-        <ExportButton
-          label={t('clients.exportClients')}
-          exportFn={crmReportsService.exportClients}
-          withModal={true}
-          disabled={users.length === 0}
-          filters={[
-            {
-              field: 'projectId',
-              label: t('export.project'),
-              type: 'select',
-              placeholder: t('export.allProjects'),
-              required: false,
-              options: projects.map(p => ({ value: p._id, label: p.name }))
-            }
-          ]}
-        />
+          <Button
+            variant="outlined"
+            startIcon={<Send />}
+            onClick={() => setBroadcastModalOpen(true)}
+            sx={{
+              borderRadius: 0,
+              textTransform: 'none',
+              fontFamily: '"Courier New", monospace',
+              fontSize: '0.75rem',
+              letterSpacing: '0.5px',
+              bgcolor: '#fff',
+              color: '#000',
+              border: '1px solid #000',
+              '&:hover': { bgcolor: '#fff', borderColor: '#555', color: '#555', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } // ✅ Hover unificado
+            }}
+          >
+            {t('clients.sendMessage')}
+          </Button>
+
+          <ExportButton
+            label={t('clients.exportClients')}
+            exportFn={crmReportsService.exportClients}
+            withModal={true}
+            disabled={users.length === 0}
+            filters={[
+              {
+                field: 'projectId',
+                label: t('export.project'),
+                type: 'select',
+                placeholder: t('export.allProjects'),
+                required: false,
+                options: projects.map(p => ({ value: p._id, label: p.name }))
+              }
+            ]}
+          />
+        </Box>
       </Box>
 
       <ResidentDialog
@@ -199,28 +235,6 @@ export default function Clients() {
       />
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.5 }}>
-        <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-          <TextField
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t('clients.searchPlaceholder')}
-            size="small"
-            sx={{ width: 360 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search sx={{ fontSize: 18, color: '#bbb' }} />
-                </InputAdornment>
-              )
-            }}
-          />
-          {search && (
-            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.62rem', color: '#aaa', letterSpacing: '1.5px' }}>
-              {t('clients.results', { count: filtered.length, defaultValue: `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''}` })}
-            </Typography>
-          )}
-        </Box>
-
         <DataTable
           columns={columns}
           data={filtered}
@@ -247,7 +261,14 @@ export default function Clients() {
         <Alert
           onClose={handleCloseSnackbar}
           severity={snackbar.severity}
-          sx={{ fontFamily: '"Helvetica Neue", sans-serif', borderRadius: 2 }}
+          sx={{ 
+            fontFamily: '"Courier New", monospace', // ✅ Tipografía unificada
+            fontSize: '0.75rem',
+            letterSpacing: '0.5px',
+            borderRadius: 0, // ✅ Bordes afilados
+            border: '1px solid',
+            bgcolor: snackbar.severity === 'success' ? '#e8f5e9' : snackbar.severity === 'error' ? '#ffebee' : '#fff3e0'
+          }}
         >
           {snackbar.message}
         </Alert>

@@ -1,3 +1,4 @@
+// apps/mv-crm/src/components/postSale/TemplateManager.jsx
 import { useState } from 'react'
 import { 
   Box, Button, Grid, FormControl, InputLabel, Select, MenuItem, 
@@ -10,10 +11,10 @@ import { useTranslation } from 'react-i18next'
 import DataTable from '@shared/components/table/DataTable'
 import { useSurveyTemplates } from '@shared/hooks/useSurveyTemplates'
 import { useProjects } from '@shared/hooks/useProjects'
-import { useTemplateColumns } from '../../constants/Columns/useTemplateColumns' // Ajusta la ruta si es necesario
+import { useTemplateColumns } from '../../constants/Columns/useTemplateColumns'
 import surveyService from '@shared/services/surveyService'
 
-import SurveyTemplateForm from './SurveyForm' 
+import SurveyTemplateForm from './SurveyForm' // ✅ Corregido el nombre del import
 
 export default function TemplateManager({ onNotify }) {
   const { t } = useTranslation('postSale')
@@ -64,32 +65,35 @@ export default function TemplateManager({ onNotify }) {
     }
   }
 
+  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
+  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' } }
+
   return (
     <Box>
-      <Box sx={{ mb: 3, p: 2.5, bgcolor: '#f9f9f9', borderRadius: 2, border: '1px solid #e0e0e0' }}>
+      <Box sx={{ mb: 3, p: 2.5, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={6} md={4}>
             <FormControl fullWidth size="small">
               <InputLabel>{t('filters.project')}</InputLabel>
-              <Select value={filters.projectId} onChange={(e) => handleFilterChange('projectId', e.target.value)} label={t('filters.project')}>
+              <Select value={filters.projectId} onChange={(e) => handleFilterChange('projectId', e.target.value)} label={t('filters.project')} sx={inputSx}>
                 <MenuItem value="">{t('filters.all')}</MenuItem>
-                {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
+                {projects.map(p => <MenuItem key={p._id} value={p._id} sx={{ fontFamily: '"Courier New", monospace' }}>{p.name}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <FormControl fullWidth size="small">
               <InputLabel>{t('filters.type')}</InputLabel>
-              <Select value={filters.type} onChange={(e) => handleFilterChange('type', e.target.value)} label={t('filters.type')}>
+              <Select value={filters.type} onChange={(e) => handleFilterChange('type', e.target.value)} label={t('filters.type')} sx={inputSx}>
                 <MenuItem value="">{t('filters.all')}</MenuItem>
                 {['post_sale', 'post_construction', 'post_warranty', 'annual'].map(type => (
-                  <MenuItem key={type} value={type}>{t(`survey.types.${type}`)}</MenuItem>
+                  <MenuItem key={type} value={type} sx={{ fontFamily: '"Courier New", monospace' }}>{t(`survey.types.${type}`)}</MenuItem>
                 ))}
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
-            <Button variant="outlined" fullWidth startIcon={<Close />} onClick={clearFilters} sx={{ height: 40 }}>
+            <Button variant="outlined" fullWidth startIcon={<Close />} onClick={clearFilters} sx={{ ...unifiedButtonSx, height: 40, border: '1px solid #000', color: '#000', '&:hover': { bgcolor: '#f5f5f5', borderColor: '#555', color: '#555', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
               {t('filters.clear')}
             </Button>
           </Grid>
@@ -97,7 +101,7 @@ export default function TemplateManager({ onNotify }) {
       </Box>
 
       <Box display="flex" justifyContent="flex-end" sx={{ mb: 2 }}>
-        <Button variant="contained" startIcon={<Add />} onClick={() => setShowTemplateForm(true)}>
+        <Button variant="contained" startIcon={<Add />} onClick={() => setShowTemplateForm(true)} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
           {t('templates.newTemplate')}
         </Button>
       </Box>
@@ -117,24 +121,25 @@ export default function TemplateManager({ onNotify }) {
         />
       )}
 
-      <Dialog open={templateDeleteDialogOpen} onClose={() => setTemplateDeleteDialogOpen(false)}>
+      <Dialog open={templateDeleteDialogOpen} onClose={() => setTemplateDeleteDialogOpen(false)} PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <WarningIcon color="error" />
-          {t('actions.confirmDelete')}
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>{t('actions.confirmDelete')}</Typography>
         </DialogTitle>
         <DialogContent>
-          <DialogContentText>
+          <DialogContentText sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
             {t('actions.deleteWarning')}
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
-          <Button onClick={() => setTemplateDeleteDialogOpen(false)}>
+          <Button onClick={() => setTemplateDeleteDialogOpen(false)} sx={{ ...unifiedButtonSx, color: '#888' }}>
             {t('actions.cancel')}
           </Button>
           <Button 
             onClick={confirmDelete} 
             color="error" 
             variant="contained"
+            sx={{ ...unifiedButtonSx, bgcolor: '#f44336', '&:hover': { bgcolor: '#d32f2f', boxShadow: '6px 6px 0px rgba(244,67,54,0.12)' } }}
           >
             {t('actions.yesDelete')}
           </Button>

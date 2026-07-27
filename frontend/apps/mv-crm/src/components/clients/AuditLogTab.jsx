@@ -1,19 +1,9 @@
 // apps/mv-crm/src/components/AuditLogTab.jsx
 import { useState, useEffect, useMemo } from 'react'
 import {
-  Box,
-  Typography,
-  CircularProgress,
-  Alert,
-  Chip,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Button,
-  Pagination,
-  TextField,
-  Grid
+  Box, Typography, CircularProgress, Alert, Chip,
+  FormControl, InputLabel, Select, MenuItem, Button,
+  Pagination, TextField, Grid
 } from '@mui/material'
 import { History, Refresh, FilterList } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
@@ -21,21 +11,12 @@ import DataTable from '@shared/components/table/DataTable'
 import auditService from '../../services/auditService'
 import { useAuditLogColumns, ACTION_CONFIG, AuditLogDetailDrawer } from '../../constants/Columns/AuditLogColumns'
 
-const AuditLogTab = ({ 
-  entity, 
-  entityId,
-  entityName 
-}) => {
-  const { t } = useTranslation('residents') // ✅ Cambiado de 'crm' a 'residents'
+const AuditLogTab = ({ entity, entityId, entityName }) => {
+  const { t } = useTranslation('residents')
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0
-  })
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 })
   
   const [actionFilter, setActionFilter] = useState('')
   const [dateFrom, setDateFrom] = useState('')
@@ -47,27 +28,17 @@ const AuditLogTab = ({
   const fetchLogs = async (page = 1) => {
     setLoading(true)
     setError(null)
-    
     try {
-      const params = {
-        entity,
-        entityId,
-        page,
-        limit: pagination.limit
-      }
-      
+      const params = { entity, entityId, page, limit: pagination.limit }
       if (actionFilter) params.action = actionFilter
       if (dateFrom) params.dateFrom = new Date(dateFrom).toISOString()
       if (dateTo) params.dateTo = new Date(dateTo).toISOString()
       
       const data = await auditService.getLogs(params)
-      
       setLogs(data.logs || [])
       setPagination(prev => ({
-        ...prev,
-        page: data.pagination?.page || page,
-        total: data.pagination?.total || 0,
-        totalPages: data.pagination?.totalPages || 0
+        ...prev, page: data.pagination?.page || page,
+        total: data.pagination?.total || 0, totalPages: data.pagination?.totalPages || 0
       }))
     } catch (err) {
       console.error('Error fetching audit logs:', err)
@@ -79,123 +50,70 @@ const AuditLogTab = ({
   }
   
   useEffect(() => {
-    if (entity && entityId) {
-      fetchLogs(1)
-    }
+    if (entity && entityId) fetchLogs(1)
   }, [entity, entityId])
   
-  const handleApplyFilters = () => {
-    fetchLogs(1)
-  }
-  
+  const handleApplyFilters = () => fetchLogs(1)
   const handleClearFilters = () => {
-    setActionFilter('')
-    setDateFrom('')
-    setDateTo('')
+    setActionFilter(''); setDateFrom(''); setDateTo('')
     setTimeout(() => fetchLogs(1), 100)
   }
-  
-  const handlePageChange = (event, value) => {
-    fetchLogs(value)
-  }
-  
-  const handleRefresh = () => {
-    fetchLogs(pagination.page)
-  }
-  
-  const handleRowClick = (log) => {
-    setSelectedLog(log)
-    setDrawerOpen(true)
-  }
-  
-  const handleCloseDetail = () => {
-    setDrawerOpen(false)
-    setSelectedLog(null)
-  }
+  const handlePageChange = (event, value) => fetchLogs(value)
+  const handleRefresh = () => fetchLogs(pagination.page)
+  const handleRowClick = (log) => { setSelectedLog(log); setDrawerOpen(true) }
+  const handleCloseDetail = () => { setDrawerOpen(false); setSelectedLog(null) }
   
   const activeFiltersCount = [actionFilter, dateFrom, dateTo].filter(v => v).length
   
-  const columns = useAuditLogColumns({ 
-    t, 
-    showEntity: false,
-    showUser: true,
-    onRowClick: handleRowClick
-  })
+  const columns = useAuditLogColumns({ t, showEntity: false, showUser: true, onRowClick: handleRowClick })
 
-  // ✅ Traducir labels de ACTION_CONFIG
   const translatedActionConfig = useMemo(() => {
     return Object.entries(ACTION_CONFIG).reduce((acc, [key, config]) => {
-      acc[key] = {
-        ...config,
-        label: t(`audit.actions.${key}`, config.label)
-      }
+      acc[key] = { ...config, label: t(`audit.actions.${key}`, config.label) }
       return acc
     }, {})
   }, [t])
+
+  // ✅ Estilos unificados
+  const unifiedButtonSx = { 
+    borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', 
+    fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
+  }
+  const inputSx = { 
+    fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, 
+    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
+    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' }
+  }
+  const chipSx = { borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 600 }
   
   return (
     <Box>
       {/* Header */}
-      <Box 
-        display="flex" 
-        alignItems="center" 
-        justifyContent="space-between" 
-        mb={2}
-        flexWrap="wrap"
-        gap={2}
-      >
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2} flexWrap="wrap" gap={2}>
         <Box display="flex" alignItems="center" gap={1}>
           <History sx={{ fontSize: 20, color: '#666' }} />
-          <Typography variant="subtitle2" fontWeight={600}>
+          <Typography variant="subtitle2" fontWeight={600} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>
             {t('audit.historyTitle')}
           </Typography>
           {pagination.total > 0 && (
-            <Chip 
-              label={pagination.total} 
-              size="small" 
-              sx={{ 
-                bgcolor: '#000', 
-                color: '#fff',
-                fontSize: '0.65rem',
-                height: 20
-              }} 
-            />
+            <Chip label={pagination.total} size="small" sx={{ ...chipSx, bgcolor: '#000', color: '#fff', height: 20 }} />
           )}
         </Box>
         
-        <Button
-          size="small"
-          startIcon={<Refresh />}
-          onClick={handleRefresh}
-          disabled={loading}
-          sx={{ textTransform: 'none' }}
-        >
+        <Button size="small" startIcon={<Refresh />} onClick={handleRefresh} disabled={loading} sx={{ ...unifiedButtonSx, color: '#000', border: '1px solid #000', '&:hover': { bgcolor: '#f5f5f5', borderColor: '#333', color: '#333', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
           {t('audit.refresh')}
         </Button>
       </Box>
       
       {/* Panel de filtros */}
-      <Box 
-        sx={{ 
-          p: 2, 
-          mb: 2, 
-          bgcolor: '#fafafa',
-          border: '1px solid #e0e0e0',
-          borderRadius: 1
-        }}
-      >
+      <Box sx={{ p: 2, mb: 2, bgcolor: '#fafafa', border: '1px solid #e0e0e0', borderRadius: 0 }}>
         <Box display="flex" alignItems="center" gap={1} mb={2}>
           <FilterList sx={{ fontSize: 18, color: '#666' }} />
-          <Typography variant="caption" fontWeight={600}>
+          <Typography variant="caption" fontWeight={600} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>
             {t('audit.filters')}
           </Typography>
           {activeFiltersCount > 0 && (
-            <Chip 
-              label={activeFiltersCount} 
-              size="small" 
-              color="primary"
-              sx={{ fontSize: '0.6rem', height: 18 }}
-            />
+            <Chip label={activeFiltersCount} size="small" color="primary" sx={{ ...chipSx, height: 18 }} />
           )}
         </Box>
         
@@ -203,25 +121,12 @@ const AuditLogTab = ({
           <Grid item xs={12} sm={4}>
             <FormControl size="small" fullWidth>
               <InputLabel>{t('audit.filterAction')}</InputLabel>
-              <Select
-                value={actionFilter}
-                onChange={(e) => setActionFilter(e.target.value)}
-                label={t('audit.filterAction')}
-              >
-                <MenuItem value="">
-                  <em>{t('audit.allActions')}</em>
-                </MenuItem>
+              <Select value={actionFilter} onChange={(e) => setActionFilter(e.target.value)} label={t('audit.filterAction')} sx={inputSx}>
+                <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}><em>{t('audit.allActions')}</em></MenuItem>
                 {Object.entries(translatedActionConfig).map(([key, config]) => (
-                  <MenuItem key={key} value={key}>
+                  <MenuItem key={key} value={key} sx={{ fontFamily: '"Courier New", monospace' }}>
                     <Box display="flex" alignItems="center" gap={1}>
-                      <Box 
-                        sx={{ 
-                          width: 8, 
-                          height: 8, 
-                          borderRadius: '50%', 
-                          bgcolor: config.color 
-                        }} 
-                      />
+                      <Box sx={{ width: 8, height: 8, borderRadius: 0, bgcolor: config.color }} />
                       {config.label}
                     </Box>
                   </MenuItem>
@@ -231,46 +136,19 @@ const AuditLogTab = ({
           </Grid>
           
           <Grid item xs={12} sm={4}>
-            <TextField
-              size="small"
-              fullWidth
-              type="date"
-              label={t('audit.dateFrom')}
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-            />
+            <TextField size="small" fullWidth type="date" label={t('audit.dateFrom')} value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} InputLabelProps={{ shrink: true }} sx={inputSx} />
           </Grid>
           
           <Grid item xs={12} sm={4}>
-            <TextField
-              size="small"
-              fullWidth
-              type="date"
-              label={t('audit.dateTo')}
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-            />
+            <TextField size="small" fullWidth type="date" label={t('audit.dateTo')} value={dateTo} onChange={(e) => setDateTo(e.target.value)} InputLabelProps={{ shrink: true }} sx={inputSx} />
           </Grid>
         </Grid>
         
         <Box display="flex" gap={1} justifyContent="flex-end" mt={2}>
-          <Button
-            size="small"
-            onClick={handleClearFilters}
-            disabled={activeFiltersCount === 0}
-            sx={{ textTransform: 'none', fontSize: '0.75rem' }}
-          >
+          <Button size="small" onClick={handleClearFilters} disabled={activeFiltersCount === 0} sx={{ ...unifiedButtonSx, color: '#888', border: '1px solid #888', '&:hover': { bgcolor: '#f5f5f5', borderColor: '#000', color: '#000', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
             {t('audit.clearFilters')}
           </Button>
-          <Button
-            size="small"
-            variant="contained"
-            onClick={handleApplyFilters}
-            disabled={loading}
-            sx={{ textTransform: 'none', fontSize: '0.75rem' }}
-          >
+          <Button size="small" variant="contained" onClick={handleApplyFilters} disabled={loading} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
             {t('audit.applyFilters')}
           </Button>
         </Box>
@@ -278,7 +156,7 @@ const AuditLogTab = ({
       
       {/* Error */}
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
           {error}
         </Alert>
       )}
@@ -291,6 +169,11 @@ const AuditLogTab = ({
         rowKey="_id"
         emptyMessage={t('audit.noLogs')}
         onRowClick={handleRowClick}
+        sx={{
+          borderRadius: 0,
+          '& .MuiTablePagination-root': { borderRadius: 0 },
+          '& .MuiTablePagination-actions .MuiIconButton-root': { borderRadius: 0 }
+        }}
       />
       
       {/* Paginación */}
@@ -304,25 +187,22 @@ const AuditLogTab = ({
             size="small"
             showFirstButton
             showLastButton
+            sx={{
+              '& .MuiPaginationItem-root': { borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.75rem' },
+              '& .MuiPaginationItem-ellipsis': { borderRadius: 0 }
+            }}
           />
         </Box>
       )}
       
       {/* Info footer */}
       {pagination.total > 0 && (
-        <Box 
-          display="flex" 
-          justifyContent="space-between" 
-          alignItems="center"
-          mt={2}
-          pt={2}
-          borderTop="1px solid #f0f0f0"
-        >
-          <Typography variant="caption" color="text.secondary">
+        <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} pt={2} borderTop="1px solid #f0f0f0">
+          <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem' }}>
             {t('audit.showing')} {logs.length} {t('audit.of')} {pagination.total} {t('audit.entries')}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {t('audit.entityLabel')}: <strong>{entityName || entity}</strong>
+          <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem' }}>
+            {t('audit.entityLabel')}: <strong style={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{entityName || entity}</strong>
           </Typography>
         </Box>
       )}

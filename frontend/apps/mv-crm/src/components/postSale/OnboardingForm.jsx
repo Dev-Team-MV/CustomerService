@@ -1,3 +1,4 @@
+// apps/mv-crm/src/components/postSale/OnboardingForm.jsx
 import { useState, useEffect, useMemo } from 'react'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
@@ -33,7 +34,6 @@ export default function OnboardingForm({ open, onClose, onSuccess }) {
     return residents.find(r => r._id === formData.clientId)
   }, [formData.clientId, residents])
 
-  // Cargar recursos filtrados por proyecto y cliente
   useEffect(() => {
     const fetchResources = async () => {
       if (!formData.projectId || !selectedProjectConfig) {
@@ -97,7 +97,6 @@ export default function OnboardingForm({ open, onClose, onSuccess }) {
         clientId: formData.clientId,
         propertyId: formData.propertyId || undefined,
         apartmentId: formData.apartmentId || undefined
-        // El backend crea los 'items' por defecto si no se envían
       }
       await api.post('/onboarding', payload)
       onSuccess()
@@ -108,38 +107,43 @@ export default function OnboardingForm({ open, onClose, onSuccess }) {
     }
   }
 
+  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
+  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' } }
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{t('onboarding.newChecklist', 'Nuevo Onboarding')}</DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
+      <DialogTitle sx={{ borderBottom: '1px solid #ececec', fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+        {t('onboarding.newChecklist')}
+      </DialogTitle>
       <DialogContent dividers>
         <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-          {error && <Alert severity="error">{error}</Alert>}
+          {error && <Alert severity="error" sx={{ borderRadius: 0, border: '1px solid' }}>{error}</Alert>}
 
           <FormControl fullWidth required>
-            <InputLabel>{t('filters.project', 'Proyecto')}</InputLabel>
-            <Select value={formData.projectId} onChange={(e) => { handleChange('projectId', e.target.value); handleChange('clientId', ''); handleChange('propertyId', ''); handleChange('apartmentId', ''); }} label={t('filters.project', 'Proyecto')}>
+            <InputLabel>{t('filters.project')}</InputLabel>
+            <Select value={formData.projectId} onChange={(e) => { handleChange('projectId', e.target.value); handleChange('clientId', ''); handleChange('propertyId', ''); handleChange('apartmentId', ''); }} label={t('filters.project')} sx={inputSx}>
               {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
             </Select>
           </FormControl>
 
           <FormControl fullWidth required disabled={!formData.projectId}>
-            <InputLabel>{t('filters.client', 'Cliente')}</InputLabel>
-            <Select value={formData.clientId} onChange={(e) => { handleChange('clientId', e.target.value); handleChange('propertyId', ''); handleChange('apartmentId', ''); }} label={t('filters.client', 'Cliente')}>
+            <InputLabel>{t('filters.client')}</InputLabel>
+            <Select value={formData.clientId} onChange={(e) => { handleChange('clientId', e.target.value); handleChange('propertyId', ''); handleChange('apartmentId', ''); }} label={t('filters.client')} sx={inputSx}>
               <MenuItem value=""><em>Seleccionar...</em></MenuItem>
               {filteredResidents.map(client => <MenuItem key={client._id} value={client._id}>{client.firstName} {client.lastName}</MenuItem>)}
             </Select>
           </FormControl>
 
           {formData.projectId && selectedProjectConfig && (
-            <Box sx={{ p: 2, bgcolor: '#f9f9f9', borderRadius: 1, border: '1px solid #e0e0e0' }}>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>
-                {selectedProjectConfig.resourceType === 'apartment' ? 'Apartamento' : 'Propiedad'}
+            <Box sx={{ p: 2, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5, fontFamily: '"Courier New", monospace' }}>
+                {selectedProjectConfig.resourceType === 'apartment' ? t('upload.apartment', 'Apartamento') : t('upload.property', 'Propiedad')}
               </Typography>
               {loadingResources ? (
                 <Box display="flex" justifyContent="center" py={2}><CircularProgress size={24} /></Box>
               ) : (
                 <FormControl fullWidth required>
-                  <InputLabel>{selectedProjectConfig.resourceType === 'apartment' ? 'Apartamento' : 'Propiedad'}</InputLabel>
+                  <InputLabel>{selectedProjectConfig.resourceType === 'apartment' ? t('upload.apartment', 'Apartamento') : t('upload.property', 'Propiedad')}</InputLabel>
                   <Select
                     value={selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses' ? formData.propertyId : formData.apartmentId}
                     onChange={(e) => {
@@ -149,14 +153,15 @@ export default function OnboardingForm({ open, onClose, onSuccess }) {
                         handleChange('apartmentId', e.target.value); handleChange('propertyId', '')
                       }
                     }}
-                    label={selectedProjectConfig.resourceType === 'apartment' ? 'Apartamento' : 'Propiedad'}
+                    label={selectedProjectConfig.resourceType === 'apartment' ? t('upload.apartment', 'Apartamento') : t('upload.property', 'Propiedad')}
+                    sx={inputSx}
                   >
                     <MenuItem value=""><em>Seleccionar...</em></MenuItem>
                     {availableResources.length > 0 ? availableResources.map(res => {
                       if (selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses') {
-                        return <MenuItem key={res._id} value={res._id}>Lote {res.lot?.number || res.lot || 'N/A'}</MenuItem>
+                        return <MenuItem key={res._id} value={res._id} sx={{ fontFamily: '"Courier New", monospace' }}>Lote {res.lot?.number || res.lot || 'N/A'}</MenuItem>
                       } else {
-                        return <MenuItem key={res._id} value={res._id}>Apto {res.apartmentNumber} (Piso {res.floorNumber})</MenuItem>
+                        return <MenuItem key={res._id} value={res._id} sx={{ fontFamily: '"Courier New", monospace' }}>Apto {res.apartmentNumber} (Piso {res.floorNumber})</MenuItem>
                       }
                     }) : <MenuItem disabled><em>No hay recursos asignados</em></MenuItem>}
                   </Select>
@@ -166,10 +171,10 @@ export default function OnboardingForm({ open, onClose, onSuccess }) {
           )}
         </Box>
       </DialogContent>
-      <DialogActions sx={{ p: 2, borderTop: '1px solid #eee' }}>
-        <Button onClick={onClose} disabled={submitting}>{t('actions.cancel', 'Cancelar')}</Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={submitting} startIcon={submitting ? <CircularProgress size={20} /> : null}>
-          {submitting ? t('actions.saving', 'Guardando...') : t('actions.create', 'Crear Onboarding')}
+      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec' }}>
+        <Button onClick={onClose} disabled={submitting} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('actions.cancel')}</Button>
+        <Button variant="contained" onClick={handleSubmit} disabled={submitting} startIcon={submitting ? <CircularProgress size={16} /> : null} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+          {submitting ? t('actions.saving') : t('actions.create')}
         </Button>
       </DialogActions>
     </Dialog>

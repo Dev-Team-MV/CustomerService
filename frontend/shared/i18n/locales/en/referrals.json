@@ -35,33 +35,54 @@
     "view": "View Details",
     "save": "Save",
     "cancel": "Cancel",
-    "saving": "Processing...",
-    "submit": "Submit Referral",
-    "createReferral": "Create Referral"
+    "createReferral": "New Referral",
+    "referralInfo": "Referral Information",
+    "name": "Name",
+    "phone": "Phone",
+    "propertyId": "Purchased Property (Referred)",
+    "discountInfo": "Select the referrer's property to which the discount will be applied.",
+    "discountBase": "Discount Base",
+    "noReferrerProperties": "Referrer has no assigned properties",
+    "overrideDiscount": "Override Discount % (Optional)",
+    "cashWarning": "Note: The system will reject this action if the referrer has a pending balance on any of their units.",
+    "rewardAmount": "Reward Amount (Cash)"
   },
   "program": {
-    "title": "Program Configuration",
+    "title": "Configuration",
     "name": "Program Name",
-    "rewardPerReferral": "Reward per Referral",
+    "rewardPerReferral": "Fixed Amount per Referral",
+    "discountPercent": "Discount Percentage (%)",
     "rewardType": "Reward Type",
+    "rewardTypes": {
+      "cash": "Cash",
+      "property_discount": "Property Discount"
+    },
     "isActive": "Active Program",
     "maxReferrals": "Max Referrals per User",
     "terms": "Terms and Conditions (ES)",
     "termsEn": "Terms and Conditions (EN)",
     "createNew": "Create New Program",
     "edit": "Edit Program",
-    "create": "Create Referral Program"
+    "create": "Create Referral Program",
+    "selectProjectError": "You must select a project",
+    "saveError": "Error saving program",
+    "confirmDelete": "Are you sure you want to delete this program?",
+    "deleteError": "Error deleting"
   },
   "leaderboard": {
     "title": "Leaderboard",
     "referrals": "Referrals",
     "earned": "Earned"
   },
-  "modal": {
-    "submitTitle": "Submit a Referral",
-    "createTitle": "Create Referral (Admin)"
+  "common": {
+    "na": "N/A",
+    "select": "Select...",
+    "loading": "Loading..."
   },
-  "fields": {
+  "filters": {
+    "allProjects": "All Projects"
+  },
+    "fields": {
     "project": "Project",
     "referrer": "Referring Client",
     "referredName": "Referred Name",
@@ -71,21 +92,5 @@
     "rewardPerReferral": "Reward Amount",
     "discountPercent": "Discount Percentage (%)",
     "notes": "Additional Notes"
-  },
-  "errors": {
-    "projectRequired": "Project is required",
-    "referrerRequired": "You must select a referring client",
-    "contactRequired": "Referred name and phone are required",
-    "submitFailed": "Error submitting referral"
-  },
-  "warnings": {
-    "noReferrers": "There are no clients assigned to this project"
-  },
-  "common": {
-    "select": "Select..."
-  },
-    "filters": {
-    "allProjects": "All Projects",
-    "allStatuses": "All Statuses"
   }
 }

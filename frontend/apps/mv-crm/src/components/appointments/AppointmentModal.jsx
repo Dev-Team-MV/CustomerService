@@ -66,7 +66,6 @@ const combineDateAndTime = (dateStr, timeStr) => {
   return localDate.toISOString()
 }
 
-// ✅ Validación de duración con traducción
 const validateAppointmentDuration = (startDate, startTime, endDate, endTime, t) => {
   if (!startDate || !startTime) {
     return { 
@@ -87,23 +86,16 @@ const validateAppointmentDuration = (startDate, startTime, endDate, endTime, t) 
   const diffMinutes = Math.round((end - start) / (1000 * 60))
 
   if (diffMinutes < 60) {
-    return { 
-      valid: false, 
-      error: t('duration.minError', { minutes: diffMinutes })
-    }
+    return { valid: false, error: t('duration.minError', { minutes: diffMinutes }) }
   }
 
   if (diffMinutes >= 1440) {
-    return { 
-      valid: false, 
-      error: t('duration.maxError')
-    }
+    return { valid: false, error: t('duration.maxError') }
   }
 
   return { valid: true, duration: diffMinutes }
 }
 
-// ✅ Formato de duración con traducción
 const formatDuration = (minutes, t) => {
   if (minutes < 60) {
     return t('duration.minutes', { count: minutes, defaultValue: `${minutes} minutos` })
@@ -169,21 +161,12 @@ const AppointmentModal = ({
       const startDate = new Date(appointment.startDate)
       const endDate = new Date(appointment.endDate)
       
-      const projectId = typeof appointment.projectId === 'object' 
-        ? appointment.projectId._id 
-        : appointment.projectId || ''
-      
-      const assignedToId = typeof appointment.assignedTo === 'object'
-        ? appointment.assignedTo._id
-        : appointment.assignedTo || ''
-      
-      const leadId = typeof appointment.leadId === 'object'
-        ? appointment.leadId._id
-        : appointment.leadId || ''
-      
-      const clientId = typeof appointment.clientId === 'object'
-        ? appointment.clientId._id
-        : appointment.clientId || ''
+      // ✅ CORRECCIÓN: Usar optional chaining (?.) para evitar errores si la propiedad es null
+      // typeof null === 'object', por lo que la validación anterior fallaba.
+      const projectId = appointment.projectId?._id || appointment.projectId || ''
+      const assignedToId = appointment.assignedTo?._id || appointment.assignedTo || ''
+      const leadId = appointment.leadId?._id || appointment.leadId || ''
+      const clientId = appointment.clientId?._id || appointment.clientId || ''
       
       setFormData({
         title: appointment.title || '',
@@ -244,7 +227,6 @@ const AppointmentModal = ({
     setDurationInfo(null)
   }, [appointment, prefillData, open])
 
-  // ✅ Calcular duración con traducción
   useEffect(() => {
     if (formData.startDate && formData.startTime) {
       const validation = validateAppointmentDuration(
@@ -286,7 +268,6 @@ const AppointmentModal = ({
   }
 
   const handleSubmit = async () => {
-    // ✅ Validaciones traducidas
     if (!formData.title) {
       setError(t('validation.titleRequired'))
       return
@@ -389,7 +370,7 @@ const AppointmentModal = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 0,
+          borderRadius: 0, // ✅ Bordes afilados
           border: '1px solid #ececec'
         }
       }}
@@ -428,7 +409,7 @@ const AppointmentModal = ({
                 fontWeight: 700,
                 letterSpacing: '0.5px',
                 textTransform: 'uppercase',
-                borderRadius: 0
+                borderRadius: 0 // ✅ Bordes afilados
               }}
             >
               {t(currentStatusConfig.labelKey)}
@@ -459,7 +440,8 @@ const AppointmentModal = ({
               '& .MuiInputBase-input': {
                 fontFamily: '"Courier New", monospace',
                 fontSize: '0.75rem'
-              }
+              },
+              '& .MuiOutlinedInput-root': { borderRadius: 0 }
             }}
           />
 
@@ -482,12 +464,7 @@ const AppointmentModal = ({
                 {APPOINTMENT_TYPES.map(type => (
                   <MenuItem key={type.value} value={type.value}>
                     <Box display="flex" alignItems="center" gap={1}>
-                      <Box sx={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: '50%',
-                        bgcolor: type.color
-                      }} />
+                      <Box sx={{ width: 10, height: 10, borderRadius: 0, bgcolor: type.color }} />
                       {t(type.labelKey)}
                     </Box>
                   </MenuItem>
@@ -512,12 +489,7 @@ const AppointmentModal = ({
                 {APPOINTMENT_STATUSES.map(status => (
                   <MenuItem key={status.value} value={status.value}>
                     <Box display="flex" alignItems="center" gap={1}>
-                      <Box sx={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: '50%',
-                        bgcolor: status.color
-                      }} />
+                      <Box sx={{ width: 10, height: 10, borderRadius: 0, bgcolor: status.color }} />
                       {t(status.labelKey)}
                     </Box>
                   </MenuItem>
@@ -557,16 +529,8 @@ const AppointmentModal = ({
                 }
               }}
             >
-              <Tab 
-                icon={<TrendingUp sx={{ fontSize: 18 }} />} 
-                iconPosition="start"
-                label={t('contact.lead')} 
-              />
-              <Tab 
-                icon={<Person sx={{ fontSize: 18 }} />} 
-                iconPosition="start"
-                label={t('contact.client')} 
-              />
+              <Tab icon={<TrendingUp sx={{ fontSize: 18 }} />} iconPosition="start" label={t('contact.lead')} />
+              <Tab icon={<Person sx={{ fontSize: 18 }} />} iconPosition="start" label={t('contact.client')} />
             </Tabs>
 
             {contactType === 0 ? (
@@ -578,15 +542,9 @@ const AppointmentModal = ({
                   value={formData.leadId}
                   onChange={(e) => handleChange('leadId', e.target.value)}
                   label={`${t('contact.lead')} *`}
-                  sx={{
-                    fontFamily: '"Courier New", monospace',
-                    fontSize: '0.75rem',
-                    borderRadius: 0
-                  }}
+                  sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}
                 >
-                  <MenuItem value="">
-                    <em>{t('form.selectLead')}</em>
-                  </MenuItem>
+                  <MenuItem value=""><em>{t('form.selectLead')}</em></MenuItem>
                   {leads.map(lead => (
                     <MenuItem key={lead._id} value={lead._id}>
                       {lead.name} {lead.phone && `- ${lead.phone}`}
@@ -603,22 +561,14 @@ const AppointmentModal = ({
                   value={formData.clientId}
                   onChange={(e) => handleChange('clientId', e.target.value)}
                   label={`${t('contact.client')} *`}
-                  sx={{
-                    fontFamily: '"Courier New", monospace',
-                    fontSize: '0.75rem',
-                    borderRadius: 0
-                  }}
+                  sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}
                 >
-                  <MenuItem value="">
-                    <em>{t('form.selectClient')}</em>
-                  </MenuItem>
-                  {residents
-                    .filter(r => r.role === 'user')
-                    .map(client => (
-                      <MenuItem key={client._id} value={client._id}>
-                        {client.firstName} {client.lastName} {client.email && `- ${client.email}`}
-                      </MenuItem>
-                    ))}
+                  <MenuItem value=""><em>{t('form.selectClient')}</em></MenuItem>
+                  {residents.filter(r => r.role === 'user').map(client => (
+                    <MenuItem key={client._id} value={client._id}>
+                      {client.firstName} {client.lastName} {client.email && `- ${client.email}`}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             )}
@@ -633,16 +583,10 @@ const AppointmentModal = ({
               value={formData.projectId}
               onChange={(e) => handleChange('projectId', e.target.value)}
               label={`${t('form.project')} *`}
-              sx={{
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.75rem',
-                borderRadius: 0
-              }}
+              sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}
             >
               {projects.map(project => (
-                <MenuItem key={project._id} value={project._id}>
-                  {project.name}
-                </MenuItem>
+                <MenuItem key={project._id} value={project._id}>{project.name}</MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -656,33 +600,17 @@ const AppointmentModal = ({
               value={formData.assignedTo}
               onChange={(e) => handleChange('assignedTo', e.target.value)}
               label={`${t('form.assignedTo')} *`}
-              sx={{
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.75rem',
-                borderRadius: 0
-              }}
+              sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}
             >
               {agents.map(agent => (
-                <MenuItem key={agent._id} value={agent._id}>
-                  {agent.firstName} {agent.lastName}
-                </MenuItem>
+                <MenuItem key={agent._id} value={agent._id}>{agent.firstName} {agent.lastName}</MenuItem>
               ))}
             </Select>
           </FormControl>
 
           {/* Fecha y hora de inicio */}
           <Box>
-            <Typography
-              sx={{
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                letterSpacing: '1px',
-                textTransform: 'uppercase',
-                mb: 1,
-                color: '#666'
-              }}
-            >
+            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', mb: 1, color: '#666' }}>
               {`${t('dateTime.startTitle')} *`}
             </Typography>
             <Box display="flex" gap={2}>
@@ -694,14 +622,8 @@ const AppointmentModal = ({
                 InputLabelProps={{ shrink: true }}
                 fullWidth
                 required
-                sx={{
-                  '& .MuiInputBase-input': {
-                    fontFamily: '"Courier New", monospace',
-                    fontSize: '0.75rem'
-                  }
-                }}
+                sx={{ '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }}
               />
-
               <TextField
                 label={`${t('form.startTime')} *`}
                 type="time"
@@ -710,29 +632,14 @@ const AppointmentModal = ({
                 InputLabelProps={{ shrink: true }}
                 fullWidth
                 required
-                sx={{
-                  '& .MuiInputBase-input': {
-                    fontFamily: '"Courier New", monospace',
-                    fontSize: '0.75rem'
-                  }
-                }}
+                sx={{ '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }}
               />
             </Box>
           </Box>
 
           {/* Fecha y hora de fin */}
           <Box>
-            <Typography
-              sx={{
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                letterSpacing: '1px',
-                textTransform: 'uppercase',
-                mb: 1,
-                color: '#666'
-              }}
-            >
+            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', mb: 1, color: '#666' }}>
               {t('dateTime.endTitle')}
             </Typography>
             <Box display="flex" gap={2}>
@@ -743,14 +650,8 @@ const AppointmentModal = ({
                 onChange={(e) => handleChange('endDate', e.target.value)}
                 InputLabelProps={{ shrink: true }}
                 fullWidth
-                sx={{
-                  '& .MuiInputBase-input': {
-                    fontFamily: '"Courier New", monospace',
-                    fontSize: '0.75rem'
-                  }
-                }}
+                sx={{ '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }}
               />
-
               <TextField
                 label={t('form.endTime')}
                 type="time"
@@ -758,12 +659,7 @@ const AppointmentModal = ({
                 onChange={(e) => handleChange('endTime', e.target.value)}
                 InputLabelProps={{ shrink: true }}
                 fullWidth
-                sx={{
-                  '& .MuiInputBase-input': {
-                    fontFamily: '"Courier New", monospace',
-                    fontSize: '0.75rem'
-                  }
-                }}
+                sx={{ '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }}
               />
             </Box>
 
@@ -775,18 +671,13 @@ const AppointmentModal = ({
                   p: 1.5,
                   bgcolor: durationInfo.valid ? '#e8f5e9' : '#ffebee',
                   border: `1px solid ${durationInfo.valid ? '#4caf50' : '#f44336'}`,
-                  borderRadius: 1,
+                  borderRadius: 0, // ✅ Bordes afilados
                   display: 'flex',
                   alignItems: 'center',
                   gap: 1
                 }}
               >
-                <AccessTime 
-                  sx={{ 
-                    fontSize: 16, 
-                    color: durationInfo.valid ? '#2e7d32' : '#c62828' 
-                  }} 
-                />
+                <AccessTime sx={{ fontSize: 16, color: durationInfo.valid ? '#2e7d32' : '#c62828' }} />
                 <Typography
                   variant="caption"
                   sx={{
@@ -796,26 +687,13 @@ const AppointmentModal = ({
                     color: durationInfo.valid ? '#2e7d32' : '#c62828'
                   }}
                 >
-                  {durationInfo.valid 
-                    ? t('duration.valid', { formatted: durationInfo.formatted })
-                    : durationInfo.error
-                  }
+                  {durationInfo.valid ? t('duration.valid', { formatted: durationInfo.formatted }) : durationInfo.error}
                 </Typography>
               </Box>
             )}
 
-            {/* Hint si no hay fecha de fin */}
             {!formData.endDate && !formData.endTime && formData.startDate && formData.startTime && (
-              <Typography
-                variant="caption"
-                sx={{
-                  display: 'block',
-                  mt: 1,
-                  color: '#888',
-                  fontFamily: '"Courier New", monospace',
-                  fontSize: '0.7rem'
-                }}
-              >
+              <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#888', fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
                 {t('dateTime.autoEndHint')}
               </Typography>
             )}
@@ -830,10 +708,8 @@ const AppointmentModal = ({
             multiline
             rows={3}
             sx={{
-              '& .MuiInputBase-input': {
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.75rem'
-              }
+              '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' },
+              '& .MuiOutlinedInput-root': { borderRadius: 0 }
             }}
           />
         </Box>
@@ -844,14 +720,7 @@ const AppointmentModal = ({
           <Button
             onClick={handleDelete}
             disabled={loading}
-            sx={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.75rem',
-              color: '#d32f2f',
-              textTransform: 'none',
-              letterSpacing: '0.5px',
-              mr: 'auto'
-            }}
+            sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', color: '#d32f2f', textTransform: 'none', letterSpacing: '0.5px', mr: 'auto' }}
           >
             {t('form.delete')}
           </Button>
@@ -859,13 +728,7 @@ const AppointmentModal = ({
         <Button
           onClick={onClose}
           disabled={loading}
-          sx={{
-            fontFamily: '"Courier New", monospace',
-            fontSize: '0.75rem',
-            color: '#888',
-            textTransform: 'none',
-            letterSpacing: '0.5px'
-          }}
+          sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', color: '#888', textTransform: 'none', letterSpacing: '0.5px' }}
         >
           {t('form.cancel')}
         </Button>
@@ -880,8 +743,8 @@ const AppointmentModal = ({
             textTransform: 'none',
             letterSpacing: '0.5px',
             bgcolor: '#000',
-            borderRadius: 0,
-            '&:hover': { bgcolor: '#333' }
+            borderRadius: 0, // ✅ Bordes afilados
+            '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' }
           }}
         >
           {loading ? t('form.saving') : isEditing ? t('form.update') : t('form.create')}

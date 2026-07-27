@@ -1,3 +1,4 @@
+// apps/mv-crm/src/pages/Referrals.jsx
 import { useState, useEffect, useMemo } from 'react'
 import { 
   Box, Tabs, Tab, Paper, Typography, Grid, 
@@ -9,18 +10,18 @@ import { useTranslation } from 'react-i18next'
 
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
 import DataTable from '@shared/components/table/DataTable'
-import { useReferrals } from '../../../../shared/hooks/useReferrals'
-import { useReferralStats } from '../../../../shared/hooks/useReferralStats'
+import { useReferrals } from '@shared/hooks/useReferrals'
+import { useReferralStats } from '@shared/hooks/useReferralStats'
 import { useProjects } from '@shared/hooks/useProjects'
 import { useResidents } from '@shared/hooks/useResidents'
 import { useReferralColumns } from '../constants/Columns/useReferralColumns'
-import referralService from '../../../../shared/services/referralService'
+import referralService from '@shared/services/referralService'
 import api from '@shared/services/api'
 import { getProjectById } from '@shared/config/projectsConfig'
 
 import ReferralProgramConfig from '../components/referrals/ReferralProgramConfig'
 import ReferrerLeaderboard from '../components/referrals/ReferrerLeaderboard'
-import SubmitReferralModal from '../../../../shared/components/referrals/SubmitReferralModal'
+import SubmitReferralModal from '@shared/components/referrals/SubmitReferralModal'
 
 export default function Referrals() {
   const { t } = useTranslation('referrals')
@@ -40,11 +41,10 @@ export default function Referrals() {
   const [submitting, setSubmitting] = useState(false)
   
   const [projectType, setProjectType] = useState('houses')
-  const [properties, setProperties] = useState([]) // Propiedades del REFERIDO (para convertir)
-  const [referrerProperties, setReferrerProperties] = useState([]) // Propiedades del REFERIDOR (para aprobar descuento)
+  const [properties, setProperties] = useState([])
+  const [referrerProperties, setReferrerProperties] = useState([])
   const [propertiesLoading, setPropertiesLoading] = useState(false)
 
-  // Estado específico para el formulario de aprobación de recompensa
   const [approveFormData, setApproveFormData] = useState({
     discountBase: 'original_100',
     rewardPropertyId: '',
@@ -81,7 +81,6 @@ export default function Referrals() {
       const data = Array.isArray(response.data) ? response.data : (response.data.properties || response.data.apartments || response.data.data || [])
       
       if (type === 'convert') {
-        // Filtrar propiedades del REFERIDO
         const targetEmail = (referral.referredEmail || referral.referredLeadId?.email)?.toLowerCase().trim()
         const targetPhone = (referral.referredPhone || referral.referredLeadId?.phone)?.trim()
         
@@ -96,11 +95,8 @@ export default function Referrals() {
         })
         setProperties(filteredData)
         setConvertPropertyId(referral.conversionPropertyId || referral.conversionApartmentId || '')
-        
       } else if (type === 'approve') {
-        // Filtrar propiedades del REFERIDOR
         const referrerId = typeof referral.referrerId === 'object' ? referral.referrerId._id : referral.referrerId
-        
         const referrerFilteredData = data.filter(res => {
           if (Array.isArray(res.users)) {
             return res.users.some(u => (typeof u === 'object' ? u._id : u) === referrerId)
@@ -109,8 +105,6 @@ export default function Referrals() {
         })
         setReferrerProperties(referrerFilteredData)
         setRewardAmount(referral.rewardAmount || '')
-        
-        // Resetear formulario de aprobación
         setApproveFormData({
           discountBase: 'original_100',
           rewardPropertyId: referral.rewardPropertyId || '',
@@ -138,28 +132,22 @@ export default function Referrals() {
           convertPayload.apartmentId = convertPropertyId
         }
         await referralService.convert(selectedReferral._id, convertPayload)
-        
       } else if (actionType === 'approve') {
-        const payload = {
-          rewardType: selectedReferral.rewardType || 'cash'
-        }
+        const payload = { rewardType: selectedReferral.rewardType || 'cash' }
 
         if (selectedReferral.rewardType === 'cash') {
           payload.rewardAmount = Number(rewardAmount)
         } else if (selectedReferral.rewardType === 'property_discount') {
           payload.discountBase = approveFormData.discountBase
-          
           if (approveFormData.discountPercent) {
             payload.discountPercent = Number(approveFormData.discountPercent)
           }
-          
           if (projectType === 'houses') {
             payload.rewardPropertyId = approveFormData.rewardPropertyId
           } else {
             payload.rewardApartmentId = approveFormData.rewardApartmentId
           }
         }
-        
         await referralService.approveReward(selectedReferral._id, payload)
       }
       setActionModalOpen(false)
@@ -180,13 +168,16 @@ export default function Referrals() {
   const columns = useReferralColumns({ t, referrerMap, projects, onAction: openActionModal })
   const conversionRate = stats?.total > 0 ? (((stats.byStatus?.converted || 0) / stats.total) * 100).toFixed(1) : 0
 
+  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
+  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' } }
+
   return (
     <PageLayout title={t('page.title')} subtitle={t('page.subtitle')}>
-      <Paper sx={{ borderRadius: 2, overflow: 'hidden' }}>
+      <Paper sx={{ borderRadius: 0, overflow: 'hidden', border: '1px solid #ececec' }}>
         <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)} sx={{ borderBottom: '1px solid #ececec', px: 2, bgcolor: '#fafafa' }}>
-          <Tab label={t('page.title', 'Referidos')} />
-          <Tab label={t('leaderboard.title', 'Tabla de Líderes')} />
-          <Tab label={t('program.title', 'Configuración')} />
+          <Tab label={t('page.title')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.8rem', letterSpacing: '0.5px' }} />
+          <Tab label={t('leaderboard.title')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.8rem', letterSpacing: '0.5px' }} />
+          <Tab label={t('program.title')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.8rem', letterSpacing: '0.5px' }} />
         </Tabs>
 
         <Box sx={{ p: 3 }}>
@@ -194,29 +185,29 @@ export default function Referrals() {
             <Box>
               <Grid container spacing={2} sx={{ mb: 3 }}>
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#e3f2fd' }}>
+                  <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#e3f2fd', borderRadius: 0, border: '1px solid #bbdefb' }}>
                     <TrendingUp color="primary" fontSize="large" />
                     <Box>
-                      <Typography variant="caption" color="text.secondary">{t('stats.total')}</Typography>
-                      <Typography variant="h5" fontWeight={700}>{statsLoading ? '...' : (stats?.total ?? 0)}</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>{t('stats.total')}</Typography>
+                      <Typography variant="h5" fontWeight={700} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{statsLoading ? '...' : (stats?.total ?? 0)}</Typography>
                     </Box>
                   </Paper>
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#e8f5e9' }}>
+                  <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#e8f5e9', borderRadius: 0, border: '1px solid #c8e6c9' }}>
                     <EmojiEvents color="success" fontSize="large" />
                     <Box>
-                      <Typography variant="caption" color="text.secondary">{t('stats.conversionRate')}</Typography>
-                      <Typography variant="h5" fontWeight={700}>{statsLoading ? '...' : `${conversionRate}%`}</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>{t('stats.conversionRate')}</Typography>
+                      <Typography variant="h5" fontWeight={700} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{statsLoading ? '...' : `${conversionRate}%`}</Typography>
                     </Box>
                   </Paper>
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#fff3e0' }}>
+                  <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#fff3e0', borderRadius: 0, border: '1px solid #ffe0b2' }}>
                     <AttachMoney color="warning" fontSize="large" />
                     <Box>
-                      <Typography variant="caption" color="text.secondary">{t('stats.rewardsPaid')}</Typography>
-                      <Typography variant="h5" fontWeight={700}>{statsLoading ? '...' : `$${stats?.rewardsPaid ?? 0}`}</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>{t('stats.rewardsPaid')}</Typography>
+                      <Typography variant="h5" fontWeight={700} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{statsLoading ? '...' : `$${stats?.rewardsPaid ?? 0}`}</Typography>
                     </Box>
                   </Paper>
                 </Grid>
@@ -225,23 +216,23 @@ export default function Referrals() {
               <Box sx={{ mb: 2, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
                 <FormControl size="small" sx={{ minWidth: 200 }}>
                   <InputLabel>{t('columns.project')}</InputLabel>
-                  <Select value={filters.projectId} onChange={(e) => handleFilterChange('projectId', e.target.value)} label={t('columns.project')}>
-                    <MenuItem value="">{t('stats.allProjects', 'Todos los Proyectos')}</MenuItem>
-                    {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
+                  <Select value={filters.projectId} onChange={(e) => handleFilterChange('projectId', e.target.value)} label={t('columns.project')} sx={inputSx}>
+                    <MenuItem value="">{t('stats.allProjects')}</MenuItem>
+                    {projects.map(p => <MenuItem key={p._id} value={p._id} sx={{ fontFamily: '"Courier New", monospace' }}>{p.name}</MenuItem>)}
                   </Select>
                 </FormControl>
                 <FormControl size="small" sx={{ minWidth: 200 }}>
                   <InputLabel>{t('columns.status')}</InputLabel>
-                  <Select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} label={t('columns.status')}>
-                    <MenuItem value="">{t('statuses.all', 'Todos')}</MenuItem>
+                  <Select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} label={t('columns.status')} sx={inputSx}>
+                    <MenuItem value="">{t('statuses.all')}</MenuItem>
                     {['pending', 'contacted', 'qualified', 'converted', 'reward_pending', 'reward_paid', 'expired'].map(s => (
-                      <MenuItem key={s} value={s}>{t(`statuses.${s}`, s)}</MenuItem>
+                      <MenuItem key={s} value={s} sx={{ fontFamily: '"Courier New", monospace' }}>{t(`statuses.${s}`)}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
                 <Box sx={{ flexGrow: 1 }} />
-                <Button variant="contained" startIcon={<Add />} onClick={() => setCreateModalOpen(true)}>
-                  {t('actions.createReferral', 'Nuevo Referido')}
+                <Button variant="contained" startIcon={<Add />} onClick={() => setCreateModalOpen(true)} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+                  {t('actions.createReferral')}
                 </Button>
               </Box>
 
@@ -256,58 +247,51 @@ export default function Referrals() {
 
       <SubmitReferralModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} onSuccess={handleCreateSuccess} mode="crm" />
 
-      {/* Modal de Acción (Convertir / Aprobar) */}
-      <Dialog open={actionModalOpen} onClose={() => setActionModalOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {actionType === 'convert' ? t('actions.convert', 'Marcar como Venta') : t('actions.approveReward', 'Aprobar Recompensa')}
+      <Dialog open={actionModalOpen} onClose={() => setActionModalOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
+        <DialogTitle sx={{ borderBottom: '1px solid #ececec', fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+          {actionType === 'convert' ? t('actions.convert') : t('actions.approveReward')}
         </DialogTitle>
         <DialogContent dividers>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
             <Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}><strong>{t('actions.referralInfo', 'Información del Referido')}</strong></Typography>
-              <Typography variant="body2"><strong>{t('actions.name', 'Nombre')}:</strong> {selectedReferral?.referredName || 'N/A'}</Typography>
-              <Typography variant="body2"><strong>{t('actions.phone', 'Teléfono')}:</strong> {selectedReferral?.referredPhone || 'N/A'}</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}><strong>{t('actions.referralInfo')}</strong></Typography>
+              <Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}><strong>{t('actions.name')}:</strong> {selectedReferral?.referredName || t('common.na')}</Typography>
+              <Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}><strong>{t('actions.phone')}:</strong> {selectedReferral?.referredPhone || t('common.na')}</Typography>
             </Box>
             
-            {/* ================= CONVERTIR ================= */}
             {actionType === 'convert' && (
               <FormControl fullWidth required>
-                <InputLabel>{t('actions.propertyId', 'Propiedad Comprada (Referido)')}</InputLabel>
-                <Select value={convertPropertyId} onChange={(e) => setConvertPropertyId(e.target.value)} label={t('actions.propertyId', 'Propiedad Comprada (Referido)')} disabled={propertiesLoading}>
+                <InputLabel>{t('actions.propertyId')}</InputLabel>
+                <Select value={convertPropertyId} onChange={(e) => setConvertPropertyId(e.target.value)} label={t('actions.propertyId')} disabled={propertiesLoading} sx={inputSx}>
                   {propertiesLoading ? (
-                    <MenuItem value=""><em>{t('loading', 'Cargando...')}</em></MenuItem>
+                    <MenuItem value=""><em>{t('common.loading')}</em></MenuItem>
                   ) : properties.length === 0 ? (
-                    <MenuItem value=""><em>{t('noProperties', 'No hay propiedades asignadas a este usuario')}</em></MenuItem>
+                    <MenuItem value=""><em>{t('actions.noReferrerProperties')}</em></MenuItem>
                   ) : (
                     properties.map(property => {
                       const label = projectType === 'houses' 
-                        ? `Lote ${property.lot?.number || property.lot || 'N/A'} ${property.model?.model || property.model?.name ? `- ${property.model.model || property.model.name}` : ''}`
-                        : `Apto ${property.apartmentNumber || 'N/A'} ${property.floorNumber ? `(Piso ${property.floorNumber})` : ''}`
-                      return <MenuItem key={property._id} value={property._id}>{label}</MenuItem>
+                        ? `Lote ${property.lot?.number || property.lot || t('common.na')} ${property.model?.model || property.model?.name ? `- ${property.model.model || property.model.name}` : ''}`
+                        : `Apto ${property.apartmentNumber || t('common.na')} ${property.floorNumber ? `(Piso ${property.floorNumber})` : ''}`
+                      return <MenuItem key={property._id} value={property._id} sx={{ fontFamily: '"Courier New", monospace' }}>{label}</MenuItem>
                     })
                   )}
                 </Select>
               </FormControl>
             )}
 
-            {/* ================= APROBAR RECOMPENSA ================= */}
             {actionType === 'approve' && (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {selectedReferral?.rewardType === 'property_discount' ? (
                   <>
-                    <Alert severity="info" sx={{ mb: 1 }}>
-                      {t('actions.discountInfo', 'Seleccione la propiedad del referidor sobre la cual se aplicará el descuento.')}
+                    <Alert severity="info" sx={{ mb: 1, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
+                      {t('actions.discountInfo')}
                     </Alert>
                     
                     <FormControl fullWidth required>
-                      <InputLabel>{t('actions.discountBase', 'Base del Descuento')}</InputLabel>
-                      <Select 
-                        value={approveFormData.discountBase} 
-                        onChange={(e) => setApproveFormData(prev => ({ ...prev, discountBase: e.target.value }))}
-                        label={t('actions.discountBase', 'Base del Descuento')}
-                      >
-                        <MenuItem value="original_100">100% del Precio Original</MenuItem>
-                        <MenuItem value="after_first_10">Después del primer 10%</MenuItem>
+                      <InputLabel>{t('actions.discountBase')}</InputLabel>
+                      <Select value={approveFormData.discountBase} onChange={(e) => setApproveFormData(prev => ({ ...prev, discountBase: e.target.value }))} label={t('actions.discountBase')} sx={inputSx}>
+                        <MenuItem value="original_100" sx={{ fontFamily: '"Courier New", monospace' }}>100% del Precio Original</MenuItem>
+                        <MenuItem value="after_first_10" sx={{ fontFamily: '"Courier New", monospace' }}>Después del primer 10%</MenuItem>
                       </Select>
                     </FormControl>
 
@@ -323,15 +307,16 @@ export default function Referrals() {
                           }
                         }}
                         label={projectType === 'houses' ? 'Lote del Referidor' : 'Apartamento del Referidor'}
+                        sx={inputSx}
                       >
                         {referrerProperties.length === 0 ? (
-                          <MenuItem value="" disabled><em>{t('actions.noReferrerProperties', 'El referidor no tiene propiedades asignadas')}</em></MenuItem>
+                          <MenuItem value="" disabled><em>{t('actions.noReferrerProperties')}</em></MenuItem>
                         ) : (
                           referrerProperties.map(prop => {
                             const label = projectType === 'houses' 
-                              ? `Lote ${prop.lot?.number || prop.lot || 'N/A'} ${prop.model?.model || prop.model?.name ? `- ${prop.model.model || prop.model.name}` : ''}`
-                              : `Apto ${prop.apartmentNumber || 'N/A'} ${prop.floorNumber ? `(Piso ${prop.floorNumber})` : ''}`
-                            return <MenuItem key={prop._id} value={prop._id}>{label}</MenuItem>
+                              ? `Lote ${prop.lot?.number || prop.lot || t('common.na')} ${prop.model?.model || prop.model?.name ? `- ${prop.model.model || prop.model.name}` : ''}`
+                              : `Apto ${prop.apartmentNumber || t('common.na')} ${prop.floorNumber ? `(Piso ${prop.floorNumber})` : ''}`
+                            return <MenuItem key={prop._id} value={prop._id} sx={{ fontFamily: '"Courier New", monospace' }}>{label}</MenuItem>
                           })
                         )}
                       </Select>
@@ -342,22 +327,24 @@ export default function Referrals() {
                       size="small" 
                       value={approveFormData.discountPercent} 
                       onChange={(e) => setApproveFormData(prev => ({ ...prev, discountPercent: e.target.value }))}
-                      label={t('actions.overrideDiscount', 'Sobrescribir % Descuento (Opcional)')}
+                      label={t('actions.overrideDiscount')}
                       helperText="Dejar vacío para usar el % configurado en el programa del proyecto"
+                      sx={{ ...inputSx, '& .MuiFormHelperText-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' } }}
                     />
                   </>
                 ) : (
                   <>
-                    <Alert severity="warning" sx={{ mb: 1 }}>
-                      {t('actions.cashWarning', 'Nota: El sistema rechazará esta acción si el referidor tiene saldo pendiente en alguna de sus unidades.')}
+                    <Alert severity="warning" sx={{ mb: 1, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
+                      {t('actions.cashWarning')}
                     </Alert>
                     <TextField 
                       type="number"
                       size="small" 
                       value={rewardAmount} 
                       onChange={(e) => setRewardAmount(e.target.value)}
-                      label={t('actions.rewardAmount', 'Monto de Recompensa (Cash)')}
+                      label={t('actions.rewardAmount')}
                       required
+                      sx={inputSx}
                     />
                   </>
                 )}
@@ -365,15 +352,16 @@ export default function Referrals() {
             )}
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setActionModalOpen(false)} disabled={submitting}>{t('actions.cancel')}</Button>
+        <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec' }}>
+          <Button onClick={() => setActionModalOpen(false)} disabled={submitting} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('actions.cancel')}</Button>
           <Button 
             variant="contained" 
             onClick={handleActionSubmit} 
             disabled={submitting || (actionType === 'convert' && !convertPropertyId) || (actionType === 'approve' && selectedReferral?.rewardType === 'property_discount' && (!approveFormData.rewardPropertyId && !approveFormData.rewardApartmentId))}
             startIcon={submitting && <CircularProgress size={16} />}
+            sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}
           >
-            {submitting ? t('loading', 'Procesando...') : t('actions.save')}
+            {submitting ? t('common.loading') : t('actions.save')}
           </Button>
         </DialogActions>
       </Dialog>

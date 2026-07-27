@@ -1,7 +1,8 @@
+// apps/mv-crm/src/components/postSale/tabs/OnboardingPanel.jsx
 import { useState, useMemo } from 'react'
 import { 
   Box, Button, Grid, FormControl, InputLabel, Select, MenuItem, 
-  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions 
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Typography
 } from '@mui/material'
 import { Add, Close, Warning as WarningIcon } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
@@ -22,20 +23,15 @@ export default function OnboardingPanel({ onNotify }) {
   const { projects } = useProjects()
   const { users: residents } = useResidents(null)
 
-  // Estados de Filtros
   const [filters, setFilters] = useState({ projectId: '', clientId: '', status: '' })
-  
-  // Estados de Modales
   const [createFormOpen, setCreateFormOpen] = useState(false)
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedOnboarding, setSelectedOnboarding] = useState(null)
 
-  // Hooks de Datos
   const { data: onboardings, loading: onboardingLoading, refresh: refreshOnboarding } = useOnboarding(filters)
   const { propertiesMap, loading: resolvingProperties } = useResolvedProperties(onboardings)
 
-  // Filtro dinámico de clientes
   const filteredResidents = useMemo(() => {
     if (!filters.projectId) return residents.filter(r => r.role === 'user')
     return residents.filter(r => 
@@ -48,30 +44,18 @@ export default function OnboardingPanel({ onNotify }) {
   const handleFilterChange = (field, value) => setFilters(prev => ({ ...prev, [field]: value }))
   const clearFilters = () => setFilters({ projectId: '', clientId: '', status: '' })
 
-  // Handlers de Acciones
-  const handleView = (row) => {
-    setSelectedOnboarding(row)
-    setDetailModalOpen(true)
-  }
-
-  const handleEdit = (row) => {
-    setSelectedOnboarding(row)
-    setCreateFormOpen(true)
-  }
-
-  const promptDelete = (row) => {
-    setSelectedOnboarding(row)
-    setDeleteDialogOpen(true)
-  }
+  const handleView = (row) => { setSelectedOnboarding(row); setDetailModalOpen(true) }
+  const handleEdit = (row) => { setSelectedOnboarding(row); setCreateFormOpen(true) }
+  const promptDelete = (row) => { setSelectedOnboarding(row); setDeleteDialogOpen(true) }
 
   const confirmDelete = async () => {
     if (!selectedOnboarding) return
     try {
       await api.delete(`/onboarding/${selectedOnboarding._id}`)
-      onNotify(t('actions.deletedMsg', 'El onboarding ha sido eliminado correctamente.'), 'success')
+      onNotify(t('actions.deletedMsg'), 'success')
       refreshOnboarding()
     } catch (error) {
-      onNotify(t('actions.deleteErrorMsg', 'No se pudo eliminar el onboarding.'), 'error')
+      onNotify(t('actions.deleteErrorMsg'), 'error')
     } finally {
       setDeleteDialogOpen(false)
       setSelectedOnboarding(null)
@@ -82,100 +66,78 @@ export default function OnboardingPanel({ onNotify }) {
     setCreateFormOpen(false)
     setSelectedOnboarding(null)
     refreshOnboarding()
-    onNotify(t('onboarding.saveSuccess', 'Onboarding guardado correctamente.'), 'success')
+    onNotify(t('onboarding.saveSuccess'), 'success')
   }
 
-  // Columnas
-  const columns = useOnboardingColumns({ 
-    t, 
-    propertiesMap, 
-    onView: handleView, 
-    onEdit: handleEdit, 
-    onDelete: promptDelete 
-  })
-
+  const columns = useOnboardingColumns({ t, propertiesMap, onView: handleView, onEdit: handleEdit, onDelete: promptDelete })
   const isLoading = onboardingLoading || resolvingProperties
+
+  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
+  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' } }
 
   return (
     <Box>
-      {/* UI DE FILTROS */}
-      <Box sx={{ mb: 3, p: 2.5, bgcolor: '#f9f9f9', borderRadius: 2, border: '1px solid #e0e0e0' }}>
+      <Box sx={{ mb: 3, p: 2.5, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
-              <InputLabel>{t('filters.project', 'Proyecto')}</InputLabel>
-              <Select value={filters.projectId} onChange={(e) => handleFilterChange('projectId', e.target.value)} label={t('filters.project', 'Proyecto')}>
-                <MenuItem value="">{t('filters.all', 'Todos')}</MenuItem>
+              <InputLabel>{t('filters.project')}</InputLabel>
+              <Select value={filters.projectId} onChange={(e) => handleFilterChange('projectId', e.target.value)} label={t('filters.project')} sx={inputSx}>
+                <MenuItem value="">{t('filters.all')}</MenuItem>
                 {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small" disabled={!filters.projectId}>
-              <InputLabel>{t('filters.client', 'Cliente')}</InputLabel>
-              <Select value={filters.clientId} onChange={(e) => handleFilterChange('clientId', e.target.value)} label={t('filters.client', 'Cliente')}>
-                <MenuItem value="">{t('filters.all', 'Todos')}</MenuItem>
+              <InputLabel>{t('filters.client')}</InputLabel>
+              <Select value={filters.clientId} onChange={(e) => handleFilterChange('clientId', e.target.value)} label={t('filters.client')} sx={inputSx}>
+                <MenuItem value="">{t('filters.all')}</MenuItem>
                 {filteredResidents.map(client => <MenuItem key={client._id} value={client._id}>{client.firstName} {client.lastName}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
-              <InputLabel>{t('filters.status', 'Estado')}</InputLabel>
-              <Select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} label={t('filters.status', 'Estado')}>
-                <MenuItem value="">{t('filters.all', 'Todos')}</MenuItem>
+              <InputLabel>{t('filters.status')}</InputLabel>
+              <Select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} label={t('filters.status')} sx={inputSx}>
+                <MenuItem value="">{t('filters.all')}</MenuItem>
                 {['not_started', 'in_progress', 'completed'].map(s => (
-                  <MenuItem key={s} value={s}>{t(`onboarding.statuses.${s}`, s)}</MenuItem>
+                  <MenuItem key={s} value={s}>{t(`onboarding.statuses.${s}`)}</MenuItem>
                 ))}
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Button variant="outlined" fullWidth startIcon={<Close />} onClick={clearFilters} sx={{ height: 40 }}>
-              {t('filters.clear', 'Limpiar')}
+            <Button variant="outlined" fullWidth startIcon={<Close />} onClick={clearFilters} sx={{ ...unifiedButtonSx, height: 40, border: '1px solid #000', color: '#000', '&:hover': { bgcolor: '#f5f5f5', borderColor: '#555', color: '#555', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
+              {t('filters.clear')}
             </Button>
           </Grid>
         </Grid>
       </Box>
 
-      {/* BOTÓN DE ACCIÓN */}
       <Box display="flex" justifyContent="flex-end" sx={{ mb: 2 }}>
-        <Button variant="contained" startIcon={<Add />} onClick={() => { setSelectedOnboarding(null); setCreateFormOpen(true); }}>
-          {t('onboarding.newOnboarding', 'Nuevo Onboarding')}
+        <Button variant="contained" startIcon={<Add />} onClick={() => { setSelectedOnboarding(null); setCreateFormOpen(true); }} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+          {t('onboarding.newOnboarding')}
         </Button>
       </Box>
 
-      {/* TABLA DE DATOS */}
       <DataTable columns={columns} data={onboardings || []} loading={isLoading} />
 
-      {/* MODAL DE CREACIÓN / EDICIÓN */}
-      <OnboardingForm 
-        open={createFormOpen} 
-        onClose={() => { setCreateFormOpen(false); setSelectedOnboarding(null); }} 
-        initialData={selectedOnboarding}
-        onSuccess={handleFormSuccess} 
-      />
+      <OnboardingForm open={createFormOpen} onClose={() => { setCreateFormOpen(false); setSelectedOnboarding(null); }} initialData={selectedOnboarding} onSuccess={handleFormSuccess} />
+      <OnboardingDetailDialog open={detailModalOpen} onClose={() => { setDetailModalOpen(false); setSelectedOnboarding(null); }} onboarding={selectedOnboarding} onRefresh={refreshOnboarding} onNotify={onNotify} />
 
-      {/* MODAL DE DETALLES Y CHECKLIST */}
-      <OnboardingDetailDialog 
-        open={detailModalOpen}
-        onClose={() => { setDetailModalOpen(false); setSelectedOnboarding(null); }}
-        onboarding={selectedOnboarding}
-        onRefresh={refreshOnboarding}
-        onNotify={onNotify}
-      />
-
-      {/* DIÁLOGO DE ELIMINACIÓN */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <WarningIcon color="error" />{t('actions.confirmDelete', '¿Estás seguro?')}
+          <WarningIcon color="error" />
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>{t('actions.confirmDelete')}</Typography>
         </DialogTitle>
         <DialogContent>
-          <DialogContentText>{t('actions.deleteWarning', 'Esta acción eliminará el onboarding de forma permanente.')}</DialogContentText>
+          <DialogContentText sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>{t('actions.deleteWarning')}</DialogContentText>
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
-          <Button onClick={() => setDeleteDialogOpen(false)}>{t('actions.cancel', 'Cancelar')}</Button>
-          <Button onClick={confirmDelete} color="error" variant="contained">{t('actions.yesDelete', 'Sí, eliminar')}</Button>
+          <Button onClick={() => setDeleteDialogOpen(false)} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('actions.cancel')}</Button>
+          <Button onClick={confirmDelete} color="error" variant="contained" sx={{ ...unifiedButtonSx, bgcolor: '#f44336', '&:hover': { bgcolor: '#d32f2f', boxShadow: '6px 6px 0px rgba(244,67,54,0.12)' } }}>{t('actions.yesDelete')}</Button>
         </DialogActions>
       </Dialog>
     </Box>

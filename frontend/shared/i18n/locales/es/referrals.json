@@ -35,33 +35,41 @@
     "view": "Ver Detalles",
     "save": "Guardar",
     "cancel": "Cancelar",
-    "saving": "Procesando...",
-    "submit": "Enviar Referido",
-    "createReferral": "Crear Referido"
+    "createReferral": "Nuevo Referido",
+    "referralInfo": "Información del Referido",
+    "name": "Nombre",
+    "phone": "Teléfono",
+    "propertyId": "Propiedad Comprada (Referido)",
+    "discountInfo": "Seleccione la propiedad del referidor sobre la cual se aplicará el descuento.",
+    "discountBase": "Base del Descuento",
+    "noReferrerProperties": "El referidor no tiene propiedades asignadas",
+    "overrideDiscount": "Sobrescribir % Descuento (Opcional)",
+    "cashWarning": "Nota: El sistema rechazará esta acción si el referidor tiene saldo pendiente en alguna de sus unidades.",
+    "rewardAmount": "Monto de Recompensa (Cash)"
   },
   "program": {
-    "title": "Configuración del Programa",
+    "title": "Configuración",
     "name": "Nombre del Programa",
-    "rewardPerReferral": "Recompensa por Referido",
+    "rewardPerReferral": "Monto Fijo por Referido",
+    "discountPercent": "Porcentaje de Descuento (%)",
     "rewardType": "Tipo de Recompensa",
+    "rewardTypes": {
+      "cash": "Efectivo (Cash)",
+      "property_discount": "Descuento en Propiedad"
+    },
     "isActive": "Programa Activo",
     "maxReferrals": "Máx. Referidos por Usuario",
     "terms": "Términos y Condiciones (ES)",
     "termsEn": "Términos y Condiciones (EN)",
     "createNew": "Crear Nuevo Programa",
     "edit": "Editar Programa",
-    "create": "Crear Programa de Referidos"
+    "create": "Crear Programa de Referidos",
+    "selectProjectError": "Debes seleccionar un proyecto",
+    "saveError": "Error al guardar el programa",
+    "confirmDelete": "¿Estás seguro de eliminar este programa?",
+    "deleteError": "Error al eliminar"
   },
-  "leaderboard": {
-    "title": "Tabla de Líderes",
-    "referrals": "Referidos",
-    "earned": "Ganado"
-  },
-  "modal": {
-    "submitTitle": "Enviar un Referido",
-    "createTitle": "Crear Referido (Admin)"
-  },
-  "fields": {
+    "fields": {
     "project": "Proyecto",
     "referrer": "Cliente Recomendador",
     "referredName": "Nombre del Referido",
@@ -72,20 +80,17 @@
     "discountPercent": "Porcentaje de Descuento (%)",
     "notes": "Notas Adicionales"
   },
-  "errors": {
-    "projectRequired": "El proyecto es obligatorio",
-    "referrerRequired": "Debes seleccionar un cliente recomendador",
-    "contactRequired": "Nombre y teléfono del referido son obligatorios",
-    "submitFailed": "Error al enviar el referido"
-  },
-  "warnings": {
-    "noReferrers": "No hay clientes asignados a este proyecto"
+  "leaderboard": {
+    "title": "Tabla de Líderes",
+    "referrals": "Referidos",
+    "earned": "Ganado"
   },
   "common": {
-    "select": "Seleccionar..."
+    "na": "N/A",
+    "select": "Seleccionar...",
+    "loading": "Cargando..."
   },
   "filters": {
-    "allProjects": "Todos los Proyectos",
-    "allStatuses": "Todos los Estados"
+    "allProjects": "Todos los Proyectos"
   }
 }

@@ -1,3 +1,4 @@
+// apps/mv-crm/src/components/postSale/OnboardingProgress.jsx
 import { useState, useEffect } from 'react'
 import { Box, Typography, LinearProgress, Checkbox, FormControlLabel, Paper, Chip } from '@mui/material'
 import { CheckCircle, Circle } from '@mui/icons-material'
@@ -32,14 +33,15 @@ const OnboardingProgress = ({ propertyId, onRefresh }) => {
   const currentLang = i18n.language === 'es' ? 'label_es' : 'label_en'
 
   return (
-    <Paper sx={{ p: 3, borderRadius: 2 }}>
+    <Paper sx={{ p: 3, borderRadius: 0, border: '1px solid #ececec' }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h6" fontWeight={600}>
-          {t('onboarding.progressTitle', 'Progreso de Onboarding')}
+        <Typography variant="h6" fontWeight={600} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase' }}>
+          {t('onboarding.progressTitle')}
         </Typography>
         <Chip 
           label={`${completedCount}/${totalCount}`} 
-          color={progress === 100 ? 'success' : 'primary'} 
+          color={progress === 100 ? 'success' : 'primary'}
+          sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 600 }}
         />
       </Box>
 
@@ -49,13 +51,13 @@ const OnboardingProgress = ({ propertyId, onRefresh }) => {
           value={progress} 
           sx={{ 
             height: 10, 
-            borderRadius: 5,
+            borderRadius: 0,
             bgcolor: '#e0e0e0',
-            '& .MuiLinearProgress-bar': { borderRadius: 5, bgcolor: '#4caf50' }
+            '& .MuiLinearProgress-bar': { borderRadius: 0, bgcolor: '#4caf50' }
           }} 
         />
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-          {Math.round(progress)}% {t('onboarding.completed', 'completado')}
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', fontFamily: '"Courier New", monospace' }}>
+          {Math.round(progress)}% {t('onboarding.completed')}
         </Typography>
       </Box>
 
@@ -66,7 +68,8 @@ const OnboardingProgress = ({ propertyId, onRefresh }) => {
             variant="outlined" 
             sx={{ 
               p: 2, 
-              borderRadius: 2,
+              borderRadius: 0,
+              border: '1px solid #e0e0e0',
               bgcolor: item.completed ? '#f1f8e9' : 'background.paper',
               borderColor: item.completed ? '#4caf50' : '#e0e0e0',
               transition: 'all 0.2s'
@@ -86,13 +89,13 @@ const OnboardingProgress = ({ propertyId, onRefresh }) => {
                   <Typography sx={{ 
                     fontWeight: 600,
                     textDecoration: item.completed ? 'line-through' : 'none',
-                    color: item.completed ? 'text.secondary' : 'text.primary'
+                    color: item.completed ? 'text.secondary' : 'text.primary',
+                    fontFamily: '"Helvetica Neue", sans-serif'
                   }}>
-                    {/* Fallback robusto para el texto del item */}
                     {item[currentLang] || item.label_es || item.label_en || item.label || item.key}
                   </Typography>
                   {item.description && (
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
                       {item.description}
                     </Typography>
                   )}

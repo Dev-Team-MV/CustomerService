@@ -1,3 +1,4 @@
+// apps/mv-crm/src/components/referrals/ReferralProgramConfig.jsx
 import { useState, useEffect } from 'react'
 import { 
   Box, Paper, Typography, Grid, TextField, FormControl, 
@@ -29,8 +30,8 @@ export default function ReferralProgramConfig({ projects }) {
   const [formData, setFormData] = useState({
     name: '', 
     rewardPerReferral: 0, 
-    discountPercent: 0, // ✅ Nuevo campo
-    rewardType: 'cash', // ✅ 'cash' | 'property_discount'
+    discountPercent: 0,
+    rewardType: 'cash',
     isActive: true, 
     maxReferralsPerUser: 0,
     termsAndConditions: { en: '', es: '' }
@@ -85,7 +86,7 @@ export default function ReferralProgramConfig({ projects }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!formData.projectId && !editingProgram) {
-      return setError(t('program.selectProjectError', 'Debes seleccionar un proyecto'))
+      return setError(t('program.selectProjectError'))
     }
     
     setSubmitting(true)
@@ -96,7 +97,6 @@ export default function ReferralProgramConfig({ projects }) {
         projectId: editingProgram ? editingProgram.projectId._id : formData.projectId 
       }
       
-      // Limpieza condicional según el tipo de recompensa
       if (payload.rewardType === 'cash') {
         delete payload.discountPercent
       } else {
@@ -112,61 +112,64 @@ export default function ReferralProgramConfig({ projects }) {
       refresh()
       handleCloseModal()
     } catch (err) {
-      setError(err.response?.data?.message || t('program.saveError', 'Error al guardar el programa'))
+      setError(err.response?.data?.message || t('program.saveError'))
     } finally {
       setSubmitting(false)
     }
   }
 
   const handleDelete = async (program) => {
-    if (window.confirm(t('program.confirmDelete', '¿Estás seguro de eliminar este programa?'))) {
+    if (window.confirm(t('program.confirmDelete'))) {
       try {
         await referralService.deleteProgram(program._id)
         refresh()
       } catch (err) {
-        alert(err.response?.data?.message || t('program.deleteError', 'Error al eliminar'))
+        alert(err.response?.data?.message || t('program.deleteError'))
       }
     }
   }
 
   const columns = useReferralProgramColumns({ t, onEdit: handleOpenModal, onDelete: handleDelete })
 
+  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
+  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' } }
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <FormControl size="small" sx={{ minWidth: 250 }}>
-          <InputLabel>{t('filters.allProjects', 'Filtrar por Proyecto')}</InputLabel>
-          <Select value={selectedProject} onChange={(e) => setSelectedProject(e.target.value)} label={t('filters.allProjects', 'Filtrar por Proyecto')}>
-            <MenuItem value="">{t('filters.allProjects', 'Todos los Proyectos')}</MenuItem>
-            {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
+          <InputLabel>{t('filters.allProjects')}</InputLabel>
+          <Select value={selectedProject} onChange={(e) => setSelectedProject(e.target.value)} label={t('filters.allProjects')} sx={inputSx}>
+            <MenuItem value="">{t('filters.allProjects')}</MenuItem>
+            {projects.map(p => <MenuItem key={p._id} value={p._id} sx={{ fontFamily: '"Courier New", monospace' }}>{p.name}</MenuItem>)}
           </Select>
         </FormControl>
 
-        <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenModal()}>
-          {t('program.createNew', 'Crear Nuevo Programa')}
+        <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenModal()} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+          {t('program.createNew')}
         </Button>
       </Box>
 
-      <Paper sx={{ borderRadius: 2, overflow: 'hidden' }}>
+      <Paper sx={{ borderRadius: 0, overflow: 'hidden', border: '1px solid #ececec' }}>
         <DataTable columns={columns} data={programs || []} loading={programsLoading} />
       </Paper>
 
-      <Dialog open={modalOpen} onClose={handleCloseModal} maxWidth="md" fullWidth>
-        <DialogTitle>
-          {editingProgram ? t('program.edit', 'Editar Programa') : t('program.create', 'Crear Programa de Referidos')}
+      <Dialog open={modalOpen} onClose={handleCloseModal} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
+        <DialogTitle sx={{ borderBottom: '1px solid #ececec', fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+          {editingProgram ? t('program.edit') : t('program.create')}
         </DialogTitle>
         
         <DialogContent dividers>
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid' }}>{error}</Alert>}
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               {!editingProgram && (
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth required>
-                    <InputLabel>{t('columns.project', 'Proyecto')}</InputLabel>
-                    <Select value={formData.projectId || ''} onChange={(e) => handleChange('projectId', e.target.value)} label={t('columns.project', 'Proyecto')}>
-                      <MenuItem value=""><em>Seleccionar Proyecto</em></MenuItem>
-                      {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
+                    <InputLabel>{t('columns.project')}</InputLabel>
+                    <Select value={formData.projectId || ''} onChange={(e) => handleChange('projectId', e.target.value)} label={t('columns.project')} sx={inputSx}>
+                      <MenuItem value=""><em>{t('common.select')}</em></MenuItem>
+                      {projects.map(p => <MenuItem key={p._id} value={p._id} sx={{ fontFamily: '"Courier New", monospace' }}>{p.name}</MenuItem>)}
                     </Select>
                   </FormControl>
                 </Grid>
@@ -174,78 +177,61 @@ export default function ReferralProgramConfig({ projects }) {
 
               {editingProgram && (
                 <Grid item xs={12} md={6}>
-                  <TextField fullWidth disabled label={t('columns.project', 'Proyecto')} value={editingProgram.projectId?.name || 'N/A'} />
+                  <TextField fullWidth disabled label={t('columns.project')} value={editingProgram.projectId?.name || t('common.na')} sx={{ ...inputSx, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif', WebkitTextFillColor: 'rgba(0,0,0,0.6)' } }} />
                 </Grid>
               )}
 
               <Grid item xs={12} md={6}>
-                <TextField fullWidth required label={t('program.name', 'Nombre del Programa')} value={formData.name} onChange={(e) => handleChange('name', e.target.value)} />
+                <TextField fullWidth required label={t('program.name')} value={formData.name} onChange={(e) => handleChange('name', e.target.value)} sx={{ ...inputSx, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }} />
               </Grid>
 
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth required>
-                  <InputLabel>{t('program.rewardType', 'Tipo de Recompensa')}</InputLabel>
-                  <Select value={formData.rewardType} onChange={(e) => handleChange('rewardType', e.target.value)} label={t('program.rewardType', 'Tipo de Recompensa')}>
-                    <MenuItem value="cash">{t('program.rewardTypes.cash', 'Efectivo (Cash)')}</MenuItem>
-                    <MenuItem value="property_discount">{t('program.rewardTypes.property_discount', 'Descuento en Propiedad')}</MenuItem>
+                  <InputLabel>{t('program.rewardType')}</InputLabel>
+                  <Select value={formData.rewardType} onChange={(e) => handleChange('rewardType', e.target.value)} label={t('program.rewardType')} sx={inputSx}>
+                    <MenuItem value="cash" sx={{ fontFamily: '"Courier New", monospace' }}>{t('program.rewardTypes.cash')}</MenuItem>
+                    <MenuItem value="property_discount" sx={{ fontFamily: '"Courier New", monospace' }}>{t('program.rewardTypes.property_discount')}</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
 
-              {/* ✅ Condicional: Monto fijo para Cash */}
               {formData.rewardType === 'cash' && (
                 <Grid item xs={12} md={6}>
-                  <TextField 
-                    fullWidth required type="number" 
-                    label={t('program.rewardPerReferral', 'Monto Fijo por Referido')} 
-                    value={formData.rewardPerReferral} 
-                    onChange={(e) => handleChange('rewardPerReferral', Number(e.target.value))} 
-                  />
+                  <TextField fullWidth required type="number" label={t('program.rewardPerReferral')} value={formData.rewardPerReferral} onChange={(e) => handleChange('rewardPerReferral', Number(e.target.value))} sx={inputSx} />
                 </Grid>
               )}
 
-              {/* ✅ Condicional: Porcentaje para Descuento */}
               {formData.rewardType === 'property_discount' && (
                 <Grid item xs={12} md={6}>
-                  <TextField 
-                    fullWidth required type="number" 
-                    label={t('program.discountPercent', 'Porcentaje de Descuento (%)')} 
-                    value={formData.discountPercent} 
-                    onChange={(e) => handleChange('discountPercent', Number(e.target.value))} 
-                  />
+                  <TextField fullWidth required type="number" label={t('program.discountPercent')} value={formData.discountPercent} onChange={(e) => handleChange('discountPercent', Number(e.target.value))} sx={inputSx} />
                 </Grid>
               )}
 
               <Grid item xs={12} md={6}>
-                <TextField 
-                  fullWidth required type="number" 
-                  label={t('program.maxReferrals', 'Máx. Referidos por Usuario')} 
-                  value={formData.maxReferralsPerUser} 
-                  onChange={(e) => handleChange('maxReferralsPerUser', Number(e.target.value))} 
-                />
+                <TextField fullWidth required type="number" label={t('program.maxReferrals')} value={formData.maxReferralsPerUser} onChange={(e) => handleChange('maxReferralsPerUser', Number(e.target.value))} sx={inputSx} />
               </Grid>
 
               <Grid item xs={12}>
                 <FormControlLabel 
                   control={<Switch checked={formData.isActive} onChange={(e) => handleChange('isActive', e.target.checked)} />} 
-                  label={<Typography fontWeight={600}>{t('program.isActive', 'Programa Activo')}</Typography>} 
+                  label={<Typography fontWeight={600} sx={{ fontFamily: '"Courier New", monospace' }}>{t('program.isActive')}</Typography>} 
                 />
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <TextField fullWidth multiline rows={4} label={t('program.terms', 'Términos y Condiciones (ES)')} value={formData.termsAndConditions.es} onChange={(e) => handleChange('termsAndConditions.es', e.target.value)} />
+                <TextField fullWidth multiline rows={4} label={t('program.terms')} value={formData.termsAndConditions.es} onChange={(e) => handleChange('termsAndConditions.es', e.target.value)} sx={{ ...inputSx, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }} />
               </Grid>
               <Grid item xs={12} md={6}>
-                <TextField fullWidth multiline rows={4} label={t('program.termsEn', 'Términos y Condiciones (EN)')} value={formData.termsAndConditions.en} onChange={(e) => handleChange('termsAndConditions.en', e.target.value)} />
+                <TextField fullWidth multiline rows={4} label={t('program.termsEn')} value={formData.termsAndConditions.en} onChange={(e) => handleChange('termsAndConditions.en', e.target.value)} sx={{ ...inputSx, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }} />
               </Grid>
             </Grid>
           </form>
         </DialogContent>
 
-        <DialogActions sx={{ p: 2, borderTop: '1px solid #eee' }}>
-          <Button onClick={handleCloseModal} disabled={submitting}>{t('actions.cancel', 'Cancelar')}</Button>
-          <Button type="submit" variant="contained" onClick={handleSubmit} disabled={submitting} startIcon={submitting && <CircularProgress size={20} />}>
-            {submitting ? t('actions.saving', 'Guardando...') : (editingProgram ? t('actions.update', 'Actualizar') : t('actions.create', 'Crear'))}
+        <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec' }}>
+          <Button onClick={handleCloseModal} disabled={submitting} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('actions.cancel')}</Button>
+          <Button type="submit" variant="contained" onClick={handleSubmit} disabled={submitting} startIcon={submitting && <CircularProgress size={16} />} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+            {submitting ? t('actions.saving') : (editingProgram ? t('actions.update') : t('actions.create'))}
           </Button>
         </DialogActions>
       </Dialog>
