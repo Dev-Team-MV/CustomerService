@@ -1,3 +1,4 @@
+// apps/mv-crm/src/pages/Commissions.jsx
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, TextField, Button, FormControl, InputLabel, Select, MenuItem, Grid, Paper, Tabs, Tab, Typography, CircularProgress } from '@mui/material'
@@ -31,7 +32,6 @@ export default function Commissions() {
   const [selectedStructure, setSelectedStructure] = useState(null)
   const [structureEditorOpen, setStructureEditorOpen] = useState(false)
 
-  // ✅ CAMBIO: Reemplazamos onDispute por onDelete
   const columns = useCommissionColumns({
     t,
     onView: (row) => { setSelectedCommission(row); setModalAction('view'); setModalOpen(true) },
@@ -97,14 +97,24 @@ export default function Commissions() {
     setStructureEditorOpen(true)
   }
 
+  // ✅ Estilos unificados para botones
+  const unifiedButtonSx = {
+    borderRadius: 0,
+    textTransform: 'none',
+    fontFamily: '"Courier New", monospace',
+    fontSize: '0.75rem',
+    letterSpacing: '0.5px',
+    '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' }
+  }
+
   return (
     <PageLayout title={t('title')} titleBold={t('titleBold')} topbarLabel={t('topbarLabel')} subtitle={t('subtitle')}>
       <StatsStrip stats={realStats} />
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.5 }}>
-        <Paper sx={{ mb: 3, border: '1px solid #ececec', borderRadius: 2, overflow: 'hidden' }}>
-          <Tabs value={tabValue} onChange={handleTabChange} sx={{ borderBottom: '1px solid #ececec', px: 2 }}>
-            <Tab icon={<Payment sx={{ mr: 1 }} />} iconPosition="start" label={t('tabs.commissions')} />
+        <Paper sx={{ mb: 3, border: '1px solid #ececec', borderRadius: 0, overflow: 'hidden' }}>
+          <Tabs value={tabValue} onChange={handleTabChange} sx={{ borderBottom: '1px solid #ececec', px: 2, fontFamily: '"Courier New", monospace' }}>
+            <Tab icon={<Payment sx={{ mr: 1,  }} />} iconPosition="start" label={t('tabs.commissions')} />
             <Tab icon={<Settings sx={{ mr: 1 }} />} iconPosition="start" label={t('tabs.structures')} />
           </Tabs>
 
@@ -113,12 +123,25 @@ export default function Commissions() {
               <>
                 <Grid container spacing={2} alignItems="center" sx={{ mb: 3 }}>
                   <Grid item xs={12} md={3}>
-                    <TextField size="small" fullWidth placeholder={t('filters.search')} InputProps={{ startAdornment: <Search sx={{ fontSize: 18, color: '#bbb', mr: 1 }} /> }} />
+                    <TextField 
+                      size="small" 
+                      fullWidth 
+                      placeholder={t('filters.search')} 
+                      InputProps={{ 
+                        startAdornment: <Search sx={{ fontSize: 18, color: '#bbb', mr: 1 }} />,
+                        sx: { '& .MuiOutlinedInput-root': { borderRadius: 0 } }
+                      }} 
+                    />
                   </Grid>
                   <Grid item xs={12} md={2}>
                     <FormControl size="small" fullWidth>
-                      <InputLabel>{t('filters.project')}</InputLabel>
-                      <Select value={filters.projectId || ''} onChange={(e) => updateFilter('projectId', e.target.value)} label={t('filters.project')}>
+                      <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('filters.project')}</InputLabel>
+                      <Select 
+                        value={filters.projectId || ''} 
+                        onChange={(e) => updateFilter('projectId', e.target.value)} 
+                        label={t('filters.project')}
+                        sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}
+                      >
                         <MenuItem value="">{t('filters.allProjects')}</MenuItem>
                         {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
                       </Select>
@@ -126,8 +149,13 @@ export default function Commissions() {
                   </Grid>
                   <Grid item xs={12} md={2}>
                     <FormControl size="small" fullWidth>
-                      <InputLabel>{t('filters.agent')}</InputLabel>
-                      <Select value={filters.agentId || ''} onChange={(e) => updateFilter('agentId', e.target.value)} label={t('filters.agent')}>
+                      <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('filters.agent')}</InputLabel>
+                      <Select 
+                        value={filters.agentId || ''} 
+                        onChange={(e) => updateFilter('agentId', e.target.value)} 
+                        label={t('filters.agent')}
+                        sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}
+                      >
                         <MenuItem value="">{t('filters.allAgents')}</MenuItem>
                         {agents.map(a => <MenuItem key={a._id} value={a._id}>{a.firstName} {a.lastName}</MenuItem>)}
                       </Select>
@@ -135,8 +163,13 @@ export default function Commissions() {
                   </Grid>
                   <Grid item xs={12} md={2}>
                     <FormControl size="small" fullWidth>
-                      <InputLabel>{t('filters.status')}</InputLabel>
-                      <Select value={filters.status || ''} onChange={(e) => updateFilter('status', e.target.value)} label={t('filters.status')}>
+                      <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('filters.status')}</InputLabel>
+                      <Select 
+                        value={filters.status || ''} 
+                        onChange={(e) => updateFilter('status', e.target.value)} 
+                        label={t('filters.status')}
+                        sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}
+                      >
                         <MenuItem value="">{t('filters.allStatuses')}</MenuItem>
                         <MenuItem value="pending">{t('status.pending')}</MenuItem>
                         <MenuItem value="approved">{t('status.approved')}</MenuItem>
@@ -146,7 +179,14 @@ export default function Commissions() {
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} md={3} display="flex" justifyContent="flex-end">
-                    <Button variant="outlined" startIcon={<FilterList />} onClick={() => refresh(1)}>{t('actions.refresh')}</Button>
+                    <Button 
+                      variant="outlined" 
+                      startIcon={<FilterList />} 
+                      onClick={() => refresh(1)}
+                      sx={{ ...unifiedButtonSx, border: '1px solid #000', color: '#000', '&:hover': { bgcolor: '#f5f5f5', borderColor: '#555', color: '#555', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}
+                    >
+                      {t('actions.refresh')}
+                    </Button>
                   </Grid>
                 </Grid>
 
@@ -157,21 +197,20 @@ export default function Commissions() {
                 <Grid container spacing={2} alignItems="center" sx={{ mb: 3 }}>
                   <Grid item xs={12} md={4}>
                     <FormControl fullWidth required>
-                      <InputLabel>{t('filters.project')} *</InputLabel>
+                      <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('filters.project')} *</InputLabel>
                       <Select 
                         value={filters.projectId || ''} 
                         onChange={handleProjectChange} 
                         label={t('filters.project')}
+                        sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}
                       >
-                        <MenuItem value="">
-                          <em>{t('structures.selectProject')}</em>
-                        </MenuItem>
+                        <MenuItem value=""><em>{t('structures.selectProject')}</em></MenuItem>
                         {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
                       </Select>
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} md={8}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
                       {filters.projectId 
                         ? `${t('structures.viewingFor')}: ${projects.find(p => p._id === filters.projectId)?.name}`
                         : t('structures.selectToView')}
@@ -181,7 +220,7 @@ export default function Commissions() {
 
                 <Box>
                   <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                    <Typography variant="subtitle1" fontWeight={600}>
+                    <Typography variant="subtitle1" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
                       {t('structures.listTitle')}
                     </Typography>
                     <Button 
@@ -189,19 +228,19 @@ export default function Commissions() {
                       startIcon={<Add />} 
                       onClick={() => handleOpenStructureEditor()} 
                       disabled={!filters.projectId}
-                      sx={{ bgcolor: '#1976d2', '&:hover': { bgcolor: '#1565c0' } }}
+                      sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}
                     >
                       {t('structures.create')}
                     </Button>
                   </Box>
 
                   {!filters.projectId ? (
-                    <Paper sx={{ p: 6, textAlign: 'center', bgcolor: '#fafafa', border: '2px dashed #e0e0e0' }}>
+                    <Paper sx={{ p: 6, textAlign: 'center', bgcolor: '#fafafa', border: '1px solid #e0e0e0', borderRadius: 0 }}>
                       <Settings sx={{ fontSize: 64, color: '#ccc', mb: 2 }} />
-                      <Typography variant="h6" color="text.secondary" mb={1} fontWeight={600}>
+                      <Typography variant="h6" color="text.secondary" mb={1} fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
                         {t('structures.selectProjectFirst')}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>
                         {t('structures.selectProjectToManage')}
                       </Typography>
                     </Paper>
@@ -210,18 +249,18 @@ export default function Commissions() {
                       <CircularProgress />
                     </Box>
                   ) : structures.length === 0 ? (
-                    <Paper sx={{ p: 6, textAlign: 'center', bgcolor: '#f5f5f5', border: '2px dashed #e0e0e0' }}>
-                      <Typography variant="h6" color="text.secondary" mb={1} fontWeight={600}>
+                    <Paper sx={{ p: 6, textAlign: 'center', bgcolor: '#f5f5f5', border: '1px solid #e0e0e0', borderRadius: 0 }}>
+                      <Typography variant="h6" color="text.secondary" mb={1} fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
                         {t('structures.noStructures')}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" mb={3}>
+                      <Typography variant="body2" color="text.secondary" mb={3} sx={{ fontFamily: '"Courier New", monospace' }}>
                         {t('structures.createFirst')}
                       </Typography>
                       <Button 
                         variant="contained" 
                         startIcon={<Add />} 
                         onClick={() => handleOpenStructureEditor()}
-                        sx={{ bgcolor: '#1976d2', '&:hover': { bgcolor: '#1565c0' } }}
+                        sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}
                       >
                         {t('structures.create')}
                       </Button>
@@ -233,14 +272,14 @@ export default function Commissions() {
                           field: 'name', 
                           headerName: t('structures.name'), 
                           minWidth: 250, 
-                          renderCell: ({row}) => <Typography fontWeight={600}>{row.name}</Typography> 
+                          renderCell: ({row}) => <Typography fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{row.name}</Typography> 
                         },
                         { 
                           field: 'type', 
                           headerName: t('structures.type'), 
                           minWidth: 150, 
                           renderCell: ({row}) => (
-                            <Typography>{t(`structures.types.${row.type}`)}</Typography>
+                            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>{t(`structures.types.${row.type}`)}</Typography>
                           ) 
                         },
                         { 
@@ -248,9 +287,9 @@ export default function Commissions() {
                           headerName: t('structures.isDefault'), 
                           minWidth: 120, 
                           renderCell: ({row}) => row.isDefault ? (
-                            <Typography sx={{ color: '#4caf50', fontWeight: 600 }}>✓ {t('structures.yes')}</Typography>
+                            <Typography sx={{ color: '#4caf50', fontWeight: 600, fontFamily: '"Courier New", monospace' }}>✓ {t('structures.yes')}</Typography>
                           ) : (
-                            <Typography color="text.secondary">-</Typography>
+                            <Typography color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>-</Typography>
                           ) 
                         },
                         { 
@@ -264,7 +303,7 @@ export default function Commissions() {
                               variant="outlined"
                               startIcon={<Edit fontSize="small" />}
                               onClick={() => handleOpenStructureEditor(row)}
-                              sx={{ textTransform: 'none' }}
+                              sx={{ ...unifiedButtonSx, border: '1px solid #000', color: '#000', '&:hover': { bgcolor: '#f5f5f5', borderColor: '#555', color: '#555', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}
                             >
                               {t('actions.edit')}
                             </Button>

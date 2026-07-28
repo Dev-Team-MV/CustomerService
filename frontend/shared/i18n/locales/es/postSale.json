@@ -1,5 +1,4 @@
 {
-    "actionstable": "Acciones",
   "page": {
     "title": "Post-Venta",
     "subtitle": "Gestión de onboarding, garantías y encuestas"
@@ -35,10 +34,12 @@
     "save": "Guardar",
     "view": "Ver",
     "delete": "Eliminar",
-      "respond": "Responder",
+    "respond": "Responder",
     "back": "Volver a la lista",
     "savingAnswers": "Enviando...",
-    "saveAnswers": "Guardar Respuestas"
+    "saveAnswers": "Guardar Respuestas",
+    "create": "Crear",
+    "update": "Actualizar"
   },
   "common": {
     "na": "N/A",
@@ -49,6 +50,7 @@
     "loading": "Cargando..."
   },
   "onboarding": {
+    "newChecklist": "Nueva Lista de Verificación",
     "newOnboarding": "Nuevo Onboarding",
     "checklistDetails": "Detalles del Onboarding",
     "overallProgress": "Progreso General",
@@ -75,6 +77,8 @@
     }
   },
   "warranty": {
+    "newClaim": "Nuevo Reclamo",
+    "editClaim": "Editar Reclamo",
     "title": "Centro de",
     "titleBold": "Garantías",
     "subtitle": "Gestiona y da seguimiento a tus solicitudes de garantía de forma sencilla.",
@@ -92,15 +96,47 @@
     "priority": "Prioridad",
     "description": "Descripción detallada del problema",
     "photos": "Evidencia Fotográfica",
+    "photoEvidence": "Evidencia fotográfica",
     "addPhoto": "Agregar",
     "noClaims": "No tienes reclamos registrados",
     "noClaimsDesc": "Cuando crees un reclamo, aparecerá aquí para que puedas darle seguimiento en tiempo real.",
     "unspecifiedProperty": "Propiedad no especificada",
     "noTimeline": "No hay historial disponible para este reclamo.",
+    "timeline": "Historial de Reclamo",
     "by": "por",
     "requiredFields": "Por favor selecciona una propiedad y describe el problema.",
+    "requiredFieldsError": "Por favor completa todos los campos obligatorios.",
     "submitError": "Error al enviar el reclamo.",
     "uploadError": "Error al subir las imágenes.",
+    "uploadImageError": "Error al subir las imágenes.",
+    "loadResourcesError": "No se pudieron cargar las propiedades del proyecto.",
+    "linkTo": "Vincular a",
+    "none": "Ninguno",
+    "lead": "Lead",
+    "client": "Cliente",
+    "selectLead": "Seleccionar Lead",
+    "selectClient": "Cliente Propietario",
+    "apartment": "Apartamento",
+    "property": "Propiedad",
+    "noResources": "No hay recursos asignados",
+    "clientLabel": "Cliente",
+    "projectLabel": "Proyecto",
+    "unit": "Unidad",
+    "building": "Edificio",
+    "floor": "Piso",
+    "model": "Modelo",
+    "createdAt": "Fecha de creación",
+    "date": "Fecha",
+    "finalStatus": "Estado Final",
+    "resolutionNotes": "Notas de resolución / Motivo de rechazo",
+    "resolutionRequired": "Por favor, agrega una descripción de la resolución o motivo de rechazo.",
+    "markResolved": "Marcar como Resuelto",
+    "markRejected": "Rechazar Reclamo",
+    "resolveSuccessMsg": "El reclamo ha sido actualizado correctamente.",
+    "resolveErrorMsg": "No se pudo actualizar el reclamo.",
+    "saveSuccess": "Reclamo guardado correctamente.",
+    "saveError": "Error al enviar el reclamo.",
+    "resolveClaim": "Resolver Reclamo",
     "statuses": {
       "submitted": "Enviado",
       "under_review": "En Revisión",
@@ -151,7 +187,7 @@
     "question": "Pregunta",
     "rating": "Calificación (1-5)",
     "comment": "Comentario (Opcional)",
-       "welcome": "Tu opinión nos",
+    "welcome": "Tu opinión nos",
     "matters": "importa",
     "subtitle": "Revisa y completa tus encuestas de satisfacción pendientes.",
     "pendingSurveys": "Encuestas Pendientes",
@@ -172,7 +208,8 @@
     "submitError": "Error al enviar la encuesta",
     "unspecifiedProperty": "Propiedad no especificada",
     "pending": "Pendiente",
-    "completed": "Completada"
+    "completed": "Completada",
+    "templatesUsed": "Plantillas Usadas"
   },
   "survey": {
     "rating": "Calificación Promedio",
@@ -215,7 +252,7 @@
     "cancel": "Cancelar",
     "saving": "Guardando...",
     "update": "Actualizar",
-    "create": "Crear Reclamo",
+    "create": "Crear",
     "select": "Seleccionar..."
   }
 }

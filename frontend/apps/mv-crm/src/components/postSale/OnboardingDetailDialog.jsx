@@ -1,3 +1,4 @@
+// apps/mv-crm/src/components/postSale/OnboardingDetailDialog.jsx
 import { useState, useEffect } from 'react'
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, Button, 
@@ -52,17 +53,17 @@ export default function OnboardingDetailDialog({ open, onClose, onboarding, onRe
 
   const isApartment = !!(onboarding.apartmentId || (typeof onboarding.propertyId === 'object' && onboarding.propertyId.apartmentNumber))
   
-  let lotNumber = t('common.na', 'N/A')
+  let lotNumber = t('common.na')
   let modelName = ''
-  let aptNumber = t('common.na', 'N/A')
-  let buildingName = t('onboarding.building', 'Edificio')
+  let aptNumber = t('common.na')
+  let buildingName = t('onboarding.building')
 
   if (isApartment) {
     const apt = typeof onboarding.apartmentId === 'object' ? onboarding.apartmentId : apartments[onboarding.apartmentId]
     if (apt) {
-      aptNumber = apt.apartmentNumber || t('common.na', 'N/A')
+      aptNumber = apt.apartmentNumber || t('common.na')
       const building = typeof apt.building === 'object' ? apt.building : buildings[apt.building]
-      buildingName = building?.name || (building?._id ? String(building._id).slice(-6) : t('onboarding.building', 'Edificio'))
+      buildingName = building?.name || (building?._id ? String(building._id).slice(-6) : t('onboarding.building'))
     }
   } else {
     const prop = onboarding.propertyId
@@ -73,7 +74,7 @@ export default function OnboardingDetailDialog({ open, onClose, onboarding, onRe
       const lotData = lots[lotId] || {}
       const modelData = models[modelId] || {}
       
-      lotNumber = lotData.number || lotData.name || (lotId ? String(lotId).slice(-6) : t('common.na', 'N/A'))
+      lotNumber = lotData.number || lotData.name || (lotId ? String(lotId).slice(-6) : t('common.na'))
       modelName = modelData.name || modelData.model || ''
     }
   }
@@ -103,11 +104,11 @@ export default function OnboardingDetailDialog({ open, onClose, onboarding, onRe
         } : i
       ))
       
-      onNotify(newStatus ? t('onboarding.itemCompleted', 'Item completado') : t('onboarding.itemPending', 'Item marcado como pendiente'), 'success')
+      onNotify(newStatus ? t('onboarding.itemCompleted') : t('onboarding.itemPending'), 'success')
       onRefresh() 
     } catch (err) {
       console.error('❌ Error toggling item:', err)
-      onNotify(t('onboarding.itemUpdateError', 'Error al actualizar el item'), 'error')
+      onNotify(t('onboarding.itemUpdateError'), 'error')
     } finally {
       setUpdatingKey(null)
     }
@@ -126,36 +127,41 @@ export default function OnboardingDetailDialog({ open, onClose, onboarding, onRe
       setLocalItems(prev => prev.map(i => 
         i.key === currentItemKey ? { ...i, requiredDocumentId: newDoc } : i
       ))
-      onNotify(t('onboarding.docUploaded', 'Documento subido y vinculado correctamente'), 'success')
+      onNotify(t('onboarding.docUploaded'), 'success')
     }
     setUploadModalOpen(false)
   }
 
   const currentLang = i18n.language === 'es' ? 'label_es' : 'label_en'
-
   const stableProjectId = typeof onboarding.projectId === 'object' ? onboarding.projectId._id : onboarding.projectId
   const stableClientId = typeof onboarding.clientId === 'object' ? onboarding.clientId._id : onboarding.clientId
   const stablePropertyId = typeof onboarding.propertyId === 'object' ? onboarding.propertyId._id : onboarding.propertyId
   const stableApartmentId = isApartment ? stablePropertyId : null
 
+  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
+  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' } }
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">{t('onboarding.checklistDetails', 'Detalles del Onboarding')}</Typography>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ececec' }}>
+        <Typography variant="h6" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+          {t('onboarding.checklistDetails')}
+        </Typography>
         <Chip 
           label={t(`onboarding.statuses.${onboarding.status}`, onboarding.status)} 
-          color={onboarding.status === 'completed' ? 'success' : onboarding.status === 'in_progress' ? 'primary' : 'default'} 
+          color={onboarding.status === 'completed' ? 'success' : onboarding.status === 'in_progress' ? 'primary' : 'default'}
+          sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.65rem', fontWeight: 600 }}
         />
       </DialogTitle>
 
       <DialogContent dividers>
-        <Box sx={{ mb: 3, p: 2, bgcolor: '#f9f9f9', borderRadius: 2 }}>
+        <Box sx={{ mb: 3, p: 2, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={4}>
               <Box display="flex" alignItems="center" gap={1}>
                 <Business fontSize="small" color="action" />
-                <Typography variant="body2" fontWeight={600}>
-                  {typeof onboarding.projectId === 'object' ? onboarding.projectId.name : t('common.na', 'N/A')}
+                <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
+                  {typeof onboarding.projectId === 'object' ? onboarding.projectId.name : t('common.na')}
                 </Typography>
               </Box>
             </Grid>
@@ -164,16 +170,16 @@ export default function OnboardingDetailDialog({ open, onClose, onboarding, onRe
               <Box display="flex" alignItems="center" gap={1}>
                 {isApartment ? <Apartment fontSize="small" color="primary" /> : <Home fontSize="small" color="success" />}
                 <Box>
-                  <Typography variant="body2" fontWeight={600}>
-                    {isApartment ? `${t('onboarding.apt', 'Apt')} ${aptNumber}` : `${t('onboarding.lot', 'Lote')} ${lotNumber}`}
+                  <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
+                    {isApartment ? `${t('onboarding.apt')} ${aptNumber}` : `${t('onboarding.lot')} ${lotNumber}`}
                   </Typography>
                   {!isApartment && modelName && (
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontFamily: '"Courier New", monospace' }}>
                       {modelName}
                     </Typography>
                   )}
                   {isApartment && (
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontFamily: '"Courier New", monospace' }}>
                       {buildingName}
                     </Typography>
                   )}
@@ -184,8 +190,8 @@ export default function OnboardingDetailDialog({ open, onClose, onboarding, onRe
             <Grid item xs={12} sm={4}>
               <Box display="flex" alignItems="center" gap={1}>
                 <Person fontSize="small" color="action" />
-                <Typography variant="body2">
-                  {typeof onboarding.clientId === 'object' ? `${onboarding.clientId.firstName} ${onboarding.clientId.lastName}` : t('common.na', 'N/A')}
+                <Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
+                  {typeof onboarding.clientId === 'object' ? `${onboarding.clientId.firstName} ${onboarding.clientId.lastName}` : t('common.na')}
                 </Typography>
               </Box>
             </Grid>
@@ -193,19 +199,19 @@ export default function OnboardingDetailDialog({ open, onClose, onboarding, onRe
 
           <Box sx={{ mt: 2 }}>
             <Box display="flex" justifyContent="space-between" sx={{ mb: 0.5 }}>
-              <Typography variant="caption" fontWeight={600}>{t('onboarding.overallProgress', 'Progreso General')}</Typography>
-              <Typography variant="caption" fontWeight={700}>{progress}%</Typography>
+              <Typography variant="caption" fontWeight={600} sx={{ fontFamily: '"Courier New", monospace' }}>{t('onboarding.overallProgress')}</Typography>
+              <Typography variant="caption" fontWeight={700} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{progress}%</Typography>
             </Box>
             <LinearProgress 
               variant="determinate" 
               value={progress} 
-              sx={{ height: 8, borderRadius: 4, bgcolor: '#e0e0e0', '& .MuiLinearProgress-bar': { borderRadius: 4 } }} 
+              sx={{ height: 8, borderRadius: 0, bgcolor: '#e0e0e0', '& .MuiLinearProgress-bar': { borderRadius: 0 } }} 
             />
           </Box>
         </Box>
 
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-          {t('onboarding.checklistItems', 'Lista de Verificación')}
+        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2, fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase' }}>
+          {t('onboarding.checklistItems')}
         </Typography>
         
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -214,7 +220,7 @@ export default function OnboardingDetailDialog({ open, onClose, onboarding, onRe
               key={item.key} 
               variant="outlined" 
               sx={{ 
-                p: 2, borderRadius: 2,
+                p: 2, borderRadius: 0, border: '1px solid #e0e0e0',
                 bgcolor: item.completed ? '#f1f8e9' : 'background.paper',
                 borderColor: item.completed ? '#4caf50' : '#e0e0e0',
                 opacity: updatingKey === item.key ? 0.7 : 1,
@@ -238,7 +244,8 @@ export default function OnboardingDetailDialog({ open, onClose, onboarding, onRe
                         <Typography sx={{ 
                           fontWeight: 600,
                           textDecoration: item.completed ? 'line-through' : 'none',
-                          color: item.completed ? 'text.secondary' : 'text.primary'
+                          color: item.completed ? 'text.secondary' : 'text.primary',
+                          fontFamily: '"Helvetica Neue", sans-serif'
                         }}>
                           {item[currentLang] || item.label_es || item.label || item.key}
                           {updatingKey === item.key && <CircularProgress size={16} sx={{ ml: 1 }} />}
@@ -249,10 +256,10 @@ export default function OnboardingDetailDialog({ open, onClose, onboarding, onRe
                         fullWidth
                         size="small"
                         variant="outlined"
-                        placeholder={t('onboarding.addNotes', 'Agregar notas...')}
+                        placeholder={t('onboarding.addNotes')}
                         value={notes[item.key] || ''}
                         onChange={(e) => setNotes(prev => ({ ...prev, [item.key]: e.target.value }))}
-                        sx={{ mt: 1, mb: 1 }}
+                        sx={{ mt: 1, mb: 1, ...inputSx }}
                       />
 
                       <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
@@ -261,20 +268,21 @@ export default function OnboardingDetailDialog({ open, onClose, onboarding, onRe
                           size="small"
                           startIcon={<CloudUpload />}
                           onClick={() => openDocumentUploadModal(item.key)}
+                          sx={{ ...unifiedButtonSx, border: '1px solid #000', color: '#000', '&:hover': { bgcolor: '#f5f5f5', borderColor: '#555', color: '#555', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}
                         >
-                          {item.requiredDocumentId ? t('onboarding.replaceDoc', 'Reemplazar Documento') : t('onboarding.uploadDoc', 'Subir Documento')}
+                          {item.requiredDocumentId ? t('onboarding.replaceDoc') : t('onboarding.uploadDoc')}
                         </Button>
                         
                         {item.requiredDocumentId && (
                           <Box display="flex" alignItems="center" gap={0.5}>
                             <Chip 
-                              label={item.requiredDocumentId.title || t('onboarding.documentAttached', 'Documento Adjunto')} 
+                              label={item.requiredDocumentId.title || t('onboarding.documentAttached')} 
                               size="small" 
                               color="primary" 
                               variant="outlined"
                               icon={<Description fontSize="small" />}
                               onClick={() => setViewingDoc(item.requiredDocumentId)}
-                              sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
+                              sx={{ cursor: 'pointer', borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem', '&:hover': { bgcolor: 'action.hover' } }}
                             />
                             <IconButton 
                               size="small" 
@@ -284,7 +292,7 @@ export default function OnboardingDetailDialog({ open, onClose, onboarding, onRe
                                 setDocData(prev => ({ ...prev, [item.key]: null }))
                                 setLocalItems(prev => prev.map(i => i.key === item.key ? { ...i, requiredDocumentId: null } : i))
                               }}
-                              title={t('actions.remove', 'Eliminar')}
+                              title={t('actions.remove')}
                             >
                               <Delete fontSize="small" />
                             </IconButton>
@@ -293,9 +301,9 @@ export default function OnboardingDetailDialog({ open, onClose, onboarding, onRe
                       </Box>
                       
                       {item.completed && item.completedAt && (
-                        <Typography variant="caption" color="success.main" sx={{ display: 'block', mt: 1 }}>
-                          {t('onboarding.completedOn', 'Completado el')} {new Date(item.completedAt).toLocaleString()} 
-                          {item.completedBy?.firstName && ` ${t('onboarding.by', 'por')} ${item.completedBy.firstName} ${item.completedBy.lastName}`}
+                        <Typography variant="caption" color="success.main" sx={{ display: 'block', mt: 1, fontFamily: '"Courier New", monospace' }}>
+                          {t('onboarding.completedOn')} {new Date(item.completedAt).toLocaleString()} 
+                          {item.completedBy?.firstName && ` ${t('onboarding.by')} ${item.completedBy.firstName} ${item.completedBy.lastName}`}
                         </Typography>
                       )}
                     </Box>
@@ -307,8 +315,8 @@ export default function OnboardingDetailDialog({ open, onClose, onboarding, onRe
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, borderTop: '1px solid #eee' }}>
-        <Button onClick={onClose}>{t('actions.close', 'Cerrar')}</Button>
+      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec' }}>
+        <Button onClick={onClose} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('actions.close')}</Button>
       </DialogActions>
 
       <DocumentUploadModal 

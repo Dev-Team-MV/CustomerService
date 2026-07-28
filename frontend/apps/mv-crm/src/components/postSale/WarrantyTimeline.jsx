@@ -1,3 +1,4 @@
+// apps/mv-crm/src/components/postSale/WarrantyTimeline.jsx
 import { Box, Typography, Stepper, Step, StepLabel, StepContent, Paper, Chip } from '@mui/material'
 import { CheckCircle, Pending, Build, Check, Cancel, AccessTime } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
@@ -5,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 const WarrantyTimeline = ({ events = [] }) => {
   const { t } = useTranslation('postSale')
 
-  // ✅ Movido dentro del componente para tener acceso a `t` y reaccionar a cambios de idioma
   const statusConfig = {
     submitted:   { label: t('warranty.statuses.submitted'),   icon: <AccessTime />, color: 'warning' },
     under_review:{ label: t('warranty.statuses.under_review'), icon: <Pending />,    color: 'info' },
@@ -16,8 +16,8 @@ const WarrantyTimeline = ({ events = [] }) => {
   }
 
   return (
-    <Paper sx={{ p: 3, borderRadius: 2 }}>
-      <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+    <Paper sx={{ p: 3, borderRadius: 0, border: '1px solid #ececec' }}>
+      <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase' }}>
         {t('warranty.timeline')}
       </Typography>
       
@@ -28,21 +28,27 @@ const WarrantyTimeline = ({ events = [] }) => {
             <Step key={index} active={true} completed={index < events.length - 1}>
               <StepLabel 
                 icon={config.icon}
-                sx={{ '& .MuiStepLabel-label': { fontWeight: 600 } }}
+                sx={{ '& .MuiStepLabel-label': { fontWeight: 600, fontFamily: '"Helvetica Neue", sans-serif' } }}
               >
                 <Box display="flex" alignItems="center" gap={1}>
                   <Typography>{config.label}</Typography>
-                  <Chip label={t(`warranty.statuses.${event.status}`)} size="small" color={config.color} variant="outlined" />
+                  <Chip 
+                    label={t(`warranty.statuses.${event.status}`)} 
+                    size="small" 
+                    color={config.color} 
+                    variant="outlined"
+                    sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.65rem', fontWeight: 600 }}
+                  />
                 </Box>
               </StepLabel>
               <StepContent>
                 <Box sx={{ pl: 2, py: 1 }}>
                   {event.notes && (
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontFamily: '"Helvetica Neue", sans-serif' }}>
                       {event.notes}
                     </Typography>
                   )}
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>
                     {event.createdAt ? new Date(event.createdAt).toLocaleString() : ''}
                     {event.user && ` • ${event.user}`}
                   </Typography>

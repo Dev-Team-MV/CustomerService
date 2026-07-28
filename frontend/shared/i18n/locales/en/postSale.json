@@ -1,5 +1,4 @@
 {
-    "actionstable":"Actions",
   "page": {
     "title": "Post-Sale",
     "subtitle": "Management of onboarding, warranties, and surveys"
@@ -35,10 +34,12 @@
     "save": "Save",
     "view": "View",
     "delete": "Delete",
-   "respond": "Respond",
+    "respond": "Respond",
     "back": "Back to list",
     "savingAnswers": "Submitting...",
-    "saveAnswers": "Save Responses"
+    "saveAnswers": "Save Responses",
+    "create": "Create",
+    "update": "Update"
   },
   "common": {
     "na": "N/A",
@@ -49,6 +50,7 @@
     "loading": "Loading..."
   },
   "onboarding": {
+    "newChecklist": "New Checklist",
     "newOnboarding": "New Onboarding",
     "checklistDetails": "Onboarding Details",
     "overallProgress": "Overall Progress",
@@ -75,6 +77,8 @@
     }
   },
   "warranty": {
+    "newClaim": "New Claim",
+    "editClaim": "Edit Claim",
     "title": "Warranty",
     "titleBold": "Center",
     "subtitle": "Manage and track your warranty requests easily.",
@@ -92,15 +96,47 @@
     "priority": "Priority",
     "description": "Detailed problem description",
     "photos": "Photo Evidence",
+    "photoEvidence": "Photo evidence",
     "addPhoto": "Add",
     "noClaims": "No claims registered",
     "noClaimsDesc": "When you create a claim, it will appear here so you can track it in real time.",
     "unspecifiedProperty": "Unspecified property",
     "noTimeline": "No history available for this claim.",
+    "timeline": "Claim History",
     "by": "by",
     "requiredFields": "Please select a property and describe the problem.",
+    "requiredFieldsError": "Please complete all required fields.",
     "submitError": "Error submitting the claim.",
     "uploadError": "Error uploading images.",
+    "uploadImageError": "Error uploading images.",
+    "loadResourcesError": "Could not load project properties.",
+    "linkTo": "Link to",
+    "none": "None",
+    "lead": "Lead",
+    "client": "Client",
+    "selectLead": "Select Lead",
+    "selectClient": "Owner Client",
+    "apartment": "Apartment",
+    "property": "Property",
+    "noResources": "No resources assigned",
+    "clientLabel": "Client",
+    "projectLabel": "Project",
+    "unit": "Unit",
+    "building": "Building",
+    "floor": "Floor",
+    "model": "Model",
+    "createdAt": "Creation Date",
+    "date": "Date",
+    "finalStatus": "Final Status",
+    "resolutionNotes": "Resolution notes / Reason for rejection",
+    "resolutionRequired": "Please add a description of the resolution or reason for rejection.",
+    "markResolved": "Mark as Resolved",
+    "markRejected": "Reject Claim",
+    "resolveSuccessMsg": "The claim has been updated successfully.",
+    "resolveErrorMsg": "Could not update the claim.",
+    "saveSuccess": "Claim saved successfully.",
+    "saveError": "Error submitting the claim.",
+    "resolveClaim": "Resolve Claim",
     "statuses": {
       "submitted": "Submitted",
       "under_review": "Under Review",
@@ -151,7 +187,7 @@
     "question": "Question",
     "rating": "Rating (1-5)",
     "comment": "Comment (Optional)",
-        "welcome": "Your opinion",
+    "welcome": "Your opinion",
     "matters": "matters",
     "subtitle": "Review and complete your pending satisfaction surveys.",
     "pendingSurveys": "Pending Surveys",
@@ -172,7 +208,8 @@
     "submitError": "Error submitting the survey",
     "unspecifiedProperty": "Unspecified property",
     "pending": "Pending",
-    "completed": "Completed"
+    "completed": "Completed",
+    "templatesUsed": "Templates Used"
   },
   "survey": {
     "rating": "Average Rating",
@@ -215,7 +252,7 @@
     "cancel": "Cancel",
     "saving": "Saving...",
     "update": "Update",
-    "create": "Create Claim",
+    "create": "Create",
     "select": "Select..."
   }
 }

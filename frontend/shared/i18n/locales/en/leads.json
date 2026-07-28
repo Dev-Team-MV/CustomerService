@@ -52,7 +52,15 @@
     "notesPlaceholder": "Additional details about the lead...",
     "cancel": "Cancel",
     "create": "Create",
-    "update": "Update"
+    "update": "Update",
+    "country": "Country"
+  },
+
+    "details": {
+    "contactInfo": "Contact Information",
+    "noContactInfo": "No contact information available",
+    "created":"created",
+    "updated":"updated"
   },
 
   "score": {

@@ -81,6 +81,9 @@
         "agents":"Agentes",
         "reports":"Reportes",
         "payments":"Pagos",
+                "referrals":"Referido",
+        "post-sale":"Post Ventas",
+
   "title": "Alertas",
   "bell": {
     "tooltip": "Notificaciones"
