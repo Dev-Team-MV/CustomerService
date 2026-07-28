@@ -18,7 +18,8 @@
     "category": "Categoría",
     "priority": "Prioridad",
     "all": "Todos",
-    "clear": "Limpiar"
+    "clear": "Limpiar",
+    "actionsTable": "Acciones"
   },
   "actions": {
     "confirmDelete": "¿Estás seguro?",

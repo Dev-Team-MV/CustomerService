@@ -16,7 +16,9 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
-  Tooltip
+  Tooltip,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
 import {
   Add,
@@ -66,7 +68,7 @@ const STATUS_OPTIONS = [
   { value: 'cancelada', label: 'Cancelada', icon: EventBusy, color: '#f44336' }
 ]
 
-// ✅ Componente para el botón de estado rápido
+// ✅ Componente QuickStatusButton optimizado
 const QuickStatusButton = ({ appointment, onUpdateStatus }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
@@ -96,7 +98,7 @@ const QuickStatusButton = ({ appointment, onUpdateStatus }) => {
           color: 'rgba(255,255,255,0.9)',
           bgcolor: 'rgba(255,255,255,0.2)',
           padding: '2px',
-          borderRadius: 0, // ✅ Bordes afilados
+          borderRadius: 0,
           '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' }
         }}
       >
@@ -110,7 +112,7 @@ const QuickStatusButton = ({ appointment, onUpdateStatus }) => {
         onClick={(e) => e.stopPropagation()}
         PaperProps={{
           sx: {
-            borderRadius: 0, // ✅ Bordes afilados
+            borderRadius: 0,
             border: '1px solid #ececec',
             minWidth: 200,
             mt: 1
@@ -162,7 +164,7 @@ const QuickStatusButton = ({ appointment, onUpdateStatus }) => {
                 }}
               />
               {isCurrent && (
-                <Box sx={{ ml: 1, width: 8, height: 8, borderRadius: 0, bgcolor: status.color }} /> // ✅ Cuadrado en lugar de círculo
+                <Box sx={{ ml: 1, width: 8, height: 8, borderRadius: 0, bgcolor: status.color }} />
               )}
             </MenuItem>
           )
@@ -172,7 +174,7 @@ const QuickStatusButton = ({ appointment, onUpdateStatus }) => {
   )
 }
 
-// ✅ Componente para mostrar información del cliente/lead
+// ✅ Componente ContactInfo optimizado
 const ContactInfo = ({ appointment }) => {
   const client = appointment.clientId
   const lead = appointment.leadId
@@ -201,7 +203,7 @@ const ContactInfo = ({ appointment }) => {
             px: 0.75,
             py: 0.25,
             bgcolor: 'rgba(255,255,255,0.15)',
-            borderRadius: 0, // ✅ Bordes afilados
+            borderRadius: 0,
             cursor: 'default'
           }}
         >
@@ -248,7 +250,7 @@ const ContactInfo = ({ appointment }) => {
             px: 0.75,
             py: 0.25,
             bgcolor: 'rgba(255,255,255,0.15)',
-            borderRadius: 0, // ✅ Bordes afilados
+            borderRadius: 0,
             cursor: 'default'
           }}
         >
@@ -276,6 +278,10 @@ const ContactInfo = ({ appointment }) => {
 
 export default function Calendar() {
   const { t, i18n } = useTranslation('appointments')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'))
+  
   const { 
     appointments, loading, error, createAppointment, updateAppointment, 
     updateAppointmentStatus, deleteAppointment 
@@ -385,48 +391,116 @@ export default function Calendar() {
     await updateAppointmentStatus(id, status)
   }
 
-  // ✅ Renderizar contenido del evento adaptado a la vista
+  // ✅ Renderizar contenido del evento optimizado para responsive
   const renderEventContent = (eventInfo) => {
     const appointment = eventInfo.event.extendedProps
     const statusConfig = appointment.statusConfig || APPOINTMENT_STATUSES[appointment.status] || APPOINTMENT_STATUSES.pendiente
     const typeConfig = appointment.typeConfig || APPOINTMENT_TYPES[appointment.type] || APPOINTMENT_TYPES.visita
     
     const isTimeGrid = eventInfo.view.type.includes('timeGrid')
+    const isDayGrid = eventInfo.view.type === 'dayGridMonth'
     const startTime = new Date(eventInfo.event.start).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
 
-    if (!isTimeGrid) {
+    // Vista de Mes - Cards compactas
+    if (isDayGrid) {
       return (
-        <Box sx={{ p: 0.5, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', bgcolor: statusConfig.color, borderRadius: 0 }}>
-          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', fontWeight: 600, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <Box sx={{ 
+          p: 0.5, 
+          height: '100%', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          justifyContent: 'center', 
+          bgcolor: statusConfig.color, 
+          borderRadius: 0,
+          minHeight: isMobile ? '40px' : 'auto'
+        }}>
+          <Typography sx={{ 
+            fontFamily: '"Courier New", monospace', 
+            fontSize: isMobile ? '0.6rem' : '0.65rem', 
+            fontWeight: 600, 
+            color: 'white', 
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis', 
+            whiteSpace: 'nowrap',
+            lineHeight: 1.2
+          }}>
             {typeConfig.icon} {eventInfo.event.title || 'Sin título'}
           </Typography>
-          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.55rem', color: 'rgba(255,255,255,0.9)', mt: 0.25 }}>
-            {startTime}
-          </Typography>
+          {!isMobile && (
+            <Typography sx={{ 
+              fontFamily: '"Courier New", monospace', 
+              fontSize: '0.55rem', 
+              color: 'rgba(255,255,255,0.9)', 
+              mt: 0.25 
+            }}>
+              {startTime}
+            </Typography>
+          )}
         </Box>
       )
     }
 
+    // Vista de Semana/Día - Cards detalladas
     return (
-      <Box sx={{ p: 0.75, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', bgcolor: statusConfig.color, borderRadius: 0, overflow: 'hidden' }}>
+      <Box sx={{ 
+        p: 0.75, 
+        height: '100%', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        justifyContent: 'space-between', 
+        position: 'relative', 
+        bgcolor: statusConfig.color, 
+        borderRadius: 0, 
+        overflow: 'hidden',
+        minHeight: '60px'
+      }}>
         <Box>
-          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 600, color: 'white', mb: 0.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', pr: 3 }}>
+          <Typography sx={{ 
+            fontFamily: '"Courier New", monospace', 
+            fontSize: isMobile ? '0.65rem' : '0.7rem', 
+            fontWeight: 600, 
+            color: 'white', 
+            mb: 0.5, 
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis', 
+            whiteSpace: 'nowrap', 
+            pr: 3,
+            lineHeight: 1.2
+          }}>
             {typeConfig.icon} {eventInfo.event.title || 'Sin título'}
           </Typography>
-          <ContactInfo appointment={appointment} />
+          {!isMobile && <ContactInfo appointment={appointment} />}
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0.5, mt: 0.5 }}>
-          <Box sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: 'rgba(255,255,255,0.9)', background: 'rgba(0,0,0,0.2)', padding: '2px 6px', borderRadius: 0 }}>
+          <Box sx={{ 
+            fontFamily: '"Courier New", monospace', 
+            fontSize: '0.6rem', 
+            color: 'rgba(255,255,255,0.9)', 
+            background: 'rgba(0,0,0,0.2)', 
+            padding: '2px 6px', 
+            borderRadius: 0 
+          }}>
             {startTime}
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.55rem', color: 'white', background: 'rgba(255,255,255,0.25)', padding: '2px 6px', borderRadius: 0, textTransform: 'uppercase', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
-              {statusConfig.label}
-            </Typography>
-            <QuickStatusButton appointment={appointment} onUpdateStatus={handleUpdateStatus} />
-          </Box>
+          {!isMobile && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography sx={{ 
+                fontFamily: '"Courier New", monospace', 
+                fontSize: '0.55rem', 
+                color: 'white', 
+                background: 'rgba(255,255,255,0.25)', 
+                padding: '2px 6px', 
+                borderRadius: 0, 
+                textTransform: 'uppercase', 
+                fontWeight: 600 
+              }}>
+                {statusConfig.label}
+              </Typography>
+              <QuickStatusButton appointment={appointment} onUpdateStatus={handleUpdateStatus} />
+            </Box>
+          )}
         </Box>
       </Box>
     )
@@ -440,13 +514,13 @@ export default function Calendar() {
     editable: true,
     selectable: true,
     selectMirror: true,
-    dayMaxEvents: true,
+    dayMaxEvents: isMobile ? 2 : true,
     weekends: true,
-    height: 'auto',
-    contentHeight: 600,
+    height: isMobile ? 'auto' : 'auto',
+    contentHeight: isMobile ? 400 : 600,
     slotEventOverlap: false,
     eventOverlap: false,
-    dayMaxEventRows: 3,
+    dayMaxEventRows: isMobile ? 2 : 3,
     slotDuration: '00:30:00',
     slotMinTime: '07:00:00',
     slotMaxTime: '21:00:00',
@@ -460,7 +534,14 @@ export default function Calendar() {
     eventDisplay: 'block',
     stickyHeaderDates: true,
     eventOrder: 'start,-duration,title',
-    nextDayThreshold: '00:00:00'
+    nextDayThreshold: '00:00:00',
+    // ✅ Responsive: Ajustar columnas en móvil
+    fixedWeekCount: false,
+    showNonCurrentDates: !isMobile,
+    // ✅ Mejorar layout en semana
+    weekNumbers: !isMobile,
+    // ✅ Scroll horizontal en móvil para vista semana
+    scrollTime: '08:00:00'
   }
 
   return (
@@ -470,9 +551,9 @@ export default function Calendar() {
       topbarLabel={t('topbarLabel')}
       subtitle={t('subtitle')}
     >
-      <Box sx={{ p: 3 }}>
-        {/* Leyenda de Estados y Tipos */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={2}>
+      <Box sx={{ p: { xs: 2, sm: 3 } }}>
+        {/* ✅ Leyenda Responsive */}
+        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} mb={3} flexWrap="wrap" gap={2}>
           <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
             <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', letterSpacing: '1px', textTransform: 'uppercase', mr: 1 }}>
               Estados:
@@ -483,7 +564,7 @@ export default function Calendar() {
                 label={status.label}
                 size="small"
                 sx={{
-                  borderRadius: 0, // ✅ Bordes afilados
+                  borderRadius: 0,
                   bgcolor: status.color,
                   color: '#fff',
                   fontFamily: '"Courier New", monospace',
@@ -506,7 +587,7 @@ export default function Calendar() {
                 size="small"
                 variant="outlined"
                 sx={{
-                  borderRadius: 0, // ✅ Bordes afilados
+                  borderRadius: 0,
                   borderColor: type.color,
                   color: type.color,
                   fontFamily: '"Courier New", monospace',
@@ -519,22 +600,24 @@ export default function Calendar() {
           </Box>
         </Box>
 
-        {/* Controles de Vista y Creación */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={2}>
+        {/* ✅ Controles Responsive */}
+        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'stretch', sm: 'center' }} mb={3} gap={2}>
           <ToggleButtonGroup
             value={calendarView}
             exclusive
             onChange={handleViewChange}
             size="small"
             sx={{
+              width: { xs: '100%', sm: 'auto' },
               '& .MuiToggleButton-root': {
                 fontFamily: '"Courier New", monospace',
                 fontSize: '0.7rem',
                 textTransform: 'none',
                 letterSpacing: '0.5px',
-                borderRadius: 0, // ✅ Bordes afilados
+                borderRadius: 0,
                 border: '1px solid #000',
                 color: '#000',
+                flex: { xs: 1, sm: 'none' },
                 '&.Mui-selected': {
                   bgcolor: '#000',
                   color: '#fff',
@@ -545,13 +628,13 @@ export default function Calendar() {
             }}
           >
             <ToggleButton value="dayGridMonth">
-              <CalendarMonth sx={{ fontSize: 16, mr: 0.5 }} /> {t('calendar.month')}
+              <CalendarMonth sx={{ fontSize: 16, mr: 0.5 }} /> {isMobile ? 'Mes' : t('calendar.month')}
             </ToggleButton>
             <ToggleButton value="timeGridWeek">
-              <ViewWeek sx={{ fontSize: 16, mr: 0.5 }} /> {t('calendar.week')}
+              <ViewWeek sx={{ fontSize: 16, mr: 0.5 }} /> {isMobile ? 'Semana' : t('calendar.week')}
             </ToggleButton>
             <ToggleButton value="timeGridDay">
-              <ViewDay sx={{ fontSize: 16, mr: 0.5 }} /> {t('calendar.day')}
+              <ViewDay sx={{ fontSize: 16, mr: 0.5 }} /> {isMobile ? 'Día' : t('calendar.day')}
             </ToggleButton>
           </ToggleButtonGroup>
 
@@ -571,16 +654,17 @@ export default function Calendar() {
               letterSpacing: '0.5px',
               bgcolor: '#000',
               color: '#fff',
-              '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } // ✅ Hover unificado
+              width: { xs: '100%', sm: 'auto' },
+              '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' }
             }}
           >
             {t('createAppointment')}
           </Button>
         </Box>
 
-        {/* Navegación del Calendario */}
-        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2} p={1.5} bgcolor="#fff" border="1px solid #ececec" borderRadius={0}>
-          <Box display="flex" gap={1} alignItems="center">
+        {/* ✅ Navegación Responsive */}
+        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between" mb={2} p={1.5} bgcolor="#fff" border="1px solid #ececec" borderRadius={0} gap={2}>
+          <Box display="flex" gap={1} alignItems="center" justifyContent={{ xs: 'center', sm: 'flex-start' }}>
             <Button size="small" onClick={handlePrev} sx={{ minWidth: 'auto', borderRadius: 0, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
               <ChevronLeft />
             </Button>
@@ -592,11 +676,18 @@ export default function Calendar() {
             </Button>
           </Box>
 
-          <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontSize: '1.1rem', fontWeight: 600, color: '#000', textTransform: 'capitalize' }}>
+          <Typography sx={{ 
+            fontFamily: '"Helvetica Neue", sans-serif', 
+            fontSize: { xs: '1rem', sm: '1.1rem' }, 
+            fontWeight: 600, 
+            color: '#000', 
+            textTransform: 'capitalize',
+            textAlign: { xs: 'center', sm: 'left' }
+          }}>
             {currentTitle}
           </Typography>
 
-          <Box sx={{ width: 120 }} /> {/* Espaciador para centrar el título */}
+          <Box sx={{ width: { xs: '100%', sm: 120 } }} />
         </Box>
 
         {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid' }}>{error}</Alert>}
@@ -609,27 +700,39 @@ export default function Calendar() {
           <Paper
             elevation={0}
             sx={{
-              p: 3,
+              p: { xs: 2, sm: 3 },
               border: '1px solid #ececec',
-              borderRadius: 0, // ✅ Bordes afilados
+              borderRadius: 0,
               bgcolor: '#fff',
-              '& .fc': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' },
+              overflowX: 'auto',
+              '& .fc': { 
+                fontFamily: '"Courier New", monospace', 
+                fontSize: isMobile ? '0.7rem' : '0.75rem',
+                minWidth: isMobile ? '600px' : 'auto' // ✅ Scroll horizontal en móvil
+              },
               '& .fc-header-toolbar': { display: 'none' },
               '& .fc-event': {
-                borderRadius: 0, // ✅ Bordes afilados en eventos
+                borderRadius: 0,
                 border: 'none',
                 padding: 0,
-                fontSize: '0.7rem',
+                fontSize: isMobile ? '0.65rem' : '0.7rem',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 marginBottom: '2px',
                 '&:hover': { transform: 'scale(1.01)', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 10 }
               },
-              '& .fc-timegrid-event': { marginBottom: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
-              '& .fc-daygrid-day-number': { padding: '4px 8px', fontSize: '0.75rem' },
-              '& .fc-col-header-cell-cushion': { padding: '8px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' },
+              '& .fc-timegrid-event': { 
+                marginBottom: '4px', 
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                fontSize: isMobile ? '0.65rem' : '0.7rem'
+              },
+              '& .fc-daygrid-day-number': { padding: '4px 8px', fontSize: isMobile ? '0.7rem' : '0.75rem' },
+              '& .fc-col-header-cell-cushion': { padding: '8px', fontSize: isMobile ? '0.65rem' : '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' },
               '& .fc-today': { backgroundColor: '#f5f5f5 !important' },
-              '& .fc-daygrid-more-link': { fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', fontWeight: 600 }
+              '& .fc-daygrid-more-link': { fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', fontWeight: 600 },
+              // ✅ Ajustes específicos para vista semana/día
+              '& .fc-timegrid-slot-label': { fontSize: isMobile ? '0.65rem' : '0.7rem', fontFamily: '"Courier New", monospace' },
+              '& .fc-timegrid-col-header': { fontSize: isMobile ? '0.65rem' : '0.7rem' }
             }}
           >
             <FullCalendar ref={calendarRef} {...calendarOptions} events={calendarEvents} />

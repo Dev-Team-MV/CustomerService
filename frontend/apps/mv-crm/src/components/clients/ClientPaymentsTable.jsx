@@ -1,15 +1,7 @@
 // apps/mv-crm/src/components/clients/ClientPaymentsTable.jsx
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Box,
-  Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TablePagination
-} from '@mui/material'
+import { Box, Typography, FormControl, InputLabel, Select, MenuItem, TablePagination, useMediaQuery, useTheme } from '@mui/material'
 import DataTable from '@shared/components/table/DataTable'
 import EmptyState from '@shared/components/table/EmptyState'
 import { Payment } from '@mui/icons-material'
@@ -18,6 +10,9 @@ import { useClientPaymentColumns } from '../../constants/Columns/clientPayments'
 
 const ClientPaymentsTable = ({ clientId }) => {
   const { t } = useTranslation('residents')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  
   const [payments, setPayments] = useState([])
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 })
   const [loading, setLoading] = useState(true)
@@ -43,7 +38,6 @@ const ClientPaymentsTable = ({ clientId }) => {
     loadPayments()
   }, [clientId, pagination.page, pagination.limit, statusFilter])
 
-  // Calcular si está vencido
   const isOverdue = (payment) => {
     if (!payment.dueDate) return false
     const dueDate = new Date(payment.dueDate)
@@ -51,22 +45,17 @@ const ClientPaymentsTable = ({ clientId }) => {
     return dueDate < now && payment.status !== 'signed'
   }
 
-  // Mapear datos para agregar isOverdue
   const tableData = useMemo(() => {
-    return payments.map(payment => ({
-      ...payment,
-      isOverdue: isOverdue(payment)
-    }))
+    return payments.map(payment => ({ ...payment, isOverdue: isOverdue(payment) }))
   }, [payments])
 
-  // Definir columnas
   const columns = useClientPaymentColumns({ t })
 
   return (
-    <Box>
-      {/* Filtro de estado */}
-      <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
-        <FormControl size="small" sx={{ minWidth: 150 }}>
+    <Box sx={{ p: { xs: 1, sm: 0 } }}>
+      {/* Filtro de estado (Responsive) */}
+      <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+        <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 150 } }}>
           <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
             {t('payments.filterStatus')}
           </InputLabel>
@@ -77,12 +66,7 @@ const ClientPaymentsTable = ({ clientId }) => {
               setPagination(prev => ({ ...prev, page: 1 }))
             }}
             label={t('payments.filterStatus')}
-            sx={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.75rem',
-              borderRadius: 0,
-              '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ececec' }
-            }}
+            sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ececec' } }}
           >
             <MenuItem value="">{t('payments.all')}</MenuItem>
             <MenuItem value="pending">{t('payments.statusPending')}</MenuItem>
@@ -91,14 +75,7 @@ const ClientPaymentsTable = ({ clientId }) => {
           </Select>
         </FormControl>
 
-        <Typography
-          sx={{
-            fontFamily: '"Courier New", monospace',
-            fontSize: '0.7rem',
-            color: '#888',
-            letterSpacing: '0.5px'
-          }}
-        >
+        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#888', letterSpacing: '0.5px' }}>
           {pagination.total} {pagination.total !== 1 ? t('payments.paymentsCountPlural') : t('payments.paymentsCount')}
         </Typography>
       </Box>
@@ -119,27 +96,10 @@ const ClientPaymentsTable = ({ clientId }) => {
         maxHeight={500}
       />
 
-      {/* Paginación */}
+      {/* Paginación (Responsive) */}
       {!loading && pagination.total > pagination.limit && (
-        <Box
-          sx={{
-            mt: 2,
-            p: 2,
-            border: '1px solid #ececec',
-            bgcolor: '#fff',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}
-        >
-          <Typography
-            sx={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.7rem',
-              color: '#888',
-              letterSpacing: '0.5px'
-            }}
-          >
+        <Box sx={{ mt: 2, p: 2, border: '1px solid #ececec', borderRadius: 0, bgcolor: '#fff', display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#888', letterSpacing: '0.5px' }}>
             {t('payments.showing')} {((pagination.page - 1) * pagination.limit) + 1} -{' '}
             {Math.min(pagination.page * pagination.limit, pagination.total)} {t('payments.of')}{' '}
             {pagination.total} {pagination.total !== 1 ? t('payments.paymentsCountPlural') : t('payments.paymentsCount')}
@@ -156,10 +116,8 @@ const ClientPaymentsTable = ({ clientId }) => {
             labelRowsPerPage={t('payments.rowsPerPage')}
             labelDisplayedRows={() => ''}
             sx={{
-              '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.7rem'
-              }
+              '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
+              '& .MuiTablePagination-actions .MuiIconButton-root': { borderRadius: 0 }
             }}
           />
         </Box>

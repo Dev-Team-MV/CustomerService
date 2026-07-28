@@ -60,28 +60,36 @@ export default function WarrantyDetailDialog({ open, onClose, warranty, onResolv
   let displayBuilding = t('common.na')
   let displayFloor = t('common.na')
 
+  // ✅ CORRECCIÓN: Validación segura contra null/undefined
   if (isApartment) {
-    const apt = typeof unit === 'object' ? unit : apartments[unit]
+    const apt = (typeof unit === 'object' && unit !== null) ? unit : apartments[unit]
     if (apt) {
       displayUnit = `${t('warranty.apartment')} ${apt.apartmentNumber || (typeof unit === 'string' ? String(unit).slice(-6) : t('common.na'))}`
       displayFloor = apt.floorNumber || t('common.na')
-      const bldg = typeof apt.building === 'object' ? apt.building : buildings[apt.building]
+      const bldg = (typeof apt.building === 'object' && apt.building !== null) ? apt.building : buildings[apt.building]
       displayBuilding = bldg?.name || (typeof apt.building === 'string' ? `ID: ${String(apt.building).slice(-6)}` : t('common.na'))
     } else {
       displayUnit = `${t('warranty.apartment')} ${typeof unit === 'string' ? String(unit).slice(-6) : t('common.na')}`
     }
   } else {
-    const propId = typeof unit === 'string' ? unit : unit?._id
-    const propObj = typeof unit === 'object' ? unit : (lots[propId] || {})
-    
-    const lotId = typeof propObj.lot === 'string' ? propObj.lot : propObj.lot?._id
-    const modelId = typeof propObj.model === 'string' ? propObj.model : propObj.model?._id
-    
-    const lotData = lots[lotId] || propObj.lot || {}
-    const modelData = models[modelId] || propObj.model || {}
-    
-    displayUnit = `${t('warranty.property')} ${lotData.number || lotData.name || (propId ? String(propId).slice(-6) : t('common.na'))}`
-    displayModel = modelData.name || modelData.model || ''
+    if (!unit) {
+      displayUnit = t('common.na')
+    } else {
+      const propId = typeof unit === 'string' ? unit : (unit._id || '')
+      const propObj = (typeof unit === 'object' && unit !== null) ? unit : (lots[propId] || {})
+      
+      const lotRef = propObj?.lot
+      const modelRef = propObj?.model
+      
+      const lotId = typeof lotRef === 'string' ? lotRef : (lotRef?._id || '')
+      const modelId = typeof modelRef === 'string' ? modelRef : (modelRef?._id || '')
+      
+      const lotData = lots[lotId] || lotRef || {}
+      const modelData = models[modelId] || modelRef || {}
+      
+      displayUnit = `${t('warranty.property')} ${lotData?.number || lotData?.name || (propId ? String(propId).slice(-6) : t('common.na'))}`
+      displayModel = modelData?.name || modelData?.model || ''
+    }
   }
 
   const isAlreadyResolved = warranty.status === 'resolved' || warranty.status === 'rejected'

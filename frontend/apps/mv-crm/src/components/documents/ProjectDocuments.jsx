@@ -1,8 +1,10 @@
+// apps/mv-crm/src/components/documents/ProjectDocuments.jsx
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { 
   Box, Typography, Button, CircularProgress, Alert, Grid, 
-  TextField, FormControl, InputLabel, Select, MenuItem 
+  TextField, FormControl, InputLabel, Select, MenuItem,
+  useMediaQuery, useTheme
 } from '@mui/material'
 import { Add, Search } from '@mui/icons-material'
 import { useDocuments } from '../../constants/hooks/useDocuments'
@@ -15,9 +17,11 @@ import { useResidents } from '@shared/hooks/useResidents'
 
 export default function ProjectDocuments({ projectId, projectName }) {
   const { t } = useTranslation('documents')
-  const { users: clients } = useResidents(null) // Para el filtro de clientes
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   
-  // ✅ Fijamos el projectId en los filtros iniciales del hook
+  const { users: clients } = useResidents(null)
+  
   const { documents, loading, error, refetch, updateFilter, filters, search, setSearch } = useDocuments({ projectId })
   
   const [uploadOpen, setUploadOpen] = useState(false)
@@ -39,43 +43,69 @@ export default function ProjectDocuments({ projectId, projectName }) {
     }
   }
 
+  // ✅ Estilos unificados
+  const unifiedButtonSx = { 
+    borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', 
+    fontSize: '0.75rem', letterSpacing: '0.5px', width: { xs: '100%', sm: 'auto' },
+    '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
+  }
+  
+  const inputSx = { 
+    fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, width: { xs: '100%', sm: 'auto' },
+    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
+    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' },
+    '& .MuiOutlinedInput-root': { borderRadius: 0 }
+  }
+
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h6" sx={{ fontFamily: '"Courier New", monospace', fontWeight: 700 }}>
+    <Box sx={{ p: { xs: 2, sm: 3 } }}>
+      {/* Header Responsive */}
+      <Box 
+        display="flex" 
+        flexDirection={{ xs: 'column', sm: 'row' }} 
+        justifyContent="space-between" 
+        alignItems={{ xs: 'flex-start', sm: 'center' }} 
+        gap={2} 
+        mb={3}
+      >
+        <Typography variant="h6" sx={{ fontFamily: '"Courier New", monospace', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', fontSize: { xs: '0.9rem', sm: '1.1rem' } }}>
           {t('projectDocuments.title', 'Documentos del Proyecto')}
         </Typography>
-        <Button variant="contained" startIcon={<Add />} onClick={() => setUploadOpen(true)}>
+        <Button 
+          variant="contained" 
+          startIcon={<Add />} 
+          onClick={() => setUploadOpen(true)} 
+          sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', fontWeight: 600, '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}
+        >
           {t('uploadDocument')}
         </Button>
       </Box>
 
-      {/* Filtros rápidos para el contexto del proyecto */}
-      <Box display="flex" gap={2} mb={3} flexWrap="wrap">
+      {/* Filtros rápidos Responsive */}
+      <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={3} flexWrap="wrap" alignItems={{ xs: 'stretch', sm: 'center' }}>
         <TextField
           size="small"
           placeholder={t('searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          InputProps={{ startAdornment: <Search sx={{ color: '#aaa', mr: 1 }} /> }}
-          sx={{ minWidth: 200 }}
+          InputProps={{ startAdornment: <Search sx={{ color: '#aaa' }} /> }}
+          sx={{ ...inputSx, minWidth: { xs: '100%', sm: 200 } }}
         />
-        <FormControl size="small" sx={{ minWidth: 150 }}>
+        <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 150 } }}>
           <InputLabel>{t('filters.category')}</InputLabel>
-          <Select value={filters.category || ''} onChange={(e) => updateFilter('category', e.target.value)} label={t('filters.category')}>
-            <MenuItem value="">{t('filters.allCategories')}</MenuItem>
+          <Select value={filters.category || ''} onChange={(e) => updateFilter('category', e.target.value)} label={t('filters.category')} sx={inputSx}>
+            <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.allCategories')}</MenuItem>
             {['contract', 'id_document', 'deed', 'appraisal', 'receipt', 'insurance', 'permit', 'blueprint', 'other'].map(c => (
-              <MenuItem key={c} value={c}>{t(`categories.${c}`)}</MenuItem>
+              <MenuItem key={c} value={c} sx={{ fontFamily: '"Courier New", monospace' }}>{t(`categories.${c}`)}</MenuItem>
             ))}
           </Select>
         </FormControl>
-        <FormControl size="small" sx={{ minWidth: 200 }}>
+        <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 200 } }}>
           <InputLabel>{t('filters.client')}</InputLabel>
-          <Select value={filters.clientId || ''} onChange={(e) => updateFilter('clientId', e.target.value)} label={t('filters.client')}>
-            <MenuItem value="">{t('filters.allClients')}</MenuItem>
+          <Select value={filters.clientId || ''} onChange={(e) => updateFilter('clientId', e.target.value)} label={t('filters.client')} sx={inputSx}>
+            <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.allClients')}</MenuItem>
             {clients.map(c => (
-              <MenuItem key={c._id} value={c._id}>
+              <MenuItem key={c._id} value={c._id} sx={{ fontFamily: '"Courier New", monospace' }}>
                 {c.firstName} {c.lastName}
               </MenuItem>
             ))}
@@ -84,7 +114,11 @@ export default function ProjectDocuments({ projectId, projectName }) {
       </Box>
 
       {/* Estado de carga o error */}
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
+          {error}
+        </Alert>
+      )}
 
       {loading ? (
         <Box display="flex" justifyContent="center" py={8}>
@@ -92,7 +126,9 @@ export default function ProjectDocuments({ projectId, projectName }) {
         </Box>
       ) : documents.length === 0 ? (
         <Box textAlign="center" py={8} color="text.secondary">
-          <Typography>{t('empty')}</Typography>
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem' }}>
+            {t('empty')}
+          </Typography>
         </Box>
       ) : (
         <Grid container spacing={2}>
@@ -110,12 +146,12 @@ export default function ProjectDocuments({ projectId, projectName }) {
         </Grid>
       )}
 
-      {/* ✅ Modales pre-llenados con el contexto del proyecto */}
+      {/* Modales pre-llenados con el contexto del proyecto */}
       <DocumentUploadModal 
         open={uploadOpen} 
         onClose={() => setUploadOpen(false)} 
         onUploadSuccess={refetch}
-        defaultProjectId={projectId} // ✅ Pre-llena el proyecto
+        defaultProjectId={projectId}
       />
       
       <DocumentViewer 

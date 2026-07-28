@@ -18,7 +18,8 @@
     "category": "Category",
     "priority": "Priority",
     "all": "All",
-    "clear": "Clear"
+    "clear": "Clear",
+    "actionsTable": "Actions"
   },
   "actions": {
     "confirmDelete": "Are you sure?",

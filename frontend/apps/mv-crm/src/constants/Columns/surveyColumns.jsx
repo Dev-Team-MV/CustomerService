@@ -126,7 +126,7 @@ export const useSurveyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDele
     },
     {
       field: 'createdAt',
-      headerName: t('survey.date', 'Fecha'),
+      headerName: t('warranty.date', 'Fecha'),
       minWidth: 120,
       renderCell: ({ row }) => (
         <Typography variant="caption" color="text.secondary">
@@ -136,7 +136,7 @@ export const useSurveyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDele
     },
     {
       field: 'actions',
-      headerName: t('actions.actions', 'Acciones'),
+      headerName: t('filters.actionsTable', 'Acciones'),
       minWidth: 140,
       sortable: false,
       renderCell: ({ row }) => (

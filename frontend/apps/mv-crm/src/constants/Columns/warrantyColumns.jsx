@@ -26,7 +26,7 @@ export const useWarrantyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDe
     },
     {
       field: 'project',
-      headerName: t('warranty.project', 'Proyecto'),
+      headerName: t('filters.project', 'Proyecto'),
       minWidth: 150,
       renderCell: ({ row }) => {
         const project = row.projectId
@@ -111,7 +111,7 @@ export const useWarrantyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDe
     },
     {
       field: 'status',
-      headerName: t('warranty.status', 'Estado'),
+      headerName: t('filters.status', 'Estado'),
       minWidth: 140,
       renderCell: ({ row }) => {
         const statusColors = {
@@ -146,7 +146,7 @@ export const useWarrantyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDe
     },
     {
       field: 'actions',
-      headerName: t('warranty.actions', 'Acciones'),
+      headerName: t('filters.actionsTable', 'Acciones'),
       minWidth: 120, // Reducido un poco ya que a veces solo habrá 1 botón
       sortable: false,
       renderCell: ({ row }) => {

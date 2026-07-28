@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Box, Typography, TextField, Button, IconButton,
-  Select, MenuItem, FormControl, InputLabel, Autocomplete, InputAdornment, Avatar
+  Select, MenuItem, FormControl, InputLabel, Autocomplete, InputAdornment, Avatar,
+  useMediaQuery, useTheme
 } from '@mui/material'
 import { Close, Save, Person, Email, Business, Notes } from '@mui/icons-material'
 import { useProjects } from '@shared/hooks/useProjects'
@@ -28,6 +29,9 @@ const initialFormData = {
 
 const LeadModal = ({ open, onClose, lead = null, onSave }) => {
   const { t } = useTranslation('leads')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  
   const [formData, setFormData] = useState(initialFormData)
   const [saving, setSaving] = useState(false)
 
@@ -77,48 +81,75 @@ const LeadModal = ({ open, onClose, lead = null, onSave }) => {
     }
   }
 
-  // ✅ Estilos unificados
-  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
-  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }
+  // ✅ Estilos unificados con soporte responsive
+  const unifiedButtonSx = { 
+    borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', 
+    fontSize: '0.75rem', letterSpacing: '0.5px', width: { xs: '100%', sm: 'auto' },
+    '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
+  }
+  
+  const inputSx = { 
+    fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, width: '100%',
+    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
+    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' },
+    '& .MuiOutlinedInput-root': { borderRadius: 0 }
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
-      <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+      <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: { xs: 2, sm: 3 } }}>
+        <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Courier New", monospace', fontSize: { xs: '0.8rem', sm: '0.85rem' }, letterSpacing: '1px', textTransform: 'uppercase' }}>
           {isEditing ? t('editLead') : t('newLead')}
         </Typography>
         <IconButton onClick={onClose} size="small" sx={{ borderRadius: 0 }}><Close /></IconButton>
       </DialogTitle>
 
-      <DialogContent dividers>
+      <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
         <Box display="flex" flexDirection="column" gap={2.5} py={1}>
-          <TextField label={t('form.name')} value={formData.name} onChange={(e) => handleChange('name', e.target.value)} fullWidth required placeholder={t('form.namePlaceholder')} sx={inputSx} InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ color: '#aaa' }} /></InputAdornment> }} />
+          <TextField 
+            label={t('form.name')} 
+            value={formData.name} 
+            onChange={(e) => handleChange('name', e.target.value)} 
+            fullWidth 
+            required 
+            placeholder={t('form.namePlaceholder')} 
+            sx={inputSx} 
+            InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ color: '#aaa' }} /></InputAdornment> }} 
+          />
 
-<Box display="flex" gap={2}>
-  <TextField 
-    label={t('form.email')} 
-    value={formData.email} 
-    onChange={(e) => handleChange('email', e.target.value)} 
-    fullWidth 
-    type="email" 
-    sx={{ ...inputSx, flex: 1 }}  // ✅ Agregado flex: 1
-    InputProps={{ 
-      startAdornment: <InputAdornment position="start"><Email sx={{ color: '#aaa' }} /></InputAdornment> 
-    }} 
-  />
-  
-  <Box sx={{ flex: 1 }}> 
-
-    <SharedPhoneInput
-      value={formData.phone}
-      onChange={(value) => handleChange('phone', value)}
-      country="us"
-      inputStyle={{ height: '40px', fontSize: '0.875rem', borderRadius: 0, border: '1px solid #ececec', fontFamily: '"Helvetica Neue", sans-serif' }}
-      containerStyle={{ width: '100%' }}
-      buttonStyle={{ borderRadius: 0, border: '1px solid #ececec', borderRight: 'none' }}
-    />
-  </Box>
-</Box>
+          {/* ✅ Responsive: Columna en móvil, fila en desktop */}
+          <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
+            <TextField 
+              label={t('form.email')} 
+              value={formData.email} 
+              onChange={(e) => handleChange('email', e.target.value)} 
+              fullWidth 
+              type="email" 
+              sx={inputSx}
+              InputProps={{ 
+                startAdornment: <InputAdornment position="start"><Email sx={{ color: '#aaa' }} /></InputAdornment> 
+              }} 
+            />
+            
+            <Box sx={{ width: { xs: '100%', sm: '50%' } }}>
+              <SharedPhoneInput
+              label={t('form.phone')}
+                value={formData.phone}
+                onChange={(value) => handleChange('phone', value)}
+                country="us"
+                inputStyle={{ 
+                  height: '40px', 
+                  fontSize: '0.875rem', 
+                  borderRadius: 0, 
+                  border: '1px solid #ececec', 
+                  fontFamily: '"Helvetica Neue", sans-serif',
+                  paddingLeft: '55px'
+                }}
+                containerStyle={{ width: '100%' }}
+                buttonStyle={{ borderRadius: 0, border: '1px solid #ececec', borderRight: 'none', height: '40px' }}
+              />
+            </Box>
+          </Box>
 
           <Box>
             <Typography variant="caption" sx={{ mb: 0.5, display: 'block', color: 'text.secondary', fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('form.country', 'País')}</Typography>
@@ -140,7 +171,7 @@ const LeadModal = ({ open, onClose, lead = null, onSave }) => {
             />
           </Box>
 
-          <Box display="flex" gap={2}>
+          <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
             <Autocomplete
               options={projectOptions} loading={loadingProjects} getOptionLabel={(option) => option.name || ''} isOptionEqualToValue={(option, val) => option._id === val?._id}
               value={projectOptions.find(p => p._id === formData.projectId) || null} onChange={(_, newValue) => handleChange('projectId', newValue?._id || null)} fullWidth
@@ -155,7 +186,7 @@ const LeadModal = ({ open, onClose, lead = null, onSave }) => {
             />
           </Box>
 
-          <Box display="flex" gap={2}>
+          <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
             <FormControl fullWidth>
               <InputLabel>{t('form.stage')}</InputLabel>
               <Select value={formData.stage} label={t('form.stage')} onChange={(e) => handleChange('stage', e.target.value)} required sx={inputSx}>
@@ -174,13 +205,31 @@ const LeadModal = ({ open, onClose, lead = null, onSave }) => {
             </FormControl>
           </Box>
 
-          <TextField label={t('form.notes')} value={formData.notes} onChange={(e) => handleChange('notes', e.target.value)} fullWidth multiline rows={3} placeholder={t('form.notesPlaceholder')} sx={{ ...inputSx, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }} InputProps={{ startAdornment: <InputAdornment position="start"><Notes sx={{ color: '#aaa' }} /></InputAdornment> }} />
+          <TextField 
+            label={t('form.notes')} 
+            value={formData.notes} 
+            onChange={(e) => handleChange('notes', e.target.value)} 
+            fullWidth 
+            multiline 
+            rows={3} 
+            placeholder={t('form.notesPlaceholder')} 
+            sx={{ ...inputSx, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }} 
+            InputProps={{ startAdornment: <InputAdornment position="start"><Notes sx={{ color: '#aaa' }} /></InputAdornment> }} 
+          />
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec' }}>
-        <Button onClick={onClose} disabled={saving} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('form.cancel')}</Button>
-        <Button variant="contained" onClick={handleSave} disabled={!formData.name.trim() || saving} startIcon={<Save />} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+        <Button onClick={onClose} disabled={saving} sx={{ ...unifiedButtonSx, color: '#888' }}>
+          {t('form.cancel')}
+        </Button>
+        <Button 
+          variant="contained" 
+          onClick={handleSave} 
+          disabled={!formData.name.trim() || saving} 
+          startIcon={<Save />} 
+          sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}
+        >
           {saving ? t('saving') : isEditing ? t('form.update') : t('form.create')}
         </Button>
       </DialogActions>

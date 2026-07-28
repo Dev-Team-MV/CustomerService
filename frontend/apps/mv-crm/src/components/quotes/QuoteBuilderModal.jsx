@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Box, Typography,
   TextField, Button, IconButton, FormControl, InputLabel, Select, MenuItem,
-  CircularProgress, Alert, Stepper, Step, StepLabel, Grid, Divider, Switch, FormControlLabel, Chip
+  CircularProgress, Alert, Stepper, Step, StepLabel, Grid, Divider, Switch, FormControlLabel, Chip,
+  useMediaQuery, useTheme
 } from '@mui/material'
 import { Close, AutoAwesome, Home, Apartment, Business } from '@mui/icons-material'
 import quoteService from '../../services/quoteService'
@@ -19,6 +20,8 @@ const STEPS = ['Propiedad', 'Financiamiento', 'Vista Previa']
 
 export default function QuoteBuilderModal({ open, onClose, quote = null, onSave, projects = [], leads = [], clients = [] }) {
   const { t } = useTranslation('quoteCrm')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const isEditing = Boolean(quote?._id)
   
   const getId = (val) => (typeof val === 'object' && val !== null ? val._id : val) || ''
@@ -39,8 +42,7 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
   const [formData, setFormData] = useState({
     leadId: '', clientId: '', projectId: '',
     lotId: '', modelId: '', facadeId: '', deckId: '', buildingId: '', apartmentId: '',
-    selectedRenderType: 'basic',
-    selectedOptions: {},
+    selectedRenderType: 'basic', selectedOptions: {},
     hasModelUpgrade: false, hasModelBalcony: false, hasModelStorage: false,
     modelUpgradeId: null, modelBalconyId: null, modelStorageId: null,
     totalPrice: 0, downPayment: 0, interestRate: 5, termMonths: 120,
@@ -364,29 +366,40 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
   }
 
   // ✅ Estilos unificados
-  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
-  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }
+  const unifiedButtonSx = { 
+    borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', 
+    fontSize: '0.75rem', letterSpacing: '0.5px', width: { xs: '100%', sm: 'auto' },
+    '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
+  }
+  
+  const inputSx = { 
+    fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, 
+    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
+    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' }
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
-      <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: { xs: 2, sm: 3 } }}>
         <Box display="flex" alignItems="center" gap={1}>
           <AutoAwesome sx={{ fontSize: 20 }} />
-          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: { xs: '0.75rem', sm: '0.85rem' }, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>
             {isEditing ? t('editTitle', 'Editar Cotización') : t('createTitle', 'Nueva Cotización')}
           </Typography>
         </Box>
-        <IconButton onClick={onClose} size="small" disabled={loading} sx={{ borderRadius: 0 }}><Close fontSize="small" /></IconButton>
+        <IconButton onClick={onClose} size="small" disabled={loading} sx={{ borderRadius: 0 }}>
+          <Close fontSize="small" />
+        </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ p: 0 }}>
-        {error && <Alert severity="error" sx={{ m: 3, mb: 0, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace' }}>{error}</Alert>}
+      <DialogContent sx={{ p: { xs: 1, sm: 3 } }}>
+        {error && <Alert severity="error" sx={{ m: { xs: 1, sm: 3 }, mb: { xs: 1, sm: 0 }, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>{error}</Alert>}
         
-        <Box sx={{ p: 3 }}>
-          <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+        <Box sx={{ p: { xs: 1, sm: 0 } }}>
+          <Stepper activeStep={activeStep} sx={{ mb: 4, '& .MuiStepLabel-label': { fontSize: { xs: '0.65rem', sm: '0.75rem' } } }}>
             {STEPS.map(label => (
               <Step key={label}>
-                <StepLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px' }}>{label}</StepLabel>
+                <StepLabel sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>{isMobile && label.length > 10 ? label.substring(0, 10) + '...' : label}</StepLabel>
               </Step>
             ))}
           </Stepper>
@@ -577,7 +590,7 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
           )}
 
           {activeStep === 1 && (
-            <Grid container spacing={3}>
+            <Grid container spacing={2}>
               <Grid item xs={12}><Alert severity="info" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, border: '1px solid' }}>Propiedad seleccionada: <strong style={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{getPropertyName()}</strong></Alert></Grid>
               <Grid item xs={12} md={6}>
                 <TextField label={t('form.totalPrice')} type="number" fullWidth size="small" value={formData.totalPrice} onChange={(e) => handleChange('totalPrice', Number(e.target.value))} sx={inputSx} InputProps={{ startAdornment: <Typography variant="body2" color="text.secondary" sx={{ mr: 1, fontFamily: '"Courier New", monospace' }}>$</Typography> }} />
@@ -613,7 +626,9 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
               </Box>
               
               <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase' }}>Tabla de Amortización</Typography>
-              <AmortizationTable schedule={previewData.schedule} />
+              <Box sx={{ overflowX: 'auto' }}>
+                <AmortizationTable schedule={previewData.schedule} />
+              </Box>
               
               <TextField label={t('form.notes')} multiline rows={3} fullWidth size="small" sx={{ mt: 3, ...inputSx }} value={formData.notes} onChange={(e) => handleChange('notes', e.target.value)} placeholder="Términos, condiciones o notas adicionales..." />
             </Box>
@@ -621,10 +636,16 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ borderTop: '1px solid #ececec', p: 2, gap: 1 }}>
-        {activeStep > 0 && <Button onClick={handleBack} disabled={loading} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('back', 'Atrás')}</Button>}
-        <Box sx={{ flex: 1 }} />
-        <Button onClick={onClose} disabled={loading} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('cancel', 'Cancelar')}</Button>
+      <DialogActions sx={{ borderTop: '1px solid #ececec', p: 2, gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
+        {activeStep > 0 && (
+          <Button onClick={handleBack} disabled={loading} sx={{ ...unifiedButtonSx, color: '#888' }}>
+            {t('back', 'Atrás')}
+          </Button>
+        )}
+        <Box sx={{ flex: 1, display: { xs: 'none', sm: 'block' } }} />
+        <Button onClick={onClose} disabled={loading} sx={{ ...unifiedButtonSx, color: '#888' }}>
+          {t('cancel', 'Cancelar')}
+        </Button>
         {activeStep < 2 ? (
           <Button variant="contained" onClick={handleNext} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
             {t('next', 'Siguiente')}
