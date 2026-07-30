@@ -12,6 +12,7 @@ import { useResidents } from '@shared/hooks/useResidents'
 // ✅ Importar el autocompletado de Google Places
 import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
 import SharedPhoneInput from '@shared/constants/SharedPhoneInput'
+import CountrySelector from '../CountrySelector'
 
 export default function SubmitReferralModal({ open, onClose, onSuccess, mode = 'customer' }) {
   const { t } = useTranslation('referrals')
@@ -204,46 +205,12 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
             />
 
             {/* ✅ Campo de País */}
-            <Box>
-              <Typography variant="caption" sx={{ mb: 0.5, display: 'block', color: 'text.secondary', fontFamily: '"DM Sans", sans-serif' }}>
-                {t('fields.country', 'País')}
-              </Typography>
-              <GooglePlacesAutocomplete
-                apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-                selectProps={{
-                  value: formData.country ? { label: formData.country, value: formData.country } : null,
-                  onChange: handleCountryChange,
-                  placeholder: t('fields.selectCountry', 'Selecciona un país...'),
-                  styles: {
-                    control: (provided) => ({
-                      ...provided,
-                      borderRadius: 4,
-                      border: '1px solid rgba(0, 0, 0, 0.23)',
-                      fontFamily: '"DM Sans", sans-serif',
-                      minHeight: 40, // Tamaño small de MUI
-                      boxShadow: 'none',
-                      '&:hover': { borderColor: 'rgba(0, 0, 0, 0.87)' },
-                      padding: '0 8px',
-                      '& .MuiInputBase-input': { padding: '8px 6px' }
-                    }),
-                    menu: (provided) => ({
-                      ...provided,
-                      fontFamily: '"DM Sans", sans-serif',
-                      borderRadius: 4,
-                      marginTop: 4,
-                      zIndex: 9999,
-                    }),
-                    option: (provided, state) => ({
-                      ...provided,
-                      fontFamily: '"DM Sans", sans-serif',
-                      backgroundColor: state.isSelected ? '#1976d2' : state.isFocused ? '#f5f5f5' : 'white',
-                      color: state.isSelected ? 'white' : 'black',
-                    })
-                  }
-                }}
-                autocompletionRequest={{ types: ['country'] }}
-              />
-            </Box>
+<CountrySelector
+              label={t('fields.country')}
+              value={formData.country}
+              onChange={(value) => handleChange('country', value)}
+              required={true}
+            />
 
             {mode === 'crm' && (
               <>

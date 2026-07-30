@@ -53,7 +53,10 @@
     "cancel": "Cancel",
     "create": "Create",
     "update": "Update",
-    "country": "Country"
+    "country": "Country",
+    "selectCountry": "Select a country",
+    "selectProject": "Select a project",
+    "noProjects": "No projects available"
   },
 
     "details": {

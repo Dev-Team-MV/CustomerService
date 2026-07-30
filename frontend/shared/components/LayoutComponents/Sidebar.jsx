@@ -38,6 +38,7 @@ const NAV = [
   { key: 'campaigns', labelKey: 'campaigns', icon: Campaign, path: '/campaigns' },
   { key: 'comissions', labelKey: 'comissions', icon: AccountBalanceWallet, path: '/comissions' },
   { key: 'quote', labelKey: 'quote', icon: ReceiptLong, path: '/quote' },
+  { key: 'vendors', labelKey: 'vendors', icon: Business, path: '/vendors' },
   { key: 'documents', labelKey: 'documents', icon: Description, path: '/documents' },
   { key: 'post-sale', labelKey: 'post-sale', icon: Handshake, path: '/post-sale' },
   { key: 'referrals', labelKey: 'referrals', icon: PersonAddAlt1, path: '/referrals' },

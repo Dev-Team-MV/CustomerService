@@ -3,6 +3,12 @@
     "title": "Referral Program",
     "subtitle": "Management of referrals, rewards, and program configuration"
   },
+  "modal":{
+    "createTitle": "Submit Referral",
+    "subtitle": "Please fill out the form below to submit a new referral.",
+    "successMessage": "Referral submitted successfully!",
+    "errorMessage": "There was an error submitting the referral. Please try again."
+  },
   "stats": {
     "total": "Total Referrals",
     "conversionRate": "Conversion Rate",
@@ -45,7 +51,8 @@
     "noReferrerProperties": "Referrer has no assigned properties",
     "overrideDiscount": "Override Discount % (Optional)",
     "cashWarning": "Note: The system will reject this action if the referrer has a pending balance on any of their units.",
-    "rewardAmount": "Reward Amount (Cash)"
+    "rewardAmount": "Reward Amount (Cash)",
+    "submit": "Submit Referral"
   },
   "program": {
     "title": "Configuration",
@@ -91,6 +98,7 @@
     "rewardType": "Reward Type",
     "rewardPerReferral": "Reward Amount",
     "discountPercent": "Discount Percentage (%)",
-    "notes": "Additional Notes"
+    "notes": "Additional Notes",
+    "country": "Country"
   }
 }
