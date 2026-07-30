@@ -26,12 +26,16 @@ import auditService, { AUDIT_ENTITIES, AUDIT_ACTIONS } from '../services/auditSe
 import { useAuditLogColumns, ACTION_CONFIG, AuditLogDetailDrawer } from '../constants/Columns/AuditLogColumns'
 import { useAuth } from '@shared/context/AuthContext'
 import { useProjects } from '@shared/hooks/useProjects'
+import { useResidents } from '@shared/hooks/useResidents' // ✅ Importado para obtener la lista de usuarios
 
 const AuditLog = () => {
-  const { t } = useTranslation('residents')
+  // Nota: Si tu namespace de traducción para audit es 'audit', cámbialo aquí. 
+  // Lo dejé como 'audit' asumiendo que es el correcto para estas claves.
+  const { t } = useTranslation('audit') 
   const { user } = useAuth()
   
   const { projects, loading: loadingProjects } = useProjects()
+  const { users: allUsers, loading: loadingUsers } = useResidents(null) // ✅ Hook para obtener usuarios
   
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(false)
@@ -59,7 +63,7 @@ const AuditLog = () => {
   
   const fetchLogs = async (page = 1) => {
     if (!isSuperAdmin) {
-      setError(t('audit.accessDeniedMessage'))
+      setError(t('accessDeniedMessage', 'Acceso denegado'))
       return
     }
     
@@ -79,7 +83,7 @@ const AuditLog = () => {
       }))
     } catch (err) {
       console.error('Error fetching audit logs:', err)
-      setError(err.response?.data?.message || t('audit.errorLoading'))
+      setError(err.response?.data?.message || t('errorLoading', 'Error al cargar los registros'))
       setLogs([])
     } finally {
       setLoading(false)
@@ -88,7 +92,7 @@ const AuditLog = () => {
   
   useEffect(() => {
     if (isSuperAdmin) fetchLogs(1)
-  }, [isSuperAdmin])
+  }, [isSuperAdmin]) // eslint-disable-line react-hooks/exhaustive-deps
   
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }))
@@ -103,6 +107,7 @@ const AuditLog = () => {
   
   const handlePageChange = (event, value) => fetchLogs(value)
   const handleRefresh = () => fetchLogs(pagination.page)
+  
   const handleOpenDetail = (log) => {
     setSelectedLog(log)
     setDrawerOpen(true)
@@ -115,7 +120,7 @@ const AuditLog = () => {
   
   const translatedActionConfig = useMemo(() => {
     return Object.entries(ACTION_CONFIG).reduce((acc, [key, config]) => {
-      acc[key] = { ...config, label: t(`audit.actions.${key}`, config.label) }
+      acc[key] = { ...config, label: t(`actions.${key}`, config.label) }
       return acc
     }, {})
   }, [t])
@@ -138,21 +143,29 @@ const AuditLog = () => {
     fontSize: '0.75rem', 
     borderRadius: 0, 
     '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
-    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' }
+    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' },
+    '& .MuiOutlinedInput-root': { borderRadius: 0 }
+  }
+
+  const menuItemSx = {
+    fontFamily: '"Courier New", monospace',
+    fontSize: '0.75rem',
+    borderRadius: 0,
+    '&:hover': { bgcolor: '#f5f5f5' }
   }
 
   const chipSx = { borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 600 }
   
   if (!isSuperAdmin) {
     return (
-      <PageLayout title={t('audit.title')} titleBold={t('audit.titleBold')} topbarLabel={t('audit.topbarLabel')} subtitle={t('audit.subtitle')}>
+      <PageLayout title={t('title', 'Audit Log')} titleBold={t('titleBold', 'CRM')} topbarLabel={t('topbarLabel', 'Audit')} subtitle={t('subtitle', 'System activity records')}>
         <Box sx={{ mt: 4, p: 4, bgcolor: '#ffebee', border: '1px solid #f44336', borderRadius: 0, textAlign: 'center' }}>
           <Lock sx={{ fontSize: 48, color: '#d32f2f', mb: 2 }} />
           <Typography variant="h5" fontWeight={700} color="#d32f2f" gutterBottom sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase' }}>
-            {t('audit.accessDeniedTitle')}
+            {t('accessDeniedTitle', 'Access Denied')}
           </Typography>
           <Typography color="#c62828" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
-            {t('audit.accessDeniedMessage')}
+            {t('accessDeniedMessage', 'You do not have permission to view this section.')}
           </Typography>
         </Box>
       </PageLayout>
@@ -160,14 +173,14 @@ const AuditLog = () => {
   }
   
   return (
-    <PageLayout title={t('audit.title')} titleBold={t('audit.titleBold')} topbarLabel={t('audit.topbarLabel')} subtitle={t('audit.subtitle')}>
+    <PageLayout title={t('title', 'Audit Log')} titleBold={t('titleBold', 'CRM')} topbarLabel={t('topbarLabel', 'Audit')} subtitle={t('subtitle', 'System activity records')}>
       {/* Panel de filtros */}
       <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 0, border: '1px solid #e0e0e0', bgcolor: '#fafafa' }}>
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           <Box display="flex" alignItems="center" gap={1}>
             <FilterList sx={{ fontSize: 20, color: '#666' }} />
             <Typography variant="subtitle2" fontWeight={600} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>
-              {t('audit.filters')}
+              {t('filters', 'Filters')}
             </Typography>
             {activeFiltersCount > 0 && (
               <Chip label={activeFiltersCount} size="small" color="primary" sx={{ ...chipSx, height: 20 }} />
@@ -175,18 +188,18 @@ const AuditLog = () => {
           </Box>
           
           <Button size="small" startIcon={<Refresh />} onClick={handleRefresh} disabled={loading} sx={{ ...unifiedButtonSx, color: '#000', border: '1px solid #000', '&:hover': { bgcolor: '#f5f5f5', borderColor: '#333', color: '#333', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
-            {t('audit.refresh')}
+            {t('refresh', 'Refresh')}
           </Button>
         </Box>
         
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl size="small" fullWidth>
-              <InputLabel>{t('audit.entity')}</InputLabel>
-              <Select value={filters.entity} onChange={(e) => handleFilterChange('entity', e.target.value)} label={t('audit.entity')} sx={inputSx}>
-                <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}><em>{t('audit.allEntities')}</em></MenuItem>
+              <InputLabel>{t('entity', 'Entity')}</InputLabel>
+              <Select value={filters.entity} onChange={(e) => handleFilterChange('entity', e.target.value)} label={t('entity', 'Entity')} sx={inputSx}>
+                <MenuItem value="" sx={menuItemSx}><em>{t('allEntities', 'All entities')}</em></MenuItem>
                 {AUDIT_ENTITIES.map(entity => (
-                  <MenuItem key={entity} value={entity} sx={{ fontFamily: '"Courier New", monospace' }}>{t(`audit.entities.${entity}`, entity)}</MenuItem>
+                  <MenuItem key={entity} value={entity} sx={menuItemSx}>{t(`entities.${entity}`, entity)}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -194,11 +207,11 @@ const AuditLog = () => {
           
           <Grid item xs={12} sm={6} md={3}>
             <FormControl size="small" fullWidth>
-              <InputLabel>{t('audit.project', 'Proyecto')}</InputLabel>
-              <Select value={filters.entityId} onChange={(e) => handleFilterChange('entityId', e.target.value)} label={t('audit.project', 'Proyecto')} disabled={loadingProjects} sx={inputSx}>
-                <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}><em>{t('audit.allProjects', 'Todos los proyectos')}</em></MenuItem>
+              <InputLabel>{t('project', 'Project')}</InputLabel>
+              <Select value={filters.entityId} onChange={(e) => handleFilterChange('entityId', e.target.value)} label={t('project', 'Project')} disabled={loadingProjects} sx={inputSx}>
+                <MenuItem value="" sx={menuItemSx}><em>{t('allProjects', 'All projects')}</em></MenuItem>
                 {projects.map(project => (
-                  <MenuItem key={project._id} value={project._id} sx={{ fontFamily: '"Courier New", monospace' }}>{project.name}</MenuItem>
+                  <MenuItem key={project._id} value={project._id} sx={menuItemSx}>{project.name}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -206,11 +219,11 @@ const AuditLog = () => {
           
           <Grid item xs={12} sm={6} md={3}>
             <FormControl size="small" fullWidth>
-              <InputLabel>{t('audit.action')}</InputLabel>
-              <Select value={filters.action} onChange={(e) => handleFilterChange('action', e.target.value)} label={t('audit.action')} sx={inputSx}>
-                <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}><em>{t('audit.allActions')}</em></MenuItem>
+              <InputLabel>{t('action', 'Action')}</InputLabel>
+              <Select value={filters.action} onChange={(e) => handleFilterChange('action', e.target.value)} label={t('action', 'Action')} sx={inputSx}>
+                <MenuItem value="" sx={menuItemSx}><em>{t('allActions', 'All actions')}</em></MenuItem>
                 {Object.entries(translatedActionConfig).map(([key, config]) => (
-                  <MenuItem key={key} value={key} sx={{ fontFamily: '"Courier New", monospace' }}>
+                  <MenuItem key={key} value={key} sx={menuItemSx}>
                     <Box display="flex" alignItems="center" gap={1}>
                       <Box sx={{ width: 8, height: 8, borderRadius: 0, bgcolor: config.color }} />
                       {config.label}
@@ -221,25 +234,60 @@ const AuditLog = () => {
             </FormControl>
           </Grid>
           
+          {/* ✅ SELECT DE USUARIOS REEMPLAZANDO AL TEXTFIELD */}
           <Grid item xs={12} sm={6} md={3}>
-            <TextField size="small" fullWidth label={t('audit.userId')} value={filters.userId} onChange={(e) => handleFilterChange('userId', e.target.value)} placeholder={t('audit.userIdPlaceholder')} sx={inputSx} />
+            <FormControl size="small" fullWidth>
+              <InputLabel>{t('user', 'User')}</InputLabel>
+              <Select 
+                value={filters.userId} 
+                onChange={(e) => handleFilterChange('userId', e.target.value)} 
+                label={t('user', 'User')} 
+                sx={inputSx}
+                disabled={loadingUsers}
+              >
+                <MenuItem value="" sx={menuItemSx}><em>{t('allUsers', 'All users')}</em></MenuItem>
+                {allUsers.map(u => (
+                  <MenuItem key={u._id} value={u._id} sx={menuItemSx}>
+                    {u.firstName} {u.lastName} {u.email ? `(${u.email})` : ''}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
           
           <Grid item xs={12} sm={6} md={3}>
-            <TextField size="small" fullWidth type="date" label={t('audit.dateFrom')} value={filters.dateFrom ? filters.dateFrom.split('T')[0] : ''} onChange={(e) => handleFilterChange('dateFrom', e.target.value ? `${e.target.value}T00:00:00.000Z` : '')} InputLabelProps={{ shrink: true }} sx={inputSx} />
+            <TextField 
+              size="small" 
+              fullWidth 
+              type="date" 
+              label={t('dateFrom', 'From Date')} 
+              value={filters.dateFrom ? filters.dateFrom.split('T')[0] : ''} 
+              onChange={(e) => handleFilterChange('dateFrom', e.target.value ? `${e.target.value}T00:00:00.000Z` : '')} 
+              InputLabelProps={{ shrink: true }} 
+              sx={inputSx} 
+            />
           </Grid>
           
           <Grid item xs={12} sm={6} md={3}>
-            <TextField size="small" fullWidth type="date" label={t('audit.dateTo')} value={filters.dateTo ? filters.dateTo.split('T')[0] : ''} onChange={(e) => handleFilterChange('dateTo', e.target.value ? `${e.target.value}T23:59:59.999Z` : '')} InputLabelProps={{ shrink: true }} sx={inputSx} />
+            <TextField 
+              size="small" 
+              fullWidth 
+              type="date" 
+              label={t('dateTo', 'To Date')} 
+              value={filters.dateTo ? filters.dateTo.split('T')[0] : ''} 
+              onChange={(e) => handleFilterChange('dateTo', e.target.value ? `${e.target.value}T23:59:59.999Z` : '')} 
+              InputLabelProps={{ shrink: true }} 
+              sx={inputSx} 
+            />
           </Grid>
           
           <Grid item xs={12} sm={12} md={6}>
             <Box display="flex" gap={1} justifyContent="flex-end">
               <Button variant="outlined" size="small" startIcon={<Clear />} onClick={handleClearFilters} disabled={activeFiltersCount === 0} sx={{ ...unifiedButtonSx, color: '#888', border: '1px solid #888', '&:hover': { bgcolor: '#f5f5f5', borderColor: '#000', color: '#000', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
-                {t('audit.clearFilters')}
+                {t('clearFilters', 'Clear')}
               </Button>
               <Button variant="contained" size="small" startIcon={<Search />} onClick={handleApplyFilters} disabled={loading} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
-                {t('audit.applyFilters')}
+                {t('applyFilters', 'Apply')}
               </Button>
             </Box>
           </Grid>
@@ -255,10 +303,10 @@ const AuditLog = () => {
       
       {/* Estadísticas rápidas */}
       <Box display="flex" gap={2} mb={3} flexWrap="wrap">
-        <Chip icon={<History sx={{ fontSize: 16 }} />} label={`${pagination.total} ${t('audit.totalRecords')}`} variant="outlined" sx={chipSx} />
-        <Chip icon={<CalendarToday sx={{ fontSize: 16 }} />} label={`${pagination.totalPages} ${t('audit.pages')}`} variant="outlined" sx={chipSx} />
+        <Chip icon={<History sx={{ fontSize: 16 }} />} label={`${pagination.total} ${t('totalRecords', 'records')}`} variant="outlined" sx={chipSx} />
+        <Chip icon={<CalendarToday sx={{ fontSize: 16 }} />} label={`${pagination.totalPages} ${t('pages', 'pages')}`} variant="outlined" sx={chipSx} />
         {activeFiltersCount > 0 && (
-          <Chip icon={<FilterList sx={{ fontSize: 16 }} />} label={`${activeFiltersCount} ${t('audit.activeFilters')}`} color="primary" sx={chipSx} />
+          <Chip icon={<FilterList sx={{ fontSize: 16 }} />} label={`${activeFiltersCount} ${t('activeFilters', 'active filters')}`} color="primary" sx={chipSx} />
         )}
       </Box>
       
@@ -268,7 +316,7 @@ const AuditLog = () => {
         data={logs}
         loading={loading}
         rowKey="_id"
-        emptyMessage={t('audit.noLogs')}
+        emptyMessage={t('noLogs', 'No logs found')}
         onRowClick={handleOpenDetail}
         sx={{
           borderRadius: 0,
@@ -299,10 +347,10 @@ const AuditLog = () => {
       {/* Info footer */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} pt={2}>
         <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem' }}>
-          {t('audit.showing')} {logs.length} {t('audit.of')} {pagination.total} {t('audit.entries')}
+          {t('showing', 'Showing')} {logs.length} {t('of', 'of')} {pagination.total} {t('entries', 'entries')}
         </Typography>
         <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem' }}>
-          {t('audit.page')} {pagination.page} {t('audit.of')} {pagination.totalPages}
+          {t('page', 'Page')} {pagination.page} {t('of', 'of')} {pagination.totalPages}
         </Typography>
       </Box>
       
