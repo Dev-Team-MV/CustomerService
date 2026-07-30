@@ -2757,6 +2757,84 @@ const options = {
               }
             }
           }
+        },
+        VendorLocation: {
+          type: 'object',
+          required: ['formattedAddress'],
+          properties: {
+            formattedAddress: { type: 'string' },
+            placeId: { type: 'string', nullable: true },
+            lat: { type: 'number', nullable: true },
+            lng: { type: 'number', nullable: true },
+            label: { type: 'string' }
+          }
+        },
+        Vendor: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            name: { type: 'string' },
+            category: { type: 'string' },
+            subcategory: { type: 'string' },
+            contactPhones: { type: 'array', items: { type: 'string' } },
+            locations: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/VendorLocation' }
+            },
+            projectId: {
+              description: 'null = general vendor; otherwise Project ref',
+              nullable: true,
+              oneOf: [{ type: 'string' }, { type: 'object' }]
+            },
+            photo: { type: 'string', nullable: true },
+            website: { type: 'string', nullable: true },
+            status: { type: 'string', enum: ['active', 'inactive'] },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        VendorCreate: {
+          type: 'object',
+          required: ['name', 'category', 'subcategory', 'contactPhones'],
+          properties: {
+            name: { type: 'string' },
+            category: { type: 'string' },
+            subcategory: { type: 'string' },
+            contactPhones: {
+              type: 'array',
+              minItems: 1,
+              items: { type: 'string' }
+            },
+            locations: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/VendorLocation' }
+            },
+            projectId: { type: 'string', nullable: true },
+            photo: { type: 'string', nullable: true },
+            website: { type: 'string', nullable: true },
+            status: { type: 'string', enum: ['active', 'inactive'] }
+          }
+        },
+        VendorUpdate: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            category: { type: 'string' },
+            subcategory: { type: 'string' },
+            contactPhones: {
+              type: 'array',
+              minItems: 1,
+              items: { type: 'string' }
+            },
+            locations: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/VendorLocation' }
+            },
+            projectId: { type: 'string', nullable: true },
+            photo: { type: 'string', nullable: true },
+            website: { type: 'string', nullable: true },
+            status: { type: 'string', enum: ['active', 'inactive'] }
+          }
         }
       }
     }
