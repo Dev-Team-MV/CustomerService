@@ -85,8 +85,8 @@ export default function WarrantiesPanel({ onNotify }) {
             <FormControl fullWidth size="small">
               <InputLabel>{t('filters.project')}</InputLabel>
               <Select value={filters.projectId} onChange={(e) => handleFilterChange('projectId', e.target.value)} label={t('filters.project')} sx={inputSx}>
-                <MenuItem value="">{t('filters.all')}</MenuItem>
-                {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
+                <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.all')}</MenuItem>
+                {projects.map(p => <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} key={p._id} value={p._id}>{p.name}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>
@@ -94,8 +94,8 @@ export default function WarrantiesPanel({ onNotify }) {
             <FormControl fullWidth size="small">
               <InputLabel>{t('filters.client')}</InputLabel>
               <Select value={filters.clientId} onChange={(e) => handleFilterChange('clientId', e.target.value)} label={t('filters.client')} sx={inputSx}>
-                <MenuItem value="">{t('filters.all')}</MenuItem>
-                {filteredResidents.map(client => <MenuItem key={client._id} value={client._id}>{client.firstName} {client.lastName}</MenuItem>)}
+                <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} value="">{t('filters.all')}</MenuItem>
+                {filteredResidents.map(client => <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} key={client._id} value={client._id}>{client.firstName} {client.lastName}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>
@@ -103,9 +103,9 @@ export default function WarrantiesPanel({ onNotify }) {
             <FormControl fullWidth size="small">
               <InputLabel>{t('filters.status')}</InputLabel>
               <Select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} label={t('filters.status')} sx={inputSx}>
-                <MenuItem value="">{t('filters.all')}</MenuItem>
+                <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} value="">{t('filters.all')}</MenuItem>
                 {['submitted', 'under_review', 'approved', 'in_progress', 'resolved', 'rejected'].map(s => (
-                  <MenuItem key={s} value={s}>{t(`warranty.statuses.${s}`)}</MenuItem>
+                  <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} key={s} value={s}>{t(`warranty.statuses.${s}`)}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -114,9 +114,9 @@ export default function WarrantiesPanel({ onNotify }) {
             <FormControl fullWidth size="small">
               <InputLabel>{t('filters.category')}</InputLabel>
               <Select value={filters.category} onChange={(e) => handleFilterChange('category', e.target.value)} label={t('filters.category')} sx={inputSx}>
-                <MenuItem value="">{t('filters.all')}</MenuItem>
+                <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} value="">{t('filters.all')}</MenuItem>
                 {['structural', 'plumbing', 'electrical', 'finish', 'appliance', 'landscaping', 'other'].map(c => (
-                  <MenuItem key={c} value={c}>{t(`warranty.categories.${c}`)}</MenuItem>
+                  <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} key={c} value={c}>{t(`warranty.categories.${c}`)}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -125,9 +125,9 @@ export default function WarrantiesPanel({ onNotify }) {
             <FormControl fullWidth size="small">
               <InputLabel>{t('filters.priority')}</InputLabel>
               <Select value={filters.priority} onChange={(e) => handleFilterChange('priority', e.target.value)} label={t('filters.priority')} sx={inputSx}>
-                <MenuItem value="">{t('filters.all')}</MenuItem>
+                <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} value="">{t('filters.all')}</MenuItem>
                 {['low', 'medium', 'high', 'emergency'].map(p => (
-                  <MenuItem key={p} value={p}>{t(`warranty.priorities.${p}`)}</MenuItem>
+                  <MenuItem key={p} sx={{ fontFamily: '"Courier New", monospace' }} value={p}>{t(`warranty.priorities.${p}`)}</MenuItem>
                 ))}
               </Select>
             </FormControl>

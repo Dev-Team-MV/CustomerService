@@ -222,7 +222,7 @@ export default function ClientDetail() {
                 fontSize: { xs: '0.65rem', sm: '0.75rem' },
                 letterSpacing: '1px',
                 textTransform: 'uppercase',
-                color: '#888',
+                color: '#000000ff',
                 minHeight: { xs: 40, sm: 48 },
                 px: { xs: 1, sm: 2 },
                 '&.Mui-selected': {
@@ -270,7 +270,7 @@ export default function ClientDetail() {
                 sx={{
                   fontFamily: '"Courier New", monospace',
                   fontSize: '0.7rem',
-                  color: '#888',
+                  color: '#000000ff',
                   letterSpacing: '1.5px',
                   textTransform: 'uppercase',
                   mb: 2

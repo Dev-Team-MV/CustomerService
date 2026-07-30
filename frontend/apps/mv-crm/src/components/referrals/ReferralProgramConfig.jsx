@@ -51,10 +51,10 @@ export default function ReferralProgramConfig({ projects }) {
         })
       } else {
         setFormData({
-          name: 'Programa de Referidos', 
+          name: '', 
           rewardPerReferral: 0, 
           discountPercent: 0,
-          rewardType: 'cash', 
+          rewardType: 'property_discount', 
           isActive: true, 
           maxReferralsPerUser: 0,
           termsAndConditions: { en: '', es: '' }

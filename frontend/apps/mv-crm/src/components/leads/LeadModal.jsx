@@ -15,6 +15,10 @@ import { LEAD_STAGES, STAGE_COLORS } from '../../services/leadService'
 import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
 import SharedPhoneInput from '@shared/constants/SharedPhoneInput'
 
+// ✅ IMPORTAMOS LOS COMPONENTES REUTILIZABLES
+import ProjectSelector from '@shared/components/ProjectSelector'
+import CountrySelector from '@shared/components/CountrySelector'
+
 const LEAD_SOURCES = [
   { id: 'web', label: 'Web' },
   { id: 'referido', label: 'Referido' },
@@ -81,7 +85,7 @@ const LeadModal = ({ open, onClose, lead = null, onSave }) => {
     }
   }
 
-  // ✅ Estilos unificados con soporte responsive
+  // ✅ Estilos unificados (ya no necesitamos definir estilos de Google Places o Projects aquí)
   const unifiedButtonSx = { 
     borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', 
     fontSize: '0.75rem', letterSpacing: '0.5px', width: { xs: '100%', sm: 'auto' },
@@ -151,38 +155,39 @@ const LeadModal = ({ open, onClose, lead = null, onSave }) => {
             </Box>
           </Box>
 
-          <Box>
-            <Typography variant="caption" sx={{ mb: 0.5, display: 'block', color: 'text.secondary', fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('form.country', 'País')}</Typography>
-            <GooglePlacesAutocomplete
-              apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-              selectProps={{
-                value: formData.country ? { label: formData.country, value: formData.country } : null,
-                onChange: handleCountryChange,
-                placeholder: t('form.selectCountry', 'Selecciona un país...'),
-                styles: {
-                  control: (provided) => ({
-                    ...provided, borderRadius: 0, border: '1px solid #ececec', fontFamily: '"Courier New", monospace', minHeight: 40, boxShadow: 'none', '&:hover': { borderColor: '#000' }, padding: '0 8px', '& .MuiInputBase-input': { padding: '8px 6px', fontFamily: '"Helvetica Neue", sans-serif', fontSize: '0.875rem' }
-                  }),
-                  menu: (provided) => ({ ...provided, fontFamily: '"Courier New", monospace', borderRadius: 0, marginTop: 4, zIndex: 9999 }),
-                  option: (provided, state) => ({ ...provided, fontFamily: '"Courier New", monospace', backgroundColor: state.isSelected ? '#000' : state.isFocused ? '#f5f5f5' : 'white', color: state.isSelected ? 'white' : 'black' })
-                }
-              }}
-              autocompletionRequest={{ types: ['country'] }}
-            />
-          </Box>
+          {/* ✅ REEMPLAZO 1: CountrySelector limpio y sin bugs de transparencia */}
+          <CountrySelector
+            value={formData.country}
+            onChange={(value) => handleChange('country', value)}
+            label={t('form.country', 'País')}
+            placeholder={t('form.selectCountry', 'Selecciona un país...')}
+          />
 
           <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
-            <Autocomplete
-              options={projectOptions} loading={loadingProjects} getOptionLabel={(option) => option.name || ''} isOptionEqualToValue={(option, val) => option._id === val?._id}
-              value={projectOptions.find(p => p._id === formData.projectId) || null} onChange={(_, newValue) => handleChange('projectId', newValue?._id || null)} fullWidth
-              renderInput={(params) => <TextField {...params} label={t('form.project')} sx={inputSx} />}
-              renderOption={(props, option) => <Box component="li" {...props} key={option._id} sx={{ fontFamily: '"Courier New", monospace', borderRadius: 0 }}><Business sx={{ fontSize: 16, mr: 1, color: '#aaa' }} />{option.name}</Box>}
+            {/* ✅ REEMPLAZO 2: ProjectSelector limpio, con búsqueda y estética perfecta */}
+            <ProjectSelector
+              value={formData.projectId}
+              onChange={(value) => handleChange('projectId', value)}
+              label={t('form.project')}
+              includeGlobal={true}
+              globalLabel={t('form.noProject', '')}
             />
+            
             <Autocomplete
-              options={adminUserOptions} loading={loadingUsers} getOptionLabel={(option) => option.name || ''} isOptionEqualToValue={(option, val) => option._id === val?._id}
-              value={adminUserOptions.find(u => u._id === formData.assignedTo) || null} onChange={(_, newValue) => handleChange('assignedTo', newValue?._id || null)} fullWidth
+              options={adminUserOptions} 
+              loading={loadingUsers} 
+              getOptionLabel={(option) => option.name || ''} 
+              isOptionEqualToValue={(option, val) => option._id === val?._id}
+              value={adminUserOptions.find(u => u._id === formData.assignedTo) || null} 
+              onChange={(_, newValue) => handleChange('assignedTo', newValue?._id || null)} 
+              fullWidth
               renderInput={(params) => <TextField {...params} label={t('form.assignedTo')} sx={inputSx} />}
-              renderOption={(props, option) => <Box component="li" {...props} key={option._id} display="flex" alignItems="center" gap={1} sx={{ fontFamily: '"Courier New", monospace', borderRadius: 0 }}><Avatar sx={{ width: 24, height: 24, bgcolor: '#000', borderRadius: 0, fontSize: '0.7rem' }}>{option.name?.charAt(0)}</Avatar>{option.name}</Box>}
+              renderOption={(props, option) => (
+                <Box component="li" {...props} key={option._id} display="flex" alignItems="center" gap={1} sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', '&:hover': { bgcolor: '#f5f5f5' } }}>
+                  <Avatar sx={{ width: 24, height: 24, bgcolor: '#000', borderRadius: 0, fontSize: '0.7rem' }}>{option.name?.charAt(0)}</Avatar>
+                  {option.name}
+                </Box>
+              )}
             />
           </Box>
 

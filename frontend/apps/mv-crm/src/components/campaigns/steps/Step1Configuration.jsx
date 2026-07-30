@@ -10,6 +10,7 @@ import {
   Divider,
   Typography
 } from '@mui/material'
+import ProjectSelector from '@shared/components/ProjectSelector' // ✅ Importado
 
 const Step1Configuration = ({
   formData,
@@ -28,6 +29,20 @@ const Step1Configuration = ({
     onAudienceChange(field, value)
   }
 
+  // ✅ Estilos unificados para Menus
+  const menuItemSx = {
+    fontFamily: '"Courier New", monospace',
+    fontSize: '0.75rem',
+    borderRadius: 0,
+    '&:hover': { bgcolor: '#f5f5f5' }
+  }
+
+  const inputSx = {
+    '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' },
+    '& .MuiOutlinedInput-root': { borderRadius: 0 },
+    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }
+  }
+
   return (
     <Box display="flex" flexDirection="column" gap={2.5}>
       <TextField
@@ -36,12 +51,7 @@ const Step1Configuration = ({
         onChange={(e) => handleChange('name', e.target.value)}
         fullWidth
         required
-        sx={{
-          '& .MuiInputBase-input': {
-            fontFamily: '"Courier New", monospace',
-            fontSize: '0.75rem'
-          }
-        }}
+        sx={inputSx}
       />
 
       <Divider sx={{ my: 1 }} />
@@ -59,69 +69,41 @@ const Step1Configuration = ({
       </Typography>
 
       <FormControl size="small" fullWidth required>
-        <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
-          {t('form.audienceType')} *
-        </InputLabel>
+        <InputLabel>{t('form.audienceType')} *</InputLabel>
         <Select
           value={formData.audience.type}
           onChange={(e) => handleAudienceChange('type', e.target.value)}
           label={t('form.audienceType')}
-          sx={{
-            fontFamily: '"Courier New", monospace',
-            fontSize: '0.75rem',
-            borderRadius: 0
-          }}
+          sx={{ ...inputSx, width: '100%' }}
         >
-          <MenuItem value="leads">{t('audience.leads')}</MenuItem>
-          <MenuItem value="clients">{t('audience.clients')}</MenuItem>
+          <MenuItem value="leads" sx={menuItemSx}>{t('audience.leads')}</MenuItem>
+          <MenuItem value="clients" sx={menuItemSx}>{t('audience.clients')}</MenuItem>
         </Select>
       </FormControl>
 
-      <FormControl size="small" fullWidth>
-        <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
-          {t('form.project')}
-        </InputLabel>
-        <Select
-          value={formData.audience.projectId}
-          onChange={(e) => handleAudienceChange('projectId', e.target.value)}
-          label={t('form.project')}
-          sx={{
-            fontFamily: '"Courier New", monospace',
-            fontSize: '0.75rem',
-            borderRadius: 0
-          }}
-        >
-          <MenuItem value="">
-            <em>{t('allProjects')}</em>
-          </MenuItem>
-          {projects.map(project => (
-            <MenuItem key={project._id} value={project._id}>
-              {project.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      {/* ✅ ProjectSelector Integrado */}
+      <ProjectSelector
+        value={formData.audience.projectId}
+        onChange={(value) => handleAudienceChange('projectId', value)}
+        label={t('form.project')}
+        includeGlobal={true}
+        globalLabel={t('allProjects', 'Todos los proyectos')}
+        fullWidth
+        size="small"
+      />
 
       {formData.audience.type === 'leads' && (
         <FormControl size="small" fullWidth>
-          <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
-            {t('form.stage')}
-          </InputLabel>
+          <InputLabel>{t('form.stage')}</InputLabel>
           <Select
             value={formData.audience.stage}
             onChange={(e) => handleAudienceChange('stage', e.target.value)}
             label={t('form.stage')}
-            sx={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.75rem',
-              borderRadius: 0
-            }}
+            sx={{ ...inputSx, width: '100%' }}
           >
-            <MenuItem value="">
-              <em>{t('allStages')}</em>
-            </MenuItem>
+            <MenuItem value="" sx={menuItemSx}><em>{t('allStages')}</em></MenuItem>
             {stages.map(stage => (
-              <MenuItem key={stage.key} value={stage.key}>
+              <MenuItem key={stage.key} value={stage.key} sx={menuItemSx}>
                 {stage.name}
               </MenuItem>
             ))}

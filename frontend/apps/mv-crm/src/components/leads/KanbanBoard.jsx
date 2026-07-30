@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material'
 import { Edit, Delete, Visibility, Add } from '@mui/icons-material'
+import { DragDropContext } from '@hello-pangea/dnd' // ✅ Importar DragDropContext
 import KanbanColumn from './KanbanColumn'
 
 const KanbanBoard = ({ 
@@ -17,28 +18,24 @@ const KanbanBoard = ({
   onScoreUpdate
 }) => {
   const { t } = useTranslation('leads')
-  const [draggedLead, setDraggedLead] = useState(null)
   
-  // Menú de lead
   const [leadMenuAnchor, setLeadMenuAnchor] = useState(null)
   const [menuLead, setMenuLead] = useState(null)
 
-  const handleDragStart = (lead) => {
-    setDraggedLead(lead)
-  }
+  // ✅ Manejador de finalización del arrastre (funciona en móvil y desktop)
+  const handleDragEnd = async (result) => {
+    if (!result.destination) return
 
-  const handleDrop = async (targetStageKey) => {
-    if (draggedLead) {
-      const currentStageKey = draggedLead.stage
-      if (currentStageKey !== targetStageKey) {
-        await onMoveLead?.(draggedLead._id, targetStageKey)
-      }
+    const { draggableId, destination } = result
+    const targetStageKey = destination.droppableId
+
+    if (onMoveLead) {
+      await onMoveLead(draggableId, targetStageKey)
     }
-    setDraggedLead(null)
   }
 
-  // Lead menu handlers
   const handleLeadMenuClick = (event, lead) => {
+    event.stopPropagation()
     setLeadMenuAnchor(event.currentTarget)
     setMenuLead(lead)
   }
@@ -49,30 +46,31 @@ const KanbanBoard = ({
   }
 
   return (
-    <Box 
-      sx={{ 
-        display: 'flex', 
-        gap: 2, 
-        overflowX: 'auto',
-        pb: 2,
-        height: 'calc(100vh - 200px)',
-        '&::-webkit-scrollbar': { height: 8 },
-        '&::-webkit-scrollbar-thumb': { bgcolor: '#ccc', borderRadius: 4 }
-      }}
-    >
-      {stages.map(stage => (
-        <KanbanColumn
-          key={stage.key}
-          column={stage}
-          leads={groupedByStage[stage.key] || []}
-          onLeadClick={onLeadClick}
-          onAddClick={() => onAddLead(stage.key)}
-          onMenuClick={handleLeadMenuClick}
-          onDragStart={handleDragStart}
-          onDrop={handleDrop}
-          onScoreUpdate={onScoreUpdate}
-        />
-      ))}
+    // ✅ Wrap principal con DragDropContext
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          gap: 2, 
+          overflowX: 'auto',
+          pb: 2,
+          height: 'calc(100vh - 200px)',
+          '&::-webkit-scrollbar': { height: 8 },
+          '&::-webkit-scrollbar-thumb': { bgcolor: '#ccc', borderRadius: 0 }
+        }}
+      >
+        {stages.map(stage => (
+          <KanbanColumn
+            key={stage.key}
+            column={stage}
+            leads={groupedByStage[stage.key] || []}
+            onLeadClick={onLeadClick}
+            onAddClick={() => onAddLead(stage.key)}
+            onMenuClick={handleLeadMenuClick}
+            onScoreUpdate={onScoreUpdate}
+          />
+        ))}
+      </Box>
 
       {/* Context Menu - Leads */}
       <Menu
@@ -100,7 +98,7 @@ const KanbanBoard = ({
           <ListItemText>{t('delete')}</ListItemText>
         </MenuItem>
       </Menu>
-    </Box>
+    </DragDropContext>
   )
 }
 

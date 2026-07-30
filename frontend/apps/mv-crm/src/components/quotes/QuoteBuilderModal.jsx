@@ -16,6 +16,9 @@ import AmortizationTable from './AmortizationTable'
 import { useCatalogConfig } from '@shared/hooks/useCatalogConfig'
 import { calculateEstimatedPrice } from '@shared/utils/pricingEngine'
 
+// ✅ Componente compartido
+import ProjectSelector from '@shared/components/ProjectSelector'
+
 const STEPS = ['Propiedad', 'Financiamiento', 'Vista Previa']
 
 export default function QuoteBuilderModal({ open, onClose, quote = null, onSave, projects = [], leads = [], clients = [] }) {
@@ -375,7 +378,15 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
   const inputSx = { 
     fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, 
     '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
-    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' }
+    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' },
+    '& .MuiOutlinedInput-root': { borderRadius: 0 }
+  }
+
+  const menuItemSx = {
+    fontFamily: '"Courier New", monospace',
+    fontSize: '0.75rem',
+    borderRadius: 0,
+    '&:hover': { bgcolor: '#f5f5f5' }
   }
 
   return (
@@ -411,7 +422,7 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
                   <InputLabel>{t('form.lead')}</InputLabel>
                   <Select value={formData.leadId} onChange={(e) => handleChange('leadId', e.target.value)} label={t('form.lead')} sx={inputSx}>
                     <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
-                    {leads.map(l => <MenuItem key={l._id} value={l._id} sx={{ fontFamily: '"Courier New", monospace' }}>{l.name}</MenuItem>)}
+                    {leads.map(l => <MenuItem key={l._id} value={l._id} sx={menuItemSx}>{l.name}</MenuItem>)}
                   </Select>
                 </FormControl>
               </Grid>
@@ -420,20 +431,23 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
                   <InputLabel>{t('form.client')}</InputLabel>
                   <Select value={formData.clientId} onChange={(e) => handleChange('clientId', e.target.value)} label={t('form.client')} sx={inputSx}>
                     <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
-                    {clients.map(c => <MenuItem key={c._id} value={c._id} sx={{ fontFamily: '"Courier New", monospace' }}>{c.firstName} {c.lastName}</MenuItem>)}
+                    {clients.map(c => <MenuItem key={c._id} value={c._id} sx={menuItemSx}>{c.firstName} {c.lastName}</MenuItem>)}
                   </Select>
                 </FormControl>
               </Grid>
               
               <Grid item xs={12}><Divider sx={{ my: 1 }} /><Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase' }}>Selección de Propiedad</Typography></Grid>
 
+              {/* ✅ ProjectSelector Integrado */}
               <Grid item xs={12} md={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>{t('form.project')} *</InputLabel>
-                  <Select value={formData.projectId} onChange={(e) => handleChange('projectId', e.target.value)} label={t('form.project')} disabled={loadingProperties} sx={inputSx}>
-                    {projects.map(p => <MenuItem key={p._id} value={p._id} sx={{ fontFamily: '"Courier New", monospace' }}>{p.name}</MenuItem>)}
-                  </Select>
-                </FormControl>
+                <ProjectSelector
+                  value={formData.projectId}
+                  onChange={(value) => handleChange('projectId', value)}
+                  label={`${t('form.project')} *`}
+                  includeGlobal={false}
+                  fullWidth
+                  size="small"
+                />
               </Grid>
 
               {(projectType === 'lakewood' || projectType === 'property') && formData.projectId && lots.length > 0 && (
@@ -445,7 +459,7 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
                         <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
                         {lots.map(l => {
                           const modelName = (l.model && typeof l.model === 'object') ? l.model.model : ''
-                          return <MenuItem key={l._id} value={l._id} sx={{ fontFamily: '"Courier New", monospace' }}>Lote {l.lot?.number || l.number || 'N/A'} {modelName ? `— ${modelName}` : ''}</MenuItem>
+                          return <MenuItem key={l._id} value={l._id} sx={menuItemSx}>Lote {l.lot?.number || l.number || 'N/A'} {modelName ? `— ${modelName}` : ''}</MenuItem>
                         })}
                       </Select>
                     </FormControl>
@@ -456,7 +470,7 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
                       <FormControl fullWidth size="small">
                         <InputLabel>{t('form.model', 'Modelo')}</InputLabel>
                         <Select value={formData.modelId} label={t('form.model', 'Modelo')} disabled sx={inputSx}>
-                          {models.map(m => <MenuItem key={m._id} value={m._id} sx={{ fontFamily: '"Courier New", monospace' }}>{m.model || m.name || `Model ${m.modelNumber}`}</MenuItem>)}
+                          {models.map(m => <MenuItem key={m._id} value={m._id} sx={menuItemSx}>{m.model || m.name || `Model ${m.modelNumber}`}</MenuItem>)}
                         </Select>
                       </FormControl>
                     </Grid>
@@ -468,7 +482,7 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
                         <InputLabel>{t('form.facade', 'Fachada')}</InputLabel>
                         <Select value={formData.facadeId} onChange={(e) => { handleChange('facadeId', e.target.value); handleChange('deckId', '') }} label={t('form.facade', 'Fachada')} sx={inputSx}>
                           <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
-                          {availableFacades.map(f => <MenuItem key={f._id} value={f._id} sx={{ fontFamily: '"Courier New", monospace' }}>{f.title} {f.price > 0 ? `(+ $${f.price.toLocaleString()})` : ''}</MenuItem>)}
+                          {availableFacades.map(f => <MenuItem key={f._id} value={f._id} sx={menuItemSx}>{f.title} {f.price > 0 ? `(+ $${f.price.toLocaleString()})` : ''}</MenuItem>)}
                         </Select>
                       </FormControl>
                     </Grid>
@@ -479,7 +493,7 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
                       <FormControl fullWidth size="small">
                         <InputLabel>{t('form.deck', 'Opción / Deck')}</InputLabel>
                         <Select value={formData.deckId} onChange={(e) => handleChange('deckId', e.target.value)} label={t('form.deck', 'Opción / Deck')} sx={inputSx}>
-                          {availableDecks.map(d => <MenuItem key={d._id} value={d._id} sx={{ fontFamily: '"Courier New", monospace' }}>{d.name} {d.price > 0 ? `(+ $${d.price.toLocaleString()})` : ''}</MenuItem>)}
+                          {availableDecks.map(d => <MenuItem key={d._id} value={d._id} sx={menuItemSx}>{d.name} {d.price > 0 ? `(+ $${d.price.toLocaleString()})` : ''}</MenuItem>)}
                         </Select>
                       </FormControl>
                     </Grid>
@@ -516,7 +530,7 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
                       <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
                       {buildings.map(b => {
                         const lotRef = typeof b.quoteRef?.lot === 'object' ? b.quoteRef.lot.number : b.quoteRef?.lot
-                        return <MenuItem key={b._id} value={b._id} sx={{ fontFamily: '"Courier New", monospace' }}>{b.name} {lotRef ? `(Lote ${lotRef})` : ''}</MenuItem>
+                        return <MenuItem key={b._id} value={b._id} sx={menuItemSx}>{b.name} {lotRef ? `(Lote ${lotRef})` : ''}</MenuItem>
                       })}
                     </Select>
                   </FormControl>
@@ -534,7 +548,7 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
                             <FormControl fullWidth size="small">
                               <InputLabel>{floor.label}</InputLabel>
                               <Select value={formData.selectedOptions?.[floor.key] || ''} onChange={(e) => setFormData(prev => ({ ...prev, selectedOptions: { ...prev.selectedOptions, [floor.key]: e.target.value } }))} label={floor.label} sx={inputSx}>
-                                {floor.options?.map(option => <MenuItem key={option.key} value={option.key} sx={{ fontFamily: '"Courier New", monospace' }}>{option.label}</MenuItem>)}
+                                {floor.options?.map(option => <MenuItem key={option.key} value={option.key} sx={menuItemSx}>{option.label}</MenuItem>)}
                               </Select>
                             </FormControl>
                           </Box>
@@ -552,7 +566,7 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
                       <InputLabel>{t('form.building', 'Edificio')}</InputLabel>
                       <Select value={formData.buildingId} onChange={(e) => handleChange('buildingId', e.target.value)} label={t('form.building', 'Edificio')} disabled={loadingProperties} sx={inputSx}>
                         <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
-                        {buildings.map(b => <MenuItem key={b._id} value={b._id} sx={{ fontFamily: '"Courier New", monospace' }}>{b.name}</MenuItem>)}
+                        {buildings.map(b => <MenuItem key={b._id} value={b._id} sx={menuItemSx}>{b.name}</MenuItem>)}
                       </Select>
                     </FormControl>
                   </Grid>
@@ -563,7 +577,7 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
                           <InputLabel>{t('form.apartment', 'Apartamento')}</InputLabel>
                           <Select value={formData.apartmentId} onChange={(e) => handleChange('apartmentId', e.target.value)} label={t('form.apartment', 'Apartamento')} sx={inputSx}>
                             <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
-                            {apartments.map(a => <MenuItem key={a._id} value={a._id} sx={{ fontFamily: '"Courier New", monospace' }}>Apto {a.apartmentNumber} {a.floorNumber ? `(Piso ${a.floorNumber})` : ''}</MenuItem>)}
+                            {apartments.map(a => <MenuItem key={a._id} value={a._id} sx={menuItemSx}>Apto {a.apartmentNumber} {a.floorNumber ? `(Piso ${a.floorNumber})` : ''}</MenuItem>)}
                           </Select>
                         </FormControl>
                       </Grid>
@@ -572,8 +586,8 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
                           <FormControl fullWidth size="small">
                             <InputLabel>{t('form.renderType', 'Tipo de Acabado')}</InputLabel>
                             <Select value={formData.selectedRenderType || 'basic'} onChange={(e) => handleChange('selectedRenderType', e.target.value)} label={t('form.renderType', 'Tipo de Acabado')} sx={inputSx}>
-                              <MenuItem value="basic" sx={{ fontFamily: '"Courier New", monospace' }}>{t('renderTypes.basic', 'Básico')}</MenuItem>
-                              <MenuItem value="upgrade" sx={{ fontFamily: '"Courier New", monospace' }}>{t('renderTypes.upgrade', 'Upgrade / Premium')}</MenuItem>
+                              <MenuItem value="basic" sx={menuItemSx}>{t('renderTypes.basic', 'Básico')}</MenuItem>
+                              <MenuItem value="upgrade" sx={menuItemSx}>{t('renderTypes.upgrade', 'Upgrade / Premium')}</MenuItem>
                             </Select>
                           </FormControl>
                         </Grid>
@@ -608,8 +622,8 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
                 <FormControl fullWidth size="small">
                   <InputLabel>{t('form.amortizationMethod')}</InputLabel>
                   <Select value={formData.amortizationMethod} onChange={(e) => handleChange('amortizationMethod', e.target.value)} label={t('form.amortizationMethod')} sx={inputSx}>
-                    <MenuItem value="fixed" sx={{ fontFamily: '"Courier New", monospace' }}>{t('form.fixed', 'Cuota Fija')}</MenuItem>
-                    <MenuItem value="declining" sx={{ fontFamily: '"Courier New", monospace' }}>{t('form.declining', 'Cuota Decreciente')}</MenuItem>
+                    <MenuItem value="fixed" sx={menuItemSx}>{t('form.fixed', 'Cuota Fija')}</MenuItem>
+                    <MenuItem value="declining" sx={menuItemSx}>{t('form.declining', 'Cuota Decreciente')}</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>

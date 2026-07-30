@@ -31,6 +31,7 @@ const ActivityModal = ({
   const { t, i18n } = useTranslation('activities')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'))
   
   const [formData, setFormData] = useState(initialFormData)
   const [saving, setSaving] = useState(false)
@@ -148,7 +149,19 @@ const ActivityModal = ({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="lg"  // ✅ Cambiado de "md" a "lg" para más espacio
+      fullWidth 
+      PaperProps={{ 
+        sx: { 
+          borderRadius: 0, 
+          border: '1px solid #ececec',
+          minHeight: '80vh'  // ✅ Altura mínima para mejor visualización
+        } 
+      }}
+    >
       <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: { xs: 2, sm: 3 } }}>
         <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Courier New", monospace', fontSize: { xs: '0.8rem', sm: '0.85rem' }, letterSpacing: '1px', textTransform: 'uppercase' }}>
           {isEditing ? t('activities.editActivity') : t('activities.createActivity')}
@@ -159,10 +172,10 @@ const ActivityModal = ({
       <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
           {/* ✅ Layout Responsive: Columna en móvil, fila en desktop */}
-          <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={{ xs: 3, md: 3 }}>
+          <Box display="flex" flexDirection={{ xs: 'column', lg: 'row' }} gap={{ xs: 3, lg: 4 }}>
             
-            {/* Columna Izquierda: Formulario */}
-            <Box flex={1} display="flex" flexDirection="column" gap={2.5} py={1}>
+            {/* Columna Izquierda: Formulario - Más ancha */}
+            <Box flex={{ xs: 'none', lg: '1 1 60%' }} width={{ xs: '100%', lg: 'auto' }} display="flex" flexDirection="column" gap={2.5} py={1}>
               <TextField label={t('activities.form.title')} value={formData.title} onChange={(e) => handleChange('title', e.target.value)} fullWidth required placeholder={t('activities.form.titlePlaceholder')} sx={inputSx} />
               <TextField label={t('activities.form.description')} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} fullWidth multiline rows={3} placeholder={t('activities.form.descriptionPlaceholder')} sx={inputSx} />
 
@@ -320,23 +333,29 @@ const ActivityModal = ({
               </Box>
             </Box>
 
-            {/* ✅ Columna Derecha: Subtareas (Responsive) */}
+            {/* ✅ Columna Derecha: Subtareas - Más estrecha y solo en desktop grande */}
             {isEditing && (
               <>
-                <Divider orientation={isMobile ? 'horizontal' : 'vertical'} flexItem sx={{ display: { xs: 'block', md: 'block' } }} />
+                <Divider orientation={isMobile ? 'horizontal' : 'vertical'} flexItem sx={{ display: { xs: 'block', lg: 'block' } }} />
                 <Box sx={{ 
-                  width: '100%', 
-                  md: { width: 350 },
-                  pt: { xs: 3, md: 0 },
-                  borderTop: { xs: '1px solid #ececec', md: 'none' }
+                  flex: { xs: 'none', lg: '0 0 280px' },  // ✅ Reducido de 350px a 280px
+                  width: { xs: '100%', lg: 'auto' },
+                  pt: { xs: 3, lg: 0 },
+                  borderTop: { xs: '1px solid #ececec', lg: 'none' },
+                  minWidth: 0
                 }}>
-                  <SubActivityList
-                    subActivities={activity?.subtasks || []}
-                    parentActivityId={activity?._id}
-                    onAdd={handleAddSubtask}
-                    onUpdate={handleUpdateSubtask}
-                    onDelete={handleDeleteSubtask}
-                  />
+                  <Box sx={{ 
+                    position: { xs: 'static', lg: 'sticky' },
+                    top: { xs: 'auto', lg: 24 }
+                  }}>
+                    <SubActivityList
+                      subActivities={activity?.subtasks || []}
+                      parentActivityId={activity?._id}
+                      onAdd={handleAddSubtask}
+                      onUpdate={handleUpdateSubtask}
+                      onDelete={handleDeleteSubtask}
+                    />
+                  </Box>
                 </Box>
               </>
             )}

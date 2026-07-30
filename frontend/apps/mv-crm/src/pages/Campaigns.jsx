@@ -250,7 +250,7 @@ const handleCreateTemplate = async (templateData) => {
               sx={{
                 fontFamily: '"Courier New", monospace',
                 fontSize: '0.65rem',
-                color: '#888',
+                color: '#000000ff',
                 letterSpacing: '1px',
                 textTransform: 'uppercase'
               }}
@@ -400,7 +400,7 @@ const handleCreateTemplate = async (templateData) => {
               sx={{
                 fontFamily: '"Courier New", monospace',
                 fontSize: '0.75rem',
-                color: '#888',
+                color: '#000000ff',
                 textTransform: 'none'
               }}
             >

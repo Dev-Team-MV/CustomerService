@@ -25,10 +25,8 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
   const assignee = activity.assignedTo
   const contact = activity.contact
 
-  // ✅ NUEVO: Obtener proyectos relacionados
   const getRelatedProjects = () => {
     if (!activity.relatedProjects || activity.relatedProjects.length === 0) return []
-    
     return activity.relatedProjects.map(project => {
       if (typeof project === 'object') {
         return project.name || project.title?.es || project.title?.en || 'Proyecto'
@@ -44,18 +42,19 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
       onClick={() => onClick?.(activity)}
       sx={{
         bgcolor: 'white',
-        borderRadius: 2,
+        borderRadius: 0, // ✅ Estética unificada
         p: 2,
-        mb: 1.5,
         cursor: 'pointer',
         border: '1px solid #e0e0e0',
-        boxShadow: isDragging ? '0 8px 24px rgba(0,0,0,0.15)' : '0 1px 3px rgba(0,0,0,0.08)',
-        transition: 'all 0.2s ease',
-        transform: isDragging ? 'rotate(3deg)' : 'none',
+        // La sombra y rotación se manejan mejor en el wrapper Draggable, 
+        // pero mantenemos un hover sutil aquí
         '&:hover': {
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-          borderColor: '#bdbdbd'
-        }
+          boxShadow: '4px 4px 0px rgba(0,0,0,0.08)',
+          borderColor: '#000'
+        },
+        // Prevenir comportamientos de texto al arrastrar en móvil
+        userSelect: 'none',
+        touchAction: 'none' 
       }}
     >
       {/* Header: Tags + Menú */}
@@ -67,60 +66,34 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
               label={tag}
               size="small"
               sx={{ 
-                fontSize: '0.65rem',
-                height: 20,
-                bgcolor: tag === 'automation' ? '#f3e5f5' : 
-                         tag === 'nota' ? '#fff3e0' : '#f5f5f5',
-                color: tag === 'automation' ? '#9c27b0' :
-                       tag === 'nota' ? '#f57c00' : '#666',
+                fontSize: '0.65rem', height: 20, borderRadius: 0,
+                bgcolor: tag === 'automation' ? '#f3e5f5' : tag === 'nota' ? '#fff3e0' : '#f5f5f5',
+                color: tag === 'automation' ? '#9c27b0' : tag === 'nota' ? '#f57c00' : '#666',
                 fontWeight: 500
               }}
             />
           ))}
           {activity.tags?.length > 2 && (
-            <Chip
-              label={`+${activity.tags.length - 2}`}
-              size="small"
-              sx={{ fontSize: '0.65rem', height: 20, bgcolor: '#e0e0e0' }}
-            />
+            <Chip label={`+${activity.tags.length - 2}`} size="small" sx={{ fontSize: '0.65rem', height: 20, bgcolor: '#e0e0e0', borderRadius: 0 }} />
           )}
         </Box>
         <IconButton 
           size="small" 
           onClick={(e) => { e.stopPropagation(); onMenuClick?.(e, activity) }}
-          sx={{ mt: -0.5, mr: -0.5 }}
+          sx={{ mt: -0.5, mr: -0.5, borderRadius: 0 }}
         >
           <MoreVert fontSize="small" />
         </IconButton>
       </Box>
 
-      {/* ✅ NUEVO: Proyectos relacionados */}
+      {/* Proyectos relacionados */}
       {relatedProjects.length > 0 && (
         <Box display="flex" gap={0.5} flexWrap="wrap" mb={1}>
           {relatedProjects.map((projectName, idx) => (
             <Tooltip key={idx} title="Proyecto relacionado">
-              <Box 
-                display="flex" 
-                alignItems="center" 
-                gap={0.5}
-                px={1}
-                py={0.3}
-                bgcolor="#e3f2fd"
-                borderRadius={0.5}
-                sx={{
-                  border: '1px solid #2196f330'
-                }}
-              >
+              <Box display="flex" alignItems="center" gap={0.5} px={1} py={0.3} bgcolor="#e3f2fd" borderRadius={0} sx={{ border: '1px solid #2196f330' }}>
                 <Business sx={{ fontSize: 12, color: '#2196f3' }} />
-                <Typography
-                  sx={{
-                    fontSize: '0.6rem',
-                    color: '#1976d2',
-                    fontWeight: 500,
-                    fontFamily: '"Courier New", monospace',
-                    letterSpacing: '0.3px'
-                  }}
-                >
+                <Typography sx={{ fontSize: '0.6rem', color: '#1976d2', fontWeight: 500, fontFamily: '"Courier New", monospace', letterSpacing: '0.3px' }}>
                   {projectName}
                 </Typography>
               </Box>
@@ -130,78 +103,28 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
       )}
 
       {/* Título */}
-      <Typography 
-        variant="subtitle2" 
-        fontWeight={600} 
-        sx={{ 
-          mb: 1,
-          lineHeight: 1.3,
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden'
-        }}
-      >
+      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontFamily: '"Helvetica Neue", sans-serif' }}>
         {activity.title}
       </Typography>
 
       {/* Descripción corta */}
       {activity.description && (
-        <Typography 
-          variant="caption" 
-          color="text.secondary"
-          sx={{
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            mb: 1
-          }}
-        >
+        <Typography variant="caption" color="text.secondary" sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', mb: 1, fontFamily: '"Helvetica Neue", sans-serif' }}>
           {activity.description}
         </Typography>
       )}
 
-      {/* ✅ MEJORADO: Contacto con más información */}
+      {/* Contacto */}
       {contact && (
-        <Box 
-          display="flex" 
-          alignItems="center" 
-          gap={1} 
-          mb={1} 
-          p={0.8}
-          bgcolor="#fff3e0"
-          borderRadius={1}
-        >
+        <Box display="flex" alignItems="center" gap={1} mb={1} p={0.8} bgcolor="#fff8e1" borderRadius={0} sx={{ border: '1px solid #ffe0b2' }}>
           <Person sx={{ fontSize: 16, color: '#ff9800' }} />
           <Box flex={1} minWidth={0}>
-            <Typography 
-              variant="caption" 
-              fontWeight={500}
-              sx={{ display: 'block', color: '#e65100' }}
-              noWrap
-            >
+            <Typography variant="caption" fontWeight={500} sx={{ display: 'block', color: '#e65100', fontFamily: '"Helvetica Neue", sans-serif' }} noWrap>
               {contact.name}
             </Typography>
             <Box display="flex" gap={1} flexWrap="wrap">
-              {contact.phone && (
-                <Typography 
-                  variant="caption" 
-                  sx={{ fontSize: '0.6rem', color: '#ff9800' }}
-                  noWrap
-                >
-                  📱 {contact.phone}
-                </Typography>
-              )}
-              {contact.email && (
-                <Typography 
-                  variant="caption" 
-                  sx={{ fontSize: '0.6rem', color: '#ff9800' }}
-                  noWrap
-                >
-                  ✉️ {contact.email}
-                </Typography>
-              )}
+              {contact.phone && <Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#ff9800', fontFamily: '"Courier New", monospace' }} noWrap>📱 {contact.phone}</Typography>}
+              {contact.email && <Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#ff9800', fontFamily: '"Courier New", monospace' }} noWrap>✉️ {contact.email}</Typography>}
             </Box>
           </Box>
         </Box>
@@ -210,36 +133,21 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
       {/* Asignado */}
       {assignee && (
         <Box display="flex" alignItems="center" gap={1} mb={1}>
-          <Avatar sx={{ width: 20, height: 20, fontSize: 10, bgcolor: '#2196f3' }}>
+          <Avatar sx={{ width: 20, height: 20, fontSize: 10, bgcolor: '#000', borderRadius: 0, color: '#fff' }}>
             {assignee.firstName?.charAt(0) || '?'}
           </Avatar>
-          <Typography variant="caption" color="text.secondary" noWrap sx={{ flex: 1 }}>
+          <Typography variant="caption" color="text.secondary" noWrap sx={{ flex: 1, fontFamily: '"Helvetica Neue", sans-serif' }}>
             {`${assignee.firstName || ''} ${assignee.lastName || ''}`.trim()}
           </Typography>
         </Box>
       )}
 
-      {/* ✅ NUEVO: Subtareas con más detalle */}
+      {/* Subtareas */}
       {activity.subtasks && activity.subtasks.length > 0 && (
-        <Box 
-          display="flex" 
-          alignItems="center" 
-          gap={1} 
-          mb={1}
-          p={0.8}
-          bgcolor="#f5f5f5"
-          borderRadius={1}
-        >
+        <Box display="flex" alignItems="center" gap={1} mb={1} p={0.8} bgcolor="#f5f5f5" borderRadius={0} sx={{ border: '1px solid #e0e0e0' }}>
           <SubdirectoryArrowRight sx={{ fontSize: 14, color: '#666' }} />
-          <Typography 
-            variant="caption" 
-            sx={{ 
-              fontSize: '0.65rem',
-              color: '#666',
-              fontWeight: 500
-            }}
-          >
-            {activity.subtasks.filter(s => s.completed).length} de {activity.subtasks.length} subtareas completadas
+          <Typography variant="caption" sx={{ fontSize: '0.65rem', color: '#666', fontWeight: 500, fontFamily: '"Courier New", monospace' }}>
+            {activity.subtasks.filter(s => s.completed).length} de {activity.subtasks.length} subtareas
           </Typography>
         </Box>
       )}
@@ -247,25 +155,24 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
       {/* Footer: Fecha + Prioridad */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mt={1.5}>
         <Box display="flex" alignItems="center" gap={1}>
-          {dueInfo ? (
+          {dueInfo && (
             <Box display="flex" alignItems="center" gap={0.5}>
               <AccessTime sx={{ fontSize: 14, color: dueInfo.color }} />
-              <Typography variant="caption" sx={{ color: dueInfo.color, fontWeight: 500 }}>
+              <Typography variant="caption" sx={{ color: dueInfo.color, fontWeight: 500, fontFamily: '"Courier New", monospace', fontSize: '0.65rem' }}>
                 {dueInfo.text}
               </Typography>
             </Box>
-          ) : null}
+          )}
         </Box>
         
         <Chip
           label={t(`activities.priority.${priority?.id}`) || t('activities.priority.medium')}
           size="small"
           sx={{
-            fontSize: '0.65rem',
-            height: 18,
+            fontSize: '0.65rem', height: 18, borderRadius: 0,
             bgcolor: `${priority?.color || '#2196f3'}20`,
             color: priority?.color || '#2196f3',
-            fontWeight: 600,
+            fontWeight: 600, fontFamily: '"Courier New", monospace',
             border: `1px solid ${priority?.color || '#2196f3'}40`
           }}
         />

@@ -116,7 +116,7 @@ export default function Dashboard() {
             <Typography sx={{
               fontFamily: '"Courier New", monospace',
               fontSize: '0.6rem',
-              color: '#aaa',
+              color: '#000000ff',
               letterSpacing: '2px',
               textTransform: 'uppercase',
               mb: 2
@@ -182,7 +182,7 @@ export default function Dashboard() {
                           {selectedProject.name}
                         </Typography>
                         <Typography sx={{
-                          fontFamily: '"Courier New", monospace', fontSize: '0.62rem', color: '#aaa', letterSpacing: '1px'
+                          fontFamily: '"Courier New", monospace', fontSize: '0.62rem', color: '#000000ff', letterSpacing: '1px'
                         }}>
                           /{selectedProject.slug}
                         </Typography>
@@ -202,26 +202,26 @@ export default function Dashboard() {
                         borderRight: { sm: '1px solid #f0f0f0', xs: 'none' }, 
                         borderBottom: '1px solid #f0f0f0' 
                       }}>
-                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#aaa', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
+                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
                           {t('metrics.totalClients')}
                         </Typography>
                         <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.4rem, 4vw, 2.2rem)', color: '#000', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>
                           <Counter to={selectedClients} duration={1.1} />
                         </Typography>
-                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#aaa' }}>
+                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff' }}>
                           {t('metrics.registeredOwners')}
                         </Typography>
                       </Box>
 
                       {/* Collected */}
                       <Box sx={{ p: '20px 24px', borderBottom: '1px solid #f0f0f0' }}>
-                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#aaa', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
+                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
                           {t('metrics.totalCollected')}
                         </Typography>
                         <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.4rem, 4vw, 2.2rem)', color: '#4a7c59', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>
                           <Counter to={Math.round((selectedBalance?.totalCollected ?? 0) / 1000)} prefix="$" suffix="K" duration={1.1} />
                         </Typography>
-                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#aaa' }}>
+                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff' }}>
                           {formatCurrency(selectedBalance?.totalCollected ?? 0)}
                         </Typography>
                       </Box>
@@ -232,20 +232,20 @@ export default function Dashboard() {
                         borderRight: { sm: '1px solid #f0f0f0', xs: 'none' }, 
                         borderBottom: { sm: 'none', xs: '1px solid #f0f0f0' } 
                       }}>
-                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#aaa', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
+                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
                           {t('metrics.totalPending')}
                         </Typography>
                         <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.4rem, 4vw, 2.2rem)', color: '#c0842a', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>
                           <Counter to={Math.round((selectedBalance?.totalPending ?? 0) / 1000)} prefix="$" suffix="K" duration={1.1} />
                         </Typography>
-                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#aaa' }}>
+                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff' }}>
                           {formatCurrency(selectedBalance?.totalPending ?? 0)}
                         </Typography>
                       </Box>
 
                       {/* Phase / Status */}
                       <Box sx={{ p: '20px 24px' }}>
-                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#aaa', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
+                        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 1.5 }}>
                           {t('metrics.phase')}
                         </Typography>
                         <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: 'clamp(1.4rem, 4vw, 2.2rem)', color: '#000', letterSpacing: '-0.04em', lineHeight: 1, mb: 1 }}>

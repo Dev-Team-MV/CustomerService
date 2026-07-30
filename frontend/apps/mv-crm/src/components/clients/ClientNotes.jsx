@@ -58,8 +58,8 @@ const ClientNotes = ({ clientId, notes, onNoteAdded }) => {
       {/* FORMULARIO PARA AGREGAR NOTA */}
       <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, mb: 3, border: '1px solid #ececec', borderRadius: 0, bgcolor: '#fafafa' }}>
         <Box display="flex" alignItems="center" gap={1} mb={2}>
-          <Note sx={{ fontSize: 18, color: '#888' }} />
-          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#888', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+          <Note sx={{ fontSize: 18, color: '#000000ff' }} />
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#000000ff', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
             {t('notes.addNew')}
           </Typography>
         </Box>
@@ -85,7 +85,7 @@ const ClientNotes = ({ clientId, notes, onNoteAdded }) => {
           <TextField size="small" label={t('notes.content')} value={newNote.text} onChange={(e) => setNewNote(prev => ({ ...prev, text: e.target.value }))} multiline rows={3} required placeholder={t('notes.placeholder')} sx={{ '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ececec', borderRadius: 0 } }} />
 
           <Box display="flex" justifyContent="flex-end" gap={1}>
-            <Button variant="text" onClick={() => setNewNote({ title: '', text: '', projectId: '' })} disabled={addingNote} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', color: '#888', textTransform: 'none', letterSpacing: '0.5px', borderRadius: 0 }}>
+            <Button variant="text" onClick={() => setNewNote({ title: '', text: '', projectId: '' })} disabled={addingNote} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', color: '#000000ff', textTransform: 'none', letterSpacing: '0.5px', borderRadius: 0 }}>
               {t('notes.clear')}
             </Button>
             <Button variant="contained" startIcon={addingNote ? <CircularProgress size={16} /> : <Send />} onClick={handleAddNote} disabled={addingNote || !newNote.text.trim()} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', textTransform: 'none', letterSpacing: '0.5px', borderRadius: 0, bgcolor: '#000', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
@@ -98,7 +98,7 @@ const ClientNotes = ({ clientId, notes, onNoteAdded }) => {
       <Divider sx={{ my: 3 }} />
 
       {/* HISTORIAL DE NOTAS */}
-      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#888', letterSpacing: '1.5px', textTransform: 'uppercase', mb: 2 }}>
+      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#000000ff', letterSpacing: '1.5px', textTransform: 'uppercase', mb: 2 }}>
         {t('notes.history')} ({notes.length})
       </Typography>
 
@@ -122,7 +122,7 @@ const ClientNotes = ({ clientId, notes, onNoteAdded }) => {
                       {note.title || t('notes.noTitle')}
                     </Typography>
                   </Box>
-                  <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#888', letterSpacing: '0.5px' }}>
+                  <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000000ff', letterSpacing: '0.5px' }}>
                     {formatDate(note.createdAt)}
                   </Typography>
                 </Box>
@@ -184,7 +184,7 @@ const ClientNotes = ({ clientId, notes, onNoteAdded }) => {
                       <Avatar sx={{ width: 18, height: 18, borderRadius: 0, fontSize: '0.55rem', bgcolor: '#757575' }}>
                         {note.createdBy.firstName?.charAt(0) || '?'}
                       </Avatar>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#888', letterSpacing: '0.5px' }}>
+                      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000000ff', letterSpacing: '0.5px' }}>
                         {t('notes.createdBy')}: {note.createdBy.firstName} {note.createdBy.lastName}
                       </Typography>
                     </Box>

@@ -211,7 +211,8 @@ const Login = () => {
                   height: 'auto',
                   objectFit: 'contain',
                   display: 'block',
-                  mb: 3,
+                  // mb: 3,
+                  margin: '0 auto',
                 }}
               />
             </motion.div>

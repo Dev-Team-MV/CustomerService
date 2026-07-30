@@ -1,15 +1,17 @@
 // apps/mv-crm/src/components/postSale/OnboardingForm.jsx
 import { useState, useEffect, useMemo } from 'react'
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Box, Button, FormControl, InputLabel, Select, MenuItem,
-  CircularProgress, Alert, Typography
+  Dialog, DialogTitle, DialogContent, DialogActions, Box, Button,
+  FormControl, InputLabel, Select, MenuItem, CircularProgress, Alert, Typography
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import api from '@shared/services/api'
 import { useProjects } from '@shared/hooks/useProjects'
 import { useResidents } from '@shared/hooks/useResidents'
 import { getProjectById, getProjectBySlug } from '@shared/config/projectsConfig'
+
+// ✅ Componente compartido
+import ProjectSelector from '@shared/components/ProjectSelector'
 
 export default function OnboardingForm({ open, onClose, onSuccess }) {
   const { t } = useTranslation('postSale')
@@ -36,10 +38,7 @@ export default function OnboardingForm({ open, onClose, onSuccess }) {
 
   useEffect(() => {
     const fetchResources = async () => {
-      if (!formData.projectId || !selectedProjectConfig) {
-        setAvailableResources([])
-        return
-      }
+      if (!formData.projectId || !selectedProjectConfig) { setAvailableResources([]); return }
       setLoadingResources(true)
       try {
         let resources = []
@@ -64,11 +63,8 @@ export default function OnboardingForm({ open, onClose, onSuccess }) {
           })
         }
         setAvailableResources(resources)
-      } catch (err) {
-        setError('No se pudieron cargar los recursos.')
-      } finally {
-        setLoadingResources(false)
-      }
+      } catch (err) { setError('No se pudieron cargar los recursos.') }
+      finally { setLoadingResources(false) }
     }
     fetchResources()
   }, [formData.projectId, formData.clientId, selectedProjectConfig, selectedClient, residents.length])
@@ -78,59 +74,55 @@ export default function OnboardingForm({ open, onClose, onSuccess }) {
     return residents.filter(r => r.role === 'user' && (r.projects?.some(p => p._id === formData.projectId) || r.projectMemberships?.some(m => m.project?._id === formData.projectId || m.project === formData.projectId)))
   }, [residents, formData.projectId])
 
-  const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
+  const handleChange = (field, value) => setFormData(prev => ({ ...prev, [field]: value }))
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault(); setError('')
     if (!formData.projectId || !formData.clientId || (!formData.propertyId && !formData.apartmentId)) {
-      setError('Por favor completa Proyecto, Cliente y Propiedad.')
-      return
+      return setError('Por favor completa Proyecto, Cliente y Propiedad.')
     }
 
     setSubmitting(true)
     try {
       const payload = {
-        projectId: formData.projectId,
-        clientId: formData.clientId,
-        propertyId: formData.propertyId || undefined,
-        apartmentId: formData.apartmentId || undefined
+        projectId: formData.projectId, clientId: formData.clientId,
+        propertyId: formData.propertyId || undefined, apartmentId: formData.apartmentId || undefined
       }
       await api.post('/onboarding', payload)
       onSuccess()
-    } catch (err) {
-      setError(err.response?.data?.message || 'Error al crear el onboarding.')
-    } finally {
-      setSubmitting(false)
-    }
+    } catch (err) { setError(err.response?.data?.message || 'Error al crear el onboarding.') }
+    finally { setSubmitting(false) }
   }
 
+  // ✅ Estilos unificados
   const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
-  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' } }
+  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }
+  const menuItemSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '&:hover': { bgcolor: '#f5f5f5' } }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
-      <DialogTitle sx={{ borderBottom: '1px solid #ececec', fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+      <DialogTitle sx={{ borderBottom: '1px solid #ececec', fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase', p: { xs: 2, sm: 3 } }}>
         {t('onboarding.newChecklist')}
       </DialogTitle>
-      <DialogContent dividers>
+      <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
         <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           {error && <Alert severity="error" sx={{ borderRadius: 0, border: '1px solid' }}>{error}</Alert>}
 
-          <FormControl fullWidth required>
-            <InputLabel>{t('filters.project')}</InputLabel>
-            <Select value={formData.projectId} onChange={(e) => { handleChange('projectId', e.target.value); handleChange('clientId', ''); handleChange('propertyId', ''); handleChange('apartmentId', ''); }} label={t('filters.project')} sx={inputSx}>
-              {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
-            </Select>
-          </FormControl>
+          {/* ✅ ProjectSelector Integrado */}
+          <ProjectSelector
+            value={formData.projectId}
+            onChange={(value) => { handleChange('projectId', value); handleChange('clientId', ''); handleChange('propertyId', ''); handleChange('apartmentId', '') }}
+            label={`${t('filters.project')} *`}
+            includeGlobal={false}
+            fullWidth
+            size="small"
+          />
 
           <FormControl fullWidth required disabled={!formData.projectId}>
-            <InputLabel>{t('filters.client')}</InputLabel>
-            <Select value={formData.clientId} onChange={(e) => { handleChange('clientId', e.target.value); handleChange('propertyId', ''); handleChange('apartmentId', ''); }} label={t('filters.client')} sx={inputSx}>
-              <MenuItem value=""><em>Seleccionar...</em></MenuItem>
-              {filteredResidents.map(client => <MenuItem key={client._id} value={client._id}>{client.firstName} {client.lastName}</MenuItem>)}
+            <InputLabel>{t('filters.client')} *</InputLabel>
+            <Select value={formData.clientId} onChange={(e) => { handleChange('clientId', e.target.value); handleChange('propertyId', ''); handleChange('apartmentId', '') }} label={t('filters.client')} sx={inputSx}>
+              <MenuItem value="" sx={menuItemSx}><em>Seleccionar...</em></MenuItem>
+              {filteredResidents.map(client => <MenuItem key={client._id} value={client._id} sx={menuItemSx}>{client.firstName} {client.lastName}</MenuItem>)}
             </Select>
           </FormControl>
 
@@ -147,23 +139,20 @@ export default function OnboardingForm({ open, onClose, onSuccess }) {
                   <Select
                     value={selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses' ? formData.propertyId : formData.apartmentId}
                     onChange={(e) => {
-                      if (selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses') {
-                        handleChange('propertyId', e.target.value); handleChange('apartmentId', '')
-                      } else {
-                        handleChange('apartmentId', e.target.value); handleChange('propertyId', '')
-                      }
+                      if (selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses') { handleChange('propertyId', e.target.value); handleChange('apartmentId', '') }
+                      else { handleChange('apartmentId', e.target.value); handleChange('propertyId', '') }
                     }}
                     label={selectedProjectConfig.resourceType === 'apartment' ? t('upload.apartment', 'Apartamento') : t('upload.property', 'Propiedad')}
                     sx={inputSx}
                   >
-                    <MenuItem value=""><em>Seleccionar...</em></MenuItem>
+                    <MenuItem value="" sx={menuItemSx}><em>Seleccionar...</em></MenuItem>
                     {availableResources.length > 0 ? availableResources.map(res => {
                       if (selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses') {
-                        return <MenuItem key={res._id} value={res._id} sx={{ fontFamily: '"Courier New", monospace' }}>Lote {res.lot?.number || res.lot || 'N/A'}</MenuItem>
+                        return <MenuItem key={res._id} value={res._id} sx={menuItemSx}>Lote {res.lot?.number || res.lot || 'N/A'}</MenuItem>
                       } else {
-                        return <MenuItem key={res._id} value={res._id} sx={{ fontFamily: '"Courier New", monospace' }}>Apto {res.apartmentNumber} (Piso {res.floorNumber})</MenuItem>
+                        return <MenuItem key={res._id} value={res._id} sx={menuItemSx}>Apto {res.apartmentNumber} (Piso {res.floorNumber})</MenuItem>
                       }
-                    }) : <MenuItem disabled><em>No hay recursos asignados</em></MenuItem>}
+                    }) : <MenuItem disabled sx={menuItemSx}><em>No hay recursos asignados</em></MenuItem>}
                   </Select>
                 </FormControl>
               )}
@@ -171,9 +160,9 @@ export default function OnboardingForm({ open, onClose, onSuccess }) {
           )}
         </Box>
       </DialogContent>
-      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec' }}>
-        <Button onClick={onClose} disabled={submitting} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('actions.cancel')}</Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={submitting} startIcon={submitting ? <CircularProgress size={16} /> : null} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+        <Button onClick={onClose} disabled={submitting} sx={{ ...unifiedButtonSx, color: '#888', width: { xs: '100%', sm: 'auto' } }}>{t('actions.cancel')}</Button>
+        <Button variant="contained" onClick={handleSubmit} disabled={submitting} startIcon={submitting ? <CircularProgress size={16} /> : null} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', width: { xs: '100%', sm: 'auto' }, '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
           {submitting ? t('actions.saving') : t('actions.create')}
         </Button>
       </DialogActions>

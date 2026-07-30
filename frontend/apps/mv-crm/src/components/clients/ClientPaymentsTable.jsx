@@ -75,7 +75,7 @@ const ClientPaymentsTable = ({ clientId }) => {
           </Select>
         </FormControl>
 
-        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#888', letterSpacing: '0.5px' }}>
+        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#000000ff', letterSpacing: '0.5px' }}>
           {pagination.total} {pagination.total !== 1 ? t('payments.paymentsCountPlural') : t('payments.paymentsCount')}
         </Typography>
       </Box>
@@ -99,7 +99,7 @@ const ClientPaymentsTable = ({ clientId }) => {
       {/* Paginación (Responsive) */}
       {!loading && pagination.total > pagination.limit && (
         <Box sx={{ mt: 2, p: 2, border: '1px solid #ececec', borderRadius: 0, bgcolor: '#fff', display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
-          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#888', letterSpacing: '0.5px' }}>
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#000000ff', letterSpacing: '0.5px' }}>
             {t('payments.showing')} {((pagination.page - 1) * pagination.limit) + 1} -{' '}
             {Math.min(pagination.page * pagination.limit, pagination.total)} {t('payments.of')}{' '}
             {pagination.total} {pagination.total !== 1 ? t('payments.paymentsCountPlural') : t('payments.paymentsCount')}

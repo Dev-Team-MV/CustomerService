@@ -168,8 +168,8 @@ export default function SurveysPanel({ onNotify }) {
                         <FormControl fullWidth size="small">
                           <InputLabel>{t('filters.project')}</InputLabel>
                           <Select value={filters.projectId} onChange={(e) => handleFilterChange('projectId', e.target.value)} label={t('filters.project')} sx={inputSx}>
-                            <MenuItem value="">{t('filters.all')}</MenuItem>
-                            {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
+                            <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} value="">{t('filters.all')}</MenuItem>
+                            {projects.map(p => <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} key={p._id} value={p._id}>{p.name}</MenuItem>)}
                           </Select>
                         </FormControl>
                       </Grid>
@@ -177,8 +177,8 @@ export default function SurveysPanel({ onNotify }) {
                         <FormControl fullWidth size="small" disabled={!filters.projectId}>
                           <InputLabel>{t('filters.client')}</InputLabel>
                           <Select value={filters.clientId} onChange={(e) => handleFilterChange('clientId', e.target.value)} label={t('filters.client')} sx={inputSx}>
-                            <MenuItem value="">{t('filters.all')}</MenuItem>
-                            {filteredResidents.map(client => <MenuItem key={client._id} value={client._id}>{client.firstName} {client.lastName}</MenuItem>)}
+                            <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} value="">{t('filters.all')}</MenuItem>
+                            {filteredResidents.map(client => <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} key={client._id} value={client._id}>{client.firstName} {client.lastName}</MenuItem>)}
                           </Select>
                         </FormControl>
                       </Grid>
@@ -186,9 +186,9 @@ export default function SurveysPanel({ onNotify }) {
                         <FormControl fullWidth size="small">
                           <InputLabel>{t('filters.type')}</InputLabel>
                           <Select value={filters.type} onChange={(e) => handleFilterChange('type', e.target.value)} label={t('filters.type')} sx={inputSx}>
-                            <MenuItem value="">{t('filters.all')}</MenuItem>
+                            <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} value="">{t('filters.all')}</MenuItem>
                             {['post_sale', 'post_construction', 'post_warranty', 'annual'].map(type => (
-                              <MenuItem key={type} value={type}>{t(`survey.types.${type}`)}</MenuItem>
+                              <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} key={type} value={type}>{t(`survey.types.${type}`)}</MenuItem>
                             ))}
                           </Select>
                         </FormControl>
