@@ -221,8 +221,10 @@ pipeline {
                     archiveArtifacts artifacts: 'backend/karate-tests/target/karate-reports/**', allowEmptyArchive: true
                 }
                 failure {
-                    echo 'Acceptance gate FAILED — Production Deploy will NOT run.'
-                    currentBuild.description = 'Blocked: Karate acceptance failed (no pdn deploy)'
+                    script {
+                        echo 'Acceptance gate FAILED — Production Deploy will NOT run.'
+                        currentBuild.description = 'Blocked: Karate acceptance failed (no pdn deploy)'
+                    }
                 }
             }
         }
@@ -376,11 +378,13 @@ pipeline {
             echo "===================================="
         }
         failure {
-            echo 'Falló el pipeline'
-            if (env.IS_PRODUCTION == 'true') {
-                echo 'Si falló Acceptance gate (pre-deploy), pdn NO fue actualizado.'
-            } else {
-                echo 'Si falló health/Karate en Develop, se intentó rollback automático.'
+            script {
+                echo 'Falló el pipeline'
+                if (env.IS_PRODUCTION == 'true') {
+                    echo 'Si falló Acceptance gate (pre-deploy), pdn NO fue actualizado.'
+                } else {
+                    echo 'Si falló health/Karate en Develop, se intentó rollback automático.'
+                }
             }
         }
     }
