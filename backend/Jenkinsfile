@@ -1,12 +1,14 @@
 // Jenkinsfile para CustomerService - backend
 // Jobs en Jenkins: CustomerService-Backend-Develop (BD Atlas dev) | CustomerService-Backend-Production (BD VPS pdn)
 // Develop → apicsdev.michelangelodelvalle.com:5001 | Production → apics.michelangelodelvalle.com:5000
-// FRONTEND_URL: base pública del SPA (SMS setup-password). Si el job define FRONTEND_URL en Jenkins, se respeta.
-// SPAs públicos: devlakewoodp1/lakewoodp1 | devlakewoodp2/lakewoodp2 | devcrm/crm (michelangelodelvalle.com).
-// API: apicsdev/apics. Otros (new.*): define FRONTEND_URL manualmente en el job si aplica.
-// Tag de imagen: solo un ":" (ej. customerservice-backend:development-1)
 //
-// IMPORTANTE: Solo se ejecuta si hay cambios en backend/. Si el commit solo toca frontend/, se omite.
+// Acceptance (Karate):
+//   Develop  → post-deploy suite amplia (~@external) contra apicsdev; si falla → rollback al tag anterior
+//   Production → pre-deploy: Mongo aislado (Testcontainers-style) + seed + API temporal; si falla → NO Deploy pdn
+// Requisitos agente: JDK 17+, Docker, docker compose, curl (Maven via ./mvnw)
+// Credenciales opcionales: karate-acceptance-admin | env KARATE_ADMIN_* / KARATE_PROJECT_ID
+//
+// IMPORTANTE: Solo se ejecuta si hay cambios en backend/.
 
 pipeline {
     agent any
@@ -20,6 +22,11 @@ pipeline {
         GCS_PROJECT_ID = 'centurions-car-wash-442201'
         GCS_BUCKET_NAME = 'customer-service-7cc'
         GCS_MAKE_PUBLIC = 'false'
+        ACCEPTANCE_PORT = '15001'
+        ACCEPTANCE_CONTAINER = 'backend-acceptance'
+        ACCEPTANCE_MONGO_PORT = '27018'
+        LAST_GOOD_TAG_SUFFIX = 'last-good'
+        KARATE_TAGS = '--tags ~@external'
     }
 
     stages {
@@ -29,7 +36,6 @@ pipeline {
             }
         }
 
-        // Solo seguir si hubo cambios en backend/ — si el commit solo toca frontend/, se omite todo el pipeline
         stage('Check changes') {
             steps {
                 script {
@@ -58,15 +64,13 @@ pipeline {
                 script {
                     def branch = env.BRANCH_NAME ?: env.GIT_BRANCH?.replaceFirst('^origin/', '') ?: 'develop'
                     def jobName = (env.JOB_NAME ?: '').toLowerCase()
-                    // El ambiente lo define el JOB: Dev job = siempre BD dev; Prod job = siempre BD pdn (dev NUNCA apunta a pdn)
                     def isProdJob = jobName.contains('production') || jobName.contains('prod') || jobName.contains('pdn')
                     def isDevJob = jobName.contains('development') || jobName.contains('dev')
-                    // Solo disparar el ambiente correcto según la rama (evitar deploy equivocado si el job se configuró mal)
                     if (isDevJob && branch != 'develop') {
-                        error "Job Develop solo debe ejecutarse con rama 'develop'. Rama actual: ${branch}. Revisa Branch Specifier del job (debe ser */develop)."
+                        error "Job Develop solo debe ejecutarse con rama 'develop'. Rama actual: ${branch}."
                     }
                     if (isProdJob && branch != 'main' && branch != 'master') {
-                        error "Job Production solo debe ejecutarse con rama 'main' (o 'master'). Rama actual: ${branch}. Revisa Branch Specifier del job (debe ser */main)."
+                        error "Job Production solo debe ejecutarse con rama 'main' (o 'master'). Rama actual: ${branch}."
                     }
                     if (isDevJob) {
                         env.IS_PRODUCTION = 'false'
@@ -80,8 +84,8 @@ pipeline {
                     env.APP_PORT = (env.IS_PRODUCTION == 'true') ? '5000' : '5001'
                     env.IMAGE_NAME = 'customerservice-backend'
                     env.IMAGE_TAG = "${env.ENVIRONMENT}-${env.BUILD_NUMBER}"
+                    env.LAST_GOOD_IMAGE = "${env.IMAGE_NAME}:${env.ENVIRONMENT}-${env.LAST_GOOD_TAG_SUFFIX}"
                     env.PUBLIC_URL = (env.IS_PRODUCTION == 'true') ? 'https://apics.michelangelodelvalle.com' : 'https://apicsdev.michelangelodelvalle.com'
-                    // FRONTEND_URL: si el job Jenkins ya la define (Environment), se usa; si no, se infiere por nombre del job
                     def fe = (env.FRONTEND_URL ?: '').trim()
                     if (!fe) {
                         def jn = (env.JOB_NAME ?: '').toLowerCase()
@@ -98,18 +102,22 @@ pipeline {
                     env.FRONTEND_URL = fe
                     def uriPdn = 'mongodb://mongo_customerservice:WmSld1ZrUWzWcaDZ6QBKl7QDKQsMnPfp@72.61.6.13:27017/customerservice?authSource=admin'
                     def uriDev = 'mongodb+srv://customerservicemichelangelo_db_user:lRNMjO5qLRGD6csL@customerservice.mkutnlt.mongodb.net/customerservice'
+                    env.MONGODB_URI_DEV = uriDev
                     env.MONGODB_URI = (env.IS_PRODUCTION == 'true') ? uriPdn : uriDev
-                    // --- Logs para verificar configuración ---
+                    if (!(env.KARATE_ADMIN_EMAIL ?: '').trim()) {
+                        env.KARATE_ADMIN_EMAIL = 'superadmin@lakewood.com'
+                    }
+                    if (!(env.KARATE_ADMIN_PASSWORD ?: '').trim()) {
+                        env.KARATE_ADMIN_PASSWORD = 'admin123'
+                    }
+                    if (!(env.KARATE_PROJECT_ID ?: '').trim()) {
+                        env.KARATE_PROJECT_ID = '69a73ce5b20401b061da6451'
+                    }
                     echo "========== CONFIGURACIÓN BACKEND =========="
-                    echo "Job name: ${env.JOB_NAME}"
-                    echo "Rama: ${branch}"
-                    echo "Ambiente resuelto por: ${isDevJob ? 'job (dev)' : isProdJob ? 'job (prod)' : 'rama'}"
-                    echo "IS_PRODUCTION: ${env.IS_PRODUCTION}"
-                    echo "ENVIRONMENT: ${env.ENVIRONMENT}"
+                    echo "Job: ${env.JOB_NAME} | Rama: ${branch} | IS_PRODUCTION: ${env.IS_PRODUCTION}"
                     echo "Contenedor: ${env.CONTAINER_NAME} | Puerto: ${env.APP_PORT}"
-                    echo "BD: ${env.IS_PRODUCTION == 'true' ? 'VPS pdn (72.61.6.13:27017/customerservice)' : 'Atlas dev (customerservice.mkutnlt.mongodb.net)'}"
-                    echo "Imagen: ${env.IMAGE_NAME}:${env.IMAGE_TAG}"
-                    echo "FRONTEND_URL (SMS setup): ${env.FRONTEND_URL}"
+                    echo "Imagen: ${env.IMAGE_NAME}:${env.IMAGE_TAG} | last-good: ${env.LAST_GOOD_IMAGE}"
+                    echo "Karate: ${env.KARATE_ADMIN_EMAIL} | projectId: ${env.KARATE_PROJECT_ID} | tags: ${env.KARATE_TAGS}"
                     echo "==========================================="
                 }
             }
@@ -142,10 +150,105 @@ pipeline {
             }
         }
 
+        // Production: Mongo aislado + seed + API temporal → Karate wide; no toca pdn
+        stage('Acceptance gate (pre-deploy)') {
+            when {
+                allOf {
+                    expression { env.SHOULD_RUN == 'true' }
+                    expression { env.IS_PRODUCTION == 'true' }
+                }
+            }
+            steps {
+                script {
+                    try {
+                        withCredentials([
+                            usernamePassword(
+                                credentialsId: 'karate-acceptance-admin',
+                                usernameVariable: 'KARATE_CRED_EMAIL',
+                                passwordVariable: 'KARATE_CRED_PASSWORD'
+                            )
+                        ]) {
+                            env.KARATE_ADMIN_EMAIL = env.KARATE_CRED_EMAIL
+                            env.KARATE_ADMIN_PASSWORD = env.KARATE_CRED_PASSWORD
+                        }
+                    } catch (ignored) {
+                        echo "Credential 'karate-acceptance-admin' not found; using defaults."
+                    }
+
+                    sh '''#!/bin/bash
+                        set -e
+                        chmod +x backend/karate-tests/scripts/*.sh
+                        export IMAGE_NAME="${IMAGE_NAME}"
+                        export IMAGE_TAG="${IMAGE_TAG}"
+                        export ACCEPTANCE_PORT="${ACCEPTANCE_PORT}"
+                        export ACCEPTANCE_MONGO_PORT="${ACCEPTANCE_MONGO_PORT}"
+                        export ACCEPTANCE_CONTAINER="${ACCEPTANCE_CONTAINER}"
+                        export JWT_SECRET="${JWT_SECRET}"
+                        export FRONTEND_URL="${FRONTEND_URL}"
+                        export PUBLIC_URL="${PUBLIC_URL}"
+                        export KARATE_ADMIN_EMAIL="${KARATE_ADMIN_EMAIL}"
+                        export KARATE_ADMIN_PASSWORD="${KARATE_ADMIN_PASSWORD}"
+                        backend/karate-tests/scripts/start-acceptance-stack.sh
+                    '''
+
+                    def envFile = readFile('backend/karate-tests/acceptance.env').trim()
+                    envFile.split('\n').each { line ->
+                        def parts = line.split('=', 2)
+                        if (parts.length == 2) {
+                            env."${parts[0]}" = parts[1]
+                        }
+                    }
+                    echo "Gate baseUrl=${env.KARATE_BASE_URL} projectId=${env.KARATE_PROJECT_ID}"
+
+                    dir('backend/karate-tests') {
+                        sh '''#!/bin/bash
+                            set -e
+                            chmod +x ./mvnw
+                            ./mvnw -B test \
+                              -Dkarate.options="${KARATE_TAGS}" \
+                              -DbaseUrl="${KARATE_BASE_URL}" \
+                              -DadminEmail="${KARATE_ADMIN_EMAIL}" \
+                              -DadminPassword="${KARATE_ADMIN_PASSWORD}" \
+                              -DprojectId="${KARATE_PROJECT_ID}"
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    sh 'backend/karate-tests/scripts/stop-acceptance-stack.sh || true'
+                    junit allowEmptyResults: true, testResults: 'backend/karate-tests/target/surefire-reports/*.xml'
+                    archiveArtifacts artifacts: 'backend/karate-tests/target/karate-reports/**', allowEmptyArchive: true
+                }
+                failure {
+                    echo 'Acceptance gate FAILED — Production Deploy will NOT run.'
+                    currentBuild.description = 'Blocked: Karate acceptance failed (no pdn deploy)'
+                }
+            }
+        }
+
         stage('Deploy') {
             when { expression { env.SHOULD_RUN == 'true' } }
             steps {
                 script {
+                    // Develop: recordar imagen actual para rollback
+                    if (env.IS_PRODUCTION != 'true') {
+                        def running = sh(
+                            script: "docker inspect -f '{{.Config.Image}}' ${env.CONTAINER_NAME} 2>/dev/null || true",
+                            returnStdout: true
+                        ).trim()
+                        if (running) {
+                            env.PREVIOUS_IMAGE = running
+                        } else {
+                            def hasLastGood = sh(
+                                script: "docker image inspect ${env.LAST_GOOD_IMAGE} >/dev/null 2>&1 && echo yes || true",
+                                returnStdout: true
+                            ).trim()
+                            env.PREVIOUS_IMAGE = (hasLastGood == 'yes') ? env.LAST_GOOD_IMAGE : ''
+                        }
+                        echo "Rollback candidate image: ${env.PREVIOUS_IMAGE ?: '(none)'}"
+                    }
+
                     withCredentials([
                         string(credentialsId: 'twilio-account-sid', variable: 'TWILIO_ACCOUNT_SID'),
                         string(credentialsId: 'twilio-auth-token', variable: 'TWILIO_AUTH_TOKEN'),
@@ -180,6 +283,89 @@ pipeline {
                 }
             }
         }
+
+        stage('Wait health') {
+            when {
+                allOf {
+                    expression { env.SHOULD_RUN == 'true' }
+                    expression { env.IS_PRODUCTION != 'true' }
+                }
+            }
+            steps {
+                sh '''#!/bin/bash
+                    set -e
+                    echo "Waiting for /api/health on port ${APP_PORT}..."
+                    for i in $(seq 1 30); do
+                      if curl -sf "http://localhost:${APP_PORT}/api/health" >/dev/null; then
+                        echo "Health OK"
+                        exit 0
+                      fi
+                      sleep 3
+                    done
+                    echo "Deployed container failed health check"
+                    docker logs "${CONTAINER_NAME}" || true
+                    exit 1
+                '''
+            }
+            post {
+                failure {
+                    script { rollbackDevelopIfPossible() }
+                }
+            }
+        }
+
+        stage('Acceptance (Karate)') {
+            when {
+                allOf {
+                    expression { env.SHOULD_RUN == 'true' }
+                    expression { env.IS_PRODUCTION != 'true' }
+                }
+            }
+            steps {
+                script {
+                    try {
+                        withCredentials([
+                            usernamePassword(
+                                credentialsId: 'karate-acceptance-admin',
+                                usernameVariable: 'KARATE_CRED_EMAIL',
+                                passwordVariable: 'KARATE_CRED_PASSWORD'
+                            )
+                        ]) {
+                            env.KARATE_ADMIN_EMAIL = env.KARATE_CRED_EMAIL
+                            env.KARATE_ADMIN_PASSWORD = env.KARATE_CRED_PASSWORD
+                        }
+                    } catch (ignored) {
+                        echo "Credential 'karate-acceptance-admin' not found; using defaults."
+                    }
+
+                    dir('backend/karate-tests') {
+                        sh '''#!/bin/bash
+                            set -e
+                            chmod +x ./mvnw
+                            ./mvnw -B test \
+                              -Dkarate.options="${KARATE_TAGS}" \
+                              -DbaseUrl="http://localhost:${APP_PORT}" \
+                              -DadminEmail="${KARATE_ADMIN_EMAIL}" \
+                              -DadminPassword="${KARATE_ADMIN_PASSWORD}" \
+                              -DprojectId="${KARATE_PROJECT_ID}"
+                        '''
+                    }
+
+                    // Marcar esta imagen como last-good tras suite OK
+                    sh "docker tag ${env.IMAGE_NAME}:${env.IMAGE_TAG} ${env.LAST_GOOD_IMAGE}"
+                    echo "Tagged ${env.LAST_GOOD_IMAGE}"
+                }
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'backend/karate-tests/target/surefire-reports/*.xml'
+                    archiveArtifacts artifacts: 'backend/karate-tests/target/karate-reports/**', allowEmptyArchive: true
+                }
+                failure {
+                    script { rollbackDevelopIfPossible() }
+                }
+            }
+        }
     }
 
     post {
@@ -187,12 +373,66 @@ pipeline {
             echo "========== DESPLIEGUE OK =========="
             echo "Ambiente: ${env.ENVIRONMENT} | Contenedor: ${env.CONTAINER_NAME} | Puerto: ${env.APP_PORT}"
             echo "URL local: http://localhost:${env.APP_PORT}"
-            echo "BD usada: ${env.ENVIRONMENT == 'production' ? 'VPS pdn' : 'Atlas dev'}"
-            echo "MONGODB_URI: ${env.MONGODB_URI}"
             echo "===================================="
         }
         failure {
             echo 'Falló el pipeline'
+            if (env.IS_PRODUCTION == 'true') {
+                echo 'Si falló Acceptance gate (pre-deploy), pdn NO fue actualizado.'
+            } else {
+                echo 'Si falló health/Karate en Develop, se intentó rollback automático.'
+            }
         }
+    }
+}
+
+def rollbackDevelopIfPossible() {
+    if (env.IS_PRODUCTION == 'true') {
+        return
+    }
+    def prev = (env.PREVIOUS_IMAGE ?: '').trim()
+    if (!prev) {
+        echo 'Rollback skipped: no previous image available'
+        currentBuild.description = 'Acceptance failed (no rollback image)'
+        return
+    }
+    echo "Rolling back Develop to ${prev}..."
+    try {
+        withCredentials([
+            string(credentialsId: 'twilio-account-sid', variable: 'TWILIO_ACCOUNT_SID'),
+            string(credentialsId: 'twilio-auth-token', variable: 'TWILIO_AUTH_TOKEN'),
+            string(credentialsId: 'gcs-credentials-json', variable: 'GCS_CREDENTIALS')
+        ]) {
+            sh "docker rm -f ${env.CONTAINER_NAME} 2>/dev/null || true"
+            sh '''
+                printf 'GCS_CREDENTIALS=%s\\n' "$GCS_CREDENTIALS" > "${WORKSPACE}/backend/gcs.env"
+                docker run -d \
+                  --name ''' + env.CONTAINER_NAME + ''' \
+                  --network deploy_app-network \
+                  -p ''' + env.APP_PORT + ''':5000 \
+                  -e NODE_ENV=development \
+                  -e PORT=5000 \
+                  -e PUBLIC_URL=''' + env.PUBLIC_URL + ''' \
+                  -e FRONTEND_URL=''' + env.FRONTEND_URL + ''' \
+                  -e UPLOAD_MAX_FILE_SIZE_MB=''' + env.UPLOAD_MAX_FILE_SIZE_MB + ''' \
+                  -e CORS_ORIGINS=''' + env.CORS_ORIGINS + ''' \
+                  -e MONGODB_URI="$MONGODB_URI" \
+                  -e JWT_SECRET=''' + env.JWT_SECRET + ''' \
+                  -e TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID \
+                  -e TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN \
+                  -e TWILIO_PHONE_FROM=''' + env.TWILIO_PHONE_FROM + ''' \
+                  -e GCS_PROJECT_ID=''' + env.GCS_PROJECT_ID + ''' \
+                  -e GCS_BUCKET_NAME=''' + env.GCS_BUCKET_NAME + ''' \
+                  -e GCS_MAKE_PUBLIC=''' + env.GCS_MAKE_PUBLIC + ''' \
+                  --env-file "${WORKSPACE}/backend/gcs.env" \
+                  --restart unless-stopped \
+                  ''' + prev + '''
+            '''
+        }
+        currentBuild.description = "Rolled back to ${prev}"
+        echo "Rollback OK → ${prev}"
+    } catch (Exception e) {
+        echo "Rollback FAILED: ${e}"
+        currentBuild.description = "Acceptance failed; rollback also failed"
     }
 }
