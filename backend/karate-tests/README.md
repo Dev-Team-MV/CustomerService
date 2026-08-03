@@ -39,7 +39,8 @@ Por eso el pipeline:
 
 1. Comprueba health con `docker exec … fetch('http://127.0.0.1:5000/api/health')`
 2. Ejecuta Karate con `scripts/run-karate.sh` en la misma red Docker (`deploy_app-network` o `acceptance-net`)
-   apuntando a `http://<container>:5000`
+   apuntando a `http://<container>:5000`. El proyecto se copia a un volume Docker vía `tar`
+   (montajes directos del workspace de Jenkins fallan con docker.sock).
 
 ## Isolated Mongo (Testcontainers-style)
 
