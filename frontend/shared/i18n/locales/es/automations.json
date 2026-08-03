@@ -8,7 +8,7 @@
   "createTitle": "Nueva automatización",
   "total": "total",
   "active": "activas",
-  "inactive": "inactiva",
+  "inactive": "inactivas",
   "enable": "Activar",
   "disable": "Desactivar",
   "edit": "Editar",
@@ -18,12 +18,10 @@
   "lastRun": "Última ejecución",
   "testMatched": "✅ Test exitoso: Coincidencia encontrada",
   "testNotMatched": "ℹ️ Test ejecutado: Sin coincidencia",
-  
   "empty": {
     "title": "No hay automatizaciones",
     "description": "Crea tu primera regla para automatizar acciones en el CRM"
   },
-  
   "form": {
     "name": "Nombre",
     "trigger": "Trigger (evento disparador)",
@@ -33,17 +31,58 @@
     "update": "Actualizar",
     "saving": "Guardando..."
   },
-  
   "triggers": {
     "lead_stage_changed": "Cambio de stage en lead",
     "payment_overdue": "Pago vencido",
     "appointment_created": "Cita creada",
     "inactivity_7days": "Inactividad de 7 días"
   },
-  
   "actions": {
     "send_sms": "Enviar SMS",
     "create_activity": "Crear actividad",
     "notify_agent": "Notificar asesor"
+  },
+  "conditions": {
+    "specificStage": "Stage específico",
+    "anyStage": "Cualquier stage",
+    "daysOfInactivity": "Días de inactividad",
+    "specificProject": "Proyecto específico",
+    "anyProject": "Cualquier proyecto"
+  },
+  "stages": {
+    "new": "Nuevo",
+    "contacted": "Contactado",
+    "visitScheduled": "Visita agendada",
+    "proposal": "Propuesta",
+    "sold": "Vendido",
+    "lost": "Perdido"
+  },
+  "actionConfig": {
+    "linkedToProject": "Vinculada al proyecto",
+    "template": "Plantilla",
+    "loading": "Cargando...",
+    "noTemplates": "No hay plantillas",
+    "project": "proyecto",
+    "global": "global",
+    "customMessage": "Mensaje personalizado",
+    "globalVariables": "Variables globales",
+    "detectedVariables": "Variables detectadas",
+    "activityTitle": "Título de actividad",
+    "description": "Descripción",
+    "assignTo": "Asignar a",
+    "notifyTo": "Notificar a",
+    "message": "Mensaje"
+  },
+  "validation": {
+    "nameRequired": "El nombre es obligatorio",
+    "triggerRequired": "El trigger es obligatorio",
+    "actionRequired": "La acción es obligatoria",
+    "templateOrMessageRequired": "Debes seleccionar un template o escribir un mensaje",
+    "activityTitleRequired": "El título de la actividad es obligatorio",
+    "assignAgentRequired": "Debes seleccionar un asesor para notificar",
+    "confirmDelete": "¿Estás seguro de eliminar esta automatización?",
+    "saveError": "Error al guardar",
+    "deleteError": "Error al eliminar",
+    "testError": "Error al probar"
   }
 }

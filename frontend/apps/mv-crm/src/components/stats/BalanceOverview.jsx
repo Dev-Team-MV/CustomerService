@@ -1,4 +1,5 @@
-import { Box, Typography } from '@mui/material'
+// apps/mv-crm/src/components/stats/BalanceOverview.jsx
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { AccountBalanceWallet, HourglassEmpty, Percent } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
@@ -7,25 +8,25 @@ const fmt = (val) =>
 
 const KPICard = ({ icon, label, value, sub, color = '#000' }) => (
   <Box sx={{
-    flex: 1, p: '20px 24px', border: '1px solid #f0f0f0',
+    flex: { xs: '1 1 100%', sm: 1 }, p: '20px 24px', border: '1px solid #f0f0f0', borderRadius: 0,
     display: 'flex', flexDirection: 'column', gap: 1,
     position: 'relative', overflow: 'hidden',
     '&::before': {
       content: '""', position: 'absolute',
-      top: 0, left: 0, width: 3, height: '100%', bgcolor: color
+      top: 0, left: 0, width: 3, height: '100%', bgcolor: color, borderRadius: 0
     }
   }}>
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <Box sx={{ color, display: 'flex' }}>{icon}</Box>
-      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase' }}>
+      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000', letterSpacing: '2px', textTransform: 'uppercase' }}>
         {label}
       </Typography>
     </Box>
-    <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: '1.9rem', color, letterSpacing: '-0.04em', lineHeight: 1 }}>
+    <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: { xs: '1.5rem', sm: '1.9rem' }, color, letterSpacing: '-0.04em', lineHeight: 1 }}>
       {value}
     </Typography>
     {sub && (
-      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#000000ff' }}>
+      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#000' }}>
         {sub}
       </Typography>
     )}
@@ -34,6 +35,8 @@ const KPICard = ({ icon, label, value, sub, color = '#000' }) => (
 
 export default function BalanceOverview({ balance }) {
   const { t } = useTranslation('analytics')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   const collected = balance?.totalCollected ?? 0
   const pending   = balance?.totalPending   ?? 0
@@ -42,11 +45,11 @@ export default function BalanceOverview({ balance }) {
 
   return (
     <Box>
-      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 2 }}>
+      <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#000', letterSpacing: '2px', textTransform: 'uppercase', mb: 2 }}>
         {t('mv.modal.balanceOverview.title')}
       </Typography>
 
-      <Box sx={{ display: 'flex', gap: 2, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         <KPICard
           icon={<AccountBalanceWallet sx={{ fontSize: 16 }} />}
           label={t('mv.modal.balanceOverview.collected')}
@@ -70,9 +73,8 @@ export default function BalanceOverview({ balance }) {
         />
       </Box>
 
-      {/* Progress bar */}
       <Box sx={{ mt: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.8 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.8, flexWrap: 'wrap', gap: 1 }}>
           <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#4a7c59', letterSpacing: '1px' }}>
             {t('mv.modal.balanceOverview.collectedLabel')} {ratio}%
           </Typography>
@@ -80,12 +82,13 @@ export default function BalanceOverview({ balance }) {
             {t('mv.modal.balanceOverview.pendingLabel')} {(100 - parseFloat(ratio)).toFixed(1)}%
           </Typography>
         </Box>
-        <Box sx={{ height: 6, background: '#f0f0f0', position: 'relative', overflow: 'hidden' }}>
+        <Box sx={{ height: 6, background: '#f0f0f0', position: 'relative', overflow: 'hidden', borderRadius: 0 }}>
           <Box sx={{
             position: 'absolute', left: 0, top: 0, bottom: 0,
             width: `${ratio}%`,
             background: 'linear-gradient(90deg, #4a7c59, #6aaa7a)',
-            transition: 'width 1s ease'
+            transition: 'width 1s ease',
+            borderRadius: 0
           }} />
         </Box>
       </Box>

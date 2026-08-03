@@ -11,6 +11,13 @@
   "noLeads": "Sin leads",
   "addLead": "Agregar lead",
   "exportButton": "Exportar Leads",
+
+  "details": {
+    "contactInfo": "Información de contacto",
+    "noContactInfo": "Sin información de contacto",
+    "created": "creado",
+    "updated": "actualizado"
+  },
   
   "stages": {
     "nuevo": "Nuevo",
@@ -52,7 +59,11 @@
     "notesPlaceholder": "Detalles adicionales sobre el lead...",
     "cancel": "Cancelar",
     "create": "Crear",
-    "update": "Actualizar"
+    "update": "Actualizar",
+    "country": "País",
+    "selectCountry": "Selecciona un país",
+    "selectProject": "Selecciona un proyecto",
+    "noProjects": "Sin proyectos disponibles"
   },
 
   "score": {

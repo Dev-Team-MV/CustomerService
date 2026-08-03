@@ -49,6 +49,7 @@ import enQuoteCrm from './locales/en/quoteCrm.json'
 import enDocuments from './locales/en/documents.json'
 import enReferrals from './locales/en/referrals.json'
 import enPostSale from './locales/en/postSale.json'
+import enVendors from './locales/en/vendors.json'
 // ES
 import esCommon from './locales/es/common.json'
 import esAuth from './locales/es/auth.json'
@@ -96,6 +97,7 @@ import esQuoteCrm from './locales/es/quoteCrm.json'
 import esDocuments from './locales/es/documents.json'
 import esReferrals from './locales/es/referrals.json'
 import esPostSale from './locales/es/postSale.json'
+import esVendors from './locales/es/vendors.json'
 
 i18n
     .use(LanguageDetector)
@@ -149,7 +151,8 @@ i18n
                 quoteCrm: enQuoteCrm,
                 documents: enDocuments,
                 referrals: enReferrals,
-                postSale: enPostSale
+                postSale: enPostSale,
+                vendors: enVendors
             },
             es: {
                 common: esCommon,
@@ -198,7 +201,8 @@ i18n
                 quoteCrm: esQuoteCrm,
                 documents: esDocuments,
                 referrals: esReferrals,
-                postSale: esPostSale
+                postSale: esPostSale,
+                vendors: esVendors
 
             },
         },
@@ -250,7 +254,8 @@ i18n
             'quoteCrm',
             'documents',
             'referrals',
-            'postSale'
+            'postSale',
+            'vendors'
         ],
         interpolation: {
             escapeValue: false,

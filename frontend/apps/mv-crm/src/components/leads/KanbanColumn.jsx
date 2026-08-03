@@ -1,8 +1,8 @@
 // apps/mv-crm/src/components/leads/KanbanColumn.jsx
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, IconButton, Tooltip, Badge } from '@mui/material'
+import { Box, Typography, IconButton, Badge, Tooltip } from '@mui/material'
 import { Add, DragIndicator } from '@mui/icons-material'
+import { Droppable, Draggable } from '@hello-pangea/dnd' // ✅ Importar Droppable y Draggable
 import LeadCard from './LeadCard'
 
 const KanbanColumn = ({ 
@@ -11,14 +11,10 @@ const KanbanColumn = ({
   onLeadClick, 
   onMenuClick,
   onAddClick,
-  onDragStart,
-  onDrop,
   onScoreUpdate
 }) => {
   const { t } = useTranslation('leads')
-  const [dragOver, setDragOver] = useState(false)
 
-  // ✅ NUEVO: Mapeo de column keys a traducciones
   const COLUMN_KEYS = {
     'nuevo': 'stages.nuevo',
     'contactado': 'stages.contactado',
@@ -28,33 +24,13 @@ const KanbanColumn = ({
     'perdido': 'stages.perdido'
   }
 
-  // ✅ NUEVO: Obtener nombre traducido o usar el nombre original como fallback
   const getColumnName = () => {
     const translationKey = COLUMN_KEYS[column.key]
     if (translationKey) {
       const translated = t(translationKey)
-      // Si la traducción no existe, t() devuelve la misma clave
-      if (translated !== translationKey) {
-        return translated
-      }
+      if (translated !== translationKey) return translated
     }
-    // Fallback: usar column.name
     return column.name
-  }
-
-  const handleDragOver = (e) => {
-    e.preventDefault()
-    setDragOver(true)
-  }
-
-  const handleDragLeave = () => {
-    setDragOver(false)
-  }
-
-  const handleDrop = (e) => {
-    e.preventDefault()
-    setDragOver(false)
-    onDrop?.(column.key)
   }
 
   return (
@@ -66,15 +42,11 @@ const KanbanColumn = ({
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        bgcolor: dragOver ? '#e3f2fd' : '#f5f5f5',
-        borderRadius: 2,
+        bgcolor: '#f5f5f5',
+        borderRadius: 0, // ✅ Estética unificada
         p: 2,
-        transition: 'all 0.2s ease',
-        border: dragOver ? '2px dashed #2196f3' : '2px solid transparent'
+        border: '1px solid #e0e0e0'
       }}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
     >
       {/* Header */}
       <Box
@@ -87,25 +59,9 @@ const KanbanColumn = ({
           borderBottom: `2px solid ${column.color}`
         }}
       >
-        <Box display="flex" alignItems="center" gap={1}>
-          <Box
-            sx={{
-              width: 12,
-              height: 12,
-              borderRadius: '50%',
-              bgcolor: column.color
-            }}
-          />
-          <Typography
-            sx={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              letterSpacing: '1px',
-              textTransform: 'uppercase',
-              color: '#000'
-            }}
-          >
+        <Box display="flex" alignItems="center" gap={2}>
+          <Box sx={{ width: 12, height: 12, borderRadius: 0, bgcolor: column.color }} />
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: '#000' }}>
             {getColumnName()}
           </Typography>
           <Badge
@@ -119,73 +75,80 @@ const KanbanColumn = ({
                 fontWeight: 700,
                 height: 18,
                 minWidth: 18,
-                padding: '0 4px'
+                padding: '0 4px',
+                borderRadius: 0
               }
             }}
           />
         </Box>
 
         <Tooltip title={t('addLead', 'Agregar lead')}>
-          <IconButton
-            size="small"
-            onClick={onAddClick}
-            sx={{
-              color: '#000',
-              '&:hover': { bgcolor: 'rgba(0,0,0,0.05)' }
-            }}
-          >
+          <IconButton size="small" onClick={onAddClick} sx={{ color: '#000', '&:hover': { bgcolor: 'rgba(0,0,0,0.05)', borderRadius: 0 } }}>
             <Add fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>
 
-      {/* Leads */}
-      <Box sx={{ flex: 1, overflowY: 'auto' }}>
-        {leads.map(lead => (
-          <Box
-            key={lead._id}
-            draggable
-            onDragStart={() => onDragStart?.(lead)}
-            sx={{
-              cursor: 'grab',
-              '&:active': {
-                cursor: 'grabbing'
-              }
+      {/* ✅ Área Droppable */}
+      <Droppable droppableId={column.key}>
+        {(provided, snapshot) => (
+          <Box 
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            sx={{ 
+              flex: 1, 
+              overflowY: 'auto', 
+              p: 1,
+              bgcolor: snapshot.isDraggingOver ? '#e3f2fd' : 'transparent',
+              transition: 'background-color 0.2s ease',
+              borderRadius: 0,
+              border: snapshot.isDraggingOver ? '2px dashed #2196f3' : '2px solid transparent',
+              '&::-webkit-scrollbar': { width: 6 },
+              '&::-webkit-scrollbar-thumb': { bgcolor: '#ccc', borderRadius: 0 }
             }}
           >
-            <LeadCard
-              lead={lead}
-              onClick={onLeadClick}
-              onMenuClick={onMenuClick}
-              onScoreUpdate={onScoreUpdate}
-            />
-          </Box>
-        ))}
-
-        {leads.length === 0 && (
-          <Box
-            sx={{
-              p: 4,
-              textAlign: 'center',
-              border: '2px dashed #e0e0e0',
-              borderRadius: 1,
-              bgcolor: '#fafafa'
-            }}
-          >
-            <DragIndicator sx={{ fontSize: 32, color: '#ccc', mb: 1 }} />
-            <Typography
-              sx={{
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.7rem',
-                color: '#888',
-                letterSpacing: '0.5px'
-              }}
-            >
-              {t('noLeads', 'Sin leads')}
-            </Typography>
+            {leads.map((lead, index) => (
+              // ✅ Cada tarjeta es Draggable
+              <Draggable key={lead._id} draggableId={lead._id} index={index}>
+                {(dragProvided, dragSnapshot) => (
+                  <Box
+                    ref={dragProvided.innerRef}
+                    {...dragProvided.draggableProps}
+                    {...dragProvided.dragHandleProps}
+                    sx={{
+                      marginBottom: 1.5,
+                      ...dragProvided.draggableProps.style,
+                      opacity: dragSnapshot.isDragging ? 0.8 : 1,
+                      transform: dragSnapshot.isDragging ? 'rotate(2deg)' : 'none',
+                      transition: dragSnapshot.isDragging ? 'none' : 'all 0.2s ease'
+                    }}
+                  >
+                    <LeadCard
+                      lead={lead}
+                      onClick={onLeadClick}
+                      onMenuClick={onMenuClick}
+                      onScoreUpdate={onScoreUpdate}
+                      isDragging={dragSnapshot.isDragging}
+                    />
+                  </Box>
+                )}
+              </Draggable>
+            ))}
+            
+            {leads.length === 0 && !snapshot.isDraggingOver && (
+              <Box sx={{ p: 4, textAlign: 'center', border: '2px dashed #e0e0e0', borderRadius: 0, bgcolor: '#fafafa' }}>
+                <DragIndicator sx={{ fontSize: 32, color: '#ccc', mb: 1 }} />
+                <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#888', letterSpacing: '0.5px' }}>
+                  {t('noLeads', 'Sin leads')}
+                </Typography>
+              </Box>
+            )}
+            
+            {/* ✅ Placeholder necesario para que el espacio se reserve al arrastrar */}
+            {provided.placeholder}
           </Box>
         )}
-      </Box>
+      </Droppable>
     </Box>
   )
 }

@@ -1,31 +1,24 @@
 // /Users/oficina/MV-CRM/CustomerService/frontend/shared/components/sms/MessageTemplateModal.jsx
-
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Box, Typography, TextField, Button, IconButton,
-  Chip, Paper, FormControl, InputLabel, Select, MenuItem,
-  Divider, Alert, CircularProgress
+  Chip, Paper, Divider, Alert, CircularProgress
 } from '@mui/material'
 import { Close, Save, Info, Code } from '@mui/icons-material'
 import VariableInserter from '@shared/components/VariableInserter'
-import { useProjects } from '@shared/hooks/useProjects' // ✅ NUEVO: Hook para obtener proyectos
+import ProjectSelector from '@shared/components/ProjectSelector'
 
 const MessageTemplateModal = ({ 
   open, 
   onClose, 
   template = null, 
   onSave,
-  projects: externalProjects = null, // ✅ RENOMBRADO: Proyectos externos (opcional)
   initialProjectId = null
 }) => {
   const { t } = useTranslation('sms')
   const templateRef = useRef(null)
-  
-  // ✅ NUEVO: Obtener proyectos automáticamente si no se pasan como prop
-  const { projects: hookProjects } = useProjects()
-  const projects = externalProjects || hookProjects || []
   
   const [formData, setFormData] = useState({
     name: '',
@@ -41,12 +34,18 @@ const MessageTemplateModal = ({
 
   useEffect(() => {
     if (template) {
+      // ✅ FIX: Normalizar el projectId (puede ser string u objeto)
+      const rawProjectId = template.projectId
+      const normalizedProjectId = typeof rawProjectId === 'object' && rawProjectId !== null 
+        ? rawProjectId._id 
+        : (rawProjectId || initialProjectId || '')
+
       setFormData({
         name: template.name || '',
         template: template.template || '',
         category: template.category || '',
         description: template.description || '',
-        projectId: template.projectId || initialProjectId || ''
+        projectId: normalizedProjectId
       })
     } else {
       setFormData({
@@ -109,26 +108,37 @@ const MessageTemplateModal = ({
   const detectedVariables = (formData.template.match(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g) || [])
     .map(m => m.replace(/[{}]/g, '').trim())
 
+  const unifiedButtonSx = { 
+    borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', 
+    fontSize: '0.75rem', letterSpacing: '0.5px', width: { xs: '100%', sm: 'auto' },
+    '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
+  }
+  
+  const inputSx = { 
+    fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, width: '100%',
+    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
+    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' },
+    '& .MuiOutlinedInput-root': { borderRadius: 0 }
+  }
+
   return (
     <Dialog 
       open={open} 
       onClose={onClose} 
       maxWidth="md" 
       fullWidth
-      PaperProps={{ sx: { borderRadius: 3 } }}
+      PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}
     >
-      <DialogTitle>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6" fontWeight={700}>
-            {isEditing ? t('sms.templateModal.editTitle') : t('sms.templateModal.newTitle')}
-          </Typography>
-          <IconButton onClick={onClose} size="small">
-            <Close />
-          </IconButton>
-        </Box>
+      <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: { xs: 2, sm: 3 } }}>
+        <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+          {isEditing ? t('sms.templateModal.editTitle') : t('sms.templateModal.newTitle')}
+        </Typography>
+        <IconButton onClick={onClose} size="small" sx={{ borderRadius: 0 }}>
+          <Close />
+        </IconButton>
       </DialogTitle>
 
-      <DialogContent dividers>
+      <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
         <Box display="flex" flexDirection="column" gap={2.5} py={1}>
           <TextField
             label={t('sms.templateModal.name')}
@@ -138,40 +148,19 @@ const MessageTemplateModal = ({
             required
             placeholder={t('sms.templateModal.namePlaceholder')}
             autoFocus
+            sx={inputSx}
           />
 
-          {/* ✅ CORREGIDO: Selector de Proyecto - siempre visible si hay proyectos */}
-          {projects.length > 0 && (
-            <FormControl size="small" fullWidth>
-              <InputLabel>{t('sms.templateModal.project', 'Proyecto (opcional)')}</InputLabel>
-              <Select
-                value={formData.projectId}
-                onChange={(e) => handleChange('projectId', e.target.value)}
-                label={t('sms.templateModal.project', 'Proyecto (opcional)')}
-              >
-                <MenuItem value="">
-                  <em>{t('sms.templateModal.globalTemplate', 'Template global (sin proyecto)')}</em>
-                </MenuItem>
-                {projects.map(project => (
-                  <MenuItem key={project._id} value={project._id}>
-                    {project.name}
-                  </MenuItem>
-                ))}
-              </Select>
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-                {t('sms.templateModal.projectHelper', 'Los templates de proyecto solo pueden usar variables definidas en ese proyecto')}
-              </Typography>
-            </FormControl>
-          )}
-
-          {/* ✅ NUEVO: Debug info cuando no hay proyectos */}
-          {projects.length === 0 && (
-            <Alert severity="info" sx={{ borderRadius: 0 }}>
-              <Typography variant="body2">
-                {t('sms.templateModal.noProjects', 'No hay proyectos disponibles. Los templates serán globales.')}
-              </Typography>
-            </Alert>
-          )}
+          {/* ✅ ProjectSelector Integrado y Corregido */}
+          <ProjectSelector
+            value={formData.projectId}
+            onChange={(value) => handleChange('projectId', value)}
+            label={t('sms.templateModal.project', 'Proyecto (opcional)')}
+            includeGlobal={true}
+            globalLabel={t('sms.templateModal.globalTemplate', 'Template global (sin proyecto)')}
+            fullWidth
+            size="small"
+          />
 
           <TextField
             label={t('sms.templateModal.category')}
@@ -179,6 +168,7 @@ const MessageTemplateModal = ({
             onChange={(e) => handleChange('category', e.target.value)}
             fullWidth
             placeholder={t('sms.templateModal.categoryPlaceholder')}
+            sx={inputSx}
           />
 
           <TextField
@@ -189,6 +179,7 @@ const MessageTemplateModal = ({
             multiline
             rows={2}
             placeholder={t('sms.templateModal.descriptionPlaceholder')}
+            sx={{ ...inputSx, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }}
           />
 
           <Divider />
@@ -211,15 +202,16 @@ const MessageTemplateModal = ({
               required
               placeholder={t('sms.templateModal.templatePlaceholder')}
               helperText={`${formData.template.length} ${t('sms.content.chars')} (SMS: ~${Math.ceil(formData.template.length / 160)} ${t('sms.content.messages')})`}
+              sx={{ ...inputSx, '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace' }, '& .MuiFormHelperText-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' } }}
             />
           </Box>
 
           {detectedVariables.length > 0 && (
-            <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, bgcolor: '#e3f2fd' }}>
+            <Paper variant="outlined" sx={{ p: 2, borderRadius: 0, border: '1px solid #bbdefb', bgcolor: '#e3f2fd' }}>
               <Box display="flex" alignItems="flex-start" gap={1}>
                 <Code fontSize="small" sx={{ mt: 0.5, color: '#1976d2' }} />
                 <Box flex={1}>
-                  <Typography variant="caption" fontWeight={600} color="#1976d2">
+                  <Typography variant="caption" fontWeight={600} color="#1976d2" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
                     {t('sms.content.variablesDetected')} ({detectedVariables.length})
                   </Typography>
                   <Box display="flex" gap={1} flexWrap="wrap" mt={1}>
@@ -229,7 +221,7 @@ const MessageTemplateModal = ({
                         label={`{{${v}}}`} 
                         size="small" 
                         variant="outlined"
-                        sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}
+                        sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', borderRadius: 0, borderColor: '#1976d2' }}
                       />
                     ))}
                   </Box>
@@ -239,11 +231,11 @@ const MessageTemplateModal = ({
           )}
 
           {warnings.length > 0 && (
-            <Alert severity="warning" sx={{ borderRadius: 0 }}>
-              <Typography variant="body2" fontWeight={600} gutterBottom>
+            <Alert severity="warning" sx={{ borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
+              <Typography variant="body2" fontWeight={600} gutterBottom sx={{ fontFamily: '"Courier New", monospace' }}>
                 {t('sms.templateModal.unknownPlaceholders', 'Variables no reconocidas')}
               </Typography>
-              <Typography variant="caption" display="block">
+              <Typography variant="caption" display="block" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
                 {t('sms.templateModal.unknownPlaceholdersHelper', 'Las siguientes variables no están definidas en el proyecto y podrían no resolverse al enviar:')}
               </Typography>
               <Box display="flex" gap={0.5} flexWrap="wrap" mt={1}>
@@ -256,7 +248,9 @@ const MessageTemplateModal = ({
                       bgcolor: '#fff3e0', 
                       color: '#e65100',
                       fontFamily: '"Courier New", monospace',
-                      fontSize: '0.7rem'
+                      fontSize: '0.7rem',
+                      borderRadius: 0,
+                      border: '1px solid #ffe0b2'
                     }}
                   />
                 ))}
@@ -266,8 +260,8 @@ const MessageTemplateModal = ({
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} disabled={saving}>
+      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+        <Button onClick={onClose} disabled={saving} sx={{ ...unifiedButtonSx, color: '#888' }}>
           {t('sms.actions.cancel')}
         </Button>
         <Button
@@ -275,6 +269,7 @@ const MessageTemplateModal = ({
           onClick={handleSave}
           disabled={!formData.name.trim() || !formData.template.trim() || saving}
           startIcon={saving ? <CircularProgress size={16} /> : <Save />}
+          sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}
         >
           {saving ? t('sms.templateModal.saving') : isEditing ? t('sms.templateModal.updateBtn') : t('sms.templateModal.createBtn')}
         </Button>

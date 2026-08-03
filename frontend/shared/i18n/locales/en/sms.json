@@ -118,7 +118,9 @@
       "templatePlaceholder": "Write the content... Use {{firstName}}, {{lastName}}, etc.",
       "saving": "Saving...",
       "updateBtn": "Save changes",
-      "createBtn": "Create template"
+      "createBtn": "Create template",
+      "globalTemplate": "Global template (available for all projects)",
+      "project": "Project"
     },
     "templates": {
       "title": "Message Templates",

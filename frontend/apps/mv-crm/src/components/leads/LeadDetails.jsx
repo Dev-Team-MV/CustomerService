@@ -4,7 +4,7 @@ import {
   Drawer, Box, Typography, IconButton, Chip, Avatar, Divider, Button, Paper, Alert
 } from '@mui/material'
 import { 
-  Close, Edit, Delete, Email, Phone, Business, Source, CalendarToday, CheckCircle, Warning
+  Close, Edit, Delete, Email, Phone, Business, Source, CalendarToday, CheckCircle, Warning, LocationOn
 } from '@mui/icons-material'
 import { STAGE_COLORS } from '../../services/leadService'
 
@@ -77,7 +77,16 @@ const LeadDetails = ({ lead, open, onClose, onEdit, onDelete, onConvert, stages 
                   </Box>
                 </Box>
               )}
-              {!lead.email && !lead.phone && <Typography variant="caption" color="text.secondary">{t('details.noContactInfo') || 'Sin información de contacto'}</Typography>}
+              {lead.country && (
+                <Box display="flex" alignItems="center" gap={1.5}>
+                  <Avatar sx={{ bgcolor: '#ff9800', width: 32, height: 32 }}><LocationOn sx={{ fontSize: 18 }} /></Avatar>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">{t('form.country')}</Typography>
+                    <Typography fontWeight={500}>{lead.country}</Typography>
+                  </Box>
+                </Box>
+              )}
+              {!lead.email && !lead.phone && !lead.country && <Typography variant="caption" color="text.secondary">{t('details.noContactInfo') || 'Sin información de contacto'}</Typography>}
             </Box>
           </Paper>
         </Box>

@@ -1,18 +1,20 @@
+// apps/mv-crm/src/components/postSale/WarrantyClaimForm.jsx
 import { useState, useEffect, useMemo } from 'react'
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Box, TextField, Button, FormControl, InputLabel, Select, MenuItem,
-  CircularProgress, Alert, Chip, IconButton, Typography
+  Dialog, DialogTitle, DialogContent, DialogActions, Box, TextField, Button,
+  FormControl, InputLabel, Select, MenuItem, CircularProgress, Alert, Chip, IconButton, Typography, Grid
 } from '@mui/material'
 import { CloudUpload, Delete, Image as ImageIcon } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
-
 import api from '@shared/services/api'
 import uploadService from '@shared/services/uploadService'
 import { useProjects } from '@shared/hooks/useProjects'
 import { useResidents } from '@shared/hooks/useResidents'
 import { useLeads } from '../../constants/hooks/useLeads'
 import { getProjectById, getProjectBySlug } from '@shared/config/projectsConfig'
+
+// ✅ Componente compartido
+import ProjectSelector from '@shared/components/ProjectSelector'
 
 export default function WarrantyClaimForm({ open, onClose, onSuccess, initialData = null }) {
   const { t } = useTranslation('postSale')
@@ -41,19 +43,15 @@ export default function WarrantyClaimForm({ open, onClose, onSuccess, initialDat
           leadId: initialData.leadId?._id || (typeof initialData.leadId === 'string' ? initialData.leadId : ''),
           propertyId: initialData.propertyId?._id || (typeof initialData.propertyId === 'string' ? initialData.propertyId : ''),
           apartmentId: initialData.apartmentId?._id || (typeof initialData.apartmentId === 'string' ? initialData.apartmentId : ''),
-          category: initialData.category || 'structural',
-          description: initialData.description || '',
-          photoUrls: initialData.photoUrls || [],
-          priority: initialData.priority || 'low'
+          category: initialData.category || 'structural', description: initialData.description || '',
+          photoUrls: initialData.photoUrls || [], priority: initialData.priority || 'low'
         })
         if (initialData.leadId) setLinkType('lead')
         else if (initialData.clientId) setLinkType('client')
         else setLinkType('none')
       } else {
         setFormData({ projectId: '', clientId: '', leadId: '', propertyId: '', apartmentId: '', category: 'structural', description: '', photoUrls: [], priority: 'low' })
-        setLinkType('none')
-        setError('')
-        setAvailableResources([])
+        setLinkType('none'); setError(''); setAvailableResources([])
       }
     }
   }, [open, initialData])
@@ -72,10 +70,7 @@ export default function WarrantyClaimForm({ open, onClose, onSuccess, initialDat
 
   useEffect(() => {
     const fetchResources = async () => {
-      if (!formData.projectId || !selectedProjectConfig) {
-        setAvailableResources([])
-        return
-      }
+      if (!formData.projectId || !selectedProjectConfig) { setAvailableResources([]); return }
       if (formData.clientId && residents.length === 0) return
 
       setLoadingResources(true)
@@ -101,11 +96,8 @@ export default function WarrantyClaimForm({ open, onClose, onSuccess, initialDat
         }
         setAvailableResources(resources)
       } catch (err) {
-        console.error('Error fetching resources:', err)
         setError(t('warranty.loadResourcesError'))
-      } finally {
-        setLoadingResources(false)
-      }
+      } finally { setLoadingResources(false) }
     }
     fetchResources()
   }, [formData.projectId, formData.clientId, selectedProjectConfig, selectedClient, residents.length, t])
@@ -128,80 +120,74 @@ export default function WarrantyClaimForm({ open, onClose, onSuccess, initialDat
     try {
       const urls = await Promise.all(files.map(file => uploadService.uploadImage(file, 'warranties', '', true)))
       setFormData(prev => ({ ...prev, photoUrls: [...prev.photoUrls, ...urls] }))
-    } catch (err) {
-      setError(t('warranty.uploadImageError'))
-    } finally {
-      setUploading(false)
-    }
+    } catch (err) { setError(t('warranty.uploadImageError')) }
+    finally { setUploading(false) }
   }
 
-  const handleRemoveImage = (index) => {
-    setFormData(prev => ({ ...prev, photoUrls: prev.photoUrls.filter((_, i) => i !== index) }))
-  }
+  const handleRemoveImage = (index) => setFormData(prev => ({ ...prev, photoUrls: prev.photoUrls.filter((_, i) => i !== index) }))
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault(); setError('')
     if (!formData.projectId || (!formData.clientId && !formData.leadId) || (!formData.propertyId && !formData.apartmentId) || !formData.description) {
-      setError(t('warranty.requiredFieldsError'))
-      return
+      return setError(t('warranty.requiredFieldsError'))
     }
 
     setSubmitting(true)
     try {
       const payload = { ...formData }
-      if (selectedProjectConfig?.resourceType === 'property' || selectedProjectConfig?.catalogType === 'houses') {
-        delete payload.apartmentId
-      } else {
-        delete payload.propertyId
-      }
+      if (selectedProjectConfig?.resourceType === 'property' || selectedProjectConfig?.catalogType === 'houses') delete payload.apartmentId
+      else delete payload.propertyId
 
-      if (initialData?._id) {
-        await api.put(`/warranties/${initialData._id}`, payload)
-      } else {
-        await api.post('/warranties', payload)
-      }
+      if (initialData?._id) await api.put(`/warranties/${initialData._id}`, payload)
+      else await api.post('/warranties', payload)
       if (onSuccess) onSuccess()
-    } catch (err) {
-      setError(err.response?.data?.message || t('warranty.saveError'))
-    } finally {
-      setSubmitting(false)
-    }
+    } catch (err) { setError(err.response?.data?.message || t('warranty.saveError')) }
+    finally { setSubmitting(false) }
   }
 
   const handleChange = (field, value) => setFormData(prev => ({ ...prev, [field]: value }))
 
+  // ✅ Estilos unificados
+  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
+  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }
+  const menuItemSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '&:hover': { bgcolor: '#f5f5f5' } }
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">{initialData ? t('warranty.editClaim') : t('warranty.newClaim')}</Typography>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ececec', p: { xs: 2, sm: 3 } }}>
+        <Typography variant="h6" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+          {initialData ? t('warranty.editClaim') : t('warranty.newClaim')}
+        </Typography>
       </DialogTitle>
       
-      <DialogContent dividers>
+      <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
         <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {error && <Alert severity="error">{error}</Alert>}
+          {error && <Alert severity="error" sx={{ borderRadius: 0, border: '1px solid' }}>{error}</Alert>}
 
-          <FormControl fullWidth required>
-            <InputLabel>{t('form.project')}</InputLabel>
-            <Select value={formData.projectId} onChange={(e) => handleChange('projectId', e.target.value)} label={t('form.project')}>
-              {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
-            </Select>
-          </FormControl>
+          {/* ✅ ProjectSelector Integrado */}
+          <ProjectSelector
+            value={formData.projectId}
+            onChange={(value) => handleChange('projectId', value)}
+            label={`${t('form.project')} *`}
+            includeGlobal={false}
+            fullWidth
+            size="small"
+          />
 
           <Box>
-            <Typography variant="subtitle2" fontWeight={600} mb={1}>{t('warranty.linkTo')}</Typography>
-            <Box display="flex" gap={2} mb={1}>
-              <Button variant={linkType === 'none' ? 'contained' : 'outlined'} size="small" onClick={() => handleLinkTypeChange('none')}>{t('warranty.none')}</Button>
-              <Button variant={linkType === 'lead' ? 'contained' : 'outlined'} size="small" onClick={() => handleLinkTypeChange('lead')}>{t('warranty.lead')}</Button>
-              <Button variant={linkType === 'client' ? 'contained' : 'outlined'} size="small" onClick={() => handleLinkTypeChange('client')}>{t('warranty.client')}</Button>
+            <Typography variant="subtitle2" fontWeight={600} mb={1} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>{t('warranty.linkTo')}</Typography>
+            <Box display="flex" gap={2} mb={1} flexWrap="wrap">
+              <Button variant={linkType === 'none' ? 'contained' : 'outlined'} size="small" onClick={() => handleLinkTypeChange('none')} sx={{ ...unifiedButtonSx, border: '1px solid #000', color: linkType === 'none' ? '#fff' : '#000', bgcolor: linkType === 'none' ? '#000' : '#fff' }}>{t('warranty.none')}</Button>
+              <Button variant={linkType === 'lead' ? 'contained' : 'outlined'} size="small" onClick={() => handleLinkTypeChange('lead')} sx={{ ...unifiedButtonSx, border: '1px solid #000', color: linkType === 'lead' ? '#fff' : '#000', bgcolor: linkType === 'lead' ? '#000' : '#fff' }}>{t('warranty.lead')}</Button>
+              <Button variant={linkType === 'client' ? 'contained' : 'outlined'} size="small" onClick={() => handleLinkTypeChange('client')} sx={{ ...unifiedButtonSx, border: '1px solid #000', color: linkType === 'client' ? '#fff' : '#000', bgcolor: linkType === 'client' ? '#000' : '#fff' }}>{t('warranty.client')}</Button>
             </Box>
 
             {linkType === 'lead' && (
               <FormControl fullWidth required>
                 <InputLabel>{t('warranty.selectLead')}</InputLabel>
-                <Select value={formData.leadId} onChange={(e) => handleChange('leadId', e.target.value)} label={t('warranty.selectLead')}>
-                  <MenuItem value="">{t('form.select')}</MenuItem>
-                  {filteredLeads.map(lead => <MenuItem key={lead._id} value={lead._id}>{lead.name} {lead.phone && `(${lead.phone})`}</MenuItem>)}
+                <Select value={formData.leadId} onChange={(e) => handleChange('leadId', e.target.value)} label={t('warranty.selectLead')} sx={inputSx}>
+                  <MenuItem value="" sx={menuItemSx}>{t('form.select')}</MenuItem>
+                  {filteredLeads.map(lead => <MenuItem key={lead._id} value={lead._id} sx={menuItemSx}>{lead.name} {lead.phone && `(${lead.phone})`}</MenuItem>)}
                 </Select>
               </FormControl>
             )}
@@ -209,17 +195,17 @@ export default function WarrantyClaimForm({ open, onClose, onSuccess, initialDat
             {linkType === 'client' && (
               <FormControl fullWidth required>
                 <InputLabel>{t('warranty.selectClient')}</InputLabel>
-                <Select value={formData.clientId} onChange={(e) => handleChange('clientId', e.target.value)} label={t('warranty.selectClient')}>
-                  <MenuItem value="">{t('form.select')}</MenuItem>
-                  {filteredResidents.map(client => <MenuItem key={client._id} value={client._id}>{client.firstName} {client.lastName}</MenuItem>)}
+                <Select value={formData.clientId} onChange={(e) => handleChange('clientId', e.target.value)} label={t('warranty.selectClient')} sx={inputSx}>
+                  <MenuItem value="" sx={menuItemSx}>{t('form.select')}</MenuItem>
+                  {filteredResidents.map(client => <MenuItem key={client._id} value={client._id} sx={menuItemSx}>{client.firstName} {client.lastName}</MenuItem>)}
                 </Select>
               </FormControl>
             )}
           </Box>
 
           {formData.projectId && selectedProjectConfig && (
-            <Box sx={{ p: 2, bgcolor: '#f9f9f9', borderRadius: 1, border: '1px solid #e0e0e0' }}>
-              <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
+            <Box sx={{ p: 2, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
+              <Typography variant="subtitle2" fontWeight={600} mb={1.5} sx={{ fontFamily: '"Courier New", monospace' }}>
                 {selectedProjectConfig.resourceType === 'apartment' ? t('warranty.apartment') : t('warranty.property')}
               </Typography>
               {loadingResources ? (
@@ -230,61 +216,63 @@ export default function WarrantyClaimForm({ open, onClose, onSuccess, initialDat
                   <Select
                     value={selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses' ? formData.propertyId : formData.apartmentId}
                     onChange={(e) => {
-                      if (selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses') {
-                        handleChange('propertyId', e.target.value); handleChange('apartmentId', '')
-                      } else {
-                        handleChange('apartmentId', e.target.value); handleChange('propertyId', '')
-                      }
+                      if (selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses') { handleChange('propertyId', e.target.value); handleChange('apartmentId', '') }
+                      else { handleChange('apartmentId', e.target.value); handleChange('propertyId', '') }
                     }}
                     label={selectedProjectConfig.resourceType === 'apartment' ? t('warranty.apartment') : t('warranty.property')}
+                    sx={inputSx}
                   >
-                    <MenuItem value=""><em>{t('form.select')}</em></MenuItem>
+                    <MenuItem value="" sx={menuItemSx}><em>{t('form.select')}</em></MenuItem>
                     {availableResources.length > 0 ? availableResources.map(res => {
                       if (selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses') {
                         const lotNumber = res.lot?.number || res.lot || t('common.na')
                         const modelName = res.model?.model || res.model?.name || ''
-                        return <MenuItem key={res._id} value={res._id}>{t('warranty.property')} {lotNumber} {modelName ? `- ${modelName}` : ''}</MenuItem>
+                        return <MenuItem key={res._id} value={res._id} sx={menuItemSx}>{t('warranty.property')} {lotNumber} {modelName ? `- ${modelName}` : ''}</MenuItem>
                       } else {
-                        return <MenuItem key={res._id} value={res._id}>{t('warranty.apartment')} {res.apartmentNumber}{res.floorNumber ? ` (${t('warranty.floor')} ${res.floorNumber})` : ''}</MenuItem>
+                        return <MenuItem key={res._id} value={res._id} sx={menuItemSx}>{t('warranty.apartment')} {res.apartmentNumber}{res.floorNumber ? ` (${t('warranty.floor')} ${res.floorNumber})` : ''}</MenuItem>
                       }
-                    }) : <MenuItem disabled><em>{t('warranty.noResources')}</em></MenuItem>}
+                    }) : <MenuItem disabled sx={menuItemSx}><em>{t('warranty.noResources')}</em></MenuItem>}
                   </Select>
                 </FormControl>
               )}
             </Box>
           )}
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-            <FormControl fullWidth required>
-              <InputLabel>{t('warranty.category')}</InputLabel>
-              <Select value={formData.category} onChange={(e) => handleChange('category', e.target.value)} label={t('warranty.category')}>
-                {['structural', 'plumbing', 'electrical', 'finish', 'appliance', 'landscaping', 'other'].map(c => (
-                  <MenuItem key={c} value={c}>{t(`warranty.categories.${c}`)}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth required>
-              <InputLabel>{t('warranty.priority')}</InputLabel>
-              <Select value={formData.priority} onChange={(e) => handleChange('priority', e.target.value)} label={t('warranty.priority')}>
-                {['low', 'medium', 'high', 'emergency'].map(p => <MenuItem key={p} value={p}>{t(`warranty.priorities.${p}`)}</MenuItem>)}
-              </Select>
-            </FormControl>
-          </Box>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth required>
+                <InputLabel>{t('warranty.category')}</InputLabel>
+                <Select value={formData.category} onChange={(e) => handleChange('category', e.target.value)} label={t('warranty.category')} sx={inputSx}>
+                  {['structural', 'plumbing', 'electrical', 'finish', 'appliance', 'landscaping', 'other'].map(c => (
+                    <MenuItem key={c} value={c} sx={menuItemSx}>{t(`warranty.categories.${c}`)}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth required>
+                <InputLabel>{t('warranty.priority')}</InputLabel>
+                <Select value={formData.priority} onChange={(e) => handleChange('priority', e.target.value)} label={t('warranty.priority')} sx={inputSx}>
+                  {['low', 'medium', 'high', 'emergency'].map(p => <MenuItem key={p} value={p} sx={menuItemSx}>{t(`warranty.priorities.${p}`)}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
 
-          <TextField required multiline rows={4} label={t('warranty.description')} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} />
+          <TextField required multiline rows={4} label={t('warranty.description')} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} sx={inputSx} />
 
           <Box>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('warranty.photos')}</Typography>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>{t('warranty.photos')}</Typography>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
               {formData.photoUrls.map((url, idx) => (
-                <Box key={idx} sx={{ position: 'relative', width: 80, height: 80 }}>
-                  <img src={url} alt={`evidence-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 4 }} />
-                  <IconButton size="small" color="error" onClick={() => handleRemoveImage(idx)} sx={{ position: 'absolute', top: -8, right: -8, bgcolor: 'white', boxShadow: 1 }}>
+                <Box key={idx} sx={{ position: 'relative', width: 80, height: 80, borderRadius: 0, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
+                  <img src={url} alt={`evidence-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <IconButton size="small" color="error" onClick={() => handleRemoveImage(idx)} sx={{ position: 'absolute', top: -8, right: -8, bgcolor: 'white', boxShadow: 1, borderRadius: 0 }}>
                     <Delete fontSize="small" />
                   </IconButton>
                 </Box>
               ))}
-              <Button variant="outlined" component="label" disabled={uploading} sx={{ width: 80, height: 80, borderStyle: 'dashed', flexDirection: 'column' }}>
+              <Button variant="outlined" component="label" disabled={uploading} sx={{ width: 80, height: 80, borderStyle: 'dashed', flexDirection: 'column', borderRadius: 0, borderColor: '#ccc', '&:hover': { borderColor: '#000', bgcolor: '#f5f5f5' } }}>
                 {uploading ? <CircularProgress size={20} /> : <ImageIcon />}
                 <input type="file" hidden multiple accept="image/*" onChange={handleImageUpload} />
               </Button>
@@ -293,9 +281,9 @@ export default function WarrantyClaimForm({ open, onClose, onSuccess, initialDat
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, borderTop: '1px solid #eee' }}>
-        <Button onClick={onClose} disabled={submitting || uploading}>{t('form.cancel')}</Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={submitting || uploading} startIcon={submitting ? <CircularProgress size={20} /> : null}>
+      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+        <Button onClick={onClose} disabled={submitting || uploading} sx={{ ...unifiedButtonSx, color: '#888', width: { xs: '100%', sm: 'auto' } }}>{t('form.cancel')}</Button>
+        <Button variant="contained" onClick={handleSubmit} disabled={submitting || uploading} startIcon={submitting ? <CircularProgress size={16} /> : null} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', width: { xs: '100%', sm: 'auto' }, '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
           {submitting ? t('form.saving') : (initialData ? t('form.update') : t('form.create'))}
         </Button>
       </DialogActions>

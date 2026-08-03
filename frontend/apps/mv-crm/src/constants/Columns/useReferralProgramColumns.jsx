@@ -24,7 +24,7 @@ export const useReferralProgramColumns = ({ t, onEdit, onDelete }) => {
     },
     {
       field: 'reward',
-      headerName: t('program.reward', 'Recompensa'),
+      headerName: t('columns.reward', 'Recompensa'),
       minWidth: 180,
       renderCell: ({ row }) => (
         <Box>

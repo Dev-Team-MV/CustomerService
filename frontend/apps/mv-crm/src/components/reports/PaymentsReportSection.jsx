@@ -8,7 +8,9 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
 import { Payment } from '@mui/icons-material'
 import ReportSection from './ReportSection'
@@ -19,6 +21,8 @@ import { useProjects } from '@shared/hooks/useProjects'
 
 const PaymentsReportSection = () => {
   const { t } = useTranslation('reports')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const { projects } = useProjects()
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -26,6 +30,21 @@ const PaymentsReportSection = () => {
   const [format, setFormat] = useState('csv')
 
   const isDisabled = !dateFrom || !dateTo
+
+  const inputSx = {
+    fontFamily: '"Courier New", monospace',
+    fontSize: '0.75rem',
+    borderRadius: 0,
+    width: { xs: '100%', sm: 180 },
+    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
+    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' },
+    '& .MuiOutlinedInput-root': { borderRadius: 0, '& fieldset': { borderColor: '#ececec' } }
+  }
+
+  const selectSx = {
+    ...inputSx,
+    minWidth: { xs: '100%', sm: 200 }
+  }
 
   return (
     <ReportSection
@@ -35,7 +54,7 @@ const PaymentsReportSection = () => {
       title={t('payments.title', 'Reporte de Pagos')}
       description={t('payments.description', 'Exporta pagos dentro de un rango de fechas específico')}
     >
-      <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
+      <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} alignItems={{ xs: 'stretch', sm: 'center' }} flexWrap="wrap">
         <TextField
           size="small"
           type="date"
@@ -43,14 +62,7 @@ const PaymentsReportSection = () => {
           value={dateFrom}
           onChange={(e) => setDateFrom(e.target.value)}
           InputLabelProps={{ shrink: true }}
-          sx={{
-            width: 180,
-            '& .MuiInputBase-input': {
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.75rem'
-            },
-            '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ececec' }
-          }}
+          sx={inputSx}
         />
 
         <TextField
@@ -60,41 +72,26 @@ const PaymentsReportSection = () => {
           value={dateTo}
           onChange={(e) => setDateTo(e.target.value)}
           InputLabelProps={{ shrink: true }}
-          sx={{
-            width: 180,
-            '& .MuiInputBase-input': {
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.75rem'
-            },
-            '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ececec' }
-          }}
+          sx={inputSx}
         />
 
-        <FormControl size="small" sx={{ minWidth: 200 }}>
-          <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
-            {t('payments.filters.project', 'Proyecto')}
-          </InputLabel>
+        <FormControl size="small" sx={selectSx}>
+          <InputLabel>{t('payments.filters.project', 'Proyecto')}</InputLabel>
           <Select
             value={projectId}
             onChange={(e) => setProjectId(e.target.value)}
             label={t('payments.filters.project', 'Proyecto')}
-            sx={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.75rem',
-              borderRadius: 0,
-              '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ececec' }
-            }}
           >
-            <MenuItem value="">{t('common.all', 'Todos')}</MenuItem>
+            <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('common.all', 'Todos')}</MenuItem>
             {projects.map(project => (
-              <MenuItem key={project._id} value={project._id}>
+              <MenuItem key={project._id} value={project._id} sx={{ fontFamily: '"Courier New", monospace' }}>
                 {project.name}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
 
-        <Box sx={{ flex: 1 }} />
+        <Box sx={{ flex: { xs: 1, sm: 1 }, display: { xs: 'none', sm: 'block' } }} />
 
         <FormatSelector format={format} onChange={setFormat} />
 

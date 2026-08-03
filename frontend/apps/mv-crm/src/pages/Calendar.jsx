@@ -17,7 +17,8 @@ import {
   ListItemIcon,
   ListItemText,
   Tooltip,
-  Popover
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
 import {
   Add,
@@ -33,8 +34,7 @@ import {
   EventBusy,
   DoneAll,
   Person,
-  PersonOutline,
-  Close
+  PersonOutline
 } from '@mui/icons-material'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -68,7 +68,7 @@ const STATUS_OPTIONS = [
   { value: 'cancelada', label: 'Cancelada', icon: EventBusy, color: '#f44336' }
 ]
 
-// ✅ NUEVO: Componente para el botón de estado rápido
+// ✅ Componente QuickStatusButton optimizado
 const QuickStatusButton = ({ appointment, onUpdateStatus }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
@@ -78,9 +78,7 @@ const QuickStatusButton = ({ appointment, onUpdateStatus }) => {
     setAnchorEl(event.currentTarget)
   }
 
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
+  const handleClose = () => setAnchorEl(null)
 
   const handleStatusChange = async (newStatus) => {
     if (newStatus === appointment.status) {
@@ -100,9 +98,8 @@ const QuickStatusButton = ({ appointment, onUpdateStatus }) => {
           color: 'rgba(255,255,255,0.9)',
           bgcolor: 'rgba(255,255,255,0.2)',
           padding: '2px',
-          '&:hover': {
-            bgcolor: 'rgba(255,255,255,0.3)'
-          }
+          borderRadius: 0,
+          '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' }
         }}
       >
         <MoreVert sx={{ fontSize: 14 }} />
@@ -123,7 +120,7 @@ const QuickStatusButton = ({ appointment, onUpdateStatus }) => {
         }}
       >
         <Box sx={{ px: 2, py: 1, borderBottom: '1px solid #f0f0f0' }}>
-          <Box sx={{ 
+          <Typography sx={{ 
             fontFamily: '"Courier New", monospace',
             fontSize: '0.65rem',
             color: '#888',
@@ -131,7 +128,7 @@ const QuickStatusButton = ({ appointment, onUpdateStatus }) => {
             textTransform: 'uppercase'
           }}>
             Cambiar estado
-          </Box>
+          </Typography>
         </Box>
         
         {STATUS_OPTIONS.map((status) => {
@@ -150,9 +147,7 @@ const QuickStatusButton = ({ appointment, onUpdateStatus }) => {
                 py: 1,
                 opacity: isCurrent ? 0.6 : 1,
                 bgcolor: isCurrent ? `${status.color}10` : 'transparent',
-                '&:hover': {
-                  bgcolor: `${status.color}15`
-                }
+                '&:hover': { bgcolor: `${status.color}15` }
               }}
             >
               <ListItemIcon sx={{ color: status.color, minWidth: 36 }}>
@@ -169,13 +164,7 @@ const QuickStatusButton = ({ appointment, onUpdateStatus }) => {
                 }}
               />
               {isCurrent && (
-                <Box sx={{ 
-                  ml: 1, 
-                  width: 8, 
-                  height: 8, 
-                  borderRadius: '50%', 
-                  bgcolor: status.color 
-                }} />
+                <Box sx={{ ml: 1, width: 8, height: 8, borderRadius: 0, bgcolor: status.color }} />
               )}
             </MenuItem>
           )
@@ -185,7 +174,7 @@ const QuickStatusButton = ({ appointment, onUpdateStatus }) => {
   )
 }
 
-// ✅ NUEVO: Componente para mostrar información del cliente/lead
+// ✅ Componente ContactInfo optimizado
 const ContactInfo = ({ appointment }) => {
   const client = appointment.clientId
   const lead = appointment.leadId
@@ -197,20 +186,10 @@ const ContactInfo = ({ appointment }) => {
     return (
       <Tooltip 
         title={
-          <Box>
-            <Typography variant="caption" sx={{ display: 'block', fontWeight: 600 }}>
-              Cliente
-            </Typography>
-            {clientName && (
-              <Typography variant="caption" sx={{ display: 'block' }}>
-                {clientName}
-              </Typography>
-            )}
-            {clientEmail && (
-              <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
-                {clientEmail}
-              </Typography>
-            )}
+          <Box sx={{ p: 1 }}>
+            <Typography variant="caption" sx={{ display: 'block', fontWeight: 600, fontFamily: '"Helvetica Neue", sans-serif' }}>Cliente</Typography>
+            {clientName && <Typography variant="caption" sx={{ display: 'block', fontFamily: '"Helvetica Neue", sans-serif' }}>{clientName}</Typography>}
+            {clientEmail && <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem', fontFamily: '"Helvetica Neue", sans-serif' }}>{clientEmail}</Typography>}
           </Box>
         }
         placement="top"
@@ -224,7 +203,7 @@ const ContactInfo = ({ appointment }) => {
             px: 0.75,
             py: 0.25,
             bgcolor: 'rgba(255,255,255,0.15)',
-            borderRadius: '3px',
+            borderRadius: 0,
             cursor: 'default'
           }}
         >
@@ -254,18 +233,10 @@ const ContactInfo = ({ appointment }) => {
     return (
       <Tooltip 
         title={
-          <Box>
-            <Typography variant="caption" sx={{ display: 'block', fontWeight: 600 }}>
-              Lead
-            </Typography>
-            <Typography variant="caption" sx={{ display: 'block' }}>
-              {leadName}
-            </Typography>
-            {leadPhone && (
-              <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
-                {leadPhone}
-              </Typography>
-            )}
+          <Box sx={{ p: 1 }}>
+            <Typography variant="caption" sx={{ display: 'block', fontWeight: 600, fontFamily: '"Helvetica Neue", sans-serif' }}>Lead</Typography>
+            <Typography variant="caption" sx={{ display: 'block', fontFamily: '"Helvetica Neue", sans-serif' }}>{leadName}</Typography>
+            {leadPhone && <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem', fontFamily: '"Helvetica Neue", sans-serif' }}>{leadPhone}</Typography>}
           </Box>
         }
         placement="top"
@@ -279,7 +250,7 @@ const ContactInfo = ({ appointment }) => {
             px: 0.75,
             py: 0.25,
             bgcolor: 'rgba(255,255,255,0.15)',
-            borderRadius: '3px',
+            borderRadius: 0,
             cursor: 'default'
           }}
         >
@@ -307,14 +278,13 @@ const ContactInfo = ({ appointment }) => {
 
 export default function Calendar() {
   const { t, i18n } = useTranslation('appointments')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'))
+  
   const { 
-    appointments, 
-    loading, 
-    error, 
-    createAppointment, 
-    updateAppointment, 
-    updateAppointmentStatus, 
-    deleteAppointment 
+    appointments, loading, error, createAppointment, updateAppointment, 
+    updateAppointmentStatus, deleteAppointment 
   } = useAppointments()
   const { projects } = useProjects()
   const { agents } = useCrmAgents()
@@ -326,7 +296,6 @@ export default function Calendar() {
   const [selectedDate, setSelectedDate] = useState(null)
   const [calendarView, setCalendarView] = useState('dayGridMonth')
   const [currentTitle, setCurrentTitle] = useState('')
-  const [popoverEvent, setPopoverEvent] = useState(null)
 
   const calendarEvents = useMemo(() => {
     return appointments.map(appointment => {
@@ -341,11 +310,7 @@ export default function Calendar() {
         backgroundColor: statusConfig.color,
         borderColor: statusConfig.color,
         textColor: '#fff',
-        extendedProps: {
-          ...appointment,
-          statusConfig,
-          typeConfig
-        }
+        extendedProps: { ...appointment, statusConfig, typeConfig }
       }
     })
   }, [appointments])
@@ -353,9 +318,7 @@ export default function Calendar() {
   useEffect(() => {
     if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi()
-      const currentView = calendarApi.view.type
-      
-      if (currentView !== calendarView) {
+      if (calendarApi.view.type !== calendarView) {
         calendarApi.changeView(calendarView)
       }
     }
@@ -363,36 +326,28 @@ export default function Calendar() {
 
   useEffect(() => {
     if (calendarRef.current) {
-      const calendarApi = calendarRef.current.getApi()
-      setCurrentTitle(calendarApi.view.title)
+      setCurrentTitle(calendarRef.current.getApi().view.title)
     }
   }, [calendarView, appointments])
 
   const handlePrev = () => {
     if (calendarRef.current) {
       calendarRef.current.getApi().prev()
-      updateTitle()
+      setCurrentTitle(calendarRef.current.getApi().view.title)
     }
   }
 
   const handleNext = () => {
     if (calendarRef.current) {
       calendarRef.current.getApi().next()
-      updateTitle()
+      setCurrentTitle(calendarRef.current.getApi().view.title)
     }
   }
 
   const handleToday = () => {
     if (calendarRef.current) {
       calendarRef.current.getApi().today()
-      updateTitle()
-    }
-  }
-
-  const updateTitle = () => {
-    if (calendarRef.current) {
-      const calendarApi = calendarRef.current.getApi()
-      setCurrentTitle(calendarApi.view.title)
+      setCurrentTitle(calendarRef.current.getApi().view.title)
     }
   }
 
@@ -403,8 +358,7 @@ export default function Calendar() {
   }
 
   const handleEventClick = (info) => {
-    const appointment = info.event.extendedProps
-    setSelectedAppointment(appointment)
+    setSelectedAppointment(info.event.extendedProps)
     setSelectedDate(null)
     setModalOpen(true)
   }
@@ -417,11 +371,8 @@ export default function Calendar() {
   }
 
   const handleSaveAppointment = async (id, data) => {
-    if (id) {
-      await updateAppointment(id, data)
-    } else {
-      await createAppointment(data)
-    }
+    if (id) await updateAppointment(id, data)
+    else await createAppointment(data)
   }
 
   const handleDeleteAppointment = async (id) => {
@@ -430,13 +381,9 @@ export default function Calendar() {
 
   const handleViewChange = (event, newView) => {
     if (newView !== null && calendarRef.current) {
-      const calendarApi = calendarRef.current.getApi()
-      calendarApi.changeView(newView)
+      calendarRef.current.getApi().changeView(newView)
       setCalendarView(newView)
-      
-      setTimeout(() => {
-        setCurrentTitle(calendarApi.view.title)
-      }, 100)
+      setTimeout(() => setCurrentTitle(calendarRef.current.getApi().view.title), 100)
     }
   }
 
@@ -444,138 +391,121 @@ export default function Calendar() {
     await updateAppointmentStatus(id, status)
   }
 
-  // ✅ MEJORADO: Renderizar contenido del evento adaptado a la vista
+  // ✅ Renderizar contenido del evento optimizado para responsive
   const renderEventContent = (eventInfo) => {
     const appointment = eventInfo.event.extendedProps
     const statusConfig = appointment.statusConfig || APPOINTMENT_STATUSES[appointment.status] || APPOINTMENT_STATUSES.pendiente
     const typeConfig = appointment.typeConfig || APPOINTMENT_TYPES[appointment.type] || APPOINTMENT_TYPES.visita
     
     const isTimeGrid = eventInfo.view.type.includes('timeGrid')
-    const startTime = new Date(eventInfo.event.start).toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    })
+    const isDayGrid = eventInfo.view.type === 'dayGridMonth'
+    const startTime = new Date(eventInfo.event.start).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
 
-    // ✅ Vista mensual: más compacta
-    if (!isTimeGrid) {
+    // Vista de Mes - Cards compactas
+    if (isDayGrid) {
       return (
-        <Box
-          sx={{
-            p: 0.5,
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            bgcolor: statusConfig.color,
-            borderRadius: '2px'
-          }}
-        >
-          <Typography
-            sx={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.65rem',
-              fontWeight: 600,
-              color: 'white',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}
-          >
+        <Box sx={{ 
+          p: 0.5, 
+          height: '100%', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          justifyContent: 'center', 
+          bgcolor: statusConfig.color, 
+          borderRadius: 0,
+          minHeight: isMobile ? '40px' : 'auto'
+        }}>
+          <Typography sx={{ 
+            fontFamily: '"Courier New", monospace', 
+            fontSize: isMobile ? '0.6rem' : '0.65rem', 
+            fontWeight: 600, 
+            color: 'white', 
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis', 
+            whiteSpace: 'nowrap',
+            lineHeight: 1.2
+          }}>
             {typeConfig.icon} {eventInfo.event.title || 'Sin título'}
           </Typography>
-          <Typography
-            sx={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.55rem',
-              color: 'rgba(255,255,255,0.9)',
-              mt: 0.25
-            }}
-          >
-            {startTime}
-          </Typography>
+          {!isMobile && (
+            <Typography sx={{ 
+              fontFamily: '"Courier New", monospace', 
+              fontSize: '0.55rem', 
+              color: 'rgba(255,255,255,0.9)', 
+              mt: 0.25 
+            }}>
+              {startTime}
+            </Typography>
+          )}
         </Box>
       )
     }
 
-    // ✅ Vista semanal/diaria: más detallada pero sin superposición
+    // Vista de Semana/Día - Cards detalladas
     return (
-      <Box
-        sx={{
-          p: 0.75,
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          position: 'relative',
-          bgcolor: statusConfig.color,
-          borderRadius: '4px',
-          overflow: 'hidden'
-        }}
-      >
-        {/* Header: Icono + Título */}
+      <Box sx={{ 
+        p: 0.75, 
+        height: '100%', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        justifyContent: 'space-between', 
+        position: 'relative', 
+        bgcolor: statusConfig.color, 
+        borderRadius: 0, 
+        overflow: 'hidden',
+        minHeight: '60px'
+      }}>
         <Box>
-          <Typography
-            sx={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.7rem',
-              fontWeight: 600,
-              color: 'white',
-              mb: 0.5,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              pr: 3
-            }}
-          >
+          <Typography sx={{ 
+            fontFamily: '"Courier New", monospace', 
+            fontSize: isMobile ? '0.65rem' : '0.7rem', 
+            fontWeight: 600, 
+            color: 'white', 
+            mb: 0.5, 
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis', 
+            whiteSpace: 'nowrap', 
+            pr: 3,
+            lineHeight: 1.2
+          }}>
             {typeConfig.icon} {eventInfo.event.title || 'Sin título'}
           </Typography>
-          
-          <ContactInfo appointment={appointment} />
+          {!isMobile && <ContactInfo appointment={appointment} />}
         </Box>
 
-        {/* Footer: Hora + Estado + Botón */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0.5, mt: 0.5 }}>
-          <Box
-            sx={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.6rem',
-              color: 'rgba(255,255,255,0.9)',
-              background: 'rgba(0,0,0,0.2)',
-              padding: '2px 6px',
-              borderRadius: '3px'
-            }}
-          >
+          <Box sx={{ 
+            fontFamily: '"Courier New", monospace', 
+            fontSize: '0.6rem', 
+            color: 'rgba(255,255,255,0.9)', 
+            background: 'rgba(0,0,0,0.2)', 
+            padding: '2px 6px', 
+            borderRadius: 0 
+          }}>
             {startTime}
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Typography
-              sx={{
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.55rem',
-                color: 'white',
-                background: 'rgba(255,255,255,0.25)',
-                padding: '2px 6px',
-                borderRadius: '3px',
-                textTransform: 'uppercase',
-                fontWeight: 600,
-                display: { xs: 'none', sm: 'block' }
-              }}
-            >
-              {statusConfig.label}
-            </Typography>
-
-            <QuickStatusButton
-              appointment={appointment}
-              onUpdateStatus={handleUpdateStatus}
-            />
-          </Box>
+          {!isMobile && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography sx={{ 
+                fontFamily: '"Courier New", monospace', 
+                fontSize: '0.55rem', 
+                color: 'white', 
+                background: 'rgba(255,255,255,0.25)', 
+                padding: '2px 6px', 
+                borderRadius: 0, 
+                textTransform: 'uppercase', 
+                fontWeight: 600 
+              }}>
+                {statusConfig.label}
+              </Typography>
+              <QuickStatusButton appointment={appointment} onUpdateStatus={handleUpdateStatus} />
+            </Box>
+          )}
         </Box>
       </Box>
     )
   }
 
-  // ✅ NUEVO: Configuración específica para evitar superposición
   const calendarOptions = {
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
     initialView: calendarView,
@@ -584,44 +514,34 @@ export default function Calendar() {
     editable: true,
     selectable: true,
     selectMirror: true,
-    dayMaxEvents: true,
+    dayMaxEvents: isMobile ? 2 : true,
     weekends: true,
-    height: 'auto',
-    contentHeight: 600,
-    
-    // ✅ Configuración para evitar superposición
-    slotEventOverlap: false, // Evita que los eventos se superpongan en timeGrid
-    eventOverlap: false, // Evita superposición general
-    dayMaxEventRows: 3, // Limita eventos visibles en month view
-    
-    // ✅ Configuración de tiempo
-    slotDuration: '00:30:00', // Slots de 30 minutos
-    slotMinTime: '07:00:00', // Hora mínima visible
-    slotMaxTime: '21:00:00', // Hora máxima visible
-    allDaySlot: true, // Mostrar slot de todo el día
-    
-    eventTimeFormat: {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    },
-    slotLabelFormat: {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    },
+    height: isMobile ? 'auto' : 'auto',
+    contentHeight: isMobile ? 400 : 600,
+    slotEventOverlap: false,
+    eventOverlap: false,
+    dayMaxEventRows: isMobile ? 2 : 3,
+    slotDuration: '00:30:00',
+    slotMinTime: '07:00:00',
+    slotMaxTime: '21:00:00',
+    allDaySlot: true,
+    eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+    slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
     dateClick: handleDateClick,
     eventClick: handleEventClick,
     datesSet: handleDatesSet,
     eventContent: renderEventContent,
-    
-    // ✅ Mejor manejo de eventos largos
     eventDisplay: 'block',
     stickyHeaderDates: true,
-    
-    // ✅ Configuración de eventos múltiples
-    eventOrder: 'start,-duration,title', // Ordenar por hora de inicio
-    nextDayThreshold: '00:00:00'
+    eventOrder: 'start,-duration,title',
+    nextDayThreshold: '00:00:00',
+    // ✅ Responsive: Ajustar columnas en móvil
+    fixedWeekCount: false,
+    showNonCurrentDates: !isMobile,
+    // ✅ Mejorar layout en semana
+    weekNumbers: !isMobile,
+    // ✅ Scroll horizontal en móvil para vista semana
+    scrollTime: '08:00:00'
   }
 
   return (
@@ -631,19 +551,11 @@ export default function Calendar() {
       topbarLabel={t('topbarLabel')}
       subtitle={t('subtitle')}
     >
-      <Box sx={{ p: 3 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={2}>
+      <Box sx={{ p: { xs: 2, sm: 3 } }}>
+        {/* ✅ Leyenda Responsive */}
+        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} mb={3} flexWrap="wrap" gap={2}>
           <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
-            <Typography
-              sx={{
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.65rem',
-                color: '#888',
-                letterSpacing: '1px',
-                textTransform: 'uppercase',
-                mr: 1
-              }}
-            >
+            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', letterSpacing: '1px', textTransform: 'uppercase', mr: 1 }}>
               Estados:
             </Typography>
             {Object.entries(APPOINTMENT_STATUSES).map(([key, status]) => (
@@ -652,6 +564,7 @@ export default function Calendar() {
                 label={status.label}
                 size="small"
                 sx={{
+                  borderRadius: 0,
                   bgcolor: status.color,
                   color: '#fff',
                   fontFamily: '"Courier New", monospace',
@@ -664,16 +577,7 @@ export default function Calendar() {
           </Box>
 
           <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
-            <Typography
-              sx={{
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.65rem',
-                color: '#888',
-                letterSpacing: '1px',
-                textTransform: 'uppercase',
-                mr: 1
-              }}
-            >
+            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', letterSpacing: '1px', textTransform: 'uppercase', mr: 1 }}>
               Tipos:
             </Typography>
             {Object.entries(APPOINTMENT_TYPES).map(([key, type]) => (
@@ -683,6 +587,7 @@ export default function Calendar() {
                 size="small"
                 variant="outlined"
                 sx={{
+                  borderRadius: 0,
                   borderColor: type.color,
                   color: type.color,
                   fontFamily: '"Courier New", monospace',
@@ -695,33 +600,41 @@ export default function Calendar() {
           </Box>
         </Box>
 
-        <Box display="flex" gap={2} alignItems="center" mb={3} flexWrap="wrap">
+        {/* ✅ Controles Responsive */}
+        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'stretch', sm: 'center' }} mb={3} gap={2}>
           <ToggleButtonGroup
             value={calendarView}
             exclusive
             onChange={handleViewChange}
             size="small"
             sx={{
+              width: { xs: '100%', sm: 'auto' },
               '& .MuiToggleButton-root': {
                 fontFamily: '"Courier New", monospace',
                 fontSize: '0.7rem',
                 textTransform: 'none',
                 letterSpacing: '0.5px',
-                borderRadius: 0
+                borderRadius: 0,
+                border: '1px solid #000',
+                color: '#000',
+                flex: { xs: 1, sm: 'none' },
+                '&.Mui-selected': {
+                  bgcolor: '#000',
+                  color: '#fff',
+                  '&:hover': { bgcolor: '#222' }
+                },
+                '&:hover': { bgcolor: '#f5f5f5' }
               }
             }}
           >
             <ToggleButton value="dayGridMonth">
-              <CalendarMonth sx={{ fontSize: 16, mr: 0.5 }} />
-              {t('calendar.month')}
+              <CalendarMonth sx={{ fontSize: 16, mr: 0.5 }} /> {isMobile ? 'Mes' : t('calendar.month')}
             </ToggleButton>
             <ToggleButton value="timeGridWeek">
-              <ViewWeek sx={{ fontSize: 16, mr: 0.5 }} />
-              {t('calendar.week')}
+              <ViewWeek sx={{ fontSize: 16, mr: 0.5 }} /> {isMobile ? 'Semana' : t('calendar.week')}
             </ToggleButton>
             <ToggleButton value="timeGridDay">
-              <ViewDay sx={{ fontSize: 16, mr: 0.5 }} />
-              {t('calendar.day')}
+              <ViewDay sx={{ fontSize: 16, mr: 0.5 }} /> {isMobile ? 'Día' : t('calendar.day')}
             </ToggleButton>
           </ToggleButtonGroup>
 
@@ -738,90 +651,46 @@ export default function Calendar() {
               textTransform: 'none',
               fontFamily: '"Courier New", monospace',
               fontSize: '0.75rem',
-              letterSpacing: '0.5px'
+              letterSpacing: '0.5px',
+              bgcolor: '#000',
+              color: '#fff',
+              width: { xs: '100%', sm: 'auto' },
+              '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' }
             }}
           >
             {t('createAppointment')}
           </Button>
         </Box>
 
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          mb={2}
-          p={1.5}
-          bgcolor="#fff"
-          border="1px solid #ececec"
-          borderRadius={1}
-        >
-          <Box display="flex" gap={1} alignItems="center">
-            <Button
-              size="small"
-              onClick={handlePrev}
-              sx={{
-                minWidth: 'auto',
-                borderRadius: 0,
-                bgcolor: '#000',
-                color: '#fff',
-                '&:hover': { bgcolor: '#333' }
-              }}
-            >
+        {/* ✅ Navegación Responsive */}
+        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between" mb={2} p={1.5} bgcolor="#fff" border="1px solid #ececec" borderRadius={0} gap={2}>
+          <Box display="flex" gap={1} alignItems="center" justifyContent={{ xs: 'center', sm: 'flex-start' }}>
+            <Button size="small" onClick={handlePrev} sx={{ minWidth: 'auto', borderRadius: 0, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
               <ChevronLeft />
             </Button>
-            
-            <Button
-              size="small"
-              onClick={handleToday}
-              sx={{
-                borderRadius: 0,
-                bgcolor: '#000',
-                color: '#fff',
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.7rem',
-                letterSpacing: '0.5px',
-                '&:hover': { bgcolor: '#333' }
-              }}
-            >
-              <Today sx={{ fontSize: 14, mr: 0.5 }} />
-              {t('calendar.today')}
+            <Button size="small" onClick={handleToday} sx={{ borderRadius: 0, bgcolor: '#000', color: '#fff', fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '0.5px', '&:hover': { bgcolor: '#222', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
+              <Today sx={{ fontSize: 14, mr: 0.5 }} /> {t('calendar.today')}
             </Button>
-            
-            <Button
-              size="small"
-              onClick={handleNext}
-              sx={{
-                minWidth: 'auto',
-                borderRadius: 0,
-                bgcolor: '#000',
-                color: '#fff',
-                '&:hover': { bgcolor: '#333' }
-              }}
-            >
+            <Button size="small" onClick={handleNext} sx={{ minWidth: 'auto', borderRadius: 0, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
               <ChevronRight />
             </Button>
           </Box>
 
-          <Typography
-            sx={{
-              fontFamily: '"Helvetica Neue", sans-serif',
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              color: '#000',
-              textTransform: 'capitalize'
-            }}
-          >
+          <Typography sx={{ 
+            fontFamily: '"Helvetica Neue", sans-serif', 
+            fontSize: { xs: '1rem', sm: '1.1rem' }, 
+            fontWeight: 600, 
+            color: '#000', 
+            textTransform: 'capitalize',
+            textAlign: { xs: 'center', sm: 'left' }
+          }}>
             {currentTitle}
           </Typography>
 
-          <Box sx={{ width: 120 }} />
+          <Box sx={{ width: { xs: '100%', sm: 120 } }} />
         </Box>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2, borderRadius: 0 }}>
-            {error}
-          </Alert>
-        )}
+        {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid' }}>{error}</Alert>}
 
         {loading ? (
           <Box display="flex" justifyContent="center" alignItems="center" py={8}>
@@ -831,55 +700,39 @@ export default function Calendar() {
           <Paper
             elevation={0}
             sx={{
-              p: 3,
+              p: { xs: 2, sm: 3 },
               border: '1px solid #ececec',
-              borderRadius: 1,
+              borderRadius: 0,
               bgcolor: '#fff',
-              '& .fc': {
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.75rem'
+              overflowX: 'auto',
+              '& .fc': { 
+                fontFamily: '"Courier New", monospace', 
+                fontSize: isMobile ? '0.7rem' : '0.75rem',
+                minWidth: isMobile ? '600px' : 'auto' // ✅ Scroll horizontal en móvil
               },
-              '& .fc-header-toolbar': {
-                display: 'none'
-              },
+              '& .fc-header-toolbar': { display: 'none' },
               '& .fc-event': {
-                borderRadius: '4px',
+                borderRadius: 0,
                 border: 'none',
                 padding: 0,
-                fontSize: '0.7rem',
+                fontSize: isMobile ? '0.65rem' : '0.7rem',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                marginBottom: '2px', // Espacio entre eventos
-                '&:hover': {
-                  transform: 'scale(1.01)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  zIndex: 10
-                }
+                marginBottom: '2px',
+                '&:hover': { transform: 'scale(1.01)', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 10 }
               },
-              // ✅ Mejorar visualización de eventos en timeGrid
-              '& .fc-timegrid-event': {
-                marginBottom: '4px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              '& .fc-timegrid-event': { 
+                marginBottom: '4px', 
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                fontSize: isMobile ? '0.65rem' : '0.7rem'
               },
-              '& .fc-daygrid-day-number': {
-                padding: '4px 8px',
-                fontSize: '0.75rem'
-              },
-              '& .fc-col-header-cell-cushion': {
-                padding: '8px',
-                fontSize: '0.7rem',
-                textTransform: 'uppercase',
-                letterSpacing: '1px'
-              },
-              '& .fc-today': {
-                backgroundColor: '#fff3e0 !important'
-              },
-              // ✅ Scroll para múltiples eventos
-              '& .fc-daygrid-more-link': {
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.65rem',
-                color: '#1976d2'
-              }
+              '& .fc-daygrid-day-number': { padding: '4px 8px', fontSize: isMobile ? '0.7rem' : '0.75rem' },
+              '& .fc-col-header-cell-cushion': { padding: '8px', fontSize: isMobile ? '0.65rem' : '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' },
+              '& .fc-today': { backgroundColor: '#f5f5f5 !important' },
+              '& .fc-daygrid-more-link': { fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', fontWeight: 600 },
+              // ✅ Ajustes específicos para vista semana/día
+              '& .fc-timegrid-slot-label': { fontSize: isMobile ? '0.65rem' : '0.7rem', fontFamily: '"Courier New", monospace' },
+              '& .fc-timegrid-col-header': { fontSize: isMobile ? '0.65rem' : '0.7rem' }
             }}
           >
             <FullCalendar ref={calendarRef} {...calendarOptions} events={calendarEvents} />
@@ -888,11 +741,7 @@ export default function Calendar() {
 
         <AppointmentModal
           open={modalOpen}
-          onClose={() => {
-            setModalOpen(false)
-            setSelectedAppointment(null)
-            setSelectedDate(null)
-          }}
+          onClose={() => { setModalOpen(false); setSelectedAppointment(null); setSelectedDate(null); }}
           appointment={selectedAppointment}
           onSave={handleSaveAppointment}
           onDelete={handleDeleteAppointment}

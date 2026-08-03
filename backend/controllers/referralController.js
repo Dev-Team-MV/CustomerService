@@ -17,7 +17,7 @@ import { applyPropertyDiscountReward } from '../services/referralRewardService.j
 
 const POPULATE = [
   { path: 'referrerId', select: 'firstName lastName email phoneNumber' },
-  { path: 'referredLeadId', select: 'name phone email stage source' },
+  { path: 'referredLeadId', select: 'name phone email country stage source' },
   { path: 'projectId', select: 'name slug title' },
   { path: 'conversionPropertyId', select: 'price status lot' },
   { path: 'conversionApartmentId', select: 'apartmentNumber floorNumber building status price' },
@@ -386,6 +386,7 @@ export const createReferral = async (req, res) => {
       referredName,
       referredPhone,
       referredEmail,
+      referredCountry,
       projectId,
       rewardType,
       rewardAmount,
@@ -430,10 +431,13 @@ export const createReferral = async (req, res) => {
       ? `${referrer.firstName || ''} ${referrer.lastName || ''}`.trim() || `user ${resolvedReferrerId}`
       : `user ${resolvedReferrerId}`
 
+    const country = referredCountry?.trim() || ''
+
     const lead = await Lead.create({
       name: referredName.trim(),
       phone: referredPhone?.trim() || '',
       email: referredEmail?.trim()?.toLowerCase() || undefined,
+      country: country || undefined,
       source: 'referido',
       projectId,
       stage: 'nuevo',
@@ -448,6 +452,7 @@ export const createReferral = async (req, res) => {
       referredName: referredName.trim(),
       referredPhone: referredPhone?.trim() || '',
       referredEmail: referredEmail?.trim()?.toLowerCase() || '',
+      referredCountry: country,
       projectId,
       status: status && isAdminUser(req.user) ? status : 'pending',
       rewardType: snapshot.rewardType,
@@ -473,6 +478,7 @@ export const updateReferral = async (req, res) => {
       referredName,
       referredPhone,
       referredEmail,
+      referredCountry,
       status,
       rewardType,
       rewardAmount,
@@ -484,6 +490,7 @@ export const updateReferral = async (req, res) => {
     if (referredName !== undefined) referral.referredName = referredName.trim()
     if (referredPhone !== undefined) referral.referredPhone = referredPhone.trim()
     if (referredEmail !== undefined) referral.referredEmail = referredEmail.trim().toLowerCase()
+    if (referredCountry !== undefined) referral.referredCountry = referredCountry.trim()
     if (notes !== undefined) referral.notes = notes.trim()
     if (status !== undefined) {
       if (!REFERRAL_STATUSES.includes(status)) {
@@ -514,6 +521,19 @@ export const updateReferral = async (req, res) => {
     }
 
     const updated = await referral.save()
+
+    // Mantener el Lead vinculado alineado (incluye country para conversión a User)
+    if (updated.referredLeadId) {
+      const leadUpdates = {}
+      if (referredName !== undefined) leadUpdates.name = updated.referredName
+      if (referredPhone !== undefined) leadUpdates.phone = updated.referredPhone
+      if (referredEmail !== undefined) leadUpdates.email = updated.referredEmail || undefined
+      if (referredCountry !== undefined) leadUpdates.country = updated.referredCountry || undefined
+      if (Object.keys(leadUpdates).length > 0) {
+        await Lead.findByIdAndUpdate(updated.referredLeadId, leadUpdates)
+      }
+    }
+
     const populated = await Referral.findById(updated._id).populate(POPULATE)
     res.json(populated)
   } catch (error) {
@@ -536,7 +556,7 @@ export const deleteReferral = async (req, res) => {
 
 export const submitReferral = async (req, res) => {
   try {
-    const { referredName, referredPhone, referredEmail, projectId, notes } = req.body
+    const { referredName, referredPhone, referredEmail, referredCountry, projectId, notes } = req.body
 
     if (!projectId || !isValidObjectId(projectId)) {
       return res.status(400).json({ message: 'Valid projectId is required' })
@@ -566,10 +586,13 @@ export const submitReferral = async (req, res) => {
       }
     }
 
+    const country = referredCountry?.trim() || ''
+
     const lead = await Lead.create({
       name: referredName.trim(),
       phone: referredPhone?.trim() || '',
       email: referredEmail?.trim()?.toLowerCase() || undefined,
+      country: country || undefined,
       source: 'referido',
       projectId,
       stage: 'nuevo',
@@ -586,6 +609,7 @@ export const submitReferral = async (req, res) => {
       referredName: referredName.trim(),
       referredPhone: referredPhone?.trim() || '',
       referredEmail: referredEmail?.trim()?.toLowerCase() || '',
+      referredCountry: country,
       projectId,
       status: 'pending',
       rewardType: snapshot.rewardType,

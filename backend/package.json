@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "backup": "node scripts/run-backup.js",
+    "seed:acceptance": "node scripts/seedAcceptanceDb.js",
     "seed:6-townhouses": "node scripts/seedProject6Townhouses.js",
     "seed:6-townhouses:catalog": "node scripts/seedProject6TownhousesCatalogConfig.js",
     "test:catalog-config": "node scripts/testProjectCatalogConfigValidation.js",

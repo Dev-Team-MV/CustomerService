@@ -13,21 +13,9 @@ export const BRAND = {
   GRADIENT_ACCENT: 'linear-gradient(135deg, #555555 0%, #aaaaaa 100%)',
   GRADIENT_INFO: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
 
-  CHIP_SUPERADMIN: {
-    bg: 'rgba(255,112,67,0.08)',
-    border: 'rgba(255,112,67,0.3)',
-    color: '#FF7043'
-  },
-  CHIP_ADMIN: {
-    bg: 'rgba(85,85,85,0.08)',
-    border: 'rgba(85,85,85,0.3)',
-    color: '#555555'
-  },
-  CHIP_RESIDENT: {
-    bg: 'rgba(0,0,0,0.08)',
-    border: 'rgba(0,0,0,0.3)',
-    color: '#000000'
-  },
+  CHIP_SUPERADMIN: { bg: 'rgba(255,112,67,0.08)', border: 'rgba(255,112,67,0.3)', color: '#FF7043' },
+  CHIP_ADMIN: { bg: 'rgba(85,85,85,0.08)', border: 'rgba(85,85,85,0.3)', color: '#555555' },
+  CHIP_RESIDENT: { bg: 'rgba(0,0,0,0.08)', border: 'rgba(0,0,0,0.3)', color: '#000000' },
 
   CARD_BG: '#ffffff',
   CARD_BORDER: '#e0e0e0',
@@ -42,87 +30,94 @@ const theme = createTheme({
     info: { main: BRAND.INFO },
     warning: { main: BRAND.WARNING },
     success: { main: BRAND.SUCCESS },
-    // Gradientes y colores extendidos
-    gradient: BRAND.GRADIENT,
-    gradientSecondary: BRAND.GRADIENT_SECONDARY,
-    gradientAccent: BRAND.GRADIENT_ACCENT,
-    gradientInfo: BRAND.GRADIENT_INFO,
-    chipSuperadmin: BRAND.CHIP_SUPERADMIN,
-    chipAdmin: BRAND.CHIP_ADMIN,
-    chipResident: BRAND.CHIP_RESIDENT,
-    cardBg: BRAND.CARD_BG,
-    cardBorder: BRAND.CARD_BORDER,
-    avatarShadow: BRAND.AVATAR_SHADOW,
-    background: {
-      default: '#fff',
-      paper: '#fff'
-    },
-    chipLanguageSwitcher: {
-        bg: 'rgba(255, 255, 255, 0.08)',          // Gris translúcido
-        border: 'rgba(85,85,85,0.3)',       // Gris más fuerte
-        color: '#ffffffff',                   // Gris principal
-        hoverBg: '#555555',                 // Gris sólido al hover
-        hoverBorder: '#555555',
-        hoverShadow: '0 4px 12px rgba(85,85,85,0.18)'
-      },
+    background: { default: '#fafafa', paper: '#ffffff' },
   },
   typography: {
-    fontFamily: '"Poppins", sans-serif',
-    fontWeightBold: 800,
+    // ✅ UNIFICACIÓN: Usamos la tipografía del Login como estándar global
+    fontFamily: '"Helvetica Neue", Arial, sans-serif',
+    fontWeightLight: 300,
+    fontWeightRegular: 400,
     fontWeightMedium: 600,
-    fontWeightRegular: 500
+    fontWeightBold: 700,
+    h1: { fontWeight: 200, letterSpacing: '-0.03em' },
+    h2: { fontWeight: 300, letterSpacing: '-0.02em' },
+    h3: { fontWeight: 400, letterSpacing: '-0.02em' },
+    h4: { fontWeight: 400, letterSpacing: '-0.02em' },
+    h5: { fontWeight: 400, letterSpacing: '-0.01em' },
+    h6: { fontWeight: 600, letterSpacing: '-0.01em' },
+    body1: { fontWeight: 300, lineHeight: 1.75 },
+    body2: { fontWeight: 300, lineHeight: 1.6 },
   },
   components: {
+    // ✅ UNIFICACIÓN: Inputs cuadrados y elegantes como en el Login
     MuiTextField: {
       styleOverrides: {
         root: {
-          backgroundColor: '#fff',
-          borderColor: '#e0e0e0 !important',
           '& .MuiOutlinedInput-root': {
-            borderRadius: 8,
+            borderRadius: 0, // Bordes afilados
             backgroundColor: '#fff',
-            fontFamily: '"Poppins", sans-serif',
+            fontFamily: '"Helvetica Neue", sans-serif',
+            transition: 'box-shadow 0.25s, border-color 0.25s',
             '& fieldset': {
-              borderColor: '#e0e0e0',
-              borderWidth: '1.5px'
+              borderColor: '#ddd',
+              borderWidth: '1px',
             },
             '&:hover fieldset': {
-              borderColor: '#e0e0e0 !important'
+              borderColor: '#000',
             },
             '&.Mui-focused fieldset': {
-              borderColor: BRAND.ACCENT,
-              borderWidth: '2px'
-            }
+              borderColor: BRAND.PRIMARY,
+              borderWidth: '2px',
+            },
+            '&.Mui-focused': {
+              boxShadow: '4px 4px 0px rgba(0,0,0,0.06)', // Sombra sutil del login
+            },
+            '& input': {
+              color: '#000',
+              padding: '18px 14px',
+              fontSize: '0.95rem',
+              fontWeight: 300,
+              '&::placeholder': { color: '#ccc', opacity: 1 },
+            },
           },
           '& .MuiInputLabel-root': {
-            fontFamily: '"Poppins", sans-serif',
-            fontWeight: 500,
-            color: '#555',
+            fontFamily: '"Helvetica Neue", sans-serif',
+            fontWeight: 400,
+            color: '#888',
             '&.Mui-focused': {
               color: BRAND.PRIMARY,
-              fontWeight: 600
-            }
+              fontWeight: 600,
+            },
           },
-          '& .MuiFormHelperText-root': {
-            fontFamily: '"Poppins", sans-serif'
-          }
-        }
-      }
+        },
+      },
     },
+    
+    // ✅ UNIFICACIÓN: Botones cuadrados, sin mayúsculas forzadas y con hover específico
     MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 0, // Bordes afilados
+          textTransform: 'none', // Evita que MUI fuerce mayúsculas
+          fontFamily: '"Helvetica Neue", sans-serif',
+          fontWeight: 400,
+          fontSize: '0.9rem',
+          letterSpacing: '1.5px',
+          padding: '14px 24px',
+          transition: 'all 0.25s ease',
+          '&:hover': {
+            boxShadow: '6px 6px 0px rgba(0,0,0,0.12)', // Efecto hover del login
+          },
+        },
+      },
       variants: [
         {
-          props: { variant: 'outlined', color: 'error' },
+          props: { variant: 'contained', color: 'primary' },
           style: {
-            backgroundColor: '#fff',
-            borderColor: BRAND.WARNING,
-            color: BRAND.WARNING,
-            '&:hover': {
-              backgroundColor: '#fff',
-              borderColor: '#b71c1c',
-              color: '#b71c1c'
-            }
-          }
+            backgroundColor: BRAND.PRIMARY,
+            color: '#fff',
+            '&:hover': { backgroundColor: '#222' },
+          },
         },
         {
           props: { variant: 'outlined', color: 'primary' },
@@ -133,66 +128,80 @@ const theme = createTheme({
             '&:hover': {
               backgroundColor: '#fff',
               borderColor: BRAND.ACCENT,
-              color: BRAND.ACCENT
-            }
-          }
+              color: BRAND.ACCENT,
+            },
+          },
         },
         {
-          props: { variant: 'outlined', color: 'secondary' },
+          props: { variant: 'outlined', color: 'error' },
           style: {
             backgroundColor: '#fff',
-            borderColor: BRAND.ACCENT,
-            color: BRAND.ACCENT,
+            borderColor: BRAND.WARNING,
+            color: BRAND.WARNING,
             '&:hover': {
               backgroundColor: '#fff',
-              borderColor: BRAND.PRIMARY,
-              color: BRAND.PRIMARY
-            }
-          }
-        }
-      ]
+              borderColor: '#b71c1c',
+              color: '#b71c1c',
+            },
+          },
+        },
+      ],
     },
+
+    // ✅ UNIFICACIÓN: Tabs minimalistas
     MuiTabs: {
       styleOverrides: {
-        root: {
-          minHeight: 48
-        },
+        root: { minHeight: 48 },
         indicator: {
-          height: 3,
-          borderRadius: '4px 4px 0 0',
-          backgroundColor: BRAND.ACCENT
-        }
-      }
+          height: 2,
+          borderRadius: 0, // Indicador afilado
+          backgroundColor: BRAND.ACCENT,
+        },
+      },
     },
     MuiTab: {
       styleOverrides: {
         root: {
-          fontWeight: 700,
-          fontSize: '1rem',
+          fontWeight: 400,
+          fontSize: '0.9rem',
           textTransform: 'none',
-          color: '#555',
+          letterSpacing: '1px',
+          color: '#888',
           minHeight: 48,
           '&.Mui-selected': {
-            color: BRAND.ACCENT
+            color: BRAND.PRIMARY,
+            fontWeight: 600,
           },
           '&:hover': {
-            backgroundColor: 'rgba(85, 85, 85, 0.05)'
-          }
-        }
-      }
+            backgroundColor: 'rgba(0, 0, 0, 0.03)',
+          },
+        },
+      },
     },
+
+    // ✅ UNIFICACIÓN: Cards/Papeles con bordes afilados y sombra limpia
     MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: 5,
+          borderRadius: 0, // Bordes afilados
           border: '1px solid rgba(0, 0, 0, 0.06)',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-          background: 'white'
-        }
-      }
-    }
+          boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+          backgroundColor: '#ffffff',
+        },
+      },
+    },
+    
+    // ✅ UNIFICACIÓN: Alertas con bordes afilados para mantener consistencia
+    MuiAlert: {
+      styleOverrides: {
+        root: {
+          borderRadius: 0,
+          border: '1px solid',
+        },
+      },
+    },
   },
-  brand: BRAND
+  brand: BRAND,
 })
 
 export default theme

@@ -9,7 +9,10 @@ import referralService from '@shared/services/referralService'
 import { useProjects } from '@shared/hooks/useProjects'
 import { useResidents } from '@shared/hooks/useResidents'
 
-import SharedPhoneInput from '@shared/constants/SharedPhoneInput' // Ajusta la ruta si es necesario
+// ✅ Importar el autocompletado de Google Places
+import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
+import SharedPhoneInput from '@shared/constants/SharedPhoneInput'
+import CountrySelector from '../CountrySelector'
 
 export default function SubmitReferralModal({ open, onClose, onSuccess, mode = 'customer' }) {
   const { t } = useTranslation('referrals')
@@ -24,6 +27,8 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
     referredName: '',
     referredPhone: '',
     referredEmail: '',
+    country: '', // ✅ Mantenemos 'country' en el estado interno del formulario
+    
     notes: '',
     rewardType: 'cash',
     rewardPerReferral: 0,
@@ -50,6 +55,7 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
         referredName: '', 
         referredPhone: '', 
         referredEmail: '', 
+        country: '', // ✅ Resetear campo
         notes: '',
         rewardType: 'cash', 
         rewardPerReferral: 0, 
@@ -63,10 +69,15 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  // ✅ Manejador específico para el autocompletado de Google
+  const handleCountryChange = (newValue) => {
+    const countryName = newValue ? newValue.label : ''
+    handleChange('country', countryName)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    // Validaciones usando las claves del JSON
     if (!projectId) return setError(t('errors.projectRequired'))
     if (mode === 'crm' && !referrerId) return setError(t('errors.referrerRequired'))
     if (!formData.referredName || !formData.referredPhone) return setError(t('errors.contactRequired'))
@@ -85,6 +96,7 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
           referredName: formData.referredName,
           referredPhone: formattedPhone,
           referredEmail: formData.referredEmail || undefined,
+          referredCountry: formData.country || undefined, // ✅ CORREGIDO: Nombre exacto que espera el backend
           notes: formData.notes || undefined
         })
       } else {
@@ -94,6 +106,7 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
           referredName: formData.referredName,
           referredPhone: formattedPhone,
           referredEmail: formData.referredEmail || undefined,
+          referredCountry: formData.country || undefined, // ✅ CORREGIDO: Nombre exacto que espera el backend
           notes: formData.notes || undefined,
           rewardType: formData.rewardType
         }
@@ -189,6 +202,14 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
               type="email" 
               value={formData.referredEmail} 
               onChange={(e) => handleChange('referredEmail', e.target.value)} 
+            />
+
+            {/* ✅ Campo de País */}
+<CountrySelector
+              label={t('fields.country')}
+              value={formData.country}
+              onChange={(value) => handleChange('country', value)}
+              required={true}
             />
 
             {mode === 'crm' && (

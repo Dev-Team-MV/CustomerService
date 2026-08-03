@@ -1,5 +1,5 @@
 // apps/mv-crm/src/components/reports/ReportSection.jsx
-import { Box, Typography, Paper, Divider } from '@mui/material'
+import { Box, Typography, Paper, Divider, useMediaQuery, useTheme } from '@mui/material'
 
 const ReportSection = ({
   icon: Icon,
@@ -9,23 +9,27 @@ const ReportSection = ({
   description,
   children
 }) => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
   return (
     <Paper
       elevation={0}
       sx={{
-        p: 3,
+        p: { xs: 2, sm: 3 },
         border: '1px solid #ececec',
-        borderRadius: 1,
-        bgcolor: '#fff'
+        borderRadius: 0, // ✅ Cero bordes redondeados
+        bgcolor: '#fff',
+        width: '100%'
       }}
     >
       {/* Header */}
-      <Box display="flex" alignItems="center" gap={2} mb={3}>
+      <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'flex-start', sm: 'center' }} gap={2} mb={3}>
         <Box
           sx={{
             width: 48,
             height: 48,
-            borderRadius: 1,
+            borderRadius: 0, // ✅ Cero bordes redondeados
             bgcolor: iconBgColor,
             display: 'flex',
             alignItems: 'center',
@@ -39,7 +43,7 @@ const ReportSection = ({
           <Typography
             sx={{
               fontFamily: '"Helvetica Neue", sans-serif',
-              fontSize: '1.2rem',
+              fontSize: { xs: '1rem', sm: '1.2rem' },
               fontWeight: 600,
               color: '#000'
             }}
@@ -51,7 +55,8 @@ const ReportSection = ({
               fontFamily: '"Courier New", monospace',
               fontSize: '0.7rem',
               color: '#888',
-              letterSpacing: '0.5px'
+              letterSpacing: '0.5px',
+              mt: { xs: 0.5, sm: 0 }
             }}
           >
             {description}

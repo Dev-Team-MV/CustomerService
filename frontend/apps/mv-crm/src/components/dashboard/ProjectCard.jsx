@@ -1,3 +1,4 @@
+// apps/mv-crm/src/components/dashboard/ProjectCard.jsx
 import React, { useState, useEffect, useRef } from 'react'
 import { Box, Typography, Avatar } from '@mui/material'
 import { People, CheckCircleOutline } from '@mui/icons-material'
@@ -22,7 +23,6 @@ const Counter = ({ to = 0, prefix = '', suffix = '', duration = 1.6 }) => {
   return <>{prefix}{val.toLocaleString()}{suffix}</>
 }
 
-// ─── ProjectCard ─────────────────────────────────────────────────────────────
 export default function ProjectCard({ project, index = 0, onClick, selected = false, clientCount = 0 }) {
   const { t } = useTranslation('dashboard')
 
@@ -43,36 +43,34 @@ export default function ProjectCard({ project, index = 0, onClick, selected = fa
         alignItems: 'center',
         justifyContent: 'space-between',
         transition: 'all 0.2s ease',
+        borderRadius: 0, // ✅ Asegurado
         '&:hover': { borderColor: '#000' }
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0, flex: 1 }}>
           <Avatar sx={{
-            width: 30, height: 30,
-            bgcolor: selected ? '#fff' : '#000',
-            borderRadius: 0,
-            fontSize: '0.65rem', fontWeight: 700,
-            color: selected ? '#000' : '#fff',
-            fontFamily: '"Courier New", monospace'
+            width: 30, height: 30, bgcolor: selected ? '#fff' : '#000', borderRadius: 0,
+            fontSize: '0.65rem', fontWeight: 700, color: selected ? '#000' : '#fff',
+            fontFamily: '"Courier New", monospace', flexShrink: 0
           }}>
             {project.name?.substring(0, 2).toUpperCase()}
           </Avatar>
-          <Box>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography sx={{
               fontFamily: '"Helvetica Neue", sans-serif', fontSize: '0.85rem',
-              fontWeight: 500, color: selected ? '#fff' : '#000', letterSpacing: '-0.01em'
+              fontWeight: 500, color: selected ? '#fff' : '#000', letterSpacing: '-0.01em',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' // ✅ Previene desbordamiento
             }}>
               {project.name}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <People sx={{ fontSize: 10, color: selected ? 'rgba(255,255,255,0.5)' : '#000000ff' }} />
-              <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: selected ? 'rgba(255,255,255,0.5)' : '#000000ff' }}>
-                {/* ← clientCount real en vez de mock */}
+              <People sx={{ fontSize: 10, color: selected ? 'rgba(255,255,255,0.5)' : '#000', flexShrink: 0 }} />
+              <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: selected ? 'rgba(255,255,255,0.5)' : '#000' }}>
                 <Counter to={clientCount} duration={1.2} /> {t('metrics.clients')}
               </Typography>
             </Box>
           </Box>
         </Box>
-        {selected && <CheckCircleOutline sx={{ fontSize: 16, color: '#fff' }} />}
+        {selected && <CheckCircleOutline sx={{ fontSize: 16, color: '#fff', flexShrink: 0, ml: 1 }} />}
       </Box>
     </motion.div>
   )

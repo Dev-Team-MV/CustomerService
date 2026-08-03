@@ -13,7 +13,8 @@
     "project": "Project",
     "allProjects": "All projects",
     "clients": "Clients",
-    "allClients": "All clients"
+    "allClients": "All clients",
+    "tags": "Tags"
   },
 
   "status": {
@@ -50,6 +51,7 @@
   "upload": {
     "title": "Upload New Document",
     "dragDrop": "Drag files here or click to select",
+    "supportedFormats": "Supported formats: PDF, JPG, PNG up to 10MB",
     "filesSelected": "file(s) selected",
     "linkToPerson": "Link to person",
     "none": "None",

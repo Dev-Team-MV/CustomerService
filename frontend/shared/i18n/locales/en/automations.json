@@ -17,13 +17,11 @@
   "conditions": "Conditions",
   "lastRun": "Last run",
   "testMatched": "✅ Test successful: Match found",
-  "testNotMatched": "️ Test executed: No match",
-  
+  "testNotMatched": "ℹ️ Test executed: No match",
   "empty": {
     "title": "No automations",
     "description": "Create your first rule to automate actions in the CRM"
   },
-  
   "form": {
     "name": "Name",
     "trigger": "Trigger (event)",
@@ -33,17 +31,58 @@
     "update": "Update",
     "saving": "Saving..."
   },
-  
   "triggers": {
     "lead_stage_changed": "Lead stage changed",
     "payment_overdue": "Payment overdue",
     "appointment_created": "Appointment created",
     "inactivity_7days": "7 days inactivity"
   },
-  
   "actions": {
     "send_sms": "Send SMS",
     "create_activity": "Create activity",
     "notify_agent": "Notify agent"
+  },
+  "conditions": {
+    "specificStage": "Specific stage",
+    "anyStage": "Any stage",
+    "daysOfInactivity": "Days of inactivity",
+    "specificProject": "Specific project",
+    "anyProject": "Any project"
+  },
+  "stages": {
+    "new": "New",
+    "contacted": "Contacted",
+    "visitScheduled": "Visit scheduled",
+    "proposal": "Proposal",
+    "sold": "Sold",
+    "lost": "Lost"
+  },
+  "actionConfig": {
+    "linkedToProject": "Linked to project",
+    "template": "Template",
+    "loading": "Loading...",
+    "noTemplates": "No templates available",
+    "project": "project",
+    "global": "global",
+    "customMessage": "Custom message",
+    "globalVariables": "Global variables",
+    "detectedVariables": "Detected variables",
+    "activityTitle": "Activity title",
+    "description": "Description",
+    "assignTo": "Assign to",
+    "notifyTo": "Notify",
+    "message": "Message"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "triggerRequired": "Trigger is required",
+    "actionRequired": "Action is required",
+    "templateOrMessageRequired": "You must select a template or write a message",
+    "activityTitleRequired": "Activity title is required",
+    "assignAgentRequired": "You must select an agent to notify",
+    "confirmDelete": "Are you sure you want to delete this automation?",
+    "saveError": "Error saving",
+    "deleteError": "Error deleting",
+    "testError": "Error testing"
   }
 }

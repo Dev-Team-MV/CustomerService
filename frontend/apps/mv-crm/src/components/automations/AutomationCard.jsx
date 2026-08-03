@@ -208,7 +208,7 @@ const AutomationCard = ({
                   size="small"
                   onClick={() => onEdit(automation)}
                   sx={{
-                    color: '#888',
+                    color: '#000000ff',
                     '&:hover': { color: '#000', bgcolor: '#f5f5f5' }
                   }}
                 >
@@ -237,7 +237,7 @@ const AutomationCard = ({
                 sx={{
                   fontFamily: '"Courier New", monospace',
                   fontSize: '0.65rem',
-                  color: '#888',
+                  color: '#000000ff',
                   letterSpacing: '1px',
                   textTransform: 'uppercase',
                   mb: 0.5
@@ -289,7 +289,7 @@ const AutomationCard = ({
               sx={{
                 fontFamily: '"Courier New", monospace',
                 fontSize: '0.65rem',
-                color: '#888',
+                color: '#000000ff',
                 letterSpacing: '1px',
                 textTransform: 'uppercase',
                 mb: 0.5
@@ -374,12 +374,12 @@ const AutomationCard = ({
                 )}
                 {assignedAgent && (
                   <Box display="flex" alignItems="center" gap={0.5} mt={0.5} pl={2.5}>
-                    <Person sx={{ fontSize: 14, color: '#888' }} />
+                    <Person sx={{ fontSize: 14, color: '#000000ff' }} />
                     <Typography
                       sx={{
                         fontFamily: '"Courier New", monospace',
                         fontSize: '0.65rem',
-                        color: '#888'
+                        color: '#000000ff'
                       }}
                     >
                       Asignado a: {assignedAgent.firstName} {assignedAgent.lastName}
@@ -484,7 +484,7 @@ const AutomationCard = ({
                   sx={{
                     fontFamily: '"Courier New", monospace',
                     fontSize: '0.65rem',
-                    color: '#888'
+                    color: '#000000ff'
                   }}
                 >
                   Creado por: {automation.createdBy.firstName} {automation.createdBy.lastName}
@@ -497,7 +497,7 @@ const AutomationCard = ({
                 sx={{
                   fontFamily: '"Courier New", monospace',
                   fontSize: '0.65rem',
-                  color: '#888',
+                  color: '#000000ff',
                   letterSpacing: '0.5px'
                 }}
               >
