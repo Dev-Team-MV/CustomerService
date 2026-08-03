@@ -3,13 +3,16 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography,
-  TextField, FormControl, InputLabel, Select, MenuItem, IconButton, Alert, CircularProgress, Switch, FormControlLabel, Divider
+  TextField, FormControl, InputLabel, Select, MenuItem, IconButton, Alert, CircularProgress, Switch, FormControlLabel, Divider,
+  useMediaQuery, useTheme
 } from '@mui/material'
 import { Close, Add, Delete, CardGiftcard } from '@mui/icons-material'
 import commissionService from '../../services/commissionService'
 
 const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefresh }) => {
   const { t } = useTranslation('commissions')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const isEdit = Boolean(structure?._id)
   
   const [formData, setFormData] = useState({
@@ -126,37 +129,46 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
     }
   }
 
+  // ✅ Estilos unificados con soporte responsive
   const unifiedButtonSx = {
     borderRadius: 0,
     textTransform: 'none',
     fontFamily: '"Courier New", monospace',
     fontSize: '0.75rem',
     letterSpacing: '0.5px',
+    width: { xs: '100%', sm: 'auto' },
     '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' }
+  }
+
+  const inputSx = {
+    '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' },
+    '& .MuiOutlinedInput-root': { borderRadius: 0 },
+    '& .MuiFormHelperText-root': { fontFamily: '"Courier New", monospace', fontSize: '0.65rem' }
   }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ececec' }}>
-        <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.85rem' }}>
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ececec', p: { xs: 2, sm: 3 } }}>
+        <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase', fontSize: { xs: '0.8rem', sm: '0.85rem' } }}>
           {isEdit ? t('structures.edit') : t('structures.create')}
         </Typography>
-        <IconButton onClick={onClose} size="small"><Close /></IconButton>
+        <IconButton onClick={onClose} size="small" sx={{ borderRadius: 0 }}><Close /></IconButton>
       </DialogTitle>
 
-      <DialogContent dividers>
-        {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid' }}>{error}</Alert>}
+      <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
+        {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>{error}</Alert>}
         
         <Box display="flex" flexDirection="column" gap={3}>
-          <Box display="flex" gap={2}>
+          {/* Nombre y Tipo */}
+          <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
             <TextField 
               label={t('structures.name')} 
               value={formData.name} 
               onChange={(e) => handleChange('name', e.target.value)} 
               fullWidth required size="small" 
-              sx={{ '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }}
+              sx={inputSx}
             />
-            <FormControl size="small" sx={{ minWidth: 150 }}>
+            <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 150 } }}>
               <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('structures.type')}</InputLabel>
               <Select 
                 value={formData.type} 
@@ -164,9 +176,9 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
                 label={t('structures.type')}
                 sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}
               >
-                <MenuItem value="flat">{t('structures.types.flat')}</MenuItem>
-                <MenuItem value="percentage">{t('structures.types.percentage')}</MenuItem>
-                <MenuItem value="tiered">{t('structures.types.tiered')}</MenuItem>
+                <MenuItem value="flat" sx={{ fontFamily: '"Courier New", monospace' }}>{t('structures.types.flat')}</MenuItem>
+                <MenuItem value="percentage" sx={{ fontFamily: '"Courier New", monospace' }}>{t('structures.types.percentage')}</MenuItem>
+                <MenuItem value="tiered" sx={{ fontFamily: '"Courier New", monospace' }}>{t('structures.types.tiered')}</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -179,7 +191,7 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
               onChange={(e) => handleChange('flatAmount', Number(e.target.value))} 
               fullWidth size="small" 
               InputProps={{ startAdornment: <Typography variant="body2" color="text.secondary" sx={{ mr: 1, fontFamily: '"Courier New", monospace' }}>$</Typography> }}
-              sx={{ '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }}
+              sx={inputSx}
             />
           )}
 
@@ -191,24 +203,27 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
               onChange={(e) => handleChange('percentageRate', Number(e.target.value))} 
               fullWidth size="small" 
               InputProps={{ endAdornment: <Typography variant="caption" sx={{ fontFamily: '"Courier New", monospace' }}>%</Typography> }}
-              sx={{ '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }}
+              sx={inputSx}
             />
           )}
 
+          {/* Sección de Tiers (Responsive) */}
           {formData.type === 'tiered' && (
-            <Box sx={{ p: 2, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+            <Box sx={{ p: { xs: 1.5, sm: 2 }, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
+              <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} mb={1.5} gap={1}>
                 <Typography variant="subtitle2" fontWeight={600} sx={{ fontFamily: '"Courier New", monospace' }}>{t('structures.tiers')}</Typography>
                 <Button size="small" startIcon={<Add />} onClick={addTier} sx={{ ...unifiedButtonSx, border: '1px solid #000', color: '#000', '&:hover': { bgcolor: '#f5f5f5', borderColor: '#555', color: '#555', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
                   {t('structures.addTier')}
                 </Button>
               </Box>
               {formData.tiers.map((tier, index) => (
-                <Box key={index} display="flex" gap={1} alignItems="center" mb={1}>
-                  <TextField label={t('structures.minAmount')} type="number" size="small" value={tier.minAmount} onChange={(e) => handleTierChange(index, 'minAmount', e.target.value)} sx={{ flex: 1, '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }} />
-                  <TextField label={t('structures.maxAmount')} type="number" size="small" value={tier.maxAmount} onChange={(e) => handleTierChange(index, 'maxAmount', e.target.value)} sx={{ flex: 1, '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }} />
-                  <TextField label={t('structures.rate')} type="number" size="small" value={tier.rate} onChange={(e) => handleTierChange(index, 'rate', e.target.value)} sx={{ width: 100, '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }} InputProps={{ endAdornment: <Typography variant="caption" sx={{ fontFamily: '"Courier New", monospace' }}>%</Typography> }} />
-                  <IconButton size="small" color="error" onClick={() => removeTier(index)}><Delete fontSize="small" /></IconButton>
+                <Box key={index} display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={1} alignItems={{ xs: 'stretch', sm: 'center' }} mb={1}>
+                  <TextField label={t('structures.minAmount')} type="number" size="small" value={tier.minAmount} onChange={(e) => handleTierChange(index, 'minAmount', e.target.value)} sx={{ flex: 1, ...inputSx }} />
+                  <TextField label={t('structures.maxAmount')} type="number" size="small" value={tier.maxAmount} onChange={(e) => handleTierChange(index, 'maxAmount', e.target.value)} sx={{ flex: 1, ...inputSx }} />
+                  <TextField label={t('structures.rate')} type="number" size="small" value={tier.rate} onChange={(e) => handleTierChange(index, 'rate', e.target.value)} sx={{ width: { xs: '100%', sm: 100 }, ...inputSx }} InputProps={{ endAdornment: <Typography variant="caption" sx={{ fontFamily: '"Courier New", monospace' }}>%</Typography> }} />
+                  <IconButton size="small" color="error" onClick={() => removeTier(index)} sx={{ borderRadius: 0, alignSelf: { xs: 'flex-end', sm: 'center' } }}>
+                    <Delete fontSize="small" />
+                  </IconButton>
                 </Box>
               ))}
             </Box>
@@ -216,8 +231,9 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
 
           <Divider />
 
+          {/* Sección de Bonus Rules (Responsive) */}
           <Box>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+            <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} mb={1.5} gap={1}>
               <Box display="flex" alignItems="center" gap={1}>
                 <CardGiftcard sx={{ fontSize: 20, color: '#ff9800' }} />
                 <Typography variant="subtitle2" fontWeight={600} sx={{ fontFamily: '"Courier New", monospace' }}>{t('structures.bonusRules')}</Typography>
@@ -235,16 +251,16 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
 
             {formData.bonusRules.map((rule, index) => (
               <Box key={index} sx={{ p: 1.5, bgcolor: '#fff8e1', borderRadius: 0, border: '1px solid #ffe0b2', mb: 1 }}>
-                <Box display="flex" gap={1} mb={1}>
+                <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={1} mb={1}>
                   <TextField 
                     label={t('structures.bonusName')} 
                     size="small" 
                     value={rule.name} 
                     onChange={(e) => handleBonusRuleChange(index, 'name', e.target.value)} 
-                    sx={{ flex: 2, '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }} 
+                    sx={{ flex: { xs: '1 1 100%', sm: 2 }, ...inputSx }} 
                     placeholder="Ej: Bono por venta rápida"
                   />
-                  <FormControl size="small" sx={{ flex: 1 }}>
+                  <FormControl size="small" sx={{ flex: { xs: '1 1 100%', sm: 1 } }}>
                     <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('structures.bonusType')}</InputLabel>
                     <Select 
                       value={rule.bonusType} 
@@ -252,8 +268,8 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
                       label={t('structures.bonusType')}
                       sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}
                     >
-                      <MenuItem value="flat">Monto Fijo ($)</MenuItem>
-                      <MenuItem value="percentage">Porcentaje (%)</MenuItem>
+                      <MenuItem value="flat" sx={{ fontFamily: '"Courier New", monospace' }}>Monto Fijo ($)</MenuItem>
+                      <MenuItem value="percentage" sx={{ fontFamily: '"Courier New", monospace' }}>Porcentaje (%)</MenuItem>
                     </Select>
                   </FormControl>
                   <TextField 
@@ -262,18 +278,20 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
                     size="small" 
                     value={rule.value} 
                     onChange={(e) => handleBonusRuleChange(index, 'value', e.target.value)} 
-                    sx={{ width: 120, '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }} 
+                    sx={{ width: { xs: '100%', sm: 120 }, ...inputSx }} 
                   />
-                  <IconButton size="small" color="error" onClick={() => removeBonusRule(index)}><Delete fontSize="small" /></IconButton>
+                  <IconButton size="small" color="error" onClick={() => removeBonusRule(index)} sx={{ borderRadius: 0, alignSelf: { xs: 'flex-end', sm: 'center' } }}>
+                    <Delete fontSize="small" />
+                  </IconButton>
                 </Box>
-                <Box display="flex" gap={1}>
+                <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={1}>
                   <TextField 
                     label={t('structures.minSaleAmount')} 
                     type="number" 
                     size="small" 
                     value={rule.minSaleAmount} 
                     onChange={(e) => handleBonusRuleChange(index, 'minSaleAmount', e.target.value)} 
-                    sx={{ flex: 1, '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }} 
+                    sx={{ flex: 1, ...inputSx }} 
                     helperText="Venta mínima para aplicar"
                   />
                   <TextField 
@@ -282,7 +300,7 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
                     size="small" 
                     value={rule.maxSaleAmount} 
                     onChange={(e) => handleBonusRuleChange(index, 'maxSaleAmount', e.target.value)} 
-                    sx={{ flex: 1, '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }} 
+                    sx={{ flex: 1, ...inputSx }} 
                     helperText="0 = sin límite"
                   />
                 </Box>
@@ -297,7 +315,8 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, gap: 1, borderTop: '1px solid #ececec' }}>
+      {/* ✅ Acciones Responsive */}
+      <DialogActions sx={{ p: 2, gap: 1, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' } }}>
         <Button onClick={onClose} disabled={loading} sx={{ ...unifiedButtonSx, color: '#888' }}>
           {t('actions.cancel')}
         </Button>

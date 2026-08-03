@@ -1,6 +1,6 @@
 // apps/mv-crm/src/pages/Reports.jsx
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, Grid } from '@mui/material'
+import { Box, Typography, Grid, useMediaQuery, useTheme } from '@mui/material'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
 import ClientsReportSection from '../components/reports/ClientsReportSection'
 import PaymentsReportSection from '../components/reports/PaymentsReportSection'
@@ -8,17 +8,19 @@ import LeadsReportSection from '../components/reports/LeadsReportSection'
 
 export default function Reports() {
   const { t } = useTranslation('reports')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   return (
     <PageLayout>
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ p: { xs: 2, sm: 3 } }}>
         {/* Header */}
         <Box mb={4}>
           <Typography
             sx={{
               fontFamily: '"Helvetica Neue", Arial, sans-serif',
               fontWeight: 200,
-              fontSize: 'clamp(1.8rem, 3vw, 2.6rem)',
+              fontSize: { xs: '1.5rem', sm: 'clamp(1.8rem, 3vw, 2.6rem)' },
               color: '#000',
               letterSpacing: '-0.04em',
               lineHeight: 1
@@ -31,7 +33,7 @@ export default function Reports() {
               sx={{
                 width: 6,
                 height: 6,
-                borderRadius: '50%',
+                borderRadius: '50%', // ✅ Los indicadores de estado pueden ser redondos
                 bgcolor: '#000',
                 animation: 'pulse 2s infinite',
                 '@keyframes pulse': {

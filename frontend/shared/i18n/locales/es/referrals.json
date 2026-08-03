@@ -78,7 +78,8 @@
     "rewardType": "Tipo de Recompensa",
     "rewardPerReferral": "Monto de Recompensa",
     "discountPercent": "Porcentaje de Descuento (%)",
-    "notes": "Notas Adicionales"
+    "notes": "Notas Adicionales",
+    "country": "País"
   },
   "leaderboard": {
     "title": "Tabla de Líderes",

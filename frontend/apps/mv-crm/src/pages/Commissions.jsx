@@ -113,8 +113,23 @@ export default function Commissions() {
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.5 }}>
         <Paper sx={{ mb: 3, border: '1px solid #ececec', borderRadius: 0, overflow: 'hidden' }}>
-          <Tabs value={tabValue} onChange={handleTabChange} sx={{ borderBottom: '1px solid #ececec', px: 2, fontFamily: '"Courier New", monospace' }}>
-            <Tab icon={<Payment sx={{ mr: 1,  }} />} iconPosition="start" label={t('tabs.commissions')} />
+            <Tabs 
+    value={tabValue} 
+    onChange={handleTabChange} 
+    sx={{ 
+      borderBottom: '1px solid #ececec', 
+      px: 2,
+      '& .MuiTab-root': {
+        fontFamily: '"Courier New", monospace',
+        fontSize: '0.8rem',
+        letterSpacing: '0.5px',
+        textTransform: 'uppercase',
+        fontWeight: 600,
+        minHeight: 48
+      }
+    }}
+  >
+            <Tab icon={<Payment sx={{ mr: 1  }} />} iconPosition="start" label={t('tabs.commissions')} />
             <Tab icon={<Settings sx={{ mr: 1 }} />} iconPosition="start" label={t('tabs.structures')} />
           </Tabs>
 

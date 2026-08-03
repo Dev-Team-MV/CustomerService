@@ -83,8 +83,8 @@ export default function OnboardingPanel({ onNotify }) {
             <FormControl fullWidth size="small">
               <InputLabel>{t('filters.project')}</InputLabel>
               <Select value={filters.projectId} onChange={(e) => handleFilterChange('projectId', e.target.value)} label={t('filters.project')} sx={inputSx}>
-                <MenuItem value="">{t('filters.all')}</MenuItem>
-                {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
+                <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.all')}</MenuItem>
+                {projects.map(p => <MenuItem key={p._id} sx={{ fontFamily: '"Courier New", monospace' }} value={p._id}>{p.name}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>
@@ -92,8 +92,8 @@ export default function OnboardingPanel({ onNotify }) {
             <FormControl fullWidth size="small" disabled={!filters.projectId}>
               <InputLabel>{t('filters.client')}</InputLabel>
               <Select value={filters.clientId} onChange={(e) => handleFilterChange('clientId', e.target.value)} label={t('filters.client')} sx={inputSx}>
-                <MenuItem value="">{t('filters.all')}</MenuItem>
-                {filteredResidents.map(client => <MenuItem key={client._id} value={client._id}>{client.firstName} {client.lastName}</MenuItem>)}
+                <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.all')}</MenuItem>
+                {filteredResidents.map(client => <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} key={client._id} value={client._id}>{client.firstName} {client.lastName}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>
@@ -101,9 +101,9 @@ export default function OnboardingPanel({ onNotify }) {
             <FormControl fullWidth size="small">
               <InputLabel>{t('filters.status')}</InputLabel>
               <Select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} label={t('filters.status')} sx={inputSx}>
-                <MenuItem value="">{t('filters.all')}</MenuItem>
+                <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.all')}</MenuItem>
                 {['not_started', 'in_progress', 'completed'].map(s => (
-                  <MenuItem key={s} value={s}>{t(`onboarding.statuses.${s}`)}</MenuItem>
+                  <MenuItem key={s} sx={{ fontFamily: '"Courier New", monospace' }} value={s}>{t(`onboarding.statuses.${s}`)}</MenuItem>
                 ))}
               </Select>
             </FormControl>

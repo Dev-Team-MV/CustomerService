@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Box, Typography, TextField, Button, IconButton, Select, MenuItem,
-  FormControl, InputLabel, Autocomplete, Chip, Divider, Avatar, Paper, InputAdornment
+  FormControl, InputLabel, Autocomplete, Chip, Divider, Avatar, Paper, InputAdornment,
+  useMediaQuery, useTheme
 } from '@mui/material'
 import { Close, Save, Business, Person, PersonAdd, Phone, Email as EmailIcon } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -28,6 +29,10 @@ const ActivityModal = ({
   onSave, onAddSubtask, onUpdateSubtask, onDeleteSubtask
 }) => {
   const { t, i18n } = useTranslation('activities')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'))
+  
   const [formData, setFormData] = useState(initialFormData)
   const [saving, setSaving] = useState(false)
   const [tagInput, setTagInput] = useState('')
@@ -117,50 +122,64 @@ const ActivityModal = ({
     }
   }
 
-  // ✅ Funciones de Subtareas (Restauradas)
   const handleAddSubtask = async (activityId, data) => {
-    if (activity?._id) {
-      await onAddSubtask?.(activity._id, data)
-    }
+    if (activity?._id) await onAddSubtask?.(activity._id, data)
   }
 
   const handleUpdateSubtask = async (subtaskId, data) => {
-    if (activity?._id) {
-      await onUpdateSubtask?.(activity._id, subtaskId, data)
-    }
+    if (activity?._id) await onUpdateSubtask?.(activity._id, subtaskId, data)
   }
 
   const handleDeleteSubtask = async (subtaskId) => {
-    if (activity?._id) {
-      await onDeleteSubtask?.(activity._id, subtaskId)
-    }
+    if (activity?._id) await onDeleteSubtask?.(activity._id, subtaskId)
   }
 
-  // ✅ Estilos unificados
-  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
+  // ✅ Estilos unificados con soporte responsive
+  const unifiedButtonSx = { 
+    borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', 
+    fontSize: '0.75rem', letterSpacing: '0.5px', width: { xs: '100%', sm: 'auto' },
+    '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
+  }
+  
   const inputSx = { 
-    fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, 
+    fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, width: '100%',
     '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
-    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' }
+    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' },
+    '& .MuiOutlinedInput-root': { borderRadius: 0, width: '100%' }
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
-      <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="lg"  // ✅ Cambiado de "md" a "lg" para más espacio
+      fullWidth 
+      PaperProps={{ 
+        sx: { 
+          borderRadius: 0, 
+          border: '1px solid #ececec',
+          minHeight: '80vh'  // ✅ Altura mínima para mejor visualización
+        } 
+      }}
+    >
+      <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: { xs: 2, sm: 3 } }}>
+        <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Courier New", monospace', fontSize: { xs: '0.8rem', sm: '0.85rem' }, letterSpacing: '1px', textTransform: 'uppercase' }}>
           {isEditing ? t('activities.editActivity') : t('activities.createActivity')}
         </Typography>
         <IconButton onClick={onClose} size="small" sx={{ borderRadius: 0 }}><Close /></IconButton>
       </DialogTitle>
 
-      <DialogContent dividers>
+      <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
-          <Box display="flex" gap={3}>
-            <Box flex={1} display="flex" flexDirection="column" gap={2.5} py={1}>
+          {/* ✅ Layout Responsive: Columna en móvil, fila en desktop */}
+          <Box display="flex" flexDirection={{ xs: 'column', lg: 'row' }} gap={{ xs: 3, lg: 4 }}>
+            
+            {/* Columna Izquierda: Formulario - Más ancha */}
+            <Box flex={{ xs: 'none', lg: '1 1 60%' }} width={{ xs: '100%', lg: 'auto' }} display="flex" flexDirection="column" gap={2.5} py={1}>
               <TextField label={t('activities.form.title')} value={formData.title} onChange={(e) => handleChange('title', e.target.value)} fullWidth required placeholder={t('activities.form.titlePlaceholder')} sx={inputSx} />
               <TextField label={t('activities.form.description')} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} fullWidth multiline rows={3} placeholder={t('activities.form.descriptionPlaceholder')} sx={inputSx} />
 
-              <Box display="flex" gap={2}>
+              <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
                 <FormControl fullWidth>
                   <InputLabel>{t('activities.form.column')}</InputLabel>
                   <Select value={formData.columnId} label={t('activities.form.column')} onChange={(e) => handleChange('columnId', e.target.value)} sx={inputSx}>
@@ -187,7 +206,7 @@ const ActivityModal = ({
                 </FormControl>
               </Box>
 
-              <Box display="flex" gap={2}>
+              <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
                 <DatePicker
                   label={t('activities.form.dueDate')}
                   value={formData.dueDate}
@@ -223,8 +242,8 @@ const ActivityModal = ({
                   {t('activities.form.contact')}
                 </Typography>
                 
-                <Box display="flex" gap={1} mb={2}>
-                  <Chip label={t('activities.contact.noContact')} onClick={() => handleContactTypeChange('none')} variant={formData.contactType === 'none' ? 'filled' : 'outlined'} sx={{ bgcolor: formData.contactType === 'none' ? '#e0e0e0' : 'transparent', borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }} />
+                <Box display="flex" gap={1} mb={2} flexWrap="wrap">
+                  <Chip label={t('activities.contact.noContact')} onClick={() => handleContactTypeChange('none')} variant={formData.contactType === 'none' ? 'filled' : 'outlined'} sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem', bgcolor: formData.contactType === 'none' ? '#000' : 'transparent', color: formData.contactType === 'none' ? '#fff' : '#000', border: '1px solid #000' }} />
                   <Chip label={t('activities.contact.registeredUser')} icon={<Person sx={{ fontSize: 16 }} />} onClick={() => handleContactTypeChange('registered')} color={formData.contactType === 'registered' ? 'primary' : 'default'} variant={formData.contactType === 'registered' ? 'filled' : 'outlined'} sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }} />
                   <Chip label={t('activities.contact.externalContact')} icon={<PersonAdd sx={{ fontSize: 16 }} />} onClick={() => handleContactTypeChange('external')} color={formData.contactType === 'external' ? 'warning' : 'default'} variant={formData.contactType === 'external' ? 'filled' : 'outlined'} sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }} />
                 </Box>
@@ -241,7 +260,7 @@ const ActivityModal = ({
                     renderInput={(params) => <TextField {...params} label={t('activities.form.contact')} placeholder={t('activities.contact.searchByName')} size="small" sx={inputSx} />}
                     renderOption={(props, option) => (
                       <Box component="li" {...props} key={option._id} display="flex" alignItems="center" gap={1.5} sx={{ borderRadius: 0 }}>
-                        <Avatar sx={{ width: 32, height: 32, bgcolor: '#2196f3', borderRadius: 0 }}>{option.name?.charAt(0)}</Avatar>
+                        <Avatar sx={{ width: 32, height: 32, bgcolor: '#000', borderRadius: 0 }}>{option.name?.charAt(0)}</Avatar>
                         <Box flex={1}>
                           <Typography variant="body2" fontWeight={500} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{option.name}</Typography>
                           <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>{option.email} {option.phone && `• ${option.phone}`}</Typography>
@@ -259,7 +278,7 @@ const ActivityModal = ({
                     </Box>
                     <Box display="flex" flexDirection="column" gap={2}>
                       <TextField label={t('activities.contact.name')} value={formData.externalContact.name} onChange={(e) => handleExternalContactChange('name', e.target.value)} fullWidth size="small" required InputProps={{ startAdornment: <InputAdornment position="start"><Person /></InputAdornment> }} sx={inputSx} />
-                      <Box display="flex" gap={2}>
+                      <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
                         <TextField label={t('activities.contact.phone')} value={formData.externalContact.phone} onChange={(e) => handleExternalContactChange('phone', e.target.value)} fullWidth size="small" InputProps={{ startAdornment: <InputAdornment position="start"><Phone /></InputAdornment> }} sx={inputSx} />
                         <TextField label={t('activities.contact.email')} value={formData.externalContact.email} onChange={(e) => handleExternalContactChange('email', e.target.value)} fullWidth size="small" type="email" InputProps={{ startAdornment: <InputAdornment position="start"><EmailIcon /></InputAdornment> }} sx={inputSx} />
                       </Box>
@@ -282,17 +301,17 @@ const ActivityModal = ({
                   renderInput={(params) => <TextField {...params} placeholder={t('activities.form.searchProjects')} size="small" sx={inputSx} />}
                   renderOption={(props, option, { selected }) => (
                     <Box component="li" {...props} key={option._id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, bgcolor: selected ? '#e3f2fd' : 'transparent', borderRadius: 0 }}>
-                      <Avatar sx={{ width: 28, height: 28, bgcolor: '#1976d2', borderRadius: 0 }}><Business sx={{ fontSize: 16 }} /></Avatar>
+                      <Avatar sx={{ width: 28, height: 28, bgcolor: '#000', borderRadius: 0 }}><Business sx={{ fontSize: 16, color: '#fff' }} /></Avatar>
                       <Box flex={1}>
                         <Typography variant="body2" fontWeight={500} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{option.name}</Typography>
                         {option.slug && <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>{option.slug}</Typography>}
                       </Box>
-                      {option.status && <Chip label={option.status} size="small" sx={{ height: 20, fontSize: '0.65rem', borderRadius: 0, fontFamily: '"Courier New", monospace' }} />}
+                      {option.status && <Chip label={option.status} size="small" sx={{ height: 20, fontSize: '0.65rem', borderRadius: 0, fontFamily: '"Courier New", monospace', bgcolor: '#f5f5f5' }} />}
                     </Box>
                   )}
                   renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
-                      <Chip {...getTagProps({ index })} key={option._id} label={option.name} size="small" avatar={<Avatar sx={{ bgcolor: '#1976d2', borderRadius: 0 }}><Business sx={{ fontSize: 12, color: 'white' }} /></Avatar>} sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }} />
+                      <Chip {...getTagProps({ index })} key={option._id} label={option.name} size="small" avatar={<Avatar sx={{ bgcolor: '#000', borderRadius: 0 }}><Business sx={{ fontSize: 12, color: 'white' }} /></Avatar>} sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }} />
                     ))
                   }
                 />
@@ -302,10 +321,10 @@ const ActivityModal = ({
                 <Typography variant="subtitle2" mb={1} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>{t('activities.form.tags')}</Typography>
                 <Box display="flex" gap={1} flexWrap="wrap" mb={1}>
                   {formData.tags.map(tag => (
-                    <Chip key={tag} label={tag} size="small" onDelete={() => handleRemoveTag(tag)} sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }} />
+                    <Chip key={tag} label={tag} size="small" onDelete={() => handleRemoveTag(tag)} sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem', bgcolor: '#f5f5f5' }} />
                   ))}
                 </Box>
-                <Box display="flex" gap={1}>
+                <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={1}>
                   <TextField size="small" placeholder={t('activities.form.enterTag')} value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleAddTag()} sx={{ flex: 1, ...inputSx }} />
                   <Button variant="outlined" size="small" onClick={handleAddTag} sx={{ ...unifiedButtonSx, border: '1px solid #000', color: '#000', '&:hover': { bgcolor: '#f5f5f5', borderColor: '#555', color: '#555', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
                     {t('activities.form.addTag')}
@@ -314,17 +333,29 @@ const ActivityModal = ({
               </Box>
             </Box>
 
+            {/* ✅ Columna Derecha: Subtareas - Más estrecha y solo en desktop grande */}
             {isEditing && (
               <>
-                <Divider orientation="vertical" flexItem />
-                <Box sx={{ width: 350, py: 1 }}>
-                  <SubActivityList
-                    subActivities={activity?.subtasks || []}
-                    parentActivityId={activity?._id}
-                    onAdd={handleAddSubtask}
-                    onUpdate={handleUpdateSubtask}
-                    onDelete={handleDeleteSubtask}
-                  />
+                <Divider orientation={isMobile ? 'horizontal' : 'vertical'} flexItem sx={{ display: { xs: 'block', lg: 'block' } }} />
+                <Box sx={{ 
+                  flex: { xs: 'none', lg: '0 0 280px' },  // ✅ Reducido de 350px a 280px
+                  width: { xs: '100%', lg: 'auto' },
+                  pt: { xs: 3, lg: 0 },
+                  borderTop: { xs: '1px solid #ececec', lg: 'none' },
+                  minWidth: 0
+                }}>
+                  <Box sx={{ 
+                    position: { xs: 'static', lg: 'sticky' },
+                    top: { xs: 'auto', lg: 24 }
+                  }}>
+                    <SubActivityList
+                      subActivities={activity?.subtasks || []}
+                      parentActivityId={activity?._id}
+                      onAdd={handleAddSubtask}
+                      onUpdate={handleUpdateSubtask}
+                      onDelete={handleDeleteSubtask}
+                    />
+                  </Box>
                 </Box>
               </>
             )}
@@ -332,7 +363,7 @@ const ActivityModal = ({
         </LocalizationProvider>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec' }}>
+      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
         <Button onClick={onClose} disabled={saving} sx={{ ...unifiedButtonSx, color: '#888' }}>
           {t('activities.form.cancel')}
         </Button>

@@ -1,4 +1,5 @@
-import { Box, Typography } from '@mui/material'
+// apps/mv-crm/src/components/stats/Analytics/GlobalKPIs.jsx
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { AccountBalanceWallet, HourglassEmpty, Percent, People } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
@@ -11,11 +12,12 @@ const KPICard = ({ icon, label, value, sub, color = '#000', index = 0 }) => (
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4, delay: index * 0.08 }}
-    style={{ flex: 1 }}
+    style={{ flex: '1 1 calc(50% - 8px)', minWidth: '200px' }}
   >
     <Box sx={{
       p: '20px 24px',
       border: '1px solid #f0f0f0',
+      borderRadius: 0,
       position: 'relative',
       overflow: 'hidden',
       height: '100%',
@@ -33,7 +35,7 @@ const KPICard = ({ icon, label, value, sub, color = '#000', index = 0 }) => (
         <Box sx={{ color, display: 'flex' }}>{icon}</Box>
         <Typography sx={{
           fontFamily: '"Courier New", monospace',
-          fontSize: '0.58rem', color: '#000000ff',
+          fontSize: '0.58rem', color: '#000',
           letterSpacing: '2px', textTransform: 'uppercase'
         }}>
           {label}
@@ -42,7 +44,7 @@ const KPICard = ({ icon, label, value, sub, color = '#000', index = 0 }) => (
 
       <Typography sx={{
         fontFamily: '"Helvetica Neue", sans-serif',
-        fontWeight: 200, fontSize: '2rem',
+        fontWeight: 200, fontSize: { xs: '1.5rem', sm: '2rem' },
         color, letterSpacing: '-0.04em', lineHeight: 1, mb: 0.8
       }}>
         {value}
@@ -51,7 +53,7 @@ const KPICard = ({ icon, label, value, sub, color = '#000', index = 0 }) => (
       {sub && (
         <Typography sx={{
           fontFamily: '"Courier New", monospace',
-          fontSize: '0.58rem', color: '#000000ff'
+          fontSize: '0.58rem', color: '#000'
         }}>
           {sub}
         </Typography>
@@ -61,9 +63,11 @@ const KPICard = ({ icon, label, value, sub, color = '#000', index = 0 }) => (
 )
 
 export default function GlobalKPIs({ filteredBalance, filteredClients }) {
-    const { t } = useTranslation('analytics')
+  const { t } = useTranslation('analytics')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-    const collected   = filteredBalance.reduce((s, p) => s + (p.totalCollected ?? 0), 0)
+  const collected   = filteredBalance.reduce((s, p) => s + (p.totalCollected ?? 0), 0)
   const pending     = filteredBalance.reduce((s, p) => s + (p.totalPending   ?? 0), 0)
   const total       = collected + pending
   const rate        = total > 0 ? ((collected / total) * 100).toFixed(1) : '0.0'
@@ -73,12 +77,17 @@ export default function GlobalKPIs({ filteredBalance, filteredClients }) {
     <Box>
       <Typography sx={{
         fontFamily: '"Courier New", monospace', fontSize: '0.6rem',
-        color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase', mb: 2
+        color: '#000', letterSpacing: '2px', textTransform: 'uppercase', mb: 2
       }}>
         {t('mv.kpis.title')}
       </Typography>
 
-      <Box sx={{ display: 'flex', gap: 2, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+      <Box sx={{ 
+        display: 'flex', 
+        gap: 2, 
+        flexWrap: 'wrap',
+        flexDirection: { xs: 'column', sm: 'row' }
+      }}>
         <KPICard
           index={0}
           icon={<AccountBalanceWallet sx={{ fontSize: 15 }} />}

@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography,
-  TextField, FormControl, InputLabel, Select, MenuItem, CircularProgress, Alert, Chip
+  TextField, FormControl, InputLabel, Select, MenuItem, CircularProgress, Alert, Chip, IconButton
 } from '@mui/material'
 import { CloudUpload, Close } from '@mui/icons-material'
 import documentService from '../../services/documentService'
@@ -13,6 +13,9 @@ import { useResidents } from '@shared/hooks/useResidents'
 import { useLeads } from '../../constants/hooks/useLeads'
 import { getProjectById, getProjectBySlug } from '@shared/config/projectsConfig'
 
+// ✅ Componente compartido
+import ProjectSelector from '@shared/components/ProjectSelector'
+
 const CATEGORIES = ['contract', 'id_document', 'deed', 'appraisal', 'receipt', 'insurance', 'permit', 'blueprint', 'other']
 
 export default function DocumentUploadModal({ 
@@ -20,7 +23,7 @@ export default function DocumentUploadModal({
   defaultPropertyId, defaultApartmentId, defaultFiles, onUploadSuccess 
 }) {
   const { t } = useTranslation('documents')
-  const { projects } = useProjects()
+  const { projects } = useProjects() // Se mantiene para la lógica de recursos
   const { users: residents } = useResidents(null)
   const { leads } = useLeads()
   
@@ -105,8 +108,9 @@ export default function DocumentUploadModal({
       setFiles(safeFiles)
       setCurrentTag('')
     } else {
-      setFiles([])
-      setCurrentTag('')
+      setFiles([]); setLinkType('none'); setCurrentTag('')
+      setFormData({ projectId: defaultProjectId || '', clientId: '', leadId: '', propertyId: '', apartmentId: '', category: 'contract', title: '', description: '', tags: [], expiresAt: '' })
+      setError('')
     }
   }, [open, defaultProjectId, defaultClientId, defaultLeadId, defaultPropertyId, defaultApartmentId])
 
@@ -125,9 +129,7 @@ export default function DocumentUploadModal({
     }
   }
 
-  const handleRemoveTag = (tagToRemove) => {
-    setFormData(prev => ({ ...prev, tags: prev.tags.filter(tag => tag !== tagToRemove) }))
-  }
+  const handleRemoveTag = (tagToRemove) => setFormData(prev => ({ ...prev, tags: prev.tags.filter(tag => tag !== tagToRemove) }))
 
   const handleDrop = (e) => {
     e.preventDefault()
@@ -212,15 +214,20 @@ export default function DocumentUploadModal({
   }, [residents, formData.projectId])
 
   const resourceLabel = selectedProjectConfig?.resourceType === 'apartment' ? t('upload.apartment', 'Apartamento') : t('upload.property', 'Propiedad')
+  
+  // ✅ Estilos unificados
   const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
+  const inputSx = { '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }
+  const menuItemSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '&:hover': { bgcolor: '#f5f5f5' } }
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ececec' }}>
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ececec', p: 3 }}>
         <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.85rem' }}>{t('upload.title')}</Typography>
-        <Close sx={{ cursor: 'pointer' }} onClick={handleClose} />
+        <IconButton onClick={handleClose} size="small" sx={{ borderRadius: 0 }}><Close /></IconButton>
       </DialogTitle>
-      <DialogContent dividers>
+      
+      <DialogContent dividers sx={{ p: 3 }}>
         {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid' }}>{error}</Alert>}
         
         <Box onDrop={handleDrop} onDragOver={(e) => e.preventDefault()} sx={{ border: '2px dashed #ccc', borderRadius: 0, p: 4, textAlign: 'center', mb: 3, bgcolor: files.length > 0 ? '#f5f5f5' : 'transparent', cursor: 'pointer', '&:hover': { borderColor: '#000', bgcolor: '#fafafa' } }} onClick={() => document.getElementById('file-input').click()}>
@@ -244,25 +251,28 @@ export default function DocumentUploadModal({
         )}
 
         <Box display="flex" flexDirection="column" gap={2.5}>
-          <TextField size="small" label={t('form.title')} value={formData.title} onChange={(e) => handleChange('title', e.target.value)} placeholder={t('form.titlePlaceholder')} fullWidth required sx={{ '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }} />
+          <TextField size="small" label={t('form.title')} value={formData.title} onChange={(e) => handleChange('title', e.target.value)} placeholder={t('form.titlePlaceholder')} fullWidth required sx={inputSx} />
 
           <FormControl size="small" fullWidth required>
             <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('form.category')}</InputLabel>
-            <Select value={formData.category} onChange={(e) => handleChange('category', e.target.value)} label={t('form.category')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}>
-              {CATEGORIES.map(cat => <MenuItem key={cat} value={cat}>{t(`categories.${cat}`)}</MenuItem>)}
+            <Select value={formData.category} onChange={(e) => handleChange('category', e.target.value)} label={t('form.category')} sx={{ ...inputSx, width: '100%' }}>
+              {CATEGORIES.map(cat => <MenuItem key={cat} value={cat} sx={menuItemSx}>{t(`categories.${cat}`)}</MenuItem>)}
             </Select>
           </FormControl>
 
-          <FormControl size="small" fullWidth required>
-            <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('form.project')}</InputLabel>
-            <Select value={formData.projectId} onChange={(e) => handleChange('projectId', e.target.value)} label={t('form.project')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}>
-              {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
-            </Select>
-          </FormControl>
+          {/* ✅ ProjectSelector Integrado */}
+          <ProjectSelector
+            value={formData.projectId}
+            onChange={(value) => handleChange('projectId', value)}
+            label={`${t('form.project')} *`}
+            includeGlobal={false}
+            fullWidth
+            size="small"
+          />
 
           <Box>
             <Typography variant="subtitle2" fontWeight={600} mb={1} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>{t('upload.linkToPerson')}</Typography>
-            <Box display="flex" gap={2} mb={1}>
+            <Box display="flex" gap={2} mb={1} flexWrap="wrap">
               <Button variant={linkType === 'none' ? 'contained' : 'outlined'} size="small" onClick={() => handleLinkTypeChange('none')} sx={{ ...unifiedButtonSx, border: '1px solid #000', color: linkType === 'none' ? '#fff' : '#000', bgcolor: linkType === 'none' ? '#000' : '#fff' }}>{t('upload.none')}</Button>
               <Button variant={linkType === 'lead' ? 'contained' : 'outlined'} size="small" onClick={() => handleLinkTypeChange('lead')} sx={{ ...unifiedButtonSx, border: '1px solid #000', color: linkType === 'lead' ? '#fff' : '#000', bgcolor: linkType === 'lead' ? '#000' : '#fff' }}>{t('upload.lead')}</Button>
               <Button variant={linkType === 'client' ? 'contained' : 'outlined'} size="small" onClick={() => handleLinkTypeChange('client')} sx={{ ...unifiedButtonSx, border: '1px solid #000', color: linkType === 'client' ? '#fff' : '#000', bgcolor: linkType === 'client' ? '#000' : '#fff' }}>{t('upload.client')}</Button>
@@ -271,9 +281,9 @@ export default function DocumentUploadModal({
             {linkType === 'lead' && (
               <FormControl size="small" fullWidth>
                 <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('upload.selectLead')}</InputLabel>
-                <Select value={formData.leadId} onChange={(e) => handleChange('leadId', e.target.value)} label={t('upload.selectLead')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}>
-                  <MenuItem value="">{t('upload.noLead')}</MenuItem>
-                  {filteredLeads.map(lead => <MenuItem key={lead._id} value={lead._id}>{lead.name} {lead.phone && `(${lead.phone})`}</MenuItem>)}
+                <Select value={formData.leadId} onChange={(e) => handleChange('leadId', e.target.value)} label={t('upload.selectLead')} sx={{ ...inputSx, width: '100%' }}>
+                  <MenuItem value="" sx={menuItemSx}>{t('upload.noLead')}</MenuItem>
+                  {filteredLeads.map(lead => <MenuItem key={lead._id} value={lead._id} sx={menuItemSx}>{lead.name} {lead.phone && `(${lead.phone})`}</MenuItem>)}
                 </Select>
               </FormControl>
             )}
@@ -281,9 +291,9 @@ export default function DocumentUploadModal({
             {linkType === 'client' && (
               <FormControl size="small" fullWidth>
                 <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('upload.selectClient')}</InputLabel>
-                <Select value={formData.clientId} onChange={(e) => handleChange('clientId', e.target.value)} label={t('upload.selectClient')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}>
-                  <MenuItem value="">{t('upload.noClient')}</MenuItem>
-                  {filteredResidents.map(client => <MenuItem key={client._id} value={client._id}>{client.firstName} {client.lastName}</MenuItem>)}
+                <Select value={formData.clientId} onChange={(e) => handleChange('clientId', e.target.value)} label={t('upload.selectClient')} sx={{ ...inputSx, width: '100%' }}>
+                  <MenuItem value="" sx={menuItemSx}>{t('upload.noClient')}</MenuItem>
+                  {filteredResidents.map(client => <MenuItem key={client._id} value={client._id} sx={menuItemSx}>{client.firstName} {client.lastName}</MenuItem>)}
                 </Select>
               </FormControl>
             )}
@@ -297,17 +307,17 @@ export default function DocumentUploadModal({
               ) : (
                 <FormControl size="small" fullWidth>
                   <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{resourceLabel} {formData.clientId ? t('upload.clientResource') : ''}</InputLabel>
-                  <Select value={selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses' ? formData.propertyId : formData.apartmentId} onChange={(e) => handleResourceChange(e.target.value)} label={resourceLabel} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}>
-                    <MenuItem value=""><em>{t('upload.unspecified')}</em></MenuItem>
+                  <Select value={selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses' ? formData.propertyId : formData.apartmentId} onChange={(e) => handleResourceChange(e.target.value)} label={resourceLabel} sx={{ ...inputSx, width: '100%' }}>
+                    <MenuItem value="" sx={menuItemSx}><em>{t('upload.unspecified')}</em></MenuItem>
                     {availableResources.length > 0 ? availableResources.map(res => {
                       if (selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses') {
                         const lotNumber = res.lot?.number || res.lot || 'N/A'
                         const modelName = res.model?.model || res.model?.name || ''
-                        return <MenuItem key={res._id} value={res._id}>Lote {lotNumber} {modelName ? `- ${modelName}` : ''}</MenuItem>
+                        return <MenuItem key={res._id} value={res._id} sx={menuItemSx}>Lote {lotNumber} {modelName ? `- ${modelName}` : ''}</MenuItem>
                       } else {
-                        return <MenuItem key={res._id} value={res._id}>Apto {res.apartmentNumber}{res.floorNumber ? ` (Piso ${res.floorNumber})` : ''}</MenuItem>
+                        return <MenuItem key={res._id} value={res._id} sx={menuItemSx}>Apto {res.apartmentNumber}{res.floorNumber ? ` (Piso ${res.floorNumber})` : ''}</MenuItem>
                       }
-                    }) : <MenuItem disabled><em>{t('upload.noResourcesFound')}</em></MenuItem>}
+                    }) : <MenuItem disabled sx={menuItemSx}><em>{t('upload.noResourcesFound')}</em></MenuItem>}
                   </Select>
                   {availableResources.length === 0 && formData.clientId && <Typography variant="caption" color="warning.main" sx={{ mt: 0.5, display: 'block', fontFamily: '"Courier New", monospace' }}>* {t('upload.noResourcesAssigned')}</Typography>}
                 </FormControl>
@@ -316,7 +326,7 @@ export default function DocumentUploadModal({
           )}
 
           <Box>
-            <TextField size="small" label={t('form.tags')} value={currentTag} onChange={(e) => setCurrentTag(e.target.value)} onKeyDown={handleAddTag} placeholder={t('form.tagsPlaceholder', 'Escribe una etiqueta y presiona Enter')} fullWidth sx={{ mb: 1, '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }} />
+            <TextField size="small" label={t('form.tags')} value={currentTag} onChange={(e) => setCurrentTag(e.target.value)} onKeyDown={handleAddTag} placeholder={t('form.tagsPlaceholder', 'Escribe una etiqueta y presiona Enter')} fullWidth sx={{ mb: 1, ...inputSx }} />
             {formData.tags.length > 0 && (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {formData.tags.map((tag, idx) => (
@@ -326,12 +336,13 @@ export default function DocumentUploadModal({
             )}
           </Box>
 
-          <TextField size="small" type="date" label={t('form.expiresAt')} value={formData.expiresAt} onChange={(e) => handleChange('expiresAt', e.target.value)} InputLabelProps={{ shrink: true }} fullWidth helperText={t('form.expiresAtHelper')} sx={{ '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }} />
+          <TextField size="small" type="date" label={t('form.expiresAt')} value={formData.expiresAt} onChange={(e) => handleChange('expiresAt', e.target.value)} InputLabelProps={{ shrink: true }} fullWidth helperText={t('form.expiresAtHelper')} sx={inputSx} />
         </Box>
       </DialogContent>
-      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec' }}>
-        <Button onClick={handleClose} disabled={loading} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('actions.cancel')}</Button>
-        <Button variant="contained" onClick={handleUpload} disabled={files.length === 0 || loading || !formData.projectId} startIcon={loading ? <CircularProgress size={16} /> : <CloudUpload />} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+      
+      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+        <Button onClick={handleClose} disabled={loading} sx={{ ...unifiedButtonSx, color: '#888', width: { xs: '100%', sm: 'auto' } }}>{t('actions.cancel')}</Button>
+        <Button variant="contained" onClick={handleUpload} disabled={files.length === 0 || loading || !formData.projectId} startIcon={loading ? <CircularProgress size={16} /> : <CloudUpload />} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', width: { xs: '100%', sm: 'auto' }, '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
           {loading ? t('upload.uploading') : t('upload.title')}
         </Button>
       </DialogActions>

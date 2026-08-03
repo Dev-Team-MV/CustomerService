@@ -11,7 +11,9 @@ import {
   CircularProgress,
   Alert,
   IconButton,
-  Button
+  Button,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
 import { ArrowBack, Event, History } from '@mui/icons-material'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
@@ -39,11 +41,16 @@ function TabPanel({ children, value, index }) {
 export default function ClientDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { t } = useTranslation('residents') // ✅ Cambiado a 'residents'
+  const { t } = useTranslation('residents')
   const { user } = useAuth()
   const { createAppointment } = useAppointments()
   const { projects } = useProjects()
   const { agents } = useCrmAgents()
+  
+  // ✅ Hook para detectar tamaño de pantalla
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'))
 
   const [tabValue, setTabValue] = useState(0)
   const [client, setClient] = useState(null)
@@ -99,7 +106,7 @@ export default function ClientDetail() {
   if (error || !client) {
     return (
       <PageLayout>
-        <Alert severity="error" sx={{ m: 3 }}>
+        <Alert severity="error" sx={{ m: 3, borderRadius: 0, border: '1px solid' }}>
           {error || t('clients.notFound', 'Cliente no encontrado')}
         </Alert>
       </PageLayout>
@@ -110,27 +117,36 @@ export default function ClientDetail() {
 
   return (
     <PageLayout>
-      <Box sx={{ p: 3 }}>
-        {/* Header */}
-        <Box mb={3} display="flex" alignItems="center" gap={2}>
-          <IconButton onClick={() => navigate('/clients')} sx={{ bgcolor: '#f5f5f5' }}>
+      {/* ✅ Padding responsive */}
+      <Box sx={{ p: { xs: 2, sm: 3 } }}>
+        
+        {/* Header responsive */}
+        <Box 
+          mb={3} 
+          display="flex" 
+          alignItems={isMobile ? 'flex-start' : 'center'} 
+          gap={2} 
+          flexWrap="wrap"
+        >
+          <IconButton onClick={() => navigate('/clients')} sx={{ bgcolor: '#f5f5f5', borderRadius: 0 }}>
             <ArrowBack />
           </IconButton>
           
-          <Box flex={1}>
+          <Box flex={1} minWidth={0}>
             <Typography
               sx={{
                 fontFamily: '"Helvetica Neue", Arial, sans-serif',
                 fontWeight: 200,
-                fontSize: 'clamp(1.8rem, 3vw, 2.6rem)',
+                fontSize: { xs: '1.4rem', sm: '1.8rem', md: '2.2rem' },
                 color: '#000',
                 letterSpacing: '-0.04em',
-                lineHeight: 1
+                lineHeight: 1.1,
+                wordBreak: 'break-word'
               }}
             >
               {client.firstName} {client.lastName}
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1, flexWrap: 'wrap' }}>
               <Box
                 sx={{
                   width: 6,
@@ -139,8 +155,9 @@ export default function ClientDetail() {
                   bgcolor: client.isActive ? '#4caf50' : '#f44336',
                   animation: 'pulse 2s infinite',
                   '@keyframes pulse': {
-                    '0%, 100%': { opacity: 1 },
-                    '50%': { opacity: 0.3 }
+                    '0%': { opacity: 1 },
+                    '50%': { opacity: 0.3 },
+                    '100%': { opacity: 1 }
                   }
                 }}
               />
@@ -158,7 +175,7 @@ export default function ClientDetail() {
             </Box>
           </Box>
 
-          {/* Botón agendar cita */}
+          {/* ✅ Botón responsive: full width en móvil */}
           <Button
             variant="outlined"
             startIcon={<Event />}
@@ -168,11 +185,14 @@ export default function ClientDetail() {
               fontSize: '0.75rem',
               textTransform: 'none',
               letterSpacing: '0.5px',
+              borderRadius: 0,
               borderColor: '#4caf50',
               color: '#4caf50',
+              width: { xs: '100%', sm: 'auto' },
               '&:hover': {
                 borderColor: '#388e3c',
-                bgcolor: '#e8f5e9'
+                bgcolor: '#e8f5e9',
+                boxShadow: '4px 4px 0px rgba(0,0,0,0.12)'
               }
             }}
           >
@@ -180,12 +200,12 @@ export default function ClientDetail() {
           </Button>
         </Box>
 
-        {/* Tabs */}
+        {/* Tabs container */}
         <Paper
           elevation={0}
           sx={{
             border: '1px solid #ececec',
-            borderRadius: 1,
+            borderRadius: 0, // ✅ Estética unificada
             bgcolor: '#fff'
           }}
         >
@@ -194,14 +214,17 @@ export default function ClientDetail() {
             onChange={(e, newValue) => setTabValue(newValue)}
             variant="scrollable"
             scrollButtons="auto"
+            allowScrollButtonsMobile
             sx={{
               borderBottom: '1px solid #ececec',
               '& .MuiTab-root': {
                 fontFamily: '"Courier New", monospace',
-                fontSize: '0.75rem',
+                fontSize: { xs: '0.65rem', sm: '0.75rem' },
                 letterSpacing: '1px',
                 textTransform: 'uppercase',
-                color: '#888',
+                color: '#000000ff',
+                minHeight: { xs: 40, sm: 48 },
+                px: { xs: 1, sm: 2 },
                 '&.Mui-selected': {
                   color: '#000',
                   fontWeight: 700
@@ -210,19 +233,22 @@ export default function ClientDetail() {
               '& .MuiTabs-indicator': {
                 bgcolor: '#000',
                 height: 3
+              },
+              '& .MuiTabScrollButton-root': {
+                color: '#000'
               }
             }}
           >
-            <Tab label={t('tabs.overview', 'Overview')} />
+            <Tab label={isMobile ? t('tabs.overview', 'Info') : t('tabs.overview', 'Overview')} />
             <Tab label={t('tabs.payments', 'Pagos')} />
             <Tab label={t('tabs.activities', 'Actividades')} />
             <Tab label={t('tabs.notes', 'Notas')} />
             <Tab 
-              label={t('tabs.history', 'Historial')} 
-              icon={<History sx={{ fontSize: 16 }} />} 
+              label={isMobile ? t('tabs.history', 'Hist.') : t('tabs.history', 'Historial')} 
+              icon={<History sx={{ fontSize: { xs: 14, sm: 16 } }} />} 
               iconPosition="start" 
             />
-            <Tab label={t('tabs.documents', 'Documentos')} />
+            <Tab label={isMobile ? t('tabs.documents', 'Docs') : t('tabs.documents', 'Documentos')} />
           </Tabs>
 
           {/* TAB 1: OVERVIEW */}
@@ -232,19 +258,19 @@ export default function ClientDetail() {
 
           {/* TAB 2: PAGOS */}
           <TabPanel value={tabValue} index={1}>
-            <Box sx={{ p: 3 }}>
+            <Box sx={{ p: { xs: 1, sm: 3 } }}>
               <ClientPaymentsTable clientId={id} />
             </Box>
           </TabPanel>
 
           {/* TAB 3: ACTIVIDADES */}
           <TabPanel value={tabValue} index={2}>
-            <Box sx={{ p: 3 }}>
+            <Box sx={{ p: { xs: 1, sm: 3 } }}>
               <Typography
                 sx={{
                   fontFamily: '"Courier New", monospace',
                   fontSize: '0.7rem',
-                  color: '#888',
+                  color: '#000000ff',
                   letterSpacing: '1.5px',
                   textTransform: 'uppercase',
                   mb: 2
@@ -267,7 +293,7 @@ export default function ClientDetail() {
 
           {/* TAB 5: HISTORIAL DE CAMBIOS */}
           <TabPanel value={tabValue} index={4}>
-            <Box sx={{ p: 3 }}>
+            <Box sx={{ p: { xs: 1, sm: 3 } }}>
               <AuditLogTab 
                 entity="Client" 
                 entityId={client._id}
@@ -276,13 +302,9 @@ export default function ClientDetail() {
             </Box>
           </TabPanel>
 
+          {/* TAB 6: DOCUMENTOS */}
           <TabPanel value={tabValue} index={5}>
-            <Box sx={{ p: 3 }}>
-              {/* <AuditLogTab 
-                entity="Client" 
-                entityId={client._id}
-                entityName={clientName}
-              /> */}
+            <Box sx={{ p: { xs: 1, sm: 3 } }}>
               <ClientDocuments clientId={client._id} clientName={clientName} />
             </Box>
           </TabPanel>

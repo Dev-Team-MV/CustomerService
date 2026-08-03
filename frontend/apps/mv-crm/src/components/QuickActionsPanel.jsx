@@ -1,21 +1,25 @@
-import { Box, Button, Typography, Stack } from '@mui/material'
+// apps/mv-crm/src/components/QuickActionsPanel.jsx
+import { Box, Button, Typography, Stack, useMediaQuery, useTheme } from '@mui/material'
 import { PersonAdd, AddCircleOutline } from '@mui/icons-material'
 
 export default function QuickActionsPanel({ onCreateProject, onCreateUser }) {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
   return (
     <Box sx={{
-      p: 3,
-      mb: 4,
-      borderRadius: 0, // ✅ Bordes afilados
-      background: '#fff', // ✅ Fondo sólido, sin gradiente verde
-      boxShadow: '0 4px 12px rgba(0,0,0,0.04)', // ✅ Sombra sutil
+      p: { xs: 2, sm: 3 },
+      mb: { xs: 2, sm: 4 },
+      borderRadius: 0,
+      background: '#fff',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
       display: 'flex',
       flexDirection: 'column',
       gap: 2,
       alignItems: 'flex-start',
-      border: '1px solid #e8e8e8' // ✅ Borde sutil
+      border: '1px solid #e8e8e8',
+      width: '100%'
     }}>
-      {/* ✅ Etiqueta técnica estilo Login */}
       <Typography sx={{
         fontFamily: '"Courier New", monospace',
         fontSize: '0.6rem',
@@ -28,8 +32,8 @@ export default function QuickActionsPanel({ onCreateProject, onCreateUser }) {
         [01] Quick Actions
       </Typography>
 
-      <Stack direction="row" spacing={2}>
-        {/* ✅ Botón primario: negro, cuadrado, hover con sombra sólida */}
+      {/* ✅ Responsive: Columna en móvil, fila en desktop */}
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ width: '100%' }}>
         <Button
           variant="contained"
           startIcon={<AddCircleOutline />}
@@ -45,17 +49,17 @@ export default function QuickActionsPanel({ onCreateProject, onCreateUser }) {
             color: '#fff',
             px: 3,
             py: 1.5,
+            width: { xs: '100%', sm: 'auto' }, // ✅ Full width en móvil
             transition: 'all 0.25s ease',
             '&:hover': {
               bgcolor: '#222',
-              boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' // ✅ Sombra sólida del Login
+              boxShadow: '6px 6px 0px rgba(0,0,0,0.12)'
             }
           }}
         >
           Crear Proyecto
         </Button>
 
-        {/* ✅ Botón outlined: borde negro, hover invierte colores */}
         <Button
           variant="outlined"
           startIcon={<PersonAdd />}
@@ -72,12 +76,13 @@ export default function QuickActionsPanel({ onCreateProject, onCreateUser }) {
             border: '1px solid #000',
             px: 3,
             py: 1.5,
+            width: { xs: '100%', sm: 'auto' }, // ✅ Full width en móvil
             transition: 'all 0.25s ease',
             '&:hover': {
               bgcolor: '#000',
               color: '#fff',
               borderColor: '#000',
-              boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' // ✅ Sombra sólida del Login
+              boxShadow: '6px 6px 0px rgba(0,0,0,0.12)'
             }
           }}
         >

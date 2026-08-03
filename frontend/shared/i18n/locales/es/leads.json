@@ -60,7 +60,10 @@
     "cancel": "Cancelar",
     "create": "Crear",
     "update": "Actualizar",
-    "country": "País"
+    "country": "País",
+    "selectCountry": "Selecciona un país",
+    "selectProject": "Selecciona un proyecto",
+    "noProjects": "Sin proyectos disponibles"
   },
 
   "score": {

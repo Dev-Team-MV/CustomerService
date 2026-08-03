@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Box, Typography, TextField, Button, IconButton,
-  Select, MenuItem, FormControl, InputLabel, Autocomplete, InputAdornment, Avatar
+  Select, MenuItem, FormControl, InputLabel, Autocomplete, InputAdornment, Avatar,
+  useMediaQuery, useTheme
 } from '@mui/material'
 import { Close, Save, Person, Email, Business, Notes } from '@mui/icons-material'
 import { useProjects } from '@shared/hooks/useProjects'
@@ -13,6 +14,10 @@ import { LEAD_STAGES, STAGE_COLORS } from '../../services/leadService'
 
 import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
 import SharedPhoneInput from '@shared/constants/SharedPhoneInput'
+
+// ✅ IMPORTAMOS LOS COMPONENTES REUTILIZABLES
+import ProjectSelector from '@shared/components/ProjectSelector'
+import CountrySelector from '@shared/components/CountrySelector'
 
 const LEAD_SOURCES = [
   { id: 'web', label: 'Web' },
@@ -28,6 +33,9 @@ const initialFormData = {
 
 const LeadModal = ({ open, onClose, lead = null, onSave }) => {
   const { t } = useTranslation('leads')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  
   const [formData, setFormData] = useState(initialFormData)
   const [saving, setSaving] = useState(false)
 
@@ -77,85 +85,113 @@ const LeadModal = ({ open, onClose, lead = null, onSave }) => {
     }
   }
 
-  // ✅ Estilos unificados
-  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
-  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }
+  // ✅ Estilos unificados (ya no necesitamos definir estilos de Google Places o Projects aquí)
+  const unifiedButtonSx = { 
+    borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', 
+    fontSize: '0.75rem', letterSpacing: '0.5px', width: { xs: '100%', sm: 'auto' },
+    '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
+  }
+  
+  const inputSx = { 
+    fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, width: '100%',
+    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
+    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' },
+    '& .MuiOutlinedInput-root': { borderRadius: 0 }
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
-      <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+      <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: { xs: 2, sm: 3 } }}>
+        <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Courier New", monospace', fontSize: { xs: '0.8rem', sm: '0.85rem' }, letterSpacing: '1px', textTransform: 'uppercase' }}>
           {isEditing ? t('editLead') : t('newLead')}
         </Typography>
         <IconButton onClick={onClose} size="small" sx={{ borderRadius: 0 }}><Close /></IconButton>
       </DialogTitle>
 
-      <DialogContent dividers>
+      <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
         <Box display="flex" flexDirection="column" gap={2.5} py={1}>
-          <TextField label={t('form.name')} value={formData.name} onChange={(e) => handleChange('name', e.target.value)} fullWidth required placeholder={t('form.namePlaceholder')} sx={inputSx} InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ color: '#aaa' }} /></InputAdornment> }} />
+          <TextField 
+            label={t('form.name')} 
+            value={formData.name} 
+            onChange={(e) => handleChange('name', e.target.value)} 
+            fullWidth 
+            required 
+            placeholder={t('form.namePlaceholder')} 
+            sx={inputSx} 
+            InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ color: '#aaa' }} /></InputAdornment> }} 
+          />
 
-<Box display="flex" gap={2}>
-  <TextField 
-    label={t('form.email')} 
-    value={formData.email} 
-    onChange={(e) => handleChange('email', e.target.value)} 
-    fullWidth 
-    type="email" 
-    sx={{ ...inputSx, flex: 1 }}  // ✅ Agregado flex: 1
-    InputProps={{ 
-      startAdornment: <InputAdornment position="start"><Email sx={{ color: '#aaa' }} /></InputAdornment> 
-    }} 
-  />
-  
-  <Box sx={{ flex: 1 }}> 
-
-    <SharedPhoneInput
-      value={formData.phone}
-      onChange={(value) => handleChange('phone', value)}
-      country="us"
-      inputStyle={{ height: '40px', fontSize: '0.875rem', borderRadius: 0, border: '1px solid #ececec', fontFamily: '"Helvetica Neue", sans-serif' }}
-      containerStyle={{ width: '100%' }}
-      buttonStyle={{ borderRadius: 0, border: '1px solid #ececec', borderRight: 'none' }}
-    />
-  </Box>
-</Box>
-
-          <Box>
-            <Typography variant="caption" sx={{ mb: 0.5, display: 'block', color: 'text.secondary', fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('form.country', 'País')}</Typography>
-            <GooglePlacesAutocomplete
-              apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-              selectProps={{
-                value: formData.country ? { label: formData.country, value: formData.country } : null,
-                onChange: handleCountryChange,
-                placeholder: t('form.selectCountry', 'Selecciona un país...'),
-                styles: {
-                  control: (provided) => ({
-                    ...provided, borderRadius: 0, border: '1px solid #ececec', fontFamily: '"Courier New", monospace', minHeight: 40, boxShadow: 'none', '&:hover': { borderColor: '#000' }, padding: '0 8px', '& .MuiInputBase-input': { padding: '8px 6px', fontFamily: '"Helvetica Neue", sans-serif', fontSize: '0.875rem' }
-                  }),
-                  menu: (provided) => ({ ...provided, fontFamily: '"Courier New", monospace', borderRadius: 0, marginTop: 4, zIndex: 9999 }),
-                  option: (provided, state) => ({ ...provided, fontFamily: '"Courier New", monospace', backgroundColor: state.isSelected ? '#000' : state.isFocused ? '#f5f5f5' : 'white', color: state.isSelected ? 'white' : 'black' })
-                }
-              }}
-              autocompletionRequest={{ types: ['country'] }}
+          {/* ✅ Responsive: Columna en móvil, fila en desktop */}
+          <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
+            <TextField 
+              label={t('form.email')} 
+              value={formData.email} 
+              onChange={(e) => handleChange('email', e.target.value)} 
+              fullWidth 
+              type="email" 
+              sx={inputSx}
+              InputProps={{ 
+                startAdornment: <InputAdornment position="start"><Email sx={{ color: '#aaa' }} /></InputAdornment> 
+              }} 
             />
+            
+            <Box sx={{ width: { xs: '100%', sm: '50%' } }}>
+              <SharedPhoneInput
+              label={t('form.phone')}
+                value={formData.phone}
+                onChange={(value) => handleChange('phone', value)}
+                country="us"
+                inputStyle={{ 
+                  height: '40px', 
+                  fontSize: '0.875rem', 
+                  borderRadius: 0, 
+                  border: '1px solid #ececec', 
+                  fontFamily: '"Helvetica Neue", sans-serif',
+                  paddingLeft: '55px'
+                }}
+                containerStyle={{ width: '100%' }}
+                buttonStyle={{ borderRadius: 0, border: '1px solid #ececec', borderRight: 'none', height: '40px' }}
+              />
+            </Box>
           </Box>
 
-          <Box display="flex" gap={2}>
-            <Autocomplete
-              options={projectOptions} loading={loadingProjects} getOptionLabel={(option) => option.name || ''} isOptionEqualToValue={(option, val) => option._id === val?._id}
-              value={projectOptions.find(p => p._id === formData.projectId) || null} onChange={(_, newValue) => handleChange('projectId', newValue?._id || null)} fullWidth
-              renderInput={(params) => <TextField {...params} label={t('form.project')} sx={inputSx} />}
-              renderOption={(props, option) => <Box component="li" {...props} key={option._id} sx={{ fontFamily: '"Courier New", monospace', borderRadius: 0 }}><Business sx={{ fontSize: 16, mr: 1, color: '#aaa' }} />{option.name}</Box>}
+          {/* ✅ REEMPLAZO 1: CountrySelector limpio y sin bugs de transparencia */}
+          <CountrySelector
+            value={formData.country}
+            onChange={(value) => handleChange('country', value)}
+            label={t('form.country', 'País')}
+            placeholder={t('form.selectCountry', 'Selecciona un país...')}
+          />
+
+          <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
+            {/* ✅ REEMPLAZO 2: ProjectSelector limpio, con búsqueda y estética perfecta */}
+            <ProjectSelector
+              value={formData.projectId}
+              onChange={(value) => handleChange('projectId', value)}
+              label={t('form.project')}
+              includeGlobal={true}
+              globalLabel={t('form.noProject', '')}
             />
+            
             <Autocomplete
-              options={adminUserOptions} loading={loadingUsers} getOptionLabel={(option) => option.name || ''} isOptionEqualToValue={(option, val) => option._id === val?._id}
-              value={adminUserOptions.find(u => u._id === formData.assignedTo) || null} onChange={(_, newValue) => handleChange('assignedTo', newValue?._id || null)} fullWidth
+              options={adminUserOptions} 
+              loading={loadingUsers} 
+              getOptionLabel={(option) => option.name || ''} 
+              isOptionEqualToValue={(option, val) => option._id === val?._id}
+              value={adminUserOptions.find(u => u._id === formData.assignedTo) || null} 
+              onChange={(_, newValue) => handleChange('assignedTo', newValue?._id || null)} 
+              fullWidth
               renderInput={(params) => <TextField {...params} label={t('form.assignedTo')} sx={inputSx} />}
-              renderOption={(props, option) => <Box component="li" {...props} key={option._id} display="flex" alignItems="center" gap={1} sx={{ fontFamily: '"Courier New", monospace', borderRadius: 0 }}><Avatar sx={{ width: 24, height: 24, bgcolor: '#000', borderRadius: 0, fontSize: '0.7rem' }}>{option.name?.charAt(0)}</Avatar>{option.name}</Box>}
+              renderOption={(props, option) => (
+                <Box component="li" {...props} key={option._id} display="flex" alignItems="center" gap={1} sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', '&:hover': { bgcolor: '#f5f5f5' } }}>
+                  <Avatar sx={{ width: 24, height: 24, bgcolor: '#000', borderRadius: 0, fontSize: '0.7rem' }}>{option.name?.charAt(0)}</Avatar>
+                  {option.name}
+                </Box>
+              )}
             />
           </Box>
 
-          <Box display="flex" gap={2}>
+          <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
             <FormControl fullWidth>
               <InputLabel>{t('form.stage')}</InputLabel>
               <Select value={formData.stage} label={t('form.stage')} onChange={(e) => handleChange('stage', e.target.value)} required sx={inputSx}>
@@ -174,13 +210,31 @@ const LeadModal = ({ open, onClose, lead = null, onSave }) => {
             </FormControl>
           </Box>
 
-          <TextField label={t('form.notes')} value={formData.notes} onChange={(e) => handleChange('notes', e.target.value)} fullWidth multiline rows={3} placeholder={t('form.notesPlaceholder')} sx={{ ...inputSx, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }} InputProps={{ startAdornment: <InputAdornment position="start"><Notes sx={{ color: '#aaa' }} /></InputAdornment> }} />
+          <TextField 
+            label={t('form.notes')} 
+            value={formData.notes} 
+            onChange={(e) => handleChange('notes', e.target.value)} 
+            fullWidth 
+            multiline 
+            rows={3} 
+            placeholder={t('form.notesPlaceholder')} 
+            sx={{ ...inputSx, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }} 
+            InputProps={{ startAdornment: <InputAdornment position="start"><Notes sx={{ color: '#aaa' }} /></InputAdornment> }} 
+          />
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec' }}>
-        <Button onClick={onClose} disabled={saving} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('form.cancel')}</Button>
-        <Button variant="contained" onClick={handleSave} disabled={!formData.name.trim() || saving} startIcon={<Save />} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+        <Button onClick={onClose} disabled={saving} sx={{ ...unifiedButtonSx, color: '#888' }}>
+          {t('form.cancel')}
+        </Button>
+        <Button 
+          variant="contained" 
+          onClick={handleSave} 
+          disabled={!formData.name.trim() || saving} 
+          startIcon={<Save />} 
+          sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}
+        >
           {saving ? t('saving') : isEditing ? t('form.update') : t('form.create')}
         </Button>
       </DialogActions>

@@ -1,7 +1,10 @@
 // apps/mv-crm/src/components/clients/ClientDocuments.jsx
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Box, Typography, Button, CircularProgress, Alert, Grid, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material'
+import { 
+  Box, Typography, Button, CircularProgress, Alert, Grid, 
+  TextField, FormControl, InputLabel, Select, MenuItem, useMediaQuery, useTheme 
+} from '@mui/material'
 import { Add, Search } from '@mui/icons-material'
 import { useDocuments } from '../../constants/hooks/useDocuments'
 import DocumentCard from '../documents/DocumentCard'
@@ -14,6 +17,8 @@ import { useProjects } from '@shared/hooks/useProjects'
 export default function ClientDocuments({ clientId, clientName }) {
   const { t } = useTranslation('documents')
   const { projects } = useProjects()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   
   const { documents, loading, error, refetch, updateFilter, filters, search, setSearch } = useDocuments({ clientId })
   
@@ -39,36 +44,51 @@ export default function ClientDocuments({ clientId, clientName }) {
   // ✅ Estilos unificados
   const unifiedButtonSx = { 
     borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', 
-    fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
+    fontSize: '0.75rem', letterSpacing: '0.5px', width: { xs: '100%', sm: 'auto' },
+    '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
   }
+  
   const inputSx = { 
-    fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, 
+    fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, width: { xs: '100%', sm: 'auto' },
     '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
     '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' }
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h6" sx={{ fontFamily: '"Courier New", monospace', fontWeight: 500, letterSpacing: '1px', textTransform: 'uppercase' }}>
-          {t('clientDocuments.title', 'Documentos del Cliente')}
+    <Box sx={{ p: { xs: 1, sm: 3 } }}>
+      {/* Header Responsive */}
+      <Box 
+        display="flex" 
+        flexDirection={{ xs: 'column', sm: 'row' }} 
+        justifyContent="space-between" 
+        alignItems={{ xs: 'flex-start', sm: 'center' }} 
+        gap={2} 
+        mb={3}
+      >
+        <Typography variant="h6" sx={{ fontFamily: '"Courier New", monospace', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', fontSize: { xs: '0.9rem', sm: '1.1rem' } }}>
+          {t('topbarLabel', 'Documentos del Cliente')}
         </Typography>
-        <Button variant="contained" startIcon={<Add />} onClick={() => setUploadOpen(true)} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', fontWeight: 600, '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+        <Button 
+          variant="contained" 
+          startIcon={<Add />} 
+          onClick={() => setUploadOpen(true)} 
+          sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', fontWeight: 600, '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}
+        >
           {t('uploadDocument')}
         </Button>
       </Box>
 
-      {/* Filtros rápidos */}
-      <Box display="flex" gap={2} mb={3} flexWrap="wrap">
+      {/* Filtros rápidos Responsive */}
+      <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={3} flexWrap="wrap">
         <TextField
           size="small"
           placeholder={t('searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           InputProps={{ startAdornment: <Search sx={{ color: '#aaa' }} /> }}
-          sx={{ minWidth: 200, ...inputSx }}
+          sx={{ ...inputSx, minWidth: { xs: '100%', sm: 200 } }}
         />
-        <FormControl size="small" sx={{ minWidth: 150 }}>
+        <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 150 } }}>
           <InputLabel>{t('filters.category')}</InputLabel>
           <Select value={filters.category || ''} onChange={(e) => updateFilter('category', e.target.value)} label={t('filters.category')} sx={inputSx}>
             <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.allCategories')}</MenuItem>
@@ -77,7 +97,7 @@ export default function ClientDocuments({ clientId, clientName }) {
             ))}
           </Select>
         </FormControl>
-        <FormControl size="small" sx={{ minWidth: 150 }}>
+        <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 150 } }}>
           <InputLabel>{t('filters.project')}</InputLabel>
           <Select value={filters.projectId || ''} onChange={(e) => updateFilter('projectId', e.target.value)} label={t('filters.project')} sx={inputSx}>
             <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.allProjects')}</MenuItem>
@@ -86,13 +106,21 @@ export default function ClientDocuments({ clientId, clientName }) {
         </FormControl>
       </Box>
 
-      {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
+          {error}
+        </Alert>
+      )}
 
       {loading ? (
-        <Box display="flex" justifyContent="center" py={8}><CircularProgress /></Box>
+        <Box display="flex" justifyContent="center" py={8}>
+          <CircularProgress />
+        </Box>
       ) : documents.length === 0 ? (
         <Box textAlign="center" py={8} color="text.secondary">
-          <Typography sx={{ fontFamily: '"Courier New", monospace' }}>{t('empty')}</Typography>
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem' }}>
+            {t('empty')}
+          </Typography>
         </Box>
       ) : (
         <Grid container spacing={2}>
