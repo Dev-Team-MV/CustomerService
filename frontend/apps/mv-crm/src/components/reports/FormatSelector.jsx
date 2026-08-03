@@ -12,7 +12,7 @@ const FormatSelector = ({ format, onChange }) => {
         sx={{
           fontFamily: '"Courier New", monospace',
           fontSize: '0.65rem',
-          color: '#888',
+          color: '#000000ff',
           letterSpacing: '1px',
           textTransform: 'uppercase'
         }}

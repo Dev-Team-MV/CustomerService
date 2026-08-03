@@ -1,3 +1,4 @@
+// apps/mv-crm/src/pages/MessageTemplates.jsx
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -53,42 +54,40 @@ export default function MessageTemplates() {
     }
   }
 
-  // Memorizar columnas para que se recalculen solo cuando cambia t
   const columns = useMemo(
     () => getMessageTemplatesColumns(t, handleEditTemplate, handleDeleteTemplate),
     [t]
   )
 
+  // ✅ Estilos unificados
+  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
+
   return (
-    <PageLayout>
+    <PageLayout
+      title={t('sms.templates.title')}
+      subtitle={t('sms.templates.subtitle')}
+    >
       <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-        {/* Header */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-          <Box>
-            <Typography variant="h4" fontWeight={700}>
-              {t('sms.templates.title')}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {t('sms.templates.subtitle')}
-            </Typography>
-          </Box>
+        
+        {/* ✅ Fila unificada: Título a la izquierda, Botón a la derecha */}
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={2}>
+          <Box /> {/* Espaciador para alinear el botón a la derecha */}
           <Button
             variant="contained"
             startIcon={<Add />}
             onClick={handleAddTemplate}
+            sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', fontWeight: 600, '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}
           >
             {t('sms.templates.newBtn')}
           </Button>
         </Box>
 
-        {/* Error Alert */}
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
             {error}
           </Alert>
         )}
 
-        {/* DataTable */}
         <Box flex={1} sx={{ overflow: 'hidden' }}>
           <DataTable
             data={templates}
@@ -97,7 +96,6 @@ export default function MessageTemplates() {
           />
         </Box>
 
-        {/* Modal */}
         <MessageTemplateModal
           open={modalOpen}
           onClose={() => {

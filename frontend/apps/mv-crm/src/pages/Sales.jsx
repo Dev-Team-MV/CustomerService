@@ -88,11 +88,8 @@ export default function Sales() {
 
   const handleSaveLead = async (data, leadId) => {
     try {
-      if (leadId) {
-        await updateLead(leadId, data)
-      } else {
-        await createLead(data)
-      }
+      if (leadId) await updateLead(leadId, data)
+      else await createLead(data)
       setModalOpen(false)
       setEditingLead(null)
       await fetchLeads()
@@ -123,7 +120,6 @@ export default function Sales() {
     setDetailsLead(null)
   }
 
-  // ✅ ACTUALIZADO: Recibe y pasa los datos de conversión (saleAmount, etc.)
   const handleConvertConfirm = async (leadId, conversionData = {}) => {
     try {
       const result = await convertToCustomer(leadId, conversionData)
@@ -172,7 +168,7 @@ export default function Sales() {
         value: stage, label: t(`stages.${stage}`),
         render: (opt) => (
           <Box display="flex" alignItems="center" gap={1}>
-            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: STAGE_COLORS[stage] }} />
+            <Box sx={{ width: 10, height: 10, borderRadius: 0, bgcolor: STAGE_COLORS[stage] }} />
             {opt.label}
           </Box>
         )
@@ -185,6 +181,10 @@ export default function Sales() {
     }
   ]
 
+  // ✅ Estilos unificados
+  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
+  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }
+
   return (
     <PageLayout title={t('title')} titleBold={t('titleBold')} topbarLabel={t('topbarLabel')} subtitle={t('description')}>
       <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -194,11 +194,11 @@ export default function Sales() {
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             size="small"
-            sx={{ width: 300 }}
-            InputProps={{ startAdornment: <InputAdornment position="start"><Search /></InputAdornment> }}
+            sx={{ width: 300, ...inputSx }}
+            InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: '#aaa' }} /></InputAdornment> }}
           />
 
-          <ToggleButtonGroup value={sortBy} exclusive onChange={(e, value) => value && setSortBy(value)} size="small" sx={{ '& .MuiToggleButton-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem', textTransform: 'none', borderRadius: 0, py: 0.75 } }}>
+          <ToggleButtonGroup value={sortBy} exclusive onChange={(e, value) => value && setSortBy(value)} size="small" sx={{ '& .MuiToggleButton-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem', textTransform: 'none', borderRadius: 0, py: 0.75, border: '1px solid #000', color: '#000', '&.Mui-selected': { bgcolor: '#000', color: '#fff' } } }}>
             <ToggleButton value="createdAt"><CalendarToday sx={{ fontSize: 14, mr: 0.5 }} />{t('sort.recent', 'Recientes')}</ToggleButton>
             <ToggleButton value="score"><TrendingUp sx={{ fontSize: 14, mr: 0.5 }} />{t('sort.priority', 'Prioridad')}</ToggleButton>
           </ToggleButtonGroup>
@@ -209,15 +209,15 @@ export default function Sales() {
             </Typography>
           )}
 
-          <Box display="flex" gap={2} flexWrap="wrap">
+          <Box display="flex" gap={2} flexWrap="wrap" sx={{ ml: 'auto' }}>
             <ExportButton label={t('exportButton')} exportFn={crmReportsService.exportLeads} withModal={true} filters={exportFilters} />
-            <Button variant="contained" startIcon={<Add />} onClick={() => handleAddLead('nuevo')} sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}>
+            <Button variant="contained" startIcon={<Add />} onClick={() => handleAddLead('nuevo')} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', fontWeight: 600, '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
               {t('newLead')}
             </Button>
           </Box>
         </Box>
 
-        {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 0 }}>{error}</Alert>}
+        {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>{error}</Alert>}
 
         {loading ? (
           <Box display="flex" justifyContent="center" alignItems="center" flex={1}><CircularProgress /></Box>
@@ -255,7 +255,7 @@ export default function Sales() {
           open={Boolean(convertLead)}
           onClose={handleCloseConversion}
           lead={convertLead}
-          onConvert={handleConvertConfirm} // ✅ Ahora pasa (leadId, conversionData)
+          onConvert={handleConvertConfirm}
           conversionResult={conversionResult}
         />
       </Box>

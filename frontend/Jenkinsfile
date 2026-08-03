@@ -126,6 +126,14 @@ pipeline {
           }
           env.VITE_PROJECT_ID = resolvedProjectId
 
+          // Google Places autocomplete (ResidentDialog, etc.). Definir en el Job:
+          // Configure → Environment variables → VITE_GOOGLE_MAPS_API_KEY
+          // o Credentials (Secret text) inyectada como env del mismo nombre.
+          env.VITE_GOOGLE_MAPS_API_KEY = (env.VITE_GOOGLE_MAPS_API_KEY ?: '').trim()
+          if (!env.VITE_GOOGLE_MAPS_API_KEY) {
+            echo "WARNING: VITE_GOOGLE_MAPS_API_KEY no definida en el Job. El autocomplete de Google Places no funcionará."
+          }
+
           env.SHOULD_RUN = 'true'
 
           echo "========== CONFIGURACIÓN FRONTEND =========="
@@ -134,6 +142,7 @@ pipeline {
           echo "Contenedor: ${env.CONTAINER_NAME} | Puerto: ${env.APP_PORT}"
           echo "API: ${env.VITE_API_URL}"
           echo "PROJECT_ID: ${env.VITE_PROJECT_ID}"
+          echo "GOOGLE_MAPS_API_KEY: ${env.VITE_GOOGLE_MAPS_API_KEY ? '(set)' : '(missing)'}"
           echo "============================================="
         }
       }
@@ -175,7 +184,8 @@ pipeline {
           script {
             def buildArgs = [
               "VITE_API_URL=${env.VITE_API_URL}",
-              "VITE_PROJECT_ID=${env.VITE_PROJECT_ID}"
+              "VITE_PROJECT_ID=${env.VITE_PROJECT_ID}",
+              "VITE_GOOGLE_MAPS_API_KEY=${env.VITE_GOOGLE_MAPS_API_KEY}"
             ]
             def dockerfileByApp = [
               'lakewood-p1': 'Dockerfile',

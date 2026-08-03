@@ -66,51 +66,6 @@ export const useResidents = (projectId = null, options = {}) => {
   const [isPhoneValid, setIsPhoneValid] = useState(false)
 
   // --- Fetch users ---
-//   const fetchData = useCallback(async () => {
-//   setLoading(true)
-//   try {
-//     if (projectId) {
-//       // ✅ Si hay projectId, hacer 3 llamadas en paralelo
-//       const [residentsRes, adminsRes, superadminsRes] = await Promise.all([
-//         api.get('/users', { params: { projectId } }), // Residentes del proyecto
-//         api.get('/users', { params: { role: 'admin' } }), // Todos los admins
-//         api.get('/users', { params: { role: 'superadmin' } }) // Todos los superadmins
-//       ])
- 
-//       // Combinar resultados y eliminar duplicados por _id
-//       const allUsers = [...residentsRes.data, ...adminsRes.data, ...superadminsRes.data]
-//       const uniqueUsers = Array.from(
-//         new Map(allUsers.map(user => [user._id, user])).values()
-//       )
- 
-//       setUsers(uniqueUsers)
-//       setStats({
-//         total: uniqueUsers.length,
-//         superadmins: uniqueUsers.filter(u => u.role === 'superadmin').length,
-//         admins: uniqueUsers.filter(u => u.role === 'admin').length,
-//         residents: uniqueUsers.filter(u => u.role === 'user').length,
-//       })
-//     } else {
-//       // ✅ Sin filtro de proyecto, obtener todos los usuarios
-//       // const res = await api.get('/users/search')
-          
-//       const fallbackId = import.meta.env.VITE_PROJECT_ID
-//       const res = await api.get('/users/search', { params: { projectId: fallbackId } })
-//       setUsers(res.data)
-//       setStats({
-//         total: res.data.length,
-//         superadmins: res.data.filter(u => u.role === 'superadmin').length,
-//         admins: res.data.filter(u => u.role === 'admin').length,
-//         residents: res.data.filter(u => u.role === 'user').length,
-//       })
-//     }
-//   } catch (error) {
-//     setSnackbar({ open: true, message: error.message, severity: 'error' })
-//   } finally {
-//     setLoading(false)
-//   }
-// }, [projectId])
-
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
@@ -172,6 +127,7 @@ export const useResidents = (projectId = null, options = {}) => {
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         email: user.email || '',
+        country: user.country || '',
         phoneNumber: user.phoneNumber || '',
         birthday: user.birthday ? new Date(user.birthday).toISOString().split('T')[0] : '',
         role: user.role || 'user',
@@ -239,33 +195,6 @@ export const useResidents = (projectId = null, options = {}) => {
   }, [formData, isEmailValid, isPhoneValid])
 
   // --- Submit ---
-  // const handleSubmit = useCallback(async () => {
-  //   try {
-  //     const payload = { ...formData }
-  //     payload.phoneNumber = e164Value || toE164(formData.phoneNumber)
-  //     if (selectedUser) {
-  //       if (!payload.password) delete payload.password
-  //       await api.put(`/users/${selectedUser._id}`, payload)
-  //       setSnackbar({ open: true, message: t('residents:snackbar.updated'), severity: 'success' })
-  //       handleCloseDialog()
-  //       fetchData()
-  //     } else {
-  //       const res = await api.post('/auth/register', { ...payload, skipPasswordSetup: true })
-  //       const newUser = res.data.user || res.data
-  //       setSnackbar({ open: true, message: t('residents:snackbar.created'), severity: 'success' })
-  //       setOpenDialog(false)
-  //       setUsers(prev => [...prev, newUser])
-  //       setSelectedUser(newUser)
-  //     }
-  //   } catch (error) {
-  //     setSnackbar({
-  //       open: true,
-  //       message: error.response?.data?.message || error.message,
-  //       severity: 'error'
-  //     })
-  //   }
-  // }, [formData, selectedUser, handleCloseDialog, fetchData, t, e164Value])
-
 const handleSubmit = useCallback(async () => {
   try {
     const payload = { ...formData }

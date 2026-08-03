@@ -3,20 +3,26 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Box, Typography, Divider, List, ListItem, ListItemIcon, ListItemText } from '@mui/material'
 import { 
   Logout, 
-  GridView, 
-  FolderOpen, 
   People, 
   Person, 
   TrendingUp,
-  AssignmentTurnedIn,
   Insights,
-  Chat,
-  AttachMoney,
   Assessment,
   SupportAgent,
   CalendarToday,
-  AutoAwesome,
-  History
+  History,
+  Dashboard,
+  AutoFixHigh,
+  Campaign,
+  AccountBalanceWallet,
+  ReceiptLong,
+  Description,
+  Handshake,
+  PersonAddAlt1,
+  Business,
+  Paid,
+  TaskAlt,
+  Message
 } from '@mui/icons-material'
 import { motion } from 'framer-motion'
 import { useAuth } from '@shared/context/AuthContext'
@@ -25,26 +31,26 @@ import { useTranslation } from 'react-i18next'
 import mvLogo from '../../assets/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png'
 
 const NAV = [
-  { key: 'overview', labelKey: 'overview', icon: GridView, path: '/dashboard' },
+  { key: 'overview', labelKey: 'overview', icon: Dashboard, path: '/dashboard' },
   { key: 'clients', labelKey: 'clients', icon: People, path: '/clients' },
   { key: 'calendar', labelKey: 'calendar', icon: CalendarToday, path: '/calendar' },
-  { key: 'automations', labelKey: 'automations', icon: AutoAwesome, path: '/automations' },
-  { key: 'campaigns', labelKey: 'campaigns', icon: AutoAwesome, path: '/campaigns' },
-  { key: 'comissions', labelKey: 'comissions', icon: AutoAwesome, path: '/comissions' },
-  { key: 'quote', labelKey: 'quote', icon: AutoAwesome, path: '/quote' },
-  { key: 'documents', labelKey: 'documents', icon: AutoAwesome, path: '/documents' },
-  { key: 'post-sale', labelKey: 'post-sale', icon: AutoAwesome, path: '/post-sale' },
-  { key: 'referrals', labelKey: 'referrals', icon: AutoAwesome, path: '/referrals' },
+  { key: 'automations', labelKey: 'automations', icon: AutoFixHigh, path: '/automations' },
+  { key: 'campaigns', labelKey: 'campaigns', icon: Campaign, path: '/campaigns' },
+  { key: 'comissions', labelKey: 'comissions', icon: AccountBalanceWallet, path: '/comissions' },
+  { key: 'quote', labelKey: 'quote', icon: ReceiptLong, path: '/quote' },
+  { key: 'vendors', labelKey: 'vendors', icon: Business, path: '/vendors' },
+  { key: 'documents', labelKey: 'documents', icon: Description, path: '/documents' },
+  { key: 'post-sale', labelKey: 'post-sale', icon: Handshake, path: '/post-sale' },
+  { key: 'referrals', labelKey: 'referrals', icon: PersonAddAlt1, path: '/referrals' },
   { key: 'audit', labelKey: 'audit', icon: History, path: '/audit' },
-  { key: 'projects', labelKey: 'projects', icon: FolderOpen, path: '/projects' },
+  { key: 'projects', labelKey: 'projects', icon: Business, path: '/projects' },
   { key: 'sales', labelKey: 'sales', icon: TrendingUp, path: '/sales' },
-  { key: 'payments', labelKey: 'payments', icon: AttachMoney, path: '/payments' },
+  { key: 'payments', labelKey: 'payments', icon: Paid, path: '/payments' },
   { key: 'reports', labelKey: 'reports', icon: Assessment, path: '/reports' },
   { key: 'agents', labelKey: 'agents', icon: SupportAgent, path: '/agents' },
-  { key: 'activities', labelKey: 'activities', icon: AssignmentTurnedIn, path: '/activities' },
+  { key: 'activities', labelKey: 'activities', icon: TaskAlt, path: '/activities' },
   { key: 'analytics', labelKey: 'analytics', icon: Insights, path: '/analytics' },
-  { key: 'messageTemplates', labelKey: 'messageTemplates', icon: Chat, path: '/message-templates' }
-
+  { key: 'messageTemplates', labelKey: 'messageTemplates', icon: Message, path: '/message-templates' }
 ]
 
 // ✅ NUEVO: Agregar prop onNavigate

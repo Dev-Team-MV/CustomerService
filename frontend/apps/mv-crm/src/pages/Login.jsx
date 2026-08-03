@@ -1,3 +1,4 @@
+// apps/mv-crm/src/pages/Login.jsx
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -10,15 +11,14 @@ import { useTranslation } from 'react-i18next'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import { useAuth } from '@shared/context/AuthContext'
-import LanguageSwitcher from '@shared/components/LanguageSwitcher'  // ← shared
+import LanguageSwitcher from '@shared/components/LanguageSwitcher'
 
 import mvLogo from '../assets/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png'
-
 
 const Login = () => {
   const navigate = useNavigate()
   const { login } = useAuth()
-  const { t } = useTranslation('auth')  // ← namespace auth de shared
+  const { t } = useTranslation('auth')
 
   const [loginMethod, setLoginMethod] = useState('email')
   const [formData, setFormData] = useState({ email: '', phone: '', password: '' })
@@ -34,8 +34,8 @@ const Login = () => {
   }, [])
 
   const handleSubmit = async (e) => {
-    e.preventDefault()      // ← debe ser lo primero, antes de cualquier async
-    e.stopPropagation()     // ← añadir esto también
+    e.preventDefault()
+    e.stopPropagation()
     
     setError('')
     setLoading(true)
@@ -66,7 +66,7 @@ const Login = () => {
       setLoading(false)
     }
 
-    return false  // ← previene cualquier submit nativo residual
+    return false
   }
 
   const formatTime = (d) => d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
@@ -91,18 +91,20 @@ const Login = () => {
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', background: '#fafafa', position: 'relative', overflow: 'hidden' }}>
 
-      {/* ...grid bg y accent lines — existing code sin cambios... */}
+      {/* Grid background */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 2 }} style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
         backgroundImage: `linear-gradient(rgba(0,0,0,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.04) 1px,transparent 1px)`,
         backgroundSize: '48px 48px'
       }} />
+      
+      {/* Accent lines */}
       <motion.div animate={{ scaleY: [1, 1.08, 1], opacity: [0.07, 0.13, 0.07] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
         style={{ position: 'absolute', left: '30%', top: 0, bottom: 0, width: 1, background: '#000', pointerEvents: 'none', transformOrigin: 'top' }} />
       <motion.div animate={{ scaleY: [1, 1.05, 1], opacity: [0.04, 0.09, 0.04] }} transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
         style={{ position: 'absolute', left: '65%', top: 0, bottom: 0, width: 1, background: '#000', pointerEvents: 'none' }} />
 
-      {/* ─── LEFT PANEL — sin cambios ─── */}
+      {/* ─── LEFT PANEL ─── */}
       <Box sx={{ flex: { xs: 0, md: 1 }, display: { xs: 'none', md: 'flex' }, flexDirection: 'column', justifyContent: 'space-between', p: '56px 64px', borderRight: '1px solid rgba(0,0,0,0.08)', position: 'relative', zIndex: 1 }}>
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -116,7 +118,7 @@ const Login = () => {
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
           <Box sx={{ maxWidth: 520 }}>
 
-            {/* Logo — reemplaza "Master Control" + stats */}
+            {/* Logo */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -191,17 +193,49 @@ const Login = () => {
             </Typography>
           </Box>
 
-          {/* Mobile header */}
-          <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 7 }}>
-            <Box sx={{ width: 3, height: 50, bgcolor: '#000', mb: 3 }} />
-            <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: '2.2rem', color: '#000', letterSpacing: '-0.03em' }}>
+          {/* Mobile header - CON LOGO */}
+          <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 5 }}>
+            {/* Logo en móvil */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <Box
+                component="img"
+                src={mvLogo}
+                alt="Michelangelo Del Valle"
+                sx={{
+                  width: '100%',
+                  maxWidth: 280,
+                  height: 'auto',
+                  objectFit: 'contain',
+                  display: 'block',
+                  // mb: 3,
+                  margin: '0 auto',
+                }}
+              />
+            </motion.div>
+            
+            {/* Línea divisora en móvil */}
+            <Box sx={{ width: 60, height: 2, bgcolor: '#000', mb: 2 }} />
+            
+            {/* Texto opcional debajo del logo */}
+            <Typography sx={{ 
+              fontFamily: '"Helvetica Neue", sans-serif', 
+              fontWeight: 200, 
+              fontSize: '1.2rem', 
+              color: '#555', 
+              letterSpacing: '-0.02em',
+              mb: 4
+            }}>
               Master<br /><Box component="span" sx={{ fontWeight: 700 }}>Control</Box>
             </Typography>
           </Box>
 
           {/* Form header */}
           <Box sx={{ mb: 5 }}>
-            <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 400, fontSize: '1.4rem', color: '#000', letterSpacing: '-0.02em', mb: 0.5 }}>
+            <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 400, fontSize: { xs: '1.2rem', sm: '1.4rem' }, color: '#000', letterSpacing: '-0.02em', mb: 0.5 }}>
               {t('mvAuthentication')}
             </Typography>
             <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontSize: '0.875rem', color: '#888', fontWeight: 300 }}>
@@ -290,33 +324,31 @@ const Login = () => {
                     <Typography sx={{ fontFamily: '"Courier New", monospace', color: focusedField === 'phone' ? '#000' : '#aaa', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', mb: 1.5, display: 'block', transition: 'color 0.2s' }}>
                       [02] {t('mvPhone')}
                     </Typography>
-  <PhoneInput
-    country="us"
-    value={formData.phone}
-    onChange={(val) => {
-      // ✅ PhoneInput devuelve el número SIN el +
-      // ej: "15551234567" → nosotros agregamos + al submit
-      setFormData({ ...formData, phone: val })
-    }}
-    onFocus={() => setFocusedField('phone')}
-    onBlur={() => setFocusedField(null)}
-    inputProps={{ name: 'phone', required: true, autoFocus: true }}
-    containerStyle={{ width: '100%' }}
-    inputStyle={{
-      width: '100%', height: '52px', fontSize: '0.95rem', fontWeight: 300,
-      borderRadius: 0,
-      border: `${focusedField === 'phone' ? '2px' : '1px'} solid ${focusedField === 'phone' ? '#000' : '#ddd'}`,
-      fontFamily: '"Helvetica Neue", sans-serif', color: '#000', background: '#fff',
-      boxShadow: focusedField === 'phone' ? '4px 4px 0px rgba(0,0,0,0.06)' : 'none',
-      transition: 'all 0.25s'
-    }}
-    buttonStyle={{
-      borderRadius: 0,
-      border: `${focusedField === 'phone' ? '2px' : '1px'} solid ${focusedField === 'phone' ? '#000' : '#ddd'}`,
-      borderRight: 'none', background: '#fff', transition: 'all 0.25s'
-    }}
-    dropdownStyle={{ borderRadius: 0, fontFamily: '"Helvetica Neue", sans-serif' }}
-  />
+                    <PhoneInput
+                      country="us"
+                      value={formData.phone}
+                      onChange={(val) => {
+                        setFormData({ ...formData, phone: val })
+                      }}
+                      onFocus={() => setFocusedField('phone')}
+                      onBlur={() => setFocusedField(null)}
+                      inputProps={{ name: 'phone', required: true, autoFocus: true }}
+                      containerStyle={{ width: '100%' }}
+                      inputStyle={{
+                        width: '100%', height: '52px', fontSize: '0.95rem', fontWeight: 300,
+                        borderRadius: 0,
+                        border: `${focusedField === 'phone' ? '2px' : '1px'} solid ${focusedField === 'phone' ? '#000' : '#ddd'}`,
+                        fontFamily: '"Helvetica Neue", sans-serif', color: '#000', background: '#fff',
+                        boxShadow: focusedField === 'phone' ? '4px 4px 0px rgba(0,0,0,0.06)' : 'none',
+                        transition: 'all 0.25s'
+                      }}
+                      buttonStyle={{
+                        borderRadius: 0,
+                        border: `${focusedField === 'phone' ? '2px' : '1px'} solid ${focusedField === 'phone' ? '#000' : '#ddd'}`,
+                        borderRight: 'none', background: '#fff', transition: 'all 0.25s'
+                      }}
+                      dropdownStyle={{ borderRadius: 0, fontFamily: '"Helvetica Neue", sans-serif' }}
+                    />
                   </Box>
                 </motion.div>
               )}

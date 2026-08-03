@@ -1,0 +1,10 @@
+# Karate / Maven
+target/
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.mvn/wrapper/maven-wrapper.jar
+acceptance.env
+acceptance-seed.out

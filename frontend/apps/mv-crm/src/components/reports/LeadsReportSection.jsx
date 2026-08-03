@@ -1,7 +1,7 @@
 // apps/mv-crm/src/components/reports/LeadsReportSection.jsx
 import { useTranslation } from 'react-i18next'
 import { TrendingUp } from '@mui/icons-material'
-import { Box } from '@mui/material'
+import { Box, useMediaQuery, useTheme } from '@mui/material'
 import ReportSection from './ReportSection'
 import ExportButton from '../ExportButton'
 import crmReportsService from '../../services/crmReportsService'
@@ -11,6 +11,8 @@ import { LEAD_STAGES, STAGE_COLORS } from '../../services/leadService'
 
 const LeadsReportSection = () => {
   const { t } = useTranslation('reports')
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const { projects } = useProjects()
   const { agents } = useCrmAgents()
 
@@ -47,7 +49,7 @@ const LeadsReportSection = () => {
             <Box sx={{
               width: 10,
               height: 10,
-              borderRadius: '50%',
+              borderRadius: 0, // ✅ Cuadrado para mantener la estética afilada
               bgcolor: STAGE_COLORS[stage]
             }} />
             {opt.label}

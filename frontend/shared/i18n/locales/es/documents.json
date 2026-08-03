@@ -13,7 +13,8 @@
     "project": "Proyecto",
     "allProjects": "Todos los proyectos",
     "clients": "Clientes",
-    "allClients": "Todos los clientes"
+    "allClients": "Todos los clientes",
+    "tags": "Etiquetas"
   },
 
   "status": {
@@ -52,6 +53,7 @@
     "dragDrop": "Arrastra archivos aquí o haz clic para seleccionar",
     "filesSelected": "archivo(s) seleccionado(s)",
     "linkToPerson": "Vincular a persona",
+    "supportedFormats": "Formatos soportados: PDF, JPG, PNG hasta 10MB",
     "none": "Ninguno",
     "lead": "Lead",
     "client": "Cliente",

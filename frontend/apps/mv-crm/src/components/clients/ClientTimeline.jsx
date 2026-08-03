@@ -179,7 +179,7 @@ const ClientTimeline = ({ activities = [] }) => {
                   sx={{
                     fontFamily: '"Courier New", monospace',
                     fontSize: '0.65rem',
-                    color: '#888',
+                    color: '#000000ff',
                     letterSpacing: '0.5px',
                     ml: 2
                   }}
@@ -321,7 +321,7 @@ const ClientTimeline = ({ activities = [] }) => {
                       sx={{
                         fontFamily: '"Courier New", monospace',
                         fontSize: '0.65rem',
-                        color: '#888',
+                        color: '#000000ff',
                         letterSpacing: '0.5px'
                       }}
                     >

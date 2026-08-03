@@ -1,7 +1,7 @@
+// apps/mv-crm/src/pages/PostSale.jsx
 import { useState } from 'react'
 import { Box, Tabs, Tab, Paper, Snackbar, Alert } from '@mui/material'
 import { useTranslation } from 'react-i18next'
-
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
 
 import OnboardingPanel from '../components/postSale/tabs/OnboardingPanel'
@@ -11,8 +11,6 @@ import SurveysPanel from '../components/postSale/tabs/SurveysPanel'
 export default function PostSale() {
   const { t } = useTranslation('postSale')
   const [tabValue, setTabValue] = useState(0)
-  
-  // Estado global para notificaciones (compartido entre paneles)
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' })
 
   const showNotification = (message, severity = 'success') => {
@@ -25,16 +23,16 @@ export default function PostSale() {
   }
 
   return (
-    <PageLayout title={t('page.title', 'Post-Venta')} subtitle={t('page.subtitle', 'Gestión de onboarding, garantías y encuestas')}>
-      <Paper sx={{ borderRadius: 2, overflow: 'hidden' }}>
+    <PageLayout title={t('page.title')} subtitle={t('page.subtitle')}>
+      <Paper sx={{ borderRadius: 0, overflow: 'hidden', border: '1px solid #ececec' }}>
         <Tabs 
           value={tabValue} 
           onChange={(e, v) => setTabValue(v)} 
           sx={{ borderBottom: '1px solid #ececec', px: 2, bgcolor: '#fafafa' }}
         >
-          <Tab label={t('tabs.onboarding', 'Onboarding')} />
-          <Tab label={t('tabs.warranties', 'Garantías')} />
-          <Tab label={t('tabs.surveys', 'Encuestas')} />
+          <Tab label={t('tabs.onboarding')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.8rem', letterSpacing: '0.5px' }} />
+          <Tab label={t('tabs.warranties')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.8rem', letterSpacing: '0.5px' }} />
+          <Tab label={t('tabs.surveys')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.8rem', letterSpacing: '0.5px' }} />
         </Tabs>
 
         <Box sx={{ p: 3 }}>
@@ -50,7 +48,18 @@ export default function PostSale() {
         onClose={handleCloseSnackbar} 
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled" sx={{ width: '100%' }}>
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity} 
+          variant="filled" 
+          sx={{ 
+            width: '100%', 
+            borderRadius: 0, 
+            border: '1px solid',
+            fontFamily: '"Courier New", monospace',
+            fontSize: '0.8rem'
+          }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

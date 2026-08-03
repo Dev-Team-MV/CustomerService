@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.lakewood.customerservice</groupId>
+  <artifactId>karate-tests</artifactId>
+  <version>1.0.0</version>
+  <name>CustomerService Backend Acceptance (Karate)</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>17</java.version>
+    <maven.compiler.release>17</maven.compiler.release>
+    <karate.version>1.5.0</karate.version>
+    <!-- Exclude Twilio/GCS-dependent scenarios by default -->
+    <karate.options>--tags ~@external</karate.options>
+    <baseUrl>http://localhost:5001</baseUrl>
+    <adminEmail>superadmin@lakewood.com</adminEmail>
+    <adminPassword>admin123</adminPassword>
+    <projectId>69a73ce5b20401b061da6451</projectId>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.karatelabs</groupId>
+      <artifactId>karate-junit5</artifactId>
+      <version>${karate.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/java</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <release>${maven.compiler.release}</release>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+          <systemPropertyVariables>
+            <baseUrl>${baseUrl}</baseUrl>
+            <adminEmail>${adminEmail}</adminEmail>
+            <adminPassword>${adminPassword}</adminPassword>
+            <projectId>${projectId}</projectId>
+            <karate.options>${karate.options}</karate.options>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

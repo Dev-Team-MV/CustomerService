@@ -28,6 +28,7 @@ import Documents from './pages/Documents'
 import Quote from './pages/Quotes'
 import PostSale from './pages/PostSale'
 import Referrals from './pages/Referrals'
+import Vendors from './pages/Vendors'
 
 const theme = createTheme({
   palette: {
@@ -133,6 +134,12 @@ export default function App() {
           <Route path="/comissions" element={
             <ProtectedRoute requiredRole="admin">
               <Commissions />
+            </ProtectedRoute> 
+          }
+          />
+          <Route path="/vendors" element={
+            <ProtectedRoute requiredRole="admin">
+              <Vendors />
             </ProtectedRoute> 
           }
           />

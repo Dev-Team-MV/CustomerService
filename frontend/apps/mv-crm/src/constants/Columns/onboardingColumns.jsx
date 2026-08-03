@@ -10,7 +10,7 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
   return [
     {
       field: 'project',
-      headerName: t('project', 'Proyecto'),
+      headerName: t('filters.project', 'Proyecto'),
       minWidth: 150,
       renderCell: ({ row }) => {
         const project = row.projectId
@@ -25,7 +25,7 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
     },
     {
       field: 'property',
-      headerName: t('property', 'Propiedad'),
+      headerName: t('warranty.property', 'Propiedad'),
       minWidth: 220,
       renderCell: ({ row }) => {
         // ✅ CASO 1: Es un Apartamento
@@ -93,7 +93,7 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
     },
     {
       field: 'client',
-      headerName: t('client', 'Cliente'),
+      headerName: t('filters.client', 'Cliente'),
       minWidth: 180,
       renderCell: ({ row }) => {
         const client = row.clientId
@@ -105,7 +105,7 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
     },
     {
       field: 'status',
-      headerName: t('status', 'Estado'),
+      headerName: t('filters.status', 'Estado'),
       minWidth: 150,
       renderCell: ({ row }) => {
         const statusColors = { not_started: 'default', in_progress: 'primary', completed: 'success' }
@@ -128,7 +128,7 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
     },
     {
       field: 'progress',
-      headerName: t('progress', 'Progreso'),
+      headerName: t('onboarding.overallProgress', 'Progreso'),
       minWidth: 150,
       renderCell: ({ row }) => {
         const items = row.items || []
@@ -158,7 +158,7 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
     },
     {
       field: 'createdAt',
-      headerName: t('createdAt', 'Creado'),
+      headerName: t('warranty.createdAt', 'Creado'),
       minWidth: 120,
       renderCell: ({ row }) => (
         <Typography variant="caption" color="text.secondary">
@@ -168,7 +168,7 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
     },
     {
       field: 'actions',
-      headerName: t('actionstable', 'Acciones'),
+      headerName: t('filters.actionsTable', 'Acciones'),
       minWidth: 140,
       sortable: false,
       renderCell: ({ row }) => (

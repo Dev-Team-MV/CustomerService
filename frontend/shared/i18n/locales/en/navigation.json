@@ -78,10 +78,13 @@
  "campaigns":"Campaigns",
  "documents":"Documents",
  "quote":"Quote",
+ "vendors":"Vendors",
  "comissions":"Commissions",
           "agents":"Agents",
         "reports":"Reports",
         "payments":"Payments",
+        "referrals":"Referrals",
+        "post-sale":"Post Sales",
 
   "title": "Alerts",
   "bell": {
