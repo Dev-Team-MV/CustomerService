@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Arranca Mongo de aceptación (Testcontainers-style) + seed + contenedor API.
 # Escribe backend/karate-tests/acceptance.env con variables para Karate/Jenkins.
+# Health y seed usan la red Docker (no localhost) para funcionar con Jenkins-in-Docker.
 set -euo pipefail
 
 KARATE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -32,15 +33,19 @@ for i in $(seq 1 40); do
   sleep 2
 done
 
-export MONGODB_URI="mongodb://127.0.0.1:${ACCEPTANCE_MONGO_PORT}/acceptance"
 export KARATE_ADMIN_EMAIL="${KARATE_ADMIN_EMAIL:-superadmin@lakewood.com}"
 export KARATE_ADMIN_PASSWORD="${KARATE_ADMIN_PASSWORD:-admin123}"
 
-echo "Seeding acceptance DB..."
-(
-  cd "$BACKEND_DIR"
+echo "Seeding acceptance DB (via Docker network)..."
+docker run --rm \
+  --network "$NETWORK_NAME" \
+  -v "${BACKEND_DIR}:/app" \
+  -w /app \
+  -e MONGODB_URI="mongodb://${ACCEPTANCE_MONGO_CONTAINER}:27017/acceptance" \
+  -e KARATE_ADMIN_EMAIL \
+  -e KARATE_ADMIN_PASSWORD \
+  node:20-alpine \
   node scripts/seedAcceptanceDb.js | tee "$SEED_OUT"
-)
 
 PROJECT_ID="$(grep '^KARATE_PROJECT_ID=' "$SEED_OUT" | cut -d= -f2)"
 if [ -z "$PROJECT_ID" ]; then
@@ -62,11 +67,13 @@ docker run -d \
   --restart no \
   "${IMAGE_NAME}:${IMAGE_TAG}"
 
-echo "Waiting for API health on :${ACCEPTANCE_PORT}..."
+echo "Waiting for API health (docker exec)..."
 for i in $(seq 1 40); do
-  if curl -sf "http://localhost:${ACCEPTANCE_PORT}/api/health" >/dev/null; then
+  if docker exec "$ACCEPTANCE_CONTAINER" node -e "fetch('http://127.0.0.1:5000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" 2>/dev/null; then
+    # URL usable desde un contenedor en la misma red Docker (Jenkins-in-Docker)
     cat > "$ENV_OUT" <<EOF
-KARATE_BASE_URL=http://localhost:${ACCEPTANCE_PORT}
+KARATE_BASE_URL=http://${ACCEPTANCE_CONTAINER}:5000
+KARATE_DOCKER_NETWORK=${NETWORK_NAME}
 KARATE_PROJECT_ID=${PROJECT_ID}
 KARATE_ADMIN_EMAIL=${KARATE_ADMIN_EMAIL}
 KARATE_ADMIN_PASSWORD=${KARATE_ADMIN_PASSWORD}

@@ -32,6 +32,15 @@ Incluir externos (GCS):
 ./mvnw test -Dkarate.options="--tags @wide" ...
 ```
 
+## Jenkins / Docker networking
+
+Jenkins suele correr en un contenedor: `localhost:5001` **no** alcanza puertos publicados en el host.
+Por eso el pipeline:
+
+1. Comprueba health con `docker exec … fetch('http://127.0.0.1:5000/api/health')`
+2. Ejecuta Karate con `scripts/run-karate.sh` en la misma red Docker (`deploy_app-network` o `acceptance-net`)
+   apuntando a `http://<container>:5000`
+
 ## Isolated Mongo (Testcontainers-style)
 
 Desde una imagen ya construida:
@@ -39,13 +48,11 @@ Desde una imagen ya construida:
 ```bash
 export IMAGE_NAME=customerservice-backend
 export IMAGE_TAG=development-local
-# docker build -t $IMAGE_NAME:$IMAGE_TAG ../
 
 chmod +x scripts/*.sh
-./scripts/start-acceptance-stack.sh   # Mongo :27018 + seed + API :15001
+./scripts/start-acceptance-stack.sh
 set -a && source acceptance.env && set +a
-./mvnw test -DbaseUrl="$KARATE_BASE_URL" -DprojectId="$KARATE_PROJECT_ID" \
-  -DadminEmail="$KARATE_ADMIN_EMAIL" -DadminPassword="$KARATE_ADMIN_PASSWORD"
+DOCKER_NETWORK="$KARATE_DOCKER_NETWORK" BASE_URL="$KARATE_BASE_URL" ./scripts/run-karate.sh
 ./scripts/stop-acceptance-stack.sh
 ```
 

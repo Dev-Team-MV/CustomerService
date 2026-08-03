@@ -3,9 +3,10 @@
 // Develop → apicsdev.michelangelodelvalle.com:5001 | Production → apics.michelangelodelvalle.com:5000
 //
 // Acceptance (Karate):
-//   Develop  → post-deploy suite amplia (~@external) contra apicsdev; si falla → rollback al tag anterior
-//   Production → pre-deploy: Mongo aislado (Testcontainers-style) + seed + API temporal; si falla → NO Deploy pdn
-// Requisitos agente: JDK 17+, Docker, docker compose, curl (Maven via ./mvnw)
+//   Develop  → post-deploy suite amplia (~@external) vía red Docker deploy_app-network; fallo → rollback
+//   Production → pre-deploy: Mongo aislado + seed + API temporal en acceptance-net; si falla → NO Deploy pdn
+// Requisitos agente: Docker, docker compose (JDK no requerido: Karate corre en contenedor Maven)
+// Health check usa docker exec (Jenkins-in-Docker no ve localhost:hostPort)
 // Credenciales opcionales: karate-acceptance-admin | env KARATE_ADMIN_* / KARATE_PROJECT_ID
 //
 // IMPORTANTE: Solo se ejecuta si hay cambios en backend/.
@@ -200,18 +201,17 @@ pipeline {
                     }
                     echo "Gate baseUrl=${env.KARATE_BASE_URL} projectId=${env.KARATE_PROJECT_ID}"
 
-                    dir('backend/karate-tests') {
-                        sh '''#!/bin/bash
-                            set -e
-                            chmod +x ./mvnw
-                            ./mvnw -B test \
-                              -Dkarate.options="${KARATE_TAGS}" \
-                              -DbaseUrl="${KARATE_BASE_URL}" \
-                              -DadminEmail="${KARATE_ADMIN_EMAIL}" \
-                              -DadminPassword="${KARATE_ADMIN_PASSWORD}" \
-                              -DprojectId="${KARATE_PROJECT_ID}"
-                        '''
-                    }
+                    sh '''#!/bin/bash
+                        set -e
+                        chmod +x backend/karate-tests/scripts/*.sh
+                        export DOCKER_NETWORK="${KARATE_DOCKER_NETWORK:-acceptance-net}"
+                        export BASE_URL="${KARATE_BASE_URL}"
+                        export KARATE_ADMIN_EMAIL
+                        export KARATE_ADMIN_PASSWORD
+                        export KARATE_PROJECT_ID
+                        export KARATE_TAGS
+                        backend/karate-tests/scripts/run-karate.sh
+                    '''
                 }
             }
             post {
@@ -296,10 +296,11 @@ pipeline {
             steps {
                 sh '''#!/bin/bash
                     set -e
-                    echo "Waiting for /api/health on port ${APP_PORT}..."
-                    for i in $(seq 1 30); do
-                      if curl -sf "http://localhost:${APP_PORT}/api/health" >/dev/null; then
-                        echo "Health OK"
+                    echo "Waiting for /api/health inside container ${CONTAINER_NAME}..."
+                    # Jenkins suele correr en Docker: localhost:APP_PORT no alcanza el puerto publicado en el host.
+                    for i in $(seq 1 40); do
+                      if docker exec "${CONTAINER_NAME}" node -e "fetch('http://127.0.0.1:5000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" 2>/dev/null; then
+                        echo "Health OK (attempt ${i})"
                         exit 0
                       fi
                       sleep 3
@@ -340,18 +341,17 @@ pipeline {
                         echo "Credential 'karate-acceptance-admin' not found; using defaults."
                     }
 
-                    dir('backend/karate-tests') {
-                        sh '''#!/bin/bash
-                            set -e
-                            chmod +x ./mvnw
-                            ./mvnw -B test \
-                              -Dkarate.options="${KARATE_TAGS}" \
-                              -DbaseUrl="http://localhost:${APP_PORT}" \
-                              -DadminEmail="${KARATE_ADMIN_EMAIL}" \
-                              -DadminPassword="${KARATE_ADMIN_PASSWORD}" \
-                              -DprojectId="${KARATE_PROJECT_ID}"
-                        '''
-                    }
+                    sh '''#!/bin/bash
+                        set -e
+                        chmod +x backend/karate-tests/scripts/*.sh
+                        export DOCKER_NETWORK=deploy_app-network
+                        export BASE_URL="http://${CONTAINER_NAME}:5000"
+                        export KARATE_ADMIN_EMAIL
+                        export KARATE_ADMIN_PASSWORD
+                        export KARATE_PROJECT_ID
+                        export KARATE_TAGS
+                        backend/karate-tests/scripts/run-karate.sh
+                    '''
 
                     // Marcar esta imagen como last-good tras suite OK
                     sh "docker tag ${env.IMAGE_NAME}:${env.IMAGE_TAG} ${env.LAST_GOOD_IMAGE}"
