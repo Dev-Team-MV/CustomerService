@@ -8,3 +8,5 @@ Dockerfile
 .dockerignore
 README.md
 GCS_SETUP.md
+karate-tests
+Jenkinsfile
