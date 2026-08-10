@@ -84,5 +84,30 @@
     "saveError": "Error al guardar",
     "deleteError": "Error al eliminar",
     "testError": "Error al probar"
+  },
+    "card": {
+    "never": "Nunca",
+    "lessThanOneMin": "Hace menos de 1 min",
+    "minutesAgo": "Hace {{count}} min",
+    "hoursAgo": "Hace {{count}} h",
+    "daysAgo": "Hace {{count}} días",
+    "na": "N/A",
+    "conditions": "Condiciones:",
+    "stage": "Stage:",
+    "project": "Proyecto:",
+    "daysInactive": "{{count}} días inactivo",
+    "action": "Acción:",
+    "template": "Plantilla:",
+    "assignedTo": "Asignado a:",
+    "notifyTo": "Notificar a:",
+    "createdBy": "Creado por:",
+    "lastRun": "Última ejecución:",
+    "active": "Activa",
+    "inactive": "Inactiva",
+    "testSuccess": "✅ Ejecutado correctamente",
+    "testError": "⚠️ Match encontrado pero error:",
+    "unknownError": "Error desconocido",
+    "client": "Cliente:",
+    "noMatches": "ℹ️ No se encontraron coincidencias"
   }
 }

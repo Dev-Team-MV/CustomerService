@@ -11,6 +11,7 @@
   "noLeads": "No leads",
   "addLead": "Add lead",
   "exportButton": "Export Leads",
+  "topbarLabel": "Sales & Leads Management",
   
   "stages": {
     "nuevo": "New",
@@ -57,6 +58,11 @@
     "selectCountry": "Select a country",
     "selectProject": "Select a project",
     "noProjects": "No projects available"
+  },
+
+  "sort":{
+    "recent": "Most recent",
+    "priority": "Highest priority"
   },
 
     "details": {

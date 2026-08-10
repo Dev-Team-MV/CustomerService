@@ -1,7 +1,8 @@
 {
   "page": {
     "title": "Programa de Referidos",
-    "subtitle": "Gestión de referidos, recompensas y configuración del programa"
+    "subtitle": "Gestión de referidos, recompensas y configuración del programa",
+    "topbarlabel": "Gestión de Programa de Referidos"
   },
   "stats": {
     "total": "Total Referidos",
@@ -45,7 +46,8 @@
     "noReferrerProperties": "El referidor no tiene propiedades asignadas",
     "overrideDiscount": "Sobrescribir % Descuento (Opcional)",
     "cashWarning": "Nota: El sistema rechazará esta acción si el referidor tiene saldo pendiente en alguna de sus unidades.",
-    "rewardAmount": "Monto de Recompensa (Cash)"
+    "rewardAmount": "Monto de Recompensa (Cash)",
+    "create":"Crear Programa de Referidos"
   },
   "program": {
     "title": "Configuración",

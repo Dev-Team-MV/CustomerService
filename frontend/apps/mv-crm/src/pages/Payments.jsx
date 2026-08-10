@@ -170,50 +170,13 @@ export default function Payments() {
   })
 
   return (
-    <PageLayout>
+    <PageLayout
+    title={t('payments.title')} topbarLabel={t('payments.topbarLabel')} subtitle={t('payments.description')}
+    >
       <Box sx={{ p: 3 }}>
         {/* Header */}
         <Box mb={3} display="flex" justifyContent="space-between" alignItems="flex-start">
-          <Box>
-            <Typography
-              sx={{
-                fontFamily: '"Helvetica Neue", Arial, sans-serif',
-                fontWeight: 200,
-                fontSize: 'clamp(1.8rem, 3vw, 2.6rem)',
-                color: '#000',
-                letterSpacing: '-0.04em',
-                lineHeight: 1
-              }}
-            >
-              {t('payments.title')}
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
-              <Box
-                sx={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  bgcolor: '#000',
-                  animation: 'pulse 2s infinite',
-                  '@keyframes pulse': {
-                    '0%, 100%': { opacity: 1 },
-                    '50%': { opacity: 0.3 }
-                  }
-                }}
-              />
-              <Typography
-                sx={{
-                  fontFamily: '"Courier New", monospace',
-                  fontSize: '0.62rem',
-                  color: '#000',
-                  letterSpacing: '1.5px',
-                  textTransform: 'uppercase'
-                }}
-              >
-                {t('payments.description')}
-              </Typography>
-            </Box>
-          </Box>
+
 
           <ExportButton
             label={t('payments.exportButton')}

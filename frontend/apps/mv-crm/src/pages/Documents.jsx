@@ -89,15 +89,14 @@ export default function Documents() {
     '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' }
   }
 
-  const inputSx = {
-    fontFamily: '"Courier New", monospace',
-    fontSize: '0.75rem',
-    borderRadius: 0,
-    width: { xs: '100%', sm: 'auto' },
-    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
-    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' }
-  }
-
+const inputSx = {
+  fontFamily: '"Courier New", monospace',
+  fontSize: '0.75rem',
+  borderRadius: 0,
+  width: { xs: '100%', sm: 220, md: 250 }, // ✅ CORREGIDO: Anchos responsivos
+  '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
+  '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' }
+}
   return (
     <PageLayout title={t('title')} titleBold={t('titleBold')} topbarLabel={t('topbarLabel')} subtitle={t('subtitle')}>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>

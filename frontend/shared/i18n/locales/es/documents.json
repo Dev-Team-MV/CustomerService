@@ -7,6 +7,12 @@
   "uploadDocument": "Subir Documento",
   "empty": "No se encontraron documentos",
 
+    "projectDocuments":{
+    "title": "Documentos del Proyecto",
+    "subtitle": "Administra contratos, escrituras, seguros y más para este proyecto",
+    "empty": "No se encontraron documentos para este proyecto"
+  },
+
   "filters": {
     "category": "Categoría",
     "allCategories": "Todas las categorías",
@@ -66,7 +72,8 @@
     "unspecified": "Sin especificar",
     "noResourcesFound": "No se encontraron recursos para este cliente en este proyecto",
     "noResourcesAssigned": "El cliente no tiene recursos asignados en este proyecto.",
-    "uploading": "Subiendo..."
+    "uploading": "Subiendo...",
+    "property": "Propiedad"
   },
 
   "actions": {

@@ -33,7 +33,8 @@
         "newsFeed": "Noticias",
         "newsFeedDesc": "Últimas novedades",
         "referrals": "Referidos",
-        "referralsDesc": "Gestionar referidos"
+        "referralsDesc": "Gestionar referidos",
+        "addClient": "Agregar Cliente"
     },
     "masterPlan": {
         "title": "Vista del Proyecto",

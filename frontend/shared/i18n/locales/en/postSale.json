@@ -1,7 +1,8 @@
 {
   "page": {
     "title": "Post-Sale",
-    "subtitle": "Management of onboarding, warranties, and surveys"
+    "subtitle": "Management of onboarding, warranties, and surveys",
+    "topbarlabel": "Post-Sale Management"
   },
   "tabs": {
     "onboarding": "Onboarding",

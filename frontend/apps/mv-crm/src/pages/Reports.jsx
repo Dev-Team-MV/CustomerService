@@ -12,49 +12,13 @@ export default function Reports() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   return (
-    <PageLayout>
+    <PageLayout
+      title={t('title', 'Reportes')}
+      subtitle={t('subtitle', 'Centro de exportación de datos')}
+      topbarLabel={t('topbarLabel', 'Reportes y Exportación de Datos')}
+    >
       <Box sx={{ p: { xs: 2, sm: 3 } }}>
         {/* Header */}
-        <Box mb={4}>
-          <Typography
-            sx={{
-              fontFamily: '"Helvetica Neue", Arial, sans-serif',
-              fontWeight: 200,
-              fontSize: { xs: '1.5rem', sm: 'clamp(1.8rem, 3vw, 2.6rem)' },
-              color: '#000',
-              letterSpacing: '-0.04em',
-              lineHeight: 1
-            }}
-          >
-            {t('title', 'Reportes')}
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
-            <Box
-              sx={{
-                width: 6,
-                height: 6,
-                borderRadius: '50%', // ✅ Los indicadores de estado pueden ser redondos
-                bgcolor: '#000',
-                animation: 'pulse 2s infinite',
-                '@keyframes pulse': {
-                  '0%, 100%': { opacity: 1 },
-                  '50%': { opacity: 0.3 }
-                }
-              }}
-            />
-            <Typography
-              sx={{
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.62rem',
-                color: '#000',
-                letterSpacing: '1.5px',
-                textTransform: 'uppercase'
-              }}
-            >
-              {t('subtitle', 'Centro de exportación de datos')}
-            </Typography>
-          </Box>
-        </Box>
 
         {/* Secciones */}
         <Grid container spacing={3}>

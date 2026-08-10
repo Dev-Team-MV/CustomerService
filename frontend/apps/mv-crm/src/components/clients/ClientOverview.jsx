@@ -1,24 +1,87 @@
 // apps/mv-crm/src/components/clients/ClientOverview.jsx
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Paper, Avatar, Chip, LinearProgress, useMediaQuery, useTheme } from '@mui/material'
 import { Email, Phone, CalendarToday, Person, Business, Home, Apartment, LocationOn } from '@mui/icons-material'
 
-const ClientOverview = ({ client, properties }) => {
+// ✅ Hooks importados
+import { useProjects } from '@shared/hooks/useProjects'
+import { useResolvedProperties } from '../../constants/hooks/useResolvedProperties' // Ajusta la ruta si es necesario
+
+const ClientOverview = ({ client, properties: rawProperties }) => {
   const { t } = useTranslation('residents')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-  const totalProperties = properties.length
-  const totalValue = properties.reduce((sum, p) => sum + (p.price || 0), 0)
-  const totalBalance = properties.reduce((sum, p) => sum + (p.balance || 0), 0)
+  // ✅ 1. Hook para obtener la lista de proyectos y resolver nombres
+  const { projects } = useProjects()
+  
+  // ✅ 2. Hook para enriquecer las propiedades con sus datos completos (lotes, aptos, modelos, etc.)
+  const { propertiesMap, loading: loadingResolved } = useResolvedProperties(rawProperties || [])
+
+  // Enriquecemos las propiedades con los datos resueltos del hook
+  const enrichedProperties = useMemo(() => {
+    if (!rawProperties) return []
+    return rawProperties.map(item => {
+      let enriched = { ...item }
+      
+      // Resolver Lote / Propiedad
+      const propRef = item.propertyId || item.property || item._id
+      if (propRef && propertiesMap.lots[propRef]) {
+        enriched = { ...enriched, ...propertiesMap.lots[propRef] }
+      }
+
+      // Resolver Apartamento
+      const aptRef = item.apartmentId || item.apartment
+      if (aptRef && propertiesMap.apartments[aptRef]) {
+        enriched = { ...enriched, ...propertiesMap.apartments[aptRef] }
+        
+        // Resolver Edificio asociado al apartamento
+        const bldgRef = enriched.building || (propertiesMap.apartments[aptRef]?.building)
+        if (bldgRef && propertiesMap.buildings[bldgRef]) {
+          enriched.buildingData = propertiesMap.buildings[bldgRef]
+        }
+      }
+
+      // Resolver Modelo
+      const modelRef = enriched.model || item.modelId
+      if (modelRef && propertiesMap.models[modelRef]) {
+        enriched = { ...enriched, ...propertiesMap.models[modelRef] }
+      }
+
+      return enriched
+    })
+  }, [rawProperties, propertiesMap])
+
+  // Función auxiliar para obtener el nombre real del proyecto
+  const getProjectName = (projectRef) => {
+    if (!projectRef) return t('overview.noProject', 'Sin proyecto')
+    if (typeof projectRef === 'object' && projectRef.name) return projectRef.name
+    const found = projects.find(p => p._id === projectRef || p._id === projectRef?._id)
+    return found ? found.name : (typeof projectRef === 'string' ? projectRef : t('overview.unknownProject'))
+  }
+
+  const totalProperties = enrichedProperties.length
+  const totalValue = enrichedProperties.reduce((sum, p) => sum + (p.price || 0), 0)
+  const totalBalance = enrichedProperties.reduce((sum, p) => sum + (p.balance || 0), 0)
   const totalPaid = totalValue - totalBalance
 
-  const propertiesByProject = properties.reduce((acc, prop) => {
-    const projectName = prop.projectName || t('overview.noProject', 'Sin proyecto')
+  const propertiesByProject = enrichedProperties.reduce((acc, prop) => {
+    const projectName = prop.projectName || getProjectName(prop.projectId) || t('overview.noProject', 'Sin proyecto')
     if (!acc[projectName]) acc[projectName] = []
     acc[projectName].push(prop)
     return acc
   }, {})
+
+  if (loadingResolved) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', color: '#888' }}>
+          {t('overview.loading', 'Cargando información...')}
+        </Typography>
+      </Box>
+    )
+  }
 
   return (
     <Box sx={{ p: { xs: 1, sm: 3 } }}>
@@ -75,7 +138,7 @@ const ClientOverview = ({ client, properties }) => {
         </Box>
       </Paper>
 
-      {/* MEMBRESÍAS DE PROYECTO */}
+      {/* ✅ MEMBRESÍAS DE PROYECTO (CORREGIDO CON NOMBRES REALES) */}
       {client.projectMemberships && client.projectMemberships.length > 0 && (
         <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, mb: 3, border: '1px solid #ececec', borderRadius: 0, bgcolor: '#fff' }}>
           <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#000000ff', letterSpacing: '1.5px', textTransform: 'uppercase', mb: 2 }}>
@@ -83,20 +146,41 @@ const ClientOverview = ({ client, properties }) => {
           </Typography>
 
           <Box display="flex" gap={1.5} flexWrap="wrap">
-            {client.projectMemberships.map((membership, idx) => (
-              <Paper key={membership._id || idx} elevation={0} sx={{ p: 1.5, border: '1px solid #ececec', borderRadius: 0, bgcolor: '#fafafa', minWidth: { xs: '100%', sm: 200 } }}>
-                <Box display="flex" alignItems="center" gap={1} mb={0.5}>
-                  <Business sx={{ fontSize: 16, color: '#2196f3' }} />
-                  <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontSize: '0.85rem', fontWeight: 600, color: '#000' }}>
-                    {t('overview.project', { number: idx + 1 })}
-                  </Typography>
-                </Box>
-                <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#666', letterSpacing: '0.5px' }}>
-                  ID: {membership.project?.substring(0, 8)}...
-                </Typography>
-                <Chip label={membership.role} size="small" sx={{ mt: 0.5, borderRadius: 0, bgcolor: '#e3f2fd', color: '#1976d2', fontFamily: '"Courier New", monospace', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase' }} />
-              </Paper>
-            ))}
+            {client.projectMemberships.map((membership, idx) => {
+              const projectName = getProjectName(membership.project)
+              const projectId = typeof membership.project === 'object' ? membership.project._id : membership.project
+
+              return (
+                <Paper key={membership._id || idx} elevation={0} sx={{ p: 1.5, border: '1px solid #ececec', borderRadius: 0, bgcolor: '#fafafa', minWidth: { xs: '100%', sm: 200 }, transition: 'all 0.2s', '&:hover': { borderColor: '#000' } }}>
+                  <Box display="flex" alignItems="center" gap={1} mb={0.5}>
+                    <Business sx={{ fontSize: 16, color: '#2196f3', flexShrink: 0 }} />
+                    <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontSize: '0.85rem', fontWeight: 600, color: '#000', wordBreak: 'break-word' }}>
+                      {projectName}
+                    </Typography>
+                  </Box>
+                  
+                  {projectId && (
+                    <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#888', letterSpacing: '0.5px', mb: 0.5 }}>
+                      ID: {projectId}
+                    </Typography>
+                  )}
+                  
+                  <Chip 
+                    label={membership.role} 
+                    size="small" 
+                    sx={{ 
+                      borderRadius: 0, 
+                      bgcolor: membership.role === 'admin' ? '#000' : '#e3f2fd', 
+                      color: membership.role === 'admin' ? '#fff' : '#1976d2', 
+                      fontFamily: '"Courier New", monospace', 
+                      fontSize: '0.65rem', 
+                      fontWeight: 600, 
+                      textTransform: 'uppercase' 
+                    }} 
+                  />
+                </Paper>
+              )
+            })}
           </Box>
         </Paper>
       )}
@@ -122,10 +206,10 @@ const ClientOverview = ({ client, properties }) => {
 
       {/* PROPIEDADES AGRUPADAS POR PROYECTO */}
       <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#000000ff', letterSpacing: '1.5px', textTransform: 'uppercase', mb: 2 }}>
-        {t('overview.properties')} ({properties.length})
+        {t('overview.properties')} ({enrichedProperties.length})
       </Typography>
 
-      {properties.length === 0 ? (
+      {enrichedProperties.length === 0 ? (
         <Box sx={{ py: 4, textAlign: 'center', border: '1px dashed #ececec', borderRadius: 0 }}>
           <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', color: '#aaa', letterSpacing: '0.5px' }}>
             {t('overview.noProperties')}
@@ -161,9 +245,9 @@ const ClientOverview = ({ client, properties }) => {
                             </Typography>
                             
                             <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
-                              {isApartment && property.buildingName && (
+                              {isApartment && property.buildingData?.name && (
                                 <>
-                                  <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#000000ff', letterSpacing: '0.5px' }}>{property.buildingName}</Typography>
+                                  <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#000000ff', letterSpacing: '0.5px' }}>{property.buildingData.name}</Typography>
                                   <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#aaa' }}>•</Typography>
                                 </>
                               )}
@@ -173,9 +257,9 @@ const ClientOverview = ({ client, properties }) => {
                                   <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#aaa' }}>•</Typography>
                                 </>
                               )}
-                              {property.modelName && (
-                                <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#000000ff', letterSpacing: '0.5px' }}>{property.modelName}</Typography>
-                              )}
+                              {property.modelName || property.model?.name ? (
+                                <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#000000ff', letterSpacing: '0.5px' }}>{property.modelName || property.model?.name}</Typography>
+                              ) : null}
                             </Box>
                           </Box>
                         </Box>

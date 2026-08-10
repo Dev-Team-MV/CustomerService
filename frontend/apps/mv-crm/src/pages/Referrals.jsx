@@ -172,7 +172,7 @@ export default function Referrals() {
   const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' } }
 
   return (
-    <PageLayout title={t('page.title')} subtitle={t('page.subtitle')}>
+    <PageLayout title={t('page.title')} subtitle={t('page.subtitle')} topbarLabel={t('page.topbarlabel')}>
       <Paper sx={{ borderRadius: 0, overflow: 'hidden', border: '1px solid #ececec' }}>
         <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)} sx={{ borderBottom: '1px solid #ececec', px: 2, bgcolor: '#fafafa' }}>
           <Tab label={t('page.title')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.8rem', letterSpacing: '0.5px' }} />

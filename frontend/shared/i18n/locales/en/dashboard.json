@@ -33,7 +33,8 @@
         "newsFeed": "News Feed",
         "newsFeedDesc": "Latest updates",
         "referrals": "Referrals",
-        "referralsDesc": "Manage referrals"
+        "referralsDesc": "Manage referrals",
+        "addClient": "Add Client"
     },
     "masterPlan": {
         "title": "Project View",

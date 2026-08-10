@@ -84,5 +84,30 @@
     "saveError": "Error saving",
     "deleteError": "Error deleting",
     "testError": "Error testing"
+  },
+    "card": {
+    "never": "Never",
+    "lessThanOneMin": "Less than 1 min ago",
+    "minutesAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}} h ago",
+    "daysAgo": "{{count}} days ago",
+    "na": "N/A",
+    "conditions": "Conditions:",
+    "stage": "Stage:",
+    "project": "Project:",
+    "daysInactive": "{{count}} days inactive",
+    "action": "Action:",
+    "template": "Template:",
+    "assignedTo": "Assigned to:",
+    "notifyTo": "Notify:",
+    "createdBy": "Created by:",
+    "lastRun": "Last run:",
+    "active": "Active",
+    "inactive": "Inactive",
+    "testSuccess": "✅ Executed successfully",
+    "testError": "⚠️ Match found but error:",
+    "unknownError": "Unknown error",
+    "client": "Client:",
+    "noMatches": "ℹ️ No matches found"
   }
 }

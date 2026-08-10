@@ -101,9 +101,9 @@ export default function ProjectDocuments({ projectId, projectName }) {
           </Select>
         </FormControl>
         <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 200 } }}>
-          <InputLabel>{t('filters.client')}</InputLabel>
-          <Select value={filters.clientId || ''} onChange={(e) => updateFilter('clientId', e.target.value)} label={t('filters.client')} sx={inputSx}>
-            <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.allClients')}</MenuItem>
+          <InputLabel>{t('filters.clients')}</InputLabel>
+          <Select value={filters.clientId || ''} onChange={(e) => updateFilter('clientId', e.target.value)} label={t('filters.clients')} sx={inputSx}>
+            <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.clients')}</MenuItem>
             {clients.map(c => (
               <MenuItem key={c._id} value={c._id} sx={{ fontFamily: '"Courier New", monospace' }}>
                 {c.firstName} {c.lastName}

@@ -1,7 +1,8 @@
 {
   "page": {
     "title": "Referral Program",
-    "subtitle": "Management of referrals, rewards, and program configuration"
+    "subtitle": "Management of referrals, rewards, and program configuration",
+    "topbarlabel": "Referral Program Management"
   },
   "modal":{
     "createTitle": "Submit Referral",
@@ -52,7 +53,8 @@
     "overrideDiscount": "Override Discount % (Optional)",
     "cashWarning": "Note: The system will reject this action if the referrer has a pending balance on any of their units.",
     "rewardAmount": "Reward Amount (Cash)",
-    "submit": "Submit Referral"
+    "submit": "Submit Referral",
+    "create":"Create Referral Program"
   },
   "program": {
     "title": "Configuration",

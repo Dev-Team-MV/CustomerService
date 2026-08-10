@@ -197,9 +197,9 @@ export default function ProjectDetails() {
             '& .MuiTabs-indicator': { bgcolor: '#4a7c59', height: 3 }
           }}
         >
-          <Tab icon={<PhotoCamera sx={{ mr: 1, fontSize: 18 }} />} iconPosition="start" label={t('tabs.info', 'Información')} />
-          <Tab icon={<Description sx={{ mr: 1, fontSize: 18 }} />} iconPosition="start" label={t('tabs.documents', 'Documentos')} />
-          <Tab icon={<Map sx={{ mr: 1, fontSize: 18 }} />} iconPosition="start" label={t('tabs.inventory', 'Inventario')} />
+          <Tab icon={<PhotoCamera sx={{ mr: 1, fontSize: 18 }} />} iconPosition="start" label={t('tab.info', 'Información')} />
+          <Tab icon={<Description sx={{ mr: 1, fontSize: 18 }} />} iconPosition="start" label={t('tab.documents', 'Documentos')} />
+          <Tab icon={<Map sx={{ mr: 1, fontSize: 18 }} />} iconPosition="start" label={t('tab.inventory', 'Inventario')} />
         </Tabs>
       </Box>
 

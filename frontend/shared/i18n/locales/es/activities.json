@@ -2,6 +2,7 @@
   "activities": {
     "title": "Actividades",
     "description": "Gestiona tus tareas y seguimientos",
+    "topbarLabel": "Gestión de Actividades y Tareas",
     "newActivity": "Nueva Actividad",
     "searchPlaceholder": "Buscar actividades...",
     "allPriorities": "Todas las prioridades",
@@ -39,6 +40,7 @@
       "column": "Columna",
       "priority": "Prioridad",
       "dueDate": "Fecha de vencimiento",
+      "addColumn": "Agregar columna",
       "assignedTo": "Asignar a",
       "tags": "Etiquetas",
       "contact": "Contacto",

@@ -1,5 +1,4 @@
-// apps/mv-crm/src/pages/Activities.jsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react' // ✅ Agregado useMemo
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import {
@@ -166,6 +165,48 @@ export default function Activities() {
     }
   }
 
+  // ✅ NUEVO: Lógica de filtrado para aplicar a groupedByColumn
+  const filteredGroupedByColumn = useMemo(() => {
+    if (!groupedByColumn) return groupedByColumn
+
+    const filterActivity = (activity) => {
+      // 1. Filtro por prioridad
+      if (priorityFilter !== 'all' && activity.priority !== priorityFilter) {
+        return false
+      }
+
+      // 2. Filtro por búsqueda de texto
+      if (searchValue.trim()) {
+        const search = searchValue.toLowerCase()
+        const matchTitle = activity.title?.toLowerCase().includes(search)
+        const matchDesc = activity.description?.toLowerCase().includes(search)
+        const matchContactName = activity.contact?.name?.toLowerCase().includes(search)
+        const matchContactEmail = activity.contact?.email?.toLowerCase().includes(search)
+        const matchTags = activity.tags?.some(tag => tag.toLowerCase().includes(search))
+
+        if (!matchTitle && !matchDesc && !matchContactName && !matchContactEmail && !matchTags) {
+          return false
+        }
+      }
+
+      return true
+    }
+
+    // Manejar si groupedByColumn es un array de columnas o un objeto agrupado por ID
+    if (Array.isArray(groupedByColumn)) {
+      return groupedByColumn.map(col => ({
+        ...col,
+        activities: col.activities ? col.activities.filter(filterActivity) : []
+      }))
+    } else {
+      const result = {}
+      Object.keys(groupedByColumn).forEach(colId => {
+        result[colId] = (groupedByColumn[colId] || []).filter(filterActivity)
+      })
+      return result
+    }
+  }, [groupedByColumn, priorityFilter, searchValue])
+
   // ✅ Estilos unificados
   const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
   const inputSx = { 
@@ -178,6 +219,7 @@ export default function Activities() {
     <PageLayout
       title={t('activities.title')}
       subtitle={t('activities.description')}
+      topbarLabel={t('activities.topbarLabel')}
     >
       <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
         
@@ -240,7 +282,7 @@ export default function Activities() {
         </Box>
 
         {error && (
-          <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace' }} onClose={() => {}}>
+          <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace' }}>
             {error}
           </Alert>
         )}
@@ -252,7 +294,7 @@ export default function Activities() {
         ) : (
           <KanbanBoard
             columns={columns}
-            groupedByColumn={groupedByColumn}
+            groupedByColumn={filteredGroupedByColumn} // ✅ PASAMOS LOS DATOS FILTRADOS
             onActivityClick={handleViewActivity}
             onAddActivity={handleAddActivity}
             onEditActivity={handleEditActivity}

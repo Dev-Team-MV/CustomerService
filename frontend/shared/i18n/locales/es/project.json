@@ -8,6 +8,11 @@
     "active": "Activos",
     "types": "Tipos"
   },
+    "tab":{
+    "documents": "Documentos",
+    "info": "Información",
+    "inventory": "Inventario"
+  },
   "table": {
     "name": "Proyecto",
     "type": "Tipo",

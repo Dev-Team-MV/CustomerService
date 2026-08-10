@@ -23,7 +23,7 @@ export default function PostSale() {
   }
 
   return (
-    <PageLayout title={t('page.title')} subtitle={t('page.subtitle')}>
+    <PageLayout title={t('page.title')} subtitle={t('page.subtitle')} topbarLabel={t('page.topbarlabel')}>
       <Paper sx={{ borderRadius: 0, overflow: 'hidden', border: '1px solid #ececec' }}>
         <Tabs 
           value={tabValue} 

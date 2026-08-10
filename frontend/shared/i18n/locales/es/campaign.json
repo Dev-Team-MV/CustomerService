@@ -47,7 +47,8 @@
   "validation": {
     "nameRequired": "El nombre es obligatorio",
     "templateRequired": "La plantilla es obligatoria",
-    "audienceRequired": "El tipo de audiencia es obligatorio"
+    "audienceRequired": "El tipo de audiencia es obligatorio",
+    "templateFieldsRequired": "Todos los campos de la plantilla son obligatorios"
   },
   "form": {
     "name": "Nombre",
@@ -55,7 +56,8 @@
     "audience": "Audiencia",
     "audienceType": "Tipo de audiencia",
     "project": "Proyecto",
-    "stage": "Stage"
+    "stage": "Stage",
+    "selectTemplate":"Selecciona una plantilla"
   },
   "audience": {
     "leads": "Leads",
@@ -91,5 +93,17 @@
   },
   "errors": {
     "campaignIdNotFound": "ID de campaña no encontrado"
+  },
+  "template":{
+    "name":"Nombre",
+    "content":"Contenido",
+    "variables":"Variables",
+    
+    "noTemplates":"No hay plantillas disponibles",
+    "loadingTemplates":"Cargando plantillas...",
+    "category":"Categoría",
+    "description":"Descripción",
+    "useExisting":"Usar plantilla existente",
+    "createNew":"Crear nueva plantilla"
   }
 }
