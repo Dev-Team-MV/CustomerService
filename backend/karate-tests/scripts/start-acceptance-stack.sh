@@ -2,6 +2,8 @@
 # Arranca Mongo de aceptación (Testcontainers-style) + seed + contenedor API.
 # Escribe backend/karate-tests/acceptance.env con variables para Karate/Jenkins.
 # Health y seed usan la red Docker (no localhost) para funcionar con Jenkins-in-Docker.
+#
+# Usa `docker run` (no `docker compose`) para compatibilidad con agentes sin Compose V2.
 set -euo pipefail
 
 KARATE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -22,8 +24,12 @@ echo "Starting acceptance Mongo on port ${ACCEPTANCE_MONGO_PORT}..."
 docker rm -f "$ACCEPTANCE_MONGO_CONTAINER" "$ACCEPTANCE_CONTAINER" 2>/dev/null || true
 docker network create "$NETWORK_NAME" 2>/dev/null || true
 
-export ACCEPTANCE_MONGO_PORT
-docker compose -f "$KARATE_DIR/docker-compose.acceptance.yml" up -d
+docker run -d \
+  --name "$ACCEPTANCE_MONGO_CONTAINER" \
+  --network "$NETWORK_NAME" \
+  -p "${ACCEPTANCE_MONGO_PORT}:27017" \
+  --restart no \
+  mongo:7
 
 echo "Waiting for Mongo health..."
 for i in $(seq 1 40); do
