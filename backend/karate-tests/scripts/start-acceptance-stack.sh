@@ -2,10 +2,11 @@
 # Arranca Mongo de aceptación (Testcontainers-style) + seed + contenedor API.
 # Escribe backend/karate-tests/acceptance.env con variables para Karate/Jenkins.
 # Health y seed usan la red Docker (no localhost) para funcionar con Jenkins-in-Docker.
+#
+# Usa `docker run` (no `docker compose`) para compatibilidad con agentes sin Compose V2.
 set -euo pipefail
 
 KARATE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-BACKEND_DIR="$(cd "$KARATE_DIR/.." && pwd)"
 
 IMAGE_NAME="${IMAGE_NAME:-customerservice-backend}"
 IMAGE_TAG="${IMAGE_TAG:?IMAGE_TAG is required}"
@@ -22,8 +23,12 @@ echo "Starting acceptance Mongo on port ${ACCEPTANCE_MONGO_PORT}..."
 docker rm -f "$ACCEPTANCE_MONGO_CONTAINER" "$ACCEPTANCE_CONTAINER" 2>/dev/null || true
 docker network create "$NETWORK_NAME" 2>/dev/null || true
 
-export ACCEPTANCE_MONGO_PORT
-docker compose -f "$KARATE_DIR/docker-compose.acceptance.yml" up -d
+docker run -d \
+  --name "$ACCEPTANCE_MONGO_CONTAINER" \
+  --network "$NETWORK_NAME" \
+  -p "${ACCEPTANCE_MONGO_PORT}:27017" \
+  --restart no \
+  mongo:7
 
 echo "Waiting for Mongo health..."
 for i in $(seq 1 40); do
@@ -36,15 +41,15 @@ done
 export KARATE_ADMIN_EMAIL="${KARATE_ADMIN_EMAIL:-superadmin@lakewood.com}"
 export KARATE_ADMIN_PASSWORD="${KARATE_ADMIN_PASSWORD:-admin123}"
 
-echo "Seeding acceptance DB (via Docker network)..."
+echo "Seeding acceptance DB (via Docker network, image ${IMAGE_NAME}:${IMAGE_TAG})..."
+# Usa la imagen ya construida (no monta el workspace: Jenkins-in-Docker + docker.sock
+# no expone rutas del contenedor Jenkins al daemon de forma fiable).
 docker run --rm \
   --network "$NETWORK_NAME" \
-  -v "${BACKEND_DIR}:/app" \
-  -w /app \
   -e MONGODB_URI="mongodb://${ACCEPTANCE_MONGO_CONTAINER}:27017/acceptance" \
   -e KARATE_ADMIN_EMAIL \
   -e KARATE_ADMIN_PASSWORD \
-  node:20-alpine \
+  "${IMAGE_NAME}:${IMAGE_TAG}" \
   node scripts/seedAcceptanceDb.js | tee "$SEED_OUT"
 
 PROJECT_ID="$(grep '^KARATE_PROJECT_ID=' "$SEED_OUT" | cut -d= -f2)"

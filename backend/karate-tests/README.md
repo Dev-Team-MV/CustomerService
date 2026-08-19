@@ -6,7 +6,7 @@ Suite amplia de API (`@wide`) más smoke (`@smoke`). Por defecto se excluyen esc
 
 - JDK 17+
 - Backend reachable (`npm run start` / Docker)
-- Para gate aislado: Docker + Docker Compose
+- Para gate aislado: Docker (los scripts usan `docker run`; Compose es opcional)
 
 Maven via `./mvnw` (no hace falta Maven global).
 

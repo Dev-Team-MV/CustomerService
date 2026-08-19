@@ -5,7 +5,7 @@
 // Acceptance (Karate):
 //   Develop  → post-deploy suite amplia (~@external) vía red Docker deploy_app-network; fallo → rollback
 //   Production → pre-deploy: Mongo aislado + seed + API temporal en acceptance-net; si falla → NO Deploy pdn
-// Requisitos agente: Docker, docker compose (JDK no requerido: Karate corre en contenedor Maven)
+// Requisitos agente: Docker (Compose NO requerido; scripts usan docker run)
 // Health check usa docker exec (Jenkins-in-Docker no ve localhost:hostPort)
 // Credenciales opcionales: karate-acceptance-admin | env KARATE_ADMIN_* / KARATE_PROJECT_ID
 //

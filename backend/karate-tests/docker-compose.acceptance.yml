@@ -1,4 +1,6 @@
 # Mongo aislado estilo Testcontainers para gate de aceptación (no toca Atlas ni pdn).
+# Opcional para uso local. En Jenkins, start/stop-acceptance-stack.sh usan `docker run`
+# (el agente no siempre tiene el plugin `docker compose`).
 services:
   mongo-acceptance:
     image: mongo:7
