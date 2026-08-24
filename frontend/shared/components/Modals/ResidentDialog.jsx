@@ -55,8 +55,6 @@ const ResidentDialog = ({
 
   // ✅ 2. Manejador específico para el autocompletado de Google
   const handleCountryChange = (newValue) => {
-    // Google Places devuelve un objeto { label: "Colombia", value: { description: "Colombia", place_id: "..." } }
-    // O puede ser null si el usuario borra el campo.
     const countryName = newValue ? newValue.label : ''
     handleFieldChange('country', countryName)
   }
@@ -67,9 +65,9 @@ const ResidentDialog = ({
     onSubmit() 
   }
 
-  // ── Actions ───────────────────────────────────────────────
+  // ── Actions (con ID para el tour) ────────────────────────
   const modalActions = (
-    <>
+    <Box id="resident-actions" sx={{ display: 'flex', gap: 2, width: '100%' }}>
       <Button
         onClick={onClose}
         sx={{
@@ -97,7 +95,7 @@ const ResidentDialog = ({
       >
         {selectedUser ? t('dialog.update') : t('dialog.sendInvitation')}
       </PrimaryButton>
-    </>
+    </Box>
   )
 
   // ✅ 4. Validación robusta para asegurar que el valor sea un string válido
@@ -115,9 +113,11 @@ const ResidentDialog = ({
       subtitle={t('dialog.invitationMessage')}
       maxWidth="md"
       actions={modalActions}
+      dialogProps={{ id: 'resident-dialog' }} // ✅ ID para el contenedor principal del modal
     >
       {/* INFO ALERT */}
       <Alert
+        id="resident-info-alert" // ✅ ID para el tour
         severity="info"
         sx={{
           mb: 2,
@@ -134,32 +134,35 @@ const ResidentDialog = ({
       {/* FORM FIELDS */}
       <Grid container spacing={2} sx={{ mt: 1 }}>
 
-        {/* First Name */}
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            required
-            label={t('dialog.firstName')}
-            value={formData.firstName}
-            onChange={(e) => handleFieldChange('firstName', e.target.value)}
-            sx={fieldSx}
-          />
+        {/* ✅ Nombre y Apellido agrupados con ID */}
+        <Grid item xs={12} id="resident-name-fields">
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                required
+                label={t('dialog.firstName')}
+                value={formData.firstName}
+                onChange={(e) => handleFieldChange('firstName', e.target.value)}
+                sx={fieldSx}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                required
+                label={t('dialog.lastName')}
+                value={formData.lastName}
+                onChange={(e) => handleFieldChange('lastName', e.target.value)}
+                sx={fieldSx}
+              />
+            </Grid>
+          </Grid>
         </Grid>
 
-        {/* Last Name */}
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            required
-            label={t('dialog.lastName')}
-            value={formData.lastName}
-            onChange={(e) => handleFieldChange('lastName', e.target.value)}
-            sx={fieldSx}
-          />
-        </Grid>
-
-        {/* Email */}
-        <Grid item xs={12} sm={6}>
+        {/* ✅ Email con ID */}
+        <Grid item xs={12} sm={6} id="resident-email-field">
           <TextField
             fullWidth
             required
@@ -171,8 +174,8 @@ const ResidentDialog = ({
           />
         </Grid>
 
-        {/* Phone */}
-        <Grid item xs={12} sm={6}>
+        {/* ✅ Teléfono con ID */}
+        <Grid item xs={12} sm={6} id="resident-phone-field">
           <Box>
             <PhoneInput
               country="us"
@@ -231,12 +234,11 @@ const ResidentDialog = ({
           </Box>
         </Grid>
 
-        {/* ✅ NUEVO: Country con Google Places Autocomplete */}
-        <Grid item xs={12} sm={6}>
+        {/* ✅ País con ID */}
+        <Grid item xs={12} sm={6} id="resident-country-field">
           <GooglePlacesAutocomplete
             apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
             selectProps={{
-              // ✅ Usamos countryValue que garantiza el formato correcto { label, value }
               value: countryValue ? { label: countryValue, value: countryValue } : null,
               onChange: handleCountryChange,
               placeholder: t('dialog.selectCountry', 'Selecciona un país...'),
@@ -300,42 +302,45 @@ const ResidentDialog = ({
           </Typography>
         </Grid>
 
-        {/* Birthday */}
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            type="date"
-            label={t('dialog.birthday')}
-            value={formData.birthday}
-            onChange={(e) => handleFieldChange('birthday', e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            sx={fieldSx}
-          />
-        </Grid>
+        {/* ✅ Fecha de Nacimiento y Rol agrupados con ID */}
+        <Grid item xs={12} id="resident-birthday-role">
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                type="date"
+                label={t('dialog.birthday')}
+                value={formData.birthday}
+                onChange={(e) => handleFieldChange('birthday', e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={fieldSx}
+              />
+            </Grid>
 
-        {/* Role */}
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            select
-            label={t('dialog.role')}
-            value={formData.role}
-            onChange={(e) => handleFieldChange('role', e.target.value)}
-            sx={fieldSx}
-          >
-            <MenuItem value="user" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
-              {t('dialog.roles.user')}
-            </MenuItem>
-            <MenuItem value="admin" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
-              {t('dialog.roles.admin')}
-            </MenuItem>
-            <MenuItem value="superadmin" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
-              {t('dialog.roles.superadmin')}
-            </MenuItem>
-            <MenuItem value="owner" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
-              {t('dialog.roles.owner')}
-            </MenuItem>
-          </TextField>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                select
+                label={t('dialog.role')}
+                value={formData.role}
+                onChange={(e) => handleFieldChange('role', e.target.value)}
+                sx={fieldSx}
+              >
+                <MenuItem value="user" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
+                  {t('dialog.roles.user')}
+                </MenuItem>
+                <MenuItem value="admin" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
+                  {t('dialog.roles.admin')}
+                </MenuItem>
+                <MenuItem value="superadmin" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
+                  {t('dialog.roles.superadmin')}
+                </MenuItem>
+                <MenuItem value="owner" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
+                  {t('dialog.roles.owner')}
+                </MenuItem>
+              </TextField>
+            </Grid>
+          </Grid>
         </Grid>
 
         {/* Password (only when editing) */}
@@ -358,4 +363,4 @@ const ResidentDialog = ({
   )
 }
 
-export default ResidentDialog 
+export default ResidentDialog

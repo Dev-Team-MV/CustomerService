@@ -1,5 +1,4 @@
-// apps/mv-crm/src/pages/Sales.jsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import {
@@ -19,8 +18,16 @@ import crmReportsService from '../services/crmReportsService'
 import ExportButton from '../components/ExportButton'
 import leadService from '../services/leadService'
 
+// ✅ IMPORTS PARA EL TOUR
+import { useTour } from '@shared/tours/useTour'
+import TourButton from '@shared/tours/TourButton'
+import { getSalesTourSteps, salesTourConfig } from '../tours/modules/salesTour'
+import { getLeadModalTourSteps, leadModalTourConfig } from '../tours/features/leadModalTour'
+import { getLeadDetailsTourSteps, leadDetailsTourConfig } from '../tours/features/leadDetailsTour'
+
 export default function Sales() {
   const { t } = useTranslation('leads')
+  const { t: tCommon } = useTranslation('common')
   
   const [searchParams, setSearchParams] = useSearchParams()
   const leadIdFromUrl = searchParams.get('leadId')
@@ -48,6 +55,14 @@ export default function Sales() {
   const [conversionResult, setConversionResult] = useState(null)
   const [searchValue, setSearchValue] = useState('')
   const [sortBy, setSortBy] = useState('createdAt')
+
+  // ✅ ESTADOS DEL TOUR
+  const [isTourMode, setIsTourMode] = useState(false)
+  const { startTour, pauseTour, resumeTour } = useTour()
+  const tourSteps = getSalesTourSteps(tCommon)
+  const modalSteps = getLeadModalTourSteps(tCommon)
+  const detailsSteps = getLeadDetailsTourSteps(tCommon)
+  const tourOptionsRef = useRef(null)
 
   useEffect(() => {
     if (leadIdFromUrl && !loading) {
@@ -181,37 +196,166 @@ export default function Sales() {
     }
   ]
 
-  // ✅ Estilos unificados
+
+  // ✅ LÓGICA DE INTERCEPCIÓN DEL TOUR
+  const handleTourNextClick = (driverObj) => {
+    const currentIndex = driverObj.getActiveIndex()
+    console.log('🔍 Tour Next Click - Índice actual:', currentIndex)
+    
+    setIsTourMode(true)
+
+    // PASO 1: Botón Nuevo Lead (Iniciar subtour del modal)
+    if (currentIndex === 1) {
+      const newLeadBtn = document.getElementById('sales-new-lead-btn')
+      if (newLeadBtn) {
+        console.log('✅ Botón encontrado, haciendo clic...')
+        newLeadBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+        pauseTour()
+        
+        let attempts = 0
+        const checkModal = setInterval(() => {
+          attempts++
+          const modalEl = document.getElementById('lead-modal-dialog')
+          
+          if (attempts % 10 === 0) {
+            console.log(`🔍 Buscando modal... (intento ${attempts})`, modalEl ? 'ENCONTRADO' : 'NO ENCONTRADO')
+          }
+
+          if (modalEl) {
+            clearInterval(checkModal)
+            console.log('✅ Modal de Lead encontrado en el DOM. Iniciando subtour...')
+            setTimeout(() => {
+              startTour(leadModalTourConfig.id, modalSteps, {
+                onNextClick: (driver) => driver.moveNext(),
+                onCloseClick: () => {
+                  document.getElementById('lead-modal-cancel-btn')?.click()
+                  setTimeout(() => resumeTour(2, tourSteps, tourOptionsRef.current), 400)
+                },
+                onDestroyStarted: () => {
+                  document.getElementById('lead-modal-cancel-btn')?.click()
+                  setTimeout(() => resumeTour(2, tourSteps, tourOptionsRef.current), 400)
+                }
+              })
+            }, 400)
+          } else if (attempts > 50) {
+            // Timeout de seguridad para evitar bucles infinitos
+            clearInterval(checkModal)
+            console.warn('⚠️ Timeout: No se encontró el modal después de 50 intentos. Avanzando...')
+            driverObj.moveNext()
+          }
+        }, 150)
+      } else {
+        console.warn('⚠️ Botón sales-new-lead-btn no encontrado')
+        driverObj.moveNext()
+      }
+      return
+    }
+
+    // PASO 5: Tarjeta de Lead (Iniciar subtour de detalles)
+    if (currentIndex === 5) {
+      const firstLeadCard = document.querySelector('[data-tour-lead-card="true"]')
+      if (firstLeadCard) {
+        console.log('✅ Tarjeta de Lead encontrada. Simulando clic...')
+        firstLeadCard.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+        pauseTour()
+        
+        const checkDrawer = setInterval(() => {
+          if (document.getElementById('lead-details-drawer')) {
+            clearInterval(checkDrawer)
+            console.log('✅ Drawer de Detalles encontrado. Iniciando subtour...')
+            setTimeout(() => {
+              startTour(leadDetailsTourConfig.id, detailsSteps, {
+                onNextClick: (driver) => driver.moveNext(),
+                onCloseClick: () => {
+                  document.getElementById('lead-details-close-btn')?.click()
+                  setTimeout(() => resumeTour(6, tourSteps, tourOptionsRef.current), 400)
+                },
+                onDestroyStarted: () => {
+                  document.getElementById('lead-details-close-btn')?.click()
+                  setTimeout(() => resumeTour(6, tourSteps, tourOptionsRef.current), 400)
+                }
+              })
+            }, 400)
+          }
+        }, 150)
+      } else {
+        console.warn('⚠️ No hay tarjetas de Lead para mostrar. Avanzando...')
+        driverObj.moveNext()
+      }
+      return
+    }
+
+    // Para el resto de pasos, avance normal
+    driverObj.moveNext()
+  }
+
+  const tourOptions = {
+    onNextClick: handleTourNextClick,
+    onPrevClick: (driverObj) => driverObj.movePrevious(),
+    onDestroy: () => {
+      console.log('🛑 Tour de Ventas destruido, limpiando modo tour')
+      setIsTourMode(false)
+      setModalOpen(false)
+      setDetailsLead(null)
+    }
+  }
+  tourOptionsRef.current = tourOptions
+
   const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
   const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }
 
   return (
     <PageLayout title={t('title')} titleBold={t('titleBold')} topbarLabel={t('topbarLabel')} subtitle={t('description')}>
-      <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <Box display="flex" gap={2} mb={3} flexWrap="wrap" alignItems="center">
-          <TextField
-            placeholder={t('searchPlaceholder')}
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            size="small"
-            sx={{ width: 300, ...inputSx }}
-            InputProps={{ startAdornment: <InputAdornment position="start"><Search sx={{ color: '#aaa' }} /></InputAdornment> }}
+      {/* ✅ ID: Contenedor Principal */}
+      <Box id="sales-page-container" sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        
+        {/* ✅ Botón del Tour */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <TourButton 
+            tourId={salesTourConfig.id}
+            steps={tourSteps}
+            label={tCommon('tour.sales.button', 'Ver guía de Ventas')}
+            options={tourOptions}
           />
+        </Box>
 
-          <ToggleButtonGroup value={sortBy} exclusive onChange={(e, value) => value && setSortBy(value)} size="small" sx={{ '& .MuiToggleButton-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem', textTransform: 'none', borderRadius: 0, py: 0.75, border: '1px solid #000', color: '#000', '&.Mui-selected': { bgcolor: '#000', color: '#fff' } } }}>
-            <ToggleButton value="createdAt"><CalendarToday sx={{ fontSize: 14, mr: 0.5 }} />{t('sort.recent', 'Recientes')}</ToggleButton>
-            <ToggleButton value="score"><TrendingUp sx={{ fontSize: 14, mr: 0.5 }} />{t('sort.priority', 'Prioridad')}</ToggleButton>
-          </ToggleButtonGroup>
+        <Box display="flex" gap={2} mb={3} flexWrap="wrap" alignItems="center">
+          {/* ✅ ID: Búsqueda y Filtros */}
+          <Box id="sales-search-filter" sx={{ display: 'flex', gap: 2, flex: 1, flexWrap: 'wrap' }}>
+            <TextField
+              placeholder={t('searchPlaceholder')}
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              size="small"
+              sx={{
+                width: 300,
+                ...inputSx,
+                '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace' },
+                '& .MuiInputBase-input::placeholder': { fontFamily: '"Courier New", monospace', opacity: 1 },
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search sx={{ color: '#aaa' }} />
+                  </InputAdornment>
+                ),
+              }}
+            />
 
-          {sortBy === 'score' && (
-            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#888', letterSpacing: '0.5px' }}>
-              {t('sort.scoreInfo', 'Ordenando por score (mayor = más caliente)')}
-            </Typography>
-          )}
+            <ToggleButtonGroup value={sortBy} exclusive onChange={(e, value) => value && setSortBy(value)} size="small" sx={{ '& .MuiToggleButton-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem', textTransform: 'none', borderRadius: 0, py: 0.75, border: '1px solid #000', color: '#000', '&.Mui-selected': { bgcolor: '#000', color: '#fff' } } }}>
+              <ToggleButton value="createdAt"><CalendarToday sx={{ fontSize: 14, mr: 0.5 }} />{t('sort.recent', 'Recientes')}</ToggleButton>
+              <ToggleButton value="score"><TrendingUp sx={{ fontSize: 14, mr: 0.5 }} />{t('sort.priority', 'Prioridad')}</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
 
           <Box display="flex" gap={2} flexWrap="wrap" sx={{ ml: 'auto' }}>
-            <ExportButton label={t('exportButton')} exportFn={crmReportsService.exportLeads} withModal={true} filters={exportFilters} />
-            <Button variant="contained" startIcon={<Add />} onClick={() => handleAddLead('nuevo')} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', fontWeight: 600, '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+            {/* ✅ ID: Botón Exportar */}
+            <Box id="sales-export-btn">
+              <ExportButton label={t('exportButton')} exportFn={crmReportsService.exportLeads} withModal={true} filters={exportFilters} />
+            </Box>
+            
+            {/* ✅ ID: Botón Nuevo Lead */}
+            <Button id="sales-new-lead-btn" variant="contained" startIcon={<Add />} onClick={() => handleAddLead('nuevo')} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', fontWeight: 600, '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
               {t('newLead')}
             </Button>
           </Box>
@@ -222,18 +366,24 @@ export default function Sales() {
         {loading ? (
           <Box display="flex" justifyContent="center" alignItems="center" flex={1}><CircularProgress /></Box>
         ) : (
-          <KanbanBoard
-            stages={stages}
-            groupedByStage={filteredGroupedByStage}
-            onLeadClick={handleViewLead}
-            onAddLead={handleAddLead}
-            onEditLead={handleEditLead}
-            onDeleteLead={handleDeleteLead}
-            onMoveLead={handleMoveLead}
-            onConvertLead={handleConvertLead}
-            onScoreUpdate={handleScoreUpdate}
-          />
+          // ✅ ID: Kanban Board (Wrapper simple para no romper el layout interno del Kanban)
+          <Box id="sales-kanban-board" sx={{ width: '100%' }}>
+            <KanbanBoard
+              stages={stages}
+              groupedByStage={filteredGroupedByStage}
+              onLeadClick={handleViewLead}
+              onAddLead={handleAddLead}
+              onEditLead={handleEditLead}
+              onDeleteLead={handleDeleteLead}
+              onMoveLead={handleMoveLead}
+              onConvertLead={handleConvertLead}
+              onScoreUpdate={handleScoreUpdate}
+            />
+          </Box>
         )}
+
+        {/* ✅ Elemento invisible para el paso final */}
+        <Box id="sales-finish" sx={{ height: 1 }} />
 
         <LeadModal
           open={modalOpen}

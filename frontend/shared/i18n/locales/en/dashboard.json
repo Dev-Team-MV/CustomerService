@@ -1,101 +1,190 @@
 {
-    "welcomeUser": "Welcome, {{name}}",
-    "overviewSubtitle": "Your Dashboard Overview",
-    "propertyMap": "Property Map",
-    "title": "6 Town Houses",
-    "titleMV":"All",
-    "subtitle": "Control Panel",
-    "quickActions": {
+  "welcomeUser": "Welcome, {{name}}",
+  "overviewSubtitle": "Your Dashboard Summary",
+  "propertyMap": "Property Map",
+  "title": "6 Town Houses",
+  "titleMV": "All",
+  "subtitle": "Dashboard",
+  "quickActions": {
+    "title": "Quick Actions",
+    "subtitle": "Manage your project",
+    "newQuote": "New Quote",
+    "newQuoteDesc": "Create quote for client",
+    "viewProperties": "View Properties",
+    "viewPropertiesDesc": "Manage inventory",
+    "clients": "Clients",
+    "clientsDesc": "Manage clients",
+    "news": "News",
+    "newsDesc": "View news",
+    "addProperty": "Add Property",
+    "addPropertyDesc": "Create new property",
+    "inviteUser": "Invite User",
+    "inviteUserDesc": "Send invitation",
+    "analytics": "Analytics",
+    "analyticsDesc": "View reports",
+    "models": "Models",
+    "modelsDesc": "Explore designs",
+    "amenities": "Amenities",
+    "amenitiesDesc": "View facilities",
+    "manageNews": "Manage News",
+    "manageNewsDesc": "Latest updates",
+    "clubHouse": "Club House",
+    "clubHouseDesc": "View club house",
+    "newsFeed": "News Feed",
+    "newsFeedDesc": "Latest updates",
+    "referrals": "Referrals",
+    "referralsDesc": "Manage referrals",
+    "addClient": "Add Client"
+  },
+  "masterPlan": {
+    "title": "Project View",
+    "loading": "Loading master plan...",
+    "noImage": "Project Master Plan",
+    "noImageDesc": "No master plan image configured"
+  },
+  "recentQuotes": {
+    "title": "Recent Quotes",
+    "noQuotes": "No recent quotes",
+    "customer": "Customer",
+    "property": "Property",
+    "date": "Date",
+    "pending": "Pending",
+    "completed": "Completed"
+  },
+  "stats": {
+    "lotsListedSold": "Lots Listed / Sold",
+    "monthlyRevenue": "Monthly Revenue",
+    "lotsOnHold": "Lots on Hold",
+    "occupancyRate": "Occupancy Rate",
+    "thisMonth": "this month",
+    "noChangeThisMonth": "No change this month",
+    "vsLastMonth": "vs last month",
+    "noChangeVsLastMonth": "No change vs last month",
+    "ofTotalInventory": "of total inventory",
+    "ofSold": "{{sold}} of {{total}} sold"
+  },
+  "recentPayloads": {
+    "title": "Recent Payments",
+    "noPayloads": "No recent payments found",
+    "lot": "Lot {{number}}"
+  },
+  "titleBold": "The Projects",
+  "topbarLabel": "All Projects — Real-time monitoring",
+  "sidebarStats": {
+    "projects": "Projects",
+    "users": "Users",
+    "clients": "Clients"
+  },
+  "createProject": "Create Project",
+  "selectProject": "Select a project",
+  "openDashboard": "Open Project Dashboard",
+  "metrics": {
+    "users": "Users",
+    "revenue": "Revenue",
+    "growth": "Growth",
+    "tasks": "Tasks",
+    "performance": "Performance",
+    "totalUsers": "Total Users",
+    "monthlyRecurring": "Monthly recurring",
+    "thisMonth": "+{{growth}}% this month",
+    "complete": "{{percent}}% Completed",
+    "totalClients": "Total Clients",
+    "registeredOwners": "Registered owners",
+    "totalCollected": "Collected",
+    "totalPending": "Pending",
+    "phase": "Phase",
+    "clients": "clients"
+  },
+  "empty": "Select a project to see details",
+  "titleISQL": "ISQL Dashboard",
+  "subtitleISQ": "Welcome to the ISQ system",
+  "tour": {
+    "dashboard": {
+      "button": "View dashboard guide",
+      "welcome": {
+        "title": "Welcome to the Dashboard",
+        "description": "This is your central view. From here you manage all projects, clients, and financial metrics. I will guide you through the main sections."
+      },
+      "sidebar": {
+        "title": "Navigation Menu",
+        "description": "Access all CRM modules: Clients, Projects, Sales, Campaigns, Automations, and more."
+      },
+      "topbar": {
+        "language": {
+          "title": "Language Switch",
+          "description": "Switch between Spanish and English for the entire CRM interface. This setting is saved in your session."
+        },
+        "search": {
+          "title": "Global Search",
+          "description": "Search for clients, projects, leads, and more from anywhere in the system. Shortcut: ⌘K or Ctrl+K."
+        },
+        "notificationCreator": {
+          "title": "Create Notification",
+          "description": "Send personalized notifications to specific users or groups. Only available to administrators."
+        },
+        "notificationBell": {
+          "title": "Notification Center",
+          "description": "Review system alerts, overdue payments, upcoming activities, and messages. The red badge indicates unread notifications."
+        },
+        "clock": {
+          "title": "System Time",
+          "description": "Shows the current real-time clock. Useful for coordinating activities and appointments with clients."
+        }
+      },
+      "quickActions": {
         "title": "Quick Actions",
-        "subtitle": "Manage your project",
-        "newQuote": "New Quote",
-        "newQuoteDesc": "Create quote for customer",
-        "viewProperties": "View Properties",
-        "viewPropertiesDesc": "Manage inventory",
-        "clients": "Clients",
-        "clientsDesc": "Manage clients",
-        "news": "News",
-        "newsDesc": "View news",
-        "addProperty": "Add Property",
-        "addPropertyDesc": "Create new property",
-        "inviteUser": "Invite User",
-        "inviteUserDesc": "Send invitation",
-        "analytics": "Analytics",
-        "analyticsDesc": "View reports",
-        "models": "Models",
-        "modelsDesc": "Browse designs",
-        "amenities": "Amenities",
-        "amenitiesDesc": "View facilities",
-        "manageNews": "Manage News",
-        "manageNewsDesc": "Latest updates",
-        "clubHouse": "Club House",
-        "clubHouseDesc": "View club house",
-        "newsFeed": "News Feed",
-        "newsFeedDesc": "Latest updates",
-        "referrals": "Referrals",
-        "referralsDesc": "Manage referrals",
-        "addClient": "Add Client"
-    },
-    "masterPlan": {
-        "title": "Project View",
-        "loading": "Loading master plan...",
-        "noImage": "Project Master Plan",
-        "noImageDesc": "No master plan image configured"
-    },
-    "recentQuotes": {
-        "title": "Recent Quotes",
-        "noQuotes": "No recent quotes",
-        "customer": "Customer",
-        "property": "Property",
-        "date": "Date",
-        "pending": "Pending",
-        "completed": "Completed"
-    },
-    "stats": {
-        "lotsListedSold": "Lots Listed / Sold",
-        "monthlyRevenue": "Monthly Revenue",
-        "lotsOnHold": "Lots on Hold",
-        "occupancyRate": "Occupancy Rate",
-        "thisMonth": "this month",
-        "noChangeThisMonth": "No change this month",
-        "vsLastMonth": "vs last month",
-        "noChangeVsLastMonth": "No change vs last month",
-        "ofTotalInventory": "of total inventory",
-        "ofSold": "{{sold}} of {{total}} sold"
-    },
-    "recentPayloads": {
-        "title": "Recent Payloads",
-        "noPayloads": "No recent payloads found",
-        "lot": "Lot {{number}}"
-    },
-    "titleBold": "Projects",
-    "topbarLabel": "All Projects — Real-time monitoring",
-    "sidebarStats": {
-        "projects": "Projects",
-        "users": "Users",
-        "clients": "Clients"
-    },
-    "createProject": "Create Project",
-    "selectProject": "Select Project",
-    "openDashboard": "Open Project Dashboard",
-    "metrics": {
-        "users": "Users",
-        "revenue": "Revenue",
-        "growth": "Growth",
-        "tasks": "Tasks",
-        "performance": "Performance",
-        "totalUsers": "Total Users",
-        "monthlyRecurring": "Monthly recurring",
-        "thisMonth": "+{{growth}}% this month",
-        "complete": "{{percent}}% Complete",
-        "totalClients": "Total Clients",
-        "registeredOwners": "Registered owners",
-        "totalCollected": "Collected",
-        "totalPending": "Pending",
-        "phase": "Phase",
-        "clients": "clients"
-    },
-    "empty": "Select a project to view details",
-    "titleISQL": "ISQL Dashboard",
-    "subtitleISQ": "Welcome to the ISQ system"
+        "description": "The two most used buttons in the CRM: create a new real estate project or register a new client/resident."
+      },
+      "createProject": {
+        "title": "Create Project",
+        "description": "Open the wizard to register a new project with all its information, multimedia, and variable configuration."
+      },
+      "addClient": {
+        "title": "Add Client",
+        "description": "Register a new resident. They will receive an SMS invitation with instructions to set up their access."
+      },
+      "statsStrip": {
+        "title": "Global Indicators",
+        "description": "Consolidated view of your entire portfolio: total projects, clients, amount collected, and pending."
+      },
+      "projectList": {
+        "title": "Project List",
+        "description": "All your projects with their client counter. Click on any to see detailed metrics."
+      },
+      "projectCard": {
+        "title": "Project Card",
+        "description": "Shows the project name and how many clients it has registered. When selected, details load on the right."
+      },
+      "projectDetail": {
+        "title": "Project Detail",
+        "description": "Here you see specific metrics for the selected project: clients, amount collected, pending, and current status."
+      },
+      "metrics": {
+        "clients": {
+          "title": "Project Clients",
+          "description": "Number of owners registered in this specific project."
+        },
+        "collected": {
+          "title": "Amount Collected",
+          "description": "Total money effectively collected from this project. A key cash flow indicator."
+        },
+        "pending": {
+          "title": "Pending Amount",
+          "description": "Total to be collected. A high number may indicate the need to activate collection campaigns."
+        },
+        "phase": {
+          "title": "Phase and Status",
+          "description": "Indicates what construction phase the project is in and whether it is active or inactive."
+        }
+      },
+      "openProject": {
+        "title": "Open Project Portal",
+        "description": "Opens the project's public portal in a new tab, where residents can view their properties, documents, and pay their dues."
+      },
+      "finish": {
+        "title": "Ready!",
+        "description": "You now know the Dashboard. Each module has its own guided tour. Explore the CRM with confidence!"
+      }
+    }
+  }
 }

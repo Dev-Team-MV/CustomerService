@@ -39,8 +39,12 @@
     "scheduleAppointment": "Agendar cita",
     "notFound": "Cliente no encontrado",
     "errorLoading": "Error al cargar cliente",
-        "sendMessage": "Enviar Mensaje",
-    "exportClients": "Exportar Clientes"
+    "sendMessage": "Enviar Mensaje",
+    "exportClients": "Exportar Clientes",
+        "export": {
+      "project": "Project",
+      "allProjects": "All Projects"
+    }
   },
 
   "stats": {
@@ -109,7 +113,10 @@
     "cancel": "Cancelar",
     "save": "Guardar",
     "sendInvitation": "Enviar Invitación",
-    "update": "Actualizar Residente"
+    "update": "Actualizar Residente",
+    "country": "País",
+    "selectCountry": "Selecciona un país",
+    "phoneFormatHelper": "El formato E.164 se genera automáticamente al seleccionar el país"
   },
 
   "overview": {
@@ -214,79 +221,116 @@
     "column": "Columna"
   },
 
-"audit": {
-  "title": "Auditoría",
-  "titleBold": "Sistema",
-  "topbarLabel": "Registro de actividad",
-  "subtitle": "Registro global de actividad del sistema",
-  "globalSubtitle": "Registro global de actividad del sistema",
-  "errorLoading": "Error al cargar el audit log",
-  
-  "accessDeniedTitle": "Acceso denegado",
-  "accessDeniedMessage": "Solo los super administradores pueden acceder al audit log del sistema.",
-  
-  "historyTitle": "Historial de cambios",
-  "refresh": "Actualizar",
-  "filters": "Filtros",
-  "filterAction": "Acción",
-  "allActions": "Todas",
-  "allEntities": "Todas",
-  "dateFrom": "Desde",
-  "dateTo": "Hasta",
-  "clearFilters": "Limpiar",
-  "applyFilters": "Aplicar",
-  "noLogs": "No hay registros de actividad",
-  "showing": "Mostrando",
-  "of": "de",
-  "entries": "registros",
-  "entityLabel": "Entidad",
-  "user": "Usuario",
-  "action": "Acción",
-  "entity": "Entidad",
-  "changes": "Cambios",
-  "timestamp": "Fecha",
-  "detailsTitle": "Detalles del cambio",
-  "ip": "IP",
-  "date": "Fecha",
-  "modifiedFields": "Campos modificados",
-  "before": "Antes",
-  "after": "Después",
-  "fullData": "Datos completos (JSON)",
-  "noChanges": "Sin cambios",
-  "system": "Sistema",
-  "clickToSeeDetails": "Click para ver detalles",
-  
-  "totalRecords": "registros totales",
-  "pages": "páginas",
-  "activeFilters": "filtros activos",
-  "page": "Página",
-  
-  "entityId": "ID de entidad",
-  "entityIdPlaceholder": "Ej: 69a73ce5b20401b061da6451",
-  "userId": "ID de usuario",
-  "userIdPlaceholder": "Ej: 695ec1a01b94d9903358a0db",
-  
-  "entities": {
-    "Lead": "Lead",
-    "Client": "Cliente",
-    "Activity": "Actividad",
-    "Appointment": "Cita",
-    "Campaign": "Campaña"
+  "audit": {
+    "title": "Auditoría",
+    "titleBold": "Sistema",
+    "topbarLabel": "Registro de actividad",
+    "subtitle": "Registro global de actividad del sistema",
+    "globalSubtitle": "Registro global de actividad del sistema",
+    "errorLoading": "Error al cargar el audit log",
+    
+    "accessDeniedTitle": "Acceso denegado",
+    "accessDeniedMessage": "Solo los super administradores pueden acceder al audit log del sistema.",
+    
+    "historyTitle": "Historial de cambios",
+    "refresh": "Actualizar",
+    "filters": "Filtros",
+    "filterAction": "Acción",
+    "allActions": "Todas",
+    "allEntities": "Todas",
+    "dateFrom": "Desde",
+    "dateTo": "Hasta",
+    "clearFilters": "Limpiar",
+    "applyFilters": "Aplicar",
+    "noLogs": "No hay registros de actividad",
+    "showing": "Mostrando",
+    "of": "de",
+    "entries": "registros",
+    "entityLabel": "Entidad",
+    "user": "Usuario",
+    "action": "Acción",
+    "entity": "Entidad",
+    "changes": "Cambios",
+    "timestamp": "Fecha",
+    "detailsTitle": "Detalles del cambio",
+    "ip": "IP",
+    "date": "Fecha",
+    "modifiedFields": "Campos modificados",
+    "before": "Antes",
+    "after": "Después",
+    "fullData": "Datos completos (JSON)",
+    "noChanges": "Sin cambios",
+    "system": "Sistema",
+    "clickToSeeDetails": "Click para ver detalles",
+    
+    "totalRecords": "registros totales",
+    "pages": "páginas",
+    "activeFilters": "filtros activos",
+    "page": "Página",
+    
+    "entityId": "ID de entidad",
+    "entityIdPlaceholder": "Ej: 69a73ce5b20401b061da6451",
+    "userId": "ID de usuario",
+    "userIdPlaceholder": "Ej: 695ec1a01b94d9903358a0db",
+    
+    "entities": {
+      "Lead": "Lead",
+      "Client": "Cliente",
+      "Activity": "Actividad",
+      "Appointment": "Cita",
+      "Campaign": "Campaña"
+    },
+    
+    "time": {
+      "now": "Ahora",
+      "minutesAgo": "Hace {{count}}m",
+      "hoursAgo": "Hace {{count}}h",
+      "daysAgo": "Hace {{count}}d"
+    },
+    "actions": {
+      "created": "Creado",
+      "updated": "Actualizado",
+      "deleted": "Eliminado",
+      "stage_changed": "Cambio de etapa",
+      "sms_sent": "SMS enviado",
+      "login": "Login"
+    }
   },
-  
-  "time": {
-    "now": "Ahora",
-    "minutesAgo": "Hace {{count}}m",
-    "hoursAgo": "Hace {{count}}h",
-    "daysAgo": "Hace {{count}}d"
-  },
-  "actions": {
-    "created": "Creado",
-    "updated": "Actualizado",
-    "deleted": "Eliminado",
-    "stage_changed": "Cambio de etapa",
-    "sms_sent": "SMS enviado",
-    "login": "Login"
+
+  "tour": {
+    "residents": {
+      "welcome": {
+        "title": "Invitar Nuevo Residente",
+        "description": "Este modal te permite invitar nuevos residentes al sistema. Se les enviará un SMS con instrucciones para configurar su acceso."
+      },
+      "infoAlert": {
+        "title": "Mensaje de Invitación",
+        "description": "Este mensaje confirma que el residente recibirá un SMS con un enlace seguro para configurar su contraseña y acceder al portal."
+      },
+      "nameFields": {
+        "title": "Nombre y Apellido",
+        "description": "Ingresa el nombre completo del residente. Esta información aparecerá en el portal y en los reportes del CRM."
+      },
+      "email": {
+        "title": "Correo Electrónico",
+        "description": "El correo debe ser único en el sistema. Se usa para notificaciones y como credencial de acceso."
+      },
+      "phone": {
+        "title": "Número de Teléfono",
+        "description": "Campo crítico: el residente recibe el SMS de invitación aquí. El formato E.164 se genera automáticamente al seleccionar el país."
+      },
+      "country": {
+        "title": "País de Residencia",
+        "description": "Usa el autocompletado de Google para seleccionar el país. Esto ayuda a configurar correctamente el formato del teléfono y la zona horaria."
+      },
+      "birthdayRole": {
+        "title": "Fecha de Nacimiento y Rol",
+        "description": "La fecha de nacimiento es opcional. El rol determina los permisos del residente: user (básico), admin, superadmin o owner."
+      },
+      "actions": {
+        "title": "Enviar Invitación",
+        "description": "Al hacer clic en \"Enviar Invitación\", el sistema creará el usuario y enviará el SMS automáticamente. El botón se activa cuando todos los campos requeridos están completos."
+      }
+    }
   }
-}
 }

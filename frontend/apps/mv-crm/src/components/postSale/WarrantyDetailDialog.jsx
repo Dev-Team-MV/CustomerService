@@ -1,10 +1,9 @@
-// apps/mv-crm/src/components/postSale/WarrantyDetailDialog.jsx
 import { useState, useMemo } from 'react'
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
-  Box, Typography, Grid, Chip, Button, TextField, Divider, ImageList, ImageListItem 
+  Box, Typography, Grid, Chip, Button, TextField, Divider, ImageList, ImageListItem, IconButton
 } from '@mui/material'
-import { Home, Apartment, Business, Person, CalendarToday } from '@mui/icons-material'
+import { Home, Apartment, Business, Person, CalendarToday, Close } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 
 import WarrantyTimeline from './WarrantyTimeline'
@@ -60,7 +59,6 @@ export default function WarrantyDetailDialog({ open, onClose, warranty, onResolv
   let displayBuilding = t('common.na')
   let displayFloor = t('common.na')
 
-  // ✅ CORRECCIÓN: Validación segura contra null/undefined
   if (isApartment) {
     const apt = (typeof unit === 'object' && unit !== null) ? unit : apartments[unit]
     if (apt) {
@@ -106,141 +104,159 @@ export default function WarrantyDetailDialog({ open, onClose, warranty, onResolv
   const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' } }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ececec' }}>
+    // ✅ ID 1: Modal completo
+    <Dialog id="warranty-detail-modal" open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ececec', p: { xs: 2, sm: 3 } }}>
         <Typography variant="h6" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
           {t('warranty.claimDetails')} #{warranty._id.slice(-6)}
         </Typography>
-        <Chip 
-          label={t(`warranty.statuses.${warranty.status}`)} 
-          color={warranty.status === 'resolved' ? 'success' : warranty.status === 'rejected' ? 'error' : 'default'}
-          sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.65rem', fontWeight: 600 }}
-        />
+        <Box display="flex" alignItems="center" gap={1}>
+          <Chip 
+            label={t(`warranty.statuses.${warranty.status}`)} 
+            color={warranty.status === 'resolved' ? 'success' : warranty.status === 'rejected' ? 'error' : 'default'}
+            sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.65rem', fontWeight: 600 }}
+          />
+          {/* ✅ ID 2: Botón de cerrar */}
+          <IconButton id="warranty-detail-close-btn" onClick={onClose} size="small" sx={{ borderRadius: 0 }}>
+            <Close fontSize="small" />
+          </IconButton>
+        </Box>
       </DialogTitle>
 
-      <DialogContent dividers>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
-                <Person fontSize="small" /> {t('warranty.clientLabel')}
-              </Typography>
-              <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
-                {client?.firstName} {client?.lastName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>{client?.email} | {client?.phoneNumber}</Typography>
-            </Box>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
-                <Business fontSize="small" /> {t('warranty.projectLabel')}
-              </Typography>
-              <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{project?.name || project?.title?.es || t('common.na')}</Typography>
-            </Box>
-
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
-                {isApartment ? <Apartment fontSize="small" /> : <Home fontSize="small" />} {t('warranty.unit')}
-              </Typography>
-              <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
-                {displayUnit}
-              </Typography>
-              {isApartment && (
-                <Typography variant="body2" sx={{ fontFamily: '"Courier New", monospace' }}>
-                  {t('warranty.building')}: {displayBuilding} | {t('warranty.floor')} {displayFloor}
+      <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
+        {/* ✅ ID 3: Información General */}
+        <Box id="warranty-detail-info">
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
+                  <Person fontSize="small" /> {t('warranty.clientLabel')}
                 </Typography>
-              )}
-              {!isApartment && displayModel && (
-                <Typography variant="body2" sx={{ fontFamily: '"Courier New", monospace' }}>
-                  {t('warranty.model')}: {displayModel}
+                <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
+                  {client?.firstName} {client?.lastName}
                 </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>{client?.email} | {client?.phoneNumber}</Typography>
+              </Box>
+
+              <Divider sx={{ my: 2 }} />
+
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
+                  <Business fontSize="small" /> {t('warranty.projectLabel')}
+                </Typography>
+                <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{project?.name || project?.title?.es || t('common.na')}</Typography>
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
+                  {isApartment ? <Apartment fontSize="small" /> : <Home fontSize="small" />} {t('warranty.unit')}
+                </Typography>
+                <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
+                  {displayUnit}
+                </Typography>
+                {isApartment && (
+                  <Typography variant="body2" sx={{ fontFamily: '"Courier New", monospace' }}>
+                    {t('warranty.building')}: {displayBuilding} | {t('warranty.floor')} {displayFloor}
+                  </Typography>
+                )}
+                {!isApartment && displayModel && (
+                  <Typography variant="body2" sx={{ fontFamily: '"Courier New", monospace' }}>
+                    {t('warranty.model')}: {displayModel}
+                  </Typography>
+                )}
+              </Box>
+
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
+                  <CalendarToday fontSize="small" /> {t('warranty.createdAt')}
+                </Typography>
+                <Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{new Date(warranty.createdAt).toLocaleString()}</Typography>
+              </Box>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('warranty.category')} & {t('warranty.priority')}</Typography>
+                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                  <Chip label={t(`warranty.categories.${warranty.category}`)} size="small" variant="outlined" sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }} />
+                  <Chip 
+                    label={t(`warranty.priorities.${warranty.priority}`)} 
+                    size="small" 
+                    color={warranty.priority === 'high' || warranty.priority === 'emergency' ? 'error' : 'default'}
+                    sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}
+                  />
+                </Box>
+                
+                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('warranty.description')}</Typography>
+                <Box sx={{ p: 2, bgcolor: '#f5f5f5', borderRadius: 0, border: '1px solid #e0e0e0', mb: 2 }}>
+                  <Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{warranty.description}</Typography>
+                </Box>
+              </Box>
+
+              {warranty.photoUrls && warranty.photoUrls.length > 0 && (
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('warranty.photoEvidence')}</Typography>
+                  <ImageList sx={{ width: '100%', height: 200 }} cols={3} rowHeight={164}>
+                    {warranty.photoUrls.map((url, index) => (
+                      <ImageListItem key={index}>
+                        <img 
+                          src={url} 
+                          alt={`Evidencia ${index + 1}`} 
+                          style={{ borderRadius: 0, objectFit: 'cover', width: '100%', height: '100%', cursor: 'pointer', border: '1px solid #e0e0e0' }} 
+                          onClick={() => window.open(url, '_blank')} 
+                        />
+                      </ImageListItem>
+                    ))}
+                  </ImageList>
+                </Box>
               )}
-            </Box>
-
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
-                <CalendarToday fontSize="small" /> {t('warranty.createdAt')}
-              </Typography>
-              <Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{new Date(warranty.createdAt).toLocaleString()}</Typography>
-            </Box>
+            </Grid>
           </Grid>
-
-          <Grid item xs={12} md={6}>
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('warranty.category')} & {t('warranty.priority')}</Typography>
-              <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                <Chip label={t(`warranty.categories.${warranty.category}`)} size="small" variant="outlined" sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }} />
-                <Chip 
-                  label={t(`warranty.priorities.${warranty.priority}`)} 
-                  size="small" 
-                  color={warranty.priority === 'high' || warranty.priority === 'emergency' ? 'error' : 'default'}
-                  sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}
-                />
-              </Box>
-              
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('warranty.description')}</Typography>
-              <Box sx={{ p: 2, bgcolor: '#f5f5f5', borderRadius: 0, border: '1px solid #e0e0e0', mb: 2 }}>
-                <Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{warranty.description}</Typography>
-              </Box>
-            </Box>
-
-            {warranty.photoUrls && warranty.photoUrls.length > 0 && (
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('warranty.photoEvidence')}</Typography>
-                <ImageList sx={{ width: '100%', height: 200 }} cols={3} rowHeight={164}>
-                  {warranty.photoUrls.map((url, index) => (
-                    <ImageListItem key={index}>
-                      <img 
-                        src={url} 
-                        alt={`Evidencia ${index + 1}`} 
-                        style={{ borderRadius: 0, objectFit: 'cover', width: '100%', height: '100%', cursor: 'pointer', border: '1px solid #e0e0e0' }} 
-                        onClick={() => window.open(url, '_blank')} 
-                      />
-                    </ImageListItem>
-                  ))}
-                </ImageList>
-              </Box>
-            )}
-          </Grid>
-        </Grid>
+        </Box>
 
         <Divider sx={{ my: 3 }} />
-        <WarrantyTimeline events={timelineEvents} />
+        
+        {/* ✅ ID 4: Timeline */}
+        <Box id="warranty-detail-timeline">
+          <WarrantyTimeline events={timelineEvents} />
+        </Box>
 
         {!isAlreadyResolved && (
           <>
             <Divider sx={{ my: 3 }} />
-            <Typography variant="h6" sx={{ mb: 2, fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>{t('warranty.resolveClaim')}</Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
-                <TextField
-                  select
-                  fullWidth
-                  label={t('warranty.finalStatus')}
-                  value={resolveStatus}
-                  onChange={(e) => setResolveStatus(e.target.value)}
-                  SelectProps={{ native: true }}
-                  sx={inputSx}
-                >
-                  <option value="resolved">{t('warranty.statuses.resolved')}</option>
-                  <option value="rejected">{t('warranty.statuses.rejected')}</option>
-                </TextField>
+            
+            {/* ✅ ID 5: Acciones de Resolución */}
+            <Box id="warranty-detail-actions">
+              <Typography variant="h6" sx={{ mb: 2, fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>{t('warranty.resolveClaim')}</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    select
+                    fullWidth
+                    label={t('warranty.finalStatus')}
+                    value={resolveStatus}
+                    onChange={(e) => setResolveStatus(e.target.value)}
+                    SelectProps={{ native: true }}
+                    sx={inputSx}
+                  >
+                    <option value="resolved">{t('warranty.statuses.resolved')}</option>
+                    <option value="rejected">{t('warranty.statuses.rejected')}</option>
+                  </TextField>
+                </Grid>
+                <Grid item xs={12} md={8}>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={3}
+                    label={t('warranty.resolutionNotes')}
+                    value={resolutionText}
+                    onChange={(e) => setResolutionText(e.target.value)}
+                    required
+                    sx={{ ...inputSx, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12} md={8}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  label={t('warranty.resolutionNotes')}
-                  value={resolutionText}
-                  onChange={(e) => setResolutionText(e.target.value)}
-                  required
-                  sx={{ ...inputSx, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }}
-                />
-              </Grid>
-            </Grid>
+            </Box>
           </>
         )}
       </DialogContent>

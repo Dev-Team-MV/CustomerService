@@ -1,0 +1,9 @@
+export const getActivityDetailsTourSteps = (t) => [
+  { element: '#activity-details-drawer', popover: { title: t('tour.activityDetails.overview.title', 'Detalles de la Actividad'), description: t('tour.activityDetails.overview.description', 'Panel completo con toda la información, historial y acciones de la actividad.'), side: 'left', align: 'start' } },
+  { element: '#activity-details-related-projects', popover: { title: t('tour.activityDetails.projects.title', 'Proyectos Relacionados'), description: t('tour.activityDetails.projects.description', 'Muestra a qué proyectos inmobiliarios está vinculada esta actividad.'), side: 'left', align: 'start' } },
+  { element: '#activity-details-contact', popover: { title: t('tour.activityDetails.contact.title', 'Contacto'), description: t('tour.activityDetails.contact.description', 'Información de la persona (cliente o externo) asociada a esta tarea.'), side: 'left', align: 'start' } },
+  { element: '#activity-details-subtasks', popover: { title: t('tour.activityDetails.subtasks.title', 'Subtareas'), description: t('tour.activityDetails.subtasks.description', 'Desglosa la actividad principal en pasos más pequeños y manejables.'), side: 'left', align: 'start' } },
+  { element: '#activity-details-comments', popover: { title: t('tour.activityDetails.comments.title', 'Comentarios'), description: t('tour.activityDetails.comments.description', 'Espacio para dejar notas, actualizaciones o mensajes para el equipo.'), side: 'left', align: 'start' } },
+  { element: '#activity-details-actions', popover: { title: t('tour.activityDetails.actions.title', 'Acciones'), description: t('tour.activityDetails.actions.description', 'Edita la actividad o elimínala. Al cerrar, finalizaremos el tour.'), side: 'top', align: 'end' } }
+]
+export const activityDetailsTourConfig = { id: 'activity-details-tour', autoStart: false }

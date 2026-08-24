@@ -7,6 +7,9 @@ import {
   ArrowForward, Close, ContentCopy 
 } from '@mui/icons-material'
 
+// ==========================================
+// CONFIGURACIÓN DE ACCIONES
+// ==========================================
 export const ACTION_CONFIG = {
   created: { label: 'Creado', icon: Add, color: '#4caf50', bgColor: '#e8f5e9' },
   updated: { label: 'Actualizado', icon: Edit, color: '#2196f3', bgColor: '#e3f2fd' },
@@ -16,6 +19,9 @@ export const ACTION_CONFIG = {
   login: { label: 'Login', icon: Login, color: '#607d8b', bgColor: '#eceff1' }
 }
 
+// ==========================================
+// FUNCIONES AUXILIARES
+// ==========================================
 const getRelativeTime = (timestamp, t) => {
   if (!timestamp) return ''
   
@@ -67,6 +73,9 @@ const formatValue = (value) => {
   return JSON.stringify(value)
 }
 
+// ==========================================
+// COMPONENTES DE CELDA
+// ==========================================
 const ActionBadge = ({ action, t }) => {
   const config = ACTION_CONFIG[action] || ACTION_CONFIG.updated
   const Icon = config.icon
@@ -212,7 +221,10 @@ const TimestampCell = ({ timestamp, t }) => {
   )
 }
 
-export const AuditLogDetailDrawer = ({ log, open, onClose, t }) => {
+// ==========================================
+// DRAWER DE DETALLES (Con soporte para tour)
+// ==========================================
+export const AuditLogDetailDrawer = ({ log, open, onClose, t, tourId = null, closeBtnId = null }) => {
   if (!log) return null
   
   const tr = (key, fallback) => (t ? t(key, fallback) : fallback)
@@ -230,17 +242,26 @@ export const AuditLogDetailDrawer = ({ log, open, onClose, t }) => {
   }
   
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', sm: 500 }, bgcolor: '#fafafa' } }}>
+    <Drawer 
+      id={tourId || undefined} 
+      anchor="right" 
+      open={open} 
+      onClose={onClose} 
+      PaperProps={{ sx: { width: { xs: '100%', sm: 500 }, bgcolor: '#fafafa' } }}
+    >
       <Box sx={{ p: 3, bgcolor: '#fff', borderBottom: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
           <Typography variant="h6" fontWeight={700}>{tr('details.title', 'Detalles del cambio')}</Typography>
           <Typography variant="caption" color="text.secondary">{new Date(log.timestamp).toLocaleString('es-ES')}</Typography>
         </Box>
-        <IconButton onClick={onClose}><Close /></IconButton>
+        <IconButton id={closeBtnId || undefined} onClick={onClose}>
+          <Close />
+        </IconButton>
       </Box>
       
       <Box sx={{ p: 3, overflowY: 'auto' }}>
-        <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: '#fff', border: '1px solid #e0e0e0' }}>
+        {/* ✅ ID 1: Información General */}
+        <Paper id="audit-drawer-general-info" elevation={0} sx={{ p: 2, mb: 2, bgcolor: '#fff', border: '1px solid #e0e0e0' }}>
           <Box display="flex" gap={1} mb={2}>
             <ActionBadge action={log.action} t={t} />
             <EntityBadge entity={log.entity} />
@@ -256,8 +277,9 @@ export const AuditLogDetailDrawer = ({ log, open, onClose, t }) => {
           </Typography>
         </Paper>
         
+        {/* ✅ ID 2: Campos Modificados (Solo si hay cambios) */}
         {log.changes && changedFields.length > 0 && (
-          <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: '#fff', border: '1px solid #e0e0e0' }}>
+          <Paper id="audit-drawer-modified-fields" elevation={0} sx={{ p: 2, mb: 2, bgcolor: '#fff', border: '1px solid #e0e0e0' }}>
             <Typography variant="subtitle2" fontWeight={700} mb={2}>
               {tr('details.modifiedFields', 'Campos modificados')} ({changedFields.length})
             </Typography>
@@ -286,7 +308,8 @@ export const AuditLogDetailDrawer = ({ log, open, onClose, t }) => {
           </Paper>
         )}
         
-        <Paper elevation={0} sx={{ p: 2, bgcolor: '#fff', border: '1px solid #e0e0e0' }}>
+        {/* ✅ ID 3: Datos Completos en JSON */}
+        <Paper id="audit-drawer-full-json" elevation={0} sx={{ p: 2, bgcolor: '#fff', border: '1px solid #e0e0e0' }}>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
             <Typography variant="subtitle2" fontWeight={700}>{tr('details.fullData', 'Datos completos (JSON)')}</Typography>
             <IconButton size="small" onClick={() => handleCopy(JSON.stringify(log, null, 2))}>
@@ -302,6 +325,9 @@ export const AuditLogDetailDrawer = ({ log, open, onClose, t }) => {
   )
 }
 
+// ==========================================
+// HOOK DE COLUMNAS (Con tourId en cada una)
+// ==========================================
 export const useAuditLogColumns = ({ t, showEntity = true, showUser = true, onRowClick }) => {
   const columns = []
   
@@ -310,6 +336,7 @@ export const useAuditLogColumns = ({ t, showEntity = true, showUser = true, onRo
       field: 'userId',
       headerName: t('table.user', 'Usuario'),
       minWidth: 200,
+      tourId: 'audit-col-user', // ✅ ID para el tour
       renderCell: ({ row }) => <UserCell user={row.userId} t={t} />
     })
   }
@@ -318,6 +345,7 @@ export const useAuditLogColumns = ({ t, showEntity = true, showUser = true, onRo
     field: 'action',
     headerName: t('table.action', 'Acción'),
     minWidth: 150,
+    tourId: 'audit-col-action', // ✅ ID para el tour
     renderCell: ({ row }) => <ActionBadge action={row.action} t={t} />
   })
   
@@ -326,6 +354,7 @@ export const useAuditLogColumns = ({ t, showEntity = true, showUser = true, onRo
       field: 'entity',
       headerName: t('table.entity', 'Entidad'),
       minWidth: 130,
+      tourId: 'audit-col-entity', // ✅ ID para el tour
       renderCell: ({ row }) => <EntityBadge entity={row.entity} />
     })
   }
@@ -335,6 +364,7 @@ export const useAuditLogColumns = ({ t, showEntity = true, showUser = true, onRo
     headerName: t('table.changes', 'Cambios'),
     flex: 1,
     minWidth: 250,
+    tourId: 'audit-col-changes', // ✅ ID para el tour
     renderCell: ({ row }) => <ChangesCell changes={row.changes} action={row.action} t={t} />
   })
   
@@ -342,6 +372,7 @@ export const useAuditLogColumns = ({ t, showEntity = true, showUser = true, onRo
     field: 'timestamp',
     headerName: t('table.timestamp', 'Fecha'),
     minWidth: 160,
+    tourId: 'audit-col-timestamp', // ✅ ID para el tour
     renderCell: ({ row }) => <TimestampCell timestamp={row.timestamp} t={t} />
   })
   

@@ -50,48 +50,54 @@ const theme = createTheme({
   },
   components: {
     // ✅ UNIFICACIÓN: Inputs cuadrados y elegantes como en el Login
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 0, // Bordes afilados
-            backgroundColor: '#fff',
-            fontFamily: '"Helvetica Neue", sans-serif',
-            transition: 'box-shadow 0.25s, border-color 0.25s',
-            '& fieldset': {
-              borderColor: '#ddd',
-              borderWidth: '1px',
-            },
-            '&:hover fieldset': {
-              borderColor: '#000',
-            },
-            '&.Mui-focused fieldset': {
-              borderColor: BRAND.PRIMARY,
-              borderWidth: '2px',
-            },
-            '&.Mui-focused': {
-              boxShadow: '4px 4px 0px rgba(0,0,0,0.06)', // Sombra sutil del login
-            },
-            '& input': {
-              color: '#000',
-              padding: '18px 14px',
-              fontSize: '0.95rem',
-              fontWeight: 300,
-              '&::placeholder': { color: '#ccc', opacity: 1 },
-            },
-          },
-          '& .MuiInputLabel-root': {
-            fontFamily: '"Helvetica Neue", sans-serif',
-            fontWeight: 400,
-            color: '#888',
-            '&.Mui-focused': {
-              color: BRAND.PRIMARY,
-              fontWeight: 600,
-            },
+MuiTextField: {
+  styleOverrides: {
+    root: {
+      '& .MuiOutlinedInput-root': {
+        borderRadius: 0,
+        backgroundColor: '#fff',
+        fontFamily: '"Helvetica Neue", sans-serif',
+        transition: 'box-shadow 0.25s, border-color 0.25s',
+        '& fieldset': {
+          borderColor: '#ddd',
+          borderWidth: '1px',
+        },
+        '&:hover fieldset': {
+          borderColor: '#000',
+        },
+        '&.Mui-focused fieldset': {
+          borderColor: BRAND.PRIMARY,
+          borderWidth: '2px',
+        },
+        '&.Mui-focused': {
+          boxShadow: '4px 4px 0px rgba(0,0,0,0.06)',
+        },
+        '& input': {
+          color: '#000',
+          padding: '18px 14px',
+          fontSize: '0.95rem',
+          fontWeight: 300,
+          fontFamily: '"Helvetica Neue", sans-serif', // ← asegura la fuente base
+          '&::placeholder': {
+            color: '#ccc',
+            opacity: 1,
+            fontFamily: '"Helvetica Neue", sans-serif', // ← FUENTE DEL PLACEHOLDER
+            fontWeight: 300,
           },
         },
       },
+      '& .MuiInputLabel-root': {
+        fontFamily: '"Helvetica Neue", sans-serif',
+        fontWeight: 400,
+        color: '#888',
+        '&.Mui-focused': {
+          color: BRAND.PRIMARY,
+          fontWeight: 600,
+        },
+      },
     },
+  },
+},
     
     // ✅ UNIFICACIÓN: Botones cuadrados, sin mayúsculas forzadas y con hover específico
     MuiButton: {

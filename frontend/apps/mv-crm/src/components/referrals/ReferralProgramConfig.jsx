@@ -134,27 +134,29 @@ export default function ReferralProgramConfig({ projects }) {
   const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
   const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' } }
 
+
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+      <Box id="program-config-filters" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <FormControl size="small" sx={{ minWidth: 250 }}>
-          <InputLabel>{t('filters.allProjects')}</InputLabel>
+          <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.allProjects')}</InputLabel>
           <Select value={selectedProject} onChange={(e) => setSelectedProject(e.target.value)} label={t('filters.allProjects')} sx={inputSx}>
-            <MenuItem value="">{t('filters.allProjects')}</MenuItem>
+            <MenuItem sx={{fontFamily: '"Courier New", monospace'}} value="">{t('filters.allProjects')}</MenuItem>
             {projects.map(p => <MenuItem key={p._id} value={p._id} sx={{ fontFamily: '"Courier New", monospace' }}>{p.name}</MenuItem>)}
           </Select>
         </FormControl>
 
-        <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenModal()} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+        <Button id="program-config-create-btn" variant="contained" startIcon={<Add />} onClick={() => handleOpenModal()} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
           {t('program.createNew')}
         </Button>
       </Box>
 
-      <Paper sx={{ borderRadius: 0, overflow: 'hidden', border: '1px solid #ececec' }}>
+      <Paper id="program-config-table" sx={{ borderRadius: 0, overflow: 'hidden', border: '1px solid #ececec' }}>
         <DataTable columns={columns} data={programs || []} loading={programsLoading} />
       </Paper>
 
-      <Dialog open={modalOpen} onClose={handleCloseModal} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
+      {/* ✅ Modal de Configuración con IDs para el tour */}
+      <Dialog id="program-config-modal" open={modalOpen} onClose={handleCloseModal} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
         <DialogTitle sx={{ borderBottom: '1px solid #ececec', fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
           {editingProgram ? t('program.edit') : t('program.create')}
         </DialogTitle>
@@ -164,7 +166,7 @@ export default function ReferralProgramConfig({ projects }) {
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               {!editingProgram && (
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={6} id="program-config-modal-project">
                   <FormControl fullWidth required>
                     <InputLabel>{t('columns.project')}</InputLabel>
                     <Select value={formData.projectId || ''} onChange={(e) => handleChange('projectId', e.target.value)} label={t('columns.project')} sx={inputSx}>
@@ -181,11 +183,11 @@ export default function ReferralProgramConfig({ projects }) {
                 </Grid>
               )}
 
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={6} id="program-config-modal-name">
                 <TextField fullWidth required label={t('program.name')} value={formData.name} onChange={(e) => handleChange('name', e.target.value)} sx={{ ...inputSx, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }} />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={6} id="program-config-modal-reward-type">
                 <FormControl fullWidth required>
                   <InputLabel>{t('program.rewardType')}</InputLabel>
                   <Select value={formData.rewardType} onChange={(e) => handleChange('rewardType', e.target.value)} label={t('program.rewardType')} sx={inputSx}>
@@ -218,7 +220,7 @@ export default function ReferralProgramConfig({ projects }) {
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={6} id="program-config-modal-terms">
                 <TextField fullWidth multiline rows={4} label={t('program.terms')} value={formData.termsAndConditions.es} onChange={(e) => handleChange('termsAndConditions.es', e.target.value)} sx={{ ...inputSx, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }} />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -228,8 +230,9 @@ export default function ReferralProgramConfig({ projects }) {
           </form>
         </DialogContent>
 
-        <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec' }}>
-          <Button onClick={handleCloseModal} disabled={submitting} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('actions.cancel')}</Button>
+        <DialogActions id="program-config-modal-actions" sx={{ p: 2, borderTop: '1px solid #ececec' }}>
+          {/* ✅ ID: Botón Cancelar para cerrar el modal desde el tour */}
+          <Button id="program-config-modal-cancel-btn" onClick={handleCloseModal} disabled={submitting} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('actions.cancel')}</Button>
           <Button type="submit" variant="contained" onClick={handleSubmit} disabled={submitting} startIcon={submitting && <CircularProgress size={16} />} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
             {submitting ? t('actions.saving') : (editingProgram ? t('actions.update') : t('actions.create'))}
           </Button>

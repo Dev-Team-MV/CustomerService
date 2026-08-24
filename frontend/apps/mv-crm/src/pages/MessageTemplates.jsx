@@ -1,16 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Box,
-  Typography,
-  Button,
-  Alert,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip
+  Box, Typography, Button, Alert, TextField, FormControl, InputLabel, Select, MenuItem, Chip
 } from '@mui/material'
 import { Add, Search, FilterList } from '@mui/icons-material'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
@@ -20,17 +11,47 @@ import useMessageTemplates from '../constants/hooks/useMessageTemplates'
 import { getMessageTemplatesColumns } from '../constants/Columns/messageTemplates'
 import { useProjects } from '@shared/hooks/useProjects'
 
+// ✅ IMPORTS PARA EL TOUR
+import { useTour } from '@shared/tours/useTour'
+import TourButton from '@shared/tours/TourButton'
+import { 
+  getMessageTemplatesTourSteps, messageTemplatesTourConfig, 
+  getMessageTemplateModalTourSteps, messageTemplateModalTourConfig 
+} from '../tours/modules/messageTemplatesTour'
+
 export default function MessageTemplates() {
   const { t } = useTranslation('sms')
+  const { t: tCommon } = useTranslation('common')
   const { templates, loading, error, createTemplate, updateTemplate, deleteTemplate } = useMessageTemplates()
   const { projects } = useProjects()
   
   const [modalOpen, setModalOpen] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState(null)
   
-  // Estados de filtros
   const [searchValue, setSearchValue] = useState('')
   const [projectFilter, setProjectFilter] = useState('all')
+
+  // ✅ ESTADOS DEL TOUR
+  const [isTourMode, setIsTourMode] = useState(false)
+  const { startTour, pauseTour, resumeTour } = useTour()
+  
+  // ✅ Todos los pasos instanciados
+  const tourSteps = getMessageTemplatesTourSteps(tCommon)
+  const modalSteps = getMessageTemplateModalTourSteps(tCommon)
+  
+  const tourOptionsRef = useRef(null)
+
+  // ✅ Callbacks estables para los listeners
+  const handleResumeFromModal = useCallback(() => resumeTour(3, tourSteps, tourOptionsRef.current), [resumeTour, tourSteps])
+
+  // ✅ Event listeners para coordinar con subtours
+  useEffect(() => {
+    window.addEventListener('tour-resume-template-modal', handleResumeFromModal)
+
+    return () => {
+      window.removeEventListener('tour-resume-template-modal', handleResumeFromModal)
+    }
+  }, [handleResumeFromModal])
 
   const handleAddTemplate = () => {
     setEditingTemplate(null)
@@ -44,11 +65,8 @@ export default function MessageTemplates() {
 
   const handleSaveTemplate = async (data, templateId) => {
     try {
-      if (templateId) {
-        await updateTemplate(templateId, data)
-      } else {
-        await createTemplate(data)
-      }
+      if (templateId) await updateTemplate(templateId, data)
+      else await createTemplate(data)
       setModalOpen(false)
       setEditingTemplate(null)
     } catch (err) {
@@ -58,73 +76,85 @@ export default function MessageTemplates() {
 
   const handleDeleteTemplate = async (id) => {
     if (window.confirm(t('templates.deleteConfirm', 'Are you sure you want to delete this template?'))) {
-      try {
-        await deleteTemplate(id)
-      } catch (err) {
-        console.error('Error deleting template:', err)
-      }
+      try { await deleteTemplate(id) } catch (err) { console.error('Error deleting template:', err) }
     }
   }
 
   const columns = useMemo(
     () => getMessageTemplatesColumns(t, handleEditTemplate, handleDeleteTemplate),
-    [t] // eslint-disable-line react-hooks/exhaustive-deps
+    [t]
   )
 
-  // ✅ Lógica de filtrado corregida
   const filteredTemplates = useMemo(() => {
     if (!templates) return []
-    
     return templates.filter(template => {
-      // ✅ CORRECCIÓN: Manejar projectId null correctamente
-      const templateProjectId = template.projectId ? 
-        (typeof template.projectId === 'object' ? template.projectId._id : template.projectId) 
-        : null
-
-      // Filtro por proyecto
-      if (projectFilter !== 'all') {
-        if (templateProjectId !== projectFilter) return false
-      }
-
-      // Filtro por búsqueda (nombre, descripción o contenido)
+      const templateProjectId = template.projectId ? (typeof template.projectId === 'object' ? template.projectId._id : template.projectId) : null
+      if (projectFilter !== 'all' && templateProjectId !== projectFilter) return false
       if (searchValue.trim()) {
         const search = searchValue.toLowerCase()
         const matchName = template.name?.toLowerCase().includes(search)
         const matchDesc = template.description?.toLowerCase().includes(search)
         const matchContent = template.template?.toLowerCase().includes(search)
-        
         if (!matchName && !matchDesc && !matchContent) return false
       }
-
       return true
     })
   }, [templates, projectFilter, searchValue])
 
-  // ✅ Estilos unificados
-  const unifiedButtonSx = { 
-    borderRadius: 0, 
-    textTransform: 'none', 
-    fontFamily: '"Courier New", monospace', 
-    fontSize: '0.75rem', 
-    letterSpacing: '0.5px', 
-    '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
-  }
-  
-  const inputSx = { 
-    fontFamily: '"Courier New", monospace', 
-    fontSize: '0.75rem', 
-    borderRadius: 0, 
-    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
-    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' },
-    '& .MuiOutlinedInput-root': { borderRadius: 0 }
+  // ✅ Handler del tour siguiendo el patrón de PostSale
+  const handleTourNextClick = (driverObj) => {
+    const currentIndex = driverObj.getActiveIndex()
+    console.log('🔍 Tour Next Click - Índice actual:', currentIndex)
+    setIsTourMode(true)
+
+    // ==========================================
+    // 1. BOTÓN NUEVA PLANTILLA (PASO 2)
+    // ==========================================
+    if (currentIndex === 2) { // Botón "Nueva Plantilla"
+      const newBtn = document.getElementById('message-templates-new-btn')
+      if (newBtn) {
+        newBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+        pauseTour()
+        setTimeout(() => {
+          startTour(messageTemplateModalTourConfig.id, modalSteps, {
+            onNextClick: (driver) => driver.moveNext(),
+            onCloseClick: () => { 
+              document.getElementById('message-template-modal-actions')?.querySelector('button')?.click()
+              window.dispatchEvent(new CustomEvent('tour-resume-template-modal')) 
+            },
+            onDestroyStarted: () => { 
+              document.getElementById('message-template-modal-actions')?.querySelector('button')?.click()
+              window.dispatchEvent(new CustomEvent('tour-resume-template-modal')) 
+            }
+          })
+        }, 800)
+      } else {
+        driverObj.moveNext()
+      }
+      return
+    }
+
+    // ==========================================
+    // 2. RESTO DE PASOS (3-10)
+    // ==========================================
+    driverObj.moveNext()
   }
 
-  const menuItemSx = {
-    fontFamily: '"Courier New", monospace',
-    fontSize: '0.75rem',
-    borderRadius: 0,
-    '&:hover': { bgcolor: '#f5f5f5' }
+  const tourOptions = {
+    onNextClick: handleTourNextClick,
+    onPrevClick: (driverObj) => driverObj.movePrevious(),
+    onDestroy: () => {
+      console.log('🛑 Tour de Plantillas destruido')
+      setIsTourMode(false)
+      setModalOpen(false)
+      setEditingTemplate(null)
+    }
   }
+  tourOptionsRef.current = tourOptions
+
+  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
+  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }
+  const menuItemSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '&:hover': { bgcolor: '#f5f5f5' } }
 
   return (
     <PageLayout
@@ -132,23 +162,31 @@ export default function MessageTemplates() {
       subtitle={t('sms.templates.subtitle', 'Create and manage templates for bulk sending')}
       topbarLabel={t('sms.topbarLabel', 'SMS Campaigns')}
     >
-      <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-        
+      <Box id="message-templates-page-container" sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <TourButton tourId={messageTemplatesTourConfig.id} steps={tourSteps} label={tCommon('tour.messageTemplates.button', 'Ver guía de Plantillas')} options={tourOptions} />
+
         {/* ✅ Panel de Filtros y Acciones */}
-        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} mb={3} gap={2}>
+        <Box id="message-templates-filters" display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} mb={3} gap={2}>
           
           <Box display="flex" gap={2} flexWrap="wrap" width={{ xs: '100%', sm: 'auto' }}>
             {/* Búsqueda */}
-            <TextField
-              placeholder={t('sms.form.searchPlaceholder', 'Search by name, description...')}
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              size="small"
-              sx={{ width: { xs: '100%', sm: 250 }, ...inputSx }}
-              InputProps={{
-                startAdornment: <Search sx={{ color: '#aaa', mr: 1, fontSize: 18 }} />
-              }}
-            />
+<TextField
+  placeholder={t('sms.form.searchPlaceholder', 'Search by name, description...')}
+  value={searchValue}
+  onChange={(e) => setSearchValue(e.target.value)}
+  size="small"
+  sx={{
+    width: { xs: '100%', sm: 250 },
+    ...inputSx,
+    '& .MuiInputBase-input::placeholder': {
+      fontFamily: '"Courier New", monospace',
+      opacity: 1,
+    },
+  }}
+  InputProps={{
+    startAdornment: <Search sx={{ color: '#aaa', mr: 1, fontSize: 18 }} />
+  }}
+/>
 
             {/* Filtro por Proyecto */}
             <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 200 } }}>
@@ -185,6 +223,7 @@ export default function MessageTemplates() {
 
           {/* Botón de Nueva Plantilla */}
           <Button
+          id="message-templates-new-btn"
             variant="contained"
             startIcon={<Add />}
             onClick={handleAddTemplate}

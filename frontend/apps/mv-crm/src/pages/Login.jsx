@@ -1,4 +1,3 @@
-// apps/mv-crm/src/pages/Login.jsx
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -13,12 +12,23 @@ import 'react-phone-input-2/lib/style.css'
 import { useAuth } from '@shared/context/AuthContext'
 import LanguageSwitcher from '@shared/components/LanguageSwitcher'
 
+// ✅ NUEVO: Imports para el Tour
+import { useTour } from '@shared/tours/useTour'
+import TourButton from '@shared/tours/TourButton'
+import { getLoginTourSteps, loginTourConfig } from '../tours/modules/loginTour'
+
 import mvLogo from '../assets/logos/LOGO_MICHELANGELO_PNG_Mesa de trabajo 1.png'
 
 const Login = () => {
   const navigate = useNavigate()
   const { login } = useAuth()
   const { t } = useTranslation('auth')
+
+  // ✅ NUEVO: Hook del Tour
+  const { hasCompletedTour } = useTour()
+
+  // ✅ NUEVO: Generamos los pasos del tour con las traducciones actuales
+  const tourSteps = getLoginTourSteps(t)
 
   const [loginMethod, setLoginMethod] = useState('email')
   const [formData, setFormData] = useState({ email: '', phone: '', password: '' })
@@ -44,11 +54,8 @@ const Login = () => {
       ? formData.email.trim()
       : `+${formData.phone}`
 
-    console.log('🔐 Login attempt:', { loginMethod, credential, hasPassword: !!formData.password })
-
     try {
       const result = await login(credential, formData.password)
-      console.log('📡 Login result:', result)
 
       if (result?.success) {
         navigate('/dashboard')
@@ -117,46 +124,17 @@ const Login = () => {
 
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
           <Box sx={{ maxWidth: 520 }}>
-
-            {/* Logo */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <Box
-                component="img"
-                src={mvLogo}
-                alt="Michelangelo Del Valle"
-                sx={{
-                  width: '100%',
-                  maxWidth: 400,
-                  height: 'auto',
-                  objectFit: 'contain',
-                  display: 'block',
-                  mb: 6,
-                }}
-              />
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+              <Box component="img" src={mvLogo} alt="Michelangelo Del Valle" sx={{ width: '100%', maxWidth: 400, height: 'auto', objectFit: 'contain', display: 'block', mb: 6 }} />
             </motion.div>
 
-            {/* Línea divisora animada */}
-            <motion.div
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: 0.7, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              style={{ transformOrigin: 'left' }}
-            >
+            <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.7, delay: 0.8, ease: [0.22, 1, 0.36, 1] }} style={{ transformOrigin: 'left' }}>
               <Box sx={{ width: 80, height: 2, bgcolor: '#000', mb: 5 }} />
             </motion.div>
 
-            <Typography sx={{
-              fontFamily: '"Helvetica Neue", Arial, sans-serif',
-              fontSize: '1.05rem', color: '#555', lineHeight: 1.75,
-              fontWeight: 300, maxWidth: 380
-            }}>
-              Enterprise-grade multi-project management. Every decision, every project, every result — centralized.
+            <Typography sx={{ fontFamily: '"Helvetica Neue", Arial, sans-serif', fontSize: '1.05rem', color: '#555', lineHeight: 1.75, fontWeight: 300, maxWidth: 380 }}>
+              {t('text', 'Enterprise-grade multi-project management. Every decision, every project, every result — centralized.')}
             </Typography>
-
           </Box>
         </motion.div>
 
@@ -180,8 +158,8 @@ const Login = () => {
       {/* ─── RIGHT PANEL ─── */}
       <Box sx={{ flex: { xs: 1, md: '0 0 480px' }, display: 'flex', alignItems: 'center', justifyContent: 'center', p: { xs: 3, sm: 6 }, position: 'relative', zIndex: 1 }}>
 
-        {/* Language switcher */}
-        <Box sx={{ position: 'absolute', top: 24, right: 28, zIndex: 10 }}>
+        {/* ✅ ID agregado para el tour */}
+        <Box id="login-language-switcher" sx={{ position: 'absolute', top: 24, right: 28, zIndex: 10 }}>
           <LanguageSwitcher />
         </Box>
 
@@ -195,40 +173,11 @@ const Login = () => {
 
           {/* Mobile header - CON LOGO */}
           <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 5 }}>
-            {/* Logo en móvil */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <Box
-                component="img"
-                src={mvLogo}
-                alt="Michelangelo Del Valle"
-                sx={{
-                  width: '100%',
-                  maxWidth: 280,
-                  height: 'auto',
-                  objectFit: 'contain',
-                  display: 'block',
-                  // mb: 3,
-                  margin: '0 auto',
-                }}
-              />
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}>
+              <Box component="img" src={mvLogo} alt="Michelangelo Del Valle" sx={{ width: '100%', maxWidth: 280, height: 'auto', objectFit: 'contain', display: 'block', margin: '0 auto' }} />
             </motion.div>
-            
-            {/* Línea divisora en móvil */}
             <Box sx={{ width: 60, height: 2, bgcolor: '#000', mb: 2 }} />
-            
-            {/* Texto opcional debajo del logo */}
-            <Typography sx={{ 
-              fontFamily: '"Helvetica Neue", sans-serif', 
-              fontWeight: 200, 
-              fontSize: '1.2rem', 
-              color: '#555', 
-              letterSpacing: '-0.02em',
-              mb: 4
-            }}>
+            <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontWeight: 200, fontSize: '1.2rem', color: '#555', letterSpacing: '-0.02em', mb: 4 }}>
               Master<br /><Box component="span" sx={{ fontWeight: 700 }}>Control</Box>
             </Typography>
           </Box>
@@ -243,8 +192,8 @@ const Login = () => {
             </Typography>
           </Box>
 
-          {/* ─── Method toggle ─── */}
-          <Box sx={{ display: 'flex', mb: 5, border: '1px solid #e0e0e0' }}>
+          {/* ✅ ID agregado para el tour */}
+          <Box id="login-method-toggle" sx={{ display: 'flex', mb: 5, border: '1px solid #e0e0e0' }}>
             {[
               { key: 'email', label: `[01] ${t('mvEmailAddress')}` },
               { key: 'phone', label: `[02] ${t('mvPhone')}` }
@@ -304,59 +253,61 @@ const Login = () => {
 
             {/* Credential field */}
             <AnimatePresence mode="wait">
-              {loginMethod === 'email' ? (
-                <motion.div key="email" initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 8 }} transition={{ duration: 0.25 }}>
-                  <motion.div animate={focusedField === 'email' ? { x: 2 } : { x: 0 }} transition={{ duration: 0.2 }}>
+              {/* ✅ ID agregado para el tour */}
+              <Box id="login-credential-field">
+                {loginMethod === 'email' ? (
+                  <motion.div key="email" initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 8 }} transition={{ duration: 0.25 }}>
+                    <motion.div animate={focusedField === 'email' ? { x: 2 } : { x: 0 }} transition={{ duration: 0.2 }}>
+                      <Box sx={{ mb: 4 }}>
+                        <Typography sx={{ fontFamily: '"Courier New", monospace', color: focusedField === 'email' ? '#000' : '#aaa', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', mb: 1.5, display: 'block', transition: 'color 0.2s' }}>
+                          [01] {t('mvEmailAddress')}
+                        </Typography>
+                        <TextField fullWidth type="email" value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          onFocus={() => setFocusedField('email')} onBlur={() => setFocusedField(null)}
+                          required placeholder="user@domain.com" sx={fieldSx} />
+                      </Box>
+                    </motion.div>
+                  </motion.div>
+                ) : (
+                  <motion.div key="phone" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.25 }}>
                     <Box sx={{ mb: 4 }}>
-                      <Typography sx={{ fontFamily: '"Courier New", monospace', color: focusedField === 'email' ? '#000' : '#aaa', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', mb: 1.5, display: 'block', transition: 'color 0.2s' }}>
-                        [01] {t('mvEmailAddress')}
+                      <Typography sx={{ fontFamily: '"Courier New", monospace', color: focusedField === 'phone' ? '#000' : '#aaa', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', mb: 1.5, display: 'block', transition: 'color 0.2s' }}>
+                        [02] {t('mvPhone')}
                       </Typography>
-                      <TextField fullWidth type="email" value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        onFocus={() => setFocusedField('email')} onBlur={() => setFocusedField(null)}
-                        required placeholder="user@domain.com" sx={fieldSx} />
+                      <PhoneInput
+                        country="us"
+                        value={formData.phone}
+                        onChange={(val) => { setFormData({ ...formData, phone: val }) }}
+                        onFocus={() => setFocusedField('phone')}
+                        onBlur={() => setFocusedField(null)}
+                        inputProps={{ name: 'phone', required: true, autoFocus: true }}
+                        containerStyle={{ width: '100%' }}
+                        inputStyle={{
+                          width: '100%', height: '52px', fontSize: '0.95rem', fontWeight: 300,
+                          borderRadius: 0,
+                          border: `${focusedField === 'phone' ? '2px' : '1px'} solid ${focusedField === 'phone' ? '#000' : '#ddd'}`,
+                          fontFamily: '"Helvetica Neue", sans-serif', color: '#000', background: '#fff',
+                          boxShadow: focusedField === 'phone' ? '4px 4px 0px rgba(0,0,0,0.06)' : 'none',
+                          transition: 'all 0.25s'
+                        }}
+                        buttonStyle={{
+                          borderRadius: 0,
+                          border: `${focusedField === 'phone' ? '2px' : '1px'} solid ${focusedField === 'phone' ? '#000' : '#ddd'}`,
+                          borderRight: 'none', background: '#fff', transition: 'all 0.25s'
+                        }}
+                        dropdownStyle={{ borderRadius: 0, fontFamily: '"Helvetica Neue", sans-serif' }}
+                      />
                     </Box>
                   </motion.div>
-                </motion.div>
-              ) : (
-                <motion.div key="phone" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.25 }}>
-                  <Box sx={{ mb: 4 }}>
-                    <Typography sx={{ fontFamily: '"Courier New", monospace', color: focusedField === 'phone' ? '#000' : '#aaa', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', mb: 1.5, display: 'block', transition: 'color 0.2s' }}>
-                      [02] {t('mvPhone')}
-                    </Typography>
-                    <PhoneInput
-                      country="us"
-                      value={formData.phone}
-                      onChange={(val) => {
-                        setFormData({ ...formData, phone: val })
-                      }}
-                      onFocus={() => setFocusedField('phone')}
-                      onBlur={() => setFocusedField(null)}
-                      inputProps={{ name: 'phone', required: true, autoFocus: true }}
-                      containerStyle={{ width: '100%' }}
-                      inputStyle={{
-                        width: '100%', height: '52px', fontSize: '0.95rem', fontWeight: 300,
-                        borderRadius: 0,
-                        border: `${focusedField === 'phone' ? '2px' : '1px'} solid ${focusedField === 'phone' ? '#000' : '#ddd'}`,
-                        fontFamily: '"Helvetica Neue", sans-serif', color: '#000', background: '#fff',
-                        boxShadow: focusedField === 'phone' ? '4px 4px 0px rgba(0,0,0,0.06)' : 'none',
-                        transition: 'all 0.25s'
-                      }}
-                      buttonStyle={{
-                        borderRadius: 0,
-                        border: `${focusedField === 'phone' ? '2px' : '1px'} solid ${focusedField === 'phone' ? '#000' : '#ddd'}`,
-                        borderRight: 'none', background: '#fff', transition: 'all 0.25s'
-                      }}
-                      dropdownStyle={{ borderRadius: 0, fontFamily: '"Helvetica Neue", sans-serif' }}
-                    />
-                  </Box>
-                </motion.div>
-              )}
+                )}
+              </Box>
             </AnimatePresence>
 
             {/* Password */}
             <motion.div animate={focusedField === 'password' ? { x: 2 } : { x: 0 }} transition={{ duration: 0.2 }}>
-              <Box sx={{ mb: 6 }}>
+              {/* ✅ ID agregado para el tour */}
+              <Box id="login-password-field" sx={{ mb: 6 }}>
                 <Typography sx={{ fontFamily: '"Courier New", monospace', color: focusedField === 'password' ? '#000' : '#aaa', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '2px', mb: 1.5, display: 'block', transition: 'color 0.2s' }}>
                   {loginMethod === 'email' ? '[02]' : '[03]'} {t('mvPassword')}
                 </Typography>
@@ -381,7 +332,8 @@ const Login = () => {
 
             {/* Submit */}
             <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-              <Button fullWidth type="submit" disabled={loading}
+              {/* ✅ ID agregado para el tour */}
+              <Button id="login-submit-btn" fullWidth type="submit" disabled={loading}
                 endIcon={loading ? null : (
                   <motion.div animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}>
                     <ArrowForward sx={{ fontSize: 18 }} />
@@ -407,6 +359,18 @@ const Login = () => {
                 {loading ? t('mvSigningIn') : t('mvSignIn')}
               </Button>
             </motion.div>
+
+            {/* ✅ NUEVO: Botón reutilizable del Tour */}
+            
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}>
+
+              <TourButton 
+                tourId={loginTourConfig.id}
+                steps={tourSteps}
+                label={t('tour.login.button', '¿Primera vez? Ver guía de acceso')}
+              />
+              </motion.div>
+            
           </Box>
 
           {/* Footer */}

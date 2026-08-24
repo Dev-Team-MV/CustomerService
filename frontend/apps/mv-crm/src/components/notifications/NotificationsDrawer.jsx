@@ -50,6 +50,15 @@ const NotificationsDrawer = ({
     }
   }, [open, onFetchAlerts])
 
+   // ✅ NUEVO: Escuchar el evento para cerrar el drawer cuando el tour termine
+  useEffect(() => {
+    const handleTourResume = () => {
+      onClose() // Esto ejecutará setNotificationsOpen(false) en PageLayout
+    }
+    window.addEventListener('tour-resume-notification-drawer', handleTourResume)
+    return () => window.removeEventListener('tour-resume-notification-drawer', handleTourResume)
+  }, [onClose])
+
   const tabs = [
     { key: 'all', label: t('tabs.all'), icon: null, count: counts.total },
     { key: 'overduePayments', label: t('tabs.overduePayments'), icon: <Payment sx={{ fontSize: 16 }} />, count: counts.overduePayments },
@@ -385,70 +394,27 @@ const NotificationsDrawer = ({
 
   const currentAlerts = getAlertsByTab()
 
-  return (
+return (
     <Drawer
       anchor="right"
       open={open}
       onClose={onClose}
-      PaperProps={{
-        sx: {
-          width: { xs: '100%', sm: 420 },
-          bgcolor: '#fafafa'
-        }
-      }}
+      PaperProps={{ sx: { width: { xs: '100%', sm: 420 }, bgcolor: '#fafafa' } }}
     >
-      {/* Header */}
-      <Box
-        sx={{
-          p: 2,
-          borderBottom: '1px solid #ececec',
-          bgcolor: '#fff',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}
-      >
+      {/* ✅ ID: Header */}
+      <Box id="notif-drawer-header" sx={{ p: 2, borderBottom: '1px solid #ececec', bgcolor: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography
-            sx={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              letterSpacing: '1px',
-              textTransform: 'uppercase'
-            }}
-          >
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>
             {t('title')}
           </Typography>
           {counts.total > 0 && (
-            <Chip
-              label={counts.total}
-              size="small"
-              sx={{
-                bgcolor: '#000',
-                color: '#fff',
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                height: 22
-              }}
-            />
+            <Chip label={counts.total} size="small" sx={{ bgcolor: '#000', color: '#fff', fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 700, height: 22 }} />
           )}
         </Box>
         <Box display="flex" gap={1}>
           {alerts.length > 0 && (
-            <Button
-              size="small"
-              startIcon={<DoneAll />}
-              onClick={onMarkAllAsRead}
-              sx={{
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.65rem',
-                textTransform: 'none',
-                letterSpacing: '0.5px',
-                color: '#888'
-              }}
-            >
+            // ✅ ID: Botón Marcar todo como leído
+            <Button id="notif-drawer-mark-all" size="small" startIcon={<DoneAll />} onClick={onMarkAllAsRead} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', textTransform: 'none', letterSpacing: '0.5px', color: '#888' }}>
               {t('markAllRead')}
             </Button>
           )}
@@ -458,17 +424,8 @@ const NotificationsDrawer = ({
         </Box>
       </Box>
 
-      {/* Tabs */}
-      <Box
-        sx={{
-          display: 'flex',
-          gap: 0.5,
-          p: 1.5,
-          bgcolor: '#fff',
-          borderBottom: '1px solid #ececec',
-          overflowX: 'auto'
-        }}
-      >
+      {/* ✅ ID: Tabs */}
+      <Box id="notif-drawer-tabs" sx={{ display: 'flex', gap: 0.5, p: 1.5, bgcolor: '#fff', borderBottom: '1px solid #ececec', overflowX: 'auto' }}>
         {tabs.map(tab => (
           <Chip
             key={tab.key}
@@ -478,46 +435,20 @@ const NotificationsDrawer = ({
             color={activeTab === tab.key ? 'primary' : 'default'}
             variant={activeTab === tab.key ? 'filled' : 'outlined'}
             size="small"
-            sx={{
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.65rem',
-              letterSpacing: '0.5px',
-              cursor: 'pointer',
-              flexShrink: 0
-            }}
+            sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', letterSpacing: '0.5px', cursor: 'pointer', flexShrink: 0 }}
           />
         ))}
       </Box>
 
-      {/* Content */}
-      <Box sx={{ flex: 1, overflowY: 'auto', p: 2 }}>
+      {/* ✅ ID: Lista de contenido */}
+      <Box id="notif-drawer-list" sx={{ flex: 1, overflowY: 'auto', p: 2 }}>
         {loading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" py={8}>
-            <CircularProgress size={32} />
-          </Box>
+          <Box display="flex" justifyContent="center" alignItems="center" py={8}><CircularProgress size={32} /></Box>
         ) : error ? (
-          <Alert severity="error" sx={{ borderRadius: 0 }}>
-            {error}
-          </Alert>
+          <Alert severity="error" sx={{ borderRadius: 0 }}>{error}</Alert>
         ) : currentAlerts.length === 0 ? (
-          <Box
-            sx={{
-              py: 8,
-              textAlign: 'center',
-              border: '2px dashed #e0e0e0',
-              borderRadius: 1
-            }}
-          >
-            <Typography
-              sx={{
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.75rem',
-                color: '#888',
-                letterSpacing: '0.5px'
-              }}
-            >
-              {t('empty')}
-            </Typography>
+          <Box sx={{ py: 8, textAlign: 'center', border: '2px dashed #e0e0e0', borderRadius: 1 }}>
+            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', color: '#888', letterSpacing: '0.5px' }}>{t('empty')}</Typography>
           </Box>
         ) : (
           <Box display="flex" flexDirection="column" gap={1.5}>
@@ -530,39 +461,17 @@ const NotificationsDrawer = ({
                   key={alert.id}
                   onClick={() => !read && !marking && onMarkAsRead(alert)}
                   sx={{
-                    p: 2,
-                    bgcolor: read ? '#fff' : getAlertColor(alert.type),
-                    border: `1px solid ${read ? '#ececec' : '#ddd'}`,
-                    borderRadius: 1,
-                    cursor: read || marking ? 'default' : 'pointer',
-                    opacity: read ? 0.6 : marking ? 0.7 : 1,
-                    transition: 'all 0.2s',
-                    position: 'relative',
-                    '&:hover': {
-                      boxShadow: read || marking ? 'none' : '0 2px 8px rgba(0,0,0,0.08)',
-                      borderColor: read || marking ? undefined : '#000'
-                    }
+                    p: 2, bgcolor: read ? '#fff' : getAlertColor(alert.type), border: `1px solid ${read ? '#ececec' : '#ddd'}`, borderRadius: 1,
+                    cursor: read || marking ? 'default' : 'pointer', opacity: read ? 0.6 : marking ? 0.7 : 1, transition: 'all 0.2s', position: 'relative',
+                    '&:hover': { boxShadow: read || marking ? 'none' : '0 2px 8px rgba(0,0,0,0.08)', borderColor: read || marking ? undefined : '#000' }
                   }}
                 >
-                  {marking && (
-                    <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}>
-                      <CircularProgress size={16} />
-                    </Box>
-                  )}
-                  
-                  {read && (
-                    <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}>
-                      <CheckCircle sx={{ fontSize: 16, color: '#4caf50' }} />
-                    </Box>
-                  )}
+                  {marking && <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}><CircularProgress size={16} /></Box>}
+                  {read && <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}><CheckCircle sx={{ fontSize: 16, color: '#4caf50' }} /></Box>}
 
                   <Box display="flex" gap={1.5} alignItems="flex-start">
-                    <Box sx={{ mt: 0.5 }}>
-                      {getAlertIcon(alert.type)}
-                    </Box>
-                    <Box flex={1}>
-                      {renderAlertContent(alert)}
-                    </Box>
+                    <Box sx={{ mt: 0.5 }}>{getAlertIcon(alert.type)}</Box>
+                    <Box flex={1}>{renderAlertContent(alert)}</Box>
                   </Box>
                 </Box>
               )
@@ -571,24 +480,9 @@ const NotificationsDrawer = ({
         )}
       </Box>
 
-      {/* Footer */}
-      <Box
-        sx={{
-          p: 2,
-          borderTop: '1px solid #ececec',
-          bgcolor: '#fff',
-          textAlign: 'center'
-        }}
-      >
-        <Typography
-          sx={{
-            fontFamily: '"Courier New", monospace',
-            fontSize: '0.6rem',
-            color: '#888',
-            letterSpacing: '1px',
-            textTransform: 'uppercase'
-          }}
-        >
+      {/* ✅ ID: Footer */}
+      <Box id="notif-drawer-footer" sx={{ p: 2, borderTop: '1px solid #ececec', bgcolor: '#fff', textAlign: 'center' }}>
+        <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#888', letterSpacing: '1px', textTransform: 'uppercase' }}>
           {t('footer.updateInfo')}
         </Typography>
       </Box>

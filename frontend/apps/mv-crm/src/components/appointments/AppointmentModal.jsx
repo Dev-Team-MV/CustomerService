@@ -98,6 +98,15 @@ const AppointmentModal = ({
   const [durationInfo, setDurationInfo] = useState(null)
   const isEditing = Boolean(appointment?._id)
 
+    // ✅ NUEVO: Escuchar el evento para cerrar el modal cuando el subtour termine
+  useEffect(() => {
+    const handleTourResume = () => {
+      onClose()
+    }
+    window.addEventListener('tour-resume-appointment', handleTourResume)
+    return () => window.removeEventListener('tour-resume-appointment', handleTourResume)
+  }, [onClose])
+
   useEffect(() => {
     if (appointment) {
       const startDate = new Date(appointment.startDate)
@@ -226,9 +235,11 @@ const AppointmentModal = ({
     '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }
   }
 
-  return (
+return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
-      <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: { xs: 2, sm: 3 } }}>
+      
+      {/* ✅ ID agregado para el tour */}
+      <DialogTitle id="appointment-modal-title" sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: { xs: 2, sm: 3 } }}>
         <Box display="flex" alignItems="center" gap={1}>
           <Event sx={{ fontSize: 20 }} />
           <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>
@@ -251,7 +262,8 @@ const AppointmentModal = ({
         <Box display="flex" flexDirection="column" gap={2.5} sx={{ p: 3 }}>
           <TextField label={`${t('form.title')} *`} value={formData.title} onChange={(e) => handleChange('title', e.target.value)} fullWidth required sx={inputSx} />
 
-          <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
+          {/* ✅ ID agregado para el tour */}
+          <Box id="appointment-modal-type-status" display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
             <FormControl size="small" fullWidth required>
               <InputLabel>{`${t('form.type')} *`}</InputLabel>
               <Select value={formData.type} onChange={(e) => handleChange('type', e.target.value)} label={`${t('form.type')} *`} sx={{ ...inputSx, width: '100%' }}>
@@ -281,7 +293,8 @@ const AppointmentModal = ({
             </FormControl>
           </Box>
 
-          <Box>
+          {/* ✅ ID agregado para el tour */}
+          <Box id="appointment-modal-contact">
             <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', mb: 1, color: '#666' }}>
               {`${t('contact.title')} *`}
             </Typography>
@@ -317,15 +330,17 @@ const AppointmentModal = ({
             )}
           </Box>
 
-          {/* ✅ ProjectSelector Integrado (Reemplaza al Select manual) */}
-          <ProjectSelector
-            value={formData.projectId}
-            onChange={(value) => handleChange('projectId', value)}
-            label={`${t('form.project')} *`}
-            includeGlobal={false} // Las citas siempre deben tener un proyecto
-            fullWidth
-            size="small"
-          />
+          {/* ✅ ID agregado para el tour */}
+          <Box id="appointment-modal-project">
+            <ProjectSelector
+              value={formData.projectId}
+              onChange={(value) => handleChange('projectId', value)}
+              label={`${t('form.project')} *`}
+              includeGlobal={false}
+              fullWidth
+              size="small"
+            />
+          </Box>
 
           <FormControl size="small" fullWidth required>
             <InputLabel>{`${t('form.assignedTo')} *`}</InputLabel>
@@ -338,7 +353,8 @@ const AppointmentModal = ({
             </Select>
           </FormControl>
 
-          <Box>
+          {/* ✅ ID agregado para el tour */}
+          <Box id="appointment-modal-datetime">
             <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', mb: 1, color: '#666' }}>
               {`${t('dateTime.startTitle')} *`}
             </Typography>
@@ -346,10 +362,8 @@ const AppointmentModal = ({
               <TextField label={`${t('form.startDate')} *`} type="date" value={formData.startDate} onChange={(e) => handleChange('startDate', e.target.value)} InputLabelProps={{ shrink: true }} fullWidth required sx={inputSx} />
               <TextField label={`${t('form.startTime')} *`} type="time" value={formData.startTime} onChange={(e) => handleChange('startTime', e.target.value)} InputLabelProps={{ shrink: true }} fullWidth required sx={inputSx} />
             </Box>
-          </Box>
 
-          <Box>
-            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', mb: 1, color: '#666' }}>
+            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', mb: 1, mt: 2, color: '#666' }}>
               {t('dateTime.endTitle')}
             </Typography>
             <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
@@ -376,7 +390,8 @@ const AppointmentModal = ({
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ borderTop: '1px solid #ececec', p: 2, gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
+      {/* ✅ ID agregado para el tour */}
+      <DialogActions id="appointment-modal-actions" sx={{ borderTop: '1px solid #ececec', p: 2, gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
         {isEditing && (
           <Button onClick={handleDelete} disabled={loading} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', color: '#d32f2f', textTransform: 'none', letterSpacing: '0.5px', mr: { xs: 0, sm: 'auto' }, width: { xs: '100%', sm: 'auto' }, borderRadius: 0, '&:hover': { bgcolor: '#ffebee' } }}>
             {t('form.delete')}

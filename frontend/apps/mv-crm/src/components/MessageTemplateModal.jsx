@@ -1,4 +1,3 @@
-// /Users/oficina/MV-CRM/CustomerService/frontend/shared/components/sms/MessageTemplateModal.jsx
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -34,7 +33,6 @@ const MessageTemplateModal = ({
 
   useEffect(() => {
     if (template) {
-      // ✅ FIX: Normalizar el projectId (puede ser string u objeto)
       const rawProjectId = template.projectId
       const normalizedProjectId = typeof rawProjectId === 'object' && rawProjectId !== null 
         ? rawProjectId._id 
@@ -123,6 +121,7 @@ const MessageTemplateModal = ({
 
   return (
     <Dialog 
+      id="message-template-modal"
       open={open} 
       onClose={onClose} 
       maxWidth="md" 
@@ -141,6 +140,7 @@ const MessageTemplateModal = ({
       <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
         <Box display="flex" flexDirection="column" gap={2.5} py={1}>
           <TextField
+            id="message-template-modal-name"
             label={t('sms.templateModal.name')}
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
@@ -151,16 +151,17 @@ const MessageTemplateModal = ({
             sx={inputSx}
           />
 
-          {/* ✅ ProjectSelector Integrado y Corregido */}
-          <ProjectSelector
-            value={formData.projectId}
-            onChange={(value) => handleChange('projectId', value)}
-            label={t('sms.templateModal.project', 'Proyecto (opcional)')}
-            includeGlobal={true}
-            globalLabel={t('sms.templateModal.globalTemplate', 'Template global (sin proyecto)')}
-            fullWidth
-            size="small"
-          />
+          <Box id="message-template-modal-project">
+            <ProjectSelector
+              value={formData.projectId}
+              onChange={(value) => handleChange('projectId', value)}
+              label={t('sms.templateModal.project', 'Proyecto (opcional)')}
+              includeGlobal={true}
+              globalLabel={t('sms.templateModal.globalTemplate', 'Template global (sin proyecto)')}
+              fullWidth
+              size="small"
+            />
+          </Box>
 
           <TextField
             label={t('sms.templateModal.category')}
@@ -191,7 +192,7 @@ const MessageTemplateModal = ({
             />
           )}
 
-          <Box ref={templateRef}>
+          <Box id="message-template-modal-content" ref={templateRef}>
             <TextField
               label={t('sms.templateModal.template')}
               value={formData.template}
@@ -207,7 +208,7 @@ const MessageTemplateModal = ({
           </Box>
 
           {detectedVariables.length > 0 && (
-            <Paper variant="outlined" sx={{ p: 2, borderRadius: 0, border: '1px solid #bbdefb', bgcolor: '#e3f2fd' }}>
+            <Paper id="message-template-modal-variables" variant="outlined" sx={{ p: 2, borderRadius: 0, border: '1px solid #bbdefb', bgcolor: '#e3f2fd' }}>
               <Box display="flex" alignItems="flex-start" gap={1}>
                 <Code fontSize="small" sx={{ mt: 0.5, color: '#1976d2' }} />
                 <Box flex={1}>
@@ -260,7 +261,7 @@ const MessageTemplateModal = ({
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+      <DialogActions id="message-template-modal-actions" sx={{ p: 2, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
         <Button onClick={onClose} disabled={saving} sx={{ ...unifiedButtonSx, color: '#888' }}>
           {t('sms.actions.cancel')}
         </Button>

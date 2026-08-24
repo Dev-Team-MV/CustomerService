@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/reports/LeadsReportSection.jsx
 import { useTranslation } from 'react-i18next'
 import { TrendingUp } from '@mui/icons-material'
 import { Box, useMediaQuery, useTheme } from '@mui/material'
@@ -46,12 +45,7 @@ const LeadsReportSection = () => {
         label: t(`leads.stages.${stage}`, stage.charAt(0).toUpperCase() + stage.slice(1).replace('_', ' ')),
         render: (opt) => (
           <Box display="flex" alignItems="center" gap={1}>
-            <Box sx={{
-              width: 10,
-              height: 10,
-              borderRadius: 0, // ✅ Cuadrado para mantener la estética afilada
-              bgcolor: STAGE_COLORS[stage]
-            }} />
+            <Box sx={{ width: 10, height: 10, borderRadius: 0, bgcolor: STAGE_COLORS[stage] }} />
             {opt.label}
           </Box>
         )
@@ -70,20 +64,26 @@ const LeadsReportSection = () => {
   ]
 
   return (
-    <ReportSection
-      icon={TrendingUp}
-      iconBgColor="#fff3e0"
-      iconColor="#f57c00"
-      title={t('leads.title', 'Reporte de Leads')}
-      description={t('leads.description', 'Exporta leads filtrados por stage, agente o proyecto')}
-    >
-      <ExportButton
-        label={t('leads.exportButton', 'Exportar Leads')}
-        exportFn={crmReportsService.exportLeads}
-        withModal={true}
-        filters={filters}
-      />
-    </ReportSection>
+    // ✅ ID agregado al contenedor principal de la sección
+    <Box id="reports-leads-section">
+      <ReportSection
+        icon={TrendingUp}
+        iconBgColor="#fff3e0"
+        iconColor="#f57c00"
+        title={t('leads.title', 'Reporte de Leads')}
+        description={t('leads.description', 'Exporta leads filtrados por stage, agente o proyecto')}
+      >
+        {/* ✅ ID agregado al contenedor del botón existente */}
+        <Box id="leads-report-export-btn">
+          <ExportButton
+            label={t('leads.exportButton', 'Exportar Leads')}
+            exportFn={crmReportsService.exportLeads}
+            withModal={true}
+            filters={filters}
+          />
+        </Box>
+      </ReportSection>
+    </Box>
   )
 }
 

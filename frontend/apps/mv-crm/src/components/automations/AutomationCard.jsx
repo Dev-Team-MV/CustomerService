@@ -38,6 +38,7 @@ const ACTIONS_CONFIG = {
 
 const AutomationCard = ({
   automation,
+  isFirst = false, // ✅ Agregado
   projects = [],
   agents = [],
   onEdit,
@@ -100,13 +101,14 @@ const AutomationCard = ({
   const templateInfo = getTemplateInfo()
   const assignedAgent = getAssignedAgent()
 
-  return (
+return (
     <Paper
+      id={isFirst ? 'automation-card-first' : undefined} // ✅ ID para la tarjeta completa
       elevation={0}
       sx={{
         p: 3,
         border: '1px solid #ececec',
-        borderRadius: 0, // ✅ Estética unificada (bordes afilados)
+        borderRadius: 0,
         bgcolor: '#fff',
         opacity: automation.isActive ? 1 : 0.6,
         transition: 'all 0.2s ease',
@@ -117,8 +119,8 @@ const AutomationCard = ({
       }}
     >
       <Box display="flex" alignItems="flex-start" gap={2}>
-        {/* Toggle */}
-        <Box sx={{ mt: 0.5 }}>
+        {/* ✅ ID: Toggle */}
+        <Box id={isFirst ? 'automation-card-toggle' : undefined} sx={{ mt: 0.5 }}>
           <Tooltip title={automation.isActive ? t('disable') : t('enable')}>
             <Switch
               checked={automation.isActive}
@@ -133,18 +135,10 @@ const AutomationCard = ({
 
         {/* Contenido */}
         <Box flex={1}>
-          {/* Header: Nombre + Acciones */}
-          <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1.5}>
+          {/* ✅ ID: Header (Nombre + Acciones) */}
+          <Box id={isFirst ? 'automation-card-header' : undefined} display="flex" justifyContent="space-between" alignItems="flex-start" mb={1.5}>
             <Box>
-              <Typography
-                sx={{
-                  fontFamily: '"Helvetica Neue", sans-serif',
-                  fontSize: '1.05rem',
-                  fontWeight: 600,
-                  color: '#000',
-                  mb: 0.5
-                }}
-              >
+              <Typography sx={{ fontFamily: '"Helvetica Neue", sans-serif', fontSize: '1.05rem', fontWeight: 600, color: '#000', mb: 0.5 }}>
                 {automation.name}
               </Typography>
               <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
@@ -152,30 +146,14 @@ const AutomationCard = ({
                   icon={<Typography>{triggerConfig.icon}</Typography>}
                   label={t(`triggers.${automation.trigger}`, automation.trigger)}
                   size="small"
-                  sx={{
-                    bgcolor: `${triggerConfig.color}15`,
-                    color: triggerConfig.color,
-                    border: `1px solid ${triggerConfig.color}30`,
-                    fontFamily: '"Courier New", monospace',
-                    fontSize: '0.65rem',
-                    fontWeight: 600,
-                    borderRadius: 0
-                  }}
+                  sx={{ bgcolor: `${triggerConfig.color}15`, color: triggerConfig.color, border: `1px solid ${triggerConfig.color}30`, fontFamily: '"Courier New", monospace', fontSize: '0.65rem', fontWeight: 600, borderRadius: 0 }}
                 />
                 <Typography sx={{ color: '#ccc', fontSize: '0.85rem' }}>→</Typography>
                 <Chip
                   icon={<Typography>{actionConfig.icon}</Typography>}
                   label={t(`actions.${automation.action}`, automation.action)}
                   size="small"
-                  sx={{
-                    bgcolor: `${actionConfig.color}15`,
-                    color: actionConfig.color,
-                    border: `1px solid ${actionConfig.color}30`,
-                    fontFamily: '"Courier New", monospace',
-                    fontSize: '0.65rem',
-                    fontWeight: 600,
-                    borderRadius: 0
-                  }}
+                  sx={{ bgcolor: `${actionConfig.color}15`, color: actionConfig.color, border: `1px solid ${actionConfig.color}30`, fontFamily: '"Courier New", monospace', fontSize: '0.65rem', fontWeight: 600, borderRadius: 0 }}
                 />
               </Box>
             </Box>
@@ -183,88 +161,46 @@ const AutomationCard = ({
             {/* Acciones */}
             <Box display="flex" gap={0.5}>
               <Tooltip title={t('test')}>
-                <IconButton
-                  size="small"
-                  onClick={() => onTest(automation._id)}
-                  sx={{ color: '#2196f3', '&:hover': { bgcolor: '#e3f2fd', borderRadius: 0 } }}
-                >
+                <IconButton size="small" onClick={() => onTest(automation._id)} sx={{ color: '#2196f3', '&:hover': { bgcolor: '#e3f2fd', borderRadius: 0 } }}>
                   <PlayArrow sx={{ fontSize: 18 }} />
                 </IconButton>
               </Tooltip>
               <Tooltip title={t('edit')}>
-                <IconButton
-                  size="small"
-                  onClick={() => onEdit(automation)}
-                  sx={{ color: '#000', '&:hover': { bgcolor: '#f5f5f5', borderRadius: 0 } }}
-                >
+                <IconButton size="small" onClick={() => onEdit(automation)} sx={{ color: '#000', '&:hover': { bgcolor: '#f5f5f5', borderRadius: 0 } }}>
                   <Edit sx={{ fontSize: 18 }} />
                 </IconButton>
               </Tooltip>
               <Tooltip title={t('delete')}>
-                <IconButton
-                  size="small"
-                  onClick={() => onDelete(automation._id)}
-                  sx={{ color: '#f44336', '&:hover': { bgcolor: '#ffebee', borderRadius: 0 } }}
-                >
+                <IconButton size="small" onClick={() => onDelete(automation._id)} sx={{ color: '#f44336', '&:hover': { bgcolor: '#ffebee', borderRadius: 0 } }}>
                   <Delete sx={{ fontSize: 18 }} />
                 </IconButton>
               </Tooltip>
             </Box>
           </Box>
 
-          {/* Condiciones */}
+          {/* ✅ ID: Condiciones */}
           {automation.condition && Object.values(automation.condition).some(v => v) && (
-            <Box mb={1.5}>
-              <Typography
-                sx={{
-                  fontFamily: '"Courier New", monospace',
-                  fontSize: '0.65rem',
-                  color: '#000',
-                  letterSpacing: '1px',
-                  textTransform: 'uppercase',
-                  mb: 0.5
-                }}
-              >
+            <Box id={isFirst ? 'automation-card-conditions' : undefined} mb={1.5}>
+              <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', letterSpacing: '1px', textTransform: 'uppercase', mb: 0.5 }}>
                 {t('card.conditions')}
               </Typography>
               <Box display="flex" gap={1} flexWrap="wrap">
                 {automation.condition.stage && (
-                  <Chip
-                    label={`${t('card.stage')} ${t(`stages.${automation.condition.stage}`, automation.condition.stage)}`}
-                    size="small"
-                    sx={{ bgcolor: '#f5f5f5', fontFamily: '"Courier New", monospace', fontSize: '0.65rem', borderRadius: 0 }}
-                  />
+                  <Chip label={`${t('card.stage')} ${t(`stages.${automation.condition.stage}`, automation.condition.stage)}`} size="small" sx={{ bgcolor: '#f5f5f5', fontFamily: '"Courier New", monospace', fontSize: '0.65rem', borderRadius: 0 }} />
                 )}
                 {projectName && (
-                  <Chip
-                    label={`${t('card.project')} ${projectName}`}
-                    size="small"
-                    sx={{ bgcolor: '#f5f5f5', fontFamily: '"Courier New", monospace', fontSize: '0.65rem', borderRadius: 0 }}
-                  />
+                  <Chip label={`${t('card.project')} ${projectName}`} size="small" sx={{ bgcolor: '#f5f5f5', fontFamily: '"Courier New", monospace', fontSize: '0.65rem', borderRadius: 0 }} />
                 )}
                 {automation.condition.daysInactive && (
-                  <Chip
-                    label={t('card.daysInactive', { count: automation.condition.daysInactive })}
-                    size="small"
-                    sx={{ bgcolor: '#f5f5f5', fontFamily: '"Courier New", monospace', fontSize: '0.65rem', borderRadius: 0 }}
-                  />
+                  <Chip label={t('card.daysInactive', { count: automation.condition.daysInactive })} size="small" sx={{ bgcolor: '#f5f5f5', fontFamily: '"Courier New", monospace', fontSize: '0.65rem', borderRadius: 0 }} />
                 )}
               </Box>
             </Box>
           )}
 
-          {/* Contexto de la acción */}
-          <Box mb={1.5}>
-            <Typography
-              sx={{
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.65rem',
-                color: '#000',
-                letterSpacing: '1px',
-                textTransform: 'uppercase',
-                mb: 0.5
-              }}
-            >
+          {/* ✅ ID: Contexto de la acción */}
+          <Box id={isFirst ? 'automation-card-action-detail' : undefined} mb={1.5}>
+            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', letterSpacing: '1px', textTransform: 'uppercase', mb: 0.5 }}>
               {t('card.action')}
             </Typography>
             
@@ -326,7 +262,7 @@ const AutomationCard = ({
             )}
           </Box>
 
-          {/* Resultado del test */}
+          {/* Resultado del test (sin ID, es dinámico) */}
           {testResult && (
             <Box mb={1.5}>
               {testResult.matched ? (
@@ -360,8 +296,8 @@ const AutomationCard = ({
 
           <Divider sx={{ my: 1.5 }} />
 
-          {/* Footer: Creado por + Última ejecución */}
-          <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1}>
+          {/* ✅ ID: Footer */}
+          <Box id={isFirst ? 'automation-card-footer' : undefined} display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1}>
             {automation.createdBy && (
               <Box display="flex" alignItems="center" gap={1}>
                 <Avatar sx={{ width: 24, height: 24, bgcolor: '#e0e0e0', color: '#666', fontSize: '0.7rem', fontWeight: 600, borderRadius: 0 }}>
@@ -378,15 +314,7 @@ const AutomationCard = ({
                 {t('card.lastRun')} {formatLastRun(automation.updatedAt)}
               </Typography>
               <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: automation.isActive ? '#4caf50' : '#f44336' }} />
-              <Typography
-                sx={{
-                  fontFamily: '"Courier New", monospace',
-                  fontSize: '0.65rem',
-                  color: automation.isActive ? '#4caf50' : '#f44336',
-                  letterSpacing: '0.5px',
-                  textTransform: 'uppercase'
-                }}
-              >
+              <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: automation.isActive ? '#4caf50' : '#f44336', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
                 {automation.isActive ? t('card.active') : t('card.inactive')}
               </Typography>
             </Box>

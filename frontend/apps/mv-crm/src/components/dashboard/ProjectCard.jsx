@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/dashboard/ProjectCard.jsx
 import React, { useState, useEffect, useRef } from 'react'
 import { Box, Typography, Avatar } from '@mui/material'
 import { People, CheckCircleOutline } from '@mui/icons-material'
@@ -23,7 +22,7 @@ const Counter = ({ to = 0, prefix = '', suffix = '', duration = 1.6 }) => {
   return <>{prefix}{val.toLocaleString()}{suffix}</>
 }
 
-export default function ProjectCard({ project, index = 0, onClick, selected = false, clientCount = 0 }) {
+export default function ProjectCard({ project, index = 0, onClick, selected = false, clientCount = 0, dataTourId }) {
   const { t } = useTranslation('dashboard')
 
   return (
@@ -34,18 +33,21 @@ export default function ProjectCard({ project, index = 0, onClick, selected = fa
       whileHover={{ x: 3 }}
       onClick={onClick}
     >
-      <Box sx={{
-        border: `1px solid ${selected ? '#000' : '#e8e8e8'}`,
-        p: '16px 20px',
-        background: selected ? '#000' : '#fff',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        transition: 'all 0.2s ease',
-        borderRadius: 0, // ✅ Asegurado
-        '&:hover': { borderColor: '#000' }
-      }}>
+      <Box 
+        id={dataTourId}
+        sx={{
+          border: `1px solid ${selected ? '#000' : '#e8e8e8'}`,
+          p: '16px 20px',
+          background: selected ? '#000' : '#fff',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          transition: 'all 0.2s ease',
+          borderRadius: 0,
+          '&:hover': { borderColor: '#000' }
+        }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0, flex: 1 }}>
           <Avatar sx={{
             width: 30, height: 30, bgcolor: selected ? '#fff' : '#000', borderRadius: 0,
@@ -58,7 +60,7 @@ export default function ProjectCard({ project, index = 0, onClick, selected = fa
             <Typography sx={{
               fontFamily: '"Helvetica Neue", sans-serif', fontSize: '0.85rem',
               fontWeight: 500, color: selected ? '#fff' : '#000', letterSpacing: '-0.01em',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' // ✅ Previene desbordamiento
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
             }}>
               {project.name}
             </Typography>

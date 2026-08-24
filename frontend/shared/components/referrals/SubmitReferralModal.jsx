@@ -130,8 +130,10 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
     }
   }
 
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    // ✅ ID 1: Modal compartido
+    <Dialog id="shared-referral-modal" open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
         {mode === 'customer' ? t('modal.submitTitle') : t('modal.createTitle')}
       </DialogTitle>
@@ -142,78 +144,87 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {mode === 'crm' && (
-              <FormControl fullWidth required>
-                <InputLabel>{t('fields.project')}</InputLabel>
-                <Select 
-                  value={projectId} 
-                  onChange={(e) => { setProjectId(e.target.value); setReferrerId('') }} 
-                  label={t('fields.project')}
-                >
-                  <MenuItem value=""><em>{t('common.select')}</em></MenuItem>
-                  {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
-                </Select>
-              </FormControl>
+              // ✅ ID 2: Proyecto
+              <Box id="shared-referral-project">
+                <FormControl fullWidth required>
+                  <InputLabel>{t('fields.project')}</InputLabel>
+                  <Select 
+                    value={projectId} 
+                    onChange={(e) => { setProjectId(e.target.value); setReferrerId('') }} 
+                    label={t('fields.project')}
+                  >
+                    <MenuItem value=""><em>{t('common.select')}</em></MenuItem>
+                    {projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Box>
             )}
 
             {mode === 'crm' && (
-              <FormControl fullWidth required disabled={!projectId}>
-                <InputLabel>{t('fields.referrer')}</InputLabel>
-                <Select 
-                  value={referrerId} 
-                  onChange={(e) => setReferrerId(e.target.value)} 
-                  label={t('fields.referrer')}
-                >
-                  <MenuItem value=""><em>{t('common.select')}</em></MenuItem>
-                  {filteredReferrers.map(client => (
-                    <MenuItem key={client._id} value={client._id}>
-                      {client.firstName} {client.lastName}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {projectId && filteredReferrers.length === 0 && (
-                  <Typography variant="caption" color="warning.main" sx={{ mt: 0.5 }}>
-                    {t('warnings.noReferrers')}
-                  </Typography>
-                )}
-              </FormControl>
+              // ✅ ID 3: Referidor
+              <Box id="shared-referral-referrer">
+                <FormControl fullWidth required disabled={!projectId}>
+                  <InputLabel>{t('fields.referrer')}</InputLabel>
+                  <Select 
+                    value={referrerId} 
+                    onChange={(e) => setReferrerId(e.target.value)} 
+                    label={t('fields.referrer')}
+                  >
+                    <MenuItem value=""><em>{t('common.select')}</em></MenuItem>
+                    {filteredReferrers.map(client => (
+                      <MenuItem key={client._id} value={client._id}>
+                        {client.firstName} {client.lastName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {projectId && filteredReferrers.length === 0 && (
+                    <Typography variant="caption" color="warning.main" sx={{ mt: 0.5 }}>
+                      {t('warnings.noReferrers')}
+                    </Typography>
+                  )}
+                </FormControl>
+              </Box>
             )}
 
-            <TextField 
-              required 
-              fullWidth 
-              size="small" 
-              label={t('fields.referredName')} 
-              value={formData.referredName} 
-              onChange={(e) => handleChange('referredName', e.target.value)} 
-            />
-            
-            <SharedPhoneInput
-              label={t('fields.referredPhone')}
-              value={formData.referredPhone}
-              onChange={(value) => handleChange('referredPhone', value)}
-              required={true}
-              country="co"
-            />
-            
-            <TextField 
-              fullWidth 
-              size="small" 
-              label={t('fields.referredEmail')} 
-              type="email" 
-              value={formData.referredEmail} 
-              onChange={(e) => handleChange('referredEmail', e.target.value)} 
-            />
+            {/* ✅ ID 4: Datos de contacto */}
+            <Box id="shared-referral-contact" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <TextField 
+                required 
+                fullWidth 
+                size="small" 
+                label={t('fields.referredName')} 
+                value={formData.referredName} 
+                onChange={(e) => handleChange('referredName', e.target.value)} 
+              />
+              
+              <SharedPhoneInput
+                label={t('fields.referredPhone')}
+                value={formData.referredPhone}
+                onChange={(value) => handleChange('referredPhone', value)}
+                required={true}
+                country="co"
+              />
+              
+              <TextField 
+                fullWidth 
+                size="small" 
+                label={t('fields.referredEmail')} 
+                type="email" 
+                value={formData.referredEmail} 
+                onChange={(e) => handleChange('referredEmail', e.target.value)} 
+              />
 
-            {/* ✅ Campo de País */}
-<CountrySelector
-              label={t('fields.country')}
-              value={formData.country}
-              onChange={(value) => handleChange('country', value)}
-              required={true}
-            />
+              <CountrySelector
+                label={t('fields.country')}
+                value={formData.country}
+                onChange={(value) => handleChange('country', value)}
+                required={true}
+              />
+            </Box>
 
             {mode === 'crm' && (
-              <>
+              // ✅ ID 5: Recompensa
+              <Box id="shared-referral-reward" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <FormControl fullWidth required>
                   <InputLabel>{t('fields.rewardType')}</InputLabel>
                   <Select 
@@ -249,7 +260,7 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
                     onChange={(e) => handleChange('discountPercent', Number(e.target.value))} 
                   />
                 )}
-              </>
+              </Box>
             )}
 
             <TextField 
@@ -264,7 +275,8 @@ export default function SubmitReferralModal({ open, onClose, onSuccess, mode = '
           </Box>
         </DialogContent>
 
-        <DialogActions sx={{ p: 2, borderTop: '1px solid #eee' }}>
+        {/* ✅ ID 6: Acciones */}
+        <DialogActions id="shared-referral-actions" sx={{ p: 2, borderTop: '1px solid #eee' }}>
           <Button onClick={onClose} disabled={submitting}>
             {t('actions.cancel')}
           </Button>

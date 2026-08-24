@@ -1,5 +1,4 @@
-// apps/mv-crm/src/components/clients/ClientDocuments.jsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { 
   Box, Typography, Button, CircularProgress, Alert, Grid, 
@@ -13,9 +12,13 @@ import DocumentViewer from '../documents/DocumentViewer'
 import VersionHistoryDrawer from '../documents/VersionHistoryDrawer'
 import documentService from '../../services/documentService'
 import { useProjects } from '@shared/hooks/useProjects'
+// ✅ Imports para el Tour
+import { useTour } from '@shared/tours/useTour'
+import { getDocumentUploadTourSteps, documentUploadTourConfig } from '../../tours/features/documentUploadTour'
 
 export default function ClientDocuments({ clientId, clientName }) {
   const { t } = useTranslation('documents')
+  const { t: tCommon } = useTranslation('common')
   const { projects } = useProjects()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -41,7 +44,36 @@ export default function ClientDocuments({ clientId, clientName }) {
     }
   }
 
-  // ✅ Estilos unificados
+    // ✅ Hooks del Tour
+  const { startTour, pauseTour, resumeTour } = useTour()
+  const docUploadSteps = getDocumentUploadTourSteps(tCommon)
+
+  // ✅ Escuchar evento desde el padre (ClientDetail) para iniciar el subtour
+  useEffect(() => {
+    const handleTriggerUploadTour = () => {
+      // Evitar abrir si ya está abierto
+      if (uploadOpen) return
+      
+      setUploadOpen(true)
+      pauseTour() // Pausa el tour principal del detalle del cliente
+      
+      setTimeout(() => {
+        startTour(documentUploadTourConfig.id, docUploadSteps, {
+          onCloseClick: () => {
+            window.dispatchEvent(new CustomEvent('tour-resume-document-upload'))
+          },
+          onDestroyStarted: () => {
+            window.dispatchEvent(new CustomEvent('tour-resume-document-upload'))
+          }
+        })
+      }, 400)
+    }
+
+    window.addEventListener('trigger-doc-upload-tour', handleTriggerUploadTour)
+    return () => window.removeEventListener('trigger-doc-upload-tour', handleTriggerUploadTour)
+  }, [startTour, pauseTour, docUploadSteps, uploadOpen]) // ✅ Agregado uploadOpen a las dependencias
+
+
   const unifiedButtonSx = { 
     borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', 
     fontSize: '0.75rem', letterSpacing: '0.5px', width: { xs: '100%', sm: 'auto' },
@@ -68,7 +100,10 @@ export default function ClientDocuments({ clientId, clientName }) {
         <Typography variant="h6" sx={{ fontFamily: '"Courier New", monospace', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', fontSize: { xs: '0.9rem', sm: '1.1rem' } }}>
           {t('topbarLabel', 'Documentos del Cliente')}
         </Typography>
+        
+        {/* ✅ ID para el botón de subir documento */}
         <Button 
+          id="client-docs-upload-btn"
           variant="contained" 
           startIcon={<Add />} 
           onClick={() => setUploadOpen(true)} 
@@ -78,8 +113,8 @@ export default function ClientDocuments({ clientId, clientName }) {
         </Button>
       </Box>
 
-      {/* Filtros rápidos Responsive */}
-      <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={3} flexWrap="wrap">
+      {/* ✅ ID para el contenedor de filtros rápidos */}
+      <Box id="client-docs-filters" display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={3} flexWrap="wrap">
         <TextField
           size="small"
           placeholder={t('searchPlaceholder')}
@@ -117,22 +152,26 @@ export default function ClientDocuments({ clientId, clientName }) {
           <CircularProgress />
         </Box>
       ) : documents.length === 0 ? (
-        <Box textAlign="center" py={8} color="text.secondary">
+        <Box id="client-docs-empty" textAlign="center" py={8} color="text.secondary">
           <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem' }}>
             {t('empty')}
           </Typography>
         </Box>
       ) : (
-        <Grid container spacing={2}>
-          {documents.map(doc => (
+        // ✅ ID para la cuadrícula de documentos
+        <Grid id="client-docs-grid" container spacing={2}>
+          {documents.map((doc, index) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={doc._id}>
-              <DocumentCard 
-                doc={doc} 
-                onPreview={() => { setSelectedDoc(doc); setViewerOpen(true) }}
-                onHistory={() => { setSelectedDoc(doc); setHistoryOpen(true) }}
-                onArchive={handleArchive}
-                onDelete={handleDelete}
-              />
+              {/* ✅ ID para la primera tarjeta de documento */}
+              <Box id={index === 0 ? 'client-docs-first-card' : undefined}>
+                <DocumentCard 
+                  doc={doc} 
+                  onPreview={() => { setSelectedDoc(doc); setViewerOpen(true) }}
+                  onHistory={() => { setSelectedDoc(doc); setHistoryOpen(true) }}
+                  onArchive={handleArchive}
+                  onDelete={handleDelete}
+                />
+              </Box>
             </Grid>
           ))}
         </Grid>

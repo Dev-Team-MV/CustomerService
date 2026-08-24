@@ -1,74 +1,71 @@
 {
-    "actionsTitle": "Actions",
-    "actions": {
-        "save": "Save",
-        "cancel": "Cancel",
-        "delete": "Delete",
-        "edit": "Edit",
-        "submit": "Submit",
-        "confirm": "Confirm",
-        "close": "Close",
-        "back": "Back",
-        "viewAll": "View all",
-        "add": "Add",
-        "create": "Create",
-        "update": "Update",
-        "search": "Search",
-        "filter": "Filter",
-        "upload": "Upload",
-        "download": "Download",
-        "send": "Send",
-        "retry": "Retry"
-    },
-    "statusTitle": "Status",
-    "status": {
-        "loading": "Loading...",
-        "error": "An error occurred",
-        "success": "Operation successful",
-        "signed": "Signed",
-        "pending": "Pending",
-        "rejected": "Rejected",
-        "available": "Available",
-        "sold": "Sold",
-        "active": "Active",
-        "inactive": "Inactive",
-        "paid": "Paid",
-        "unpaid": "Unpaid"
-    },
-    "validation": {
-        "required": "This field is required",
-        "invalidEmail": "Invalid email address",
-        "invalidPhone": "Invalid phone number",
-        "passwordTooShort": "Password is too short"
-    },
-    "noData": "No data found",
-    "copyright": "© 2026 Developed by Michelangelo Del Valle • All Rights Reserved",
-    "premiumTagline": "Premium Lakefront Living Experience",
-    "resortLifestyle": "Resort Lifestyle",
-    "notFound": {
-        "title": "Page Not Found",
-        "description": "Sorry, the page you're looking for doesn't exist.",
-        "goHome": "Go to Home"
-    },
-    "addPayment": "Add Payment",
-    "activeUser": "Active User",
-    "accountDetails": "Account Details",
-    "enableEditMode": "Enable edit mode to change your password",
-    "managePersonalInfo": "Manage your personal information and security settings",
-    "myProfile": "My Profile",
-    "editProfile": "Edit Profile",
-    "passwordFillAll": "Please fill all password fields.",
-    "passwordsNoMatch": "New passwords do not match.",
-    "passwordMinLength": "New password must be at least 6 characters.",
-    "passwordChanged": "Password changed successfully!",
-    "passwordChangeError": "Error changing password. Please try again.",
-    "profileUpdated": "Profile updated successfully!",
-
-      "footer": {
+  "actionsTitle": "Actions",
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back",
+    "viewAll": "View all",
+    "add": "Add",
+    "create": "Create",
+    "update": "Update",
+    "search": "Search",
+    "filter": "Filter",
+    "upload": "Upload",
+    "download": "Download",
+    "send": "Send",
+    "retry": "Retry"
+  },
+  "statusTitle": "Status",
+  "status": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Operation successful",
+    "signed": "Signed",
+    "pending": "Pending",
+    "rejected": "Rejected",
+    "available": "Available",
+    "sold": "Sold",
+    "active": "Active",
+    "inactive": "Inactive",
+    "paid": "Paid",
+    "unpaid": "Unpaid"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "invalidPhone": "Invalid phone number",
+    "passwordTooShort": "Password is too short"
+  },
+  "noData": "No data found",
+  "copyright": "© 2026 Developed by Michelangelo Del Valle • All Rights Reserved",
+  "premiumTagline": "Premium Lakefront Living Experience",
+  "resortLifestyle": "Resort Lifestyle",
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "Sorry, the page you're looking for doesn't exist.",
+    "goHome": "Go to Home"
+  },
+  "addPayment": "Add Payment",
+  "activeUser": "Active User",
+  "accountDetails": "Account Details",
+  "enableEditMode": "Enable edit mode to change your password",
+  "managePersonalInfo": "Manage your personal information and security settings",
+  "myProfile": "My Profile",
+  "editProfile": "Edit Profile",
+  "passwordFillAll": "Please fill all password fields.",
+  "passwordsNoMatch": "New passwords do not match.",
+  "passwordMinLength": "New password must be at least 6 characters.",
+  "passwordChanged": "Password changed successfully!",
+  "passwordChangeError": "Error changing password. Please try again.",
+  "profileUpdated": "Profile updated successfully!",
+  "footer": {
     "copyright": "© {{year}} — MV Platform"
   },
-
-
   "cancel": "Cancel",
   "clearFilters": "Clear filters",
   "all": "All",
@@ -80,12 +77,10 @@
   "public": "Public",
   "private": "Private",
   "noImage": "No image",
-
   "uploading": "Uploading...",
   "uploadAll": "Upload All",
   "back": "Back",
-  "new": "NEW" ,
-
+  "new": "NEW",
   "notifications": {
     "title": "Notifications",
     "paymentReceived": "Payment received",
@@ -129,7 +124,6 @@
       "sending": "Sending..."
     }
   },
-
   "variables": {
     "title": "Message Variables",
     "description": "Variables are used in message templates with the format {{name}}. The path indicates where the value is obtained from.",
@@ -139,7 +133,6 @@
     "empty": "No variables in this category",
     "createFirst": "Create first variable",
     "saveProjectFirst": "Save the project first to manage variables.",
-    
     "name": "Name",
     "nameHelper": "Only letters, numbers and _. Must start with a letter.",
     "path": "Path",
@@ -147,25 +140,20 @@
     "currentPath": "Current path",
     "category": "Category",
     "categoryAutoSet": "(auto-set by the selected category)",
-    
     "modeBuilder": "Visual",
     "modeManual": "Manual",
-    
     "selectCategory": "Select a category",
     "selectField": "Select a field",
     "noRoots": "No categories available",
     "noSegments": "No fields available at this level",
-    
     "selectedPath": "Selected path",
     "useThisPath": "Use this path",
     "backToRoots": "Back to categories",
     "back": "Back",
-    
     "cancel": "Cancel",
     "saving": "Saving...",
     "create": "Create",
     "update": "Update",
-    
     "availableVariables": "Available variables",
     "clickToInsert": "Click on a variable to insert it into the message",
     "loading": "Loading variables...",
@@ -173,7 +161,6 @@
     "noVariablesYet": "No variables defined for this project",
     "goToConfig": "Go to project configuration to create variables",
     "total": "variables",
-    
     "copyVariable": "Copy variable",
     "editVariable": "Edit",
     "deleteVariable": "Delete",
@@ -182,7 +169,6 @@
     "errorNameRequired": "Name is required",
     "errorPathRequired": "Path is required",
     "errorCategoryRequired": "Category is required",
-    
     "categories": {
       "all": "All",
       "Usuario": "User",
@@ -195,10 +181,1251 @@
       "Pago": "Payment",
       "Custom": "Custom"
     },
-    
     "chipTypes": {
       "ref": "ref",
       "value": "value"
     }
+  },
+  "tour": {
+    "notifCreator": {
+      "mode": { "title": "Recipient Mode", "description": "Choose whether to send to everyone (General), a specific role, a single user, or multiple users." },
+      "title": { "title": "Notification Title", "description": "Write a clear and concise subject. This will be the first thing the user sees." },
+      "body": { "title": "Message Body", "description": "Detail the important information. You can use multiple lines for clarity." },
+      "type": { "title": "Notification Type", "description": "Select the urgency: Info (Blue), Warning (Orange), Error (Red), or Custom (Purple)." },
+      "audience": { "title": "Audience Filter", "description": "This field changes based on the chosen mode. Select the specific roles or users who will receive the message." },
+      "preview": { "title": "Preview", "description": "This is how the notification will look on the user's device, with its respective type color." },
+      "actions": { "title": "Send Notification", "description": "Check that everything is correct and click \"Send\". Recipients will receive it instantly." }
+    },
+    "notifDrawer": {
+      "header": { "title": "Notification Center", "description": "Here you see a summary of all your alerts. The number next to the title indicates how many notifications you have in total." },
+      "tabs": { "title": "Category Filters", "description": "Quickly filter by overdue payments, upcoming activities, or stale leads to prioritize your work." },
+      "markAll": { "title": "Mark All as Read", "description": "Already reviewed everything? Use this button to clear your inbox with a single click." },
+      "list": { "title": "Alert List", "description": "Click on any alert to mark it as read. Unread alerts have a colored background to stand out." },
+      "footer": { "title": "Real-time Updates", "description": "This panel updates automatically. Stay on top of critical actions for your projects!" }
+    },
+    "clients": {
+      "button": "View clients guide",
+      "welcome": { "title": "Client Management", "description": "From here you can view, search, edit, and manage all residents in the system centrally." },
+      "search": { "title": "Smart Search", "description": "Quickly filter the list in real-time by name, email, phone number, or client role." },
+      "addAction": { "title": "Add New Client", "description": "Click here to register a new resident. A wizard will open to guide you in setting up their data and sending the invitation." },
+      "sendMessage": { "title": "Send Bulk Message", "description": "Use this tool to send SMS or emails to multiple clients simultaneously, using templates or personalized messages." },
+      "export": { "title": "Export Data", "description": "Download the client list in CSV or JSON format. You can apply filters before exporting to get only the data you need." },
+      "table": { "title": "Data Table", "description": "All clients are listed here. I will explain each column and the actions available in the first row." },
+      "colName": { "title": "Name and Email", "description": "Shows the avatar with initials, full name, and primary contact email." },
+      "colPhone": { "title": "Phone", "description": "The formatted phone number. It is the main channel for sending invitations and reminders." },
+      "colRole": { "title": "User Role", "description": "Indicates the permission level: Super Admin, Admin, Owner, or Resident." },
+      "colProjects": { "title": "Assigned Projects", "description": "Shows the real estate projects this client has access to, with a maximum of 4 visible avatars." },
+      "colLots": { "title": "Lots/Properties", "description": "Number of lots, apartments, or specific properties assigned to the client." },
+      "colStatus": { "title": "Account Status", "description": "Indicates whether the client's account is active or inactive in the system." },
+      "colJoined": { "title": "Registration Date", "description": "The date the client was created or invited to the system." },
+      "colActions": { "title": "Actions Column", "description": "Here you will find the buttons to manage the client. I will show them to you one by one in the first row." },
+      "actionSms": { "title": "Send Setup SMS", "description": "Click here to resend the password setup link to the client's phone." },
+      "actionEdit": { "title": "Edit Client", "description": "Open the modal to modify the name, email, phone, role, or project assigned to this client." },
+      "actionDelete": { "title": "Delete Client", "description": "Permanently remove the client from the system. You will be asked for confirmation before proceeding." },
+      "clickRow": { "title": "View Client Details", "description": "Click on this row (or any other) to open the detailed client view, where you can manage their payments, activities, notes, and documents!" }
+    },
+    "broadcast": {
+      "project": { "title": "Link to Project", "description": "Select a project to filter recipients and unlock specific variables for that project (such as lot or building name)." },
+      "channels": { "title": "Sending Channels", "description": "Choose whether to send the message via SMS, Email, or both. The system will automatically validate which users have valid data for each channel." },
+      "recipients": { "title": "Recipients", "description": "You can send to all users in the project or select specific recipients using the search." },
+      "templates": { "title": "Saved Templates", "description": "Save time by selecting a predefined template. They will automatically filter based on the selected project." },
+      "content": { "title": "Content and Variables", "description": "Write your message. Use the chips above to insert dynamic variables (e.g., {{firstName}}). The preview will show you how the final message will look." },
+      "actions": { "title": "Send Message", "description": "Review the recipient summary at the bottom. When everything is ready, click \"Send Message\" to start the process." }
+    },
+    "export": {
+      "projectFilter": { "title": "Project Filter", "description": "Select a specific project to export only the clients associated with it, or leave it on \"All\" to download the complete database." },
+      "format": { "title": "File Format", "description": "Choose the output format. CSV is ideal for opening in Excel, while JSON is useful for technical integrations or backups." },
+      "actions": { "title": "Download Data", "description": "Click the export button to download the file with the filtered data in the format you selected." }
+    },
+    "clientDetail": {
+      "header": { "title": "Client Profile", "description": "Here you see the name, account status, and main actions for this resident." },
+      "appointment": { "title": "Schedule Appointment", "description": "Schedule a meeting or call with this client directly from their profile." },
+      "tabs": { "title": "Tab Navigation", "description": "All information is organized here. The tour will navigate through each one to show you its content." },
+      "overview": { "title": "1. General Overview", "description": "Let's click here to view the overview. The tour will show you each section of this tab." },
+      "overviewPersonal": { "title": "Personal Data", "description": "Here you see the avatar, email, country, phone, date of birth, and the role assigned to the client in the system." },
+      "overviewProjects": { "title": "Related Projects", "description": "Shows the client's active memberships, indicating which projects they have access to and with what role (e.g., admin or resident)." },
+      "overviewStats": { "title": "Financial Summary", "description": "A quick look at the total properties, accumulated value, amount paid, and outstanding balance for this client." },
+      "overviewProperties": { "title": "Assigned Properties", "description": "Detailed list of lots or apartments, grouped by project. Includes status, price, balance, and payment progress bar." },
+      "payments": { "title": "2. Payment History", "description": "Let's click here to explore the financial history. I'll explain its components." },
+      "paymentsFilter": { "title": "Status Filter", "description": "Filter payments by status: Pending, Signed, or Rejected to quickly find what you need." },
+      "paymentsTable": { "title": "Payments Table", "description": "Here you see the details of each installment: payment type, amount, due dates, and current status." },
+      "paymentsPagination": { "title": "Pagination", "description": "Navigate between pages or adjust the number of records shown per screen." },
+      "activities": { "title": "3. Activities", "description": "Chronological record of every interaction: calls, emails, status changes, and team notes." },
+      "timeline": {
+        "marker": { "title": "Activity Indicator", "description": "The color and icon indicate the type of interaction: note, SMS, email, or automation." },
+        "card": { "title": "Activity Details", "description": "Here you see the title, full description, and the exact date when the action was recorded." },
+        "metadata": { "title": "Contextual Metadata", "description": "Shows which project it belongs to, the pipeline column, and the priority level of this task." },
+        "users": { "title": "Responsible Parties", "description": "Clearly identify who created the activity and which team member it is assigned to for follow-up." }
+      },
+      "notes": {
+        "title": "4. Internal Notes",
+        "description": "Space to add private observations about the client that only your team can see.",
+        "form": { "title": "Add New Note", "description": "Use this form to record internal observations, optionally linking them to a specific project." },
+        "card": { "title": "Note Details", "description": "Each note shows its title, full content, and the exact date when it was recorded." },
+        "metadata": { "title": "Note Context", "description": "Indicates which project or pipeline column this note is associated with, and its priority level." },
+        "users": { "title": "Follow-up", "description": "Clearly shows who created the note and which team member it is assigned to for follow-up." }
+      },
+      "history": {
+        "title": "5. Change History",
+        "description": "Let's click here to view the complete audit of modifications.",
+        "filters": { "title": "Audit Filters", "description": "Filter changes by action type (create, update, delete) and by date range to find specific events." },
+        "table": { "title": "Change Log", "description": "Here you see each modification: who made it, which field changed, the old and new values, and the exact date." },
+        "pagination": { "title": "Pagination", "description": "Navigate through the history pages if there are many change records." }
+      },
+      "documents": {
+        "title": "6. Documents",
+        "description": "Let's click here to manage the client's files, contracts, and legal documents.",
+        "uploadBtn": { "title": "Upload New Document", "description": "Use this button to upload new files, assign them a category, and link them to a specific project." },
+        "filters": { "title": "Search Filters", "description": "Search by name, filter by category (contracts, deeds, blueprints, etc.) or by associated project." },
+        "card": { "title": "Document Card", "description": "Each card shows a preview, name, date, and quick actions to preview, view version history, archive, or delete." }
+      },
+      "finish": { "title": "Explore the Profile!", "description": "The tour has finished. Now you can freely navigate through all sections to manage this client." }
+    },
+    "calendar": {
+      "button": "View Calendar Guide",
+      "overview": { "title": "Appointment Calendar", "description": "Here you have a centralized view of all your scheduled appointments, meetings, and calls." },
+      "views": { "title": "Calendar Views", "description": "Easily switch between Month, Week, or Day views to organize your agenda according to your needs." },
+      "navigation": { "title": "Date Navigation", "description": "Navigate forward or backward in time, or return to today with a single click." },
+      "create": { "title": "Create New Appointment", "description": "Click here to schedule a new appointment. I will guide you through the creation form." },
+      "grid": { "title": "Events Grid", "description": "Click on any empty day/time to create a quick appointment, or click on an existing appointment to view its details or change its status." },
+      "finish": { "title": "Ready!", "description": "You have mastered the calendar. Manage your time and appointments efficiently!" }
+    },
+    "appointment": {
+      "title": { "title": "Title and Status", "description": "Define a clear name for the appointment and its current status (Pending, Confirmed, Completed, or Canceled)." },
+      "contact": { "title": "Select Contact", "description": "Choose whether the appointment is with a Lead (prospect) or a Client (resident) already registered in the system." },
+      "project": { "title": "Associated Project", "description": "Link the appointment to a specific real estate project to maintain the meeting context." },
+      "datetime": { "title": "Date and Time", "description": "Set the start date and time. Optionally, define the end time to calculate the duration automatically." },
+      "actions": { "title": "Save Appointment", "description": "Check that all required fields are complete and click \"Create\" or \"Update\" to save." }
+    },
+    "automation": {
+      "button": "View Automations Guide",
+      "overview": { "title": "Automations Module", "description": "Here you can create, edit, and manage automated workflows to save time and improve communication." },
+      "stats": { "title": "Quick Stats", "description": "Quickly view the total number of automations created and how many are currently active." },
+      "create": { "title": "Create Automation", "description": "Click here to start designing a new automation. I will guide you through the builder step by step." },
+      "list": { "title": "Automations List", "description": "Here you will see all your automations. I will explain the components of the first card so you understand how to read them." },
+      "card": {
+        "title": "Automation Card",
+        "description": "Each automation is displayed on a card with all relevant information at a glance.",
+        "toggle": { "title": "Enable / Disable", "description": "Use this switch to pause or resume the automation instantly, without needing to delete it." },
+        "header": { "title": "Name and Flow", "description": "Shows the automation name, the event that triggers it, and the action it executes." },
+        "conditions": { "title": "Specific Conditions", "description": "Summarizes the applied filters, such as lead stage, specific project, or required days of inactivity." },
+        "action": { "title": "Action Detail", "description": "Shows the exact content that will be executed: the SMS template message, activity details, or the agent to notify." },
+        "footer": { "title": "Additional Information", "description": "Indicates who created the automation, when it was last executed, and its current status." }
+      },
+      "finish": { "title": "Ready!", "description": "You have mastered the automations module. Create smart workflows and optimize your CRM!" }
+    },
+    "automationBuilder": {
+      "name": { "title": "Name and Status", "description": "Assign a descriptive name to your automation and define whether it will be active or inactive from the start." },
+      "trigger": { "title": "Trigger", "description": "Choose the event that will start this automation (e.g., lead stage change, overdue payment, etc.)." },
+      "conditions": { "title": "Conditions", "description": "Refine when it executes. You can filter by specific lead stage, days of inactivity, or a particular project." },
+      "action": { "title": "Action to Execute", "description": "Define what will happen when the conditions are met: send an SMS, create an activity, or notify an agent." },
+      "config": { "title": "Action Configuration", "description": "Detail the action: select a message template, write a custom message with dynamic variables, or assign the task to an agent." },
+      "actions": { "title": "Save and Test", "description": "Use the \"Test\" button to simulate the automation. When you are ready, click \"Create\" or \"Update\" to save." }
+    },
+    "campaigns": {
+      "button": "View Campaigns Guide",
+      "overview": { "title": "Campaigns Module", "description": "From here you can create, manage, and monitor the bulk sending of messages to your leads or clients." },
+      "filters": { "title": "Search Filters", "description": "Filter your campaigns by status (Draft, Sending, Completed, etc.) or by specific project." },
+      "create": { "title": "Create Campaign", "description": "Click here to start the campaign creation wizard. I will guide you through its steps." },
+      "table": { "title": "Campaigns Table", "description": "All your campaigns are listed here. I will explain the meaning of each column using the first row as an example." },
+      "colName": { "title": "Campaign Name", "description": "The descriptive name you assigned to this campaign to easily identify it." },
+      "colStatus": { "title": "Status", "description": "Indicates whether the campaign is in draft, scheduled, sending, completed, or failed." },
+      "colAudience": { "title": "Target Audience", "description": "Shows who it is directed to: Leads or Clients, and the applied project or stage filters." },
+      "colStats": { "title": "Sending Statistics", "description": "Shows the total contacts, how many messages were sent successfully, and how many failed, with a progress bar." },
+      "colActions": { "title": "Quick Actions", "description": "Edit or delete drafts, send scheduled campaigns, or resend/update campaigns in progress or finalized." },
+      "finish": { "title": "Ready!", "description": "You have mastered campaign management. Create your first campaign and measure its impact!" }
+    },
+    "wizard": {
+      "stepper": { "title": "4-Step Wizard", "description": "This wizard guides you sequentially: Configuration, Template, Preview, and Send." },
+      "step1": {
+        "name": { "title": "Campaign Name", "description": "Assign a descriptive name. (In this tour, the system will fill it out automatically)." },
+        "audience": { "title": "Audience Type", "description": "Define whether you will send to Leads or Clients. The system will pre-select a test option." },
+        "project": { "title": "Project and Stage", "description": "Filter by project and stage to properly segment your audience." },
+        "continue": { "title": "Advance to Step 2", "description": "The system will automatically fill the fields with test data and advance to template selection." }
+      },
+      "step2": {
+        "mode": { "title": "Template Mode", "description": "Choose whether to use an existing template or create a new one. The system has already selected a default one for this demo." },
+        "content": { "title": "Content and Variables", "description": "If you create a new one, use the chips to insert dynamic variables (like {{firstName}}) that will be personalized for each contact." }
+      },
+      "step3": { "title": "Step 3: Preview", "description": "Here you can see a table with the contacts who will receive the message. Verify that the total and data match your selected audience." },
+      "step4": { "title": "Step 4: Confirmation and Send", "description": "Review the sending status. In this tour, the system will simulate the progress. In a real case, you would launch the campaign here and monitor messages in real-time." }
+    },
+    "commissions": {
+      "button": "View Commissions Guide",
+      "overview": { "title": "Commissions Module", "description": "Manage, approve, and track your agents' commission payments in one place." },
+      "tabs": { "title": "Management Tabs", "description": "Navigate between the list of individual commissions and the configuration of commission structures by project." },
+      "tabCommissions": { "title": "Tab: Commissions", "description": "Here you manage the lifecycle of each commission: from its creation to the final payment." },
+      "filters": { "title": "Advanced Filters", "description": "Refine your search using these filters to quickly find specific commissions." },
+      "filterProject": { "title": "Filter by Project", "description": "Filter commissions associated with a particular real estate project." },
+      "filterAgent": { "title": "Filter by Agent", "description": "Search for commissions generated by a specific agent or advisor." },
+      "filterStatus": { "title": "Filter by Status", "description": "Filter by current status: Pending, Approved, Paid, or Disputed." },
+      "table": { "title": "Commissions List", "description": "Here you see the breakdown of each commission. I will explain each column below." },
+      "colDate": { "title": "Date", "description": "The date when the commission was registered or generated." },
+      "colAgent": { "title": "Agent", "description": "The name of the agent or advisor who generated the sale and to whom the commission belongs." },
+      "colProject": { "title": "Project", "description": "The real estate project associated with this sale." },
+      "colAmounts": { "title": "Amounts", "description": "The total sale amount and the specific commission amount to be paid." },
+      "colStatus": { "title": "Status", "description": "The current status of the commission approval workflow." },
+      "colActions": { "title": "Quick Actions", "description": "Buttons to manage the commission. By clicking \"Next\", we will open the details modal to show you how it works." },
+      "tabStructures": { "title": "Tab: Structures", "description": "Switch to this tab to configure commission calculation rules for each project." },
+      "structuresFilter": { "title": "Select Project", "description": "First, select a project to view or create its structures. The system will select it for you." },
+      "structuresTable": { "title": "Structures Table", "description": "Here are listed the commission structures configured for the selected project." },
+      "structuresColName": { "title": "Name", "description": "The identifier name of the commission structure." },
+      "structuresColType": { "title": "Calculation Type", "description": "The calculation method: Flat Amount, Percentage, or Tiered." },
+      "structuresColDefault": { "title": "Default Structure", "description": "Indicates if this is the default structure that will be applied to new commissions in this project." },
+      "structuresColActions": { "title": "Edit", "description": "Click here to modify the rules of an existing structure." },
+      "createStructure": { "title": "Create Structure", "description": "Click here to configure commission rules. I will guide you through the process." },
+      "finish": { "title": "Ready!", "description": "You have mastered commission management. Keep your team motivated with transparent and timely payments!" }
+    },
+    "commissionDetail": {
+      "modal": { "title": "Details Modal", "description": "This modal allows you to view all the commission information and take actions on it." },
+      "overview": { "title": "General Information", "description": "Here you see the agent, project, sale and commission amounts, as well as any commission splits with other agents." },
+      "actions": { "title": "Modal Actions", "description": "From here you can Approve the commission, Mark it as Paid, or Close the modal to return to the list." }
+    },
+    "structure": {
+      "nameType": { "title": "Name and Type", "description": "Assign a name to the structure and choose the calculation type: Flat Amount, Percentage, or Tiered." },
+      "rates": { "title": "Rates Configuration", "description": "Define the percentage, flat amount, or tiered ranges according to the selected structure type." },
+      "bonus": { "title": "Bonus Rules", "description": "Add additional incentives, such as bonuses for fast sales or for exceeding minimum amounts." },
+      "actions": { "title": "Save Structure", "description": "Check that everything is correct and click \"Create\" or \"Update\" to save the structure." }
+    },
+    "quotes": {
+      "button": "View quotes guide",
+      "overview": { "title": "Quotes Module", "description": "From here you can create, send, and convert quotes with detailed amortization tables." },
+      "stats": { "title": "Quick Stats", "description": "View the total number of quotes and how many have been sent or converted into sales." },
+      "create": { "title": "New Quote", "description": "Click here to start the 3-step wizard. I will guide you through the process." },
+      "table": { "title": "Quotes List", "description": "All quotes are listed here. I will explain each column and its actions." },
+      "colDate": { "title": "Date", "description": "The date the quote was created." },
+      "colClient": { "title": "Client or Lead", "description": "Shows who the quote is addressed to." },
+      "colProject": { "title": "Project", "description": "The real estate project the quote belongs to." },
+      "colTotal": { "title": "Total Price", "description": "The total amount of the property with the selected customization options." },
+      "colStatus": { "title": "Status", "description": "Indicates if it's a draft, sent, accepted, expired, or already converted to a sale." },
+      "colActions": { "title": "Actions Column", "description": "Here are the buttons to manage each quote. I will explain them one by one." },
+      "actionEdit": { "title": "Edit", "description": "Opens the 3-step wizard to modify the quote details." },
+      "actionSend": { "title": "Send Quote", "description": "By clicking \"Next\", we will open the modal to send the quote via Email or SMS." },
+      "actionConvert": { "title": "Convert to Sale", "description": "By clicking \"Next\", we will open the modal to convert this quote into a real sale." },
+      "actionPdf": { "title": "Download PDF", "description": "Download the quote in PDF format to share or archive it." },
+      "actionDelete": { "title": "Delete", "description": "Permanently deletes the quote from the system." },
+      "finish": { "title": "Ready!", "description": "You have mastered the quotes module. Generate professional proposals and close more sales!" }
+    },
+    "quoteBuilder": {
+      "stepper": { "title": "3-Step Wizard", "description": "This wizard guides you sequentially: Property Selection, Financing Configuration, and Preview." },
+      "step1": { "title": "Step 1: Property", "description": "Select the Lead or Client, the project, and the specific property. The system will fill these fields automatically in this tour." },
+      "step2": { "title": "Step 2: Financing", "description": "Define the total price, down payment, interest rate, and term. The system will use test values for this demonstration." },
+      "step3": { "title": "Step 3: Preview", "description": "Review the financial summary and the generated amortization table. You can add notes before saving." },
+      "actions": { "title": "Save Quote", "description": "By clicking \"Next\", the system will simulate saving and close the modal automatically." }
+    },
+    "sendQuote": {
+      "modal": { "title": "Send Modal", "description": "From here you can send the quote to the client via email, SMS, or both." },
+      "method": { "title": "Sending Method", "description": "Select whether you want to send via Email, SMS, or both channels simultaneously." },
+      "contact": { "title": "Contact Details", "description": "The system pre-fills the client's email and phone. You can edit them if necessary before sending." },
+      "actions": { "title": "Send", "description": "Click \"Send\" to dispatch the quote. The system will automatically mark it as \"Sent\"." }
+    },
+    "convertSale": {
+      "modal": { "title": "Convert to Sale", "description": "This process transforms the quote into a real sale, creating or linking the property in the system." },
+      "info": { "title": "Conversion Summary", "description": "Shows the client, the quoted amount, and whether the property already exists or needs to be created." },
+      "actions": { "title": "Confirm Conversion", "description": "By clicking \"Confirm Conversion\", the system will link the quote to the property and update the statuses." }
+    },
+    "vendors": {
+      "button": "View vendors guide",
+      "overview": { "title": "Vendors Module", "description": "From here you can manage the complete vendor directory, filtering them by category, project, or scope." },
+      "filters": { "title": "Advanced Filters", "description": "Use the search by name, category, subcategory, project, or scope to quickly find the vendor you need." },
+      "grid": { "title": "Vendor Directory", "description": "All registered vendors are shown here. I will explain the details of the first card." },
+      "card": { "title": "Vendor Card", "description": "Each card shows the photo, name, associated project, category, phone, location, and website at a glance." },
+      "cardActions": { "title": "Quick Actions", "description": "Use these icons to edit the vendor's information or remove them from the system." },
+      "add": { "title": "Add Vendor", "description": "Click here to open the registration form. I will guide you through its fields." },
+      "finish": { "title": "Ready!", "description": "You have mastered vendor management. Keep your directory updated to optimize your projects!" }
+    },
+    "vendorModal": {
+      "overview": { "title": "Vendor Form", "description": "This modal allows you to register or edit all relevant information of a vendor." },
+      "basic": { "title": "Basic Information", "description": "Define the vendor's name and select their main category and subcategory for proper classification." },
+      "contact": { "title": "Contact and Location", "description": "Add one or more phones, search their address on the map, assign them to a specific project, and add their website." },
+      "actions": { "title": "Save Changes", "description": "Check that all information is correct and click \"Save\" or \"Update\" to register the vendor." }
+    },
+    "documents": {
+      "button": "View documents guide",
+      "overview": { "title": "Documents Module", "description": "Centralize and manage all files, contracts, and blueprints for your projects and clients in one secure place." },
+      "dropzone": { "title": "Quick Upload Zone", "description": "Drag and drop files here directly, or click anywhere in this area to open the upload wizard." },
+      "filters": { "title": "Search and Filters", "description": "Find any document in seconds by filtering by category, project, client, or tags, or use the free text search." },
+      "viewToggle": { "title": "View Mode", "description": "Toggle between a grid view (ideal for seeing details at a glance) or a compact list view for higher information density." },
+      "list": { "title": "Documents List", "description": "All documents matching your filters are shown here. I will explain the anatomy of the first card." },
+      "card": { "title": "Card Anatomy", "description": "Each card shows: the category icon, the title with its version, a status chip (Valid, Expiring Soon, Expired, or Archived), and its direct relationships with Projects, Clients, or Properties." },
+      "actionPreview": { "title": "1. Preview", "description": "By clicking \"Next\", we will open the viewer so you can see the document without needing to download it." },
+      "actionHistory": { "title": "2. Version History", "description": "Now we will open the side panel to see how the system keeps track of changes and updates to this file." },
+      "upload": { "title": "3. Upload New Document", "description": "Finally, click here to open the file upload and linking wizard. I will guide you through its fields." },
+      "finish": { "title": "Ready!", "description": "You have mastered document management. Keep your files organized, linked, and always up to date!" }
+    },
+    "docUpload": {
+      "dropzone": { "title": "Drag or Select Files", "description": "Drag your files here or click to select them from your device. You can upload multiple documents at once." },
+      "basicInfo": { "title": "Basic Information", "description": "Assign a descriptive title and select the document category (Contract, Deed, Blueprint, etc.)." },
+      "linking": { "title": "Linking", "description": "Link the document to a Project, and optionally to a Lead, Client, or a specific property (Lot/Apartment)." },
+      "metadata": { "title": "Metadata", "description": "Add tags to facilitate searching and, if applicable, set an expiration date for the document." },
+      "actions": { "title": "Upload Documents", "description": "Review that all information is correct and click \"Upload\" to save the documents in the system." }
+    },
+    "documentViewer": {
+      "modal": { "title": "Document Viewer", "description": "Here you can preview the document content without needing to download it to your device." },
+      "content": { "title": "Preview Area", "description": "Supports direct viewing for images and PDFs. For other formats, it will offer the option to open it in a new tab." },
+      "actions": { "title": "Viewer Actions", "description": "Download the file to your computer or open it in a new browser tab for a wider view." }
+    },
+    "versionHistory": {
+      "drawer": { "title": "Version History", "description": "Keeps a record of all changes and updates to this document over time." },
+      "list": { "title": "Version List", "description": "Shows the current version (marked in green) and the archived previous versions, with the date and the user who uploaded them." },
+      "upload": { "title": "Upload New Version", "description": "When uploading a new file, the system increments the version and archives the previous one automatically." }
+    },
+    "postSale": {
+      "button": "View Post-Sale Guide",
+      "overview": { "title": "Post-Sale Module", "description": "Manage all post-sale activities: Onboarding, Warranties, and Surveys." },
+      "tabs": { "title": "Management Tabs", "description": "Navigate between different areas. We will start with Onboarding." },
+      "tabOnboarding": { "title": "Tab: Onboarding", "description": "Manage the delivery checklist and onboarding progress for each client." },
+      "onboardingFilters": { "title": "Filters", "description": "Filter by project, client, or completion status." },
+      "onboardingTable": { "title": "Table", "description": "Onboardings are listed here. I will explain its columns." },
+      "colProject": { "title": "Project", "description": "The real estate project of the delivery." },
+      "colProperty": { "title": "Property", "description": "The specific lot or apartment." },
+      "colClient": { "title": "Client", "description": "The resident receiving the property." },
+      "colStatus": { "title": "Status", "description": "Indicates if it has not started, is in progress, or is completed." },
+      "colProgress": { "title": "Progress", "description": "Percentage of checklist items completed." },
+      "colCreatedAt": { "title": "Date", "description": "Date the record was generated." },
+      "colActions": { "title": "Actions", "description": "Tools to manage each onboarding." },
+      "actionView": { "title": "1. View Details", "description": "Opens the modal to review the checklist, notes, and documents." },
+      "actionEdit": { "title": "2. Edit", "description": "Modify the basic onboarding data." },
+      "actionDelete": { "title": "3. Delete", "description": "Delete the record (requires confirmation)." },
+      "onboardingNew": { "title": "4. New Onboarding", "description": "Opens the form to create one from scratch." },
+      "tabWarranties": { "title": "Tab: Warranties", "description": "Let's move on to managing post-sale claims." },
+      "warrantiesFilters": { "title": "Filters", "description": "Filter claims by project, client, status, category, or priority." },
+      "warrantiesCreate": { "title": "Create Claim", "description": "Opens the form to register a new claim." },
+      "warrantiesTable": { "title": "Claims Table", "description": "List of all warranty claims." },
+      "warrantyColClient": { "title": "Client", "description": "Who is reporting the issue." },
+      "warrantyColProject": { "title": "Project", "description": "Location of the property under warranty." },
+      "warrantyColProperty": { "title": "Unit", "description": "Affected lot or apartment." },
+      "warrantyColCategory": { "title": "Category", "description": "Type of issue (e.g., plumbing, electrical)." },
+      "warrantyColPriority": { "title": "Priority", "description": "Urgency level of the claim." },
+      "warrantyColStatus": { "title": "Status", "description": "Current resolution status." },
+      "warrantyColDate": { "title": "Date", "description": "Date the claim was registered." },
+      "warrantyColActions": { "title": "Actions", "description": "Options to view details, resolve, or delete." },
+      "warrantyActionView": { "title": "View Details", "description": "Opens the modal to review complete information and resolution actions." },
+      "tabSurveys": { "title": "Tab: Surveys", "description": "Let's measure client satisfaction." },
+      "surveysSummary": { "title": "Metrics Summary", "description": "Average NPS, overall rating, and total surveys." },
+      "surveysFilters": { "title": "Filters", "description": "Filter by project, client, type, or template." },
+      "surveysTable": { "title": "Surveys Table", "description": "List of completed surveys." },
+      "surveyColClient": { "title": "Client", "description": "Resident who completed the survey." },
+      "surveyColProject": { "title": "Project", "description": "Associated project." },
+      "surveyColProperty": { "title": "Unit", "description": "Evaluated apartment or lot." },
+      "surveyColType": { "title": "Type", "description": "Survey category." },
+      "surveyColNps": { "title": "NPS", "description": "Net Promoter Score (Promoter, Passive, or Detractor)." },
+      "surveyColRating": { "title": "Rating", "description": "Average star rating." },
+      "surveyColDate": { "title": "Date", "description": "Registration date." },
+      "surveyColActions": { "title": "Actions", "description": "View details, edit, or delete." },
+      "surveyActionView": { "title": "View Details", "description": "By clicking \"Next\", we will open the modal to view individual responses and comments." },
+      "surveyDetailClient": { "title": "Client Information", "description": "Shows the name of the resident who completed the evaluation." },
+      "surveyDetailProject": { "title": "Associated Project", "description": "The real estate project to which the evaluated property belongs." },
+      "surveyDetailProperty": { "title": "Evaluated Unit", "description": "Details whether the survey corresponds to a specific apartment or lot." },
+      "surveyDetailRating": { "title": "Overall Rating", "description": "The average star rating the client gave to their experience." },
+      "surveyDetailResponses": { "title": "Detailed Responses", "description": "Here you can review each individual question, its rating, and the client's textual comments." },
+      "surveyDetailClose": { "title": "Close Modal", "description": "Click here to close the details view and continue with Templates." },
+      "tabTemplates": { "title": "Tab: Templates", "description": "Finally, let's explore the Templates tab to manage reusable survey models." },
+      "templatesFilters": { "title": "Template Filters", "description": "Filter available templates by project or survey type." },
+      "templatesNewBtn": { "title": "New Template", "description": "By clicking \"Next\", we will open the designer to create a new template." },
+      "templateFormModal": { "title": "Template Designer", "description": "This modal allows you to create standardized survey models to save time." },
+      "templateFormGeneral": { "title": "General Information", "description": "Assign the template to a project, define its type, give it a name, and decide if it is active." },
+      "templateFormQuestions": { "title": "Questions", "description": "Add the questions that will make up the survey. You must define a unique key and the text in both Spanish and English." },
+      "templateFormActions": { "title": "Save Changes", "description": "Review that everything is correct and click \"Save\" to create the template." },
+      "templateFormClose": { "title": "Close Designer", "description": "Click here to close the modal. Doing so will end the tour." },
+      "finish": { "title": "Tour Completed!", "description": "You have toured the entire Post-Sale module. You are now ready to manage Onboarding, Warranties, Surveys, and Templates like a pro!" }
+    },
+    "onboardingForm": {
+      "modal": { "title": "Creation Form", "description": "This modal allows you to start the onboarding process for a specific client." },
+      "project": { "title": "Project Selection", "description": "Select the project the client belongs to. This will filter the following options." },
+      "client": { "title": "Client", "description": "Choose the client (resident) who will undergo the onboarding process." },
+      "property": { "title": "Assigned Property", "description": "Select the specific lot or apartment. The system will only show properties assigned to this client in the project." },
+      "actions": { "title": "Create Onboarding", "description": "Review that the data is correct and click \"Create\" to generate the initial checklist." }
+    },
+    "onboardingDetail": {
+      "modal": { "title": "Onboarding Details", "description": "This modal allows you to manage the delivery checklist. We will start by reviewing the top summary." },
+      "summary": { "title": "Top Summary", "description": "This panel shows at a glance the key information of the property, the client, and a general progress bar." },
+      "items": { "title": "Items List", "description": "All required tasks are broken down here. I will explain how to interact with the first item on the list." },
+      "checkbox": { "title": "Mark as Completed", "description": "Click this checkbox to mark the task as done. The system will automatically record the date and user." },
+      "notes": { "title": "Item Notes", "description": "Use this text field to add specific observations, instructions, or comments about this particular task." },
+      "upload": { "title": "Attach Files", "description": "Click here to upload or replace the mandatory document associated with this checklist item." },
+      "close": { "title": "Close Modal", "description": "When you finish reviewing or editing, click here to return to the main table. Changes are saved automatically." }
+    },
+    "warrantyDetail": {
+      "modal": { "title": "Claim Details", "description": "Here you can review all claim information, its history, and take resolution actions." },
+      "info": { "title": "General Information", "description": "Shows the client, property, category, priority, problem description, and attached photographic evidence." },
+      "timeline": { "title": "Timeline", "description": "Chronological record of all status changes and notes added to the claim since its creation." },
+      "actions": { "title": "Resolution Actions", "description": "From here you can approve, reject, or mark the claim as resolved, adding the corresponding final notes." }
+    },
+    "warrantyForm": {
+      "modal": { "title": "Claim Form", "description": "This modal allows you to register a new warranty claim with all necessary evidence." },
+      "project": { "title": "Project", "description": "Select the project to which the affected property belongs." },
+      "linkType": { "title": "Linkage", "description": "Indicates whether the report is made by a Lead (prospect) or a registered Client (resident)." },
+      "property": { "title": "Affected Unit", "description": "Select the specific lot or apartment where the problem occurs." },
+      "categoryPriority": { "title": "Category and Priority", "description": "Classify the type of problem (e.g., plumbing, electrical) and define its urgency level." },
+      "description": { "title": "Detailed Description", "description": "Describe the problem reported by the client in as much detail as possible." },
+      "photos": { "title": "Photographic Evidence", "description": "Attach photos or videos supporting the claim for a faster evaluation." },
+      "actions": { "title": "Save Claim", "description": "Review that all required fields are complete and click \"Create\" to register the claim." }
+    },
+    "templateForm": {
+      "modal": { "title": "Template Designer", "description": "This modal allows you to create or edit reusable survey models to standardize feedback collection." },
+      "generalInfo": { "title": "General Information", "description": "Assign the template to a project, define its type (Post-sale, Annual, etc.), give it a name, and decide if it is active." },
+      "questions": { "title": "Survey Questions", "description": "Add the questions that will make up the survey. You must define a unique key and the text in both Spanish and English." },
+      "actions": { "title": "Save Template", "description": "Review that all questions have a key and Spanish text. Then, click \"Save\". Upon closing, we will finish the tour." }
+    },
+        "referrals": {
+      "button": "View Referrals Guide",
+      "overview": {
+        "title": "Referrals Module",
+        "description": "Manage the referral program, track lead progress, and administer rewards."
+      },
+      "tabs": {
+        "title": "Management Tabs",
+        "description": "Navigate between the list of referrals, the referrer ranking, and the program configuration."
+      },
+      "tabList": {
+        "title": "Referrals List",
+        "description": "Here you can view and manage all referrals registered in the system."
+      },
+      "stats": {
+        "title": "Key Statistics",
+        "description": "Quickly view the total referrals, conversion rate, and total amount of rewards paid."
+      },
+      "filters": {
+        "title": "Filters",
+        "description": "Filter the list by specific project or the current status of the referral."
+      },
+      "createBtn": {
+        "title": "Create New Referral",
+        "description": "By clicking \"Next\", we will open the shared form to register a new referral."
+      },
+      "table": {
+        "title": "Referrals Table",
+        "description": "All referrals are listed here with their information. I will explain each of its columns."
+      },
+      "colReferrer": {
+        "title": "Referrer",
+        "description": "The name of the client or resident making the recommendation."
+      },
+      "colReferred": {
+        "title": "Referred",
+        "description": "The contact details of the person who was recommended."
+      },
+      "colProject": {
+        "title": "Project",
+        "description": "The real estate project the contact is being referred to."
+      },
+      "colStatus": {
+        "title": "Status",
+        "description": "The current progress of the referral (Pending, Contacted, Qualified, Converted, etc.)."
+      },
+      "colReward": {
+        "title": "Reward",
+        "description": "The type and amount of the agreed reward (Cash or Property Discount)."
+      },
+      "colActions": {
+        "title": "Actions",
+        "description": "Here you will find the \"Mark as Sale\" button to convert the referral, or \"Approve Reward\" once the sale is finalized."
+      },
+      "tabLeaderboard": {
+        "title": "Go to Leaderboard",
+        "description": "By clicking \"Next\", we will move to the ranking tab."
+      },
+      "leaderboardContainer": {
+        "title": "Referrers Ranking",
+        "description": "Here the top 10 most successful referrers are shown, ordered by total amount earned."
+      },
+      "leaderboardList": {
+        "title": "Ranking Details",
+        "description": "Each row shows the medal, name, number of referrals, how many converted to sales, and total amount earned."
+      },
+      "tabProgram": {
+        "title": "Go to Configuration",
+        "description": "By clicking \"Next\", we will go to the program's reward configuration."
+      },
+      "programFilters": {
+        "title": "Program Filters",
+        "description": "Filter existing reward configurations by project."
+      },
+      "programCreate": {
+        "title": "New Program",
+        "description": "By clicking \"Next\", we will open the form to create a new reward configuration."
+      },
+      "programModal": {
+        "title": "Program Designer",
+        "description": "This modal allows you to define the reward rules for a specific project."
+      },
+      "programModalProject": {
+        "title": "Project",
+        "description": "Select the project to which this reward configuration will apply."
+      },
+      "programModalName": {
+        "title": "Program Name",
+        "description": "Assign a descriptive name to easily identify this configuration."
+      },
+      "programModalReward": {
+        "title": "Reward Type",
+        "description": "Choose whether the reward will be in cash or a property discount."
+      },
+      "programModalTerms": {
+        "title": "Terms and Conditions",
+        "description": "Define the legal rules or important notes in Spanish and English."
+      },
+      "programModalClose": {
+        "title": "Close",
+        "description": "Click \"Cancel\" to close this modal without saving and finish the tour."
+      },
+      "finish": {
+        "title": "Tour Completed!",
+        "description": "You are now ready to manage and grow your referral network."
+      }
+    },
+    "sharedReferralModal": {
+      "modal": {
+        "title": "Referral Form",
+        "description": "This is a shared component to register new referrals, either from the CRM or the client portal."
+      },
+      "project": {
+        "title": "Project",
+        "description": "Select the real estate project the contact will be referred to."
+      },
+      "referrer": {
+        "title": "Referrer",
+        "description": "Choose the client or resident who is making the recommendation."
+      },
+      "contact": {
+        "title": "Referred Contact Details",
+        "description": "Enter the name, phone, email, and country of the referred person."
+      },
+      "reward": {
+        "title": "Reward Type",
+        "description": "Define whether the reward will be in cash or a property discount, and its amount."
+      },
+      "actions": {
+        "title": "Save Referral",
+        "description": "Review the information and click \"Submit\" to register the referral. Upon closing, we will continue with the tour."
+      }
+    },
+        "auditLog": {
+      "button": "View Audit Guide",
+      "overview": {
+        "title": "Audit Log Module",
+        "description": "This module records all actions performed in the system. Here you can track who did what, when, and what changed."
+      },
+      "filters": {
+        "title": "Search Filters",
+        "description": "Filter audit records by entity, project, action, user, or date range."
+      },
+      "filterEntity": {
+        "title": "Entity",
+        "description": "Select the entity type (Lead, Client, Project, etc.) to view only its records."
+      },
+      "filterProject": {
+        "title": "Project",
+        "description": "Filter records by specific project."
+      },
+      "filterAction": {
+        "title": "Action",
+        "description": "Filter by action type: Created, Updated, Deleted, Stage Change, etc."
+      },
+      "filterUser": {
+        "title": "User",
+        "description": "Filter records by the user who performed the action."
+      },
+      "filterDates": {
+        "title": "Date Range",
+        "description": "Define a date range to view specific records from a period."
+      },
+      "table": {
+        "title": "Records Table",
+        "description": "All audit records are listed here. I will explain each column."
+      },
+      "colUser": {
+        "title": "User",
+        "description": "The person who performed the action, showing their name and role."
+      },
+      "colAction": {
+        "title": "Action",
+        "description": "The type of action performed (Created, Updated, Deleted, etc.) with a color code."
+      },
+      "colEntity": {
+        "title": "Entity",
+        "description": "The type of object affected (Lead, Client, Project, etc.)."
+      },
+      "colChanges": {
+        "title": "Changes",
+        "description": "The fields that were modified in this action."
+      },
+      "colTimestamp": {
+        "title": "Date",
+        "description": "When the action was performed, with relative time and full date."
+      },
+      "rowClick": {
+        "title": "View Details",
+        "description": "By clicking \"Next\", we will open the details panel for the first row."
+      },
+      "detailDrawer": {
+        "title": "Details Panel",
+        "description": "This panel contains all the forensic information of the record."
+      },
+      "drawerInfo": {
+        "title": "General Information",
+        "description": "Shows the user who performed the action, their IP address, and the exact date of the event."
+      },
+      "drawerFields": {
+        "title": "Modified Fields",
+        "description": "Here you can compare exactly what values the fields had \"Before\" and \"After\" the change."
+      },
+      "drawerJson": {
+        "title": "Complete Data (JSON)",
+        "description": "For advanced technical needs, here is the complete record object in JSON format, with a copy option."
+      },
+      "detailClose": {
+        "title": "Close Panel",
+        "description": "Click here to close the details panel."
+      },
+      "finish": {
+        "title": "Tour Completed!",
+        "description": "You can now effectively track and audit all system actions."
+      }
+    },
+
+        "projects": {
+      "button": "View Projects Guide",
+      "overview": {
+        "title": "Projects Module",
+        "description": "Here you manage all real estate developments. You can create, edit, view statistics, and manage the configuration of each project."
+      },
+      "createBtn": {
+        "title": "Create New Project",
+        "description": "By clicking \"Next\", we will start a step-by-step wizard to configure a new project from scratch."
+      },
+      "stats": {
+        "title": "Quick Summary",
+        "description": "Get a quick glance at the total projects, how many are active, and the variety of development types registered."
+      },
+      "search": {
+        "title": "Search",
+        "description": "Filter the table in real-time by typing the project name or slug."
+      },
+      "table": {
+        "title": "Projects Table",
+        "description": "All projects are listed here. I will explain the meaning of each column."
+      },
+      "colName": {
+        "title": "Name and Slug",
+        "description": "The commercial name of the project and its unique identifier for URLs (slug)."
+      },
+      "colType": {
+        "title": "Type",
+        "description": "The development category (e.g., houses, apartments, mixed-use)."
+      },
+      "colStatus": {
+        "title": "Status",
+        "description": "Indicates whether the project is currently active or inactive in the system."
+      },
+      "colPhase": {
+        "title": "Phase",
+        "description": "The current construction or commercialization stage of the project."
+      },
+      "colActions": {
+        "title": "Actions",
+        "description": "Buttons to view detailed statistics, visit the portal, edit, or delete the project."
+      },
+      "actionStats": {
+        "title": "View Statistics",
+        "description": "By clicking \"Next\", we will open the statistics panel to analyze the balance and clients of this project."
+      },
+      "actionView": {
+        "title": "View Details",
+        "description": "By clicking \"Next\", we will navigate to the detailed view of this project to continue the tour."
+      },
+      "finish": {
+        "title": "Tour Completed!",
+        "description": "You now master project management. Start creating and managing your developments!"
+      }
+    },
+    "projectDetails": {
+      "overview": {
+        "title": "Project Details",
+        "description": "This is the complete view of the project. Here you can manage all information, documents, and inventory."
+      },
+      "hero": {
+        "title": "Main Image",
+        "description": "The cover image and logo of the project, along with its current status."
+      },
+      "tabs": {
+        "title": "Main Tabs",
+        "description": "Navigate between General Information, Attached Documents, and Property Inventory."
+      },
+      "info": {
+        "title": "General Information",
+        "description": "Here you will find quick statistics, branding, description, and project features."
+      },
+      "gallery": {
+        "title": "Media Gallery",
+        "description": "View and manage the images and videos associated with the project."
+      },
+      "documentsTab": {
+        "title": "Go to Documents",
+        "description": "By clicking \"Next\", we will navigate to the Documents tab to view the project files."
+      },
+      "documents": {
+        "title": "Document Management",
+        "description": "Here you can upload, view, and manage all project documents: contracts, deeds, permits, etc."
+      },
+      "documentsUpload": {
+        "title": "Upload Document",
+        "description": "Click here to upload a new document to the project. You can categorize it and assign it to a specific client."
+      },
+      "inventoryTab": {
+        "title": "Go to Inventory",
+        "description": "By clicking \"Next\", we will go to the Inventory tab to see the status of the properties."
+      },
+      "inventory": {
+        "title": "Property Inventory",
+        "description": "View the project's Master Plan with statistics on available, pending, and sold units."
+      },
+      "inventoryStats": {
+        "title": "Quick Statistics",
+        "description": "Cards with an inventory summary: total buildings/units, available, pending, and sold."
+      },
+      "inventoryMasterplan": {
+        "title": "Interactive Master Plan",
+        "description": "Project map with polygons representing each building. Click to see specific details."
+      },
+      "finish": {
+        "title": "Tour Completed!",
+        "description": "You have completed the Projects module tour. Now you can manage your developments from start to finish!"
+      }
+    },
+
+        "statsModal": {
+      "overview": {
+        "title": "Statistics Panel",
+        "description": "This panel offers a detailed financial and commercial analysis of the selected project."
+      },
+      "tabs": {
+        "title": "Analysis Tabs",
+        "description": "Toggle between \"Balance\" to see collected vs. pending amounts, and \"Clients\" to analyze occupancy."
+      },
+      "balanceOverview": {
+        "title": "Balance Summary",
+        "description": "Shows the total collected and the pending payment amount for this specific project."
+      },
+      "balanceChart": {
+        "title": "Distribution Chart",
+        "description": "Donut chart visualization of the percentage collected versus the percentage pending."
+      },
+      "clientsTab": {
+        "title": "Clients Tab",
+        "description": "By clicking \"Next\", we will switch to this tab to view client information."
+      },
+      "clientsOverview": {
+        "title": "Clients Summary",
+        "description": "Shows the total number of associated clients and the status of their properties (sold, reserved, available)."
+      },
+      "clientsChart": {
+        "title": "Properties Chart",
+        "description": "Visual distribution of properties assigned to clients within this project."
+      },
+      "close": {
+        "title": "Close Panel",
+        "description": "Click here to close the statistics and finish the projects module tour."
+      }
+    },
+
+        "sales": {
+      "button": "View Sales Guide",
+      "overview": {
+        "title": "Sales Module",
+        "description": "Manage the entire sales funnel. Here you can create, move, convert, and track your leads."
+      },
+      "newLeadBtn": {
+        "title": "New Lead",
+        "description": "By clicking \"Next\", we will open the form to register a new contact in the funnel."
+      },
+      "search": {
+        "title": "Search and Sort",
+        "description": "Filter leads by name, email, or phone. You can also sort by creation date or Score (priority)."
+      },
+      "export": {
+        "title": "Export Data",
+        "description": "Download your lead information in Excel or CSV. You can apply date, project, stage, or agent filters before exporting."
+      },
+      "kanban": {
+        "title": "Kanban Board",
+        "description": "Visualize the workflow. Drag cards between columns to change the lead's stage."
+      },
+      "leadCard": {
+        "title": "Lead Card",
+        "description": "By clicking \"Next\", we will open the details of this lead to view their complete information."
+      },
+      "finish": {
+        "title": "Tour Completed!",
+        "description": "You now master the Sales module. Start closing deals!"
+      }
+    },
+    "leadModal": {
+      "overview": {
+        "title": "Lead Registration",
+        "description": "Complete form to capture the initial contact information and assign it correctly in the funnel."
+      },
+      "name": {
+        "title": "Name",
+        "description": "The full name of the contact. This is the only strictly required field."
+      },
+      "email": {
+        "title": "Email Address",
+        "description": "Enter the contact's email to maintain formal communication and send documents."
+      },
+      "phone": {
+        "title": "Phone",
+        "description": "Contact number with country code. Essential for calls or automated SMS sending."
+      },
+      "country": {
+        "title": "Country",
+        "description": "Select the contact's country of residence to adjust formats and time zones."
+      },
+      "project": {
+        "title": "Project of Interest",
+        "description": "Associate the lead with a specific project in your real estate portfolio."
+      },
+      "assigned": {
+        "title": "Assigned To",
+        "description": "Select the advisor or agent responsible for following up with this contact."
+      },
+      "stage": {
+        "title": "Funnel Stage",
+        "description": "Define which part of the sales process they are in (default: \"New\")."
+      },
+      "source": {
+        "title": "Lead Source",
+        "description": "Indicate how you met this contact (Web, Referral, Visit, Call, etc.) to measure your channels' ROI."
+      },
+      "notes": {
+        "title": "Additional Notes",
+        "description": "Add any observations, special requirements, or relevant context about the contact."
+      },
+      "actions": {
+        "title": "Actions",
+        "description": "Click \"Cancel\" to close this modal and continue with the main tour, or \"Save\" if you wish to create the record."
+      }
+    },
+    "leadDetails": {
+      "overview": {
+        "title": "Lead Details",
+        "description": "Complete view of the contact's information, history, and quick actions."
+      },
+      "contact": {
+        "title": "Contact Information",
+        "description": "Here you see the registered email, phone, and country. Click on them to copy or call."
+      },
+      "convert": {
+        "title": "Convert to Client",
+        "description": "When the lead is ready to buy, use this button to transform them into a formal client."
+      },
+      "close": {
+        "title": "Close",
+        "description": "Close this panel to finish the Sales module tour."
+      }
+    },
+
+        "payments": {
+      "button": "View Payments Guide",
+      "overview": {
+        "title": "Payments Module",
+        "description": "Manage and track all pending, signed, and overdue payments from your clients."
+      },
+      "summary": {
+        "title": "Financial Summary",
+        "description": "Get a quick glance at the total pending amount, collected funds, and at-risk value from overdue payments."
+      },
+      "filters": {
+        "title": "Search Filters",
+        "description": "Filter payments by project, status (Pending, Signed, Overdue), or date range."
+      },
+      "export": {
+        "title": "Export Reports",
+        "description": "Download a detailed payment report in Excel or CSV, applying the current filters."
+      },
+      "table": {
+        "title": "Payments Table",
+        "description": "All payments are listed here. I will explain each of its columns."
+      },
+      "colClient": {
+        "title": "Client",
+        "description": "Client's name and their quick contact phone number."
+      },
+      "colProject": {
+        "title": "Project",
+        "description": "The real estate project this payment corresponds to."
+      },
+      "colUnit": {
+        "title": "Unit",
+        "description": "The specific lot or apartment number associated with the payment."
+      },
+      "colAmount": {
+        "title": "Amount",
+        "description": "The monetary value the client must pay in this installment."
+      },
+      "colDueDate": {
+        "title": "Due Date",
+        "description": "The payment deadline. If the date has passed, it will be visually marked as \"Overdue\" in red."
+      },
+      "colStatus": {
+        "title": "Status",
+        "description": "Indicates if the payment is Pending, already Signed, or Overdue."
+      },
+      "finish": {
+        "title": "Tour Completed!",
+        "description": "You can now efficiently manage, filter, and track payments."
+      }
+    },
+
+        "reports": {
+      "button": "View Reports Guide",
+      "overview": {
+        "title": "Reports Module",
+        "description": "Centralized hub to export and analyze your CRM's Client, Payment, and Lead data."
+      },
+      "clientsSection": {
+        "title": "Clients Report",
+        "description": "Export your complete client database. You can filter by specific project."
+      },
+      "clientsProject": {
+        "title": "Project Filter",
+        "description": "Select a project to download only the clients associated with it, or leave it empty for all."
+      },
+      "clientsExport": {
+        "title": "Export Clients",
+        "description": "Choose the format (CSV or Excel) and click to download the report immediately."
+      },
+      "paymentsSection": {
+        "title": "Payments Report",
+        "description": "Get a detailed history of payments made within a specific date range."
+      },
+      "paymentsDates": {
+        "title": "Date Range",
+        "description": "It is mandatory to define a start and end date to generate this report."
+      },
+      "paymentsProject": {
+        "title": "Project Filter",
+        "description": "Filter payments to see the cash flow of a particular project."
+      },
+      "paymentsExport": {
+        "title": "Export Payments",
+        "description": "The button will only enable when dates are valid. Download the report in your chosen format."
+      },
+      "leadsSection": {
+        "title": "Leads Report",
+        "description": "Export your sales funnel. This report includes advanced filters in a modal."
+      },
+      "leadsExport": {
+        "title": "Open Advanced Filters",
+        "description": "By clicking \"Next\", we will open the modal to filter leads by stage, agent, or project before exporting."
+      },
+      "leadsModal": {
+        "title": "Export Filters",
+        "description": "Here you can refine your search by dates, project, funnel stage, or assigned agent before downloading."
+      },
+      "leadsModalClose": {
+        "title": "Close Modal",
+        "description": "Click here to close the modal and finish the Reports module tour."
+      },
+      "finish": {
+        "title": "Tour Completed!",
+        "description": "You now know how to generate and download all the key reports for your operation."
+      }
+    },
+
+        "agents": {
+      "button": "View Agents Guide",
+      "overview": {
+        "title": "Agents Module",
+        "description": "Manage and monitor your sales team's performance, their metrics, and monthly goals."
+      },
+      "stats": {
+        "title": "Team Summary",
+        "description": "Quickly view the total number of agents, roles, and overall lead and conversion performance."
+      },
+      "table": {
+        "title": "Agents Table",
+        "description": "All agents are listed here. I will explain the meaning of each column."
+      },
+      "colName": {
+        "title": "Name",
+        "description": "Agent's full name and their contact email address."
+      },
+      "colRole": {
+        "title": "Role",
+        "description": "The user's permission level in the system (Super Admin or Admin)."
+      },
+      "colPhone": {
+        "title": "Phone",
+        "description": "Agent's direct contact number."
+      },
+      "colLeads": {
+        "title": "Leads",
+        "description": "Total assigned leads and how many of them have been successfully converted."
+      },
+      "colTarget": {
+        "title": "Monthly Goal",
+        "description": "Visual progress of the goals set for conversions and leads in the current period."
+      },
+      "colActivities": {
+        "title": "Activities",
+        "description": "Number of activities (calls, appointments, follow-ups) completed this month."
+      },
+      "colClients": {
+        "title": "Clients",
+        "description": "Number of clients served this month compared to the historical total."
+      },
+      "colActions": {
+        "title": "Actions",
+        "description": "Buttons to manage the agent: set monthly goals or view their detailed metrics."
+      },
+      "actionTargets": {
+        "title": "Set Goals",
+        "description": "By clicking \"Next\", we will open the modal to set monthly objectives for this agent."
+      },
+      "actionMetrics": {
+        "title": "View Metrics",
+        "description": "By clicking \"Next\", we will open the detailed metrics panel for this agent."
+      },
+      "finish": {
+        "title": "Tour Completed!",
+        "description": "You can now effectively manage the performance and goals of your sales team."
+      }
+    },
+    "agentMetrics": {
+      "overview": {
+        "title": "Agent Metrics",
+        "description": "Complete panel with the agent's performance in the current period."
+      },
+      "kpis": {
+        "title": "Main KPIs",
+        "description": "Summary of total leads, converted leads, activities, and clients served this month."
+      },
+      "progress": {
+        "title": "Progress vs Goals",
+        "description": "Visual chart comparing the agent's actual progress against the established goals."
+      },
+      "pipeline": {
+        "title": "Pipeline by Stage",
+        "description": "Distribution of leads assigned to the agent according to their current stage in the funnel."
+      },
+      "close": {
+        "title": "Close",
+        "description": "Click here to close the panel and continue with the main tour."
+      }
+    },
+    "targetSetter": {
+      "overview": {
+        "title": "Goals Configuration",
+        "description": "Define monthly objectives to motivate and measure the agent's performance."
+      },
+      "period": {
+        "title": "Period",
+        "description": "Select the month and year for which you want to set or modify the goals."
+      },
+      "currentProgress": {
+        "title": "Current Progress",
+        "description": "Quickly visualize how much the agent has advanced in the goals already configured for this period."
+      },
+      "form": {
+        "title": "New Goals",
+        "description": "Enter the target values for Leads, Conversions, Appointments, and SMS count."
+      },
+      "close": {
+        "title": "Close",
+        "description": "Click \"Cancel\" to close this modal and finish the tour."
+      }
+    },
+
+        "activities": {
+      "button": "View Activities Guide",
+      "overview": {
+        "title": "Activities Module",
+        "description": "Manage all tasks, follow-ups, and team actions in a dynamic Kanban board."
+      },
+      "filters": {
+        "title": "Search Filters",
+        "description": "Search activities by text or quickly filter by priority level."
+      },
+      "newBtn": {
+        "title": "New Activity",
+        "description": "By clicking \"Next\", we will open the form to create a new activity."
+      },
+      "kanban": {
+        "title": "Kanban Board",
+        "description": "Organize your activities by dragging cards between different status columns."
+      },
+      "card": {
+        "title": "Activity Card",
+        "description": "Each card shows key information. By clicking \"Next\", we will see its full details."
+      },
+      "actionView": {
+        "title": "View Details",
+        "description": "By clicking \"Next\", we will open the side panel with all information, subtasks, and comments."
+      },
+      "finish": {
+        "title": "Tour Completed!",
+        "description": "You can now efficiently manage your team's activities."
+      }
+    },
+    "activityModal": {
+      "overview": {
+        "title": "Create Activity",
+        "description": "Complete form to register a new task or follow-up."
+      },
+      "title": {
+        "title": "Title and Description",
+        "description": "Define a clear name and detailed description of what needs to be done."
+      },
+      "columnPriority": {
+        "title": "Column and Priority",
+        "description": "Assign the activity to a board column and define its urgency level."
+      },
+      "dueAssignee": {
+        "title": "Due Date and Assignee",
+        "description": "Set the deadline and assign responsibility to a team member."
+      },
+      "contact": {
+        "title": "Associated Contact",
+        "description": "Link this activity to a registered user or an external contact."
+      },
+      "actions": {
+        "title": "Save",
+        "description": "Click \"Cancel\" to close and continue the tour, or \"Create\" to save the activity."
+      }
+    },
+    "activityDetails": {
+      "overview": {
+        "title": "Activity Details",
+        "description": "Complete panel with all information, history, and actions for the activity."
+      },
+      "projects": {
+        "title": "Related Projects",
+        "description": "Shows which real estate projects this activity is linked to."
+      },
+      "contact": {
+        "title": "Contact",
+        "description": "Information of the person (client or external) associated with this task."
+      },
+      "subtasks": {
+        "title": "Subtasks",
+        "description": "Break down the main activity into smaller, manageable steps."
+      },
+      "comments": {
+        "title": "Comments",
+        "description": "Space to leave notes, updates, or messages for the team."
+      },
+      "actions": {
+        "title": "Actions",
+        "description": "Edit or delete the activity. Upon closing, we will finish the tour."
+      }
+    },
+
+        "analytics": {
+      "button": "View Analytics Guide",
+      "overview": {
+        "title": "Analytics Module",
+        "description": "Visualize the financial performance and client distribution of all your projects in real-time."
+      },
+      "filter": {
+        "title": "Project Filter",
+        "description": "Select or deselect specific projects. All charts and KPIs will automatically update to show only the selected data."
+      },
+      "kpis": {
+        "title": "Key Performance Indicators (KPIs)",
+        "description": "Global summary of collected funds, pending amounts, collection rate, and total active clients in the selected projects."
+      },
+      "balance": {
+        "title": "Comparative Balance",
+        "description": "Bar chart visually comparing the collected amount vs. the pending amount for each project."
+      },
+      "share": {
+        "title": "Project Distribution",
+        "description": "Donut chart showing what percentage of the total collected belongs to each project, with a detailed legend."
+      },
+      "clients": {
+        "title": "Clients and Properties",
+        "description": "Compares the number of unique clients against the total number of assigned properties in each project."
+      },
+      "finish": {
+        "title": "Tour Completed!",
+        "description": "You can now effectively monitor and analyze the growth of your real estate portfolio."
+      }
+    },
+
+    "messageTemplates": {
+  "button": "View Templates Guide",
+  "overview": {
+    "title": "Message Templates",
+    "description": "Manage reusable templates for your SMS and bulk email campaigns."
+  },
+  "filters": {
+    "title": "Search and Filters",
+    "description": "Search templates by name or content, and filter by specific project or global templates."
+  },
+  "newBtn": {
+    "title": "New Template",
+    "description": "By clicking \"Next\", we will open the form to create a new template."
+  },
+  "table": {
+    "title": "Templates Table",
+    "description": "Here you see all created templates. I'll explain each column."
+  },
+  "colName": {
+    "title": "Name and Category",
+    "description": "The template name and its category (e.g., Welcome, Reminder, etc.)."
+  },
+  "colProject": {
+    "title": "Project",
+    "description": "Shows if the template is Global (for all projects) or specific to a project."
+  },
+  "colContent": {
+    "title": "Content",
+    "description": "Preview of the template message. If it's too long, it's truncated with ellipsis."
+  },
+  "colVariables": {
+    "title": "Variables",
+    "description": "Dynamic variables the template uses (e.g., {{name}}, {{project}}). They're automatically replaced when sending."
+  },
+  "colStatus": {
+    "title": "Status",
+    "description": "Indicates if the template is Active (available to use) or Inactive (archived)."
+  },
+  "colActions": {
+    "title": "Actions",
+    "description": "Buttons to edit or delete the template."
+  },
+  "finish": {
+    "title": "Tour Completed!",
+    "description": "You can now efficiently create, edit, and manage message templates."
+  }
+},
+"messageTemplateModal": {
+  "overview": {
+    "title": "Template Editor",
+    "description": "Form to define the name, project, and content of your message template."
+  },
+  "name": {
+    "title": "Template Name",
+    "description": "Assign a clear and descriptive name to easily identify this template."
+  },
+  "project": {
+    "title": "Associated Project",
+    "description": "Link the template to a specific project to use its variables, or leave it as \"Global\" for general use."
+  },
+  "content": {
+    "title": "Message Content",
+    "description": "Write the message text. This is where you'll insert dynamic variables."
+  },
+  "variables": {
+    "title": "Detected Variables",
+    "description": "The system automatically highlights variables (e.g., {{name}}) it detects in the text so you can verify they're valid."
+  },
+  "actions": {
+    "title": "Save Changes",
+    "description": "Click \"Cancel\" to close the modal and finish the tour, or \"Save\" to create the template."
+  }
+}
   }
 }

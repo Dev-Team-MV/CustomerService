@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/postSale/TemplateManager.jsx
 import { useState } from 'react'
 import { 
   Box, Button, Grid, FormControl, InputLabel, Select, MenuItem, 
@@ -14,9 +13,10 @@ import { useProjects } from '@shared/hooks/useProjects'
 import { useTemplateColumns } from '../../constants/Columns/useTemplateColumns'
 import surveyService from '@shared/services/surveyService'
 
+// ✅ Asegúrate de que este import apunte al archivo correcto (SurveyTemplateForm.jsx)
 import SurveyTemplateForm from './SurveyForm' // ✅ Corregido el nombre del import
 
-export default function TemplateManager({ onNotify }) {
+export default function TemplateManager({ onNotify, isTourMode = false }) {
   const { t } = useTranslation('postSale')
   const { projects } = useProjects()
   
@@ -70,11 +70,12 @@ export default function TemplateManager({ onNotify }) {
 
   return (
     <Box>
-      <Box sx={{ mb: 3, p: 2.5, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
+      {/* ✅ ID: Filtros de Plantillas */}
+      <Box id="templates-filters" sx={{ mb: 3, p: 2.5, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={6} md={4}>
             <FormControl fullWidth size="small">
-              <InputLabel>{t('filters.project')}</InputLabel>
+              <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.project')}</InputLabel>
               <Select value={filters.projectId} onChange={(e) => handleFilterChange('projectId', e.target.value)} label={t('filters.project')} sx={inputSx}>
                 <MenuItem value="">{t('filters.all')}</MenuItem>
                 {projects.map(p => <MenuItem key={p._id} value={p._id} sx={{ fontFamily: '"Courier New", monospace' }}>{p.name}</MenuItem>)}
@@ -83,7 +84,7 @@ export default function TemplateManager({ onNotify }) {
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <FormControl fullWidth size="small">
-              <InputLabel>{t('filters.type')}</InputLabel>
+              <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.type')}</InputLabel>
               <Select value={filters.type} onChange={(e) => handleFilterChange('type', e.target.value)} label={t('filters.type')} sx={inputSx}>
                 <MenuItem value="">{t('filters.all')}</MenuItem>
                 {['post_sale', 'post_construction', 'post_warranty', 'annual'].map(type => (
@@ -100,13 +101,23 @@ export default function TemplateManager({ onNotify }) {
         </Grid>
       </Box>
 
+      {/* ✅ ID: Botón Nueva Plantilla */}
       <Box display="flex" justifyContent="flex-end" sx={{ mb: 2 }}>
-        <Button variant="contained" startIcon={<Add />} onClick={() => setShowTemplateForm(true)} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+        <Button 
+          id="templates-new-btn" 
+          variant="contained" 
+          startIcon={<Add />} 
+          onClick={() => setShowTemplateForm(true)} 
+          sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}
+        >
           {t('templates.newTemplate')}
         </Button>
       </Box>
 
-      <DataTable columns={columns} data={templates || []} loading={templatesLoading} />
+      {/* ✅ ID: Tabla de Plantillas */}
+      <Box id="templates-data-table">
+        <DataTable columns={columns} data={templates || []} loading={templatesLoading} />
+      </Box>
 
       {showTemplateForm && (
         <SurveyTemplateForm 
@@ -118,6 +129,7 @@ export default function TemplateManager({ onNotify }) {
           initialData={selectedTemplate}
           onSuccess={handleTemplateSuccess}
           onError={(err) => onNotify(t('templates.saveError'), 'error')}
+          isTourMode={isTourMode}
         />
       )}
 

@@ -40,7 +40,11 @@
     "projects": "Projects",
     "scheduleAppointment": "Schedule Appointment",
     "notFound": "Client not found",
-    "errorLoading": "Error loading client"
+    "errorLoading": "Error loading client",
+    "export": {
+      "project": "Project",
+      "allProjects": "All Projects"
+    }
   },
 
   "stats": {
@@ -109,7 +113,10 @@
     "cancel": "Cancel",
     "save": "Save",
     "sendInvitation": "Send Invitation",
-    "update": "Update Resident"
+    "update": "Update Resident",
+        "country": "Country",
+    "selectCountry": "Select a country",
+    "phoneFormatHelper": "The E.164 format is generated automatically when selecting a country"
   },
 
   "overview": {
@@ -287,6 +294,42 @@
     "stage_changed": "Stage changed",
     "sms_sent": "SMS sent",
     "login": "Login"
+  }
+},
+"tour": {
+  "residents": {
+    "welcome": {
+      "title": "Invite New Resident",
+      "description": "This modal allows you to invite new residents to the system. They will receive an SMS with instructions to set up their access."
+    },
+    "infoAlert": {
+      "title": "Invitation Message",
+      "description": "This message confirms that the resident will receive an SMS with a secure link to set up their password and access the portal."
+    },
+    "nameFields": {
+      "title": "First and Last Name",
+      "description": "Enter the resident's full name. This information will appear on the portal and in CRM reports."
+    },
+    "email": {
+      "title": "Email Address",
+      "description": "The email must be unique in the system. It's used for notifications and as an access credential."
+    },
+    "phone": {
+      "title": "Phone Number",
+      "description": "Critical field: the resident receives the invitation SMS here. The E.164 format is generated automatically when selecting the country."
+    },
+    "country": {
+      "title": "Country of Residence",
+      "description": "Use Google autocomplete to select the country. This helps correctly configure the phone format and time zone."
+    },
+    "birthdayRole": {
+      "title": "Birthday and Role",
+      "description": "Birthday is optional. The role determines the resident's permissions: user (basic), admin, superadmin or owner."
+    },
+    "actions": {
+      "title": "Send Invitation",
+      "description": "By clicking \"Send Invitation\", the system will create the user and send the SMS automatically. The button activates when all required fields are complete."
+    }
   }
 }
 }

@@ -10,7 +10,10 @@ export const useProjectColumns = ({
   handleDelete,
 }) => [
   {
-    field: 'name', headerName: t('table.name'), minWidth: 220,
+    field: 'name', 
+    headerName: t('table.name'), 
+    minWidth: 220,
+    tourId: 'projects-col-name', // ✅ ID para el tour
     renderCell: ({ row }) => (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Avatar sx={{ width: 34, height: 34, bgcolor: '#000', borderRadius: 0, fontSize: '0.65rem', fontWeight: 700, fontFamily: '"Courier New", monospace', flexShrink: 0 }}>
@@ -28,7 +31,10 @@ export const useProjectColumns = ({
     )
   },
   {
-    field: 'type', headerName: t('table.type'), minWidth: 120,
+    field: 'type', 
+    headerName: t('table.type'), 
+    minWidth: 120,
+    tourId: 'projects-col-type', // ✅ ID para el tour
     renderCell: ({ row }) => (
       <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.78rem', color: '#444', letterSpacing: '0.5px', textTransform: 'capitalize' }}>
         {row.type?.replace('_', ' ')}
@@ -36,7 +42,10 @@ export const useProjectColumns = ({
     )
   },
   {
-    field: 'status', headerName: t('table.status'), minWidth: 110,
+    field: 'status', 
+    headerName: t('table.status'), 
+    minWidth: 110,
+    tourId: 'projects-col-status', // ✅ ID para el tour
     renderCell: ({ row }) => (
       <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: row.isActive ? '#000' : '#bbb', letterSpacing: '1px', textTransform: 'uppercase' }}>
         {row.status}
@@ -44,58 +53,50 @@ export const useProjectColumns = ({
     )
   },
   {
-    field: 'phase', headerName: t('table.phase'), minWidth: 80,
+    field: 'phase', 
+    headerName: t('table.phase'), 
+    minWidth: 80,
+    tourId: 'projects-col-phase', // ✅ ID para el tour
     renderCell: ({ row }) => (
       <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#888' }}>
         {row.phase}
       </Typography>
     )
   },
-{
-  field: 'actions', headerName: t('table.actions'), minWidth: 90, align: 'center',
-  renderCell: ({ row }) => (
-    <Box sx={{ display: 'flex', gap: 1 }}>
-      <Tooltip title="Statistics">
-        <IconButton
-          size="small"
-          onClick={(e) => { e.stopPropagation(); openStats(row) }}
-          sx={{
-            color: '#aaa', borderRadius: 0,
-            '&:hover': { color: '#000', background: '#f5f5f5' }
-          }}
-        >
-          <BarChart sx={{ fontSize: 16 }} />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title={t('table.view')}>
-        <IconButton
-          size="small"
-          sx={{ color: '#aaa', borderRadius: 0 }}
-          onClick={() => navigate(`/projects/${row._id}`)}
-        >
-          <Visibility sx={{ fontSize: 16 }} />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title={t('table.edit')}>
-        <IconButton
-          size="small"
-          sx={{ color: '#aaa', borderRadius: 0 }}
-          onClick={() => setEditProject(row)} // ← Cambia por:
-          // onClick={() => setEditProject(row); setCreateOpen(true)} 
-        >
-          <Edit sx={{ fontSize: 16 }} />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title={t('table.delete')}>
-        <IconButton
-          size="small"
-          sx={{ color: '#aaa', borderRadius: 0 }}
-          onClick={(e) => { e.stopPropagation(); handleDelete(row._id) }}
-        >
-          <Delete sx={{ fontSize: 16 }} />
-        </IconButton>
-      </Tooltip>
-    </Box>
-  )
-}
+  {
+    field: 'actions', 
+    headerName: t('table.actions'), 
+    minWidth: 90, 
+    align: 'center',
+    tourId: 'projects-col-actions', // ✅ ID para el tour
+    renderCell: ({ row }) => (
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <Tooltip title="Statistics">
+          <IconButton
+            id="projects-action-stats" // ✅ ID específico para el botón de stats
+            size="small"
+            onClick={(e) => { e.stopPropagation(); openStats(row) }}
+            sx={{ color: '#aaa', borderRadius: 0, '&:hover': { color: '#000', background: '#f5f5f5' } }}
+          >
+            <BarChart sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={t('table.view')}>
+          <IconButton id="project-action-view" size="small" sx={{ color: '#aaa', borderRadius: 0 }} onClick={() => navigate(`/projects/${row._id}`)}>
+            <Visibility sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={t('table.edit')}>
+          <IconButton  size="small" sx={{ color: '#aaa', borderRadius: 0 }} onClick={() => setEditProject(row)}>
+            <Edit sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={t('table.delete')}>
+          <IconButton size="small" sx={{ color: '#aaa', borderRadius: 0 }} onClick={(e) => { e.stopPropagation(); handleDelete(row._id) }}>
+            <Delete sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    )
+  }
 ]

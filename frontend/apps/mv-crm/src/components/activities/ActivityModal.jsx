@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/activities/ActivityModal.jsx
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -134,7 +133,6 @@ const ActivityModal = ({
     if (activity?._id) await onDeleteSubtask?.(activity._id, subtaskId)
   }
 
-  // ✅ Estilos unificados con soporte responsive
   const unifiedButtonSx = { 
     borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', 
     fontSize: '0.75rem', letterSpacing: '0.5px', width: { xs: '100%', sm: 'auto' },
@@ -149,16 +147,18 @@ const ActivityModal = ({
   }
 
   return (
+    // ✅ ID 1: Dialog principal (CRUCIAL para que el tour lo encuentre)
     <Dialog 
+      id="activity-modal-dialog"
       open={open} 
       onClose={onClose} 
-      maxWidth="lg"  // ✅ Cambiado de "md" a "lg" para más espacio
+      maxWidth="lg"
       fullWidth 
       PaperProps={{ 
         sx: { 
           borderRadius: 0, 
           border: '1px solid #ececec',
-          minHeight: '80vh'  // ✅ Altura mínima para mejor visualización
+          minHeight: '80vh'
         } 
       }}
     >
@@ -171,15 +171,18 @@ const ActivityModal = ({
 
       <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
-          {/* ✅ Layout Responsive: Columna en móvil, fila en desktop */}
           <Box display="flex" flexDirection={{ xs: 'column', lg: 'row' }} gap={{ xs: 3, lg: 4 }}>
             
-            {/* Columna Izquierda: Formulario - Más ancha */}
             <Box flex={{ xs: 'none', lg: '1 1 60%' }} width={{ xs: '100%', lg: 'auto' }} display="flex" flexDirection="column" gap={2.5} py={1}>
-              <TextField label={t('activities.form.title')} value={formData.title} onChange={(e) => handleChange('title', e.target.value)} fullWidth required placeholder={t('activities.form.titlePlaceholder')} sx={inputSx} />
-              <TextField label={t('activities.form.description')} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} fullWidth multiline rows={3} placeholder={t('activities.form.descriptionPlaceholder')} sx={inputSx} />
+              
+              {/* ✅ ID 2: Título y Descripción */}
+              <Box id="activity-modal-title">
+                <TextField label={t('activities.form.title')} value={formData.title} onChange={(e) => handleChange('title', e.target.value)} fullWidth required placeholder={t('activities.form.titlePlaceholder')} sx={inputSx} />
+                <TextField label={t('activities.form.description')} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} fullWidth multiline rows={3} placeholder={t('activities.form.descriptionPlaceholder')} sx={{ ...inputSx, mt: 2 }} />
+              </Box>
 
-              <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
+              {/* ✅ ID 3: Columna y Prioridad */}
+              <Box id="activity-modal-column-priority" display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
                 <FormControl fullWidth>
                   <InputLabel>{t('activities.form.column')}</InputLabel>
                   <Select value={formData.columnId} label={t('activities.form.column')} onChange={(e) => handleChange('columnId', e.target.value)} sx={inputSx}>
@@ -206,7 +209,8 @@ const ActivityModal = ({
                 </FormControl>
               </Box>
 
-              <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
+              {/* ✅ ID 4: Fecha y Asignación */}
+              <Box id="activity-modal-due-assignee" display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
                 <DatePicker
                   label={t('activities.form.dueDate')}
                   value={formData.dueDate}
@@ -237,7 +241,8 @@ const ActivityModal = ({
                 />
               </Box>
 
-              <Box>
+              {/* ✅ ID 5: Contacto */}
+              <Box id="activity-modal-contact">
                 <Typography variant="subtitle2" fontWeight={600} mb={1} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
                   {t('activities.form.contact')}
                 </Typography>
@@ -333,12 +338,11 @@ const ActivityModal = ({
               </Box>
             </Box>
 
-            {/* ✅ Columna Derecha: Subtareas - Más estrecha y solo en desktop grande */}
             {isEditing && (
               <>
                 <Divider orientation={isMobile ? 'horizontal' : 'vertical'} flexItem sx={{ display: { xs: 'block', lg: 'block' } }} />
                 <Box sx={{ 
-                  flex: { xs: 'none', lg: '0 0 280px' },  // ✅ Reducido de 350px a 280px
+                  flex: { xs: 'none', lg: '0 0 280px' },
                   width: { xs: '100%', lg: 'auto' },
                   pt: { xs: 3, lg: 0 },
                   borderTop: { xs: '1px solid #ececec', lg: 'none' },
@@ -363,7 +367,8 @@ const ActivityModal = ({
         </LocalizationProvider>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+      {/* ✅ ID 6: Acciones del modal */}
+      <DialogActions id="activity-modal-actions" sx={{ p: 2, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
         <Button onClick={onClose} disabled={saving} sx={{ ...unifiedButtonSx, color: '#888' }}>
           {t('activities.form.cancel')}
         </Button>

@@ -8,7 +8,7 @@
     "active": "Activos",
     "types": "Tipos"
   },
-    "tab":{
+  "tab": {
     "documents": "Documentos",
     "info": "Información",
     "inventory": "Inventario"
@@ -20,13 +20,12 @@
     "phase": "Fase",
     "actions": "Acciones",
     "view": "Ver",
-    "edit": "Editar",
     "create": "Crear",
+    "edit": "Editar",
     "delete": "Eliminar"
   },
   "searchPlaceholder": "Buscar por nombre, slug, tipo o estado...",
-
-    "modal": {
+  "modal": {
     "generalInfo": "Información General",
     "editTitle": "Editar Proyecto",
     "createTitle": "Crear Nuevo Proyecto",
@@ -34,40 +33,38 @@
       "en": "Inglés",
       "es": "Español"
     },
-  "title": "Title ({{lang}})",
-  "subtitle": "Subtitle ({{lang}})",
-  "shortDescription": "Short Description ({{lang}})",
-  "fullDescription": "Full Description ({{lang}})",
-  "features": "Features ({{lang}})",
+    "title": "Título ({{lang}})",
+    "subtitle": "Subtítulo ({{lang}})",
+    "shortDescription": "Descripción Corta ({{lang}})",
+    "fullDescription": "Descripción Completa ({{lang}})",
+    "features": "Características ({{lang}})",
     "addFeature": "Agregar característica",
     "projectName": "Nombre del Proyecto",
     "slug": "Slug",
-    "slugHelper": "Identificador único, ej: lakewood-p1",
+    "slugHelper": "Identificador único, ej. lakewood-p1",
     "phase": "Fase",
     "status": "Estado",
     "type": "Tipo",
-    "externalUrl": "URL externa",
+    "externalUrl": "URL Externa",
     "location": "Ubicación",
     "area": "Área",
-    "mediaAssets": "Recursos multimedia",
-    "mainImage": "Imagen principal",
+    "mediaAssets": "Recursos Multimedia",
+    "mainImage": "Imagen Principal",
     "gallery": "Galería",
     "videos": "Videos",
     "upload": "Subir",
-    "uploadVideo": "Subir video",
+    "uploadVideo": "Subir Video",
     "cancel": "Cancelar",
     "save": "Guardar",
     "create": "Crear",
-      "propertyDetails": "Detalles de la propiedad",
-  "projectTypes": {
-    "residential_lots": "Lotes Residenciales",
-    "commercial": "Comercial",
-    "mixed_use": "Uso Mixto"
-  }
+    "propertyDetails": "Detalles de Propiedad",
+    "projectTypes": {
+      "residential_lots": "Lotes Residenciales",
+      "commercial": "Comercial",
+      "mixed_use": "Uso Mixto"
+    }
   },
-
-
-    "details": {
+  "details": {
     "title": "Detalles del Proyecto",
     "topbar": "Detalles del Proyecto",
     "loading": "Cargando proyecto...",
@@ -75,11 +72,11 @@
     "back": "Volver",
     "description": "Descripción",
     "features": "Características",
-    "noFeatures": "Sin características disponibles",
+    "noFeatures": "No hay características disponibles",
     "gallery": "Galería",
-    "noGallery": "Sin imágenes disponibles",
+    "noGallery": "No hay imágenes disponibles",
     "videos": "Videos",
-    "noVideos": "Sin videos disponibles",
+    "noVideos": "No hay videos disponibles",
     "media": "Multimedia",
     "mainImage": "Imagen Principal",
     "phase": "Fase",
@@ -92,7 +89,6 @@
     "createdAt": "Creado",
     "updatedAt": "Actualizado"
   },
-
   "create": {
     "title": "Nuevo Proyecto",
     "name": "Nombre del Proyecto",
@@ -100,5 +96,43 @@
     "type": "Tipo",
     "submit": "Crear",
     "cancel": "Cancelar"
+  },
+  "tour": {
+    "modals": {
+      "createProject": {
+        "welcome": {
+          "title": "Asistente de Creación de Proyecto",
+          "description": "Te guiaré por todas las secciones del formulario. Puedes pausar y retomar el tour en cualquier momento."
+        },
+        "tabs": {
+          "title": "Configuración Bilingüe",
+          "description": "Configura la información del proyecto en ambos idiomas. Al alternar entre tabs, los datos de cada idioma se conservan."
+        },
+        "generalInfo": {
+          "title": "Información General",
+          "description": "Define título, subtítulo, descripciones y características. Esta información aparece en el portal público del proyecto."
+        },
+        "nameSlug": {
+          "title": "Nombre y Slug",
+          "description": "El nombre es el identificador interno del proyecto. El slug se usa en las URLs del portal y debe ser único en el sistema."
+        },
+        "propertyDetails": {
+          "title": "Detalles de Propiedad",
+          "description": "Define la fase de construcción, estado, tipo de proyecto, ubicación y área total del desarrollo."
+        },
+        "media": {
+          "title": "Recursos Multimedia",
+          "description": "Sube imagen principal, logo, galería de fotos y videos. Estos se muestran en el portal público y documentos."
+        },
+        "brandColors": {
+          "title": "Colores de Marca",
+          "description": "Define la paleta de colores del proyecto. Usa formato \"primary:#333F1F\" o simplemente \"#333F1F\". Se usan en el portal y documentos."
+        },
+        "actions": {
+          "title": "Guardar Proyecto",
+          "description": "Cuando termines, guarda el proyecto. Una vez creado, podrás configurar las variables de mensajes en modo edición."
+        }
+      }
+    }
   }
 }

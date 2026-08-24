@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/referrals/ReferrerLeaderboard.jsx
 import { useMemo } from 'react'
 import { Box, Paper, Typography, Avatar, List, ListItem, ListItemAvatar, ListItemText, Divider } from '@mui/material'
 import { EmojiEvents } from '@mui/icons-material'
@@ -44,7 +43,8 @@ export default function ReferrerLeaderboard({ referrals, residents }) {
   }
 
   return (
-    <Paper sx={{ p: 3, borderRadius: 0, maxWidth: 800, mx: 'auto', border: '1px solid #ececec' }}>
+    // ✅ ID: Contenedor del Leaderboard
+    <Paper id="leaderboard-container" sx={{ p: 3, borderRadius: 0, maxWidth: 800, mx: 'auto', border: '1px solid #ececec' }}>
       <Box display="flex" alignItems="center" gap={1} sx={{ mb: 3 }}>
         <EmojiEvents color="warning" fontSize="large" />
         <Typography variant="h5" fontWeight={700} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase' }}>{t('leaderboard.title')}</Typography>
@@ -55,7 +55,8 @@ export default function ReferrerLeaderboard({ referrals, residents }) {
           No hay datos de referidos para mostrar aún.
         </Typography>
       ) : (
-        <List sx={{ width: '100%' }}>
+        // ✅ ID: Lista del Leaderboard
+        <List id="leaderboard-list" sx={{ width: '100%' }}>
           {leaderboard.map((item, index) => {
             const user = residentMap[item.id]
             const name = item.name || (user ? `${user.firstName} ${user.lastName}` : `Usuario ${String(item.id).slice(-4)}`)

@@ -35,7 +35,7 @@ export default function ProjectShareChart({ filteredBalance }) {
   }))
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box id="analytics-project-share" sx={{ width: '100%' }}>
       <Typography sx={{
         fontFamily: '"Courier New", monospace', fontSize: '0.6rem',
         color: '#000', letterSpacing: '2px', textTransform: 'uppercase', mb: 3

@@ -148,7 +148,9 @@ const ActivityDetails = ({
   const locale = i18n.language === 'es' ? 'es-ES' : 'en-US'
 
   return (
+    // ✅ ID 1: Drawer principal
     <Drawer
+      id="activity-details-drawer"
       anchor="right"
       open={open}
       onClose={onClose}
@@ -216,9 +218,9 @@ const ActivityDetails = ({
           ))}
         </Box>
 
-        {/* Proyectos Relacionados */}
+        {/* ✅ ID 2: Proyectos Relacionados */}
         {relatedProjects.length > 0 && (
-          <Box mb={3}>
+          <Box id="activity-details-related-projects" mb={3}>
             <Typography variant="subtitle2" fontWeight={600} mb={1.5} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
               {t('activities.details.relatedProjects', 'Proyectos Relacionados')}
             </Typography>
@@ -302,9 +304,9 @@ const ActivityDetails = ({
           </Box>
         )}
 
-        {/* Contacto asociado */}
+        {/* ✅ ID 3: Contacto asociado */}
         {contact && (
-          <Box mb={3}>
+          <Box id="activity-details-contact" mb={3}>
             <Typography variant="subtitle2" fontWeight={600} mb={1.5} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
               {t('activities.details.associatedContact')}
             </Typography>
@@ -363,20 +365,22 @@ const ActivityDetails = ({
 
         <Divider sx={{ my: 2 }} />
 
-        {/* Subtareas */}
-        <SubActivityList
-          subActivities={currentActivity.subtasks || []}
-          parentActivityId={currentActivity._id}
-          onAdd={handleAddSubtaskWithRefresh}
-          onUpdate={handleUpdateSubtaskWithRefresh}
-          onDelete={handleDeleteSubtaskWithRefresh}
-          readOnly={false}
-        />
+        {/* ✅ ID 4: Subtareas */}
+        <Box id="activity-details-subtasks" mb={2}>
+          <SubActivityList
+            subActivities={currentActivity.subtasks || []}
+            parentActivityId={currentActivity._id}
+            onAdd={handleAddSubtaskWithRefresh}
+            onUpdate={handleUpdateSubtaskWithRefresh}
+            onDelete={handleDeleteSubtaskWithRefresh}
+            readOnly={false}
+          />
+        </Box>
 
         <Divider sx={{ my: 2 }} />
 
-        {/* ✅ Comentarios (CORREGIDO) */}
-        <Box>
+        {/* ✅ ID 5: Comentarios */}
+        <Box id="activity-details-comments">
           <Typography variant="subtitle2" fontWeight={600} mb={2} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
             {t('activities.details.comments')} ({currentActivity.threads?.length || 0})
           </Typography>
@@ -408,7 +412,6 @@ const ActivityDetails = ({
                         </Typography>
                       </Box>
                       <Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif', wordBreak: 'break-word', lineHeight: 1.5 }}>
-                        {/* ✅ CORRECCIÓN PRINCIPAL: thread.content -> thread.message */}
                         {thread.message}
                       </Typography>
                     </Box>
@@ -456,8 +459,8 @@ const ActivityDetails = ({
         </Box>
       </Box>
 
-      {/* Footer Actions */}
-      <Box sx={{ p: 2, borderTop: '1px solid #e0e0e0', flexShrink: 0, display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
+      {/* ✅ ID 6: Acciones del footer */}
+      <Box id="activity-details-actions" sx={{ p: 2, borderTop: '1px solid #e0e0e0', flexShrink: 0, display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
         <Button
           variant="outlined"
           startIcon={<Edit />}

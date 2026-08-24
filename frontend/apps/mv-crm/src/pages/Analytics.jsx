@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react' // ✅ Agregado useRef
 import { Box, Typography, Divider, Skeleton } from '@mui/material'
 import { BarChart as BarChartIcon, TrendingUp, Refresh } from '@mui/icons-material'
 import { motion } from 'framer-motion'
@@ -10,6 +10,11 @@ import ProjectFilter from '../components/stats/Analytics/ProjectFilter'
 import BalanceComparativaChart from '../components/stats/Analytics/BalanceComparativaChart'
 import ClientsComparativaChart from '../components/stats/Analytics/ClientsComparativaChart'
 import ProjectShareChart from '../components/stats/Analytics/ProjectShareChart'
+
+// ✅ IMPORTS PARA EL TOUR
+import { useTour } from '@shared/tours/useTour'
+import TourButton from '@shared/tours/TourButton'
+import { getAnalyticsTourSteps, analyticsTourConfig } from '../tours/modules/analyticsTour'
 
 // ── Skeleton loader ───────────────────────────────────────────────────────────
 const SectionSkeleton = ({ height = 280 }) => (
@@ -32,14 +37,18 @@ const Section = ({ children, delay = 0 }) => (
   </motion.div>
 )
 
-// ─────────────────────────────────────────────────────────────────────────────
-
 export default function Analytics() {
   const { t } = useTranslation('analytics')
+  const { t: tCommon } = useTranslation('common') // ✅ Para el botón del tour
+
+  // ✅ ESTADOS DEL TOUR
+  const { startTour } = useTour()
+  const tourSteps = getAnalyticsTourSteps(tCommon)
+  const tourOptionsRef = useRef(null)
 
   // ── Raw data ────────────────────────────────────────────────────────────────
   const [allBalance, setAllBalance]   = useState(null)
-  const [clientsMap, setClientsMap]   = useState({})   // { [projectId]: { clients, total } }
+  const [clientsMap, setClientsMap]   = useState({})
   const [loading, setLoading]         = useState(true)
   const [loadingClients, setLoadingClients] = useState(false)
   const [lastUpdated, setLastUpdated] = useState(null)
@@ -53,12 +62,9 @@ export default function Analytics() {
     try {
       const data = await crmService.getBalance()
       setAllBalance(data)
-
-      // Inicializa todos los proyectos como activos
       const ids = new Set(data.byProject.map(p => p.projectId))
       setActiveIds(ids)
       setLastUpdated(new Date())
-
       return data.byProject
     } catch (err) {
       console.error('Analytics — getBalance error:', err)
@@ -68,7 +74,7 @@ export default function Analytics() {
     }
   }, [])
 
-  // ── Fetch clients (en paralelo para todos los proyectos) ────────────────────
+  // ── Fetch clients ───────────────────────────────────────────────────────────
   const fetchAllClients = useCallback(async (projects) => {
     if (!projects?.length) return
     setLoadingClients(true)
@@ -88,17 +94,14 @@ export default function Analytics() {
     }
   }, [])
 
-  // ── Init ────────────────────────────────────────────────────────────────────
   useEffect(() => {
     fetchBalance().then(projects => fetchAllClients(projects))
   }, [fetchBalance, fetchAllClients])
 
-  // ── Refresh ─────────────────────────────────────────────────────────────────
   const handleRefresh = useCallback(() => {
     fetchBalance().then(projects => fetchAllClients(projects))
   }, [fetchBalance, fetchAllClients])
 
-  // ── Filter toggles ──────────────────────────────────────────────────────────
   const handleToggle = useCallback((id) => {
     setActiveIds(prev => {
       const next = new Set(prev)
@@ -114,7 +117,6 @@ export default function Analytics() {
     )
   }, [allBalance])
 
-  // ── Filtered data (memoized) ────────────────────────────────────────────────
   const filteredBalance = useMemo(() =>
     (allBalance?.byProject ?? []).filter(p => activeIds.has(p.projectId)),
     [allBalance, activeIds]
@@ -128,8 +130,7 @@ export default function Analytics() {
     return result
   }, [clientsMap, activeIds])
 
-  // ── Subtitle ─────────────────────────────────────────────────────────────────
- const subtitle = useMemo(() => {
+  const subtitle = useMemo(() => {
     if (!allBalance) return ''
     const total  = allBalance.byProject.length
     const active = activeIds.size
@@ -138,7 +139,11 @@ export default function Analytics() {
     return t('mv.page.subtitle', { active, total, amount: fmt(globalTotal) })
   }, [allBalance, activeIds, t])
 
-  // ─────────────────────────────────────────────────────────────────────────────
+  const tourOptions = {
+    onNextClick: (driverObj) => driverObj.moveNext(),
+    onPrevClick: (driverObj) => driverObj.movePrevious(),
+  }
+  tourOptionsRef.current = tourOptions
 
   return (
     <PageLayout
@@ -147,58 +152,40 @@ export default function Analytics() {
       topbarLabel={t('mv.page.topbarLabel')}
       subtitle={subtitle}
     >
-      <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 3,
-        pb: 6,
-        px: { xs: 2, sm: 3, md: 4 },   // ← padding horizontal
-        maxWidth: '100%',
-        overflow: 'hidden',             // ← evita desbordamiento
-        boxSizing: 'border-box',
+      {/* ✅ ID: Contenedor Principal */}
+      <Box id="analytics-page-container" sx={{
+        display: 'flex', flexDirection: 'column', gap: 3, pb: 6,
+        px: { xs: 2, sm: 3, md: 4 }, maxWidth: '100%', overflow: 'hidden', boxSizing: 'border-box',
       }}>
-        {/* ── Header row ── */}
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        
+        {/* Header row con Botón del Tour */}
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <BarChartIcon sx={{ fontSize: 16, color: '#000000ff' }} />
-              <Typography sx={{
-                fontFamily: '"Courier New", monospace', fontSize: '0.6rem',
-                color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase'
-              }}>
-              {t('mv.page.multiProject')}
+              <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.6rem', color: '#000000ff', letterSpacing: '2px', textTransform: 'uppercase' }}>
+                {t('mv.page.multiProject')}
               </Typography>
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {/* ✅ Botón del Tour */}
+              <TourButton 
+                tourId={analyticsTourConfig.id}
+                steps={tourSteps}
+                label={tCommon('tour.analytics.button', 'Ver guía de Analíticas')}
+                options={tourOptions}
+              />
+
               {lastUpdated && (
-                <Typography sx={{
-                  fontFamily: '"Courier New", monospace', fontSize: '0.58rem',
-                  color: '#000000ff', letterSpacing: '1px'
-                }}>
+                <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '1px' }}>
                   {lastUpdated.toLocaleTimeString()}
                 </Typography>
               )}
-              <Box
-                onClick={handleRefresh}
-                sx={{
-                  display: 'flex', alignItems: 'center', gap: 0.8,
-                  px: 1.5, py: 0.8,
-                  border: '1px solid #e0e0e0', cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  '&:hover': { border: '1px solid #000' }
-                }}
-              >
+              <Box onClick={handleRefresh} sx={{ display: 'flex', alignItems: 'center', gap: 0.8, px: 1.5, py: 0.8, border: '1px solid #e0e0e0', cursor: 'pointer', transition: 'all 0.2s', '&:hover': { border: '1px solid #000' } }}>
                 <Refresh sx={{ fontSize: 13, color: '#000000ff' }} />
-                <Typography sx={{
-                  fontFamily: '"Courier New", monospace', fontSize: '0.58rem',
-                  color: '#000000ff', letterSpacing: '1.5px', textTransform: 'uppercase'
-                }}>
-              {t('mv.page.refresh')}
+                <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#000000ff', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+                  {t('mv.page.refresh')}
                 </Typography>
               </Box>
             </Box>
@@ -207,43 +194,29 @@ export default function Analytics() {
 
         <Divider sx={{ borderColor: '#f0f0f0' }} />
 
-        {/* ── Project Filter ── */}
         {loading ? (
           <Box sx={{ display: 'flex', gap: 1.5 }}>
             {[1, 2, 3].map(i => <Skeleton key={i} variant="rectangular" width={110} height={36} />)}
           </Box>
         ) : (
           <Section delay={0.05}>
-            <ProjectFilter
-              projects={allBalance?.byProject ?? []}
-              activeIds={activeIds}
-              onToggle={handleToggle}
-              onToggleAll={handleToggleAll}
-            />
+            <ProjectFilter projects={allBalance?.byProject ?? []} activeIds={activeIds} onToggle={handleToggle} onToggleAll={handleToggleAll} />
           </Section>
         )}
 
-        {/* ── Global KPIs ── */}
         {loading ? (
           <Box sx={{ display: 'flex', gap: 2 }}>
             {[1, 2, 3, 4].map(i => <Skeleton key={i} variant="rectangular" sx={{ flex: 1 }} height={100} />)}
           </Box>
         ) : (
           <Section delay={0.1}>
-            <GlobalKPIs
-              filteredBalance={filteredBalance}
-              filteredClients={filteredClients}
-            />
+            <GlobalKPIs filteredBalance={filteredBalance} filteredClients={filteredClients} />
           </Section>
         )}
 
-        {/* ── Balance + Share — row ── */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 380px' }, gap: 3,minWidth: 0,   }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 380px' }, gap: 3, minWidth: 0 }}>
           {loading ? (
-            <>
-              <SectionSkeleton height={280} />
-              <SectionSkeleton height={280} />
-            </>
+            <><SectionSkeleton height={280} /><SectionSkeleton height={280} /></>
           ) : (
             <>
               <Section delay={0.15}>
@@ -256,18 +229,16 @@ export default function Analytics() {
           )}
         </Box>
 
-        {/* ── Clients Comparativa ── */}
         {loading || loadingClients ? (
           <SectionSkeleton height={260} />
         ) : (
           <Section delay={0.25}>
-            <ClientsComparativaChart
-              filteredBalance={filteredBalance}
-              filteredClients={filteredClients}
-            />
+            <ClientsComparativaChart filteredBalance={filteredBalance} filteredClients={filteredClients} />
           </Section>
         )}
 
+        {/* ✅ Elemento invisible para el paso final */}
+        <Box id="analytics-finish" sx={{ height: 1 }} />
       </Box>
     </PageLayout>
   )

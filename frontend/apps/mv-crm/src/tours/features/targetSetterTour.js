@@ -1,0 +1,8 @@
+export const getTargetSetterTourSteps = (t) => [
+  { element: '#target-setter-modal', popover: { title: t('tour.targetSetter.overview.title', 'Configuración de Metas'), description: t('tour.targetSetter.overview.description', 'Define los objetivos mensuales para motivar y medir el desempeño del agente.'), side: 'bottom', align: 'center' } },
+  { element: '#target-setter-period', popover: { title: t('tour.targetSetter.period.title', 'Período'), description: t('tour.targetSetter.period.description', 'Selecciona el mes y el año para el cual deseas establecer o modificar las metas.'), side: 'right', align: 'start' } },
+  { element: '#target-setter-current-progress', popover: { title: t('tour.targetSetter.currentProgress.title', 'Progreso Actual'), description: t('tour.targetSetter.currentProgress.description', 'Visualiza rápidamente cuánto ha avanzado el agente en las metas ya configuradas para este período.'), side: 'right', align: 'start' } },
+  { element: '#target-setter-form', popover: { title: t('tour.targetSetter.form.title', 'Nuevas Metas'), description: t('tour.targetSetter.form.description', 'Ingresa los valores objetivo para Leads, Conversiones, Citas y conteo de SMS.'), side: 'right', align: 'start' } },
+  { element: '#target-setter-close', popover: { title: t('tour.targetSetter.close.title', 'Cerrar'), description: t('tour.targetSetter.close.description', 'Haz clic en "Cancelar" para cerrar este modal y finalizar el tour.'), side: 'top', align: 'end' } }
+]
+export const targetSetterTourConfig = { id: 'target-setter-tour', autoStart: false }

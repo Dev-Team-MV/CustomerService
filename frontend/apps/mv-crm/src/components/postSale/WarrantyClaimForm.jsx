@@ -1,10 +1,9 @@
-// apps/mv-crm/src/components/postSale/WarrantyClaimForm.jsx
 import { useState, useEffect, useMemo } from 'react'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Box, TextField, Button,
   FormControl, InputLabel, Select, MenuItem, CircularProgress, Alert, Chip, IconButton, Typography, Grid
 } from '@mui/material'
-import { CloudUpload, Delete, Image as ImageIcon } from '@mui/icons-material'
+import { CloudUpload, Delete, Image as ImageIcon, Close } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import api from '@shared/services/api'
 import uploadService from '@shared/services/uploadService'
@@ -13,10 +12,9 @@ import { useResidents } from '@shared/hooks/useResidents'
 import { useLeads } from '../../constants/hooks/useLeads'
 import { getProjectById, getProjectBySlug } from '@shared/config/projectsConfig'
 
-// ✅ Componente compartido
 import ProjectSelector from '@shared/components/ProjectSelector'
 
-export default function WarrantyClaimForm({ open, onClose, onSuccess, initialData = null }) {
+export default function WarrantyClaimForm({ open, onClose, onSuccess, initialData = null, isTourMode = false }) {
   const { t } = useTranslation('postSale')
   const { projects } = useProjects()
   const { users: residents } = useResidents(null)
@@ -132,6 +130,14 @@ export default function WarrantyClaimForm({ open, onClose, onSuccess, initialDat
       return setError(t('warranty.requiredFieldsError'))
     }
 
+    // ✅ Simulación para el tour
+    if (isTourMode) {
+      setTimeout(() => {
+        if (onSuccess) onSuccess()
+      }, 500)
+      return
+    }
+
     setSubmitting(true)
     try {
       const payload = { ...formData }
@@ -147,34 +153,41 @@ export default function WarrantyClaimForm({ open, onClose, onSuccess, initialDat
 
   const handleChange = (field, value) => setFormData(prev => ({ ...prev, [field]: value }))
 
-  // ✅ Estilos unificados
   const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
   const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }
   const menuItemSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '&:hover': { bgcolor: '#f5f5f5' } }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
+    // ✅ ID 1: Modal completo
+    <Dialog id="warranty-form-modal" open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ececec', p: { xs: 2, sm: 3 } }}>
         <Typography variant="h6" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
           {initialData ? t('warranty.editClaim') : t('warranty.newClaim')}
         </Typography>
+        {/* ✅ ID 2: Botón de cerrar */}
+        <IconButton id="warranty-form-close-btn" onClick={onClose} size="small" sx={{ borderRadius: 0 }}>
+          <Close fontSize="small" />
+        </IconButton>
       </DialogTitle>
       
       <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
         <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {error && <Alert severity="error" sx={{ borderRadius: 0, border: '1px solid' }}>{error}</Alert>}
 
-          {/* ✅ ProjectSelector Integrado */}
-          <ProjectSelector
-            value={formData.projectId}
-            onChange={(value) => handleChange('projectId', value)}
-            label={`${t('form.project')} *`}
-            includeGlobal={false}
-            fullWidth
-            size="small"
-          />
+          {/* ✅ ID 3: Selector de Proyecto */}
+          <Box id="warranty-form-project">
+            <ProjectSelector
+              value={formData.projectId}
+              onChange={(value) => handleChange('projectId', value)}
+              label={`${t('form.project')} *`}
+              includeGlobal={false}
+              fullWidth
+              size="small"
+            />
+          </Box>
 
-          <Box>
+          {/* ✅ ID 4: Vinculación (Lead/Cliente) */}
+          <Box id="warranty-form-link-type">
             <Typography variant="subtitle2" fontWeight={600} mb={1} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>{t('warranty.linkTo')}</Typography>
             <Box display="flex" gap={2} mb={1} flexWrap="wrap">
               <Button variant={linkType === 'none' ? 'contained' : 'outlined'} size="small" onClick={() => handleLinkTypeChange('none')} sx={{ ...unifiedButtonSx, border: '1px solid #000', color: linkType === 'none' ? '#fff' : '#000', bgcolor: linkType === 'none' ? '#000' : '#fff' }}>{t('warranty.none')}</Button>
@@ -203,65 +216,84 @@ export default function WarrantyClaimForm({ open, onClose, onSuccess, initialDat
             )}
           </Box>
 
-          {formData.projectId && selectedProjectConfig && (
-            <Box sx={{ p: 2, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
-              <Typography variant="subtitle2" fontWeight={600} mb={1.5} sx={{ fontFamily: '"Courier New", monospace' }}>
-                {selectedProjectConfig.resourceType === 'apartment' ? t('warranty.apartment') : t('warranty.property')}
-              </Typography>
-              {loadingResources ? (
-                <Box display="flex" justifyContent="center" py={2}><CircularProgress size={24} /></Box>
-              ) : (
+          {/* ✅ ID 5: Selector de Propiedad */}
+          <Box id="warranty-form-property">
+            {formData.projectId && selectedProjectConfig && (
+              <Box sx={{ p: 2, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
+                <Typography variant="subtitle2" fontWeight={600} mb={1.5} sx={{ fontFamily: '"Courier New", monospace' }}>
+                  {selectedProjectConfig.resourceType === 'apartment' ? t('warranty.apartment') : t('warranty.property')}
+                </Typography>
+                {loadingResources ? (
+                  <Box display="flex" justifyContent="center" py={2}><CircularProgress size={24} /></Box>
+                ) : (
+                  <FormControl fullWidth required>
+                    <InputLabel>{selectedProjectConfig.resourceType === 'apartment' ? t('warranty.apartment') : t('warranty.property')}</InputLabel>
+                    <Select
+                      value={selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses' ? formData.propertyId : formData.apartmentId}
+                      onChange={(e) => {
+                        if (selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses') { handleChange('propertyId', e.target.value); handleChange('apartmentId', '') }
+                        else { handleChange('apartmentId', e.target.value); handleChange('propertyId', '') }
+                      }}
+                      label={selectedProjectConfig.resourceType === 'apartment' ? t('warranty.apartment') : t('warranty.property')}
+                      sx={inputSx}
+                    >
+                      <MenuItem value="" sx={menuItemSx}><em>{t('form.select')}</em></MenuItem>
+                      {availableResources.length > 0 ? availableResources.map(res => {
+                        if (selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses') {
+                          const lotNumber = res.lot?.number || res.lot || t('common.na')
+                          const modelName = res.model?.model || res.model?.name || ''
+                          return <MenuItem key={res._id} value={res._id} sx={menuItemSx}>{t('warranty.property')} {lotNumber} {modelName ? `- ${modelName}` : ''}</MenuItem>
+                        } else {
+                          return <MenuItem key={res._id} value={res._id} sx={menuItemSx}>{t('warranty.apartment')} {res.apartmentNumber}{res.floorNumber ? ` (${t('warranty.floor')} ${res.floorNumber})` : ''}</MenuItem>
+                        }
+                      }) : <MenuItem disabled sx={menuItemSx}><em>{t('warranty.noResources')}</em></MenuItem>}
+                    </Select>
+                  </FormControl>
+                )}
+              </Box>
+            )}
+          </Box>
+
+          {/* ✅ ID 6: Categoría y Prioridad */}
+          <Box id="warranty-form-category-priority">
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
                 <FormControl fullWidth required>
-                  <InputLabel>{selectedProjectConfig.resourceType === 'apartment' ? t('warranty.apartment') : t('warranty.property')}</InputLabel>
-                  <Select
-                    value={selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses' ? formData.propertyId : formData.apartmentId}
-                    onChange={(e) => {
-                      if (selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses') { handleChange('propertyId', e.target.value); handleChange('apartmentId', '') }
-                      else { handleChange('apartmentId', e.target.value); handleChange('propertyId', '') }
-                    }}
-                    label={selectedProjectConfig.resourceType === 'apartment' ? t('warranty.apartment') : t('warranty.property')}
-                    sx={inputSx}
-                  >
-                    <MenuItem value="" sx={menuItemSx}><em>{t('form.select')}</em></MenuItem>
-                    {availableResources.length > 0 ? availableResources.map(res => {
-                      if (selectedProjectConfig.resourceType === 'property' || selectedProjectConfig.catalogType === 'houses') {
-                        const lotNumber = res.lot?.number || res.lot || t('common.na')
-                        const modelName = res.model?.model || res.model?.name || ''
-                        return <MenuItem key={res._id} value={res._id} sx={menuItemSx}>{t('warranty.property')} {lotNumber} {modelName ? `- ${modelName}` : ''}</MenuItem>
-                      } else {
-                        return <MenuItem key={res._id} value={res._id} sx={menuItemSx}>{t('warranty.apartment')} {res.apartmentNumber}{res.floorNumber ? ` (${t('warranty.floor')} ${res.floorNumber})` : ''}</MenuItem>
-                      }
-                    }) : <MenuItem disabled sx={menuItemSx}><em>{t('warranty.noResources')}</em></MenuItem>}
+                  <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('warranty.category')}</InputLabel>
+                  <Select value={formData.category} onChange={(e) => handleChange('category', e.target.value)} label={t('warranty.category')} sx={inputSx}>
+                    {['structural', 'plumbing', 'electrical', 'finish', 'appliance', 'landscaping', 'other'].map(c => (
+                      <MenuItem key={c} value={c} sx={menuItemSx}>{t(`warranty.categories.${c}`)}</MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
-              )}
-            </Box>
-          )}
-
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth required>
-                <InputLabel>{t('warranty.category')}</InputLabel>
-                <Select value={formData.category} onChange={(e) => handleChange('category', e.target.value)} label={t('warranty.category')} sx={inputSx}>
-                  {['structural', 'plumbing', 'electrical', 'finish', 'appliance', 'landscaping', 'other'].map(c => (
-                    <MenuItem key={c} value={c} sx={menuItemSx}>{t(`warranty.categories.${c}`)}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth required>
+                  <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('warranty.priority')}</InputLabel>
+                  <Select  value={formData.priority} onChange={(e) => handleChange('priority', e.target.value)} label={t('warranty.priority')} sx={inputSx}>
+                    {['low', 'medium', 'high', 'emergency'].map(p => <MenuItem key={p} value={p} sx={menuItemSx}>{t(`warranty.priorities.${p}`)}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth required>
-                <InputLabel>{t('warranty.priority')}</InputLabel>
-                <Select value={formData.priority} onChange={(e) => handleChange('priority', e.target.value)} label={t('warranty.priority')} sx={inputSx}>
-                  {['low', 'medium', 'high', 'emergency'].map(p => <MenuItem key={p} value={p} sx={menuItemSx}>{t(`warranty.priorities.${p}`)}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
+          </Box>
 
-          <TextField required multiline rows={4} label={t('warranty.description')} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} sx={inputSx} />
+          {/* ✅ ID 7: Descripción */}
+<Box id="warranty-form-description" sx={{ width: '100%' }}>
+  <TextField 
+    required 
+    fullWidth
+    multiline 
+    rows={4} 
+    label={t('warranty.description')} 
+    value={formData.description} 
+    onChange={(e) => handleChange('description', e.target.value)} 
+    sx={inputSx} 
+  />
+</Box>
 
-          <Box>
+          {/* ✅ ID 8: Fotos */}
+          <Box id="warranty-form-photos">
             <Typography variant="subtitle2" sx={{ mb: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>{t('warranty.photos')}</Typography>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
               {formData.photoUrls.map((url, idx) => (
@@ -281,7 +313,8 @@ export default function WarrantyClaimForm({ open, onClose, onSuccess, initialDat
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+      {/* ✅ ID 9: Acciones del formulario */}
+      <DialogActions id="warranty-form-actions" sx={{ p: 2, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
         <Button onClick={onClose} disabled={submitting || uploading} sx={{ ...unifiedButtonSx, color: '#888', width: { xs: '100%', sm: 'auto' } }}>{t('form.cancel')}</Button>
         <Button variant="contained" onClick={handleSubmit} disabled={submitting || uploading} startIcon={submitting ? <CircularProgress size={16} /> : null} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', width: { xs: '100%', sm: 'auto' }, '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
           {submitting ? t('form.saving') : (initialData ? t('form.update') : t('form.create'))}

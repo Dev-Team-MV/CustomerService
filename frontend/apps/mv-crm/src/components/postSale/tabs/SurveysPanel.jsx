@@ -1,10 +1,9 @@
-// apps/mv-crm/src/components/postSale/tabs/SurveysPanel.jsx
 import { useState, useMemo } from 'react'
 import { 
   Box, Tabs, Tab, Paper, Typography, Grid, 
   FormControl, InputLabel, Select, MenuItem,
   Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, 
-  CircularProgress, Rating, Chip, Divider, Button
+  CircularProgress, Rating, Chip, Divider, Button, IconButton
 } from '@mui/material'
 import { Add, Close, Warning as WarningIcon, Edit, Home, Apartment, BarChart } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
@@ -22,7 +21,7 @@ import surveyService from '@shared/services/surveyService'
 import SurveyForm from '../SurveyForm'
 import TemplateManager from '../TemplateManager'
 
-export default function SurveysPanel({ onNotify }) {
+export default function SurveysPanel({ onNotify, isTourMode = false }) {
   const { t } = useTranslation('postSale')
   const { projects } = useProjects()
   const { users: residents } = useResidents(null)
@@ -49,6 +48,7 @@ export default function SurveysPanel({ onNotify }) {
   const handleFilterChange = (field, value) => setFilters(prev => ({ ...prev, [field]: value }))
   const clearFilters = () => setFilters({ projectId: '', clientId: '', type: '', templateId: '' })
 
+  // ✅ Funciones base limpias. El tour las dispara mediante clics simulados desde PostSale.jsx
   const handleView = (row) => { setSelectedSurvey(row); setSurveyDetailOpen(true) }
   const handleEdit = (row) => { setSelectedSurvey(row); setShowSurveyForm(true) }
   const promptDelete = (row) => { setSurveyToDelete(row); setSurveyDeleteDialogOpen(true) }
@@ -74,6 +74,7 @@ export default function SurveysPanel({ onNotify }) {
     onNotify(t('surveys.saveSuccess'), 'success')
   }
 
+  // ✅ Pasamos las funciones directamente a las columnas
   const columns = useSurveyColumns({ t, propertiesMap: surveyPropertiesMap, onView: handleView, onEdit: handleEdit, onDelete: promptDelete })
   const isLoading = surveysLoading || resolvingSurveys
 
@@ -84,8 +85,11 @@ export default function SurveysPanel({ onNotify }) {
     <Box>
       <Paper sx={{ borderRadius: 0, overflow: 'hidden', border: '1px solid #ececec' }}>
         <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)} sx={{ borderBottom: '1px solid #ececec', px: 2, bgcolor: '#fafafa' }}>
-          <Tab label={t('tabs.surveys')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.8rem', letterSpacing: '0.5px' }} />
-          <Tab label={t('tabs.templates')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.8rem', letterSpacing: '0.5px' }} />
+          {/* ✅ ID para la primera pestaña (Lista de encuestas) */}
+          <Tab id="surveys-tab-list" label={t('tabs.surveys')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.8rem', letterSpacing: '0.5px' }} />
+          
+          {/* ✅ ID para la segunda pestaña (Plantillas) - ¡Esta es la que necesita el tour! */}
+          <Tab id="surveys-tab-templates" label={t('tabs.templates')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.8rem', letterSpacing: '0.5px' }} />
         </Tabs>
 
         <Box sx={{ p: 3 }}>
@@ -93,7 +97,8 @@ export default function SurveysPanel({ onNotify }) {
             <Box>
               {!showSurveyForm && (
                 <>
-                  <Box sx={{ mb: 3, p: 3, bgcolor: '#f5f5f5', borderRadius: 0, border: '1px solid #e0e0e0' }}>
+                  {/* ✅ ID: Resumen de Métricas */}
+                  <Box id="surveys-summary" sx={{ mb: 3, p: 3, bgcolor: '#f5f5f5', borderRadius: 0, border: '1px solid #e0e0e0' }}>
                     <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1, fontFamily: '"Helvetica Neue", sans-serif' }}>
                       <BarChart color="primary" /> {t('surveys.summary')}
                     </Typography>
@@ -162,11 +167,12 @@ export default function SurveysPanel({ onNotify }) {
                     )}
                   </Box>
 
-                  <Box sx={{ mb: 2, p: 2.5, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
+                  {/* ✅ ID: Filtros */}
+                  <Box id="surveys-filters" sx={{ mb: 2, p: 2.5, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
                     <Grid container spacing={2} alignItems="center">
                       <Grid item xs={12} sm={6} md={2.4}>
                         <FormControl fullWidth size="small">
-                          <InputLabel>{t('filters.project')}</InputLabel>
+                          <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.project')}</InputLabel>
                           <Select value={filters.projectId} onChange={(e) => handleFilterChange('projectId', e.target.value)} label={t('filters.project')} sx={inputSx}>
                             <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} value="">{t('filters.all')}</MenuItem>
                             {projects.map(p => <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} key={p._id} value={p._id}>{p.name}</MenuItem>)}
@@ -175,7 +181,7 @@ export default function SurveysPanel({ onNotify }) {
                       </Grid>
                       <Grid item xs={12} sm={6} md={2.4}>
                         <FormControl fullWidth size="small" disabled={!filters.projectId}>
-                          <InputLabel>{t('filters.client')}</InputLabel>
+                          <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.client')}</InputLabel>
                           <Select value={filters.clientId} onChange={(e) => handleFilterChange('clientId', e.target.value)} label={t('filters.client')} sx={inputSx}>
                             <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} value="">{t('filters.all')}</MenuItem>
                             {filteredResidents.map(client => <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} key={client._id} value={client._id}>{client.firstName} {client.lastName}</MenuItem>)}
@@ -184,7 +190,7 @@ export default function SurveysPanel({ onNotify }) {
                       </Grid>
                       <Grid item xs={12} sm={6} md={2.4}>
                         <FormControl fullWidth size="small">
-                          <InputLabel>{t('filters.type')}</InputLabel>
+                          <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.type')}</InputLabel>
                           <Select value={filters.type} onChange={(e) => handleFilterChange('type', e.target.value)} label={t('filters.type')} sx={inputSx}>
                             <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} value="">{t('filters.all')}</MenuItem>
                             {['post_sale', 'post_construction', 'post_warranty', 'annual'].map(type => (
@@ -195,7 +201,7 @@ export default function SurveysPanel({ onNotify }) {
                       </Grid>
                       <Grid item xs={12} sm={6} md={2.4}>
                         <FormControl fullWidth size="small">
-                          <InputLabel>{t('filters.template')}</InputLabel>
+                          <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.template')}</InputLabel>
                           <Select value={filters.templateId} onChange={(e) => handleFilterChange('templateId', e.target.value)} label={t('filters.template')} sx={inputSx}>
                             <MenuItem value="">{t('filters.all')}</MenuItem>
                             {templates.map(tpl => <MenuItem key={tpl._id} value={tpl._id}>{tpl.name}</MenuItem>)}
@@ -210,8 +216,9 @@ export default function SurveysPanel({ onNotify }) {
                     </Grid>
                   </Box>
 
+                  {/* ✅ ID: Botón Nueva Encuesta */}
                   <Box display="flex" justifyContent="flex-end" sx={{ mb: 2 }}>
-                    <Button variant="contained" startIcon={<Add />} onClick={() => setShowSurveyForm(true)} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+                    <Button id="surveys-new-btn" variant="contained" startIcon={<Add />} onClick={() => setShowSurveyForm(true)} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
                       {t('surveys.newSurvey')}
                     </Button>
                   </Box>
@@ -219,9 +226,19 @@ export default function SurveysPanel({ onNotify }) {
               )}
 
               {showSurveyForm ? (
-                <SurveyForm open={showSurveyForm} onClose={() => { setShowSurveyForm(false); setSelectedSurvey(null); }} initialData={selectedSurvey} onSuccess={handleSuccess} onError={(err) => onNotify(t('surveys.saveError'), 'error')} />
+                <SurveyForm 
+                  open={showSurveyForm} 
+                  onClose={() => { setShowSurveyForm(false); setSelectedSurvey(null); }} 
+                  initialData={selectedSurvey} 
+                  onSuccess={handleSuccess} 
+                  onError={(err) => onNotify(t('surveys.saveError'), 'error')} 
+                  isTourMode={isTourMode} 
+                />
               ) : (
-                <DataTable columns={columns} data={Array.isArray(surveys) ? surveys : (surveys?.items || surveys?.data || [])} loading={isLoading} />
+                // ✅ ID: Tabla de Datos
+                <Box id="surveys-data-table">
+                  <DataTable columns={columns} data={Array.isArray(surveys) ? surveys : (surveys?.items || surveys?.data || [])} loading={isLoading} />
+                </Box>              
               )}
             </Box>
           )}
@@ -230,20 +247,33 @@ export default function SurveysPanel({ onNotify }) {
         </Box>
       </Paper>
 
-      <Dialog open={surveyDetailOpen} onClose={() => setSurveyDetailOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
-        <DialogTitle sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase' }}>{t('surveys.surveyDetails')}</DialogTitle>
+      {/* ✅ ID: Modal de Detalles de Encuesta */}
+      <Dialog id="survey-detail-modal" open={surveyDetailOpen} onClose={() => setSurveyDetailOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase' }}>
+          <span>{t('surveys.surveyDetails')}</span>
+          <IconButton id="survey-detail-close-btn" onClick={() => setSurveyDetailOpen(false)} size="small" sx={{ borderRadius: 0 }}>
+            <Close fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        
         <DialogContent dividers>
           {selectedSurvey && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box>
+              
+              {/* ✅ ID: Información del Cliente */}
+              <Box id="survey-detail-client">
                 <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>{t('survey.client')}</Typography>
                 <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{selectedSurvey.clientId?.firstName} {selectedSurvey.clientId?.lastName}</Typography>
               </Box>
-              <Box>
+              
+              {/* ✅ ID: Información del Proyecto */}
+              <Box id="survey-detail-project">
                 <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>{t('survey.project')}</Typography>
                 <Typography variant="body1" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{selectedSurvey.projectId?.name || selectedSurvey.projectId?.title?.es || t('common.na')}</Typography>
               </Box>
-              <Box>
+              
+              {/* ✅ ID: Información de la Propiedad */}
+              <Box id="survey-detail-property">
                 <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>{t('survey.property')}</Typography>
                 <Typography variant="body1" fontWeight={600} sx={{ display: 'flex', alignItems: 'center', gap: 1, fontFamily: '"Helvetica Neue", sans-serif' }}>
                   {selectedSurvey.apartmentId ? (
@@ -258,14 +288,18 @@ export default function SurveysPanel({ onNotify }) {
                   ) : t('common.na')}
                 </Typography>
               </Box>
-              <Box>
+              
+              {/* ✅ ID: Calificación General */}
+              <Box id="survey-detail-rating">
                 <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>{t('surveys.overallRating')}</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <Rating value={selectedSurvey.overallRating || 0} readOnly size="small" sx={{ color: '#ffb300' }} />
                   <Typography variant="body2" sx={{ ml: 1, fontFamily: '"Helvetica Neue", sans-serif' }}>({selectedSurvey.overallRating || 0}/5)</Typography>
                 </Box>
               </Box>
-              <Box>
+              
+              {/* ✅ ID: Respuestas Detalladas */}
+              <Box id="survey-detail-responses">
                 <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>{t('survey.responses')}</Typography>
                 <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {selectedSurvey.responses?.map((r, idx) => (
@@ -277,9 +311,11 @@ export default function SurveysPanel({ onNotify }) {
                   ))}
                 </Box>
               </Box>
+
             </Box>
           )}
         </DialogContent>
+        
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setSurveyDetailOpen(false)} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('actions.close')}</Button>
           <Button variant="contained" startIcon={<Edit />} onClick={() => { setSurveyDetailOpen(false); handleEdit(selectedSurvey); }} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>

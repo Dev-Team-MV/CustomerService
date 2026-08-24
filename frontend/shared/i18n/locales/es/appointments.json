@@ -1,4 +1,8 @@
 {
+      "legend": {
+    "statuses": "Estados",
+    "types": "Tipos"
+  },
   "title": "Calendario",
   "titleBold": "CRM",
   "topbarLabel": "Gestión de citas",

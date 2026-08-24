@@ -11,6 +11,7 @@ export const useWarrantyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDe
     {
       field: 'client',
       headerName: t('warranty.client', 'Cliente'),
+      tourId: 'warranty-col-client',
       minWidth: 150,
       renderCell: ({ row }) => {
         const client = row.clientId
@@ -27,6 +28,7 @@ export const useWarrantyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDe
     {
       field: 'project',
       headerName: t('filters.project', 'Proyecto'),
+      tourId: 'warranty-col-project',
       minWidth: 150,
       renderCell: ({ row }) => {
         const project = row.projectId
@@ -41,6 +43,7 @@ export const useWarrantyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDe
     {
       field: 'property',
       headerName: t('warranty.property', 'Unidad'),
+      tourId: 'warranty-col-property',
       minWidth: 200,
       renderCell: ({ row }) => {
         const apt = row.apartmentId || row.apartment
@@ -78,6 +81,7 @@ export const useWarrantyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDe
     {
       field: 'category',
       headerName: t('warranty.category', 'Categoría'),
+      tourId: 'warranty-col-category',
       minWidth: 140,
       renderCell: ({ row }) => (
         <Typography variant="body2" textTransform="capitalize">
@@ -88,6 +92,7 @@ export const useWarrantyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDe
     {
       field: 'priority',
       headerName: t('warranty.priority', 'Prioridad'),
+      tourId: 'warranty-col-priority',
       minWidth: 130,
       renderCell: ({ row }) => {
         const config = {
@@ -112,6 +117,7 @@ export const useWarrantyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDe
     {
       field: 'status',
       headerName: t('filters.status', 'Estado'),
+      tourId: 'warranty-col-status',
       minWidth: 140,
       renderCell: ({ row }) => {
         const statusColors = {
@@ -137,6 +143,7 @@ export const useWarrantyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDe
     {
       field: 'createdAt',
       headerName: t('warranty.date', 'Fecha'),
+      tourId: 'warranty-col-date',
       minWidth: 120,
       renderCell: ({ row }) => (
         <Typography variant="caption" color="text.secondary">
@@ -148,6 +155,7 @@ export const useWarrantyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDe
       field: 'actions',
       headerName: t('filters.actionsTable', 'Acciones'),
       minWidth: 120, // Reducido un poco ya que a veces solo habrá 1 botón
+      tourId: 'warranty-col-actions',
       sortable: false,
       renderCell: ({ row }) => {
         // ✅ Verificamos si el reclamo ya fue finalizado
@@ -157,7 +165,7 @@ export const useWarrantyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDe
           <Box sx={{ display: 'flex', gap: 0.5 }}>
             {/* El botón de Ver Detalles siempre se muestra */}
             <Tooltip title={t('actions.view', 'Ver Detalles')}>
-              <IconButton size="small" color="primary" onClick={() => onView(row)}>
+              <IconButton id="warranty-action-view" size="small" color="primary" onClick={() => onView(row)}>
                 <Visibility fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -166,7 +174,7 @@ export const useWarrantyColumns = ({ t, propertiesMap = {}, onView, onEdit, onDe
             {!isFinalized && (
               <>
                 <Tooltip title={t('actions.resolve', 'Resolver/Rechazar')}>
-                  <IconButton size="small" color="success" onClick={() => onResolve(row)}>
+                  <IconButton  size="small" color="success" onClick={() => onResolve(row)}>
                     <CheckCircle fontSize="small" />
                   </IconButton>
                 </Tooltip>

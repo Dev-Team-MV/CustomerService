@@ -1,71 +1,71 @@
 {
-        "actionsTitle": "Acciones",
-
-    "actions": {
-        "save": "Guardar",
-        "cancel": "Cancelar",
-        "delete": "Eliminar",
-        "edit": "Editar",
-        "submit": "Enviar",
-        "confirm": "Confirmar",
-        "close": "Cerrar",
-        "back": "Volver",
-        "viewAll": "Ver todo",
-        "add": "Agregar",
-        "create": "Crear",
-        "update": "Actualizar",
-        "search": "Buscar",
-        "filter": "Filtrar",
-        "upload": "Subir",
-        "download": "Descargar",
-        "send": "Enviar",
-        "retry": "Reintentar"
-    },
-    "statusTitle": "Estado",
-    "status": {
-        "loading": "Cargando...",
-        "error": "Ocurrió un error",
-        "success": "Operación exitosa",
-        "signed": "Firmado",
-        "pending": "Pendiente",
-        "rejected": "Rechazado",
-        "available": "Disponible",
-        "sold": "Vendido",
-        "active": "Activo",
-        "inactive": "Inactivo",
-        "paid": "Pagado",
-        "unpaid": "Sin pagar"
-    },
-    "validation": {
-        "required": "Este campo es obligatorio",
-        "invalidEmail": "Dirección de correo inválida",
-        "invalidPhone": "Número de teléfono inválido",
-        "passwordTooShort": "La contraseña es muy corta"
-    },
-    "noData": "No se encontraron datos",
-    "copyright": "© 2026 Desarrollado por Michelangelo Del Valle • Todos los Derechos Reservados",
-    "premiumTagline": "Experiencia Premium de Vida Frente al Lago",
-    "resortLifestyle": "Estilo de Vida Resort",
-    "notFound": {
-        "title": "Página No Encontrada",
-        "description": "Lo sentimos, la página que buscas no existe.",
-        "goHome": "Ir al Inicio"
-    },
-    "addPayment": "Agregar Pago",
-    "activeUser": "Usuario Activo",
-    "accountDetails": "Detalles de Cuenta",
-    "enableEditMode": "Activa el modo de edición para cambiar tu contraseña",
-    "managePersonalInfo": "Administra tu información personal y configuración de seguridad",
-    "myProfile": "Mi Perfil",
-    "editProfile": "Editar Perfil",
-    "passwordFillAll": "Por favor completa todos los campos de contraseña.",
-    "passwordsNoMatch": "Las nuevas contraseñas no coinciden.",
-    "passwordMinLength": "La nueva contraseña debe tener al menos 6 caracteres.",
-    "passwordChanged": "¡Contraseña cambiada exitosamente!",
-    "passwordChangeError": "Error al cambiar contraseña. Inténtalo de nuevo.",
-    "profileUpdated": "¡Perfil actualizado exitosamente!",
-
-
+  "actionsTitle": "Acciones",
+  "actions": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "submit": "Enviar",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "viewAll": "Ver todo",
+    "add": "Agregar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "upload": "Subir",
+    "download": "Descargar",
+    "send": "Enviar",
+    "retry": "Reintentar"
+  },
+  "statusTitle": "Estado",
+  "status": {
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "success": "Operación exitosa",
+    "signed": "Firmado",
+    "pending": "Pendiente",
+    "rejected": "Rechazado",
+    "available": "Disponible",
+    "sold": "Vendido",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "paid": "Pagado",
+    "unpaid": "No pagado"
+  },
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "invalidEmail": "Correo electrónico inválido",
+    "invalidPhone": "Número de teléfono inválido",
+    "passwordTooShort": "La contraseña es demasiado corta"
+  },
+  "noData": "No se encontraron datos",
+  "copyright": "© 2026 Desarrollado por Michelangelo Del Valle • Todos los derechos reservados",
+  "premiumTagline": "Experiencia Premium de Vida Frente al Lago",
+  "resortLifestyle": "Estilo de Vida Resort",
+  "notFound": {
+    "title": "Página No Encontrada",
+    "description": "Lo sentimos, la página que buscas no existe.",
+    "goHome": "Ir al Inicio"
+  },
+  "addPayment": "Agregar Pago",
+  "activeUser": "Usuario Activo",
+  "accountDetails": "Detalles de la Cuenta",
+  "enableEditMode": "Habilita el modo de edición para cambiar tu contraseña",
+  "managePersonalInfo": "Gestiona tu información personal y configuración de seguridad",
+  "myProfile": "Mi Perfil",
+  "editProfile": "Editar Perfil",
+  "passwordFillAll": "Por favor, completa todos los campos de contraseña.",
+  "passwordsNoMatch": "Las nuevas contraseñas no coinciden.",
+  "passwordMinLength": "La nueva contraseña debe tener al menos 6 caracteres.",
+  "passwordChanged": "¡Contraseña cambiada exitosamente!",
+  "passwordChangeError": "Error al cambiar la contraseña. Por favor, inténtalo de nuevo.",
+  "profileUpdated": "¡Perfil actualizado exitosamente!",
+  "footer": {
+    "copyright": "© {{year}} — MV Platform"
+  },
   "cancel": "Cancelar",
   "clearFilters": "Limpiar filtros",
   "all": "Todos",
@@ -74,22 +74,14 @@
   "delete": "Eliminar",
   "edit": "Editar",
   "close": "Cerrar",
-
-        
-      "footer": {
-        "copyright": "© {{year}} — MV Plataforma"
-      },
-      "public": "Público",
-      "private": "Privado",
-      "noImage": "Sin imagen",
-
-      "uploading": "Subiendo...",
-      "uploadAll": "Subir Todo",
-      "new": "NUEVO",
-      "project": "Proyecto",
-      "back": "Volver",
-
-      "notifications": {
+  "public": "Público",
+  "private": "Privado",
+  "noImage": "Sin imagen",
+  "uploading": "Subiendo...",
+  "uploadAll": "Subir Todo",
+  "back": "Atrás",
+  "new": "NUEVO",
+  "notifications": {
     "title": "Notificaciones",
     "paymentReceived": "Pago recibido",
     "paymentReceivedDesc": "Tu pago ha sido procesado.",
@@ -120,11 +112,11 @@
       "roleOwner": "Propietario",
       "roleUser": "Usuario",
       "rolesLabel": "Roles",
-      "rolesPlaceholder": "Selecciona roles",
+      "rolesPlaceholder": "Seleccionar roles",
       "userLabel": "Usuario",
       "usersLabel": "Usuarios",
-      "userPlaceholder": "Selecciona un usuario",
-      "usersPlaceholder": "Selecciona usuarios",
+      "userPlaceholder": "Seleccionar un usuario",
+      "usersPlaceholder": "Seleccionar usuarios",
       "preview": "Vista previa:",
       "titleExample": "Título de ejemplo",
       "cancel": "Cancelar",
@@ -132,60 +124,51 @@
       "sending": "Enviando..."
     }
   },
-
   "variables": {
     "title": "Variables de Mensaje",
-    "description": "Las variables se usan en los templates de mensajes con el formato {{nombre}}. El recorrido indica de dónde se obtiene el valor.",
+    "description": "Las variables se usan en las plantillas de mensajes con el formato {{name}}. La ruta indica de dónde se obtiene el valor.",
     "addNew": "Nueva Variable",
     "editTitle": "Editar Variable",
     "createTitle": "Nueva Variable",
     "empty": "No hay variables en esta categoría",
     "createFirst": "Crear primera variable",
     "saveProjectFirst": "Guarda el proyecto primero para gestionar las variables.",
-    
     "name": "Nombre",
-    "nameHelper": "Solo letras, números y _. Debe empezar con letra.",
-    "path": "Recorrido",
+    "nameHelper": "Solo letras, números y _. Debe comenzar con una letra.",
+    "path": "Ruta",
     "pathHelper": "Ruta para obtener el valor (ej: user.firstName, client.email, lot.number)",
-    "currentPath": "Recorrido actual",
+    "currentPath": "Ruta actual",
     "category": "Categoría",
-    "categoryAutoSet": "(auto-seteada por la categoría seleccionada)",
-    
+    "categoryAutoSet": "(auto-establecida por la categoría seleccionada)",
     "modeBuilder": "Visual",
     "modeManual": "Manual",
-    
-    "selectCategory": "Selecciona una categoría",
-    "selectField": "Selecciona un campo",
+    "selectCategory": "Seleccionar una categoría",
+    "selectField": "Seleccionar un campo",
     "noRoots": "No hay categorías disponibles",
     "noSegments": "No hay campos disponibles en este nivel",
-    
-    "selectedPath": "Recorrido seleccionado",
-    "useThisPath": "Usar este recorrido",
+    "selectedPath": "Ruta seleccionada",
+    "useThisPath": "Usar esta ruta",
     "backToRoots": "Volver a categorías",
-    "back": "Volver",
-    
+    "back": "Atrás",
     "cancel": "Cancelar",
     "saving": "Guardando...",
     "create": "Crear",
     "update": "Actualizar",
-    
     "availableVariables": "Variables disponibles",
-    "clickToInsert": "Haz click en una variable para insertarla en el mensaje",
+    "clickToInsert": "Haz clic en una variable para insertarla en el mensaje",
     "loading": "Cargando variables...",
     "noVariablesForProject": "No hay variables para este proyecto",
     "noVariablesYet": "No hay variables definidas para este proyecto",
     "goToConfig": "Ve a la configuración del proyecto para crear variables",
     "total": "variables",
-    
     "copyVariable": "Copiar variable",
     "editVariable": "Editar",
     "deleteVariable": "Eliminar",
-    "confirmDelete": "¿Eliminar la variable \"{{name}}\"? Esta acción no se puede deshacer.",
+    "confirmDelete": "¿Eliminar variable \"{{name}}\"? Esta acción no se puede deshacer.",
     "errorSaving": "Error al guardar la variable",
     "errorNameRequired": "El nombre es obligatorio",
-    "errorPathRequired": "El recorrido es obligatorio",
+    "errorPathRequired": "La ruta es obligatoria",
     "errorCategoryRequired": "La categoría es obligatoria",
-    
     "categories": {
       "all": "Todas",
       "Usuario": "Usuario",
@@ -194,16 +177,1256 @@
       "Lote": "Lote",
       "Edificio": "Edificio",
       "Apartamento": "Apartamento",
-      "ApartamentoModelo": "Modelo Apto",
+      "ApartamentoModelo": "Modelo de Apto",
       "Pago": "Pago",
       "Custom": "Personalizado"
     },
-    
     "chipTypes": {
       "ref": "ref",
       "value": "valor"
     }
-  }
+  },
+  "tour": {
+    "notifCreator": {
+      "mode": { "title": "Modo de Destinatario", "description": "Elige si enviar a todos (General), un rol específico, un solo usuario o múltiples usuarios." },
+      "title": { "title": "Título de la Notificación", "description": "Escribe un asunto claro y conciso. Esto será lo primero que vea el usuario." },
+      "body": { "title": "Cuerpo del Mensaje", "description": "Detalla la información importante. Puedes usar múltiples líneas para mayor claridad." },
+      "type": { "title": "Tipo de Notificación", "description": "Selecciona la urgencia: Info (Azul), Advertencia (Naranja), Error (Rojo) o Personalizado (Morado)." },
+      "audience": { "title": "Filtro de Audiencia", "description": "Este campo cambia según el modo elegido. Selecciona los roles o usuarios específicos que recibirán el mensaje." },
+      "preview": { "title": "Vista Previa", "description": "Así es como se verá la notificación en el dispositivo del usuario, con su respectivo color de tipo." },
+      "actions": { "title": "Enviar Notificación", "description": "Verifica que todo esté correcto y haz clic en \"Enviar\". Los destinatarios la recibirán al instante." }
+    },
+    "notifDrawer": {
+      "header": { "title": "Centro de Notificaciones", "description": "Aquí ves un resumen de todas tus alertas. El número junto al título indica cuántas notificaciones tienes en total." },
+      "tabs": { "title": "Filtros por Categoría", "description": "Filtra rápidamente por pagos vencidos, actividades próximas o leads estancados para priorizar tu trabajo." },
+      "markAll": { "title": "Marcar Todo como Leído", "description": "¿Ya revisaste todo? Usa este botón para limpiar tu bandeja de entrada con un solo clic." },
+      "list": { "title": "Lista de Alertas", "description": "Haz clic en cualquier alerta para marcarla como leída. Las alertas no leídas tienen un fondo de color para destacar." },
+      "footer": { "title": "Actualizaciones en Tiempo Real", "description": "Este panel se actualiza automáticamente. ¡Mantente al tanto de las acciones críticas de tus proyectos!" }
+    },
+    "clients": {
+      "button": "Ver guía de clientes",
+      "welcome": { "title": "Gestión de Clientes", "description": "Desde aquí puedes ver, buscar, editar y gestionar a todos los residentes del sistema de forma centralizada." },
+      "search": { "title": "Búsqueda Inteligente", "description": "Filtra la lista rápidamente en tiempo real por nombre, correo, teléfono o rol del cliente." },
+      "addAction": { "title": "Agregar Nuevo Cliente", "description": "Haz clic aquí para registrar un nuevo residente. Se abrirá un asistente para guiarte en la configuración de sus datos y el envío de la invitación." },
+      "sendMessage": { "title": "Enviar Mensaje Masivo", "description": "Usa esta herramienta para enviar SMS o correos a múltiples clientes simultáneamente, usando plantillas o mensajes personalizados." },
+      "export": { "title": "Exportar Datos", "description": "Descarga la lista de clientes en formato CSV o JSON. Puedes aplicar filtros antes de exportar para obtener solo los datos que necesitas." },
+      "table": { "title": "Tabla de Datos", "description": "Aquí se listan todos los clientes. Te explicaré cada columna y las acciones disponibles en la primera fila." },
+      "colName": { "title": "Nombre y Correo", "description": "Muestra el avatar con iniciales, nombre completo y correo electrónico principal de contacto." },
+      "colPhone": { "title": "Teléfono", "description": "El número de teléfono formateado. Es el canal principal para enviar invitaciones y recordatorios." },
+      "colRole": { "title": "Rol de Usuario", "description": "Indica el nivel de permisos: Super Admin, Admin, Propietario o Residente." },
+      "colProjects": { "title": "Proyectos Asignados", "description": "Muestra los proyectos inmobiliarios a los que este cliente tiene acceso, con un máximo de 4 avatares visibles." },
+      "colLots": { "title": "Lotes/Propiedades", "description": "Número de lotes, apartamentos o propiedades específicas asignadas al cliente." },
+      "colStatus": { "title": "Estado de la Cuenta", "description": "Indica si la cuenta del cliente está activa o inactiva en el sistema." },
+      "colJoined": { "title": "Fecha de Registro", "description": "La fecha en que el cliente fue creado o invitado al sistema." },
+      "colActions": { "title": "Columna de Acciones", "description": "Aquí encontrarás los botones para gestionar al cliente. Te los mostraré uno por uno en la primera fila." },
+      "actionSms": { "title": "Enviar SMS de Configuración", "description": "Haz clic aquí para reenviar el enlace de configuración de contraseña al teléfono del cliente." },
+      "actionEdit": { "title": "Editar Cliente", "description": "Abre el modal para modificar el nombre, correo, teléfono, rol o proyecto asignado a este cliente." },
+      "actionDelete": { "title": "Eliminar Cliente", "description": "Elimina permanentemente al cliente del sistema. Se te pedirá confirmación antes de proceder." },
+      "clickRow": { "title": "Ver Detalles del Cliente", "description": "Haz clic en esta fila (o en cualquier otra) para abrir la vista detallada del cliente, donde podrás gestionar sus pagos, actividades, notas y documentos." }
+    },
+    "broadcast": {
+      "project": { "title": "Vincular a Proyecto", "description": "Selecciona un proyecto para filtrar destinatarios y desbloquear variables específicas para ese proyecto (como el nombre del lote o edificio)." },
+      "channels": { "title": "Canales de Envío", "description": "Elige si enviar el mensaje por SMS, Correo o ambos. El sistema validará automáticamente qué usuarios tienen datos válidos para cada canal." },
+      "recipients": { "title": "Destinatarios", "description": "Puedes enviar a todos los usuarios del proyecto o seleccionar destinatarios específicos usando la búsqueda." },
+      "templates": { "title": "Plantillas Guardadas", "description": "Ahorra tiempo seleccionando una plantilla predefinida. Se filtrarán automáticamente según el proyecto seleccionado." },
+      "content": { "title": "Contenido y Variables", "description": "Escribe tu mensaje. Usa los chips de arriba para insertar variables dinámicas (ej: {{firstName}}). La vista previa te mostrará cómo se verá el mensaje final." },
+      "actions": { "title": "Enviar Mensaje", "description": "Revisa el resumen de destinatarios en la parte inferior. Cuando todo esté listo, haz clic en \"Enviar Mensaje\" para iniciar el proceso." }
+    },
+    "export": {
+      "projectFilter": { "title": "Filtro de Proyecto", "description": "Selecciona un proyecto específico para exportar solo los clientes asociados a él, o déjalo en \"Todos\" para descargar la base de datos completa." },
+      "format": { "title": "Formato de Archivo", "description": "Elige el formato de salida. CSV es ideal para abrir en Excel, mientras que JSON es útil para integraciones técnicas o copias de seguridad." },
+      "actions": { "title": "Descargar Datos", "description": "Haz clic en el botón de exportar para descargar el archivo con los datos filtrados en el formato que seleccionaste." }
+    },
+    "clientDetail": {
+      "header": { "title": "Perfil del Cliente", "description": "Aquí ves el nombre, estado de la cuenta y las acciones principales para este residente." },
+      "appointment": { "title": "Agendar Cita", "description": "Programa una reunión o llamada con este cliente directamente desde su perfil." },
+      "tabs": { "title": "Navegación por Pestañas", "description": "Toda la información está organizada aquí. El tour navegará por cada una para mostrarte su contenido." },
+      "overview": { "title": "1. Resumen General", "description": "Hagamos clic aquí para ver el resumen. El tour te mostrará cada sección de esta pestaña." },
+      "overviewPersonal": { "title": "Datos Personales", "description": "Aquí ves el avatar, correo, país, teléfono, fecha de nacimiento y el rol asignado al cliente en el sistema." },
+      "overviewProjects": { "title": "Proyectos Relacionados", "description": "Muestra las membresías activas del cliente, indicando a qué proyectos tiene acceso y con qué rol (ej: admin o residente)." },
+      "overviewStats": { "title": "Resumen Financiero", "description": "Un vistazo rápido al total de propiedades, valor acumulado, monto pagado y saldo pendiente de este cliente." },
+      "overviewProperties": { "title": "Propiedades Asignadas", "description": "Lista detallada de lotes o apartamentos, agrupados por proyecto. Incluye estado, precio, saldo y barra de progreso de pago." },
+      "payments": { "title": "2. Historial de Pagos", "description": "Hagamos clic aquí para explorar el historial financiero. Te explicaré sus componentes." },
+      "paymentsFilter": { "title": "Filtro de Estado", "description": "Filtra los pagos por estado: Pendiente, Firmado o Rechazado para encontrar rápidamente lo que necesitas." },
+      "paymentsTable": { "title": "Tabla de Pagos", "description": "Aquí ves los detalles de cada cuota: tipo de pago, monto, fechas de vencimiento y estado actual." },
+      "paymentsPagination": { "title": "Paginación", "description": "Navega entre páginas o ajusta el número de registros mostrados por pantalla." },
+      "activities": { "title": "3. Actividades", "description": "Registro cronológico de cada interacción: llamadas, correos, cambios de estado y notas del equipo." },
+      "timeline": {
+        "marker": { "title": "Indicador de Actividad", "description": "El color y el icono indican el tipo de interacción: nota, SMS, correo o automatización." },
+        "card": { "title": "Detalles de la Actividad", "description": "Aquí ves el título, la descripción completa y la fecha exacta en que se registró la acción." },
+        "metadata": { "title": "Metadatos Contextuales", "description": "Muestra a qué proyecto pertenece, la columna del pipeline y el nivel de prioridad de esta tarea." },
+        "users": { "title": "Responsables", "description": "Identifica claramente quién creó la actividad y a qué miembro del equipo está asignada para darle seguimiento." }
+      },
+      "notes": {
+        "title": "4. Notas Internas",
+        "description": "Espacio para agregar observaciones privadas sobre el cliente que solo tu equipo puede ver.",
+        "form": { "title": "Agregar Nueva Nota", "description": "Usa este formulario para registrar observaciones internas, vinculándolas opcionalmente a un proyecto específico." },
+        "card": { "title": "Detalles de la Nota", "description": "Cada nota muestra su título, contenido completo y la fecha exacta en que se registró." },
+        "metadata": { "title": "Contexto de la Nota", "description": "Indica a qué proyecto o columna del pipeline está asociada esta nota, y su nivel de prioridad." },
+        "users": { "title": "Seguimiento", "description": "Muestra claramente quién creó la nota y a qué miembro del equipo está asignada para darle seguimiento." }
+      },
+      "history": {
+        "title": "5. Historial de Cambios",
+        "description": "Hagamos clic aquí para ver la auditoría completa de modificaciones.",
+        "filters": { "title": "Filtros de Auditoría", "description": "Filtra los cambios por tipo de acción (crear, actualizar, eliminar) y por rango de fechas para encontrar eventos específicos." },
+        "table": { "title": "Registro de Cambios", "description": "Aquí ves cada modificación: quién la hizo, qué campo cambió, los valores antiguos y nuevos, y la fecha exacta." },
+        "pagination": { "title": "Paginación", "description": "Navega por las páginas del historial si hay muchos registros de cambios." }
+      },
+      "documents": {
+        "title": "6. Documentos",
+        "description": "Hagamos clic aquí para gestionar los archivos, contratos y documentos legales del cliente.",
+        "uploadBtn": { "title": "Subir Nuevo Documento", "description": "Usa este botón para subir nuevos archivos, asignarles una categoría y vincularlos a un proyecto específico." },
+        "filters": { "title": "Filtros de Búsqueda", "description": "Busca por nombre, filtra por categoría (contratos, escrituras, planos, etc.) o por proyecto asociado." },
+        "card": { "title": "Tarjeta de Documento", "description": "Cada tarjeta muestra una vista previa, nombre, fecha y acciones rápidas para previsualizar, ver historial de versiones, archivar o eliminar." }
+      },
+      "finish": { "title": "¡Explora el Perfil!", "description": "El tour ha terminado. Ahora puedes navegar libremente por todas las secciones para gestionar a este cliente." }
+    },
+    "calendar": {
+      "button": "Ver guía del calendario",
+      "overview": { "title": "Calendario de Citas", "description": "Aquí tienes una vista centralizada de todas tus citas, reuniones y llamadas programadas." },
+      "views": { "title": "Vistas del Calendario", "description": "Cambia fácilmente entre vistas de Mes, Semana o Día para organizar tu agenda según tus necesidades." },
+      "navigation": { "title": "Navegación de Fechas", "description": "Navega hacia adelante o atrás en el tiempo, o regresa al día de hoy con un solo clic." },
+      "create": { "title": "Crear Nueva Cita", "description": "Haz clic aquí para programar una nueva cita. Te guiaré a través del formulario de creación." },
+      "grid": { "title": "Cuadrícula de Eventos", "description": "Haz clic en cualquier día/hora vacío para crear una cita rápida, o en una cita existente para ver sus detalles o cambiar su estado." },
+      "finish": { "title": "¡Listo!", "description": "Has dominado el calendario. ¡Gestiona tu tiempo y citas de manera eficiente!" }
+    },
+    "appointment": {
+      "title": { "title": "Título y Estado", "description": "Define un nombre claro para la cita y su estado actual (Pendiente, Confirmada, Completada o Cancelada)." },
+      "contact": { "title": "Seleccionar Contacto", "description": "Elige si la cita es con un Lead (prospecto) o un Cliente (residente) ya registrado en el sistema." },
+      "project": { "title": "Proyecto Asociado", "description": "Vincula la cita a un proyecto inmobiliario específico para mantener el contexto de la reunión." },
+      "datetime": { "title": "Fecha y Hora", "description": "Establece la fecha y hora de inicio. Opcionalmente, define la hora de fin para calcular la duración automáticamente." },
+      "actions": { "title": "Guardar Cita", "description": "Verifica que todos los campos obligatorios estén completos y haz clic en \"Crear\" o \"Actualizar\" para guardar." }
+    },
+    "automation": {
+      "button": "Ver guía de automatizaciones",
+      "overview": { "title": "Módulo de Automatizaciones", "description": "Aquí puedes crear, editar y gestionar flujos de trabajo automatizados para ahorrar tiempo y mejorar la comunicación." },
+      "stats": { "title": "Estadísticas Rápidas", "description": "Visualiza rápidamente el total de automatizaciones creadas y cuántas están actualmente activas." },
+      "create": { "title": "Crear Automatización", "description": "Haz clic aquí para empezar a diseñar una nueva automatización. Te guiaré paso a paso por el constructor." },
+      "list": { "title": "Lista de Automatizaciones", "description": "Aquí verás todas tus automatizaciones. Te explicaré los componentes de la primera tarjeta para que entiendas cómo leerlas." },
+      "card": {
+        "title": "Tarjeta de Automatización",
+        "description": "Cada automatización se muestra en una tarjeta con toda la información relevante de un vistazo.",
+        "toggle": { "title": "Activar / Desactivar", "description": "Usa este interruptor para pausar o reanudar la automatización al instante, sin necesidad de eliminarla." },
+        "header": { "title": "Nombre y Flujo", "description": "Muestra el nombre de la automatización, el evento que la desencadena y la acción que ejecuta." },
+        "conditions": { "title": "Condiciones Específicas", "description": "Resume los filtros aplicados, como la etapa del lead, un proyecto específico o días de inactividad requeridos." },
+        "action": { "title": "Detalle de la Acción", "description": "Muestra el contenido exacto que se ejecutará: el mensaje de la plantilla de SMS, detalles de la actividad o el agente a notificar." },
+        "footer": { "title": "Información Adicional", "description": "Indica quién creó la automatización, cuándo se ejecutó por última vez y su estado actual." }
+      },
+      "finish": { "title": "¡Listo!", "description": "Has dominado el módulo de automatizaciones. ¡Crea flujos inteligentes y optimiza tu CRM!" }
+    },
+    "automationBuilder": {
+      "name": { "title": "Nombre y Estado", "description": "Asigna un nombre descriptivo a tu automatización y define si estará activa o inactiva desde el inicio." },
+      "trigger": { "title": "Desencadenante", "description": "Elige el evento que iniciará esta automatización (ej: cambio de etapa del lead, pago vencido, etc.)." },
+      "conditions": { "title": "Condiciones", "description": "Refina cuándo se ejecuta. Puedes filtrar por etapa específica del lead, días de inactividad o un proyecto en particular." },
+      "action": { "title": "Acción a Ejecutar", "description": "Define qué sucederá cuando se cumplan las condiciones: enviar un SMS, crear una actividad o notificar a un agente." },
+      "config": { "title": "Configuración de la Acción", "description": "Detalla la acción: selecciona una plantilla de mensaje, escribe un mensaje personalizado con variables dinámicas o asigna la tarea a un agente." },
+      "actions": { "title": "Guardar y Probar", "description": "Usa el botón \"Probar\" para simular la automatización. Cuando estés listo, haz clic en \"Crear\" o \"Actualizar\" para guardar." }
+    },
+    "campaigns": {
+      "button": "Ver guía de campañas",
+      "overview": { "title": "Módulo de Campañas", "description": "Desde aquí puedes crear, gestionar y monitorear el envío masivo de mensajes a tus leads o clientes." },
+      "filters": { "title": "Filtros de Búsqueda", "description": "Filtra tus campañas por estado (Borrador, Enviando, Completada, etc.) o por proyecto específico." },
+      "create": { "title": "Crear Campaña", "description": "Haz clic aquí para iniciar el asistente de creación de campañas. Te guiaré a través de sus pasos." },
+      "table": { "title": "Tabla de Campañas", "description": "Todas tus campañas están listadas aquí. Te explicaré el significado de cada columna usando la primera fila como ejemplo." },
+      "colName": { "title": "Nombre de la Campaña", "description": "El nombre descriptivo que asignaste a esta campaña para identificarla fácilmente." },
+      "colStatus": { "title": "Estado", "description": "Indica si la campaña está en borrador, programada, enviando, completada o fallida." },
+      "colAudience": { "title": "Audiencia Objetivo", "description": "Muestra a quién va dirigida: Leads o Clientes, y los filtros de proyecto o etapa aplicados." },
+      "colStats": { "title": "Estadísticas de Envío", "description": "Muestra el total de contactos, cuántos mensajes se enviaron exitosamente y cuántos fallaron, con una barra de progreso." },
+      "colActions": { "title": "Acciones Rápidas", "description": "Edita o elimina borradores, envía campañas programadas, o reenvía/actualiza campañas en progreso o finalizadas." },
+      "finish": { "title": "¡Listo!", "description": "Has dominado la gestión de campañas. ¡Crea tu primera campaña y mide su impacto!" }
+    },
+    "wizard": {
+      "stepper": { "title": "Asistente de 4 Pasos", "description": "Este asistente te guía secuencialmente: Configuración, Plantilla, Vista Previa y Envío." },
+      "step1": {
+        "name": { "title": "Nombre de la Campaña", "description": "Asigna un nombre descriptivo. (En este tour, el sistema lo completará automáticamente)." },
+        "audience": { "title": "Tipo de Audiencia", "description": "Define si enviarás a Leads o Clientes. El sistema preseleccionará una opción de prueba." },
+        "project": { "title": "Proyecto y Etapa", "description": "Filtra por proyecto y etapa para segmentar correctamente a tu audiencia." },
+        "continue": { "title": "Avanzar al Paso 2", "description": "El sistema completará automáticamente los campos con datos de prueba y avanzará a la selección de plantilla." }
+      },
+      "step2": {
+        "mode": { "title": "Modo de Plantilla", "description": "Elige si usar una plantilla existente o crear una nueva. El sistema ya ha seleccionado una por defecto para esta demo." },
+        "content": { "title": "Contenido y Variables", "description": "Si creas una nueva, usa los chips para insertar variables dinámicas (como {{firstName}}) que se personalizarán para cada contacto." }
+      },
+      "step3": { "title": "Paso 3: Vista Previa", "description": "Aquí puedes ver una tabla con los contactos que recibirán el mensaje. Verifica que el total y los datos coincidan con tu audiencia seleccionada." },
+      "step4": { "title": "Paso 4: Confirmación y Envío", "description": "Revisa el estado del envío. En este tour, el sistema simulará el progreso. En un caso real, lanzarías la campaña aquí y monitorearías los mensajes en tiempo real." }
+    },
+    "commissions": {
+      "button": "Ver guía de comisiones",
+      "overview": { "title": "Módulo de Comisiones", "description": "Gestiona, aprueba y rastrea los pagos de comisiones de tus agentes en un solo lugar." },
+      "tabs": { "title": "Pestañas de Gestión", "description": "Navega entre la lista de comisiones individuales y la configuración de estructuras de comisiones por proyecto." },
+      "tabCommissions": { "title": "Pestaña: Comisiones", "description": "Aquí gestionas el ciclo de vida de cada comisión: desde su creación hasta el pago final." },
+      "filters": { "title": "Filtros Avanzados", "description": "Refina tu búsqueda usando estos filtros para encontrar comisiones específicas rápidamente." },
+      "filterProject": { "title": "Filtrar por Proyecto", "description": "Filtra las comisiones asociadas a un proyecto inmobiliario en particular." },
+      "filterAgent": { "title": "Filtrar por Agente", "description": "Busca comisiones generadas por un agente o asesor específico." },
+      "filterStatus": { "title": "Filtrar por Estado", "description": "Filtra por estado actual: Pendiente, Aprobada, Pagada o en Disputa." },
+      "table": { "title": "Lista de Comisiones", "description": "Aquí ves el desglose de cada comisión. Te explicaré cada columna a continuación." },
+      "colDate": { "title": "Fecha", "description": "La fecha en que se registró o generó la comisión." },
+      "colAgent": { "title": "Agente", "description": "El nombre del agente o asesor que generó la venta y a quien pertenece la comisión." },
+      "colProject": { "title": "Proyecto", "description": "El proyecto inmobiliario asociado a esta venta." },
+      "colAmounts": { "title": "Montos", "description": "El monto total de la venta y el monto específico de la comisión a pagar." },
+      "colStatus": { "title": "Estado", "description": "El estado actual del flujo de aprobación de la comisión." },
+      "colActions": { "title": "Acciones Rápidas", "description": "Botones para gestionar la comisión. Al hacer clic en \"Siguiente\", abriremos el modal de detalles para mostrarte cómo funciona." },
+      "tabStructures": { "title": "Pestaña: Estructuras", "description": "Cambia a esta pestaña para configurar las reglas de cálculo de comisiones para cada proyecto." },
+      "structuresFilter": { "title": "Seleccionar Proyecto", "description": "Primero, selecciona un proyecto para ver o crear sus estructuras. El sistema lo seleccionará por ti." },
+      "structuresTable": { "title": "Tabla de Estructuras", "description": "Aquí se listan las estructuras de comisiones configuradas para el proyecto seleccionado." },
+      "structuresColName": { "title": "Nombre", "description": "El nombre identificador de la estructura de comisión." },
+      "structuresColType": { "title": "Tipo de Cálculo", "description": "El método de cálculo: Monto Fijo, Porcentaje o Escalonado." },
+      "structuresColDefault": { "title": "Estructura Predeterminada", "description": "Indica si esta es la estructura predeterminada que se aplicará a nuevas comisiones en este proyecto." },
+      "structuresColActions": { "title": "Editar", "description": "Haz clic aquí para modificar las reglas de una estructura existente." },
+      "createStructure": { "title": "Crear Estructura", "description": "Haz clic aquí para configurar las reglas de comisión. Te guiaré a través del proceso." },
+      "finish": { "title": "¡Listo!", "description": "Has dominado la gestión de comisiones. ¡Mantén a tu equipo motivado con pagos transparentes y oportunos!" }
+    },
+    "commissionDetail": {
+      "modal": { "title": "Modal de Detalles", "description": "Este modal te permite ver toda la información de la comisión y tomar acciones sobre ella." },
+      "overview": { "title": "Información General", "description": "Aquí ves el agente, proyecto, montos de venta y comisión, así como cualquier división de comisión con otros agentes." },
+      "actions": { "title": "Acciones del Modal", "description": "Desde aquí puedes Aprobar la comisión, Marcarla como Pagada o Cerrar el modal para volver a la lista." }
+    },
+    "structure": {
+      "nameType": { "title": "Nombre y Tipo", "description": "Asigna un nombre a la estructura y elige el tipo de cálculo: Monto Fijo, Porcentaje o Escalonado." },
+      "rates": { "title": "Configuración de Tasas", "description": "Define el porcentaje, monto fijo o rangos escalonados según el tipo de estructura seleccionado." },
+      "bonus": { "title": "Reglas de Bonificación", "description": "Agrega incentivos adicionales, como bonos por ventas rápidas o por superar montos mínimos." },
+      "actions": { "title": "Guardar Estructura", "description": "Verifica que todo esté correcto y haz clic en \"Crear\" o \"Actualizar\" para guardar la estructura." }
+    },
+    "quotes": {
+      "button": "Ver guía de cotizaciones",
+      "overview": { "title": "Módulo de Cotizaciones", "description": "Desde aquí puedes crear, enviar y convertir cotizaciones con tablas de amortización detalladas." },
+      "stats": { "title": "Estadísticas Rápidas", "description": "Visualiza el total de cotizaciones y cuántas han sido enviadas o convertidas en ventas." },
+      "create": { "title": "Nueva Cotización", "description": "Haz clic aquí para iniciar el asistente de 3 pasos. Te guiaré a través del proceso." },
+      "table": { "title": "Lista de Cotizaciones", "description": "Todas las cotizaciones están listadas aquí. Te explicaré cada columna y sus acciones." },
+      "colDate": { "title": "Fecha", "description": "La fecha en que se creó la cotización." },
+      "colClient": { "title": "Cliente o Lead", "description": "Muestra a quién va dirigida la cotización." },
+      "colProject": { "title": "Proyecto", "description": "El proyecto inmobiliario al que pertenece la cotización." },
+      "colTotal": { "title": "Precio Total", "description": "El monto total de la propiedad con las opciones de personalización seleccionadas." },
+      "colStatus": { "title": "Estado", "description": "Indica si es un borrador, enviada, aceptada, expirada o ya convertida en venta." },
+      "colActions": { "title": "Columna de Acciones", "description": "Aquí están los botones para gestionar cada cotización. Te los explicaré uno por uno." },
+      "actionEdit": { "title": "Editar", "description": "Abre el asistente de 3 pasos para modificar los detalles de la cotización." },
+      "actionSend": { "title": "Enviar Cotización", "description": "Al hacer clic en \"Siguiente\", abriremos el modal para enviar la cotización por Correo o SMS." },
+      "actionConvert": { "title": "Convertir a Venta", "description": "Al hacer clic en \"Siguiente\", abriremos el modal para convertir esta cotización en una venta real." },
+      "actionPdf": { "title": "Descargar PDF", "description": "Descarga la cotización en formato PDF para compartir o archivar." },
+      "actionDelete": { "title": "Eliminar", "description": "Elimina permanentemente la cotización del sistema." },
+      "finish": { "title": "¡Listo!", "description": "Has dominado el módulo de cotizaciones. ¡Genera propuestas profesionales y cierra más ventas!" }
+    },
+    "quoteBuilder": {
+      "stepper": { "title": "Asistente de 3 Pasos", "description": "Este asistente te guía secuencialmente: Selección de Propiedad, Configuración de Financiamiento y Vista Previa." },
+      "step1": { "title": "Paso 1: Propiedad", "description": "Selecciona el Lead o Cliente, el proyecto y la propiedad específica. El sistema completará estos campos automáticamente en este tour." },
+      "step2": { "title": "Paso 2: Financiamiento", "description": "Define el precio total, cuota inicial, tasa de interés y plazo. El sistema usará valores de prueba para esta demostración." },
+      "step3": { "title": "Paso 3: Vista Previa", "description": "Revisa el resumen financiero y la tabla de amortización generada. Puedes agregar notas antes de guardar." },
+      "actions": { "title": "Guardar Cotización", "description": "Al hacer clic en \"Siguiente\", el sistema simulará el guardado y cerrará el modal automáticamente." }
+    },
+    "sendQuote": {
+      "modal": { "title": "Modal de Envío", "description": "Desde aquí puedes enviar la cotización al cliente por correo, SMS o ambos." },
+      "method": { "title": "Método de Envío", "description": "Selecciona si deseas enviar por Correo, SMS o ambos canales simultáneamente." },
+      "contact": { "title": "Detalles de Contacto", "description": "El sistema prellena el correo y teléfono del cliente. Puedes editarlos si es necesario antes de enviar." },
+      "actions": { "title": "Enviar", "description": "Haz clic en \"Enviar\" para despachar la cotización. El sistema la marcará automáticamente como \"Enviada\"." }
+    },
+    "convertSale": {
+      "modal": { "title": "Convertir a Venta", "description": "Este proceso transforma la cotización en una venta real, creando o vinculando la propiedad en el sistema." },
+      "info": { "title": "Resumen de Conversión", "description": "Muestra el cliente, el monto cotizado y si la propiedad ya existe o necesita ser creada." },
+      "actions": { "title": "Confirmar Conversión", "description": "Al hacer clic en \"Confirmar Conversión\", el sistema vinculará la cotización a la propiedad y actualizará los estados." }
+    },
+    "vendors": {
+      "button": "Ver guía de proveedores",
+      "overview": { "title": "Módulo de Proveedores", "description": "Desde aquí puedes gestionar el directorio completo de proveedores, filtrándolos por categoría, proyecto o alcance." },
+      "filters": { "title": "Filtros Avanzados", "description": "Usa la búsqueda por nombre, categoría, subcategoría, proyecto o alcance para encontrar rápidamente al proveedor que necesitas." },
+      "grid": { "title": "Directorio de Proveedores", "description": "Todos los proveedores registrados se muestran aquí. Te explicaré los detalles de la primera tarjeta." },
+      "card": { "title": "Tarjeta de Proveedor", "description": "Cada tarjeta muestra la foto, nombre, proyecto asociado, categoría, teléfono, ubicación y sitio web de un vistazo." },
+      "cardActions": { "title": "Acciones Rápidas", "description": "Usa estos iconos para editar la información del proveedor o eliminarlo del sistema." },
+      "add": { "title": "Agregar Proveedor", "description": "Haz clic aquí para abrir el formulario de registro. Te guiaré a través de sus campos." },
+      "finish": { "title": "¡Listo!", "description": "Has dominado la gestión de proveedores. ¡Mantén tu directorio actualizado para optimizar tus proyectos!" }
+    },
+    "vendorModal": {
+      "overview": { "title": "Formulario de Proveedor", "description": "Este modal te permite registrar o editar toda la información relevante de un proveedor." },
+      "basic": { "title": "Información Básica", "description": "Define el nombre del proveedor y selecciona su categoría y subcategoría principal para una clasificación adecuada." },
+      "contact": { "title": "Contacto y Ubicación", "description": "Agrega uno o más teléfonos, busca su dirección en el mapa, asígnalo a un proyecto específico y añade su sitio web." },
+      "actions": { "title": "Guardar Cambios", "description": "Verifica que toda la información sea correcta y haz clic en \"Guardar\" o \"Actualizar\" para registrar al proveedor." }
+    },
+    "documents": {
+      "button": "Ver guía de documentos",
+      "overview": { "title": "Módulo de Documentos", "description": "Centraliza y gestiona todos los archivos, contratos y planos de tus proyectos y clientes en un lugar seguro." },
+      "dropzone": { "title": "Zona de Carga Rápida", "description": "Arrastra y suelta archivos aquí directamente, o haz clic en cualquier parte de esta área para abrir el asistente de carga." },
+      "filters": { "title": "Búsqueda y Filtros", "description": "Encuentra cualquier documento en segundos filtrando por categoría, proyecto, cliente o etiquetas, o usa la búsqueda de texto libre." },
+      "viewToggle": { "title": "Modo de Vista", "description": "Alterna entre una vista de cuadrícula (ideal para ver detalles de un vistazo) o una vista de lista compacta para mayor densidad de información." },
+      "list": { "title": "Lista de Documentos", "description": "Todos los documentos que coinciden con tus filtros se muestran aquí. Te explicaré la anatomía de la primera tarjeta." },
+      "card": { "title": "Anatomía de la Tarjeta", "description": "Cada tarjeta muestra: el icono de categoría, el título con su versión, un chip de estado (Válido, Por Vencer, Vencido o Archivado) y sus relaciones directas con Proyectos, Clientes o Propiedades." },
+      "actionPreview": { "title": "1. Previsualizar", "description": "Al hacer clic en \"Siguiente\", abriremos el visor para que puedas ver el documento sin necesidad de descargarlo." },
+      "actionHistory": { "title": "2. Historial de Versiones", "description": "Ahora abriremos el panel lateral para ver cómo el sistema lleva el registro de los cambios y actualizaciones de este archivo." },
+      "upload": { "title": "3. Subir Nuevo Documento", "description": "Finalmente, haz clic aquí para abrir el asistente de carga y vinculación de archivos. Te guiaré a través de sus campos." },
+      "finish": { "title": "¡Listo!", "description": "Has dominado la gestión de documentos. ¡Mantén tus archivos organizados, vinculados y siempre actualizados!" }
+    },
+    "docUpload": {
+      "dropzone": { "title": "Arrastra o Selecciona Archivos", "description": "Arrastra tus archivos aquí o haz clic para seleccionarlos desde tu dispositivo. Puedes subir múltiples documentos a la vez." },
+      "basicInfo": { "title": "Información Básica", "description": "Asigna un título descriptivo y selecciona la categoría del documento (Contrato, Escritura, Plano, etc.)." },
+      "linking": { "title": "Vinculación", "description": "Vincula el documento a un Proyecto, y opcionalmente a un Lead, Cliente o una propiedad específica (Lote/Apartamento)." },
+      "metadata": { "title": "Metadatos", "description": "Agrega etiquetas para facilitar la búsqueda y, si aplica, establece una fecha de vencimiento para el documento." },
+      "actions": { "title": "Subir Documentos", "description": "Revisa que toda la información sea correcta y haz clic en \"Subir\" para guardar los documentos en el sistema." }
+    },
+    "documentViewer": {
+      "modal": { "title": "Visor de Documentos", "description": "Aquí puedes previsualizar el contenido del documento sin necesidad de descargarlo a tu dispositivo." },
+      "content": { "title": "Área de Previsualización", "description": "Soporta visualización directa para imágenes y PDFs. Para otros formatos, ofrecerá la opción de abrirlo en una nueva pestaña." },
+      "actions": { "title": "Acciones del Visor", "description": "Descarga el archivo a tu computadora o ábrelo en una nueva pestaña del navegador para una vista más amplia." }
+    },
+    "versionHistory": {
+      "drawer": { "title": "Historial de Versiones", "description": "Mantiene un registro de todos los cambios y actualizaciones de este documento a lo largo del tiempo." },
+      "list": { "title": "Lista de Versiones", "description": "Muestra la versión actual (marcada en verde) y las versiones anteriores archivadas, con la fecha y el usuario que las subió." },
+      "upload": { "title": "Subir Nueva Versión", "description": "Al subir un nuevo archivo, el sistema incrementa la versión y archiva la anterior automáticamente." }
+    },
+    "postSale": {
+      "button": "Ver guía de Post-Venta",
+      "overview": { "title": "Módulo de Post-Venta", "description": "Gestiona todas las actividades después de la venta: Onboarding, Garantías y Encuestas." },
+      "tabs": { "title": "Pestañas de Gestión", "description": "Navega entre las diferentes áreas. Comenzaremos por Onboarding." },
+      "tabOnboarding": { "title": "Pestaña: Onboarding", "description": "Gestiona el checklist de entrega y el progreso de incorporación de cada cliente." },
+      "onboardingFilters": { "title": "Filtros", "description": "Filtra por proyecto, cliente o estado de completitud." },
+      "onboardingTable": { "title": "Tabla", "description": "Aquí se listan los onboardings. Te explicaré sus columnas." },
+      "colProject": { "title": "Proyecto", "description": "El proyecto inmobiliario de la entrega." },
+      "colProperty": { "title": "Propiedad", "description": "El lote o apartamento específico." },
+      "colClient": { "title": "Cliente", "description": "El residente que recibe la propiedad." },
+      "colStatus": { "title": "Estado", "description": "Indica si no ha comenzado, está en progreso o completado." },
+      "colProgress": { "title": "Progreso", "description": "Porcentaje de ítems del checklist completados." },
+      "colCreatedAt": { "title": "Fecha", "description": "Fecha de generación del registro." },
+      "colActions": { "title": "Acciones", "description": "Herramientas para gestionar cada onboarding." },
+      "actionView": { "title": "1. Ver Detalles", "description": "Abre el modal para revisar el checklist, notas y documentos." },
+      "actionEdit": { "title": "2. Editar", "description": "Modifica los datos básicos del onboarding." },
+      "actionDelete": { "title": "3. Eliminar", "description": "Elimina el registro (requiere confirmación)." },
+      "onboardingNew": { "title": "4. Nuevo Onboarding", "description": "Abre el formulario para crear uno desde cero." },
+      "tabWarranties": { "title": "Pestaña: Garantías", "description": "Pasemos a gestionar los reclamos post-venta." },
+      "warrantiesFilters": { "title": "Filtros", "description": "Filtra reclamos por proyecto, cliente, estado, categoría o prioridad." },
+      "warrantiesCreate": { "title": "Crear Reclamo", "description": "Abre el formulario para registrar un nuevo reclamo." },
+      "warrantiesTable": { "title": "Tabla de Reclamos", "description": "Listado de todos los reclamos de garantía." },
+      "warrantyColClient": { "title": "Cliente", "description": "Quien reporta el problema." },
+      "warrantyColProject": { "title": "Proyecto", "description": "Ubicación de la propiedad con garantía." },
+      "warrantyColProperty": { "title": "Unidad", "description": "Lote o apartamento afectado." },
+      "warrantyColCategory": { "title": "Categoría", "description": "Tipo de problema (ej: plomería, eléctrico)." },
+      "warrantyColPriority": { "title": "Prioridad", "description": "Nivel de urgencia del reclamo." },
+      "warrantyColStatus": { "title": "Estado", "description": "Estado actual de la resolución." },
+      "warrantyColDate": { "title": "Fecha", "description": "Fecha de registro del reclamo." },
+      "warrantyColActions": { "title": "Acciones", "description": "Opciones para ver detalles, resolver o eliminar." },
+      "warrantyActionView": { "title": "Ver Detalles", "description": "Abre el modal para revisar la información completa y acciones de resolución." },
+      "tabSurveys": { "title": "Pestaña: Encuestas", "description": "Midamos la satisfacción del cliente." },
+      "surveysSummary": { "title": "Resumen de Métricas", "description": "NPS promedio, calificación general y total de encuestas." },
+      "surveysFilters": { "title": "Filtros", "description": "Filtra por proyecto, cliente, tipo o plantilla." },
+      "surveysTable": { "title": "Tabla de Encuestas", "description": "Listado de encuestas realizadas." },
+      "surveyColClient": { "title": "Cliente", "description": "Residente que completó la encuesta." },
+      "surveyColProject": { "title": "Proyecto", "description": "Proyecto asociado." },
+      "surveyColProperty": { "title": "Unidad", "description": "Apartamento o lote evaluado." },
+      "surveyColType": { "title": "Tipo", "description": "Categoría de la encuesta." },
+      "surveyColNps": { "title": "NPS", "description": "Net Promoter Score (Promotor, Neutro o Detractor)." },
+      "surveyColRating": { "title": "Calificación", "description": "Calificación promedio en estrellas." },
+      "surveyColDate": { "title": "Fecha", "description": "Fecha de registro." },
+      "surveyColActions": { "title": "Acciones", "description": "Ver detalles, editar o eliminar." },
+      "surveyActionView": { "title": "Ver Detalles", "description": "Al hacer clic en \"Siguiente\", abriremos el modal para ver las respuestas individuales y comentarios." },
+      "surveyDetailClient": { "title": "Información del Cliente", "description": "Muestra el nombre del residente que completó la evaluación." },
+      "surveyDetailProject": { "title": "Proyecto Asociado", "description": "El proyecto inmobiliario al que pertenece la propiedad evaluada." },
+      "surveyDetailProperty": { "title": "Unidad Evaluada", "description": "Detalla si la encuesta corresponde a un apartamento o un lote específico." },
+      "surveyDetailRating": { "title": "Calificación General", "description": "La puntuación promedio en estrellas que el cliente otorgó a su experiencia." },
+      "surveyDetailResponses": { "title": "Respuestas Detalladas", "description": "Aquí puedes revisar cada pregunta individual, su calificación y los comentarios textuales del cliente." },
+      "surveyDetailClose": { "title": "Cerrar Modal", "description": "Haz clic aquí para cerrar la vista de detalles y continuar con las Plantillas." },
+      "tabTemplates": { "title": "Pestaña: Plantillas", "description": "Finalmente, exploremos la pestaña de Plantillas para gestionar los modelos de encuestas reutilizables." },
+      "templatesFilters": { "title": "Filtros de Plantillas", "description": "Filtra las plantillas disponibles por proyecto o tipo de encuesta." },
+      "templatesNewBtn": { "title": "Nueva Plantilla", "description": "Al hacer clic en \"Siguiente\", abriremos el diseñador para crear una nueva plantilla." },
+      "templateFormModal": { "title": "Diseñador de Plantillas", "description": "Este modal te permite crear modelos de encuestas estandarizados para ahorrar tiempo." },
+      "templateFormGeneral": { "title": "Información General", "description": "Asigna la plantilla a un proyecto, define su tipo, dale un nombre y decide si está activa." },
+      "templateFormQuestions": { "title": "Preguntas", "description": "Agrega las preguntas que compondrán la encuesta. Debes definir una clave única y el texto en español e inglés." },
+      "templateFormActions": { "title": "Guardar Cambios", "description": "Revisa que todo esté correcto y haz clic en \"Guardar\" para crear la plantilla." },
+      "templateFormClose": { "title": "Cerrar Diseñador", "description": "Haz clic aquí para cerrar el modal. Al hacerlo, terminaremos el tour." },
+      "finish": { "title": "¡Tour Completado!", "description": "Has recorrido todo el módulo de Post-Venta. ¡Ahora estás listo para gestionar Onboarding, Garantías, Encuestas y Plantillas como un profesional!" }
+    },
+    "onboardingForm": {
+      "modal": { "title": "Formulario de Creación", "description": "Este modal te permite iniciar el proceso de onboarding para un cliente específico." },
+      "project": { "title": "Selección de Proyecto", "description": "Selecciona el proyecto al que pertenece el cliente. Esto filtrará las opciones siguientes." },
+      "client": { "title": "Cliente", "description": "Elige al cliente (residente) que realizará el proceso de onboarding." },
+      "property": { "title": "Propiedad Asignada", "description": "Selecciona el lote o apartamento específico. El sistema solo mostrará las propiedades asignadas a este cliente en el proyecto." },
+      "actions": { "title": "Crear Onboarding", "description": "Revisa que los datos sean correctos y haz clic en \"Crear\" para generar el checklist inicial." }
+    },
+    "onboardingDetail": {
+      "modal": { "title": "Detalles del Onboarding", "description": "Este modal te permite gestionar el checklist de entrega. Comenzaremos revisando el resumen superior." },
+      "summary": { "title": "Resumen Superior", "description": "Este panel muestra de un vistazo la información clave de la propiedad, el cliente y una barra de progreso general." },
+      "items": { "title": "Lista de Ítems", "description": "Aquí se desglosan todas las tareas requeridas. Te explicaré cómo interactuar con el primer ítem de la lista." },
+      "checkbox": { "title": "Marcar como Completado", "description": "Haz clic en este checkbox para marcar la tarea como realizada. El sistema registrará automáticamente la fecha y el usuario." },
+      "notes": { "title": "Notas del Ítem", "description": "Usa este campo de texto para agregar observaciones específicas, instrucciones o comentarios sobre esta tarea en particular." },
+      "upload": { "title": "Adjuntar Archivos", "description": "Haz clic aquí para subir o reemplazar el documento obligatorio asociado a este ítem del checklist." },
+      "close": { "title": "Cerrar Modal", "description": "Cuando termines de revisar o editar, haz clic aquí para volver a la tabla principal. Los cambios se guardan automáticamente." }
+    },
+    "warrantyDetail": {
+      "modal": { "title": "Detalles del Reclamo", "description": "Aquí puedes revisar toda la información del reclamo, su historial y tomar acciones de resolución." },
+      "info": { "title": "Información General", "description": "Muestra el cliente, propiedad, categoría, prioridad, descripción del problema y la evidencia fotográfica adjunta." },
+      "timeline": { "title": "Línea de Tiempo", "description": "Registro cronológico de todos los cambios de estado y notas añadidas al reclamo desde su creación." },
+      "actions": { "title": "Acciones de Resolución", "description": "Desde aquí puedes aprobar, rechazar o marcar el reclamo como resuelto, agregando las notas finales correspondientes." }
+    },
+    "warrantyForm": {
+      "modal": { "title": "Formulario de Reclamo", "description": "Este modal te permite registrar un nuevo reclamo de garantía con toda la evidencia necesaria." },
+      "project": { "title": "Proyecto", "description": "Selecciona el proyecto al que pertenece la propiedad afectada." },
+      "linkType": { "title": "Vinculación", "description": "Indica si el reporte lo hace un Lead (prospecto) o un Cliente (residente) registrado." },
+      "property": { "title": "Unidad Afectada", "description": "Selecciona el lote o apartamento específico donde se presenta el problema." },
+      "categoryPriority": { "title": "Categoría y Prioridad", "description": "Clasifica el tipo de problema (ej: plomería, eléctrico) y define su nivel de urgencia." },
+      "description": { "title": "Descripción Detallada", "description": "Describe con el mayor detalle posible el problema reportado por el cliente." },
+      "photos": { "title": "Evidencia Fotográfica", "description": "Adjunta fotos o videos que respalden el reclamo para una evaluación más rápida." },
+      "actions": { "title": "Guardar Reclamo", "description": "Revisa que todos los campos obligatorios estén completos y haz clic en \"Crear\" para registrar el reclamo." }
+    },
+    "templateForm": {
+      "modal": { "title": "Diseñador de Plantillas", "description": "Este modal te permite crear o editar modelos de encuestas reutilizables para estandarizar la recolección de feedback." },
+      "generalInfo": { "title": "Información General", "description": "Asigna la plantilla a un proyecto, define su tipo (Post-venta, Anual, etc.), dale un nombre y decide si está activa." },
+      "questions": { "title": "Preguntas de la Encuesta", "description": "Agrega las preguntas que compondrán la encuesta. Debes definir una clave única y el texto tanto en español como en inglés." },
+      "actions": { "title": "Guardar Plantilla", "description": "Revisa que todas las preguntas tengan clave y texto en español. Luego, haz clic en \"Guardar\". Al cerrar, finalizaremos el tour." }
+    },
 
-    
+    "referrals": {
+      "button": "Ver guía de Referidos",
+      "overview": {
+        "title": "Módulo de Referidos",
+        "description": "Gestiona el programa de referidos, rastrea el progreso de los leads y administra las recompensas."
+      },
+      "tabs": {
+        "title": "Pestañas de Gestión",
+        "description": "Navega entre la lista de referidos, el ranking de referidores y la configuración del programa."
+      },
+      "tabList": {
+        "title": "Lista de Referidos",
+        "description": "Aquí puedes ver y gestionar todos los referidos registrados en el sistema."
+      },
+      "stats": {
+        "title": "Estadísticas Clave",
+        "description": "Visualiza rápidamente el total de referidos, la tasa de conversión y el monto total de recompensas pagadas."
+      },
+      "filters": {
+        "title": "Filtros",
+        "description": "Filtra la lista por proyecto específico o por el estado actual del referido."
+      },
+      "createBtn": {
+        "title": "Crear Nuevo Referido",
+        "description": "Al hacer clic en \"Siguiente\", abriremos el formulario compartido para registrar un nuevo referido."
+      },
+      "table": {
+        "title": "Tabla de Referidos",
+        "description": "Aquí se listan todos los referidos con su información. Te explicaré cada una de sus columnas."
+      },
+      "colReferrer": {
+        "title": "Referidor",
+        "description": "El nombre del cliente o residente que está haciendo la recomendación."
+      },
+      "colReferred": {
+        "title": "Referido",
+        "description": "Los datos de contacto de la persona que fue recomendada."
+      },
+      "colProject": {
+        "title": "Proyecto",
+        "description": "El proyecto inmobiliario al que se está refiriendo al contacto."
+      },
+      "colStatus": {
+        "title": "Estado",
+        "description": "El progreso actual del referido (Pendiente, Contactado, Calificado, Convertido, etc.)."
+      },
+      "colReward": {
+        "title": "Recompensa",
+        "description": "El tipo y monto de la recompensa acordada (Efectivo o Descuento en Propiedad)."
+      },
+      "colActions": {
+        "title": "Acciones",
+        "description": "Aquí encontrarás el botón \"Marcar como Venta\" para convertir el referido, o \"Aprobar Recompensa\" una vez que la venta se haya concretado."
+      },
+      "tabLeaderboard": {
+        "title": "Ir al Leaderboard",
+        "description": "Al hacer clic en \"Siguiente\", nos moveremos a la pestaña de ranking."
+      },
+      "leaderboardContainer": {
+        "title": "Ranking de Referidores",
+        "description": "Aquí se muestra el top 10 de los referidores más exitosos, ordenados por el monto total ganado."
+      },
+      "leaderboardList": {
+        "title": "Detalle del Ranking",
+        "description": "Cada fila muestra la medalla, el nombre, la cantidad de referidos, cuántos se convirtieron en venta y el monto total ganado."
+      },
+      "tabProgram": {
+        "title": "Ir a Configuración",
+        "description": "Al hacer clic en \"Siguiente\", iremos a la configuración de recompensas del programa."
+      },
+      "programFilters": {
+        "title": "Filtros de Programa",
+        "description": "Filtra las configuraciones de recompensas existentes por proyecto."
+      },
+      "programCreate": {
+        "title": "Nuevo Programa",
+        "description": "Al hacer clic en \"Siguiente\", abriremos el formulario para crear una nueva configuración de recompensas."
+      },
+      "programModal": {
+        "title": "Diseñador de Programas",
+        "description": "Este modal te permite definir las reglas de recompensa para un proyecto específico."
+      },
+      "programModalProject": {
+        "title": "Proyecto",
+        "description": "Selecciona el proyecto al que se aplicará esta configuración de recompensas."
+      },
+      "programModalName": {
+        "title": "Nombre del Programa",
+        "description": "Asigna un nombre descriptivo para identificar fácilmente esta configuración."
+      },
+      "programModalReward": {
+        "title": "Tipo de Recompensa",
+        "description": "Elige si la recompensa será en efectivo (Cash) o un descuento en la propiedad."
+      },
+      "programModalTerms": {
+        "title": "Términos y Condiciones",
+        "description": "Define las reglas legales o notas importantes en español e inglés."
+      },
+      "programModalClose": {
+        "title": "Cerrar",
+        "description": "Haz clic en \"Cancelar\" para cerrar este modal sin guardar y finalizar el tour."
+      },
+      "finish": {
+        "title": "¡Tour Completado!",
+        "description": "Ahora estás listo para gestionar y hacer crecer tu red de referidos."
+      }
+    },
+    "sharedReferralModal": {
+      "modal": {
+        "title": "Formulario de Referido",
+        "description": "Este es un componente compartido para registrar nuevos referidos, ya sea desde el CRM o desde el portal del cliente."
+      },
+      "project": {
+        "title": "Proyecto",
+        "description": "Selecciona el proyecto inmobiliario al que se referirá al contacto."
+      },
+      "referrer": {
+        "title": "Referidor",
+        "description": "Elige al cliente o residente que está haciendo la recomendación."
+      },
+      "contact": {
+        "title": "Datos del Referido",
+        "description": "Ingresa el nombre, teléfono, correo y país de la persona referida."
+      },
+      "reward": {
+        "title": "Tipo de Recompensa",
+        "description": "Define si la recompensa será en efectivo o un descuento en la propiedad, y su monto."
+      },
+      "actions": {
+        "title": "Guardar Referido",
+        "description": "Revisa la información y haz clic en \"Enviar\" para registrar el referido. Al cerrar, continuaremos con el tour."
+      }
+    },
+
+        "auditLog": {
+      "button": "Ver guía de Auditoría",
+      "overview": {
+        "title": "Módulo de Auditoría",
+        "description": "Este módulo registra todas las acciones realizadas en el sistema. Aquí puedes rastrear quién hizo qué, cuándo y qué cambió."
+      },
+      "filters": {
+        "title": "Filtros de Búsqueda",
+        "description": "Filtra los registros de auditoría por entidad, proyecto, acción, usuario o rango de fechas."
+      },
+      "filterEntity": {
+        "title": "Entidad",
+        "description": "Selecciona el tipo de entidad (Lead, Cliente, Proyecto, etc.) para ver solo sus registros."
+      },
+      "filterProject": {
+        "title": "Proyecto",
+        "description": "Filtra los registros por proyecto específico."
+      },
+      "filterAction": {
+        "title": "Acción",
+        "description": "Filtra por tipo de acción: Creado, Actualizado, Eliminado, Cambio de etapa, etc."
+      },
+      "filterUser": {
+        "title": "Usuario",
+        "description": "Filtra los registros por el usuario que realizó la acción."
+      },
+      "filterDates": {
+        "title": "Rango de Fechas",
+        "description": "Define un rango de fechas para ver registros específicos de un período."
+      },
+      "table": {
+        "title": "Tabla de Registros",
+        "description": "Aquí se listan todos los registros de auditoría. Te explicaré cada columna."
+      },
+      "colUser": {
+        "title": "Usuario",
+        "description": "La persona que realizó la acción, mostrando su nombre y rol."
+      },
+      "colAction": {
+        "title": "Acción",
+        "description": "El tipo de acción realizada (Creado, Actualizado, Eliminado, etc.) con un código de color."
+      },
+      "colEntity": {
+        "title": "Entidad",
+        "description": "El tipo de objeto afectado (Lead, Cliente, Proyecto, etc.)."
+      },
+      "colChanges": {
+        "title": "Cambios",
+        "description": "Los campos que fueron modificados en esta acción."
+      },
+      "colTimestamp": {
+        "title": "Fecha",
+        "description": "Cuándo se realizó la acción, con tiempo relativo y fecha completa."
+      },
+      "rowClick": {
+        "title": "Ver Detalles",
+        "description": "Al hacer clic en \"Siguiente\", abriremos el panel de detalles de la primera fila."
+      },
+      "detailDrawer": {
+        "title": "Panel de Detalles",
+        "description": "Este panel contiene toda la información forense del registro."
+      },
+      "drawerInfo": {
+        "title": "Información General",
+        "description": "Muestra el usuario que realizó la acción, su dirección IP y la fecha exacta del evento."
+      },
+      "drawerFields": {
+        "title": "Campos Modificados",
+        "description": "Aquí puedes comparar exactamente qué valores tenían los campos \"Antes\" y \"Después\" del cambio."
+      },
+      "drawerJson": {
+        "title": "Datos Completos (JSON)",
+        "description": "Para necesidades técnicas avanzadas, aquí tienes el objeto completo del registro en formato JSON, con opción de copiar."
+      },
+      "detailClose": {
+        "title": "Cerrar Panel",
+        "description": "Haz clic aquí para cerrar el panel de detalles."
+      },
+      "finish": {
+        "title": "¡Tour Completado!",
+        "description": "Ahora puedes rastrear y auditar todas las acciones del sistema de manera efectiva."
+      }
+    },
+
+        "projects": {
+      "button": "Ver guía de Proyectos",
+      "overview": {
+        "title": "Módulo de Proyectos",
+        "description": "Aquí gestionas todos los desarrollos inmobiliarios. Podrás crear, editar, ver estadísticas y administrar la configuración de cada proyecto."
+      },
+      "createBtn": {
+        "title": "Crear Nuevo Proyecto",
+        "description": "Al hacer clic en \"Siguiente\", iniciaremos un asistente paso a paso para configurar un nuevo proyecto desde cero."
+      },
+      "stats": {
+        "title": "Resumen Rápido",
+        "description": "Visualiza de un vistazo el total de proyectos, cuántos están activos y la variedad de tipos de desarrollo registrados."
+      },
+      "search": {
+        "title": "Búsqueda",
+        "description": "Filtra la tabla en tiempo real escribiendo el nombre o slug del proyecto."
+      },
+      "table": {
+        "title": "Tabla de Proyectos",
+        "description": "Aquí se listan todos los proyectos. Te explicaré el significado de cada columna."
+      },
+      "colName": {
+        "title": "Nombre y Slug",
+        "description": "El nombre comercial del proyecto y su identificador único para URLs (slug)."
+      },
+      "colType": {
+        "title": "Tipo",
+        "description": "La categoría del desarrollo (ej: casas, apartamentos, mixto)."
+      },
+      "colStatus": {
+        "title": "Estado",
+        "description": "Indica si el proyecto está actualmente activo o inactivo en el sistema."
+      },
+      "colPhase": {
+        "title": "Fase",
+        "description": "La etapa actual de construcción o comercialización del proyecto."
+      },
+      "colActions": {
+        "title": "Acciones",
+        "description": "Botones para ver estadísticas detalladas, visitar el portal, editar o eliminar el proyecto."
+      },
+      "actionStats": {
+        "title": "Ver Estadísticas",
+        "description": "Al hacer clic en \"Siguiente\", abriremos el panel de estadísticas para analizar el balance y los clientes de este proyecto."
+      },
+      "actionView": {
+        "title": "Ver Detalles",
+        "description": "Al hacer clic en \"Siguiente\", navegaremos a la vista de detalles de este proyecto para continuar el tour."
+      },
+      "finish": {
+        "title": "¡Tour Completado!",
+        "description": "Ahora dominas la gestión de proyectos. ¡Comienza a crear y administrar tus desarrollos!"
+      }
+    },
+    "projectDetails": {
+      "overview": {
+        "title": "Detalle del Proyecto",
+        "description": "Esta es la vista completa del proyecto. Aquí puedes gestionar toda la información, documentos e inventario."
+      },
+      "hero": {
+        "title": "Imagen Principal",
+        "description": "La imagen de portada y el logo del proyecto, junto con su estado actual."
+      },
+      "tabs": {
+        "title": "Pestañas Principales",
+        "description": "Navega entre la Información general, los Documentos adjuntos y el Inventario de propiedades."
+      },
+      "info": {
+        "title": "Información General",
+        "description": "Aquí se muestran las estadísticas rápidas, el branding, la descripción y las características del proyecto."
+      },
+      "gallery": {
+        "title": "Galería Multimedia",
+        "description": "Visualiza y gestiona las imágenes y videos asociados al proyecto."
+      },
+      "documentsTab": {
+        "title": "Ir a Documentos",
+        "description": "Al hacer clic en \"Siguiente\", navegaremos a la pestaña de Documentos para ver los archivos del proyecto."
+      },
+      "documents": {
+        "title": "Gestión de Documentos",
+        "description": "Aquí puedes subir, visualizar y gestionar todos los documentos del proyecto: contratos, escrituras, permisos, etc."
+      },
+      "documentsUpload": {
+        "title": "Subir Documento",
+        "description": "Haz clic aquí para subir un nuevo documento al proyecto. Puedes categorizarlo y asignarlo a un cliente específico."
+      },
+      "inventoryTab": {
+        "title": "Ir a Inventario",
+        "description": "Al hacer clic en \"Siguiente\", iremos a la pestaña de Inventario para ver el estado de las propiedades."
+      },
+      "inventory": {
+        "title": "Inventario de Propiedades",
+        "description": "Visualiza el Master Plan del proyecto con las estadísticas de unidades disponibles, pendientes y vendidas."
+      },
+      "inventoryStats": {
+        "title": "Estadísticas Rápidas",
+        "description": "Tarjetas con el resumen del inventario: total de edificios/unidades, disponibles, pendientes y vendidas."
+      },
+      "inventoryMasterplan": {
+        "title": "Master Plan Interactivo",
+        "description": "Mapa del proyecto con polígonos que representan cada edificio. Haz clic para ver detalles específicos."
+      },
+      "finish": {
+        "title": "¡Tour Completado!",
+        "description": "Has completado el recorrido del módulo de Proyectos. ¡Ahora puedes gestionar tus desarrollos de principio a fin!"
+      }
+    },
+        "statsModal": {
+      "overview": {
+        "title": "Panel de Estadísticas",
+        "description": "Este panel te ofrece un análisis financiero y comercial detallado del proyecto seleccionado."
+      },
+      "tabs": {
+        "title": "Pestañas de Análisis",
+        "description": "Alterna entre \"Balance\" para ver lo recaudado vs. pendiente, y \"Clients\" para analizar la ocupación."
+      },
+      "balanceOverview": {
+        "title": "Resumen de Balance",
+        "description": "Muestra el total recaudado y el monto pendiente de pago para este proyecto específico."
+      },
+      "balanceChart": {
+        "title": "Gráfico de Distribución",
+        "description": "Visualización gráfica en dona del porcentaje cobrado versus el porcentaje pendiente."
+      },
+      "clientsTab": {
+        "title": "Pestaña de Clientes",
+        "description": "Al hacer clic en \"Siguiente\", cambiaremos a esta pestaña para ver la información de los clientes."
+      },
+      "clientsOverview": {
+        "title": "Resumen de Clientes",
+        "description": "Muestra el total de clientes asociados y el estado de sus propiedades (vendidas, reservadas, disponibles)."
+      },
+      "clientsChart": {
+        "title": "Gráfico de Propiedades",
+        "description": "Distribución visual de las propiedades asignadas a los clientes dentro de este proyecto."
+      },
+      "close": {
+        "title": "Cerrar Panel",
+        "description": "Haz clic aquí para cerrar las estadísticas y finalizar el tour del módulo de proyectos."
+      }
+    },
+
+        "sales": {
+      "button": "Ver guía de Ventas",
+      "overview": {
+        "title": "Módulo de Ventas",
+        "description": "Gestiona todo el embudo de ventas. Aquí puedes crear, mover, convertir y dar seguimiento a tus leads."
+      },
+      "newLeadBtn": {
+        "title": "Nuevo Lead",
+        "description": "Al hacer clic en \"Siguiente\", abriremos el formulario para registrar un nuevo contacto en el embudo."
+      },
+      "search": {
+        "title": "Búsqueda y Orden",
+        "description": "Filtra leads por nombre, email o teléfono. También puedes ordenar por fecha de creación o por Score (prioridad)."
+      },
+      "export": {
+        "title": "Exportar Datos",
+        "description": "Descarga la información de tus leads en Excel o CSV. Puedes aplicar filtros de fecha, proyecto, etapa o asesor antes de exportar."
+      },
+      "kanban": {
+        "title": "Tablero Kanban",
+        "description": "Visualiza el flujo de trabajo. Arrastra las tarjetas entre columnas para cambiar la etapa del lead."
+      },
+      "leadCard": {
+        "title": "Tarjeta de Lead",
+        "description": "Al hacer clic en \"Siguiente\", abriremos los detalles de este lead para ver su información completa."
+      },
+      "finish": {
+        "title": "¡Tour Completado!",
+        "description": "Ahora dominas el módulo de Ventas. ¡Comienza a cerrar tratos!"
+      }
+    },
+    "leadModal": {
+      "overview": {
+        "title": "Registro de Lead",
+        "description": "Formulario completo para capturar la información inicial del contacto y asignarlo correctamente en el embudo."
+      },
+      "name": {
+        "title": "Nombre",
+        "description": "El nombre completo del contacto. Este es el único campo estrictamente obligatorio."
+      },
+      "email": {
+        "title": "Correo Electrónico",
+        "description": "Ingresa el email del contacto para mantener una comunicación formal y enviar documentos."
+      },
+      "phone": {
+        "title": "Teléfono",
+        "description": "Número de contacto con código de país. Fundamental para llamadas o envío de SMS automatizados."
+      },
+      "country": {
+        "title": "País",
+        "description": "Selecciona el país de residencia del contacto para ajustar formatos y zonas horarias."
+      },
+      "project": {
+        "title": "Proyecto de Interés",
+        "description": "Asocia el lead a un proyecto específico de tu portafolio inmobiliario."
+      },
+      "assigned": {
+        "title": "Asignado a",
+        "description": "Selecciona el asesor o agente responsable de dar seguimiento a este contacto."
+      },
+      "stage": {
+        "title": "Etapa del Embudo",
+        "description": "Define en qué parte del proceso de venta se encuentra (por defecto: \"Nuevo\")."
+      },
+      "source": {
+        "title": "Fuente del Lead",
+        "description": "Indica cómo conociste a este contacto (Web, Referido, Visita, Llamada, etc.) para medir el ROI de tus canales."
+      },
+      "notes": {
+        "title": "Notas Adicionales",
+        "description": "Agrega cualquier observación, requerimiento especial o contexto relevante sobre el contacto."
+      },
+      "actions": {
+        "title": "Acciones",
+        "description": "Haz clic en \"Cancelar\" para cerrar este modal y continuar con el tour principal, o \"Guardar\" si deseas crear el registro."
+      }
+    },
+    "leadDetails": {
+      "overview": {
+        "title": "Detalle del Lead",
+        "description": "Vista completa de la información del contacto, historial y acciones rápidas."
+      },
+      "contact": {
+        "title": "Información de Contacto",
+        "description": "Aquí ves el email, teléfono y país registrados. Haz clic en ellos para copiar o llamar."
+      },
+      "convert": {
+        "title": "Convertir a Cliente",
+        "description": "Cuando el lead esté listo para comprar, usa este botón para transformarlo en un cliente formal."
+      },
+      "close": {
+        "title": "Cerrar",
+        "description": "Cierra este panel para finalizar el tour del módulo de Ventas."
+      }
+    },
+
+        "payments": {
+      "button": "Ver guía de Pagos",
+      "overview": {
+        "title": "Módulo de Pagos",
+        "description": "Gestiona y da seguimiento a todos los pagos pendientes, firmados y vencidos de tus clientes."
+      },
+      "summary": {
+        "title": "Resumen Financiero",
+        "description": "Visualiza de un vistazo el monto total pendiente, lo recaudado y el valor en riesgo por pagos vencidos."
+      },
+      "filters": {
+        "title": "Filtros de Búsqueda",
+        "description": "Filtra los pagos por proyecto, estado (Pendiente, Firmado, Vencido) o rango de fechas."
+      },
+      "export": {
+        "title": "Exportar Reportes",
+        "description": "Descarga un reporte detallado de los pagos en Excel o CSV, aplicando los filtros actuales."
+      },
+      "table": {
+        "title": "Tabla de Pagos",
+        "description": "Aquí se listan todos los pagos. Te explicaré cada una de sus columnas."
+      },
+      "colClient": {
+        "title": "Cliente",
+        "description": "Nombre del cliente y su número de teléfono de contacto rápido."
+      },
+      "colProject": {
+        "title": "Proyecto",
+        "description": "El proyecto inmobiliario al que corresponde este pago."
+      },
+      "colUnit": {
+        "title": "Unidad",
+        "description": "El número de lote o apartamento específico asociado al pago."
+      },
+      "colAmount": {
+        "title": "Monto",
+        "description": "El valor monetario que el cliente debe pagar en esta cuota."
+      },
+      "colDueDate": {
+        "title": "Fecha de Vencimiento",
+        "description": "La fecha límite de pago. Si la fecha ya pasó, se marcará visualmente como \"Vencido\" en rojo."
+      },
+      "colStatus": {
+        "title": "Estado",
+        "description": "Indica si el pago está Pendiente, ya fue Firmado o está Vencido."
+      },
+      "finish": {
+        "title": "¡Tour Completado!",
+        "description": "Ahora puedes gestionar, filtrar y dar seguimiento a los pagos de manera eficiente."
+      }
+    },
+
+        "reports": {
+      "button": "Ver guía de Reportes",
+      "overview": {
+        "title": "Módulo de Reportes",
+        "description": "Centro centralizado para exportar y analizar los datos de Clientes, Pagos y Leads de tu CRM."
+      },
+      "clientsSection": {
+        "title": "Reporte de Clientes",
+        "description": "Exporta la base de datos completa de tus clientes. Puedes filtrar por proyecto específico."
+      },
+      "clientsProject": {
+        "title": "Filtro de Proyecto",
+        "description": "Selecciona un proyecto para descargar solo los clientes asociados a él, o déjalo vacío para todos."
+      },
+      "clientsExport": {
+        "title": "Exportar Clientes",
+        "description": "Elige el formato (CSV o Excel) y haz clic para descargar el reporte inmediatamente."
+      },
+      "paymentsSection": {
+        "title": "Reporte de Pagos",
+        "description": "Obtén un historial detallado de los pagos realizados en un rango de fechas específico."
+      },
+      "paymentsDates": {
+        "title": "Rango de Fechas",
+        "description": "Es obligatorio definir una fecha de inicio y una de fin para generar este reporte."
+      },
+      "paymentsProject": {
+        "title": "Filtro de Proyecto",
+        "description": "Filtra los pagos para ver el flujo de caja de un proyecto en particular."
+      },
+      "paymentsExport": {
+        "title": "Exportar Pagos",
+        "description": "El botón se habilitará solo cuando las fechas sean válidas. Descarga el reporte en el formato elegido."
+      },
+      "leadsSection": {
+        "title": "Reporte de Leads",
+        "description": "Exporta tu embudo de ventas. Este reporte incluye filtros avanzados en un modal."
+      },
+      "leadsExport": {
+        "title": "Abrir Filtros Avanzados",
+        "description": "Al hacer clic en \"Siguiente\", abriremos el modal para filtrar leads por etapa, agente o proyecto antes de exportar."
+      },
+      "leadsModal": {
+        "title": "Filtros de Exportación",
+        "description": "Aquí puedes refinar tu búsqueda por fechas, proyecto, etapa del embudo o agente asignado antes de descargar."
+      },
+      "leadsModalClose": {
+        "title": "Cerrar Modal",
+        "description": "Haz clic aquí para cerrar el modal y finalizar el tour del módulo de Reportes."
+      },
+      "finish": {
+        "title": "¡Tour Completado!",
+        "description": "Ahora sabes cómo generar y descargar todos los reportes clave de tu operación."
+      }
+    },
+
+        "agents": {
+      "button": "Ver guía de Agentes",
+      "overview": {
+        "title": "Módulo de Agentes",
+        "description": "Gestiona y monitorea el desempeño de tu equipo de ventas, sus métricas y metas mensuales."
+      },
+      "stats": {
+        "title": "Resumen del Equipo",
+        "description": "Visualiza rápidamente el total de agentes, roles y el rendimiento global de leads y conversiones."
+      },
+      "table": {
+        "title": "Tabla de Agentes",
+        "description": "Aquí se listan todos los agentes. Te explicaré el significado de cada columna."
+      },
+      "colName": {
+        "title": "Nombre",
+        "description": "Nombre completo del agente y su correo electrónico de contacto."
+      },
+      "colRole": {
+        "title": "Rol",
+        "description": "El nivel de permisos del usuario en el sistema (Super Admin o Admin)."
+      },
+      "colPhone": {
+        "title": "Teléfono",
+        "description": "Número de contacto directo del agente."
+      },
+      "colLeads": {
+        "title": "Leads",
+        "description": "Total de leads asignados y cuántos de ellos han sido convertidos exitosamente."
+      },
+      "colTarget": {
+        "title": "Meta del Mes",
+        "description": "Progreso visual de las metas establecidas para conversiones y leads en el período actual."
+      },
+      "colActivities": {
+        "title": "Actividades",
+        "description": "Cantidad de actividades (llamadas, citas, seguimientos) completadas este mes."
+      },
+      "colClients": {
+        "title": "Clientes",
+        "description": "Número de clientes atendidos este mes en comparación con el total histórico."
+      },
+      "colActions": {
+        "title": "Acciones",
+        "description": "Botones para gestionar al agente: fijar metas mensuales o ver sus métricas detalladas."
+      },
+      "actionTargets": {
+        "title": "Fijar Metas",
+        "description": "Al hacer clic en \"Siguiente\", abriremos el modal para establecer objetivos mensuales para este agente."
+      },
+      "actionMetrics": {
+        "title": "Ver Métricas",
+        "description": "Al hacer clic en \"Siguiente\", abriremos el panel de métricas detalladas de este agente."
+      },
+      "finish": {
+        "title": "¡Tour Completado!",
+        "description": "Ahora puedes gestionar eficazmente el rendimiento y las metas de tu equipo de ventas."
+      }
+    },
+    "agentMetrics": {
+      "overview": {
+        "title": "Métricas del Agente",
+        "description": "Panel completo con el rendimiento del agente en el período actual."
+      },
+      "kpis": {
+        "title": "KPIs Principales",
+        "description": "Resumen de leads totales, convertidos, actividades y clientes atendidos este mes."
+      },
+      "progress": {
+        "title": "Progreso vs Metas",
+        "description": "Gráfica visual que compara el progreso real del agente contra las metas establecidas."
+      },
+      "pipeline": {
+        "title": "Pipeline por Etapa",
+        "description": "Distribución de los leads asignados al agente según su etapa actual en el embudo."
+      },
+      "close": {
+        "title": "Cerrar",
+        "description": "Haz clic aquí para cerrar el panel y continuar con el tour principal."
+      }
+    },
+    "targetSetter": {
+      "overview": {
+        "title": "Configuración de Metas",
+        "description": "Define los objetivos mensuales para motivar y medir el desempeño del agente."
+      },
+      "period": {
+        "title": "Período",
+        "description": "Selecciona el mes y el año para el cual deseas establecer o modificar las metas."
+      },
+      "currentProgress": {
+        "title": "Progreso Actual",
+        "description": "Visualiza rápidamente cuánto ha avanzado el agente en las metas ya configuradas para este período."
+      },
+      "form": {
+        "title": "Nuevas Metas",
+        "description": "Ingresa los valores objetivo para Leads, Conversiones, Citas y conteo de SMS."
+      },
+      "close": {
+        "title": "Cerrar",
+        "description": "Haz clic en \"Cancelar\" para cerrar este modal y finalizar el tour."
+      }
+    },
+
+        "activities": {
+      "button": "Ver guía de Actividades",
+      "overview": {
+        "title": "Módulo de Actividades",
+        "description": "Gestiona todas las tareas, seguimientos y acciones de tu equipo en un tablero Kanban dinámico."
+      },
+      "filters": {
+        "title": "Filtros de Búsqueda",
+        "description": "Busca actividades por texto o filtra rápidamente por nivel de prioridad."
+      },
+      "newBtn": {
+        "title": "Nueva Actividad",
+        "description": "Al hacer clic en \"Siguiente\", abriremos el formulario para crear una nueva actividad."
+      },
+      "kanban": {
+        "title": "Tablero Kanban",
+        "description": "Organiza tus actividades arrastrando las tarjetas entre las diferentes columnas de estado."
+      },
+      "card": {
+        "title": "Tarjeta de Actividad",
+        "description": "Cada tarjeta muestra la información clave. Al hacer clic en \"Siguiente\", veremos sus detalles completos."
+      },
+      "actionView": {
+        "title": "Ver Detalles",
+        "description": "Al hacer clic en \"Siguiente\", abriremos el panel lateral con toda la información, subtareas y comentarios."
+      },
+      "finish": {
+        "title": "¡Tour Completado!",
+        "description": "Ahora puedes gestionar las actividades de tu equipo de manera eficiente."
+      }
+    },
+    "activityModal": {
+      "overview": {
+        "title": "Crear Actividad",
+        "description": "Formulario completo para registrar una nueva tarea o seguimiento."
+      },
+      "title": {
+        "title": "Título y Descripción",
+        "description": "Define un nombre claro y una descripción detallada de lo que se debe hacer."
+      },
+      "columnPriority": {
+        "title": "Columna y Prioridad",
+        "description": "Asigna la actividad a una columna del tablero y define su nivel de urgencia."
+      },
+      "dueAssignee": {
+        "title": "Fecha y Asignación",
+        "description": "Establece la fecha límite y asigna la responsabilidad a un miembro del equipo."
+      },
+      "contact": {
+        "title": "Contacto Asociado",
+        "description": "Vincula esta actividad a un usuario registrado o a un contacto externo."
+      },
+      "actions": {
+        "title": "Guardar",
+        "description": "Haz clic en \"Cancelar\" para cerrar y continuar el tour, o \"Crear\" para guardar la actividad."
+      }
+    },
+    "activityDetails": {
+      "overview": {
+        "title": "Detalles de la Actividad",
+        "description": "Panel completo con toda la información, historial y acciones de la actividad."
+      },
+      "projects": {
+        "title": "Proyectos Relacionados",
+        "description": "Muestra a qué proyectos inmobiliarios está vinculada esta actividad."
+      },
+      "contact": {
+        "title": "Contacto",
+        "description": "Información de la persona (cliente o externo) asociada a esta tarea."
+      },
+      "subtasks": {
+        "title": "Subtareas",
+        "description": "Desglosa la actividad principal en pasos más pequeños y manejables."
+      },
+      "comments": {
+        "title": "Comentarios",
+        "description": "Espacio para dejar notas, actualizaciones o mensajes para el equipo."
+      },
+      "actions": {
+        "title": "Acciones",
+        "description": "Edita la actividad o elimínala. Al cerrar, finalizaremos el tour."
+      }
+    },
+
+        "analytics": {
+      "button": "Ver guía de Analíticas",
+      "overview": {
+        "title": "Módulo de Analíticas",
+        "description": "Visualiza el rendimiento financiero y la distribución de clientes de todos tus proyectos en tiempo real."
+      },
+      "filter": {
+        "title": "Filtro de Proyectos",
+        "description": "Selecciona o deselecciona proyectos específicos. Todos los gráficos y KPIs se actualizarán automáticamente para mostrar solo los datos seleccionados."
+      },
+      "kpis": {
+        "title": "Indicadores Clave (KPIs)",
+        "description": "Resumen global del dinero recaudado, pendiente, la tasa de cobro y el total de clientes activos en los proyectos seleccionados."
+      },
+      "balance": {
+        "title": "Balance Comparativo",
+        "description": "Gráfico de barras que compara visualmente el monto recaudado vs. el monto pendiente por cada proyecto."
+      },
+      "share": {
+        "title": "Distribución por Proyecto",
+        "description": "Gráfico de dona que muestra qué porcentaje del total recaudado pertenece a cada proyecto, con una leyenda detallada."
+      },
+      "clients": {
+        "title": "Clientes y Propiedades",
+        "description": "Compara la cantidad de clientes únicos frente al total de propiedades asignadas en cada proyecto."
+      },
+      "finish": {
+        "title": "¡Tour Completado!",
+        "description": "Ahora puedes monitorear y analizar el crecimiento de tu portafolio inmobiliario de manera efectiva."
+      }
+    },
+
+    "messageTemplates": {
+  "button": "Ver guía de Plantillas",
+  "overview": {
+    "title": "Plantillas de Mensajes",
+    "description": "Gestiona las plantillas reutilizables para tus campañas de SMS y correos masivos."
+  },
+  "filters": {
+    "title": "Búsqueda y Filtros",
+    "description": "Busca plantillas por nombre o contenido, y filtra por proyecto específico o plantillas globales."
+  },
+  "newBtn": {
+    "title": "Nueva Plantilla",
+    "description": "Al hacer clic en \"Siguiente\", abriremos el formulario para crear una nueva plantilla."
+  },
+  "table": {
+    "title": "Tabla de Plantillas",
+    "description": "Aquí ves todas las plantillas creadas. Te explicaré cada columna."
+  },
+  "colName": {
+    "title": "Nombre y Categoría",
+    "description": "El nombre de la plantilla y su categoría (ej: Bienvenida, Recordatorio, etc.)."
+  },
+  "colProject": {
+    "title": "Proyecto",
+    "description": "Muestra si la plantilla es Global (para todos los proyectos) o específica de un proyecto."
+  },
+  "colContent": {
+    "title": "Contenido",
+    "description": "Vista previa del mensaje de la plantilla. Si es muy largo, se trunca con puntos suspensivos."
+  },
+  "colVariables": {
+    "title": "Variables",
+    "description": "Las variables dinámicas que usa la plantilla (ej: {{nombre}}, {{proyecto}}). Se reemplazan automáticamente al enviar."
+  },
+  "colStatus": {
+    "title": "Estado",
+    "description": "Indica si la plantilla está Activa (disponible para usar) o Inactiva (archivada)."
+  },
+  "colActions": {
+    "title": "Acciones",
+    "description": "Botones para editar o eliminar la plantilla."
+  },
+  "finish": {
+    "title": "¡Tour Completado!",
+    "description": "Ahora puedes crear, editar y gestionar plantillas de mensajes de manera eficiente."
+  }
+},
+"messageTemplateModal": {
+  "overview": {
+    "title": "Editor de Plantillas",
+    "description": "Formulario para definir el nombre, proyecto y contenido de tu plantilla de mensaje."
+  },
+  "name": {
+    "title": "Nombre de la Plantilla",
+    "description": "Asigna un nombre claro y descriptivo para identificar fácilmente esta plantilla."
+  },
+  "project": {
+    "title": "Proyecto Asociado",
+    "description": "Vincula la plantilla a un proyecto específico para usar sus variables, o déjala en \"Global\" para uso general."
+  },
+  "content": {
+    "title": "Contenido del Mensaje",
+    "description": "Escribe el texto del mensaje. Aquí es donde insertarás las variables dinámicas."
+  },
+  "variables": {
+    "title": "Variables Detectadas",
+    "description": "El sistema resalta automáticamente las variables (ej: {{nombre}}) que detecta en el texto para que verifiques que son válidas."
+  },
+  "actions": {
+    "title": "Guardar Cambios",
+    "description": "Haz clic en \"Cancelar\" para cerrar el modal y finalizar el tour, o \"Guardar\" para crear la plantilla."
+  }
+}
+  }
 }

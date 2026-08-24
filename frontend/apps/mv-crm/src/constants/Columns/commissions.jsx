@@ -16,6 +16,7 @@ export const useCommissionColumns = ({ t, onView, onApprove, onDelete, onMarkPai
     field: 'date',
     headerName: t('table.date', 'Fecha'),
     minWidth: 120,
+    tourId: 'commissions-col-date',
     renderCell: ({ row }) => (
       <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', color: '#666' }}>
         {new Date(row.createdAt).toLocaleDateString()}
@@ -26,40 +27,33 @@ export const useCommissionColumns = ({ t, onView, onApprove, onDelete, onMarkPai
     field: 'agent',
     headerName: t('table.agent', 'Agente'),
     minWidth: 180,
+    tourId: 'commissions-col-agent',
     renderCell: ({ row }) => {
       const agent = row.agentId
       const agentName = agent && typeof agent === 'object' 
         ? `${agent.firstName || ''} ${agent.lastName || ''}`.trim() || agent.email 
         : row.agentName || (typeof agent === 'string' ? agent : 'N/A')
-      
-      return (
-        <Typography sx={{ fontWeight: 600, fontSize: '0.85rem' }}>
-          {agentName}
-        </Typography>
-      )
+      return <Typography sx={{ fontWeight: 600, fontSize: '0.85rem' }}>{agentName}</Typography>
     }
   },
   {
     field: 'project',
     headerName: t('table.project', 'Proyecto'),
     minWidth: 150,
+    tourId: 'commissions-col-project',
     renderCell: ({ row }) => {
       const project = row.projectId
       const projectName = project && typeof project === 'object'
         ? project.name || (project.title && (project.title.es || project.title.en))
         : row.projectName || (typeof project === 'string' ? project : 'N/A')
-
-      return (
-        <Typography sx={{ fontSize: '0.8rem', color: '#555' }}>
-          {projectName}
-        </Typography>
-      )
+      return <Typography sx={{ fontSize: '0.8rem', color: '#555' }}>{projectName}</Typography>
     }
   },
   {
     field: 'amounts',
     headerName: t('table.amounts', 'Montos'),
     minWidth: 160,
+    tourId: 'commissions-col-amounts',
     renderCell: ({ row }) => (
       <Box>
         <Typography sx={{ fontSize: '0.7rem', color: '#888' }}>Venta: ${row.saleAmount?.toLocaleString()}</Typography>
@@ -73,14 +67,11 @@ export const useCommissionColumns = ({ t, onView, onApprove, onDelete, onMarkPai
     field: 'status',
     headerName: t('table.status', 'Estado'),
     minWidth: 120,
+    tourId: 'commissions-col-status',
     renderCell: ({ row }) => {
       const config = getStatusConfig(row.status, t)
       return (
-        <Chip
-          label={config.label}
-          size="small"
-          sx={{ bgcolor: config.bg, color: config.color, fontWeight: 600, fontSize: '0.7rem', height: 24 }}
-        />
+        <Chip label={config.label} size="small" sx={{ bgcolor: config.bg, color: config.color, fontWeight: 600, fontSize: '0.7rem', height: 24 }} />
       )
     }
   },
@@ -89,6 +80,7 @@ export const useCommissionColumns = ({ t, onView, onApprove, onDelete, onMarkPai
     headerName: t('table.actions', 'Acciones'),
     minWidth: 160,
     align: 'center',
+    tourId: 'commissions-col-actions',
     renderCell: ({ row }) => (
       <Box display="flex" gap={0.5} justifyContent="center">
         <Tooltip title={t('actions.view', 'Ver')}>
@@ -103,7 +95,6 @@ export const useCommissionColumns = ({ t, onView, onApprove, onDelete, onMarkPai
                 <CheckCircle sx={{ fontSize: 18, color: '#4caf50' }} />
               </IconButton>
             </Tooltip>
-            {/* ✅ CAMBIO: Botón de Eliminar en lugar de Disputar */}
             <Tooltip title={t('actions.delete', 'Eliminar')}>
               <IconButton size="small" onClick={() => onDelete(row)}>
                 <Delete sx={{ fontSize: 18, color: '#f44336' }} />

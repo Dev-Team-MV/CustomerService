@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/clients/ClientNotes.jsx
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Paper, TextField, Button, CircularProgress, Alert, Divider, FormControl, InputLabel, Select, MenuItem, Avatar, Chip, useMediaQuery, useTheme } from '@mui/material'
@@ -55,8 +54,9 @@ const ClientNotes = ({ clientId, notes, onNoteAdded }) => {
 
   return (
     <Box sx={{ p: { xs: 1, sm: 3 } }}>
-      {/* FORMULARIO PARA AGREGAR NOTA */}
-      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, mb: 3, border: '1px solid #ececec', borderRadius: 0, bgcolor: '#fafafa' }}>
+      
+      {/* ✅ FORMULARIO PARA AGREGAR NOTA (ID para el tour) */}
+      <Paper id="client-notes-add-form" elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, mb: 3, border: '1px solid #ececec', borderRadius: 0, bgcolor: '#fafafa' }}>
         <Box display="flex" alignItems="center" gap={1} mb={2}>
           <Note sx={{ fontSize: 18, color: '#000000ff' }} />
           <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#000000ff', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
@@ -103,17 +103,25 @@ const ClientNotes = ({ clientId, notes, onNoteAdded }) => {
       </Typography>
 
       {notes.length === 0 ? (
-        <Box sx={{ py: 6, textAlign: 'center', border: '1px dashed #ececec', borderRadius: 0 }}>
+        <Box id="client-notes-empty" sx={{ py: 6, textAlign: 'center', border: '1px dashed #ececec', borderRadius: 0 }}>
           <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', color: '#aaa', letterSpacing: '0.5px' }}>
             {t('notes.noNotesRegistered')}
           </Typography>
         </Box>
       ) : (
         <Box display="flex" flexDirection="column" gap={2}>
-          {notes.map((note) => {
+          {notes.map((note, index) => {
+            const isFirst = index === 0 // ✅ Detectar el primer elemento para el tour
             const relatedProjectNames = getRelatedProjects(note)
+            
             return (
-              <Paper key={note._id} elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, border: '1px solid #ececec', borderRadius: 0, bgcolor: '#fff', transition: 'all 0.2s', '&:hover': { boxShadow: '4px 4px 0px rgba(0,0,0,0.08)', borderColor: '#ff9800' } }}>
+              <Paper 
+                key={note._id} 
+                // ✅ ID para la tarjeta de la primera nota
+                id={isFirst ? 'client-notes-first-item-card' : undefined}
+                elevation={0} 
+                sx={{ p: { xs: 2, sm: 2.5 }, border: '1px solid #ececec', borderRadius: 0, bgcolor: '#fff', transition: 'all 0.2s', '&:hover': { boxShadow: '4px 4px 0px rgba(0,0,0,0.08)', borderColor: '#ff9800' } }}
+              >
                 {/* Header */}
                 <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'flex-start' }} gap={1} mb={1.5}>
                   <Box display="flex" alignItems="center" gap={1}>
@@ -134,8 +142,8 @@ const ClientNotes = ({ clientId, notes, onNoteAdded }) => {
                   </Typography>
                 )}
 
-                {/* Metadata */}
-                <Box display="flex" gap={1} flexWrap="wrap" mb={1.5} pl={{ xs: 0, sm: 3.5 }}>
+                {/* ✅ Metadata: Proyectos, Columna, Prioridad (ID para el tour) */}
+                <Box id={isFirst ? 'client-notes-first-item-metadata' : undefined} display="flex" gap={1} flexWrap="wrap" mb={1.5} pl={{ xs: 0, sm: 3.5 }}>
                   {relatedProjectNames.map((projectName, idx) => (
                     <Box key={idx} display="flex" alignItems="center" gap={0.5}>
                       <Business sx={{ fontSize: 14, color: '#2196f3' }} />
@@ -165,8 +173,8 @@ const ClientNotes = ({ clientId, notes, onNoteAdded }) => {
                   </Box>
                 )}
 
-                {/* Asignado a + Creado por */}
-                <Box display="flex" gap={2} alignItems="center" pl={{ xs: 0, sm: 3.5 }} flexWrap="wrap">
+                {/* ✅ Asignado a + Creado por (ID para el tour) */}
+                <Box id={isFirst ? 'client-notes-first-item-users' : undefined} display="flex" gap={2} alignItems="center" pl={{ xs: 0, sm: 3.5 }} flexWrap="wrap">
                   {note.assignedTo && (
                     <Box display="flex" alignItems="center" gap={0.5}>
                       <Person sx={{ fontSize: 14, color: '#4caf50' }} />

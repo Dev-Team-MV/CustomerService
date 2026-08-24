@@ -64,7 +64,7 @@ export default function DocumentViewer({ open, onClose, document: doc }) {
   const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="lg" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
+    <Dialog id="document-viewer-modal" open={open} onClose={handleClose} maxWidth="lg" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ececec' }}>
         <Box>
           <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{doc?.title || 'Documento'}</Typography>
@@ -76,7 +76,7 @@ export default function DocumentViewer({ open, onClose, document: doc }) {
         <IconButton onClick={handleClose} size="small"><Close /></IconButton>
       </DialogTitle>
 
-      <DialogContent dividers sx={{ minHeight: 400, position: 'relative' }}>
+      <DialogContent id="document-viewer-content" dividers sx={{ minHeight: 400, position: 'relative' }}>
         {loading && <Box display="flex" justifyContent="center" alignItems="center" height="100%"><CircularProgress /></Box>}
         {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid' }}>{error}</Alert>}
 
@@ -102,7 +102,7 @@ export default function DocumentViewer({ open, onClose, document: doc }) {
         )}
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, gap: 1, borderTop: '1px solid #ececec' }}>
+      <DialogActions id="document-viewer-actions" sx={{ p: 2, gap: 1, borderTop: '1px solid #ececec' }}>
         <Button onClick={handleClose} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('actions.close', 'Cerrar')}</Button>
         {previewUrl && (
           <>

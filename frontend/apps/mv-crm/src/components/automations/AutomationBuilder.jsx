@@ -75,6 +75,15 @@ const AutomationBuilder = ({ open, onClose, automation = null, onSave, onDelete,
   
   const selectedProjectName = projects.find(p => p._id === selectedProjectId)?.name || ''
 
+    // ✅ NUEVO: Escuchar el evento para cerrar el modal cuando el subtour termine
+  useEffect(() => {
+    const handleTourResume = () => {
+      onClose()
+    }
+    window.addEventListener('tour-resume-automation-builder', handleTourResume)
+    return () => window.removeEventListener('tour-resume-automation-builder', handleTourResume)
+  }, [onClose])
+
   useEffect(() => {
     if (automation) {
       setFormData({
@@ -197,7 +206,7 @@ const AutomationBuilder = ({ open, onClose, automation = null, onSave, onDelete,
   const inputSx = { '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 }, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' } }
   const menuItemSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '&:hover': { bgcolor: '#f5f5f5' } }
 
-  return (
+return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
       <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: { xs: 2, sm: 3 } }}>
         <Box display="flex" alignItems="center" gap={1}>
@@ -212,90 +221,69 @@ const AutomationBuilder = ({ open, onClose, automation = null, onSave, onDelete,
       <DialogContent sx={{ p: 0 }}>
         {error && <Alert severity="error" sx={{ m: 3, mb: 0, borderRadius: 0, border: '1px solid' }}>{error}</Alert>}
         <Box display="flex" flexDirection="column" gap={2.5} sx={{ p: 3 }}>
-          <TextField label={`${t('form.name')} *`} value={formData.name} onChange={(e) => handleChange('name', e.target.value)} fullWidth required sx={inputSx} />
-
-          <FormControlLabel 
-            control={<Switch checked={formData.isActive} onChange={(e) => handleChange('isActive', e.target.checked)} sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#4caf50' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#4caf50' } }} />} 
-            label={<Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', color: formData.isActive ? '#4caf50' : '#888' }}>{formData.isActive ? t('active') : t('inactive')}</Typography>} 
-          />
+          
+          {/* ✅ ID: Nombre y Estado */}
+          <Box id="automation-builder-name" display="flex" flexDirection="column" gap={1}>
+            <TextField label={`${t('form.name')} *`} value={formData.name} onChange={(e) => handleChange('name', e.target.value)} fullWidth required sx={inputSx} />
+            <FormControlLabel 
+              control={<Switch checked={formData.isActive} onChange={(e) => handleChange('isActive', e.target.checked)} sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#4caf50' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#4caf50' } }} />} 
+              label={<Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', color: formData.isActive ? '#4caf50' : '#888' }}>{formData.isActive ? t('active') : t('inactive')}</Typography>} 
+            />
+          </Box>
           <Divider />
 
-          <Box>
+          {/* ✅ ID: Trigger */}
+          <Box id="automation-builder-trigger">
             <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#888', letterSpacing: '1px', textTransform: 'uppercase', mb: 1 }}>{t('form.trigger')} *</Typography>
             <FormControl size="small" fullWidth required>
               <Select value={formData.trigger} onChange={(e) => handleChange('trigger', e.target.value)} sx={{ ...inputSx, width: '100%' }}>
                 {TRIGGERS.map(trigger => (
                   <MenuItem key={trigger.value} value={trigger.value} sx={menuItemSx}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography>{trigger.icon}</Typography>
-                      {t(`triggers.${trigger.value}`)}
-                    </Box>
+                    <Box display="flex" alignItems="center" gap={1}><Typography>{trigger.icon}</Typography>{t(`triggers.${trigger.value}`)}</Box>
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
           </Box>
 
-          <Box>
+          {/* ✅ ID: Condiciones */}
+          <Box id="automation-builder-conditions">
             <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#888', letterSpacing: '1px', textTransform: 'uppercase', mb: 1 }}>{t('conditions')}</Typography>
             <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
               {formData.trigger === 'lead_stage_changed' && (
                 <FormControl size="small" fullWidth>
                   <InputLabel>{t('conditions.specificStage')}</InputLabel>
                   <Select value={formData.condition.stage} onChange={(e) => handleConditionChange('stage', e.target.value)} label={t('conditions.specificStage')} sx={{ ...inputSx, width: '100%' }}>
-                    {STAGES.map(stage => (
-                      <MenuItem key={stage.value} value={stage.value} sx={menuItemSx}>
-                        {t(stage.labelKey)}
-                      </MenuItem>
-                    ))}
+                    {STAGES.map(stage => <MenuItem key={stage.value} value={stage.value} sx={menuItemSx}>{t(stage.labelKey)}</MenuItem>)}
                   </Select>
                 </FormControl>
               )}
-
-
               {formData.trigger === 'inactivity_7days' && (
-                <TextField 
-                  label={t('conditions.daysOfInactivity')} 
-                  type="number" 
-                  value={formData.condition.daysInactive} 
-                  onChange={(e) => handleConditionChange('daysInactive', parseInt(e.target.value) || 7)} 
-                  fullWidth 
-                  inputProps={{ min: 1 }} 
-                  sx={inputSx} 
-                />
+                <TextField label={t('conditions.daysOfInactivity')} type="number" value={formData.condition.daysInactive} onChange={(e) => handleConditionChange('daysInactive', parseInt(e.target.value) || 7)} fullWidth inputProps={{ min: 1 }} sx={inputSx} />
               )}
             </Box>
-              <Box sx={{ flex: 1, mt:2 }}>
-                <ProjectSelector
-                  value={formData.condition.projectId}
-                  onChange={(value) => handleConditionChange('projectId', value)}
-                  label={t('conditions.specificProject')}
-                  includeGlobal={true}
-                  globalLabel={t('conditions.anyProject')}
-                  fullWidth
-                  size="small"
-                />
-              </Box>
+            <Box sx={{ flex: 1, mt: 2 }}>
+              <ProjectSelector value={formData.condition.projectId} onChange={(value) => handleConditionChange('projectId', value)} label={t('conditions.specificProject')} includeGlobal={true} globalLabel={t('conditions.anyProject')} fullWidth size="small" />
+            </Box>
           </Box>
 
           <Divider />
 
-          <Box>
+          {/* ✅ ID: Acción */}
+          <Box id="automation-builder-action">
             <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#888', letterSpacing: '1px', textTransform: 'uppercase', mb: 1 }}>{t('form.action')} *</Typography>
             <FormControl size="small" fullWidth required>
               <Select value={formData.action} onChange={(e) => handleChange('action', e.target.value)} sx={{ ...inputSx, width: '100%' }}>
                 {ACTIONS.map(action => (
                   <MenuItem key={action.value} value={action.value} sx={menuItemSx}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography>{action.icon}</Typography>
-                      {t(`actions.${action.value}`)}
-                    </Box>
+                    <Box display="flex" alignItems="center" gap={1}><Typography>{action.icon}</Typography>{t(`actions.${action.value}`)}</Box>
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
           </Box>
 
+          {/* ✅ ID: Configuración de la Acción */}
           <Box>
             <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#888', letterSpacing: '1px', textTransform: 'uppercase', mb: 1 }}>{t('actionConfig.template')}</Typography>
             <Box display="flex" flexDirection="column" gap={2}>
@@ -432,9 +420,11 @@ const AutomationBuilder = ({ open, onClose, automation = null, onSave, onDelete,
             </Box>
           </Box>
         </Box>
+        
       </DialogContent>
 
-      <DialogActions sx={{ borderTop: '1px solid #ececec', p: 2, gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
+      {/* ✅ ID: Acciones del Modal */}
+      <DialogActions id="automation-builder-actions" sx={{ borderTop: '1px solid #ececec', p: 2, gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
         {isEditing && (<>
           <Button onClick={handleTest} disabled={loading} startIcon={<PlayArrow />} sx={{ ...unifiedButtonSx, color: '#2196f3' }}>{t('test')}</Button>
           <Button onClick={handleDelete} disabled={loading} sx={{ ...unifiedButtonSx, color: '#d32f2f' }}>{t('delete')}</Button>

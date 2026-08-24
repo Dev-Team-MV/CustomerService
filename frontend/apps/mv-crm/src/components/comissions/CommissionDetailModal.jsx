@@ -88,7 +88,15 @@ const CommissionDetailModal = ({ open, onClose, commission, onRefresh, actionTyp
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
+    // ✅ ID 1: Para que el tour resalte todo el modal
+    <Dialog 
+      id="commission-detail-modal" 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth 
+      PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}
+    >
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ececec' }}>
         <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.85rem' }}>
           {isEditing ? t('detail.editTitle', 'Editar Comisión') : isDisputing ? t('detail.disputeTitle', 'Disputar Comisión') : t('detail.title', 'Detalle de Comisión')}
@@ -99,7 +107,8 @@ const CommissionDetailModal = ({ open, onClose, commission, onRefresh, actionTyp
       <DialogContent dividers>
         {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid' }}>{error}</Alert>}
         
-        <Box display="flex" flexDirection="column" gap={2}>
+        {/* ✅ ID 2: Para que el tour explique la información general de la comisión */}
+        <Box id="commission-detail-overview" display="flex" flexDirection="column" gap={2}>
           {!isEditing && !isDisputing && (
             <>
               <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -178,7 +187,8 @@ const CommissionDetailModal = ({ open, onClose, commission, onRefresh, actionTyp
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, gap: 1, borderTop: '1px solid #ececec' }}>
+      {/* ✅ ID 3: Para que el tour explique los botones de acción (Aprobar, Pagar, Cerrar, etc.) */}
+      <DialogActions id="commission-detail-actions" sx={{ p: 2, gap: 1, borderTop: '1px solid #ececec' }}>
         <Button onClick={onClose} disabled={loading} sx={{ ...unifiedButtonSx, color: '#888' }}>
           {t('actions.close', 'Cerrar')}
         </Button>

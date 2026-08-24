@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/activities/ActivityCard.jsx
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Chip, Avatar, IconButton, Tooltip } from '@mui/material'
 import { AccessTime, Person, MoreVert, Business, SubdirectoryArrowRight } from '@mui/icons-material'
@@ -39,20 +38,19 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
 
   return (
     <Box
+      // ✅ 1. Atributo de datos para que el tour encuentre la primera tarjeta disponible
+      data-tour-activity-card="true"
       onClick={() => onClick?.(activity)}
       sx={{
         bgcolor: 'white',
-        borderRadius: 0, // ✅ Estética unificada
+        borderRadius: 0,
         p: 2,
         cursor: 'pointer',
         border: '1px solid #e0e0e0',
-        // La sombra y rotación se manejan mejor en el wrapper Draggable, 
-        // pero mantenemos un hover sutil aquí
         '&:hover': {
           boxShadow: '4px 4px 0px rgba(0,0,0,0.08)',
           borderColor: '#000'
         },
-        // Prevenir comportamientos de texto al arrastrar en móvil
         userSelect: 'none',
         touchAction: 'none' 
       }}
@@ -77,7 +75,10 @@ const ActivityCard = ({ activity, onClick, onMenuClick, isDragging }) => {
             <Chip label={`+${activity.tags.length - 2}`} size="small" sx={{ fontSize: '0.65rem', height: 20, bgcolor: '#e0e0e0', borderRadius: 0 }} />
           )}
         </Box>
+        
+        {/* ✅ 2. ID específico para que el tour haga clic en "Ver Detalles" */}
         <IconButton 
+          id="activities-action-view"
           size="small" 
           onClick={(e) => { e.stopPropagation(); onMenuClick?.(e, activity) }}
           sx={{ mt: -0.5, mr: -0.5, borderRadius: 0 }}

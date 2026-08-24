@@ -13,6 +13,7 @@ export const getMessageTemplatesColumns = (t, onEdit, onDelete) => [
     headerName: t('sms.templates.columns.name', 'Name'),
     flex: 1,
     minWidth: 200,
+    tourId: 'message-templates-col-name', // ✅ ID para el tour
     renderCell: (params) => (
       <Box>
         <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
@@ -40,6 +41,7 @@ export const getMessageTemplatesColumns = (t, onEdit, onDelete) => [
     field: 'project',
     headerName: t('sms.templates.columns.project', 'Project'),
     minWidth: 150,
+    tourId: 'message-templates-col-project', // ✅ ID para el tour
     renderCell: (params) => {
       const isGlobal = !params.row.projectId
       const projectName = isGlobal 
@@ -65,6 +67,7 @@ export const getMessageTemplatesColumns = (t, onEdit, onDelete) => [
     headerName: t('sms.templates.columns.content', 'Content'),
     flex: 1.5,
     minWidth: 250,
+    tourId: 'message-templates-col-content', // ✅ ID para el tour
     renderCell: (params) => (
       <Typography 
         variant="body2" 
@@ -86,6 +89,7 @@ export const getMessageTemplatesColumns = (t, onEdit, onDelete) => [
     field: 'placeholders',
     headerName: t('sms.templates.columns.variables', 'Variables'),
     minWidth: 180,
+    tourId: 'message-templates-col-variables', // ✅ ID para el tour
     renderCell: (params) => (
       <Box display="flex" gap={0.5} flexWrap="wrap">
         {params.row.placeholders && params.row.placeholders.length > 0 ? (
@@ -121,6 +125,7 @@ export const getMessageTemplatesColumns = (t, onEdit, onDelete) => [
     field: 'isActive',
     headerName: t('sms.templates.columns.status', 'Status'),
     minWidth: 100,
+    tourId: 'message-templates-col-status', // ✅ ID para el tour
     renderCell: (params) => (
       <Chip
         label={params.row.isActive ? t('sms.templates.active', 'Active') : t('sms.templates.inactive', 'Inactive')}
@@ -143,11 +148,13 @@ export const getMessageTemplatesColumns = (t, onEdit, onDelete) => [
     width: 120,
     sortable: false,
     filterable: false,
+    tourId: 'message-templates-col-actions', // ✅ ID para el tour
     renderCell: (params) => (
       <Box display="flex" gap={0.5}>
         <Tooltip title={t('sms.actions.edit', 'Edit')}>
           <IconButton 
             size="small"
+            data-tour-edit-btn="true"
             onClick={() => onEdit(params.row)}
             sx={{ borderRadius: 0, '&:hover': { bgcolor: '#f5f5f5' } }}
           >

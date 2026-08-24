@@ -1,101 +1,190 @@
 {
-    "welcomeUser": "Bienvenido, {{name}}",
-    "overviewSubtitle": "Resumen de Tu Panel",
-    "propertyMap": "Mapa de Propiedades",
-    "title": "6 Town Houses",
-    "titleMV":"Todos",
-    "subtitle": "Panel de Control",
-    "quickActions": {
+  "welcomeUser": "Bienvenido, {{name}}",
+  "overviewSubtitle": "Resumen de Tu Panel",
+  "propertyMap": "Mapa de Propiedades",
+  "title": "6 Town Houses",
+  "titleMV": "Todos",
+  "subtitle": "Panel de Control",
+  "quickActions": {
+    "title": "Acciones Rápidas",
+    "subtitle": "Gestiona tu proyecto",
+    "newQuote": "Nueva Cotización",
+    "newQuoteDesc": "Crear cotización para cliente",
+    "viewProperties": "Ver Propiedades",
+    "viewPropertiesDesc": "Gestionar inventario",
+    "clients": "Clientes",
+    "clientsDesc": "Administrar clientes",
+    "news": "Noticias",
+    "newsDesc": "Ver noticias",
+    "addProperty": "Agregar Propiedad",
+    "addPropertyDesc": "Crear nueva propiedad",
+    "inviteUser": "Invitar Usuario",
+    "inviteUserDesc": "Enviar invitación",
+    "analytics": "Analíticas",
+    "analyticsDesc": "Ver reportes",
+    "models": "Modelos",
+    "modelsDesc": "Explorar diseños",
+    "amenities": "Amenidades",
+    "amenitiesDesc": "Ver instalaciones",
+    "manageNews": "Gestionar Noticias",
+    "manageNewsDesc": "Últimas novedades",
+    "clubHouse": "Club House",
+    "clubHouseDesc": "Ver club house",
+    "newsFeed": "Noticias",
+    "newsFeedDesc": "Últimas novedades",
+    "referrals": "Referidos",
+    "referralsDesc": "Gestionar referidos",
+    "addClient": "Agregar Cliente"
+  },
+  "masterPlan": {
+    "title": "Vista del Proyecto",
+    "loading": "Cargando master plan...",
+    "noImage": "Master Plan del Proyecto",
+    "noImageDesc": "No hay imagen de master plan configurada"
+  },
+  "recentQuotes": {
+    "title": "Cotizaciones Recientes",
+    "noQuotes": "No hay cotizaciones recientes",
+    "customer": "Cliente",
+    "property": "Propiedad",
+    "date": "Fecha",
+    "pending": "Pendiente",
+    "completed": "Completado"
+  },
+  "stats": {
+    "lotsListedSold": "Lotes Listados / Vendidos",
+    "monthlyRevenue": "Ingresos Mensuales",
+    "lotsOnHold": "Lotes en Espera",
+    "occupancyRate": "Tasa de Ocupación",
+    "thisMonth": "este mes",
+    "noChangeThisMonth": "Sin cambios este mes",
+    "vsLastMonth": "vs mes anterior",
+    "noChangeVsLastMonth": "Sin cambios vs mes anterior",
+    "ofTotalInventory": "del inventario total",
+    "ofSold": "{{sold}} de {{total}} vendidos"
+  },
+  "recentPayloads": {
+    "title": "Pagos Recientes",
+    "noPayloads": "No se encontraron pagos recientes",
+    "lot": "Lote {{number}}"
+  },
+  "titleBold": "Los Proyectos",
+  "topbarLabel": "Todos los Proyectos — Monitoreo en tiempo real",
+  "sidebarStats": {
+    "projects": "Proyectos",
+    "users": "Usuarios",
+    "clients": "Clientes"
+  },
+  "createProject": "Crear Proyecto",
+  "selectProject": "Selecciona un proyecto",
+  "openDashboard": "Abrir Dashboard del Proyecto",
+  "metrics": {
+    "users": "Usuarios",
+    "revenue": "Ingresos",
+    "growth": "Crecimiento",
+    "tasks": "Tareas",
+    "performance": "Desempeño",
+    "totalUsers": "Usuarios Totales",
+    "monthlyRecurring": "Ingresos mensuales",
+    "thisMonth": "+{{growth}}% este mes",
+    "complete": "{{percent}}% Completado",
+    "totalClients": "Total Clientes",
+    "registeredOwners": "Propietarios registrados",
+    "totalCollected": "Recaudado",
+    "totalPending": "Pendiente",
+    "phase": "Fase",
+    "clients": "clientes"
+  },
+  "empty": "Selecciona un proyecto para ver detalles",
+  "titleISQL": "ISQL Dashboard",
+  "subtitleISQ": "Bienvenido al sistema ISQ",
+  "tour": {
+    "dashboard": {
+      "button": "Ver guía del dashboard",
+      "welcome": {
+        "title": "Bienvenido al Dashboard",
+        "description": "Esta es tu vista central. Desde aquí gestionas todos los proyectos, clientes y métricas financieras. Te guiaré por las secciones principales."
+      },
+      "sidebar": {
+        "title": "Menú de Navegación",
+        "description": "Accede a todos los módulos del CRM: Clientes, Proyectos, Ventas, Campañas, Automatizaciones y más."
+      },
+      "topbar": {
+        "language": {
+          "title": "Cambio de Idioma",
+          "description": "Cambia entre Español e Inglés para toda la interfaz del CRM. Esta configuración se guarda en tu sesión."
+        },
+        "search": {
+          "title": "Búsqueda Global",
+          "description": "Busca clientes, proyectos, leads y más desde cualquier parte del sistema. Atajo: ⌘K o Ctrl+K."
+        },
+        "notificationCreator": {
+          "title": "Crear Notificación",
+          "description": "Envía notificaciones personalizadas a usuarios específicos o grupos. Solo disponible para administradores."
+        },
+        "notificationBell": {
+          "title": "Centro de Notificaciones",
+          "description": "Revisa alertas del sistema, pagos vencidos, actividades próximas y mensajes. El badge rojo indica notificaciones sin leer."
+        },
+        "clock": {
+          "title": "Hora del Sistema",
+          "description": "Muestra la hora actual en tiempo real. Útil para coordinar actividades y citas con clientes."
+        }
+      },
+      "quickActions": {
         "title": "Acciones Rápidas",
-        "subtitle": "Gestiona tu proyecto",
-        "newQuote": "Nueva Cotización",
-        "newQuoteDesc": "Crear cotización para cliente",
-        "viewProperties": "Ver Propiedades",
-        "viewPropertiesDesc": "Gestionar inventario",
-        "clients": "Clientes",
-        "clientsDesc": "Administrar clientes",
-        "news": "Noticias",
-        "newsDesc": "Ver noticias",
-        "addProperty": "Agregar Propiedad",
-        "addPropertyDesc": "Crear nueva propiedad",
-        "inviteUser": "Invitar Usuario",
-        "inviteUserDesc": "Enviar invitación",
-        "analytics": "Analíticas",
-        "analyticsDesc": "Ver reportes",
-        "models": "Modelos",
-        "modelsDesc": "Explorar diseños",
-        "amenities": "Amenidades",
-        "amenitiesDesc": "Ver instalaciones",
-        "manageNews": "Gestionar Noticias",
-        "manageNewsDesc": "Últimas novedades",
-        "clubHouse": "Club House",
-        "clubHouseDesc": "Ver club house",
-        "newsFeed": "Noticias",
-        "newsFeedDesc": "Últimas novedades",
-        "referrals": "Referidos",
-        "referralsDesc": "Gestionar referidos",
-        "addClient": "Agregar Cliente"
-    },
-    "masterPlan": {
-        "title": "Vista del Proyecto",
-        "loading": "Cargando master plan...",
-        "noImage": "Master Plan del Proyecto",
-        "noImageDesc": "No hay imagen de master plan configurada"
-    },
-    "recentQuotes": {
-        "title": "Cotizaciones Recientes",
-        "noQuotes": "No hay cotizaciones recientes",
-        "customer": "Cliente",
-        "property": "Propiedad",
-        "date": "Fecha",
-        "pending": "Pendiente",
-        "completed": "Completado"
-    },
-    "stats": {
-        "lotsListedSold": "Lotes Listados / Vendidos",
-        "monthlyRevenue": "Ingresos Mensuales",
-        "lotsOnHold": "Lotes en Espera",
-        "occupancyRate": "Tasa de Ocupación",
-        "thisMonth": "este mes",
-        "noChangeThisMonth": "Sin cambios este mes",
-        "vsLastMonth": "vs mes anterior",
-        "noChangeVsLastMonth": "Sin cambios vs mes anterior",
-        "ofTotalInventory": "del inventario total",
-        "ofSold": "{{sold}} de {{total}} vendidos"
-    },
-    "recentPayloads": {
-        "title": "Pagos Recientes",
-        "noPayloads": "No se encontraron pagos recientes",
-        "lot": "Lote {{number}}"
-    },
-    "titleBold": "Los Proyectos",
-    "topbarLabel": "Todos los Proyectos — Monitoreo en tiempo real",
-    "sidebarStats": {
-        "projects": "Proyectos",
-        "users": "Usuarios",
-        "clients": "Clientes"
-    },
-    "createProject": "Crear Proyecto",
-    "selectProject": "Selecciona un proyecto",
-    "openDashboard": "Abrir Dashboard del Proyecto",
-    "metrics": {
-        "users": "Usuarios",
-        "revenue": "Ingresos",
-        "growth": "Crecimiento",
-        "tasks": "Tareas",
-        "performance": "Desempeño",
-        "totalUsers": "Usuarios Totales",
-        "monthlyRecurring": "Ingresos mensuales",
-        "thisMonth": "+{{growth}}% este mes",
-        "complete": "{{percent}}% Completado",
-        "totalClients": "Total Clientes",
-        "registeredOwners": "Propietarios registrados",
-        "totalCollected": "Recaudado",
-        "totalPending": "Pendiente",
-        "phase": "Fase",
-        "clients": "clientes"
-    },
-    "empty": "Selecciona un proyecto para ver detalles",
-    "titleISQL": "ISQL Dashboard",
-    "subtitleISQ": "Bienvenido al sistema ISQ"
+        "description": "Los dos botones más usados del CRM: crear un nuevo proyecto inmobiliario o registrar un nuevo cliente/residente."
+      },
+      "createProject": {
+        "title": "Crear Proyecto",
+        "description": "Abre el asistente para registrar un nuevo proyecto con toda su información, multimedia y configuración de variables."
+      },
+      "addClient": {
+        "title": "Agregar Cliente",
+        "description": "Registra un nuevo residente. Se le enviará una invitación por SMS con instrucciones para configurar su acceso."
+      },
+      "statsStrip": {
+        "title": "Indicadores Globales",
+        "description": "Vista consolidada de todo tu portafolio: total de proyectos, clientes, monto recaudado y pendiente."
+      },
+      "projectList": {
+        "title": "Lista de Proyectos",
+        "description": "Todos tus proyectos con su contador de clientes. Haz clic en cualquiera para ver sus métricas detalladas."
+      },
+      "projectCard": {
+        "title": "Tarjeta de Proyecto",
+        "description": "Muestra el nombre del proyecto y cuántos clientes tiene registrados. Al seleccionarla, se cargan los detalles a la derecha."
+      },
+      "projectDetail": {
+        "title": "Detalle del Proyecto",
+        "description": "Aquí ves las métricas específicas del proyecto seleccionado: clientes, monto recaudado, pendiente y estado actual."
+      },
+      "metrics": {
+        "clients": {
+          "title": "Clientes del Proyecto",
+          "description": "Número de propietarios registrados en este proyecto específico."
+        },
+        "collected": {
+          "title": "Monto Recaudado",
+          "description": "Total de dinero efectivamente cobrado de este proyecto. Un indicador clave de flujo de caja."
+        },
+        "pending": {
+          "title": "Monto Pendiente",
+          "description": "Total por cobrar. Un número alto puede indicar la necesidad de activar campañas de cobranza."
+        },
+        "phase": {
+          "title": "Fase y Estado",
+          "description": "Indica en qué fase de construcción está el proyecto y si se encuentra activo o inactivo."
+        }
+      },
+      "openProject": {
+        "title": "Abrir Portal del Proyecto",
+        "description": "Abre en una nueva pestaña el portal público del proyecto, donde los residentes pueden ver sus propiedades, documentos y pagar sus cuotas."
+      },
+      "finish": {
+        "title": "¡Listo!",
+        "description": "Ya conoces el Dashboard. Cada módulo tiene su propio tour guiado. ¡Explora el CRM con confianza!"
+      }
+    }
+  }
 }

@@ -1,4 +1,9 @@
 {
+
+    "legend": {
+    "statuses": "Statuses",
+    "types": "Types"
+  },
   "title": "Calendar",
   "titleBold": "CRM",
   "topbarLabel": "Appointment management",

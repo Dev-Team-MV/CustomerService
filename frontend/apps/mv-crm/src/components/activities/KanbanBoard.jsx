@@ -89,6 +89,7 @@ const KanbanBoard = ({
     // ✅ Wrap principal con DragDropContext
     <DragDropContext onDragEnd={handleDragEnd}>
       <Box 
+      id="activities-kanban-board"
         sx={{ 
           display: 'flex', 
           gap: 2, 

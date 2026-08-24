@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/leads/LeadDetails.jsx
 import { useTranslation } from 'react-i18next'
 import {
   Drawer, Box, Typography, IconButton, Chip, Avatar, Divider, Button, Paper, Alert
@@ -31,7 +30,8 @@ const LeadDetails = ({ lead, open, onClose, onEdit, onDelete, onConvert, stages 
   const isLost = stageKey === 'perdido'
 
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', sm: 450 }, p: 0, display: 'flex', flexDirection: 'column' } }}>
+    // ✅ ID: Drawer principal
+    <Drawer id="lead-details-drawer" anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', sm: 450 }, p: 0, display: 'flex', flexDirection: 'column' } }}>
       <Box sx={{ p: 2, bgcolor: stageColor, color: 'white', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
         <Box sx={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, bgcolor: 'rgba(255, 255, 255, 0.1)', borderRadius: '50%', filter: 'blur(40px)' }} />
         <Box display="flex" justifyContent="space-between" alignItems="flex-start" position="relative" zIndex={1}>
@@ -39,7 +39,10 @@ const LeadDetails = ({ lead, open, onClose, onEdit, onDelete, onConvert, stages 
             <Chip label={stageName} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', mb: 1, fontWeight: 600, backdropFilter: 'blur(10px)' }} />
             <Typography variant="h6" fontWeight={700} sx={{ wordBreak: 'break-word' }}>{lead.name}</Typography>
           </Box>
-          <IconButton onClick={onClose} sx={{ color: 'white', flexShrink: 0, bgcolor: 'rgba(255,255,255,0.15)', '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' } }}><Close /></IconButton>
+          {/* ✅ ID: Botón de cerrar */}
+          <IconButton id="lead-details-close-btn" onClick={onClose} sx={{ color: 'white', flexShrink: 0, bgcolor: 'rgba(255,255,255,0.15)', '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' } }}>
+            <Close />
+          </IconButton>
         </Box>
       </Box>
 
@@ -55,7 +58,8 @@ const LeadDetails = ({ lead, open, onClose, onEdit, onDelete, onConvert, stages 
           {lead.source && <Chip icon={<Source sx={{ fontSize: 14 }} />} label={t(`source.${lead.source}`) || lead.source} variant="outlined" />}
         </Box>
 
-        <Box mb={3}>
+        {/* ✅ ID: Sección de Información de Contacto */}
+        <Box mb={3} id="lead-details-contact">
           <Typography variant="subtitle2" fontWeight={600} mb={1.5}>{t('details.contactInfo')}</Typography>
           <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
             <Box display="flex" flexDirection="column" gap={1.5}>
@@ -144,7 +148,8 @@ const LeadDetails = ({ lead, open, onClose, onEdit, onDelete, onConvert, stages 
       <Box sx={{ p: 2, borderTop: '1px solid #e0e0e0', flexShrink: 0, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
         <Button variant="outlined" startIcon={<Edit />} onClick={() => onEdit?.(lead)} sx={{ flex: 1 }} size="small">{t('edit')}</Button>
         {!isLost && (
-          <Button variant="contained" color="success" startIcon={<CheckCircle />} onClick={() => onConvert?.(lead)} sx={{ flex: 1 }} size="small">{t('convert')}</Button>
+          // ✅ ID: Botón de Convertir
+          <Button id="lead-details-convert-btn" variant="contained" color="success" startIcon={<CheckCircle />} onClick={() => onConvert?.(lead)} sx={{ flex: 1 }} size="small">{t('convert')}</Button>
         )}
         <Button variant="outlined" color="error" startIcon={<Delete />} onClick={() => { if (window.confirm(t('deleteConfirm'))) { onDelete?.(lead._id); onClose() } }} size="small"><Delete /></Button>
       </Box>

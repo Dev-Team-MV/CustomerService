@@ -1,11 +1,11 @@
-import { Box, Typography, Avatar, IconButton, Tooltip, Chip, CircularProgress } from '@mui/material'
+import { Box, Typography, Avatar, IconButton, Tooltip, CircularProgress } from '@mui/material'
 import { Edit, Delete, Sms, CheckCircle, Cancel } from '@mui/icons-material'
 
 const ROLE_STYLES = {
-  superadmin: { bg: '#000',    color: '#fff' },
-  admin:      { bg: '#1a1a1a', color: '#fff' },
-  user:       { bg: '#f0f0f0', color: '#555' },
-  default:    { bg: '#f5f5f5', color: '#888' },
+  superadmin: { bg: '#000', color: '#fff' },
+  admin: { bg: '#1a1a1a', color: '#fff' },
+  user: { bg: '#f0f0f0', color: '#555' },
+  default: { bg: '#f5f5f5', color: '#888' },
 }
 
 const formatPhoneDisplay = (e164) => {
@@ -20,15 +20,12 @@ const formatPhoneDisplay = (e164) => {
   return `+${digits}`
 }
 
-export const useClientColumns = ({
-  t,
-  sendingSMS,
-  onEdit,
-  onDelete,
-  onSendSMS,
-}) => [
+export const useClientColumns = ({ t, sendingSMS, onEdit, onDelete, onSendSMS }) => [
   {
-    field: 'name', headerName: t('clients.client'), minWidth: 220,
+    field: 'name', 
+    headerName: t('clients.client'), 
+    minWidth: 220,
+    tourId: 'clients-col-name', // ✅
     renderCell: ({ row }) => (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Avatar sx={{ width: 34, height: 34, bgcolor: '#000', borderRadius: 0, fontSize: '0.65rem', fontWeight: 700, fontFamily: '"Courier New", monospace', flexShrink: 0 }}>
@@ -46,7 +43,10 @@ export const useClientColumns = ({
     )
   },
   {
-    field: 'phoneNumber', headerName: t('clients.phone'), minWidth: 160,
+    field: 'phoneNumber', 
+    headerName: t('clients.phone'), 
+    minWidth: 160,
+    tourId: 'clients-col-phone', // ✅
     renderCell: ({ row }) => (
       <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.78rem', color: row.phoneNumber ? '#444' : '#ccc', letterSpacing: '0.5px' }}>
         {formatPhoneDisplay(row.phoneNumber) || '—'}  
@@ -54,7 +54,10 @@ export const useClientColumns = ({
     )
   },
   {
-    field: 'role', headerName: t('clients.role'), minWidth: 130,
+    field: 'role', 
+    headerName: t('clients.role'), 
+    minWidth: 130,
+    tourId: 'clients-col-role', // ✅
     renderCell: ({ row }) => {
       const style = ROLE_STYLES[row.role] || ROLE_STYLES.default
       return (
@@ -67,60 +70,40 @@ export const useClientColumns = ({
     }
   },
   {
-  field: 'projects', headerName: t('clients.projects'), minWidth: 140,
-  renderCell: ({ row }) => {
-    const projects = row.projects || []
-    if (projects.length === 0) {
-      return <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#ccc' }}>—</Typography>
+    field: 'projects', 
+    headerName: t('clients.projects'), 
+    minWidth: 140,
+    tourId: 'clients-col-projects', // ✅
+    renderCell: ({ row }) => {
+      const projects = row.projects || []
+      if (projects.length === 0) {
+        return <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#ccc' }}>—</Typography>
+      }
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {projects.slice(0, 4).map((project, idx) => (
+            <Tooltip key={project._id || idx} title={project.name} placement="top">
+              <Avatar sx={{ width: 24, height: 24, fontSize: '0.55rem', fontWeight: 700, fontFamily: '"Courier New", monospace', bgcolor: '#1a1a1a', color: '#fff', borderRadius: 0, ml: idx > 0 ? -0.5 : 0, border: '1px solid #fff', cursor: 'default' }}>
+                {project.name?.substring(0, 2).toUpperCase()}
+              </Avatar>
+            </Tooltip>
+          ))}
+          {projects.length > 4 && (
+            <Tooltip title={projects.slice(4).map(p => p.name).join(', ')} placement="top">
+              <Avatar sx={{ width: 24, height: 24, fontSize: '0.5rem', fontWeight: 700, bgcolor: '#666', color: '#fff', borderRadius: 0, ml: -0.5, border: '1px solid #fff' }}>
+                +{projects.length - 4}
+              </Avatar>
+            </Tooltip>
+          )}
+        </Box>
+      )
     }
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        {projects.slice(0, 4).map((project, idx) => (
-          <Tooltip key={project._id || idx} title={project.name} placement="top">
-            <Avatar
-              sx={{
-                width: 24,
-                height: 24,
-                fontSize: '0.55rem',
-                fontWeight: 700,
-                fontFamily: '"Courier New", monospace',
-                bgcolor: '#1a1a1a',
-                color: '#fff',
-                borderRadius: 0,
-                ml: idx > 0 ? -0.5 : 0,
-                border: '1px solid #fff',
-                cursor: 'default'
-              }}
-            >
-              {project.name?.substring(0, 2).toUpperCase()}
-            </Avatar>
-          </Tooltip>
-        ))}
-        {projects.length > 4 && (
-          <Tooltip title={projects.slice(4).map(p => p.name).join(', ')} placement="top">
-            <Avatar
-              sx={{
-                width: 24,
-                height: 24,
-                fontSize: '0.5rem',
-                fontWeight: 700,
-                bgcolor: '#666',
-                color: '#fff',
-                borderRadius: 0,
-                ml: -0.5,
-                border: '1px solid #fff'
-              }}
-            >
-              +{projects.length - 4}
-            </Avatar>
-          </Tooltip>
-        )}
-      </Box>
-    )
-  }
-},
+  },
   {
-    field: 'lots', headerName: t('clients.lots'), minWidth: 110,
+    field: 'lots', 
+    headerName: t('clients.lots'), 
+    minWidth: 110,
+    tourId: 'clients-col-lots', // ✅
     renderCell: ({ row }) => (
       <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.78rem', color: '#666' }}>
         {row.lots?.length > 0 ? `${row.lots.length} ${t('clients.assigned')}` : '—'}
@@ -128,7 +111,10 @@ export const useClientColumns = ({
     )
   },
   {
-    field: 'isActive', headerName: t('clients.status'), minWidth: 110,
+    field: 'isActive', 
+    headerName: t('clients.status'), 
+    minWidth: 110,
+    tourId: 'clients-col-status', // ✅
     renderCell: ({ row }) => (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
         {row.isActive ? <CheckCircle sx={{ fontSize: 13, color: '#000' }} /> : <Cancel sx={{ fontSize: 13, color: '#ccc' }} />}
@@ -139,7 +125,10 @@ export const useClientColumns = ({
     )
   },
   {
-    field: 'createdAt', headerName: t('clients.joined'), minWidth: 130,
+    field: 'createdAt', 
+    headerName: t('clients.joined'), 
+    minWidth: 130,
+    tourId: 'clients-col-joined', // ✅
     renderCell: ({ row }) => (
       <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#999', letterSpacing: '0.5px' }}>
         {row.createdAt ? new Date(row.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }) : '—'}
@@ -147,52 +136,54 @@ export const useClientColumns = ({
     )
   },
   {
-    field: 'actions', headerName: t('clients.actions'), minWidth: 80, align: 'center',
-    renderCell: ({ row }) => (
-      <Box sx={{ display: 'flex', gap: 0.5 }}>
-        {/* SMS */}
-        <Tooltip title={t('clients.sendSMS')} placement="top">
-          <span>
+    field: 'actions', 
+    headerName: t('clients.actions'), 
+    minWidth: 80, 
+    align: 'center',
+    tourId: 'clients-col-actions', // ✅ Header de acciones
+    renderCell: ({ row, rowId, isFirstRow }) => { // ✅ Recibimos isFirstRow
+      // ✅ Generamos IDs únicos solo para la primera fila para que el tour los encuentre
+      const idPrefix = isFirstRow ? 'clients-action-first-' : ''
+      
+      return (
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <Tooltip title={t('clients.sendSMS')} placement="top">
+            <span>
+              <IconButton
+                id={`${idPrefix}sms`}
+                size="small"
+                disabled={sendingSMS}
+                onClick={(e) => { e.stopPropagation(); onSendSMS(row) }}
+                sx={{ color: '#aaa', borderRadius: 0, '&:hover': { color: '#4a7c59', background: '#f0f4f0' }, '&:disabled': { opacity: 0.4 } }}
+              >
+                {sendingSMS ? <CircularProgress size={14} sx={{ color: '#4a7c59' }} /> : <Sms sx={{ fontSize: 15 }} />}
+              </IconButton>
+            </span>
+          </Tooltip>
+
+          <Tooltip title={t('clients.edit')}>
             <IconButton
+              id={`${idPrefix}edit`}
               size="small"
-              disabled={sendingSMS}
-              onClick={(e) => { e.stopPropagation(); onSendSMS(row) }}
-              sx={{
-                color: '#aaa', borderRadius: 0,
-                '&:hover': { color: '#4a7c59', background: '#f0f4f0' },
-                '&:disabled': { opacity: 0.4 }
-              }}
+              onClick={(e) => { e.stopPropagation(); onEdit(row) }}
+              sx={{ color: '#aaa', borderRadius: 0, '&:hover': { color: '#000', background: '#f5f5f5' } }}
             >
-              {sendingSMS
-                ? <CircularProgress size={14} sx={{ color: '#4a7c59' }} />
-                : <Sms sx={{ fontSize: 15 }} />
-              }
+              <Edit sx={{ fontSize: 15 }} />
             </IconButton>
-          </span>
-        </Tooltip>
+          </Tooltip>
 
-        {/* Edit - ✅ AGREGAR e.stopPropagation() */}
-        <Tooltip title={t('clients.edit')}>
-          <IconButton
-            size="small"
-            onClick={(e) => { e.stopPropagation(); onEdit(row) }}
-            sx={{ color: '#aaa', borderRadius: 0, '&:hover': { color: '#000', background: '#f5f5f5' } }}
-          >
-            <Edit sx={{ fontSize: 15 }} />
-          </IconButton>
-        </Tooltip>
-
-        {/* Delete */}
-        <Tooltip title={t('clients.delete')} placement="left">
-          <IconButton
-            size="small"
-            onClick={(e) => { e.stopPropagation(); onDelete(row._id) }}            
-            sx={{ color: '#ccc', borderRadius: 0, '&:hover': { color: '#000', background: '#f5f5f5' } }}
-          >
-            <Delete sx={{ fontSize: 15 }} />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    )
+          <Tooltip title={t('clients.delete')} placement="left">
+            <IconButton
+              id={`${idPrefix}delete`}
+              size="small"
+              onClick={(e) => { e.stopPropagation(); onDelete(row._id) }}            
+              sx={{ color: '#ccc', borderRadius: 0, '&:hover': { color: '#000', background: '#f5f5f5' } }}
+            >
+              <Delete sx={{ fontSize: 15 }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )
+    }
   }
 ]

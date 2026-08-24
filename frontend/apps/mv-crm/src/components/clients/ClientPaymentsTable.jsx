@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/clients/ClientPaymentsTable.jsx
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, FormControl, InputLabel, Select, MenuItem, TablePagination, useMediaQuery, useTheme } from '@mui/material'
@@ -53,8 +52,9 @@ const ClientPaymentsTable = ({ clientId }) => {
 
   return (
     <Box sx={{ p: { xs: 1, sm: 0 } }}>
-      {/* Filtro de estado (Responsive) */}
-      <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+      
+      {/* ✅ 1. FILTRO DE ESTADO CON ID */}
+      <Box id="client-payments-filter" sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
         <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 150 } }}>
           <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
             {t('payments.filterStatus')}
@@ -80,8 +80,9 @@ const ClientPaymentsTable = ({ clientId }) => {
         </Typography>
       </Box>
 
-      {/* DataTable */}
+      {/* ✅ 2. DATATABLE CON ID */}
       <DataTable
+        id="client-payments-table"
         columns={columns}
         data={tableData}
         loading={loading}
@@ -96,9 +97,9 @@ const ClientPaymentsTable = ({ clientId }) => {
         maxHeight={500}
       />
 
-      {/* Paginación (Responsive) */}
+      {/* ✅ 3. PAGINACIÓN CON ID */}
       {!loading && pagination.total > pagination.limit && (
-        <Box sx={{ mt: 2, p: 2, border: '1px solid #ececec', borderRadius: 0, bgcolor: '#fff', display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
+        <Box id="client-payments-pagination" sx={{ mt: 2, p: 2, border: '1px solid #ececec', borderRadius: 0, bgcolor: '#fff', display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
           <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#000000ff', letterSpacing: '0.5px' }}>
             {t('payments.showing')} {((pagination.page - 1) * pagination.limit) + 1} -{' '}
             {Math.min(pagination.page * pagination.limit, pagination.total)} {t('payments.of')}{' '}

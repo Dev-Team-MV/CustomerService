@@ -62,7 +62,7 @@ export default function VersionHistoryDrawer({ open, onClose, document, onUpload
   const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
 
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: 350, borderRadius: 0 } }}>
+    <Drawer id="document-history-drawer" anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: 350, borderRadius: 0 } }}>
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ececec' }}>
         <Box display="flex" alignItems="center" gap={1}>
           <History color="primary" />
@@ -72,7 +72,7 @@ export default function VersionHistoryDrawer({ open, onClose, document, onUpload
       </Box>
       
       <Box sx={{ p: 2 }}>
-        <List>
+        <List id="document-history-list">
           {versions.length === 0 ? (
             <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 2, fontFamily: '"Courier New", monospace' }}>
               {t('history.noVersions', 'No hay historial de versiones disponible')}
@@ -119,7 +119,7 @@ export default function VersionHistoryDrawer({ open, onClose, document, onUpload
 
         {uploadError && <Alert severity="error" sx={{ mt: 2, mb: 1, borderRadius: 0, border: '1px solid' }}>{uploadError}</Alert>}
 
-        <Button fullWidth variant="contained" color="primary" startIcon={uploading ? <CircularProgress size={16} color="inherit" /> : <Upload />} onClick={handleUploadClick} disabled={uploading} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+        <Button fullWidth variant="contained" id="document-history-upload" color="primary" startIcon={uploading ? <CircularProgress size={16} color="inherit" /> : <Upload />} onClick={handleUploadClick} disabled={uploading} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
           {uploading ? t('history.uploading', 'Subiendo...') : t('actions.newVersion')}
         </Button>
         

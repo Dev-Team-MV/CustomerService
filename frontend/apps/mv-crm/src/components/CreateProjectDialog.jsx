@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/projects/CreateProjectDialog.jsx
 import { useState, useEffect } from 'react'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, Box, Typography,
@@ -248,7 +247,6 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
     }
   }
 
-  // ✅ Estilos unificados
   const unifiedButtonSx = { 
     borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', 
     fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
@@ -260,13 +258,25 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth={false} PaperProps={{ sx: { width: '100%', maxWidth: '1200px', borderRadius: 0, border: '1px solid #ececec', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', background: '#fff' } }}>
+    <Dialog 
+      id="create-project-dialog"
+      open={open} 
+      onClose={onClose} 
+      maxWidth={false} 
+      PaperProps={{ sx: { width: '100%', maxWidth: '1200px', borderRadius: 0, border: '1px solid #ececec', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', background: '#fff' } }}
+    >
       <DialogTitle sx={{ fontWeight: 700, fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase', color: '#000', background: '#fff', borderBottom: '1px solid #ececec', px: 4, py: 3 }}>
         {editMode ? t('modal.editTitle') : t('modal.createTitle')}
       </DialogTitle>
       
       <DialogContent sx={{ background: '#fff', px: 4, py: 3 }}>
-        <Tabs value={langTab} onChange={(_, v) => setLangTab(v)} sx={{ mb: 3, '& .MuiTab-root': { fontWeight: 600, fontFamily: '"Courier New", monospace', fontSize: "0.8rem", textTransform: "uppercase", color: '#000' }, '& .MuiTabs-indicator': { background: '#000' } }}>
+        {/* ✅ ID agregado para el tour */}
+        <Tabs 
+          id="create-project-tabs"
+          value={langTab} 
+          onChange={(_, v) => setLangTab(v)} 
+          sx={{ mb: 3, '& .MuiTab-root': { fontWeight: 600, fontFamily: '"Courier New", monospace', fontSize: "0.8rem", textTransform: "uppercase", color: '#000' }, '& .MuiTabs-indicator': { background: '#000' } }}
+        >
           {LANGS.map(l => <Tab key={l.code} value={l.code} label={t(`modal.lang.${l.code}`)} />)}
         </Tabs>
         <Divider sx={{ mb: 3, borderColor: '#ececec' }} />
@@ -274,7 +284,8 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
         <Grid container spacing={4}>
           {/* Columna izquierda: Información general y detalles */}
           <Grid item xs={12} md={7}>
-            <Paper elevation={0} sx={{ p: 3, mb: 4, borderRadius: 0, border: '1px solid #e0e0e0', background: '#fff', boxShadow: 'none' }}>
+            {/* ✅ ID agregado para el tour */}
+            <Paper id="create-project-general-info" elevation={0} sx={{ p: 3, mb: 4, borderRadius: 0, border: '1px solid #e0e0e0', background: '#fff', boxShadow: 'none' }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#000', mb: 2, fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>
                 {t('modal.generalInfo')}
               </Typography>
@@ -307,16 +318,23 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
                     ))}
                   </Box>
                 </Grid>
-                <Grid item xs={12}>
-                  <TextField label={t('modal.projectName')} fullWidth value={form.name} onChange={e => handleChange('name', e.target.value)} sx={inputSx} />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField label={t('modal.slug')} fullWidth value={form.slug} onChange={e => handleChange('slug', e.target.value)} helperText={t('modal.slugHelper')} sx={{ ...inputSx, '& .MuiFormHelperText-root': { fontFamily: '"Courier New", monospace', fontSize: '0.65rem' } }} />
+                
+                {/* ✅ ID agrupado para nombre y slug */}
+                <Grid item xs={12} id="create-project-name-slug">
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <TextField label={t('modal.projectName')} fullWidth value={form.name} onChange={e => handleChange('name', e.target.value)} sx={inputSx} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField label={t('modal.slug')} fullWidth value={form.slug} onChange={e => handleChange('slug', e.target.value)} helperText={t('modal.slugHelper')} sx={{ ...inputSx, '& .MuiFormHelperText-root': { fontFamily: '"Courier New", monospace', fontSize: '0.65rem' } }} />
+                    </Grid>
+                  </Grid>
                 </Grid>
               </Grid>
             </Paper>
 
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 0, border: '1px solid #e0e0e0', background: '#fff', boxShadow: 'none' }}>
+            {/* ✅ ID agregado para el tour */}
+            <Paper id="create-project-property-details" elevation={0} sx={{ p: 3, borderRadius: 0, border: '1px solid #e0e0e0', background: '#fff', boxShadow: 'none' }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#000', mb: 2, fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>
                 {t('modal.propertyDetails')}
               </Typography>
@@ -347,12 +365,12 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
 
           {/* Columna derecha: Media */}
           <Grid item xs={12} md={5}>
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 0, border: '1px solid #e0e0e0', background: '#fff', boxShadow: 'none' }}>
+            {/* ✅ ID agregado para el tour */}
+            <Paper id="create-project-media-assets" elevation={0} sx={{ p: 3, borderRadius: 0, border: '1px solid #e0e0e0', background: '#fff', boxShadow: 'none' }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#000', mb: 2, fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>
                 {t('modal.mediaAssets')}
               </Typography>
 
-              {/* Main Image */}
               <Box mb={2}>
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: '#000', fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
                   {t('modal.mainImage')}
@@ -374,7 +392,6 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
                 )}
               </Box>
 
-              {/* Logo */}
               <Box mb={2}>
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: '#000', fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
                   Logo
@@ -396,7 +413,6 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
                 )}
               </Box>
 
-              {/* Gallery */}
               <Box mb={2}>
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: '#000', fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
                   {t('modal.gallery')}
@@ -412,7 +428,6 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
                 </Box>
               </Box>
 
-              {/* Videos */}
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: '#000', fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
                   {t('modal.videos')}
@@ -439,7 +454,8 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
 
           {/* Brand Colors - Fila completa debajo */}
           <Grid item xs={12}>
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 0, border: '1px solid #e0e0e0', background: '#fff', boxShadow: 'none' }}>
+            {/* ✅ ID agregado para el tour */}
+            <Paper id="create-project-brand-colors" elevation={0} sx={{ p: 3, borderRadius: 0, border: '1px solid #e0e0e0', background: '#fff', boxShadow: 'none' }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#000', mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>
                 <Palette fontSize="small" /> {t('modal.brandColors', 'Brand Colors')}
               </Typography>
@@ -459,7 +475,6 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
                 {form.brandColors?.map((color, idx) => <ColorChip key={idx} color={color} onRemove={() => handleRemoveColor(idx)} />)}
               </Box>
 
-              {/* Preview de colores */}
               {form.brandColors?.length > 0 && (
                 <Box sx={{ p: 2, bgcolor: '#f5f5f5', borderRadius: 0, border: '1px solid #e0e0e0' }}>
                   <Typography variant="caption" sx={{ fontWeight: 600, color: '#000', mb: 1, display: 'block', fontFamily: '"Courier New", monospace' }}>
@@ -482,7 +497,6 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
             </Paper>
           </Grid>
 
-          {/* Variables de Mensaje - Solo visible en modo edición */}
           {editMode && initialData?._id && (
             <Grid item xs={12}>
               <ProjectVariablesManager projectId={initialData._id} disabled={false} variant="dialog" />
@@ -493,7 +507,8 @@ export default function CreateProjectDialog({ open, onClose, onCreated, initialD
         {error && <Typography color="error" sx={{ mt: 2, fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>{error}</Typography>}
       </DialogContent>
       
-      <DialogActions sx={{ px: 4, pb: 3, background: '#fff', borderTop: '1px solid #ececec' }}>
+      {/* ✅ ID agregado para el tour */}
+      <DialogActions id="create-project-actions" sx={{ px: 4, pb: 3, background: '#fff', borderTop: '1px solid #ececec' }}>
         <Button onClick={onClose} disabled={loading} startIcon={<Cancel />} sx={{ ...unifiedButtonSx, color: '#888' }}>
           {t('modal.cancel')}
         </Button>

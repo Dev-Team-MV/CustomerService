@@ -4,6 +4,7 @@
     "@mui/material": "^6.5.0",
     "@mui/x-date-pickers": "^7.29.4",
     "date-fns": "^3.6.0",
+    "driver.js": "^1.8.0",
     "swiper": "^12.1.0"
   }
 }

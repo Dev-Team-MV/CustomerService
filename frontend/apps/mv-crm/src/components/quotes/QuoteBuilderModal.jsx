@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/quotes/QuoteBuilderModal.jsx
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -7,7 +6,7 @@ import {
   CircularProgress, Alert, Stepper, Step, StepLabel, Grid, Divider, Switch, FormControlLabel, Chip,
   useMediaQuery, useTheme
 } from '@mui/material'
-import { Close, AutoAwesome, Home, Apartment, Business } from '@mui/icons-material'
+import { Close, AutoAwesome } from '@mui/icons-material'
 import quoteService from '../../services/quoteService'
 import propertyService from '@shared/services/propertyService'
 import buildingService from '@shared/services/buildingService'
@@ -21,7 +20,16 @@ import ProjectSelector from '@shared/components/ProjectSelector'
 
 const STEPS = ['Propiedad', 'Financiamiento', 'Vista Previa']
 
-export default function QuoteBuilderModal({ open, onClose, quote = null, onSave, projects = [], leads = [], clients = [] }) {
+export default function QuoteBuilderModal({ 
+  open, 
+  onClose, 
+  quote = null, 
+  onSave, 
+  projects = [], 
+  leads = [], 
+  clients = [],
+  isTourMode = false // ✅ Prop para el modo tour
+}) {
   const { t } = useTranslation('quoteCrm')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -299,16 +307,101 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
     }
   }, [formData.totalPrice, formData.downPayment, formData.interestRate, formData.termMonths, formData.amortizationMethod, formData.balloonAmount, formData.balloonMonth, formData.startDate, activeStep])
 
+  // ✅ MODIFICADO: handleNext con lógica de simulación para el tour
   const handleNext = () => {
     if (activeStep === 0) {
       const hasProperty = formData.lotId || formData.apartmentId || formData.buildingId
-      if (!formData.projectId || !hasProperty) {
-        setError('Debes seleccionar un proyecto y una propiedad')
-        return
+      
+      if (isTourMode) {
+        // 1. Forzar proyecto si está vacío
+        if (!formData.projectId && projects.length > 0) {
+          setFormData(prev => ({ ...prev, projectId: projects[0]._id }))
+        }
+        
+        // 2. Forzar una propiedad según el tipo de proyecto
+        if (!hasProperty) {
+          if (projectType === 'lakewood' || projectType === 'property') {
+            if (lots.length > 0) {
+              const firstLot = lots[0]
+              const modelId = (firstLot?.model && typeof firstLot?.model === 'object') ? firstLot.model._id : firstLot?.model
+              setFormData(prev => ({ ...prev, lotId: firstLot._id, modelId: modelId || '', facadeId: '', deckId: '' }))
+            }
+          } else if (projectType === '6town') {
+            if (buildings.length > 0) {
+              const firstBuilding = buildings[0]
+              const modelId = typeof firstBuilding?.quoteRef?.model === 'object' ? firstBuilding.quoteRef.model._id : firstBuilding?.quoteRef?.model
+              const lotId = typeof firstBuilding?.quoteRef?.lot === 'object' ? firstBuilding.quoteRef.lot._id : firstBuilding?.quoteRef?.lot
+              setFormData(prev => ({ ...prev, buildingId: firstBuilding._id, modelId: modelId || '', lotId: lotId || '' }))
+            }
+          } else if (projectType === 'apartment') {
+            if (buildings.length > 0 && apartments.length > 0) {
+              setFormData(prev => ({ ...prev, buildingId: buildings[0]._id, apartmentId: apartments[0]._id, selectedRenderType: 'basic' }))
+            }
+          }
+        }
+      } else {
+        // Validación normal para usuarios reales
+        if (!formData.projectId || !hasProperty) {
+          setError(t('validation.selectProperty', 'Debes seleccionar un proyecto y una propiedad'))
+          return
+        }
       }
     }
+    
+    if (activeStep === 1 && isTourMode) {
+      // Asegurar valores válidos para generar la vista previa en el paso 3
+      setFormData(prev => ({
+        ...prev,
+        totalPrice: prev.totalPrice > 0 ? prev.totalPrice : 100000,
+        downPayment: prev.downPayment > 0 ? prev.downPayment : 20000,
+        termMonths: prev.termMonths > 0 ? prev.termMonths : 120,
+        interestRate: prev.interestRate > 0 ? prev.interestRate : 5
+      }))
+    }
+    
     setError(null)
     setActiveStep(prev => prev + 1)
+  }
+
+  // ✅ MODIFICADO: handleSubmit con simulación para el tour
+  const handleSubmit = async () => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      if (isTourMode) {
+        // Simulación: No llamar a la API, solo cerrar el modal
+        console.log('🎭 Modo tour: Simulando guardado de cotización...')
+        setTimeout(() => {
+          setLoading(false)
+          onClose()
+        }, 500)
+        return
+      }
+      
+      // Lógica normal de guardado
+      let payload = { ...formData, ...previewData }
+      if (projectType === 'lakewood' || projectType === 'property') {
+        payload = {
+          ...payload, 
+          hasBalcony: formData.hasModelBalcony, 
+          hasStorage: formData.hasModelStorage,
+          modelType: formData.hasModelUpgrade ? 'upgrade' : 'basic',
+          selectedOptions: { 
+            upgradeId: formData.modelUpgradeId || null, 
+            balconyId: formData.modelBalconyId || null, 
+            storageId: formData.modelStorageId || null 
+          }
+        }
+      }
+      if (isEditing) await onSave(quote._id, payload)
+      else await onSave(null, payload)
+      onClose()
+    } catch (err) {
+      setError(err.response?.data?.message || t('errors.saveError', 'Error al guardar la cotización'))
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleBack = () => {
@@ -316,27 +409,27 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
     setActiveStep(prev => prev - 1)
   }
 
-  const handleSubmit = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      let payload = { ...formData, ...previewData }
-      if (projectType === 'lakewood' || projectType === 'property') {
-        payload = {
-          ...payload, hasBalcony: formData.hasModelBalcony, hasStorage: formData.hasModelStorage,
-          modelType: formData.hasModelUpgrade ? 'upgrade' : 'basic',
-          selectedOptions: { upgradeId: formData.modelUpgradeId || null, balconyId: formData.modelBalconyId || null, storageId: formData.modelStorageId || null }
-        }
-      }
-      if (isEditing) await onSave(quote._id, payload)
-      else await onSave(null, payload)
-      onClose()
-    } catch (err) {
-      setError(err.response?.data?.message || 'Error al guardar la cotización')
-    } finally {
-      setLoading(false)
-    }
-  }
+  // const handleSubmit = async () => {
+  //   setLoading(true)
+  //   setError(null)
+  //   try {
+  //     let payload = { ...formData, ...previewData }
+  //     if (projectType === 'lakewood' || projectType === 'property') {
+  //       payload = {
+  //         ...payload, hasBalcony: formData.hasModelBalcony, hasStorage: formData.hasModelStorage,
+  //         modelType: formData.hasModelUpgrade ? 'upgrade' : 'basic',
+  //         selectedOptions: { upgradeId: formData.modelUpgradeId || null, balconyId: formData.modelBalconyId || null, storageId: formData.modelStorageId || null }
+  //       }
+  //     }
+  //     if (isEditing) await onSave(quote._id, payload)
+  //     else await onSave(null, payload)
+  //     onClose()
+  //   } catch (err) {
+  //     setError(err.response?.data?.message || 'Error al guardar la cotización')
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
   const availableFacades = useMemo(() => {
     if (!formData.modelId) return []
@@ -407,7 +500,8 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
         {error && <Alert severity="error" sx={{ m: { xs: 1, sm: 3 }, mb: { xs: 1, sm: 0 }, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>{error}</Alert>}
         
         <Box sx={{ p: { xs: 1, sm: 0 } }}>
-          <Stepper activeStep={activeStep} sx={{ mb: 4, '& .MuiStepLabel-label': { fontSize: { xs: '0.65rem', sm: '0.75rem' } } }}>
+          {/* ✅ ID: Stepper del Asistente */}
+          <Stepper id="quote-builder-stepper" activeStep={activeStep} sx={{ mb: 4, '& .MuiStepLabel-label': { fontSize: { xs: '0.65rem', sm: '0.75rem' } } }}>
             {STEPS.map(label => (
               <Step key={label}>
                 <StepLabel sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>{isMobile && label.length > 10 ? label.substring(0, 10) + '...' : label}</StepLabel>
@@ -415,223 +509,229 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
             ))}
           </Stepper>
 
+          {/* ✅ ID: Paso 1 - Propiedad */}
           {activeStep === 0 && (
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>{t('form.lead')}</InputLabel>
-                  <Select value={formData.leadId} onChange={(e) => handleChange('leadId', e.target.value)} label={t('form.lead')} sx={inputSx}>
-                    <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
-                    {leads.map(l => <MenuItem key={l._id} value={l._id} sx={menuItemSx}>{l.name}</MenuItem>)}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>{t('form.client')}</InputLabel>
-                  <Select value={formData.clientId} onChange={(e) => handleChange('clientId', e.target.value)} label={t('form.client')} sx={inputSx}>
-                    <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
-                    {clients.map(c => <MenuItem key={c._id} value={c._id} sx={menuItemSx}>{c.firstName} {c.lastName}</MenuItem>)}
-                  </Select>
-                </FormControl>
-              </Grid>
-              
-              <Grid item xs={12}><Divider sx={{ my: 1 }} /><Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase' }}>Selección de Propiedad</Typography></Grid>
-
-              {/* ✅ ProjectSelector Integrado */}
-              <Grid item xs={12} md={6}>
-                <ProjectSelector
-                  value={formData.projectId}
-                  onChange={(value) => handleChange('projectId', value)}
-                  label={`${t('form.project')} *`}
-                  includeGlobal={false}
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-
-              {(projectType === 'lakewood' || projectType === 'property') && formData.projectId && lots.length > 0 && (
-                <>
-                  <Grid item xs={12} md={6}>
-                    <FormControl fullWidth size="small">
-                      <InputLabel>{t('form.lot', 'Lote')}</InputLabel>
-                      <Select value={formData.lotId} onChange={(e) => handleChange('lotId', e.target.value)} label={t('form.lot', 'Lote')} disabled={loadingProperties} sx={inputSx}>
-                        <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
-                        {lots.map(l => {
-                          const modelName = (l.model && typeof l.model === 'object') ? l.model.model : ''
-                          return <MenuItem key={l._id} value={l._id} sx={menuItemSx}>Lote {l.lot?.number || l.number || 'N/A'} {modelName ? `— ${modelName}` : ''}</MenuItem>
-                        })}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-
-                  {formData.modelId && models.length > 0 && (
-                    <Grid item xs={12} md={6}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>{t('form.model', 'Modelo')}</InputLabel>
-                        <Select value={formData.modelId} label={t('form.model', 'Modelo')} disabled sx={inputSx}>
-                          {models.map(m => <MenuItem key={m._id} value={m._id} sx={menuItemSx}>{m.model || m.name || `Model ${m.modelNumber}`}</MenuItem>)}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  )}
-
-                  {formData.modelId && availableFacades.length > 0 && (
-                    <Grid item xs={12} md={6}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>{t('form.facade', 'Fachada')}</InputLabel>
-                        <Select value={formData.facadeId} onChange={(e) => { handleChange('facadeId', e.target.value); handleChange('deckId', '') }} label={t('form.facade', 'Fachada')} sx={inputSx}>
-                          <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
-                          {availableFacades.map(f => <MenuItem key={f._id} value={f._id} sx={menuItemSx}>{f.title} {f.price > 0 ? `(+ $${f.price.toLocaleString()})` : ''}</MenuItem>)}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  )}
-
-                  {formData.facadeId && availableDecks.length > 0 && (
-                    <Grid item xs={12} md={6}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>{t('form.deck', 'Opción / Deck')}</InputLabel>
-                        <Select value={formData.deckId} onChange={(e) => handleChange('deckId', e.target.value)} label={t('form.deck', 'Opción / Deck')} sx={inputSx}>
-                          {availableDecks.map(d => <MenuItem key={d._id} value={d._id} sx={menuItemSx}>{d.name} {d.price > 0 ? `(+ $${d.price.toLocaleString()})` : ''}</MenuItem>)}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  )}
-
-                  {formData.modelId && modelPricingOptions?.availableOptions && (
-                    <Grid item xs={12}>
-                      <Box sx={{ p: 2, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
-                        <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5, fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                          {t('form.customization', 'Opciones de Personalización')}
-                        </Typography>
-                        <Box display="flex" flexDirection="column" gap={1.5}>
-                          {modelPricingOptions.availableOptions.upgrades?.length > 0 && (
-                            <FormControlLabel control={<Switch checked={formData.hasModelUpgrade} onChange={() => handleModelCustomizationToggle('upgrade')} color="primary" />} label={<Box display="flex" alignItems="center" gap={1}><Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{modelPricingOptions.availableOptions.upgrades[0].name || t('form.upgrade', 'Upgrade')}</Typography><Chip label={`+$${modelPricingOptions.availableOptions.upgrades[0].price?.toLocaleString()}`} size="small" color="primary" variant="outlined" sx={{ height: 20, fontSize: '0.7rem', borderRadius: 0, fontFamily: '"Courier New", monospace' }} /></Box>} />
-                          )}
-                          {modelPricingOptions.availableOptions.balconies?.length > 0 && (
-                            <FormControlLabel control={<Switch checked={formData.hasModelBalcony} onChange={() => handleModelCustomizationToggle('balcony')} color="primary" />} label={<Box display="flex" alignItems="center" gap={1}><Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{modelPricingOptions.availableOptions.balconies[0].name || t('form.balcony', 'Balcón')}</Typography><Chip label={`+$${modelPricingOptions.availableOptions.balconies[0].price?.toLocaleString()}`} size="small" color="primary" variant="outlined" sx={{ height: 20, fontSize: '0.7rem', borderRadius: 0, fontFamily: '"Courier New", monospace' }} /></Box>} />
-                          )}
-                          {modelPricingOptions.availableOptions.storages?.length > 0 && (
-                            <FormControlLabel control={<Switch checked={formData.hasModelStorage} onChange={() => handleModelCustomizationToggle('storage')} color="primary" />} label={<Box display="flex" alignItems="center" gap={1}><Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{modelPricingOptions.availableOptions.storages[0].name || t('form.storage', 'Storage')}</Typography><Chip label={`+$${modelPricingOptions.availableOptions.storages[0].price?.toLocaleString()}`} size="small" color="primary" variant="outlined" sx={{ height: 20, fontSize: '0.7rem', borderRadius: 0, fontFamily: '"Courier New", monospace' }} /></Box>} />
-                          )}
-                        </Box>
-                      </Box>
-                    </Grid>
-                  )}
-                </>
-              )}
-
-              {projectType === '6town' && formData.projectId && buildings.length > 0 && (
+            <Box id="quote-builder-step1">
+              <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth size="small">
-                    <InputLabel>Casa / Propiedad</InputLabel>
-                    <Select value={formData.buildingId} onChange={(e) => handleChange('buildingId', e.target.value)} label="Casa / Propiedad" disabled={loadingProperties} sx={inputSx}>
+                    <InputLabel>{t('form.lead')}</InputLabel>
+                    <Select value={formData.leadId} onChange={(e) => handleChange('leadId', e.target.value)} label={t('form.lead')} sx={inputSx}>
                       <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
-                      {buildings.map(b => {
-                        const lotRef = typeof b.quoteRef?.lot === 'object' ? b.quoteRef.lot.number : b.quoteRef?.lot
-                        return <MenuItem key={b._id} value={b._id} sx={menuItemSx}>{b.name} {lotRef ? `(Lote ${lotRef})` : ''}</MenuItem>
-                      })}
+                      {leads.map(l => <MenuItem key={l._id} value={l._id} sx={menuItemSx}>{l.name}</MenuItem>)}
                     </Select>
                   </FormControl>
-                  {formData.buildingId && (() => {
-                    const selectedBuilding = buildings.find(b => b._id === formData.buildingId)
-                    const modelId = typeof selectedBuilding?.quoteRef?.model === 'object' ? selectedBuilding.quoteRef.model._id : selectedBuilding?.quoteRef?.model
-                    const selectedModel = models.find(m => m._id === modelId)
-                    if (!selectedModel?.floors) return null
-                    return (
-                      <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 0, bgcolor: '#f9f9f9' }}>
-                        <Typography variant="subtitle2" fontWeight={600} gutterBottom sx={{ fontFamily: '"Courier New", monospace' }}>Personalización de Pisos</Typography>
-                        {selectedModel.floors.filter(f => f.isCustomizable).map((floor) => (
-                          <Box key={floor.key} sx={{ mb: 2 }}>
-                            <Typography variant="caption" fontWeight={600} sx={{ mb: 1, display: 'block', fontFamily: '"Courier New", monospace' }}>{floor.label}</Typography>
-                            <FormControl fullWidth size="small">
-                              <InputLabel>{floor.label}</InputLabel>
-                              <Select value={formData.selectedOptions?.[floor.key] || ''} onChange={(e) => setFormData(prev => ({ ...prev, selectedOptions: { ...prev.selectedOptions, [floor.key]: e.target.value } }))} label={floor.label} sx={inputSx}>
-                                {floor.options?.map(option => <MenuItem key={option.key} value={option.key} sx={menuItemSx}>{option.label}</MenuItem>)}
-                              </Select>
-                            </FormControl>
-                          </Box>
-                        ))}
-                      </Box>
-                    )
-                  })()}
                 </Grid>
-              )}
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>{t('form.client')}</InputLabel>
+                    <Select value={formData.clientId} onChange={(e) => handleChange('clientId', e.target.value)} label={t('form.client')} sx={inputSx}>
+                      <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
+                      {clients.map(c => <MenuItem key={c._id} value={c._id} sx={menuItemSx}>{c.firstName} {c.lastName}</MenuItem>)}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                
+                <Grid item xs={12}><Divider sx={{ my: 1 }} /><Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1, fontFamily: '"Courier New", monospace', letterSpacing: '1px', textTransform: 'uppercase' }}>Selección de Propiedad</Typography></Grid>
 
-              {projectType === 'apartment' && formData.projectId && buildings.length > 0 && (
-                <>
-                  <Grid item xs={12} md={6}>
-                    <FormControl fullWidth size="small">
-                      <InputLabel>{t('form.building', 'Edificio')}</InputLabel>
-                      <Select value={formData.buildingId} onChange={(e) => handleChange('buildingId', e.target.value)} label={t('form.building', 'Edificio')} disabled={loadingProperties} sx={inputSx}>
-                        <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
-                        {buildings.map(b => <MenuItem key={b._id} value={b._id} sx={menuItemSx}>{b.name}</MenuItem>)}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  {formData.buildingId && apartments.length > 0 && (
-                    <>
+                <Grid item xs={12} md={6}>
+                  <ProjectSelector
+                    value={formData.projectId}
+                    onChange={(value) => handleChange('projectId', value)}
+                    label={`${t('form.project')} *`}
+                    includeGlobal={false}
+                    fullWidth
+                    size="small"
+                  />
+                </Grid>
+
+                {(projectType === 'lakewood' || projectType === 'property') && formData.projectId && lots.length > 0 && (
+                  <>
+                    <Grid item xs={12} md={6}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>{t('form.lot', 'Lote')}</InputLabel>
+                        <Select value={formData.lotId} onChange={(e) => handleChange('lotId', e.target.value)} label={t('form.lot', 'Lote')} disabled={loadingProperties} sx={inputSx}>
+                          <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
+                          {lots.map(l => {
+                            const modelName = (l.model && typeof l.model === 'object') ? l.model.model : ''
+                            return <MenuItem key={l._id} value={l._id} sx={menuItemSx}>Lote {l.lot?.number || l.number || 'N/A'} {modelName ? `— ${modelName}` : ''}</MenuItem>
+                          })}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+
+                    {formData.modelId && models.length > 0 && (
                       <Grid item xs={12} md={6}>
                         <FormControl fullWidth size="small">
-                          <InputLabel>{t('form.apartment', 'Apartamento')}</InputLabel>
-                          <Select value={formData.apartmentId} onChange={(e) => handleChange('apartmentId', e.target.value)} label={t('form.apartment', 'Apartamento')} sx={inputSx}>
-                            <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
-                            {apartments.map(a => <MenuItem key={a._id} value={a._id} sx={menuItemSx}>Apto {a.apartmentNumber} {a.floorNumber ? `(Piso ${a.floorNumber})` : ''}</MenuItem>)}
+                          <InputLabel>{t('form.model', 'Modelo')}</InputLabel>
+                          <Select value={formData.modelId} label={t('form.model', 'Modelo')} disabled sx={inputSx}>
+                            {models.map(m => <MenuItem key={m._id} value={m._id} sx={menuItemSx}>{m.model || m.name || `Model ${m.modelNumber}`}</MenuItem>)}
                           </Select>
                         </FormControl>
                       </Grid>
-                      {formData.apartmentId && (
+                    )}
+
+                    {formData.modelId && availableFacades.length > 0 && (
+                      <Grid item xs={12} md={6}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>{t('form.facade', 'Fachada')}</InputLabel>
+                          <Select value={formData.facadeId} onChange={(e) => { handleChange('facadeId', e.target.value); handleChange('deckId', '') }} label={t('form.facade', 'Fachada')} sx={inputSx}>
+                            <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
+                            {availableFacades.map(f => <MenuItem key={f._id} value={f._id} sx={menuItemSx}>{f.title} {f.price > 0 ? `(+ $${f.price.toLocaleString()})` : ''}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    )}
+
+                    {formData.facadeId && availableDecks.length > 0 && (
+                      <Grid item xs={12} md={6}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>{t('form.deck', 'Opción / Deck')}</InputLabel>
+                          <Select value={formData.deckId} onChange={(e) => handleChange('deckId', e.target.value)} label={t('form.deck', 'Opción / Deck')} sx={inputSx}>
+                            {availableDecks.map(d => <MenuItem key={d._id} value={d._id} sx={menuItemSx}>{d.name} {d.price > 0 ? `(+ $${d.price.toLocaleString()})` : ''}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    )}
+
+                    {formData.modelId && modelPricingOptions?.availableOptions && (
+                      <Grid item xs={12}>
+                        <Box sx={{ p: 2, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
+                          <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5, fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                            {t('form.customization', 'Opciones de Personalización')}
+                          </Typography>
+                          <Box display="flex" flexDirection="column" gap={1.5}>
+                            {modelPricingOptions.availableOptions.upgrades?.length > 0 && (
+                              <FormControlLabel control={<Switch checked={formData.hasModelUpgrade} onChange={() => handleModelCustomizationToggle('upgrade')} color="primary" />} label={<Box display="flex" alignItems="center" gap={1}><Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{modelPricingOptions.availableOptions.upgrades[0].name || t('form.upgrade', 'Upgrade')}</Typography><Chip label={`+$${modelPricingOptions.availableOptions.upgrades[0].price?.toLocaleString()}`} size="small" color="primary" variant="outlined" sx={{ height: 20, fontSize: '0.7rem', borderRadius: 0, fontFamily: '"Courier New", monospace' }} /></Box>} />
+                            )}
+                            {modelPricingOptions.availableOptions.balconies?.length > 0 && (
+                              <FormControlLabel control={<Switch checked={formData.hasModelBalcony} onChange={() => handleModelCustomizationToggle('balcony')} color="primary" />} label={<Box display="flex" alignItems="center" gap={1}><Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{modelPricingOptions.availableOptions.balconies[0].name || t('form.balcony', 'Balcón')}</Typography><Chip label={`+$${modelPricingOptions.availableOptions.balconies[0].price?.toLocaleString()}`} size="small" color="primary" variant="outlined" sx={{ height: 20, fontSize: '0.7rem', borderRadius: 0, fontFamily: '"Courier New", monospace' }} /></Box>} />
+                            )}
+                            {modelPricingOptions.availableOptions.storages?.length > 0 && (
+                              <FormControlLabel control={<Switch checked={formData.hasModelStorage} onChange={() => handleModelCustomizationToggle('storage')} color="primary" />} label={<Box display="flex" alignItems="center" gap={1}><Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{modelPricingOptions.availableOptions.storages[0].name || t('form.storage', 'Storage')}</Typography><Chip label={`+$${modelPricingOptions.availableOptions.storages[0].price?.toLocaleString()}`} size="small" color="primary" variant="outlined" sx={{ height: 20, fontSize: '0.7rem', borderRadius: 0, fontFamily: '"Courier New", monospace' }} /></Box>} />
+                            )}
+                          </Box>
+                        </Box>
+                      </Grid>
+                    )}
+                  </>
+                )}
+
+                {projectType === '6town' && formData.projectId && buildings.length > 0 && (
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Casa / Propiedad</InputLabel>
+                      <Select value={formData.buildingId} onChange={(e) => handleChange('buildingId', e.target.value)} label="Casa / Propiedad" disabled={loadingProperties} sx={inputSx}>
+                        <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
+                        {buildings.map(b => {
+                          const lotRef = typeof b.quoteRef?.lot === 'object' ? b.quoteRef.lot.number : b.quoteRef?.lot
+                          return <MenuItem key={b._id} value={b._id} sx={menuItemSx}>{b.name} {lotRef ? `(Lote ${lotRef})` : ''}</MenuItem>
+                        })}
+                      </Select>
+                    </FormControl>
+                    {formData.buildingId && (() => {
+                      const selectedBuilding = buildings.find(b => b._id === formData.buildingId)
+                      const modelId = typeof selectedBuilding?.quoteRef?.model === 'object' ? selectedBuilding.quoteRef.model._id : selectedBuilding?.quoteRef?.model
+                      const selectedModel = models.find(m => m._id === modelId)
+                      if (!selectedModel?.floors) return null
+                      return (
+                        <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 0, bgcolor: '#f9f9f9' }}>
+                          <Typography variant="subtitle2" fontWeight={600} gutterBottom sx={{ fontFamily: '"Courier New", monospace' }}>Personalización de Pisos</Typography>
+                          {selectedModel.floors.filter(f => f.isCustomizable).map((floor) => (
+                            <Box key={floor.key} sx={{ mb: 2 }}>
+                              <Typography variant="caption" fontWeight={600} sx={{ mb: 1, display: 'block', fontFamily: '"Courier New", monospace' }}>{floor.label}</Typography>
+                              <FormControl fullWidth size="small">
+                                <InputLabel>{floor.label}</InputLabel>
+                                <Select value={formData.selectedOptions?.[floor.key] || ''} onChange={(e) => setFormData(prev => ({ ...prev, selectedOptions: { ...prev.selectedOptions, [floor.key]: e.target.value } }))} label={floor.label} sx={inputSx}>
+                                  {floor.options?.map(option => <MenuItem key={option.key} value={option.key} sx={menuItemSx}>{option.label}</MenuItem>)}
+                                </Select>
+                              </FormControl>
+                            </Box>
+                          ))}
+                        </Box>
+                      )
+                    })()}
+                  </Grid>
+                )}
+
+                {projectType === 'apartment' && formData.projectId && buildings.length > 0 && (
+                  <>
+                    <Grid item xs={12} md={6}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>{t('form.building', 'Edificio')}</InputLabel>
+                        <Select value={formData.buildingId} onChange={(e) => handleChange('buildingId', e.target.value)} label={t('form.building', 'Edificio')} disabled={loadingProperties} sx={inputSx}>
+                          <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
+                          {buildings.map(b => <MenuItem key={b._id} value={b._id} sx={menuItemSx}>{b.name}</MenuItem>)}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    {formData.buildingId && apartments.length > 0 && (
+                      <>
                         <Grid item xs={12} md={6}>
                           <FormControl fullWidth size="small">
-                            <InputLabel>{t('form.renderType', 'Tipo de Acabado')}</InputLabel>
-                            <Select value={formData.selectedRenderType || 'basic'} onChange={(e) => handleChange('selectedRenderType', e.target.value)} label={t('form.renderType', 'Tipo de Acabado')} sx={inputSx}>
-                              <MenuItem value="basic" sx={menuItemSx}>{t('renderTypes.basic', 'Básico')}</MenuItem>
-                              <MenuItem value="upgrade" sx={menuItemSx}>{t('renderTypes.upgrade', 'Upgrade / Premium')}</MenuItem>
+                            <InputLabel>{t('form.apartment', 'Apartamento')}</InputLabel>
+                            <Select value={formData.apartmentId} onChange={(e) => handleChange('apartmentId', e.target.value)} label={t('form.apartment', 'Apartamento')} sx={inputSx}>
+                              <MenuItem value="">{t('none', 'Ninguno')}</MenuItem>
+                              {apartments.map(a => <MenuItem key={a._id} value={a._id} sx={menuItemSx}>Apto {a.apartmentNumber} {a.floorNumber ? `(Piso ${a.floorNumber})` : ''}</MenuItem>)}
                             </Select>
                           </FormControl>
                         </Grid>
-                      )}
-                    </>
-                  )}
-                </>
-              )}
-              
-              {formData.projectId && lots.length === 0 && buildings.length === 0 && apartments.length === 0 && !loadingProperties && (
-                <Grid item xs={12}><Alert severity="info" sx={{ borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace' }}>Este proyecto no tiene propiedades disponibles configuradas aún.</Alert></Grid>
-              )}
-            </Grid>
+                        {formData.apartmentId && (
+                          <Grid item xs={12} md={6}>
+                            <FormControl fullWidth size="small">
+                              <InputLabel>{t('form.renderType', 'Tipo de Acabado')}</InputLabel>
+                              <Select value={formData.selectedRenderType || 'basic'} onChange={(e) => handleChange('selectedRenderType', e.target.value)} label={t('form.renderType', 'Tipo de Acabado')} sx={inputSx}>
+                                <MenuItem value="basic" sx={menuItemSx}>{t('renderTypes.basic', 'Básico')}</MenuItem>
+                                <MenuItem value="upgrade" sx={menuItemSx}>{t('renderTypes.upgrade', 'Upgrade / Premium')}</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
+                
+                {formData.projectId && lots.length === 0 && buildings.length === 0 && apartments.length === 0 && !loadingProperties && (
+                  <Grid item xs={12}><Alert severity="info" sx={{ borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace' }}>Este proyecto no tiene propiedades disponibles configuradas aún.</Alert></Grid>
+                )}
+              </Grid>
+            </Box>
           )}
 
+          {/* ✅ ID: Paso 2 - Financiamiento */}
           {activeStep === 1 && (
-            <Grid container spacing={2}>
-              <Grid item xs={12}><Alert severity="info" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, border: '1px solid' }}>Propiedad seleccionada: <strong style={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{getPropertyName()}</strong></Alert></Grid>
-              <Grid item xs={12} md={6}>
-                <TextField label={t('form.totalPrice')} type="number" fullWidth size="small" value={formData.totalPrice} onChange={(e) => handleChange('totalPrice', Number(e.target.value))} sx={inputSx} InputProps={{ startAdornment: <Typography variant="body2" color="text.secondary" sx={{ mr: 1, fontFamily: '"Courier New", monospace' }}>$</Typography> }} />
+            <Box id="quote-builder-step2">
+              <Grid container spacing={2}>
+                <Grid item xs={12}><Alert severity="info" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, border: '1px solid' }}>Propiedad seleccionada: <strong style={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{getPropertyName()}</strong></Alert></Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField label={t('form.totalPrice')} type="number" fullWidth size="small" value={formData.totalPrice} onChange={(e) => handleChange('totalPrice', Number(e.target.value))} sx={inputSx} InputProps={{ startAdornment: <Typography variant="body2" color="text.secondary" sx={{ mr: 1, fontFamily: '"Courier New", monospace' }}>$</Typography> }} />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField label={`${t('form.downPayment')} (${previewData?.downPaymentPercentage || 0}%)`} type="number" fullWidth size="small" value={formData.downPayment} onChange={(e) => handleChange('downPayment', Number(e.target.value))} sx={inputSx} InputProps={{ startAdornment: <Typography variant="body2" color="text.secondary" sx={{ mr: 1, fontFamily: '"Courier New", monospace' }}>$</Typography> }} />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField label={t('form.interestRate')} type="number" fullWidth size="small" value={formData.interestRate} onChange={(e) => handleChange('interestRate', Number(e.target.value))} sx={inputSx} InputProps={{ endAdornment: <Typography variant="caption" sx={{ fontFamily: '"Courier New", monospace' }}>%</Typography> }} />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField label={t('form.termMonths')} type="number" fullWidth size="small" value={formData.termMonths} onChange={(e) => handleChange('termMonths', Number(e.target.value))} sx={inputSx} InputProps={{ endAdornment: <Typography variant="caption" sx={{ fontFamily: '"Courier New", monospace' }}>meses</Typography> }} />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>{t('form.amortizationMethod')}</InputLabel>
+                    <Select value={formData.amortizationMethod} onChange={(e) => handleChange('amortizationMethod', e.target.value)} label={t('form.amortizationMethod')} sx={inputSx}>
+                      <MenuItem value="fixed" sx={menuItemSx}>{t('form.fixed', 'Cuota Fija')}</MenuItem>
+                      <MenuItem value="declining" sx={menuItemSx}>{t('form.declining', 'Cuota Decreciente')}</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
               </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField label={`${t('form.downPayment')} (${previewData?.downPaymentPercentage || 0}%)`} type="number" fullWidth size="small" value={formData.downPayment} onChange={(e) => handleChange('downPayment', Number(e.target.value))} sx={inputSx} InputProps={{ startAdornment: <Typography variant="body2" color="text.secondary" sx={{ mr: 1, fontFamily: '"Courier New", monospace' }}>$</Typography> }} />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField label={t('form.interestRate')} type="number" fullWidth size="small" value={formData.interestRate} onChange={(e) => handleChange('interestRate', Number(e.target.value))} sx={inputSx} InputProps={{ endAdornment: <Typography variant="caption" sx={{ fontFamily: '"Courier New", monospace' }}>%</Typography> }} />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField label={t('form.termMonths')} type="number" fullWidth size="small" value={formData.termMonths} onChange={(e) => handleChange('termMonths', Number(e.target.value))} sx={inputSx} InputProps={{ endAdornment: <Typography variant="caption" sx={{ fontFamily: '"Courier New", monospace' }}>meses</Typography> }} />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>{t('form.amortizationMethod')}</InputLabel>
-                  <Select value={formData.amortizationMethod} onChange={(e) => handleChange('amortizationMethod', e.target.value)} label={t('form.amortizationMethod')} sx={inputSx}>
-                    <MenuItem value="fixed" sx={menuItemSx}>{t('form.fixed', 'Cuota Fija')}</MenuItem>
-                    <MenuItem value="declining" sx={menuItemSx}>{t('form.declining', 'Cuota Decreciente')}</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
+            </Box>
           )}
 
+          {/* ✅ ID: Paso 3 - Vista Previa */}
           {activeStep === 2 && previewData && (
-            <Box>
+            <Box id="quote-builder-step3">
               <Box sx={{ p: 2, bgcolor: '#f5f5f5', borderRadius: 0, mb: 3, border: '1px solid #e0e0e0' }}>
                 <Typography variant="subtitle2" fontWeight={600} gutterBottom sx={{ fontFamily: '"Courier New", monospace' }}>Resumen de la Cotización</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>Propiedad: {getPropertyName()}</Typography>
@@ -650,7 +750,8 @@ export default function QuoteBuilderModal({ open, onClose, quote = null, onSave,
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ borderTop: '1px solid #ececec', p: 2, gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
+      {/* ✅ ID: Acciones del Modal */}
+      <DialogActions id="quote-builder-actions" sx={{ borderTop: '1px solid #ececec', p: 2, gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
         {activeStep > 0 && (
           <Button onClick={handleBack} disabled={loading} sx={{ ...unifiedButtonSx, color: '#888' }}>
             {t('back', 'Atrás')}
