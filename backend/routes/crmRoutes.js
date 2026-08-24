@@ -75,7 +75,7 @@ router.get('/search', protect, superadmin, searchCrm)
  *         name: entity
  *         schema:
  *           type: string
- *           enum: [Lead, Client, Activity, Appointment, Campaign]
+ *           enum: [Lead, Client, Activity, Appointment, Campaign, Loan]
  *       - in: query
  *         name: entityId
  *         schema: { type: string }

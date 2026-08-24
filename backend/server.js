@@ -45,6 +45,7 @@ import onboardingRoutes from './routes/onboardingRoutes.js'
 import warrantyRoutes from './routes/warrantyRoutes.js'
 import surveyRoutes from './routes/surveyRoutes.js'
 import vendorRoutes from './routes/vendorRoutes.js'
+import loanRoutes from './routes/loanRoutes.js'
 import { startBackupScheduler } from './services/backupScheduler.js'
 import { startLeadScoringScheduler } from './services/leadScoringScheduler.js'
 import { startDocumentExpiryScheduler } from './services/documentExpiryScheduler.js'
@@ -146,6 +147,7 @@ app.use('/api/onboarding', onboardingRoutes)
 app.use('/api/warranties', warrantyRoutes)
 app.use('/api/surveys', surveyRoutes)
 app.use('/api/vendors', vendorRoutes)
+app.use('/api/loans', loanRoutes)
 
 // Start automatic GCS backup scheduler (if enabled)
 startBackupScheduler()

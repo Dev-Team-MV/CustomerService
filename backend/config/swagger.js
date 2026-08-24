@@ -1457,7 +1457,7 @@ const options = {
             },
             entity: {
               type: 'string',
-              enum: ['Lead', 'Client', 'Activity', 'Appointment', 'Campaign']
+              enum: ['Lead', 'Client', 'Activity', 'Appointment', 'Campaign', 'Loan']
             },
             entityId: { type: 'string' },
             changes: {
