@@ -58,8 +58,14 @@ const uploadLoanFile = (req, res, next) => {
  *         name: status
  *         schema: { type: string }
  *       - in: query
- *         name: assignedTo
+ *         name: buyer
  *         schema: { type: string }
+ *       - in: query
+ *         name: fromDate
+ *         schema: { type: string, format: date-time }
+ *       - in: query
+ *         name: toDate
+ *         schema: { type: string, format: date-time }
  *       - in: query
  *         name: page
  *         schema: { type: integer, default: 1 }
@@ -83,8 +89,7 @@ const uploadLoanFile = (req, res, next) => {
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             additionalProperties: true
+ *             $ref: '#/components/schemas/LoanCreate'
  *     responses:
  *       201:
  *         description: Loan created
