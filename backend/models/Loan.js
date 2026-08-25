@@ -161,6 +161,8 @@ const loanSchema = new mongoose.Schema(
 
     projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
     propertyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Property' },
+    apartmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Apartment' },
+    buildingId: { type: mongoose.Schema.Types.ObjectId, ref: 'Building' },
     propertyAddress: { type: String, trim: true },
 
     purchasePrice: { type: Number },
@@ -212,6 +214,8 @@ const loanSchema = new mongoose.Schema(
 loanSchema.index({ buyer: 1 })
 loanSchema.index({ projectId: 1 })
 loanSchema.index({ propertyId: 1 })
+loanSchema.index({ apartmentId: 1 })
+loanSchema.index({ buildingId: 1 })
 loanSchema.index({ pipelineStage: 1 })
 loanSchema.index({ specialStatus: 1 })
 loanSchema.index({ assignedTo: 1 })

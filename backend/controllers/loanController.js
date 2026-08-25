@@ -13,6 +13,8 @@ import Loan, {
 import User from '../models/User.js'
 import Project from '../models/Project.js'
 import Property from '../models/Property.js'
+import Apartment from '../models/Apartment.js'
+import Building from '../models/Building.js'
 import { isValidObjectId, parsePagination, buildPaginationMeta } from '../utils/crmHelpers.js'
 import { uploadFile, deleteFile } from '../services/storageService.js'
 import { computeLoanAlerts } from '../services/loanAlertService.js'
@@ -32,6 +34,15 @@ const POPULATE_FIELDS = [
       { path: 'model', select: 'model name' }
     ]
   },
+  {
+    path: 'apartmentId',
+    select: 'apartmentNumber floorNumber price status building apartmentModel',
+    populate: [
+      { path: 'building', select: 'name project' },
+      { path: 'apartmentModel', select: 'name modelNumber' }
+    ]
+  },
+  { path: 'buildingId', select: 'name project' },
   { path: 'projectId', select: 'name slug title' },
   { path: 'assignedTo', select: USER_SELECT },
   { path: 'nextAction.responsiblePerson', select: USER_SELECT },
@@ -44,6 +55,8 @@ const PROFILE_FIELDS = [
   'buyerContactInfo',
   'projectId',
   'propertyId',
+  'apartmentId',
+  'buildingId',
   'propertyAddress',
   'purchasePrice',
   'loanAmount',
@@ -153,7 +166,61 @@ function applyFinancialDefaults(data) {
   return data
 }
 
-async function validateRefs({ buyer, coBuyer, projectId, propertyId, responsiblePerson, assignedTo }) {
+function emptyToNull(value) {
+  if (value === undefined) return undefined
+  if (value === null || value === '') return null
+  return value
+}
+
+async function resolveUnitRefs({ propertyId, apartmentId, buildingId } = {}) {
+  const hasProp = propertyId !== undefined
+  const hasApt = apartmentId !== undefined
+  const hasBld = buildingId !== undefined
+  if (!hasProp && !hasApt && !hasBld) return { skip: true }
+
+  let prop = hasProp ? emptyToNull(propertyId) : undefined
+  let apt = hasApt ? emptyToNull(apartmentId) : undefined
+  let bld = hasBld ? emptyToNull(buildingId) : undefined
+
+  if (prop) {
+    if (!isValidObjectId(prop)) return { error: 'Invalid propertyId', status: 400 }
+    const propertyExists = await Property.exists({ _id: prop })
+    if (!propertyExists) {
+      const apartment = await Apartment.findById(prop).select('building').lean()
+      if (!apartment) {
+        return { error: 'Property or apartment not found', status: 404 }
+      }
+      apt = apt || prop
+      prop = null
+      if (bld === undefined && apartment.building) bld = apartment.building
+    } else {
+      apt = apt ?? null
+      bld = bld ?? null
+    }
+  }
+
+  if (apt) {
+    if (!isValidObjectId(apt)) return { error: 'Invalid apartmentId', status: 400 }
+    const apartment = await Apartment.findById(apt).select('building').lean()
+    if (!apartment) return { error: 'Apartment not found', status: 404 }
+    if (!bld) bld = apartment.building || null
+    if (prop === undefined) prop = null
+  }
+
+  if (bld) {
+    if (!isValidObjectId(bld)) return { error: 'Invalid buildingId', status: 400 }
+    const exists = await Building.exists({ _id: bld })
+    if (!exists) return { error: 'Building not found', status: 404 }
+  }
+
+  return {
+    propertyId: prop === undefined ? null : prop,
+    apartmentId: apt === undefined ? null : apt,
+    buildingId: bld === undefined ? null : bld
+  }
+}
+
+async function validateRefs({ buyer, coBuyer, projectId, responsiblePerson, assignedTo }) {
   if (buyer !== undefined) {
     if (!isValidObjectId(buyer)) return { error: 'Invalid buyer', status: 400 }
     const exists = await User.exists({ _id: buyer })
@@ -170,12 +237,6 @@ async function validateRefs({ buyer, coBuyer, projectId, propertyId, responsible
     if (!isValidObjectId(projectId)) return { error: 'Invalid projectId', status: 400 }
     const exists = await Project.exists({ _id: projectId })
     if (!exists) return { error: 'Project not found', status: 404 }
-  }
-
-  if (propertyId !== undefined && propertyId !== null && propertyId !== '') {
-    if (!isValidObjectId(propertyId)) return { error: 'Invalid propertyId', status: 400 }
-    const exists = await Property.exists({ _id: propertyId })
-    if (!exists) return { error: 'Property not found', status: 404 }
   }
 
   if (responsiblePerson !== undefined && responsiblePerson !== null && responsiblePerson !== '') {
@@ -204,6 +265,8 @@ function buildLoanFilter(query) {
     specialStatus,
     buyer,
     assignedTo,
+    propertyId,
+    apartmentId,
     fromDate,
     toDate,
     dateFrom,
@@ -236,6 +299,14 @@ function buildLoanFilter(query) {
   if (assignedTo) {
     if (!isValidObjectId(assignedTo)) return { error: 'Invalid assignedTo' }
     filter.assignedTo = assignedTo
+  }
+  if (propertyId) {
+    if (!isValidObjectId(propertyId)) return { error: 'Invalid propertyId' }
+    filter.propertyId = propertyId
+  }
+  if (apartmentId) {
+    if (!isValidObjectId(apartmentId)) return { error: 'Invalid apartmentId' }
+    filter.apartmentId = apartmentId
   }
 
   const start = fromDate || dateFrom
@@ -329,10 +400,16 @@ export const createLoan = async (req, res) => {
       buyer,
       coBuyer: body.coBuyer,
       projectId,
-      propertyId: body.propertyId,
       assignedTo: body.assignedTo
     })
     if (refs.error) return res.status(refs.status).json({ message: refs.error })
+
+    const unit = await resolveUnitRefs({
+      propertyId: body.propertyId,
+      apartmentId: body.apartmentId,
+      buildingId: body.buildingId
+    })
+    if (unit.error) return res.status(unit.status).json({ message: unit.error })
 
     applyFinancialDefaults(body)
 
@@ -342,7 +419,9 @@ export const createLoan = async (req, res) => {
       coBuyer: body.coBuyer || null,
       buyerContactInfo: body.buyerContactInfo || '',
       projectId,
-      propertyId: body.propertyId || null,
+      propertyId: unit.skip ? null : unit.propertyId,
+      apartmentId: unit.skip ? null : unit.apartmentId,
+      buildingId: unit.skip ? null : unit.buildingId,
       propertyAddress: body.propertyAddress || '',
       assignedTo: body.assignedTo || null,
       purchasePrice: body.purchasePrice || 0,
@@ -403,11 +482,28 @@ export const updateLoan = async (req, res) => {
       buyer: body.buyer,
       coBuyer: body.coBuyer,
       projectId: body.projectId,
-      propertyId: body.propertyId,
       assignedTo: body.assignedTo,
       responsiblePerson: body.nextAction?.responsiblePerson
     })
     if (refs.error) return res.status(refs.status).json({ message: refs.error })
+
+    if (
+      body.propertyId !== undefined ||
+      body.apartmentId !== undefined ||
+      body.buildingId !== undefined
+    ) {
+      const unit = await resolveUnitRefs({
+        propertyId: body.propertyId,
+        apartmentId: body.apartmentId,
+        buildingId: body.buildingId
+      })
+      if (unit.error) return res.status(unit.status).json({ message: unit.error })
+      if (!unit.skip) {
+        body.propertyId = unit.propertyId
+        body.apartmentId = unit.apartmentId
+        body.buildingId = unit.buildingId
+      }
+    }
 
     let nextActionTouched = false
     if (nextActionOnly || body.nextAction !== undefined) {
@@ -421,7 +517,7 @@ export const updateLoan = async (req, res) => {
       for (const field of PROFILE_FIELDS) {
         if (body[field] === undefined) continue
         if (
-          ['coBuyer', 'propertyId', 'assignedTo', 'contractDate', 'estimatedClosingDate'].includes(field) &&
+          ['coBuyer', 'propertyId', 'apartmentId', 'buildingId', 'assignedTo', 'contractDate', 'estimatedClosingDate'].includes(field) &&
           body[field] === ''
         ) {
           loan[field] = null
