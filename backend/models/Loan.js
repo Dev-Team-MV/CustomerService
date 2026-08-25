@@ -196,7 +196,7 @@ const loanSchema = new mongoose.Schema(
     percentComplete: { type: Number, default: 0, min: 0, max: 100 },
     stageEnteredAt: { type: Date, default: Date.now },
 
-    nextAction: { type: nextActionSchema },
+    nextAction: { type: nextActionSchema, default: () => ({}) },
 
     assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
