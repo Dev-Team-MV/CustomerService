@@ -98,7 +98,7 @@ export const LOAN_DOCUMENT_STATUSES = [
   'not_applicable'
 ]
 
-export const LOAN_TYPES = ['Conventional', 'FHA', 'VA', 'USDA', 'Jumbo', 'Other']
+export const LOAN_TYPES = ['Conventional', 'FHA', 'VA', 'USDA', 'Jumbo', 'DSCR', 'Other']
 
 export const STAGE_LABELS = {
   new_loan_buyer_added: 'New Loan / Buyer Added',

@@ -181,8 +181,28 @@ export default function LoanProfileForm({ loan, onSave, onStageChange, onStatusC
           <Grid item xs={12}><SectionTitle>Financial</SectionTitle></Grid>
           <Grid item xs={12} sm={6} md={3}><TextField fullWidth type="number" label="Purchase Price" value={form.purchasePrice} onChange={change('purchasePrice')} size="small" sx={fieldSx} /></Grid>
           <Grid item xs={12} sm={6} md={3}><TextField fullWidth type="number" label="Loan Amount" value={form.loanAmount} onChange={change('loanAmount')} size="small" sx={fieldSx} /></Grid>
-          <Grid item xs={12} sm={6} md={3}><TextField fullWidth type="number" label="Down Payment" value={form.downPayment} onChange={change('downPayment')} size="small" sx={fieldSx} /></Grid>
-          <Grid item xs={12} sm={6} md={3}><TextField fullWidth type="number" label="Down Payment %" value={form.downPaymentPercent} onChange={change('downPaymentPercent')} size="small" sx={fieldSx} /></Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField
+              fullWidth
+              type="number"
+              label="Down Payment %"
+              value={form.downPaymentPercent}
+              onChange={(e) => {
+                const pct = e.target.value
+                const price = Number(form.purchasePrice) || 0
+                const dp = price > 0 && pct ? Math.round((pct / 100) * price * 100) / 100 : ''
+                setForm(prev => ({ ...prev, downPaymentPercent: pct, downPayment: dp }))
+              }}
+              size="small"
+              sx={fieldSx}
+              inputProps={{ min: 0, max: 100, step: 0.5 }}
+              helperText={
+                form.downPayment && Number(form.downPayment) > 0
+                  ? `$${Number(form.downPayment).toLocaleString()}`
+                  : form.purchasePrice ? 'Enter % to calculate' : 'Set purchase price first'
+              }
+            />
+          </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <TextField fullWidth select label="Loan Type" value={form.loanType} onChange={change('loanType')} size="small" sx={fieldSx}>
               {LOAN_TYPES.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}

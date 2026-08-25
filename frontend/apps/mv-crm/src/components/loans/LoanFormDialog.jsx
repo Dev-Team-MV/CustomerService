@@ -50,6 +50,7 @@ export default function LoanFormDialog({ open, onClose, onSubmit, loan = null })
         purchasePrice: loan?.purchasePrice || '',
         loanAmount: loan?.loanAmount || '',
         downPayment: loan?.downPayment || '',
+        downPaymentPercent: loan?.downPaymentPercent || '',
         loanType: loan?.loanType || 'Conventional',
         interestRate: loan?.interestRate || '',
         estimatedMonthlyPayment: loan?.estimatedMonthlyPayment || '',
@@ -156,6 +157,7 @@ export default function LoanFormDialog({ open, onClose, onSubmit, loan = null })
       if (data.purchasePrice) data.purchasePrice = Number(data.purchasePrice)
       if (data.loanAmount) data.loanAmount = Number(data.loanAmount)
       if (data.downPayment) data.downPayment = Number(data.downPayment)
+      if (data.downPaymentPercent) data.downPaymentPercent = Number(data.downPaymentPercent)
       if (data.interestRate) data.interestRate = Number(data.interestRate)
       if (data.estimatedMonthlyPayment) data.estimatedMonthlyPayment = Number(data.estimatedMonthlyPayment)
 
@@ -311,7 +313,28 @@ export default function LoanFormDialog({ open, onClose, onSubmit, loan = null })
               helperText={form.propertyId ? 'Auto-filled from property' : ''}
             />
           </Grid>
-          <Grid item xs={12} sm={4}><TextField fullWidth type="number" label="Down Payment" value={form.downPayment || ''} onChange={change('downPayment')} size="small" sx={fieldSx} /></Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              type="number"
+              label="Down Payment %"
+              value={form.downPaymentPercent || ''}
+              onChange={(e) => {
+                const pct = e.target.value
+                const price = Number(form.purchasePrice) || 0
+                const dp = price > 0 && pct ? Math.round((pct / 100) * price * 100) / 100 : ''
+                setForm(prev => ({ ...prev, downPaymentPercent: pct, downPayment: dp }))
+              }}
+              size="small"
+              sx={fieldSx}
+              inputProps={{ min: 0, max: 100, step: 0.5 }}
+              helperText={
+                form.downPayment && Number(form.downPayment) > 0
+                  ? `$${Number(form.downPayment).toLocaleString()}`
+                  : form.purchasePrice ? 'Enter % to calculate' : 'Set purchase price first'
+              }
+            />
+          </Grid>
           <Grid item xs={12} sm={4}><TextField fullWidth type="number" label="Loan Amount" value={form.loanAmount || ''} onChange={change('loanAmount')} size="small" sx={fieldSx} /></Grid>
           <Grid item xs={12} sm={4}>
             <TextField fullWidth select label="Loan Type" value={form.loanType || 'Conventional'} onChange={change('loanType')} size="small" sx={fieldSx}>
