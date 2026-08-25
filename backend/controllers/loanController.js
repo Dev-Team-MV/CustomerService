@@ -88,6 +88,59 @@ function parseOptionalDate(value) {
   return { value: date }
 }
 
+const NEXT_ACTION_KEYS = ['description', 'responsiblePerson', 'deadline']
+
+function isBareNextActionBody(body = {}) {
+  const keys = Object.keys(body)
+  if (!keys.length) return false
+  return keys.every((key) => NEXT_ACTION_KEYS.includes(key))
+}
+
+function currentNextAction(loan) {
+  const raw = loan.nextAction?.toObject?.({ depopulate: true }) || loan.nextAction || {}
+  return {
+    description: raw.description || '',
+    responsiblePerson: raw.responsiblePerson || null,
+    deadline: raw.deadline || null
+  }
+}
+
+async function applyNextActionFields(loan, payload, req) {
+  const source =
+    payload?.nextAction && typeof payload.nextAction === 'object' ? payload.nextAction : payload
+  const { description, responsiblePerson, deadline } = source || {}
+
+  const refs = await validateRefs({ responsiblePerson })
+  if (refs.error) return refs
+
+  const parsedDeadline = parseOptionalDate(deadline)
+  if (parsedDeadline.error) return { error: parsedDeadline.error, status: 400 }
+
+  const next = currentNextAction(loan)
+  if (description !== undefined) next.description = description
+  if (responsiblePerson !== undefined) {
+    next.responsiblePerson =
+      responsiblePerson === '' || responsiblePerson === null ? null : responsiblePerson
+  }
+  if (!parsedDeadline.skip) next.deadline = parsedDeadline.value
+
+  loan.nextAction = next
+  loan.markModified('nextAction')
+
+  pushTimeline(loan, {
+    action: 'next_action_updated',
+    description: next.description || 'Next action updated',
+    performedBy: actorId(req),
+    metadata: {
+      description: next.description,
+      responsiblePerson: next.responsiblePerson,
+      deadline: next.deadline
+    }
+  })
+
+  return { error: null }
+}
+
 function applyFinancialDefaults(data) {
   const purchasePrice = Number(data.purchasePrice) || 0
   const downPayment = Number(data.downPayment) || 0
@@ -340,6 +393,8 @@ export const updateLoan = async (req, res) => {
     if (!loan) return
 
     const body = req.body || {}
+    const nextActionOnly = isBareNextActionBody(body)
+
     if (body.loanType !== undefined && !LOAN_TYPES.includes(body.loanType)) {
       return res.status(400).json({ message: `Invalid loanType. Allowed: ${LOAN_TYPES.join(', ')}` })
     }
@@ -349,33 +404,50 @@ export const updateLoan = async (req, res) => {
       coBuyer: body.coBuyer,
       projectId: body.projectId,
       propertyId: body.propertyId,
-      assignedTo: body.assignedTo
+      assignedTo: body.assignedTo,
+      responsiblePerson: body.nextAction?.responsiblePerson
     })
     if (refs.error) return res.status(refs.status).json({ message: refs.error })
 
-    const changes = {}
-    for (const field of PROFILE_FIELDS) {
-      if (body[field] === undefined) continue
-      if (
-        ['coBuyer', 'propertyId', 'assignedTo', 'contractDate', 'estimatedClosingDate'].includes(field) &&
-        body[field] === ''
-      ) {
-        loan[field] = null
-        changes[field] = null
-        continue
-      }
-      loan[field] = body[field]
-      changes[field] = body[field]
+    let nextActionTouched = false
+    if (nextActionOnly || body.nextAction !== undefined) {
+      const nextResult = await applyNextActionFields(loan, body, req)
+      if (nextResult.error) return res.status(nextResult.status).json({ message: nextResult.error })
+      nextActionTouched = true
     }
 
-    applyFinancialDefaults(loan)
+    const changes = {}
+    if (!nextActionOnly) {
+      for (const field of PROFILE_FIELDS) {
+        if (body[field] === undefined) continue
+        if (
+          ['coBuyer', 'propertyId', 'assignedTo', 'contractDate', 'estimatedClosingDate'].includes(field) &&
+          body[field] === ''
+        ) {
+          loan[field] = null
+          changes[field] = null
+          continue
+        }
+        loan[field] = body[field]
+        changes[field] = body[field]
+      }
 
-    pushTimeline(loan, {
-      action: 'updated',
-      description: 'Loan profile updated',
-      performedBy: actorId(req),
-      metadata: { fields: Object.keys(changes) }
-    })
+      applyFinancialDefaults(loan)
+    }
+
+    if (Object.keys(changes).length) {
+      pushTimeline(loan, {
+        action: 'updated',
+        description: 'Loan profile updated',
+        performedBy: actorId(req),
+        metadata: { fields: Object.keys(changes) }
+      })
+    }
+
+    if (!Object.keys(changes).length && !nextActionTouched) {
+      await loan.populate(POPULATE_FIELDS)
+      return res.json(loan)
+    }
 
     await loan.save()
     await loan.populate(POPULATE_FIELDS)
@@ -539,29 +611,8 @@ export const updateNextAction = async (req, res) => {
     const loan = await findLoanOr404(req.params.id, res)
     if (!loan) return
 
-    const { description, responsiblePerson, deadline } = req.body || {}
-    const refs = await validateRefs({ responsiblePerson })
-    if (refs.error) return res.status(refs.status).json({ message: refs.error })
-
-    const parsedDeadline = parseOptionalDate(deadline)
-    if (parsedDeadline.error) return res.status(400).json({ message: parsedDeadline.error })
-
-    if (description !== undefined) loan.nextAction.description = description
-    if (responsiblePerson !== undefined) {
-      loan.nextAction.responsiblePerson =
-        responsiblePerson === '' || responsiblePerson === null ? null : responsiblePerson
-    }
-    if (!parsedDeadline.skip) loan.nextAction.deadline = parsedDeadline.value
-
-    pushTimeline(loan, {
-      action: 'next_action_updated',
-      description: 'Next action updated',
-      performedBy: actorId(req),
-      metadata: {
-        description: loan.nextAction.description,
-        deadline: loan.nextAction.deadline
-      }
-    })
+    const nextResult = await applyNextActionFields(loan, req.body || {}, req)
+    if (nextResult.error) return res.status(nextResult.status).json({ message: nextResult.error })
 
     await loan.save()
     await loan.populate(POPULATE_FIELDS)
