@@ -29,6 +29,8 @@ import Quote from './pages/Quotes'
 import PostSale from './pages/PostSale'
 import Referrals from './pages/Referrals'
 import Vendors from './pages/Vendors'
+import Loans from './pages/Loans'
+import LoanDetail from './pages/LoanDetail'
 
 const theme = createTheme({
   palette: {
@@ -170,7 +172,19 @@ export default function App() {
           <Route path="/campaigns" element={
             <ProtectedRoute requiredRole="admin">
               <Campaigns />
-            </ProtectedRoute> 
+            </ProtectedRoute>
+          }
+          />
+          <Route path="/loans" element={
+            <ProtectedRoute requiredRole="admin">
+              <Loans />
+            </ProtectedRoute>
+          }
+          />
+          <Route path="/loans/:id" element={
+            <ProtectedRoute requiredRole="admin">
+              <LoanDetail />
+            </ProtectedRoute>
           }
           />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

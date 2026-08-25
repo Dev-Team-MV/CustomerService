@@ -15,6 +15,7 @@ import {
   AutoFixHigh,
   Campaign,
   AccountBalanceWallet,
+  AccountBalance,
   ReceiptLong,
   Description,
   Handshake,
@@ -48,6 +49,7 @@ const NAV = [
   { key: 'payments', labelKey: 'payments', icon: Paid, path: '/payments' },
   { key: 'reports', labelKey: 'reports', icon: Assessment, path: '/reports' },
   { key: 'agents', labelKey: 'agents', icon: SupportAgent, path: '/agents' },
+  { key: 'loans', labelKey: 'loans', icon: AccountBalance, path: '/loans' },
   { key: 'activities', labelKey: 'activities', icon: TaskAlt, path: '/activities' },
   { key: 'analytics', labelKey: 'analytics', icon: Insights, path: '/analytics' },
   { key: 'messageTemplates', labelKey: 'messageTemplates', icon: Message, path: '/message-templates' }
