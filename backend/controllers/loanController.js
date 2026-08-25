@@ -33,6 +33,7 @@ const POPULATE_FIELDS = [
     ]
   },
   { path: 'projectId', select: 'name slug title' },
+  { path: 'assignedTo', select: USER_SELECT },
   { path: 'nextAction.responsiblePerson', select: USER_SELECT },
   { path: 'timeline.performedBy', select: USER_SELECT }
 ]
@@ -40,8 +41,10 @@ const POPULATE_FIELDS = [
 const PROFILE_FIELDS = [
   'buyer',
   'coBuyer',
+  'buyerContactInfo',
   'projectId',
   'propertyId',
+  'propertyAddress',
   'purchasePrice',
   'loanAmount',
   'downPayment',
@@ -59,6 +62,7 @@ const PROFILE_FIELDS = [
   'titleCompany',
   'insuranceCompany',
   'appraisalCompany',
+  'assignedTo',
   'internalNotes'
 ]
 
@@ -96,7 +100,7 @@ function applyFinancialDefaults(data) {
   return data
 }
 
-async function validateRefs({ buyer, coBuyer, projectId, propertyId, responsiblePerson }) {
+async function validateRefs({ buyer, coBuyer, projectId, propertyId, responsiblePerson, assignedTo }) {
   if (buyer !== undefined) {
     if (!isValidObjectId(buyer)) return { error: 'Invalid buyer', status: 400 }
     const exists = await User.exists({ _id: buyer })
@@ -129,6 +133,12 @@ async function validateRefs({ buyer, coBuyer, projectId, propertyId, responsible
     if (!exists) return { error: 'Responsible person not found', status: 404 }
   }
 
+  if (assignedTo !== undefined && assignedTo !== null && assignedTo !== '') {
+    if (!isValidObjectId(assignedTo)) return { error: 'Invalid assignedTo', status: 400 }
+    const exists = await User.exists({ _id: assignedTo })
+    if (!exists) return { error: 'Assigned user not found', status: 404 }
+  }
+
   return { error: null }
 }
 
@@ -140,6 +150,7 @@ function buildLoanFilter(query) {
     status,
     specialStatus,
     buyer,
+    assignedTo,
     fromDate,
     toDate,
     dateFrom,
@@ -168,6 +179,10 @@ function buildLoanFilter(query) {
   if (buyer) {
     if (!isValidObjectId(buyer)) return { error: 'Invalid buyer' }
     filter.buyer = buyer
+  }
+  if (assignedTo) {
+    if (!isValidObjectId(assignedTo)) return { error: 'Invalid assignedTo' }
+    filter.assignedTo = assignedTo
   }
 
   const start = fromDate || dateFrom
@@ -261,7 +276,8 @@ export const createLoan = async (req, res) => {
       buyer,
       coBuyer: body.coBuyer,
       projectId,
-      propertyId: body.propertyId
+      propertyId: body.propertyId,
+      assignedTo: body.assignedTo
     })
     if (refs.error) return res.status(refs.status).json({ message: refs.error })
 
@@ -271,8 +287,11 @@ export const createLoan = async (req, res) => {
     const loan = await Loan.create({
       buyer,
       coBuyer: body.coBuyer || null,
+      buyerContactInfo: body.buyerContactInfo || '',
       projectId,
       propertyId: body.propertyId || null,
+      propertyAddress: body.propertyAddress || '',
+      assignedTo: body.assignedTo || null,
       purchasePrice: body.purchasePrice || 0,
       loanAmount: body.loanAmount || 0,
       downPayment: body.downPayment || 0,
@@ -329,14 +348,18 @@ export const updateLoan = async (req, res) => {
       buyer: body.buyer,
       coBuyer: body.coBuyer,
       projectId: body.projectId,
-      propertyId: body.propertyId
+      propertyId: body.propertyId,
+      assignedTo: body.assignedTo
     })
     if (refs.error) return res.status(refs.status).json({ message: refs.error })
 
     const changes = {}
     for (const field of PROFILE_FIELDS) {
       if (body[field] === undefined) continue
-      if (['coBuyer', 'propertyId', 'contractDate', 'estimatedClosingDate'].includes(field) && body[field] === '') {
+      if (
+        ['coBuyer', 'propertyId', 'assignedTo', 'contractDate', 'estimatedClosingDate'].includes(field) &&
+        body[field] === ''
+      ) {
         loan[field] = null
         changes[field] = null
         continue

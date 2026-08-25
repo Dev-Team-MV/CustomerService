@@ -113,229 +113,109 @@ export function buildDefaultDocumentChecklist() {
     documentType,
     status: 'not_applicable',
     fileUrl: null,
-    gcsFileName: null,
     uploadedAt: null,
     notes: '',
+    gcsFileName: null,
     statusChangedAt: now
   }))
 }
 
 const documentChecklistItemSchema = new mongoose.Schema(
   {
-    documentType: {
-      type: String,
-      enum: LOAN_DOCUMENT_TYPES,
-      required: true
-    },
-    status: {
-      type: String,
-      enum: LOAN_DOCUMENT_STATUSES,
-      default: 'not_applicable'
-    },
-    fileUrl: {
-      type: String,
-      trim: true,
-      default: null
-    },
-    gcsFileName: {
-      type: String,
-      trim: true,
-      default: null
-    },
-    uploadedAt: {
-      type: Date,
-      default: null
-    },
-    notes: {
-      type: String,
-      trim: true,
-      default: ''
-    },
-    statusChangedAt: {
-      type: Date,
-      default: Date.now
-    }
+    documentType: { type: String, enum: LOAN_DOCUMENT_TYPES, required: true },
+    status: { type: String, enum: LOAN_DOCUMENT_STATUSES, default: 'not_applicable' },
+    fileUrl: { type: String },
+    uploadedAt: { type: Date },
+    notes: { type: String, trim: true },
+    gcsFileName: { type: String, trim: true, default: null },
+    statusChangedAt: { type: Date, default: Date.now }
   },
   { _id: true }
 )
 
-const timelineItemSchema = new mongoose.Schema(
+const timelineEntrySchema = new mongoose.Schema(
   {
-    action: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    description: {
-      type: String,
-      trim: true,
-      default: ''
-    },
-    performedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      default: null
-    },
-    timestamp: {
-      type: Date,
-      default: Date.now
-    },
-    metadata: {
-      type: mongoose.Schema.Types.Mixed,
-      default: {}
-    }
+    action: { type: String, required: true },
+    description: { type: String },
+    performedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    timestamp: { type: Date, default: Date.now },
+    metadata: { type: mongoose.Schema.Types.Mixed }
   },
   { _id: true }
 )
 
 const nextActionSchema = new mongoose.Schema(
   {
-    description: {
-      type: String,
-      trim: true,
-      default: ''
-    },
-    responsiblePerson: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      default: null
-    },
-    deadline: {
-      type: Date,
-      default: null
-    }
+    description: { type: String, trim: true },
+    responsiblePerson: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    deadline: { type: Date }
   },
   { _id: false }
 )
 
 const loanSchema = new mongoose.Schema(
   {
-    buyer: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'Buyer is required'],
-      index: true
-    },
-    coBuyer: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      default: null
-    },
-    projectId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Project',
-      required: [true, 'Project is required'],
-      index: true
-    },
-    propertyId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Property',
-      default: null,
-      index: true
-    },
-    purchasePrice: {
-      type: Number,
-      min: 0,
-      default: 0
-    },
-    loanAmount: {
-      type: Number,
-      min: 0,
-      default: 0
-    },
-    downPayment: {
-      type: Number,
-      min: 0,
-      default: 0
-    },
-    downPaymentPercent: {
-      type: Number,
-      min: 0,
-      max: 100,
-      default: 0
-    },
-    interestRate: {
-      type: Number,
-      min: 0,
-      default: 0
-    },
-    estimatedMonthlyPayment: {
-      type: Number,
-      min: 0,
-      default: 0
-    },
-    contractDate: {
-      type: Date,
-      default: null
-    },
-    estimatedClosingDate: {
-      type: Date,
-      default: null,
-      index: true
-    },
-    loanType: {
-      type: String,
-      enum: LOAN_TYPES,
-      default: 'Conventional'
-    },
-    lender: { type: String, trim: true, default: '' },
-    loanOfficer: { type: String, trim: true, default: '' },
-    loanOfficerContact: { type: String, trim: true, default: '' },
-    processor: { type: String, trim: true, default: '' },
-    underwriter: { type: String, trim: true, default: '' },
-    titleCompany: { type: String, trim: true, default: '' },
-    insuranceCompany: { type: String, trim: true, default: '' },
-    appraisalCompany: { type: String, trim: true, default: '' },
+    buyer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    coBuyer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    buyerContactInfo: { type: String, trim: true },
+
+    projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
+    propertyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Property' },
+    propertyAddress: { type: String, trim: true },
+
+    purchasePrice: { type: Number },
+    loanAmount: { type: Number },
+    downPayment: { type: Number },
+    downPaymentPercent: { type: Number },
+    loanType: { type: String, enum: LOAN_TYPES },
+    interestRate: { type: Number },
+    estimatedMonthlyPayment: { type: Number },
+
+    contractDate: { type: Date },
+    estimatedClosingDate: { type: Date },
+
+    lender: { type: String, trim: true },
+    loanOfficer: { type: String, trim: true },
+    loanOfficerContact: { type: String, trim: true },
+    processor: { type: String, trim: true },
+    underwriter: { type: String, trim: true },
+    titleCompany: { type: String, trim: true },
+    insuranceCompany: { type: String, trim: true },
+    appraisalCompany: { type: String, trim: true },
+
     pipelineStage: {
       type: String,
       enum: LOAN_PIPELINE_STAGES,
-      default: 'new_loan_buyer_added',
-      index: true
+      default: 'new_loan_buyer_added'
     },
     specialStatus: {
       type: String,
       enum: [...LOAN_SPECIAL_STATUSES, null],
-      default: null,
-      index: true
+      default: null
     },
-    percentComplete: {
-      type: Number,
-      min: 0,
-      max: 100,
-      default: 0
-    },
-    stageEnteredAt: {
-      type: Date,
-      default: Date.now
-    },
-    internalNotes: {
-      type: String,
-      trim: true,
-      default: ''
-    },
-    nextAction: {
-      type: nextActionSchema,
-      default: () => ({})
-    },
-    documentChecklist: {
-      type: [documentChecklistItemSchema],
-      default: []
-    },
-    timeline: {
-      type: [timelineItemSchema],
-      default: []
-    }
+    percentComplete: { type: Number, default: 0, min: 0, max: 100 },
+    stageEnteredAt: { type: Date, default: Date.now },
+
+    nextAction: { type: nextActionSchema },
+
+    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+    internalNotes: { type: String, trim: true },
+
+    documentChecklist: [documentChecklistItemSchema],
+
+    timeline: [timelineEntrySchema]
   },
   { timestamps: true }
 )
 
-loanSchema.index({ buyer: 1, projectId: 1 })
+loanSchema.index({ buyer: 1 })
+loanSchema.index({ projectId: 1 })
+loanSchema.index({ propertyId: 1 })
+loanSchema.index({ pipelineStage: 1 })
+loanSchema.index({ specialStatus: 1 })
+loanSchema.index({ assignedTo: 1 })
+loanSchema.index({ estimatedClosingDate: 1 })
 loanSchema.index({ projectId: 1, pipelineStage: 1 })
-loanSchema.index({ projectId: 1, specialStatus: 1 })
-loanSchema.index({ pipelineStage: 1, stageEnteredAt: 1 })
-loanSchema.index({ estimatedClosingDate: 1, pipelineStage: 1 })
-loanSchema.index({ createdAt: -1 })
 
-const Loan = mongoose.model('Loan', loanSchema)
-
-export default Loan
+export default mongoose.model('Loan', loanSchema)

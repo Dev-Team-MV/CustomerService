@@ -61,6 +61,9 @@ const uploadLoanFile = (req, res, next) => {
  *         name: buyer
  *         schema: { type: string }
  *       - in: query
+ *         name: assignedTo
+ *         schema: { type: string }
+ *       - in: query
  *         name: fromDate
  *         schema: { type: string, format: date-time }
  *       - in: query
