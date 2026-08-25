@@ -118,6 +118,7 @@ export default function LoanProfileForm({ loan, onSave, onStageChange, onStatusC
           size="small"
           sx={{ minWidth: 250, ...fieldSx }}
         >
+          <MenuItem value=""><em>TBD</em></MenuItem>
           {LOAN_PIPELINE_STAGES.map(s => (
             <MenuItem key={s} value={s}>{STAGE_LABELS[s]}</MenuItem>
           ))}
@@ -130,7 +131,7 @@ export default function LoanProfileForm({ loan, onSave, onStageChange, onStatusC
           size="small"
           sx={{ minWidth: 200, ...fieldSx }}
         >
-          <MenuItem value="">None</MenuItem>
+          <MenuItem value=""><em>TBD</em></MenuItem>
           {LOAN_SPECIAL_STATUSES.map(s => (
             <MenuItem key={s} value={s}>{SPECIAL_STATUS_LABELS[s]}</MenuItem>
           ))}
@@ -205,6 +206,7 @@ export default function LoanProfileForm({ loan, onSave, onStageChange, onStatusC
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <TextField fullWidth select label="Loan Type" value={form.loanType} onChange={change('loanType')} size="small" sx={fieldSx}>
+              <MenuItem value=""><em>TBD</em></MenuItem>
               {LOAN_TYPES.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
             </TextField>
           </Grid>

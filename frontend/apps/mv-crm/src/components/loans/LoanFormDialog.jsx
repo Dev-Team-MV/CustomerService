@@ -203,6 +203,7 @@ export default function LoanFormDialog({ open, onClose, onSubmit, loan = null })
                 label="Project *"
                 sx={selectSx}
               >
+                <MenuItem value=""><em>TBD</em></MenuItem>
                 {loadingProjects && <MenuItem disabled>Loading...</MenuItem>}
                 {projects.map(p => (
                   <MenuItem key={p._id} value={p._id}>
@@ -224,7 +225,7 @@ export default function LoanFormDialog({ open, onClose, onSubmit, loan = null })
                 sx={selectSx}
               >
                 <MenuItem value="">
-                  <em>None</em>
+                  <em>TBD</em>
                 </MenuItem>
                 {loadingProperties && <MenuItem disabled>Loading properties...</MenuItem>}
                 {properties.map(p => (
@@ -337,7 +338,8 @@ export default function LoanFormDialog({ open, onClose, onSubmit, loan = null })
           </Grid>
           <Grid item xs={12} sm={4}><TextField fullWidth type="number" label="Loan Amount" value={form.loanAmount || ''} onChange={change('loanAmount')} size="small" sx={fieldSx} /></Grid>
           <Grid item xs={12} sm={4}>
-            <TextField fullWidth select label="Loan Type" value={form.loanType || 'Conventional'} onChange={change('loanType')} size="small" sx={fieldSx}>
+            <TextField fullWidth select label="Loan Type" value={form.loanType || ''} onChange={change('loanType')} size="small" sx={fieldSx}>
+              <MenuItem value=""><em>TBD</em></MenuItem>
               {LOAN_TYPES.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
             </TextField>
           </Grid>
