@@ -11,7 +11,7 @@ export const AUDIT_ACTIONS = [
   'impersonation_stopped'
 ]
 
-export const AUDIT_ENTITIES = ['Lead', 'Client', 'Activity', 'Appointment', 'Campaign']
+export const AUDIT_ENTITIES = ['Lead', 'Client', 'Activity', 'Appointment', 'Campaign', 'Loan']
 
 const auditLogSchema = new mongoose.Schema(
   {
