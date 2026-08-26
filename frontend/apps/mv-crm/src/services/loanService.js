@@ -1,163 +1,375 @@
 import api from '@shared/services/api'
 
-// ─── CONSTANTES DE UI Y ESTADOS ────────────────────────────────────────────────
-
 export const LOAN_PIPELINE_STAGES = [
-  // FASE 1: Inicio y Aplicación
-  { id: 'new_loan_buyer_added', name: 'New Loan / Buyer Added', phase: 'Application', order: 1 },
-  { id: 'loan_application_started', name: 'Application Started', phase: 'Application', order: 2 },
-  { id: 'loan_application_completed', name: 'Application Completed', phase: 'Application', order: 3 },
-  { id: 'pre_qualified', name: 'Pre-Qualified', phase: 'Application', order: 4 },
-  { id: 'pre_approved', name: 'Pre-Approved', phase: 'Application', order: 5 },
-  
-  // FASE 2: Procesamiento
-  { id: 'processing', name: 'Processing', phase: 'Processing', order: 6 },
-  { id: 'documents_received', name: 'Documents Received', phase: 'Processing', order: 7 },
-  { id: 'additional_documents_requested', name: 'Additional Docs Requested', phase: 'Processing', order: 8 },
-  { id: 'appraisal_ordered', name: 'Appraisal Ordered', phase: 'Processing', order: 9 },
-  { id: 'appraisal_received', name: 'Appraisal Received', phase: 'Processing', order: 10 },
-  
-  // FASE 3: Underwriting
-  { id: 'submitted_to_underwriting', name: 'Submitted to UW', phase: 'Underwriting', order: 11 },
-  { id: 'underwriting_review', name: 'UW Review', phase: 'Underwriting', order: 12 },
-  { id: 'conditional_approval', name: 'Conditional Approval', phase: 'Underwriting', order: 13 },
-  { id: 'conditions_submitted', name: 'Conditions Submitted', phase: 'Underwriting', order: 14 },
-  { id: 'clear_to_close', name: 'Clear to Close', phase: 'Underwriting', order: 15 },
-  
-  // FASE 4: Cierre
-  { id: 'closing_disclosure_issued', name: 'CD Issued', phase: 'Closing', order: 16 },
-  { id: 'closing_scheduled', name: 'Closing Scheduled', phase: 'Closing', order: 17 },
-  { id: 'closing_documents_signed', name: 'Docs Signed', phase: 'Closing', order: 18 },
-  { id: 'loan_funded', name: 'Loan Funded', phase: 'Closing', order: 19 },
-  
-  // FASE 5: Completado
-  { id: 'title_confirmed_closed', name: 'Title Confirmed / Closed', phase: 'Completed', order: 20 },
-  { id: 'completed', name: 'Completed', phase: 'Completed', order: 21 }
+  'new_loan_buyer_added',
+  'loan_application_sent',
+  'loan_application_started',
+  'loan_application_completed',
+  'initial_documents_requested',
+  'documents_received',
+  'documents_missing_pending',
+  'pre_qualification_in_review',
+  'pre_qualified',
+  'pre_approval_in_review',
+  'pre_approved',
+  'property_unit_selected',
+  'purchase_contract_executed',
+  'contract_sent_to_lender',
+  'loan_estimate_issued',
+  'disclosures_sent',
+  'disclosures_signed',
+  'processing',
+  'additional_documents_requested',
+  'submitted_to_underwriting',
+  'underwriting_review',
+  'conditional_approval',
+  'conditions_outstanding',
+  'conditions_submitted',
+  'appraisal_ordered',
+  'appraisal_scheduled',
+  'appraisal_completed',
+  'appraisal_received',
+  'appraisal_approved',
+  'title_ordered_title_review',
+  'insurance_requested',
+  'insurance_received',
+  'final_underwriting',
+  'clear_to_close',
+  'closing_disclosure_issued',
+  'closing_disclosure_signed',
+  'closing_scheduled',
+  'buyer_funds_due',
+  'closing_documents_signed',
+  'loan_funded',
+  'title_confirmed_closed',
+  'completed'
 ]
 
 export const LOAN_SPECIAL_STATUSES = [
-  { key: 'on_hold', label: 'On Hold', color: '#ff9800' },
-  { key: 'missing_documents', label: 'Missing Documents', color: '#e91e63' },
-  { key: 'buyer_action_required', label: 'Buyer Action Required', color: '#f44336' },
-  { key: 'financing_issue', label: 'Financing Issue', color: '#9c27b0' },
-  { key: 'cancelled', label: 'Cancelled', color: '#757575' }
+  'on_hold',
+  'buyer_action_required',
+  'lender_action_required',
+  'developer_action_required',
+  'missing_documents',
+  'financing_issue',
+  'appraisal_issue',
+  'title_issue',
+  'loan_denied',
+  'buyer_withdrawn',
+  'cancelled'
 ]
 
 export const LOAN_DOCUMENT_TYPES = [
-  { key: 'bank_statements', label: 'Bank Statements', color: '#ff9800' },
-  { key: 'paystubs', label: 'Paystubs', color: '#2196f3' },
-  { key: 'tax_returns', label: 'Tax Returns', color: '#4caf50' },
-  { key: 'id_proof', label: 'ID Proof', color: '#9e9e9e' },
-  { key: 'employment_letter', label: 'Employment Letter', color: '#00bcd4' }
+  'loan_application',
+  'government_id_passport',
+  'ssn_itin',
+  'proof_of_address',
+  'bank_statements',
+  'proof_of_funds',
+  'income_verification',
+  'pay_stubs',
+  'w2s',
+  'tax_returns',
+  'pl_statements',
+  'cpa_letter',
+  'employment_verification',
+  'credit_authorization',
+  'purchase_agreement',
+  'amendments',
+  'earnest_money_receipt',
+  'down_payment_verification',
+  'gift_letter',
+  'loan_estimate',
+  'signed_disclosures',
+  'appraisal',
+  'homeowners_insurance',
+  'title_commitment',
+  'closing_disclosure',
+  'clear_to_close',
+  'final_closing_documents'
 ]
 
-export const STAGE_COLORS = {
-  'Application': '#9e9e9e',
-  'Processing': '#2196f3',
-  'Underwriting': '#ff9800',
-  'Closing': '#9c27b0',
-  'Completed': '#4caf50',
-  'Denied': '#f44336',
-  'Cancelled': '#757575'
+export const LOAN_DOCUMENT_STATUSES = [
+  'requested',
+  'received',
+  'missing',
+  'under_review',
+  'approved',
+  'not_applicable'
+]
+
+export const LOAN_TYPES = ['Conventional', 'FHA', 'VA', 'USDA', 'Jumbo', 'DSCR', 'Other']
+
+export const STAGE_LABELS = {
+  new_loan_buyer_added: 'New Loan / Buyer Added',
+  loan_application_sent: 'Loan Application Sent',
+  loan_application_started: 'Loan Application Started',
+  loan_application_completed: 'Loan Application Completed',
+  initial_documents_requested: 'Initial Documents Requested',
+  documents_received: 'Documents Received',
+  documents_missing_pending: 'Documents Missing / Pending',
+  pre_qualification_in_review: 'Pre-Qualification in Review',
+  pre_qualified: 'Pre-Qualified',
+  pre_approval_in_review: 'Pre-Approval in Review',
+  pre_approved: 'Pre-Approved',
+  property_unit_selected: 'Property / Unit Selected',
+  purchase_contract_executed: 'Purchase Contract Executed',
+  contract_sent_to_lender: 'Contract Sent to Lender',
+  loan_estimate_issued: 'Loan Estimate Issued',
+  disclosures_sent: 'Disclosures Sent',
+  disclosures_signed: 'Disclosures Signed',
+  processing: 'Processing',
+  additional_documents_requested: 'Additional Documents Requested',
+  submitted_to_underwriting: 'Submitted to Underwriting',
+  underwriting_review: 'Underwriting Review',
+  conditional_approval: 'Conditional Approval',
+  conditions_outstanding: 'Conditions Outstanding',
+  conditions_submitted: 'Conditions Submitted',
+  appraisal_ordered: 'Appraisal Ordered',
+  appraisal_scheduled: 'Appraisal Scheduled',
+  appraisal_completed: 'Appraisal Completed',
+  appraisal_received: 'Appraisal Received',
+  appraisal_approved: 'Appraisal Approved',
+  title_ordered_title_review: 'Title Ordered / Title Review',
+  insurance_requested: 'Insurance Requested',
+  insurance_received: 'Insurance Received',
+  final_underwriting: 'Final Underwriting',
+  clear_to_close: 'Clear to Close',
+  closing_disclosure_issued: 'Closing Disclosure Issued',
+  closing_disclosure_signed: 'Closing Disclosure Signed',
+  closing_scheduled: 'Closing Scheduled',
+  buyer_funds_due: 'Buyer Funds Due',
+  closing_documents_signed: 'Closing / Documents Signed',
+  loan_funded: 'Loan Funded',
+  title_confirmed_closed: 'Title Confirmed / Closed',
+  completed: 'Completed'
 }
 
-// ─── SERVICIO API (100% Alineado con la nueva spec de Swagger) ───────────────
+export const SPECIAL_STATUS_LABELS = {
+  on_hold: 'On Hold',
+  buyer_action_required: 'Buyer Action Required',
+  lender_action_required: 'Lender Action Required',
+  developer_action_required: 'Developer Action Required',
+  missing_documents: 'Missing Documents',
+  financing_issue: 'Financing Issue',
+  appraisal_issue: 'Appraisal Issue',
+  title_issue: 'Title Issue',
+  loan_denied: 'Loan Denied',
+  buyer_withdrawn: 'Buyer Withdrawn',
+  cancelled: 'Cancelled'
+}
+
+export const DOCUMENT_TYPE_LABELS = {
+  loan_application: 'Loan Application',
+  government_id_passport: 'Government ID / Passport',
+  ssn_itin: 'Social Security / ITIN',
+  proof_of_address: 'Proof of Address',
+  bank_statements: 'Bank Statements',
+  proof_of_funds: 'Proof of Funds',
+  income_verification: 'Income Verification',
+  pay_stubs: 'Pay Stubs',
+  w2s: 'W-2s',
+  tax_returns: 'Tax Returns',
+  pl_statements: 'P&L Statements',
+  cpa_letter: 'CPA Letter',
+  employment_verification: 'Employment Verification',
+  credit_authorization: 'Credit Authorization',
+  purchase_agreement: 'Purchase Agreement',
+  amendments: 'Amendments',
+  earnest_money_receipt: 'Earnest Money Receipt',
+  down_payment_verification: 'Down Payment Verification',
+  gift_letter: 'Gift Letter',
+  loan_estimate: 'Loan Estimate',
+  signed_disclosures: 'Signed Disclosures',
+  appraisal: 'Appraisal',
+  homeowners_insurance: 'Homeowners Insurance',
+  title_commitment: 'Title Commitment',
+  closing_disclosure: 'Closing Disclosure',
+  clear_to_close: 'Clear to Close',
+  final_closing_documents: 'Final Closing Documents'
+}
+
+export const DOCUMENT_STATUS_LABELS = {
+  requested: 'Requested',
+  received: 'Received',
+  missing: 'Missing',
+  under_review: 'Under Review',
+  approved: 'Approved',
+  not_applicable: 'N/A'
+}
+
+export const STAGE_PHASE_MAP = {
+  new_loan_buyer_added: 'application',
+  loan_application_sent: 'application',
+  loan_application_started: 'application',
+  loan_application_completed: 'application',
+  initial_documents_requested: 'application',
+  documents_received: 'application',
+  documents_missing_pending: 'application',
+  pre_qualification_in_review: 'application',
+  pre_qualified: 'application',
+  pre_approval_in_review: 'application',
+  pre_approved: 'application',
+  property_unit_selected: 'processing',
+  purchase_contract_executed: 'processing',
+  contract_sent_to_lender: 'processing',
+  loan_estimate_issued: 'processing',
+  disclosures_sent: 'processing',
+  disclosures_signed: 'processing',
+  processing: 'processing',
+  additional_documents_requested: 'processing',
+  submitted_to_underwriting: 'underwriting',
+  underwriting_review: 'underwriting',
+  conditional_approval: 'underwriting',
+  conditions_outstanding: 'underwriting',
+  conditions_submitted: 'underwriting',
+  appraisal_ordered: 'underwriting',
+  appraisal_scheduled: 'underwriting',
+  appraisal_completed: 'underwriting',
+  appraisal_received: 'underwriting',
+  appraisal_approved: 'underwriting',
+  title_ordered_title_review: 'underwriting',
+  insurance_requested: 'underwriting',
+  insurance_received: 'underwriting',
+  final_underwriting: 'underwriting',
+  clear_to_close: 'closing',
+  closing_disclosure_issued: 'closing',
+  closing_disclosure_signed: 'closing',
+  closing_scheduled: 'closing',
+  buyer_funds_due: 'closing',
+  closing_documents_signed: 'closing',
+  loan_funded: 'closing',
+  title_confirmed_closed: 'closing',
+  completed: 'closing'
+}
+
+export const PHASE_COLORS = {
+  application: '#2196f3',
+  processing: '#ff9800',
+  underwriting: '#9c27b0',
+  closing: '#4caf50'
+}
+
+export const PHASE_LABELS = {
+  application: 'Application',
+  processing: 'Processing',
+  underwriting: 'Underwriting',
+  closing: 'Closing'
+}
+
+export const SPECIAL_STATUS_COLORS = {
+  on_hold: '#ff9800',
+  buyer_action_required: '#e91e63',
+  lender_action_required: '#9c27b0',
+  developer_action_required: '#673ab7',
+  missing_documents: '#f44336',
+  financing_issue: '#d32f2f',
+  appraisal_issue: '#e65100',
+  title_issue: '#bf360c',
+  loan_denied: '#b71c1c',
+  buyer_withdrawn: '#616161',
+  cancelled: '#424242'
+}
+
+export const DOCUMENT_STATUS_COLORS = {
+  requested: '#ff9800',
+  received: '#2196f3',
+  missing: '#f44336',
+  under_review: '#9c27b0',
+  approved: '#4caf50',
+  not_applicable: '#9e9e9e'
+}
 
 const loanService = {
-  // GET /api/loans?projectId=&stage=&status=&buyer=&assignedTo=&fromDate=&toDate=&page=1&limit=20
   getAll: async (filters = {}) => {
     const res = await api.get('/loans', { params: filters })
-    return { 
-      loans: Array.isArray(res.data) ? res.data : (res.data.loans || []), 
-      total: res.data.total || (Array.isArray(res.data) ? res.data.length : 0) 
+    return {
+      loans: res.data.loans || [],
+      pagination: res.data.pagination || {}
     }
   },
 
-  // GET /api/loans/:id
   getById: async (id) => {
     const res = await api.get(`/loans/${id}`)
     return res.data
   },
 
-  // POST /api/loans
   create: async (data) => {
     const res = await api.post('/loans', data)
     return res.data
   },
 
-  // PUT /api/loans/:id
   update: async (id, data) => {
     const res = await api.put(`/loans/${id}`, data)
     return res.data
   },
 
-  // DELETE /api/loans/:id
   delete: async (id) => {
     await api.delete(`/loans/${id}`)
   },
 
-  // ✅ CORREGIDO: PUT /api/loans/:id/stage  ->  { "stage": "pre_approved" }
   updateStage: async (id, stage) => {
     const res = await api.put(`/loans/${id}/stage`, { stage })
     return res.data
   },
 
-  // ✅ CORREGIDO: PUT /api/loans/:id/status  ->  { "status": "on_hold" } o null
   updateSpecialStatus: async (id, status) => {
     const res = await api.put(`/loans/${id}/status`, { status })
     return res.data
   },
 
-  // PUT /api/loans/:id/documents/:docType  ->  { "status": "requested" }
-  updateDocumentItem: async (loanId, docType, data) => {
-    const res = await api.put(`/loans/${loanId}/documents/${docType}`, data)
+  updateDocumentItem: async (id, docType, data) => {
+    const res = await api.put(`/loans/${id}/documents/${docType}`, data)
     return res.data
   },
 
-  // POST /api/loans/:id/documents/:docType/upload (multipart/form-data)
-  uploadDocument: async (loanId, docType, file) => {
+  uploadDocument: async (id, docType, file) => {
     const formData = new FormData()
     formData.append('file', file)
-    
-    const res = await api.post(`/loans/${loanId}/documents/${docType}/upload`, formData, {
+    const res = await api.post(`/loans/${id}/documents/${docType}/upload`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
     return res.data
   },
 
-  // DELETE /api/loans/:id/documents/:docType/file
-  deleteDocumentFile: async (loanId, docType) => {
-    await api.delete(`/loans/${loanId}/documents/${docType}/file`)
-  },
-
-  // PUT /api/loans/:id/next-action
-  updateNextAction: async (id, actionData) => {
-    const res = await api.put(`/loans/${id}/next-action`, actionData)
+  deleteDocumentFile: async (id, docType) => {
+    const res = await api.delete(`/loans/${id}/documents/${docType}/file`)
     return res.data
   },
 
-  // ✅ CORREGIDO: POST /api/loans/:id/notes  ->  { "note": "string" }
-  addNote: async (id, noteText) => {
-    const res = await api.post(`/loans/${id}/notes`, { note: noteText })
+  updateNextAction: async (id, data) => {
+    const res = await api.put(`/loans/${id}/next-action`, data)
     return res.data
   },
 
-  // GET /api/loans/:id/timeline?page=1&limit=20
-  getTimeline: async (id, page = 1, limit = 20) => {
-    const res = await api.get(`/loans/${id}/timeline`, { params: { page, limit } })
+  addNote: async (id, note) => {
+    const res = await api.post(`/loans/${id}/notes`, { note })
     return res.data
   },
 
-  // GET /api/loans/dashboard?projectId=...
+  getTimeline: async (id, params = {}) => {
+    const res = await api.get(`/loans/${id}/timeline`, { params })
+    return {
+      timeline: res.data.timeline || [],
+      pagination: res.data.pagination || {}
+    }
+  },
+
   getDashboardKPIs: async (filters = {}) => {
     const res = await api.get('/loans/dashboard', { params: filters })
-    return res.data
+    return {
+      kpis: res.data.kpis || {},
+      byStage: res.data.byStage || {}
+    }
   },
 
-  // ✅ CORREGIDO: GET /api/loans/alerts?projectId=...
   getAlerts: async (filters = {}) => {
     const res = await api.get('/loans/alerts', { params: filters })
-    return res.data
+    return {
+      alerts: res.data.alerts || [],
+      byType: res.data.byType || {},
+      counts: res.data.counts || {}
+    }
   }
 }
 

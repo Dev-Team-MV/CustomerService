@@ -1,147 +1,156 @@
-import { useState } from 'react'
-import { Box, Typography, List, ListItem, IconButton, Tooltip, CircularProgress, Select, MenuItem, Link } from '@mui/material'
-import { UploadFile, CheckCircle, Description, Delete, OpenInNew } from '@mui/icons-material'
-import { useTranslation } from 'react-i18next'
+import { useRef } from 'react'
+import {
+  Box, Typography, Chip, IconButton, MenuItem, Select, Tooltip
+} from '@mui/material'
+import {
+  CloudUpload, Delete, Download, Description
+} from '@mui/icons-material'
+import {
+  DOCUMENT_TYPE_LABELS,
+  DOCUMENT_STATUS_LABELS,
+  DOCUMENT_STATUS_COLORS,
+  LOAN_DOCUMENT_STATUSES
+} from '../../services/loanService'
 
-export default function LoanDocumentChecklist({ loanId, documentChecklist = [], onUpdate, onUpload, onDelete }) {
-  const { t } = useTranslation('loans')
-  const [uploadingType, setUploadingType] = useState(null)
-  const [updatingType, setUpdatingType] = useState(null)
+export default function LoanDocumentChecklist({
+  checklist = [],
+  onStatusChange,
+  onUpload,
+  onDeleteFile
+}) {
+  const fileInputRefs = useRef({})
 
-  const handleFileChange = async (docType, e) => {
+  const handleFileSelect = (docType) => (e) => {
     const file = e.target.files?.[0]
-    e.target.value = ''
-    if (!file) return
-    setUploadingType(docType)
-    try {
-      await onUpload(loanId, docType, file)
-    } catch (err) {
-      console.error('Upload error:', err)
-    } finally {
-      setUploadingType(null)
+    if (file) {
+      onUpload?.(docType, file)
+      e.target.value = ''
     }
   }
 
-  const handleStatusChange = async (docType, status) => {
-    setUpdatingType(docType)
-    try {
-      await onUpdate(loanId, docType, { status })
-    } catch (err) {
-      console.error('Status update error:', err)
-    } finally {
-      setUpdatingType(null)
-    }
-  }
-
-  const handleDeleteFile = async (docType) => {
-    setUploadingType(docType)
-    try {
-      await onDelete(loanId, docType)
-    } catch (err) {
-      console.error('Delete error:', err)
-    } finally {
-      setUploadingType(null)
-    }
-  }
-
-  // ✅ Statuses traducidos dinámicamente
-  const statusOptions = [
-    { value: 'requested', label: t('loans.documentChecklist.status.requested') },
-    { value: 'received', label: t('loans.documentChecklist.status.received') },
-    { value: 'missing', label: t('loans.documentChecklist.status.missing') },
-    { value: 'under_review', label: t('loans.documentChecklist.status.under_review') },
-    { value: 'approved', label: t('loans.documentChecklist.status.approved') },
-    { value: 'not_applicable', label: t('loans.documentChecklist.status.not_applicable') }
-  ]
+  const received = checklist.filter(d => d.status === 'received' || d.status === 'approved').length
+  const total = checklist.filter(d => d.status !== 'not_applicable').length
 
   return (
-    <Box sx={{ border: '1px solid #ececec', borderRadius: 0, bgcolor: '#fff' }}>
-      <List sx={{ p: 0, maxHeight: 600, overflowY: 'auto' }}>
-        {documentChecklist.map((doc) => {
-          const status = doc.status || 'requested'
-          const label = t(`loans.documentTypes.${doc.documentType}`, doc.documentType)
-          const busy = uploadingType === doc.documentType || updatingType === doc.documentType
+    <Box sx={{ border: '1px solid #e0e0e0', bgcolor: '#fff', mb: 3 }}>
+      <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Typography
+          sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#000' }}
+        >
+          Document Checklist
+        </Typography>
+        {total > 0 && (
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.62rem', color: '#888' }}>
+            {received}/{total} complete
+          </Typography>
+        )}
+      </Box>
 
-          return (
-            <ListItem key={doc._id || doc.documentType} sx={{ borderBottom: '1px solid #f0f0f0', py: 1.5, px: 2, alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-              <Box sx={{ color: status === 'approved' ? '#4caf50' : '#9e9e9e', display: 'flex' }}>
-                {status === 'approved' ? <CheckCircle /> : <Description />}
-              </Box>
+      <Box sx={{ overflow: 'auto' }}>
+        {checklist.map((doc) => (
+          <Box
+            key={doc.documentType}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              px: 2,
+              py: 1,
+              borderBottom: '1px solid #f5f5f5',
+              '&:hover': { bgcolor: '#fafafa' }
+            }}
+          >
+            <Description sx={{ fontSize: 16, color: '#bbb' }} />
 
-              <Box sx={{ flex: 1, minWidth: 200 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: '"Helvetica Neue", sans-serif' }}>
-                  {label}
-                </Typography>
-                {doc.fileUrl ? (
-                  <Link href={doc.fileUrl} target="_blank" rel="noopener" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
-                    <OpenInNew sx={{ fontSize: 12 }} /> {doc.gcsFileName || t('loans.documentChecklist.viewFile', 'View file')}
-                  </Link>
-                ) : (
-                  <Typography variant="caption" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#9e9e9e' }}>
-                    {t('loans.documentChecklist.noFileUploaded')}
-                  </Typography>
-                )}
-                {doc.notes && (
-                  <Typography variant="caption" sx={{ display: 'block', fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#706f6f', fontStyle: 'italic' }}>
-                    {t('loans.documentChecklist.note', 'Note')}: {doc.notes}
-                  </Typography>
-                )}
-              </Box>
-
-              <Select
-                size="small"
-                value={status}
-                disabled={busy}
-                onChange={(e) => handleStatusChange(doc.documentType, e.target.value)}
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography
                 sx={{
-                  minWidth: 140, borderRadius: 0,
-                  fontFamily: '"Courier New", monospace', fontSize: '0.7rem',
-                  '& .MuiSelect-select': { py: 0.75, fontFamily: '"Courier New", monospace' }
+                  fontFamily: '"Helvetica Neue", sans-serif',
+                  fontSize: '0.8rem',
+                  color: '#000',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
                 }}
               >
-                {statusOptions.map(opt => (
-                  <MenuItem key={opt.value} value={opt.value} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
-                    {opt.label}
-                  </MenuItem>
-                ))}
-              </Select>
+                {DOCUMENT_TYPE_LABELS[doc.documentType] || doc.documentType}
+              </Typography>
+              {doc.uploadedAt && (
+                <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.55rem', color: '#aaa' }}>
+                  Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}
+                </Typography>
+              )}
+            </Box>
 
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <input
-                  accept="application/pdf,image/*"
-                  style={{ display: 'none' }}
-                  id={`upload-${doc.documentType}`}
-                  type="file"
-                  onChange={(e) => handleFileChange(doc.documentType, e)}
-                />
-                <Tooltip title={t('loans.documents.upload')}>
-                  <IconButton
-                    size="small"
-                    disabled={busy}
-                    onClick={() => document.getElementById(`upload-${doc.documentType}`)?.click()}
-                    sx={{ color: '#2196f3', borderRadius: 0 }}
-                  >
-                    {uploadingType === doc.documentType ? <CircularProgress size={16} /> : <UploadFile fontSize="small" />}
-                  </IconButton>
-                </Tooltip>
+            <Select
+              value={doc.status || 'not_applicable'}
+              onChange={(e) => onStatusChange?.(doc.documentType, { status: e.target.value })}
+              size="small"
+              sx={{
+                height: 28,
+                fontSize: '0.65rem',
+                fontFamily: '"Courier New", monospace',
+                borderRadius: 0,
+                minWidth: 120,
+                '& .MuiSelect-select': { py: 0.5 }
+              }}
+            >
+              {LOAN_DOCUMENT_STATUSES.map(s => (
+                <MenuItem key={s} value={s} sx={{ fontSize: '0.72rem' }}>
+                  {DOCUMENT_STATUS_LABELS[s]}
+                </MenuItem>
+              ))}
+            </Select>
 
-                {doc.fileUrl && (
-                  <Tooltip title={t('loans.documents.delete')}>
-                    <IconButton
-                      size="small"
-                      disabled={busy}
-                      onClick={() => handleDeleteFile(doc.documentType)}
-                      sx={{ color: '#f44336', borderRadius: 0 }}
-                    >
-                      <Delete fontSize="small" />
+            <Chip
+              label={DOCUMENT_STATUS_LABELS[doc.status] || doc.status}
+              size="small"
+              sx={{
+                height: 20,
+                fontSize: '0.55rem',
+                fontFamily: '"Courier New", monospace',
+                borderRadius: 0,
+                bgcolor: (DOCUMENT_STATUS_COLORS[doc.status] || '#9e9e9e') + '18',
+                color: DOCUMENT_STATUS_COLORS[doc.status] || '#9e9e9e',
+                border: `1px solid ${(DOCUMENT_STATUS_COLORS[doc.status] || '#9e9e9e')}40`,
+                minWidth: 60
+              }}
+            />
+
+            <Box sx={{ display: 'flex', gap: 0.25 }}>
+              <input
+                type="file"
+                hidden
+                ref={(el) => { fileInputRefs.current[doc.documentType] = el }}
+                onChange={handleFileSelect(doc.documentType)}
+              />
+              <Tooltip title="Upload file">
+                <IconButton
+                  size="small"
+                  onClick={() => fileInputRefs.current[doc.documentType]?.click()}
+                >
+                  <CloudUpload sx={{ fontSize: 16, color: '#2196f3' }} />
+                </IconButton>
+              </Tooltip>
+
+              {doc.fileUrl && (
+                <>
+                  <Tooltip title="Download">
+                    <IconButton size="small" component="a" href={doc.fileUrl} target="_blank" rel="noopener">
+                      <Download sx={{ fontSize: 16, color: '#4caf50' }} />
                     </IconButton>
                   </Tooltip>
-                )}
-              </Box>
-            </ListItem>
-          )
-        })}
-      </List>
+                  <Tooltip title="Delete file">
+                    <IconButton size="small" onClick={() => onDeleteFile?.(doc.documentType)}>
+                      <Delete sx={{ fontSize: 16, color: '#f44336' }} />
+                    </IconButton>
+                  </Tooltip>
+                </>
+              )}
+            </Box>
+          </Box>
+        ))}
+      </Box>
     </Box>
   )
 }

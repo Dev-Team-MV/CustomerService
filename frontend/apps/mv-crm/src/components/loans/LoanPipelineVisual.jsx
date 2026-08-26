@@ -1,35 +1,147 @@
-import { Box, Typography, Stepper, Step, StepLabel, StepConnector, stepConnectorClasses } from '@mui/material'
-import { useTranslation } from 'react-i18next'
-import { STAGE_COLORS } from '../../services/loanService'
+import { Box, Typography, Tooltip } from '@mui/material'
+import { motion } from 'framer-motion'
+import {
+  LOAN_PIPELINE_STAGES,
+  STAGE_LABELS,
+  STAGE_PHASE_MAP,
+  PHASE_COLORS,
+  PHASE_LABELS
+} from '../../services/loanService'
 
-export default function LoanPipelineVisual({ phases, currentStageId }) {
-  const { t } = useTranslation('loans')
-  const activeStepIndex = phases.findIndex(p => p.stages.some(s => s.id === currentStageId))
+const PHASES = ['application', 'processing', 'underwriting', 'closing']
 
-  const ColorConnector = () => ({
-    [`&.${stepConnectorClasses.alternativeLabel}`]: { top: 10, left: 'calc(-50% + 16px)', right: 'calc(50% + 16px)' },
-    [`&.${stepConnectorClasses.active}`]: { [`& .${stepConnectorClasses.line}`]: { borderColor: '#004535', borderTopWidth: 3 } },
-    [`&.${stepConnectorClasses.completed}`]: { [`& .${stepConnectorClasses.line}`]: { borderColor: '#004535', borderTopWidth: 3 } },
-    [`& .${stepConnectorClasses.line}`]: { borderColor: '#e0e0e0', borderTopWidth: 3, borderRadius: 0 }
-  })
+export default function LoanPipelineVisual({ currentStage, onStageClick }) {
+  const currentIndex = LOAN_PIPELINE_STAGES.indexOf(currentStage)
+  const groupedStages = PHASES.map(phase => ({
+    phase,
+    label: PHASE_LABELS[phase],
+    color: PHASE_COLORS[phase],
+    stages: LOAN_PIPELINE_STAGES.filter(s => STAGE_PHASE_MAP[s] === phase)
+  }))
 
   return (
-    <Box sx={{ width: '100%', p: 3, bgcolor: '#fff', border: '1px solid #e0e0e0', borderRadius: 0 }}>
-      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 3, color: '#004535', fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
-        {t('loans.pipeline.title')}
-      </Typography>
-      <Stepper activeStep={activeStepIndex >= 0 ? activeStepIndex : 0} alternativeLabel connector={<ColorConnector />}>
-        {phases.map((phase) => (
-          <Step key={phase.name}>
-            <StepLabel 
-              StepIconProps={{ sx: { color: STAGE_COLORS[phase.name] || '#ccc', '& .MuiStepIcon-root': { fontSize: 24 } } }}
-              sx={{ '& .MuiStepLabel-label': { fontWeight: 600, fontSize: '0.8rem', fontFamily: '"Helvetica Neue", sans-serif', color: '#1a1a1a' } }}
-            >
-              {t(`loans.pipelinePhases.${phase.name}`, phase.name)}
-            </StepLabel>
-          </Step>
-        ))}
-      </Stepper>
+    <Box sx={{ mb: 3 }}>
+      {/* Phase progress bar */}
+      <Box sx={{ display: 'flex', gap: 0, mb: 2 }}>
+        {groupedStages.map((group, gi) => {
+          const firstIdx = LOAN_PIPELINE_STAGES.indexOf(group.stages[0])
+          const lastIdx = LOAN_PIPELINE_STAGES.indexOf(group.stages[group.stages.length - 1])
+          const isActive = currentIndex >= firstIdx
+          const isComplete = currentIndex > lastIdx
+          const isCurrent = currentIndex >= firstIdx && currentIndex <= lastIdx
+          const progressInPhase = isCurrent
+            ? ((currentIndex - firstIdx + 1) / group.stages.length) * 100
+            : isComplete ? 100 : 0
+
+          return (
+            <Box key={group.phase} sx={{ flex: group.stages.length, position: 'relative' }}>
+              <Box
+                sx={{
+                  height: 8,
+                  bgcolor: '#f0f0f0',
+                  borderLeft: gi > 0 ? '1px solid #fff' : 'none',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressInPhase}%` }}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
+                  style={{
+                    height: '100%',
+                    backgroundColor: group.color,
+                    position: 'absolute',
+                    left: 0,
+                    top: 0
+                  }}
+                />
+              </Box>
+              <Typography
+                sx={{
+                  fontFamily: '"Courier New", monospace',
+                  fontSize: '0.58rem',
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase',
+                  color: isActive ? group.color : '#bbb',
+                  fontWeight: isCurrent ? 700 : 400,
+                  mt: 0.5,
+                  textAlign: 'center'
+                }}
+              >
+                {group.label}
+              </Typography>
+            </Box>
+          )
+        })}
+      </Box>
+
+      {/* Detailed stage dots */}
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+        {LOAN_PIPELINE_STAGES.map((stage, i) => {
+          const phase = STAGE_PHASE_MAP[stage]
+          const color = PHASE_COLORS[phase]
+          const isPast = i < currentIndex
+          const isCurrent = i === currentIndex
+          const isFuture = i > currentIndex
+
+          return (
+            <Tooltip key={stage} title={`${i + 1}. ${STAGE_LABELS[stage]}`} arrow placement="top">
+              <Box
+                onClick={() => onStageClick?.(stage)}
+                sx={{
+                  width: isCurrent ? 16 : 10,
+                  height: isCurrent ? 16 : 10,
+                  borderRadius: '50%',
+                  bgcolor: isPast ? color : isCurrent ? color : '#e0e0e0',
+                  border: isCurrent ? `2px solid ${color}` : 'none',
+                  cursor: onStageClick ? 'pointer' : 'default',
+                  transition: 'all 0.2s',
+                  opacity: isFuture ? 0.4 : 1,
+                  '&:hover': {
+                    transform: 'scale(1.4)',
+                    opacity: 1
+                  }
+                }}
+              />
+            </Tooltip>
+          )
+        })}
+      </Box>
+
+      {/* Current stage label */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}>
+        <Typography
+          sx={{
+            fontFamily: '"Courier New", monospace',
+            fontSize: '0.6rem',
+            color: '#888',
+            letterSpacing: '1px',
+            textTransform: 'uppercase'
+          }}
+        >
+          Current:
+        </Typography>
+        <Typography
+          sx={{
+            fontFamily: '"Helvetica Neue", sans-serif',
+            fontSize: '0.85rem',
+            fontWeight: 500,
+            color: PHASE_COLORS[STAGE_PHASE_MAP[currentStage]] || '#000'
+          }}
+        >
+          {STAGE_LABELS[currentStage] || currentStage}
+        </Typography>
+        <Typography
+          sx={{
+            fontFamily: '"Courier New", monospace',
+            fontSize: '0.6rem',
+            color: '#aaa'
+          }}
+        >
+          ({currentIndex + 1}/{LOAN_PIPELINE_STAGES.length})
+        </Typography>
+      </Box>
     </Box>
   )
 }

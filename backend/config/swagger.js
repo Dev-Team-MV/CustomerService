@@ -1457,7 +1457,7 @@ const options = {
             },
             entity: {
               type: 'string',
-              enum: ['Lead', 'Client', 'Activity', 'Appointment', 'Campaign']
+              enum: ['Lead', 'Client', 'Activity', 'Appointment', 'Campaign', 'Loan']
             },
             entityId: { type: 'string' },
             changes: {
@@ -2834,6 +2834,126 @@ const options = {
             photo: { type: 'string', nullable: true },
             website: { type: 'string', nullable: true },
             status: { type: 'string', enum: ['active', 'inactive'] }
+          }
+        },
+        LoanNextAction: {
+          type: 'object',
+          properties: {
+            description: { type: 'string' },
+            responsiblePerson: { type: 'string', nullable: true },
+            deadline: { type: 'string', format: 'date-time', nullable: true }
+          }
+        },
+        LoanDocumentChecklistItem: {
+          type: 'object',
+          properties: {
+            documentType: { type: 'string' },
+            status: {
+              type: 'string',
+              enum: ['requested', 'received', 'missing', 'under_review', 'approved', 'not_applicable']
+            },
+            fileUrl: { type: 'string', nullable: true },
+            uploadedAt: { type: 'string', format: 'date-time', nullable: true },
+            notes: { type: 'string' }
+          }
+        },
+        LoanTimelineItem: {
+          type: 'object',
+          properties: {
+            action: { type: 'string' },
+            description: { type: 'string' },
+            performedBy: { type: 'string', nullable: true },
+            timestamp: { type: 'string', format: 'date-time' },
+            metadata: { type: 'object', additionalProperties: true }
+          }
+        },
+        Loan: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            buyer: { type: 'string' },
+            coBuyer: { type: 'string', nullable: true },
+            buyerContactInfo: { type: 'string' },
+            projectId: { type: 'string' },
+            propertyId: { type: 'string', nullable: true, description: 'Lot/house unit. If this id is an apartment, it is stored as apartmentId' },
+            apartmentId: { type: 'string', nullable: true },
+            buildingId: { type: 'string', nullable: true },
+            propertyAddress: { type: 'string' },
+            assignedTo: { type: 'string', nullable: true },
+            purchasePrice: { type: 'number' },
+            loanAmount: { type: 'number' },
+            downPayment: { type: 'number' },
+            downPaymentPercent: { type: 'number' },
+            interestRate: { type: 'number' },
+            estimatedMonthlyPayment: { type: 'number' },
+            contractDate: { type: 'string', format: 'date-time', nullable: true },
+            estimatedClosingDate: { type: 'string', format: 'date-time', nullable: true },
+            loanType: {
+              type: 'string',
+              enum: ['Conventional', 'FHA', 'VA', 'USDA', 'Jumbo', 'Other']
+            },
+            lender: { type: 'string' },
+            loanOfficer: { type: 'string' },
+            loanOfficerContact: { type: 'string' },
+            processor: { type: 'string' },
+            underwriter: { type: 'string' },
+            titleCompany: { type: 'string' },
+            insuranceCompany: { type: 'string' },
+            appraisalCompany: { type: 'string' },
+            pipelineStage: { type: 'string' },
+            specialStatus: { type: 'string', nullable: true },
+            percentComplete: { type: 'number' },
+            stageEnteredAt: { type: 'string', format: 'date-time' },
+            internalNotes: { type: 'string' },
+            nextAction: { $ref: '#/components/schemas/LoanNextAction' },
+            documentChecklist: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/LoanDocumentChecklistItem' }
+            },
+            timeline: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/LoanTimelineItem' }
+            },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        LoanCreate: {
+          type: 'object',
+          required: ['buyer', 'projectId'],
+          properties: {
+            buyer: { type: 'string' },
+            coBuyer: { type: 'string', nullable: true },
+            buyerContactInfo: { type: 'string' },
+            projectId: { type: 'string' },
+            propertyId: { type: 'string', nullable: true, description: 'Lot/house unit. If this id is an apartment, it is stored as apartmentId' },
+            apartmentId: { type: 'string', nullable: true },
+            buildingId: { type: 'string', nullable: true },
+            propertyAddress: { type: 'string' },
+            assignedTo: { type: 'string', nullable: true },
+            purchasePrice: { type: 'number' },
+            loanAmount: { type: 'number' },
+            downPayment: { type: 'number' },
+            downPaymentPercent: { type: 'number' },
+            interestRate: { type: 'number' },
+            estimatedMonthlyPayment: { type: 'number' },
+            contractDate: { type: 'string', format: 'date-time' },
+            estimatedClosingDate: { type: 'string', format: 'date-time' },
+            loanType: {
+              type: 'string',
+              enum: ['Conventional', 'FHA', 'VA', 'USDA', 'Jumbo', 'Other']
+            },
+            lender: { type: 'string' },
+            loanOfficer: { type: 'string' },
+            loanOfficerContact: { type: 'string' },
+            processor: { type: 'string' },
+            underwriter: { type: 'string' },
+            titleCompany: { type: 'string' },
+            insuranceCompany: { type: 'string' },
+            appraisalCompany: { type: 'string' },
+            pipelineStage: { type: 'string' },
+            specialStatus: { type: 'string', nullable: true },
+            internalNotes: { type: 'string' }
           }
         }
       }

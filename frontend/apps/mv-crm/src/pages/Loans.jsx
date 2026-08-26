@@ -1,262 +1,248 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, Tabs, Tab, Button, TextField, InputAdornment, Snackbar, Alert, FormControl, InputLabel, Select, MenuItem } from '@mui/material'
-import { Add, Search, Business } from '@mui/icons-material'
+import {
+  Box, Button, Typography, TextField, InputAdornment, Snackbar, Alert, Tabs, Tab
+} from '@mui/material'
+import { Search, Add } from '@mui/icons-material'
 import { motion } from 'framer-motion'
-import { useTranslation } from 'react-i18next'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
-import DataTable from '@shared/components/table/DataTable'
-import { useLoanColumns } from '../constants/Columns/loanColumns'
 import LoanKPIStrip from '../components/loans/LoanKPIStrip'
 import LoanAlertsPanel from '../components/loans/LoanAlertsPanel'
+import LoanSummaryTable from '../components/loans/LoanSummaryTable'
 import LoanFormDialog from '../components/loans/LoanFormDialog'
-import { useLoans } from '../constants/hooks/useLoans'
-import { useProjects } from '@shared/hooks/useProjects'
+import useLoans from '../constants/hooks/useLoans'
+
+const FILTER_TABS = [
+  { key: 'all', label: 'All' },
+  { key: 'active', label: 'Active' },
+  { key: 'processing', label: 'Processing' },
+  { key: 'underwriting', label: 'Underwriting' },
+  { key: 'closing', label: 'Closing' },
+  { key: 'completed', label: 'Completed' },
+  { key: 'issues', label: 'Issues' }
+]
+
+const STAGE_GROUPS = {
+  active: [
+    'new_loan_buyer_added', 'loan_application_sent', 'loan_application_started',
+    'loan_application_completed', 'initial_documents_requested', 'documents_received',
+    'documents_missing_pending', 'pre_qualification_in_review', 'pre_qualified',
+    'pre_approval_in_review', 'pre_approved'
+  ],
+  processing: [
+    'property_unit_selected', 'purchase_contract_executed', 'contract_sent_to_lender',
+    'loan_estimate_issued', 'disclosures_sent', 'disclosures_signed',
+    'processing', 'additional_documents_requested'
+  ],
+  underwriting: [
+    'submitted_to_underwriting', 'underwriting_review', 'conditional_approval',
+    'conditions_outstanding', 'conditions_submitted', 'appraisal_ordered',
+    'appraisal_scheduled', 'appraisal_completed', 'appraisal_received',
+    'appraisal_approved', 'title_ordered_title_review', 'insurance_requested',
+    'insurance_received', 'final_underwriting'
+  ],
+  closing: [
+    'clear_to_close', 'closing_disclosure_issued', 'closing_disclosure_signed',
+    'closing_scheduled', 'buyer_funds_due', 'closing_documents_signed',
+    'loan_funded', 'title_confirmed_closed'
+  ],
+  completed: ['completed'],
+  issues: []
+}
+
+const ISSUE_STATUSES = [
+  'on_hold', 'buyer_action_required', 'lender_action_required',
+  'developer_action_required', 'missing_documents', 'financing_issue',
+  'appraisal_issue', 'title_issue', 'loan_denied', 'buyer_withdrawn', 'cancelled'
+]
 
 export default function Loans() {
-  const { t } = useTranslation('loans')
-  const { t: tCommon } = useTranslation('common')
   const navigate = useNavigate()
-  const { projects } = useProjects()
-  
-  const { 
-    loans = [], loading = false, dashboardKPIs, alerts, 
-    filters, setFilters,
-    createLoan, deleteLoan 
-  } = useLoans() || {}
-  
-  const [activeTab, setActiveTab] = useState('all')
+  const {
+    loans, loading, error,
+    createLoan, fetchLoans,
+    dashboardKPIs, alerts,
+    fetchDashboardKPIs, fetchAlerts
+  } = useLoans()
+
+  const [search, setSearch] = useState('')
+  const [tabIndex, setTabIndex] = useState(0)
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [searchValue, setSearchValue] = useState('')
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' })
 
-  const tabs = [
-    { value: 'all', label: t('loans.tabs.all', 'All') },
-    { value: 'active', label: t('loans.tabs.active', 'Active') },
-    { value: 'processing', label: t('loans.tabs.processing', 'Processing') },
-    { value: 'closing', label: t('loans.tabs.closing', 'Closing') },
-    { value: 'issues', label: t('loans.tabs.issues', 'Issues') },
-  ]
+  useEffect(() => {
+    fetchDashboardKPIs()
+    fetchAlerts()
+  }, [])
 
-  const safeLoans = Array.isArray(loans) ? loans : []
-  
-  const filteredLoans = useMemo(() => {
-    let result = safeLoans
-    
-    if (activeTab !== 'all') {
+  const filtered = useMemo(() => {
+    let result = loans
+    const tab = FILTER_TABS[tabIndex]?.key
+
+    if (tab && tab !== 'all') {
+      if (tab === 'issues') {
+        result = result.filter(l => ISSUE_STATUSES.includes(l.specialStatus))
+      } else if (STAGE_GROUPS[tab]) {
+        result = result.filter(l => STAGE_GROUPS[tab].includes(l.pipelineStage))
+      }
+    }
+
+    if (search.trim()) {
+      const q = search.toLowerCase()
       result = result.filter(l => {
-        if (activeTab === 'issues') return !!l.specialStatus
-        if (activeTab === 'active') return !['Completed', 'Denied', 'Cancelled'].includes(l.phase)
-        return l.phase?.toLowerCase() === activeTab
+        const buyer = l.buyer
+        const buyerName = buyer && typeof buyer === 'object'
+          ? `${buyer.firstName || ''} ${buyer.lastName || ''} ${buyer.email || ''}`.toLowerCase()
+          : ''
+        return buyerName.includes(q) ||
+          l.propertyAddress?.toLowerCase().includes(q) ||
+          l.lender?.toLowerCase().includes(q) ||
+          l.pipelineStage?.toLowerCase().includes(q)
       })
     }
-    
-    if (searchValue.trim()) {
-      const q = searchValue.toLowerCase()
-      result = result.filter(l => 
-        l.borrower?.firstName?.toLowerCase().includes(q) ||
-        l.borrower?.lastName?.toLowerCase().includes(q) ||
-        l.borrower?.email?.toLowerCase().includes(q) ||
-        l.loanAmount?.toString().includes(q) ||
-        l.lender?.toLowerCase().includes(q)
-      )
-    }
-    
+
     return result
-  }, [safeLoans, activeTab, searchValue])
+  }, [loans, tabIndex, search])
 
-  const columns = useLoanColumns({
-    t,
-    onViewDetails: (row) => navigate(`/loans/${row._id}`),
-    onEdit: (row) => setDialogOpen(true),
-    onDelete: async (row) => { 
-      if(window.confirm(t('loans.confirmDelete', 'Delete this loan?'))) { 
-        try {
-          await deleteLoan(row._id)
-          setSnackbar({ open: true, message: t('loans.snackbar.deleted'), severity: 'success' })
-        } catch (err) {
-          setSnackbar({ open: true, message: t('loans.snackbar.deleteError'), severity: 'error' })
-        }
-      } 
-    }
-  })
-
-  // ✅ Estilos unificados
-  const unifiedButtonSx = { 
-    borderRadius: 0, 
-    textTransform: 'none', 
-    fontFamily: '"Courier New", monospace', 
-    fontSize: '0.75rem', 
-    letterSpacing: '0.5px', 
-    '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
-  }
-  
-  const inputSx = { 
-    fontFamily: '"Courier New", monospace', 
-    fontSize: '0.75rem', 
-    borderRadius: 0, 
-    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }, 
-    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' },
-    '& .MuiInputBase-input::placeholder': { fontFamily: '"Courier New", monospace', opacity: 1 }
-  }
-
-  const selectSx = {
-    fontFamily: '"Courier New", monospace',
-    fontSize: '0.75rem',
-    borderRadius: 0,
-    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
-    '& .MuiSelect-select': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', py: 1 }
-  }
-
-  const menuItemSx = {
-    fontFamily: '"Courier New", monospace',
-    fontSize: '0.75rem',
-    borderRadius: 0,
-    '&:hover': { bgcolor: '#f5f5f5' }
-  }
-
-  // ✅ Handler de cambio de proyecto (actualiza filters y dispara refetch)
-  const handleProjectChange = (e) => {
-    const value = e.target.value || null
-    setFilters(prev => ({
-      ...prev,
-      projectId: value || undefined
-    }))
-  }
-
-  const handleCreateLoan = async (data) => {
+  const handleCreate = async (data) => {
     try {
       await createLoan(data)
-      setDialogOpen(false)
-      setSnackbar({ open: true, message: t('loans.snackbar.created'), severity: 'success' })
+      setSnackbar({ open: true, message: 'Loan created successfully', severity: 'success' })
+      fetchDashboardKPIs()
+      fetchAlerts()
     } catch (err) {
-      setSnackbar({ open: true, message: err.response?.data?.message || t('loans.snackbar.createError'), severity: 'error' })
+      setSnackbar({ open: true, message: err.response?.data?.message || 'Error creating loan', severity: 'error' })
+      throw err
     }
   }
 
-  // Contar loans por proyecto para mostrarlo en el menú
-  const getLoanCountByProject = (projectId) => {
-    if (!projectId) return safeLoans.length
-    return safeLoans.filter(l => (l.projectId?._id || l.projectId) === projectId).length
+  const handleViewLoan = (loan) => {
+    navigate(`/loans/${loan._id}`)
+  }
+
+  const handleAlertClick = (alert) => {
+    if (alert.loanId) navigate(`/loans/${alert.loanId}`)
   }
 
   return (
-    <PageLayout title={t('loans.title', 'Loan')} titleBold={t('loans.titleBold', 'Management')} subtitle={t('loans.subtitle', 'Manage the complete lifecycle of mortgage loans.')}>
-      <Box id="loans-page-container" sx={{ p: { xs: 2, sm: 3 } }}>
-        
-        {/* ✅ FILTRO DE PROYECTO (antes de KPIs) */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-          <FormControl size="small" sx={{ minWidth: 320, ...selectSx }}>
-            <InputLabel>
-              <Business sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
-              {t('loans.filters.project', 'Filter by Project')}
-            </InputLabel>
-            <Select
-              value={filters?.projectId || ''}
-              label={t('loans.filters.project', 'Filter by Project')}
-              onChange={handleProjectChange}
-              sx={selectSx}
-            >
-              <MenuItem value="" sx={menuItemSx}>
-                <em>{t('loans.filters.allProjects', 'All Projects')} ({getLoanCountByProject()})</em>
-              </MenuItem>
-              {(projects || []).map(project => (
-                <MenuItem key={project._id} value={project._id} sx={menuItemSx}>
-                  {project.name} ({getLoanCountByProject(project._id)})
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+    <PageLayout
+      title="Loan"
+      titleBold="Pipeline"
+      topbarLabel="Loans"
+      subtitle="Track buyer financing from application to closing"
+    >
+      <LoanKPIStrip kpis={dashboardKPIs?.kpis} />
 
-          {filters?.projectId && (
-            <Button
-              size="small"
-              onClick={() => setFilters(prev => ({ ...prev, projectId: undefined }))}
-              sx={{ 
-                ...unifiedButtonSx, 
-                color: '#706f6f', 
-                border: '1px solid #e0e0e0',
-                '&:hover': { bgcolor: '#f5f5f5', borderColor: '#ccc' }
-              }}
-            >
-              {t('loans.filters.clearFilter', 'Clear Filter')} ×
-            </Button>
+      <LoanAlertsPanel
+        alerts={alerts?.alerts || []}
+        onAlertClick={handleAlertClick}
+      />
+
+      {/* Toolbar */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
+        <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
+          <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', letterSpacing: '1px', textTransform: 'uppercase' }}>
+            Search:
+          </Typography>
+          <TextField
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buyer, address, lender..."
+            size="small"
+            sx={{ width: 320, '& .MuiOutlinedInput-root': { borderRadius: 0 } }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ fontSize: 18, color: '#888' }} />
+                </InputAdornment>
+              )
+            }}
+          />
+          {search && (
+            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.62rem', color: '#888', letterSpacing: '1px' }}>
+              {filtered.length} results
+            </Typography>
           )}
         </Box>
 
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-          {/* <TourButton tourId="loans-tour" steps={tourSteps} label={tCommon('tour.loans.button')} options={tourOptions} /> */}
-        </Box>
-
-        <LoanKPIStrip kpis={dashboardKPIs} />
-        <LoanAlertsPanel alerts={alerts} />
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-          <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
-            <TextField
-              placeholder={t('loans.searchPlaceholder', 'Search by borrower, amount or lender...')}
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              size="small"
-              sx={{ width: 320, ...inputSx }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search sx={{ fontSize: 18, color: '#bbb' }} />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            
-            <Tabs value={activeTab} onChange={(e, v) => setActiveTab(v)} sx={{ 
-              minHeight: 40, 
-              '& .MuiTab-root': { minHeight: 40, textTransform: 'none', fontWeight: 600, fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 } 
-            }}>
-              {tabs.map(tab => <Tab key={tab.value} value={tab.value} label={tab.label} />)}
-            </Tabs>
-          </Box>
-
-          <Box display="flex" gap={2} flexWrap="wrap">
-            <Button
-              id="loans-btn-add"
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => setDialogOpen(true)}
-              sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', fontWeight: 600, '&:hover': { bgcolor: '#222' } }}
-            >
-              {t('loans.actions.newLoan', 'New Loan')}
-            </Button>
-          </Box>
-        </Box>
-
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.5 }}>
-          <DataTable
-            id="loans-data-table"
-            columns={columns}
-            data={filteredLoans}
-            loading={loading}
-            rowKey="_id"
-            onRowClick={(row) => navigate(`/loans/${row._id}`)}
-          />
-        </motion.div>
-
-        <LoanFormDialog 
-          open={dialogOpen} 
-          onClose={() => setDialogOpen(false)} 
-          onSave={handleCreateLoan} 
-        />
-
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={4000}
-          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        <Button
+          variant="contained"
+          startIcon={<Add />}
+          onClick={() => setDialogOpen(true)}
+          sx={{
+            borderRadius: 0,
+            textTransform: 'none',
+            fontFamily: '"Courier New", monospace',
+            fontSize: '0.75rem',
+            letterSpacing: '0.5px',
+            bgcolor: '#000',
+            color: '#fff',
+            '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' }
+          }}
         >
-          <Alert severity={snackbar.severity} sx={{ borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
+          New Loan
+        </Button>
       </Box>
+
+      {/* Filter Tabs */}
+      <Tabs
+        value={tabIndex}
+        onChange={(_, v) => setTabIndex(v)}
+        variant="scrollable"
+        scrollButtons="auto"
+        sx={{
+          mb: 2,
+          '& .MuiTab-root': {
+            fontFamily: '"Courier New", monospace',
+            fontSize: '0.68rem',
+            letterSpacing: '0.8px',
+            textTransform: 'uppercase',
+            color: '#888',
+            minHeight: 36,
+            '&.Mui-selected': { color: '#000', fontWeight: 700 }
+          },
+          '& .MuiTabs-indicator': { bgcolor: '#000', height: 2 }
+        }}
+      >
+        {FILTER_TABS.map(tab => (
+          <Tab key={tab.key} label={tab.label} />
+        ))}
+      </Tabs>
+
+      {/* Table */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
+        <LoanSummaryTable
+          loans={filtered}
+          loading={loading}
+          onRowClick={handleViewLoan}
+        />
+      </motion.div>
+
+      <LoanFormDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onSubmit={handleCreate}
+      />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{
+            fontFamily: '"Courier New", monospace',
+            fontSize: '0.75rem',
+            borderRadius: 0,
+            border: '1px solid'
+          }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </PageLayout>
   )
 }
