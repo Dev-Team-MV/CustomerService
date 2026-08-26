@@ -20,7 +20,7 @@ export default function LoanPipelineVisual({ currentStage, onStageClick }) {
   }))
 
   return (
-    <Box sx={{ mb: 3 }}>
+    <Box id="loan-pipeline-visual" sx={{ mb: 3 }}>
       {/* Phase progress bar */}
       <Box sx={{ display: 'flex', gap: 0, mb: 2 }}>
         {groupedStages.map((group, gi) => {

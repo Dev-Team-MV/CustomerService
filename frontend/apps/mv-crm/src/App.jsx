@@ -192,7 +192,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        </TourProvider>
+        </TourProvider> 
       </AuthProvider>
     </ThemeProvider>
   )

@@ -1,22 +1,25 @@
+import { useTranslation } from 'react-i18next'
 import { Box, Typography } from '@mui/material'
 import { motion } from 'framer-motion'
 
 const KPI_CONFIG = [
-  { key: 'activeLoans', label: 'Active Loans', color: '#2196f3' },
-  { key: 'completedLoans', label: 'Funded / Closed', color: '#4caf50' },
-  { key: 'clearToClose', label: 'Clear to Close', color: '#00c853' },
-  { key: 'closingWithin7Days', label: 'Closing This Week', color: '#ff9800' },
-  { key: 'onHold', label: 'On Hold', color: '#9e9e9e' },
-  { key: 'overdueDeadlines', label: 'Overdue Tasks', color: '#f44336' },
-  { key: 'requestedDocumentsOverdue', label: 'Missing Docs', color: '#e91e63' },
-  { key: 'staleStages', label: 'Stale Loans', color: '#ff5722' },
-  { key: 'loanDenied', label: 'Denied', color: '#b71c1c' },
-  { key: 'cancelledOrWithdrawn', label: 'Cancelled', color: '#616161' }
+  { key: 'activeLoans', color: '#2196f3' },
+  { key: 'completedLoans', color: '#4caf50' },
+  { key: 'clearToClose', color: '#00c853' },
+  { key: 'closingWithin7Days', color: '#ff9800' },
+  { key: 'onHold', color: '#9e9e9e' },
+  { key: 'overdueDeadlines', color: '#f44336' },
+  { key: 'requestedDocumentsOverdue', color: '#e91e63' },
+  { key: 'staleStages', color: '#ff5722' },
+  { key: 'loanDenied', color: '#b71c1c' },
+  { key: 'cancelledOrWithdrawn', color: '#616161' }
 ]
 
 export default function LoanKPIStrip({ kpis = {} }) {
+  const { t } = useTranslation('loans')
+
   return (
-    <Box sx={{ display: 'flex', gap: 1.5, mb: 3, flexWrap: 'wrap' }}>
+    <Box id="loans-kpi-strip" sx={{ display: 'flex', gap: 1.5, mb: 3, flexWrap: 'wrap' }}>
       {KPI_CONFIG.map((item, i) => (
         <motion.div
           key={item.key}
@@ -57,7 +60,7 @@ export default function LoanKPIStrip({ kpis = {} }) {
                 mt: 0.5
               }}
             >
-              {item.label}
+              {t(`loans.kpis.${item.key}`, item.key)}
             </Typography>
           </Box>
         </motion.div>

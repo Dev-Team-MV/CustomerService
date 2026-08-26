@@ -5,35 +5,54 @@
     "subtitle": "Manage the complete lifecycle of mortgage loans.",
     "searchPlaceholder": "Search by borrower, amount or lender...",
     "confirmDelete": "Delete this loan?",
-    
+
     "tabs": {
       "all": "All",
       "active": "Active",
       "processing": "Processing",
+      "underwriting": "Underwriting",
       "closing": "Closing",
+      "completed": "Completed",
       "issues": "Issues"
     },
-    
+
     "filters": {
       "project": "Filter by Project",
       "allProjects": "All Projects",
       "clearFilter": "Clear Filter"
     },
-    
+
     "actions": {
       "newLoan": "New Loan",
       "view": "View",
       "edit": "Edit",
       "delete": "Delete"
     },
-    
+
     "snackbar": {
+      "created": "Loan created successfully",
+      "createError": "Error creating loan",
       "deleted": "Loan deleted successfully",
       "deleteError": "Error deleting loan",
-      "created": "Loan created successfully",
-      "createError": "Error creating loan"
+      "updated": "Loan updated successfully",
+      "updateError": "Error updating loan",
+      "profileUpdated": "Profile updated",
+      "profileUpdateError": "Error updating profile",
+      "stageUpdated": "Pipeline stage updated",
+      "stageUpdateError": "Error updating stage",
+      "statusUpdated": "Special status updated",
+      "statusUpdateError": "Error updating status",
+      "nextActionUpdated": "Next action updated",
+      "nextActionError": "Error updating next action",
+      "docUploaded": "Document uploaded",
+      "docUploadError": "Error uploading document",
+      "docDeleted": "Document deleted",
+      "docDeleteError": "Error deleting document",
+      "docUpdateError": "Error updating document",
+      "noteAdded": "Note added",
+      "noteError": "Error adding note"
     },
-    
+
     "common": {
       "noEmail": "No email",
       "notAvailable": "N/A",
@@ -42,46 +61,54 @@
       "unassigned": "Unassigned",
       "unknownBuyer": "Unknown Buyer"
     },
-    
+
     "table": {
       "borrower": "Borrower",
       "property": "Property",
       "loanAmount": "Loan Amount",
       "purchasePrice": "Purchase Price",
+      "progress": "Progress",
       "stage": "Stage",
       "status": "Status",
       "nextAction": "Next Action",
       "assignedTo": "Assigned To",
-      "actions": "Actions"
+      "actions": "Actions",
+      "estimatedClosing": "Est. Closing",
+      "results": "results",
+      "noLoans": "No loans found"
     },
-    
+
     "detail": {
       "backToList": "Back to List",
       "saveChanges": "Save Changes",
       "notFound": "Loan not found",
       "errorSaving": "Error saving changes",
+      "loadError": "Error loading loan",
+      "defaultTitle": "Loan",
       "profile": "Loan Profile",
       "documents": "Document Checklist",
       "timeline": "Activity Timeline",
       "notes": "Internal Notes",
       "loanDetailTitle": "Loan Detail: {{id}}"
     },
-    
+
     "pipeline": {
       "title": "Pipeline Status"
     },
-    
+
     "nextAction": {
       "title": "Next Critical Action",
-      "overdue": "Overdue Action",
+      "overdue": "OVERDUE",
+      "soon": "SOON",
       "editing": "Editing Next Action",
       "empty": "No next action defined yet.",
       "define": "Define Next Action",
       "taskDescription": "Task Description",
       "description": "Task Description",
+      "placeholder": "What needs to happen next...",
       "deadline": "Deadline",
       "responsiblePerson": "Responsible Person",
-      "responsible": "Responsible Person",
+      "responsible": "Responsible",
       "cancel": "Cancel",
       "saveAction": "Save Action",
       "save": "Save Action",
@@ -94,7 +121,7 @@
       "unassigned": "Unassigned",
       "errorSaving": "Error saving next action"
     },
-    
+
     "profileForm": {
       "title": "Loan Profile",
       "readOnlyInfo": "Read-Only Information",
@@ -102,6 +129,8 @@
       "financialDetails": "Financial Details",
       "datesCompanies": "Dates & Companies",
       "contactsStatus": "Contacts & Status",
+      "buyerInfo": "Buyer Info",
+      "thirdParties": "Third Parties",
       "borrowerName": "Borrower Name",
       "email": "Email",
       "phone": "Phone",
@@ -110,42 +139,60 @@
       "interestRate": "Interest Rate (%)",
       "saveChanges": "Save Profile Changes"
     },
-    
+
     "documents": {
       "upload": "Upload file",
+      "download": "Download",
       "delete": "Delete file"
     },
-    
-"documentChecklist": {
-  "title": "Document Checklist",
-  "noFileUploaded": "No file uploaded",
-  "viewFile": "View file",
-  "note": "Note",
-  "upload": "Upload",
-  "deleteFile": "Delete File",
-  "status": {
-    "approved": "Approved",
-    "received": "Received",
-    "under_review": "Under Review",
-    "missing": "Missing",
-    "requested": "Requested",
-    "not_applicable": "N/A"
-  }
-},
-    
+
+    "documentChecklist": {
+      "title": "Document Checklist",
+      "noFileUploaded": "No file uploaded",
+      "viewFile": "View file",
+      "uploaded": "Uploaded",
+      "complete": "complete",
+      "note": "Note",
+      "upload": "Upload",
+      "deleteFile": "Delete File",
+      "status": {
+        "approved": "Approved",
+        "received": "Received",
+        "under_review": "Under Review",
+        "missing": "Missing",
+        "requested": "Requested",
+        "not_applicable": "N/A"
+      }
+    },
+
     "timeline": {
       "empty": "No activity recorded yet.",
       "by": "by",
       "noDate": "No date",
-      "unknownAction": "Unknown action"
+      "unknownAction": "Unknown action",
+      "system": "System",
+      "unknown": "Unknown",
+      "loadMore": "Load more",
+      "actions": {
+        "created": "Loan created",
+        "updated": "Loan profile updated",
+        "noteAdded": "Note added",
+        "documentUploaded": "Document uploaded",
+        "documentUpdated": "Document status updated",
+        "documentDeleted": "Document file deleted",
+        "stageChanged": "Stage changed",
+        "statusChanged": "Special status set",
+        "statusCleared": "Special status cleared",
+        "nextActionUpdated": "Next action updated"
+      }
     },
-    
+
     "notes": {
       "placeholder": "Add an internal note...",
       "postNote": "Post Note",
       "noNotes": "No notes yet"
     },
-    
+
     "documentTypes": {
       "loan_application": "Loan Application",
       "government_id_passport": "Government ID / Passport",
@@ -175,7 +222,7 @@
       "clear_to_close": "Clear to Close",
       "final_closing_documents": "Final Closing Documents"
     },
-    
+
     "pipelineStages": {
       "new_loan_buyer_added": "New Loan / Buyer Added",
       "loan_application_sent": "Loan Application Sent",
@@ -220,7 +267,7 @@
       "title_confirmed_closed": "Title Confirmed / Closed",
       "completed": "Completed"
     },
-    
+
     "pipelinePhases": {
       "Application": "Application",
       "Processing": "Processing",
@@ -228,7 +275,7 @@
       "Closing": "Closing",
       "Completed": "Completed"
     },
-    
+
     "specialStatuses": {
       "on_hold": "On Hold",
       "missing_documents": "Missing Documents",
@@ -236,34 +283,50 @@
       "financing_issue": "Financing Issue",
       "cancelled": "Cancelled"
     },
-    
+
     "alerts": {
       "title": "Action Required / Alerts",
       "noAlerts": "No pending alerts. Everything is on track.",
+      "closing": "Closing",
       "severity": {
         "high": "High",
         "medium": "Medium",
         "low": "Low",
         "default": "Info"
+      },
+      "types": {
+        "missing_documents": "Missing Documents",
+        "deadline_approaching": "Deadline Soon",
+        "deadline_overdue": "Overdue",
+        "stale_stage": "Stale",
+        "appraisal_pending": "Appraisal",
+        "conditions_outstanding": "Conditions",
+        "closing_approaching": "Closing Soon",
+        "clear_to_close": "Clear to Close",
+        "loan_funded": "Funded"
       }
     },
-    
+
     "kpis": {
       "totalLoans": "Total Loans",
       "totalPipeline": "Total Pipeline",
       "activeLoans": "Active Loans",
       "clearToClose": "Clear to Close",
-      "closingWithin7Days": "Closing 7 Days",
-      "completedLoans": "Completed",
+      "closingWithin7Days": "Closing This Week",
+      "completedLoans": "Funded / Closed",
       "averagePercentComplete": "Avg % Complete",
-      "overdueDeadlines": "Overdue",
+      "overdueDeadlines": "Overdue Tasks",
       "onHold": "On Hold",
+      "requestedDocumentsOverdue": "Missing Docs",
+      "staleStages": "Stale Loans",
+      "loanDenied": "Denied",
+      "cancelledOrWithdrawn": "Cancelled",
       "avgDaysToClose": "Avg Days to Close",
       "pendingDocs": "Pending Docs",
       "closedThisMonth": "Closed This Month",
       "notAvailable": "N/A"
     },
-    
+
     "form": {
       "create": "Create New Loan",
       "edit": "Edit Loan",
@@ -271,13 +334,22 @@
       "autoCalculated": "auto-calculated",
       "autoPriceMinusDown": "Auto: Price − Down Payment",
       "auto30yr": "Auto: 30-yr fixed (P&I)",
+      "ofPrice": "of price",
+      "enterPercentToCalculate": "Enter % to calculate",
+      "setPurchasePriceFirst": "Set purchase price first",
+      "autoFilled": "Auto-filled from selection",
+      "noBuyersInProject": "No buyers in this project",
+      "selectProjectFirst": "Select a project first",
+      "selectBuyerFirst": "Select a Buyer first to see their {{resource}}s",
+      "noResourcesFound": "No resources found",
       "loadingResources": "Loading {{resource}}s...",
-      "selectBuyerFirst": "* Select a Buyer first to see their {{resource}}s",
+      "model": "Model",
       "sections": {
         "projectSelection": "1. Project Selection",
         "partiesProject": "1. Parties & Project",
         "partiesInvolved": "2. Parties Involved",
         "resourceDetails": "3. {{resource}} Details",
+        "details": "Details",
         "financialDetails": "4. Financial Details",
         "datesCompanies": "5. Dates & Companies",
         "contactsStatusNotes": "6. Contacts, Status & Notes",

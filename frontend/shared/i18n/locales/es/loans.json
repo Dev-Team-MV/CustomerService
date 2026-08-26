@@ -5,35 +5,54 @@
     "subtitle": "Administra el ciclo de vida completo de los préstamos hipotecarios.",
     "searchPlaceholder": "Buscar por comprador, monto o prestamista...",
     "confirmDelete": "¿Eliminar este préstamo?",
-    
+
     "tabs": {
       "all": "Todos",
       "active": "Activos",
       "processing": "En Proceso",
+      "underwriting": "Suscripción",
       "closing": "Cierre",
+      "completed": "Completados",
       "issues": "Incidencias"
     },
-    
+
     "filters": {
       "project": "Filtrar por Proyecto",
       "allProjects": "Todos los Proyectos",
       "clearFilter": "Limpiar Filtro"
     },
-    
+
     "actions": {
       "newLoan": "Nuevo Préstamo",
       "view": "Ver",
       "edit": "Editar",
       "delete": "Eliminar"
     },
-    
+
     "snackbar": {
+      "created": "Préstamo creado correctamente",
+      "createError": "Error al crear el préstamo",
       "deleted": "Préstamo eliminado correctamente",
       "deleteError": "Error al eliminar el préstamo",
-      "created": "Préstamo creado correctamente",
-      "createError": "Error al crear el préstamo"
+      "updated": "Préstamo actualizado correctamente",
+      "updateError": "Error al actualizar el préstamo",
+      "profileUpdated": "Perfil actualizado",
+      "profileUpdateError": "Error al actualizar el perfil",
+      "stageUpdated": "Etapa del pipeline actualizada",
+      "stageUpdateError": "Error al actualizar la etapa",
+      "statusUpdated": "Estado especial actualizado",
+      "statusUpdateError": "Error al actualizar el estado",
+      "nextActionUpdated": "Próxima acción actualizada",
+      "nextActionError": "Error al actualizar la próxima acción",
+      "docUploaded": "Documento subido",
+      "docUploadError": "Error al subir el documento",
+      "docDeleted": "Documento eliminado",
+      "docDeleteError": "Error al eliminar el documento",
+      "docUpdateError": "Error al actualizar el documento",
+      "noteAdded": "Nota agregada",
+      "noteError": "Error al agregar la nota"
     },
-    
+
     "common": {
       "noEmail": "Sin correo",
       "notAvailable": "N/A",
@@ -42,46 +61,54 @@
       "unassigned": "Sin asignar",
       "unknownBuyer": "Comprador desconocido"
     },
-    
+
     "table": {
       "borrower": "Comprador",
       "property": "Propiedad",
       "loanAmount": "Monto del Préstamo",
       "purchasePrice": "Precio de Compra",
+      "progress": "Progreso",
       "stage": "Etapa",
       "status": "Estado",
       "nextAction": "Próxima Acción",
       "assignedTo": "Asignado a",
-      "actions": "Acciones"
+      "actions": "Acciones",
+      "estimatedClosing": "Cierre Est.",
+      "results": "resultados",
+      "noLoans": "No se encontraron préstamos"
     },
-    
+
     "detail": {
       "backToList": "Volver a la lista",
       "saveChanges": "Guardar Cambios",
       "notFound": "Préstamo no encontrado",
       "errorSaving": "Error al guardar los cambios",
+      "loadError": "Error al cargar el préstamo",
+      "defaultTitle": "Préstamo",
       "profile": "Perfil del Préstamo",
       "documents": "Lista de Documentos",
       "timeline": "Historial de Actividad",
       "notes": "Notas Internas",
       "loanDetailTitle": "Detalle del Préstamo: {{id}}"
     },
-    
+
     "pipeline": {
       "title": "Estado del Pipeline"
     },
-    
+
     "nextAction": {
       "title": "Próxima Acción Crítica",
-      "overdue": "Acción Vencida",
+      "overdue": "VENCIDO",
+      "soon": "PRONTO",
       "editing": "Editando Próxima Acción",
       "empty": "No hay próxima acción definida aún.",
       "define": "Definir Próxima Acción",
       "taskDescription": "Descripción de la Tarea",
       "description": "Descripción de la Tarea",
+      "placeholder": "¿Qué necesita suceder después...",
       "deadline": "Fecha Límite",
       "responsiblePerson": "Persona Responsable",
-      "responsible": "Persona Responsable",
+      "responsible": "Responsable",
       "cancel": "Cancelar",
       "saveAction": "Guardar Acción",
       "save": "Guardar Acción",
@@ -90,11 +117,11 @@
       "noDescription": "Sin descripción",
       "due": "Vence",
       "noDeadline": "Sin fecha límite",
-      "assigned": "Asignado a",
+      "assigned": "Asignado",
       "unassigned": "Sin asignar",
       "errorSaving": "Error al guardar la próxima acción"
     },
-    
+
     "profileForm": {
       "title": "Perfil del Préstamo",
       "readOnlyInfo": "Información de Solo Lectura",
@@ -102,6 +129,8 @@
       "financialDetails": "Detalles Financieros",
       "datesCompanies": "Fechas y Compañías",
       "contactsStatus": "Contactos y Estado",
+      "buyerInfo": "Información del Comprador",
+      "thirdParties": "Terceros",
       "borrowerName": "Nombre del Comprador",
       "email": "Correo Electrónico",
       "phone": "Teléfono",
@@ -110,42 +139,60 @@
       "interestRate": "Tasa de Interés (%)",
       "saveChanges": "Guardar Cambios del Perfil"
     },
-    
+
     "documents": {
       "upload": "Subir archivo",
+      "download": "Descargar",
       "delete": "Eliminar archivo"
     },
-    
-"documentChecklist": {
-  "title": "Lista de Documentos",
-  "noFileUploaded": "Sin archivo cargado",
-  "viewFile": "Ver archivo",
-  "note": "Nota",
-  "upload": "Subir",
-  "deleteFile": "Eliminar Archivo",
-  "status": {
-    "approved": "Aprobado",
-    "received": "Recibido",
-    "under_review": "En Revisión",
-    "missing": "Faltante",
-    "requested": "Solicitado",
-    "not_applicable": "N/A"
-  }
-},
-    
+
+    "documentChecklist": {
+      "title": "Lista de Documentos",
+      "noFileUploaded": "Sin archivo cargado",
+      "viewFile": "Ver archivo",
+      "uploaded": "Subido",
+      "complete": "completos",
+      "note": "Nota",
+      "upload": "Subir",
+      "deleteFile": "Eliminar Archivo",
+      "status": {
+        "approved": "Aprobado",
+        "received": "Recibido",
+        "under_review": "En Revisión",
+        "missing": "Faltante",
+        "requested": "Solicitado",
+        "not_applicable": "N/A"
+      }
+    },
+
     "timeline": {
       "empty": "No hay actividad registrada aún.",
       "by": "por",
       "noDate": "Sin fecha",
-      "unknownAction": "Acción desconocida"
+      "unknownAction": "Acción desconocida",
+      "system": "Sistema",
+      "unknown": "Desconocido",
+      "loadMore": "Cargar más",
+      "actions": {
+        "created": "Préstamo creado",
+        "updated": "Perfil del préstamo actualizado",
+        "noteAdded": "Nota agregada",
+        "documentUploaded": "Documento subido",
+        "documentUpdated": "Estado de documento actualizado",
+        "documentDeleted": "Archivo de documento eliminado",
+        "stageChanged": "Etapa cambiada",
+        "statusChanged": "Estado especial establecido",
+        "statusCleared": "Estado especial limpiado",
+        "nextActionUpdated": "Próxima acción actualizada"
+      }
     },
-    
+
     "notes": {
       "placeholder": "Agregar una nota interna...",
       "postNote": "Publicar Nota",
       "noNotes": "No hay notas aún"
     },
-    
+
     "documentTypes": {
       "loan_application": "Solicitud de Préstamo",
       "government_id_passport": "ID Gubernamental / Pasaporte",
@@ -175,7 +222,7 @@
       "clear_to_close": "Listo para Cierre",
       "final_closing_documents": "Documentos Finales de Cierre"
     },
-    
+
     "pipelineStages": {
       "new_loan_buyer_added": "Nuevo Préstamo / Comprador Agregado",
       "loan_application_sent": "Solicitud Enviada",
@@ -220,7 +267,7 @@
       "title_confirmed_closed": "Título Confirmado / Cerrado",
       "completed": "Completado"
     },
-    
+
     "pipelinePhases": {
       "Application": "Solicitud",
       "Processing": "Proceso",
@@ -228,7 +275,7 @@
       "Closing": "Cierre",
       "Completed": "Completado"
     },
-    
+
     "specialStatuses": {
       "on_hold": "En Espera",
       "missing_documents": "Documentos Faltantes",
@@ -236,34 +283,50 @@
       "financing_issue": "Problema de Financiamiento",
       "cancelled": "Cancelado"
     },
-    
+
     "alerts": {
       "title": "Acción Requerida / Alertas",
       "noAlerts": "No hay alertas pendientes. Todo va según lo planeado.",
+      "closing": "Cierre",
       "severity": {
         "high": "Alta",
         "medium": "Media",
         "low": "Baja",
         "default": "Info"
+      },
+      "types": {
+        "missing_documents": "Documentos Faltantes",
+        "deadline_approaching": "Fecha Próxima",
+        "deadline_overdue": "Vencido",
+        "stale_stage": "Estancado",
+        "appraisal_pending": "Avalúo",
+        "conditions_outstanding": "Condiciones",
+        "closing_approaching": "Cierre Próximo",
+        "clear_to_close": "Listo para Cierre",
+        "loan_funded": "Desembolsado"
       }
     },
-    
+
     "kpis": {
       "totalLoans": "Total de Préstamos",
       "totalPipeline": "Pipeline Total",
       "activeLoans": "Préstamos Activos",
       "clearToClose": "Listos para Cierre",
-      "closingWithin7Days": "Cierres en 7 Días",
-      "completedLoans": "Completados",
+      "closingWithin7Days": "Cierres Esta Semana",
+      "completedLoans": "Desembolsados / Cerrados",
       "averagePercentComplete": "% Prom. Completado",
-      "overdueDeadlines": "Vencidos",
+      "overdueDeadlines": "Tareas Vencidas",
       "onHold": "En Espera",
+      "requestedDocumentsOverdue": "Docs Faltantes",
+      "staleStages": "Préstamos Estancados",
+      "loanDenied": "Denegados",
+      "cancelledOrWithdrawn": "Cancelados",
       "avgDaysToClose": "Días Prom. para Cierre",
       "pendingDocs": "Documentos Pendientes",
       "closedThisMonth": "Cerrados Este Mes",
       "notAvailable": "N/A"
     },
-    
+
     "form": {
       "create": "Crear Nuevo Préstamo",
       "edit": "Editar Préstamo",
@@ -271,13 +334,22 @@
       "autoCalculated": "auto-calculado",
       "autoPriceMinusDown": "Auto: Precio − Cuota Inicial",
       "auto30yr": "Auto: 30 años fijos (P&I)",
+      "ofPrice": "del precio",
+      "enterPercentToCalculate": "Ingresa % para calcular",
+      "setPurchasePriceFirst": "Establece el precio de compra primero",
+      "autoFilled": "Autocompletado desde la selección",
+      "noBuyersInProject": "No hay compradores en este proyecto",
+      "selectProjectFirst": "Selecciona un proyecto primero",
+      "selectBuyerFirst": "Selecciona un Comprador primero para ver sus {{resource}}s",
+      "noResourcesFound": "No se encontraron recursos",
       "loadingResources": "Cargando {{resource}}s...",
-      "selectBuyerFirst": "* Selecciona un Comprador primero para ver sus {{resource}}s",
+      "model": "Modelo",
       "sections": {
         "projectSelection": "1. Selección de Proyecto",
         "partiesProject": "1. Partes y Proyecto",
         "partiesInvolved": "2. Partes Involucradas",
         "resourceDetails": "3. Detalles de {{resource}}",
+        "details": "Detalles",
         "financialDetails": "4. Detalles Financieros",
         "datesCompanies": "5. Fechas y Compañías",
         "contactsStatusNotes": "6. Contactos, Estado y Notas",

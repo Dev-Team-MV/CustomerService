@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box, Typography, Button, TextField, IconButton
 } from '@mui/material'
@@ -11,6 +12,7 @@ function personName(p) {
 }
 
 export default function LoanNextAction({ nextAction = {}, onSave }) {
+  const { t } = useTranslation('loans')
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState({
     description: nextAction?.description || '',
@@ -31,6 +33,7 @@ export default function LoanNextAction({ nextAction = {}, onSave }) {
 
   return (
     <Box
+    id="loan-next-action"
       sx={{
         border: isOverdue ? '2px solid #f44336' : isSoon ? '2px solid #ff9800' : '1px solid #e0e0e0',
         bgcolor: isOverdue ? '#fff5f5' : isSoon ? '#fff8e1' : '#fff',
@@ -50,7 +53,7 @@ export default function LoanNextAction({ nextAction = {}, onSave }) {
               color: '#000'
             }}
           >
-            Next Action
+            {t('loans.nextAction.title')}
           </Typography>
         </Box>
         {!editing ? (
@@ -70,7 +73,7 @@ export default function LoanNextAction({ nextAction = {}, onSave }) {
           <TextField
             value={form.description}
             onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
-            placeholder="What needs to happen next..."
+            placeholder={t('loans.nextAction.placeholder', 'What needs to happen next...')}
             size="small"
             multiline
             rows={2}
@@ -81,7 +84,7 @@ export default function LoanNextAction({ nextAction = {}, onSave }) {
             type="date"
             value={form.deadline}
             onChange={(e) => setForm(prev => ({ ...prev, deadline: e.target.value }))}
-            label="Deadline"
+            label={t('loans.nextAction.deadline')}
             size="small"
             InputLabelProps={{ shrink: true }}
             sx={{ maxWidth: 200, '& .MuiOutlinedInput-root': { borderRadius: 0, fontSize: '0.82rem' } }}
@@ -98,11 +101,11 @@ export default function LoanNextAction({ nextAction = {}, onSave }) {
               mb: 0.5
             }}
           >
-            {nextAction?.description || 'No action set'}
+            {nextAction?.description || t('loans.nextAction.empty')}
           </Typography>
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#888' }}>
-              Responsible: {personName(nextAction?.responsiblePerson)}
+              {t('loans.nextAction.responsible')}: {personName(nextAction?.responsiblePerson)}
             </Typography>
             {deadline && (
               <Typography
@@ -113,9 +116,9 @@ export default function LoanNextAction({ nextAction = {}, onSave }) {
                   fontWeight: isOverdue || isSoon ? 700 : 400
                 }}
               >
-                Due: {deadline.toLocaleDateString()}
-                {isOverdue && ' (OVERDUE)'}
-                {isSoon && ' (SOON)'}
+                {t('loans.nextAction.due')}: {deadline.toLocaleDateString()}
+                {isOverdue && ` (${t('loans.nextAction.overdue')})`}
+                {isSoon && ` (${t('loans.nextAction.soon')})`}
               </Typography>
             )}
           </Box>

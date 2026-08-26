@@ -1630,6 +1630,95 @@
         "title": "Recent Activity",
         "description": "Monitor the latest transactions, payments, and important system movements."
       }
+    },
+
+
+  "loans": {
+    "button": "Loan pipeline guide",
+    "overview": {
+      "title": "Loan Pipeline",
+      "description": "Manage the complete mortgage loan lifecycle from application to closing. Track buyers, documents, stages, and deadlines in one place."
+    },
+    "kpis": {
+      "title": "KPI Dashboard",
+      "description": "At-a-glance metrics: active loans, closings this week, overdue deadlines, missing docs, and more. Click any KPI to understand its meaning."
+    },
+    "alerts": {
+      "title": "Action Required Alerts",
+      "description": "Priority alerts for loans that need attention: closing deadlines approaching, missing documents, overdue tasks, or status changes requiring action."
+    },
+    "toolbar": {
+      "title": "Search & Create",
+      "description": "Use the search box to find loans by buyer, lender, or property address. Use the 'New Loan' button to register a new buyer financing."
+    },
+    "tabs": {
+      "title": "Stage Filters",
+      "description": "Filter loans by pipeline phase: Active, Processing, Underwriting, Closing, Completed, or Issues. The Issues tab shows loans with special status flags."
+    },
+    "table": {
+      "title": "Loans Table",
+      "description": "The main table shows all loans with key columns. Let me walk you through the anatomy of the first row."
+    },
+    "row": {
+      "title": "Loan Row Anatomy",
+      "description": "Each row shows: Buyer (with avatar + email), Property/Apartment, Loan Amount + rate, Progress %, Pipeline Stage chip, Special Status, Assigned agent, and Est. Closing date."
+    },
+    "colBorrower": {
+      "title": "Buyer Column",
+      "description": "Displays the borrower's name, avatar, and email. Click the row to open the loan detail page."
+    },
+    "colProperty": {
+      "title": "Property / Apartment",
+      "description": "Shows the linked unit: 🏠 Lot + Model for properties, or 🏢 Apt + Floor for apartments, along with project and price."
+    },
+    "colStage": {
+      "title": "Pipeline Stage",
+      "description": "A color-coded chip showing the current stage (Application, Processing, Underwriting, Closing, or Completed). Colors change by phase."
+    },
+    "colClosing": {
+      "title": "Est. Closing Date",
+      "description": "Shows the estimated closing date with a countdown (e.g., '5d left'). Turns red when overdue and orange when closing within 7 days."
+    },
+    "goDetail": {
+      "title": "Opening the Loan Detail",
+      "description": "Click 'Next' to navigate into the loan detail page, where you'll see the complete loan profile, documents, and timeline."
     }
+  },
+  "loanDetail": {
+    "button": "Loan detail guide",
+    "header": {
+      "title": "Loan Header",
+      "description": "The header shows the buyer's name, project, linked unit, special status chip, and overall completion progress."
+    },
+    "pipeline": {
+      "title": "Pipeline Visualization",
+      "description": "A visual stepper of the loan lifecycle. Click any stage to advance or move the loan to that specific stage."
+    },
+    "nextAction": {
+      "title": "Next Critical Action",
+      "description": "Shows the most urgent pending task with its deadline and responsible person. Turns red when overdue and orange when due within 3 days."
+    },
+    "profile": {
+      "title": "Loan Profile",
+      "description": "Read-only view of the buyer, financial details, dates, and third parties. Click Edit to update any field, or change the pipeline stage / special status directly from the dropdowns."
+    },
+    "docs": {
+      "title": "Document Checklist",
+      "description": "The 27-document checklist tracks every required file: upload PDFs, mark statuses (Requested, Received, Missing, Approved), and download or delete files. Progress is tracked automatically."
+    },
+    "timeline": {
+      "title": "Activity Timeline",
+      "description": "A chronological log of every action: stage changes, document uploads, notes added, status changes. Shows who did what and when."
+    },
+    "notes": {
+      "title": "Internal Notes",
+      "description": "Add private team notes to the loan. Use Ctrl+Enter to save quickly. Notes are stored in the timeline for full audit trail."
+    },
+    "finish": {
+      "title": "You're all set!",
+      "description": "You now know the complete loan management flow. Use the back arrow to return to the pipeline view."
+    }
+  }
+
   }
 }

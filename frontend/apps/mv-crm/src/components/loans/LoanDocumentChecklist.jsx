@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box, Typography, Chip, IconButton, MenuItem, Select, Tooltip
 } from '@mui/material'
@@ -18,6 +19,7 @@ export default function LoanDocumentChecklist({
   onUpload,
   onDeleteFile
 }) {
+  const { t } = useTranslation('loans')
   const fileInputRefs = useRef({})
 
   const handleFileSelect = (docType) => (e) => {
@@ -32,16 +34,16 @@ export default function LoanDocumentChecklist({
   const total = checklist.filter(d => d.status !== 'not_applicable').length
 
   return (
-    <Box sx={{ border: '1px solid #e0e0e0', bgcolor: '#fff', mb: 3 }}>
+    <Box id="loan-document-checklist" sx={{ border: '1px solid #e0e0e0', bgcolor: '#fff', mb: 3 }}>
       <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography
           sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#000' }}
         >
-          Document Checklist
+          {t('loans.documentChecklist.title')}
         </Typography>
         {total > 0 && (
           <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.62rem', color: '#888' }}>
-            {received}/{total} complete
+            {received}/{total} {t('loans.documentChecklist.complete', 'complete')}
           </Typography>
         )}
       </Box>
@@ -77,7 +79,7 @@ export default function LoanDocumentChecklist({
               </Typography>
               {doc.uploadedAt && (
                 <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.55rem', color: '#aaa' }}>
-                  Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}
+                  {t('loans.documentChecklist.uploaded', 'Uploaded')} {new Date(doc.uploadedAt).toLocaleDateString()}
                 </Typography>
               )}
             </Box>
@@ -124,7 +126,7 @@ export default function LoanDocumentChecklist({
                 ref={(el) => { fileInputRefs.current[doc.documentType] = el }}
                 onChange={handleFileSelect(doc.documentType)}
               />
-              <Tooltip title="Upload file">
+              <Tooltip title={t('loans.documents.upload')}>
                 <IconButton
                   size="small"
                   onClick={() => fileInputRefs.current[doc.documentType]?.click()}
@@ -135,12 +137,12 @@ export default function LoanDocumentChecklist({
 
               {doc.fileUrl && (
                 <>
-                  <Tooltip title="Download">
+                  <Tooltip title={t('loans.documents.download', 'Download')}>
                     <IconButton size="small" component="a" href={doc.fileUrl} target="_blank" rel="noopener">
                       <Download sx={{ fontSize: 16, color: '#4caf50' }} />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="Delete file">
+                  <Tooltip title={t('loans.documents.delete')}>
                     <IconButton size="small" onClick={() => onDeleteFile?.(doc.documentType)}>
                       <Delete sx={{ fontSize: 16, color: '#f44336' }} />
                     </IconButton>

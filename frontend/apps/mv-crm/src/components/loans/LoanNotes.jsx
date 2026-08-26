@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Typography, TextField, Button } from '@mui/material'
 import { NoteAdd } from '@mui/icons-material'
 
 export default function LoanNotes({ notes = '', onAddNote }) {
+  const { t } = useTranslation('loans')
   const [newNote, setNewNote] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -20,12 +22,12 @@ export default function LoanNotes({ notes = '', onAddNote }) {
   const noteLines = notes ? notes.split('\n').filter(Boolean) : []
 
   return (
-    <Box sx={{ border: '1px solid #e0e0e0', bgcolor: '#fff', mb: 3 }}>
+    <Box id="loan-notes" sx={{ border: '1px solid #e0e0e0', bgcolor: '#fff', mb: 3 }}>
       <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid #e0e0e0' }}>
         <Typography
           sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#000' }}
         >
-          Internal Notes
+          {t('loans.detail.notes')}
         </Typography>
       </Box>
 
@@ -34,7 +36,7 @@ export default function LoanNotes({ notes = '', onAddNote }) {
           <TextField
             value={newNote}
             onChange={(e) => setNewNote(e.target.value)}
-            placeholder="Add a note..."
+            placeholder={t('loans.notes.placeholder')}
             size="small"
             multiline
             rows={2}
@@ -74,7 +76,7 @@ export default function LoanNotes({ notes = '', onAddNote }) {
 
         {noteLines.length === 0 && (
           <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#aaa', textAlign: 'center', py: 1 }}>
-            No notes yet
+            {t('loans.notes.noNotes')}
           </Typography>
         )}
       </Box>

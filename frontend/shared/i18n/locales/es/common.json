@@ -1632,6 +1632,95 @@
         "title": "Actividad Reciente",
         "description": "Monitorea las últimas transacciones, pagos y movimientos importantes del sistema."
       }
+    },
+
+
+  "loans": {
+    "button": "Guía del pipeline de préstamos",
+    "overview": {
+      "title": "Pipeline de Préstamos",
+      "description": "Administra el ciclo de vida completo de los préstamos hipotecarios, desde la solicitud hasta el cierre. Rastrea compradores, documentos, etapas y fechas límite en un solo lugar."
+    },
+    "kpis": {
+      "title": "Dashboard de KPIs",
+      "description": "Métricas clave de un vistazo: préstamos activos, cierres esta semana, fechas vencidas, documentos faltantes y más. Haz click en cualquier KPI para entender su significado."
+    },
+    "alerts": {
+      "title": "Alertas de Acción Requerida",
+      "description": "Alertas prioritarias para préstamos que necesitan atención: fechas de cierre próximas, documentos faltantes, tareas vencidas o cambios de estado que requieren acción."
+    },
+    "toolbar": {
+      "title": "Buscar y Crear",
+      "description": "Usa el buscador para encontrar préstamos por comprador, prestamista o dirección de la propiedad. Usa el botón 'Nuevo Préstamo' para registrar una nueva financiación."
+    },
+    "tabs": {
+      "title": "Filtros por Etapa",
+      "description": "Filtra préstamos por fase del pipeline: Activos, En Proceso, Suscripción, Cierre, Completados o Incidencias. La pestaña Incidencias muestra préstamos con banderas de estado especial."
+    },
+    "table": {
+      "title": "Tabla de Préstamos",
+      "description": "La tabla principal muestra todos los préstamos con sus columnas clave. Te guiaré a través de la anatomía de la primera fila."
+    },
+    "row": {
+      "title": "Anatomía de la Fila de Préstamo",
+      "description": "Cada fila muestra: Comprador (con avatar + email), Propiedad/Apartamento, Monto del Préstamo + tasa, Progreso %, Chip de Etapa del Pipeline, Estado Especial, Agente asignado y Cierre Estimado."
+    },
+    "colBorrower": {
+      "title": "Columna Comprador",
+      "description": "Muestra el nombre del comprador, avatar y email. Haz click en la fila para abrir la página de detalle del préstamo."
+    },
+    "colProperty": {
+      "title": "Propiedad / Apartamento",
+      "description": "Muestra la unidad vinculada: 🏠 Lote + Modelo para propiedades, o 🏢 Apto + Piso para apartamentos, junto con el proyecto y precio."
+    },
+    "colStage": {
+      "title": "Etapa del Pipeline",
+      "description": "Un chip de color que indica la etapa actual (Solicitud, Proceso, Suscripción, Cierre o Completado). Los colores cambian según la fase."
+    },
+    "colClosing": {
+      "title": "Fecha de Cierre Estimada",
+      "description": "Muestra la fecha estimada de cierre con un contador (ej: '5d restantes'). Se vuelve roja si está vencida y naranja si el cierre es en 7 días."
+    },
+    "goDetail": {
+      "title": "Abriendo el Detalle del Préstamo",
+      "description": "Haz click en 'Siguiente' para navegar a la página de detalle del préstamo, donde verás el perfil completo, documentos y cronología."
     }
+  },
+  "loanDetail": {
+    "button": "Guía del detalle del préstamo",
+    "header": {
+      "title": "Encabezado del Préstamo",
+      "description": "El encabezado muestra el nombre del comprador, proyecto, unidad vinculada, chip de estado especial y el progreso general de completado."
+    },
+    "pipeline": {
+      "title": "Visualización del Pipeline",
+      "description": "Un stepper visual del ciclo de vida del préstamo. Haz click en cualquier etapa para avanzar o mover el préstamo a esa etapa específica."
+    },
+    "nextAction": {
+      "title": "Próxima Acción Crítica",
+      "description": "Muestra la tarea pendiente más urgente con su fecha límite y persona responsable. Se vuelve roja si está vencida y naranja si vence en 3 días."
+    },
+    "profile": {
+      "title": "Perfil del Préstamo",
+      "description": "Vista de solo lectura del comprador, detalles financieros, fechas y terceros. Haz click en Editar para actualizar cualquier campo, o cambia la etapa del pipeline / estado especial directamente desde los selectores."
+    },
+    "docs": {
+      "title": "Lista de Documentos",
+      "description": "El checklist de 27 documentos rastrea cada archivo requerido: sube PDFs, marca estados (Solicitado, Recibido, Faltante, Aprobado) y descarga o elimina archivos. El progreso se rastrea automáticamente."
+    },
+    "timeline": {
+      "title": "Cronología de Actividad",
+      "description": "Un log cronológico de cada acción: cambios de etapa, documentos subidos, notas agregadas, cambios de estado. Muestra quién hizo qué y cuándo."
+    },
+    "notes": {
+      "title": "Notas Internas",
+      "description": "Agrega notas privadas del equipo al préstamo. Usa Ctrl+Enter para guardar rápidamente. Las notas se almacenan en la cronología para una auditoría completa."
+    },
+    "finish": {
+      "title": "¡Todo listo!",
+      "description": "Ya dominas el flujo completo de gestión de préstamos. Usa la flecha de retorno para volver a la vista del pipeline."
+    }
+  }
+
   }
 }
