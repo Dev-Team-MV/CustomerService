@@ -52,6 +52,8 @@ import SharedTermsAndConditionsPage from '@shared/components/TermsAndConditions/
 import { getNewsConfig } from '@shared/config/newsConfig'
 import ImpersonationBanner from '@shared/components/ImpersonationBanner'
 
+import {TourProvider} from '@shared/tours/useTour'
+
 const DynamicLayoutWrapper = ({ children }) => {
   const { user } = useAuth()
   const publicView = !user
@@ -71,7 +73,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider projectSlug="lakewood">
-         
+        <TourProvider>
         <Routes>
           {/* Auth Routes */}
           <Route 
@@ -151,6 +153,7 @@ function App() {
           
           <Route path="*" element={<SharedNotFoundPage />} />
         </Routes>
+        </TourProvider>
       </AuthProvider>
     </ThemeProvider>
   )

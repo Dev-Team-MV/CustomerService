@@ -39,6 +39,7 @@ const NAV = [
   { key: 'comissions', labelKey: 'comissions', icon: AccountBalanceWallet, path: '/comissions' },
   { key: 'quote', labelKey: 'quote', icon: ReceiptLong, path: '/quote' },
   { key: 'vendors', labelKey: 'vendors', icon: Business, path: '/vendors' },
+  { key: 'loans', labelKey: 'loans', icon: AccountBalanceWallet, path: '/loans' },
   { key: 'documents', labelKey: 'documents', icon: Description, path: '/documents' },
   { key: 'post-sale', labelKey: 'post-sale', icon: Handshake, path: '/post-sale' },
   { key: 'referrals', labelKey: 'referrals', icon: PersonAddAlt1, path: '/referrals' },
@@ -148,6 +149,7 @@ export default function Sidebar({ stats = [], onNavigate }) {
           return (
             <motion.div key={item.key} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 * i }}>
               <ListItem
+              id="sidebar-nav-overview"
                 onClick={() => handleNavClick(item.path)}
                 sx={{
                   borderRadius: 0, mb: 0.5, px: 1.5, py: 1.1, cursor: 'pointer',

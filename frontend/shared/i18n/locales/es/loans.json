@@ -1,0 +1,334 @@
+{
+  "loans": {
+    "title": "Gestión de",
+    "titleBold": "Préstamos",
+    "subtitle": "Administra el ciclo de vida completo de los préstamos hipotecarios.",
+    "searchPlaceholder": "Buscar por comprador, monto o prestamista...",
+    "confirmDelete": "¿Eliminar este préstamo?",
+    
+    "tabs": {
+      "all": "Todos",
+      "active": "Activos",
+      "processing": "En Proceso",
+      "closing": "Cierre",
+      "issues": "Incidencias"
+    },
+    
+    "filters": {
+      "project": "Filtrar por Proyecto",
+      "allProjects": "Todos los Proyectos",
+      "clearFilter": "Limpiar Filtro"
+    },
+    
+    "actions": {
+      "newLoan": "Nuevo Préstamo",
+      "view": "Ver",
+      "edit": "Editar",
+      "delete": "Eliminar"
+    },
+    
+    "snackbar": {
+      "deleted": "Préstamo eliminado correctamente",
+      "deleteError": "Error al eliminar el préstamo",
+      "created": "Préstamo creado correctamente",
+      "createError": "Error al crear el préstamo"
+    },
+    
+    "common": {
+      "noEmail": "Sin correo",
+      "notAvailable": "N/A",
+      "normal": "Normal",
+      "none": "Ninguno",
+      "unassigned": "Sin asignar",
+      "unknownBuyer": "Comprador desconocido"
+    },
+    
+    "table": {
+      "borrower": "Comprador",
+      "property": "Propiedad",
+      "loanAmount": "Monto del Préstamo",
+      "purchasePrice": "Precio de Compra",
+      "stage": "Etapa",
+      "status": "Estado",
+      "nextAction": "Próxima Acción",
+      "assignedTo": "Asignado a",
+      "actions": "Acciones"
+    },
+    
+    "detail": {
+      "backToList": "Volver a la lista",
+      "saveChanges": "Guardar Cambios",
+      "notFound": "Préstamo no encontrado",
+      "errorSaving": "Error al guardar los cambios",
+      "profile": "Perfil del Préstamo",
+      "documents": "Lista de Documentos",
+      "timeline": "Historial de Actividad",
+      "notes": "Notas Internas",
+      "loanDetailTitle": "Detalle del Préstamo: {{id}}"
+    },
+    
+    "pipeline": {
+      "title": "Estado del Pipeline"
+    },
+    
+    "nextAction": {
+      "title": "Próxima Acción Crítica",
+      "overdue": "Acción Vencida",
+      "editing": "Editando Próxima Acción",
+      "empty": "No hay próxima acción definida aún.",
+      "define": "Definir Próxima Acción",
+      "taskDescription": "Descripción de la Tarea",
+      "description": "Descripción de la Tarea",
+      "deadline": "Fecha Límite",
+      "responsiblePerson": "Persona Responsable",
+      "responsible": "Persona Responsable",
+      "cancel": "Cancelar",
+      "saveAction": "Guardar Acción",
+      "save": "Guardar Acción",
+      "editAction": "Editar Acción",
+      "edit": "Editar",
+      "noDescription": "Sin descripción",
+      "due": "Vence",
+      "noDeadline": "Sin fecha límite",
+      "assigned": "Asignado a",
+      "unassigned": "Sin asignar",
+      "errorSaving": "Error al guardar la próxima acción"
+    },
+    
+    "profileForm": {
+      "title": "Perfil del Préstamo",
+      "readOnlyInfo": "Información de Solo Lectura",
+      "editableInfo": "Información Editable",
+      "financialDetails": "Detalles Financieros",
+      "datesCompanies": "Fechas y Compañías",
+      "contactsStatus": "Contactos y Estado",
+      "borrowerName": "Nombre del Comprador",
+      "email": "Correo Electrónico",
+      "phone": "Teléfono",
+      "propertyAddress": "Dirección de la Propiedad",
+      "loanAmount": "Monto del Préstamo",
+      "interestRate": "Tasa de Interés (%)",
+      "saveChanges": "Guardar Cambios del Perfil"
+    },
+    
+    "documents": {
+      "upload": "Subir archivo",
+      "delete": "Eliminar archivo"
+    },
+    
+"documentChecklist": {
+  "title": "Lista de Documentos",
+  "noFileUploaded": "Sin archivo cargado",
+  "viewFile": "Ver archivo",
+  "note": "Nota",
+  "upload": "Subir",
+  "deleteFile": "Eliminar Archivo",
+  "status": {
+    "approved": "Aprobado",
+    "received": "Recibido",
+    "under_review": "En Revisión",
+    "missing": "Faltante",
+    "requested": "Solicitado",
+    "not_applicable": "N/A"
+  }
+},
+    
+    "timeline": {
+      "empty": "No hay actividad registrada aún.",
+      "by": "por",
+      "noDate": "Sin fecha",
+      "unknownAction": "Acción desconocida"
+    },
+    
+    "notes": {
+      "placeholder": "Agregar una nota interna...",
+      "postNote": "Publicar Nota",
+      "noNotes": "No hay notas aún"
+    },
+    
+    "documentTypes": {
+      "loan_application": "Solicitud de Préstamo",
+      "government_id_passport": "ID Gubernamental / Pasaporte",
+      "ssn_itin": "SSN / ITIN",
+      "proof_of_address": "Comprobante de Domicilio",
+      "bank_statements": "Estados de Cuenta Bancarios",
+      "proof_of_funds": "Comprobante de Fondos",
+      "income_verification": "Verificación de Ingresos",
+      "pay_stubs": "Recibos de Nómina",
+      "w2s": "W-2s",
+      "tax_returns": "Declaraciones de Impuestos",
+      "pl_statements": "Estados de P&L",
+      "cpa_letter": "Carta de CPA",
+      "employment_verification": "Verificación de Empleo",
+      "credit_authorization": "Autorización de Crédito",
+      "purchase_agreement": "Acuerdo de Compra",
+      "amendments": "Enmiendas",
+      "earnest_money_receipt": "Recibo de Señal",
+      "down_payment_verification": "Verificación de Cuota Inicial",
+      "gift_letter": "Carta de Regalo",
+      "loan_estimate": "Estimación del Préstamo",
+      "signed_disclosures": "Divulgaciones Firmadas",
+      "appraisal": "Avalúo",
+      "homeowners_insurance": "Seguro de Hogar",
+      "title_commitment": "Compromiso de Título",
+      "closing_disclosure": "Divulgación de Cierre",
+      "clear_to_close": "Listo para Cierre",
+      "final_closing_documents": "Documentos Finales de Cierre"
+    },
+    
+    "pipelineStages": {
+      "new_loan_buyer_added": "Nuevo Préstamo / Comprador Agregado",
+      "loan_application_sent": "Solicitud Enviada",
+      "loan_application_started": "Solicitud Iniciada",
+      "loan_application_completed": "Solicitud Completada",
+      "initial_documents_requested": "Documentos Iniciales Solicitados",
+      "documents_received": "Documentos Recibidos",
+      "documents_missing_pending": "Documentos Faltantes / Pendientes",
+      "pre_qualification_in_review": "Pre-Calificación en Revisión",
+      "pre_qualified": "Pre-Calificado",
+      "pre_approval_in_review": "Pre-Aprobación en Revisión",
+      "pre_approved": "Pre-Aprobado",
+      "property_unit_selected": "Unidad de Propiedad Seleccionada",
+      "purchase_contract_executed": "Contrato de Compra Ejecutado",
+      "contract_sent_to_lender": "Contrato Enviado al Prestamista",
+      "loan_estimate_issued": "Estimación del Préstamo Emitida",
+      "disclosures_sent": "Divulgaciones Enviadas",
+      "disclosures_signed": "Divulgaciones Firmadas",
+      "processing": "En Proceso",
+      "additional_documents_requested": "Documentos Adicionales Solicitados",
+      "submitted_to_underwriting": "Enviado a Suscripción",
+      "underwriting_review": "Revisión de Suscripción",
+      "conditional_approval": "Aprobación Condicional",
+      "conditions_outstanding": "Condiciones Pendientes",
+      "conditions_submitted": "Condiciones Enviadas",
+      "appraisal_ordered": "Avalúo Solicitado",
+      "appraisal_scheduled": "Avalúo Programado",
+      "appraisal_completed": "Avalúo Completado",
+      "appraisal_received": "Avalúo Recibido",
+      "appraisal_approved": "Avalúo Aprobado",
+      "title_ordered_title_review": "Título Solicitado / Revisión de Título",
+      "insurance_requested": "Seguro Solicitado",
+      "insurance_received": "Seguro Recibido",
+      "final_underwriting": "Suscripción Final",
+      "clear_to_close": "Listo para Cierre",
+      "closing_disclosure_issued": "Divulgación de Cierre Emitida",
+      "closing_disclosure_signed": "Divulgación de Cierre Firmada",
+      "closing_scheduled": "Cierre Programado",
+      "buyer_funds_due": "Fondos del Comprador Vencidos",
+      "closing_documents_signed": "Documentos de Cierre Firmados",
+      "loan_funded": "Préstamo Desembolsado",
+      "title_confirmed_closed": "Título Confirmado / Cerrado",
+      "completed": "Completado"
+    },
+    
+    "pipelinePhases": {
+      "Application": "Solicitud",
+      "Processing": "Proceso",
+      "Underwriting": "Suscripción",
+      "Closing": "Cierre",
+      "Completed": "Completado"
+    },
+    
+    "specialStatuses": {
+      "on_hold": "En Espera",
+      "missing_documents": "Documentos Faltantes",
+      "buyer_action_required": "Acción del Comprador Requerida",
+      "financing_issue": "Problema de Financiamiento",
+      "cancelled": "Cancelado"
+    },
+    
+    "alerts": {
+      "title": "Acción Requerida / Alertas",
+      "noAlerts": "No hay alertas pendientes. Todo va según lo planeado.",
+      "severity": {
+        "high": "Alta",
+        "medium": "Media",
+        "low": "Baja",
+        "default": "Info"
+      }
+    },
+    
+    "kpis": {
+      "totalLoans": "Total de Préstamos",
+      "totalPipeline": "Pipeline Total",
+      "activeLoans": "Préstamos Activos",
+      "clearToClose": "Listos para Cierre",
+      "closingWithin7Days": "Cierres en 7 Días",
+      "completedLoans": "Completados",
+      "averagePercentComplete": "% Prom. Completado",
+      "overdueDeadlines": "Vencidos",
+      "onHold": "En Espera",
+      "avgDaysToClose": "Días Prom. para Cierre",
+      "pendingDocs": "Documentos Pendientes",
+      "closedThisMonth": "Cerrados Este Mes",
+      "notAvailable": "N/A"
+    },
+    
+    "form": {
+      "create": "Crear Nuevo Préstamo",
+      "edit": "Editar Préstamo",
+      "saveButton": "Guardar Préstamo",
+      "autoCalculated": "auto-calculado",
+      "autoPriceMinusDown": "Auto: Precio − Cuota Inicial",
+      "auto30yr": "Auto: 30 años fijos (P&I)",
+      "loadingResources": "Cargando {{resource}}s...",
+      "selectBuyerFirst": "* Selecciona un Comprador primero para ver sus {{resource}}s",
+      "sections": {
+        "projectSelection": "1. Selección de Proyecto",
+        "partiesProject": "1. Partes y Proyecto",
+        "partiesInvolved": "2. Partes Involucradas",
+        "resourceDetails": "3. Detalles de {{resource}}",
+        "financialDetails": "4. Detalles Financieros",
+        "datesCompanies": "5. Fechas y Compañías",
+        "contactsStatusNotes": "6. Contactos, Estado y Notas",
+        "contactsNotes": "4. Contactos y Notas",
+        "nextAction": "5. Próxima Acción"
+      },
+      "fields": {
+        "buyer": "Comprador *",
+        "coBuyer": "Co-Comprador",
+        "buyerContactInfo": "Info de Contacto del Comprador",
+        "project": "Proyecto *",
+        "property": "Propiedad",
+        "apartment": "Apartamento",
+        "propertyId": "Propiedad *",
+        "propertyAddress": "Dirección de la Propiedad",
+        "lot": "Lote",
+        "apt": "Apto",
+        "floor": "Piso",
+        "assignedTo": "Asignado a (Agente)",
+        "loanType": "Tipo de Préstamo",
+        "purchasePrice": "Precio de Compra",
+        "loanAmount": "Monto del Préstamo *",
+        "downPayment": "Cuota Inicial",
+        "downPaymentPercent": "Cuota Inicial %",
+        "interestRate": "Tasa de Interés",
+        "estimatedMonthlyPayment": "Pago Mensual Estimado",
+        "contractDate": "Fecha de Contrato",
+        "estimatedClosingDate": "Fecha Estimada de Cierre",
+        "lender": "Prestamista",
+        "titleCompany": "Compañía de Título",
+        "insuranceCompany": "Compañía de Seguros",
+        "appraisalCompany": "Compañía de Avalúo",
+        "loanOfficer": "Oficial de Préstamo",
+        "loanOfficerContact": "Contacto del Oficial (Correo/Teléfono)",
+        "processor": "Procesador",
+        "underwriter": "Suscriptor",
+        "pipelineStage": "Etapa del Pipeline",
+        "specialStatus": "Estado Especial",
+        "internalNotes": "Notas Internas",
+        "actionDescription": "Descripción de la Acción",
+        "responsiblePerson": "Persona Responsable",
+        "deadline": "Fecha Límite"
+      },
+      "loanTypes": {
+        "conventional": "Convencional",
+        "fha": "FHA",
+        "va": "VA",
+        "usda": "USDA",
+        "jumbo": "Jumbo",
+        "other": "Otro"
+      }
+    }
+  }
+}

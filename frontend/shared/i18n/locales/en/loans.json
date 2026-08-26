@@ -1,0 +1,334 @@
+{
+  "loans": {
+    "title": "Loan",
+    "titleBold": "Management",
+    "subtitle": "Manage the complete lifecycle of mortgage loans.",
+    "searchPlaceholder": "Search by borrower, amount or lender...",
+    "confirmDelete": "Delete this loan?",
+    
+    "tabs": {
+      "all": "All",
+      "active": "Active",
+      "processing": "Processing",
+      "closing": "Closing",
+      "issues": "Issues"
+    },
+    
+    "filters": {
+      "project": "Filter by Project",
+      "allProjects": "All Projects",
+      "clearFilter": "Clear Filter"
+    },
+    
+    "actions": {
+      "newLoan": "New Loan",
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    
+    "snackbar": {
+      "deleted": "Loan deleted successfully",
+      "deleteError": "Error deleting loan",
+      "created": "Loan created successfully",
+      "createError": "Error creating loan"
+    },
+    
+    "common": {
+      "noEmail": "No email",
+      "notAvailable": "N/A",
+      "normal": "Normal",
+      "none": "None",
+      "unassigned": "Unassigned",
+      "unknownBuyer": "Unknown Buyer"
+    },
+    
+    "table": {
+      "borrower": "Borrower",
+      "property": "Property",
+      "loanAmount": "Loan Amount",
+      "purchasePrice": "Purchase Price",
+      "stage": "Stage",
+      "status": "Status",
+      "nextAction": "Next Action",
+      "assignedTo": "Assigned To",
+      "actions": "Actions"
+    },
+    
+    "detail": {
+      "backToList": "Back to List",
+      "saveChanges": "Save Changes",
+      "notFound": "Loan not found",
+      "errorSaving": "Error saving changes",
+      "profile": "Loan Profile",
+      "documents": "Document Checklist",
+      "timeline": "Activity Timeline",
+      "notes": "Internal Notes",
+      "loanDetailTitle": "Loan Detail: {{id}}"
+    },
+    
+    "pipeline": {
+      "title": "Pipeline Status"
+    },
+    
+    "nextAction": {
+      "title": "Next Critical Action",
+      "overdue": "Overdue Action",
+      "editing": "Editing Next Action",
+      "empty": "No next action defined yet.",
+      "define": "Define Next Action",
+      "taskDescription": "Task Description",
+      "description": "Task Description",
+      "deadline": "Deadline",
+      "responsiblePerson": "Responsible Person",
+      "responsible": "Responsible Person",
+      "cancel": "Cancel",
+      "saveAction": "Save Action",
+      "save": "Save Action",
+      "editAction": "Edit Action",
+      "edit": "Edit",
+      "noDescription": "No description",
+      "due": "Due",
+      "noDeadline": "No deadline",
+      "assigned": "Assigned",
+      "unassigned": "Unassigned",
+      "errorSaving": "Error saving next action"
+    },
+    
+    "profileForm": {
+      "title": "Loan Profile",
+      "readOnlyInfo": "Read-Only Information",
+      "editableInfo": "Editable Information",
+      "financialDetails": "Financial Details",
+      "datesCompanies": "Dates & Companies",
+      "contactsStatus": "Contacts & Status",
+      "borrowerName": "Borrower Name",
+      "email": "Email",
+      "phone": "Phone",
+      "propertyAddress": "Property Address",
+      "loanAmount": "Loan Amount",
+      "interestRate": "Interest Rate (%)",
+      "saveChanges": "Save Profile Changes"
+    },
+    
+    "documents": {
+      "upload": "Upload file",
+      "delete": "Delete file"
+    },
+    
+"documentChecklist": {
+  "title": "Document Checklist",
+  "noFileUploaded": "No file uploaded",
+  "viewFile": "View file",
+  "note": "Note",
+  "upload": "Upload",
+  "deleteFile": "Delete File",
+  "status": {
+    "approved": "Approved",
+    "received": "Received",
+    "under_review": "Under Review",
+    "missing": "Missing",
+    "requested": "Requested",
+    "not_applicable": "N/A"
+  }
+},
+    
+    "timeline": {
+      "empty": "No activity recorded yet.",
+      "by": "by",
+      "noDate": "No date",
+      "unknownAction": "Unknown action"
+    },
+    
+    "notes": {
+      "placeholder": "Add an internal note...",
+      "postNote": "Post Note",
+      "noNotes": "No notes yet"
+    },
+    
+    "documentTypes": {
+      "loan_application": "Loan Application",
+      "government_id_passport": "Government ID / Passport",
+      "ssn_itin": "SSN / ITIN",
+      "proof_of_address": "Proof of Address",
+      "bank_statements": "Bank Statements",
+      "proof_of_funds": "Proof of Funds",
+      "income_verification": "Income Verification",
+      "pay_stubs": "Pay Stubs",
+      "w2s": "W-2s",
+      "tax_returns": "Tax Returns",
+      "pl_statements": "P&L Statements",
+      "cpa_letter": "CPA Letter",
+      "employment_verification": "Employment Verification",
+      "credit_authorization": "Credit Authorization",
+      "purchase_agreement": "Purchase Agreement",
+      "amendments": "Amendments",
+      "earnest_money_receipt": "Earnest Money Receipt",
+      "down_payment_verification": "Down Payment Verification",
+      "gift_letter": "Gift Letter",
+      "loan_estimate": "Loan Estimate",
+      "signed_disclosures": "Signed Disclosures",
+      "appraisal": "Appraisal",
+      "homeowners_insurance": "Homeowners Insurance",
+      "title_commitment": "Title Commitment",
+      "closing_disclosure": "Closing Disclosure",
+      "clear_to_close": "Clear to Close",
+      "final_closing_documents": "Final Closing Documents"
+    },
+    
+    "pipelineStages": {
+      "new_loan_buyer_added": "New Loan / Buyer Added",
+      "loan_application_sent": "Loan Application Sent",
+      "loan_application_started": "Loan Application Started",
+      "loan_application_completed": "Loan Application Completed",
+      "initial_documents_requested": "Initial Documents Requested",
+      "documents_received": "Documents Received",
+      "documents_missing_pending": "Documents Missing / Pending",
+      "pre_qualification_in_review": "Pre-Qualification in Review",
+      "pre_qualified": "Pre-Qualified",
+      "pre_approval_in_review": "Pre-Approval in Review",
+      "pre_approved": "Pre-Approved",
+      "property_unit_selected": "Property Unit Selected",
+      "purchase_contract_executed": "Purchase Contract Executed",
+      "contract_sent_to_lender": "Contract Sent to Lender",
+      "loan_estimate_issued": "Loan Estimate Issued",
+      "disclosures_sent": "Disclosures Sent",
+      "disclosures_signed": "Disclosures Signed",
+      "processing": "Processing",
+      "additional_documents_requested": "Additional Documents Requested",
+      "submitted_to_underwriting": "Submitted to Underwriting",
+      "underwriting_review": "Underwriting Review",
+      "conditional_approval": "Conditional Approval",
+      "conditions_outstanding": "Conditions Outstanding",
+      "conditions_submitted": "Conditions Submitted",
+      "appraisal_ordered": "Appraisal Ordered",
+      "appraisal_scheduled": "Appraisal Scheduled",
+      "appraisal_completed": "Appraisal Completed",
+      "appraisal_received": "Appraisal Received",
+      "appraisal_approved": "Appraisal Approved",
+      "title_ordered_title_review": "Title Ordered / Title Review",
+      "insurance_requested": "Insurance Requested",
+      "insurance_received": "Insurance Received",
+      "final_underwriting": "Final Underwriting",
+      "clear_to_close": "Clear to Close",
+      "closing_disclosure_issued": "Closing Disclosure Issued",
+      "closing_disclosure_signed": "Closing Disclosure Signed",
+      "closing_scheduled": "Closing Scheduled",
+      "buyer_funds_due": "Buyer Funds Due",
+      "closing_documents_signed": "Closing Documents Signed",
+      "loan_funded": "Loan Funded",
+      "title_confirmed_closed": "Title Confirmed / Closed",
+      "completed": "Completed"
+    },
+    
+    "pipelinePhases": {
+      "Application": "Application",
+      "Processing": "Processing",
+      "Underwriting": "Underwriting",
+      "Closing": "Closing",
+      "Completed": "Completed"
+    },
+    
+    "specialStatuses": {
+      "on_hold": "On Hold",
+      "missing_documents": "Missing Documents",
+      "buyer_action_required": "Buyer Action Required",
+      "financing_issue": "Financing Issue",
+      "cancelled": "Cancelled"
+    },
+    
+    "alerts": {
+      "title": "Action Required / Alerts",
+      "noAlerts": "No pending alerts. Everything is on track.",
+      "severity": {
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "default": "Info"
+      }
+    },
+    
+    "kpis": {
+      "totalLoans": "Total Loans",
+      "totalPipeline": "Total Pipeline",
+      "activeLoans": "Active Loans",
+      "clearToClose": "Clear to Close",
+      "closingWithin7Days": "Closing 7 Days",
+      "completedLoans": "Completed",
+      "averagePercentComplete": "Avg % Complete",
+      "overdueDeadlines": "Overdue",
+      "onHold": "On Hold",
+      "avgDaysToClose": "Avg Days to Close",
+      "pendingDocs": "Pending Docs",
+      "closedThisMonth": "Closed This Month",
+      "notAvailable": "N/A"
+    },
+    
+    "form": {
+      "create": "Create New Loan",
+      "edit": "Edit Loan",
+      "saveButton": "Save Loan",
+      "autoCalculated": "auto-calculated",
+      "autoPriceMinusDown": "Auto: Price − Down Payment",
+      "auto30yr": "Auto: 30-yr fixed (P&I)",
+      "loadingResources": "Loading {{resource}}s...",
+      "selectBuyerFirst": "* Select a Buyer first to see their {{resource}}s",
+      "sections": {
+        "projectSelection": "1. Project Selection",
+        "partiesProject": "1. Parties & Project",
+        "partiesInvolved": "2. Parties Involved",
+        "resourceDetails": "3. {{resource}} Details",
+        "financialDetails": "4. Financial Details",
+        "datesCompanies": "5. Dates & Companies",
+        "contactsStatusNotes": "6. Contacts, Status & Notes",
+        "contactsNotes": "4. Contacts & Notes",
+        "nextAction": "5. Next Action"
+      },
+      "fields": {
+        "buyer": "Buyer *",
+        "coBuyer": "Co-Buyer",
+        "buyerContactInfo": "Buyer Contact Info",
+        "project": "Project *",
+        "property": "Property",
+        "apartment": "Apartment",
+        "propertyId": "Property *",
+        "propertyAddress": "Property Address",
+        "lot": "Lot",
+        "apt": "Apt",
+        "floor": "Floor",
+        "assignedTo": "Assigned To (Agent)",
+        "loanType": "Loan Type",
+        "purchasePrice": "Purchase Price",
+        "loanAmount": "Loan Amount *",
+        "downPayment": "Down Payment",
+        "downPaymentPercent": "Down Payment %",
+        "interestRate": "Interest Rate",
+        "estimatedMonthlyPayment": "Est. Monthly Payment",
+        "contractDate": "Contract Date",
+        "estimatedClosingDate": "Est. Closing Date",
+        "lender": "Lender",
+        "titleCompany": "Title Company",
+        "insuranceCompany": "Insurance Company",
+        "appraisalCompany": "Appraisal Company",
+        "loanOfficer": "Loan Officer",
+        "loanOfficerContact": "Officer Contact (Email/Phone)",
+        "processor": "Processor",
+        "underwriter": "Underwriter",
+        "pipelineStage": "Pipeline Stage",
+        "specialStatus": "Special Status",
+        "internalNotes": "Internal Notes",
+        "actionDescription": "Action Description",
+        "responsiblePerson": "Responsible Person",
+        "deadline": "Deadline"
+      },
+      "loanTypes": {
+        "conventional": "Conventional",
+        "fha": "FHA",
+        "va": "VA",
+        "usda": "USDA",
+        "jumbo": "Jumbo",
+        "other": "Other"
+      }
+    }
+  }
+}

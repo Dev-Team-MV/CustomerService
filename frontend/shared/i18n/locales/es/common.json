@@ -1427,6 +1427,211 @@
     "title": "Guardar Cambios",
     "description": "Haz clic en \"Cancelar\" para cerrar el modal y finalizar el tour, o \"Guardar\" para crear la plantilla."
   }
-}
+},
+
+    "universalLogin": {
+      "button": "Ver guía de Inicio de Sesión",
+      "overview": {
+        "title": "Pantalla de Inicio de Sesión",
+        "description": "Bienvenido al sistema. Aquí podrás autenticarte para acceder a tu cuenta."
+      },
+      "languageSwitcher": {
+        "title": "Selector de Idioma",
+        "description": "Cambia el idioma de la interfaz entre español e inglés en cualquier momento."
+      },
+      "methodToggle": {
+        "title": "Método de Autenticación",
+        "description": "Elige si prefieres iniciar sesión con tu correo electrónico o número de teléfono."
+      },
+      "emailField": {
+        "title": "Correo Electrónico",
+        "description": "Ingresa tu dirección de correo electrónico registrada en el sistema."
+      },
+      "passwordField": {
+        "title": "Contraseña",
+        "description": "Ingresa tu contraseña. Puedes usar el ícono del ojo para mostrarla u ocultarla."
+      },
+      "forgotPassword": {
+        "title": "¿Olvidaste tu Contraseña?",
+        "description": "Si olvidaste tu contraseña, haz clic aquí para recuperarla mediante un código de verificación."
+      },
+      "terms": {
+        "title": "Términos y Condiciones",
+        "description": "Al iniciar sesión, aceptas nuestros términos y condiciones de uso del sistema."
+      },
+      "submit": {
+        "title": "Iniciar Sesión",
+        "description": "Haz clic aquí para autenticarte y acceder al sistema."
+      }
+    },
+    "layout": {
+      "sidebarToggle": {
+        "title": "Menú Principal",
+        "description": "Haz clic para abrir el menú lateral y navegar entre los módulos del proyecto."
+      },
+      "sidebarNav": {
+        "title": "Navegación",
+        "description": "Desde aquí puedes acceder a todas las secciones, como el Dashboard, Clientes o Reportes."
+      },
+      "notifications": {
+        "title": "Centro de Notificaciones",
+        "description": "Haz clic para revisar alertas, mensajes y actualizaciones en tiempo real."
+      },
+      "notificationsAction": {
+        "title": "Gestionar Notificaciones",
+        "description": "Puedes marcar todas como leídas o cerrar este panel para volver a tu trabajo."
+      },
+      "userMenu": {
+        "title": "Perfil de Usuario",
+        "description": "Accede a la configuración de tu cuenta, gestiona tu perfil o cierra sesión de forma segura."
+      },
+      "mainContent": {
+        "title": "Área de Trabajo",
+        "description": "¡Listo! Aquí se renderiza el contenido. Comencemos explorando el Dashboard."
+      }
+    },
+    "lakewoodDashboard": {
+      "button": "Guía del Dashboard",
+      "layoutIntro": {
+        "title": "Conoce la Interfaz",
+        "description": "Antes de explorar los datos, hagamos un recorrido rápido por las herramientas de navegación generales."
+      },
+      "overview": {
+        "title": "Panel de Control",
+        "description": "Bienvenido a tu vista principal. Aquí tienes un resumen de tu actividad y accesos directos."
+      },
+      "map": {
+        "title": "Mapa de Inventario",
+        "description": "Visualiza la disponibilidad de lotes y propiedades en tiempo real de forma interactiva."
+      },
+      "quickActions": {
+        "title": "Acciones Rápidas",
+        "description": "Accede directamente a las funciones más utilizadas, como agregar propiedades, invitar usuarios o ver analíticas."
+      },
+      "payloads": {
+        "title": "Actividad Reciente",
+        "description": "Monitorea las últimas transacciones y movimientos importantes del sistema."
+      }
+    },
+
+        "phase2Dashboard": {
+      "button": "Guía del Dashboard",
+      "layoutIntro": {
+        "title": "Conoce la Interfaz",
+        "description": "Antes de explorar los datos, hagamos un recorrido rápido por las herramientas de navegación generales."
+      },
+      "overview": {
+        "title": "Panel de Control",
+        "description": "Bienvenido a tu vista principal de Phase 2. Aquí tienes un resumen de tu actividad y accesos directos."
+      },
+      "map": {
+        "title": "Mapa de Amenidades",
+        "description": "Explora las amenidades del proyecto de forma interactiva y descubre todo lo que tenemos para ti."
+      },
+      "quickActions": {
+        "title": "Acciones Rápidas",
+        "description": "Accede directamente a las funciones más utilizadas, como gestionar edificios, ver residentes o administrar noticias."
+      },
+            "payloads": {
+        "title": "Actividad Reciente",
+        "description": "Monitorea las últimas transacciones y movimientos importantes del sistema."
+      }
+    },
+
+    "isqDashboard": {
+      "button": "Guía del Dashboard",
+      "layoutIntro": {
+        "title": "Conoce la Interfaz",
+        "description": "Antes de explorar los datos, hagamos un recorrido rápido por las herramientas de navegación generales."
+      },
+      "overview": {
+        "title": "Panel de Control",
+        "description": "Bienvenido a tu vista principal de ISQ. Aquí tienes un resumen de tu actividad y accesos directos."
+      },
+      "map": {
+        "title": "Mapa de Amenidades",
+        "description": "Explora las amenidades del proyecto de forma interactiva."
+      },
+      "quickActions": {
+        "title": "Acciones Rápidas",
+        "description": "Accede directamente a las funciones más utilizadas."
+      },
+      "payloads": {
+        "title": "Actividad Reciente",
+        "description": "Monitorea las últimas transacciones y movimientos importantes del sistema."
+      }
+    },
+
+        "sheperdDashboard": {
+      "button": "Guía del Dashboard",
+      "layoutIntro": {
+        "title": "Conoce la Interfaz",
+        "description": "Antes de explorar los datos, hagamos un recorrido rápido por las herramientas de navegación generales."
+      },
+      "overview": {
+        "title": "Panel de Control",
+        "description": "Bienvenido a tu vista principal de Sheperd. Aquí tienes un resumen de tu actividad y accesos directos."
+      },
+      "map": {
+        "title": "Master Plan",
+        "description": "Visualiza el plano maestro del proyecto y la distribución de los edificios de forma interactiva."
+      },
+      "quickActions": {
+        "title": "Acciones Rápidas",
+        "description": "Accede directamente a las funciones más utilizadas, como crear cotizaciones o gestionar residentes."
+      },
+      "payloads": {
+        "title": "Actividad Reciente",
+        "description": "Monitorea las últimas transacciones y movimientos importantes del sistema."
+      }
+    },
+
+        "sixtownDashboard": {
+      "button": "Guía del Dashboard",
+      "layoutIntro": {
+        "title": "Conoce la Interfaz",
+        "description": "Antes de explorar los datos, hagamos un recorrido rápido por las herramientas de navegación generales."
+      },
+      "overview": {
+        "title": "Panel de Control",
+        "description": "Bienvenido a tu vista principal de 6town Houses. Aquí tienes un resumen de tu actividad y accesos directos."
+      },
+      "map": {
+        "title": "Master Plan",
+        "description": "Visualiza el plano maestro del proyecto y la distribución de las propiedades de forma interactiva."
+      },
+      "quickActions": {
+        "title": "Acciones Rápidas",
+        "description": "Accede directamente a las funciones más utilizadas, como crear cotizaciones o ver propiedades."
+      },
+      "payloads": {
+        "title": "Actividad Reciente",
+        "description": "Monitorea las últimas transacciones y movimientos importantes del sistema."
+      }
+    },
+
+        "htowerDashboard": {
+      "button": "Guía del Dashboard",
+      "layoutIntro": {
+        "title": "Conoce la Interfaz",
+        "description": "Antes de explorar los datos, hagamos un recorrido rápido por las herramientas de navegación generales."
+      },
+      "overview": {
+        "title": "Panel de Control",
+        "description": "Bienvenido a tu vista principal de hTower. Aquí tienes un resumen de la actividad del edificio."
+      },
+      "map": {
+        "title": "Mapa del Proyecto",
+        "description": "Visualiza la distribución de torres, departamentos y amenidades de forma interactiva."
+      },
+      "quickActions": {
+        "title": "Acciones Rápidas",
+        "description": "Accede directamente a las funciones más utilizadas, como gestionar residentes o ver reportes."
+      },
+      "payloads": {
+        "title": "Actividad Reciente",
+        "description": "Monitorea las últimas transacciones, pagos y movimientos importantes del sistema."
+      }
+    }
   }
 }

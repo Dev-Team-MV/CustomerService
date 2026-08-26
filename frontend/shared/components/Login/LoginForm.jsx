@@ -1,5 +1,4 @@
 // /Users/oficina/MV-CRM/CustomerService/frontend/shared/components/Login/LoginForm.jsx
-
 import { useState } from 'react'
 import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom'
 import {
@@ -30,7 +29,6 @@ import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import LanguageSwitcher from '../LanguageSwitcher'
 
-// ✅ NUEVO: Import del modal de recuperación
 import ForgotPasswordModal from './ForgotPasswordModal'
 
 const LoginForm = ({ brandColors }) => {
@@ -43,7 +41,6 @@ const LoginForm = ({ brandColors }) => {
   const [loading, setLoading] = useState(false)
   const [focusedField, setFocusedField] = useState(null)
   
-  // ✅ NUEVO: Estado para el modal de recuperación
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
   
   const { login } = useAuth()
@@ -98,8 +95,9 @@ const LoginForm = ({ brandColors }) => {
         height: '100%'
       }}
     >
-      {/* Language Switcher - Top Right */}
+      {/* ✅ ID 1: Language Switcher */}
       <motion.div
+        id="language-switcher"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.5 }}
@@ -183,8 +181,8 @@ const LoginForm = ({ brandColors }) => {
             </AnimatePresence>
           )}
 
-          {/* Login Method Toggle */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+          {/* ✅ ID 2: Login Method Toggle */}
+          <Box id="login-method-toggle" sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
             <ToggleButtonGroup
               value={loginMethod}
               exclusive
@@ -243,10 +241,11 @@ const LoginForm = ({ brandColors }) => {
                     }}
                     transition={{ duration: 0.3 }}
                   >
+                    {/* ✅ ID 3: Email Field */}
                     <TextField
+                      id="login-email-field"
                       required
                       fullWidth
-                      id="email"
                       label={t('emailAddress')}
                       name="email"
                       autoComplete="email"
@@ -301,9 +300,7 @@ const LoginForm = ({ brandColors }) => {
                         required: true,
                         autoFocus: true
                       }}
-                      containerStyle={{
-                        width: '100%'
-                      }}
+                      containerStyle={{ width: '100%' }}
                       inputStyle={{
                         width: '100%',
                         height: '56px',
@@ -337,13 +334,14 @@ const LoginForm = ({ brandColors }) => {
               }}
               transition={{ duration: 0.3 }}
             >
+              {/* ✅ ID 4: Password Field */}
               <TextField
+                id="login-password-field"
                 required
                 fullWidth
                 name="password"
                 label={t('password')}
                 type={showPassword ? 'text' : 'password'}
-                id="password"
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -388,8 +386,8 @@ const LoginForm = ({ brandColors }) => {
               />
             </motion.div>
 
-            {/* ✅ NUEVO: Forgot Password Link */}
-            <Box sx={{ mb: 3, textAlign: 'right' }}>
+            {/* ✅ ID 5: Forgot Password Link */}
+            <Box id="forgot-password-link" sx={{ mb: 3, textAlign: 'right' }}>
               <Button
                 onClick={() => setForgotPasswordOpen(true)}
                 startIcon={<LockReset sx={{ fontSize: 16 }} />}
@@ -429,7 +427,9 @@ const LoginForm = ({ brandColors }) => {
                 }}
               >
                 {t('termsAgreement')}{' '}
+                {/* ✅ ID 6: Terms Link */}
                 <Link
+                  id="terms-link"
                   component={RouterLink}
                   to="/terms-and-conditions"
                   sx={{
@@ -465,7 +465,9 @@ const LoginForm = ({ brandColors }) => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
+              {/* ✅ ID 7: Submit Button */}
               <Button
+                id="login-submit-button"
                 type="submit"
                 fullWidth
                 variant="contained"
@@ -520,7 +522,6 @@ const LoginForm = ({ brandColors }) => {
         </motion.div>
       </Box>
 
-      {/* ✅ NUEVO: Forgot Password Modal */}
       <ForgotPasswordModal
         open={forgotPasswordOpen}
         onClose={() => setForgotPasswordOpen(false)}

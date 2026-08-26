@@ -30,6 +30,7 @@ import Properties from './Pages/Properties'
 import UniversalLogin from '@shared/components/Login/UniversalLogin'
 import CustomerSurveyPage from '@shared/components/CustomerSurveyPage'
 import ForcePasswordChange from '@shared/components/Login/ForcePasswordChange'
+import { TourProvider } from '@shared/tours/useTour'
 
 // Configuración de noticias
 import { getNewsConfig } from '@shared/config/newsConfig'
@@ -63,6 +64,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider projectSlug="h-tower">
+        <TourProvider>
         <Routes>
           {/* 🔐 Auth Routes */}
           <Route path="/login" element={<UniversalLogin showFooter={false} />} />
@@ -160,6 +162,7 @@ function App() {
 
           <Route path="*" element={<SharedNotFoundPage />} />
         </Routes>
+        </TourProvider>
       </AuthProvider>
     </ThemeProvider>
   )

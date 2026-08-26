@@ -31,6 +31,9 @@ import PostSale from './pages/PostSale'
 import Referrals from './pages/Referrals'
 import Vendors from './pages/Vendors'
 
+import Loans from './pages/Loans'
+import LoanDetail from './pages/LoanDetail'
+
 const theme = createTheme({
   palette: {
     primary: { main: '#1a1a2e' },
@@ -175,6 +178,21 @@ export default function App() {
               </ProtectedRoute> 
             }
             />
+            <Route path="/loans" element={
+              <ProtectedRoute requiredRole="admin">
+                <Loans />
+              </ProtectedRoute> 
+            }
+            />
+            <Route path="/loans/:id" element={
+              <ProtectedRoute requiredRole="admin">
+                <LoanDetail />
+              </ProtectedRoute> 
+            }
+            />
+
+
+
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

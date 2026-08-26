@@ -1426,6 +1426,210 @@
     "title": "Save Changes",
     "description": "Click \"Cancel\" to close the modal and finish the tour, or \"Save\" to create the template."
   }
-}
+},
+
+    "universalLogin": {
+      "button": "View Login Guide",
+      "overview": {
+        "title": "Login Screen",
+        "description": "Welcome to the system. Here you can authenticate to access your account."
+      },
+      "languageSwitcher": {
+        "title": "Language Selector",
+        "description": "Change the interface language between Spanish and English at any time."
+      },
+      "methodToggle": {
+        "title": "Authentication Method",
+        "description": "Choose whether you prefer to log in with your email address or phone number."
+      },
+      "emailField": {
+        "title": "Email Address",
+        "description": "Enter your registered email address in the system."
+      },
+      "passwordField": {
+        "title": "Password",
+        "description": "Enter your password. You can use the eye icon to show or hide it."
+      },
+      "forgotPassword": {
+        "title": "Forgot Your Password?",
+        "description": "If you forgot your password, click here to recover it using a verification code."
+      },
+      "terms": {
+        "title": "Terms and Conditions",
+        "description": "By logging in, you accept our system terms and conditions of use."
+      },
+      "submit": {
+        "title": "Sign In",
+        "description": "Click here to authenticate and access the system."
+      }
+    },
+    "layout": {
+      "sidebarToggle": {
+        "title": "Main Menu",
+        "description": "Click to open the side menu and navigate through the project modules."
+      },
+      "sidebarNav": {
+        "title": "Navigation",
+        "description": "From here you can access all sections, such as Dashboard, Clients, or Reports."
+      },
+      "notifications": {
+        "title": "Notification Center",
+        "description": "Click to check alerts, messages, and real-time updates."
+      },
+      "notificationsAction": {
+        "title": "Manage Notifications",
+        "description": "You can mark all as read or close this panel to return to your work."
+      },
+      "userMenu": {
+        "title": "User Profile",
+        "description": "Access your account settings, manage your profile, or log out securely."
+      },
+      "mainContent": {
+        "title": "Workspace",
+        "description": "Ready! This is where your content renders. Let's start by exploring the Dashboard."
+      }
+    },
+    "lakewoodDashboard": {
+      "button": "Dashboard Guide",
+      "layoutIntro": {
+        "title": "Get to Know the Interface",
+        "description": "Before exploring the data, let's take a quick tour of the general navigation tools."
+      },
+      "overview": {
+        "title": "Control Panel",
+        "description": "Welcome to your main view. Here you have a summary of your activity and shortcuts."
+      },
+      "map": {
+        "title": "Inventory Map",
+        "description": "Visualize the availability of lots and properties in real-time interactively."
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "description": "Directly access the most used functions, such as adding properties, inviting users, or viewing analytics."
+      },
+      "payloads": {
+        "title": "Recent Activity",
+        "description": "Monitor the latest transactions and important system movements."
+      }
+    },
+
+        "phase2Dashboard": {
+      "button": "Dashboard Guide",
+      "layoutIntro": {
+        "title": "Get to Know the Interface",
+        "description": "Before exploring the data, let's take a quick tour of the general navigation tools."
+      },
+      "overview": {
+        "title": "Control Panel",
+        "description": "Welcome to your main Phase 2 view. Here you have a summary of your activity and shortcuts."
+      },
+      "map": {
+        "title": "Amenities Map",
+        "description": "Explore the project's amenities interactively and discover everything we have for you."
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "description": "Directly access the most used functions, such as managing buildings, viewing residents, or administering news."
+      },
+            "payloads": {
+        "title": "Recent Activity",
+        "description": "Monitor the latest transactions and important system movements."
+      }
+    },
+        "isqDashboard": {
+      "button": "Dashboard Guide",
+      "layoutIntro": {
+        "title": "Get to Know the Interface",
+        "description": "Before exploring the data, let's take a quick tour of the general navigation tools."
+      },
+      "overview": {
+        "title": "Control Panel",
+        "description": "Welcome to your main ISQ view. Here you have a summary of your activity and shortcuts."
+      },
+      "map": {
+        "title": "Amenities Map",
+        "description": "Explore the project's amenities interactively."
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "description": "Directly access the most used functions."
+      },
+      "payloads": {
+        "title": "Recent Activity",
+        "description": "Monitor the latest transactions and important system movements."
+      }
+    },
+
+        "sheperdDashboard": {
+      "button": "Dashboard Guide",
+      "layoutIntro": {
+        "title": "Get to Know the Interface",
+        "description": "Before exploring the data, let's take a quick tour of the general navigation tools."
+      },
+      "overview": {
+        "title": "Control Panel",
+        "description": "Welcome to your main Sheperd view. Here you have a summary of your activity and shortcuts."
+      },
+      "map": {
+        "title": "Master Plan",
+        "description": "Visualize the project's master plan and building distribution interactively."
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "description": "Directly access the most used functions, such as creating quotes or managing residents."
+      },
+      "payloads": {
+        "title": "Recent Activity",
+        "description": "Monitor the latest transactions and important system movements."
+      }
+    },
+
+        "sixtownDashboard": {
+      "button": "Dashboard Guide",
+      "layoutIntro": {
+        "title": "Get to Know the Interface",
+        "description": "Before exploring the data, let's take a quick tour of the general navigation tools."
+      },
+      "overview": {
+        "title": "Control Panel",
+        "description": "Welcome to your main 6town Houses view. Here you have a summary of your activity and shortcuts."
+      },
+      "map": {
+        "title": "Master Plan",
+        "description": "Visualize the project's master plan and property distribution interactively."
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "description": "Directly access the most used functions, such as creating quotes or viewing properties."
+      },
+      "payloads": {
+        "title": "Recent Activity",
+        "description": "Monitor the latest transactions and important system movements."
+      }
+    },
+
+        "htowerDashboard": {
+      "button": "Dashboard Guide",
+      "layoutIntro": {
+        "title": "Get to Know the Interface",
+        "description": "Before exploring the data, let's take a quick tour of the general navigation tools."
+      },
+      "overview": {
+        "title": "Control Panel",
+        "description": "Welcome to your main hTower view. Here you have a summary of the building's activity."
+      },
+      "map": {
+        "title": "Project Map",
+        "description": "Visualize the distribution of towers, apartments, and amenities interactively."
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "description": "Directly access the most used functions, such as managing residents or viewing reports."
+      },
+      "payloads": {
+        "title": "Recent Activity",
+        "description": "Monitor the latest transactions, payments, and important system movements."
+      }
+    }
   }
 }

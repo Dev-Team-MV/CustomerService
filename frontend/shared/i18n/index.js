@@ -51,6 +51,8 @@ import enReferrals from './locales/en/referrals.json'
 import enPostSale from './locales/en/postSale.json'
 import enVendors from './locales/en/vendors.json'
 import enAudit from './locales/en/audit.json'
+import enLoans from './locales/en/loans.json'
+
 // ES
 import esCommon from './locales/es/common.json'
 import esAuth from './locales/es/auth.json'
@@ -100,6 +102,7 @@ import esReferrals from './locales/es/referrals.json'
 import esPostSale from './locales/es/postSale.json'
 import esVendors from './locales/es/vendors.json'
 import esAudit from './locales/es/audit.json'
+import esLoans from './locales/es/loans.json'
 
 i18n
     .use(LanguageDetector)
@@ -155,7 +158,8 @@ i18n
                 referrals: enReferrals,
                 postSale: enPostSale,
                 vendors: enVendors,
-                audit: enAudit
+                audit: enAudit,
+                loans: enLoans
             },
             es: {
                 common: esCommon,
@@ -206,7 +210,8 @@ i18n
                 referrals: esReferrals,
                 postSale: esPostSale,
                 vendors: esVendors,
-                audit: esAudit
+                audit: esAudit,
+                loans: esLoans
 
             },
         },
@@ -260,7 +265,8 @@ i18n
             'referrals',
             'postSale',
             'vendors',
-            'audit'
+            'audit',
+            'loans'
         ],
         interpolation: {
             escapeValue: false,
