@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Typography, Button, CircularProgress, Avatar } from '@mui/material'
 import {
   SwapHoriz, NoteAdd, CloudUpload, Edit, Add, Flag, Delete, Info
@@ -29,9 +30,9 @@ const ACTION_COLORS = {
   next_action_updated: '#ff9800'
 }
 
-function personName(p) {
-  if (!p) return 'System'
-  if (typeof p === 'object') return [p.firstName, p.lastName].filter(Boolean).join(' ') || p.email || 'Unknown'
+function personName(p, systemLabel = 'System', unknownLabel = 'Unknown') {
+  if (!p) return systemLabel
+  if (typeof p === 'object') return [p.firstName, p.lastName].filter(Boolean).join(' ') || p.email || unknownLabel
   return String(p)
 }
 
@@ -41,6 +42,7 @@ function personInitials(p) {
 }
 
 export default function LoanTimeline({ loanId }) {
+  const { t } = useTranslation('loans')
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -69,12 +71,12 @@ export default function LoanTimeline({ loanId }) {
   }, [loanId])
 
   return (
-    <Box sx={{ border: '1px solid #e0e0e0', bgcolor: '#fff', mb: 3 }}>
+    <Box id="loan-timeline" sx={{ border: '1px solid #e0e0e0', bgcolor: '#fff', mb: 3 }}>
       <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid #e0e0e0' }}>
         <Typography
           sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#000' }}
         >
-          Activity Timeline
+          {t('loans.detail.timeline')}
         </Typography>
       </Box>
 
@@ -94,7 +96,6 @@ export default function LoanTimeline({ loanId }) {
                 position: 'relative'
               }}
             >
-              {/* Timeline line */}
               {i < entries.length - 1 && (
                 <Box sx={{
                   position: 'absolute',
@@ -123,7 +124,7 @@ export default function LoanTimeline({ loanId }) {
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1.5, mt: 0.3, flexWrap: 'wrap' }}>
                   <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#aaa' }}>
-                    {personName(entry.performedBy)}
+                    {personName(entry.performedBy, t('loans.timeline.system', 'System'), t('loans.timeline.unknown', 'Unknown'))}
                   </Typography>
                   <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.58rem', color: '#ccc' }}>
                     {entry.timestamp ? new Date(entry.timestamp).toLocaleString() : ''}
@@ -143,7 +144,7 @@ export default function LoanTimeline({ loanId }) {
         {!loading && entries.length === 0 && (
           <Box sx={{ py: 3, textAlign: 'center' }}>
             <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', color: '#aaa' }}>
-              No activity yet
+              {t('loans.timeline.empty')}
             </Typography>
           </Box>
         )}
@@ -156,7 +157,7 @@ export default function LoanTimeline({ loanId }) {
             onClick={() => loadTimeline(page + 1)}
             sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', textTransform: 'none', borderRadius: 0, color: '#000' }}
           >
-            Load more
+            {t('loans.timeline.loadMore', 'Load more')}
           </Button>
         </Box>
       )}

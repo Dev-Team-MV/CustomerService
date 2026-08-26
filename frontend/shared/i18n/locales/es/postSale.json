@@ -1,7 +1,8 @@
 {
   "page": {
     "title": "Post-Venta",
-    "subtitle": "Gestión de onboarding, garantías y encuestas"
+    "subtitle": "Gestión de onboarding, garantías y encuestas",
+    "topbarlabel": "Gestión de Post-Venta"
   },
   "tabs": {
     "onboarding": "Onboarding",

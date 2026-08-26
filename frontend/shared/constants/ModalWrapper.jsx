@@ -19,19 +19,24 @@ const ModalWrapper = ({
   children,
   actions = null,
   maxWidth = 'md',
-  fullWidth = true
+  fullWidth = true,
+  dialogProps = {} // ✅ NUEVO: Permite pasar 'id', 'aria-*' u otras props nativas del Dialog
 }) => {
   const theme = useTheme()
+  
   return (
     <Dialog
       open={open}
       onClose={onClose}
       maxWidth={maxWidth}
       fullWidth={fullWidth}
+      {...dialogProps} // ✅ Expandir las props aquí (incluye el 'id')
       PaperProps={{
+        ...dialogProps.PaperProps, // ✅ Preservar PaperProps si se pasan desde fuera
         sx: {
           borderRadius: 4,
-          boxShadow: `0 20px 60px ${theme.palette?.primary?.main ? theme.palette.primary.main + '26' : 'rgba(51,63,31,0.15)'}`
+          boxShadow: `0 20px 60px ${theme.palette?.primary?.main ? theme.palette.primary.main + '26' : 'rgba(51,63,31,0.15)'}`,
+          ...(dialogProps.PaperProps?.sx || {}) // ✅ Fusionar estilos adicionales si los hay
         }
       }}
     >
@@ -67,9 +72,11 @@ const ModalWrapper = ({
           </IconButton>
         </Box>
       </DialogTitle>
+      
       <DialogContent sx={{ pt: 3 }}>
         {children}
       </DialogContent>
+      
       {actions && (
         <DialogActions sx={{ p: 3, gap: 2 }}>
           {actions}

@@ -3,6 +3,7 @@
     "title": "Collections",
     "description": "Payment and collections management",
     "exportButton": "Export Payments",
+    "topbarLabel": "Payments & Collections Management",
     
     "filters": {
       "title": "Filters",
@@ -62,6 +63,17 @@
     
     "errors": {
       "loadFailed": "Error loading payments"
-    }
+    },
+
+      "summary": {
+    "loading": "Loading summary...",
+    "totalPending": "Total Pending",
+    "overdue": "Overdue",
+    "overduePayments": "{{count}} payments",
+    "collectedThisMonth": "Collected this month",
+    "expectedAmount": "of ${{expected}} expected",
+    "collectionRate": "Collection Rate",
+    "currentMonth": "Current Month"
+  }
   }
 }

@@ -17,7 +17,7 @@ export default function ClientsComparativaChart({ filteredBalance, filteredClien
   })
 
   return (
-    <Box>
+    <Box id="analytics-clients-chart">
       <Box sx={{ 
         display: 'flex', 
         alignItems: 'center', 

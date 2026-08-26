@@ -9,5 +9,21 @@
     "leads": "Leads",
     "activities": "Activities",
     "projects": "Projects"
+  },
+  "tour": {
+    "globalSearch": {
+      "input": {
+        "title": "Search Field",
+        "description": "Type the name of a client, project, or lead. Results update in real-time."
+      },
+      "results": {
+        "title": "Results",
+        "description": "Click on any result to navigate directly to that section of the CRM."
+      },
+      "shortcut": {
+        "title": "Keyboard Shortcut",
+        "description": "You can quickly open this search by pressing ⌘K (Mac) or Ctrl+K (Windows) from anywhere."
+      }
+    }
   }
 }

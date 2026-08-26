@@ -60,25 +60,21 @@ export default function ProjectInventory({ projectId, projectName }) {
   const [statsLoading, setStatsLoading] = useState(false)
   const [apartmentsData, setApartmentsData] = useState([])
 
-  // ✅ Detectar el tipo de proyecto para ajustar la lógica de negocio
   const projectConfig = getProjectById(projectId)
   const isHouseProject = projectConfig?.catalogType === 'houses'
 
-  // ✅ 1. Cargar Master Plan
   useEffect(() => {
     if (projectId) {
-      fetchMasterPlan(projectId, true) // onlyWithPolygon = true
+      fetchMasterPlan(projectId, true)
     }
   }, [projectId, fetchMasterPlan])
 
-  // ✅ 2. Cargar Apartments cuando sea necesario (solo para proyectos de apartamentos)
   useEffect(() => {
     if (projectId && !isHouseProject) {
       fetchApartments(projectId)
     }
   }, [projectId, isHouseProject])
 
-  // ✅ 3. Calcular stats cuando tengamos masterPlanData Y apartmentsData (si aplica)
   useEffect(() => {
     if (isHouseProject && projectId) {
       fetchHouseStats(projectId)
@@ -159,7 +155,6 @@ export default function ProjectInventory({ projectId, projectName }) {
 
   const previewPolygons = preparePolygonsForPreview()
 
-  // ✅ Configuración dinámica de las 4 tarjetas según el tipo de proyecto
   const cardsConfig = isHouseProject 
     ? [
         { icon: <Home />, label: t('inventory.totalHouses', 'Total Casas'), value: stats.totalUnits, color: '#4a7c59' },
@@ -183,9 +178,10 @@ export default function ProjectInventory({ projectId, projectName }) {
   }
 
   return (
-    <Box sx={{ mt: 3 }}>
-      {/* ✅ Grid de Estadísticas Adaptativo */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+    // ✅ ID: Contenedor de Inventario
+    <Box id="project-inventory-container" sx={{ mt: 3 }}>
+      {/* ✅ ID: Estadísticas de Inventario */}
+      <Grid id="project-inventory-stats" container spacing={3} sx={{ mb: 4 }}>
         {cardsConfig.map((card, index) => (
           <Grid item xs={6} md={3} key={index}>
             <StatCard 
@@ -198,7 +194,6 @@ export default function ProjectInventory({ projectId, projectName }) {
         ))}
       </Grid>
 
-      {/* Vista del Master Plan */}
       {masterPlanData?.masterPlanImage ? (
         <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, borderRadius: 3, border: '1px solid #e0e0e0', bgcolor: '#fff' }}>
           <Box display="flex" alignItems="center" gap={1.5} mb={2}>
@@ -215,7 +210,8 @@ export default function ProjectInventory({ projectId, projectName }) {
             </Typography>
           </Box>
           
-          <Box sx={{ 
+          {/* ✅ ID: Master Plan Interactivo */}
+          <Box id="project-inventory-masterplan" sx={{ 
             width: '100%', 
             position: 'relative', 
             bgcolor: '#f5f5f5', 

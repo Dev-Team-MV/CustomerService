@@ -1,5 +1,5 @@
 // apps/mv-crm/src/components/reports/ExportButton.jsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
@@ -25,6 +25,7 @@ import { Download, Close, TableChart, Description, Warning } from '@mui/icons-ma
 import crmReportsService from '../services/crmReportsService'
 
 const ExportButton = ({
+  buttonId, // ✅ NUEVO: ID para el botón principal
   label,
   exportFn,
   params = {},
@@ -46,6 +47,16 @@ const ExportButton = ({
   const [modalFilters, setModalFilters] = useState({})
   const [internalFormat, setInternalFormat] = useState('csv')
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' })
+
+    // ✅ NUEVO: Escuchar evento para cerrar el modal desde el tour
+  useEffect(() => {
+    const handleCloseModalEvent = () => {
+      setModalOpen(false)
+    }
+    window.addEventListener('close-export-modal', handleCloseModalEvent)
+    return () => window.removeEventListener('close-export-modal', handleCloseModalEvent)
+  }, [])
+
 
   const format = externalFormat !== undefined ? externalFormat : internalFormat
   const setFormat = onExternalFormatChange || setInternalFormat
@@ -172,6 +183,7 @@ const ExportButton = ({
   return (
     <>
       <Button
+        id={buttonId} // ✅ APLICAR ID AL BOTÓN
         variant={variant}
         startIcon={loading ? <CircularProgress size={16} /> : <Download />}
         onClick={handleClick}
@@ -192,13 +204,7 @@ const ExportButton = ({
       </Button>
 
       {withModal && (
-        <Dialog
-          open={modalOpen}
-          onClose={handleCloseModal}
-          maxWidth="sm"
-          fullWidth
-          PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}
-        >
+        <Dialog open={modalOpen} onClose={handleCloseModal} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
           <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box display="flex" alignItems="center" gap={1}>
               <Download sx={{ fontSize: 20 }} />
@@ -212,117 +218,93 @@ const ExportButton = ({
           </DialogTitle>
 
           <DialogContent sx={{ p: 0 }}>
-            <Box sx={{ p: 3 }}>
+            {/* ✅ ID para la sección de filtros */}
+            <Box id="export-modal-filters" sx={{ p: 3 }}>
               {filters.some(f => f.required) && (
-                <Alert
-                  severity="warning"
-                  icon={<Warning />}
-                  sx={{ mb: 3, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}
-                >
-                  <Typography variant="body2" fontWeight={600}>
-                    {t('requiredFieldsNote', 'Los campos marcados con * son obligatorios')}
-                  </Typography>
+                <Alert severity="warning" icon={<Warning />} sx={{ mb: 3, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
+                  <Typography variant="body2" fontWeight={600}>{t('requiredFieldsNote', 'Los campos marcados con * son obligatorios')}</Typography>
                 </Alert>
               )}
 
               <Box display="flex" flexDirection="column" gap={2.5}>
-                {filters.map((filter) => {
-                  if (filter.type === 'date') {
-                    return (
-                      <TextField
-                        key={filter.field}
-                        size="small"
-                        type="date"
-                        label={`${filter.label}${filter.required ? ' *' : ''}`}
-                        value={modalFilters[filter.field] || ''}
-                        onChange={(e) => handleFilterChange(filter.field, e.target.value)}
-                        InputLabelProps={{ shrink: true }}
-                        required={filter.required}
-                        error={filter.required && !modalFilters[filter.field]}
-                        helperText={filter.required && !modalFilters[filter.field] ? t('validation.requiredShort', 'Requerido') : ''}
-                        fullWidth
-                        sx={{
-                          ...inputSx,
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: filter.required && !modalFilters[filter.field] ? '#d32f2f' : '#ececec'
-                          },
-                          '& .MuiFormHelperText-root': {
-                            fontFamily: '"Courier New", monospace',
-                            fontSize: '0.65rem',
-                            color: '#d32f2f'
-                          }
-                        }}
-                      />
-                    )
-                  }
 
-                  if (filter.type === 'select') {
-                    return (
-                      <FormControl key={filter.field} size="small" fullWidth>
-                        <InputLabel>{filter.label}</InputLabel>
-                        <Select
-                          value={modalFilters[filter.field] || ''}
-                          onChange={(e) => handleFilterChange(filter.field, e.target.value)}
-                          label={filter.label}
-                          sx={{ ...inputSx, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ececec' } }}
-                        >
-                          <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{filter.placeholder || t('common:all', 'Todos')}</MenuItem>
-                          {filter.options.map(option => (
-                            <MenuItem key={option.value} value={option.value} sx={{ fontFamily: '"Courier New", monospace' }}>
-                              {option.render ? option.render(option) : option.label}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    )
-                  }
-                  return null
-                })}
+{filters.map((filter) => {
+  if (filter.type === 'date') {
+    return (
+      <TextField
+        key={filter.field}
+        id={`export-filter-${filter.field}`} // ✅ ID dinámico para fechas
+        size="small"
+        type="date"
+        label={`${filter.label}${filter.required ? ' *' : ''}`}
+        value={modalFilters[filter.field] || ''}
+        onChange={(e) => handleFilterChange(filter.field, e.target.value)}
+        InputLabelProps={{ shrink: true }}
+        required={filter.required}
+        error={filter.required && !modalFilters[filter.field]}
+        helperText={filter.required && !modalFilters[filter.field] ? t('validation.requiredShort', 'Requerido') : ''}
+        fullWidth
+        sx={{
+          ...inputSx,
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: filter.required && !modalFilters[filter.field] ? '#d32f2f' : '#ececec'
+          },
+          '& .MuiFormHelperText-root': {
+            fontFamily: '"Courier New", monospace',
+            fontSize: '0.65rem',
+            color: '#d32f2f'
+          }
+        }}
+      />
+    )
+  }
+
+  if (filter.type === 'select') {
+    return (
+      <FormControl 
+        key={filter.field} 
+        id={`export-filter-${filter.field}`} // ✅ ID dinámico para selects (ej: export-filter-projectId)
+        size="small" 
+        fullWidth
+      >
+        <InputLabel>{filter.label}</InputLabel>
+        <Select
+          value={modalFilters[filter.field] || ''}
+          onChange={(e) => handleFilterChange(filter.field, e.target.value)}
+          label={filter.label}
+          sx={{ ...inputSx, '& .MuiOutlinedInput-notchedOutline': { borderColor: '#ececec' } }}
+        >
+          <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{filter.placeholder || t('common:all', 'Todos')}</MenuItem>
+          {filter.options.map(option => (
+            <MenuItem key={option.value} value={option.value} sx={{ fontFamily: '"Courier New", monospace' }}>
+              {option.render ? option.render(option) : option.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    )
+  }
+  return null
+})}
 
                 <Divider />
 
-                <Box>
+                {/* ✅ ID para la sección de formato */}
+                <Box id="export-modal-format" sx={{ pt: 2 }}>
                   <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#888', letterSpacing: '1px', textTransform: 'uppercase', mb: 1.5 }}>
                     {t('formatSelector.title', 'Formato de Exportación')}
                   </Typography>
                   <Box display="flex" gap={1}>
-                    <Chip
-                      icon={<TableChart sx={{ fontSize: 16 }} />}
-                      label="CSV"
-                      onClick={() => setFormat('csv')}
-                      color={format === 'csv' ? 'success' : 'default'}
-                      variant={format === 'csv' ? 'filled' : 'outlined'}
-                      sx={{
-                        fontFamily: '"Courier New", monospace',
-                        fontSize: '0.75rem',
-                        letterSpacing: '0.5px',
-                        cursor: 'pointer',
-                        borderRadius: 0,
-                        border: format !== 'csv' ? '1px solid #ececec' : 'none'
-                      }}
-                    />
-                    <Chip
-                      icon={<Description sx={{ fontSize: 16 }} />}
-                      label="JSON"
-                      onClick={() => setFormat('json')}
-                      color={format === 'json' ? 'primary' : 'default'}
-                      variant={format === 'json' ? 'filled' : 'outlined'}
-                      sx={{
-                        fontFamily: '"Courier New", monospace',
-                        fontSize: '0.75rem',
-                        letterSpacing: '0.5px',
-                        cursor: 'pointer',
-                        borderRadius: 0,
-                        border: format !== 'json' ? '1px solid #ececec' : 'none'
-                      }}
-                    />
+                    <Chip icon={<TableChart sx={{ fontSize: 16 }} />} label="CSV" onClick={() => setFormat('csv')} color={format === 'csv' ? 'success' : 'default'} variant={format === 'csv' ? 'filled' : 'outlined'} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', cursor: 'pointer', borderRadius: 0, border: format !== 'csv' ? '1px solid #ececec' : 'none' }} />
+                    <Chip icon={<Description sx={{ fontSize: 16 }} />} label="JSON" onClick={() => setFormat('json')} color={format === 'json' ? 'primary' : 'default'} variant={format === 'json' ? 'filled' : 'outlined'} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', cursor: 'pointer', borderRadius: 0, border: format !== 'json' ? '1px solid #ececec' : 'none' }} />
                   </Box>
                 </Box>
               </Box>
             </Box>
           </DialogContent>
 
-          <DialogActions sx={{ borderTop: '1px solid #ececec', p: 2, gap: 1 }}>
+          {/* ✅ ID para las acciones finales */}
+          <DialogActions id="export-modal-actions" sx={{ borderTop: '1px solid #ececec', p: 2, gap: 1 }}>
             <Button onClick={handleClearFilters} disabled={loading} sx={{ ...unifiedButtonSx, color: '#888' }}>
               {t('common:clearFilters', 'Limpiar')}
             </Button>
@@ -330,36 +312,15 @@ const ExportButton = ({
             <Button onClick={handleCloseModal} disabled={loading} sx={{ ...unifiedButtonSx, color: '#888' }}>
               {t('common:cancel', 'Cancelar')}
             </Button>
-            <Button
-              onClick={handleExportWithModal}
-              variant="contained"
-              startIcon={loading ? <CircularProgress size={16} /> : <Download />}
-              disabled={loading}
-              sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}
-            >
+            <Button onClick={handleExportWithModal} variant="contained" startIcon={loading ? <CircularProgress size={16} /> : <Download />} disabled={loading} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
               {loading ? t('exporting', 'Exportando...') : t('exportFormat', { format: format.toUpperCase() })}
             </Button>
           </DialogActions>
         </Dialog>
       )}
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ 
-            fontFamily: '"Courier New", monospace', 
-            fontSize: '0.75rem', 
-            borderRadius: 0, 
-            border: '1px solid',
-            bgcolor: snackbar.severity === 'success' ? '#e8f5e9' : snackbar.severity === 'error' ? '#ffebee' : '#fff3e0'
-          }}
-        >
+      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, border: '1px solid', bgcolor: snackbar.severity === 'success' ? '#e8f5e9' : snackbar.severity === 'error' ? '#ffebee' : '#fff3e0' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>

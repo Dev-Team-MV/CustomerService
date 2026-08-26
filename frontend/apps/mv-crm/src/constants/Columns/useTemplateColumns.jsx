@@ -1,4 +1,5 @@
-import { Box, Typography, Button, Chip } from '@mui/material'
+import { Box, Typography, Chip, IconButton, Tooltip } from '@mui/material'
+import { Edit, Delete, Visibility } from '@mui/icons-material'
 
 export const useTemplateColumns = ({ t, onView, onEdit, onDelete }) => {
   return [
@@ -25,6 +26,7 @@ export const useTemplateColumns = ({ t, onView, onEdit, onDelete }) => {
             row.type === 'post_construction' ? 'info' : 
             row.type === 'post_warranty' ? 'warning' : 'default'
           } 
+          sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.65rem' }} // ✅ Estética unificada
         />
       )
     },
@@ -33,7 +35,7 @@ export const useTemplateColumns = ({ t, onView, onEdit, onDelete }) => {
       headerName: t('filters.project', 'Proyecto'),
       minWidth: 150,
       renderCell: ({ row }) => (
-        <Typography variant="body2">
+        <Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
           {row.projectId?.name || row.projectId?.title?.es || t('common.na', 'N/A')}
         </Typography>
       )
@@ -43,7 +45,7 @@ export const useTemplateColumns = ({ t, onView, onEdit, onDelete }) => {
       headerName: t('templates.questions', 'Preguntas'),
       minWidth: 100,
       renderCell: ({ row }) => (
-        <Typography variant="body2">
+        <Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
           {row.questions?.length || 0}
         </Typography>
       )
@@ -58,40 +60,30 @@ export const useTemplateColumns = ({ t, onView, onEdit, onDelete }) => {
           size="small" 
           color={row.isActive ? 'success' : 'default'} 
           variant={row.isActive ? 'outlined' : 'filled'}
+          sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.65rem' }} // ✅ Estética unificada
         />
       )
     },
     {
       field: 'actions',
       headerName: t('actionstable', 'Acciones'),
-      minWidth: 180,
+      minWidth: 140, // ✅ Ancho ajustado para íconos
       sortable: false,
       renderCell: ({ row }) => (
         <Box sx={{ display: 'flex', gap: 0.5 }}>
-          {/* <Button 
-            variant="outlined" 
-            size="small" 
-            color="primary" 
-            onClick={() => onView(row)}
-          >
-            {t('actions.view', 'Ver')}
-          </Button> */}
-          <Button 
-            variant="outlined" 
-            size="small" 
-            color="info" 
-            onClick={() => onEdit(row)}
-          >
-            {t('actions.edit', 'Editar')}
-          </Button>
-          <Button 
-            variant="outlined" 
-            size="small" 
-            color="error" 
-            onClick={() => onDelete(row)}
-          >
-            {t('actions.delete', 'Eliminar')}
-          </Button>
+
+          
+          <Tooltip title={t('actions.edit', 'Editar')}>
+            <IconButton size="small" color="info" onClick={() => onEdit(row)}>
+              <Edit fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title={t('actions.delete', 'Eliminar')}>
+            <IconButton size="small" color="error" onClick={() => onDelete(row)}>
+              <Delete fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
       )
     }

@@ -9,7 +9,7 @@ const VendorCard = ({ vendor, onClick, onEdit, onDelete, categories = [] }) => {
 
   const firstPhone = vendor.contactPhones?.[0]
   const firstLocation = vendor.locations?.[0]
-  const projectName = vendor.projectId?.name || t('vendors.generalVendor')
+  const projectName = vendor.projectId?.name || t('vendors.generalVendor', 'General')
 
   const getCategoryLabel = (slug) => {
     const cat = categories.find(c => c.slug === slug)
@@ -33,7 +33,7 @@ const VendorCard = ({ vendor, onClick, onEdit, onDelete, categories = [] }) => {
         p: 2,
         cursor: 'pointer',
         transition: 'all 0.2s',
-        // ✅ NUEVO: Fuerza a la tarjeta a ocupar toda la altura de la celda del Grid
+        // ✅ Fuerza a la tarjeta a ocupar toda la altura de la celda del Grid
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -62,7 +62,8 @@ const VendorCard = ({ vendor, onClick, onEdit, onDelete, categories = [] }) => {
           {!vendor.photo && vendor.name.charAt(0).toUpperCase()}
         </Avatar>
         
-        <Box display="flex" gap={0.5}>
+        {/* ✅ ID: Contenedor de acciones de la tarjeta para el tour */}
+        <Box id="vendor-card-actions" display="flex" gap={0.5}>
           <Tooltip title={t('actions.update', 'Editar')}>
             <IconButton
               size="small"

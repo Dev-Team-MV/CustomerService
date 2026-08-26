@@ -1,5 +1,6 @@
 // apps/mv-crm/src/components/payments/PaymentSummaryStrip.jsx
-import { Box, Paper, Typography, Chip } from '@mui/material'
+import { useTranslation } from 'react-i18next'
+import { Box, Paper, Typography } from '@mui/material'
 import { 
   AttachMoney, 
   PendingActions, 
@@ -8,11 +9,13 @@ import {
 } from '@mui/icons-material'
 
 const PaymentSummaryStrip = ({ summary, loading }) => {
+  const { t } = useTranslation('payments')
+
   if (loading || !summary) {
     return (
       <Box sx={{ mb: 3 }}>
-        <Typography variant="body2" color="text.secondary">
-          Cargando resumen...
+        <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
+          {t('summary.loading', 'Cargando resumen...')}
         </Typography>
       </Box>
     )
@@ -20,34 +23,35 @@ const PaymentSummaryStrip = ({ summary, loading }) => {
 
   const { global, currentMonth } = summary
 
+  // ✅ El array se define dentro del componente para acceder a 't' y a los datos
   const kpis = [
     {
-      title: 'Total Pendiente',
+      title: t('payments.summary.totalPending'),
       value: `$${global.totalPending.toLocaleString()}`,
       icon: <PendingActions sx={{ fontSize: 32 }} />,
       color: '#2196f3',
       bgColor: '#e3f2fd'
     },
     {
-      title: 'Vencidos',
+      title: t('payments.summary.overdue', 'Vencidos'),
       value: `$${global.overdueAmount.toLocaleString()}`,
-      subtitle: `${global.overdueCount} pagos`,
+      subtitle: t('payments.summary.overduePayments', { count: global.overdueCount }),
       icon: <Warning sx={{ fontSize: 32 }} />,
       color: '#f44336',
       bgColor: '#ffebee'
     },
     {
-      title: 'Cobrado este mes',
+      title: t('payments.summary.collectedThisMonth', 'Cobrado este mes'),
       value: `$${currentMonth.collected.toLocaleString()}`,
-      subtitle: `de $${currentMonth.expected.toLocaleString()} esperado`,
+      subtitle: t('payments.summary.expectedAmount', { expected: currentMonth.expected.toLocaleString() }),
       icon: <AttachMoney sx={{ fontSize: 32 }} />,
       color: '#4caf50',
       bgColor: '#e8f5e9'
     },
     {
-      title: 'Tasa de cobro',
+      title: t('payments.summary.collectionRate', 'Tasa de cobro'),
       value: `${currentMonth.collectionRate}%`,
-      subtitle: 'Mes actual',
+      subtitle: t('payments.summary.currentMonth', 'Mes actual'),
       icon: <TrendingUp sx={{ fontSize: 32 }} />,
       color: currentMonth.collectionRate >= 70 ? '#4caf50' : currentMonth.collectionRate >= 50 ? '#ff9800' : '#f44336',
       bgColor: currentMonth.collectionRate >= 70 ? '#e8f5e9' : currentMonth.collectionRate >= 50 ? '#fff3e0' : '#ffebee'
@@ -65,13 +69,14 @@ const PaymentSummaryStrip = ({ summary, loading }) => {
             minWidth: 200,
             p: 2.5,
             border: '1px solid #e0e0e0',
-            borderRadius: 2,
+            borderRadius: 0, // ✅ Estética unificada (bordes afilados)
             display: 'flex',
             alignItems: 'center',
             gap: 2,
             transition: 'all 0.2s',
             '&:hover': {
-              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              boxShadow: '4px 4px 0px rgba(0,0,0,0.08)',
+              borderColor: '#000',
               transform: 'translateY(-2px)'
             }
           }}
@@ -80,7 +85,7 @@ const PaymentSummaryStrip = ({ summary, loading }) => {
             sx={{
               width: 56,
               height: 56,
-              borderRadius: 2,
+              borderRadius: 0, // ✅ Estética unificada
               bgcolor: kpi.bgColor,
               color: kpi.color,
               display: 'flex',
@@ -96,10 +101,11 @@ const PaymentSummaryStrip = ({ summary, loading }) => {
               variant="caption" 
               color="text.secondary" 
               sx={{ 
-                fontSize: '0.75rem',
-                fontWeight: 500,
+                fontSize: '0.7rem',
+                fontWeight: 600,
                 textTransform: 'uppercase',
-                letterSpacing: '0.5px'
+                letterSpacing: '0.5px',
+                fontFamily: '"Courier New", monospace'
               }}
             >
               {kpi.title}
@@ -110,7 +116,8 @@ const PaymentSummaryStrip = ({ summary, loading }) => {
               sx={{ 
                 color: kpi.color,
                 lineHeight: 1.2,
-                mt: 0.5
+                mt: 0.5,
+                fontFamily: '"Helvetica Neue", sans-serif'
               }}
             >
               {kpi.value}
@@ -119,7 +126,7 @@ const PaymentSummaryStrip = ({ summary, loading }) => {
               <Typography 
                 variant="caption" 
                 color="text.secondary"
-                sx={{ fontSize: '0.7rem' }}
+                sx={{ fontSize: '0.7rem', fontFamily: '"Courier New", monospace' }}
               >
                 {kpi.subtitle}
               </Typography>

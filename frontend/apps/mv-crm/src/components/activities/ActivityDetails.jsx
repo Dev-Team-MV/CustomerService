@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/activities/ActivityDetails.jsx
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -77,7 +76,6 @@ const ActivityDetails = ({
   const contact = currentActivity.contact
   const creator = currentActivity.createdBy
 
-  // ✅ NUEVO: Obtener proyectos relacionados
   const getRelatedProjects = () => {
     if (!currentActivity.relatedProjects || currentActivity.relatedProjects.length === 0) return []
     
@@ -139,7 +137,7 @@ const ActivityDetails = ({
     if (!newMessage.trim()) return
     setSendingMessage(true)
     try {
-      await onAddThreadMessage?.(currentActivity._id, { content: newMessage })
+      await onAddThreadMessage?.(currentActivity._id, { message: newMessage })
       setNewMessage('')
       await handleRefreshActivity()
     } finally {
@@ -150,7 +148,9 @@ const ActivityDetails = ({
   const locale = i18n.language === 'es' ? 'es-ES' : 'en-US'
 
   return (
+    // ✅ ID 1: Drawer principal
     <Drawer
+      id="activity-details-drawer"
       anchor="right"
       open={open}
       onClose={onClose}
@@ -162,7 +162,8 @@ const ActivityDetails = ({
           p: 2, 
           bgcolor: column?.color || '#757575',
           color: 'white',
-          flexShrink: 0
+          flexShrink: 0,
+          borderBottom: '1px solid rgba(0,0,0,0.1)'
         }}
       >
         <Box display="flex" justifyContent="space-between" alignItems="flex-start">
@@ -171,21 +172,21 @@ const ActivityDetails = ({
               <Chip
                 label={column.name}
                 size="small"
-                sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', mb: 1 }}
+                sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', mb: 1, borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.65rem' }}
               />
             )}
-            <Typography variant="h6" fontWeight={700} sx={{ wordBreak: 'break-word' }}>
+            <Typography variant="h6" fontWeight={700} sx={{ wordBreak: 'break-word', fontFamily: '"Helvetica Neue", sans-serif', fontSize: '1.1rem' }}>
               {currentActivity.title}
             </Typography>
           </Box>
-          <IconButton onClick={onClose} sx={{ color: 'white', flexShrink: 0 }}>
+          <IconButton onClick={onClose} sx={{ color: 'white', flexShrink: 0, borderRadius: 0 }}>
             <Close />
           </IconButton>
         </Box>
       </Box>
 
       {/* Content - Scrollable */}
-      <Box sx={{ p: 2, overflowY: 'auto', flex: 1 }}>
+      <Box sx={{ p: { xs: 2, sm: 3 }, overflowY: 'auto', flex: 1 }}>
         {/* Prioridad y Tags */}
         <Box display="flex" gap={1} mb={2} flexWrap="wrap">
           <Chip
@@ -193,7 +194,10 @@ const ActivityDetails = ({
             sx={{
               bgcolor: `${priority?.color || '#2196f3'}20`,
               color: priority?.color || '#2196f3',
-              fontWeight: 600
+              fontWeight: 600,
+              borderRadius: 0,
+              fontFamily: '"Courier New", monospace',
+              fontSize: '0.7rem'
             }}
           />
           {currentActivity.tags?.map((tag, idx) => (
@@ -204,19 +208,20 @@ const ActivityDetails = ({
               icon={<Label sx={{ fontSize: 14 }} />}
               variant="outlined"
               sx={{
-                borderColor: tag === 'automation' ? '#9c27b0' : 
-                             tag === 'nota' ? '#ff9800' : undefined,
-                color: tag === 'automation' ? '#9c27b0' :
-                       tag === 'nota' ? '#ff9800' : undefined
+                borderRadius: 0,
+                fontFamily: '"Courier New", monospace',
+                fontSize: '0.7rem',
+                borderColor: tag === 'automation' ? '#9c27b0' : tag === 'nota' ? '#ff9800' : '#e0e0e0',
+                color: tag === 'automation' ? '#9c27b0' : tag === 'nota' ? '#ff9800' : '#666'
               }}
             />
           ))}
         </Box>
 
-        {/* ✅ NUEVO: Proyectos Relacionados */}
+        {/* ✅ ID 2: Proyectos Relacionados */}
         {relatedProjects.length > 0 && (
-          <Box mb={3}>
-            <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
+          <Box id="activity-details-related-projects" mb={3}>
+            <Typography variant="subtitle2" fontWeight={600} mb={1.5} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
               {t('activities.details.relatedProjects', 'Proyectos Relacionados')}
             </Typography>
             <Box display="flex" flexDirection="column" gap={1}>
@@ -224,21 +229,16 @@ const ActivityDetails = ({
                 <Paper
                   key={project.id}
                   variant="outlined"
-                  sx={{
-                    p: 1.5,
-                    borderRadius: 2,
-                    bgcolor: '#e3f2fd',
-                    borderColor: '#2196f3'
-                  }}
+                  sx={{ p: 1.5, borderRadius: 0, bgcolor: '#e3f2fd', borderColor: '#2196f3' }}
                 >
                   <Box display="flex" alignItems="center" gap={1.5}>
                     <Business sx={{ fontSize: 20, color: '#2196f3' }} />
                     <Box flex={1}>
-                      <Typography fontWeight={600} sx={{ color: '#1976d2', fontSize: '0.9rem' }}>
+                      <Typography fontWeight={600} sx={{ color: '#1976d2', fontSize: '0.9rem', fontFamily: '"Helvetica Neue", sans-serif' }}>
                         {project.name}
                       </Typography>
                       {project.phase && (
-                        <Typography variant="caption" sx={{ color: '#2196f3' }}>
+                        <Typography variant="caption" sx={{ color: '#2196f3', fontFamily: '"Courier New", monospace' }}>
                           Fase: {project.phase}
                         </Typography>
                       )}
@@ -253,10 +253,10 @@ const ActivityDetails = ({
         {/* Descripción */}
         {currentActivity.description && (
           <Box mb={3}>
-            <Typography variant="subtitle2" fontWeight={600} mb={1}>
+            <Typography variant="subtitle2" fontWeight={600} mb={1} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
               {t('activities.form.description')}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Helvetica Neue", sans-serif', lineHeight: 1.6 }}>
               {currentActivity.description}
             </Typography>
           </Box>
@@ -266,10 +266,10 @@ const ActivityDetails = ({
         <Box display="flex" alignItems="center" gap={1} mb={3}>
           <AccessTime sx={{ fontSize: 20, color: '#757575' }} />
           <Box>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', textTransform: 'uppercase' }}>
               {t('activities.form.dueDate')}
             </Typography>
-            <Typography variant="body2" fontWeight={600}>
+            <Typography variant="body2" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
               {formatDate(currentActivity.dueDate, locale)}
             </Typography>
           </Box>
@@ -278,22 +278,22 @@ const ActivityDetails = ({
         {/* Asignado */}
         {assignee && (
           <Box mb={3}>
-            <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
+            <Typography variant="subtitle2" fontWeight={600} mb={1.5} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
               {t('activities.form.assignedTo')}
             </Typography>
-            <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+            <Paper variant="outlined" sx={{ p: 2, borderRadius: 0, border: '1px solid #e0e0e0' }}>
               <Box display="flex" alignItems="center" gap={2}>
-                <Avatar sx={{ bgcolor: '#2196f3', width: 36, height: 36 }}>
+                <Avatar sx={{ bgcolor: '#000', width: 36, height: 36, borderRadius: 0, fontSize: '0.9rem' }}>
                   {assignee.firstName?.charAt(0) || '?'}
                 </Avatar>
                 <Box>
-                  <Typography fontWeight={600}>
+                  <Typography fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
                     {`${assignee.firstName || ''} ${assignee.lastName || ''}`.trim()}
                   </Typography>
                   {assignee.email && (
                     <Box display="flex" alignItems="center" gap={0.5}>
                       <Email sx={{ fontSize: 14, color: '#757575' }} />
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
                         {assignee.email}
                       </Typography>
                     </Box>
@@ -304,33 +304,25 @@ const ActivityDetails = ({
           </Box>
         )}
 
-        {/* Contacto asociado */}
+        {/* ✅ ID 3: Contacto asociado */}
         {contact && (
-          <Box mb={3}>
-            <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
+          <Box id="activity-details-contact" mb={3}>
+            <Typography variant="subtitle2" fontWeight={600} mb={1.5} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
               {t('activities.details.associatedContact')}
             </Typography>
-            <Paper 
-              variant="outlined" 
-              sx={{ 
-                p: 2, 
-                borderRadius: 2,
-                bgcolor: '#fff8e1',
-                borderColor: '#ffb74d'
-              }}
-            >
+            <Paper variant="outlined" sx={{ p: 2, borderRadius: 0, bgcolor: '#fff8e1', borderColor: '#ffe0b2' }}>
               <Box display="flex" alignItems="center" gap={2}>
-                <Avatar sx={{ bgcolor: '#ff9800', width: 36, height: 36 }}>
-                  <Person />
+                <Avatar sx={{ bgcolor: '#ff9800', width: 36, height: 36, borderRadius: 0 }}>
+                  <Person sx={{ color: '#fff' }} />
                 </Avatar>
                 <Box flex={1}>
-                  <Typography fontWeight={600} sx={{ color: '#e65100' }}>
+                  <Typography fontWeight={600} sx={{ color: '#e65100', fontFamily: '"Helvetica Neue", sans-serif' }}>
                     {contact.name}
                   </Typography>
                   {contact.phone && (
                     <Box display="flex" alignItems="center" gap={0.5} mt={0.5}>
                       <Phone sx={{ fontSize: 14, color: '#ff9800' }} />
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
                         {contact.phone}
                       </Typography>
                     </Box>
@@ -338,7 +330,7 @@ const ActivityDetails = ({
                   {contact.email && (
                     <Box display="flex" alignItems="center" gap={0.5} mt={0.3}>
                       <Email sx={{ fontSize: 14, color: '#ff9800' }} />
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
                         {contact.email}
                       </Typography>
                     </Box>
@@ -352,18 +344,18 @@ const ActivityDetails = ({
         {/* Creado por */}
         {creator && (
           <Box mb={3}>
-            <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
+            <Typography variant="subtitle2" fontWeight={600} mb={1.5} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
               {t('activities.details.createdBy')}
             </Typography>
             <Box display="flex" alignItems="center" gap={1.5}>
-              <Avatar sx={{ bgcolor: '#4caf50', width: 28, height: 28, fontSize: 12 }}>
+              <Avatar sx={{ bgcolor: '#4caf50', width: 28, height: 28, fontSize: 12, borderRadius: 0 }}>
                 {creator.firstName?.charAt(0) || '?'}
               </Avatar>
               <Box>
-                <Typography variant="caption" fontWeight={600}>
+                <Typography variant="caption" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
                   {`${creator.firstName || ''} ${creator.lastName || ''}`.trim()}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontFamily: '"Courier New", monospace', fontSize: '0.65rem' }}>
                   {creator.email}
                 </Typography>
               </Box>
@@ -373,21 +365,23 @@ const ActivityDetails = ({
 
         <Divider sx={{ my: 2 }} />
 
-        {/* Subtareas */}
-        <SubActivityList
-          subActivities={currentActivity.subtasks || []}
-          parentActivityId={currentActivity._id}
-          onAdd={handleAddSubtaskWithRefresh}
-          onUpdate={handleUpdateSubtaskWithRefresh}
-          onDelete={handleDeleteSubtaskWithRefresh}
-          readOnly={false}
-        />
+        {/* ✅ ID 4: Subtareas */}
+        <Box id="activity-details-subtasks" mb={2}>
+          <SubActivityList
+            subActivities={currentActivity.subtasks || []}
+            parentActivityId={currentActivity._id}
+            onAdd={handleAddSubtaskWithRefresh}
+            onUpdate={handleUpdateSubtaskWithRefresh}
+            onDelete={handleDeleteSubtaskWithRefresh}
+            readOnly={false}
+          />
+        </Box>
 
         <Divider sx={{ my: 2 }} />
 
-        {/* Comentarios */}
-        <Box>
-          <Typography variant="subtitle2" fontWeight={600} mb={2}>
+        {/* ✅ ID 5: Comentarios */}
+        <Box id="activity-details-comments">
+          <Typography variant="subtitle2" fontWeight={600} mb={2} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
             {t('activities.details.comments')} ({currentActivity.threads?.length || 0})
           </Typography>
           
@@ -397,18 +391,18 @@ const ActivityDetails = ({
                 <Paper 
                   key={thread._id || idx} 
                   variant="outlined" 
-                  sx={{ p: 1.5, mb: 1, borderRadius: 2, bgcolor: '#f5f5f5' }}
+                  sx={{ p: 1.5, mb: 1, borderRadius: 0, bgcolor: '#f5f5f5', border: '1px solid #e0e0e0' }}
                 >
                   <Box display="flex" gap={1.5}>
-                    <Avatar sx={{ width: 28, height: 28, fontSize: 12, bgcolor: '#2196f3', flexShrink: 0 }}>
+                    <Avatar sx={{ width: 28, height: 28, fontSize: 12, bgcolor: '#000', borderRadius: 0, flexShrink: 0 }}>
                       {thread.createdBy?.firstName?.charAt(0) || '?'}
                     </Avatar>
-                    <Box flex={1}>
+                    <Box flex={1} minWidth={0}>
                       <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
-                        <Typography variant="caption" fontWeight={600}>
+                        <Typography variant="caption" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
                           {thread.createdBy?.firstName || t('activities.user')} {thread.createdBy?.lastName || ''}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem' }}>
                           {thread.createdAt ? new Date(thread.createdAt).toLocaleDateString(locale, {
                             day: 'numeric',
                             month: 'short',
@@ -417,8 +411,8 @@ const ActivityDetails = ({
                           }) : ''}
                         </Typography>
                       </Box>
-                      <Typography variant="body2">
-                        {thread.content}
+                      <Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif', wordBreak: 'break-word', lineHeight: 1.5 }}>
+                        {thread.message}
                       </Typography>
                     </Box>
                   </Box>
@@ -426,7 +420,7 @@ const ActivityDetails = ({
               ))}
             </Box>
           ) : (
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
               {t('activities.details.noComments')}
             </Typography>
           )}
@@ -442,27 +436,45 @@ const ActivityDetails = ({
               fullWidth
               multiline
               maxRows={3}
+              sx={{ 
+                '& .MuiOutlinedInput-root': { borderRadius: 0 },
+                '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif', fontSize: '0.85rem' }
+              }}
             />
             <IconButton 
-              color="primary" 
               onClick={handleSendMessage}
               disabled={!newMessage.trim() || sendingMessage || refreshing}
-              sx={{ alignSelf: 'flex-end' }}
+              sx={{ 
+                alignSelf: 'flex-end', 
+                borderRadius: 0, 
+                bgcolor: '#000', 
+                color: '#fff', 
+                '&:hover': { bgcolor: '#222' }, 
+                '&.Mui-disabled': { bgcolor: '#e0e0e0', color: '#9e9e9e' } 
+              }}
             >
-              {sendingMessage || refreshing ? <CircularProgress size={20} /> : <Send />}
+              {sendingMessage || refreshing ? <CircularProgress size={20} color="inherit" /> : <Send sx={{ fontSize: 18 }} />}
             </IconButton>
           </Box>
         </Box>
       </Box>
 
-      {/* Footer Actions */}
-      <Box sx={{ p: 2, borderTop: '1px solid #e0e0e0', flexShrink: 0, display: 'flex', gap: 1 }}>
+      {/* ✅ ID 6: Acciones del footer */}
+      <Box id="activity-details-actions" sx={{ p: 2, borderTop: '1px solid #e0e0e0', flexShrink: 0, display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
         <Button
           variant="outlined"
           startIcon={<Edit />}
           onClick={() => onEdit?.(currentActivity)}
-          fullWidth
-          size="small"
+          sx={{ 
+            flex: 1, 
+            borderRadius: 0, 
+            textTransform: 'none', 
+            fontFamily: '"Courier New", monospace', 
+            fontSize: '0.75rem',
+            border: '1px solid #000',
+            color: '#000',
+            '&:hover': { bgcolor: '#f5f5f5', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' }
+          }}
         >
           {t('activities.form.edit')}
         </Button>
@@ -476,8 +488,16 @@ const ActivityDetails = ({
               onClose()
             }
           }}
-          fullWidth
-          size="small"
+          sx={{ 
+            flex: 1, 
+            borderRadius: 0, 
+            textTransform: 'none', 
+            fontFamily: '"Courier New", monospace', 
+            fontSize: '0.75rem',
+            border: '1px solid #f44336',
+            color: '#f44336',
+            '&:hover': { bgcolor: '#ffebee', boxShadow: '4px 4px 0px rgba(244,67,54,0.12)' }
+          }}
         >
           {t('activities.form.delete')}
         </Button>

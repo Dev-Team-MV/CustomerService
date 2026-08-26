@@ -10,6 +10,10 @@
   "confirmDelete": "¿Estás seguro de eliminar esta cotización?",
   "confirmConvert": "¿Convertir esta cotización a venta?",
   "none": "Ninguno",
+    "converting": "Convirtiendo...",
+  "confirm": "Confirmar Conversión",
+    "send": "Enviar",
+  "sending": "Enviando...",
   
   "form": {
     "lead": "Lead",
@@ -76,5 +80,28 @@
   "next": "Siguiente",
   "saving": "Guardando...",
   "update": "Actualizar",
-  "create": "Crear"
+  "create": "Crear",
+
+    "sendQuote": {
+    "title": "Enviar Cotización",
+    "client": "Cliente / Lead",
+    "method": "Método de envío",
+    "emailLabel": "Correo electrónico",
+    "phoneLabel": "Teléfono",
+    "errorEmail": "El correo es obligatorio",
+    "errorPhone": "El teléfono es obligatorio",
+    "errorSend": "Error al enviar"
+  },
+  "convertToSale": {
+    "title": "Convertir a Venta",
+    "client": "Cliente / Lead",
+    "amount": "Monto Cotizado",
+    "hasProperty": "Esta cotización tiene datos de propiedad. Se vinculará o creará automáticamente.",
+    "noProperty": "Faltan datos de propiedad. Es posible que debas crearla manualmente.",
+    "hintTitle": "Acción requerida",
+    "hintAction": "Por favor, asegúrate de que la cotización incluya todos los datos obligatorios o crea la propiedad manualmente desde el módulo de propiedades."
+  },
+  "errors": {
+    "convertFailed": "Error al convertir"
+  }
 }

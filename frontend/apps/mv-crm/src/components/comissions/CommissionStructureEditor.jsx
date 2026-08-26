@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/comissions/CommissionStructureEditor.jsx
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -9,7 +8,7 @@ import {
 import { Close, Add, Delete, CardGiftcard } from '@mui/icons-material'
 import commissionService from '../../services/commissionService'
 
-const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefresh }) => {
+const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefresh, isTourMode = false }) => {
   const { t } = useTranslation('commissions')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -129,7 +128,6 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
     }
   }
 
-  // ✅ Estilos unificados con soporte responsive
   const unifiedButtonSx = {
     borderRadius: 0,
     textTransform: 'none',
@@ -159,8 +157,9 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
         {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>{error}</Alert>}
         
         <Box display="flex" flexDirection="column" gap={3}>
-          {/* Nombre y Tipo */}
-          <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
+          
+          {/* ✅ ID 1: Nombre y Tipo */}
+          <Box id="structure-editor-name-type" display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
             <TextField 
               label={t('structures.name')} 
               value={formData.name} 
@@ -183,56 +182,58 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
             </FormControl>
           </Box>
 
-          {formData.type === 'flat' && (
-            <TextField 
-              label={t('structures.flatAmount')} 
-              type="number" 
-              value={formData.flatAmount} 
-              onChange={(e) => handleChange('flatAmount', Number(e.target.value))} 
-              fullWidth size="small" 
-              InputProps={{ startAdornment: <Typography variant="body2" color="text.secondary" sx={{ mr: 1, fontFamily: '"Courier New", monospace' }}>$</Typography> }}
-              sx={inputSx}
-            />
-          )}
+          {/* ✅ ID 2: Configuración de Tasas (Envuelve las 3 opciones condicionales) */}
+          <Box id="structure-editor-rates" display="flex" flexDirection="column" gap={2}>
+            {formData.type === 'flat' && (
+              <TextField 
+                label={t('structures.flatAmount')} 
+                type="number" 
+                value={formData.flatAmount} 
+                onChange={(e) => handleChange('flatAmount', Number(e.target.value))} 
+                fullWidth size="small" 
+                InputProps={{ startAdornment: <Typography variant="body2" color="text.secondary" sx={{ mr: 1, fontFamily: '"Courier New", monospace' }}>$</Typography> }}
+                sx={inputSx}
+              />
+            )}
 
-          {formData.type === 'percentage' && (
-            <TextField 
-              label={t('structures.percentageRate')} 
-              type="number" 
-              value={formData.percentageRate} 
-              onChange={(e) => handleChange('percentageRate', Number(e.target.value))} 
-              fullWidth size="small" 
-              InputProps={{ endAdornment: <Typography variant="caption" sx={{ fontFamily: '"Courier New", monospace' }}>%</Typography> }}
-              sx={inputSx}
-            />
-          )}
+            {formData.type === 'percentage' && (
+              <TextField 
+                label={t('structures.percentageRate')} 
+                type="number" 
+                value={formData.percentageRate} 
+                onChange={(e) => handleChange('percentageRate', Number(e.target.value))} 
+                fullWidth size="small" 
+                InputProps={{ endAdornment: <Typography variant="caption" sx={{ fontFamily: '"Courier New", monospace' }}>%</Typography> }}
+                sx={inputSx}
+              />
+            )}
 
-          {/* Sección de Tiers (Responsive) */}
-          {formData.type === 'tiered' && (
-            <Box sx={{ p: { xs: 1.5, sm: 2 }, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
-              <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} mb={1.5} gap={1}>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ fontFamily: '"Courier New", monospace' }}>{t('structures.tiers')}</Typography>
-                <Button size="small" startIcon={<Add />} onClick={addTier} sx={{ ...unifiedButtonSx, border: '1px solid #000', color: '#000', '&:hover': { bgcolor: '#f5f5f5', borderColor: '#555', color: '#555', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
-                  {t('structures.addTier')}
-                </Button>
-              </Box>
-              {formData.tiers.map((tier, index) => (
-                <Box key={index} display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={1} alignItems={{ xs: 'stretch', sm: 'center' }} mb={1}>
-                  <TextField label={t('structures.minAmount')} type="number" size="small" value={tier.minAmount} onChange={(e) => handleTierChange(index, 'minAmount', e.target.value)} sx={{ flex: 1, ...inputSx }} />
-                  <TextField label={t('structures.maxAmount')} type="number" size="small" value={tier.maxAmount} onChange={(e) => handleTierChange(index, 'maxAmount', e.target.value)} sx={{ flex: 1, ...inputSx }} />
-                  <TextField label={t('structures.rate')} type="number" size="small" value={tier.rate} onChange={(e) => handleTierChange(index, 'rate', e.target.value)} sx={{ width: { xs: '100%', sm: 100 }, ...inputSx }} InputProps={{ endAdornment: <Typography variant="caption" sx={{ fontFamily: '"Courier New", monospace' }}>%</Typography> }} />
-                  <IconButton size="small" color="error" onClick={() => removeTier(index)} sx={{ borderRadius: 0, alignSelf: { xs: 'flex-end', sm: 'center' } }}>
-                    <Delete fontSize="small" />
-                  </IconButton>
+            {formData.type === 'tiered' && (
+              <Box sx={{ p: { xs: 1.5, sm: 2 }, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
+                <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} mb={1.5} gap={1}>
+                  <Typography variant="subtitle2" fontWeight={600} sx={{ fontFamily: '"Courier New", monospace' }}>{t('structures.tiers')}</Typography>
+                  <Button size="small" startIcon={<Add />} onClick={addTier} sx={{ ...unifiedButtonSx, border: '1px solid #000', color: '#000', '&:hover': { bgcolor: '#f5f5f5', borderColor: '#555', color: '#555', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
+                    {t('structures.addTier')}
+                  </Button>
                 </Box>
-              ))}
-            </Box>
-          )}
+                {formData.tiers.map((tier, index) => (
+                  <Box key={index} display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={1} alignItems={{ xs: 'stretch', sm: 'center' }} mb={1}>
+                    <TextField label={t('structures.minAmount')} type="number" size="small" value={tier.minAmount} onChange={(e) => handleTierChange(index, 'minAmount', e.target.value)} sx={{ flex: 1, ...inputSx }} />
+                    <TextField label={t('structures.maxAmount')} type="number" size="small" value={tier.maxAmount} onChange={(e) => handleTierChange(index, 'maxAmount', e.target.value)} sx={{ flex: 1, ...inputSx }} />
+                    <TextField label={t('structures.rate')} type="number" size="small" value={tier.rate} onChange={(e) => handleTierChange(index, 'rate', e.target.value)} sx={{ width: { xs: '100%', sm: 100 }, ...inputSx }} InputProps={{ endAdornment: <Typography variant="caption" sx={{ fontFamily: '"Courier New", monospace' }}>%</Typography> }} />
+                    <IconButton size="small" color="error" onClick={() => removeTier(index)} sx={{ borderRadius: 0, alignSelf: { xs: 'flex-end', sm: 'center' } }}>
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
 
           <Divider />
 
-          {/* Sección de Bonus Rules (Responsive) */}
-          <Box>
+          {/* ✅ ID 3: Reglas de Bonificación */}
+          <Box id="structure-editor-bonus">
             <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} mb={1.5} gap={1}>
               <Box display="flex" alignItems="center" gap={1}>
                 <CardGiftcard sx={{ fontSize: 20, color: '#ff9800' }} />
@@ -315,8 +316,8 @@ const CommissionStructureEditor = ({ open, onClose, structure, projectId, onRefr
         </Box>
       </DialogContent>
 
-      {/* ✅ Acciones Responsive */}
-      <DialogActions sx={{ p: 2, gap: 1, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' } }}>
+      {/* ✅ ID 4: Acciones del Modal */}
+      <DialogActions id="structure-editor-actions" sx={{ p: 2, gap: 1, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' } }}>
         <Button onClick={onClose} disabled={loading} sx={{ ...unifiedButtonSx, color: '#888' }}>
           {t('actions.cancel')}
         </Button>

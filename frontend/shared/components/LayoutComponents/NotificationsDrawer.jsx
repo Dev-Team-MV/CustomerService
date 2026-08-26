@@ -89,6 +89,7 @@ const NotificationsDrawer = ({
 
   return (
     <Drawer
+    id="notification-drawer-container"
       anchor="right"
       variant="temporary"
       open={open}
@@ -441,6 +442,7 @@ const NotificationsDrawer = ({
             }}
           >
             <Button
+            id="notification-mark-all-read" 
               fullWidth
               variant="outlined"
               size="medium"

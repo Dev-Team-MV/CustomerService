@@ -74,7 +74,7 @@ export default function GlobalKPIs({ filteredBalance, filteredClients }) {
   const totalClients = Object.values(filteredClients).reduce((s, d) => s + (d?.total ?? 0), 0)
 
   return (
-    <Box>
+    <Box id="analytics-global-kpis">
       <Typography sx={{
         fontFamily: '"Courier New", monospace', fontSize: '0.6rem',
         color: '#000', letterSpacing: '2px', textTransform: 'uppercase', mb: 2

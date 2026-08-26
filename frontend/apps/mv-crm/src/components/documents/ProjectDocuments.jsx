@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/documents/ProjectDocuments.jsx
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { 
@@ -43,7 +42,6 @@ export default function ProjectDocuments({ projectId, projectName }) {
     }
   }
 
-  // ✅ Estilos unificados
   const unifiedButtonSx = { 
     borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', 
     fontSize: '0.75rem', letterSpacing: '0.5px', width: { xs: '100%', sm: 'auto' },
@@ -58,7 +56,8 @@ export default function ProjectDocuments({ projectId, projectName }) {
   }
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 } }}>
+    // ✅ ID: Contenedor de Documentos
+    <Box id="project-documents-container" sx={{ p: { xs: 2, sm: 3 } }}>
       {/* Header Responsive */}
       <Box 
         display="flex" 
@@ -71,7 +70,9 @@ export default function ProjectDocuments({ projectId, projectName }) {
         <Typography variant="h6" sx={{ fontFamily: '"Courier New", monospace', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', fontSize: { xs: '0.9rem', sm: '1.1rem' } }}>
           {t('projectDocuments.title', 'Documentos del Proyecto')}
         </Typography>
+        {/* ✅ ID: Botón Subir Documento */}
         <Button 
+          id="project-documents-upload-btn"
           variant="contained" 
           startIcon={<Add />} 
           onClick={() => setUploadOpen(true)} 
@@ -83,16 +84,23 @@ export default function ProjectDocuments({ projectId, projectName }) {
 
       {/* Filtros rápidos Responsive */}
       <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={3} flexWrap="wrap" alignItems={{ xs: 'stretch', sm: 'center' }}>
-        <TextField
-          size="small"
-          placeholder={t('searchPlaceholder')}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          InputProps={{ startAdornment: <Search sx={{ color: '#aaa' }} /> }}
-          sx={{ ...inputSx, minWidth: { xs: '100%', sm: 200 } }}
-        />
+<TextField
+  size="small"
+  placeholder={t('searchPlaceholder')}
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  InputProps={{ startAdornment: <Search sx={{ color: '#aaa' }} /> }}
+  sx={{
+    ...inputSx,
+    minWidth: { xs: '100%', sm: 200 },
+    '& .MuiInputBase-input::placeholder': {
+      fontFamily: '"Courier New", monospace',
+      opacity: 1,
+    },
+  }}
+/>
         <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 150 } }}>
-          <InputLabel>{t('filters.category')}</InputLabel>
+          <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.category')}</InputLabel>
           <Select value={filters.category || ''} onChange={(e) => updateFilter('category', e.target.value)} label={t('filters.category')} sx={inputSx}>
             <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.allCategories')}</MenuItem>
             {['contract', 'id_document', 'deed', 'appraisal', 'receipt', 'insurance', 'permit', 'blueprint', 'other'].map(c => (
@@ -101,9 +109,9 @@ export default function ProjectDocuments({ projectId, projectName }) {
           </Select>
         </FormControl>
         <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 200 } }}>
-          <InputLabel>{t('filters.client')}</InputLabel>
-          <Select value={filters.clientId || ''} onChange={(e) => updateFilter('clientId', e.target.value)} label={t('filters.client')} sx={inputSx}>
-            <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.allClients')}</MenuItem>
+          <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.clients')}</InputLabel>
+          <Select value={filters.clientId || ''} onChange={(e) => updateFilter('clientId', e.target.value)} label={t('filters.clients')} sx={inputSx}>
+            <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.clients')}</MenuItem>
             {clients.map(c => (
               <MenuItem key={c._id} value={c._id} sx={{ fontFamily: '"Courier New", monospace' }}>
                 {c.firstName} {c.lastName}
@@ -113,7 +121,6 @@ export default function ProjectDocuments({ projectId, projectName }) {
         </FormControl>
       </Box>
 
-      {/* Estado de carga o error */}
       {error && (
         <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
           {error}
@@ -146,7 +153,6 @@ export default function ProjectDocuments({ projectId, projectName }) {
         </Grid>
       )}
 
-      {/* Modales pre-llenados con el contexto del proyecto */}
       <DocumentUploadModal 
         open={uploadOpen} 
         onClose={() => setUploadOpen(false)} 

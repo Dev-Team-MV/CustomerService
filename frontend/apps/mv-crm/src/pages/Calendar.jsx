@@ -48,17 +48,23 @@ import { useAppointments } from '../constants/hooks/useAppointments'
 import { useProjects } from '@shared/hooks/useProjects'
 import { useCrmAgents } from '../constants/hooks/useCrmAgents'
 
+// ✅ NUEVOS IMPORTS PARA EL TOUR
+import { useTour } from '@shared/tours/useTour'
+import TourButton from '@shared/tours/TourButton'
+import { getCalendarTourSteps, calendarTourConfig } from '../tours/modules/calendarTour'
+import { getAppointmentTourSteps, appointmentTourConfig } from '../tours/features/appointmentTour'
+
 const APPOINTMENT_TYPES = {
-  visita: { label: 'Visita', color: '#4caf50', icon: '🏠' },
-  llamada: { label: 'Llamada', color: '#2196f3', icon: '📞' },
-  reunion: { label: 'Reunión', color: '#ff9800', icon: '🤝' }
+  visita: { labelKey: 'types.visita', color: '#4caf50', icon: '' },
+  llamada: { labelKey: 'types.llamada', color: '#2196f3', icon: '📞' },
+  reunion: { labelKey: 'types.reunion', color: '#ff9800', icon: '🤝' }
 }
 
 const APPOINTMENT_STATUSES = {
-  pendiente: { label: 'Pendiente', color: '#ff9800', bgColor: '#fff3e0' },
-  confirmada: { label: 'Confirmada', color: '#2196f3', bgColor: '#e3f2fd' },
-  completada: { label: 'Completada', color: '#4caf50', bgColor: '#e8f5e9' },
-  cancelada: { label: 'Cancelada', color: '#f44336', bgColor: '#ffebee' }
+  pendiente: { labelKey: 'statuses.pendiente', color: '#ff9800', bgColor: '#fff3e0' },
+  confirmada: { labelKey: 'statuses.confirmada', color: '#2196f3', bgColor: '#e3f2fd' },
+  completada: { labelKey: 'statuses.completada', color: '#4caf50', bgColor: '#e8f5e9' },
+  cancelada: { labelKey: 'statuses.cancelada', color: '#f44336', bgColor: '#ffebee' }
 }
 
 const STATUS_OPTIONS = [
@@ -277,15 +283,13 @@ const ContactInfo = ({ appointment }) => {
 }
 
 export default function Calendar() {
-  const { t, i18n } = useTranslation('appointments')
+ const { t, i18n } = useTranslation('appointments')
+  const { t: tCommon } = useTranslation('common') // ✅ Para las claves del tour
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const isTablet = useMediaQuery(theme.breakpoints.down('md'))
   
-  const { 
-    appointments, loading, error, createAppointment, updateAppointment, 
-    updateAppointmentStatus, deleteAppointment 
-  } = useAppointments()
+  const { appointments, loading, error, createAppointment, updateAppointment, updateAppointmentStatus, deleteAppointment } = useAppointments()
   const { projects } = useProjects()
   const { agents } = useCrmAgents()
   
@@ -296,6 +300,12 @@ export default function Calendar() {
   const [selectedDate, setSelectedDate] = useState(null)
   const [calendarView, setCalendarView] = useState('dayGridMonth')
   const [currentTitle, setCurrentTitle] = useState('')
+
+  // ✅ HOOKS DEL TOUR
+  const { startTour, pauseTour, resumeTour } = useTour()
+  const tourSteps = getCalendarTourSteps(tCommon)
+  const appointmentSteps = getAppointmentTourSteps(tCommon)
+  const tourOptionsRef = useRef(null)
 
   const calendarEvents = useMemo(() => {
     return appointments.map(appointment => {
@@ -314,6 +324,16 @@ export default function Calendar() {
       }
     })
   }, [appointments])
+
+    // ✅ ESCUCHAR REANUDACIÓN DESDE EL SUBTOUR DE CITAS
+  useEffect(() => {
+    const handleResume = () => {
+      // Reanuda en el índice 4 (#calendar-grid) después de cerrar el modal
+      resumeTour(4, tourSteps, tourOptionsRef.current)
+    }
+    window.addEventListener('tour-resume-appointment', handleResume)
+    return () => window.removeEventListener('tour-resume-appointment', handleResume)
+  }, [resumeTour, tourSteps])
 
   useEffect(() => {
     if (calendarRef.current) {
@@ -390,6 +410,40 @@ export default function Calendar() {
   const handleUpdateStatus = async (id, status) => {
     await updateAppointmentStatus(id, status)
   }
+
+  // ✅ LÓGICA DE INTERCEPCIÓN DEL TOUR
+  const handleTourNextClick = (driverObj) => {
+    const currentIndex = driverObj.getActiveIndex()
+    
+    // Índice 3 es el botón de Crear Cita
+    if (currentIndex === 3) {
+      setSelectedAppointment(null)
+      setSelectedDate(null)
+      setModalOpen(true)
+      pauseTour()
+      
+      setTimeout(() => {
+        startTour(appointmentTourConfig.id, appointmentSteps, {
+          onCloseClick: () => window.dispatchEvent(new CustomEvent('tour-resume-appointment')),
+          onDestroyStarted: () => window.dispatchEvent(new CustomEvent('tour-resume-appointment'))
+        })
+      }, 400)
+      return
+    }
+    
+    driverObj.moveNext()
+  }
+
+  const handleTourPrevClick = (driverObj) => {
+    driverObj.movePrevious()
+  }
+
+  const tourOptions = {
+    onNextClick: handleTourNextClick,
+    onPrevClick: handleTourPrevClick
+  }
+  tourOptionsRef.current = tourOptions
+
 
   // ✅ Renderizar contenido del evento optimizado para responsive
   const renderEventContent = (eventInfo) => {
@@ -551,58 +605,72 @@ export default function Calendar() {
       topbarLabel={t('topbarLabel')}
       subtitle={t('subtitle')}
     >
-      <Box sx={{ p: { xs: 2, sm: 3 } }}>
-        {/* ✅ Leyenda Responsive */}
-        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} mb={3} flexWrap="wrap" gap={2}>
-          <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
-            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', letterSpacing: '1px', textTransform: 'uppercase', mr: 1 }}>
-              Estados:
-            </Typography>
-            {Object.entries(APPOINTMENT_STATUSES).map(([key, status]) => (
-              <Chip
-                key={key}
-                label={status.label}
-                size="small"
-                sx={{
-                  borderRadius: 0,
-                  bgcolor: status.color,
-                  color: '#fff',
-                  fontFamily: '"Courier New", monospace',
-                  fontSize: '0.65rem',
-                  fontWeight: 600,
-                  letterSpacing: '0.5px'
-                }}
-              />
-            ))}
-          </Box>
-
-          <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
-            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', letterSpacing: '1px', textTransform: 'uppercase', mr: 1 }}>
-              Tipos:
-            </Typography>
-            {Object.entries(APPOINTMENT_TYPES).map(([key, type]) => (
-              <Chip
-                key={key}
-                label={`${type.icon} ${type.label}`}
-                size="small"
-                variant="outlined"
-                sx={{
-                  borderRadius: 0,
-                  borderColor: type.color,
-                  color: type.color,
-                  fontFamily: '"Courier New", monospace',
-                  fontSize: '0.65rem',
-                  fontWeight: 600,
-                  letterSpacing: '0.5px'
-                }}
-              />
-            ))}
-          </Box>
+      {/* ✅ ID: Contenedor principal de la página */}
+      <Box id="calendar-page-container" sx={{ p: { xs: 2, sm: 3 } }}>
+        
+        {/* ✅ Botón del Tour en la esquina superior derecha */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <TourButton 
+            tourId={calendarTourConfig.id}
+            steps={tourSteps}
+            label={tCommon('tour.calendar.button', 'Ver guía del calendario')}
+            options={tourOptions}
+          />
         </Box>
+
+        {/* ✅ Leyenda Responsive */}
+{/* ✅ Leyenda Responsive con traducciones */}
+<Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} mb={3} flexWrap="wrap" gap={2}>
+  <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
+    <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', letterSpacing: '1px', textTransform: 'uppercase', mr: 1 }}>
+      {t('legend.statuses', 'Estados')}:
+    </Typography>
+    {Object.entries(APPOINTMENT_STATUSES).map(([key, status]) => (
+      <Chip
+        key={key}
+        label={t(status.labelKey)}
+        size="small"
+        sx={{
+          borderRadius: 0,
+          bgcolor: status.color,
+          color: '#fff',
+          fontFamily: '"Courier New", monospace',
+          fontSize: '0.65rem',
+          fontWeight: 600,
+          letterSpacing: '0.5px'
+        }}
+      />
+    ))}
+  </Box>
+
+  <Box display="flex" gap={1} alignItems="center" flexWrap="wrap">
+    <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', letterSpacing: '1px', textTransform: 'uppercase', mr: 1 }}>
+      {t('legend.types', 'Tipos')}:
+    </Typography>
+    {Object.entries(APPOINTMENT_TYPES).map(([key, type]) => (
+      <Chip
+        key={key}
+        label={`${type.icon} ${t(type.labelKey)}`}
+        size="small"
+        variant="outlined"
+        sx={{
+          borderRadius: 0,
+          borderColor: type.color,
+          color: type.color,
+          fontFamily: '"Courier New", monospace',
+          fontSize: '0.65rem',
+          fontWeight: 600,
+          letterSpacing: '0.5px'
+        }}
+      />
+    ))}
+  </Box>
+</Box>
 
         {/* ✅ Controles Responsive */}
         <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'stretch', sm: 'center' }} mb={3} gap={2}>
           <ToggleButtonGroup
+            id="calendar-view-toggles" // ✅ ID para el tour
             value={calendarView}
             exclusive
             onChange={handleViewChange}
@@ -639,6 +707,7 @@ export default function Calendar() {
           </ToggleButtonGroup>
 
           <Button
+            id="calendar-create-btn" // ✅ ID para el tour (paso 3)
             variant="contained"
             startIcon={<Add />}
             onClick={() => {
@@ -663,7 +732,19 @@ export default function Calendar() {
         </Box>
 
         {/* ✅ Navegación Responsive */}
-        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between" mb={2} p={1.5} bgcolor="#fff" border="1px solid #ececec" borderRadius={0} gap={2}>
+        <Box 
+          id="calendar-navigation" // ✅ ID para el tour
+          display="flex" 
+          flexDirection={{ xs: 'column', sm: 'row' }} 
+          alignItems={{ xs: 'stretch', sm: 'center' }} 
+          justifyContent="space-between" 
+          mb={2} 
+          p={1.5} 
+          bgcolor="#fff" 
+          border="1px solid #ececec" 
+          borderRadius={0} 
+          gap={2}
+        >
           <Box display="flex" gap={1} alignItems="center" justifyContent={{ xs: 'center', sm: 'flex-start' }}>
             <Button size="small" onClick={handlePrev} sx={{ minWidth: 'auto', borderRadius: 0, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' } }}>
               <ChevronLeft />
@@ -698,6 +779,7 @@ export default function Calendar() {
           </Box>
         ) : (
           <Paper
+            id="calendar-grid" // ✅ ID para el tour (paso 4)
             elevation={0}
             sx={{
               p: { xs: 2, sm: 3 },
@@ -708,7 +790,7 @@ export default function Calendar() {
               '& .fc': { 
                 fontFamily: '"Courier New", monospace', 
                 fontSize: isMobile ? '0.7rem' : '0.75rem',
-                minWidth: isMobile ? '600px' : 'auto' // ✅ Scroll horizontal en móvil
+                minWidth: isMobile ? '600px' : 'auto'
               },
               '& .fc-header-toolbar': { display: 'none' },
               '& .fc-event': {
@@ -730,7 +812,6 @@ export default function Calendar() {
               '& .fc-col-header-cell-cushion': { padding: '8px', fontSize: isMobile ? '0.65rem' : '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' },
               '& .fc-today': { backgroundColor: '#f5f5f5 !important' },
               '& .fc-daygrid-more-link': { fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000', fontWeight: 600 },
-              // ✅ Ajustes específicos para vista semana/día
               '& .fc-timegrid-slot-label': { fontSize: isMobile ? '0.65rem' : '0.7rem', fontFamily: '"Courier New", monospace' },
               '& .fc-timegrid-col-header': { fontSize: isMobile ? '0.65rem' : '0.7rem' }
             }}
@@ -738,6 +819,9 @@ export default function Calendar() {
             <FullCalendar ref={calendarRef} {...calendarOptions} events={calendarEvents} />
           </Paper>
         )}
+
+        {/* ✅ Elemento invisible para el paso final del tour (paso 5) */}
+        <Box id="calendar-finish" sx={{ height: 1 }} />
 
         <AppointmentModal
           open={modalOpen}

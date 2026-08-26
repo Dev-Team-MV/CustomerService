@@ -1,0 +1,8 @@
+export const getAgentMetricsTourSteps = (t) => [
+  { element: '#agent-metrics-modal', popover: { title: t('tour.agentMetrics.overview.title', 'Métricas del Agente'), description: t('tour.agentMetrics.overview.description', 'Panel completo con el rendimiento del agente en el período actual.'), side: 'bottom', align: 'center' } },
+  { element: '#agent-metrics-kpis', popover: { title: t('tour.agentMetrics.kpis.title', 'KPIs Principales'), description: t('tour.agentMetrics.kpis.description', 'Resumen de leads totales, convertidos, actividades y clientes atendidos este mes.'), side: 'right', align: 'start' } },
+  { element: '#agent-metrics-progress', popover: { title: t('tour.agentMetrics.progress.title', 'Progreso vs Metas'), description: t('tour.agentMetrics.progress.description', 'Gráfica visual que compara el progreso real del agente contra las metas establecidas.'), side: 'right', align: 'start' } },
+  { element: '#agent-metrics-pipeline', popover: { title: t('tour.agentMetrics.pipeline.title', 'Pipeline por Etapa'), description: t('tour.agentMetrics.pipeline.description', 'Distribución de los leads asignados al agente según su etapa actual en el embudo.'), side: 'right', align: 'start' } },
+  { element: '#agent-metrics-close', popover: { title: t('tour.agentMetrics.close.title', 'Cerrar'), description: t('tour.agentMetrics.close.description', 'Haz clic aquí para cerrar el panel y continuar con el tour principal.'), side: 'top', align: 'end' } }
+]
+export const agentMetricsTourConfig = { id: 'agent-metrics-tour', autoStart: false }

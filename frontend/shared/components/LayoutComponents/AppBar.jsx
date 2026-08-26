@@ -1,3 +1,4 @@
+// /Users/oficina/MV-CRM/CustomerService/frontend/shared/components/LayoutComponents/AppBar.jsx
 import { useState, useEffect } from "react";
 import {
   AppBar,
@@ -24,7 +25,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../LanguageSwitcher'
 import { useTheme } from "@mui/material/styles";
-// ✅ IMPORTAR ImpersonationBanner
 import ImpersonationBanner from "../ImpersonationBanner";
 
 const AppBarBrandbook = ({
@@ -54,7 +54,6 @@ const AppBarBrandbook = ({
 
   return (
     <>
-      {/* ✅ 1. Banner de Impersonación (se renderiza primero) */}
       <ImpersonationBanner />
       
       <AppBar
@@ -65,14 +64,12 @@ const AppBarBrandbook = ({
           color: theme.palette.text.primary,
           boxShadow: scrolled ? theme.shadows[2] : "none",
           borderBottom: `1px solid ${theme.palette.divider}`,
-          zIndex: 1200, // ✅ Menor que el banner (1300)
+          zIndex: 1200,
           height: "auto",
-          // ✅ 2. Ajustar top automáticamente (el banner empuja)
           top: 0,
           transition: "box-shadow 0.3s ease",
         }}
       >
-        {/* ─ Top controls row ── */}
         <Box
           sx={{
             display: "flex",
@@ -84,8 +81,10 @@ const AppBarBrandbook = ({
             transition: "padding 0.35s ease",
           }}
         >
+          {/* ✅ ID 1: Botón del Menú Lateral */}
           <Tooltip title={t('navigation:tooltips.openMenu')} placement="right">
             <IconButton
+              id="layout-sidebar-toggle"
               color="inherit"
               edge="start"
               onClick={onMenuClick}
@@ -98,7 +97,6 @@ const AppBarBrandbook = ({
             </IconButton>
           </Tooltip>
 
-          {/* Logo compacto — solo visible cuando se hace scroll */}
           <AnimatePresence>
             {scrolled && (
               <motion.div
@@ -125,7 +123,9 @@ const AppBarBrandbook = ({
 
             {!publicView && user && (
               <Tooltip title={t('navigation:tooltips.notifications')} placement="bottom">
+                {/* ✅ ID 2: Botón de Notificaciones */}
                 <IconButton
+                  id="layout-notifications-btn"
                   onClick={onNotificationsClick}
                   sx={{ color: theme.palette.text.primary, "&:hover": { bgcolor: theme.palette.action.hover } }}
                 >
@@ -139,7 +139,9 @@ const AppBarBrandbook = ({
             {user ? (
               <>
                 <Tooltip title={t('navigation:tooltips.accountSettings')} placement="bottom">
+                  {/* ✅ ID 3: Botón de Menú de Usuario */}
                   <IconButton
+                    id="layout-user-menu-btn"
                     onClick={onOpenUserMenu}
                     sx={{ color: theme.palette.text.primary, "&:hover": { bgcolor: theme.palette.action.hover } }}
                   >
@@ -207,7 +209,6 @@ const AppBarBrandbook = ({
           </Box>
         </Box>
 
-        {/* ── Logo area — se colapsa con scroll ── */}
         <AnimatePresence>
           {!scrolled && (
             <motion.div

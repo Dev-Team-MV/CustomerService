@@ -3,6 +3,7 @@
     "title": "Cobranza",
     "description": "Gestión de pagos y cobranzas",
     "exportButton": "Exportar Pagos",
+    "topbarLabel": "Gestión de Pagos y Cobranzas",
     
     "filters": {
       "title": "Filtros",
@@ -62,6 +63,16 @@
     
     "errors": {
       "loadFailed": "Error al cargar pagos"
-    }
+    },
+      "summary": {
+    "loading": "Cargando resumen...",
+    "totalPending": "Total Pendiente",
+    "overdue": "Vencidos",
+    "overduePayments": "{{count}} pagos",
+    "collectedThisMonth": "Cobrado este mes",
+    "expectedAmount": "de ${{expected}} esperado",
+    "collectionRate": "Tasa de cobro",
+    "currentMonth": "Mes actual"
+  }
   }
 }

@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/leads/LeadCard.jsx
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Chip, Avatar, IconButton, Tooltip } from '@mui/material'
@@ -63,22 +62,22 @@ const LeadCard = ({ lead, onClick, onMenuClick, isDragging, onScoreUpdate }) => 
 
   return (
     <>
+      {/* ✅ Atributo data-tour-lead-card para que el tour lo encuentre dinámicamente */}
       <Box
+        data-tour-lead-card="true"
         onClick={() => onClick?.(lead)}
         sx={{
           bgcolor: 'white',
-          borderRadius: 0, // ✅ Estética unificada
+          borderRadius: 0,
           p: 2,
           cursor: 'pointer',
           border: '1px solid #e0e0e0',
-          // La sombra y rotación se manejan mejor en el wrapper Draggable, 
-          // pero mantenemos un hover sutil aquí
           '&:hover': {
             boxShadow: '4px 4px 0px rgba(0,0,0,0.08)',
             borderColor: '#000'
           },
           userSelect: 'none',
-          touchAction: 'none' // ✅ Prevenir comportamientos de texto al arrastrar en móvil
+          touchAction: 'none'
         }}
       >
         {/* Header: Nombre + Score */}

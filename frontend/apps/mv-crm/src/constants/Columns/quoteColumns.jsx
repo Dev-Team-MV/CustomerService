@@ -19,6 +19,7 @@ export const useQuoteColumns = ({ t, onEdit, onDelete, onSend, onConvert, onDown
       field: 'date',
       headerName: t('table.date', 'Fecha'),
       minWidth: 120,
+      tourId: 'quotes-col-date', // ✅ Agregado
       renderCell: ({ row }) => (
         <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', color: '#666' }}>
           {new Date(row.createdAt).toLocaleDateString()}
@@ -29,30 +30,24 @@ export const useQuoteColumns = ({ t, onEdit, onDelete, onSend, onConvert, onDown
       field: 'client',
       headerName: t('table.client', 'Cliente'),
       minWidth: 180,
+      tourId: 'quotes-col-client',
       renderCell: ({ row }) => {
         const clientName = row.clientId 
           ? `${row.clientId.firstName || ''} ${row.clientId.lastName || ''}`.trim() 
           : (row.leadId?.name || 'N/A')
-        return (
-          <Typography sx={{ fontWeight: 600, fontSize: '0.85rem' }}>
-            {clientName}
-          </Typography>
-        )
+        return <Typography sx={{ fontWeight: 600, fontSize: '0.85rem' }}>{clientName}</Typography>
       }
     },
     {
       field: 'project',
       headerName: t('table.project', 'Proyecto'),
       minWidth: 150,
+      tourId: 'quotes-col-project', // ✅ Agregado
       renderCell: ({ row }) => {
         const projectName = typeof row.projectId === 'object' 
           ? row.projectId.name || (row.projectId.title && (row.projectId.title.es || row.projectId.title.en))
           : row.projectName || 'N/A'
-        return (
-          <Typography sx={{ fontSize: '0.8rem', color: '#555' }}>
-            {projectName}
-          </Typography>
-        )
+        return <Typography sx={{ fontSize: '0.8rem', color: '#555' }}>{projectName}</Typography>
       }
     },
     {
@@ -60,6 +55,7 @@ export const useQuoteColumns = ({ t, onEdit, onDelete, onSend, onConvert, onDown
       headerName: t('table.totalPrice', 'Precio Total'),
       minWidth: 120,
       align: 'right',
+      tourId: 'quotes-col-total',
       renderCell: ({ row }) => (
         <Typography sx={{ fontWeight: 700, fontSize: '0.85rem' }}>
           ${row.totalPrice?.toLocaleString()}
@@ -70,14 +66,11 @@ export const useQuoteColumns = ({ t, onEdit, onDelete, onSend, onConvert, onDown
       field: 'status',
       headerName: t('table.status', 'Estado'),
       minWidth: 130,
+      tourId: 'quotes-col-status',
       renderCell: ({ row }) => {
         const config = getStatusConfig(row.status)
         return (
-          <Chip 
-            label={config.label} 
-            size="small" 
-            sx={{ bgcolor: config.bg, color: config.color, fontWeight: 600, fontSize: '0.7rem', height: 24 }} 
-          />
+          <Chip label={config.label} size="small" sx={{ bgcolor: config.bg, color: config.color, fontWeight: 600, fontSize: '0.7rem', height: 24 }} />
         )
       }
     },
@@ -86,59 +79,69 @@ export const useQuoteColumns = ({ t, onEdit, onDelete, onSend, onConvert, onDown
       headerName: t('table.actions', 'Acciones'),
       minWidth: 150,
       align: 'center',
+      tourId: 'quotes-col-actions',
       renderCell: ({ row }) => {
-        // ✅ Si ya está convertida, SOLO mostrar el botón de PDF
         if (row.status === 'converted') {
           return (
-            <Tooltip title={t('actions.downloadPdf', 'Descargar PDF')}>
-              <IconButton size="small" onClick={() => onDownload?.(row)} sx={{ color: '#f44336' }}>
-                <PictureAsPdf fontSize="small" />
-              </IconButton>
-            </Tooltip>
+            <span id="quotes-action-pdf">
+              <Tooltip title={t('actions.downloadPdf', 'Descargar PDF')}>
+                <IconButton size="small" onClick={() => onDownload?.(row)} sx={{ color: '#f44336' }}>
+                  <PictureAsPdf fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </span>
           )
         }
 
-        // Para el resto de estados, mostramos las acciones normales
-        // (Ocultamos editar/eliminar/enviar/convertir si está expirada)
         const isExpired = row.status === 'expired'
 
         return (
           <Box display="flex" gap={0.5} justifyContent="center">
             {!isExpired && (
-              <Tooltip title={t('actions.edit', 'Editar')}>
-                <IconButton size="small" onClick={() => onEdit?.(row)}>
-                  <Edit fontSize="small" />
-                </IconButton>
-              </Tooltip>
+              <span id="quotes-action-edit">
+                <Tooltip title={t('actions.edit', 'Editar')}>
+                  <IconButton size="small" onClick={() => onEdit?.(row)}>
+                    <Edit fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </span>
             )}
             
             {!isExpired && (
               <>
-                <Tooltip title={t('actions.send', 'Enviar')}>
-                  <IconButton size="small" onClick={() => onSend?.(row)} sx={{ color: '#1976d2' }}>
-                    <Send fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title={t('actions.convertToSale', 'Convertir a Venta')}>
-                  <IconButton size="small" onClick={() => onConvert?.(row)} sx={{ color: '#4caf50' }}>
-                    <ShoppingCart fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                <span id="quotes-action-send">
+                  <Tooltip title={t('actions.send', 'Enviar')}>
+                    <IconButton size="small" onClick={() => onSend?.(row)} sx={{ color: '#1976d2' }}>
+                      <Send fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </span>
+                <span id="quotes-action-convert">
+                  <Tooltip title={t('actions.convertToSale', 'Convertir a Venta')}>
+                    <IconButton size="small" onClick={() => onConvert?.(row)} sx={{ color: '#4caf50' }}>
+                      <ShoppingCart fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </span>
               </>
             )}
             
-            <Tooltip title={t('actions.downloadPdf', 'Descargar PDF')}>
-              <IconButton size="small" onClick={() => onDownload?.(row)} sx={{ color: '#f44336' }}>
-                <PictureAsPdf fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            
-            {!isExpired && (
-              <Tooltip title={t('actions.delete', 'Eliminar')}>
-                <IconButton size="small" onClick={() => onDelete?.(row._id)} sx={{ color: '#9e9e9e' }}>
-                  <Delete fontSize="small" />
+            <span id="quotes-action-pdf">
+              <Tooltip title={t('actions.downloadPdf', 'Descargar PDF')}>
+                <IconButton size="small" onClick={() => onDownload?.(row)} sx={{ color: '#f44336' }}>
+                  <PictureAsPdf fontSize="small" />
                 </IconButton>
               </Tooltip>
+            </span>
+            
+            {!isExpired && (
+              <span id="quotes-action-delete">
+                <Tooltip title={t('actions.delete', 'Eliminar')}>
+                  <IconButton size="small" onClick={() => onDelete?.(row._id)} sx={{ color: '#9e9e9e' }}>
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </span>
             )}
           </Box>
         )

@@ -16,7 +16,7 @@ import uploadService from '@shared/services/uploadService'
 import ProjectSelector from '@shared/components/ProjectSelector'
 import CountrySelector from '@shared/components/CountrySelector'
 
-const VendorModal = ({ open, onClose, vendor = null, onSave, categories }) => {
+const VendorModal = ({ open, onClose, vendor = null, onSave, categories, isTourMode = false }) => {
   const { t, i18n } = useTranslation('vendors')
   const lang = i18n.language.startsWith('es') ? 'es' : 'en'
   const isEditing = Boolean(vendor?._id)
@@ -161,7 +161,8 @@ const VendorModal = ({ open, onClose, vendor = null, onSave, categories }) => {
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #e0e0e0' } }}>
+    // ✅ ID 1: Modal completo
+    <Dialog id="vendor-modal" open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #e0e0e0' } }}>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e0e0e0', p: 3 }}>
         <Typography variant="h6" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
           {isEditing ? t('vendors.editVendor', 'Editar Proveedor') : t('vendors.addVendor', 'Agregar Proveedor')}
@@ -173,33 +174,38 @@ const VendorModal = ({ open, onClose, vendor = null, onSave, categories }) => {
         {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 0, border: '1px solid' }}>{error}</Alert>}
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <TextField fullWidth required label={t('vendors.name', 'Nombre del Proveedor')} value={formData.name} onChange={(e) => handleChange('name', e.target.value)} sx={inputSx} />
+          
+          {/* ✅ ID 2: Información Básica */}
+          <Box id="vendor-modal-basic-info">
+            <TextField fullWidth required label={t('vendors.name', 'Nombre del Proveedor')} value={formData.name} onChange={(e) => handleChange('name', e.target.value)} sx={inputSx} />
 
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth required>
-                <InputLabel>{t('vendors.category', 'Categoría')}</InputLabel>
-                <Select value={formData.category} onChange={(e) => handleChange('category', e.target.value)} label={t('vendors.category', 'Categoría')} sx={inputSx}>
-                  {categories.map((cat) => (
-                    <MenuItem key={cat.slug} value={cat.slug} sx={menuItemSx}>{cat.label[lang]}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+            <Grid container spacing={2} sx={{ mt: 0.5 }}>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth required>
+                  <InputLabel>{t('vendors.category', 'Categoría')}</InputLabel>
+                  <Select value={formData.category} onChange={(e) => handleChange('category', e.target.value)} label={t('vendors.category', 'Categoría')} sx={inputSx}>
+                    {categories.map((cat) => (
+                      <MenuItem key={cat.slug} value={cat.slug} sx={menuItemSx}>{cat.label[lang]}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>{t('vendors.subcategory', 'Subcategoría')}</InputLabel>
+                  <Select value={formData.subcategory} onChange={(e) => handleChange('subcategory', e.target.value)} label={t('vendors.subcategory', 'Subcategoría')} sx={inputSx}>
+                    {getSubcategories().map((sub) => (
+                      <MenuItem key={sub.slug} value={sub.slug} sx={menuItemSx}>{sub.label[lang]}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
             </Grid>
+          </Box>
 
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel>{t('vendors.subcategory', 'Subcategoría')}</InputLabel>
-                <Select value={formData.subcategory} onChange={(e) => handleChange('subcategory', e.target.value)} label={t('vendors.subcategory', 'Subcategoría')} sx={inputSx}>
-                  {getSubcategories().map((sub) => (
-                    <MenuItem key={sub.slug} value={sub.slug} sx={menuItemSx}>{sub.label[lang]}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-
-          <Box>
+          {/* ✅ ID 3: Contacto y Ubicación */}
+          <Box id="vendor-modal-contact">
             <Typography variant="subtitle2" mb={1} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
               {t('vendors.contactPhones', 'Teléfonos de Contacto')}
             </Typography>
@@ -216,10 +222,8 @@ const VendorModal = ({ open, onClose, vendor = null, onSave, categories }) => {
             <Button size="small" startIcon={<Add />} onClick={addPhone} variant="outlined" sx={{ ...unifiedButtonSx, border: '1px solid #000', color: '#000', '&:hover': { bgcolor: '#f5f5f5' } }}>
               {t('vendors.addPhone', 'Agregar Teléfono')}
             </Button>
-          </Box>
 
-          <Box>
-            <Typography variant="subtitle2" mb={1} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+            <Typography variant="subtitle2" mb={1} mt={2} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
               {t('vendors.locations', 'Ubicaciones')}
             </Typography>
             <CountrySelector
@@ -236,8 +240,8 @@ const VendorModal = ({ open, onClose, vendor = null, onSave, categories }) => {
               }}
               label={t('vendors.searchLocation', 'Buscar dirección')}
               placeholder="Ej: 123 Main St, Miami, FL"
-              countryRestriction="us" // ✅ Restringe los resultados a EE. UU.
-              types={['address']}     // ✅ Busca direcciones específicas, no solo países
+              countryRestriction="us"
+              types={['address']}
             />
             {formData.locations.length > 0 && (
               <Box mt={2} display="flex" flexDirection="column" gap={1}>
@@ -252,34 +256,33 @@ const VendorModal = ({ open, onClose, vendor = null, onSave, categories }) => {
                 ))}
               </Box>
             )}
+
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              <Grid item xs={12} sm={6}>
+                <ProjectSelector
+                  value={formData.projectId}
+                  onChange={(value) => handleChange('projectId', value)}
+                  label={t('vendors.project', 'Proyecto (Opcional)')}
+                  includeGlobal={true}
+                  globalLabel={t('vendors.general', 'General (Sin proyecto)')}
+                  fullWidth
+                  size="small"
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label={t('vendors.website', 'Sitio Web')}
+                  value={formData.website}
+                  onChange={(e) => handleChange('website', e.target.value)}
+                  placeholder="https://ejemplo.com"
+                  InputProps={{ startAdornment: <Box component="span" sx={{ display: 'flex', alignItems: 'center', pl: 1 }}><Public sx={{ fontSize: 18, color: '#888', mr: 0.5 }} /></Box> }}
+                  sx={inputSx}
+                />
+              </Grid>
+            </Grid>
           </Box>
-
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              {/* ✅ ProjectSelector Integrado */}
-              <ProjectSelector
-                value={formData.projectId}
-                onChange={(value) => handleChange('projectId', value)}
-                label={t('vendors.project', 'Proyecto (Opcional)')}
-                includeGlobal={true}
-                globalLabel={t('vendors.general', 'General (Sin proyecto)')}
-                fullWidth
-                size="small"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label={t('vendors.website', 'Sitio Web')}
-                value={formData.website}
-                onChange={(e) => handleChange('website', e.target.value)}
-                placeholder="https://ejemplo.com"
-                InputProps={{ startAdornment: <Box component="span" sx={{ display: 'flex', alignItems: 'center', pl: 1 }}><Public sx={{ fontSize: 18, color: '#888', mr: 0.5 }} /></Box> }}
-                sx={inputSx}
-              />
-            </Grid>
-          </Grid>
 
           <Box>
             <Typography variant="subtitle2" mb={1} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
@@ -311,7 +314,8 @@ const VendorModal = ({ open, onClose, vendor = null, onSave, categories }) => {
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, borderTop: '1px solid #e0e0e0', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+      {/* ✅ ID 4: Botones de Acción */}
+      <DialogActions id="vendor-modal-actions" sx={{ p: 2, borderTop: '1px solid #e0e0e0', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
         <Button onClick={onClose} disabled={loading} sx={{ ...unifiedButtonSx, color: '#888' }}>{t('actions.cancel', 'Cancelar')}</Button>
         <Button variant="contained" onClick={handleSubmit} disabled={loading} startIcon={loading ? <CircularProgress size={16} /> : <Save />} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
           {loading ? t('actions.saving', 'Guardando...') : isEditing ? t('actions.update', 'Actualizar') : t('actions.save', 'Guardar')}

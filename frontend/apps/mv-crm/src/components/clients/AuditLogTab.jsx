@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/AuditLogTab.jsx
 import { useState, useEffect, useMemo } from 'react'
 import {
   Box, Typography, CircularProgress, Alert, Chip,
@@ -74,16 +73,8 @@ const AuditLogTab = ({ entity, entityId, entityName }) => {
     }, {})
   }, [t])
 
-  // ✅ Estilos unificados
-  const unifiedButtonSx = { 
-    borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', 
-    fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
-  }
-  const inputSx = { 
-    fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, 
-    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
-    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' }
-  }
+  const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
+  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }
   const chipSx = { borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 600 }
   
   return (
@@ -105,8 +96,8 @@ const AuditLogTab = ({ entity, entityId, entityName }) => {
         </Button>
       </Box>
       
-      {/* Panel de filtros */}
-      <Box sx={{ p: 2, mb: 2, bgcolor: '#fafafa', border: '1px solid #e0e0e0', borderRadius: 0 }}>
+      {/* ✅ Panel de filtros (ID para el tour) */}
+      <Box id="audit-log-filters" sx={{ p: 2, mb: 2, bgcolor: '#fafafa', border: '1px solid #e0e0e0', borderRadius: 0 }}>
         <Box display="flex" alignItems="center" gap={1} mb={2}>
           <FilterList sx={{ fontSize: 18, color: '#666' }} />
           <Typography variant="caption" fontWeight={600} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>
@@ -161,24 +152,26 @@ const AuditLogTab = ({ entity, entityId, entityName }) => {
         </Alert>
       )}
       
-      {/* Tabla */}
-      <DataTable
-        columns={columns}
-        data={logs}
-        loading={loading}
-        rowKey="_id"
-        emptyMessage={t('audit.noLogs')}
-        onRowClick={handleRowClick}
-        sx={{
-          borderRadius: 0,
-          '& .MuiTablePagination-root': { borderRadius: 0 },
-          '& .MuiTablePagination-actions .MuiIconButton-root': { borderRadius: 0 }
-        }}
-      />
+      {/* ✅ Tabla (ID para el tour) */}
+      <Box id="audit-log-table-container">
+        <DataTable
+          columns={columns}
+          data={logs}
+          loading={loading}
+          rowKey="_id"
+          emptyMessage={t('audit.noLogs')}
+          onRowClick={handleRowClick}
+          sx={{
+            borderRadius: 0,
+            '& .MuiTablePagination-root': { borderRadius: 0 },
+            '& .MuiTablePagination-actions .MuiIconButton-root': { borderRadius: 0 }
+          }}
+        />
+      </Box>
       
-      {/* Paginación */}
+      {/* ✅ Paginación (ID para el tour) */}
       {pagination.totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={2}>
+        <Box id="audit-log-pagination" display="flex" justifyContent="center" mt={2}>
           <Pagination
             count={pagination.totalPages}
             page={pagination.page}

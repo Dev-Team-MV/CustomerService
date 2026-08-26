@@ -8,6 +8,23 @@
     "active": "Active",
     "types": "Types"
   },
+  "tab": {
+    "documents": "Documents",
+    "info": "Information",
+    "inventory": "Inventory"
+  },
+  "inventory":{
+    "totalHouses": "Total Houses",
+    "available": "Available",
+    "sold": "Sold",
+    "reserved": "Reserved",
+    "pending": "Pending",
+    "occupied": "Occupied",
+    "totalApts": "Total Apartments",
+    "totalLots": "Total Lots",
+    "totalBuildings" : "Total Buildings"
+
+  },
   "table": {
     "name": "Project",
     "type": "Type",
@@ -20,8 +37,7 @@
     "delete": "Delete"
   },
   "searchPlaceholder": "Search by name, slug, type or status...",
-
-    "modal": {
+  "modal": {
     "generalInfo": "General Information",
     "editTitle": "Edit Project",
     "createTitle": "Create New Project",
@@ -29,11 +45,11 @@
       "en": "English",
       "es": "Spanish"
     },
-  "title": "Title ({{lang}})",
-  "subtitle": "Subtitle ({{lang}})",
-  "shortDescription": "Short Description ({{lang}})",
-  "fullDescription": "Full Description ({{lang}})",
-  "features": "Features ({{lang}})",
+    "title": "Title ({{lang}})",
+    "subtitle": "Subtitle ({{lang}})",
+    "shortDescription": "Short Description ({{lang}})",
+    "fullDescription": "Full Description ({{lang}})",
+    "features": "Features ({{lang}})",
     "addFeature": "Add feature",
     "projectName": "Project Name",
     "slug": "Slug",
@@ -53,16 +69,14 @@
     "cancel": "Cancel",
     "save": "Save",
     "create": "Create",
-      "propertyDetails": "Property Details",
-  "projectTypes": {
-    "residential_lots": "Residential Lots",
-    "commercial": "Commercial",
-    "mixed_use": "Mixed Use"
-  }
+    "propertyDetails": "Property Details",
+    "projectTypes": {
+      "residential_lots": "Residential Lots",
+      "commercial": "Commercial",
+      "mixed_use": "Mixed Use"
+    }
   },
-
-
-    "details": {
+  "details": {
     "title": "Project Details",
     "topbar": "Project Details",
     "loading": "Loading project...",
@@ -94,5 +108,43 @@
     "type": "Type",
     "submit": "Create",
     "cancel": "Cancel"
+  },
+  "tour": {
+    "modals": {
+      "createProject": {
+        "welcome": {
+          "title": "Project Creation Wizard",
+          "description": "I'll guide you through all sections of the form. You can pause and resume the tour at any time."
+        },
+        "tabs": {
+          "title": "Bilingual Configuration",
+          "description": "Configure the project information in both languages. When switching between tabs, data for each language is preserved."
+        },
+        "generalInfo": {
+          "title": "General Information",
+          "description": "Define title, subtitle, descriptions and features. This information appears on the project's public portal."
+        },
+        "nameSlug": {
+          "title": "Name and Slug",
+          "description": "The name is the project's internal identifier. The slug is used in portal URLs and must be unique across the system."
+        },
+        "propertyDetails": {
+          "title": "Property Details",
+          "description": "Define the construction phase, status, project type, location and total area of the development."
+        },
+        "media": {
+          "title": "Media Assets",
+          "description": "Upload main image, logo, photo gallery and videos. These are displayed on the public portal and documents."
+        },
+        "brandColors": {
+          "title": "Brand Colors",
+          "description": "Define the project's color palette. Use format \"primary:#333F1F\" or simply \"#333F1F\". Used on portal and documents."
+        },
+        "actions": {
+          "title": "Save Project",
+          "description": "When finished, save the project. Once created, you can configure message variables in edit mode."
+        }
+      }
+    }
   }
 }

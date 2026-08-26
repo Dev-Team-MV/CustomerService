@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/reports/ClientsReportSection.jsx
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -37,44 +36,53 @@ const ClientsReportSection = () => {
   }
 
   return (
-    <ReportSection
-      icon={People}
-      iconBgColor="#e3f2fd"
-      iconColor="#1976d2"
-      title={t('clients.title', 'Reporte de Clientes')}
-      description={t('clients.description', 'Exporta la lista completa de clientes con sus datos de contacto')}
-    >
-      <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} alignItems={{ xs: 'stretch', sm: 'center' }} flexWrap="wrap">
-        <FormControl size="small" sx={inputSx}>
-          <InputLabel>{t('clients.filters.project', 'Filtrar por proyecto')}</InputLabel>
-          <Select
-            value={projectId}
-            onChange={(e) => setProjectId(e.target.value)}
-            label={t('clients.filters.project', 'Filtrar por proyecto')}
-          >
-            <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('common.allProjects', 'Todos los proyectos')}</MenuItem>
-            {projects.map(project => (
-              <MenuItem key={project._id} value={project._id} sx={{ fontFamily: '"Courier New", monospace' }}>
-                {project.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+    // ✅ ID agregado al contenedor principal de la sección
+    <Box id="reports-clients-section">
+      <ReportSection
+        icon={People}
+        iconBgColor="#e3f2fd"
+        iconColor="#1976d2"
+        title={t('clients.title', 'Reporte de Clientes')}
+        description={t('clients.description', 'Exporta la lista completa de clientes con sus datos de contacto')}
+      >
+        {/* Layout original intacto */}
+        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} alignItems={{ xs: 'stretch', sm: 'center' }} flexWrap="wrap">
+          
+          {/* ✅ ID agregado directamente al FormControl existente */}
+          <FormControl id="clients-report-project" size="small" sx={inputSx}>
+            <InputLabel>{t('clients.filters.project', 'Filtrar por proyecto')}</InputLabel>
+            <Select
+              value={projectId}
+              onChange={(e) => setProjectId(e.target.value)}
+              label={t('clients.filters.project', 'Filtrar por proyecto')}
+            >
+              <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('common.allProjects', 'Todos los proyectos')}</MenuItem>
+              {projects.map(project => (
+                <MenuItem key={project._id} value={project._id} sx={{ fontFamily: '"Courier New", monospace' }}>
+                  {project.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-        <Box sx={{ flex: { xs: 1, sm: 1 }, display: { xs: 'none', sm: 'block' } }} />
+          <Box sx={{ flex: { xs: 1, sm: 1 }, display: { xs: 'none', sm: 'block' } }} />
 
-        <FormatSelector format={format} onChange={setFormat} />
+          <FormatSelector format={format} onChange={setFormat} />
 
-        <ExportButton
-          label={t('clients.exportButton', 'Exportar Clientes')}
-          exportFn={crmReportsService.exportClients}
-          params={{ projectId }}
-          externalFormat={format}
-          onExternalFormatChange={setFormat}
-          withModal={false}
-        />
-      </Box>
-    </ReportSection>
+          {/* ✅ ID agregado al contenedor del botón existente */}
+          <Box id="clients-report-export">
+            <ExportButton
+              label={t('clients.exportButton', 'Exportar Clientes')}
+              exportFn={crmReportsService.exportClients}
+              params={{ projectId }}
+              externalFormat={format}
+              onExternalFormatChange={setFormat}
+              withModal={false}
+            />
+          </Box>
+        </Box>
+      </ReportSection>
+    </Box>
   )
 }
 

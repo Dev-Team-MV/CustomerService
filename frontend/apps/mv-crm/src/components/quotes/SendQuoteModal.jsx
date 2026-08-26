@@ -63,7 +63,8 @@ export default function SendQuoteModal({ open, onClose, quote, onSuccess }) {
   if (!quote) return null
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    // ✅ ID 1: Modal completo
+    <Dialog id="send-quote-modal" open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Send color="primary" />
         <Typography variant="h6" fontWeight={700}>{t('sendQuote.title', 'Enviar Cotización')}</Typography>
@@ -76,7 +77,8 @@ export default function SendQuoteModal({ open, onClose, quote, onSuccess }) {
           </Typography>
         </Box>
 
-        <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+        {/* ✅ ID 2: Método de envío */}
+        <FormControl id="send-quote-method" fullWidth size="small" sx={{ mb: 2 }}>
           <InputLabel>{t('sendQuote.method', 'Método de envío')}</InputLabel>
           <Select value={method} onChange={(e) => setMethod(e.target.value)} label={t('sendQuote.method', 'Método de envío')}>
             <MenuItem value="email"><Box display="flex" alignItems="center" gap={1}><Email fontSize="small" /> Email</Box></MenuItem>
@@ -85,20 +87,25 @@ export default function SendQuoteModal({ open, onClose, quote, onSuccess }) {
           </Select>
         </FormControl>
 
-        {(method === 'email' || method === 'both') && (
-          <TextField fullWidth size="small" label={t('sendQuote.emailLabel', 'Correo electrónico')} value={email} onChange={(e) => setEmail(e.target.value)} sx={{ mb: 2 }} required />
-        )}
+        {/* ✅ ID 3: Campos de contacto (Email/Teléfono) */}
+        <Box id="send-quote-contact">
+          {(method === 'email' || method === 'both') && (
+            <TextField fullWidth size="small" label={t('sendQuote.emailLabel', 'Correo electrónico')} value={email} onChange={(e) => setEmail(e.target.value)} sx={{ mb: 2 }} required />
+          )}
 
-        {(method === 'sms' || method === 'both') && (
-          <TextField fullWidth size="small" label={t('sendQuote.phoneLabel', 'Teléfono')} value={phone} onChange={(e) => setPhone(e.target.value)} required />
-        )}
+          {(method === 'sms' || method === 'both') && (
+            <TextField fullWidth size="small" label={t('sendQuote.phoneLabel', 'Teléfono')} value={phone} onChange={(e) => setPhone(e.target.value)} required />
+          )}
+        </Box>
 
         {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
       </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} disabled={loading}>{t('actions.cancel', 'Cancelar')}</Button>
+      
+      {/* ✅ ID 4: Botones de acción */}
+      <DialogActions id="send-quote-actions" sx={{ p: 2 }}>
+        <Button onClick={onClose} disabled={loading}>{t('cancel', 'Cancelar')}</Button>
         <Button variant="contained" onClick={handleSend} disabled={loading} startIcon={loading ? <CircularProgress size={16} /> : <Send />}>
-          {loading ? t('actions.sending', 'Enviando...') : t('actions.send', 'Enviar')}
+          {loading ? t('sending', 'Enviando...') : t('send', 'Enviar')}
         </Button>
       </DialogActions>
     </Dialog>

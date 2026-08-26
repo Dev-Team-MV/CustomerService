@@ -63,7 +63,16 @@ export default function DocumentCard({ doc, onPreview, onHistory, onArchive, onD
             )}
           </Box>
         </Box>
-        <Chip label={statusLabel} size="small" color={statusColor} variant="outlined" sx={{ ml: 1, flexShrink: 0, height: 22, borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.65rem' }} />
+        
+        {/* ✅ ID: Chip de Estado para que el tour pueda señalarlo si se desea */}
+        <Chip 
+          id="document-card-status"
+          label={statusLabel} 
+          size="small" 
+          color={statusColor} 
+          variant="outlined" 
+          sx={{ ml: 1, flexShrink: 0, height: 22, borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.65rem' }} 
+        />
       </Box>
 
       <Divider sx={{ my: 1 }} />
@@ -105,18 +114,19 @@ export default function DocumentCard({ doc, onPreview, onHistory, onArchive, onD
         </Box>
       )}
 
-      <Box display="flex" justifyContent="flex-end" gap={0.5} mt="auto">
+      {/* ✅ ID: Contenedor de Acciones Rápidas (con IDs individuales por si se necesitan en el futuro) */}
+      <Box id="document-card-actions" display="flex" justifyContent="flex-end" gap={0.5} mt="auto">
         <Tooltip title={t('actions.preview')}>
-          <IconButton size="small" onClick={() => onPreview(doc)}><Description fontSize="small" /></IconButton>
+          <IconButton id="doc-action-preview" size="small" onClick={() => onPreview(doc)}><Description fontSize="small" /></IconButton>
         </Tooltip>
         <Tooltip title={t('actions.history')}>
-          <IconButton size="small" onClick={() => onHistory(doc)}><History fontSize="small" /></IconButton>
+          <IconButton id="doc-action-history" size="small" onClick={() => onHistory(doc)}><History fontSize="small" /></IconButton>
         </Tooltip>
         <Tooltip title={t('actions.archive')}>
-          <IconButton size="small" onClick={() => onArchive(doc)} color="warning"><Archive fontSize="small" /></IconButton>
+          <IconButton id="doc-action-archive" size="small" onClick={() => onArchive(doc)} color="warning"><Archive fontSize="small" /></IconButton>
         </Tooltip>
         <Tooltip title={t('actions.delete')}>
-          <IconButton size="small" onClick={() => onDelete(doc)} color="error"><Delete fontSize="small" /></IconButton>
+          <IconButton id="doc-action-delete" size="small" onClick={() => onDelete(doc)} color="error"><Delete fontSize="small" /></IconButton>
         </Tooltip>
       </Box>
     </Paper>

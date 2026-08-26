@@ -2,6 +2,7 @@
   "activities": {
     "title": "Activities",
     "description": "Manage your tasks and follow-ups",
+    "topbarLabel": "Activities & Task Management",
     "newActivity": "New Activity",
     "searchPlaceholder": "Search activities...",
     "allPriorities": "All priorities",
@@ -38,6 +39,7 @@
       "descriptionPlaceholder": "Activity details...",
       "column": "Column",
       "priority": "Priority",
+      "addColumn": "Add Column",
       "dueDate": "Due date",
       "assignedTo": "Assigned to",
       "tags": "Tags",

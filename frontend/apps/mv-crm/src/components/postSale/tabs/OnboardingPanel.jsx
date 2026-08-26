@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/postSale/tabs/OnboardingPanel.jsx
 import { useState, useMemo } from 'react'
 import { 
   Box, Button, Grid, FormControl, InputLabel, Select, MenuItem, 
@@ -18,8 +17,16 @@ import api from '@shared/services/api'
 import OnboardingForm from '../OnboardingForm'
 import OnboardingDetailDialog from '../OnboardingDetailDialog'
 
-export default function OnboardingPanel({ onNotify }) {
-  const { t } = useTranslation('postSale')
+import { useTour } from '@shared/tours/useTour'
+import { getOnboardingDetailTourSteps, onboardingDetailTourConfig } from '../../../tours/features/onboardingDetailTour'
+
+export default function OnboardingPanel({ onNotify, isTourMode = false }) {
+  // ✅ 1. Extraemos 'ready' e 'i18n' para controlar el renderizado
+  const { t, i18n, ready } = useTranslation('postSale')
+  
+  // ✅ 2. Si las traducciones aún no cargaron, no renderizamos nada (evita el parpadeo en inglés)
+  if (!ready) return null
+
   const { projects } = useProjects()
   const { users: residents } = useResidents(null)
 
@@ -31,6 +38,11 @@ export default function OnboardingPanel({ onNotify }) {
 
   const { data: onboardings, loading: onboardingLoading, refresh: refreshOnboarding } = useOnboarding(filters)
   const { propertiesMap, loading: resolvingProperties } = useResolvedProperties(onboardings)
+
+  const { startTour, pauseTour } = useTour()
+  
+  // ✅ 3. Generamos los pasos del tour dependiendo del idioma actual para evitar caché en inglés
+  const detailSteps = useMemo(() => getOnboardingDetailTourSteps(t), [t, i18n.language])
 
   const filteredResidents = useMemo(() => {
     if (!filters.projectId) return residents.filter(r => r.role === 'user')
@@ -47,6 +59,55 @@ export default function OnboardingPanel({ onNotify }) {
   const handleView = (row) => { setSelectedOnboarding(row); setDetailModalOpen(true) }
   const handleEdit = (row) => { setSelectedOnboarding(row); setCreateFormOpen(true) }
   const promptDelete = (row) => { setSelectedOnboarding(row); setDeleteDialogOpen(true) }
+
+  const handleViewForTour = (row) => {
+    console.log('✅ handleViewForTour INICIADO para:', row._id)
+    
+    setSelectedOnboarding(row)
+    setDetailModalOpen(true)
+    
+    pauseTour()
+    
+    setTimeout(() => {
+      const modalElement = document.getElementById('onboarding-detail-modal')
+      console.log('🔍 Elemento modal encontrado en el DOM:', !!modalElement)
+      
+      if (modalElement) {
+        console.log('🚀 Iniciando subtour de detalles...')
+        startTour(onboardingDetailTourConfig.id, detailSteps, {
+          onNextClick: (driver) => {
+            // ✅ Si es el último paso del subtour, cerramos el modal y reanudamos el tour principal
+            if (driver.getActiveIndex() === detailSteps.length - 1) {
+              console.log('🔙 Último paso del subtour alcanzado. Cerrando modal y reanudando...')
+              setDetailModalOpen(false)
+              setSelectedOnboarding(null)
+              window.dispatchEvent(new CustomEvent('tour-resume-onboarding-view'))
+            }
+            driver.moveNext()
+          },
+          onCloseClick: () => {
+            console.log('🔙 Subtour cerrado manualmente, reanudando tour principal')
+            setDetailModalOpen(false)
+            setSelectedOnboarding(null)
+            window.dispatchEvent(new CustomEvent('tour-resume-onboarding-view'))
+          },
+          onDestroyStarted: () => {
+            console.log('🔙 Subtour destruido, reanudando tour principal')
+            setDetailModalOpen(false)
+            setSelectedOnboarding(null)
+            window.dispatchEvent(new CustomEvent('tour-resume-onboarding-view'))
+          }
+        })
+      } else {
+        console.error('❌ No se encontró el elemento modal. Reanudando tour principal.')
+        window.dispatchEvent(new CustomEvent('tour-resume-onboarding-view'))
+      }
+    }, 800)
+  }
+
+  const onView = isTourMode ? handleViewForTour : handleView
+  const onEdit = handleEdit
+  const onDelete = promptDelete
 
   const confirmDelete = async () => {
     if (!selectedOnboarding) return
@@ -69,7 +130,7 @@ export default function OnboardingPanel({ onNotify }) {
     onNotify(t('onboarding.saveSuccess'), 'success')
   }
 
-  const columns = useOnboardingColumns({ t, propertiesMap, onView: handleView, onEdit: handleEdit, onDelete: promptDelete })
+  const columns = useOnboardingColumns({ t, propertiesMap, onView, onEdit, onDelete })
   const isLoading = onboardingLoading || resolvingProperties
 
   const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
@@ -77,11 +138,11 @@ export default function OnboardingPanel({ onNotify }) {
 
   return (
     <Box>
-      <Box sx={{ mb: 3, p: 2.5, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
+      <Box id="onboarding-filters" sx={{ mb: 3, p: 2.5, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
-              <InputLabel>{t('filters.project')}</InputLabel>
+              <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.project')}</InputLabel>
               <Select value={filters.projectId} onChange={(e) => handleFilterChange('projectId', e.target.value)} label={t('filters.project')} sx={inputSx}>
                 <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.all')}</MenuItem>
                 {projects.map(p => <MenuItem key={p._id} sx={{ fontFamily: '"Courier New", monospace' }} value={p._id}>{p.name}</MenuItem>)}
@@ -90,7 +151,7 @@ export default function OnboardingPanel({ onNotify }) {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small" disabled={!filters.projectId}>
-              <InputLabel>{t('filters.client')}</InputLabel>
+              <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.client')}</InputLabel>
               <Select value={filters.clientId} onChange={(e) => handleFilterChange('clientId', e.target.value)} label={t('filters.client')} sx={inputSx}>
                 <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.all')}</MenuItem>
                 {filteredResidents.map(client => <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} key={client._id} value={client._id}>{client.firstName} {client.lastName}</MenuItem>)}
@@ -99,7 +160,7 @@ export default function OnboardingPanel({ onNotify }) {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
-              <InputLabel>{t('filters.status')}</InputLabel>
+              <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.status')}</InputLabel>
               <Select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} label={t('filters.status')} sx={inputSx}>
                 <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.all')}</MenuItem>
                 {['not_started', 'in_progress', 'completed'].map(s => (
@@ -117,17 +178,38 @@ export default function OnboardingPanel({ onNotify }) {
       </Box>
 
       <Box display="flex" justifyContent="flex-end" sx={{ mb: 2 }}>
-        <Button variant="contained" startIcon={<Add />} onClick={() => { setSelectedOnboarding(null); setCreateFormOpen(true); }} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+        <Button 
+          id="onboarding-new-btn"
+          variant="contained" 
+          startIcon={<Add />} 
+          onClick={() => { setSelectedOnboarding(null); setCreateFormOpen(true); }} 
+          sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}
+        >
           {t('onboarding.newOnboarding')}
         </Button>
       </Box>
 
-      <DataTable columns={columns} data={onboardings || []} loading={isLoading} />
+      <Box id="onboarding-data-table">
+        <DataTable columns={columns} data={onboardings || []} loading={isLoading} />
+      </Box>
 
-      <OnboardingForm open={createFormOpen} onClose={() => { setCreateFormOpen(false); setSelectedOnboarding(null); }} initialData={selectedOnboarding} onSuccess={handleFormSuccess} />
-      <OnboardingDetailDialog open={detailModalOpen} onClose={() => { setDetailModalOpen(false); setSelectedOnboarding(null); }} onboarding={selectedOnboarding} onRefresh={refreshOnboarding} onNotify={onNotify} />
+      <OnboardingForm 
+        isTourMode={isTourMode} 
+        open={createFormOpen} 
+        onClose={() => { setCreateFormOpen(false); setSelectedOnboarding(null); }} 
+        initialData={selectedOnboarding} 
+        onSuccess={handleFormSuccess} 
+      />
+      
+      <OnboardingDetailDialog 
+        open={detailModalOpen} 
+        onClose={() => { setDetailModalOpen(false); setSelectedOnboarding(null); }} 
+        onboarding={selectedOnboarding} 
+        onRefresh={refreshOnboarding} 
+        onNotify={onNotify} 
+      />
 
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
+      <Dialog id="onboarding-delete-dialog" open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <WarningIcon color="error" />
           <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>{t('actions.confirmDelete')}</Typography>

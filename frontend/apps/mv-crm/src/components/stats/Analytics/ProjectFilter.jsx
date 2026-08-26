@@ -11,7 +11,7 @@ export default function ProjectFilter({ projects, activeIds, onToggle, onToggleA
   const allActive = projects.every(p => activeIds.has(p.projectId))
 
   return (
-    <Box>
+    <Box id="analytics-project-filter">
       <Box sx={{ 
         display: 'flex', 
         alignItems: 'center', 

@@ -1,5 +1,5 @@
 // apps/mv-crm/src/pages/Campaigns.jsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -28,8 +28,17 @@ import { LEAD_STAGES } from '../services/leadService'
 import { useCampaignColumns, getStatusConfig } from '../constants/Columns/campaigns'
 import messageTemplateService from '../services/messageTemplateService'
 
+// ✅ NUEVOS IMPORTS PARA EL TOUR
+import { useTour } from '@shared/tours/useTour'
+import TourButton from '@shared/tours/TourButton'
+import { getCampaignTourSteps, campaignTourConfig } from '../tours/modules/campaignTour'
+import { getCampaignWizardTourSteps, campaignWizardTourConfig } from '../tours/features/campaignWizardTour'
+
+
 export default function Campaigns() {
   const { t } = useTranslation('campaign')
+    const { t: tCommon } = useTranslation('common') // ✅ Para las claves del tour
+
   const { 
     campaigns, 
     total, 
@@ -55,8 +64,25 @@ export default function Campaigns() {
   const [wizardSendProgress, setWizardSendProgress] = useState(null)
   const [activeCampaignId, setActiveCampaignId] = useState(null)
 
-  // ✅ Obtener STATUS_CONFIG traducido
+  const [isTourMode, setIsTourMode] = useState(false)
+
+  // ✅ HOOKS DEL TOUR
+  const { startTour, pauseTour, resumeTour } = useTour()
+  const tourSteps = getCampaignTourSteps(tCommon)
+  const wizardSteps = getCampaignWizardTourSteps(tCommon)
+  const tourOptionsRef = useRef(null)
+
   const statusConfig = getStatusConfig(t)
+
+  // ✅ ESCUCHAR REANUDACIÓN DESDE EL SUBTOUR DEL WIZARD
+  useEffect(() => {
+    const handleResume = () => {
+      // Reanuda en el índice 3 (#campaigns-data-table) después de cerrar el wizard
+      resumeTour(3, tourSteps, tourOptionsRef.current)
+    }
+    window.addEventListener('tour-resume-campaign-wizard', handleResume)
+    return () => window.removeEventListener('tour-resume-campaign-wizard', handleResume)
+  }, [resumeTour, tourSteps])
 
   useEffect(() => {
     const filters = {}
@@ -224,6 +250,83 @@ const handleCreateTemplate = async (templateData) => {
     throw err
   }
 }
+  // ✅ NUEVO: Función para abrir el wizard desde el tour
+  const handleCreateForTour = () => {
+    setSelectedCampaign(null)
+    setWizardSendProgress(null)
+    setActiveCampaignId(null)
+    setIsTourMode(true) // Activamos el modo silencioso
+    setWizardOpen(true)
+  }
+
+
+  // ✅ LÓGICA DE INTERCEPCIÓN DEL TOUR BLINDADA (Corregida para 3 avances)
+  const handleTourNextClick = (driverObj) => {
+    const currentIndex = driverObj.getActiveIndex()
+    console.log('🔍 Main Tour Next Click - Índice actual:', currentIndex)
+    
+    // Índice 2 es el botón de Crear Campaña en la página principal
+    if (currentIndex === 2) {
+      console.log('🚀 Iniciando subtour del Wizard...')
+      handleCreateForTour()
+      pauseTour()
+      
+      setTimeout(() => {
+        startTour(campaignWizardTourConfig.id, wizardSteps, {
+          onNextClick: (driver) => {
+            const currentTourStep = driver.getActiveIndex()
+            console.log('🎯 Wizard Tour onNextClick - Paso actual del wizard:', currentTourStep)
+            
+            // ✅ Hacemos clic automático en "Continuar" en los pasos 4, 6 y 7
+            // Paso 4: para avanzar del Paso 1 al Paso 2 del formulario
+            // Paso 6: para avanzar del Paso 2 al Paso 3 del formulario
+            // Paso 7: para avanzar del Paso 3 al Paso 4 del formulario (¡ESTE FALTABA!)
+            if (currentTourStep === 4 || currentTourStep === 6 || currentTourStep === 7) {
+              console.log(`👉 Paso ${currentTourStep} detectado: Haciendo clic automático en el botón "Continuar" del formulario`)
+              const formNextBtn = document.getElementById('wizard-continue-btn')
+              
+              if (formNextBtn) {
+                formNextBtn.click() // Esto dispara handleNext y avanza el formulario
+              } else {
+                console.error('❌ No se encontró el botón #wizard-continue-btn en el DOM')
+              }
+              
+              // Esperamos a que React renderice el nuevo paso del formulario antes de mover el tour
+              setTimeout(() => {
+                console.log(`⏭️ Avanzando el tour al Paso ${currentTourStep + 1}`)
+                driver.moveNext()
+              }, 800)
+            } else {
+              // Para todos los demás pasos, solo avanzamos el popover del tour normalmente
+              console.log('⏭️ Avance normal del popover del tour')
+              driver.moveNext()
+            }
+          },
+          onCloseClick: () => {
+            console.log('🔙 Tour del wizard cerrado por el usuario')
+            setIsTourMode(false)
+            window.dispatchEvent(new CustomEvent('tour-resume-campaign-wizard'))
+          },
+          onDestroyStarted: () => {
+            console.log('💥 Tour del wizard destruido')
+            setIsTourMode(false)
+            window.dispatchEvent(new CustomEvent('tour-resume-campaign-wizard'))
+          }
+        })
+      }, 400)
+      return
+    }
+    
+    // Para el resto de los pasos del tour principal, comportamiento normal
+    driverObj.moveNext()
+  }
+
+  const tourOptions = {
+    onNextClick: handleTourNextClick,
+    onPrevClick: (driverObj) => driverObj.movePrevious()
+  }
+  tourOptionsRef.current = tourOptions
+
 
   const columns = useCampaignColumns({
     t,
@@ -237,105 +340,66 @@ const handleCreateTemplate = async (templateData) => {
   })
 
   return (
-    <PageLayout
-      title={t('title')}
-      titleBold={t('titleBold')}
-      topbarLabel={t('topbarLabel')}
-      subtitle={t('subtitle')}
-    >
-      <Box sx={{ p: 3 }}>
+    <PageLayout title={t('title')} titleBold={t('titleBold')} topbarLabel={t('topbarLabel')} subtitle={t('subtitle')}>
+      {/* ✅ ID: Contenedor principal */}
+      <Box id="campaigns-page-container" sx={{ p: 3 }}>
+        
+        {/* ✅ Botón del Tour */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <TourButton 
+            tourId={campaignTourConfig.id}
+            steps={tourSteps}
+            label={tCommon('tour.campaigns.button', 'Ver guía de campañas')}
+            options={tourOptions}
+          />
+        </Box>
+
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={2}>
-          <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
-            <Typography
-              sx={{
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.65rem',
-                color: '#000000ff',
-                letterSpacing: '1px',
-                textTransform: 'uppercase'
-              }}
-            >
+          {/* ✅ ID: Filtros */}
+          <Box id="campaigns-filters" display="flex" gap={2} alignItems="center" flexWrap="wrap">
+            <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem', color: '#000000ff', letterSpacing: '1px', textTransform: 'uppercase' }}>
               {t('filters')}:
             </Typography>
 
             <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
-                {t('status')}
-              </InputLabel>
-              <Select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                label={t('status')}
-                sx={{
-                  fontFamily: '"Courier New", monospace',
-                  fontSize: '0.75rem',
-                  borderRadius: 0
-                }}
-              >
-                <MenuItem value="">
-                  <em>{t('all')}</em>
-                </MenuItem>
+              <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('status')}</InputLabel>
+              <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} label={t('status')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}>
+                <MenuItem value=""><em>{t('all')}</em></MenuItem>
                 {Object.entries(statusConfig).map(([key, config]) => (
                   <MenuItem key={key} value={key}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      {config.icon}
-                      {config.label}
-                    </Box>
+                    <Box display="flex" alignItems="center" gap={1}>{config.icon}{config.label}</Box>
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
             <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
-                {t('project')}
-              </InputLabel>
-              <Select
-                value={filterProject}
-                onChange={(e) => setFilterProject(e.target.value)}
-                label={t('project')}
-                sx={{
-                  fontFamily: '"Courier New", monospace',
-                  fontSize: '0.75rem',
-                  borderRadius: 0
-                }}
-              >
-                <MenuItem value="">
-                  <em>{t('all')}</em>
-                </MenuItem>
-                {projects.map(project => (
-                  <MenuItem key={project._id} value={project._id}>
-                    {project.name}
-                  </MenuItem>
-                ))}
+              <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>{t('project')}</InputLabel>
+              <Select value={filterProject} onChange={(e) => setFilterProject(e.target.value)} label={t('project')} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0 }}>
+                <MenuItem value=""><em>{t('all')}</em></MenuItem>
+                {projects.map(project => (<MenuItem key={project._id} value={project._id}>{project.name}</MenuItem>))}
               </Select>
             </FormControl>
           </Box>
 
+          {/* ✅ ID: Botón Crear */}
           <Button
+            id="campaigns-create-btn"
             variant="contained"
             startIcon={<Add />}
             onClick={handleCreate}
-            sx={{
-              borderRadius: 0,
-              textTransform: 'none',
-              fontFamily: '"Courier New", monospace',
-              fontSize: '0.75rem',
-              letterSpacing: '0.5px'
-            }}
+            sx={{ borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px' }}
           >
             {t('createCampaign')}
           </Button>
         </Box>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2, borderRadius: 0 }}>
-            {error}
-          </Alert>
-        )}
+        {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 0 }}>{error}</Alert>}
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.5 }}>
+          {/* ✅ ID: Tabla de Datos */}
           <DataTable
+            id="campaigns-data-table"
             columns={columns}
             data={campaigns}
             loading={loading}
@@ -343,22 +407,28 @@ const handleCreateTemplate = async (templateData) => {
           />
         </motion.div>
 
-        <CampaignWizard
-          open={wizardOpen}
-          onClose={handleCloseWizard}
-          campaign={selectedCampaign}
-          onCreate={handleCreateCampaign}
-          onCreateTemplate={handleCreateTemplate} 
-          onSend={handleSend}
-          onPreview={handlePreview}
-          projects={projects}
-          templates={[]}
-          stages={LEAD_STAGES.map(stage => ({
-            key: stage,
-            name: stage.charAt(0).toUpperCase() + stage.slice(1).replace('_', ' ')
-          }))}
-          sendProgress={wizardSendProgress}
-        />
+        {/* ✅ Elemento invisible para el paso final */}
+        <Box id="campaigns-finish" sx={{ height: 1 }} />
+
+      <CampaignWizard
+        open={wizardOpen}
+        isTourMode={isTourMode} // ✅ PASAMOS LA PROP AL WIZARD
+        onClose={() => { 
+          setWizardOpen(false); 
+          setSelectedCampaign(null); 
+          setWizardSendProgress(null); 
+          setActiveCampaignId(null);
+          setIsTourMode(false); // Limpieza de seguridad
+        }}
+        campaign={selectedCampaign}
+        onCreate={handleCreateCampaign}
+        onCreateTemplate={handleCreateTemplate} 
+        onSend={handleSend}
+        onPreview={handlePreview}
+        projects={projects}
+        stages={LEAD_STAGES.map(stage => ({ key: stage, name: stage.charAt(0).toUpperCase() + stage.slice(1).replace('_', ' ') }))}
+        sendProgress={wizardSendProgress}
+      />
 
         <Dialog
           open={deleteDialogOpen}

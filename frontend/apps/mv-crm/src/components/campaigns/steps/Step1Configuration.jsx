@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/campaigns/steps/Step1Configuration.jsx
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -10,7 +9,7 @@ import {
   Divider,
   Typography
 } from '@mui/material'
-import ProjectSelector from '@shared/components/ProjectSelector' // ✅ Importado
+import ProjectSelector from '@shared/components/ProjectSelector'
 
 const Step1Configuration = ({
   formData,
@@ -29,7 +28,6 @@ const Step1Configuration = ({
     onAudienceChange(field, value)
   }
 
-  // ✅ Estilos unificados para Menus
   const menuItemSx = {
     fontFamily: '"Courier New", monospace',
     fontSize: '0.75rem',
@@ -45,7 +43,9 @@ const Step1Configuration = ({
 
   return (
     <Box display="flex" flexDirection="column" gap={2.5}>
+      {/* ✅ ID: Nombre */}
       <TextField
+        id="wizard-step1-name"
         label={`${t('form.name')} *`}
         value={formData.name}
         onChange={(e) => handleChange('name', e.target.value)}
@@ -68,7 +68,8 @@ const Step1Configuration = ({
         {t('form.audience')}
       </Typography>
 
-      <FormControl size="small" fullWidth required>
+      {/* ✅ ID: Tipo de Audiencia */}
+      <FormControl id="wizard-step1-audience" size="small" fullWidth required>
         <InputLabel>{t('form.audienceType')} *</InputLabel>
         <Select
           value={formData.audience.type}
@@ -81,35 +82,37 @@ const Step1Configuration = ({
         </Select>
       </FormControl>
 
-      {/* ✅ ProjectSelector Integrado */}
-      <ProjectSelector
-        value={formData.audience.projectId}
-        onChange={(value) => handleAudienceChange('projectId', value)}
-        label={t('form.project')}
-        includeGlobal={true}
-        globalLabel={t('allProjects', 'Todos los proyectos')}
-        fullWidth
-        size="small"
-      />
+      {/* ✅ ID: Proyecto y Etapa */}
+      <Box id="wizard-step1-project" display="flex" flexDirection="column" gap={2}>
+        <ProjectSelector
+          value={formData.audience.projectId}
+          onChange={(value) => handleAudienceChange('projectId', value)}
+          label={t('form.project')}
+          includeGlobal={true}
+          globalLabel={t('allProjects', 'Todos los proyectos')}
+          fullWidth
+          size="small"
+        />
 
-      {formData.audience.type === 'leads' && (
-        <FormControl size="small" fullWidth>
-          <InputLabel>{t('form.stage')}</InputLabel>
-          <Select
-            value={formData.audience.stage}
-            onChange={(e) => handleAudienceChange('stage', e.target.value)}
-            label={t('form.stage')}
-            sx={{ ...inputSx, width: '100%' }}
-          >
-            <MenuItem value="" sx={menuItemSx}><em>{t('allStages')}</em></MenuItem>
-            {stages.map(stage => (
-              <MenuItem key={stage.key} value={stage.key} sx={menuItemSx}>
-                {stage.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      )}
+        {formData.audience.type === 'leads' && (
+          <FormControl size="small" fullWidth>
+            <InputLabel>{t('form.stage')}</InputLabel>
+            <Select
+              value={formData.audience.stage}
+              onChange={(e) => handleAudienceChange('stage', e.target.value)}
+              label={t('form.stage')}
+              sx={{ ...inputSx, width: '100%' }}
+            >
+              <MenuItem value="" sx={menuItemSx}><em>{t('allStages')}</em></MenuItem>
+              {stages.map(stage => (
+                <MenuItem key={stage.key} value={stage.key} sx={menuItemSx}>
+                  {stage.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+      </Box>
     </Box>
   )
 }

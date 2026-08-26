@@ -1,88 +1,59 @@
 {
   "sms": {
     "title": "SMS Sending",
-    "description": "Manage and send SMS messages",
-    "messageTemplates": "Message Templates",
-    "broadcastMessages": "Broadcast Messages",
-    "newTemplate": "New Template",
-    "newBroadcast": "New Broadcast",
-    "form": {
-      "name": "Name",
-      "message": "Message",
-      "recipient": "Recipient",
-      "recipients": "Recipients",
-      "selectTemplate": "Select template",
-      "subject": "Subject",
-      "content": "Content",
-      "variables": "Available variables",
-      "preview": "Preview",
-      "send": "Send",
-      "save": "Save",
-      "update": "Update",
-      "cancel": "Cancel",
-      "delete": "Delete",
-      "selectRecipients": "Select recipients",
-      "searchRecipients": "Search recipients...",
-      "addRecipient": "Add recipient"
-    },
-    "messages": {
-      "sentSuccessfully": "Message sent successfully",
-      "savedSuccessfully": "Template saved successfully",
-      "deletedSuccessfully": "Template deleted successfully",
-      "errorSending": "Error sending message",
-      "errorSaving": "Error saving template",
-      "errorDeleting": "Error deleting template",
-      "confirmDelete": "Are you sure you want to delete this template?"
-    },
-    "table": {
-      "name": "Name",
-      "message": "Message",
-      "recipients": "Recipients",
-      "sent": "Sent",
-      "date": "Date",
-      "status": "Status",
-      "actions": "Actions",
-      "edit": "Edit",
-      "delete": "Delete",
-      "view": "View"
-    },
-    "status": {
-      "pending": "Pending",
-      "sent": "Sent",
-      "failed": "Failed",
-      "delivered": "Delivered"
-    },
-    "channel": {
-      "title": "Send channel",
-      "sms": "SMS",
-      "email": "Email",
-      "selectAtLeastOne": "Select at least one send channel",
-      "validPhone": "with valid phone"
+    "selectProject": "Select project",
+    "topbarLabel": "SMS Sending",
+    "project": {
+      "title": "Project (optional)",
+      "global": "No project (global)",
+      "active": "Message linked to project: {{projectName}}",
+      "filteredUsers": "{{filtered}} of {{total}} users",
+      "withPhone": "{{count}} with valid phone"
     },
     "recipients": {
       "title": "Recipients",
       "sendAll": "Send to all",
+      "sendAllInProject": "Send to all in project",
       "users": "users",
+      "usersInProject": "{{count}} users in project",
+      "noUsersInProject": "No users associated with this project",
       "searchLabel": "Search and select users",
       "searchPlaceholder": "Name, email or phone...",
-      "selected": "user(s) selected"
+      "selected": "user(s) selected",
+      "selectedCount": "{{count}} user(s) selected"
     },
     "template": {
       "title": "Use saved template",
-      "selectPlaceholder": "Select a template..."
+      "selectPlaceholder": "Select a template...",
+      "project": "project",
+      "global": "global",
+      "filterHint": "Select a project to filter specific templates",
+      "badgeProject": "project",
+      "badgeGlobal": "global"
     },
     "content": {
       "title": "Message content",
       "variablesLabel": "Available variables (click to insert):",
       "variablesDetected": "Variables detected",
       "variablesWillReplace": "They will be automatically replaced with each user's data.",
+      "variablesWillResolveFromProject": "Variables will be resolved from project data.",
+      "globalVariablesHint": "Select a project to use project-specific variables",
       "emailSubject": "Email subject",
       "emailSubjectPlaceholder": "Email subject...",
       "messageLabel": "Message",
       "messagePlaceholder": "Write the message content here... Use {{firstName}}, {{lastName}}, etc. to personalize",
       "preview": "Preview (example)",
       "chars": "characters",
-      "messages": "message(s)"
+      "messages": "message(s)",
+      "charCount": "{{count}} characters (SMS: ~{{smsCount}} message(s))"
+    },
+    "channel": {
+      "title": "Send channel",
+      "sms": "SMS",
+      "email": "Email",
+      "selectAtLeastOne": "Select at least one send channel",
+      "validPhone": "with valid phone",
+      "validPhoneCount": "{{count}} with valid phone"
     },
     "results": {
       "title": "Send completed",
@@ -105,6 +76,26 @@
       "edit": "Edit",
       "delete": "Delete"
     },
+    "templates": {
+      "title": "Message Templates",
+      "subtitle": "Create and manage templates for bulk sending",
+      "newBtn": "New Template",
+      "deleteConfirm": "Delete this template?",
+      "globalTemplate": "Global",
+      "project": "Project",
+      "active": "Active",
+      "inactive": "Inactive",
+      "empty": "No templates found",
+      "columns": {
+        "name": "Name",
+        "project": "Project",
+        "content": "Content",
+        "variables": "Variables",
+        "description": "Description",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
     "templateModal": {
       "editTitle": "Edit Template",
       "newTitle": "New Template",
@@ -122,26 +113,13 @@
       "globalTemplate": "Global template (available for all projects)",
       "project": "Project"
     },
-    "templates": {
-      "title": "Message Templates",
-      "subtitle": "Create and manage templates for bulk sending",
-      "newBtn": "New Template",
-      "deleteConfirm": "Delete this template?",
-      "columns": {
-        "name": "Name",
-        "content": "Content",
-        "description": "Description",
-        "actions": "Actions"
-      }
+    "filters": {
+      "project": "Project",
+      "allProjects": "All projects",
+      "results": "{{count}} results"
     },
-    "variables": {
-      "firstName": "First Name",
-      "lastName": "Last Name",
-      "email": "Email",
-      "phone": "Phone"
-    },
-    "errors": {
-      "invalidFileType": "Only .txt or .html files are allowed"
+    "form": {
+      "searchPlaceholder": "Search by name, description..."
     }
   }
 }

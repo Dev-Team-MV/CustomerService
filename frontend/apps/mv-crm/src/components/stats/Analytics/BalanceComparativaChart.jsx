@@ -18,7 +18,7 @@ export default function BalanceComparativaChart({ filteredBalance }) {
   const pending   = filteredBalance.map(p => p.totalPending   ?? 0)
 
   return (
-    <Box>
+    <Box id="analytics-balance-chart">
       <Box sx={{ 
         display: 'flex', 
         alignItems: 'center', 

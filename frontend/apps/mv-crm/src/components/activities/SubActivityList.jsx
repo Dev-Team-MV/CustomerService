@@ -18,7 +18,8 @@ import {
   DialogActions,
   Autocomplete,
   CircularProgress,
-  InputAdornment
+  InputAdornment,
+  useTheme
 } from '@mui/material'
 import { 
   Add, 
@@ -35,26 +36,29 @@ import {
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-// import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
-
 import { es, enUS } from 'date-fns/locale'
 import { useResidents } from '@shared/hooks/useResidents'
-import { useTranslation as useTranslationLang } from 'react-i18next'
 
 const formatDate = (date, locale = 'es') => {
   if (!date) return null
   const d = new Date(date)
-  const dateLocale = locale === 'es' ? es : enUS
   return d.toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-US', { 
     day: 'numeric', 
     month: 'short'
   })
 }
 
+// ══════════════════════════════════════════════════════════════
+// COMPONENTE: SubActivityItem (Item individual de subactividad)
+// ═══════════════════════════════════════════════════════════════
+
 const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly, t }) => {
   const isCompleted = sub.completed || sub.status === 'completed'
   const isOverdue = sub.dueDate && new Date(sub.dueDate) < new Date() && !isCompleted
+
+  // ✅ Estilos unificados
+  const theme = useTheme()
 
   return (
     <Paper
@@ -62,11 +66,16 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly, t }) => {
       sx={{
         p: 1.5,
         mb: 1,
-        borderRadius: 2,
+        borderRadius: 0, // ✅ Bordes afilados
         bgcolor: isCompleted ? '#f5f5f5' : 'white',
         borderColor: isOverdue ? '#f44336' : '#e0e0e0',
         borderLeftWidth: 3,
-        borderLeftColor: isCompleted ? '#4caf50' : isOverdue ? '#f44336' : '#2196f3'
+        borderLeftColor: isCompleted ? '#4caf50' : isOverdue ? '#f44336' : '#2196f3',
+        transition: 'all 0.2s',
+        '&:hover': {
+          boxShadow: isCompleted ? 'none' : '4px 4px 0px rgba(0,0,0,0.08)',
+          borderColor: isOverdue ? '#f44336' : '#000'
+        }
       }}
     >
       <Box display="flex" alignItems="flex-start" gap={1}>
@@ -79,7 +88,8 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly, t }) => {
           sx={{
             mt: -0.5,
             color: '#9e9e9e',
-            '&.Mui-checked': { color: '#4caf50' }
+            '&.Mui-checked': { color: '#4caf50' },
+            borderRadius: 0
           }}
         />
 
@@ -91,7 +101,8 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly, t }) => {
             fontWeight={500}
             sx={{
               textDecoration: isCompleted ? 'line-through' : 'none',
-              color: isCompleted ? '#9e9e9e' : 'inherit'
+              color: isCompleted ? '#9e9e9e' : '#000',
+              fontFamily: '"Helvetica Neue", sans-serif'
             }}
           >
             {sub.title}
@@ -107,7 +118,9 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly, t }) => {
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical',
                 overflow: 'hidden',
-                mt: 0.5
+                mt: 0.5,
+                fontFamily: '"Courier New", monospace',
+                fontSize: '0.7rem'
               }}
             >
               {sub.description}
@@ -127,6 +140,8 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly, t }) => {
                     fontSize: '0.65rem',
                     bgcolor: isOverdue ? '#f4433620' : '#2196f320',
                     color: isOverdue ? '#f44336' : '#2196f3',
+                    borderRadius: 0, // ✅ Bordes afilados
+                    fontFamily: '"Courier New", monospace',
                     '& .MuiChip-icon': { color: 'inherit' }
                   }}
                 />
@@ -142,7 +157,8 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly, t }) => {
                       width: 16, 
                       height: 16, 
                       fontSize: 8,
-                      bgcolor: '#2196f3'
+                      bgcolor: '#2196f3',
+                      borderRadius: 0 // ✅ Bordes afilados
                     }}>
                       {sub.assignedTo.firstName?.charAt(0) || '?'}
                     </Avatar>
@@ -151,7 +167,10 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly, t }) => {
                   size="small"
                   sx={{ 
                     height: 20, 
-                    fontSize: '0.65rem'
+                    fontSize: '0.65rem',
+                    borderRadius: 0, // ✅ Bordes afilados
+                    fontFamily: '"Courier New", monospace',
+                    bgcolor: '#e3f2fd'
                   }}
                 />
               </Tooltip>
@@ -166,7 +185,8 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly, t }) => {
                       width: 16, 
                       height: 16, 
                       fontSize: 8,
-                      bgcolor: '#ff9800'
+                      bgcolor: '#ff9800',
+                      borderRadius: 0 // ✅ Bordes afilados
                     }}>
                       {sub.contact.name?.charAt(0) || '?'}
                     </Avatar>
@@ -176,8 +196,10 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly, t }) => {
                   sx={{ 
                     height: 20, 
                     fontSize: '0.65rem',
-                    bgcolor: '#ff980020',
-                    color: '#ff9800'
+                    borderRadius: 0, // ✅ Bordes afilados
+                    fontFamily: '"Courier New", monospace',
+                    bgcolor: '#fff3e0',
+                    color: '#f57c00'
                   }}
                 />
               </Tooltip>
@@ -189,12 +211,12 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly, t }) => {
         {!readOnly && (
           <Box display="flex" gap={0.5}>
             <Tooltip title={t('activities.form.edit')}>
-              <IconButton size="small" onClick={() => onEdit?.(sub)}>
+              <IconButton size="small" onClick={() => onEdit?.(sub)} sx={{ borderRadius: 0 }}>
                 <Edit sx={{ fontSize: 16, color: '#757575' }} />
               </IconButton>
             </Tooltip>
             <Tooltip title={t('activities.form.delete')}>
-              <IconButton size="small" onClick={() => onDelete?.(sub._id)}>
+              <IconButton size="small" onClick={() => onDelete?.(sub._id)} sx={{ borderRadius: 0 }}>
                 <Delete sx={{ fontSize: 16, color: '#f44336' }} />
               </IconButton>
             </Tooltip>
@@ -205,9 +227,13 @@ const SubActivityItem = ({ sub, onToggle, onEdit, onDelete, readOnly, t }) => {
   )
 }
 
-// Modal para crear/editar subactividad
+// ═══════════════════════════════════════════════════════════════
+// COMPONENTE: SubActivityModal (Modal para crear/editar)
+// ═══════════════════════════════════════════════════════════════
+
 const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentActivityId = null }) => {
   const { t, i18n } = useTranslation('activities')
+  const theme = useTheme()
   
   const [formData, setFormData] = useState({
     title: '',
@@ -325,14 +351,52 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
 
   const dateLocale = i18n.language === 'es' ? es : enUS
 
+  // ✅ Estilos unificados (idénticos a ActivityModal)
+  const unifiedButtonSx = { 
+    borderRadius: 0, 
+    textTransform: 'none', 
+    fontFamily: '"Courier New", monospace', 
+    fontSize: '0.75rem', 
+    letterSpacing: '0.5px',
+    '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
+  }
+  
+  const inputSx = { 
+    fontFamily: '"Courier New", monospace', 
+    fontSize: '0.75rem', 
+    borderRadius: 0, 
+    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
+    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' },
+    '& .MuiOutlinedInput-root': { borderRadius: 0 }
+  }
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle fontWeight={700}>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth
+      PaperProps={{ 
+        sx: { 
+          borderRadius: 0, 
+          border: '1px solid #ececec' 
+        } 
+      }}
+    >
+      <DialogTitle sx={{ 
+        borderBottom: '1px solid #ececec', 
+        p: 3,
+        fontFamily: '"Courier New", monospace',
+        fontSize: '0.85rem',
+        letterSpacing: '1px',
+        textTransform: 'uppercase'
+      }}>
         {subActivity 
           ? t('activities.subActivities.editSubActivity') 
           : t('activities.subActivities.newSubActivity')}
       </DialogTitle>
-      <DialogContent>
+      
+      <DialogContent dividers sx={{ p: 3 }}>
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={dateLocale}>
           <Box display="flex" flexDirection="column" gap={2.5} pt={1}>
             {/* Título */}
@@ -344,6 +408,7 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
               required
               autoFocus
               placeholder={t('activities.subActivities.form.titlePlaceholder')}
+              sx={inputSx}
             />
 
             {/* Descripción */}
@@ -355,6 +420,7 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
               multiline
               rows={2}
               placeholder={t('activities.subActivities.form.descriptionPlaceholder')}
+              sx={inputSx}
             />
 
             {/* Fecha límite */}
@@ -362,12 +428,22 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
               label={t('activities.subActivities.form.dueDate')}
               value={formData.dueDate}
               onChange={(newValue) => setFormData(prev => ({ ...prev, dueDate: newValue }))}
-              slotProps={{ textField: { fullWidth: true } }}
+              slotProps={{ 
+                textField: { 
+                  fullWidth: true,
+                  sx: inputSx 
+                } 
+              }}
             />
 
             {/* Sección de asignación */}
             <Box>
-              <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
+              <Typography variant="subtitle2" fontWeight={600} mb={1.5} sx={{ 
+                fontFamily: '"Courier New", monospace', 
+                fontSize: '0.7rem', 
+                letterSpacing: '1px', 
+                textTransform: 'uppercase' 
+              }}>
                 {t('activities.subActivities.form.assignTo')}
               </Typography>
               
@@ -378,6 +454,7 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
                   onClick={() => handleContactTypeChange('none')}
                   color={formData.contactType === 'none' ? 'primary' : 'default'}
                   variant={formData.contactType === 'none' ? 'filled' : 'outlined'}
+                  sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}
                 />
                 <Chip
                   label={t('activities.subActivities.form.registeredUser')}
@@ -385,6 +462,7 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
                   onClick={() => handleContactTypeChange('user')}
                   color={formData.contactType === 'user' ? 'primary' : 'default'}
                   variant={formData.contactType === 'user' ? 'filled' : 'outlined'}
+                  sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}
                 />
                 <Chip
                   label={t('activities.subActivities.form.externalContact')}
@@ -392,6 +470,7 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
                   onClick={() => handleContactTypeChange('external')}
                   color={formData.contactType === 'external' ? 'warning' : 'default'}
                   variant={formData.contactType === 'external' ? 'filled' : 'outlined'}
+                  sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}
                 />
               </Box>
 
@@ -411,6 +490,7 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
                       {...params}
                       label={t('activities.subActivities.form.searchUser')}
                       placeholder={t('activities.subActivities.form.searchByName')}
+                      sx={inputSx}
                       InputProps={{
                         ...params.InputProps,
                         startAdornment: (
@@ -431,15 +511,15 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
                     />
                   )}
                   renderOption={(props, option) => (
-                    <Box component="li" {...props} display="flex" alignItems="center" gap={1.5} py={1}>
-                      <Avatar sx={{ width: 32, height: 32, bgcolor: '#2196f3', fontSize: 12 }}>
+                    <Box component="li" {...props} display="flex" alignItems="center" gap={1.5} py={1} sx={{ borderRadius: 0 }}>
+                      <Avatar sx={{ width: 32, height: 32, bgcolor: '#2196f3', fontSize: 12, borderRadius: 0 }}>
                         {option.firstName?.charAt(0) || '?'}
                       </Avatar>
                       <Box>
-                        <Typography variant="body2">
+                        <Typography variant="body2" sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
                           {option.firstName} {option.lastName}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace' }}>
                           {option.email}
                         </Typography>
                       </Box>
@@ -450,10 +530,10 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
 
               {/* Contacto externo */}
               {formData.contactType === 'external' && (
-                <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, bgcolor: '#fff8e1' }}>
+                <Paper variant="outlined" sx={{ p: 2, borderRadius: 0, bgcolor: '#fff8e1', border: '1px solid #ffe0b2' }}>
                   <Box display="flex" alignItems="center" gap={1} mb={2}>
                     <PersonAdd color="warning" fontSize="small" />
-                    <Typography variant="body2" color="warning.main" fontWeight={500}>
+                    <Typography variant="body2" color="warning.main" fontWeight={500} sx={{ fontFamily: '"Courier New", monospace' }}>
                       {t('activities.subActivities.form.unregisteredContact')}
                     </Typography>
                   </Box>
@@ -471,6 +551,7 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
                       InputProps={{
                         startAdornment: <InputAdornment position="start"><Person fontSize="small" /></InputAdornment>
                       }}
+                      sx={inputSx}
                     />
                     <TextField
                       label={t('activities.subActivities.form.email')}
@@ -485,6 +566,7 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
                       InputProps={{
                         startAdornment: <InputAdornment position="start"><Email fontSize="small" /></InputAdornment>
                       }}
+                      sx={inputSx}
                     />
                     <TextField
                       label={t('activities.subActivities.form.phone')}
@@ -498,6 +580,7 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
                       InputProps={{
                         startAdornment: <InputAdornment position="start"><Phone fontSize="small" /></InputAdornment>
                       }}
+                      sx={inputSx}
                     />
                   </Box>
                 </Paper>
@@ -506,8 +589,13 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
           </Box>
         </LocalizationProvider>
       </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose}>
+      
+      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+        <Button 
+          onClick={onClose} 
+          disabled={saving}
+          sx={{ ...unifiedButtonSx, color: '#888' }}
+        >
           {t('activities.subActivities.form.cancel')}
         </Button>
         <Button 
@@ -515,6 +603,12 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
           onClick={handleSave}
           disabled={!formData.title.trim() || saving}
           startIcon={saving ? <CircularProgress size={20} /> : null}
+          sx={{ 
+            ...unifiedButtonSx, 
+            bgcolor: '#000', 
+            color: '#fff',
+            '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } 
+          }}
         >
           {subActivity 
             ? t('activities.subActivities.form.saveChanges') 
@@ -524,6 +618,10 @@ const SubActivityModal = ({ open, onClose, onSave, subActivity = null, parentAct
     </Dialog>
   )
 }
+
+// ═══════════════════════════════════════════════════════════════
+// COMPONENTE PRINCIPAL: SubActivityList
+// ═══════════════════════════════════════════════════════════════
 
 const SubActivityList = ({ 
   subActivities = [], 
@@ -569,11 +667,22 @@ const SubActivityList = ({
         alignItems="center" 
         justifyContent="space-between"
         onClick={() => setExpanded(!expanded)}
-        sx={{ cursor: 'pointer', mb: 1, p: 1, borderRadius: 1, '&:hover': { bgcolor: '#f5f5f5' } }}
+        sx={{ 
+          cursor: 'pointer', 
+          mb: 1, 
+          p: 1, 
+          borderRadius: 0, // ✅ Bordes afilados
+          '&:hover': { bgcolor: '#f5f5f5' } 
+        }}
       >
         <Box display="flex" alignItems="center" gap={1}>
           <SubdirectoryArrowRight sx={{ fontSize: 20, color: '#757575' }} />
-          <Typography variant="subtitle2" fontWeight={600}>
+          <Typography variant="subtitle2" fontWeight={600} sx={{ 
+            fontFamily: '"Courier New", monospace', 
+            fontSize: '0.7rem', 
+            letterSpacing: '0.5px',
+            textTransform: 'uppercase'
+          }}>
             {t('activities.subActivities.title')}
           </Typography>
           {totalCount > 0 && (
@@ -582,15 +691,17 @@ const SubActivityList = ({
               size="small"
               sx={{
                 height: 20,
-                fontSize: '0.7rem',
+                fontSize: '0.65rem',
                 bgcolor: completedCount === totalCount ? '#4caf5020' : '#ff980020',
                 color: completedCount === totalCount ? '#4caf50' : '#ff9800',
-                fontWeight: 600
+                fontWeight: 600,
+                borderRadius: 0, // ✅ Bordes afilados
+                fontFamily: '"Courier New", monospace'
               }}
             />
           )}
         </Box>
-        <IconButton size="small" onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}>
+        <IconButton size="small" onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }} sx={{ borderRadius: 0 }}>
           {expanded ? <ExpandLess /> : <ExpandMore />}
         </IconButton>
       </Box>
@@ -612,7 +723,7 @@ const SubActivityList = ({
             ))}
           </Box>
         ) : (
-          <Typography variant="caption" color="text.secondary" sx={{ pl: 1, display: 'block', py: 1 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ pl: 1, display: 'block', py: 1, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
             {t('activities.subActivities.noSubActivities')}
           </Typography>
         )}
@@ -623,7 +734,21 @@ const SubActivityList = ({
             startIcon={<Add />}
             size="small"
             onClick={() => handleOpenModal()}
-            sx={{ textTransform: 'none', mt: 1, ml: 0.5 }}
+            sx={{ 
+              textTransform: 'none', 
+              mt: 1, 
+              ml: 0.5,
+              borderRadius: 0, // ✅ Bordes afilados
+              fontFamily: '"Courier New", monospace',
+              fontSize: '0.75rem',
+              letterSpacing: '0.5px',
+              border: '1px solid #000',
+              color: '#000',
+              '&:hover': { 
+                bgcolor: '#f5f5f5', 
+                boxShadow: '4px 4px 0px rgba(0,0,0,0.12)' 
+              } 
+            }}
           >
             {t('activities.subActivities.addSubActivity')}
           </Button>

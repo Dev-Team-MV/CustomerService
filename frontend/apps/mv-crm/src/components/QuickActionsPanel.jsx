@@ -1,13 +1,14 @@
-// apps/mv-crm/src/components/QuickActionsPanel.jsx
 import { Box, Button, Typography, Stack, useMediaQuery, useTheme } from '@mui/material'
 import { PersonAdd, AddCircleOutline } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 
 export default function QuickActionsPanel({ onCreateProject, onCreateUser }) {
+  const { t } = useTranslation('dashboard')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   return (
-    <Box sx={{
+    <Box id="quick-actions-panel" sx={{
       p: { xs: 2, sm: 3 },
       mb: { xs: 2, sm: 4 },
       borderRadius: 0,
@@ -29,12 +30,12 @@ export default function QuickActionsPanel({ onCreateProject, onCreateUser }) {
         textTransform: 'uppercase',
         mb: 1
       }}>
-        [01] Quick Actions
+        [01] {t('quickActions.title', 'Quick Actions')}
       </Typography>
 
-      {/* ✅ Responsive: Columna en móvil, fila en desktop */}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ width: '100%' }}>
         <Button
+          id="create-project-btn"
           variant="contained"
           startIcon={<AddCircleOutline />}
           onClick={onCreateProject}
@@ -49,7 +50,7 @@ export default function QuickActionsPanel({ onCreateProject, onCreateUser }) {
             color: '#fff',
             px: 3,
             py: 1.5,
-            width: { xs: '100%', sm: 'auto' }, // ✅ Full width en móvil
+            width: { xs: '100%', sm: 'auto' },
             transition: 'all 0.25s ease',
             '&:hover': {
               bgcolor: '#222',
@@ -57,10 +58,11 @@ export default function QuickActionsPanel({ onCreateProject, onCreateUser }) {
             }
           }}
         >
-          Crear Proyecto
+          {t('createProject', 'Crear Proyecto')}
         </Button>
 
         <Button
+          id="add-client-btn"
           variant="outlined"
           startIcon={<PersonAdd />}
           onClick={onCreateUser}
@@ -76,7 +78,7 @@ export default function QuickActionsPanel({ onCreateProject, onCreateUser }) {
             border: '1px solid #000',
             px: 3,
             py: 1.5,
-            width: { xs: '100%', sm: 'auto' }, // ✅ Full width en móvil
+            width: { xs: '100%', sm: 'auto' },
             transition: 'all 0.25s ease',
             '&:hover': {
               bgcolor: '#000',
@@ -86,7 +88,7 @@ export default function QuickActionsPanel({ onCreateProject, onCreateUser }) {
             }
           }}
         >
-          Agregar Cliente
+          {t('quickActions.addClient', 'Agregar Cliente')}
         </Button>
       </Stack>
     </Box>

@@ -10,6 +10,10 @@
   "confirmDelete": "Are you sure you want to delete this quote?",
   "confirmConvert": "Convert this quote to a sale?",
   "none": "None",
+  "converting": "Converting...",
+  "confirm": "Confirm Conversion",
+  "send": "Send",
+  "sending": "Sending...",
   
   "form": {
     "lead": "Lead",
@@ -76,5 +80,28 @@
   "next": "Next",
   "saving": "Saving...",
   "update": "Update",
-  "create": "Create"
+  "create": "Create",
+  
+    "sendQuote": {
+    "title": "Send Quote",
+    "client": "Client / Lead",
+    "method": "Sending method",
+    "emailLabel": "Email address",
+    "phoneLabel": "Phone number",
+    "errorEmail": "Email is required",
+    "errorPhone": "Phone number is required",
+    "errorSend": "Error sending"
+  },
+  "convertToSale": {
+    "title": "Convert to Sale",
+    "client": "Client / Lead",
+    "amount": "Quoted Amount",
+    "hasProperty": "This quote has property data. It will be linked or created automatically.",
+    "noProperty": "Property data is missing. You may need to create it manually.",
+    "hintTitle": "Action required",
+    "hintAction": "Please ensure the quote includes all mandatory data or create the property manually from the properties module."
+  },
+  "errors": {
+    "convertFailed": "Error converting"
+  }
 }

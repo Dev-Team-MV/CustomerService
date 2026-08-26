@@ -96,6 +96,27 @@ const Layout = ({
     refreshNotifications();
   };
 
+  // ✅ ESCUCHAR EVENTOS DEL TOUR PARA ABRIR/CERRAR DRAWERS
+  useEffect(() => {
+    const handleOpenSidebar = () => setExpanded(true)
+    const handleOpenNotifications = () => setNotificationsOpen(true)
+    const handleCloseDrawers = () => {
+      setExpanded(false)
+      setNotificationsOpen(false)
+      setAnchorElUser(null)
+    }
+
+    window.addEventListener('tour-open-sidebar', handleOpenSidebar)
+    window.addEventListener('tour-open-notifications', handleOpenNotifications)
+    window.addEventListener('tour-close-drawers', handleCloseDrawers)
+
+    return () => {
+      window.removeEventListener('tour-open-sidebar', handleOpenSidebar)
+      window.removeEventListener('tour-open-notifications', handleOpenNotifications)
+      window.removeEventListener('tour-close-drawers', handleCloseDrawers)
+    }
+  }, [])
+
   // Mostrar loading mientras se cargan los datos de branding
   if (branding.loading && projectSlug) {
     return (

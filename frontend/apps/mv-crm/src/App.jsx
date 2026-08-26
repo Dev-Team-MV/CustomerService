@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import { CssBaseline } from '@mui/material'
 import { AuthProvider } from '@shared/context/AuthContext'
+import { TourProvider } from '@shared/tours/useTour'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Clients from './pages/Clients'
@@ -44,6 +45,7 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
+        <TourProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={
@@ -190,6 +192,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </TourProvider> 
       </AuthProvider>
     </ThemeProvider>
   )

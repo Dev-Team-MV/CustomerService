@@ -39,6 +39,7 @@ import UniversalLogin from '@shared/components/Login/UniversalLogin'
 import CustomerSurveyPage from '@shared/components/CustomerSurveyPage'
 import CustomerWarrantyPage from '@shared/components/Warranties/CustomerWarrantyPage'
 import ForcePasswordChange from '@shared/components/Login/ForcePasswordChange'
+import { TourProvider } from '@shared/tours/useTour'
 
 const DynamicLayoutWrapper = ({ children }) => {
   const { user } = useAuth()
@@ -59,6 +60,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider projectSlug="lakewood-f2">
+        <TourProvider>
         <Routes>
           {/* Auth Routes */}
           <Route path="/login" element={<UniversalLogin />} />
@@ -122,6 +124,7 @@ function App() {
 
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </TourProvider>
       </AuthProvider>
     </ThemeProvider>
   )

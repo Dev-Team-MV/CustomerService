@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/campaigns/steps/Step2Template.jsx
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -20,7 +19,7 @@ import {
 } from '@mui/material'
 import { Message, Info, Code } from '@mui/icons-material'
 
-// ✅ NUEVO: Importar VariableInserter
+// ✅ Importar VariableInserter para variables dinámicas
 import VariableInserter from '@shared/components/VariableInserter'
 
 // Variables hardcodeadas para templates globales (sin proyecto)
@@ -37,7 +36,7 @@ const Step2Template = ({
   onTemplateDataChange,
   templates,
   loadingTemplates,
-  selectedProjectId = '', // ✅ NUEVO: projectId desde Step1
+  selectedProjectId = '', // ✅ Recibido desde Step1
   projects = []
 }) => {
   const { t } = useTranslation('campaign')
@@ -53,8 +52,6 @@ const Step2Template = ({
   })
 
   const selectedTemplate = templates.find(t => t._id === formData.templateId)
-  
-  // ✅ NUEVO: Nombre del proyecto seleccionado (para mostrar en UI)
   const selectedProjectName = projects.find(p => p._id === selectedProjectId)?.name || ''
 
   const handleTemplateChange = (templateId) => {
@@ -72,11 +69,10 @@ const Step2Template = ({
     setNewTemplate(prev => ({ ...prev, [field]: value }))
   }
 
-  // ✅ NUEVO: Insertar variable en la posición del cursor
+  // ✅ Insertar variable en la posición exacta del cursor
   const handleInsertVariable = (varName) => {
     const textarea = templateRef.current?.querySelector('textarea')
     if (!textarea) {
-      // Fallback: agregar al final
       handleNewTemplateChange('template', newTemplate.template + `{{${varName}}}`)
       return
     }
@@ -101,24 +97,19 @@ const Step2Template = ({
 
   const isNewTemplateValid = newTemplate.name.trim() && newTemplate.template.trim()
 
+  // ✅ Sincronizar estado hacia arriba para que el padre sepa qué se está creando
   useEffect(() => {
     if (templateMode === 'new') {
-      onTemplateDataChange?.({
-        isNew: true,
-        newTemplate
-      })
+      onTemplateDataChange?.({ isNew: true, newTemplate })
     } else {
-      onTemplateDataChange?.({
-        isNew: false,
-        templateId: formData.templateId
-      })
+      onTemplateDataChange?.({ isNew: false, templateId: formData.templateId })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [templateMode, newTemplate.name, newTemplate.template, formData.templateId])
 
   return (
     <Box display="flex" flexDirection="column" gap={2.5}>
-      {/* ✅ NUEVO: Banner informativo del proyecto seleccionado */}
+      {/* ✅ Banner informativo del proyecto seleccionado (Contexto visual) */}
       {selectedProjectId && (
         <Box
           sx={{
@@ -146,7 +137,8 @@ const Step2Template = ({
         </Box>
       )}
 
-      <FormControl component="fieldset">
+      {/* ✅ ID: Modo de Plantilla (Para que el tour resalte la elección) */}
+      <FormControl id="wizard-step2-mode" component="fieldset">
         <RadioGroup
           row
           value={templateMode}
@@ -156,12 +148,7 @@ const Step2Template = ({
             value="existing"
             control={<Radio size="small" />}
             label={
-              <Typography
-                sx={{
-                  fontFamily: '"Courier New", monospace',
-                  fontSize: '0.75rem'
-                }}
-              >
+              <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
                 {t('template.useExisting')}
               </Typography>
             }
@@ -170,12 +157,7 @@ const Step2Template = ({
             value="new"
             control={<Radio size="small" />}
             label={
-              <Typography
-                sx={{
-                  fontFamily: '"Courier New", monospace',
-                  fontSize: '0.75rem'
-                }}
-              >
+              <Typography sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
                 {t('template.createNew')}
               </Typography>
             }
@@ -189,7 +171,7 @@ const Step2Template = ({
       {/* MODO: TEMPLATE EXISTENTE */}
       {/* ═══════════════════════════════════════════════════════ */}
       {templateMode === 'existing' && (
-        <>
+        <Box id="wizard-step2-content" display="flex" flexDirection="column" gap={2}>
           <FormControl size="small" fullWidth required disabled={loadingTemplates}>
             <InputLabel sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
               {t('form.selectTemplate')} *
@@ -218,9 +200,9 @@ const Step2Template = ({
               ) : (
                 templates.map(template => (
                   <MenuItem key={template._id} value={template._id}>
-                    <Box display="flex" alignItems="center" gap={1}>
+                    <Box display="flex" alignItems="center" gap={1} width="100%">
                       <Message sx={{ fontSize: 16, color: '#666' }} />
-                      <Box>
+                      <Box sx={{ flex: 1 }}>
                         <Typography variant="body2" fontWeight={600}>
                           {template.name}
                         </Typography>
@@ -230,32 +212,10 @@ const Step2Template = ({
                           </Typography>
                         )}
                       </Box>
-                      {/* ✅ NUEVO: Badge si el template es de proyecto */}
-                      {template.projectId && (
-                        <Chip 
-                          label="proyecto" 
-                          size="small" 
-                          sx={{ 
-                            bgcolor: '#e3f2fd', 
-                            color: '#1976d2',
-                            fontSize: '0.6rem',
-                            height: 18,
-                            ml: 'auto'
-                          }}
-                        />
-                      )}
-                      {!template.projectId && (
-                        <Chip 
-                          label="global" 
-                          size="small" 
-                          sx={{ 
-                            bgcolor: '#f5f5f5', 
-                            color: '#666',
-                            fontSize: '0.6rem',
-                            height: 18,
-                            ml: 'auto'
-                          }}
-                        />
+                      {template.projectId ? (
+                        <Chip label="proyecto" size="small" sx={{ bgcolor: '#e3f2fd', color: '#1976d2', fontSize: '0.6rem', height: 18 }} />
+                      ) : (
+                        <Chip label="global" size="small" sx={{ bgcolor: '#f5f5f5', color: '#666', fontSize: '0.6rem', height: 18 }} />
                       )}
                     </Box>
                   </MenuItem>
@@ -265,38 +225,14 @@ const Step2Template = ({
           </FormControl>
 
           {selectedTemplate && (
-            <Paper 
-              variant="outlined" 
-              sx={{ 
-                p: 2, 
-                borderRadius: 2,
-                bgcolor: '#f5f5f5'
-              }}
-            >
+            <Paper variant="outlined" sx={{ p: 2, borderRadius: 0, bgcolor: '#fafafa', border: '1px solid #ececec' }}>
               <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
-                <Typography variant="subtitle2" fontWeight={600}>
+                <Typography variant="subtitle2" fontWeight={600} sx={{ fontFamily: '"Helvetica Neue", sans-serif' }}>
                   {selectedTemplate.name}
                 </Typography>
                 <Box display="flex" gap={0.5}>
-                  {selectedTemplate.projectId && (
-                    <Chip 
-                      label="proyecto" 
-                      size="small" 
-                      sx={{ 
-                        bgcolor: '#e3f2fd', 
-                        color: '#1976d2',
-                        fontSize: '0.6rem',
-                        height: 18
-                      }}
-                    />
-                  )}
-                  {selectedTemplate.category && (
-                    <Chip 
-                      label={selectedTemplate.category} 
-                      size="small" 
-                      sx={{ fontSize: '0.65rem', height: 18 }}
-                    />
-                  )}
+                  {selectedTemplate.projectId && <Chip label="proyecto" size="small" sx={{ bgcolor: '#e3f2fd', color: '#1976d2', fontSize: '0.6rem', height: 18 }} />}
+                  {selectedTemplate.category && <Chip label={selectedTemplate.category} size="small" sx={{ fontSize: '0.65rem', height: 18 }} />}
                 </Box>
               </Box>
               
@@ -314,11 +250,7 @@ const Step2Template = ({
               </Typography>
 
               {selectedTemplate.description && (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ display: 'block', mt: 1, fontStyle: 'italic' }}
-                >
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, fontStyle: 'italic' }}>
                   {selectedTemplate.description}
                 </Typography>
               )}
@@ -326,18 +258,19 @@ const Step2Template = ({
           )}
 
           {!formData.templateId && (
-            <Alert severity="info" sx={{ borderRadius: 0 }}>
+            <Alert severity="info" sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
               {t('validation.templateRequired')}
             </Alert>
           )}
-        </>
+        </Box>
       )}
 
       {/* ═══════════════════════════════════════════════════════ */}
       {/* MODO: NUEVO TEMPLATE */}
       {/* ═══════════════════════════════════════════════════════ */}
       {templateMode === 'new' && (
-        <>
+        // ✅ ID: Contenido y Variables (Para que el tour resalte esta área)
+        <Box id="wizard-step2-content" display="flex" flexDirection="column" gap={2}>
           <TextField
             label={`${t('template.name')} *`}
             value={newTemplate.name}
@@ -345,12 +278,7 @@ const Step2Template = ({
             fullWidth
             required
             placeholder={t('template.namePlaceholder')}
-            sx={{
-              '& .MuiInputBase-input': {
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.75rem'
-              }
-            }}
+            sx={{ '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }}
           />
 
           <TextField
@@ -359,12 +287,7 @@ const Step2Template = ({
             onChange={(e) => handleNewTemplateChange('category', e.target.value)}
             fullWidth
             placeholder={t('template.categoryPlaceholder')}
-            sx={{
-              '& .MuiInputBase-input': {
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.75rem'
-              }
-            }}
+            sx={{ '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }}
           />
 
           <TextField
@@ -375,29 +298,20 @@ const Step2Template = ({
             multiline
             rows={2}
             placeholder={t('template.descriptionPlaceholder')}
-            sx={{
-              '& .MuiInputBase-input': {
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.75rem'
-              }
-            }}
+            sx={{ '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }, '& .MuiOutlinedInput-root': { borderRadius: 0 } }}
           />
 
           <Divider />
 
-          {/* ✅ NUEVO: Variable Inserter si hay proyecto seleccionado */}
+          {/* ✅ Inserción de Variables (Dinámico según proyecto) */}
           {selectedProjectId ? (
-            <VariableInserter
-              projectId={selectedProjectId}
-              onInsert={handleInsertVariable}
-            />
+            <VariableInserter projectId={selectedProjectId} onInsert={handleInsertVariable} />
           ) : (
-            /* ✅ Variables hardcodeadas para templates globales */
             <Box>
-              <Typography variant="subtitle2" fontWeight={600} mb={1}>
+              <Typography variant="subtitle2" fontWeight={600} mb={1} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
                 {t('template.globalVariables', 'Variables globales disponibles')}
               </Typography>
-              <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+              <Typography variant="caption" color="text.secondary" display="block" mb={1} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.65rem' }}>
                 {t('template.globalVariablesHelper', 'Selecciona un proyecto en el paso anterior para usar variables específicas del proyecto')}
               </Typography>
               <Box display="flex" gap={1} flexWrap="wrap">
@@ -412,6 +326,7 @@ const Step2Template = ({
                       bgcolor: '#e3f2fd',
                       fontFamily: '"Courier New", monospace',
                       fontSize: '0.65rem',
+                      borderRadius: 0,
                       '&:hover': { bgcolor: '#bbdefb' }
                     }}
                   />
@@ -420,7 +335,7 @@ const Step2Template = ({
             </Box>
           )}
 
-          {/* ✅ NUEVO: Template con ref para inserción en cursor */}
+          {/* ✅ Área de texto con ref para inserción precisa */}
           <Box ref={templateRef}>
             <TextField
               label={`${t('template.content')} *`}
@@ -433,20 +348,19 @@ const Step2Template = ({
               placeholder={t('template.contentPlaceholder')}
               helperText={`${newTemplate.template.length} ${t('template.chars')} (SMS: ~${Math.ceil(newTemplate.template.length / 160)} ${t('template.messages')})`}
               sx={{
-                '& .MuiInputBase-input': {
-                  fontFamily: '"Courier New", monospace',
-                  fontSize: '0.75rem'
-                }
+                '& .MuiInputBase-input': { fontFamily: '"Courier New", monospace', fontSize: '0.75rem' },
+                '& .MuiOutlinedInput-root': { borderRadius: 0 }
               }}
             />
           </Box>
 
+          {/* ✅ Feedback visual de variables detectadas */}
           {detectedVariables.length > 0 && (
-            <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, bgcolor: '#e3f2fd' }}>
+            <Paper variant="outlined" sx={{ p: 2, borderRadius: 0, bgcolor: '#e3f2fd', border: '1px solid #90caf9' }}>
               <Box display="flex" alignItems="flex-start" gap={1}>
                 <Code fontSize="small" sx={{ mt: 0.5, color: '#1976d2' }} />
                 <Box flex={1}>
-                  <Typography variant="caption" fontWeight={600} color="#1976d2">
+                  <Typography variant="caption" fontWeight={600} color="#1976d2" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
                     {t('template.variablesDetected')} ({detectedVariables.length})
                   </Typography>
                   <Box display="flex" gap={1} flexWrap="wrap" mt={1}>
@@ -456,7 +370,7 @@ const Step2Template = ({
                         label={`{{${v}}}`} 
                         size="small" 
                         variant="outlined"
-                        sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}
+                        sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.7rem', borderRadius: 0, borderColor: '#1976d2', color: '#1976d2' }}
                       />
                     ))}
                   </Box>
@@ -465,12 +379,12 @@ const Step2Template = ({
             </Paper>
           )}
 
-          {!isNewTemplateValid && (
-            <Alert severity="info" sx={{ borderRadius: 0 }}>
+          {!isNewTemplateValid && (newTemplate.name || newTemplate.template) && (
+            <Alert severity="info" sx={{ borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }}>
               {t('validation.templateFieldsRequired')}
             </Alert>
           )}
-        </>
+        </Box>
       )}
     </Box>
   )

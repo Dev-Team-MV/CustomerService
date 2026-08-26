@@ -1,0 +1,9 @@
+export const getActivityModalTourSteps = (t) => [
+  { element: '#activity-modal-dialog', popover: { title: t('tour.activityModal.overview.title', 'Crear Actividad'), description: t('tour.activityModal.overview.description', 'Formulario completo para registrar una nueva tarea o seguimiento.'), side: 'bottom', align: 'center' } },
+  { element: '#activity-modal-title', popover: { title: t('tour.activityModal.title.title', 'Título y Descripción'), description: t('tour.activityModal.title.description', 'Define un nombre claro y una descripción detallada de lo que se debe hacer.'), side: 'right', align: 'start' } },
+  { element: '#activity-modal-column-priority', popover: { title: t('tour.activityModal.columnPriority.title', 'Columna y Prioridad'), description: t('tour.activityModal.columnPriority.description', 'Asigna la actividad a una columna del tablero y define su nivel de urgencia.'), side: 'right', align: 'start' } },
+  { element: '#activity-modal-due-assignee', popover: { title: t('tour.activityModal.dueAssignee.title', 'Fecha y Asignación'), description: t('tour.activityModal.dueAssignee.description', 'Establece la fecha límite y asigna la responsabilidad a un miembro del equipo.'), side: 'right', align: 'start' } },
+  { element: '#activity-modal-contact', popover: { title: t('tour.activityModal.contact.title', 'Contacto Asociado'), description: t('tour.activityModal.contact.description', 'Vincula esta actividad a un usuario registrado o a un contacto externo.'), side: 'right', align: 'start' } },
+  { element: '#activity-modal-actions', popover: { title: t('tour.activityModal.actions.title', 'Guardar'), description: t('tour.activityModal.actions.description', 'Haz clic en "Cancelar" para cerrar y continuar el tour, o "Crear" para guardar la actividad.'), side: 'top', align: 'end' } }
+]
+export const activityModalTourConfig = { id: 'activity-modal-tour', autoStart: false }

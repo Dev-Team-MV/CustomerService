@@ -1,6 +1,7 @@
 {
   "title": "Reportes",
   "subtitle": "Centro de exportación de datos",
+  "topbarLabel": "Reportes y Exportación de Datos",
   
   "exportButton": "Exportar",
   "exporting": "Exportando...",

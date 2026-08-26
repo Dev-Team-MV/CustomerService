@@ -10,7 +10,6 @@ import quoteService from '../../services/quoteService'
 import propertyService from '@shared/services/propertyService'
 import buildingService from '@shared/services/buildingService'
 
-// ✅ Helper para extraer siempre un string ID
 const getId = (val) => (typeof val === 'object' && val !== null ? val._id : val) || ''
 
 export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) {
@@ -41,16 +40,9 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
       const leadId = getId(quote.leadId)
       const quoteId = quote._id
 
-      // ==========================================
-      // CASO 1: YA ES UNA PROPIEDAD (LOTE/CASA)
-      // ==========================================
       if (existingPropertyId) {
         payload.propertyId = existingPropertyId
-      } 
-      // ==========================================
-      // CASO 2: ES UN APARTAMENTO (H Tower, Phase 2, ISQ)
-      // ==========================================
-      else if (existingApartmentId || (getId(quote.apartmentModelId) || getId(quote.apartmentId?.apartmentModel))) {
+      } else if (existingApartmentId || (getId(quote.apartmentModelId) || getId(quote.apartmentId?.apartmentModel))) {
         const aptObj = typeof quote.apartmentId === 'object' ? quote.apartmentId : {}
         const aptModelId = getId(aptObj.apartmentModel) || getId(quote.apartmentModelId)
         const floorNum = aptObj.floorNumber || quote.floorNumber
@@ -66,8 +58,8 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
             apartmentNumber: String(aptNum),
             user: userId,
             users: [userId],
-            leadId: leadId || undefined,       // ✅ Agregado para conversión Lead -> User
-            quoteId: quoteId,                  // ✅ Agregado para ligar la cotización
+            leadId: leadId || undefined,
+            quoteId: quoteId,
             price: quote.totalPrice || 0,
             initialPayment: quote.downPayment || 0,
             status: 'pending',
@@ -76,29 +68,21 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
 
           try {
             if (existingApartmentId) {
-              console.log('📤 Actualizando apartamento existente:', existingApartmentId, aptPayload)
               await buildingService.updateApartment(existingApartmentId, aptPayload)
               payload.apartmentId = existingApartmentId
             } else {
-              console.log('📤 Creando nuevo apartamento:', aptPayload)
               const newApartment = await buildingService.createApartment(aptPayload)
               payload.apartmentId = newApartment._id
             }
           } catch (createErr) {
-            console.error('Error auto-creating/updating apartment:', createErr)
-            const errMsg = createErr.response?.data?.message || 'Error al asignar/crear el apartamento.'
-            setError(errMsg)
+            setError(createErr.response?.data?.message || 'Error al asignar/crear el apartamento.')
             return
           }
         } else {
           setError('Faltan datos del apartamento: modelo, piso, número o usuario/proyecto')
           return
         }
-      } 
-      // ==========================================
-      // CASO 3: FALLBACK A LOTE/CASA (6Town, LakeWood)
-      // ==========================================
-      else {
+      } else {
         const lotId = getId(quote.lotId)
         const modelId = getId(quote.modelId)
         const buildingId = getId(quote.buildingId)
@@ -106,7 +90,6 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
 
         if (lotId && modelId && userId && projectId) {
           try {
-            // ✅ PAYLOAD ACTUALIZADO SEGÚN REQUERIMIENTO
             const propertyPayload = {
               projectId,
               ...(buildingId ? { buildingId } : {}),
@@ -114,8 +97,8 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
               model: modelId,
               facade: facadeId || undefined,
               userId: userId,
-              leadId: leadId || undefined,  // ✅ Clave para que el backend haga la conversión
-              quoteId: quoteId,             // ✅ Clave para ligar la cotización y sus opciones
+              leadId: leadId || undefined,
+              quoteId: quoteId,
               price: quote.totalPrice || 0,
               initialPayment: quote.downPayment || 0,
               status: 'pending',
@@ -125,14 +108,10 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
               hasStorage: quote.hasStorage || false
             }
 
-            console.log('📤 Creando nueva propiedad con payload de conversión:', propertyPayload)
             const newProperty = await propertyService.createProperty(propertyPayload)
-            
             payload.propertyId = newProperty._id
           } catch (createErr) {
-            console.error('Error auto-creating property:', createErr)
-            const errMsg = createErr.response?.data?.message || 'Error al crear la propiedad automáticamente.'
-            setError(errMsg)
+            setError(createErr.response?.data?.message || 'Error al crear la propiedad automáticamente.')
             return
           }
         } else {
@@ -141,18 +120,11 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
         }
       }
 
-      // ==========================================
-      // VALIDACIÓN FINAL: Verificar que payload tenga datos
-      // ==========================================
       if (!payload.propertyId && !payload.apartmentId) {
         setError('No se pudo determinar la propiedad o apartamento a asignar. Verifica los datos de la cotización.')
         return
       }
 
-      // ==========================================
-      // PASO FINAL: CONVERTIR LA COTIZACIÓN
-      // ==========================================
-      console.log('📤 Convirtiendo cotización con payload:', payload)
       const res = await quoteService.convertToSale(quote._id, payload)
       
       if (res?.propertyCreateHint) {
@@ -165,7 +137,6 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
         onClose()
       }
     } catch (err) {
-      console.error('Error en handleConvert:', err)
       setError(err.response?.data?.message || t('errors.convertFailed', 'Error al convertir'))
     } finally {
       setLoading(false)
@@ -174,7 +145,6 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
 
   if (!quote) return null
 
-  // ✅ Lógica de nombre: Cliente registrado o Lead
   const clientObj = typeof quote.clientId === 'object' ? quote.clientId : null
   const leadObj = typeof quote.leadId === 'object' ? quote.leadId : null
 
@@ -192,20 +162,24 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
   const hasPropertyData = getId(quote.propertyId) || getId(quote.apartmentId) || (getId(quote.lotId) && getId(quote.modelId)) || (getId(quote.apartmentModelId) && quote.floorNumber)
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    // ✅ ID 1: Modal completo
+    <Dialog id="convert-sale-modal" open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <CheckCircle color="success" />
         <Typography variant="h6" fontWeight={700}>{t('convertToSale.title', 'Convertir a Venta')}</Typography>
       </DialogTitle>
       <DialogContent dividers>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" color="text.secondary">{t('convertToSale.client', 'Cliente / Lead')}</Typography>
-          <Typography fontWeight={600}>{personName}</Typography>
-        </Box>
-        
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" color="text.secondary">{t('convertToSale.amount', 'Monto Cotizado')}</Typography>
-          <Typography fontWeight={700} color="primary">${quote.totalPrice?.toLocaleString()}</Typography>
+        {/* ✅ ID 2: Información del cliente y monto */}
+        <Box id="convert-sale-info">
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" color="text.secondary">{t('convertToSale.client', 'Cliente / Lead')}</Typography>
+            <Typography fontWeight={600}>{personName}</Typography>
+          </Box>
+          
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" color="text.secondary">{t('convertToSale.amount', 'Monto Cotizado')}</Typography>
+            <Typography fontWeight={700} color="primary">${quote.totalPrice?.toLocaleString()}</Typography>
+          </Box>
         </Box>
 
         {hasPropertyData ? (
@@ -232,8 +206,10 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
 
         {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
       </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} disabled={loading}>{t('actions.cancel', 'Cancelar')}</Button>
+      
+      {/* ✅ ID 3: Botones de acción */}
+      <DialogActions id="convert-sale-actions" sx={{ p: 2 }}>
+        <Button onClick={onClose} disabled={loading}>{t('cancel', 'Cancelar')}</Button>
         <Button 
           variant="contained" 
           color="success"
@@ -241,7 +217,7 @@ export default function ConvertToSaleModal({ open, onClose, quote, onSuccess }) 
           disabled={loading}
           startIcon={loading ? <CircularProgress size={16} /> : <CheckCircle />}
         >
-          {loading ? t('actions.converting', 'Convirtiendo...') : t('actions.confirmConvert', 'Confirmar Conversión')}
+          {loading ? t('converting', 'Convirtiendo...') : t('confirm', 'Confirmar Conversión')}
         </Button>
       </DialogActions>
     </Dialog>

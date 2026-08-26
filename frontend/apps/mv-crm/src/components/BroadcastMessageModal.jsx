@@ -1,19 +1,23 @@
-// apps/mv-crm/src/components/sms/BroadcastMessageModal.jsx
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Box, Typography, TextField, Button, IconButton, Checkbox,
   FormControlLabel, FormGroup, Chip, Avatar, Autocomplete,
-  Paper, Divider, Alert, CircularProgress, LinearProgress,
-  FormControl, InputLabel, Select, MenuItem
+  Paper, Divider, Alert, CircularProgress, LinearProgress
 } from '@mui/material'
 import {
   Close, Send, Sms, Email, People, PersonAdd, CheckCircle,
-  Error as ErrorIcon, Info, FilterList
+  Error as ErrorIcon, Info, FilterList, HelpOutline
 } from '@mui/icons-material'
 import messageTemplateService from '../services/messageTemplateService'
 import VariableInserter from '@shared/components/VariableInserter'
+import ProjectSelector from '@shared/components/ProjectSelector'
+
+// ✅ NUEVO: Imports para el tour
+import { useTour } from '@shared/tours/useTour'
+import TourButton from '@shared/tours/TourButton'
+import { getBroadcastMessageTourSteps, broadcastMessageTourConfig } from '../tours/features/broadcastMessageTour'
 
 const GLOBAL_VARIABLES = [
   { key: 'firstName', label: 'firstName' },
@@ -24,7 +28,11 @@ const GLOBAL_VARIABLES = [
 
 const BroadcastMessageModal = ({ open, onClose, users = [], projects = [], onSend }) => {
   const { t } = useTranslation('sms')
+  const { t: tCommon } = useTranslation('common') // Para las claves del tour
+  const { startTour } = useTour()
   
+  const tourSteps = getBroadcastMessageTourSteps(tCommon)
+
   const [formData, setFormData] = useState({
     title: '', content: '', sendSms: false, sendEmail: false,
     sendToAll: false, selectedUsers: [], projectId: ''
@@ -224,27 +232,53 @@ const BroadcastMessageModal = ({ open, onClose, users = [], projects = [], onSen
     setSelectedTemplate(null)
     onClose()
   }
+  // ✅ Escuchar el evento para cerrar el modal cuando el tour termine
+  useEffect(() => {
+    const handleTourResume = () => {
+      handleClose() // Esto ejecutará la lógica de limpieza y llamará a onClose()
+    }
+    window.addEventListener('tour-resume-broadcast-message', handleTourResume)
+    return () => window.removeEventListener('tour-resume-broadcast-message', handleTourResume)
+  }, [])
 
-  // ✅ Estilos unificados
+  // ✅ Manejador para cuando se cierra el tour desde el botón de ayuda
+  const handleTourClose = () => {
+    handleClose()
+    // Opcional: Notificar al componente padre si este modal fue abierto por un tour del dashboard
+    window.dispatchEvent(new CustomEvent('tour-resume-broadcast-message'))
+  }
+
+
+
   const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
   const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }
   const chipSx = { borderRadius: 0, fontFamily: '"Courier New", monospace', fontSize: '0.7rem', fontWeight: 600 }
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>
-      <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <DialogTitle sx={{ borderBottom: '1px solid #ececec', display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: { xs: 2, sm: 3 } }}>
         <Box display="flex" alignItems="center" gap={1}>
           <Send color="primary" />
           <Typography variant="h6" fontWeight={700} sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.85rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
             {t('sms.title')}
           </Typography>
         </Box>
-        <IconButton onClick={handleClose} size="small" disabled={sending} sx={{ borderRadius: 0 }}>
-          <Close />
-        </IconButton>
+        <Box display="flex" alignItems="center" gap={1}>
+          {/* ✅ Botón de Tour en el header */}
+          <TourButton 
+            tourId={broadcastMessageTourConfig.id}
+            steps={tourSteps}
+            label=""
+            options={{ onCloseClick: handleTourClose }}
+            sx={{ minWidth: 'auto', p: 0.5 }}
+          />
+          <IconButton onClick={handleClose} size="small" disabled={sending} sx={{ borderRadius: 0 }}>
+            <Close />
+          </IconButton>
+        </Box>
       </DialogTitle>
 
-      <DialogContent dividers>
+      <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
         {results && (
           <Alert severity={results.failed?.length > 0 ? 'warning' : 'success'} sx={{ mb: 3, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }} onClose={() => setResults(null)}>
             <Typography variant="subtitle2" fontWeight={600}>{t('sms.results.title')}</Typography>
@@ -269,19 +303,22 @@ const BroadcastMessageModal = ({ open, onClose, users = [], projects = [], onSen
 
         <Box display="flex" flexDirection="column" gap={3}>
           {projects.length > 0 && (
-            <Box>
+            // ✅ ID para el selector de proyecto
+            <Box id="broadcast-modal-project">
               <Typography variant="subtitle2" fontWeight={600} mb={1} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>
                 {t('sms.project.title', 'Proyecto (opcional)')}
               </Typography>
-              <FormControl size="small" fullWidth>
-                <InputLabel>{t('sms.project.label', 'Seleccionar proyecto')}</InputLabel>
-                <Select value={formData.projectId} onChange={(e) => setFormData(prev => ({ ...prev, projectId: e.target.value }))} label={t('sms.project.label', 'Seleccionar proyecto')} disabled={sending} sx={inputSx}>
-                  <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}><em>{t('sms.project.global', 'Sin proyecto (global)')}</em></MenuItem>
-                  {projects.map(project => (
-                    <MenuItem key={project._id} value={project._id} sx={{ fontFamily: '"Courier New", monospace' }}>{project.name}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              
+              <ProjectSelector
+                value={formData.projectId}
+                onChange={(value) => setFormData(prev => ({ ...prev, projectId: value }))}
+                label={t('sms.selectProject', 'Seleccionar proyecto')}
+                includeGlobal={true}
+                globalLabel={t('sms.project.global', '')}
+                fullWidth
+                size="small"
+                disabled={sending}
+              />
               
               {formData.projectId && (
                 <Box sx={{ mt: 1.5, p: 1.5, bgcolor: '#e8f5e9', borderRadius: 0, border: '1px solid #4caf50', display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -302,7 +339,8 @@ const BroadcastMessageModal = ({ open, onClose, users = [], projects = [], onSen
 
           <Divider />
 
-          <Box>
+          {/* ✅ ID para los canales de envío */}
+          <Box id="broadcast-modal-channels">
             <Typography variant="subtitle2" fontWeight={600} mb={1} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>{t('sms.channel.title')}</Typography>
             <FormGroup row>
               <FormControlLabel
@@ -330,7 +368,8 @@ const BroadcastMessageModal = ({ open, onClose, users = [], projects = [], onSen
 
           <Divider />
 
-          <Box>
+          {/* ✅ ID para los destinatarios */}
+          <Box id="broadcast-modal-recipients">
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
               <Typography variant="subtitle2" fontWeight={600} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>{t('sms.recipients.title')}</Typography>
               {formData.projectId && (
@@ -400,7 +439,8 @@ const BroadcastMessageModal = ({ open, onClose, users = [], projects = [], onSen
 
           <Divider />
 
-          <Box>
+          {/* ✅ ID para las plantillas */}
+          <Box id="broadcast-modal-templates">
             <Typography variant="subtitle2" fontWeight={600} mb={1} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>{t('sms.template.title')}</Typography>
             <Autocomplete
               options={filteredTemplates} getOptionLabel={(option) => option.name || ''} value={selectedTemplate}
@@ -429,7 +469,8 @@ const BroadcastMessageModal = ({ open, onClose, users = [], projects = [], onSen
 
           <Divider />
 
-          <Box>
+          {/* ✅ ID para el contenido del mensaje */}
+          <Box id="broadcast-modal-content">
             <Typography variant="subtitle2" fontWeight={600} mb={1} sx={{ fontFamily: '"Courier New", monospace', letterSpacing: '0.5px' }}>{t('sms.content.title')}</Typography>
 
             <Box mb={2}>
@@ -489,8 +530,9 @@ const BroadcastMessageModal = ({ open, onClose, users = [], projects = [], onSen
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, borderTop: '1px solid #ececec', justifyContent: 'space-between' }}>
-        <Box>
+      {/* ✅ ID para las acciones finales */}
+      <DialogActions id="broadcast-modal-actions" sx={{ p: 2, borderTop: '1px solid #ececec', justifyContent: 'space-between', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+        <Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
           {recipientCount > 0 && (formData.sendSms || formData.sendEmail) && (
             <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Courier New", monospace', fontSize: '0.75rem' }}>
               {t('sms.summary.willSendTo')} <strong style={{ fontFamily: '"Helvetica Neue", sans-serif' }}>{formData.sendSms ? usersWithValidPhone.length : recipientCount}</strong> {t('sms.summary.recipients')} {' '}
@@ -498,12 +540,12 @@ const BroadcastMessageModal = ({ open, onClose, users = [], projects = [], onSen
             </Typography>
           )}
         </Box>
-        <Box display="flex" gap={1}>
-          <Button onClick={handleClose} disabled={sending} sx={{ ...unifiedButtonSx, color: '#888' }}>
+        <Box display="flex" gap={1} sx={{ width: { xs: '100%', sm: 'auto' }, flexDirection: { xs: 'column-reverse', sm: 'row' } }}>
+          <Button onClick={handleClose} disabled={sending} sx={{ ...unifiedButtonSx, color: '#888', width: { xs: '100%', sm: 'auto' } }}>
             {results ? t('sms.actions.close') : t('sms.actions.cancel')}
           </Button>
           {!results && (
-            <Button variant="contained" onClick={handleSend} disabled={!isValid || sending || (formData.projectId && usersByProject.length === 0)} startIcon={sending ? <CircularProgress size={16} color="inherit" /> : <Send />} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+            <Button variant="contained" onClick={handleSend} disabled={!isValid || sending || (formData.projectId && usersByProject.length === 0)} startIcon={sending ? <CircularProgress size={16} color="inherit" /> : <Send />} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', width: { xs: '100%', sm: 'auto' }, '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
               {sending ? `${t('sms.actions.sending')} ${progress.percent}%` : t('sms.actions.send')}
             </Button>
           )}

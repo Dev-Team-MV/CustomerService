@@ -12,6 +12,7 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
       field: 'project',
       headerName: t('filters.project', 'Proyecto'),
       minWidth: 150,
+      tourId: 'onboarding-col-project', // ✅ ID para el tour
       renderCell: ({ row }) => {
         const project = row.projectId
         const name = project?.name || project?.title?.es || (typeof project === 'string' ? `ID: ${String(project).slice(-6)}` : 'N/A')
@@ -27,8 +28,8 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
       field: 'property',
       headerName: t('warranty.property', 'Propiedad'),
       minWidth: 220,
+      tourId: 'onboarding-col-property', // ✅ ID para el tour
       renderCell: ({ row }) => {
-        // ✅ CASO 1: Es un Apartamento
         const apt = row.apartmentId
         if (apt) {
           const buildingData = typeof apt.building === 'string' ? buildings[apt.building] : apt.building
@@ -47,15 +48,12 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
           )
         }
 
-        // ✅ CASO 2: Es una Propiedad / Lote
         const prop = row.propertyId
         if (prop) {
-          // Subcaso A: prop es un string (ID directo de la propiedad). Lo buscamos en 'lots'
           if (typeof prop === 'string') {
             const propertyData = lots[prop] || {}
             const lotNumber = propertyData.lot?.number || propertyData.number || String(prop).slice(-6)
             const modelName = propertyData.model?.model || propertyData.model?.name || ''
-            
             return (
               <Box display="flex" alignItems="center" gap={1}>
                 <Home fontSize="small" sx={{ color: '#4a7c59' }} />
@@ -67,13 +65,10 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
             )
           }
 
-          // Subcaso B: prop es un objeto. Extraemos los IDs de lot y model
           const lotId = typeof prop.lot === 'string' ? prop.lot : prop.lot?._id
           const modelId = typeof prop.model === 'string' ? prop.model : prop.model?._id
-          
           const lotData = lots[lotId] || prop.lot || {}
           const modelData = models[modelId] || prop.model || {}
-          
           const lotNumber = lotData.number || lotData.lot?.number || (lotId ? String(lotId).slice(-6) : 'N/A')
           const modelName = modelData.model || modelData.name || modelData.model?.name || ''
 
@@ -87,7 +82,6 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
             </Box>
           )
         }
-
         return <Typography variant="body2" color="text.secondary">N/A</Typography>
       }
     },
@@ -95,6 +89,7 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
       field: 'client',
       headerName: t('filters.client', 'Cliente'),
       minWidth: 180,
+      tourId: 'onboarding-col-client', // ✅ ID para el tour
       renderCell: ({ row }) => {
         const client = row.clientId
         const name = client && typeof client === 'object' 
@@ -107,6 +102,7 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
       field: 'status',
       headerName: t('filters.status', 'Estado'),
       minWidth: 150,
+      tourId: 'onboarding-col-status', // ✅ ID para el tour
       renderCell: ({ row }) => {
         const statusColors = { not_started: 'default', in_progress: 'primary', completed: 'success' }
         const statusIcons = { 
@@ -130,6 +126,7 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
       field: 'progress',
       headerName: t('onboarding.overallProgress', 'Progreso'),
       minWidth: 150,
+      tourId: 'onboarding-col-progress', // ✅ ID para el tour
       renderCell: ({ row }) => {
         const items = row.items || []
         const completedCount = items.filter(i => i.completed).length
@@ -160,6 +157,7 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
       field: 'createdAt',
       headerName: t('warranty.createdAt', 'Creado'),
       minWidth: 120,
+      tourId: 'onboarding-col-createdAt', // ✅ ID para el tour
       renderCell: ({ row }) => (
         <Typography variant="caption" color="text.secondary">
           {new Date(row.createdAt).toLocaleDateString()}
@@ -171,20 +169,22 @@ export const useOnboardingColumns = ({ t, propertiesMap = {}, onView, onEdit, on
       headerName: t('filters.actionsTable', 'Acciones'),
       minWidth: 140,
       sortable: false,
+      tourId: 'onboarding-col-actions', // ✅ ID para la columna general
       renderCell: ({ row }) => (
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
+        <Box id="onboarding-col-actions" sx={{ display: 'flex', gap: 0.5 }}>
+          {/* ✅ IDs individuales para cada botón de acción */}
           <Tooltip title={t('actions.view', 'Ver Detalles / Items')}>
-            <IconButton size="small" color="primary" onClick={() => onView(row)}>
+            <IconButton id="onboarding-action-view" size="small" color="primary" onClick={() => onView(row)}>
               <Visibility fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title={t('actions.edit', 'Editar')}>
-            <IconButton size="small" color="info" onClick={() => onEdit(row)}>
+            <IconButton id="onboarding-action-edit" size="small" color="info" onClick={() => onEdit(row)}>
               <Edit fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title={t('actions.delete', 'Eliminar')}>
-            <IconButton size="small" color="error" onClick={() => onDelete(row)}>
+            <IconButton id="onboarding-action-delete" size="small" color="error" onClick={() => onDelete(row)}>
               <Delete fontSize="small" />
             </IconButton>
           </Tooltip>

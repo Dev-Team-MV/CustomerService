@@ -1,19 +1,9 @@
-// apps/mv-crm/src/pages/Activities.jsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import {
-  Box,
-  Typography,
-  Button,
-  TextField,
-  InputAdornment,
-  FormControl,
-  Select,
-  MenuItem,
-  Chip,
-  CircularProgress,
-  Alert
+  Box, Typography, Button, TextField, InputAdornment,
+  FormControl, Select, MenuItem, Chip, CircularProgress, Alert
 } from '@mui/material'
 import { Add, Search, FilterList } from '@mui/icons-material'
 import PageLayout from '@shared/components/LayoutComponents/PageLayout'
@@ -25,8 +15,16 @@ import { useProjects } from '@shared/hooks/useProjects'
 import activityService from '../services/activityService'
 import ColumnModal from '../components/activities/ColumnModal'
 
+// ✅ IMPORTS PARA EL TOUR
+import { useTour } from '@shared/tours/useTour'
+import TourButton from '@shared/tours/TourButton'
+import { getActivitiesTourSteps, activitiesTourConfig } from '../tours/modules/activitiesTour'
+import { getActivityModalTourSteps, activityModalTourConfig } from '../tours/features/activityModalTour'
+import { getActivityDetailsTourSteps, activityDetailsTourConfig } from '../tours/features/activityDetailsTour'
+
 export default function Activities() {
   const { t } = useTranslation('activities')
+  const { t: tCommon } = useTranslation('common')
   const { currentProject } = useProjects()
   const projectId = currentProject?._id || null
   
@@ -34,22 +32,10 @@ export default function Activities() {
   const activityIdFromUrl = searchParams.get('activityId')
 
   const {
-    columns,
-    groupedByColumn,
-    loading,
-    error,
-    createActivity,
-    updateActivity,
-    moveActivity,
-    deleteActivity,
-    addSubtask,
-    updateSubtask,
-    deleteSubtask,
-    addThreadMessage,
-    fetchBoard,
-    createColumn,
-    updateColumn,
-    deleteColumn
+    columns, groupedByColumn, loading, error,
+    createActivity, updateActivity, moveActivity, deleteActivity,
+    addSubtask, updateSubtask, deleteSubtask, addThreadMessage,
+    fetchBoard, createColumn, updateColumn, deleteColumn
   } = useActivities(projectId)
 
   const [modalOpen, setModalOpen] = useState(false)
@@ -60,8 +46,18 @@ export default function Activities() {
   const [columnModalOpen, setColumnModalOpen] = useState(false)
   const [editingColumn, setEditingColumn] = useState(null)
 
+  // ✅ ESTADOS DEL TOUR
+  const [isTourMode, setIsTourMode] = useState(false)
+  const [activeSubTour, setActiveSubTour] = useState(null) // 🚨 NUEVO: 'modal' | 'details' | null
+  const { startTour, pauseTour, resumeTour } = useTour()
+  
+  const tourSteps = getActivitiesTourSteps(tCommon)
+  const modalSteps = getActivityModalTourSteps(tCommon)
+  const detailsSteps = getActivityDetailsTourSteps(tCommon)
+  const tourOptionsRef = useRef(null)
+
   useEffect(() => {
-    if (activityIdFromUrl && columns.length > 0) {
+    if (activityIdFromUrl && columns && columns.length > 0) {
       loadActivityFromUrl(activityIdFromUrl)
     }
   }, [activityIdFromUrl, columns])
@@ -70,136 +66,237 @@ export default function Activities() {
     try {
       for (const column of columns) {
         const activity = column.activities?.find(a => a._id === activityId)
-        if (activity) {
-          setDetailsActivity(activity)
-          return
-        }
+        if (activity) { setDetailsActivity(activity); return }
       }
       const activity = await activityService.getById(activityId)
       if (activity) setDetailsActivity(activity)
-    } catch (err) {
-      console.error('Error loading activity from URL:', err)
-    }
+    } catch (err) { console.error('Error loading activity from URL:', err) }
   }
 
-  const handleAddActivity = (columnId) => {
-    setEditingActivity({ columnId })
-    setModalOpen(true)
-  }
-
-  const handleEditActivity = (activity) => {
-    setEditingActivity(activity)
-    setModalOpen(true)
-    setDetailsActivity(null)
-  }
-
-  const handleViewActivity = (activity) => {
-    setDetailsActivity(activity)
-  }
+  const handleAddActivity = (columnId) => { setEditingActivity({ columnId }); setModalOpen(true) }
+  const handleEditActivity = (activity) => { setEditingActivity(activity); setModalOpen(true); setDetailsActivity(null) }
+  const handleViewActivity = (activity) => { setDetailsActivity(activity) }
 
   const handleSaveActivity = async (data, activityId) => {
     try {
       if (activityId) await updateActivity(activityId, data)
       else await createActivity(data)
-      setModalOpen(false)
-      setEditingActivity(null)
-      await fetchBoard()
-    } catch (err) {
-      console.error('Error saving activity:', err)
-    }
+      setModalOpen(false); setEditingActivity(null); await fetchBoard()
+    } catch (err) { console.error('Error saving activity:', err) }
   }
 
   const handleDeleteActivity = async (id) => {
     if (window.confirm(t('activities.deleteConfirm'))) {
-      try {
-        await deleteActivity(id)
-        setDetailsActivity(null)
-        await fetchBoard()
-      } catch (err) {
-        console.error('Error deleting activity:', err)
-      }
+      try { await deleteActivity(id); setDetailsActivity(null); await fetchBoard() } 
+      catch (err) { console.error('Error deleting activity:', err) }
     }
   }
 
-  const handleMoveActivity = async (activityId, columnId) => {
-    await moveActivity(activityId, columnId)
-  }
-
+  const handleMoveActivity = async (activityId, columnId) => { await moveActivity(activityId, columnId) }
   const handleRefreshActivityDetails = async () => {
     if (!detailsActivity?._id) return
-    try {
-      const updated = await activityService.getById(detailsActivity._id)
-      setDetailsActivity(updated)
-    } catch (err) {
-      console.error('Error refreshing activity:', err)
-    }
+    try { const updated = await activityService.getById(detailsActivity._id); setDetailsActivity(updated) } 
+    catch (err) { console.error('Error refreshing activity:', err) }
   }
 
-  const handleAddColumn = () => {
-    setEditingColumn(null)
-    setColumnModalOpen(true)
-  }
-
-  const handleEditColumn = (column) => {
-    setEditingColumn(column)
-    setColumnModalOpen(true)
-  }
-
+  const handleAddColumn = () => { setEditingColumn(null); setColumnModalOpen(true) }
+  const handleEditColumn = (column) => { setEditingColumn(column); setColumnModalOpen(true) }
   const handleSaveColumn = async (data, columnId) => {
     try {
       if (columnId) await updateColumn(columnId, data)
       else await createColumn(data)
-      setColumnModalOpen(false)
-      setEditingColumn(null)
-      await fetchBoard()
-    } catch (err) {
-      console.error('Error saving column:', err)
+      setColumnModalOpen(false); setEditingColumn(null); await fetchBoard()
+    } catch (err) { console.error('Error saving column:', err) }
+  }
+  const handleDeleteColumn = async (id) => { try { await deleteColumn(id); await fetchBoard() } catch (err) { console.error('Error deleting column:', err) } }
+
+  const filteredGroupedByColumn = useMemo(() => {
+    if (!groupedByColumn) return {}
+    const filterActivity = (activity) => {
+      if (!activity) return false
+      if (priorityFilter !== 'all' && activity.priority !== priorityFilter) return false
+      if (searchValue.trim()) {
+        const search = searchValue.toLowerCase()
+        const matchTitle = activity.title?.toLowerCase().includes(search)
+        const matchDesc = activity.description?.toLowerCase().includes(search)
+        const matchContactName = activity.contact?.name?.toLowerCase().includes(search)
+        const matchContactEmail = activity.contact?.email?.toLowerCase().includes(search)
+        const matchTags = activity.tags?.some(tag => tag.toLowerCase().includes(search))
+        if (!matchTitle && !matchDesc && !matchContactName && !matchContactEmail && !matchTags) return false
+      }
+      return true
     }
+    if (Array.isArray(groupedByColumn)) {
+      return groupedByColumn.map(col => ({ ...col, activities: col.activities ? col.activities.filter(filterActivity) : [] }))
+    } else {
+      const result = {}
+      Object.keys(groupedByColumn).forEach(colId => { result[colId] = (groupedByColumn[colId] || []).filter(filterActivity) })
+      return result
+    }
+  }, [groupedByColumn, priorityFilter, searchValue])
+
+  // ✅ LÓGICA DE INTERCEPCIÓN DEL TOUR CORREGIDA
+  const handleTourNextClick = (driverObj) => {
+    const currentIndex = driverObj.getActiveIndex()
+    console.log('🔍 Tour Next Click - Índice:', currentIndex, '| SubTour Activo:', activeSubTour)
+    setIsTourMode(true)
+
+    // 🚨 1. Si estamos DENTRO de un subtour, NO interceptamos. Dejamos que avance normal.
+    if (activeSubTour === 'modal') {
+      if (currentIndex === modalSteps.length - 1) setActiveSubTour(null) // Limpiar al llegar al final
+      driverObj.moveNext()
+      return
+    }
+
+    if (activeSubTour === 'details') {
+      if (currentIndex === detailsSteps.length - 1) setActiveSubTour(null) // Limpiar al llegar al final
+      driverObj.moveNext()
+      return
+    }
+
+    // 🚨 2. Lógica del Tour Principal (solo si NO hay un subtour activo)
+    if (currentIndex === 2) { // Botón Nueva Actividad
+      const newBtn = document.getElementById('activities-new-btn')
+      if (newBtn) {
+        newBtn.click()
+        pauseTour()
+        setActiveSubTour('modal') // 🚨 Marcamos que entramos al subtour del modal
+        
+        let attempts = 0
+        const checkModal = setInterval(() => {
+          attempts++
+          if (document.getElementById('activity-modal-dialog')) {
+            clearInterval(checkModal)
+            setTimeout(() => {
+              startTour(activityModalTourConfig.id, modalSteps, {
+                onNextClick: (driver) => driver.moveNext(),
+                onCloseClick: () => {
+                  console.log('🔙 Subtour modal cerrado')
+                  setActiveSubTour(null) // 🚨 Limpiamos el estado
+                  const closeBtn = document.querySelector('#activity-modal-actions button') || document.querySelector('[aria-label="close"]')
+                  if (closeBtn) closeBtn.click()
+                  setTimeout(() => resumeTour(3, tourSteps, tourOptionsRef.current), 400)
+                },
+                onDestroyStarted: () => {
+                  console.log('🔙 Subtour modal destruido')
+                  setActiveSubTour(null) // 🚨 Limpiamos el estado
+                  const closeBtn = document.querySelector('#activity-modal-actions button') || document.querySelector('[aria-label="close"]')
+                  if (closeBtn) closeBtn.click()
+                  setTimeout(() => resumeTour(3, tourSteps, tourOptionsRef.current), 400)
+                }
+              })
+            }, 500) 
+          } else if (attempts > 40) { 
+            clearInterval(checkModal)
+            setActiveSubTour(null)
+            resumeTour(3, tourSteps, tourOptionsRef.current)
+          }
+        }, 150)
+      } else { driverObj.moveNext() }
+      return
+    }
+
+    if (currentIndex === 4) { // Tarjeta de Actividad
+      const firstCard = document.querySelector('[data-tour-activity-card="true"]')
+      if (firstCard) {
+        firstCard.click()
+        pauseTour()
+        setActiveSubTour('details') // 🚨 Marcamos que entramos al subtour de detalles
+        
+        let attempts = 0
+        const checkDrawer = setInterval(() => {
+          attempts++
+          if (document.getElementById('activity-details-drawer')) {
+            clearInterval(checkDrawer)
+            setTimeout(() => {
+              startTour(activityDetailsTourConfig.id, detailsSteps, {
+                onNextClick: (driver) => driver.moveNext(),
+                onCloseClick: () => {
+                  console.log('🔙 Subtour detalles cerrado')
+                  setActiveSubTour(null) // 🚨 Limpiamos el estado
+                  setDetailsActivity(null)
+                  setTimeout(() => resumeTour(5, tourSteps, tourOptionsRef.current), 400)
+                },
+                onDestroyStarted: () => {
+                  console.log('🔙 Subtour detalles destruido')
+                  setActiveSubTour(null) // 🚨 Limpiamos el estado
+                  setDetailsActivity(null)
+                  setTimeout(() => resumeTour(5, tourSteps, tourOptionsRef.current), 400)
+                }
+              })
+            }, 500)
+          } else if (attempts > 40) {
+            clearInterval(checkDrawer)
+            setActiveSubTour(null)
+            resumeTour(5, tourSteps, tourOptionsRef.current)
+          }
+        }, 150)
+      } else { driverObj.moveNext() }
+      return
+    }
+
+    // Para el resto de pasos del tour principal, avance normal
+    driverObj.moveNext()
   }
 
-  const handleDeleteColumn = async (id) => {
-    try {
-      await deleteColumn(id)
-      await fetchBoard()
-    } catch (err) {
-      console.error('Error deleting column:', err)
+  const tourOptions = {
+    onNextClick: handleTourNextClick,
+    onPrevClick: (driverObj) => driverObj.movePrevious(),
+    onDestroy: () => {
+      console.log('🛑 Tour de Actividades destruido')
+      setIsTourMode(false)
+      setActiveSubTour(null)
+      setModalOpen(false)
+      setDetailsActivity(null)
     }
   }
+  tourOptionsRef.current = tourOptions
 
-  // ✅ Estilos unificados
   const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
-  const inputSx = { 
-    fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, 
-    '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' },
-    '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' }
-  }
+  const inputSx = { fontFamily: '"Courier New", monospace', fontSize: '0.75rem', borderRadius: 0, '& .MuiInputLabel-root': { fontFamily: '"Courier New", monospace', fontSize: '0.7rem' }, '& .MuiInputBase-input': { fontFamily: '"Helvetica Neue", sans-serif' } }
 
   return (
     <PageLayout
       title={t('activities.title')}
       subtitle={t('activities.description')}
+      topbarLabel={t('activities.topbarLabel')}
     >
-      <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-        
+      <Box id="activities-page-container" sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                {/* ✅ Botón del Tour */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <TourButton 
+            tourId={activitiesTourConfig.id} 
+            steps={tourSteps} 
+            label={tCommon('tour.activities.button', 'Ver guía de Actividades')} 
+            options={tourOptions} 
+          />
+        </Box>
         {/* ✅ FILA UNIFICADA: Filtros a la izquierda, Botón a la derecha */}
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={2}>
           
           {/* Grupo de Filtros (Izquierda) */}
-          <Box display="flex" gap={2} flexWrap="wrap">
-            <TextField
-              placeholder={t('activities.searchPlaceholder')}
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              size="small"
-              sx={{ width: 300, ...inputSx }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search sx={{ color: '#aaa' }} />
-                  </InputAdornment>
-                )
-              }}
-            />
+          <Box id="activities-filters" display="flex" gap={2} flexWrap="wrap">
+<TextField
+  placeholder={t('activities.searchPlaceholder')}
+  value={searchValue}
+  onChange={(e) => setSearchValue(e.target.value)}
+  size="small"
+  sx={{
+    width: 300,
+    ...inputSx,
+    '& .MuiInputBase-input::placeholder': {
+      fontFamily: '"Courier New", monospace',
+      opacity: 1,
+    },
+  }}
+  InputProps={{
+    startAdornment: (
+      <InputAdornment position="start">
+        <Search sx={{ color: '#aaa' }} />
+      </InputAdornment>
+    ),
+  }}
+/>
 
             <FormControl size="small" sx={{ minWidth: 180 }}>
               <Select
@@ -230,6 +327,7 @@ export default function Activities() {
           {/* Botón de Nueva Actividad (Derecha) */}
           <Button
             variant="contained"
+            id="activities-new-btn"
             startIcon={<Add />}
             onClick={() => handleAddActivity(columns[0]?._id)}
             disabled={columns.length === 0}
@@ -240,7 +338,7 @@ export default function Activities() {
         </Box>
 
         {error && (
-          <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace' }} onClose={() => {}}>
+          <Alert severity="error" sx={{ mb: 2, borderRadius: 0, border: '1px solid', fontFamily: '"Courier New", monospace' }}>
             {error}
           </Alert>
         )}
@@ -252,7 +350,7 @@ export default function Activities() {
         ) : (
           <KanbanBoard
             columns={columns}
-            groupedByColumn={groupedByColumn}
+            groupedByColumn={filteredGroupedByColumn} // ✅ PASAMOS LOS DATOS FILTRADOS
             onActivityClick={handleViewActivity}
             onAddActivity={handleAddActivity}
             onEditActivity={handleEditActivity}

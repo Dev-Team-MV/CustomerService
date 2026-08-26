@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/layout/PageLayout.jsx
 import { useState, useEffect, useCallback } from 'react'
 import { Box, Typography, IconButton, Tooltip, Drawer, useMediaQuery, useTheme } from '@mui/material'
 import { AddCircle as AddCircleIcon, Search, Menu as MenuIcon } from '@mui/icons-material'
@@ -23,8 +22,8 @@ export default function PageLayout({
   sidebarStats = [],
   children
 }) {
-  const { t } = useTranslation('common')
-  const { user } = useAuth()
+const { t } = useTranslation(['common', 'dashboard']) // ✅ CORRECTO  
+const { user } = useAuth()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   
@@ -32,7 +31,7 @@ export default function PageLayout({
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [notificationCreatorOpen, setNotificationCreatorOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false) // ✅ NUEVO
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [users, setUsers] = useState([])
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin'
@@ -59,7 +58,7 @@ export default function PageLayout({
   useKeyboardShortcut('k', handleOpenSearch, { metaKey: true })
   useKeyboardShortcut('k', handleOpenSearch, { ctrlKey: true })
 
-  // ✅ NUEVO: Cerrar menú móvil al cambiar de ruta
+  // Cerrar menú móvil al cambiar de ruta
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [window.location.pathname])
@@ -75,6 +74,15 @@ export default function PageLayout({
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
+  }, [])
+
+    // ✅ NUEVO: Escuchar evento para abrir el drawer desde el tour del Dashboard
+  useEffect(() => {
+    const handleOpenDrawer = () => {
+      setNotificationsOpen(true)
+    }
+    window.addEventListener('open-notification-drawer', handleOpenDrawer)
+    return () => window.removeEventListener('open-notification-drawer', handleOpenDrawer)
   }, [])
 
   const formatTime = (d) => d.toLocaleTimeString('en-US', {
@@ -107,17 +115,17 @@ export default function PageLayout({
       />
 
       {/* Sidebar - Solo desktop */}
-      <Box sx={{ display: { xs: 'none', md: 'flex' }, zIndex: 10, position: 'relative', flexShrink: 0 }}>
-        <Sidebar stats={sidebarStats} />
+      <Box sx={{ display: { xs: 'none', md: 'flex' }, zIndex: 10, position: 'relative', flexShrink: 0 }} id="sidebar-menu">
+        <Sidebar id="sidebar-menu" stats={sidebarStats} />
       </Box>
 
-      {/* ✅ NUEVO: Drawer móvil */}
+      {/* Drawer móvil */}
       <Drawer
         anchor="left"
         open={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
         ModalProps={{
-          keepMounted: true, // Mejor performance en móvil
+          keepMounted: true,
         }}
         PaperProps={{
           sx: {
@@ -127,7 +135,7 @@ export default function PageLayout({
           }
         }}
       >
-        <Sidebar stats={sidebarStats} onNavigate={() => setMobileMenuOpen(false)} />
+        <Sidebar id="sidebar-menu" stats={sidebarStats} onNavigate={() => setMobileMenuOpen(false)} />
       </Drawer>
 
       {/* Main */}
@@ -147,15 +155,18 @@ export default function PageLayout({
           transition={{ duration: 0.45 }}
           style={{ flexShrink: 0 }}
         >
-          <Box sx={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            px: { xs: 2, md: 5 }, py: 2,
-            borderBottom: '1px solid #ececec',
-            background: '#fff',
-            zIndex: 5,
-          }}>
+          <Box 
+            id="topbar"
+            sx={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              px: { xs: 2, md: 5 }, py: 2,
+              borderBottom: '1px solid #ececec',
+              background: '#fff',
+              zIndex: 5,
+            }}
+          >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              {/* ✅ NUEVO: Botón hamburguesa - Solo móvil */}
+              {/* Botón hamburguesa - Solo móvil */}
               <IconButton
                 onClick={() => setMobileMenuOpen(true)}
                 sx={{ 
@@ -180,13 +191,17 @@ export default function PageLayout({
             </Box>
 
             {/* NOTIFICACIONES + BÚSQUEDA + RELOJ */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, md: 2 } }}>
-              {/* Language Switcher */}
-              <LanguageSwitcher />
+            <Box id="topbar-actions" sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, md: 2 } }}>
+              
+              {/* ✅ ID para Language Switcher */}
+              <Box id="topbar-language-switcher">
+                <LanguageSwitcher />
+              </Box>
 
-              {/* Botón de búsqueda */}
+              {/* ✅ ID para Botón de búsqueda */}
               <Tooltip title="Buscar (⌘K)" placement="bottom">
                 <IconButton
+                  id="topbar-search-btn"
                   onClick={handleOpenSearch}
                   sx={{
                     color: '#000',
@@ -202,6 +217,7 @@ export default function PageLayout({
               {isAdmin && (
                 <Tooltip title="Crear Notificación" placement="bottom">
                   <IconButton
+                    id="topbar-notification-creator"
                     onClick={() => setNotificationCreatorOpen(true)}
                     sx={{
                       color: '#000',
@@ -215,20 +231,25 @@ export default function PageLayout({
                 </Tooltip>
               )}
 
-              {/* NOTIFICATION BELL DEL CRM */}
-              <NotificationBell
-                unreadCount={unreadCount}
-                onClick={() => setNotificationsOpen(true)}
-              />
+              {/* ✅ ID para Notification Bell */}
+              <Box id="topbar-notification-bell">
+                <NotificationBell
+                  unreadCount={unreadCount}
+                  onClick={() => setNotificationsOpen(true)}
+                />
+              </Box>
 
-              {/* Reloj - Solo desktop */}
-              <Typography sx={{
-                fontFamily: '"Courier New", monospace',
-                fontSize: '0.7rem',
-                color: '#000',
-                letterSpacing: '2px',
-                display: { xs: 'none', md: 'block' }
-              }}>
+              {/* ✅ ID para Reloj */}
+              <Typography 
+                id="topbar-clock"
+                sx={{
+                  fontFamily: '"Courier New", monospace',
+                  fontSize: '0.7rem',
+                  color: '#000',
+                  letterSpacing: '2px',
+                  display: { xs: 'none', md: 'block' }
+                }}
+              >
                 {formatTime(currentTime)}
               </Typography>
             </Box>

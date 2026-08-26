@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/postSale/tabs/WarrantiesPanel.jsx
 import { useState, useMemo } from 'react'
 import { Box, Button, Grid, FormControl, InputLabel, Select, MenuItem, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Typography } from '@mui/material'
 import { Add, Close, Warning as WarningIcon } from '@mui/icons-material'
@@ -15,8 +14,16 @@ import warrantyService from '@shared/services/warrantyService'
 import WarrantyClaimForm from '../WarrantyClaimForm'
 import WarrantyDetailDialog from '../WarrantyDetailDialog'
 
-export default function WarrantiesPanel({ onNotify }) {
-  const { t } = useTranslation('postSale')
+import { useTour } from '@shared/tours/useTour'
+import { getWarrantyDetailTourSteps, warrantyDetailTourConfig } from '../../../tours/features/warrantyDetailTour'
+
+export default function WarrantiesPanel({ onNotify, isTourMode = false }) {
+  // ✅ 1. Extraemos 'ready' e 'i18n'
+  const { t, i18n, ready } = useTranslation('postSale')
+  
+  // ✅ 2. Si las traducciones no están listas, no renderizamos nada (evita el parpadeo en inglés)
+  if (!ready) return null
+
   const { projects } = useProjects()
   const { users: residents } = useResidents(null)
 
@@ -37,8 +44,48 @@ export default function WarrantiesPanel({ onNotify }) {
   const handleFilterChange = (field, value) => setFilters(prev => ({ ...prev, [field]: value }))
   const clearFilters = () => setFilters({ projectId: '', clientId: '', status: '', category: '', priority: '' })
 
-  const handleView = (row) => { setSelectedWarranty(row); setDetailModalOpen(true) }
-  const handleEdit = (row) => { setEditingWarranty(row); setClaimModalOpen(true) }
+  const handleViewBase = (row) => { setSelectedWarranty(row); setDetailModalOpen(true) }
+  const handleEditBase = (row) => { setEditingWarranty(row); setClaimModalOpen(true) }
+  const promptDeleteBase = (row) => { setItemToDelete(row); setDeleteDialogOpen(true) }
+
+  const { startTour, pauseTour } = useTour()
+  
+  // ✅ 3. Memoizamos los pasos del tour dependiendo del idioma actual
+  const detailSteps = useMemo(() => getWarrantyDetailTourSteps(t), [t, i18n.language])
+
+  const handleViewForTour = (row) => {
+    setSelectedWarranty(row)
+    setDetailModalOpen(true)
+    pauseTour()
+    setTimeout(() => {
+      startTour(warrantyDetailTourConfig.id, detailSteps, {
+        onNextClick: (driver) => {
+          // ✅ Si es el último paso, cerramos el modal y reanudamos
+          if (driver.getActiveIndex() === detailSteps.length - 1) {
+            setDetailModalOpen(false)
+            setSelectedWarranty(null)
+            window.dispatchEvent(new CustomEvent('tour-resume-warranty-detail'))
+          }
+          driver.moveNext()
+        },
+        onCloseClick: () => {
+          setDetailModalOpen(false)
+          setSelectedWarranty(null)
+          window.dispatchEvent(new CustomEvent('tour-resume-warranty-detail'))
+        },
+        onDestroyStarted: () => {
+          setDetailModalOpen(false)
+          setSelectedWarranty(null)
+          window.dispatchEvent(new CustomEvent('tour-resume-warranty-detail'))
+        }
+      })
+    }, 800)
+  }
+
+  const onView = isTourMode ? handleViewForTour : handleViewBase
+  const onEdit = handleEditBase
+  const onDelete = promptDeleteBase
+  const onResolve = onView
 
   const handleResolve = async (id, payload) => {
     setResolving(true)
@@ -51,8 +98,6 @@ export default function WarrantiesPanel({ onNotify }) {
     } finally { setResolving(false) }
   }
 
-  const promptDelete = (row) => { setItemToDelete(row); setDeleteDialogOpen(true) }
-  
   const confirmDelete = async () => {
     if (!itemToDelete) return
     try {
@@ -71,7 +116,7 @@ export default function WarrantiesPanel({ onNotify }) {
     onNotify(t('warranty.saveSuccess'), 'success')
   }
 
-  const columns = useWarrantyColumns({ t, propertiesMap, onView: handleView, onEdit: handleEdit, onResolve: handleView, onDelete: promptDelete })
+  const columns = useWarrantyColumns({ t, propertiesMap, onView, onEdit, onResolve, onDelete })
   const isLoading = warrantiesLoading || resolvingProperties
 
   const unifiedButtonSx = { borderRadius: 0, textTransform: 'none', fontFamily: '"Courier New", monospace', fontSize: '0.75rem', letterSpacing: '0.5px', '&:hover': { boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }
@@ -79,11 +124,11 @@ export default function WarrantiesPanel({ onNotify }) {
 
   return (
     <Box>
-      <Box sx={{ mb: 3, p: 2.5, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
+      <Box id="warranties-filters" sx={{ mb: 3, p: 2.5, bgcolor: '#f9f9f9', borderRadius: 0, border: '1px solid #e0e0e0' }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth size="small">
-              <InputLabel>{t('filters.project')}</InputLabel>
+              <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.project')}</InputLabel>
               <Select value={filters.projectId} onChange={(e) => handleFilterChange('projectId', e.target.value)} label={t('filters.project')} sx={inputSx}>
                 <MenuItem value="" sx={{ fontFamily: '"Courier New", monospace' }}>{t('filters.all')}</MenuItem>
                 {projects.map(p => <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} key={p._id} value={p._id}>{p.name}</MenuItem>)}
@@ -92,7 +137,7 @@ export default function WarrantiesPanel({ onNotify }) {
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth size="small">
-              <InputLabel>{t('filters.client')}</InputLabel>
+              <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.client')}</InputLabel>
               <Select value={filters.clientId} onChange={(e) => handleFilterChange('clientId', e.target.value)} label={t('filters.client')} sx={inputSx}>
                 <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} value="">{t('filters.all')}</MenuItem>
                 {filteredResidents.map(client => <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} key={client._id} value={client._id}>{client.firstName} {client.lastName}</MenuItem>)}
@@ -101,7 +146,7 @@ export default function WarrantiesPanel({ onNotify }) {
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth size="small">
-              <InputLabel>{t('filters.status')}</InputLabel>
+              <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.status')}</InputLabel>
               <Select value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} label={t('filters.status')} sx={inputSx}>
                 <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} value="">{t('filters.all')}</MenuItem>
                 {['submitted', 'under_review', 'approved', 'in_progress', 'resolved', 'rejected'].map(s => (
@@ -112,7 +157,7 @@ export default function WarrantiesPanel({ onNotify }) {
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth size="small">
-              <InputLabel>{t('filters.category')}</InputLabel>
+              <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.category')}</InputLabel>
               <Select value={filters.category} onChange={(e) => handleFilterChange('category', e.target.value)} label={t('filters.category')} sx={inputSx}>
                 <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} value="">{t('filters.all')}</MenuItem>
                 {['structural', 'plumbing', 'electrical', 'finish', 'appliance', 'landscaping', 'other'].map(c => (
@@ -123,7 +168,7 @@ export default function WarrantiesPanel({ onNotify }) {
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth size="small">
-              <InputLabel>{t('filters.priority')}</InputLabel>
+              <InputLabel sx={{fontFamily: '"Courier New", monospace'}}>{t('filters.priority')}</InputLabel>
               <Select value={filters.priority} onChange={(e) => handleFilterChange('priority', e.target.value)} label={t('filters.priority')} sx={inputSx}>
                 <MenuItem sx={{ fontFamily: '"Courier New", monospace' }} value="">{t('filters.all')}</MenuItem>
                 {['low', 'medium', 'high', 'emergency'].map(p => (
@@ -141,14 +186,16 @@ export default function WarrantiesPanel({ onNotify }) {
       </Box>
 
       <Box display="flex" justifyContent="flex-end" sx={{ mb: 2 }}>
-        <Button variant="contained" startIcon={<Add />} onClick={() => { setEditingWarranty(null); setClaimModalOpen(true); }} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
+        <Button id="warranties-create-btn" variant="contained" startIcon={<Add />} onClick={() => { setEditingWarranty(null); setClaimModalOpen(true); }} sx={{ ...unifiedButtonSx, bgcolor: '#000', color: '#fff', '&:hover': { bgcolor: '#222', boxShadow: '6px 6px 0px rgba(0,0,0,0.12)' } }}>
           {t('warranty.createNew')}
         </Button>
       </Box>
 
-      <DataTable columns={columns} data={warranties || []} loading={isLoading} />
+      <Box id="warranties-data-table">
+        <DataTable columns={columns} data={warranties || []} loading={isLoading} />
+      </Box>
 
-      <WarrantyClaimForm open={claimModalOpen} onClose={() => { setClaimModalOpen(false); setEditingWarranty(null); }} initialData={editingWarranty} onSuccess={handleClaimSuccess} />
+      <WarrantyClaimForm open={claimModalOpen} onClose={() => { setClaimModalOpen(false); setEditingWarranty(null); }} initialData={editingWarranty} onSuccess={handleClaimSuccess} isTourMode={isTourMode} />
       <WarrantyDetailDialog open={detailModalOpen} onClose={() => { setDetailModalOpen(false); setSelectedWarranty(null); }} warranty={selectedWarranty} onResolve={handleResolve} resolving={resolving} propertiesMap={propertiesMap} />
 
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} PaperProps={{ sx: { borderRadius: 0, border: '1px solid #ececec' } }}>

@@ -7,6 +7,12 @@
   "uploadDocument": "Upload Document",
   "empty": "No documents found",
 
+  "projectDocuments":{
+    "title": "Project Documents",
+    "subtitle": "Manage contracts, deeds, insurance, and more for this project",
+    "empty": "No documents found for this project"
+  },
+
   "filters": {
     "category": "Category",
     "allCategories": "All categories",
@@ -66,7 +72,8 @@
     "unspecified": "Unspecified",
     "noResourcesFound": "No resources found for this client in this project",
     "noResourcesAssigned": "The client has no resources assigned in this project.",
-    "uploading": "Uploading..."
+    "uploading": "Uploading...",
+    "property": "Property"
   },
 
   "actions": {

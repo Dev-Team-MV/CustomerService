@@ -47,7 +47,8 @@
   "validation": {
     "nameRequired": "Name is required",
     "templateRequired": "Template is required",
-    "audienceRequired": "Audience type is required"
+    "audienceRequired": "Audience type is required",
+    "templateFieldsRequired": "All template fields are required"
   },
   "form": {
     "name": "Name",
@@ -55,7 +56,8 @@
     "audience": "Audience",
     "audienceType": "Audience type",
     "project": "Project",
-    "stage": "Stage"
+    "stage": "Stage",
+    "selectTemplate":"Select a template"
   },
   "audience": {
     "leads": "Leads",
@@ -91,5 +93,17 @@
   },
   "errors": {
     "campaignIdNotFound": "Campaign ID not found"
+  },
+    "template":{
+    "name":"Name",
+    "content":"Content",
+    "variables":"Variables",
+    
+    "noTemplates":"No templates available",
+    "loadingTemplates":"Loading templates...",
+    "category":"Category",
+    "description":"Description",
+    "useExisting":"Use existing template",
+    "createNew":"Create new template"
   }
 }

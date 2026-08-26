@@ -1,4 +1,3 @@
-// apps/mv-crm/src/components/stats/ProjectStatsModal.jsx
 import { useEffect, useState } from 'react'
 import {
   Dialog, DialogContent, Box, Typography, IconButton,
@@ -37,6 +36,7 @@ export default function ProjectStatsModal({ open, onClose, project, allBalance }
 
   return (
     <Dialog
+      id="project-stats-modal"
       open={open}
       onClose={onClose}
       maxWidth="md"
@@ -79,12 +79,13 @@ export default function ProjectStatsModal({ open, onClose, project, allBalance }
             </Typography>
           </Box>
         </Box>
-        <IconButton onClick={onClose} size="small" sx={{ borderRadius: 0, '&:hover': { background: '#f0f0f0' }, flexShrink: 0 }}>
+        <IconButton id="project-stats-close" onClick={onClose} size="small" sx={{ borderRadius: 0, '&:hover': { background: '#f0f0f0' }, flexShrink: 0 }}>
           <Close sx={{ fontSize: 18 }} />
         </IconButton>
       </Box>
 
       <Tabs
+        id="project-stats-tabs"
         value={tab}
         onChange={(_, v) => setTab(v)}
         sx={{
@@ -99,8 +100,19 @@ export default function ProjectStatsModal({ open, onClose, project, allBalance }
           '& .MuiTabs-indicator': { background: '#000', height: 2 },
         }}
       >
-        <Tab icon={<TrendingUp sx={{ fontSize: 14, mr: 0.5 }} />} iconPosition="start" label="Balance" />
-        <Tab icon={<People sx={{ fontSize: 14, mr: 0.5 }} />} iconPosition="start" label="Clients" />
+        {/* ✅ IDs agregados directamente a los componentes Tab */}
+        <Tab 
+          id="project-stats-tab-balance"
+          icon={<TrendingUp sx={{ fontSize: 14, mr: 0.5 }} />} 
+          iconPosition="start" 
+          label="Balance" 
+        />
+        <Tab 
+          id="project-stats-tab-clients"
+          icon={<People sx={{ fontSize: 14, mr: 0.5 }} />} 
+          iconPosition="start" 
+          label="Clients" 
+        />
       </Tabs>
 
       <DialogContent sx={{ p: { xs: 2, sm: 4 } }}>
@@ -114,9 +126,15 @@ export default function ProjectStatsModal({ open, onClose, project, allBalance }
               transition={{ duration: 0.25 }}
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <BalanceOverview balance={projectBalance} />
+                {/* ✅ ID para el resumen de balance */}
+                <Box id="project-stats-balance-overview">
+                  <BalanceOverview balance={projectBalance} />
+                </Box>
                 <Divider />
-                <BalanceDonutChart balance={projectBalance} projectName={project.name} />
+                {/* ✅ ID para el gráfico de balance */}
+                <Box id="project-stats-balance-chart">
+                  <BalanceDonutChart balance={projectBalance} projectName={project.name} />
+                </Box>
               </Box>
             </motion.div>
           )}
@@ -135,9 +153,15 @@ export default function ProjectStatsModal({ open, onClose, project, allBalance }
                 </Box>
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <ClientsOverview clientsData={clientsData} />
+                  {/* ✅ ID para el resumen de clientes */}
+                  <Box id="project-stats-clients-overview">
+                    <ClientsOverview clientsData={clientsData} />
+                  </Box>
                   <Divider />
-                  <ClientsPropertyChart clientsData={clientsData} />
+                  {/* ✅ ID para el gráfico de propiedades de clientes */}
+                  <Box id="project-stats-clients-chart">
+                    <ClientsPropertyChart clientsData={clientsData} />
+                  </Box>
                 </Box>
               )}
             </motion.div>

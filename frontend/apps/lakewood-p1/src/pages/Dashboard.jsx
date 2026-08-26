@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState }  from 'react'
+// /Users/oficina/MV-CRM/CustomerService/frontend/apps/lakewood-p1/src/pages/Dashboard.jsx
+import { useCallback, useMemo, useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Chip } from '@mui/material'
@@ -10,6 +11,12 @@ import { motion } from 'framer-motion'
 import { useAuth } from '@shared/context/AuthContext'
 import api from '@shared/services/api'
 
+// ✅ IMPORTS DEL TOUR
+import { useTour } from '@shared/tours/useTour'
+import TourButton from '@shared/tours/TourButton'
+import { getLakewoodDashboardTourSteps, lakewoodDashboardTourConfig } from '../tours/modules/dashboardTour'
+import { getLayoutTourSteps, layoutTourConfig } from '@shared/tours/shared/layoutTour'
+
 import useFetch from '../hooks/useFetch'
 import useDashboardStats from '../hooks/useDashboardStats'
 import { useResidents } from '@shared/hooks/useResidents'
@@ -17,7 +24,6 @@ import ResidentDialog from '../../../../shared/components/Modals/ResidentDialog'
 
 import DashboardMap from '../components/DashboardMap'
 import MapInventory from '../components/MapInventory'
-
 
 import StatsCards from '../components/statscard'
 import Loader from '../components/Loader'
@@ -37,13 +43,40 @@ const C = {
   border:  '#d6ddc9',
 }
 
+// ✅ ÍNDICES DEL TOUR
+const LAYOUT_SUBTOUR_STEP_INDEX = 0
+const RESUME_AFTER_LAYOUT_STEP_INDEX = 1
+
 // ─── main component ─────────────────────────────────────────────────────────────
 const Dashboard = () => {
   const { user }  = useAuth()
   const navigate  = useNavigate()
-  const { t }     = useTranslation(['dashboard', 'common'])
+  const { t } = useTranslation('dashboard')
+  const { t: tCommon } = useTranslation('common')   
   const isAdmin   = user?.role === 'admin' || user?.role === 'superadmin'
   const projectId = getLakewoodProjectId(user)
+
+  // ✅ ESTADOS DEL TOUR
+  const [activeSubTour, setActiveSubTour] = useState(null)
+  const [isTourTransitioning, setIsTourTransitioning] = useState(false)
+  const { startTour, pauseTour, resumeTour, isPaused } = useTour()
+  const tourOptionsRef = useRef(null)
+
+  const dashboardSteps = getLakewoodDashboardTourSteps(tCommon) // ✅ Usa tCommon
+  const layoutSteps = getLayoutTourSteps(tCommon)
+
+  // ✅ ESCUCHAR REANUDACIÓN DESDE EL SUBTOUR DEL LAYOUT
+  useEffect(() => {
+    const handleResume = () => {
+      const success = resumeTour(RESUME_AFTER_LAYOUT_STEP_INDEX, dashboardSteps, tourOptionsRef.current)
+      if (success) {
+        setIsTourTransitioning(false)
+        setActiveSubTour(null)
+      }
+    }
+    window.addEventListener('tour-resume-layout', handleResume)
+    return () => window.removeEventListener('tour-resume-layout', handleResume)
+  }, [resumeTour, dashboardSteps])
 
   // ── fetching ────────────────────────────────────────────────
   const { data: lots, loading: lotsLoading } = useFetch(
@@ -53,7 +86,7 @@ const Dashboard = () => {
     }, [projectId])
   )
 
-  const { data: payloads } = useFetch(
+  const { data: payloads, loading: payloadsLoading } = useFetch(
     useCallback(() => {
       if (!projectId) return Promise.resolve([])
       return api.get('/payloads', {
@@ -63,7 +96,7 @@ const Dashboard = () => {
     { initialData: [] }
   )
 
-  const loading = lotsLoading || payloads.loading
+  const loading = lotsLoading || payloadsLoading
 
   // ── stats ───────────────────────────────────────────────────
   const stats = useDashboardStats(lots)
@@ -80,7 +113,7 @@ const Dashboard = () => {
   // ── quick actions ───────────────────────────────────────────
   const adminActions = useMemo(() => [
     { icon: <Business />,  label: t('quickActions.addProperty'), description: t('quickActions.addPropertyDesc'), color: C.dark,   bgColor: '#e8f5ee', onClick: () => navigate('/properties/select') },
-        { 
+    { 
       icon: <GroupAdd />,  
       label: t('quickActions.referrals'), 
       description: t('quickActions.referralsDesc'), 
@@ -94,11 +127,7 @@ const Dashboard = () => {
     { icon: <Article />,   label: t('quickActions.manageNews'),  description: t('quickActions.manageNewsDesc'),  color: C.orange, bgColor: '#fff5e6', onClick: () => navigate('/admin/news') },
   ], [t, navigate, handleOpenDialog])
 
-  // const userActions = useMemo(() => [
-  //   { icon: <Deck />,    label: t('quickActions.amenities'), description: t('quickActions.amenitiesDesc'), color: C.green,  bgColor: '#f0f7e8', onClick: () => navigate('/amenities') },
-  //   { icon: <Article />, label: t('quickActions.newsFeed'),  description: t('quickActions.newsFeedDesc'),  color: C.orange, bgColor: '#fff5e6', onClick: () => navigate('/explore/news') },
-  // ], [t, navigate])
-    const userActions = useMemo(() => [
+  const userActions = useMemo(() => [
     { icon: <Deck />,    label: t('quickActions.amenities'), description: t('quickActions.amenitiesDesc'), color: C.green,  bgColor: '#f0f7e8', onClick: () => navigate('/amenities') },
     { icon: <Article />, label: t('quickActions.newsFeed'),  description: t('quickActions.newsFeedDesc'),  color: C.orange, bgColor: '#fff5e6', onClick: () => navigate('/explore/news') },
     
@@ -169,6 +198,71 @@ const Dashboard = () => {
     }
   ], [stats, t])
 
+  // ✅ FUNCIÓN PARA DISPARAR EL SUBTOUR DEL LAYOUT (Arquitectura Robusta con Custom Events)
+  const triggerLayoutSubtour = () => {
+    if (isTourTransitioning) return
+    setIsTourTransitioning(true)
+    pauseTour()
+    
+    // 1. Disparamos el evento para que el Layout abra el sidebar usando su estado de React
+    window.dispatchEvent(new CustomEvent('tour-open-sidebar'))
+    
+    // 2. Esperamos a que la animación termine e iniciamos el subtour
+    setTimeout(() => {
+      startTour(layoutTourConfig.id, layoutSteps, {
+        onNextClick: (driverObj) => {
+          const currentIndex = driverObj.getActiveIndex()
+          const currentElement = layoutSteps[currentIndex]?.element
+
+          // Lógica interactiva DENTRO del subtour del Layout
+          if (currentElement === '#layout-sidebar-drawer') {
+            window.dispatchEvent(new CustomEvent('tour-close-drawers'))
+            setTimeout(() => driverObj.moveNext(), 400)
+          } else if (currentElement === '#layout-notifications-btn') {
+            window.dispatchEvent(new CustomEvent('tour-open-notifications'))
+            setTimeout(() => driverObj.moveNext(), 400)
+          } else if (currentElement === '#notification-drawer-container') {
+            window.dispatchEvent(new CustomEvent('tour-close-drawers'))
+            setTimeout(() => driverObj.moveNext(), 400)
+          } else if (currentElement === '#layout-user-menu-btn') {
+            document.querySelector('#layout-user-menu-btn')?.click()
+            setTimeout(() => driverObj.moveNext(), 400)
+          } else {
+            driverObj.moveNext()
+          }
+        },
+        onCloseClick: () => {
+          window.dispatchEvent(new CustomEvent('tour-close-drawers'))
+          window.dispatchEvent(new CustomEvent('tour-resume-layout'))
+        },
+        onDestroyStarted: () => {
+          window.dispatchEvent(new CustomEvent('tour-close-drawers'))
+          window.dispatchEvent(new CustomEvent('tour-resume-layout'))
+        }
+      })
+      setIsTourTransitioning(false)
+    }, 400) // 400ms coincide con la transición CSS de MUI
+  }
+
+  // ✅ HANDLER UNIFICADO DEL TOUR PRINCIPAL
+  const handleTourNextClick = (driverObj) => {
+    const currentIndex = driverObj.getActiveIndex()
+    console.log('🔍 Tour Next - Índice:', currentIndex, '| SubTour:', activeSubTour)
+
+    if (currentIndex === LAYOUT_SUBTOUR_STEP_INDEX) {
+      triggerLayoutSubtour()
+    } else {
+      // Avance normal para el resto de pasos del dashboard
+      driverObj.moveNext()
+    }
+  }
+
+  const tourOptions = {
+    onNextClick: handleTourNextClick,
+    onPrevClick: (driverObj) => driverObj.movePrevious(),
+  }
+  tourOptionsRef.current = tourOptions
+
   // ── render ──────────────────────────────────────────────────
   if (loading) {
     return (
@@ -181,7 +275,18 @@ const Dashboard = () => {
   const actions = isAdmin ? adminActions : userActions
 
   return (
-    <Box sx={{  minHeight: '100vh' }}>
+    // ✅ ID 1: Contenedor principal del Dashboard
+    <Box id="lakewood-dashboard-container" sx={{ minHeight: '100vh' }}>
+
+      {/* ✅ Botón del Tour */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', px: { xs: 3, md: 6 }, pt: 2 }}>
+        <TourButton 
+          tourId={lakewoodDashboardTourConfig.id}
+          steps={dashboardSteps}
+          label={tCommon('tour.lakewoodDashboard.button', 'Guía del Dashboard')}
+          options={tourOptions}
+        />
+      </Box>
 
       {/* ── HEADER ── */}
       <motion.div
@@ -231,8 +336,11 @@ const Dashboard = () => {
         </Box>
       </motion.div>
 
+      {/* Elemento invisible que sirve como ancla para el Paso 0 (Subtour del Layout) */}
+      <Box id="lakewood-layout-intro-trigger" sx={{ height: 1, width: 1 }} />
+
       {/* ── STATS (admin only) ── */}
-      {/* {isAdmin && (
+      {isAdmin && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -242,7 +350,7 @@ const Dashboard = () => {
             <StatsCards stats={statsCards} loading={loading} />
           </Box>
         </motion.div>
-      )} */}
+      )}
 
       {/* ── MAP SECTION ── */}
       <motion.div
@@ -250,17 +358,20 @@ const Dashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
       >
-        <PageSection
-          title={t('propertyMap').split(' ')[0]}
-          bold={t('propertyMap').split(' ').slice(1).join(' ')}
-          description="Here you will find all the information about our properties, as well as details about your specific property and its specifications."
-          bgcolor="white"
-          topBorderColor={C.green}
-          dividerColor={C.border}
-          primaryColor={C.dark}
-        >
-          <MapInventory />
-        </PageSection>
+        {/* ✅ ID 2: Sección del Mapa */}
+        <Box id="lakewood-map-section">
+          <PageSection
+            title={t('propertyMap').split(' ')[0]}
+            bold={t('propertyMap').split(' ').slice(1).join(' ')}
+            description="Here you will find all the information about our properties, as well as details about your specific property and its specifications."
+            bgcolor="white"
+            topBorderColor={C.green}
+            dividerColor={C.border}
+            primaryColor={C.dark}
+          >
+            <MapInventory />
+          </PageSection>
+        </Box>
       </motion.div>
 
       {/* ── QUICK ACTIONS ── */}
@@ -269,110 +380,113 @@ const Dashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <PageSection
-          title={t('quickActions.title').split(' ')[0]}
-          bold={t('quickActions.title').split(' ').slice(1).join(' ')}
-          description={t('quickActions.subtitle')}
-          topBorderColor={C.green}
-          dividerColor={C.border}
-          primaryColor={C.dark}
-          contentPy={0}
-        >
-          {/* Numbered actions grid — 2 per row */}
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-              py: 4,
-            }}
+        {/* ✅ ID 3: Sección de Acciones Rápidas */}
+        <Box id="lakewood-quick-actions">
+          <PageSection
+            title={t('quickActions.title').split(' ')[0]}
+            bold={t('quickActions.title').split(' ').slice(1).join(' ')}
+            description={t('quickActions.subtitle')}
+            topBorderColor={C.green}
+            dividerColor={C.border}
+            primaryColor={C.dark}
+            contentPy={0}
           >
-            {actions.map((action, index) => {
-              const col = index % 2
-              const row = Math.floor(index / 2)
-              const isLastRow = Math.floor((actions.length - 1) / 2) === row
-              return (
-                <Box
-                  key={index}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: { xs: 2, md: 3 },
-                    borderLeft: { xs: 'none', sm: col === 1 ? `1px solid ${C.border}` : 'none' },
-                    borderBottom: isLastRow ? 'none' : `1px solid ${C.border}`,
-                    pl: { xs: 0, sm: col === 1 ? 5 : 0 },
-                    pr: { xs: 0, sm: col === 0 ? 5 : 0 },
-                    py: 4,
-                  }}
-                >
-                  {/* Number */}
-                  <Typography
-                    sx={{
-                      fontSize: { xs: '4rem', md: '5.5rem' },
-                      fontWeight: 400,
-                      color: C.dark,
-                      fontFamily: '"DM Sans", sans-serif',
-                      lineHeight: 1,
-                      minWidth: { xs: 72, md: 96 },
-                      letterSpacing: '-2px',
-                    }}
-                  >
-                    {String(index + 1).padStart(2, '0')}
-                  </Typography>
-
-                  {/* Text */}
-                  <Box flex={1}>
-                    <Typography
-                      sx={{
-                        fontWeight: 700,
-                        color: C.dark,
-                        fontFamily: '"DM Sans", sans-serif',
-                        fontSize: { xs: '1rem', md: '1.1rem' },
-                        mb: 0.5,
-                      }}
-                    >
-                      {action.label}
-                    </Typography>
-                    <Typography
-                      sx={{
-                        color: C.gray,
-                        fontFamily: '"DM Sans", sans-serif',
-                        fontSize: '0.82rem',
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      {action.description}
-                    </Typography>
-                  </Box>
-
-                  {/* Arrow button */}
+            {/* Numbered actions grid — 2 per row */}
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                py: 4,
+              }}
+            >
+              {actions.map((action, index) => {
+                const col = index % 2
+                const row = Math.floor(index / 2)
+                const isLastRow = Math.floor((actions.length - 1) / 2) === row
+                return (
                   <Box
-                    component={motion.div}
-                    whileHover={{ scale: 1.08 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={action.onClick}
+                    key={index}
                     sx={{
-                      width: { xs: 52, md: 60 },
-                      height: { xs: 52, md: 60 },
-                      bgcolor: '#C4DB99',
-                      borderRadius: 2.5,
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      flexShrink: 0,
-                      color: C.dark,
-                      fontSize: '1.3rem',
-                      transition: 'background 0.2s',
-                      '&:hover': { bgcolor: C.green, color: 'white' },
+                      gap: { xs: 2, md: 3 },
+                      borderLeft: { xs: 'none', sm: col === 1 ? `1px solid ${C.border}` : 'none' },
+                      borderBottom: isLastRow ? 'none' : `1px solid ${C.border}`,
+                      pl: { xs: 0, sm: col === 1 ? 5 : 0 },
+                      pr: { xs: 0, sm: col === 0 ? 5 : 0 },
+                      py: 4,
                     }}
                   >
-                    ↗
+                    {/* Number */}
+                    <Typography
+                      sx={{
+                        fontSize: { xs: '4rem', md: '5.5rem' },
+                        fontWeight: 400,
+                        color: C.dark,
+                        fontFamily: '"DM Sans", sans-serif',
+                        lineHeight: 1,
+                        minWidth: { xs: 72, md: 96 },
+                        letterSpacing: '-2px',
+                      }}
+                    >
+                      {String(index + 1).padStart(2, '0')}
+                    </Typography>
+
+                    {/* Text */}
+                    <Box flex={1}>
+                      <Typography
+                        sx={{
+                          fontWeight: 700,
+                          color: C.dark,
+                          fontFamily: '"DM Sans", sans-serif',
+                          fontSize: { xs: '1rem', md: '1.1rem' },
+                          mb: 0.5,
+                        }}
+                      >
+                        {action.label}
+                      </Typography>
+                      <Typography
+                        sx={{
+                          color: C.gray,
+                          fontFamily: '"DM Sans", sans-serif',
+                          fontSize: '0.82rem',
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        {action.description}
+                      </Typography>
+                    </Box>
+
+                    {/* Arrow button */}
+                    <Box
+                      component={motion.div}
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={action.onClick}
+                      sx={{
+                        width: { xs: 52, md: 60 },
+                        height: { xs: 52, md: 60 },
+                        bgcolor: '#C4DB99',
+                        borderRadius: 2.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                        color: C.dark,
+                        fontSize: '1.3rem',
+                        transition: 'background 0.2s',
+                        '&:hover': { bgcolor: C.green, color: 'white' },
+                      }}
+                    >
+                      ↗
+                    </Box>
                   </Box>
-                </Box>
-              )
-            })}
-          </Box>
-        </PageSection>
+                )
+              })}
+            </Box>
+          </PageSection>
+        </Box>
       </motion.div>
 
       {/* ── RECENT PAYLOADS (admin only) ── */}
@@ -382,7 +496,8 @@ const Dashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.5 }}
         >
-          <Box sx={{ px: { xs: 3, md: 6 }, py: 4 }}>
+          {/* ✅ ID 4: Sección de Payloads Recientes */}
+          <Box id="lakewood-recent-payloads" sx={{ px: { xs: 3, md: 6 }, py: 4 }}>
             <RecentPayloadsPanel payloads={payloads} t={t} />
           </Box>
         </motion.div>
@@ -403,7 +518,7 @@ const Dashboard = () => {
         isPhoneValid={isPhoneValid}
       />
 
-            {/* ✅ MODAL DE ENVÍO DE REFERIDOS (Modo Customer) */}
+      {/* ✅ MODAL DE ENVÍO DE REFERIDOS (Modo Customer) */}
       <SubmitReferralModal
         open={referralModalOpen}
         onClose={() => setReferralModalOpen(false)}

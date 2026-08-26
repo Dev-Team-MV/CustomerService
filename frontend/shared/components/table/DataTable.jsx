@@ -15,6 +15,7 @@ import PropTypes from 'prop-types';
 import Loader from '../Loader';
 
 const DataTable = ({
+  id, // ✅ NUEVO: ID para el contenedor principal de la tabla
   columns = [],
   data = [],
   loading = false,
@@ -36,6 +37,7 @@ const DataTable = ({
 
   return (
     <motion.div
+      id={id} // ✅ APLICAR ID AL CONTENEDOR
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4, duration: 0.6 }}
@@ -66,6 +68,7 @@ const DataTable = ({
                 {columns.map((column, idx) => (
                   <TableCell
                     key={column.id || column.field || idx}
+                    id={column.tourId} // ✅ NUEVO: Inyectar ID del tour en el header de la columna
                     align={column.align || 'left'}
                     sx={{
                       fontWeight: 700,
@@ -97,44 +100,18 @@ const DataTable = ({
                 {loading ? (
                   <TableRow>
                     <TableCell colSpan={columns.length}>
-                      <Loader
-                        size="medium"
-                        message="Loading data..."
-                        fullHeight={false}
-                      />
+                      <Loader size="medium" message="Loading data..." fullHeight={false} />
                     </TableCell>
                   </TableRow>
                 ) : data.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={columns.length}>
                       {emptyState || (
-                        <Box
-                          sx={{
-                            py: 8,
-                            textAlign: 'center',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: 2
-                          }}
-                        >
-                          <Typography
-                            variant="h6"
-                            sx={{
-                              color: theme.palette.primary?.main || '#333F1F',
-                              fontWeight: 600,
-                              fontFamily: '"DM Sans", sans-serif'
-                            }}
-                          >
+                        <Box sx={{ py: 8, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                          <Typography variant="h6" sx={{ color: theme.palette.primary?.main || '#333F1F', fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}>
                             No data available
                           </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: theme.palette.text?.secondary || '#706f6f',
-                              fontFamily: '"DM Sans", sans-serif'
-                            }}
-                          >
+                          <Typography variant="body2" sx={{ color: theme.palette.text?.secondary || '#706f6f', fontFamily: '"DM Sans", sans-serif' }}>
                             No records found
                           </Typography>
                         </Box>
@@ -144,11 +121,13 @@ const DataTable = ({
                 ) : (
                   data.map((row, rowIndex) => {
                     const rowId = row._id || row.id || rowIndex;
+                    const isFirstRow = rowIndex === 0; // ✅ 1. CALCULAR isFirstRow
 
                     return (
                       <motion.tr
                         key={rowId}
                         component={TableRow}
+                        id={rowIndex === 0 ? 'data-table-first-row' : undefined} // ✅ Opcional: ID para resaltar la primera fila
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3, delay: rowIndex * 0.05 }}
@@ -165,9 +144,7 @@ const DataTable = ({
                               borderLeftColor: theme.palette.secondary?.main || '#8CA551'
                             }
                           }),
-                          '&:last-child td': {
-                            borderBottom: 'none'
-                          }
+                          '&:last-child td': { borderBottom: 'none' }
                         }}
                       >
                         {columns.map((column, colIndex) => {
@@ -176,14 +153,13 @@ const DataTable = ({
                           return (
                             <TableCell
                               key={column.id || column.field || colIndex}
+                              id={column.tourId} // ✅ ID del header
                               align={column.align || 'left'}
-                              sx={{
-                                fontFamily: '"DM Sans", sans-serif',
-                                ...column.cellSx
-                              }}
+                              sx={{ fontFamily: '"DM Sans", sans-serif', ...column.cellSx }}
                             >
                               {column.renderCell
-                                ? column.renderCell({ row, value: cellValue })
+                                // ✅ 2. PASAR isFirstRow AQUÍ
+                                ? column.renderCell({ row, value: cellValue, rowId, isFirstRow })
                                 : cellValue}
                             </TableCell>
                           );
@@ -202,12 +178,14 @@ const DataTable = ({
 };
 
 DataTable.propTypes = {
+  id: PropTypes.string,
   columns: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
       field: PropTypes.string,
       headerName: PropTypes.string,
       label: PropTypes.string,
+      tourId: PropTypes.string, // ✅ NUEVO en PropTypes
       align: PropTypes.oneOf(['left', 'center', 'right', 'justify']),
       width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       minWidth: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),

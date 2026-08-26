@@ -11,12 +11,18 @@
   "noLeads": "Sin leads",
   "addLead": "Agregar lead",
   "exportButton": "Exportar Leads",
+  "topbarLabel": "Gestión de Ventas y Leads",
 
   "details": {
     "contactInfo": "Información de contacto",
     "noContactInfo": "Sin información de contacto",
     "created": "creado",
     "updated": "actualizado"
+  },
+
+    "sort":{
+    "recent": "Más reciente",
+    "priority": "Mayor prioridad"
   },
   
   "stages": {

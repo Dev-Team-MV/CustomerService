@@ -4,11 +4,21 @@ import { motion } from 'framer-motion'
 /**
  * StatsStrip — banda de métricas horizontal
  * @param {Array} stats - [{ label: string, value: number|string }]
+ * @param {string} id - ID opcional para tours guiados
  */
-export default function StatsStrip({ stats = [] }) {
+export default function StatsStrip({ stats = [], id }) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.5 }}>
-      <Box sx={{ display: 'flex', border: '1px solid #e8e8e8', background: '#fff', mb: 5, flexWrap: 'wrap' }}>
+      <Box 
+        id={id} 
+        sx={{ 
+          display: 'flex', 
+          border: '1px solid #e8e8e8', 
+          background: '#fff', 
+          mb: 5, 
+          flexWrap: 'wrap' 
+        }}
+      >
         {stats.map((s, i, arr) => (
           <Box key={s.label} sx={{
             flex: '1 1 120px', p: '18px 24px',
